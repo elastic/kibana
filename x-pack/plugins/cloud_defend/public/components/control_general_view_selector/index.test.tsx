@@ -11,6 +11,7 @@ import userEvent from '@testing-library/user-event';
 import { TestProvider } from '../../test/test_provider';
 import { ControlGeneralViewSelector } from '.';
 import { ControlSelector, ControlSelectorCondition, ControlSelectorOperation } from '../../types';
+import * as i18n from '../control_general_view/translations';
 
 describe('<ControlGeneralViewSelector />', () => {
   const onChange = jest.fn();
@@ -131,6 +132,30 @@ describe('<ControlGeneralViewSelector />', () => {
     expect(onChange.mock.calls).toHaveLength(1);
     expect(onChange.mock.calls[0][0]).toHaveProperty('containerImageName');
     expect(onChange.mock.calls[0][0]).toHaveProperty('hasErrors');
+  });
+
+  it('prevents conditions from having values that exceed MAX_CONDITION_VALUE_LENGTH', async () => {
+    const { getByText, getByTestId } = render(<WrappedComponent />);
+
+    const addConditionBtn = getByTestId('cloud-defend-btnaddselectorcondition');
+    userEvent.click(addConditionBtn);
+
+    await waitFor(() => userEvent.click(getByText('Container image name'))); // add containerImageName
+
+    const el = getByTestId('cloud-defend-selectorcondition-containerImageName').querySelector(
+      'input'
+    );
+
+    if (el) {
+      userEvent.type(
+        el,
+        'really really really really really really really really long string{enter}'
+      );
+    } else {
+      throw new Error("Can't find input");
+    }
+
+    expect(getByText(i18n.errorValueLengthExceeded)).toBeTruthy();
   });
 
   it('allows the user to remove conditions', async () => {

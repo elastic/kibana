@@ -26,6 +26,7 @@ interface ControlSettingsDeps {
 
 export const ControlSettings = ({ policy, onChange }: ControlSettingsDeps) => {
   const [viewMode, setViewMode] = useState(VIEW_MODE_GENERAL);
+  const [isValid, setIsValid] = useState(true);
 
   const onViewModeGeneral = useCallback(() => {
     setViewMode(VIEW_MODE_GENERAL);
@@ -38,6 +39,14 @@ export const ControlSettings = ({ policy, onChange }: ControlSettingsDeps) => {
   const isGeneralViewSelected = viewMode === VIEW_MODE_GENERAL;
   const isYamlViewSelected = viewMode === VIEW_MODE_YAML;
 
+  const onChanges = useCallback(
+    (opts: OnChangeDeps) => {
+      onChange(opts);
+      setIsValid(opts.isValid);
+    },
+    [onChange]
+  );
+
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
@@ -47,6 +56,7 @@ export const ControlSettings = ({ policy, onChange }: ControlSettingsDeps) => {
             onClick={onViewModeGeneral}
             isSelected={isGeneralViewSelected}
             data-test-subj="cloud-defend-btngeneralview"
+            disabled={!isValid}
           >
             {i18n.viewModeGeneral}
           </EuiTab>
@@ -55,14 +65,15 @@ export const ControlSettings = ({ policy, onChange }: ControlSettingsDeps) => {
             onClick={onViewModeYaml}
             isSelected={isYamlViewSelected}
             data-test-subj="cloud-defend-btnyamlview"
+            disabled={!isValid}
           >
             {i18n.viewModeYaml}
           </EuiTab>
         </EuiTabs>
       </EuiFlexItem>
       <EuiFlexItem>
-        {isGeneralViewSelected && <ControlGeneralView policy={policy} onChange={onChange} />}
-        {isYamlViewSelected && <ControlYamlView policy={policy} onChange={onChange} />}
+        {isGeneralViewSelected && <ControlGeneralView policy={policy} onChange={onChanges} />}
+        {isYamlViewSelected && <ControlYamlView policy={policy} onChange={onChanges} />}
       </EuiFlexItem>
     </EuiFlexGroup>
   );

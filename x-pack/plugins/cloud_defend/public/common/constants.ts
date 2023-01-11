@@ -5,3 +5,4 @@
  * 2.0.
  */
 export const VALID_SELECTOR_NAME_REGEX = /[a-z0-9_\-]/;
+export const MAX_CONDITION_VALUE_LENGTH = 32;

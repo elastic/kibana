@@ -5,15 +5,16 @@
  * 2.0.
  */
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiSpacer, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiSpacer, EuiText, EuiFlexGroup, EuiFlexItem, EuiForm } from '@elastic/eui';
 import { CodeEditor, YamlLang } from '@kbn/kibana-react-plugin/public';
 import { monaco } from '@kbn/monaco';
+import yaml from 'js-yaml';
 import { INPUT_CONTROL } from '../../../common/constants';
 import { useStyles } from './styles';
 import { useConfigModel } from './hooks/use_config_model';
 import { getInputFromPolicy } from '../../common/utils';
 import * as i18n from './translations';
-import type { SettingsDeps } from '../../types';
+import { ControlResponseAction, SettingsDeps } from '../../types';
 
 const { editor } = monaco;
 
@@ -25,10 +26,10 @@ interface ConfigError {
 export const ControlYamlView = ({ policy, onChange }: SettingsDeps) => {
   const styles = useStyles();
   const [errors, setErrors] = useState<ConfigError[]>([]);
+  const [actionsValid, setActionsValid] = useState(true);
   const input = getInputFromPolicy(policy, INPUT_CONTROL);
   const configuration = input?.vars?.configuration?.value || '';
   const currentModel = useConfigModel(configuration);
-  const controlEnabled = !!input?.enabled;
 
   useEffect(() => {
     const listener = editor.onDidChangeMarkers(([resource]) => {
@@ -42,47 +43,70 @@ export const ControlYamlView = ({ policy, onChange }: SettingsDeps) => {
         return error;
       });
 
-      onChange({ isValid: errs.length === 0, updatedPolicy: policy });
+      onChange({ isValid: actionsValid && errs.length === 0, updatedPolicy: policy });
       setErrors(errs);
     });
 
     return () => {
       listener.dispose();
     };
-  }, [onChange, policy]);
+  }, [actionsValid, onChange, policy]);
+
+  // for now we force 'alert' action on all responses. This restriction may be removed in future when we have a plan to record all responses. e.g. audit
+  const validateActions = useCallback((value) => {
+    try {
+      const json = yaml.load(value);
+
+      for (let i = 0; i < json.responses.length; i++) {
+        const response = json.responses[i];
+
+        if (!response.actions.includes(ControlResponseAction.alert)) {
+          return false;
+        }
+      }
+    } catch {
+      // noop
+    }
+
+    return true;
+  }, []);
 
   const onYamlChange = useCallback(
     (value) => {
       if (input?.vars) {
         input.vars.configuration.value = value;
-        onChange({ isValid: errors.length === 0, updatedPolicy: policy });
+
+        const areActionsValid = validateActions(value);
+
+        setActionsValid(areActionsValid);
+
+        onChange({ isValid: areActionsValid && errors.length === 0, updatedPolicy: policy });
       }
     },
-    [errors.length, input, onChange, policy]
+    [errors.length, input?.vars, onChange, policy, validateActions]
   );
 
   return (
     <EuiFlexGroup direction="column">
-      {controlEnabled && (
-        <EuiFlexItem>
-          <EuiText color="subdued" size="s">
-            {i18n.controlYamlHelp}
-          </EuiText>
-          <EuiSpacer size="s" />
-          <div css={styles.yamlEditor}>
-            <CodeEditor
-              languageId={YamlLang}
-              options={{
-                wordWrap: 'off',
-                model: currentModel,
-              }}
-              onChange={onYamlChange}
-              value={configuration}
-            />
-          </div>
-          <EuiSpacer size="s" />
-        </EuiFlexItem>
-      )}
+      <EuiFlexItem>
+        <EuiText color="subdued" size="s">
+          {i18n.controlYamlHelp}
+        </EuiText>
+        <EuiSpacer size="s" />
+        {!actionsValid && <EuiForm isInvalid={true} error={i18n.errorAlertActionRequired} />}
+        <div css={styles.yamlEditor}>
+          <CodeEditor
+            languageId={YamlLang}
+            options={{
+              wordWrap: 'off',
+              model: currentModel,
+            }}
+            onChange={onYamlChange}
+            value={configuration}
+          />
+        </div>
+        <EuiSpacer size="s" />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

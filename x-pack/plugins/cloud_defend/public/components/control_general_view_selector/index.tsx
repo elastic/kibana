@@ -29,7 +29,7 @@ import {
 } from '../../types';
 import { getControlSelectorValueForProp, setControlSelectorValueForProp } from '../../common/utils';
 import * as i18n from '../control_general_view/translations';
-import { VALID_SELECTOR_NAME_REGEX } from '../../common/constants';
+import { VALID_SELECTOR_NAME_REGEX, MAX_CONDITION_VALUE_LENGTH } from '../../common/constants';
 
 export const ControlGeneralViewSelector = ({
   selector,
@@ -108,14 +108,27 @@ export const ControlGeneralViewSelector = ({
     (prop: string, values: string[]) => {
       setControlSelectorValueForProp(prop, values, selector);
 
+      const errors = [];
+
       if (values.length === 0) {
-        errorMap[prop] = [i18n.errorValueRequired];
-        selector.hasErrors = true;
+        errors.push(i18n.errorValueRequired);
+      }
+
+      values.forEach((value) => {
+        if (value.length > MAX_CONDITION_VALUE_LENGTH) {
+          errors.push(i18n.errorValueLengthExceeded);
+        }
+      });
+
+      if (errors.length) {
+        errorMap[prop] = errors;
       } else {
         delete errorMap[prop];
       }
 
+      selector.hasErrors = Object.keys(errorMap).length > 0;
       setErrorMap({ ...errorMap });
+
       onChange(selector);
     },
     [errorMap, onChange, selector]
@@ -144,11 +157,10 @@ export const ControlGeneralViewSelector = ({
       const values = getControlSelectorValueForProp(prop, selector);
 
       if (values && values.indexOf(value) === -1) {
-        setControlSelectorValueForProp(prop, [...values, value], selector);
-        onChange(selector);
+        onChangeCondition(prop, [...values, value]);
       }
     },
-    [onChange, selector]
+    [onChangeCondition, selector]
   );
 
   const errors = useMemo(() => {
@@ -214,7 +226,11 @@ export const ControlGeneralViewSelector = ({
       }
     >
       <EuiForm component="form" error={errors} isInvalid={errors.length > 0}>
-        <EuiFormRow label={i18n.name} fullWidth={true}>
+        <EuiFormRow
+          label={i18n.name}
+          fullWidth={true}
+          isInvalid={!!errorMap.hasOwnProperty('name')}
+        >
           <EuiFieldText
             fullWidth={true}
             name="name"
@@ -235,7 +251,12 @@ export const ControlGeneralViewSelector = ({
             const restrictedValues = ControlSelectorConditionUIOptionsMap[prop]?.values;
 
             return (
-              <EuiFormRow label={label} fullWidth={true} key={prop}>
+              <EuiFormRow
+                label={label}
+                fullWidth={true}
+                key={prop}
+                isInvalid={!!errorMap.hasOwnProperty(prop)}
+              >
                 <EuiFlexGroup alignItems="center">
                   <EuiComboBox
                     aria-label={label}

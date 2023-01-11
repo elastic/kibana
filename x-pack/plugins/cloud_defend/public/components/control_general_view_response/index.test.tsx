@@ -16,6 +16,7 @@ import {
   ControlSelector,
   ControlSelectorOperation,
 } from '../../types';
+import * as i18n from '../control_general_view/translations';
 
 describe('<ControlGeneralViewSelector />', () => {
   const onChange = jest.fn();
@@ -111,6 +112,17 @@ describe('<ControlGeneralViewSelector />', () => {
     ).querySelectorAll('.euiComboBoxOption__content');
     expect(updatedOptions).toHaveLength(1);
     expect(updatedOptions[0].textContent).toContain('mockExclude');
+  });
+
+  it('ensures there is at least 1 selector to match', () => {
+    const { getByText, getByTitle, rerender } = render(<WrappedComponent />);
+
+    userEvent.click(getByTitle('Remove mock from selection in this group'));
+
+    const updatedResponse: ControlResponse = onChange.mock.calls[0][0];
+    rerender(<WrappedComponent response={updatedResponse} />);
+
+    expect(getByText(i18n.errorValueRequired)).toBeTruthy();
   });
 
   it('allows the user to exclude selectors', async () => {

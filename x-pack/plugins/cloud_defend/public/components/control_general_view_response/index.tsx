@@ -57,6 +57,8 @@ export const ControlGeneralViewResponse = ({
   const onChangeMatches = useCallback(
     (options) => {
       response.match = options.map((option: EuiComboBoxOptionOption) => option.value);
+      response.hasErrors = response.match.length === 0;
+
       onChange(response);
     },
     [onChange, response]
@@ -113,7 +115,7 @@ export const ControlGeneralViewResponse = ({
 
   const onToggleAlert = useCallback(() => {
     if (alertSelected) {
-      delete response.actions[response.actions.indexOf(ControlResponseAction.alert)];
+      response.actions.splice(response.actions.indexOf(ControlResponseAction.alert), 1);
     } else {
       response.actions.push(ControlResponseAction.alert);
     }
@@ -122,7 +124,7 @@ export const ControlGeneralViewResponse = ({
 
   const onToggleBlock = useCallback(() => {
     if (blockSelected) {
-      delete response.actions[response.actions.indexOf(ControlResponseAction.block)];
+      response.actions.splice(response.actions.indexOf(ControlResponseAction.block), 1);
     } else {
       response.actions.push(ControlResponseAction.block);
 
@@ -134,11 +136,21 @@ export const ControlGeneralViewResponse = ({
     onChange(response);
   }, [alertSelected, blockSelected, onChange, onToggleAlert, response]);
 
+  const errors = useMemo(() => {
+    const errs: string[] = [];
+
+    if (response.match.length === 0) {
+      errs.push(i18n.errorValueRequired);
+    }
+
+    return errs;
+  }, [response.match.length]);
+
   return (
     <EuiFlexGroup data-test-subj="cloud-defend-response">
       <EuiFlexItem>
-        <EuiForm component="form" fullWidth>
-          <EuiFormRow label={i18n.matchSelectors} fullWidth>
+        <EuiForm component="form" fullWidth error={errors} isInvalid={errors.length > 0}>
+          <EuiFormRow label={i18n.matchSelectors} fullWidth isInvalid={errors.length > 0}>
             <EuiComboBox
               aria-label={i18n.matchSelectors}
               fullWidth

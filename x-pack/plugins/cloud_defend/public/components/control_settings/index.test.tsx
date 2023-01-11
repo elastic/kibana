@@ -10,12 +10,17 @@ import userEvent from '@testing-library/user-event';
 import { TestProvider } from '../../test/test_provider';
 import { getCloudDefendNewPolicyMock } from '../../test/mocks';
 import { ControlSettings } from '.';
+import { coreMock } from '@kbn/core/public/mocks';
 
 describe('<ControlSettings />', () => {
   const onChange = jest.fn();
+
+  // defining this here to avoid a warning in testprovider with params.history changing on rerender.
+  const params = coreMock.createAppMountParameters();
+
   const WrappedComponent = ({ policy = getCloudDefendNewPolicyMock() }) => {
     return (
-      <TestProvider>
+      <TestProvider params={params}>
         <ControlSettings policy={policy} onChange={onChange} />;
       </TestProvider>
     );
@@ -45,5 +50,20 @@ describe('<ControlSettings />', () => {
     userEvent.click(screen.getByText('General view'));
 
     await waitFor(() => expect(screen.findByTestId('cloud-defend-generalview')).toBeTruthy());
+  });
+
+  it('should prevent ability to switch views if there are errors', async () => {
+    const { rerender } = render(<WrappedComponent />);
+
+    userEvent.click(screen.getByTitle('Remove createExecutable from selection in this group'));
+    userEvent.click(screen.getByTitle('Remove modifyExecutable from selection in this group'));
+    userEvent.click(screen.getByTitle('Remove execMemFd from selection in this group'));
+
+    const updated = onChange.mock.calls[2][0].updatedPolicy;
+
+    rerender(<WrappedComponent policy={updated} />);
+
+    expect(screen.getByTestId('cloud-defend-btngeneralview')).toBeDisabled();
+    expect(screen.getByTestId('cloud-defend-btnyamlview')).toBeDisabled();
   });
 });

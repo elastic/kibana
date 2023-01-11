@@ -51,10 +51,13 @@ export const ControlGeneralView = ({ policy, onChange }: SettingsDeps) => {
   const onUpdateYaml = useCallback(
     (newSelectors: ControlSelector[], newResponses: ControlResponse[]) => {
       if (input?.vars?.configuration) {
-        const isValid = !newSelectors.find((selector) => selector.hasErrors);
+        const isValid =
+          !newSelectors.find((selector) => selector.hasErrors) &&
+          !newResponses.find((response) => response.hasErrors);
 
         // remove hasErrors prop prior to yaml conversion
         newSelectors.forEach((selector) => delete selector.hasErrors);
+        newResponses.forEach((response) => delete response.hasErrors);
 
         const yml = yaml.dump({ selectors: newSelectors, responses: newResponses });
         input.vars.configuration.value = yml;
@@ -101,7 +104,7 @@ export const ControlGeneralView = ({ policy, onChange }: SettingsDeps) => {
 
   const onDuplicateSelector = useCallback(
     (selector: ControlSelector) => {
-      const duplicate = { ...selector };
+      const duplicate = JSON.parse(JSON.stringify(selector));
 
       duplicate.name = incrementName(duplicate.name);
 

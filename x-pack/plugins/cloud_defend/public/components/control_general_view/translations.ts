@@ -81,6 +81,13 @@ export const errorValueRequired = i18n.translate('xpack.cloudDefend.errorValueRe
   defaultMessage: 'At least one value is required.',
 });
 
+export const errorValueLengthExceeded = i18n.translate(
+  'xpack.cloudDefend.errorValueLengthExceeded',
+  {
+    defaultMessage: 'Values must not exceed 32 characters.',
+  }
+);
+
 export const getConditionLabel = (prop: string) => {
   switch (prop) {
     case ControlSelectorCondition.operation:

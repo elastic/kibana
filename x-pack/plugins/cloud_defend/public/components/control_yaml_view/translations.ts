@@ -7,13 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const enableControl = i18n.translate('xpack.cloudDefend.enableControl', {
-  defaultMessage: 'Enable BPF/LSM controls',
-});
-
-export const enableControlHelp = i18n.translate('xpack.cloudDefend.enableControlHelp', {
+export const errorAlertActionRequired = i18n.translate('xpack.cloudDefend.alertActionRequired', {
   defaultMessage:
-    'Enables BPF/LSM control mechanism, for use with FIM and container drift prevention.',
+    '[Technical Preview] The "alert" action is required on all responses. This restriction will be removed once all responses become auditable.',
 });
 
 export const controlYamlHelp = i18n.translate('xpack.cloudDefend.controlYamlHelp', {

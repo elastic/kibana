@@ -77,6 +77,9 @@ export interface ControlResponse {
   match: string[];
   exclude?: string[];
   actions: ControlResponseAction[];
+
+  // ephemeral, used to track response error state in UI
+  hasErrors?: boolean;
 }
 
 export const DefaultSelector: ControlSelector = {
