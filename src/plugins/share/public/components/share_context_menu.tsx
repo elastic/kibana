@@ -157,9 +157,7 @@ export class ShareContextMenu extends Component<ShareContextMenuProps> {
             return -1;
           })
           .map((menuItem) => {
-            menuItem['data-test-subj'] = `sharePanel-${
-              menuItem['data-test-subj'] ?? menuItem.name.replace(' ', '')
-            }`;
+            menuItem['data-test-subj'] = `sharePanel-${menuItem.name.replace(' ', '')}`;
             delete menuItem.sortOrder;
             return menuItem;
           }),
