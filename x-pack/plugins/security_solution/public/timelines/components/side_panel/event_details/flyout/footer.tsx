@@ -10,7 +10,7 @@ import { EuiFlyoutFooter, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { find } from 'lodash/fp';
 import type { ConnectedProps } from 'react-redux';
 import { connect } from 'react-redux';
-import type { Scs as Ecs } from '@kbn/securitysolution-ecs';
+import type { SecurityEcs as Ecs } from '@kbn/securitysolution-ecs';
 import { isActiveTimeline } from '../../../../../helpers';
 import { TakeActionDropdown } from '../../../../../detections/components/take_action_dropdown';
 import type { TimelineEventsDetailsItem } from '../../../../../../common/search_strategy';

@@ -10,7 +10,7 @@ import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
 import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
-import type { Scs as Ecs } from '@kbn/securitysolution-ecs';
+import type { SecurityEcs as Ecs } from '@kbn/securitysolution-ecs';
 import {
   mockDnsEvent,
   mockEndpointProcessExecutionMalwarePreventionAlert,

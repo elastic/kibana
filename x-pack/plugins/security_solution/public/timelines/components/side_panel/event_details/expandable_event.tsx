@@ -18,7 +18,7 @@ import {
 import React from 'react';
 import styled from 'styled-components';
 
-import type { Scs as Ecs } from '@kbn/securitysolution-ecs';
+import type { SecurityEcs as Ecs } from '@kbn/securitysolution-ecs';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { getAlertDetailsUrl } from '../../../../common/components/link_to';
 import {

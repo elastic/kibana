@@ -10,7 +10,7 @@ import { get } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
-import type { Scs as Ecs } from '@kbn/securitysolution-ecs';
+import type { SecurityEcs as Ecs } from '@kbn/securitysolution-ecs';
 import {
   DragEffects,
   DraggableWrapper,

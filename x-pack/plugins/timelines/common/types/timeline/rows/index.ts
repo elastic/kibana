@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Scs as Ecs } from '@kbn/securitysolution-ecs';
+import { SecurityEcs as Ecs } from '@kbn/securitysolution-ecs';
 import { RowRendererId } from '..';
 
 export interface RowRenderer {

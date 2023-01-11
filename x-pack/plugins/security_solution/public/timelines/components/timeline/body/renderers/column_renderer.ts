@@ -8,7 +8,7 @@
 import type React from 'react';
 import type { Filter } from '@kbn/es-query';
 
-import type { Scs as Ecs } from '@kbn/securitysolution-ecs';
+import type { SecurityEcs as Ecs } from '@kbn/securitysolution-ecs';
 import type { ColumnHeaderOptions, RowRenderer } from '../../../../../../common/types';
 import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 

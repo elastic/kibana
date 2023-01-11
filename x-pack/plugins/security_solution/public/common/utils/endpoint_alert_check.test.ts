@@ -6,7 +6,7 @@
  */
 
 import _ from 'lodash';
-import type { Scs as Ecs } from '@kbn/securitysolution-ecs';
+import type { SecurityEcs as Ecs } from '@kbn/securitysolution-ecs';
 import { generateMockDetailItemData } from '../mock';
 import { isAlertFromEndpointAlert, isAlertFromEndpointEvent } from './endpoint_alert_check';
 

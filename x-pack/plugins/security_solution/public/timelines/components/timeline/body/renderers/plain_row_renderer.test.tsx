@@ -10,7 +10,7 @@ import { mount, shallow } from 'enzyme';
 import { cloneDeep } from 'lodash';
 import React from 'react';
 
-import type { Scs as Ecs } from '@kbn/securitysolution-ecs';
+import type { SecurityEcs as Ecs } from '@kbn/securitysolution-ecs';
 import { mockTimelineData } from '../../../../../common/mock';
 import { plainRowRenderer } from './plain_row_renderer';
 

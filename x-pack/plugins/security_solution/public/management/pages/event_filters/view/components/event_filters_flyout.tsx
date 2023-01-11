@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { lastValueFrom } from 'rxjs';
 
-import type { Scs as Ecs } from '@kbn/securitysolution-ecs';
+import type { SecurityEcs as Ecs } from '@kbn/securitysolution-ecs';
 import { useWithArtifactSubmitData } from '../../../../components/artifact_list_page/hooks/use_with_artifact_submit_data';
 import type {
   ArtifactFormComponentOnChangeCallbackProps,

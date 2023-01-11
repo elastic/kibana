@@ -9,7 +9,7 @@ import { JsonObject } from '@kbn/utility-types';
 
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
-import type { Scs as Ecs } from '@kbn/securitysolution-ecs';
+import type { SecurityEcs as Ecs } from '@kbn/securitysolution-ecs';
 import type { CursorType, Inspect, Maybe, PaginationInputPaginated } from '../../../common';
 import type { TimelineRequestOptionsPaginated } from '../..';
 

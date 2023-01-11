@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { Scs as Ecs } from '@kbn/securitysolution-ecs';
+import type { SecurityEcs as Ecs } from '@kbn/securitysolution-ecs';
 import { ActionIconItem } from '../../../../common/components/header_actions/action_icon_item';
 
 import {

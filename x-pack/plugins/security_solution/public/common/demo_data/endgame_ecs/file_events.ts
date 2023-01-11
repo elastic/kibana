@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Scs as Ecs } from '@kbn/securitysolution-ecs';
+import type { SecurityEcs as Ecs } from '@kbn/securitysolution-ecs';
 
 export const demoEndgameFileCreateEvent: Ecs = {
   _id: '98jPcG0BOpWiDweSouzg',

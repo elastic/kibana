@@ -7,7 +7,7 @@
 
 import type { ISearchStart } from '@kbn/data-plugin/public';
 import type { Filter } from '@kbn/es-query';
-import type { Scs as Ecs } from '@kbn/securitysolution-ecs';
+import type { SecurityEcs as Ecs } from '@kbn/securitysolution-ecs';
 import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import type { NoteResult } from '../../../../common/types/timeline/note';
 import type { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';

@@ -7,7 +7,7 @@
 
 import * as runtimeTypes from 'io-ts';
 
-import { Scs as Ecs } from '@kbn/securitysolution-ecs';
+import { SecurityEcs as Ecs } from '@kbn/securitysolution-ecs';
 import { unionWithNullType } from '../../utility_types';
 import { Direction } from '../../search_strategy';
 

@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 
-import type { Scs as Ecs } from '@kbn/securitysolution-ecs';
+import type { SecurityEcs as Ecs } from '@kbn/securitysolution-ecs';
 import type {
   ControlColumnProps,
   RowCellRender,

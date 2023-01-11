@@ -6,7 +6,7 @@
  */
 
 import { get } from 'lodash/fp';
-import type { Scs as Ecs } from '@kbn/securitysolution-ecs';
+import type { SecurityEcs as Ecs } from '@kbn/securitysolution-ecs';
 
 export const isInvestigateInResolverActionEnabled = (ecsData?: Ecs) =>
   (get(['agent', 'type', 0], ecsData) === 'endpoint' ||

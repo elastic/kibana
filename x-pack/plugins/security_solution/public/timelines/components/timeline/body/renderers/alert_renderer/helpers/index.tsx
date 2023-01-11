@@ -9,7 +9,7 @@ import { EuiFlexGroup } from '@elastic/eui';
 import { has } from 'lodash/fp';
 import styled from 'styled-components';
 
-import type { Scs as Ecs } from '@kbn/securitysolution-ecs';
+import type { SecurityEcs as Ecs } from '@kbn/securitysolution-ecs';
 import { TimelineId } from '../../../../../../../../common/types';
 
 export const DESTINATION_IP = 'destination.ip';

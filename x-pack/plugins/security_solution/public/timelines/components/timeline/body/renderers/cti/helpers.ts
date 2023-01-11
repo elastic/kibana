@@ -8,7 +8,7 @@
 import { get, isEmpty } from 'lodash';
 import styled from 'styled-components';
 
-import type { Scs as Ecs, ThreatIndicatorEcs } from '@kbn/securitysolution-ecs';
+import type { SecurityEcs as Ecs, ThreatIndicatorEcs } from '@kbn/securitysolution-ecs';
 import { ENRICHMENT_DESTINATION_PATH } from '../../../../../../../common/constants';
 import { INDICATOR_MATCH_SUBFIELDS } from '../../../../../../../common/cti/constants';
 
