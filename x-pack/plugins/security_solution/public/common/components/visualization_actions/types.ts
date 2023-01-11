@@ -104,3 +104,7 @@ export interface ExtraOptions {
   spaceId?: string;
   status?: Status;
 }
+
+export interface VisualizationEmbeddableProps extends LensEmbeddableComponentProps {
+  inputId?: InputsModelId.global | InputsModelId.timeline;
+}

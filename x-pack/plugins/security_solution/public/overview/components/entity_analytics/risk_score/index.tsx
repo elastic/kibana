@@ -43,6 +43,10 @@ import { usersActions } from '../../../../explore/users/store';
 import { useNavigateToTimeline } from '../../detection_response/hooks/use_navigate_to_timeline';
 import type { TimeRange } from '../../../../common/store/inputs/model';
 import { openAlertsFilter } from '../../detection_response/utils';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { DonutEmbeddable } from '../../../../common/components/visualization_actions/donut_embeddable';
+import { useSpaceId } from '../../../../common/hooks/use_space_id';
+import { getRiskScoreDonutAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/risk_scores/risk_score_donut';
 
 const HOST_RISK_TABLE_QUERY_ID = 'hostRiskDashboardTable';
 const HOST_RISK_KPI_QUERY_ID = 'headerHostRiskScoreKpiQuery';
@@ -53,7 +57,8 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
   const { deleteQuery, setQuery, from, to } = useGlobalTime();
   const [updatedAt, setUpdatedAt] = useState<number>(Date.now());
   const dispatch = useDispatch();
-
+  const spaceId = useSpaceId();
+  const extraOptions = useMemo(() => ({ spaceId }), [spaceId]);
   const entity = useMemo(
     () =>
       riskEntity === RiskScoreEntity.host
@@ -137,6 +142,7 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
     }),
     [from, to]
   );
+  const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
 
   const {
     severityCount,
@@ -270,7 +276,19 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
         {toggleStatus && (
           <EuiFlexGroup data-test-subj="entity_analytics_content">
             <EuiFlexItem grow={false}>
-              <RiskScoreDonutChart severityCount={severityCount ?? EMPTY_SEVERITY_COUNT} />
+              {isChartEmbeddablesEnabled && spaceId ? (
+                <DonutEmbeddable
+                  id={`${entity.kpiQueryId}-table`}
+                  timerange={timerange}
+                  label={'Total'}
+                  getLensAttributes={getRiskScoreDonutAttributes}
+                  stackByField={riskEntity}
+                  extraOptions={extraOptions}
+                  height="135px"
+                />
+              ) : (
+                <RiskScoreDonutChart severityCount={severityCount ?? EMPTY_SEVERITY_COUNT} />
+              )}
             </EuiFlexItem>
             <EuiFlexItem>
               <StyledBasicTable
