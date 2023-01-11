@@ -29,76 +29,91 @@ program
   .description(`Check whether this commit's SO mappings are compatible with latest from main`);
 
 const MY_INDEX = '.kibana_mappings_check';
-program.command('check').action(
-  /**
-   * Algorithm for checking compatible mappings. Should work in CI or local
-   * dev environment.
-   *
-   * 1. Extract mappings from code as JSON object
-   * 2. Check if extracted mappings is different from current_mappings.json, current_mappings.json represents the mappings from "main"
-   * 3. Start a fresh ES node
-   * 4. Upload current_mappings.json to ES node
-   * 5. Upload extracted mappings.json to ES node
-   * 6. Check result of response to step 8, if bad response the mappings are incompatible
-   * 7. If good response, write extracted mappings to current_mappings.json
-   */
-  async () => {
-    if (!fs.existsSync(CURRENT_MAPPINGS_FILE)) {
-      log.fatal(
-        `No existing mappings file found at ${CURRENT_MAPPINGS_FILE}. Run the "generate" command then retry this command.`
-      );
-      exit(1);
-      return;
-    }
-    let errorEncountered = false;
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const currentMappings: SavedObjectsTypeMappingDefinitions = require(CURRENT_MAPPINGS_FILE);
-      log.info('Extracting mappings from plugins...');
-      const extractedMappings = await extractMappingsFromPlugins();
-      log.info(`Got mappings from plugins.`);
-
-      if (deepEqual(currentMappings, extractedMappings)) {
-        log.success('Mappings are unchanged.');
+program
+  .command('check')
+  .option('-d, --dryRun', 'Do not update the current mappings')
+  .action(
+    /**
+     * Algorithm for checking compatible mappings. Should work in CI or local
+     * dev environment.
+     *
+     * 1. Extract mappings from code as JSON object
+     * 2. Check if extracted mappings is different from current_mappings.json, current_mappings.json represents the mappings from "main"
+     * 3. Start a fresh ES node
+     * 4. Upload current_mappings.json to ES node
+     * 5. Upload extracted mappings.json to ES node
+     * 6. Check result of response to step 8, if bad response the mappings are incompatible
+     * 7. If good response, write extracted mappings to current_mappings.json
+     */
+    async (options = {}) => {
+      if (!fs.existsSync(CURRENT_MAPPINGS_FILE)) {
+        log.error(
+          `No existing mappings file found at ${CURRENT_MAPPINGS_FILE}. Run the "generateSnapshot" command then retry this command.`
+        );
+        exit(1);
         return;
       }
+      let errorEncountered = false;
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const currentMappings: SavedObjectsTypeMappingDefinitions = require(CURRENT_MAPPINGS_FILE);
+        log.info('Extracting mappings from plugins...');
+        const extractedMappings = await extractMappingsFromPlugins();
+        log.info(`Got mappings from plugins.`);
 
-      const esClient = await startES();
+        if (deepEqual(currentMappings, extractedMappings)) {
+          log.success('Mappings are unchanged.');
+          return;
+        }
 
-      await esClient.indices.create({
-        index: MY_INDEX,
-        mappings: {
-          properties: currentMappings,
-        },
-        settings: {
-          mapping: {
-            total_fields: { limit: 1500 },
+        log.info(`Starting ES node...`);
+        const esClient = await startES();
+
+        await esClient.indices.create({
+          index: MY_INDEX,
+          mappings: {
+            dynamic: false,
+            properties: currentMappings,
           },
-        },
-      });
+          settings: {
+            mapping: {
+              total_fields: { limit: 1500 },
+            },
+          },
+        });
 
-      const res = await esClient.indices.putMapping({
-        index: MY_INDEX,
-        properties: extractedMappings,
-      });
+        const res = await esClient.indices.putMapping({
+          index: MY_INDEX,
+          properties: extractedMappings,
+        });
 
-      log.success('Extracted mappings are compatible with existing mappings!');
-      log.success(`Got response\n${JSON.stringify(res, null, 2)}`);
-      writeToMappingsFile(extractedMappings);
-    } catch (e) {
-      log.fatal('There was an issue trying to apply the extracted mappings to the existing index.');
-      log.fatal(`Error: ${e}`);
-      log.fatal(`Consider reaching out to the Kibana core team if you are stuck.`);
-      errorEncountered = true;
-    } finally {
-      const code = errorEncountered ? 1 : 0;
-      (code ? log.fatal : log.success)(`Exiting with code "${code}"...`);
-      exit(code);
+        log.success('Extracted mappings are compatible with existing mappings.');
+        log.success(`Got response\n${JSON.stringify(res, null, 2)}`);
+        if (options.dryRun) {
+          log.info('Dry run detected, not updating current mappings file...');
+        } else {
+          log.info(`Writing extracted mappings to current mappings file ${CURRENT_MAPPINGS_FILE}.`);
+          writeToMappingsFile(extractedMappings);
+        }
+      } catch (e) {
+        log.error(
+          'There was an issue trying to apply the extracted mappings to the existing index.'
+        );
+        log.error(`Error: ${e}`);
+        log.error(
+          `Only mappings changes that are compatible with current mappings are allowed. Consider reaching out to the Kibana core team if you are stuck.`
+        );
+
+        errorEncountered = true;
+      } finally {
+        const code = errorEncountered ? 1 : 0;
+        (code ? log.error.bind(log) : log.success.bind(log))(`Exiting with code "${code}"...`);
+        exit(code);
+      }
     }
-  }
-);
+  );
 
-program.command('generate').action(async () => {
+program.command('generateSnapshot').action(async () => {
   log.info(`Extracting mappings from plugins and writing to ${CURRENT_MAPPINGS_FILE}...`);
   writeToMappingsFile(await extractMappingsFromPlugins());
   log.success(`Done!`);
