@@ -126,13 +126,28 @@ plugins: [
           </EuiCodeBlock>
           <EuiSpacer size="m" />
           <p>
-            {i18n.translate(
-              'xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.searchui.stepTwo.moreInfoDescription',
-              {
-                defaultMessage:
-                  'See the Javascript Embed and Javascript Client tabs for more information on initializing the tracker and firing events.',
-              }
-            )}
+            <FormattedMessage
+              id="xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.searchui.stepTwo.moreInfoDescription"
+              defaultMessage="See the {link} for more information on initializing the tracker and firing events."
+              values={{
+                link: (
+                  <EuiLink
+                    href="https://docs.elastic.co/search-ui/api/core/plugins/analytics-plugin"
+                    target="_blank"
+                    data-telemetry-id={
+                      'entSearch-analytics-integrate-javascriptEmbed-analyticsPluginDocumentationLink'
+                    }
+                  >
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.searchui.stepTwo.analyticsPluginDoc',
+                      {
+                        defaultMessage: 'Analytics Plugin Documentation',
+                      }
+                    )}
+                  </EuiLink>
+                ),
+              }}
+            />
           </p>
         </EuiText>
       </>
