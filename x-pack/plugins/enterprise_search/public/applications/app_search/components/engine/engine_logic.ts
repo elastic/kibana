@@ -30,6 +30,7 @@ interface EngineValues {
   engineNotFound: boolean;
   searchKey: string;
   intervalId: number | null;
+  hasIncompleteFields: boolean;
 }
 
 interface EngineActions {

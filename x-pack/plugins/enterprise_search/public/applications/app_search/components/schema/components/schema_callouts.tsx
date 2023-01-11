@@ -145,7 +145,7 @@ export const MissingSubfieldsCallout: React.FC = () => {
       iconType="alert"
       color="warning"
       title={`${incompleteFields.length} ${i18n.translate(
-        'xpack.enterpriseSearch.appSearch.engine.schema.unconfirmedFields.title',
+        'xpack.enterpriseSearch.appSearch.engine.schema.incompleteFields.title',
         { defaultMessage: 'field(s) are missing subfields' }
       )}`}
     >
@@ -159,6 +159,7 @@ export const MissingSubfieldsCallout: React.FC = () => {
         )}{' '}
         <a
           href="https://www.elastic.co/guide/en/app-search/current/elasticsearch-engines-text-subfields-support-conventions.html"
+          data-test-subj="missingSubfieldsLearnMoreLink"
           target="_blank"
         >
           {i18n.translate('xpack.enterpriseSearch.appSearch.engine.schema.incompleteFields.link', {

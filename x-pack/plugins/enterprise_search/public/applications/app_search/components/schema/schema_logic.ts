@@ -32,6 +32,8 @@ interface SchemaValues extends SchemaBaseValues {
   hasUnconfirmedFields: boolean;
   hasNewUnsearchedFields: boolean;
   isModalOpen: boolean;
+  incompleteFields: string[];
+  hasIncompleteFields: boolean;
 }
 
 interface SchemaActions extends SchemaBaseActions {
@@ -128,7 +130,7 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
     ],
     hasIncompleteFields: [
       (selectors) => [selectors.incompleteFields],
-      (incompleteFields) => incompleteFields.length > 0,
+      (incompleteFields: string[]) => incompleteFields.length > 0,
     ],
   },
   listeners: ({ actions, values }) => ({
