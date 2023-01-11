@@ -17,7 +17,7 @@ import { fetchMetricbeatErrors } from './metricbeat';
 import type { FetchParameters } from './types';
 import { fetchPackageErrors } from './package/fetch_package_errors';
 
-const DEFAULT_QUERY_TIMERANGE = { min: 'now-15h', max: 'now' };
+const DEFAULT_QUERY_TIMERANGE = { min: 'now-15m', max: 'now' };
 const DEFAULT_QUERY_TIMEOUT_SECONDS = 15;
 
 export function registerV1HealthRoute(server: MonitoringCore) {

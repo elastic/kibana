@@ -7,13 +7,13 @@
 
 import { FetchParameters, FetchExecution, MonitoredProduct } from '../types';
 
-import type { PackageProducts } from './build_package_errors';
+import type { Products } from '../errors_helpers/build_errors';
 
-import { packageErrorsQuery } from './package_errors_query';
-import { buildPackageErrors } from './build_package_errors';
+import { errorsQuery } from '../errors_helpers/errors_query';
+import { buildErrors } from '../errors_helpers/build_errors';
 
 interface PackageResponse {
-  products?: PackageProducts;
+  products?: Products;
   execution: FetchExecution;
 }
 
@@ -29,22 +29,22 @@ export const fetchPackageErrors = async ({
   const getPackageErrors = async () => {
     const { aggregations, timed_out: timedOut } = await search({
       index: packageIndex,
-      body: packageErrorsQuery({
+      body: errorsQuery({
         timeRange,
         timeout,
         products: [
           MonitoredProduct.Beats,
           MonitoredProduct.Elasticsearch,
-          MonitoredProduct.EnterpriseSearch,
           MonitoredProduct.Kibana,
           MonitoredProduct.Logstash,
         ],
+        errorQueryType: 'packageErrorsQuery',
       }),
       size: 0,
       ignore_unavailable: true,
     });
     const buckets = aggregations?.errors_aggregation?.buckets ?? [];
-    return { products: buildPackageErrors(buckets), timedOut: Boolean(timedOut) };
+    return { products: buildErrors(buckets), timedOut: Boolean(timedOut) };
   };
 
   try {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MetricbeatMonitoredProduct, QueryOptions } from '../types';
+import type { MetricbeatMonitoredProduct, PackagesMonitoredProduct, QueryOptions } from '../types';
 
 const MAX_BUCKET_SIZE = 50;
 
@@ -13,16 +13,18 @@ const MAX_BUCKET_SIZE = 50;
  * Returns a nested aggregation of error messages per event.datasets.
  * Each module (beats, kibana...) can contain one or multiple metricsets with error messages
  */
-interface MetricbeatErrorsQueryOptions extends QueryOptions {
-  products: MetricbeatMonitoredProduct[];
+interface ErrorsQueryOptions extends QueryOptions {
+  products: MetricbeatMonitoredProduct[] | PackagesMonitoredProduct[];
+  errorQueryType: 'metricbeatErrorsQuery' | 'packageErrorsQuery';
 }
 
-export const metricbeatErrorsQuery = ({
+export const errorsQuery = ({
   timeRange,
   timeout,
   products,
-}: MetricbeatErrorsQueryOptions) => {
-  if (!timeRange) throw new Error('metricbeatErrorsQuery: missing timeRange parameter');
+  errorQueryType,
+}: ErrorsQueryOptions) => {
+  if (!timeRange) throw new Error(`${errorQueryType}: missing timeRange parameter`);
   return {
     timeout: `${timeout}s`,
     query: {
