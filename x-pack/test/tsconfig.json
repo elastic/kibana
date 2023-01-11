@@ -112,5 +112,6 @@
     "@kbn/apm-synthtrace-client",
     "@kbn/utils",
     "@kbn/journeys",
+    "@kbn/securitysolution-ecs",
   ]
 }
