@@ -34,7 +34,7 @@ export const sourceMapRt = t.intersection([
     names: t.array(t.string),
     file: t.string,
     sourceRoot: t.string,
-    sourcesContent: t.array(t.string),
+    sourcesContent: t.array(t.union([t.string, t.null])),
   }),
 ]);
 
