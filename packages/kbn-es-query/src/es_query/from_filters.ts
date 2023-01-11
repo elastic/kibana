@@ -97,8 +97,8 @@ function findIndexPattern(
   inputDataViews: DataViewBase | DataViewBase[] | undefined,
   id: string | undefined
 ) {
-  const indexPatterns = Array.isArray(inputDataViews) ? inputDataViews : [inputDataViews];
-  return indexPatterns.find((index) => index?.id === id);
+  const dataViews = Array.isArray(inputDataViews) ? inputDataViews : [inputDataViews];
+  return dataViews.find((index) => index?.id === id) ?? dataViews[0];
 }
 
 export function filterToQueryDsl(
