@@ -9,7 +9,7 @@ import React, { VFC } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useBlockListContext } from '../../../indicators/hooks/use_block_list_context';
-import { useSecurityContext } from '../../../../hooks';
+import { useSetUrlParams } from '../../hooks/use_set_url_params';
 
 export interface AddToBlockListProps {
   /**
@@ -23,7 +23,7 @@ export interface AddToBlockListProps {
   /**
    * Click event to notify the parent component (to for example close the popover)
    */
-  onClick?: () => void;
+  onClick: () => void;
 }
 
 /**
@@ -38,11 +38,10 @@ export const AddToBlockListContextMenu: VFC<AddToBlockListProps> = ({
   onClick,
 }) => {
   const { setBlockListIndicatorValue } = useBlockListContext();
-  const { blockList } = useSecurityContext();
-  const setUrlParams = blockList.useSetUrlParams();
+  const { setUrlParams } = useSetUrlParams();
 
   const menuItemClicked = () => {
-    if (onClick) onClick();
+    onClick();
     setBlockListIndicatorValue(data as string);
     setUrlParams({ show: 'create' });
   };
