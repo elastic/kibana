@@ -55,7 +55,7 @@ describe('Processor: Enrich', () => {
     // Click submit button with only the type defined
     await saveNewProcessor();
 
-    // Expect form error as "field" and "value" are required parameters
+    // Expect form errors from the required fields
     expect(form.getErrorsMessages()).toEqual([
       'A field value is required.',
       'A value is required.',
