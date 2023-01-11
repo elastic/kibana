@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import React, { useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -130,7 +131,6 @@ export const ActionNotifyWhen = ({
   onNotifyWhenChange,
   onThrottleChange,
 }: RuleNotifyWhenProps) => {
-  const [ruleThrottle, setRuleThrottle] = useState<number>(throttle || 1);
   const [showCustomThrottleOpts, setShowCustomThrottleOpts] = useState<boolean>(false);
   const [notifyWhenValue, setNotifyWhenValue] =
     useState<RuleNotifyWhenType>(DEFAULT_NOTIFY_WHEN_VALUE);
@@ -140,7 +140,7 @@ export const ActionNotifyWhen = ({
       setNotifyWhenValue(frequency.notifyWhen);
     } else {
       // If 'notifyWhen' is not set, derive value from existence of throttle value
-      setNotifyWhenValue(frequency.throttle ? 'onThrottleInterval' : 'onActiveAlert');
+      setNotifyWhenValue(frequency.throttle ? RuleNotifyWhen.THROTTLE : RuleNotifyWhen.ACTIVE);
     }
   }, [frequency]);
 
@@ -152,13 +152,15 @@ export const ActionNotifyWhen = ({
     (newValue: RuleNotifyWhenType) => {
       onNotifyWhenChange(newValue);
       setNotifyWhenValue(newValue);
+      // Calling onNotifyWhenChange and onThrottleChange at the same time interferes with the React state lifecycle
+      // so wait for onNotifyWhenChange to process before calling onThrottleChange
       setTimeout(
         () =>
-          onThrottleChange(newValue === 'onThrottleInterval' ? ruleThrottle : null, throttleUnit),
+          onThrottleChange(newValue === 'onThrottleInterval' ? throttle ?? 1 : null, throttleUnit),
         100
       );
     },
-    [onNotifyWhenChange, setNotifyWhenValue, onThrottleChange, ruleThrottle, throttleUnit]
+    [onNotifyWhenChange, setNotifyWhenValue, onThrottleChange, throttle, throttleUnit]
   );
 
   const labelForRuleRenotify = [
@@ -194,7 +196,7 @@ export const ActionNotifyWhen = ({
                   <EuiFlexItem grow={2}>
                     <EuiFieldNumber
                       min={1}
-                      value={ruleThrottle}
+                      value={throttle ?? 1}
                       name="throttle"
                       data-test-subj="throttleInput"
                       prepend={i18n.translate(
@@ -210,7 +212,6 @@ export const ActionNotifyWhen = ({
                           map((value) => parseInt(value, 10)),
                           filter((value) => !isNaN(value)),
                           map((value) => {
-                            setRuleThrottle(value);
                             onThrottleChange(value, throttleUnit);
                           })
                         );
