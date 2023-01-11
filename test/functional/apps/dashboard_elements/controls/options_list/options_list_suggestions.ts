@@ -28,11 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     let controlId: string;
 
     before(async () => {
-      if (await dashboard.getIsInViewMode()) {
-        await dashboard.switchToEditMode();
-      }
-      await dashboard.waitForRenderComplete();
-
+      await dashboard.ensureDashboardIsInEditMode();
       await dashboardControls.createControl({
         controlType: OPTIONS_LIST_CONTROL,
         dataViewTitle: 'animals-*',

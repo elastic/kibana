@@ -31,10 +31,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
   ]);
 
-  describe('Interactions between options list and dashboard', () => {
+  describe('Dashboard options list validation', () => {
     let controlId: string;
 
     before(async () => {
+      await dashboard.ensureDashboardIsInEditMode();
       await dashboardControls.createControl({
         controlType: OPTIONS_LIST_CONTROL,
         dataViewTitle: 'animals-*',

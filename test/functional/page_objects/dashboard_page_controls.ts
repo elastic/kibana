@@ -461,14 +461,25 @@ export class DashboardPageControls extends FtrService {
     });
   }
 
+  public async optionsListPopoverSelectExists() {
+    await this.retry.try(async () => {
+      await this.testSubjects.existOrFail(`optionsList-control-selection-exists`);
+      await this.testSubjects.click(`optionsList-control-selection-exists`);
+    });
+  }
+
   public async optionsListPopoverSelectOption(availableOption: string) {
     this.log.debug(`selecting ${availableOption} from options list`);
-    if (!(await this.testSubjects.exists(`optionsList-control-selection-${availableOption}`))) {
-      await this.optionsListPopoverClearSearch();
-      await this.optionsListPopoverSearchForOption(availableOption);
-      await this.optionsListPopoverWaitForLoading();
-    }
-    await this.testSubjects.click(`optionsList-control-selection-${availableOption}`);
+    await this.optionsListPopoverSearchForOption(availableOption);
+    await this.optionsListPopoverWaitForLoading();
+
+    await this.retry.try(async () => {
+      await this.testSubjects.existOrFail(`optionsList-control-selection-${availableOption}`);
+      await this.testSubjects.click(`optionsList-control-selection-${availableOption}`);
+    });
+
+    await this.optionsListPopoverClearSearch();
+    await this.optionsListPopoverWaitForLoading();
   }
 
   public async optionsListPopoverClearSelections() {

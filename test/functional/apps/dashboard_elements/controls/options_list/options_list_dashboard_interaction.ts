@@ -23,6 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const dashboardPanelActions = getService('dashboardPanelActions');
 
   const { dashboardControls, timePicker, console, common, dashboard, header, settings } =
     getPageObjects([
@@ -35,7 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       'header',
     ]);
 
-  describe.skip('Interactions between options list and dashboard', () => {
+  describe('Interactions between options list and dashboard', () => {
     let controlId: string;
 
     const returnToDashboard = async () => {
@@ -43,14 +44,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
       await elasticChart.setNewChartUiDebugFlag();
       await dashboard.loadSavedDashboard(OPTIONS_LIST_DASHBOARD_NAME);
-
-      if (await dashboard.getIsInViewMode()) {
-        await dashboard.switchToEditMode();
-      }
-      await dashboard.waitForRenderComplete();
+      await dashboard.ensureDashboardIsInEditMode();
     };
 
     before(async () => {
+      await dashboard.ensureDashboardIsInEditMode();
       await dashboardControls.createControl({
         controlType: OPTIONS_LIST_CONTROL,
         dataViewTitle: 'animals-*',
@@ -60,6 +58,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.addVisualization('Rendering-Test:-animal-sounds-pie');
       await dashboard.clickQuickSave();
       await header.waitUntilLoadingHasFinished();
+    });
+
+    after(async () => {
+      await dashboardControls.deleteAllControls();
+      await dashboardPanelActions.removePanelByTitle('Rendering Test: animal sounds pie');
+      await dashboard.clickQuickSave();
     });
 
     describe('Applies query settings to controls', async () => {
@@ -222,7 +226,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('Applies options list control options to dashboard by default on open', async () => {
         await dashboard.gotoDashboardLandingPage();
         await header.waitUntilLoadingHasFinished();
-        await dashboard.clickUnsavedChangesContinueEditing(DASHBOARD_NAME);
+        await dashboard.clickUnsavedChangesContinueEditing(OPTIONS_LIST_DASHBOARD_NAME);
         await header.waitUntilLoadingHasFinished();
         expect(await pieChart.getPieSliceCount()).to.be(2);
 
@@ -271,7 +275,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('test data view runtime field', async () => {
+    describe('Test data view runtime field', async () => {
       const FIELD_NAME = 'testRuntimeField';
       const FIELD_VALUES = {
         G:
@@ -341,7 +345,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('test exists query', async () => {
+    describe('Test exists query', async () => {
       const newDocuments: Array<{ index: string; id: string }> = [];
 
       const addDocument = async (index: string, document: string) => {
@@ -376,7 +380,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('creating exists query has expected results', async () => {
         expect((await pieChart.getPieChartValues())[0]).to.be(6);
         await dashboardControls.optionsListOpenPopover(controlId);
-        await dashboardControls.optionsListPopoverSelectOption('exists');
+        await dashboardControls.optionsListPopoverSelectExists();
         await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
         await dashboard.waitForRenderComplete();
 
@@ -402,126 +406,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await console.clickPlay();
           await header.waitUntilLoadingHasFinished();
         }
-
         await returnToDashboard();
-        await dashboardControls.deleteAllControls();
       });
-    });
-
-    describe('Options List dashboard validation', async () => {
-      before(async () => {
-        await dashboardControls.createControl({
-          controlType: OPTIONS_LIST_CONTROL,
-          dataViewTitle: 'animals-*',
-          fieldName: 'sound.keyword',
-          title: 'Animal Sounds',
-        });
-        controlId = (await dashboardControls.getAllControlIds())[0];
-
-        await dashboardControls.optionsListOpenPopover(controlId);
-        await dashboardControls.optionsListPopoverSelectOption('meow');
-        await dashboardControls.optionsListPopoverSelectOption('bark');
-        await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
-      });
-
-      after(async () => {
-        await dashboardControls.optionsListOpenPopover(controlId);
-        await dashboardControls.optionsListPopoverClearSelections();
-        await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
-        await filterBar.removeAllFilters();
-      });
-
-      it('Can mark selections invalid with Query', async () => {
-        await queryBar.setQuery('NOT animal.keyword : "dog" ');
-        await queryBar.submitQuery();
-        await dashboard.waitForRenderComplete();
-        await header.waitUntilLoadingHasFinished();
-
-        const suggestions = pick(OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS, [
-          'hiss',
-          'meow',
-          'growl',
-          'grr',
-        ]);
-        await dashboardControls.ensureAvailableOptionsEqual(controlId, {
-          suggestions: { ...suggestions, grr: suggestions.grr - 1 },
-          invalidSelections: ['bark'],
-        });
-        // only valid selections are applied as filters.
-        expect(await pieChart.getPieSliceCount()).to.be(1);
-      });
-
-      it('can make invalid selections valid again if the parent filter changes', async () => {
-        await queryBar.setQuery('');
-        await queryBar.submitQuery();
-        await dashboard.waitForRenderComplete();
-        await header.waitUntilLoadingHasFinished();
-        await dashboardControls.ensureAvailableOptionsEqual(controlId, {
-          suggestions: OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS,
-          invalidSelections: [],
-        });
-        expect(await pieChart.getPieSliceCount()).to.be(2);
-      });
-
-      it('Can mark multiple selections invalid with Filter', async () => {
-        await filterBar.addFilter({ field: 'sound.keyword', operation: 'is', value: 'hiss' });
-        await dashboard.waitForRenderComplete();
-        await header.waitUntilLoadingHasFinished();
-        await dashboardControls.ensureAvailableOptionsEqual(controlId, {
-          suggestions: {
-            hiss: OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS.hiss,
-          },
-          invalidSelections: ['meow', 'bark'],
-        });
-        // only valid selections are applied as filters.
-        expect(await pieChart.getPieSliceCount()).to.be(1);
-      });
-    });
-
-    describe('Options List dashboard no validation', async () => {
-      before(async () => {
-        await filterBar.removeAllFilters();
-        await queryBar.clickQuerySubmitButton();
-        await dashboardControls.optionsListOpenPopover(controlId);
-        await dashboardControls.optionsListPopoverSelectOption('meow');
-        await dashboardControls.optionsListPopoverSelectOption('bark');
-        await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
-        await dashboardControls.updateValidationSetting(false);
-      });
-
-      it('Does not mark selections invalid with Query', async () => {
-        await queryBar.setQuery('NOT animal.keyword : "dog" ');
-        await queryBar.submitQuery();
-        await dashboard.waitForRenderComplete();
-        await header.waitUntilLoadingHasFinished();
-
-        const suggestions = pick(OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS, [
-          'hiss',
-          'meow',
-          'growl',
-          'grr',
-        ]);
-        await dashboardControls.ensureAvailableOptionsEqual(controlId, {
-          suggestions: { ...suggestions, grr: suggestions.grr - 1 },
-          invalidSelections: [],
-        });
-      });
-
-      it('Does not mark multiple selections invalid with Filter', async () => {
-        await filterBar.addFilter({ field: 'sound.keyword', operation: 'is', value: 'hiss' });
-        await dashboard.waitForRenderComplete();
-        await header.waitUntilLoadingHasFinished();
-        await dashboardControls.ensureAvailableOptionsEqual(controlId, {
-          suggestions: {
-            hiss: OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS.hiss,
-          },
-          invalidSelections: [],
-        });
-      });
-    });
-
-    after(async () => {
-      await filterBar.removeAllFilters();
     });
   });
 }

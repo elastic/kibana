@@ -30,14 +30,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Dashboard options list creation and editing', () => {
     before(async () => {
-      if (await dashboard.getIsInViewMode()) {
-        await dashboard.switchToEditMode();
-      }
-      await dashboard.waitForRenderComplete();
+      await dashboard.ensureDashboardIsInEditMode();
     });
 
     after(async () => {
       await dashboardControls.deleteAllControls();
+      await dashboard.clickQuickSave();
     });
 
     describe('Options List Control Editor selects relevant data views', async () => {
