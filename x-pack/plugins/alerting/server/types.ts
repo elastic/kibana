@@ -50,6 +50,7 @@ import {
 } from '../common';
 import { PublicAlertFactory } from './alert/create_alert_factory';
 import { FieldMap } from '../common/alert_schema/field_maps/types';
+import { PublicAlertsClient } from './alerts_client/alerts_client';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 export type { RuleTypeParams };
@@ -83,7 +84,11 @@ export interface RuleExecutorServices<
   savedObjectsClient: SavedObjectsClientContract;
   uiSettingsClient: IUiSettingsClient;
   scopedClusterClient: IScopedClusterClient;
+  /**
+   * @deprecated
+   */
   alertFactory: PublicAlertFactory<State, Context, ActionGroupIds>;
+  alertsClient: PublicAlertsClient;
   shouldWriteAlerts: () => boolean;
   shouldStopExecution: () => boolean;
   ruleMonitoringService?: PublicRuleMonitoringService;

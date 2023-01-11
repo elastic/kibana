@@ -71,57 +71,31 @@ export const schemaGeoPoint = rt.union([
 export const schemaGeoPointArray = rt.array(schemaGeoPoint);
 
 const AlertRequiredSchema = rt.type({
-  kibana: rt.type({
-    alert: rt.type({
-      id: schemaString,
-      rule: rt.type({
-        category: schemaString,
-        consumer: schemaString,
-        name: schemaString,
-        producer: schemaString,
-        rule_type_id: schemaString,
-        uuid: schemaString,
-      }),
-      status: schemaString,
-      uuid: schemaString,
-    }),
-    space_ids: schemaStringArray,
-  }),
+  '@timestamp': schemaDate,
+  'kibana.alert.id': schemaString,
+  'kibana.alert.rule.category': schemaString,
+  'kibana.alert.rule.consumer': schemaString,
+  'kibana.alert.rule.name': schemaString,
+  'kibana.alert.rule.producer': schemaString,
+  'kibana.alert.rule.rule_type_id': schemaString,
+  'kibana.alert.rule.uuid': schemaString,
+  'kibana.alert.status': schemaString,
+  'kibana.alert.uuid': schemaString,
+  'kibana.space_ids': schemaStringArray,
 });
 const AlertOptionalSchema = rt.partial({
-  kibana: rt.partial({
-    alert: rt.partial({
-      action_group: schemaString,
-      duration: rt.partial({
-        us: schemaStringOrNumber,
-      }),
-      end: schemaDate,
-      evaluation_results: rt.array(
-        rt.partial({
-          thresholds: rt.partial({
-            comparator: schemaString,
-            type: schemaString,
-            value: schemaStringArray,
-          }),
-          value: schemaNumber,
-        })
-      ),
-      flapping: schemaBoolean,
-      reason: schemaString,
-      rule: rt.partial({
-        execution: rt.partial({
-          uuid: schemaString,
-        }),
-        parameters: schemaUnknown,
-        tags: schemaStringArray,
-      }),
-      severity: schemaString,
-      start: schemaDate,
-      time_range: schemaDateRange,
-      workflow_status: schemaString,
-    }),
-    version: schemaString,
-  }),
+  'kibana.alert.action_group': schemaString,
+  'kibana.alert.duration.us': schemaStringOrNumber,
+  'kibana.alert.end': schemaDate,
+  'kibana.alert.flapping': schemaBoolean,
+  'kibana.alert.reason': schemaString,
+  'kibana.alert.rule.execution.uuid': schemaString,
+  'kibana.alert.rule.parameters': schemaUnknown,
+  'kibana.alert.rule.tags': schemaStringArray,
+  'kibana.alert.start': schemaDate,
+  'kibana.alert.time_range': schemaDateRange,
+  'kibana.alert.workflow_status': schemaString,
+  'kibana.version': schemaString,
 });
 
 export const AlertSchema = rt.intersection([AlertRequiredSchema, AlertOptionalSchema]);

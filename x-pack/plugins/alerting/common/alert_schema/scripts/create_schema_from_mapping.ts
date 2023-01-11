@@ -93,8 +93,6 @@ const generateSchemaLines = ({
 }: GenerateSchemaLinesOpts) => {
   if (fieldMap == null) return;
 
-  propertyKey = propertyKey === '@timestamp' ? `'@timestamp'` : propertyKey;
-
   const type = get(fieldMap, 'type');
   const isArray = get(fieldMap, 'array', false);
   const isEnabled = get(fieldMap, 'enabled', true);
@@ -102,14 +100,14 @@ const generateSchemaLines = ({
   if (null != type) {
     switch (type) {
       case 'flattened':
-        lineWriter.addLine(`${propertyKey}: ${getSchemaDefinition('schemaUnknown', isArray)},`);
+        lineWriter.addLine(`'${propertyKey}': ${getSchemaDefinition('schemaUnknown', isArray)},`);
         break;
       case 'object':
       case 'nested':
         if (!isEnabled) {
-          lineWriter.addLine(`${propertyKey}: ${getSchemaDefinition('schemaUnknown', isArray)},`);
+          lineWriter.addLine(`'${propertyKey}': ${getSchemaDefinition('schemaUnknown', isArray)},`);
         } else if (isArray && null != fieldMap.properties) {
-          lineWriter.addLineAndIndent(`${propertyKey}: rt.array(`);
+          lineWriter.addLineAndIndent(`'${propertyKey}': rt.array(`);
           if (required) {
             lineWriter.addLineAndIndent(`rt.type({`);
           } else {
@@ -133,29 +131,29 @@ const generateSchemaLines = ({
       case 'match_only_text':
       case 'version':
       case 'wildcard':
-        lineWriter.addLine(`${propertyKey}: ${getSchemaDefinition('schemaString', isArray)},`);
+        lineWriter.addLine(`'${propertyKey}': ${getSchemaDefinition('schemaString', isArray)},`);
         break;
       case 'date':
-        lineWriter.addLine(`${propertyKey}: ${getSchemaDefinition('schemaDate', isArray)},`);
+        lineWriter.addLine(`'${propertyKey}': ${getSchemaDefinition('schemaDate', isArray)},`);
         break;
       case 'date_range':
-        lineWriter.addLine(`${propertyKey}: ${getSchemaDefinition('schemaDateRange', isArray)},`);
+        lineWriter.addLine(`'${propertyKey}': ${getSchemaDefinition('schemaDateRange', isArray)},`);
         break;
       case 'geo_point':
-        lineWriter.addLine(`${propertyKey}: ${getSchemaDefinition('schemaGeoPoint', isArray)},`);
+        lineWriter.addLine(`'${propertyKey}': ${getSchemaDefinition('schemaGeoPoint', isArray)},`);
         break;
       case 'long':
       case 'scaled_float':
         lineWriter.addLine(
-          `${propertyKey}: ${getSchemaDefinition('schemaStringOrNumber', isArray)},`
+          `'${propertyKey}': ${getSchemaDefinition('schemaStringOrNumber', isArray)},`
         );
         break;
       case 'float':
       case 'integer':
-        lineWriter.addLine(`${propertyKey}: ${getSchemaDefinition('schemaNumber', isArray)},`);
+        lineWriter.addLine(`'${propertyKey}': ${getSchemaDefinition('schemaNumber', isArray)},`);
         break;
       case 'boolean':
-        lineWriter.addLine(`${propertyKey}: ${getSchemaDefinition('schemaBoolean', isArray)},`);
+        lineWriter.addLine(`'${propertyKey}': ${getSchemaDefinition('schemaBoolean', isArray)},`);
         break;
       default:
         logError(`unknown type ${type}: ${JSON.stringify(fieldMap)}`);
@@ -175,24 +173,22 @@ const generateSchemaLines = ({
     } else {
       lineWriter.addLineAndIndent(`rt.partial({`);
     }
-  } else {
-    if (required) {
-      lineWriter.addLineAndIndent(`${propertyKey}: rt.type({`);
-    } else {
-      lineWriter.addLineAndIndent(`${propertyKey}: rt.partial({`);
-    }
   }
 
   // write the object properties
   for (const prop of Object.keys(fieldMap.properties).sort()) {
+    const key = propertyKey ? `${propertyKey}.${prop}` : prop;
     generateSchemaLines({
       lineWriter,
-      propertyKey: prop,
+      propertyKey: key,
       required,
       fieldMap: fieldMap.properties[prop],
     });
   }
-  lineWriter.dedentAndAddLine(`}),`);
+
+  if (null == propertyKey) {
+    lineWriter.dedentAndAddLine(`}),`);
+  }
 };
 
 const SchemaFileTemplate = `

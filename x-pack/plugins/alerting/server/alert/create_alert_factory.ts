@@ -27,9 +27,9 @@ export interface AlertFactory<
 }
 
 export type PublicAlertFactory<
-  State extends AlertInstanceState,
-  Context extends AlertInstanceContext,
-  ActionGroupIds extends string
+  State extends AlertInstanceState = AlertInstanceState,
+  Context extends AlertInstanceContext = AlertInstanceContext,
+  ActionGroupIds extends string = string
 > = Pick<AlertFactory<State, Context, ActionGroupIds>, 'create' | 'done'> & {
   alertLimit: Pick<
     AlertFactory<State, Context, ActionGroupIds>['alertLimit'],

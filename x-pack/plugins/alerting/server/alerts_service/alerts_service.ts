@@ -29,7 +29,9 @@ import {
   createResourceInstallationHelper,
   ResourceInstallationHelper,
 } from './create_resource_installation_helper';
-import { AlertsClient } from './alerts_client';
+import { AlertsClient } from '../alerts_client/alerts_client';
+import { IAlertsClient } from '../alerts_client';
+import { type Alert } from '../../common';
 
 const TOTAL_FIELDS_LIMIT = 2500;
 const INSTALLATION_TIMEOUT = 20 * 60 * 1000; // 20 minutes
@@ -70,7 +72,7 @@ interface IAlertsService {
 
   isInitialized(): boolean;
 
-  createAlertsClient(ruleType: UntypedNormalizedRuleType, maxAlerts: number): AlertsClient | null;
+  createAlertsClient(ruleType: UntypedNormalizedRuleType, maxAlerts: number): IAlertsClient | null;
 }
 
 export class AlertsService implements IAlertsService {
@@ -144,20 +146,16 @@ export class AlertsService implements IAlertsService {
     this.resourceInitializationHelper.add({ context, fieldMap }, timeoutMs);
   }
 
-  public createAlertsClient(
-    ruleType: UntypedNormalizedRuleType,
-    maxAlerts: number
-  ): AlertsClient | null {
-    if (!ruleType.alerts) {
-      return null;
-    }
-    return new AlertsClient({
-      logger: this.options.logger,
-      elasticsearchClientPromise: this.options.elasticsearchClientPromise,
-      resourceInstallationPromise: this.isContextInitialized(ruleType.alerts?.context),
-      ruleType,
-      maxAlerts,
-    });
+  public createAlertsClient(ruleType: UntypedNormalizedRuleType, maxAlerts: number) {
+    return this.initialized && ruleType.alerts
+      ? new AlertsClient({
+          logger: this.options.logger,
+          elasticsearchClientPromise: this.options.elasticsearchClientPromise,
+          resourceInstallationPromise: this.isContextInitialized(ruleType.alerts.context),
+          ruleType,
+          maxAlerts,
+        })
+      : null;
   }
 
   private async initializeContext({ context, fieldMap }: IRuleTypeAlerts, timeoutMs?: number) {

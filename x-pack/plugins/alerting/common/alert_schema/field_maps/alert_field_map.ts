@@ -27,10 +27,16 @@ import {
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
   SPACE_IDS,
+  TIMESTAMP,
   VERSION,
 } from '@kbn/rule-data-utils';
 
 export const alertFieldMap = {
+  [TIMESTAMP]: {
+    type: 'date',
+    required: true,
+    array: false,
+  },
   [ALERT_RULE_PARAMETERS]: {
     type: 'object',
     enabled: false,

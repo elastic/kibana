@@ -72,7 +72,9 @@ import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
 import { ILastRun, lastRunFromState, lastRunToRaw } from '../lib/last_run_status';
 import { RunningHandler } from './running_handler';
 import { RuleResultService } from '../monitoring/rule_result_service';
-import { AlertsClient } from '../alerts_service/alerts_client';
+import { AlertsClient, PublicAlertsClient } from '../alerts_client/alerts_client';
+import { IAlertsClient } from '../alerts_client';
+import { LegacyAlertsClient } from '../alerts_client/legacy_alerts_client';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -111,7 +113,8 @@ export class TaskRunner<
   private alerts: Record<string, Alert<State, Context>>;
   private timer: TaskRunnerTimer;
   private alertingEventLogger: AlertingEventLogger;
-  private alertsClient: AlertsClient | null;
+  private alertsClient: IAlertsClient | null;
+  private
   private usageCounter?: UsageCounter;
   private searchAbortController: AbortController;
   private cancelled: boolean;
@@ -119,7 +122,6 @@ export class TaskRunner<
   private ruleMonitoring: RuleMonitoringService;
   private ruleRunning: RunningHandler;
   private ruleResult: RuleResultService;
-  private useLegacyApi: boolean;
 
   constructor(
     ruleType: NormalizedRuleType<
@@ -159,14 +161,11 @@ export class TaskRunner<
       loggerId
     );
     this.ruleResult = new RuleResultService();
+
     this.alertsClient = context.alertsService ? context.alertsService.createAlertsClient(
       ruleType as UntypedNormalizedRuleType,
       this.maxAlerts
-    ) : null;
-
-    // If this rule type has not registered an alert configuration or the AlertsClient is null
-    // default to legacy API
-    this.useLegacyApi = !this.ruleType.alerts || !this.alertsClient;
+    );
   }
 
   private async updateRuleSavedObjectPostRun(
@@ -306,24 +305,37 @@ export class TaskRunner<
 
     const { updatedRuleTypeState, hasReachedAlertLimit, originalAlerts, originalRecoveredAlerts } =
       await this.timer.runWithTimer(TaskRunnerTimerSpan.RuleTypeRun, async () => {
-        if (previousExecutionUuid && !this.useLegacyApi) {
-          // This rule type has registered an alert configuration with the framework so we should use
-          // the FAAD API to query for alerts from previous execution
-          this.alertsClient!.loadExistingAlerts({
-            ruleId,
-            previousRuleExecutionUuid: previousExecutionUuid,
-          });
-
-        } else {
-          // Use legacy method of de-serializing alerts from the task document
-          for (const id in alertRawInstances) {
-            if (alertRawInstances.hasOwnProperty(id)) {
-              this.alerts[id] = new Alert<State, Context>(id, alertRawInstances[id]);
-            }
+        this.alertsClient.initialize({
+          previousExecutionUuid,
+          deserializedAlerts: alertRawInstances,
+          rule: {
+            id: rule.id,
+            name: rule.name,
+            tags: rule.tags,
+            consumer: rule.consumer,
+            spaceId,
+            executionId: this.executionId,
           }
-        }
+        });
+        // if (previousExecutionUuid) {
+        //   // This rule type has registered an alert configuration with the framework so we should use
+        //   // the FAAD API to query for alerts from previous execution
+        //   this.alertsClient.loadExistingAlerts({
+        //     ruleId,
+        //     previousRuleExecutionUuid: previousExecutionUuid,
+        //   });
+
+        // } else {
+        //   // Use legacy method of de-serializing alerts from the task document
+        //   for (const id in alertRawInstances) {
+        //     if (alertRawInstances.hasOwnProperty(id)) {
+        //       this.alerts[id] = new Alert<State, Context>(id, alertRawInstances[id]);
+        //     }
+        //   }
+        // }
 
 
+        // TODO
         const recoveredAlerts: Record<string, Alert<State, Context>> = {};
         for (const id in alertRecoveredRawInstances) {
           if (alertRecoveredRawInstances.hasOwnProperty(id)) {
@@ -333,19 +345,20 @@ export class TaskRunner<
 
         const alertsCopy = cloneDeep(this.alerts);
 
-        const alertFactory = createAlertFactory<
-          State,
-          Context,
-          WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
-        >({
-          alerts: this.alerts,
-          logger: this.logger,
-          maxAlerts: this.maxAlerts,
-          canSetRecoveryContext: ruleType.doesSetRecoveryContext ?? false,
-        });
+        // const alertFactory = createAlertFactory<
+        //   State,
+        //   Context,
+        //   WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
+        // >({
+        //   alerts: this.alerts,
+        //   logger: this.logger,
+        //   maxAlerts: this.maxAlerts,
+        //   useLegacyApi: this.useLegacyApi,
+        //   canSetRecoveryContext: ruleType.doesSetRecoveryContext ?? false,
+        // });
 
         const checkHasReachedAlertLimit = () => {
-          const reachedLimit = alertFactory.hasReachedAlertLimit();
+          const reachedLimit = this.alertsClient.hasReachedAlertLimit();
           if (reachedLimit) {
             this.logger.warn(
               `rule execution generated greater than ${this.maxAlerts} alerts: ${ruleLabel}`
@@ -383,8 +396,16 @@ export class TaskRunner<
                 searchSourceClient: wrappedSearchSourceClient.searchSourceClient,
                 uiSettingsClient: this.context.uiSettings.asScopedToClient(savedObjectsClient),
                 scopedClusterClient: wrappedScopedClusterClient.client(),
-                alertFactory: getPublicAlertFactory(alertFactory),
+                /**
+                 * Deprecate alertFactory and remove when all rules are onboarded to
+                 * the alertsClient
+                 * @deprecated
+                 */
+                alertFactory: this.alertsClient.getExecutorServices(),
+                alertsClient: this.alertsClient.getExecutorServices(),
+                // can move to alertsclient
                 shouldWriteAlerts: () => this.shouldLogAndScheduleActionsForAlerts(),
+                // can move to alertsclient
                 shouldStopExecution: () => this.cancelled,
                 ruleMonitoringService: this.ruleMonitoring.getLastRunMetricsSetters(),
                 dataViews,
@@ -460,36 +481,41 @@ export class TaskRunner<
     const { activeAlerts, recoveredAlerts, currentRecoveredAlerts } = await this.timer.runWithTimer(
       TaskRunnerTimerSpan.ProcessAlerts,
       async () => {
-        const {
-          newAlerts: processedAlertsNew,
-          activeAlerts: processedAlertsActive,
-          currentRecoveredAlerts: processedAlertsRecoveredCurrent,
-          recoveredAlerts: processedAlertsRecovered,
-        } = processAlerts<State, Context, ActionGroupIds, RecoveryActionGroupId>({
-          alerts: this.alerts,
-          existingAlerts: originalAlerts,
-          previouslyRecoveredAlerts: originalRecoveredAlerts,
-          hasReachedAlertLimit,
-          alertLimit: this.maxAlerts,
-          setFlapping: true,
-        });
+        if (this.useLegacyApi) {
+          const {
+            newAlerts: processedAlertsNew,
+            activeAlerts: processedAlertsActive,
+            currentRecoveredAlerts: processedAlertsRecoveredCurrent,
+            recoveredAlerts: processedAlertsRecovered,
+          } = processAlerts<State, Context, ActionGroupIds, RecoveryActionGroupId>({
+            alerts: this.alerts,
+            existingAlerts: originalAlerts,
+            previouslyRecoveredAlerts: originalRecoveredAlerts,
+            hasReachedAlertLimit,
+            alertLimit: this.maxAlerts,
+            setFlapping: true,
+          });
 
-        setFlapping<State, Context, ActionGroupIds, RecoveryActionGroupId>(
-          processedAlertsActive,
-          processedAlertsRecovered
-        );
+          setFlapping<State, Context, ActionGroupIds, RecoveryActionGroupId>(
+            processedAlertsActive,
+            processedAlertsRecovered
+          );
 
-        logAlerts({
-          logger: this.logger,
-          alertingEventLogger: this.alertingEventLogger,
-          newAlerts: processedAlertsNew,
-          activeAlerts: processedAlertsActive,
-          recoveredAlerts: processedAlertsRecoveredCurrent,
-          ruleLogPrefix: ruleLabel,
-          ruleRunMetricsStore,
-          canSetRecoveryContext: ruleType.doesSetRecoveryContext ?? false,
-          shouldPersistAlerts: this.shouldLogAndScheduleActionsForAlerts(),
-        });
+          logAlerts({
+            logger: this.logger,
+            alertingEventLogger: this.alertingEventLogger,
+            newAlerts: processedAlertsNew,
+            activeAlerts: processedAlertsActive,
+            recoveredAlerts: processedAlertsRecoveredCurrent,
+            ruleLogPrefix: ruleLabel,
+            ruleRunMetricsStore,
+            canSetRecoveryContext: ruleType.doesSetRecoveryContext ?? false,
+            shouldPersistAlerts: this.shouldLogAndScheduleActionsForAlerts(),
+          });
+        } else {
+          await this.alertsClient!.writeAlerts();
+        }
+
 
         return {
           newAlerts: processedAlertsNew,
@@ -592,7 +618,7 @@ export class TaskRunner<
 
     this.alertingEventLogger.start();
 
-    return await loadRule<Params>({
+    const result = await loadRule<Params>({
       paramValidator: this.ruleType.validate?.params,
       ruleId,
       spaceId,
@@ -600,6 +626,8 @@ export class TaskRunner<
       ruleTypeRegistry: this.ruleTypeRegistry,
       alertingEventLogger: this.alertingEventLogger,
     });
+
+    return result;
   }
 
   private async processRunResults({
@@ -728,6 +756,7 @@ export class TaskRunner<
         TaskRunnerTimerSpan.PrepareRule,
         async () => this.prepareToRun()
       );
+
       this.ruleMonitoring.setMonitoring(preparedResult.rule.monitoring);
 
       stateWithMetrics = asOk(await this.runRule(preparedResult));
