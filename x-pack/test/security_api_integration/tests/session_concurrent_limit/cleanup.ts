@@ -141,6 +141,15 @@ export default function ({ getService }: FtrProviderContext) {
       .auth(adminTestUser.username, adminTestUser.password)
       .send({ enabled })
       .expect(200);
+
+    log.info(
+      `Session cleanup task document after toggling a task (enabled: ${enabled}): ${JSON.stringify(
+        await es.get({
+          id: `task:session_cleanup`,
+          index: '.kibana_task_manager',
+        })
+      )}`
+    );
   }
 
   describe('Session Concurrent Limit cleanup', () => {
@@ -162,7 +171,7 @@ export default function ({ getService }: FtrProviderContext) {
       await esDeleteAllIndices('.kibana_security_session*');
     });
 
-    it('should properly clean up sessions that exceeded concurrent session limit', async function () {
+    it.only('should properly clean up sessions that exceeded concurrent session limit', async function () {
       this.timeout(100000);
 
       log.debug(`Log in as ${testUser.username} 3 times with a 0.5s delay.`);
@@ -177,11 +186,14 @@ export default function ({ getService }: FtrProviderContext) {
 
       // Cleanup routine runs every 10s, let's wait for 60s to make sure cleanup routine runs at least once.
       log.debug('Waiting for cleanup job to run...');
+      await setTimeoutAsync(5000);
       await toggleSessionCleanupTask(true);
-      await setTimeoutAsync(60000);
+      await setTimeoutAsync(20000);
 
       // The oldest session should have been removed, but the rest should still be valid.
       expect(await getNumberOfSessionDocuments()).to.be(2);
+      log.debug('Stop...');
+      await setTimeoutAsync(5000);
 
       await checkSessionCookieInvalid(basicSessionCookieOne);
       await checkSessionCookie(basicSessionCookieTwo, testUser.username, basicProvider);

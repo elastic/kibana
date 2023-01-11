@@ -111,11 +111,17 @@ export function initRoutes(
     async (context, request, response) => {
       const [, { taskManager }] = await core.getStartServices();
       logger.info(`Toggle session cleanup task (enabled: ${request.body.enabled}).`);
+      let bulkEnableDisableResult;
       try {
         if (request.body.enabled) {
-          await taskManager.bulkEnable([SESSION_INDEX_CLEANUP_TASK_NAME], true /** runSoon **/);
+          bulkEnableDisableResult = await taskManager.bulkEnable(
+            [SESSION_INDEX_CLEANUP_TASK_NAME],
+            true /** runSoon **/
+          );
         } else {
-          await taskManager.bulkDisable([SESSION_INDEX_CLEANUP_TASK_NAME]);
+          bulkEnableDisableResult = await taskManager.bulkDisable([
+            SESSION_INDEX_CLEANUP_TASK_NAME,
+          ]);
         }
       } catch (err) {
         logger.error(
@@ -126,7 +132,11 @@ export function initRoutes(
         throw err;
       }
 
-      logger.info(`Successfully toggled session cleanup task (enabled: ${request.body.enabled}).`);
+      logger.info(
+        `Successfully toggled session cleanup task (enabled: ${
+          request.body.enabled
+        }, enable/disable response: ${JSON.stringify(bulkEnableDisableResult)}).`
+      );
 
       return response.ok();
     }
