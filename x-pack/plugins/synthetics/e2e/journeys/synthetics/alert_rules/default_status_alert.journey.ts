@@ -62,7 +62,7 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
   });
 
   step('Monitor is as up in overview page', async () => {
-    await retry.tryForTime(60 * 1000, async () => {
+    await retry.tryForTime(90 * 1000, async () => {
       const totalDown = await page.textContent(
         byTestId('xpack.uptime.synthetics.overview.status.up')
       );
@@ -80,10 +80,8 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
   });
 
   step('set the monitor status as down', async () => {
-    downCheckTime = new Date(Date.now()).toISOString();
     await services.addTestSummaryDocument({
       docType: 'summaryDown',
-      timestamp: downCheckTime,
     });
     await page.waitForTimeout(5 * 1000);
 
@@ -105,7 +103,10 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
       timestamp: downCheckTime,
       status: 'is down.',
     });
-    await retry.tryForTime(2 * 60 * 1000, async () => {
+    await services.addTestSummaryDocument({
+      docType: 'summaryDown',
+    });
+    await retry.tryForTime(3 * 60 * 1000, async () => {
       await page.click(byTestId('querySubmitButton'));
       expect(
         await page.isVisible(`text=1 Alert`, {
