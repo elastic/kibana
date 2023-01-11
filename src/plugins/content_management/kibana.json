@@ -3,7 +3,7 @@
   "version": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": [],
+  "requiredPlugins": ["management"],
   "requiredBundles": [],
   "optionalPlugins": [],
   "owner": {

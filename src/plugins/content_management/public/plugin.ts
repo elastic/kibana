@@ -7,30 +7,49 @@
  */
 
 import type { CoreSetup, Plugin } from '@kbn/core/public';
+import { ManagementAppMountParams, ManagementSetup } from '@kbn/management-plugin/public';
+import { PLUGIN_ID } from '../common';
 import { RpcClient } from './rpc';
+import type { Context } from './demo-app';
+
+interface SetupDependencies {
+  management: ManagementSetup;
+}
 
 export class ContentManagementPlugin implements Plugin {
   private rpcClient: RpcClient | undefined;
 
-  public setup(core: CoreSetup): void {
+  public setup(core: CoreSetup, { management }: SetupDependencies): void {
     const httpClient = {
       post: core.http.post,
     };
-    this.rpcClient = new RpcClient(httpClient);
+
+    const rpcClient = new RpcClient(httpClient);
+    this.rpcClient = rpcClient;
+
+    management.sections.section.kibana.registerApp({
+      id: PLUGIN_ID,
+      title: 'Content Management',
+      order: 1,
+      async mount(params: ManagementAppMountParams) {
+        if (!rpcClient) {
+          throw new Error('Rcp client has not been initialized');
+        }
+
+        const { mountApp } = await import('./demo-app/mount_app');
+        const [coreStart] = await core.getStartServices();
+        const ctx: Context = {
+          rpc: rpcClient,
+        };
+        return mountApp(coreStart, ctx, params);
+      },
+    });
   }
 
   public start() {
     if (!this.rpcClient) {
       throw new Error('Rcp client has not been initialized');
     }
-
-    const foo = async (rpc: RpcClient) => {
-      // Get a content by id
-      const res = await rpc.get({ type: 'dashboard', id: '123' });
-      console.log('Result', res);
-    };
-
-    foo(this.rpcClient);
 
     return {
       rpc: this.rpcClient,
