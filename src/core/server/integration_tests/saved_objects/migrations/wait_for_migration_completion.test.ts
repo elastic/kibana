@@ -9,9 +9,13 @@
 import Path from 'path';
 import fs from 'fs/promises';
 import JSON5 from 'json5';
-import { kibanaPackageJson as pkg } from '@kbn/utils';
+import { kibanaPackageJson as pkg } from '@kbn/repo-info';
 import { retryAsync } from '@kbn/core-saved-objects-migration-server-mocks';
-import * as kbnTestServer from '../../../../test_helpers/kbn_server';
+import {
+  createRootWithCorePlugins,
+  createTestServers,
+  type TestElasticsearchUtils,
+} from '@kbn/core-test-helpers-kbn-server';
 import { Root } from '@kbn/core-root-server-internal';
 
 const logFilePath = Path.join(__dirname, 'wait_for_migration_completion.log');
@@ -22,7 +26,7 @@ async function removeLogFile() {
 }
 
 describe('migration with waitForCompletion=true', () => {
-  let esServer: kbnTestServer.TestElasticsearchUtils;
+  let esServer: TestElasticsearchUtils;
   let root: Root;
 
   beforeAll(async () => {
@@ -41,7 +45,7 @@ describe('migration with waitForCompletion=true', () => {
   });
 
   it('waits for another instance to complete the migration', async () => {
-    const { startES } = kbnTestServer.createTestServers({
+    const { startES } = createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
       settings: {
         es: {
@@ -120,7 +124,7 @@ describe('migration with waitForCompletion=true', () => {
 });
 
 function createRoot() {
-  return kbnTestServer.createRootWithCorePlugins(
+  return createRootWithCorePlugins(
     {
       migrations: {
         skip: false,

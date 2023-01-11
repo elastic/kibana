@@ -30,6 +30,7 @@ import {
   EuiPanel,
   EuiPopover,
   EuiSpacer,
+  EuiText,
   EuiTitle,
   useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
@@ -48,7 +49,7 @@ import { ClientPluginsStart } from '../../../../../../plugin';
 import { useStatusByLocation } from '../../../../hooks/use_status_by_location';
 import { MonitorEnabled } from '../../management/monitor_list_table/monitor_enabled';
 import { ActionsPopover } from './actions_popover';
-import { selectOverviewState } from '../../../../state';
+import { selectOverviewState, selectServiceLocationsState } from '../../../../state';
 import { useMonitorDetail } from '../../../../hooks/use_monitor_detail';
 import {
   ConfigKey,
@@ -61,11 +62,18 @@ import { fetchSyntheticsMonitor } from '../../../../state/overview/api';
 import { MonitorStatus } from '../../../common/components/monitor_status';
 
 interface Props {
+  configId: string;
   id: string;
   location: string;
+  locationId: string;
   onClose: () => void;
   onEnabledChange: () => void;
-  onLocationChange: (id: string, location: string) => void;
+  onLocationChange: (params: {
+    configId: string;
+    id: string;
+    location: string;
+    locationId: string;
+  }) => void;
   currentDurationChartFrom?: string;
   currentDurationChartTo?: string;
   previousDurationChartFrom?: string;
@@ -162,20 +170,22 @@ function DetailFlyoutDurationChart({
 function LocationSelect({
   locations,
   currentLocation,
-  id,
+  configId,
   setCurrentLocation,
   monitor,
   onEnabledChange,
 }: {
   locations: ReturnType<typeof useStatusByLocation>['locations'];
   currentLocation: string;
-  id: string;
+  configId: string;
   monitor: EncryptedSyntheticsMonitor;
   onEnabledChange: () => void;
-  setCurrentLocation: (location: string) => void;
+  setCurrentLocation: (location: string, locationId: string) => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const status = locations.find((l) => l.observer?.geo?.name === currentLocation)?.monitor?.status;
+
+  const { locations: allLocations } = useSelector(selectServiceLocationsState);
 
   return (
     <EuiFlexGroup wrap={true} responsive={false}>
@@ -211,13 +221,14 @@ function LocationSelect({
                     id: 0,
                     title: GO_TO_LOCATIONS_LABEL,
                     items: locations.map((l) => {
+                      const loc = allLocations.find((ll) => ll.label === l.observer?.geo?.name);
                       return {
                         name: l.observer?.geo?.name,
                         icon: <EuiHealth color={!!l.summary?.down ? 'danger' : 'success'} />,
                         disabled: !l.observer?.geo?.name || l.observer.geo.name === currentLocation,
                         onClick: () => {
                           if (l.observer?.geo?.name && currentLocation !== l.observer.geo.name)
-                            setCurrentLocation(l.observer?.geo?.name);
+                            setCurrentLocation(l.observer?.geo?.name, loc?.id!);
                         },
                       };
                     }),
@@ -235,7 +246,7 @@ function LocationSelect({
         <EuiDescriptionList align="left" compressed>
           <EuiDescriptionListTitle>{ENABLED_ITEM_TEXT}</EuiDescriptionListTitle>
           <EuiDescriptionListDescription>
-            <MonitorEnabled id={id} monitor={monitor} reloadPage={onEnabledChange} />
+            <MonitorEnabled configId={configId} monitor={monitor} reloadPage={onEnabledChange} />
           </EuiDescriptionListDescription>
         </EuiDescriptionList>
       </EuiFlexItem>
@@ -243,7 +254,7 @@ function LocationSelect({
   );
 }
 
-function LoadingState() {
+export function LoadingState() {
   return (
     <EuiFlexGroup alignItems="center" justifyContent="center" style={{ height: '100%' }}>
       <EuiFlexItem grow={false}>
@@ -254,7 +265,7 @@ function LoadingState() {
 }
 
 export function MonitorDetailFlyout(props: Props) {
-  const { id, onLocationChange } = props;
+  const { id, configId, onLocationChange, locationId } = props;
   const {
     data: { monitors },
   } = useSelector(selectOverviewState);
@@ -265,12 +276,14 @@ export function MonitorDetailFlyout(props: Props) {
   }, [id, monitors]);
 
   const setLocation = useCallback(
-    (location: string) => onLocationChange(id, location),
-    [id, onLocationChange]
+    (location: string, locationIdT: string) =>
+      onLocationChange({ id, configId, location, locationId: locationIdT }),
+    [id, configId, onLocationChange]
   );
 
   const detailLink = useMonitorDetailLocator({
-    monitorId: id,
+    configId: id,
+    locationId,
   });
 
   const {
@@ -278,14 +291,14 @@ export function MonitorDetailFlyout(props: Props) {
     error,
     status,
   }: FetcherResult<SavedObject<SyntheticsMonitor>> = useFetcher(
-    () => fetchSyntheticsMonitor(id),
-    [id]
+    () => fetchSyntheticsMonitor(configId),
+    [configId]
   );
 
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
 
-  const monitorDetail = useMonitorDetail(id, props.location);
-  const locationStatuses = useStatusByLocation(id);
+  const monitorDetail = useMonitorDetail(configId, props.location);
+  const locationStatuses = useStatusByLocation(configId);
   const locations = locationStatuses.locations?.filter((l: any) => !!l?.observer?.geo?.name) ?? [];
 
   const isOverlay = useIsWithinMaxBreakpoint('xl');
@@ -328,7 +341,7 @@ export function MonitorDetailFlyout(props: Props) {
                 currentLocation={props.location}
                 locations={locations}
                 setCurrentLocation={setLocation}
-                id={id}
+                configId={configId}
                 monitor={monitorSavedObject.attributes}
                 onEnabledChange={props.onEnabledChange}
               />
@@ -347,19 +360,23 @@ export function MonitorDetailFlyout(props: Props) {
                 compressed
                 listItems={
                   [
-                    {
-                      title: URL_HEADER_TEXT,
-                      description: monitorDetail.data?.url?.full ? (
-                        <EuiLink external href={monitorDetail.data.url.full}>
-                          {monitorDetail.data.url.full}
-                        </EuiLink>
-                      ) : (
-                        ''
-                      ),
-                    },
+                    monitorDetail.data?.url?.full
+                      ? {
+                          title: URL_HEADER_TEXT,
+                          description: (
+                            <EuiLink external href={monitorDetail.data.url.full}>
+                              {monitorDetail.data.url.full}
+                            </EuiLink>
+                          ),
+                        }
+                      : undefined,
                     {
                       title: LAST_RUN_HEADER_TEXT,
-                      description: <Time timestamp={monitorDetail.data?.timestamp} />,
+                      description: monitorDetail.data?.timestamp ? (
+                        <Time timestamp={monitorDetail.data.timestamp} />
+                      ) : (
+                        <EuiText color="subdued">--</EuiText>
+                      ),
                     },
                     {
                       title: LAST_MODIFIED_HEADER_TEXT,

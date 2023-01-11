@@ -53,6 +53,7 @@ export enum WriteOperations {
   BulkEdit = 'bulkEdit',
   BulkDelete = 'bulkDelete',
   BulkEnable = 'bulkEnable',
+  BulkDisable = 'bulkDisable',
   Unsnooze = 'unsnooze',
 }
 
@@ -128,10 +129,12 @@ export class AlertingAuthorization {
       });
 
     this.allPossibleConsumers = this.featuresIds.then((featuresIds) => {
-      return asAuthorizedConsumers([ALERTS_FEATURE_ID, ...featuresIds], {
-        read: true,
-        all: true,
-      });
+      return featuresIds.size
+        ? asAuthorizedConsumers([ALERTS_FEATURE_ID, ...featuresIds], {
+            read: true,
+            all: true,
+          })
+        : {};
     });
   }
 

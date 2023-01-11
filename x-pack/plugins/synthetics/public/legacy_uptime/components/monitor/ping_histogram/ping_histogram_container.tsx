@@ -29,7 +29,7 @@ const Container: React.FC<Props & ResponsiveWrapperProps> = ({ height }) => {
     dateRangeStart: dateStart,
     dateRangeEnd: dateEnd,
   } = useGetUrlParams();
-  const filterCheck = useOverviewFilterCheck();
+  const { filterCheck, pending } = useOverviewFilterCheck();
 
   const dispatch = useDispatch();
   const monitorId = useMonitorId();
@@ -76,7 +76,7 @@ const Container: React.FC<Props & ResponsiveWrapperProps> = ({ height }) => {
       absoluteStartDate={absoluteDateRangeStart}
       absoluteEndDate={absoluteDateRangeEnd}
       height={height}
-      loading={loading}
+      loading={loading || pending}
       timeZone={timeZone}
     />
   );

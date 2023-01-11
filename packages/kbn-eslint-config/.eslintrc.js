@@ -131,6 +131,10 @@ module.exports = {
           from: '@elastic/apm-synthtrace',
           to: '@kbn/apm-synthtrace',
         },
+        {
+          from: 'rison-node',
+          to: '@kbn/rison',
+        },
       ],
     ],
 
@@ -252,6 +256,17 @@ module.exports = {
         exportNames: [
           'withProcRunner',
           'ProcRunner',
+        ]
+      },
+      {
+        fromPackage: '@kbn/utils',
+        toPackage: '@kbn/repo-info',
+        exportNames: [
+          'REPO_ROOT',
+          'UPSTREAM_BRANCH',
+          'kibanaPackageJson',
+          'isKibanaDistributable',
+          'fromRoot',
         ]
       },
     ]],

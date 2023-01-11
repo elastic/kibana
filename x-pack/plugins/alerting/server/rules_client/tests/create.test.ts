@@ -6,7 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { RulesClient, ConstructorOptions, CreateOptions } from '../rules_client';
+import { CreateOptions } from '../methods/create';
+import { RulesClient, ConstructorOptions } from '../rules_client';
 import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
@@ -15,6 +16,7 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import { AlertingAuthorization } from '../../authorization/alerting_authorization';
 import { ActionsAuthorization, ActionsClient } from '@kbn/actions-plugin/server';
+import { RuleNotifyWhen } from '../../types';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
@@ -95,6 +97,7 @@ function getMockData(overwrites: Record<string, unknown> = {}): CreateOptions<{
         },
       },
     ],
+    running: false,
     ...overwrites,
   };
 }
@@ -165,6 +168,7 @@ describe('create()', () => {
               params: {
                 foo: true,
               },
+              frequency: { summary: false, notifyWhen: RuleNotifyWhen.CHANGE, throttle: null },
             },
           ],
         },
@@ -376,6 +380,7 @@ describe('create()', () => {
         "params": Object {
           "bar": true,
         },
+        "running": false,
         "schedule": Object {
           "interval": "1m",
         },
@@ -441,10 +446,11 @@ describe('create()', () => {
         "muteAll": false,
         "mutedInstanceIds": Array [],
         "name": "abc",
-        "notifyWhen": "onActiveAlert",
+        "notifyWhen": null,
         "params": Object {
           "bar": true,
         },
+        "running": false,
         "schedule": Object {
           "interval": "1m",
         },
@@ -658,10 +664,11 @@ describe('create()', () => {
         "muteAll": false,
         "mutedInstanceIds": Array [],
         "name": "abc",
-        "notifyWhen": "onActiveAlert",
+        "notifyWhen": null,
         "params": Object {
           "bar": true,
         },
+        "running": false,
         "schedule": Object {
           "interval": "1m",
         },
@@ -748,7 +755,7 @@ describe('create()', () => {
         },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        notifyWhen: 'onActiveAlert',
+        notifyWhen: null,
         actions: [
           {
             group: 'default',
@@ -835,7 +842,7 @@ describe('create()', () => {
         "alertTypeId": "123",
         "createdAt": 2019-02-12T21:01:22.479Z,
         "id": "1",
-        "notifyWhen": "onActiveAlert",
+        "notifyWhen": null,
         "params": Object {
           "bar": true,
         },
@@ -940,7 +947,7 @@ describe('create()', () => {
         },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        notifyWhen: 'onActiveAlert',
+        notifyWhen: null,
         actions: [
           {
             group: 'default',
@@ -967,6 +974,7 @@ describe('create()', () => {
             },
           },
         ],
+        running: false,
       },
       references: [
         {
@@ -1022,10 +1030,11 @@ describe('create()', () => {
         "alertTypeId": "123",
         "createdAt": 2019-02-12T21:01:22.479Z,
         "id": "1",
-        "notifyWhen": "onActiveAlert",
+        "notifyWhen": null,
         "params": Object {
           "bar": true,
         },
+        "running": false,
         "schedule": Object {
           "interval": "1m",
         },
@@ -1082,8 +1091,9 @@ describe('create()', () => {
         snoozeSchedule: [],
         mutedInstanceIds: [],
         name: 'abc',
-        notifyWhen: 'onActiveAlert',
+        notifyWhen: null,
         params: { bar: true },
+        running: false,
         schedule: { interval: '1m' },
         tags: ['foo'],
         throttle: null,
@@ -1115,7 +1125,7 @@ describe('create()', () => {
         },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        notifyWhen: 'onActiveAlert',
+        notifyWhen: null,
         actions: [
           {
             group: 'default',
@@ -1152,7 +1162,7 @@ describe('create()', () => {
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": false,
         "id": "1",
-        "notifyWhen": "onActiveAlert",
+        "notifyWhen": null,
         "params": Object {
           "bar": true,
         },
@@ -1229,6 +1239,7 @@ describe('create()', () => {
             },
           },
         ],
+        running: false,
       },
       references: [
         {
@@ -1281,8 +1292,9 @@ describe('create()', () => {
         snoozeSchedule: [],
         mutedInstanceIds: [],
         name: 'abc',
-        notifyWhen: 'onActiveAlert',
+        notifyWhen: null,
         params: { bar: true, parameterThatIsSavedObjectRef: 'soRef_0' },
+        running: false,
         schedule: { interval: '1m' },
         tags: ['foo'],
         throttle: null,
@@ -1325,6 +1337,7 @@ describe('create()', () => {
           "bar": true,
           "parameterThatIsSavedObjectId": "9",
         },
+        "running": false,
         "schedule": Object {
           "interval": "1m",
         },
@@ -1397,6 +1410,7 @@ describe('create()', () => {
             },
           },
         ],
+        running: false,
       },
       references: [
         {
@@ -1449,8 +1463,9 @@ describe('create()', () => {
         snoozeSchedule: [],
         mutedInstanceIds: [],
         name: 'abc',
-        notifyWhen: 'onActiveAlert',
+        notifyWhen: null,
         params: { bar: true, parameterThatIsSavedObjectRef: 'action_0' },
+        running: false,
         schedule: { interval: '1m' },
         tags: ['foo'],
         throttle: null,
@@ -1493,6 +1508,7 @@ describe('create()', () => {
           "bar": true,
           "parameterThatIsSavedObjectId": "8",
         },
+        "running": false,
         "schedule": Object {
           "interval": "1m",
         },
@@ -1568,6 +1584,7 @@ describe('create()', () => {
           },
         },
       ],
+      running: false,
     };
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
@@ -1622,6 +1639,7 @@ describe('create()', () => {
           warning: null,
         },
         monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
+        running: false,
       },
       {
         id: 'mock-saved-object-id',
@@ -1659,6 +1677,7 @@ describe('create()', () => {
         "params": Object {
           "bar": true,
         },
+        "running": false,
         "schedule": Object {
           "interval": "1m",
         },
@@ -1700,6 +1719,7 @@ describe('create()', () => {
           },
         },
       ],
+      running: false,
     };
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
@@ -1754,6 +1774,7 @@ describe('create()', () => {
           warning: null,
         },
         monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
+        running: false,
       },
       {
         id: 'mock-saved-object-id',
@@ -1791,6 +1812,7 @@ describe('create()', () => {
         "params": Object {
           "bar": true,
         },
+        "running": false,
         "schedule": Object {
           "interval": "1m",
         },
@@ -1821,7 +1843,7 @@ describe('create()', () => {
       muteAll: false,
       snoozeSchedule: [],
       mutedInstanceIds: [],
-      notifyWhen: 'onActiveAlert',
+      notifyWhen: null,
       actions: [
         {
           group: 'default',
@@ -1832,6 +1854,7 @@ describe('create()', () => {
           },
         },
       ],
+      running: false,
     };
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
@@ -1874,7 +1897,7 @@ describe('create()', () => {
         },
         schedule: { interval: '1m' },
         throttle: null,
-        notifyWhen: 'onActiveAlert',
+        notifyWhen: null,
         muteAll: false,
         snoozeSchedule: [],
         mutedInstanceIds: [],
@@ -1886,6 +1909,7 @@ describe('create()', () => {
           warning: null,
         },
         monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
+        running: false,
       },
       {
         id: 'mock-saved-object-id',
@@ -1919,10 +1943,11 @@ describe('create()', () => {
         "muteAll": false,
         "mutedInstanceIds": Array [],
         "name": "abc",
-        "notifyWhen": "onActiveAlert",
+        "notifyWhen": null,
         "params": Object {
           "bar": true,
         },
+        "running": false,
         "schedule": Object {
           "interval": "1m",
         },
@@ -1972,6 +1997,7 @@ describe('create()', () => {
           },
         },
       ],
+      running: false,
     };
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '123',
@@ -2000,7 +2026,7 @@ describe('create()', () => {
           interval: '1m',
         },
         throttle: null,
-        notifyWhen: 'onActiveAlert',
+        notifyWhen: null,
         params: {
           bar: true,
           risk_score: 42,
@@ -2057,6 +2083,7 @@ describe('create()', () => {
         meta: {
           versionApiKeyLastmodified: 'v8.0.0',
         },
+        running: false,
       },
       {
         references: [
@@ -2097,6 +2124,7 @@ describe('create()', () => {
           "risk_score": 42,
           "severity": "low",
         },
+        "running": false,
         "schedule": Object {
           "interval": "10s",
         },
@@ -2394,7 +2422,7 @@ describe('create()', () => {
         },
         schedule: { interval: '1m' },
         throttle: null,
-        notifyWhen: 'onActiveAlert',
+        notifyWhen: null,
         muteAll: false,
         snoozeSchedule: [],
         mutedInstanceIds: [],
@@ -2406,6 +2434,7 @@ describe('create()', () => {
           warning: null,
         },
         monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
+        running: false,
       },
       {
         id: 'mock-saved-object-id',
@@ -2441,6 +2470,7 @@ describe('create()', () => {
             },
           },
         ],
+        running: false,
       },
       references: [
         {
@@ -2496,7 +2526,7 @@ describe('create()', () => {
         },
         schedule: { interval: '1m' },
         throttle: null,
-        notifyWhen: 'onActiveAlert',
+        notifyWhen: null,
         muteAll: false,
         snoozeSchedule: [],
         mutedInstanceIds: [],
@@ -2508,6 +2538,7 @@ describe('create()', () => {
           warning: null,
         },
         monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
+        running: false,
       },
       {
         id: 'mock-saved-object-id',
@@ -2611,6 +2642,7 @@ describe('create()', () => {
           },
         },
       ],
+      running: false,
     };
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
@@ -2713,7 +2745,7 @@ describe('create()', () => {
       ],
     });
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Cannot specify per-action frequency params when notify_when and throttle are defined at the rule level: default, default"`
+      `"Cannot specify per-action frequency params when notify_when or throttle are defined at the rule level: default, default"`
     );
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();
@@ -2743,7 +2775,7 @@ describe('create()', () => {
       ],
     });
     await expect(rulesClient.create({ data: data2 })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Cannot specify per-action frequency params when notify_when and throttle are defined at the rule level: default"`
+      `"Cannot specify per-action frequency params when notify_when or throttle are defined at the rule level: default"`
     );
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();

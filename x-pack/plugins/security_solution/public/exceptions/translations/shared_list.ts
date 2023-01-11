@@ -88,7 +88,7 @@ export const EXCEPTIONS_LISTS_SEARCH_PLACEHOLDER = i18n.translate(
 export const ALL_EXCEPTIONS = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allExceptions.tableTitle',
   {
-    defaultMessage: 'Rule Exceptions',
+    defaultMessage: 'Shared Exception Lists',
   }
 );
 
@@ -163,7 +163,7 @@ export const referenceErrorMessage = (referenceCount: number) =>
 export const EXCEPTION_LIST_SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.all.exceptions.searchPlaceholder',
   {
-    defaultMessage: 'Search by name or list id',
+    defaultMessage: 'Search by name or list_id:id',
   }
 );
 
@@ -324,7 +324,7 @@ export const CREATE_SHARED_LIST_DESCRIPTION = i18n.translate(
 export const CREATE_SHARED_LIST_DESCRIPTION_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.exceptions.createSharedExceptionListFlyoutDescriptionPlaceholder',
   {
-    defaultMessage: 'New exception list',
+    defaultMessage: 'New exception list description',
   }
 );
 

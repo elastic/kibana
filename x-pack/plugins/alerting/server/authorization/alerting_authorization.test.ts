@@ -550,55 +550,6 @@ describe('AlertingAuthorization', () => {
       });
     });
 
-    test('ensures the user has privileges to execute alerts when all features are disabled', async () => {
-      features.getKibanaFeatures.mockReturnValue([]);
-      const { authorization } = mockSecurity();
-      const checkPrivileges: jest.MockedFunction<
-        ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
-      > = jest.fn();
-      authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
-      const alertAuthorization = new AlertingAuthorization({
-        request,
-        authorization,
-        ruleTypeRegistry,
-        features,
-        getSpace,
-        getSpaceId,
-      });
-
-      checkPrivileges.mockResolvedValueOnce({
-        username: 'some-user',
-        hasAllRequested: true,
-        privileges: { kibana: [] },
-      });
-
-      await alertAuthorization.ensureAuthorized({
-        ruleTypeId: 'myType',
-        consumer: 'alerts',
-        operation: WriteOperations.Update,
-        entity: AlertingAuthorizationEntity.Alert,
-      });
-
-      expect(ruleTypeRegistry.get).toHaveBeenCalledWith('myType');
-
-      expect(authorization.actions.alerting.get).toHaveBeenCalledTimes(2);
-      expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
-        'myType',
-        'alerts',
-        'alert',
-        'update'
-      );
-      expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
-        'myType',
-        'myApp',
-        'alert',
-        'update'
-      );
-      expect(checkPrivileges).toHaveBeenCalledWith({
-        kibana: [mockAuthorizationAction('myType', 'myApp', 'alert', 'update')],
-      });
-    });
-
     test('throws if user lacks the required rule privileges for the consumer', async () => {
       const { authorization } = mockSecurity();
       const checkPrivileges: jest.MockedFunction<

@@ -18,7 +18,7 @@ import {
 
 /** @internal */
 export interface WaitForTaskResponse {
-  error: Option.Option<{ type: string; reason: string; index?: string }>;
+  error: Option.Option<{ type: string; reason?: string; index?: string }>;
   completed: boolean;
   failures: Option.Option<any[]>;
   description?: string;

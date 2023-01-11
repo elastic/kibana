@@ -1,0 +1,302 @@
+////
+This content is generated from the open API specification.
+Any modifications made to this file will be overwritten.
+////
+
+++++
+<div class="openapi">
+  <h2>Access</h2>
+    <ol>
+      <li>APIKey KeyParamName:ApiKey KeyInQuery:false KeyInHeader:true</li>
+      <li>HTTP Basic Authentication</li>
+    </ol>
+
+  <h2><a name="__Methods">Methods</a></h2>
+  [ Jump to <a href="#__Models">Models</a> ]
+
+  <h3>Table of Contents </h3>
+  <div class="method-summary"></div>
+  <h4><a href="#Connectors">Connectors</a></h4>
+  <ul>
+  <li><a href="#deleteConnector"><code><span class="http-method">delete</span> /s/{spaceId}/api/actions/connector/{connectorId}</code></a></li>
+  <li><a href="#getConnector"><code><span class="http-method">get</span> /s/{spaceId}/api/actions/connector/{connectorId}</code></a></li>
+  <li><a href="#getConnectorTypes"><code><span class="http-method">get</span> /s/{spaceId}/api/actions/connector_types</code></a></li>
+  <li><a href="#getConnectors"><code><span class="http-method">get</span> /s/{spaceId}/api/actions/connectors</code></a></li>
+  </ul>
+
+  <h1><a name="Connectors">Connectors</a></h1>
+  <div class="method"><a name="deleteConnector"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="delete"><code class="huge"><span class="http-method">delete</span> /s/{spaceId}/api/actions/connector/{connectorId}</code></pre></div>
+    <div class="method-summary">Deletes a connector. (<span class="nickname">deleteConnector</span>)</div>
+    <div class="method-notes">You must have <code>all</code> privileges for the <strong>Actions and Connectors</strong> feature in the <strong>Management</strong> section of the Kibana feature privileges. WARNING: When you delete a connector, it cannot be recovered.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">connectorId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the connector. default: null </div><div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+    <h3 class="field-label">Request headers</h3>
+    <div class="field-items">
+      <div class="param">kbn-xsrf (required)</div>
+
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash;  default: null </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">204</h4>
+    Indicates a successful call.
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getConnector"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /s/{spaceId}/api/actions/connector/{connectorId}</code></pre></div>
+    <div class="method-summary">Retrieves a connector by ID. (<span class="nickname">getConnector</span>)</div>
+    <div class="method-notes">You must have <code>read</code> privileges for the <strong>Actions and Connectors</strong> feature in the <strong>Management</strong> section of the Kibana feature privileges.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">connectorId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the connector. default: null </div><div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#getConnector_200_response">getConnector_200_response</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "is_missing_secrets" : false,
+  "is_deprecated" : false,
+  "is_preconfigured" : false,
+  "name" : "my-connector",
+  "id" : "b0766e10-d190-11ec-b04c-776c77d14fca",
+  "config" : {
+    "key" : ""
+  },
+  "connector_type_id" : ".server-log"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Indicates a successful call.
+        <a href="#getConnector_200_response">getConnector_200_response</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getConnectorTypes"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /s/{spaceId}/api/actions/connector_types</code></pre></div>
+    <div class="method-summary">Retrieves a list of all connector types. (<span class="nickname">getConnectorTypes</span>)</div>
+    <div class="method-notes">You do not need any Kibana feature privileges to run this API.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">feature_id (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; A filter to limit the retrieved connector types to those that support a specific feature (such as alerting or cases). default: null </div>
+    </div>  <!-- field-items -->
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      array[<a href="#getConnectorTypes_200_response_inner">getConnectorTypes_200_response_inner</a>]
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "supported_feature_ids" : [ "alerting", "uptime", "siem" ],
+  "name" : "Index",
+  "enabled_in_license" : true,
+  "id" : ".server-log",
+  "enabled_in_config" : true,
+  "minimum_license_required" : "basic",
+  "enabled" : true
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Indicates a successful call.
+        
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getConnectors"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /s/{spaceId}/api/actions/connectors</code></pre></div>
+    <div class="method-summary">Retrieves all connectors. (<span class="nickname">getConnectors</span>)</div>
+    <div class="method-notes">You must have <code>read</code> privileges for the <strong>Actions and Connectors</strong> feature in the <strong>Management</strong> section of the Kibana feature privileges.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      array[<a href="#getConnectors_200_response_inner">getConnectors_200_response_inner</a>]
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "is_missing_secrets" : false,
+  "is_deprecated" : false,
+  "is_preconfigured" : false,
+  "name" : "my-connector",
+  "referenced_by_count" : 2,
+  "id" : "b0766e10-d190-11ec-b04c-776c77d14fca",
+  "config" : {
+    "key" : ""
+  },
+  "connector_type_id" : ".server-log"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Indicates a successful call.
+        
+  </div> <!-- method -->
+  <hr/>
+
+  <h2><a name="__Models">Models</a></h2>
+  [ Jump to <a href="#__Methods">Methods</a> ]
+
+  <h3>Table of Contents</h3>
+  <ol>
+    <li><a href="#connector_types"><code>connector_types</code> - </a></li>
+    <li><a href="#features"><code>features</code> - </a></li>
+    <li><a href="#getConnectorTypes_200_response_inner"><code>getConnectorTypes_200_response_inner</code> - </a></li>
+    <li><a href="#getConnector_200_response"><code>getConnector_200_response</code> - </a></li>
+    <li><a href="#getConnectors_200_response_inner"><code>getConnectors_200_response_inner</code> - </a></li>
+  </ol>
+
+  <div class="model">
+    <h3><a name="connector_types"><code>connector_types</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>The type of connector. For example, <code>.email</code>, <code>.index</code>, <code>.jira</code>, <code>.opsgenie</code>, or <code>.server-log</code>.</div>
+    <div class="field-items">
+          </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="features"><code>features</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>The feature that uses the connector. Valid values are <code>alerting</code>, <code>cases</code>, <code>uptime</code>, and <code>siem</code>.</div>
+    <div class="field-items">
+          </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="getConnectorTypes_200_response_inner"><code>getConnectorTypes_200_response_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">enabled (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector type is enabled in Kibana. </div>
+<div class="param">enabled_in_config (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector type is enabled in the Kibana <code>.yml</code> file. </div>
+<div class="param">enabled_in_license (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector is enabled in the license. </div>
+<div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#connector_types">connector_types</a></span>  </div>
+<div class="param">minimum_license_required (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The license that is required to use the connector type. </div>
+<div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the connector type. </div>
+<div class="param">supported_feature_ids (optional)</div><div class="param-desc"><span class="param-type"><a href="#features">array[features]</a></span> The Kibana features that are supported by the connector type. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="getConnector_200_response"><code>getConnector_200_response</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">config (optional)</div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The configuration for the connector. Configuration properties vary depending on the connector type. </div>
+<div class="param">connector_type_id </div><div class="param-desc"><span class="param-type"><a href="#connector_types">connector_types</a></span>  </div>
+<div class="param">id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the connector. </div>
+<div class="param">is_deprecated </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector type is deprecated. </div>
+<div class="param">is_missing_secrets (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether secrets are missing for the connector. Secrets configuration properties vary depending on the connector type. </div>
+<div class="param">is_preconfigured </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether it is a preconfigured connector. If true, the <code>config</code> and <code>is_missing_secrets</code> properties are omitted from the response. </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="getConnectors_200_response_inner"><code>getConnectors_200_response_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">connector_type_id </div><div class="param-desc"><span class="param-type"><a href="#connector_types">connector_types</a></span>  </div>
+<div class="param">config (optional)</div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The configuration for the connector. Configuration properties vary depending on the connector type. </div>
+<div class="param">id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the connector. </div>
+<div class="param">is_deprecated </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector type is deprecated. </div>
+<div class="param">is_missing_secrets (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether secrets are missing for the connector. Secrets configuration properties vary depending on the connector type. </div>
+<div class="param">is_preconfigured </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether it is a preconfigured connector. If true, the <code>config</code> and <code>is_missing_secrets</code> properties are omitted from the response. </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
+<div class="param">referenced_by_count </div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> Indicates the number of saved objects that reference the connector. If <code>is_preconfigured</code> is true, this value is not calculated. </div>
+    </div>  <!-- field-items -->
+  </div>
+</div>
+++++

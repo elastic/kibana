@@ -14,6 +14,7 @@ import { InternalQueryError } from '../../errors';
 import { Duration, DurationUnit } from '../../domain/models';
 import { createSLO } from './fixtures/slo';
 import { DefaultSLIClient } from './sli_client';
+import { sevenDaysRolling, weeklyCalendarAligned } from './fixtures/time_window';
 
 const commonEsResponse = {
   took: 100,
@@ -29,6 +30,19 @@ const commonEsResponse = {
   },
 };
 
+const getMsearchResponse = (good: number = 90, total: number = 100) => ({
+  ...commonEsResponse,
+  responses: [
+    {
+      ...commonEsResponse,
+      aggregations: {
+        good: { value: good },
+        total: { value: total },
+      },
+    },
+  ],
+});
+
 describe('SLIClient', () => {
   let esClientMock: ElasticsearchClientMock;
 
@@ -37,56 +51,44 @@ describe('SLIClient', () => {
   });
 
   describe('fetchCurrentSLIData', () => {
-    describe('for SLO defined with occurrences budgeting method', () => {
+    describe('with occurrences budgeting method', () => {
       it('throws when aggregations failed', async () => {
-        const slo = createSLO({
-          time_window: {
-            duration: new Duration(7, DurationUnit.Day),
-            is_rolling: true,
-          },
-        });
-        esClientMock.search.mockResolvedValueOnce({
+        const slo = createSLO({ timeWindow: sevenDaysRolling() });
+        esClientMock.msearch.mockResolvedValueOnce({
           ...commonEsResponse,
-          aggregations: {},
+          responses: [
+            {
+              ...commonEsResponse,
+              aggregations: {},
+            },
+          ],
         });
         const sliClient = new DefaultSLIClient(esClientMock);
 
-        await expect(sliClient.fetchCurrentSLIData(slo)).rejects.toThrowError(
+        await expect(sliClient.fetchCurrentSLIData([slo])).rejects.toThrowError(
           new InternalQueryError('SLI aggregation query')
         );
       });
 
-      describe('for a rolling time window SLO type', () => {
+      describe('with a rolling time window', () => {
         it('returns the aggregated good and total values', async () => {
-          const slo = createSLO({
-            time_window: {
-              duration: new Duration(7, DurationUnit.Day),
-              is_rolling: true,
-            },
-          });
-          esClientMock.search.mockResolvedValueOnce({
-            ...commonEsResponse,
-            aggregations: {
-              good: { value: 90 },
-              total: { value: 100 },
-            },
-          });
+          const slo = createSLO({ timeWindow: sevenDaysRolling() });
+          esClientMock.msearch.mockResolvedValueOnce(getMsearchResponse());
           const sliClient = new DefaultSLIClient(esClientMock);
 
-          const result = await sliClient.fetchCurrentSLIData(slo);
+          const result = await sliClient.fetchCurrentSLIData([slo]);
 
-          const expectedDateRange = toDateRange(slo.time_window);
-
-          expect(result).toMatchObject({
+          const expectedDateRange = toDateRange(slo.timeWindow);
+          expect(result[slo.id]).toMatchObject({
             good: 90,
             total: 100,
           });
-          expect(result.date_range.from).toBeClose(expectedDateRange.from);
-          expect(result.date_range.to).toBeClose(expectedDateRange.to);
-
-          expect(esClientMock.search).toHaveBeenCalledWith(
-            expect.objectContaining({
-              index: `${SLO_DESTINATION_INDEX_NAME}*`,
+          expect(result[slo.id].dateRange.from).toBeClose(expectedDateRange.from);
+          expect(result[slo.id].dateRange.to).toBeClose(expectedDateRange.to);
+          // @ts-ignore searches not typed properly
+          expect(esClientMock.msearch.mock.calls[0][0].searches).toEqual([
+            { index: `${SLO_DESTINATION_INDEX_NAME}*` },
+            {
               size: 0,
               query: {
                 bool: {
@@ -105,40 +107,30 @@ describe('SLIClient', () => {
                 good: { sum: { field: 'slo.numerator' } },
                 total: { sum: { field: 'slo.denominator' } },
               },
-            })
-          );
+            },
+          ]);
         });
       });
 
-      describe('for a calendar aligned time window SLO type', () => {
+      describe('with a calendar aligned time window', () => {
         it('returns the aggregated good and total values', async () => {
           const slo = createSLO({
-            time_window: {
-              duration: new Duration(1, DurationUnit.Month),
-              calendar: {
-                start_time: new Date('2022-09-01T00:00:00.000Z'),
-              },
-            },
+            timeWindow: weeklyCalendarAligned(new Date('2022-09-01T00:00:00.000Z')),
           });
-          esClientMock.search.mockResolvedValueOnce({
-            ...commonEsResponse,
-            aggregations: {
-              good: { value: 90 },
-              total: { value: 100 },
-            },
-          });
+          esClientMock.msearch.mockResolvedValueOnce(getMsearchResponse());
           const sliClient = new DefaultSLIClient(esClientMock);
 
-          const result = await sliClient.fetchCurrentSLIData(slo);
+          const result = await sliClient.fetchCurrentSLIData([slo]);
 
-          const expectedDateRange = toDateRange(slo.time_window);
-
-          expect(result).toMatchObject({ good: 90, total: 100 });
-          expect(result.date_range.from).toBeClose(expectedDateRange.from);
-          expect(result.date_range.to).toBeClose(expectedDateRange.to);
-          expect(esClientMock.search).toHaveBeenCalledWith(
-            expect.objectContaining({
-              index: `${SLO_DESTINATION_INDEX_NAME}*`,
+          const expectedDateRange = toDateRange(slo.timeWindow);
+          expect(result[slo.id]).toMatchObject({ good: 90, total: 100 });
+          expect(result[slo.id].dateRange.from).toBeClose(expectedDateRange.from);
+          expect(result[slo.id].dateRange.to).toBeClose(expectedDateRange.to);
+          // @ts-ignore searches not typed properly
+          expect(esClientMock.msearch.mock.calls[0][0].searches).toEqual([
+            { index: `${SLO_DESTINATION_INDEX_NAME}*` },
+            {
+              size: 0,
               query: {
                 bool: {
                   filter: [
@@ -159,69 +151,64 @@ describe('SLIClient', () => {
                 good: { sum: { field: 'slo.numerator' } },
                 total: { sum: { field: 'slo.denominator' } },
               },
-            })
-          );
+            },
+          ]);
         });
       });
     });
 
-    describe('for SLO defined with timeslices budgeting method', () => {
+    describe('with timeslices budgeting method', () => {
       it('throws when aggregations failed', async () => {
         const slo = createSLO({
-          budgeting_method: 'timeslices',
+          budgetingMethod: 'timeslices',
           objective: {
             target: 0.95,
-            timeslice_target: 0.95,
-            timeslice_window: new Duration(10, DurationUnit.Minute),
+            timesliceTarget: 0.95,
+            timesliceWindow: new Duration(10, DurationUnit.Minute),
           },
         });
 
-        esClientMock.search.mockResolvedValueOnce({
+        esClientMock.msearch.mockResolvedValueOnce({
           ...commonEsResponse,
-          aggregations: {},
+          responses: [
+            {
+              ...commonEsResponse,
+              aggregations: {},
+            },
+          ],
         });
         const sliClient = new DefaultSLIClient(esClientMock);
 
-        await expect(sliClient.fetchCurrentSLIData(slo)).rejects.toThrowError(
+        await expect(sliClient.fetchCurrentSLIData([slo])).rejects.toThrowError(
           new InternalQueryError('SLI aggregation query')
         );
       });
 
-      describe('for a calendar aligned time window SLO type', () => {
+      describe('with a calendar aligned time window', () => {
         it('returns the aggregated good and total values', async () => {
           const slo = createSLO({
-            budgeting_method: 'timeslices',
+            budgetingMethod: 'timeslices',
             objective: {
               target: 0.95,
-              timeslice_target: 0.9,
-              timeslice_window: new Duration(10, DurationUnit.Minute),
+              timesliceTarget: 0.9,
+              timesliceWindow: new Duration(10, DurationUnit.Minute),
             },
-            time_window: {
-              duration: new Duration(1, DurationUnit.Month),
-              calendar: {
-                start_time: new Date('2022-09-01T00:00:00.000Z'),
-              },
-            },
+            timeWindow: weeklyCalendarAligned(new Date('2022-09-01T00:00:00.000Z')),
           });
-          esClientMock.search.mockResolvedValueOnce({
-            ...commonEsResponse,
-            aggregations: {
-              slices: { buckets: [] },
-              good: { value: 90 },
-              total: { value: 100 },
-            },
-          });
+          esClientMock.msearch.mockResolvedValueOnce(getMsearchResponse());
           const sliClient = new DefaultSLIClient(esClientMock);
 
-          const result = await sliClient.fetchCurrentSLIData(slo);
+          const result = await sliClient.fetchCurrentSLIData([slo]);
 
-          const expectedDateRange = toDateRange(slo.time_window);
-          expect(result).toMatchObject({ good: 90, total: 100 });
-          expect(result.date_range.from).toBeClose(expectedDateRange.from);
-          expect(result.date_range.to).toBeClose(expectedDateRange.to);
-          expect(esClientMock.search).toHaveBeenCalledWith(
-            expect.objectContaining({
-              index: `${SLO_DESTINATION_INDEX_NAME}*`,
+          const expectedDateRange = toDateRange(slo.timeWindow);
+          expect(result[slo.id]).toMatchObject({ good: 90, total: 100 });
+          expect(result[slo.id].dateRange.from).toBeClose(expectedDateRange.from);
+          expect(result[slo.id].dateRange.to).toBeClose(expectedDateRange.to);
+          // @ts-ignore searches not typed properly
+          expect(esClientMock.msearch.mock.calls[0][0].searches).toEqual([
+            { index: `${SLO_DESTINATION_INDEX_NAME}*` },
+            {
+              size: 0,
               query: {
                 bool: {
                   filter: [
@@ -261,7 +248,7 @@ describe('SLIClient', () => {
                           good: 'good',
                           total: 'total',
                         },
-                        script: `params.good / params.total >= ${slo.objective.timeslice_target} ? 1 : 0`,
+                        script: `params.good / params.total >= ${slo.objective.timesliceTarget} ? 1 : 0`,
                       },
                     },
                     count_slice: {
@@ -283,43 +270,36 @@ describe('SLIClient', () => {
                   },
                 },
               },
-            })
-          );
+            },
+          ]);
         });
       });
 
-      describe('for a rolling time window SLO type', () => {
+      describe('with a rolling time window', () => {
         it('returns the aggregated good and total values', async () => {
           const slo = createSLO({
-            budgeting_method: 'timeslices',
+            budgetingMethod: 'timeslices',
             objective: {
               target: 0.95,
-              timeslice_target: 0.9,
-              timeslice_window: new Duration(10, DurationUnit.Minute),
+              timesliceTarget: 0.9,
+              timesliceWindow: new Duration(10, DurationUnit.Minute),
             },
-            time_window: {
-              duration: new Duration(1, DurationUnit.Month),
-              is_rolling: true,
-            },
+            timeWindow: sevenDaysRolling(),
           });
-          esClientMock.search.mockResolvedValueOnce({
-            ...commonEsResponse,
-            aggregations: {
-              good: { value: 90 },
-              total: { value: 100 },
-            },
-          });
+          esClientMock.msearch.mockResolvedValueOnce(getMsearchResponse());
           const sliClient = new DefaultSLIClient(esClientMock);
 
-          const result = await sliClient.fetchCurrentSLIData(slo);
+          const result = await sliClient.fetchCurrentSLIData([slo]);
 
-          const expectedDateRange = toDateRange(slo.time_window);
-          expect(result).toMatchObject({ good: 90, total: 100 });
-          expect(result.date_range.from).toBeClose(expectedDateRange.from);
-          expect(result.date_range.to).toBeClose(expectedDateRange.to);
-          expect(esClientMock.search).toHaveBeenCalledWith(
-            expect.objectContaining({
-              index: `${SLO_DESTINATION_INDEX_NAME}*`,
+          const expectedDateRange = toDateRange(slo.timeWindow);
+          expect(result[slo.id]).toMatchObject({ good: 90, total: 100 });
+          expect(result[slo.id].dateRange.from).toBeClose(expectedDateRange.from);
+          expect(result[slo.id].dateRange.to).toBeClose(expectedDateRange.to);
+          // @ts-ignore searches not typed properly
+          expect(esClientMock.msearch.mock.calls[0][0].searches).toEqual([
+            { index: `${SLO_DESTINATION_INDEX_NAME}*` },
+            {
+              size: 0,
               query: {
                 bool: {
                   filter: [
@@ -356,7 +336,7 @@ describe('SLIClient', () => {
                           good: 'good',
                           total: 'total',
                         },
-                        script: `params.good / params.total >= ${slo.objective.timeslice_target} ? 1 : 0`,
+                        script: `params.good / params.total >= ${slo.objective.timesliceTarget} ? 1 : 0`,
                       },
                     },
                     count_slice: {
@@ -378,8 +358,8 @@ describe('SLIClient', () => {
                   },
                 },
               },
-            })
-          );
+            },
+          ]);
         });
       });
     });
@@ -391,7 +371,7 @@ describe('SLIClient', () => {
 
     describe('for SLO defined with occurrences budgeting method', () => {
       it('calls ES with the lookback windows aggregations', async () => {
-        const slo = createSLO({ budgeting_method: 'occurrences' });
+        const slo = createSLO({ budgetingMethod: 'occurrences' });
         const lookbackWindows = [
           { name: LONG_WINDOW, duration: new Duration(1, DurationUnit.Hour) },
           { name: SHORT_WINDOW, duration: new Duration(5, DurationUnit.Minute) },
@@ -474,11 +454,11 @@ describe('SLIClient', () => {
     describe('for SLO defined with timeslices budgeting method', () => {
       it('calls ES with the lookback windows aggregations', async () => {
         const slo = createSLO({
-          budgeting_method: 'timeslices',
+          budgetingMethod: 'timeslices',
           objective: {
             target: 0.95,
-            timeslice_target: 0.9,
-            timeslice_window: new Duration(10, DurationUnit.Minute),
+            timesliceTarget: 0.9,
+            timesliceWindow: new Duration(10, DurationUnit.Minute),
           },
         });
 

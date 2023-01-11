@@ -42,11 +42,31 @@ describe('UpdateSLO', () => {
         expect.objectContaining({ ...slo, name: newName, updated_at: expect.anything() })
       );
       expect(response.name).toBe(newName);
-      expect(response.updated_at).not.toBe(slo.updated_at);
+      expect(response.updatedAt).not.toBe(slo.updatedAt);
+      expect(response.revision).toBe(slo.revision);
     });
   });
 
   describe('with breaking changes', () => {
+    it('consideres settings as a breaking change', async () => {
+      const slo = createSLO();
+      mockRepository.findById.mockResolvedValueOnce(slo);
+
+      const newSettings = { ...slo.settings, timestamp_field: 'newField' };
+      await updateSLO.execute(slo.id, { settings: newSettings });
+
+      expectDeletionOfObsoleteSLOData(slo);
+      expect(mockRepository.save).toBeCalledWith(
+        expect.objectContaining({
+          ...slo,
+          settings: newSettings,
+          revision: 2,
+          updated_at: expect.anything(),
+        })
+      );
+      expectInstallationOfNewSLOTransform();
+    });
+
     it('removes the obsolete data from the SLO previous revision', async () => {
       const slo = createSLO({
         indicator: createAPMTransactionErrorRateIndicator({ environment: 'development' }),

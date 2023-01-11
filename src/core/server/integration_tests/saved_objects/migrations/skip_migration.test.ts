@@ -10,7 +10,11 @@ import Path from 'path';
 import Fs from 'fs';
 import Util from 'util';
 import { firstValueFrom } from 'rxjs';
-import * as kbnTestServer from '../../../../test_helpers/kbn_server';
+import {
+  createRootWithCorePlugins,
+  createTestServers,
+  type TestElasticsearchUtils,
+} from '@kbn/core-test-helpers-kbn-server';
 import { Root } from '@kbn/core-root-server-internal';
 
 const logFilePath = Path.join(__dirname, 'cleanup.log');
@@ -22,7 +26,7 @@ async function removeLogFile() {
 }
 
 function createRoot({ skipMigration }: { skipMigration: boolean }) {
-  return kbnTestServer.createRootWithCorePlugins(
+  return createRootWithCorePlugins(
     {
       migrations: {
         skip: skipMigration,
@@ -53,7 +57,7 @@ function createRoot({ skipMigration }: { skipMigration: boolean }) {
 }
 
 describe('starting with `migration.skip: true` when indices are up to date', () => {
-  let esServer: kbnTestServer.TestElasticsearchUtils;
+  let esServer: TestElasticsearchUtils;
   let root: Root;
 
   beforeAll(async () => {
@@ -72,7 +76,7 @@ describe('starting with `migration.skip: true` when indices are up to date', () 
   });
 
   it('starts and display the correct service status', async () => {
-    const { startES } = kbnTestServer.createTestServers({
+    const { startES } = createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
       settings: {
         es: {

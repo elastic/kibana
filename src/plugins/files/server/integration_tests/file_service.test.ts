@@ -10,8 +10,8 @@ import { CoreStart, ElasticsearchClient } from '@kbn/core/server';
 import {
   createTestServers,
   createRootWithCorePlugins,
-  TestElasticsearchUtils,
-} from '@kbn/core/test_helpers/kbn_server';
+  type TestElasticsearchUtils,
+} from '@kbn/core-test-helpers-kbn-server';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import type { AuditLogger } from '@kbn/security-plugin/server';
 import { Readable } from 'stream';
@@ -177,6 +177,58 @@ describe('FileService', () => {
       expect(files.length).toBe(1);
       expect(total).toBe(3);
     }
+  });
+
+  it('filters files by mime type', async () => {
+    await Promise.all([
+      createDisposableFile({ fileKind, name: 'My pic', mime: 'image/png' }),
+      createDisposableFile({ fileKind, name: 'Vern payslip', mime: 'application/pdf' }),
+    ]);
+
+    const result1 = await fileService.find({
+      kind: [fileKind],
+      mimeType: ['image/png'],
+    });
+
+    expect(result1.files.length).toBe(1);
+    expect(result1.files[0].name).toBe('My pic');
+
+    const result2 = await fileService.find({
+      kind: [fileKind],
+      mimeType: ['application/pdf'],
+    });
+
+    expect(result2.files.length).toBe(1);
+    expect(result2.files[0].name).toBe('Vern payslip');
+  });
+
+  it('filters files by user ID', async () => {
+    await Promise.all([
+      createDisposableFile({ fileKind, name: "Johnny's file", user: { id: '123' } }),
+      createDisposableFile({ fileKind, name: "Marry's file", user: { id: '456' } }),
+    ]);
+
+    const result1 = await fileService.find({
+      kind: [fileKind],
+      user: ['123'],
+    });
+
+    expect(result1.files.length).toBe(1);
+    expect(result1.files[0].name).toBe("Johnny's file");
+
+    const result2 = await fileService.find({
+      kind: [fileKind],
+      user: ['456'],
+    });
+
+    expect(result2.files.length).toBe(1);
+    expect(result2.files[0].name).toBe("Marry's file");
+
+    const result3 = await fileService.find({
+      user: ['456', '123'],
+    });
+
+    expect(result3.files.length).toBe(2);
   });
 
   it('deletes files', async () => {

@@ -40,10 +40,8 @@ export async function getServiceNamesFromTermsEnum({
           ProcessorEvent.error,
         ],
       },
-      body: {
-        size: maxNumberOfServices,
-        field: SERVICE_NAME,
-      },
+      size: maxNumberOfServices,
+      field: SERVICE_NAME,
     }
   );
 
