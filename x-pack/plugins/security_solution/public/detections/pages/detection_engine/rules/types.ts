@@ -143,6 +143,11 @@ export enum DataSourceType {
   DataView = 'dataView',
 }
 
+export enum GroupByOptions {
+  PerRuleExecution = 'per-rule-execution',
+  PerTimePeriod = 'per-time-period',
+}
+
 /**
  * add / update data source types to show XOR relationship between 'index' and 'dataViewId' fields
  * Maybe something with io-ts?
@@ -169,11 +174,12 @@ export interface DefineStepRule {
   historyWindowSize: string;
   shouldLoadQueryDynamically: boolean;
   groupByFields: string[];
+  groupByRadioSelection: GroupByOptions;
   groupByDuration: Duration;
 }
 
 export interface Duration {
-  value?: number;
+  value: number;
   unit: string;
 }
 

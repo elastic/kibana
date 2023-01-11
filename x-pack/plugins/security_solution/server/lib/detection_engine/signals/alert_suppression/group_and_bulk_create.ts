@@ -21,6 +21,7 @@ import type { SuppressionBuckets } from '../../rule_types/factories/utils/wrap_s
 import { wrapSuppressedAlerts } from '../../rule_types/factories/utils/wrap_suppressed_alerts';
 import { buildGroupByFieldAggregation } from './build_group_by_field_aggregation';
 import { singleSearchAfter } from '../single_search_after';
+import { bulkCreateWithSuppression } from '../../rule_types/factories/bulk_create_with_suppression';
 
 export interface BucketHistory {
   key: Record<string, string | number>;
@@ -187,11 +188,25 @@ export const groupAndBulkCreate = async ({
         alertTimestampOverride: runOpts.alertTimestampOverride,
       });
 
-      const bulkCreateResult = await runOpts.bulkCreate(wrappedAlerts);
+      const suppressionDuration = runOpts.completeRule.ruleParams.alertSuppression?.duration;
 
-      addToSearchAfterReturn({ current: toReturn, next: bulkCreateResult });
-
-      runOpts.ruleExecutionLogger.debug(`created ${bulkCreateResult.createdItemsCount} signals`);
+      if (suppressionDuration) {
+        const suppressionWindow = `now-${suppressionDuration.value}${suppressionDuration.unit}`;
+        const bulkCreateResult = await bulkCreateWithSuppression({
+          alertWithSuppression: runOpts.alertWithSuppression,
+          refreshForBulkCreate: runOpts.refreshOnIndexingAlerts,
+          ruleExecutionLogger: runOpts.ruleExecutionLogger,
+          wrappedDocs: wrappedAlerts,
+          services,
+          suppressionWindow,
+          alertTimestampOverride: runOpts.alertTimestampOverride,
+        });
+        addToSearchAfterReturn({ current: toReturn, next: bulkCreateResult });
+      } else {
+        const bulkCreateResult = await runOpts.bulkCreate(wrappedAlerts);
+        addToSearchAfterReturn({ current: toReturn, next: bulkCreateResult });
+        runOpts.ruleExecutionLogger.debug(`created ${bulkCreateResult.createdItemsCount} signals`);
+      }
 
       const newBucketHistory: BucketHistory[] = buckets
         .filter((bucket) => {
@@ -207,6 +222,7 @@ export const groupAndBulkCreate = async ({
           };
         });
 
+      // TODO: combine history buckets with identical keys
       toReturn.state.suppressionGroupHistory.push(...newBucketHistory);
     } catch (exc) {
       toReturn.success = false;

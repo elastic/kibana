@@ -34,10 +34,16 @@ export interface SuppressionBuckets {
   terms: Array<{ field: string; value: string | number | null }>;
 }
 
-export const createSuppressedAlertInstanceId = (
-  terms: Array<{ field: string; value: string | number | null }>
-): string => {
-  return objectHash(terms);
+export const createSuppressedAlertInstanceId = ({
+  terms,
+  ruleId,
+  spaceId,
+}: {
+  terms: Array<{ field: string; value: string | number | null }>;
+  ruleId: string;
+  spaceId: string;
+}): string => {
+  return objectHash([terms, ruleId, spaceId]);
 };
 
 export const wrapSuppressedAlerts = ({
@@ -50,7 +56,7 @@ export const wrapSuppressedAlerts = ({
   alertTimestampOverride,
 }: {
   suppressionBuckets: SuppressionBuckets[];
-  spaceId: string | null | undefined;
+  spaceId: string;
   completeRule: CompleteRule<RuleParams>;
   mergeStrategy: ConfigType['alertMergeStrategy'];
   indicesToQuery: string[];
@@ -67,7 +73,11 @@ export const wrapSuppressedAlerts = ({
       bucket.start,
       bucket.end,
     ]);
-    const instanceId = createSuppressedAlertInstanceId(bucket.terms);
+    const instanceId = createSuppressedAlertInstanceId({
+      terms: bucket.terms,
+      ruleId: completeRule.alertId,
+      spaceId,
+    });
     const baseAlert: BaseFieldsLatest = buildBulkBody(
       spaceId,
       completeRule,

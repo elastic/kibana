@@ -343,6 +343,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     ruleExecutionLogger,
                     aggregatableTimestampField,
                     alertTimestampOverride,
+                    alertWithSuppression,
+                    refreshOnIndexingAlerts: refresh,
                   },
                 });
 

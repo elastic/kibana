@@ -15,6 +15,7 @@ import {
   EuiSpacer,
   EuiButtonGroup,
   EuiText,
+  EuiRadioGroup,
 } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { memo, useCallback, useState, useEffect, useMemo } from 'react';
@@ -40,7 +41,11 @@ import {
   getStepDataDataSource,
 } from '../../../../detection_engine/rule_creation_ui/pages/rule_creation/helpers';
 import type { DefineStepRule, RuleStepProps } from '../../../pages/detection_engine/rules/types';
-import { RuleStep, DataSourceType } from '../../../pages/detection_engine/rules/types';
+import {
+  RuleStep,
+  DataSourceType,
+  GroupByOptions,
+} from '../../../pages/detection_engine/rules/types';
 import { StepRuleDescription } from '../description_step';
 import type { QueryBarDefineRuleProps } from '../query_bar';
 import { QueryBarDefineRule } from '../query_bar';
@@ -170,6 +175,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       'historyWindowSize',
       'shouldLoadQueryDynamically',
       'groupByFields',
+      'groupByRadioSelection',
       'groupByDuration.value',
       'groupByDuration.unit',
     ],
@@ -494,16 +500,37 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   );
 
   const GroupByChildren = useCallback(
-    ({ groupByDurationUnit, groupByDurationValue }) => (
-      <DurationInput
-        durationValueField={groupByDurationValue}
-        durationUnitField={groupByDurationUnit}
-        isDisabled={
+    ({ groupByRadioSelection, groupByDurationUnit, groupByDurationValue }) => (
+      <EuiRadioGroup
+        disabled={
           !license.isAtLeast(minimumLicenseForSuppression) ||
           groupByFields == null ||
           groupByFields.length === 0
         }
-        minimumValue={1}
+        idSelected={groupByRadioSelection.value}
+        options={[
+          {
+            id: GroupByOptions.PerRuleExecution,
+            label: 'Per rule execution',
+          },
+          {
+            id: GroupByOptions.PerTimePeriod,
+            label: (
+              <>
+                {`Per time period`}
+                <DurationInput
+                  durationValueField={groupByDurationValue}
+                  durationUnitField={groupByDurationUnit}
+                  isDisabled={groupByRadioSelection.value !== GroupByOptions.PerTimePeriod}
+                  minimumValue={1}
+                />
+              </>
+            ),
+          },
+        ]}
+        onChange={(id: string) => {
+          groupByRadioSelection.setValue(id);
+        }}
       />
     ),
     [license, groupByFields]
@@ -831,6 +858,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           <RuleTypeEuiFormRow $isVisible={isQueryRule(ruleType)}>
             <UseMultiFields
               fields={{
+                groupByRadioSelection: {
+                  path: 'groupByRadioSelection',
+                },
                 groupByDurationValue: {
                   path: 'groupByDuration.value',
                 },

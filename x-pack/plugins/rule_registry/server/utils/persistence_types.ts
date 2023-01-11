@@ -45,14 +45,13 @@ export type SuppressedAlertService = <T extends SuppressionFields>(
   alerts: Array<{
     _id: string;
     _source: T;
-    instanceId: string;
   }>,
   refresh: boolean | 'wait_for',
   suppressionWindow: string,
-  enrichAlerts?: <TAlert extends { _source: T }>(
-    alerts: TAlert[],
+  enrichAlerts?: (
+    alerts: Array<{ _id: string; _source: T }>,
     params: { spaceId: string }
-  ) => Promise<TAlert[]>,
+  ) => Promise<Array<{ _id: string; _source: T }>>,
   currentTimeOverride?: Date
 ) => Promise<Omit<PersistenceAlertServiceResult<T>, 'alertsWereTruncated'>>;
 

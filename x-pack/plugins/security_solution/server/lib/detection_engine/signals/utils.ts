@@ -711,7 +711,7 @@ export const addToSearchAfterReturn = ({
   next,
 }: {
   current: SearchAfterAndBulkCreateReturnType;
-  next: GenericBulkCreateResponse<BaseFieldsLatest>;
+  next: Omit<GenericBulkCreateResponse<BaseFieldsLatest>, 'alertsWereTruncated'>;
 }) => {
   current.success = current.success && next.success;
   current.createdSignalsCount += next.createdItemsCount;

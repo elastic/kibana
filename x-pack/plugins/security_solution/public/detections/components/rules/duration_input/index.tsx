@@ -6,15 +6,13 @@
  */
 
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFieldNumber,
   EuiFormRow,
   EuiSelect,
   EuiFormControlLayout,
   transparentize,
 } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
 import type { FieldHook } from '../../../../shared_imports';
@@ -41,13 +39,6 @@ const getNumberFromUserInput = (input: string, minimumValue = 0): number | undef
     return Math.max(minimumValue, Math.min(number, Number.MAX_SAFE_INTEGER));
   }
 };
-
-// move optional label to the end of input
-const StyledLabelAppend = styled(EuiFlexItem)`
-  &.euiFlexItem {
-    margin-left: 31px;
-  }
-`;
 
 const StyledEuiFormRow = styled(EuiFormRow)`
   max-width: none;
@@ -117,29 +108,9 @@ const DurationInputComponent: React.FC<DurationInputProps> = ({
 
   // EUI missing some props
   const rest = { disabled: isDisabled };
-  const label = useMemo(
-    () => (
-      <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="center">
-        <EuiFlexItem grow={false} component="span">
-          {durationValueField.label}
-        </EuiFlexItem>
-        <StyledLabelAppend grow={false} component="span">
-          {durationValueField.labelAppend}
-        </StyledLabelAppend>
-      </EuiFlexGroup>
-    ),
-    [durationValueField.label, durationValueField.labelAppend]
-  );
 
   return (
-    <StyledEuiFormRow
-      label={label}
-      helpText={durationValueField.helpText}
-      error={errorMessage}
-      isInvalid={isInvalid}
-      // data-test-subj={dataTestSubj}
-      // describedByIds={idAria ? [idAria] : undefined}
-    >
+    <StyledEuiFormRow error={errorMessage} isInvalid={isInvalid}>
       <EuiFormControlLayout
         append={
           <MyEuiSelect

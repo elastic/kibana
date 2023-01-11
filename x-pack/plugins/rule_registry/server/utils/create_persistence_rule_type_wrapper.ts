@@ -10,6 +10,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { chunk, partition } from 'lodash';
 import {
   ALERT_INSTANCE_ID,
+  ALERT_LAST_DETECTED,
   ALERT_SUPPRESSION_DOCS_COUNT,
   ALERT_SUPPRESSION_END,
   ALERT_UUID,
@@ -201,8 +202,10 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                             },
                           },
                           {
-                            term: {
-                              [ALERT_INSTANCE_ID]: alerts.map((alert) => alert.instanceId),
+                            terms: {
+                              [ALERT_INSTANCE_ID]: alerts.map(
+                                (alert) => alert._source['kibana.alert.instance.id']
+                              ),
                             },
                           },
                         ],
@@ -218,28 +221,6 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                         },
                       },
                     ],
-                    /*aggs: {
-                      suppressionAlerts: {
-                        terms: {
-                          field: ALERT_INSTANCE_ID,
-                          size: alerts.length,
-                          include: alerts.map((alert) => alert.instanceId),
-                        },
-                        aggs: {
-                          docs: {
-                            top_hits: {
-                              sort: [
-                                {
-                                  [TIMESTAMP]: {
-                                    order: 'desc' as const,
-                                  },
-                                },
-                              ],
-                            },
-                          },
-                        },
-                      },
-                    },*/
                   },
                 };
 
@@ -248,12 +229,6 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   .search<typeof suppressionAlertSearchRequest, SuppressionFields>(
                     suppressionAlertSearchRequest
                   );
-
-                if (!response.aggregations) {
-                  throw new Error(
-                    'Expected to find aggregations on suppression alert search response'
-                  );
-                }
 
                 const existingAlertsByInstanceId = response.hits.hits.reduce<
                   Record<string, estypes.SearchHit<SuppressionFields>>
@@ -264,18 +239,20 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
 
                 const [duplicateAlerts, newAlerts] = partition(
                   alerts,
-                  (alert) => existingAlertsByInstanceId[alert.instanceId] != null
+                  (alert) =>
+                    existingAlertsByInstanceId[alert._source['kibana.alert.instance.id']] != null
                 );
 
                 const duplicateAlertUpdates = duplicateAlerts.flatMap((alert) => {
-                  const existingAlert = existingAlertsByInstanceId[alert.instanceId];
+                  const existingAlert =
+                    existingAlertsByInstanceId[alert._source['kibana.alert.instance.id']];
                   const existingDocsCount =
                     existingAlert._source?.[ALERT_SUPPRESSION_DOCS_COUNT] ?? 0;
                   return [
                     { update: { _id: existingAlert._id } },
                     {
                       doc: {
-                        // TODO: add last detected at based on now or currentTimeOverride
+                        [ALERT_LAST_DETECTED]: currentTimeOverride ?? new Date(),
                         [ALERT_SUPPRESSION_END]: alert._source[ALERT_SUPPRESSION_END],
                         [ALERT_SUPPRESSION_DOCS_COUNT]:
                           existingDocsCount + alert._source[ALERT_SUPPRESSION_DOCS_COUNT] + 1,
@@ -301,6 +278,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                     ...alert,
                     _source: {
                       [VERSION]: ruleDataClient.kibanaVersion,
+                      [ALERT_LAST_DETECTED]: currentTimeOverride ?? new Date(),
                       ...commonRuleFields,
                       ...alert._source,
                     },
@@ -314,7 +292,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
 
                 const bulkResponse = await ruleDataClientWriter.bulk({
                   body: [...duplicateAlertUpdates, ...newAlertCreates],
-                  refresh,
+                  refresh: 'wait_for',
                 });
 
                 if (bulkResponse == null) {
@@ -338,7 +316,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                 };
               } else {
                 logger.debug('Writing is disabled.');
-                return { createdAlerts: [], errors: {}, alertsWereTruncated: false };
+                return { createdAlerts: [], errors: {} };
               }
             },
           },

@@ -605,6 +605,7 @@ export const schema: FormSchema<DefineStepRule> = {
       },
     ],
   },
+  groupByRadioSelection: {},
   groupByDuration: {
     label: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByDurationValueLabel',
@@ -618,34 +619,8 @@ export const schema: FormSchema<DefineStepRule> = {
         defaultMessage: 'Suppress alerts for',
       }
     ),
-    value: {
-      label: i18n.translate(
-        'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByDurationValueLabel',
-        {
-          defaultMessage: 'Suppress alerts for',
-        }
-      ),
-      helpText: i18n.translate(
-        'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldGroupByDurationValueHelpText',
-        {
-          defaultMessage: 'Suppress alerts for',
-        }
-      ),
-    },
-    unit: {
-      label: i18n.translate(
-        'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByDurationUnitLabel',
-        {
-          defaultMessage: 'Suppress alerts for',
-        }
-      ),
-      helpText: i18n.translate(
-        'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldGroupByDurationUnitHelpText',
-        {
-          defaultMessage: 'Suppress alerts for',
-        }
-      ),
-    },
+    value: {},
+    unit: {},
   },
   newTermsFields: {
     type: FIELD_TYPES.COMBO_BOX,
