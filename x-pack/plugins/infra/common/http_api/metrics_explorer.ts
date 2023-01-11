@@ -17,6 +17,7 @@ export const METRIC_EXPLORER_AGGREGATIONS = [
   'sum',
   'p95',
   'p99',
+  'custom',
 ] as const;
 
 type MetricExplorerAggregations = typeof METRIC_EXPLORER_AGGREGATIONS[number];
@@ -27,12 +28,41 @@ const metricsExplorerAggregationKeys = METRIC_EXPLORER_AGGREGATIONS.reduce<
 
 export const metricsExplorerAggregationRT = rt.keyof(metricsExplorerAggregationKeys);
 
+export type MetricExplorerCustomMetricAggregations = Exclude<
+  MetricsExplorerAggregation,
+  'custom' | 'rate' | 'p95' | 'p99'
+>;
+const metricsExplorerCustomMetricAggregationKeys = METRIC_EXPLORER_AGGREGATIONS.filter(
+  (a) => a !== 'custom'
+).reduce<Record<MetricExplorerCustomMetricAggregations, null>>(
+  (acc, agg) => ({ ...acc, [agg]: null }),
+  {} as Record<MetricExplorerCustomMetricAggregations, null>
+);
+export const metricsExplorerCustomMetricAggregationRT = rt.keyof(
+  metricsExplorerCustomMetricAggregationKeys
+);
+
 export const metricsExplorerMetricRequiredFieldsRT = rt.type({
   aggregation: metricsExplorerAggregationRT,
 });
 
+export const metricsExplorerCustomMetricRT = rt.intersection([
+  rt.type({
+    name: rt.string,
+    aggregation: metricsExplorerCustomMetricAggregationRT,
+  }),
+  rt.partial({
+    field: rt.string,
+    filter: rt.string,
+  }),
+]);
+
+export type MetricsExplorerCustomMetric = rt.TypeOf<typeof metricsExplorerCustomMetricRT>;
+
 export const metricsExplorerMetricOptionalFieldsRT = rt.partial({
   field: rt.union([rt.string, rt.undefined]),
+  custom_metrics: rt.array(metricsExplorerCustomMetricRT),
+  equation: rt.string,
 });
 
 export const metricsExplorerMetricRT = rt.intersection([

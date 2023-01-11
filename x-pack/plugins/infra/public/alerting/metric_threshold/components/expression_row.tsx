@@ -20,16 +20,18 @@ import { omit } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import {
+  AggregationType,
   builtInComparators,
   IErrorObject,
   OfExpression,
   ThresholdExpression,
   WhenExpression,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { Comparator } from '../../../../common/alerting/metrics';
+import { Aggregators, Comparator } from '../../../../common/alerting/metrics';
 import { decimalToPct, pctToDecimal } from '../../../../common/utils/corrected_percent_convert';
 import { DerivedIndexPattern } from '../../../containers/metrics_source';
 import { AGGREGATION_TYPES, MetricExpression } from '../types';
+import { CustomMetricEditor } from './custom_metric';
 
 const customComparators = {
   ...builtInComparators,
@@ -166,6 +168,13 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
     expressionId,
   ]);
 
+  const handleCustomMetricChange = useCallback(
+    (exp) => {
+      setRuleParams(expressionId, exp);
+    },
+    [expressionId, setRuleParams]
+  );
+
   const criticalThresholdExpression = (
     <ThresholdElement
       comparator={comparator}
@@ -188,6 +197,11 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
     />
   );
 
+  const normalizedFields = fields.map((f) => ({
+    normalizedType: f.type,
+    name: f.name,
+  }));
+
   return (
     <>
       <EuiFlexGroup gutterSize="xs">
@@ -201,7 +215,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
           />
         </EuiFlexItem>
         <EuiFlexItem grow>
-          <StyledExpressionRow>
+          <StyledExpressionRow style={{ gap: aggType !== 'custom' ? 24 : 12 }}>
             <StyledExpression>
               <WhenExpression
                 customAggTypesOptions={aggregationType}
@@ -209,15 +223,12 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                 onChangeSelectedAggType={updateAggType}
               />
             </StyledExpression>
-            {aggType !== 'count' && (
+            {['count', 'custom'].includes(aggType) !== true && (
               <StyledExpression>
                 <OfExpression
                   customAggTypesOptions={aggregationType}
                   aggField={metric}
-                  fields={fields.map((f) => ({
-                    normalizedType: f.type,
-                    name: f.name,
-                  }))}
+                  fields={normalizedFields}
                   aggType={aggType}
                   errors={errors}
                   onChangeSelectedAggField={updateMetric}
@@ -246,6 +257,19 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
             )}
             {!displayWarningThreshold && criticalThresholdExpression}
           </StyledExpressionRow>
+          {aggType === Aggregators.CUSTOM && (
+            <>
+              <EuiSpacer size={'s'} />
+              <StyledExpressionRow>
+                <CustomMetricEditor
+                  expression={expression}
+                  fields={normalizedFields}
+                  aggregationTypes={aggregationType}
+                  onChange={handleCustomMetricChange}
+                />
+              </StyledExpressionRow>
+            </>
+          )}
           {displayWarningThreshold && (
             <>
               <StyledExpressionRow>
@@ -358,7 +382,7 @@ const ThresholdElement: React.FC<{
   );
 };
 
-export const aggregationType: { [key: string]: any } = {
+export const aggregationType: { [key: string]: AggregationType } = {
   avg: {
     text: i18n.translate('xpack.infra.metrics.alertFlyout.aggregationText.avg', {
       defaultMessage: 'Average',
@@ -429,6 +453,14 @@ export const aggregationType: { [key: string]: any } = {
     }),
     fieldRequired: false,
     value: AGGREGATION_TYPES.P99,
+    validNormalizedTypes: ['number', 'histogram'],
+  },
+  custom: {
+    text: i18n.translate('xpack.infra.metrics.alertFlyout.aggregationText.custom', {
+      defaultMessage: 'Custom metric',
+    }),
+    fieldRequired: false,
+    value: AGGREGATION_TYPES.CUSTOM,
     validNormalizedTypes: ['number', 'histogram'],
   },
 };
