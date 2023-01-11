@@ -7,7 +7,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { get, takeRight } from 'lodash';
+import { get, takeRight, pick } from 'lodash';
 
 import { PluginSetup as UnifiedSearchPluginSetup } from '@kbn/unified-search-plugin/server';
 import { getKbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/server';
@@ -140,13 +140,14 @@ export const setupOptionsListSuggestionsRoute = (
      */
     const totalCardinality = get(rawEsResult, 'aggregations.unique_terms.value');
     const remainingSuggestionCount = totalCardinality - ((request.page ?? 1) - 1) * 10;
+    const results = suggestionBuilder.parse(rawEsResult);
     const suggestions = takeRight(
-      suggestionBuilder.parse(rawEsResult, request.page),
+      Object.keys(results),
       remainingSuggestionCount >= 10 ? 10 : remainingSuggestionCount
     );
     const invalidSelections = validationBuilder.parse(rawEsResult);
     return {
-      suggestions,
+      suggestions: pick(results, suggestions),
       totalCardinality,
       invalidSelections,
       rejected: false,
