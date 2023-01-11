@@ -45,7 +45,7 @@ export function registerSetupRoute({
         const esClient = await getClient(context);
         logger.info('applying initial setup of Elasticsearch resources');
 
-        return await applySetup(esClient).then((ok) => {
+        return await applySetup(esClient).then((_) => {
           return response.ok();
         });
       } catch (error) {
