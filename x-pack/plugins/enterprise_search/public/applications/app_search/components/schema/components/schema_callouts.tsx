@@ -154,7 +154,7 @@ export const MissingSubfieldsCallout: React.FC = () => {
           'xpack.enterpriseSearch.appSearch.engine.schema.incompleteFields.description',
           {
             defaultMessage:
-              'The field(s) are missing one or more subfields used by App Search. Some relevance features may not work until those subfields are added.',
+              'The field(s) are missing one or more subfields used by App Search. Some search features may not work until those subfields are added.',
           }
         )}{' '}
         <a
