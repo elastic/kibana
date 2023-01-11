@@ -16,7 +16,6 @@ import {
   OptionsListRequest,
   OptionsListResponse,
   OptionsListRequestBody,
-  OptionsListField,
 } from '../../../common/options_list/types';
 import { ControlsHTTPService } from '../http/types';
 import { ControlsDataService } from '../data/types';
@@ -92,7 +91,6 @@ class OptionsListService implements ControlsOptionsListService {
       filters: esFilters,
       fieldName: field.name,
       fieldSpec: field,
-      textFieldName: (field as OptionsListField).textFieldName,
       runtimeFieldMap: dataView.toSpec().runtimeFieldMap,
     };
   };

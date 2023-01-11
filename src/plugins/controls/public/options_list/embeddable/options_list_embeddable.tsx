@@ -215,7 +215,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     } = this.reduxEmbeddableTools;
 
     const {
-      explicitInput: { dataViewId, fieldName, parentFieldName, childFieldName },
+      explicitInput: { dataViewId, fieldName },
     } = getState();
 
     if (!this.dataView || this.dataView.id !== dataViewId) {
@@ -247,21 +247,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
           );
         }
 
-        // pair up keyword / text fields for case insensitive search
-        const childField =
-          (childFieldName && this.dataView.getFieldByName(childFieldName)) || undefined;
-        const parentField =
-          (parentFieldName && this.dataView.getFieldByName(parentFieldName)) || undefined;
-        const textFieldName = childField?.esTypes?.includes('text')
-          ? childField.name
-          : parentField?.esTypes?.includes('text')
-          ? parentField.name
-          : undefined;
-
-        const optionsListField: OptionsListField = originalField.toSpec();
-        optionsListField.textFieldName = textFieldName;
-
-        this.field = optionsListField;
+        this.field = originalField.toSpec();
       } catch (e) {
         this.onFatalError(e);
       }

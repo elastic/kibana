@@ -92,7 +92,6 @@ export const setupOptionsListSuggestionsRoute = (
     const timeoutSettings = runPastTimeout
       ? {}
       : { timeout: `${timeout}ms`, terminate_after: terminateAfter };
-
     const suggestionBuilder = getSuggestionAggregationBuilder(request);
     const validationBuilder = getValidationAggregationBuilder();
 
@@ -129,6 +128,7 @@ export const setupOptionsListSuggestionsRoute = (
         ...runtimeFieldMap,
       },
     };
+    console.log(JSON.stringify(body));
 
     /**
      * Run ES query

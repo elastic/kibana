@@ -28,12 +28,6 @@ export interface OptionsListEmbeddableInput extends DataControlInput {
   placeholder?: string;
 }
 
-export type OptionsListField = FieldSpec & {
-  textFieldName?: string;
-  parentFieldName?: string;
-  childFieldName?: string;
-};
-
 export interface OptionsListSuggestions {
   [key: string]: { doc_count: number };
 }
@@ -72,8 +66,6 @@ export interface OptionsListRequestBody {
   filters?: Array<{ bool: BoolQuery }>;
   selectedOptions?: string[];
   runPastTimeout?: boolean;
-  parentFieldName?: string;
-  textFieldName?: string;
   searchString?: string;
   fieldSpec?: FieldSpec;
   fieldName: string;

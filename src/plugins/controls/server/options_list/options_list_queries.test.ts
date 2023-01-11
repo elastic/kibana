@@ -107,7 +107,6 @@ describe('options list queries', () => {
       test('with a search string, creates case insensitive aggregation', () => {
         const optionsListRequestBodyMock: OptionsListRequestBody = {
           fieldName: 'coolTestField.keyword',
-          textFieldName: 'coolTestField',
           searchString: 'cooool',
           fieldSpec: { aggregatable: true } as unknown as FieldSpec,
         };
@@ -138,7 +137,6 @@ describe('options list queries', () => {
       test('without a search string, creates keyword aggregation', () => {
         const optionsListRequestBodyMock: OptionsListRequestBody = {
           fieldName: 'coolTestField.keyword',
-          textFieldName: 'coolTestField',
           fieldSpec: { aggregatable: true } as unknown as FieldSpec,
           sort: { by: '_count', direction: 'asc' },
         };
@@ -429,7 +427,6 @@ describe('options list queries', () => {
     test('parses keyword / text result', () => {
       const optionsListRequestBodyMock: OptionsListRequestBody = {
         fieldName: 'coolTestField.keyword',
-        textFieldName: 'coolTestField',
         searchString: 'cooool',
         fieldSpec: { aggregatable: true } as unknown as FieldSpec,
       };

@@ -74,12 +74,8 @@ export const getValidationAggregationBuilder: () => OptionsListValidationAggrega
  */
 export const getSuggestionAggregationBuilder = ({
   fieldSpec,
-  textFieldName,
   searchString,
 }: OptionsListRequestBody) => {
-  if (textFieldName && fieldSpec?.aggregatable && searchString) {
-    return suggestionAggSubtypes.keywordAndText;
-  }
   if (fieldSpec?.type === 'boolean') {
     return suggestionAggSubtypes.boolean;
   }
@@ -89,7 +85,7 @@ export const getSuggestionAggregationBuilder = ({
   if (fieldSpec && getFieldSubtypeNested(fieldSpec)) {
     return suggestionAggSubtypes.subtypeNested;
   }
-  return suggestionAggSubtypes.keywordOnly;
+  return suggestionAggSubtypes.textOrKeyword;
 };
 
 const getEscapedQuery = (q: string = '') =>
@@ -109,54 +105,32 @@ const suggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBu
   /**
    * the "Keyword only" query / parser should be used when the options list is built on a field which has only keyword mappings.
    */
-  keywordOnly: {
+  textOrKeyword: {
     buildAggregation: ({ fieldName, searchString, sort, page = 1 }: OptionsListRequestBody) => ({
-      terms: {
-        size: page === 1 ? 10 : page * 10,
-        field: fieldName,
-        include: `${getEscapedQuery(searchString)}.*`,
-        execution_hint: 'map',
-        shard_size: 10,
-        order: getSortType(sort),
+      filter: {
+        prefix: {
+          [fieldName]: {
+            value: searchString,
+            case_insensitive: true,
+          },
+        },
+      },
+      aggs: {
+        keywordSuggestions: {
+          terms: {
+            size: page === 1 ? 10 : page * 10,
+            field: fieldName,
+            shard_size: 10,
+            order: getSortType(sort),
+          },
+        },
+        unique_terms: {
+          cardinality: {
+            field: fieldName,
+          },
+        },
       },
     }),
-    parse: (rawEsResult) =>
-      get(rawEsResult, 'aggregations.suggestions.buckets')?.reduce(
-        (suggestions: OptionsListSuggestions, suggestion: EsBucket) => {
-          return { ...suggestions, [suggestion.key]: { doc_count: suggestion.doc_count } };
-        },
-        {}
-      ),
-  },
-
-  /**
-   * the "Keyword and text" query / parser should be used when the options list is built on a multi-field which has both keyword and text mappings. It supports case-insensitive searching
-   */
-  keywordAndText: {
-    buildAggregation: (req: OptionsListRequestBody) => {
-      if (!req.textFieldName) {
-        // if there is no textFieldName specified, or if there is no search string yet fall back to keywordOnly
-        return suggestionAggSubtypes.keywordOnly.buildAggregation(req);
-      }
-      const { fieldName, searchString, textFieldName, sort } = req;
-      return {
-        filter: {
-          match_phrase_prefix: {
-            [textFieldName]: searchString,
-          },
-        },
-        aggs: {
-          keywordSuggestions: {
-            terms: {
-              size: (req.page ?? 1) === 1 ? 10 : (req.page ?? 1) * 10,
-              field: fieldName,
-              shard_size: 10,
-              order: getSortType(sort),
-            },
-          },
-        },
-      };
-    },
     parse: (rawEsResult) =>
       get(rawEsResult, 'aggregations.suggestions.keywordSuggestions.buckets')?.reduce(
         (suggestions: OptionsListSuggestions, suggestion: EsBucket) => {
@@ -231,6 +205,11 @@ const suggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBu
               order: getSortType(sort),
             },
           },
+          unique_terms: {
+            cardinality: {
+              field: fieldName,
+            },
+          },
         },
       };
     },
@@ -255,6 +234,7 @@ const suggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBu
   /**
    * the "Subtype Nested" query / parser should be used when the options list is built on a field with subtype nested.
    */
+  /** TODO: CFIX THIS */
   subtypeNested: {
     buildAggregation: (req: OptionsListRequestBody) => {
       const { fieldSpec, fieldName, searchString, sort, page = 1 } = req;
