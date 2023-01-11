@@ -29,7 +29,6 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
   updatePackagePolicyInput: (updatedInput: Partial<NewPackagePolicyInput>) => void;
   inputVarsValidationResults: PackagePolicyConfigValidationResults;
   forceShowErrors?: boolean;
-  isEditPage?: boolean;
 }> = memo(
   ({
     hasInputStreams,
@@ -38,7 +37,6 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
     updatePackagePolicyInput,
     inputVarsValidationResults,
     forceShowErrors,
-    isEditPage = false,
   }) => {
     // Showing advanced options toggle state
     const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(false);
@@ -123,7 +121,6 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
                     }}
                     errors={inputVarsValidationResults.vars?.[varName]}
                     forceShowErrors={forceShowErrors}
-                    isEditPage={isEditPage}
                   />
                 </EuiFlexItem>
               );
@@ -181,7 +178,6 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
                             }}
                             errors={inputVarsValidationResults.vars?.[varName]}
                             forceShowErrors={forceShowErrors}
-                            isEditPage={isEditPage}
                           />
                         </EuiFlexItem>
                       );

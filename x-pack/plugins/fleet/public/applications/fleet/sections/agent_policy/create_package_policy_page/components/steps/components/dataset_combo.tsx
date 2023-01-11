@@ -13,8 +13,7 @@ export const DatasetComboBox: React.FC<{
   value: any;
   onChange: (newValue: any) => void;
   datasets: string[];
-  isDisabled?: boolean;
-}> = ({ value, onChange, datasets, isDisabled }) => {
+}> = ({ value, onChange, datasets }) => {
   const datasetOptions = datasets.map((dataset: string) => ({ label: dataset })) ?? [];
   const defaultOption = 'generic';
   const [selectedOptions, setSelectedOptions] = useState<Array<{ label: string }>>([
@@ -43,6 +42,7 @@ export const DatasetComboBox: React.FC<{
     setSelectedOptions([newOption]);
     onChange(searchValue);
   };
+
   return (
     <EuiComboBox
       aria-label={i18n.translate('xpack.fleet.datasetCombo.ariaLabel', {
@@ -61,7 +61,6 @@ export const DatasetComboBox: React.FC<{
         values: { searchValue: '{searchValue}' },
       })}
       isClearable={false}
-      isDisabled={isDisabled}
     />
   );
 };
