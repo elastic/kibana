@@ -58,7 +58,6 @@ interface Props {
   updatePackagePolicyInputStream: (updatedStream: Partial<NewPackagePolicyInputStream>) => void;
   inputStreamValidationResults: PackagePolicyConfigValidationResults;
   forceShowErrors?: boolean;
-  isEditPage?: boolean;
 }
 
 export const PackagePolicyInputStreamConfig = memo<Props>(
@@ -71,7 +70,6 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     updatePackagePolicyInputStream,
     inputStreamValidationResults,
     forceShowErrors,
-    isEditPage,
   }) => {
     const config = useConfig();
     const isExperimentalDataStreamSettingsEnabled =
@@ -228,7 +226,6 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                       forceShowErrors={forceShowErrors}
                       packageType={packageInfo.type}
                       datasets={datasets}
-                      isEditPage={isEditPage}
                     />
                   </EuiFlexItem>
                 );
@@ -290,7 +287,6 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                             forceShowErrors={forceShowErrors}
                             packageType={packageInfo.type}
                             datasets={datasets}
-                            isEditPage={isEditPage}
                           />
                         </EuiFlexItem>
                       );
