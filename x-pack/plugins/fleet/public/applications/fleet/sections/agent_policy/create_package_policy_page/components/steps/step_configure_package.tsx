@@ -37,7 +37,6 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
   validationResults: PackagePolicyValidationResults;
   submitAttempted: boolean;
   noTopRule?: boolean;
-  isEditPage?: boolean;
 }> = ({
   packageInfo,
   showOnlyIntegration,
@@ -46,7 +45,6 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
   validationResults,
   submitAttempted,
   noTopRule = false,
-  isEditPage = false,
 }) => {
   const hasIntegrations = useMemo(() => doesPackageHaveIntegrations(packageInfo), [packageInfo]);
   const packagePolicyTemplates = useMemo(
@@ -111,7 +109,6 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
                       ]
                     }
                     forceShowErrors={submitAttempted}
-                    isEditPage={isEditPage}
                   />
                   <EuiHorizontalRule margin="m" />
                 </EuiFlexItem>
