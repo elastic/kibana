@@ -290,6 +290,7 @@ export interface RawRule extends SavedObjectAttributes {
   isSnoozedUntil?: string | null;
   lastRun?: RawRuleLastRun | null;
   nextRun?: string | null;
+  running?: boolean | null;
 }
 
 export interface AlertingPlugin {

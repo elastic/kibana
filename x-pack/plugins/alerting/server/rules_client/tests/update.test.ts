@@ -12,7 +12,7 @@ import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mock
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
-import { IntervalSchedule } from '../../types';
+import { IntervalSchedule, RuleNotifyWhen } from '../../types';
 import { RecoveredActionGroup } from '../../../common';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
@@ -87,8 +87,6 @@ describe('update()', () => {
       consumer: 'myApp',
       scheduledTaskId: 'task-123',
       params: {},
-      throttle: null,
-      notifyWhen: null,
       actions: [
         {
           group: 'default',
@@ -97,6 +95,11 @@ describe('update()', () => {
           actionRef: '1',
           params: {
             foo: true,
+          },
+          frequency: {
+            summary: false,
+            notifyWhen: RuleNotifyWhen.CHANGE,
+            throttle: null,
           },
         },
       ],
@@ -890,7 +893,7 @@ describe('update()', () => {
           bar: true,
         },
         throttle: '5m',
-        notifyWhen: null,
+        notifyWhen: 'onThrottleInterval',
         actions: [
           {
             group: 'default',
@@ -1255,6 +1258,11 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            frequency: {
+              summary: false,
+              notifyWhen: 'onActionGroupChange',
+              throttle: null,
+            },
           },
         ],
         scheduledTaskId: 'task-123',
@@ -1298,6 +1306,11 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            frequency: {
+              summary: false,
+              notifyWhen: 'onActionGroupChange',
+              throttle: null,
+            },
           },
         ],
         scheduledTaskId: 'task-123',
@@ -1320,14 +1333,17 @@ describe('update()', () => {
         params: {
           bar: true,
         },
-        throttle: null,
-        notifyWhen: null,
         actions: [
           {
             group: 'default',
             id: '1',
             params: {
               foo: true,
+            },
+            frequency: {
+              summary: false,
+              notifyWhen: 'onActionGroupChange',
+              throttle: null,
             },
           },
         ],
@@ -1396,6 +1412,11 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            frequency: {
+              summary: false,
+              notifyWhen: 'onActionGroupChange',
+              throttle: null,
+            },
           },
           {
             group: 'default',
@@ -1404,6 +1425,11 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            frequency: {
+              summary: false,
+              notifyWhen: 'onActionGroupChange',
+              throttle: null,
+            },
           },
           {
             group: 'default',
@@ -1411,6 +1437,11 @@ describe('update()', () => {
             actionTypeId: 'test2',
             params: {
               foo: true,
+            },
+            frequency: {
+              summary: false,
+              notifyWhen: 'onActionGroupChange',
+              throttle: null,
             },
           },
         ],
@@ -1445,8 +1476,6 @@ describe('update()', () => {
         params: {
           bar: true,
         },
-        throttle: '5m',
-        notifyWhen: null,
         actions: [
           {
             group: 'default',
@@ -1454,6 +1483,11 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            frequency: {
+              summary: false,
+              notifyWhen: 'onThrottleInterval',
+              throttle: '5m',
+            },
           },
           {
             group: 'default',
@@ -1461,12 +1495,22 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            frequency: {
+              summary: false,
+              notifyWhen: 'onThrottleInterval',
+              throttle: '5m',
+            },
           },
           {
             group: 'default',
             id: '2',
             params: {
               foo: true,
+            },
+            frequency: {
+              summary: false,
+              notifyWhen: 'onThrottleInterval',
+              throttle: '5m',
             },
           },
         ],
@@ -1494,14 +1538,17 @@ describe('update()', () => {
           params: {
             bar: true,
           },
-          throttle: null,
-          notifyWhen: null,
           actions: [
             {
               group: 'default',
               id: '1',
               params: {
                 foo: true,
+              },
+              frequency: {
+                summary: false,
+                notifyWhen: 'onActionGroupChange',
+                throttle: null,
               },
             },
           ],
@@ -1580,6 +1627,11 @@ describe('update()', () => {
               params: {
                 foo: true,
               },
+              frequency: {
+                summary: false,
+                notifyWhen: 'onActionGroupChange',
+                throttle: null,
+              },
             },
           ],
           scheduledTaskId: taskId,
@@ -1611,14 +1663,17 @@ describe('update()', () => {
           params: {
             bar: true,
           },
-          throttle: null,
-          notifyWhen: null,
           actions: [
             {
               group: 'default',
               id: '1',
               params: {
                 foo: true,
+              },
+              frequency: {
+                summary: false,
+                notifyWhen: 'onActionGroupChange',
+                throttle: null,
               },
             },
           ],
@@ -1643,14 +1698,17 @@ describe('update()', () => {
           params: {
             bar: true,
           },
-          throttle: null,
-          notifyWhen: null,
           actions: [
             {
               group: 'default',
               id: '1',
               params: {
                 foo: true,
+              },
+              frequency: {
+                summary: false,
+                notifyWhen: 'onActionGroupChange',
+                throttle: null,
               },
             },
           ],
@@ -1706,7 +1764,7 @@ describe('update()', () => {
           },
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Cannot specify per-action frequency params when notify_when and throttle are defined at the rule level: default, default"`
+        `"Cannot specify per-action frequency params when notify_when or throttle are defined at the rule level: default, default"`
       );
       expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
       expect(taskManager.schedule).not.toHaveBeenCalled();
@@ -1747,7 +1805,7 @@ describe('update()', () => {
           },
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Cannot specify per-action frequency params when notify_when and throttle are defined at the rule level: default"`
+        `"Cannot specify per-action frequency params when notify_when or throttle are defined at the rule level: default"`
       );
       expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
       expect(taskManager.schedule).not.toHaveBeenCalled();
@@ -1855,14 +1913,17 @@ describe('update()', () => {
           params: {
             bar: true,
           },
-          throttle: null,
-          notifyWhen: null,
           actions: [
             {
               group: 'default',
               id: '1',
               params: {
                 foo: true,
+              },
+              frequency: {
+                summary: false,
+                notifyWhen: 'onActionGroupChange',
+                throttle: null,
               },
             },
           ],
