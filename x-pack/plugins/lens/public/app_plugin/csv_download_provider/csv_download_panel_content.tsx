@@ -29,8 +29,8 @@ export function DownloadPanelContent({
             defaultMessage="Download the data used in the current visualization."
           />
         </p>
-        {warnings.map((warning) => (
-          <p>{warning}</p>
+        {warnings.map((warning, i) => (
+          <p key={i}>{warning}</p>
         ))}
       </EuiText>
       <EuiSpacer size="s" />
