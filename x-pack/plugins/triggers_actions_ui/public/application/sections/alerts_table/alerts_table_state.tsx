@@ -110,6 +110,8 @@ const AlertsTableState = ({
   showExpandToDetails,
   leadingControlColumns,
   additionalControls,
+  rowHeightsOptions,
+  renderCellValue,
 }: AlertsTableStateProps) => {
   const { cases } = useKibana<{ cases: CaseUi }>().services;
 
@@ -277,6 +279,8 @@ const AlertsTableState = ({
       onChangeVisibleColumns,
       query,
       additionalControls,
+      rowHeightsOptions,
+      renderCellValue,
     }),
     [
       alertsTableConfiguration,
@@ -296,6 +300,8 @@ const AlertsTableState = ({
       leadingControlColumns,
       query,
       additionalControls,
+      rowHeightsOptions,
+      renderCellValue,
     ]
   );
 

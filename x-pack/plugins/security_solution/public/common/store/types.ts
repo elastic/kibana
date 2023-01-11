@@ -34,7 +34,8 @@ export type State = HostsPluginState &
     inputs: InputsState;
     sourcerer: SourcererState;
     globalUrlParam: GlobalUrlParam;
-  } & DataTableState;
+  } & DataTableState &
+  AlertTableState;
 
 /**
  * like redux's `MiddlewareAPI` but `getState` returns an `Immutable` version of

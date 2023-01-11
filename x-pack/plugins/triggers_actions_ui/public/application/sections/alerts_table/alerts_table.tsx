@@ -342,6 +342,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
             onChangeItemsPerPage: onChangePageSize,
             onChangePage: onChangePageIndex,
           }}
+          rowHeightsOptions={props.rowHeightOptions}
         />
       )}
     </section>

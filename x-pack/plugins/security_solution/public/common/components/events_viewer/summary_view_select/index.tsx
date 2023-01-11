@@ -15,7 +15,14 @@ import { ALERTS_TABLE_VIEW_SELECTION_KEY } from '../../event_rendered_view/helpe
 
 const storage = new Storage(localStorage);
 
-export type ViewSelection = 'gridView' | 'eventRenderedView';
+export const VIEW_SELECTION = {
+  gridView: 'gridView',
+  eventRenderedView: 'eventRenderedView',
+} as const;
+
+export type ViewSelectionTypes = keyof typeof VIEW_SELECTION;
+
+export type ViewSelection = typeof VIEW_SELECTION[ViewSelectionTypes];
 
 const ContainerEuiSelectable = styled.div`
   width: 300px;

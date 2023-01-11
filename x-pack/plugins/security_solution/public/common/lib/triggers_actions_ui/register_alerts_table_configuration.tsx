@@ -56,6 +56,9 @@ import { getEventIdToDataMapping } from '../../components/data_table/helpers';
 import { checkBoxControlColumn } from '../../components/control_columns';
 import { useBulkAlertActionItems } from './use_alert_actions';
 import { FIELDS_WITHOUT_CELL_ACTIONS } from '../cell_actions/constants';
+import { alertTableViewModeSelector } from '../../store/alert_table/selectors';
+import { useShallowEqualSelector } from '../../hooks/use_selector';
+import { VIEW_SELECTION } from '../../components/events_viewer/summary_view_select';
 
 function getFiltersForDSLQuery(datafeedQuery: QueryDslQueryContainer): Filter[] {
   if (isKnownEmptyQuery(datafeedQuery)) {
@@ -157,24 +160,13 @@ const registerAlertsTableConfiguration = (
     } = dataTableActions;
 
     const {
-      filters,
-      query,
       dataTable: {
         columns,
-        defaultColumns,
         deletedEventIds,
-        graphEventId, // If truthy, the graph viewer (Resolver) is showing
-        itemsPerPage,
-        itemsPerPageOptions,
-        sessionViewConfig,
         showCheckboxes,
-        sort,
         queryFields,
-        selectAll,
         selectedEventIds,
-        isSelectAllChecked,
         loadingEventIds,
-        title,
       } = getAlertsDefaultModel(license),
     } = useSelector((state: State) => eventsViewerSelector(state, TableId.alertsOnAlertsPage));
 
@@ -285,6 +277,13 @@ const registerAlertsTableConfiguration = (
       pageSize: number;
     }) => {
       const { browserFields } = useSourcererDataView(SourcererScopeName.detections);
+      const viewModeSelector = alertTableViewModeSelector();
+      const viewMode = useShallowEqualSelector((state) => viewModeSelector(state));
+
+      if (viewMode === VIEW_SELECTION.eventRenderedView) {
+        return {};
+      }
+
       return {
         cellActions: defaultCellActions.map((dca) => {
           return dca({

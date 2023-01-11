@@ -29,6 +29,8 @@ import { getScopePatternListSelection } from './sourcerer/helpers';
 import { globalUrlParamReducer, initialGlobalUrlParam } from './global_url_param';
 import type { DataTableState } from './data_table/types';
 import { dataTableReducer } from './data_table/reducer';
+import { alertTableReducer } from './alert_table/reducer';
+import { defaultAlertTableModel } from './alert_table/defaults';
 
 export type SubPluginsInitReducer = HostsPluginReducer &
   UsersPluginReducer &
@@ -108,6 +110,7 @@ export const createInitialState = (
     },
     globalUrlParam: initialGlobalUrlParam,
     dataTable: dataTableState.dataTable,
+    alertTable: defaultAlertTableModel,
   };
 
   return preloadedState;
@@ -126,5 +129,6 @@ export const createReducer: (
     sourcerer: sourcererReducer,
     globalUrlParam: globalUrlParamReducer,
     dataTable: dataTableReducer,
+    alertTable: alertTableReducer,
     ...pluginsReducer,
   });

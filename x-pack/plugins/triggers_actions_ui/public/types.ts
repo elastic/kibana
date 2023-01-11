@@ -19,6 +19,7 @@ import type {
   RecursivePartial,
   EuiDataGridCellValueElementProps,
   EuiDataGridToolBarAdditionalControlsOptions,
+  EuiDataGridProps,
 } from '@elastic/eui';
 import { EuiDataGridColumn, EuiDataGridControlColumn, EuiDataGridSorting } from '@elastic/eui';
 import {
@@ -490,6 +491,7 @@ export interface AlertsTableProps {
   onChangeVisibleColumns: (newColumns: string[]) => void;
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   additionalControls?: EuiDataGridToolBarAdditionalControlsOptions;
+  rowHeightOptions?: EuiDataGridProps['rowHeightsOptions'];
 }
 
 // TODO We need to create generic type between our plugin, right now we have different one because of the old alerts table
