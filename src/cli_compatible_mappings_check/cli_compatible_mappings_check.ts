@@ -113,7 +113,8 @@ program.command('check').action(
       writeToMappingsFile(extractedMappings);
     } catch (e) {
       log.fatal('There was an issue trying to apply the extracted mappings to the existing index.');
-      log.fatal(`Put mapping command failed with: ${e}`);
+      log.fatal(`Error: ${e}`);
+      log.fatal(`Consider reaching out to the Kibana core team if you are stuck.`);
       errorEncountered = true;
     } finally {
       const code = errorEncountered ? 1 : 0;
