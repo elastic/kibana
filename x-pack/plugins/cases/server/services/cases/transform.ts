@@ -192,6 +192,11 @@ export function transformSavedObjectToExternalModel(
   const status =
     STATUS_ESMODEL_TO_EXTERNAL[caseSavedObject.attributes?.status] ?? CaseStatuses.open;
 
+  // @ts-ignore
+  delete caseSavedObject.attributes?.total_alerts;
+  // @ts-ignore
+  delete caseSavedObject.attributes?.total_comments;
+
   return {
     ...caseSavedObject,
     attributes: {

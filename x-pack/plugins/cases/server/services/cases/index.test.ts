@@ -739,6 +739,8 @@ describe('CasesService', () => {
               "defacement",
             ],
             "title": "Super Bad Security Issue",
+            "total_alerts": -1,
+            "total_comments": -1,
             "updated_at": "2019-11-25T21:54:48.952Z",
             "updated_by": Object {
               "email": "testemail@elastic.co",
@@ -765,6 +767,23 @@ describe('CasesService', () => {
             "refresh": undefined,
           }
         `);
+      });
+
+      it('includes default values for total_alerts and total_comments', async () => {
+        unsecuredSavedObjectsClient.create.mockResolvedValue({} as SavedObject<ESCaseAttributes>);
+
+        await service.postNewCase({
+          attributes: createCasePostParams({
+            connector: getNoneCaseConnector(),
+          }),
+          id: '1',
+        });
+
+        const postAttributes = unsecuredSavedObjectsClient.create.mock
+          .calls[0][1] as ESCaseAttributes;
+
+        expect(postAttributes.total_alerts).toEqual(-1);
+        expect(postAttributes.total_comments).toEqual(-1);
       });
 
       it('moves the connector.id and connector_id to the references', async () => {
@@ -1272,6 +1291,19 @@ describe('CasesService', () => {
           expect(res.attributes.status).toEqual(expectedStatus);
         }
       );
+
+      it('does not include total_alerts and total_comments fields in the response', async () => {
+        unsecuredSavedObjectsClient.update.mockResolvedValue(createUpdateSOResponse({}));
+
+        const res = await service.patchCase({
+          caseId: '1',
+          updatedAttributes: createCaseUpdateParams({}),
+          originalCase: {} as CaseSavedObject,
+        });
+
+        expect(res.attributes).not.toHaveProperty('total_alerts');
+        expect(res.attributes).not.toHaveProperty('total_comments');
+      });
     });
 
     describe('post', () => {
@@ -1332,6 +1364,23 @@ describe('CasesService', () => {
           expect(res.attributes.status).toEqual(expectedStatus);
         }
       );
+
+      it('does not include total_alerts and total_comments fields in the response', async () => {
+        unsecuredSavedObjectsClient.create.mockResolvedValue(
+          createCaseSavedObjectResponse({
+            connector: createESJiraConnector(),
+            externalService: createExternalService(),
+          })
+        );
+
+        const res = await service.postNewCase({
+          attributes: createCasePostParams({ connector: getNoneCaseConnector() }),
+          id: '1',
+        });
+
+        expect(res.attributes).not.toHaveProperty('total_alerts');
+        expect(res.attributes).not.toHaveProperty('total_comments');
+      });
     });
 
     describe('find', () => {
@@ -1409,6 +1458,16 @@ describe('CasesService', () => {
           expect(res.saved_objects[0].attributes.status).toEqual(expectedStatus);
         }
       );
+
+      it('does not include total_alerts and total_comments fields in the response', async () => {
+        const findMockReturn = createSOFindResponse([createFindSO(), createFindSO()]);
+        unsecuredSavedObjectsClient.find.mockResolvedValue(findMockReturn);
+
+        const res = await service.findCases();
+
+        expect(res.saved_objects[0].attributes).not.toHaveProperty('total_alerts');
+        expect(res.saved_objects[0].attributes).not.toHaveProperty('total_comments');
+      });
     });
 
     describe('bulkGet', () => {
@@ -1483,6 +1542,24 @@ describe('CasesService', () => {
         expect(res.saved_objects[0].attributes.status).toEqual(CaseStatuses.open);
         expect(res.saved_objects[1].attributes.status).toEqual(CaseStatuses['in-progress']);
         expect(res.saved_objects[2].attributes.status).toEqual(CaseStatuses.closed);
+      });
+
+      it('does not include total_alerts and total_comments fields in the response', async () => {
+        unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
+          saved_objects: [
+            createCaseSavedObjectResponse({}),
+            createCaseSavedObjectResponse({}),
+            createCaseSavedObjectResponse({}),
+          ],
+        });
+
+        const res = await service.getCases({ caseIds: ['a'] });
+        expect(res.saved_objects[0].attributes).not.toHaveProperty('total_alerts');
+        expect(res.saved_objects[0].attributes).not.toHaveProperty('total_comments');
+        expect(res.saved_objects[1].attributes).not.toHaveProperty('total_alerts');
+        expect(res.saved_objects[1].attributes).not.toHaveProperty('total_comments');
+        expect(res.saved_objects[2].attributes).not.toHaveProperty('total_alerts');
+        expect(res.saved_objects[2].attributes).not.toHaveProperty('total_comments');
       });
     });
 
@@ -1621,6 +1698,14 @@ describe('CasesService', () => {
           expect(res.attributes.status).toEqual(expectedStatus);
         }
       );
+
+      it('does not include total_alerts and total_comments fields in the response', async () => {
+        unsecuredSavedObjectsClient.get.mockResolvedValue({} as SavedObject<ESCaseAttributes>);
+
+        const res = await service.getCase({ id: 'a' });
+        expect(res.attributes).not.toHaveProperty('total_alerts');
+        expect(res.attributes).not.toHaveProperty('total_comments');
+      });
     });
   });
 

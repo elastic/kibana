@@ -681,7 +681,9 @@ describe('case migrations', () => {
       const doc = {
         id: '123',
         type: 'abc',
-        attributes: {},
+        attributes: {
+          title: 'foobar',
+        },
         references: [],
       } as unknown as SavedObjectUnsanitizedDoc<CaseAttributes>;
 
@@ -699,7 +701,9 @@ describe('case migrations', () => {
       const doc = {
         id: '123',
         type: 'abc',
-        attributes: {},
+        attributes: {
+          title: 'foobar',
+        },
         references: [],
       } as unknown as SavedObjectUnsanitizedDoc<CaseAttributes>;
 
