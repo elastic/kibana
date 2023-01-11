@@ -134,5 +134,6 @@
     "@kbn/controls-plugin",
     "@kbn/shared-ux-utility",
     "@kbn/core-saved-objects-common",
+    "@kbn/core-saved-objects-import-export-server-mocks",
   ]
 }
