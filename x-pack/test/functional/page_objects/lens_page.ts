@@ -1670,13 +1670,19 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
     },
 
-    async openPermalinkShare() {
+    async ensureShareMenuIsOpen(action: 'csvDownload' | 'permalinks') {
+      await this.clickShareMenu();
+
       if (!(await testSubjects.exists('shareContextMenu'))) {
         await this.clickShareMenu();
       }
-      if (!(await this.isShareActionEnabled('permalinks'))) {
-        throw Error('Sharing feature is disabled');
+      if (!(await this.isShareActionEnabled(action))) {
+        throw Error(`${action} sharing feature is disabled`);
       }
+    },
+
+    async openPermalinkShare() {
+      await this.ensureShareMenuIsOpen('permalinks');
       await testSubjects.click('sharePanel-Permalinks');
     },
 
@@ -1704,6 +1710,25 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       const copyButton = await testSubjects.find('copyShareUrlButton');
       const url = await copyButton.getAttribute('data-share-url');
       return url;
+    },
+
+    async openCSVDownloadShare() {
+      await this.ensureShareMenuIsOpen('csvDownload');
+      await testSubjects.click('sharePanel-CSVDownload');
+    },
+
+    async setCSVDownloadDebugFlag(value: boolean = true) {
+      await browser.execute<[boolean], void>((v) => {
+        window.ELASTIC_LENS_CSV_DOWNLOAD_DEBUG = v;
+      }, value);
+    },
+
+    async getCSVContent() {
+      await testSubjects.click('lnsApp_downloadCSVButton');
+      return await browser.execute<
+        [void],
+        Record<string, { content: string; type: string }> | undefined
+      >(() => window.ELASTIC_LENS_CSV_CONTENT);
     },
   });
 }
