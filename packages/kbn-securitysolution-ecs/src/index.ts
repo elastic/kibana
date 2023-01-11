@@ -7,7 +7,7 @@
  */
 
 import type { Ecs } from '@kbn/ecs';
-import { AgentEcs } from '@kbn/securitysolution-ecs/src/agent';
+import { AgentEcs } from './agent';
 import type { AuditdEcs } from './auditd';
 import type { CloudEcs } from './cloud';
 import type { CodeSignature, FileEcs } from './file';
