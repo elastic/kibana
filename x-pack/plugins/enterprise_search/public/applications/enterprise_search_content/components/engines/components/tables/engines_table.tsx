@@ -102,9 +102,6 @@ export const EnginesListTable: React.FC<EnginesListTableProps> = ({
               'xpack.enterpriseSearch.content.engineList.table.column.actions.deleteEngineLabel',
               {
                 defaultMessage: 'Delete this engine',
-                // values: {
-                //  // engineName: engine.name,
-                // },
               }
             ),
           onClick: (engine) => {

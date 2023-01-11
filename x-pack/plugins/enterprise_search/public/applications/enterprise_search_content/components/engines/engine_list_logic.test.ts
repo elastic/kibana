@@ -31,7 +31,7 @@ const DEFAULT_VALUES = {
   status: Status.IDLE,
 };
 
-// mocked fetchEngine result. May need to call  mock engines response when ready
+// may need to call  mock engines response when ready
 
 const results: EnterpriseSearchEngine[] = [
   {
