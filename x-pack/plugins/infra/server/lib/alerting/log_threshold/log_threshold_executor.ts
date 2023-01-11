@@ -50,6 +50,7 @@ import { getIntervalInSeconds } from '../../../../common/utils/get_interval_in_s
 import { InfraBackendLibs } from '../../infra_types';
 import {
   AdditionalContext,
+  flattenAdditionalContext,
   getAlertDetailsUrl,
   getContextForRecoveredAlerts,
   getGroupByObject,
@@ -135,7 +136,7 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
           [ALERT_EVALUATION_THRESHOLD]: threshold,
           [ALERT_EVALUATION_VALUE]: value,
           [ALERT_REASON]: reason,
-          ...additionalContext,
+          ...flattenAdditionalContext(additionalContext),
         },
       });
 
