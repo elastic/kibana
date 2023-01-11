@@ -23,7 +23,6 @@
     "@kbn/i18n-react",
     "@kbn/data-views-plugin",
     "@kbn/es-query",
-    "@kbn/rule-registry-plugin",
     "@kbn/inspector-plugin",
     "@kbn/shared-ux-page-kibana-template-types",
     "@kbn/doc-links",
