@@ -1,6 +1,6 @@
 /* @notice
- * Portions of this code are licensed under the following license:
- * For license information please see https://edge.fullstory.com/s/fs.js.LICENSE.txt
+ * This code is part of the Services provided by FullStory, Inc. For license information, please refer to https://www.fullstory.com/legal/terms-and-conditions/.
+ * Portions of this code are licensed separately and can be found in https://edge.fullstory.com/s/fs.js.LICENSE.txt
  */
 /* eslint-disable prettier/prettier,no-var,eqeqeq,new-cap,no-nested-ternary,no-use-before-define,no-sequences,block-scoped-var,one-var,
     dot-notation,no-script-url,no-restricted-globals,no-unused-vars,guard-for-in,no-proto,camelcase,no-empty,no-redeclare,no-caller,
