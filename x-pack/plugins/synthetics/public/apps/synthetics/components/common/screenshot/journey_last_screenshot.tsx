@@ -9,10 +9,16 @@ import React, { useMemo } from 'react';
 import { useJourneySteps } from '../../monitor_details/hooks/use_journey_steps';
 import { parseBadgeStatus } from '../monitor_test_result/status_badge';
 import { JourneyStepScreenshotContainer } from './journey_step_screenshot_container';
+import { ScreenshotImageSize } from './screenshot_size';
 
-export const JourneyScreenshot = ({ checkGroupId }: { checkGroupId: string }) => {
+export const JourneyLastScreenshot = ({
+  checkGroupId,
+  size,
+}: {
+  checkGroupId: string;
+  size: ScreenshotImageSize;
+}) => {
   const { loading: stepsLoading, stepEnds } = useJourneySteps(checkGroupId);
-  const stepLabels = stepEnds.map((stepEnd) => stepEnd?.synthetics?.step?.name ?? '');
 
   const lastSignificantStep = useMemo(() => {
     const copy = [...stepEnds];
@@ -29,11 +35,11 @@ export const JourneyScreenshot = ({ checkGroupId }: { checkGroupId: string }) =>
   return (
     <JourneyStepScreenshotContainer
       checkGroup={lastSignificantStep?.monitor.check_group}
-      initialStepNo={lastSignificantStep?.synthetics?.step?.index}
+      initialStepNumber={lastSignificantStep?.synthetics?.step?.index}
       stepStatus={lastSignificantStep?.synthetics.payload?.status}
       allStepsLoaded={!stepsLoading}
-      stepLabels={stepLabels}
       retryFetchOnRevisit={false}
+      size={size}
     />
   );
 };

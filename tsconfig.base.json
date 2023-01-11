@@ -90,6 +90,8 @@
       "@kbn/cases-fixture-plugin/*": ["x-pack/test/functional_with_es_ssl/fixtures/plugins/cases/*"],
       "@kbn/cases-plugin": ["x-pack/plugins/cases"],
       "@kbn/cases-plugin/*": ["x-pack/plugins/cases/*"],
+      "@kbn/chart-expressions-common": ["src/plugins/chart_expressions/common"],
+      "@kbn/chart-expressions-common/*": ["src/plugins/chart_expressions/common/*"],
       "@kbn/chart-icons": ["packages/kbn-chart-icons"],
       "@kbn/chart-icons/*": ["packages/kbn-chart-icons/*"],
       "@kbn/charts-plugin": ["src/plugins/charts"],
