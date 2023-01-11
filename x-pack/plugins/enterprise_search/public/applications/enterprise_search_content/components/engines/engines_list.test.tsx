@@ -11,16 +11,21 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { mockedEngines } from '../../api/engines/fetch_engines_api_logic';
+import { Status } from '../../../../../common/types/api';
 
 import { EnginesListTable } from './components/tables/engines_table';
 import { EnginesList } from './engines_list';
 import { DEFAULT_META } from './types';
 
-const mockValues = {
-  enginesList: mockedEngines,
+const DEFAULT_VALUES = {
+  data: undefined,
+  results: [],
   meta: DEFAULT_META,
+  parameters: { meta: DEFAULT_META },
+  status: Status.IDLE,
 };
+const mockValues = { ...DEFAULT_VALUES };
+
 const mockActions = {
   fetchEngines: jest.fn(),
   onPaginate: jest.fn(),
