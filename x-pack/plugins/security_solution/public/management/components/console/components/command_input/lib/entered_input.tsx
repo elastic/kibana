@@ -55,6 +55,7 @@ const toReactJsxFragment = (prefix: string, item: InputCharacter, index: number)
 export class EnteredInput {
   private leftOfCursorContent: InputCharacter[];
   private rightOfCursorContent: InputCharacter[];
+  private canHaveArgValueSelectors: boolean;
 
   constructor(
     leftOfCursorText: string,
@@ -67,6 +68,8 @@ export class EnteredInput {
 
     this.leftOfCursorContent = getInputCharacters(leftOfCursorText);
     this.rightOfCursorContent = getInputCharacters(rightOfCursorText);
+
+    this.canHaveArgValueSelectors = Boolean(enteredCommand?.argsWithValueSelectors);
 
     // Determine if any argument value selector should be inserted
     if (parsedInput.hasArgs && enteredCommand && enteredCommand.argsWithValueSelectors) {
@@ -128,6 +131,18 @@ export class EnteredInput {
     let start = prevFullTextEntered.indexOf(selection);
 
     const fullContent = [...this.leftOfCursorContent, ...this.rightOfCursorContent];
+
+    // Adjust the `start` to account for arguments that have value selectors.
+    // These arguments, are stored in the `fullContent` array as one single array item instead of
+    // one per-character. The adjustment needs to be done only if the argument appears to the left
+    // of the selection
+    if (this.canHaveArgValueSelectors) {
+      fullContent.forEach((inputCharacter, index) => {
+        if (inputCharacter.isArgSelector && index < start) {
+          start = start - (inputCharacter.value.length - 1);
+        }
+      });
+    }
 
     fullContent.splice(start, selection.length);
 
