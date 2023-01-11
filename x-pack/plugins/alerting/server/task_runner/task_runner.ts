@@ -412,7 +412,7 @@ export class TaskRunner<
     );
 
     await this.timer.runWithTimer(TaskRunnerTimerSpan.ProcessAlerts, async () => {
-      this.legacyAlertsClient.processAlertsAndLogAlerts({
+      this.legacyAlertsClient.processAndLogAlerts({
         eventLogger: this.alertingEventLogger,
         ruleLabel,
         ruleRunMetricsStore,

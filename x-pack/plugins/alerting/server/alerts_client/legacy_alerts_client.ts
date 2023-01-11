@@ -85,7 +85,7 @@ export class LegacyAlertsClient<
     });
   }
 
-  public processAlertsAndLogAlerts({
+  public processAndLogAlerts({
     eventLogger,
     ruleLabel,
     ruleRunMetricsStore,
