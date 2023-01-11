@@ -6,7 +6,8 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import { getUserDisplayName, type AuthenticatedUser } from '@kbn/security-plugin/common/model';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
+import { getUserDisplayName } from '@kbn/user-profile-components';
 import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import type { SavedTimelineWithSavedObjectId } from '../../../../../common/types/timeline';
 import { TimelineType, TimelineStatus } from '../../../../../common/types/timeline';
