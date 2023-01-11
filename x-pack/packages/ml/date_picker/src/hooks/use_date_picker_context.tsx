@@ -17,13 +17,37 @@ import type { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/publi
  * Date Picker Dependencies to be passed on via `DatePickerContextProvider`.
  */
 export interface DatePickerDependencies {
+  /**
+   * data plugin
+   */
   data: DataPublicPluginStart;
+  /**
+   * http service
+   */
   http: HttpStart;
+  /**
+   * notifications service
+   */
   notifications: CoreSetup['notifications'];
+  /**
+   * EUI theme
+   */
   theme: ThemeServiceStart;
+  /**
+   * Kibana UI advanced settings
+   */
   uiSettings: IUiSettingsClient;
+  /**
+   * Kibana UI advanced settings keys.
+   */
   uiSettingsKeys: typeof UI_SETTINGS;
+  /**
+   * helper to be used with notifications.
+   */
   wrapWithTheme: typeof wrapWithTheme;
+  /**
+   * helper to be used with notifications.
+   */
   toMountPoint: typeof toMountPoint;
 }
 
@@ -55,6 +79,7 @@ export const useDatePickerContext = (): DatePickerDependencies => {
  * @returns {React.ReactElement} The DatePickerContextProvider component.
  */
 
-export const DatePickerContextProvider: FC<DatePickerDependencies> = ({ children, ...deps }) => (
-  <DatePickerContext.Provider value={deps}>{children}</DatePickerContext.Provider>
-);
+export const DatePickerContextProvider: FC<DatePickerDependencies> = (props) => {
+  const { children, ...deps } = props;
+  return <DatePickerContext.Provider value={deps}>{children}</DatePickerContext.Provider>;
+};

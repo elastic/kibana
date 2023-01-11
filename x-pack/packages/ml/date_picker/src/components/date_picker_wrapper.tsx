@@ -71,22 +71,29 @@ function updateLastRefresh(timeRange?: OnRefreshProps) {
  * DatePickerWrapper React Component props interface
  */
 interface DatePickerWrapperProps {
+  /**
+   * Boolean flag to be passed on to `EuiSuperDatePicker`.
+   */
   isAutoRefreshOnly?: boolean;
+  /**
+   * Boolean flag to indicate loading state.
+   */
   isLoading?: boolean;
+  /**
+   * Boolean flag to enforce showing/hiding the refresh button.
+   */
   showRefresh?: boolean;
 }
 
 /**
  * DatePickerWrapper React Component
  *
- * @param `DatePickerWrapperProps` component props
- * @returns JSX
+ * @type {FC<DatePickerWrapperProps>}
+ * @param props - `DatePickerWrapper` component props
+ * @returns {React.ReactElement} The DatePickerWrapper component.
  */
-export const DatePickerWrapper: FC<DatePickerWrapperProps> = ({
-  isAutoRefreshOnly,
-  isLoading = false,
-  showRefresh,
-}) => {
+export const DatePickerWrapper: FC<DatePickerWrapperProps> = (props) => {
+  const { isAutoRefreshOnly, isLoading = false, showRefresh } = props;
   const {
     data,
     notifications: { toasts },

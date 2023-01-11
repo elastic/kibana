@@ -11,6 +11,7 @@ import { distinctUntilChanged, map } from 'rxjs/operators';
 import { isEqual } from 'lodash';
 
 import type { TimeRange } from '@kbn/es-query';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
 
 import { useDatePickerContext } from './use_date_picker_context';
 
@@ -18,20 +19,24 @@ import { useDatePickerContext } from './use_date_picker_context';
  * Options interface for the `useTimefilter` custom hook.
  */
 interface UseTimefilterOptions {
+  /**
+   * Boolean flag to enable/disable the time range selector
+   */
   timeRangeSelector?: boolean;
+  /**
+   * Boolean flag to enable/disable the auto refresh selector
+   */
   autoRefreshSelector?: boolean;
 }
 
 /**
  * Custom hook to get the timefilter from runtime dependencies.
  *
- * @param UseTimefilterOptions
- * @returns timefilter
+ * @param {UseTimefilterOptions} options - time filter options
+ * @returns {TimefilterContract} timefilter
  */
-export const useTimefilter = ({
-  timeRangeSelector,
-  autoRefreshSelector,
-}: UseTimefilterOptions = {}) => {
+export const useTimefilter = (options: UseTimefilterOptions = {}): TimefilterContract => {
+  const { timeRangeSelector, autoRefreshSelector } = options;
   const {
     data: {
       query: {
