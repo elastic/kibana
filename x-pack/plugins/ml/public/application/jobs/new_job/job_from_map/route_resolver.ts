@@ -26,6 +26,13 @@ export async function resolver(
   let decodedDashboard;
   let decodedEmbeddable;
   let splitFieldDecoded;
+  let dvId;
+
+  try {
+    dvId = rison.decode(dataViewId) as string;
+  } catch (error) {
+    dvId = '';
+  }
 
   try {
     decodedDashboard = rison.decode(dashboard) as { query: Query; filters: Filter[] };
@@ -61,7 +68,7 @@ export async function resolver(
   const jobCreator = new QuickGeoJobCreator(getUiSettings(), getTimefilter(), getShare(), ml);
 
   await jobCreator.createAndStashGeoJob(
-    dataViewId,
+    dvId,
     from,
     to,
     decodedDashboard.query,

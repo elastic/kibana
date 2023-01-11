@@ -68,7 +68,7 @@ export const CompatibleLayer: FC<Props> = ({ embeddable, layer, layerIndex }) =>
       share
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [embeddable, selectedSplitField]);
+  }, [layer?.dataView?.id, embeddable, selectedSplitField]);
 
   const createGeoJob = useCallback(
     async ({
