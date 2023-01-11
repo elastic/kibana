@@ -15,6 +15,5 @@
   ],
   "kbn_references": [
     "@kbn/ecs",
-    "@kbn/securitysolution-ecs"
   ]
 }
