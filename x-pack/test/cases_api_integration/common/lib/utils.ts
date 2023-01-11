@@ -60,24 +60,12 @@ import { ActionResult, FindActionResult } from '@kbn/actions-plugin/server/types
 import { ESCasesConfigureAttributes } from '@kbn/cases-plugin/server/services/configure/types';
 import { ESCaseAttributes } from '@kbn/cases-plugin/server/services/cases/types';
 import type { SavedObjectsRawDocSource } from '@kbn/core/server';
-import { ToolingLog } from '@kbn/tooling-log';
-import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '@kbn/security-solution-plugin/common/constants';
-import { DetectionAlert } from '@kbn/security-solution-plugin/common/detection_engine/schemas/alerts';
-import { RiskEnrichmentFields } from '@kbn/security-solution-plugin/server/lib/detection_engine/signals/enrichments/types';
 import { User } from './authentication/types';
 import { superUser } from './authentication/users';
 import { getPostCaseRequest, postCaseReq } from './mock';
 import { ObjectRemover as ActionsRemover } from '../../../alerting_api_integration/common/lib';
 import { getServiceNowServer } from '../../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/plugin';
 import { RecordingServiceNowSimulator } from '../../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/servicenow_simulation';
-import {
-  getRuleForSignalTesting,
-  createRule,
-  waitForRuleSuccessOrStatus,
-  waitForSignalsToBePresent,
-  getSignalsByIds,
-  getQuerySignalIds,
-} from '../../../detection_engine_api_integration/utils';
 
 function toArray<T>(input: T | T[]): T[] {
   if (Array.isArray(input)) {
@@ -1430,29 +1418,3 @@ export const getReferenceFromEsResponse = (
   esResponse: TransportResult<GetResponse<SavedObjectsRawDocSource>, unknown>,
   id: string
 ) => esResponse.body._source?.references?.find((r) => r.id === id);
-
-export const createSecuritySolutionAlerts = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
-  log: ToolingLog
-): Promise<estypes.SearchResponse<DetectionAlert & RiskEnrichmentFields>> => {
-  const rule = getRuleForSignalTesting(['auditbeat-*']);
-  const { id } = await createRule(supertest, log, rule);
-  await waitForRuleSuccessOrStatus(supertest, log, id);
-  await waitForSignalsToBePresent(supertest, log, 1, [id]);
-  const signals = await getSignalsByIds(supertest, log, [id]);
-
-  return signals;
-};
-
-export const getSecuritySolutionAlerts = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
-  alertIds: string[]
-): Promise<estypes.SearchResponse<DetectionAlert & RiskEnrichmentFields>> => {
-  const { body: updatedAlert } = await supertest
-    .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-    .set('kbn-xsrf', 'true')
-    .send(getQuerySignalIds(alertIds))
-    .expect(200);
-
-  return updatedAlert;
-};
