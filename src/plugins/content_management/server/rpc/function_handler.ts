@@ -45,6 +45,10 @@ export class FunctionHandler<Context> {
     if (isLeft(input)) throw new Error(`Invalid input for ${fn}: ${input}`);
 
     const result = await handler.fn(context, input.right);
+
+    const output = handler.type.o.decode(result);
+    if (isLeft(output)) throw new Error(`Invalid output for ${fn}: ${JSON.stringify(output.left)}`);
+
     return { result };
   }
 }

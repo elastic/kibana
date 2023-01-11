@@ -23,7 +23,10 @@ export class RpcClient {
 
   private sendMessage = async <I, O>(name: string, input: I): Promise<O> => {
     const payload = Payload.encode({ fn: name, arg: input });
-    return this.http.post(API_ENDPOINT, { body: JSON.stringify(payload) });
+    const { result } = await this.http.post<{ result: O }>(API_ENDPOINT, {
+      body: JSON.stringify(payload),
+    });
+    return result;
   };
 
   private realize<I, O>(decl: NamedFnDef<I, O>): AsyncFN<I, O> {
