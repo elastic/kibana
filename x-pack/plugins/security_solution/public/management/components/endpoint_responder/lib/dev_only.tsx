@@ -50,15 +50,32 @@ export const getUploadCommand = ({
         about: 'Select the file that should be uploaded and executed',
         required: true,
         allowMultiples: false,
+        mustHaveValue: true,
         validate: () => {
           // FIXME:PT Validate File was selected
           return true;
         },
         SelectorComponent: ArgumentFileSelector,
       },
+
+      n: {
+        required: false,
+        allowMultiples: true,
+        mustHaveValue: 'number-greater-than-zero',
+        about: 'just a number greater than zero',
+      },
+
+      nn: {
+        required: false,
+        allowMultiples: true,
+        mustHaveValue: 'number',
+        about: 'just a number',
+      },
+
       comment: {
         required: false,
         allowMultiples: false,
+        mustHaveValue: 'non-empty-string',
         about: 'A comment',
       },
     },
