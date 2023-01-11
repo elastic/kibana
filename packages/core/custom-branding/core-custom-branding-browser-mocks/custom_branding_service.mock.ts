@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { CustomBranding } from '@kbn/core-custom-branding-common';
 import { of } from 'rxjs';
+import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import { serviceContractMock } from './service_contract.mock';
 
 const mockCustomBranding: CustomBranding = {

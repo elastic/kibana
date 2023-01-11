@@ -5,14 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { KibanaRequest } from '@kbn/core-http-server';
-import { CustomBranding } from '@kbn/core-custom-branding-common';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { CustomBranding } from '@kbn/core-custom-branding-common';
+import type { MaybePromise } from '@kbn/utility-types';
 
 /** @public */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CustomBrandingStart {}
 
-export type CustomBrandingFetchFn = (request: KibanaRequest) => Promise<CustomBranding>;
+export type CustomBrandingFetchFn = (request: KibanaRequest) => MaybePromise<CustomBranding>;
 
 /** @public */
 export interface CustomBrandingSetup {

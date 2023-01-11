@@ -22,10 +22,9 @@ export class CustomBrandingService {
   /**
    * @public
    */
-  public start(): CustomBrandingStart {
-    if (!this.customBranding$) {
-      throw new Error('Setup needs to be called before start');
-    }
+  public setup({ injectedMetadata }: CustomBrandingSetupDeps): CustomBrandingSetup {
+    const customBranding = injectedMetadata.getCustomBranding();
+    this.customBranding$ = new BehaviorSubject<CustomBranding>(customBranding);
     return {
       customBranding$: this.customBranding$.pipe(takeUntil(this.stop$), shareReplay(1)),
       hasCustomBranding$: this.customBranding$.pipe(
@@ -39,9 +38,10 @@ export class CustomBrandingService {
   /**
    * @public
    */
-  public setup({ injectedMetadata }: CustomBrandingSetupDeps): CustomBrandingSetup {
-    const customBranding = injectedMetadata.getCustomBranding() as CustomBranding;
-    this.customBranding$ = new BehaviorSubject<CustomBranding>(customBranding);
+  public start(): CustomBrandingStart {
+    if (!this.customBranding$) {
+      throw new Error('Setup needs to be called before start');
+    }
     return {
       customBranding$: this.customBranding$.pipe(takeUntil(this.stop$), shareReplay(1)),
       hasCustomBranding$: this.customBranding$.pipe(

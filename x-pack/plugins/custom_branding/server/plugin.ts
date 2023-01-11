@@ -48,7 +48,7 @@ export class CustomBrandingPlugin implements Plugin {
     const router = core.http.createRouter<CustomBrandingRequestHandlerContext>();
     registerRoutes(router);
 
-    const fetchFn = async (request: KibanaRequest) => {
+    const fetchFn = async (request: KibanaRequest): Promise<CustomBranding> => {
       const [coreStart] = await core.getStartServices();
       const soClient = coreStart.savedObjects.getScopedClient(request);
       const uiSettings = coreStart.uiSettings.globalAsScopedToClient(soClient);

@@ -34,7 +34,7 @@ import type { InternalRenderingRequestHandlerContext } from './internal_types';
 
 type RenderOptions =
   | RenderingSetupDeps
-  | (RenderingPrebootDeps & { status?: never; elasticsearch?: never });
+  | (RenderingPrebootDeps & { status?: never; elasticsearch?: never; customBranding?: never });
 
 /** @internal */
 export class RenderingService {
@@ -92,7 +92,7 @@ export class RenderingService {
     },
     { isAnonymousPage = false, vars, includeExposedConfigKeys }: IRenderOptions = {}
   ) {
-    const { elasticsearch, http, uiPlugins, status } = renderOptions;
+    const { elasticsearch, http, uiPlugins, status, customBranding } = renderOptions;
 
     const env = {
       mode: this.coreContext.env.mode,
@@ -109,8 +109,8 @@ export class RenderingService {
       defaults: uiSettings.globalClient?.getRegistered() ?? {},
       user: isAnonymousPage ? {} : await uiSettings.globalClient?.getUserProvided(),
     };
-    let branding: CustomBranding = {};
     let clusterInfo = {};
+    let branding: CustomBranding = {};
     try {
       // Only provide the clusterInfo if the request is authenticated and the elasticsearch service is available.
       if (isAuthenticated(http.auth, request) && elasticsearch) {
@@ -120,9 +120,7 @@ export class RenderingService {
             catchError(() => of({}))
           )
         );
-        if ('customBranding' in renderOptions) {
-          branding = await renderOptions.customBranding.getBrandingFor(request);
-        }
+        branding = await customBranding?.getBrandingFor(request);
       }
     } catch (err) {
       // swallow error

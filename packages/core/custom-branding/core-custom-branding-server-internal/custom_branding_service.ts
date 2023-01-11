@@ -7,7 +7,7 @@
  */
 import type { CustomBrandingFetchFn, CustomBrandingStart } from '@kbn/core-custom-branding-server';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
-import { KibanaRequest } from '@kbn/core-http-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { Logger } from '@kbn/logging';
 
@@ -20,9 +20,9 @@ export interface InternalCustomBrandingSetup {
 }
 
 export class CustomBrandingService {
-  private pluginName: string | undefined;
+  private pluginName?: string;
   private logger: Logger;
-  private fetchFn: CustomBrandingFetchFn | undefined;
+  private fetchFn?: CustomBrandingFetchFn;
   private startCalled: boolean = false;
 
   constructor(coreContext: CoreContext) {
@@ -35,6 +35,11 @@ export class CustomBrandingService {
         this.logger.info('CustomBrandingService registering plugin: ' + pluginName);
         if (this.pluginName) {
           throw new Error('Another plugin already registered');
+        }
+        if (!pluginName || !fetchFn) {
+          throw new Error(
+            'Both plugin name and fetch function need to be provided when registering a plugin'
+          );
         }
         this.pluginName = pluginName;
         this.fetchFn = fetchFn;
@@ -54,9 +59,9 @@ export class CustomBrandingService {
     if (!this.startCalled) {
       throw new Error('Cannot be called before #start');
     }
-    if (!this.pluginName || this.pluginName !== 'customBranding') {
+    if (!this.pluginName || this.pluginName !== 'customBranding' || !this.fetchFn) {
       return {};
     }
-    return await this.fetchFn!(request);
+    return this.fetchFn!(request);
   };
 }

@@ -7,7 +7,7 @@
  */
 
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
-import { KibanaRequest } from '@kbn/core-http-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import { CustomBrandingService } from './custom_branding_service';
 
 describe('#setup', () => {
@@ -33,6 +33,19 @@ describe('#setup', () => {
       await getBrandingFor(kibanaRequest);
     } catch (e) {
       expect(e.message).toMatch('Cannot be called before #start');
+    }
+  });
+
+  it('throws if `fetchFn` not provided with register', async () => {
+    const service = new CustomBrandingService(coreContext);
+    const { register } = service.setup();
+    try {
+      // @ts-expect-error
+      register('customBranding');
+    } catch (e) {
+      expect(e.message).toMatch(
+        'Both plugin name and fetch function need to be provided when registering a plugin'
+      );
     }
   });
 
