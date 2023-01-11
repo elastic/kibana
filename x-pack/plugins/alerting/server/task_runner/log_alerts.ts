@@ -15,9 +15,7 @@ import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 
 export interface LogAlertsParams<
   State extends AlertInstanceState,
-  Context extends AlertInstanceContext,
-  ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  Context extends AlertInstanceContext
 > {
   logger: Logger;
   alertingEventLogger: AlertingEventLogger;
@@ -30,12 +28,7 @@ export interface LogAlertsParams<
   shouldPersistAlerts: boolean;
 }
 
-export function logAlerts<
-  State extends AlertInstanceState,
-  Context extends AlertInstanceContext,
-  ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
->({
+export function logAlerts<State extends AlertInstanceState, Context extends AlertInstanceContext>({
   logger,
   alertingEventLogger,
   newAlerts,
@@ -45,7 +38,7 @@ export function logAlerts<
   ruleRunMetricsStore,
   canSetRecoveryContext,
   shouldPersistAlerts,
-}: LogAlertsParams<State, Context, ActionGroupIds, RecoveryActionGroupId>) {
+}: LogAlertsParams<State, Context>) {
   const newAlertIds = Object.keys(newAlerts);
   const activeAlertIds = Object.keys(activeAlerts);
   const recoveredAlertIds = Object.keys(recoveredAlerts);

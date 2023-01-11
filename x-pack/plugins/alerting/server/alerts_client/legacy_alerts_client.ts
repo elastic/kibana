@@ -17,12 +17,7 @@ import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { logAlerts } from '../task_runner/log_alerts';
-import {
-  AlertInstanceContext,
-  AlertInstanceState,
-  RawAlertInstance,
-  WithoutReservedActionGroups,
-} from '../types';
+import { AlertInstanceContext, AlertInstanceState, RawAlertInstance } from '../types';
 
 interface ConstructorOpts {
   logger: Logger;
@@ -33,8 +28,7 @@ interface ConstructorOpts {
 export class LegacyAlertsClient<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
-  ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  ActionGroupIds extends string
 > {
   private activeAlertsFromPreviousExecution: Record<string, Alert<State, Context>>;
   private recoveredAlertsFromPreviousExecution: Record<string, Alert<State, Context>>;
@@ -46,11 +40,7 @@ export class LegacyAlertsClient<
     recoveredCurrent: Record<string, Alert<State, Context>>;
   };
 
-  private alertFactory?: AlertFactory<
-    State,
-    Context,
-    WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
-  >;
+  private alertFactory?: AlertFactory<State, Context, ActionGroupIds>;
   constructor(private readonly options: ConstructorOpts) {
     this.alerts = {};
     this.activeAlertsFromPreviousExecution = {};
@@ -87,11 +77,7 @@ export class LegacyAlertsClient<
 
     this.alerts = cloneDeep(this.activeAlertsFromPreviousExecution);
 
-    this.alertFactory = createAlertFactory<
-      State,
-      Context,
-      WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
-    >({
+    this.alertFactory = createAlertFactory<State, Context, ActionGroupIds>({
       alerts: this.alerts,
       logger: this.options.logger,
       maxAlerts: this.options.maxAlerts,
@@ -124,10 +110,7 @@ export class LegacyAlertsClient<
       setFlapping: true,
     });
 
-    setFlapping<State, Context, ActionGroupIds, RecoveryActionGroupId>(
-      processedAlertsActive,
-      processedAlertsRecovered
-    );
+    setFlapping<State, Context>(processedAlertsActive, processedAlertsRecovered);
 
     this.processedAlerts.new = processedAlertsNew;
     this.processedAlerts.active = processedAlertsActive;
@@ -156,7 +139,7 @@ export class LegacyAlertsClient<
   }
 
   public getAlertsToSerialize() {
-    return determineAlertsToReturn<State, Context, ActionGroupIds, RecoveryActionGroupId>(
+    return determineAlertsToReturn<State, Context>(
       this.processedAlerts.active,
       this.processedAlerts.recovered
     );
