@@ -24,11 +24,12 @@ import type {
   PackageInfo,
   PackagePolicySOAttributes,
   AgentPolicySOAttributes,
-  PostPackagePolicyDeleteCallback,
+  PostPackagePolicyPostDeleteCallback,
   RegistryDataStream,
   PackagePolicyInputStream,
   PackagePolicy,
   PostPackagePolicyPostCreateCallback,
+  PostPackagePolicyDeleteCallback,
 } from '../types';
 import { createPackagePolicyMock } from '../../common/mocks';
 
@@ -37,11 +38,12 @@ import type { PutPackagePolicyUpdateCallback, PostPackagePolicyCreateCallback } 
 import { createAppContextStartContractMock, xpackMocks } from '../mocks';
 
 import type {
-  DeletePackagePoliciesResponse,
+  PostDeletePackagePoliciesResponse,
   InputsOverride,
   NewPackagePolicy,
   NewPackagePolicyInput,
   PackagePolicyPackage,
+  DeletePackagePoliciesResponse,
 } from '../../common/types';
 import { packageToPackagePolicy } from '../../common/services';
 
@@ -2039,11 +2041,11 @@ describe('Package policy service', () => {
     it('should allow to delete a package policy', async () => {});
   });
 
-  describe('runDeleteExternalCallbacks', () => {
-    let callbackOne: jest.MockedFunction<PostPackagePolicyDeleteCallback>;
-    let callbackTwo: jest.MockedFunction<PostPackagePolicyDeleteCallback>;
+  describe('runPostDeleteExternalCallbacks', () => {
+    let callbackOne: jest.MockedFunction<PostPackagePolicyPostDeleteCallback>;
+    let callbackTwo: jest.MockedFunction<PostPackagePolicyPostDeleteCallback>;
     let callingOrder: string[];
-    let deletedPackagePolicies: DeletePackagePoliciesResponse;
+    let deletedPackagePolicies: PostDeletePackagePoliciesResponse;
 
     beforeEach(() => {
       appContextService.start(createAppContextStartContractMock());
@@ -2058,8 +2060,8 @@ describe('Package policy service', () => {
       callbackTwo = jest.fn(async (deletedPolicies) => {
         callingOrder.push('two');
       });
-      appContextService.addExternalCallback('postPackagePolicyDelete', callbackOne);
-      appContextService.addExternalCallback('postPackagePolicyDelete', callbackTwo);
+      appContextService.addExternalCallback('packagePolicyPostDelete', callbackOne);
+      appContextService.addExternalCallback('packagePolicyPostDelete', callbackTwo);
     });
 
     afterEach(() => {
@@ -2067,7 +2069,7 @@ describe('Package policy service', () => {
     });
 
     it('should execute external callbacks', async () => {
-      await packagePolicyService.runDeleteExternalCallbacks(deletedPackagePolicies);
+      await packagePolicyService.runPostDeleteExternalCallbacks(deletedPackagePolicies);
 
       expect(callbackOne).toHaveBeenCalledWith(deletedPackagePolicies);
       expect(callbackTwo).toHaveBeenCalledWith(deletedPackagePolicies);
@@ -2080,7 +2082,7 @@ describe('Package policy service', () => {
         throw new Error('foo');
       });
       await expect(
-        packagePolicyService.runDeleteExternalCallbacks(deletedPackagePolicies)
+        packagePolicyService.runPostDeleteExternalCallbacks(deletedPackagePolicies)
       ).rejects.toThrow(FleetError);
       expect(callingOrder).toEqual(['one', 'two']);
     });
@@ -2099,7 +2101,78 @@ describe('Package policy service', () => {
         throw callbackTwoError;
       });
 
-      await packagePolicyService.runDeleteExternalCallbacks(deletedPackagePolicies).catch((e) => {
+      await packagePolicyService
+        .runPostDeleteExternalCallbacks(deletedPackagePolicies)
+        .catch((e) => {
+          error = e;
+        });
+
+      expect(error!.message).toEqual(
+        '2 encountered while executing package post delete external callbacks'
+      );
+      expect(error!.meta).toEqual([callbackOneError, callbackTwoError]);
+      expect(callingOrder).toEqual(['one', 'two']);
+    });
+  });
+
+  describe('runDeleteExternalCallbacks', () => {
+    let callbackOne: jest.MockedFunction<PostPackagePolicyDeleteCallback>;
+    let callbackTwo: jest.MockedFunction<PostPackagePolicyDeleteCallback>;
+    let callingOrder: string[];
+    let packagePolicies: DeletePackagePoliciesResponse;
+
+    beforeEach(() => {
+      appContextService.start(createAppContextStartContractMock());
+      callingOrder = [];
+      packagePolicies = [{ id: 'a' }, { id: 'a' }] as DeletePackagePoliciesResponse;
+      callbackOne = jest.fn(async (deletedPolicies) => {
+        callingOrder.push('one');
+      });
+      callbackTwo = jest.fn(async (deletedPolicies) => {
+        callingOrder.push('two');
+      });
+      appContextService.addExternalCallback('packagePolicyDelete', callbackOne);
+      appContextService.addExternalCallback('packagePolicyDelete', callbackTwo);
+    });
+
+    afterEach(() => {
+      appContextService.stop();
+    });
+
+    it('should execute external callbacks', async () => {
+      await packagePolicyService.runDeleteExternalCallbacks(packagePolicies);
+
+      expect(callbackOne).toHaveBeenCalledWith(packagePolicies);
+      expect(callbackTwo).toHaveBeenCalledWith(packagePolicies);
+      expect(callingOrder).toEqual(['one', 'two']);
+    });
+
+    it("should execute all external callbacks even if one throw's", async () => {
+      callbackOne.mockImplementation(async (deletedPolicies) => {
+        callingOrder.push('one');
+        throw new Error('foo');
+      });
+      await expect(
+        packagePolicyService.runDeleteExternalCallbacks(packagePolicies)
+      ).rejects.toThrow(FleetError);
+      expect(callingOrder).toEqual(['one', 'two']);
+    });
+
+    it('should provide an array of errors encountered by running external callbacks', async () => {
+      let error: FleetError;
+      const callbackOneError = new Error('foo 1');
+      const callbackTwoError = new Error('foo 2');
+
+      callbackOne.mockImplementation(async (deletedPolicies) => {
+        callingOrder.push('one');
+        throw callbackOneError;
+      });
+      callbackTwo.mockImplementation(async (deletedPolicies) => {
+        callingOrder.push('two');
+        throw callbackTwoError;
+      });
+
+      await packagePolicyService.runDeleteExternalCallbacks(packagePolicies).catch((e) => {
         error = e;
       });
 
@@ -2286,7 +2359,7 @@ describe('Package policy service', () => {
     });
   });
 
-  describe('runPostPackagePolicyPostCreateCallback', () => {
+  describe('runPackagePolicyPostCreateCallback', () => {
     let context: ReturnType<typeof xpackMocks.createRequestHandlerContext>;
     let request: KibanaRequest;
     const packagePolicy = {
