@@ -11,7 +11,24 @@
  * 2.0.
  */
 
-const CLOUD_SECURITY_POSTURE_PACKAGE_NAME = 'cloud_security_posture';
+const CLOUD_SECURITY_PACKAGE_NAME = 'cloud_security_posture';
+const CLOUD_SECURITY_PACKAGE_VERSION = '1.0.8';
+
+/**
+ * Package version is fixed (not latest) so FTR won't suddenly break when package is changed.
+ *
+ * test a new package:
+ * 1. merge a new package to EPR
+ * 2. locally checkout the kibana version that matches the new package
+ * 3. update CLOUD_SECURITY_PACKAGE_VERSION with the new package version
+ * 4. run FTR test locally
+ * 5. when test pass, merge new kibana changes with the new package version.
+ *
+ */
+const getCloudSecurityPackageConfig = () => [
+  `--xpack.fleet.packages.0.name=${CLOUD_SECURITY_PACKAGE_NAME}`,
+  `--xpack.fleet.packages.0.version=${CLOUD_SECURITY_PACKAGE_VERSION}`,
+];
 
 export const getCloudSecurityFleetConfig = () => [
   ...getCloudSecurityPackageConfig(),
@@ -20,18 +37,5 @@ export const getCloudSecurityFleetConfig = () => [
   '--xpack.fleet.agentPolicies.0.name=example-agent-policy-csp',
   '--xpack.fleet.agentPolicies.0.package_policies.0.id=integration-policy-csp',
   '--xpack.fleet.agentPolicies.0.package_policies.0.name=example-integration-csp',
-  `--xpack.fleet.agentPolicies.0.package_policies.0.package.name=${CLOUD_SECURITY_POSTURE_PACKAGE_NAME}`,
-];
-/**
- * Package version is fixed (not latest) so FTR won't suddenly break when package is changed.
- *
- * test a new package:
- * 1. merge a new package to EPR
- * 2. locally change the fixed version in kibana to the new package version
- * 3. run the FTR test locally
- * 4. when test pass, merge new kibana changes with the new package version.
- */
-const getCloudSecurityPackageConfig = () => [
-  `--xpack.fleet.packages.0.name=${CLOUD_SECURITY_POSTURE_PACKAGE_NAME}`,
-  '--xpack.fleet.packages.0.version=1.0.8', // fixed version
+  `--xpack.fleet.agentPolicies.0.package_policies.0.package.name=${CLOUD_SECURITY_PACKAGE_NAME}`,
 ];
