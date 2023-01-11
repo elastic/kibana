@@ -114,11 +114,7 @@ export class BulkActionsResolver {
       scope: ['fleet'],
       state: {},
       params: { actionParams, retryParams },
-      runAt:
-        runAt ??
-        moment(new Date())
-          .add(Math.pow(3, retryParams.retryCount ?? 1), 's')
-          .toDate(),
+      runAt: runAt ?? moment(new Date()).add(3, 's').toDate(),
     });
     appContextService.getLogger().info('Scheduling task ' + taskId);
     return taskId;
@@ -146,7 +142,15 @@ export function createRetryTask(
 
       const { esClient, soClient } = await getDeps();
 
-      const retryParams = taskInstance.params.retryParams;
+      // update tags will retry with tags filter
+      const retryParams: RetryParams =
+        taskInstance.taskType === BulkActionTaskType.UPDATE_AGENT_TAGS_RETRY
+          ? {
+              ...taskInstance.params.retryParams,
+              pitId: undefined,
+              searchAfter: undefined,
+            }
+          : taskInstance.params.retryParams;
 
       appContextService
         .getLogger()

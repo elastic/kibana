@@ -235,7 +235,9 @@ export abstract class ActionRunner {
       }
     }
 
-    await closePointInTime(this.esClient, pitId!);
+    if (pitId) {
+      await closePointInTime(this.esClient, pitId!);
+    }
 
     appContextService
       .getLogger()

@@ -71,6 +71,11 @@ export async function updateTagsBatch(
   );
   const agentIds = filteredAgents.map((agent) => agent.id);
 
+  const actionId = options.actionId ?? uuid();
+  if (agentIds.length === 0) {
+    return { actionId, updated: 0, took: 0 };
+  }
+
   let res;
   try {
     res = await esClient.updateByQuery({
@@ -116,13 +121,11 @@ export async function updateTagsBatch(
 
   appContextService.getLogger().debug(JSON.stringify(res).slice(0, 1000));
 
-  const actionId = options.actionId ?? uuid();
-
   if (options.retryCount === undefined) {
     // creating an action doc so that update tags  shows up in activity
     await createAgentAction(esClient, {
       id: actionId,
-      agents: options.kuery === undefined ? agentIds : [],
+      agents: agentIds,
       created_at: new Date().toISOString(),
       type: 'UPDATE_TAGS',
       total: res.total,
@@ -136,7 +139,7 @@ export async function updateTagsBatch(
   if (res.updated ?? 0 > 0) {
     await bulkCreateAgentActionResults(
       esClient,
-      (options.kuery === undefined ? agentIds : getUuidArray(res.updated!)).map((id) => ({
+      agentIds.map((id) => ({
         agentId: id,
         actionId,
       }))
