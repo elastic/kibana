@@ -21,9 +21,9 @@ export interface LogAlertsParams<
 > {
   logger: Logger;
   alertingEventLogger: AlertingEventLogger;
-  newAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
-  activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
-  recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
+  newAlerts: Record<string, Alert<State, Context>>;
+  activeAlerts: Record<string, Alert<State, Context>>;
+  recoveredAlerts: Record<string, Alert<State, Context>>;
   ruleLogPrefix: string;
   ruleRunMetricsStore: RuleRunMetricsStore;
   canSetRecoveryContext: boolean;
