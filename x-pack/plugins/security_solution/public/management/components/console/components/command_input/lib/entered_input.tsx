@@ -118,101 +118,20 @@ export class EnteredInput {
 
   private replaceSelection(selection: string, newValue: string) {
     const prevFullTextEntered = this.getFullText();
-    const leftText = this.getLeftOfCursorText();
-    const rightText = this.getRightOfCursorText();
-
     const newValueContent = newValue ? createInputCharacter({ value: newValue }) : undefined;
+    let start = prevFullTextEntered.indexOf(selection);
 
-    const start = prevFullTextEntered.indexOf(selection);
+    const fullContent = [...this.leftOfCursorContent, ...this.rightOfCursorContent];
 
-    let leftSelection = '';
-    let rightSelection = '';
+    fullContent.splice(start, selection.length);
 
-    if (start < leftText.length) {
-      const numOfCharsFromLeft = leftText.length - start;
-
-      leftSelection = selection.substring(0, numOfCharsFromLeft);
-
-      // If there is still replacement text left, then it
-      // needs to be removed from the right side
-      if (leftSelection !== selection) {
-        rightSelection = selection.substring(numOfCharsFromLeft);
-      }
-    } else {
-      rightSelection = selection;
+    if (newValueContent) {
+      fullContent.splice(start, 0, newValueContent);
+      start++;
     }
 
-    // console.log(`
-    //
-    // full text:      ${prevFullTextEntered}
-    //
-    // selection:      ${selection}
-    // replacement:    ${newValue}
-    // current pos:    ${leftText.length}
-    //
-    // ---------------------------------------------------
-    //
-    // leftText:       [${leftText}]
-    // leftSelection:  [${leftSelection}]
-    //
-    // rightText:      [${rightText}]
-    // rightSelection: [${rightSelection}]
-    //
-    // `);
-
-    let newCursorIndex = -1;
-
-    if (leftSelection) {
-      newCursorIndex = leftText.indexOf(leftSelection);
-      this.leftOfCursorContent.splice(newCursorIndex, leftSelection.length);
-
-      if (newValueContent) {
-        this.leftOfCursorContent.splice(newCursorIndex, 0, newValueContent);
-        // newCursorIndex++;
-      }
-    }
-
-    if (rightSelection) {
-      const spliceStart = rightText.indexOf(rightSelection);
-
-      if (newCursorIndex === -1) {
-        newCursorIndex = leftText.length + spliceStart;
-      }
-
-      this.rightOfCursorContent.splice(spliceStart, rightSelection.length);
-
-      if (newValueContent && !leftSelection) {
-        this.rightOfCursorContent.splice(spliceStart, 0, newValueContent);
-        // newCursorIndex++;
-      }
-    }
-
-    // console.log(`
-    //
-    // UPDATED LEFT:   [${this.getLeftOfCursorText()}]
-    // UPDATED RIGHT:  [${this.getRightOfCursorText()}]
-    //
-    // UPDATED FULL:   [${this.getFullText()}]
-    //
-    // NEW POSITION:   ${newCursorIndex}
-    // LETTER AT POS:  [${this.getFullText().charAt(newCursorIndex)}]
-    //
-    // `);
-    // console.table(
-    //   this.getFullText()
-    //     .split('')
-    //     .reduce((acc, l, index) => {
-    //       acc.push({
-    //         letter: l,
-    //       });
-    //
-    //       return acc;
-    //     }, [])
-    // );
-
-    if (newCursorIndex !== -1) {
-      this.moveCursorToIndex(newCursorIndex);
-    }
+    this.leftOfCursorContent = fullContent.splice(0, start);
+    this.rightOfCursorContent = fullContent;
   }
 
   getLeftOfCursorText(): string {
@@ -233,36 +152,6 @@ export class EnteredInput {
 
   getRightOfCursorRenderingContent(): ReactNode {
     return <>{this.rightOfCursorContent.map(toReactJsxFragment.bind(null, 'right'))}</>;
-  }
-
-  /**
-   * Move the cursor to a specific location. The characters up to and including the `indexPosition`
-   * character will be moved to the left of the cursor
-   * @param indexPosition zero based
-   */
-  moveCursorToIndex(indexPosition: number) {
-    if (indexPosition === 0 && this.leftOfCursorContent.length) {
-      this.moveCursorTo('home');
-      return;
-    }
-
-    const leftLastIndex = this.leftOfCursorContent.length - 1;
-    const rightLastIndex = this.rightOfCursorContent.length - 1;
-    const fullLastIndex = this.leftOfCursorContent.length + rightLastIndex;
-
-    if (indexPosition >= fullLastIndex) {
-      this.moveCursorTo('end');
-      return;
-    }
-
-    // move to specific location
-    if (indexPosition <= leftLastIndex) {
-      this.rightOfCursorContent.unshift(...this.leftOfCursorContent.splice(indexPosition + 1));
-    } else {
-      const rightSidePosition = indexPosition - leftLastIndex;
-
-      this.leftOfCursorContent.push(...this.rightOfCursorContent.splice(0, rightSidePosition));
-    }
   }
 
   moveCursorTo(direction: 'left' | 'right' | 'end' | 'home') {
