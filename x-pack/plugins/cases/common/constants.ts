@@ -90,6 +90,7 @@ export const INTERNAL_BULK_CREATE_ATTACHMENTS_URL =
 export const INTERNAL_SUGGEST_USER_PROFILES_URL =
   `${CASES_INTERNAL_URL}/_suggest_user_profiles` as const;
 export const INTERNAL_CONNECTORS_URL = `${CASES_INTERNAL_URL}/{case_id}/_connectors` as const;
+export const INTERNAL_BULK_GET_CASES_URL = `${CASES_INTERNAL_URL}/_bulk_get` as const;
 
 /**
  * Action routes
@@ -137,6 +138,7 @@ export const OWNER_INFO = {
  */
 export const MAX_DOCS_PER_PAGE = 10000 as const;
 export const MAX_CONCURRENT_SEARCHES = 10 as const;
+export const MAX_BULK_GET_CASES = 1000 as const;
 
 /**
  * Validation

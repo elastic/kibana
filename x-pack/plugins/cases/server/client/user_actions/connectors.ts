@@ -178,14 +178,14 @@ const getPushInfo = async ({
     return new Map();
   }
 
-  const priorToPushFields = await userActionService.getConnectorFieldsUsedInPushes(
+  const connectorFieldsForPushes = await userActionService.getConnectorFieldsUsedInPushes(
     caseId,
     pushRequest
   );
 
   const enrichedPushInfo = new Map<string, EnrichedPushInfo>();
   for (const request of pushRequest) {
-    const connectorFieldsSO = priorToPushFields.get(request.connectorId);
+    const connectorFieldsSO = connectorFieldsForPushes.get(request.connectorId);
     const connectorFields = getConnectorInfoFromSavedObject(connectorFieldsSO);
 
     if (connectorFields != null) {

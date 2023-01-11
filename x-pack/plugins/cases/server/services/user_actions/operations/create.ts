@@ -12,7 +12,7 @@ import type {
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 import { get, isEmpty } from 'lodash';
-import { CASE_USER_ACTION_SAVED_OBJECT } from '../../../../common/constants';
+import { CASE_SAVED_OBJECT, CASE_USER_ACTION_SAVED_OBJECT } from '../../../../common/constants';
 import type { CaseSavedObject } from '../../../common/types';
 import { arraysDifference } from '../../../client/utils';
 import { isUserActionType } from '../../../../common/utils/user_actions';
@@ -39,7 +39,6 @@ import type {
 import { isAssigneesArray, isStringArray } from '../type_guards';
 import type { IndexRefresh } from '../../types';
 import { UserActionAuditLogger } from '../audit_logger';
-import { createDeleteEvent } from '../builders/delete_case';
 
 type CommonUserActionArgs = CommonArguments;
 
@@ -422,7 +421,13 @@ export class UserActionPersister {
     this.context.log.debug(`Attempting to log bulk case deletion`);
 
     for (const id of caseIds) {
-      this.auditLogger.log(createDeleteEvent({ caseId: id, action: Actions.delete }));
+      this.auditLogger.log({
+        getMessage: () => `User deleted case id: ${id}`,
+        action: Actions.delete,
+        descriptiveAction: 'case_user_action_delete_case',
+        savedObjectId: id,
+        savedObjectType: CASE_SAVED_OBJECT,
+      });
     }
   }
 }

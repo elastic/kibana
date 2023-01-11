@@ -8,6 +8,7 @@
 import type { UserProfileService } from '../../services';
 import { getConnectorsRoute } from './internal/get_connectors';
 import { bulkCreateAttachmentsRoute } from './internal/bulk_create_attachments';
+import { bulkGetCasesRoute } from './internal/bulk_get_cases';
 import { suggestUserProfilesRoute } from './internal/suggest_user_profiles';
 import type { CaseRoute } from './types';
 
@@ -16,4 +17,5 @@ export const getInternalRoutes = (userProfileService: UserProfileService) =>
     bulkCreateAttachmentsRoute,
     suggestUserProfilesRoute(userProfileService),
     getConnectorsRoute,
+    bulkGetCasesRoute,
   ] as CaseRoute[];
