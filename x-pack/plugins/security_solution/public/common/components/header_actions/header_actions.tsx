@@ -11,7 +11,6 @@ import { EuiButtonIcon, EuiCheckbox, EuiToolTip, useDataGridColumnSorting } from
 import { useDispatch } from 'react-redux';
 
 import styled from 'styled-components';
-import { ruleRegistryBrowserFieldsMapper } from '@kbn/triggers-actions-ui-plugin/public';
 import type { HeaderActionProps, SortDirection } from '../../../../common/types';
 import { TimelineTabs, TimelineId } from '../../../../common/types';
 import { isFullScreen } from '../../../timelines/components/timeline/body/column_headers';
@@ -197,10 +196,6 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
 
   const ColumnSorting = useDataGridColumnSorting(myColumns, sortedColumns, {}, [], displayValues);
 
-  const triggersActionsUiBrowserFields = useMemo(() => {
-    return ruleRegistryBrowserFieldsMapper(browserFields);
-  }, [browserFields]);
-
   return (
     <ActionsContainer>
       {showSelectAllCheckbox && (
@@ -219,7 +214,7 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
       <EventsTh role="button">
         <FieldBrowserContainer>
           {triggersActionsUi.getFieldBrowser({
-            browserFields: triggersActionsUiBrowserFields,
+            browserFields,
             columnIds: columnHeaders.map(({ id }) => id),
             onResetColumns,
             onToggleColumn,

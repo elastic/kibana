@@ -11,7 +11,6 @@ export type {
   BeatFields,
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
-  BrowserField,
-  BrowserFields,
 } from '@kbn/timelines-plugin/common';
+export type { BrowserField, BrowserFields } from '@kbn/rule-registry-plugin/common/types';
 export { EMPTY_BROWSER_FIELDS, EMPTY_INDEX_FIELDS } from '@kbn/timelines-plugin/common';

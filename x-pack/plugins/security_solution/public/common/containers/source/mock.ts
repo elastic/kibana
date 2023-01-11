@@ -494,6 +494,7 @@ export const mockIndexFields = [
 
 export const mockBrowserFields: BrowserFields = {
   agent: {
+    name: 'agent',
     fields: {
       'agent.ephemeral_id': {
         aggregatable: true,
@@ -549,6 +550,7 @@ export const mockBrowserFields: BrowserFields = {
     },
   },
   auditd: {
+    name: 'auditd',
     fields: {
       'auditd.data.a0': {
         aggregatable: true,
@@ -589,6 +591,7 @@ export const mockBrowserFields: BrowserFields = {
     },
   },
   base: {
+    name: 'base',
     fields: {
       '@timestamp': {
         aggregatable: true,
@@ -631,6 +634,7 @@ export const mockBrowserFields: BrowserFields = {
     },
   },
   client: {
+    name: 'client',
     fields: {
       'client.address': {
         aggregatable: true,
@@ -684,6 +688,7 @@ export const mockBrowserFields: BrowserFields = {
     },
   },
   cloud: {
+    name: 'cloud',
     fields: {
       'cloud.account.id': {
         aggregatable: true,
@@ -713,6 +718,7 @@ export const mockBrowserFields: BrowserFields = {
     },
   },
   container: {
+    name: 'container',
     fields: {
       'container.id': {
         aggregatable: true,
@@ -753,6 +759,7 @@ export const mockBrowserFields: BrowserFields = {
     },
   },
   destination: {
+    name: 'destination',
     fields: {
       'destination.address': {
         aggregatable: true,
@@ -819,6 +826,7 @@ export const mockBrowserFields: BrowserFields = {
     },
   },
   event: {
+    name: 'event',
     fields: {
       'event.end': {
         category: 'event',
@@ -875,6 +883,7 @@ export const mockBrowserFields: BrowserFields = {
     },
   },
   host: {
+    name: 'host',
     fields: {
       'host.name': {
         category: 'host',
@@ -891,6 +900,7 @@ export const mockBrowserFields: BrowserFields = {
     },
   },
   source: {
+    name: 'source',
     fields: {
       'source.ip': {
         aggregatable: true,
@@ -919,6 +929,7 @@ export const mockBrowserFields: BrowserFields = {
     },
   },
   user: {
+    name: 'user',
     fields: {
       'user.name': {
         category: 'user',
@@ -935,6 +946,7 @@ export const mockBrowserFields: BrowserFields = {
     },
   },
   nestedField: {
+    name: 'nestedField',
     fields: {
       'nestedField.firstAttributes': {
         aggregatable: false,

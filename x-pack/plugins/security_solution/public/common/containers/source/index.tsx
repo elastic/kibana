@@ -13,19 +13,18 @@ import type { DataViewBase } from '@kbn/es-query';
 import { Subscription } from 'rxjs';
 
 import type {
-  BrowserField,
-  BrowserFields,
   IndexField,
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
 } from '@kbn/timelines-plugin/common';
 import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
+import type { BrowserField, BrowserFields } from '@kbn/rule-registry-plugin/common/types';
 import { useKibana } from '../../lib/kibana';
 import * as i18n from './translations';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { getDataViewStateFromIndexFields } from './use_data_view';
 
-export type { BrowserField, BrowserFields };
+export { BrowserField, BrowserFields };
 
 export function getAllBrowserFields(browserFields: BrowserFields): Array<Partial<BrowserField>> {
   const result: Array<Partial<BrowserField>> = [];
