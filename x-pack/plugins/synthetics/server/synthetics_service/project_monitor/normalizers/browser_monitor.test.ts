@@ -136,8 +136,6 @@ describe('browser normalizers', () => {
                 id: 'us_central',
                 isServiceManaged: true,
                 label: 'Test Location',
-                url: 'test-url',
-                status: 'ga',
               },
             ],
             name: 'test-name-1',
@@ -182,8 +180,6 @@ describe('browser normalizers', () => {
                 id: 'us_central',
                 isServiceManaged: true,
                 label: 'Test Location',
-                url: 'test-url',
-                status: 'ga',
               },
               {
                 geo: {
@@ -193,8 +189,6 @@ describe('browser normalizers', () => {
                 id: 'us_east',
                 isServiceManaged: true,
                 label: 'Test Location',
-                url: 'test-url',
-                status: 'ga',
               },
             ],
             name: 'test-name-2',
@@ -240,8 +234,6 @@ describe('browser normalizers', () => {
                 id: 'us_central',
                 isServiceManaged: true,
                 label: 'Test Location',
-                url: 'test-url',
-                status: 'ga',
               },
               {
                 geo: {
@@ -251,15 +243,11 @@ describe('browser normalizers', () => {
                 id: 'us_east',
                 isServiceManaged: true,
                 label: 'Test Location',
-                url: 'test-url',
-                status: 'ga',
               },
               {
                 id: 'germany',
                 isServiceManaged: false,
                 label: 'Germany',
-                agentPolicyId: 'germany',
-                concurrentMonitors: 1,
               },
             ],
             name: 'test-name-3',

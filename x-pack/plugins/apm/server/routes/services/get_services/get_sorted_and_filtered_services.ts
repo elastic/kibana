@@ -8,12 +8,12 @@
 import { Logger } from '@kbn/logging';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-import { SERVICE_NAME } from '../../../../common/elasticsearch_fieldnames';
+import { SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { Environment } from '../../../../common/environment_rt';
 import { joinByKey } from '../../../../common/utils/join_by_key';
 import { ServiceGroup } from '../../../../common/service_groups';
-import { Setup } from '../../../lib/helpers/setup_request';
+import { MlClient } from '../../../lib/helpers/get_ml_client';
 import { getHealthStatuses } from './get_health_statuses';
 import { lookupServices } from '../../service_groups/lookup_services';
 
@@ -40,10 +40,8 @@ export async function getServiceNamesFromTermsEnum({
           ProcessorEvent.error,
         ],
       },
-      body: {
-        size: maxNumberOfServices,
-        field: SERVICE_NAME,
-      },
+      size: maxNumberOfServices,
+      field: SERVICE_NAME,
     }
   );
 
@@ -51,7 +49,7 @@ export async function getServiceNamesFromTermsEnum({
 }
 
 export async function getSortedAndFilteredServices({
-  setup,
+  mlClient,
   apmEventClient,
   start,
   end,
@@ -60,7 +58,7 @@ export async function getSortedAndFilteredServices({
   serviceGroup,
   maxNumberOfServices,
 }: {
-  setup: Setup;
+  mlClient?: MlClient;
   apmEventClient: APMEventClient;
   start: number;
   end: number;
@@ -71,7 +69,7 @@ export async function getSortedAndFilteredServices({
 }) {
   const [servicesWithHealthStatuses, selectedServices] = await Promise.all([
     getHealthStatuses({
-      setup,
+      mlClient,
       start,
       end,
       environment,

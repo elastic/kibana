@@ -6,6 +6,7 @@
  */
 
 import { journey, step, before } from '@elastic/synthetics';
+import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
 import { UXDashboardDatePicker } from '../page_objects/date_picker';
 import { byLensTestId, loginToKibana, waitForLoadingToFinish } from './utils';
 
@@ -15,6 +16,8 @@ const uaNameMetric = 'ux-visitor-breakdown-user_agent-name';
 const chartIds = [osNameMetric, uaNameMetric];
 
 journey('UX Visitor Breakdown', async ({ page, params }) => {
+  recordVideo(page);
+
   before(async () => {
     await waitForLoadingToFinish({ page });
   });
@@ -45,7 +48,9 @@ journey('UX Visitor Breakdown', async ({ page, params }) => {
 
   step('Confirm charts are visible', async () => {
     // Wait until chart data is loaded
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
     await page.waitForLoadState('networkidle');
+    await waitForLoadingToFinish({ page });
 
     await Promise.all(
       chartIds.map(

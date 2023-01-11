@@ -24,11 +24,12 @@ import type {
   PackageInfo,
   PackagePolicySOAttributes,
   AgentPolicySOAttributes,
-  PostPackagePolicyDeleteCallback,
+  PostPackagePolicyPostDeleteCallback,
   RegistryDataStream,
   PackagePolicyInputStream,
   PackagePolicy,
   PostPackagePolicyPostCreateCallback,
+  PostPackagePolicyDeleteCallback,
 } from '../types';
 import { createPackagePolicyMock } from '../../common/mocks';
 
@@ -37,11 +38,12 @@ import type { PutPackagePolicyUpdateCallback, PostPackagePolicyCreateCallback } 
 import { createAppContextStartContractMock, xpackMocks } from '../mocks';
 
 import type {
-  DeletePackagePoliciesResponse,
+  PostDeletePackagePoliciesResponse,
   InputsOverride,
   NewPackagePolicy,
   NewPackagePolicyInput,
   PackagePolicyPackage,
+  DeletePackagePoliciesResponse,
 } from '../../common/types';
 import { packageToPackagePolicy } from '../../common/services';
 
@@ -57,6 +59,11 @@ import {
 import { appContextService } from './app_context';
 
 import { getPackageInfo } from './epm/packages';
+import { sendTelemetryEvents } from './upgrade_sender';
+
+const mockedSendTelemetryEvents = sendTelemetryEvents as jest.MockedFunction<
+  typeof sendTelemetryEvents
+>;
 
 async function mockedGetAssetsData(_a: any, _b: any, dataset: string) {
   if (dataset === 'dataset1') {
@@ -1297,6 +1304,7 @@ describe('Package policy service', () => {
   describe('bulkUpdate', () => {
     beforeEach(() => {
       appContextService.start(createAppContextStartContractMock());
+      mockedSendTelemetryEvents.mockReset();
     });
     afterEach(() => {
       appContextService.stop();
@@ -1826,17 +1834,218 @@ describe('Package policy service', () => {
 
       expect(result![0].name).toEqual('test');
     });
+
+    it('should send telemetry event when upgrading a package policy', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      const mockPackagePolicy = createPackagePolicyMock();
+      const mockInputs = [
+        {
+          config: {},
+          enabled: true,
+          keep_enabled: true,
+          type: 'endpoint',
+          vars: {
+            dog: {
+              type: 'text',
+              value: 'dalmatian',
+            },
+            cat: {
+              type: 'text',
+              value: 'siamese',
+              frozen: true,
+            },
+          },
+          streams: [
+            {
+              data_stream: {
+                type: 'birds',
+                dataset: 'migratory.patterns',
+              },
+              enabled: false,
+              id: `endpoint-migratory.patterns-${mockPackagePolicy.id}`,
+              vars: {
+                paths: {
+                  value: ['north', 'south'],
+                  type: 'text',
+                  frozen: true,
+                },
+                period: {
+                  value: '6mo',
+                  type: 'text',
+                },
+              },
+            },
+          ],
+        },
+      ];
+
+      const attributes = {
+        ...mockPackagePolicy,
+        inputs: mockInputs,
+      };
+
+      savedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes,
+          },
+        ],
+      });
+
+      savedObjectsClient.bulkUpdate.mockImplementation(
+        async (
+          objs: Array<{
+            type: string;
+            id: string;
+            attributes: any;
+          }>
+        ) => {
+          const newObjs = objs.map((obj) => ({
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: obj.attributes,
+          }));
+          savedObjectsClient.bulkGet.mockResolvedValue({
+            saved_objects: newObjs,
+          });
+          return {
+            saved_objects: newObjs,
+          };
+        }
+      );
+      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      await packagePolicyService.bulkUpdate(
+        savedObjectsClient,
+        elasticsearchClient,
+        [
+          {
+            ...mockPackagePolicy,
+            package: { ...mockPackagePolicy!.package, version: '0.9.1' },
+          } as any,
+        ],
+        { force: true }
+      );
+
+      expect(mockedSendTelemetryEvents).toBeCalled();
+    });
+
+    it('should not send telemetry event when updating a package policy without upgrade', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      const mockPackagePolicy = createPackagePolicyMock();
+      const mockInputs = [
+        {
+          config: {},
+          enabled: true,
+          keep_enabled: true,
+          type: 'endpoint',
+          vars: {
+            dog: {
+              type: 'text',
+              value: 'dalmatian',
+            },
+            cat: {
+              type: 'text',
+              value: 'siamese',
+              frozen: true,
+            },
+          },
+          streams: [
+            {
+              data_stream: {
+                type: 'birds',
+                dataset: 'migratory.patterns',
+              },
+              enabled: false,
+              id: `endpoint-migratory.patterns-${mockPackagePolicy.id}`,
+              vars: {
+                paths: {
+                  value: ['north', 'south'],
+                  type: 'text',
+                  frozen: true,
+                },
+                period: {
+                  value: '6mo',
+                  type: 'text',
+                },
+              },
+            },
+          ],
+        },
+      ];
+
+      const attributes = {
+        ...mockPackagePolicy,
+        inputs: mockInputs,
+      };
+
+      savedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes,
+          },
+        ],
+      });
+
+      savedObjectsClient.bulkUpdate.mockImplementation(
+        async (
+          objs: Array<{
+            type: string;
+            id: string;
+            attributes: any;
+          }>
+        ) => {
+          const newObjs = objs.map((obj) => ({
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: obj.attributes,
+          }));
+          savedObjectsClient.bulkGet.mockResolvedValue({
+            saved_objects: newObjs,
+          });
+          return {
+            saved_objects: newObjs,
+          };
+        }
+      );
+      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      await packagePolicyService.bulkUpdate(
+        savedObjectsClient,
+        elasticsearchClient,
+        [
+          {
+            ...mockPackagePolicy,
+          } as any,
+        ],
+        { force: true }
+      );
+
+      expect(mockedSendTelemetryEvents).not.toBeCalled();
+    });
   });
 
   describe('delete', () => {
     it('should allow to delete a package policy', async () => {});
   });
 
-  describe('runDeleteExternalCallbacks', () => {
-    let callbackOne: jest.MockedFunction<PostPackagePolicyDeleteCallback>;
-    let callbackTwo: jest.MockedFunction<PostPackagePolicyDeleteCallback>;
+  describe('runPostDeleteExternalCallbacks', () => {
+    let callbackOne: jest.MockedFunction<PostPackagePolicyPostDeleteCallback>;
+    let callbackTwo: jest.MockedFunction<PostPackagePolicyPostDeleteCallback>;
     let callingOrder: string[];
-    let deletedPackagePolicies: DeletePackagePoliciesResponse;
+    let deletedPackagePolicies: PostDeletePackagePoliciesResponse;
 
     beforeEach(() => {
       appContextService.start(createAppContextStartContractMock());
@@ -1851,8 +2060,8 @@ describe('Package policy service', () => {
       callbackTwo = jest.fn(async (deletedPolicies) => {
         callingOrder.push('two');
       });
-      appContextService.addExternalCallback('postPackagePolicyDelete', callbackOne);
-      appContextService.addExternalCallback('postPackagePolicyDelete', callbackTwo);
+      appContextService.addExternalCallback('packagePolicyPostDelete', callbackOne);
+      appContextService.addExternalCallback('packagePolicyPostDelete', callbackTwo);
     });
 
     afterEach(() => {
@@ -1860,7 +2069,7 @@ describe('Package policy service', () => {
     });
 
     it('should execute external callbacks', async () => {
-      await packagePolicyService.runDeleteExternalCallbacks(deletedPackagePolicies);
+      await packagePolicyService.runPostDeleteExternalCallbacks(deletedPackagePolicies);
 
       expect(callbackOne).toHaveBeenCalledWith(deletedPackagePolicies);
       expect(callbackTwo).toHaveBeenCalledWith(deletedPackagePolicies);
@@ -1873,7 +2082,7 @@ describe('Package policy service', () => {
         throw new Error('foo');
       });
       await expect(
-        packagePolicyService.runDeleteExternalCallbacks(deletedPackagePolicies)
+        packagePolicyService.runPostDeleteExternalCallbacks(deletedPackagePolicies)
       ).rejects.toThrow(FleetError);
       expect(callingOrder).toEqual(['one', 'two']);
     });
@@ -1892,7 +2101,78 @@ describe('Package policy service', () => {
         throw callbackTwoError;
       });
 
-      await packagePolicyService.runDeleteExternalCallbacks(deletedPackagePolicies).catch((e) => {
+      await packagePolicyService
+        .runPostDeleteExternalCallbacks(deletedPackagePolicies)
+        .catch((e) => {
+          error = e;
+        });
+
+      expect(error!.message).toEqual(
+        '2 encountered while executing package post delete external callbacks'
+      );
+      expect(error!.meta).toEqual([callbackOneError, callbackTwoError]);
+      expect(callingOrder).toEqual(['one', 'two']);
+    });
+  });
+
+  describe('runDeleteExternalCallbacks', () => {
+    let callbackOne: jest.MockedFunction<PostPackagePolicyDeleteCallback>;
+    let callbackTwo: jest.MockedFunction<PostPackagePolicyDeleteCallback>;
+    let callingOrder: string[];
+    let packagePolicies: DeletePackagePoliciesResponse;
+
+    beforeEach(() => {
+      appContextService.start(createAppContextStartContractMock());
+      callingOrder = [];
+      packagePolicies = [{ id: 'a' }, { id: 'a' }] as DeletePackagePoliciesResponse;
+      callbackOne = jest.fn(async (deletedPolicies) => {
+        callingOrder.push('one');
+      });
+      callbackTwo = jest.fn(async (deletedPolicies) => {
+        callingOrder.push('two');
+      });
+      appContextService.addExternalCallback('packagePolicyDelete', callbackOne);
+      appContextService.addExternalCallback('packagePolicyDelete', callbackTwo);
+    });
+
+    afterEach(() => {
+      appContextService.stop();
+    });
+
+    it('should execute external callbacks', async () => {
+      await packagePolicyService.runDeleteExternalCallbacks(packagePolicies);
+
+      expect(callbackOne).toHaveBeenCalledWith(packagePolicies);
+      expect(callbackTwo).toHaveBeenCalledWith(packagePolicies);
+      expect(callingOrder).toEqual(['one', 'two']);
+    });
+
+    it("should execute all external callbacks even if one throw's", async () => {
+      callbackOne.mockImplementation(async (deletedPolicies) => {
+        callingOrder.push('one');
+        throw new Error('foo');
+      });
+      await expect(
+        packagePolicyService.runDeleteExternalCallbacks(packagePolicies)
+      ).rejects.toThrow(FleetError);
+      expect(callingOrder).toEqual(['one', 'two']);
+    });
+
+    it('should provide an array of errors encountered by running external callbacks', async () => {
+      let error: FleetError;
+      const callbackOneError = new Error('foo 1');
+      const callbackTwoError = new Error('foo 2');
+
+      callbackOne.mockImplementation(async (deletedPolicies) => {
+        callingOrder.push('one');
+        throw callbackOneError;
+      });
+      callbackTwo.mockImplementation(async (deletedPolicies) => {
+        callingOrder.push('two');
+        throw callbackTwoError;
+      });
+
+      await packagePolicyService.runDeleteExternalCallbacks(packagePolicies).catch((e) => {
         error = e;
       });
 
@@ -2079,7 +2359,7 @@ describe('Package policy service', () => {
     });
   });
 
-  describe('runPostPackagePolicyPostCreateCallback', () => {
+  describe('runPackagePolicyPostCreateCallback', () => {
     let context: ReturnType<typeof xpackMocks.createRequestHandlerContext>;
     let request: KibanaRequest;
     const packagePolicy = {

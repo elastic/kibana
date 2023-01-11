@@ -15,6 +15,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'infraHome']);
   const find = getService('find');
   const supertest = getService('supertest');
+  const deployment = getService('deployment');
 
   const setInitialTourState = async (activeStep?: number) => {
     await browser.setLocalStorageItem(observTourStepStorageKey, String(activeStep || 1));
@@ -23,8 +24,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Onboarding Observability tour', function () {
     this.tags('includeFirefox');
-
+    let isCloud: boolean;
     before(async () => {
+      isCloud = await deployment.isCloud();
       await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
       await pageObjects.common.navigateToApp('observability');
       // Need to increase the browser height so the tour steps fit to screen
@@ -37,131 +39,134 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('Tour enabled', () => {
-      beforeEach(async () => {
-        // Activate the Observability guide, step 3, in order to trigger the EuiTour
-        await supertest
-          .put(`/api/guided_onboarding/state`)
-          .set('kbn-xsrf', 'true')
-          .send({
-            status: 'in_progress',
-            guideId: 'observability',
-            isActive: true,
-            steps: [
-              {
-                id: 'add_data',
-                status: 'complete',
-              },
-              {
-                id: 'view_dashboard',
-                status: 'complete',
-              },
-              {
-                id: 'tour_observability',
-                status: 'in_progress',
-              },
-            ],
-          })
-          .expect(200);
-      });
+      // only run these tests on Cloud
+      if (isCloud) {
+        beforeEach(async () => {
+          // Activate the Observability guide, step 3, in order to trigger the EuiTour
+          await supertest
+            .put(`/api/guided_onboarding/state`)
+            .set('kbn-xsrf', 'true')
+            .send({
+              status: 'in_progress',
+              guideId: 'observability',
+              isActive: true,
+              steps: [
+                {
+                  id: 'add_data',
+                  status: 'complete',
+                },
+                {
+                  id: 'view_dashboard',
+                  status: 'complete',
+                },
+                {
+                  id: 'tour_observability',
+                  status: 'in_progress',
+                },
+              ],
+            })
+            .expect(200);
+        });
 
-      it('can complete tour', async () => {
-        await setInitialTourState();
+        it('can complete tour', async () => {
+          await setInitialTourState();
 
-        // Step 1: Overview
-        await pageObjects.infraHome.waitForTourStep('overviewStep');
-        await pageObjects.infraHome.clickTourNextButton();
-        await pageObjects.infraHome.ensureTourStepIsClosed('overviewStep');
+          // Step 1: Overview
+          await pageObjects.infraHome.waitForTourStep('overviewStep');
+          await pageObjects.infraHome.clickTourNextButton();
+          await pageObjects.infraHome.ensureTourStepIsClosed('overviewStep');
 
-        // Step 2: Streams
-        await pageObjects.infraHome.waitForTourStep('streamStep');
-        await pageObjects.infraHome.clickTourNextButton();
-        await pageObjects.infraHome.ensureTourStepIsClosed('streamStep');
+          // Step 2: Streams
+          await pageObjects.infraHome.waitForTourStep('streamStep');
+          await pageObjects.infraHome.clickTourNextButton();
+          await pageObjects.infraHome.ensureTourStepIsClosed('streamStep');
 
-        // Step 3: Metrics explorer
-        await pageObjects.infraHome.waitForTourStep('metricsExplorerStep');
-        await pageObjects.infraHome.clickTourNextButton();
-        await pageObjects.infraHome.ensureTourStepIsClosed('metricsExplorerStep');
+          // Step 3: Metrics explorer
+          await pageObjects.infraHome.waitForTourStep('metricsExplorerStep');
+          await pageObjects.infraHome.clickTourNextButton();
+          await pageObjects.infraHome.ensureTourStepIsClosed('metricsExplorerStep');
 
-        // Step 4: Services
-        await pageObjects.infraHome.waitForTourStep('servicesStep');
-        await pageObjects.infraHome.clickTourNextButton();
-        await pageObjects.infraHome.ensureTourStepIsClosed('servicesStep');
+          // Step 4: Services
+          await pageObjects.infraHome.waitForTourStep('servicesStep');
+          await pageObjects.infraHome.clickTourNextButton();
+          await pageObjects.infraHome.ensureTourStepIsClosed('servicesStep');
 
-        // Step 5: Alerts
-        await pageObjects.infraHome.waitForTourStep('alertStep');
-        await pageObjects.infraHome.clickTourNextButton();
-        await pageObjects.infraHome.ensureTourStepIsClosed('alertStep');
+          // Step 5: Alerts
+          await pageObjects.infraHome.waitForTourStep('alertStep');
+          await pageObjects.infraHome.clickTourNextButton();
+          await pageObjects.infraHome.ensureTourStepIsClosed('alertStep');
 
-        // Step 6: Guided setup
-        await pageObjects.infraHome.waitForTourStep('guidedSetupStep');
-        await pageObjects.infraHome.clickTourEndButton();
-        await pageObjects.infraHome.ensureTourStepIsClosed('guidedSetupStep');
-      });
+          // Step 6: Guided setup
+          await pageObjects.infraHome.waitForTourStep('guidedSetupStep');
+          await pageObjects.infraHome.clickTourEndButton();
+          await pageObjects.infraHome.ensureTourStepIsClosed('guidedSetupStep');
+        });
 
-      it('can skip tour', async () => {
-        await setInitialTourState();
+        it('can skip tour', async () => {
+          await setInitialTourState();
 
-        await pageObjects.infraHome.waitForTourStep('overviewStep');
-        await pageObjects.infraHome.clickTourSkipButton();
+          await pageObjects.infraHome.waitForTourStep('overviewStep');
+          await pageObjects.infraHome.clickTourSkipButton();
 
-        // Verify current step ("Overview") is not displayed
-        await pageObjects.infraHome.ensureTourStepIsClosed('overviewStep');
-        // Verify next step ("Streams") is not displayed
-        await pageObjects.infraHome.ensureTourStepIsClosed('streamStep');
+          // Verify current step ("Overview") is not displayed
+          await pageObjects.infraHome.ensureTourStepIsClosed('overviewStep');
+          // Verify next step ("Streams") is not displayed
+          await pageObjects.infraHome.ensureTourStepIsClosed('streamStep');
 
-        await browser.refresh();
+          await browser.refresh();
 
-        // Verify current step ("Overview") is not displayed after browser refresh,
-        // i.e., localStorage has been updated to not show the tour again
-        await pageObjects.infraHome.ensureTourStepIsClosed('overviewStep');
-      });
+          // Verify current step ("Overview") is not displayed after browser refresh,
+          // i.e., localStorage has been updated to not show the tour again
+          await pageObjects.infraHome.ensureTourStepIsClosed('overviewStep');
+        });
 
-      it('can start mid-tour', async () => {
-        await setInitialTourState(5);
+        it('can start mid-tour', async () => {
+          await setInitialTourState(5);
 
-        // Step 5: Alerts
-        await pageObjects.infraHome.waitForTourStep('alertStep');
-        await pageObjects.infraHome.clickTourNextButton();
-        await pageObjects.infraHome.ensureTourStepIsClosed('alertStep');
+          // Step 5: Alerts
+          await pageObjects.infraHome.waitForTourStep('alertStep');
+          await pageObjects.infraHome.clickTourNextButton();
+          await pageObjects.infraHome.ensureTourStepIsClosed('alertStep');
 
-        // Step 6: Guided setup
-        await pageObjects.infraHome.waitForTourStep('guidedSetupStep');
-        await pageObjects.infraHome.clickTourEndButton();
-        await pageObjects.infraHome.ensureTourStepIsClosed('guidedSetupStep');
-      });
+          // Step 6: Guided setup
+          await pageObjects.infraHome.waitForTourStep('guidedSetupStep');
+          await pageObjects.infraHome.clickTourEndButton();
+          await pageObjects.infraHome.ensureTourStepIsClosed('guidedSetupStep');
+        });
 
-      it('navigates the user to the guided setup step', async () => {
-        // For brevity, starting the tour at step 5
-        await setInitialTourState(5);
+        it('navigates the user to the guided setup step', async () => {
+          // For brevity, starting the tour at step 5
+          await setInitialTourState(5);
 
-        await pageObjects.infraHome.waitForTourStep('alertStep');
+          await pageObjects.infraHome.waitForTourStep('alertStep');
 
-        // Click on Alerts link
-        await (await find.byCssSelector('[data-nav-id="alerts"]')).click();
+          // Click on Alerts link
+          await (await find.byCssSelector('[data-nav-id="alerts"]')).click();
 
-        // Verify user correctly navigated to the Alerts page
-        const alertsPageUrl = await browser.getCurrentUrl();
-        expect(alertsPageUrl).to.contain('/app/observability/alerts');
+          // Verify user correctly navigated to the Alerts page
+          const alertsPageUrl = await browser.getCurrentUrl();
+          expect(alertsPageUrl).to.contain('/app/observability/alerts');
 
-        // Verify Step 5 persists on Alerts page, then continue with tour
-        await pageObjects.infraHome.waitForTourStep('alertStep');
-        await pageObjects.infraHome.clickTourNextButton();
+          // Verify Step 5 persists on Alerts page, then continue with tour
+          await pageObjects.infraHome.waitForTourStep('alertStep');
+          await pageObjects.infraHome.clickTourNextButton();
 
-        // Verify user navigated back to the overview page, and guided setup step renders (Step 6)
-        await pageObjects.infraHome.waitForTourStep('guidedSetupStep');
-        const overviewPageUrl = await browser.getCurrentUrl();
-        expect(overviewPageUrl).to.contain('/app/observability/overview');
-      });
+          // Verify user navigated back to the overview page, and guided setup step renders (Step 6)
+          await pageObjects.infraHome.waitForTourStep('guidedSetupStep');
+          const overviewPageUrl = await browser.getCurrentUrl();
+          expect(overviewPageUrl).to.contain('/app/observability/overview');
+        });
 
-      it('ends the tour if the user clicks on the guided setup button', async () => {
-        // For brevity, starting the tour at step 5, "Alerts"
-        await setInitialTourState(5);
+        it('ends the tour if the user clicks on the guided setup button', async () => {
+          // For brevity, starting the tour at step 5, "Alerts"
+          await setInitialTourState(5);
 
-        await pageObjects.infraHome.clickTourNextButton();
-        await pageObjects.infraHome.waitForTourStep('guidedSetupStep');
-        await pageObjects.infraHome.clickGuidedSetupButton();
-        await pageObjects.infraHome.ensureTourStepIsClosed('guidedSetupStep');
-      });
+          await pageObjects.infraHome.clickTourNextButton();
+          await pageObjects.infraHome.waitForTourStep('guidedSetupStep');
+          await pageObjects.infraHome.clickGuidedSetupButton();
+          await pageObjects.infraHome.ensureTourStepIsClosed('guidedSetupStep');
+        });
+      }
     });
   });
 };

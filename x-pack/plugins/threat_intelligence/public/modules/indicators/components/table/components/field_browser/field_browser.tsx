@@ -35,7 +35,7 @@ export const IndicatorsFieldBrowser: VFC<IndicatorsFieldBrowserProps> = ({
     onResetColumns,
     onToggleColumn,
     options: {
-      preselectedCategoryIds: ['threat'],
+      preselectedCategoryIds: ['threat', 'base', 'event', 'agent'],
     },
   });
 };

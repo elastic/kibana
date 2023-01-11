@@ -234,6 +234,7 @@ describe('enable()', () => {
           error: null,
           warning: null,
         },
+        nextRun: '2019-02-12T21:01:32.479Z',
       },
       {
         version: '123',
@@ -290,6 +291,7 @@ describe('enable()', () => {
           error: null,
           warning: null,
         },
+        nextRun: '2019-02-12T21:01:32.479Z',
       },
       {
         version: '123',
@@ -356,6 +358,7 @@ describe('enable()', () => {
           error: null,
           warning: null,
         },
+        nextRun: '2019-02-12T21:01:32.479Z',
       },
       {
         version: '123',

@@ -164,6 +164,61 @@ export class HelloWorld extends Embeddable {
 }
 ```
 
+In some cases, the `reload` hook can be called to force rerender of the embeddable widget.
+When the imperative rendering approach is used, the example above is good enough to achieve the goal.
+
+In the case of React rendering, it will no longer work as the returned node is mounted on the upper level.
+The recommended way is to use [Redux store](#redux) with a custom reducer.
+
+```tsx
+import React from 'react';
+import { createSlice } from '@reduxjs/toolkit';
+import { connect, Provider } from 'react-redux';
+import { Embeddable, IEmbeddable } from '@kbn/embeddable-plugin/public';
+import { createStore, State } from '@kbn/embeddable-plugin/public/store';
+
+interface ComponentState {
+  reloadedAt?: number;
+}
+
+export interface HelloWorldState extends State<HelloWorld> {
+  component: ComponentState;
+}
+
+const component = createSlice({
+  name: 'hello-world-component',
+  initialState: {} as ComponentState,
+  reducers: {
+    reload(state) {
+      state.reloadedAt = new Date().getTime();
+    },
+  },
+});
+
+export class HelloWorld extends Embeddable {
+  readonly store = createStore<HelloWorld, HelloWorldState>(this, {
+    preloadedState: {
+      component: {}
+    },
+    reducer: { component: component.reducer }
+  });
+
+  render() {
+    return (
+      <Provider store={this.store}>
+        <Component />
+      </Provider>
+    );
+  }
+
+  reload() {
+    this.store.dispatch(component.actions.reload());
+  }
+}
+```
+
+Alternatively, a [state modifier](https://reactjs.org/docs/hooks-faq.html#is-there-something-like-forceupdate) can be exposed via a reference object and later called from the `reload` hook.
+
 #### `catchError`
 This is an optional error handler to provide a custom UI for the error state.
 

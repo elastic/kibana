@@ -15,6 +15,8 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { IconType, EuiFlyoutSize, RecursivePartial } from '@elastic/eui';
 import { EuiDataGridColumn, EuiDataGridControlColumn, EuiDataGridSorting } from '@elastic/eui';
+import { HttpSetup } from '@kbn/core/public';
+import { KueryNode } from '@kbn/es-query';
 import {
   ActionType,
   AlertHistoryEsIndexConnectorId,
@@ -40,16 +42,15 @@ import {
   RuleTypeParams,
   ActionVariable,
   RuleType as CommonRuleType,
+  RuleLastRun,
 } from '@kbn/alerting-plugin/common';
-import type { BulkEditError } from '@kbn/alerting-plugin/server';
-import {
-  BrowserFields,
-  RuleRegistrySearchRequestPagination,
-} from '@kbn/rule-registry-plugin/common';
+import type { BulkOperationError } from '@kbn/alerting-plugin/server';
+import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 import { SortCombinations } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React from 'react';
 import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
+import { BrowserFields as RuleRegistryBrowserFields } from '@kbn/rule-registry-plugin/common/types';
 import { TypeRegistry } from './application/type_registry';
 import type { ComponentOpts as RuleStatusDropdownProps } from './application/sections/rules_list/components/rule_status_dropdown';
 import type { RuleTagFilterProps } from './application/sections/rules_list/components/rule_tag_filter';
@@ -109,6 +110,7 @@ export type {
   RuleStatusDropdownProps,
   RuleTagFilterProps,
   RuleStatusFilterProps,
+  RuleLastRun,
   RuleTagBadgeProps,
   RuleTagBadgeOptions,
   RuleEventLogListProps,
@@ -161,9 +163,36 @@ export enum RuleFlyoutCloseReason {
 
 export interface BulkEditResponse {
   rules: Rule[];
-  errors: BulkEditError[];
+  errors: BulkOperationError[];
   total: number;
 }
+
+export enum ActionConnectorMode {
+  Test = 'test',
+  ActionForm = 'actionForm',
+}
+
+export interface BulkOperationResponse {
+  rules: Rule[];
+  errors: BulkOperationError[];
+  total: number;
+}
+
+interface BulkOperationAttributesByIds {
+  ids: string[];
+  filter?: never;
+}
+interface BulkOperationAttributesByFilter {
+  ids?: never;
+  filter: KueryNode | null;
+}
+export type BulkOperationAttributesWithoutHttp =
+  | BulkOperationAttributesByIds
+  | BulkOperationAttributesByFilter;
+
+export type BulkOperationAttributes = BulkOperationAttributesWithoutHttp & {
+  http: HttpSetup;
+};
 
 export interface ActionParamsProps<TParams> {
   actionParams: Partial<TParams>;
@@ -176,6 +205,8 @@ export interface ActionParamsProps<TParams> {
   isLoading?: boolean;
   isDisabled?: boolean;
   showEmailSubjectAndMessage?: boolean;
+  executionMode?: ActionConnectorMode;
+  onBlur?: (field?: string) => void;
 }
 
 export interface Pagination {
@@ -293,7 +324,7 @@ export interface RuleType<
 
 export type SanitizedRuleType = Omit<RuleType, 'apiKey'>;
 
-export type RuleUpdates = Omit<Rule, 'id' | 'executionStatus'>;
+export type RuleUpdates = Omit<Rule, 'id' | 'executionStatus' | 'lastRun' | 'nextRun'>;
 
 export interface RuleTableItem extends Rule {
   ruleType: RuleType['name'];
@@ -319,6 +350,7 @@ export interface RuleTypeParamsExpressionProps<
     key: Prop,
     value: SanitizedRule<Params>[Prop] | null
   ) => void;
+  onChangeMetaData: (metadata: MetaData) => void;
   errors: IErrorObject;
   defaultActionGroupId: string;
   actionGroups: Array<ActionGroup<ActionGroupIds>>;
@@ -341,6 +373,9 @@ export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
   requiresAppContext: boolean;
   defaultActionMessage?: string;
   defaultRecoveryMessage?: string;
+  alertDetailsAppSection?:
+    | React.FunctionComponent<any>
+    | React.LazyExoticComponent<ComponentType<any>>;
 }
 
 export interface IErrorObject {
@@ -356,10 +391,10 @@ export interface RuleEditProps<MetaData = Record<string, any>> {
   initialRule: Rule;
   ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
-  onClose: (reason: RuleFlyoutCloseReason) => void;
+  onClose: (reason: RuleFlyoutCloseReason, metadata?: MetaData) => void;
   /** @deprecated use `onSave` as a callback after an alert is saved*/
   reloadRules?: () => Promise<void>;
-  onSave?: () => Promise<void>;
+  onSave?: (metadata?: MetaData) => Promise<void>;
   metadata?: MetaData;
   ruleType?: RuleType<string, string>;
 }
@@ -368,13 +403,13 @@ export interface RuleAddProps<MetaData = Record<string, any>> {
   consumer: string;
   ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
-  onClose: (reason: RuleFlyoutCloseReason) => void;
+  onClose: (reason: RuleFlyoutCloseReason, metadata?: MetaData) => void;
   ruleTypeId?: string;
   canChangeTrigger?: boolean;
   initialValues?: Partial<Rule>;
   /** @deprecated use `onSave` as a callback after an alert is saved*/
   reloadRules?: () => Promise<void>;
-  onSave?: () => Promise<void>;
+  onSave?: (metadata?: MetaData) => Promise<void>;
   metadata?: MetaData;
   ruleTypeIndex?: RuleTypeIndex;
   filteredRuleTypes?: string[];
@@ -438,7 +473,7 @@ export interface AlertsTableProps {
   visibleColumns: string[];
   'data-test-subj': string;
   updatedAt: number;
-  browserFields: BrowserFields;
+  browserFields: RuleRegistryBrowserFields;
   onToggleColumn: (columnId: string) => void;
   onResetColumns: () => void;
   onColumnsChange: (columns: EuiDataGridColumn[], visibleColumns: string[]) => void;
@@ -548,4 +583,47 @@ export interface SnoozeSchedule {
 
 export interface ConnectorServices {
   validateEmailAddresses: ActionsPublicPluginSetup['validateEmailAddresses'];
+}
+
+export interface RulesListFilters {
+  searchText: string;
+  types: string[];
+  actionTypes: string[];
+  ruleExecutionStatuses: string[];
+  ruleLastRunOutcomes: string[];
+  ruleStatuses: RuleStatus[];
+  tags: string[];
+}
+
+export type UpdateFiltersProps =
+  | {
+      filter: 'searchText';
+      value: string;
+    }
+  | {
+      filter: 'ruleStatuses';
+      value: RuleStatus[];
+    }
+  | {
+      filter: 'types' | 'actionTypes' | 'ruleExecutionStatuses' | 'ruleLastRunOutcomes' | 'tags';
+      value: string[];
+    };
+
+export interface RulesPageContainerState {
+  lastResponse: string[];
+  status: RuleStatus[];
+}
+
+export type BulkEditActions =
+  | 'snooze'
+  | 'unsnooze'
+  | 'schedule'
+  | 'unschedule'
+  | 'updateApiKey'
+  | 'delete';
+
+export interface UpdateRulesToBulkEditProps {
+  action: BulkEditActions;
+  rules?: RuleTableItem[];
+  filter?: KueryNode | null;
 }

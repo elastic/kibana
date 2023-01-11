@@ -16,7 +16,6 @@ import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
 import { VisTypeVislibCoreSetup } from './plugin';
 import { VisLegend, CUSTOM_LEGEND_VIS_TYPES } from './vislib/components/legend';
 import { BasicVislibParams } from './types';
-import { LegendDisplay, PieVisParams } from './pie';
 
 const legendClassName = {
   top: 'vislib--legend-top',
@@ -63,7 +62,7 @@ export const createVislibVisController = (
 
     async render(
       esResponse: any,
-      visParams: BasicVislibParams | PieVisParams,
+      visParams: BasicVislibParams,
       handlers: IInterpreterRenderHandlers,
       renderComplete: (() => void) | undefined
     ): Promise<void> {
@@ -79,7 +78,6 @@ export const createVislibVisController = (
         return;
       }
 
-      // @ts-expect-error
       const { Vis: Vislib } = await import('./vislib/vis');
       const { uiState, event: fireEvent } = handlers;
 
@@ -124,7 +122,7 @@ export const createVislibVisController = (
 
     mountLegend(
       visData: unknown,
-      visParams: BasicVislibParams | PieVisParams,
+      visParams: BasicVislibParams,
       fireEvent: IInterpreterRenderHandlers['event'],
       uiState?: PersistedState
     ) {
@@ -156,15 +154,8 @@ export const createVislibVisController = (
       }
     }
 
-    showLegend(visParams: BasicVislibParams | PieVisParams) {
-      if (this.arePieVisParams(visParams)) {
-        return visParams.legendDisplay === LegendDisplay.SHOW;
-      }
+    showLegend(visParams: BasicVislibParams) {
       return visParams.addLegend ?? false;
-    }
-
-    arePieVisParams(visParams: BasicVislibParams | PieVisParams): visParams is PieVisParams {
-      return Object.values(LegendDisplay).includes((visParams as PieVisParams).legendDisplay);
     }
   };
 };

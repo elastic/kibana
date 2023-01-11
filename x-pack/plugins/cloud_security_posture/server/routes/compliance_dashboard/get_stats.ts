@@ -24,6 +24,9 @@ export interface FindingsEvaluationsQueryResult {
   passed_findings: {
     doc_count: number;
   };
+  resources_evaluated?: {
+    value: number;
+  };
 }
 
 export const findingsEvaluationAggsQuery = {
@@ -35,13 +38,24 @@ export const findingsEvaluationAggsQuery = {
   },
 };
 
+const uniqueResourcesCountQuery = {
+  resources_evaluated: {
+    cardinality: {
+      field: 'resource.id',
+    },
+  },
+};
+
 export const getEvaluationsQuery = (
   query: QueryDslQueryContainer,
   pitId: string
 ): SearchRequest => ({
   query,
   size: 0,
-  aggs: findingsEvaluationAggsQuery,
+  aggs: {
+    ...findingsEvaluationAggsQuery,
+    ...uniqueResourcesCountQuery,
+  },
   pit: {
     id: pitId,
   },
@@ -50,17 +64,18 @@ export const getEvaluationsQuery = (
 export const getStatsFromFindingsEvaluationsAggs = (
   findingsEvaluationsAggs: FindingsEvaluationsQueryResult
 ): ComplianceDashboardData['stats'] => {
+  const resourcesEvaluated = findingsEvaluationsAggs.resources_evaluated?.value;
   const failedFindings = findingsEvaluationsAggs.failed_findings.doc_count || 0;
   const passedFindings = findingsEvaluationsAggs.passed_findings.doc_count || 0;
   const totalFindings = failedFindings + passedFindings;
-  if (!totalFindings) throw new Error("couldn't calculate posture score");
-  const postureScore = calculatePostureScore(passedFindings, failedFindings);
+  const postureScore = calculatePostureScore(passedFindings, failedFindings) || 0;
 
   return {
     totalFailed: failedFindings,
     totalPassed: passedFindings,
     totalFindings,
     postureScore,
+    ...(resourcesEvaluated && { resourcesEvaluated }),
   };
 };
 

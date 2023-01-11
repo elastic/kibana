@@ -35,6 +35,11 @@ export function createPluginInitializerContext(
   return {
     opaqueId,
     env: coreContext.env,
+    logger: {
+      get(...contextParts) {
+        return coreContext.logger.get('plugins', pluginManifest.id, ...contextParts);
+      },
+    },
     config: {
       get<T>() {
         return pluginConfig as unknown as T;
@@ -74,9 +79,7 @@ export function createPluginSetupContext<
     http: deps.http,
     notifications: deps.notifications,
     uiSettings: deps.uiSettings,
-    injectedMetadata: {
-      getInjectedVar: deps.injectedMetadata.getInjectedVar,
-    },
+    settings: deps.settings,
     theme: deps.theme,
     getStartServices: () => plugin.startDependencies,
   };
@@ -120,10 +123,8 @@ export function createPluginStartContext<
     notifications: deps.notifications,
     overlays: deps.overlays,
     uiSettings: deps.uiSettings,
+    settings: deps.settings,
     savedObjects: deps.savedObjects,
-    injectedMetadata: {
-      getInjectedVar: deps.injectedMetadata.getInjectedVar,
-    },
     fatalErrors: deps.fatalErrors,
     deprecations: deps.deprecations,
     theme: deps.theme,

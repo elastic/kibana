@@ -34,6 +34,7 @@ export const DEFAULT_COMMON_FIELDS: CommonFields = {
   [ConfigKey.MONITOR_TYPE]: DataStream.HTTP,
   [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.MULTISTEP,
   [ConfigKey.ENABLED]: true,
+  [ConfigKey.ALERT_CONFIG]: { status: { enabled: true } },
   [ConfigKey.SCHEDULE]: {
     number: '3',
     unit: ScheduleUnit.MINUTES,
@@ -48,9 +49,7 @@ export const DEFAULT_COMMON_FIELDS: CommonFields = {
   [ConfigKey.MONITOR_SOURCE_TYPE]: SourceType.UI,
   [ConfigKey.JOURNEY_ID]: '',
   [ConfigKey.CONFIG_HASH]: '',
-
-  // Deprecated, slated to be removed in a future version
-  [ConfigKey.ID]: '',
+  [ConfigKey.MONITOR_QUERY_ID]: '',
 };
 
 export const DEFAULT_BROWSER_ADVANCED_FIELDS: BrowserAdvancedFields = {

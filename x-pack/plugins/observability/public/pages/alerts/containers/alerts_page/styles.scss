@@ -1,6 +1,6 @@
 $fullscreenFlyoutTop: 72px;
 .kbnBody.euiBody--headerIsFixed.euiDataGrid__restrictBody {
-  .euiOverlayMask--belowHeader {
+  .euiOverlayMask[data-relative-to-header=below] {
     top: $fullscreenFlyoutTop;
   }
 

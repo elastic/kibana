@@ -110,6 +110,7 @@ export const PopoverDemo: FunctionComponent = () => {
           selectedOptions,
           defaultOptions,
           onChange: setSelectedOptions,
+          limit: 2,
           height: 32 * 8,
         }}
         panelStyle={{
@@ -140,6 +141,7 @@ export const PopoverDemo: FunctionComponent = () => {
             selectedOptions: selectedOptions2,
             options: options2,
             onChange: setSelectedOptions2,
+            limit: 2,
             height: 32 * 8,
             nullOptionLabel: 'Unassigned',
           }}

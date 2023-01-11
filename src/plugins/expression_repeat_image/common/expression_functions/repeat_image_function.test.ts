@@ -11,7 +11,7 @@ import {
   getElasticLogo,
   getElasticOutline,
   functionWrapper,
-} from '@kbn/presentation-util-plugin/common/lib';
+} from '@kbn/presentation-util-plugin/common';
 import { repeatImageFunction } from './repeat_image_function';
 
 describe('repeatImage', () => {

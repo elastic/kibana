@@ -22,13 +22,19 @@ export type AgentStatus =
   | 'error'
   | 'online'
   | 'inactive'
-  | 'warning'
   | 'enrolling'
   | 'unenrolling'
+  | 'unenrolled'
   | 'updating'
   | 'degraded';
 
-export type SimplifiedAgentStatus = 'healthy' | 'unhealthy' | 'updating' | 'offline' | 'inactive';
+export type SimplifiedAgentStatus =
+  | 'healthy'
+  | 'unhealthy'
+  | 'updating'
+  | 'offline'
+  | 'inactive'
+  | 'unenrolled';
 
 export type AgentActionType =
   | 'UNENROLL'
@@ -37,7 +43,8 @@ export type AgentActionType =
   | 'POLICY_REASSIGN'
   | 'CANCEL'
   | 'FORCE_UNENROLL'
-  | 'UPDATE_TAGS';
+  | 'UPDATE_TAGS'
+  | 'REQUEST_DIAGNOSTICS';
 
 type FleetServerAgentComponentStatusTuple = typeof FleetServerAgentComponentStatuses;
 export type FleetServerAgentComponentStatus = FleetServerAgentComponentStatusTuple[number];
@@ -53,6 +60,7 @@ export interface NewAgentAction {
   expiration?: string;
   start_time?: string;
   minimum_execution_duration?: number;
+  rollout_duration_seconds?: number;
   source_uri?: string;
   total?: number;
 }
@@ -134,12 +142,21 @@ export interface ActionStatus {
   type?: string;
   // how many agents were actioned by the user
   nbAgentsActioned: number;
-  status: 'COMPLETE' | 'EXPIRED' | 'CANCELLED' | 'FAILED' | 'IN_PROGRESS';
+  status: 'COMPLETE' | 'EXPIRED' | 'CANCELLED' | 'FAILED' | 'IN_PROGRESS' | 'ROLLOUT_PASSED';
   expiration?: string;
   completionTime?: string;
   cancellationTime?: string;
   newPolicyId?: string;
   creationTime: string;
+}
+
+export interface AgentDiagnostics {
+  id: string;
+  name: string;
+  createTime: string;
+  filePath: string;
+  status: 'READY' | 'AWAITING_UPLOAD' | 'DELETED' | 'IN_PROGRESS';
+  actionId: string;
 }
 
 // Generated from FleetServer schema.json
@@ -336,9 +353,15 @@ export interface FleetServerAgentAction {
   start_time?: string;
 
   /**
+   * @deprecated
    * Minimun execution duration in seconds, used for progressive rollout of the action.
    */
   minimum_execution_duration?: number;
+
+  /**
+   * Rollout duration in seconds, used for progressive rollout of the action.
+   */
+  rollout_duration_seconds?: number;
 
   /**
    * The opaque payload.

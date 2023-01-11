@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Suspense, useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -28,6 +28,10 @@ import {
 } from '@elastic/eui';
 import { isEmpty, partition, some } from 'lodash';
 import { ActionVariable, RuleActionParam } from '@kbn/alerting-plugin/common';
+import {
+  getDurationNumberInItsUnit,
+  getDurationUnitValue,
+} from '@kbn/alerting-plugin/common/parse_duration';
 import { betaBadgeProps } from './beta_badge_props';
 import {
   IErrorObject,
@@ -36,6 +40,7 @@ import {
   ActionConnector,
   ActionVariables,
   ActionTypeRegistryContract,
+  ActionConnectorMode,
 } from '../../../types';
 import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
@@ -43,6 +48,7 @@ import { ActionAccordionFormProps, ActionGroupWithMessageVariables } from './act
 import { transformActionVariables } from '../../lib/action_variables';
 import { useKibana } from '../../../common/lib/kibana';
 import { ConnectorsSelection } from './connectors_selection';
+import { ActionNotifyWhen } from './action_notify_when';
 
 export type ActionTypeFormProps = {
   actionItem: RuleAction;
@@ -52,11 +58,13 @@ export type ActionTypeFormProps = {
   onConnectorSelected: (id: string) => void;
   onDeleteAction: () => void;
   setActionParamsProperty: (key: string, value: RuleActionParam, index: number) => void;
+  setActionFrequencyProperty: (key: string, value: RuleActionParam, index: number) => void;
   actionTypesIndex: ActionTypeIndex;
   connectors: ActionConnector[];
   actionTypeRegistry: ActionTypeRegistryContract;
   recoveryActionGroup?: string;
   isActionGroupDisabledForActionType?: (actionGroupId: string, actionTypeId: string) => boolean;
+  hideNotifyWhen?: boolean;
 } & Pick<
   ActionAccordionFormProps,
   | 'defaultActionGroupId'
@@ -82,6 +90,7 @@ export const ActionTypeForm = ({
   onConnectorSelected,
   onDeleteAction,
   setActionParamsProperty,
+  setActionFrequencyProperty,
   actionTypesIndex,
   connectors,
   defaultActionGroupId,
@@ -92,6 +101,7 @@ export const ActionTypeForm = ({
   actionTypeRegistry,
   isActionGroupDisabledForActionType,
   recoveryActionGroup,
+  hideNotifyWhen = false,
 }: ActionTypeFormProps) => {
   const {
     application: { capabilities },
@@ -105,6 +115,14 @@ export const ActionTypeForm = ({
   const [actionParamsErrors, setActionParamsErrors] = useState<{ errors: IErrorObject }>({
     errors: {},
   });
+  const [actionThrottle, setActionThrottle] = useState<number | null>(
+    actionItem.frequency?.throttle
+      ? getDurationNumberInItsUnit(actionItem.frequency.throttle)
+      : null
+  );
+  const [actionThrottleUnit, setActionThrottleUnit] = useState<string>(
+    actionItem.frequency?.throttle ? getDurationUnitValue(actionItem.frequency?.throttle) : 'h'
+  );
 
   const getDefaultParams = async () => {
     const connectorType = await actionTypeRegistry.get(actionItem.actionTypeId);
@@ -160,6 +178,13 @@ export const ActionTypeForm = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionItem]);
 
+  // useEffect(() => {
+  //   if (!actionItem.frequency) {
+  //     setActionFrequency(DEFAULT_FREQUENCY, index);
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [actionItem.frequency]);
+
   const canSave = hasSaveActionsCapability(capabilities);
 
   const actionGroupDisplay = (
@@ -184,6 +209,32 @@ export const ActionTypeForm = ({
       ? isActionGroupDisabledForActionType(actionGroupId, actionTypeId)
       : false;
 
+  const actionNotifyWhen = (
+    <ActionNotifyWhen
+      frequency={actionItem.frequency}
+      throttle={actionThrottle}
+      throttleUnit={actionThrottleUnit}
+      onNotifyWhenChange={useCallback(
+        (notifyWhen) => {
+          setActionFrequencyProperty('notifyWhen', notifyWhen, index);
+        },
+        [setActionFrequencyProperty, index]
+      )}
+      onThrottleChange={useCallback(
+        (throttle: number | null, throttleUnit: string) => {
+          setActionThrottle(throttle);
+          setActionThrottleUnit(throttleUnit);
+          setActionFrequencyProperty(
+            'throttle',
+            throttle ? `${throttle}${throttleUnit}` : null,
+            index
+          );
+        },
+        [setActionFrequencyProperty, index]
+      )}
+    />
+  );
+
   const actionTypeRegistered = actionTypeRegistry.get(actionConnector.actionTypeId);
   if (!actionTypeRegistered) return null;
 
@@ -197,10 +248,13 @@ export const ActionTypeForm = ({
     connectors.filter((connector) => connector.isPreconfigured)
   );
 
+  const showSelectActionGroup = actionGroups && selectedActionGroup && setActionGroupIdByIndex;
+
   const accordionContent = checkEnabledResult.isEnabled ? (
     <>
-      {actionGroups && selectedActionGroup && setActionGroupIdByIndex && (
+      {showSelectActionGroup && (
         <>
+          <EuiSpacer size="xs" />
           <EuiSuperSelect
             prepend={
               <EuiFormLabel htmlFor={`addNewActionConnectorActionGroup-${actionItem.actionTypeId}`}>
@@ -225,10 +279,10 @@ export const ActionTypeForm = ({
               setActionGroup(group);
             }}
           />
-
-          <EuiSpacer size="l" />
         </>
       )}
+      {!hideNotifyWhen && actionNotifyWhen}
+      {(showSelectActionGroup || !hideNotifyWhen) && <EuiSpacer size="l" />}
       <EuiFormRow
         fullWidth
         label={
@@ -280,6 +334,7 @@ export const ActionTypeForm = ({
               messageVariables={availableActionVariables}
               defaultMessage={selectedActionGroup?.defaultActionMessage ?? defaultActionMessage}
               actionConnector={actionConnector}
+              executionMode={ActionConnectorMode.ActionForm}
             />
           </Suspense>
         </EuiErrorBoundary>

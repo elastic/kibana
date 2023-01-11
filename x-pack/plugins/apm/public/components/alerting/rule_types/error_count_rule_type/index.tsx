@@ -10,7 +10,10 @@ import { defaults, omit } from 'lodash';
 import React, { useEffect } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ForLastExpression } from '@kbn/triggers-actions-ui-plugin/public';
+import {
+  ForLastExpression,
+  TIME_UNITS,
+} from '@kbn/triggers-actions-ui-plugin/public';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { asInteger } from '../../../../../common/utils/formatters';
 import { useFetcher } from '../../../../hooks/use_fetcher';
@@ -21,16 +24,12 @@ import {
   IsAboveField,
   ServiceField,
 } from '../../utils/fields';
-import {
-  AlertMetadata,
-  getIntervalAndTimeRange,
-  TimeUnit,
-} from '../../utils/helper';
+import { AlertMetadata, getIntervalAndTimeRange } from '../../utils/helper';
 import { ApmRuleParamsContainer } from '../../ui_components/apm_rule_params_container';
 
 export interface RuleParams {
   windowSize?: number;
-  windowUnit?: TimeUnit;
+  windowUnit?: TIME_UNITS;
   threshold?: number;
   serviceName?: string;
   environment?: string;
@@ -55,8 +54,8 @@ export function ErrorCountRuleType(props: Props) {
     { ...omit(metadata, ['start', 'end']), ...ruleParams },
     {
       threshold: 25,
-      windowSize: 1,
-      windowUnit: 'm',
+      windowSize: 5,
+      windowUnit: TIME_UNITS.MINUTE,
       environment: ENVIRONMENT_ALL.value,
     }
   );
@@ -65,7 +64,7 @@ export function ErrorCountRuleType(props: Props) {
     (callApmApi) => {
       const { interval, start, end } = getIntervalAndTimeRange({
         windowSize: params.windowSize,
-        windowUnit: params.windowUnit as TimeUnit,
+        windowUnit: params.windowUnit,
       });
       if (interval && start && end) {
         return callApmApi(
@@ -135,7 +134,8 @@ export function ErrorCountRuleType(props: Props) {
 
   return (
     <ApmRuleParamsContainer
-      defaults={params}
+      minimumWindowSize={{ value: 5, unit: TIME_UNITS.MINUTE }}
+      defaultParams={params}
       fields={fields}
       setRuleParams={setRuleParams}
       setRuleProperty={setRuleProperty}

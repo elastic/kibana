@@ -7,20 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { CSSProperties } from 'react';
-import {
-  EuiBasicTable,
-  EuiBasicTableColumn,
-  EuiButtonIcon,
-  EuiText,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiBasicTable, EuiBasicTableColumn, EuiText, useEuiTheme } from '@elastic/eui';
 import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 
-import { useSyntheticsSettingsContext } from '../../../contexts/synthetics_settings_context';
+import { StepDetailsLinkIcon } from '../links/step_details_link';
+import { JourneyStepScreenshotContainer } from '../screenshot/journey_step_screenshot_container';
 import { JourneyStep } from '../../../../../../common/runtime_types';
 
 import { StatusBadge, parseBadgeStatus, getTextColorForMonitorStatus } from './status_badge';
-import { JourneyStepScreenshotWithLabel } from './journey_step_screenshot_with_label';
 import { StepDurationText } from './step_duration_text';
 
 interface Props {
@@ -28,18 +22,23 @@ interface Props {
   error?: Error;
   loading: boolean;
   showStepNumber: boolean;
+  compressed?: boolean;
 }
 
 export function isStepEnd(step: JourneyStep) {
   return step.synthetics?.type === 'step/end';
 }
 
-export const BrowserStepsList = ({ steps, error, loading, showStepNumber = false }: Props) => {
+export const BrowserStepsList = ({
+  steps,
+  error,
+  loading,
+  showStepNumber = false,
+  compressed = true,
+}: Props) => {
   const { euiTheme } = useEuiTheme();
   const stepEnds: JourneyStep[] = steps.filter(isStepEnd);
   const stepLabels = stepEnds.map((stepEnd) => stepEnd?.synthetics?.step?.name ?? '');
-
-  const { basePath } = useSyntheticsSettingsContext();
 
   const columns: Array<EuiBasicTableColumn<JourneyStep>> = [
     ...(showStepNumber
@@ -56,13 +55,15 @@ export const BrowserStepsList = ({ steps, error, loading, showStepNumber = false
     {
       align: 'left',
       field: 'timestamp',
-      name: STEP_LABEL,
-      render: (_timestamp: string, item) => (
-        <JourneyStepScreenshotWithLabel
-          step={item}
-          stepLabels={stepLabels}
-          compactView={true}
+      name: SCREENSHOT_LABEL,
+      render: (_timestamp: string, step) => (
+        <JourneyStepScreenshotContainer
+          checkGroup={step.monitor.check_group}
+          initialStepNo={step.synthetics?.step?.index}
+          stepStatus={step.synthetics.payload?.status}
           allStepsLoaded={true}
+          stepLabels={stepLabels}
+          retryFetchOnRevisit={false}
         />
       ),
       mobileOptions: {
@@ -73,8 +74,25 @@ export const BrowserStepsList = ({ steps, error, loading, showStepNumber = false
             </strong>
           </EuiText>
         ),
-        header: STEP_LABEL,
+        header: SCREENSHOT_LABEL,
         enlarge: true,
+      },
+    },
+    {
+      field: 'synthetics.step.name',
+      name: STEP_NAME,
+      render: (stepName: string, item) => {
+        const status = parseBadgeStatus(item.synthetics.step?.status ?? '');
+
+        const textColor = euiTheme.colors[
+          getTextColorForMonitorStatus(status)
+        ] as CSSProperties['color'];
+
+        return (
+          <EuiText color={textColor} size="m">
+            {stepName}
+          </EuiText>
+        );
       },
     },
     {
@@ -99,13 +117,9 @@ export const BrowserStepsList = ({ steps, error, loading, showStepNumber = false
       name: '',
       mobileOptions: { show: false },
       render: (_val: string, item) => (
-        <EuiButtonIcon
-          aria-label={VIEW_DETAILS}
-          title={VIEW_DETAILS}
-          size="s"
-          href={`${basePath}/app/uptime/journey/${item.monitor.check_group}/step/${item.synthetics?.step?.index}`}
-          target="_self"
-          iconType="apmTrace"
+        <StepDetailsLinkIcon
+          checkGroup={item.monitor.check_group}
+          stepIndex={item.synthetics?.step?.index}
         />
       ),
     },
@@ -114,7 +128,7 @@ export const BrowserStepsList = ({ steps, error, loading, showStepNumber = false
   return (
     <>
       <EuiBasicTable
-        compressed={true}
+        compressed={compressed}
         loading={loading}
         columns={columns}
         error={error?.message}
@@ -164,14 +178,14 @@ const RESULT_LABEL = i18n.translate('xpack.synthetics.monitor.result.label', {
   defaultMessage: 'Result',
 });
 
-const STEP_LABEL = i18n.translate('xpack.synthetics.monitor.step.label', {
-  defaultMessage: 'Step',
+const SCREENSHOT_LABEL = i18n.translate('xpack.synthetics.monitor.screenshot.label', {
+  defaultMessage: 'Screenshot',
+});
+
+const STEP_NAME = i18n.translate('xpack.synthetics.monitor.stepName.label', {
+  defaultMessage: 'Step name',
 });
 
 const STEP_DURATION = i18n.translate('xpack.synthetics.monitor.step.duration.label', {
   defaultMessage: 'Duration',
-});
-
-const VIEW_DETAILS = i18n.translate('xpack.synthetics.monitor.step.viewDetails', {
-  defaultMessage: 'View Details',
 });

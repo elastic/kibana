@@ -20,6 +20,8 @@ import { RuleDataClient } from '../rule_data_client';
 import { createRuleDataClientMock } from '../rule_data_client/rule_data_client.mock';
 import { createLifecycleRuleTypeFactory } from './create_lifecycle_rule_type_factory';
 import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
+import { SharePluginStart } from '@kbn/share-plugin/server';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 
 type RuleTestHelpers = ReturnType<typeof createRule>;
 
@@ -95,15 +97,13 @@ function createRule(shouldWriteAlerts: boolean = true) {
       scheduleActions.mockClear();
 
       state = ((await type.executor({
-        alertId: 'alertId',
-        createdBy: 'createdBy',
         executionId: 'b33f65d7-6e8b-4aae-8d20-c93613dec9f9',
         logger: loggerMock.create(),
-        name: 'name',
         namespace: 'namespace',
         params: {},
         previousStartedAt,
         rule: {
+          id: 'alertId',
           actions: [],
           consumer: 'consumer',
           createdAt,
@@ -131,12 +131,12 @@ function createRule(shouldWriteAlerts: boolean = true) {
           shouldStopExecution: () => false,
           shouldWriteAlerts: () => shouldWriteAlerts,
           uiSettingsClient: {} as any,
+          share: {} as SharePluginStart,
+          dataViews: dataViewPluginMocks.createStartContract(),
         },
         spaceId: 'spaceId',
         startedAt,
         state,
-        tags: ['tags'],
-        updatedBy: 'updatedBy',
       })) ?? {}) as Record<string, any>;
 
       previousStartedAt = startedAt;
@@ -239,6 +239,7 @@ describe('createLifecycleRuleTypeFactory', () => {
               "event.action": "open",
               "event.kind": "signal",
               "kibana.alert.duration.us": 0,
+              "kibana.alert.flapping": false,
               "kibana.alert.instance.id": "opbeans-java",
               "kibana.alert.rule.category": "ruleTypeName",
               "kibana.alert.rule.consumer": "consumer",
@@ -270,6 +271,7 @@ describe('createLifecycleRuleTypeFactory', () => {
               "event.action": "open",
               "event.kind": "signal",
               "kibana.alert.duration.us": 0,
+              "kibana.alert.flapping": false,
               "kibana.alert.instance.id": "opbeans-node",
               "kibana.alert.rule.category": "ruleTypeName",
               "kibana.alert.rule.consumer": "consumer",

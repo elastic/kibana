@@ -15,7 +15,7 @@ import { waitsForEventsToBeLoaded } from '../../tasks/hosts/events';
 import { openEvents, openUncommonProcesses } from '../../tasks/hosts/main';
 import { waitForUncommonProcessesToBeLoaded } from '../../tasks/hosts/uncommon_processes';
 import { login, visit } from '../../tasks/login';
-import { goToFirstPage, goToSecondPage, sortFirstColumn } from '../../tasks/pagination';
+import { goToSecondPage, sortFirstColumn } from '../../tasks/pagination';
 import { refreshPage } from '../../tasks/security_header';
 import { HOSTS_URL, USERS_URL, HOSTS_PAGE_TAB_URLS } from '../../urls/navigation';
 import { ALL_HOSTS_TABLE } from '../../screens/hosts/all_hosts';
@@ -29,21 +29,21 @@ describe('Pagination', () => {
   describe('Host uncommon processes table)', () => {
     before(() => {
       esArchiverLoad('host_uncommon_processes');
+    });
+
+    beforeEach(() => {
       visit(HOSTS_PAGE_TAB_URLS.uncommonProcesses);
       waitForUncommonProcessesToBeLoaded();
     });
+
     after(() => {
       esArchiverUnload('host_uncommon_processes');
-    });
-
-    afterEach(() => {
-      goToFirstPage();
     });
 
     it('pagination updates results and page number', () => {
       cy.get(UNCOMMON_PROCESSES_TABLE)
         .find(FIRST_PAGE_SELECTOR)
-        .should('have.class', 'euiPaginationButton-isActive');
+        .should('have.attr', 'aria-current');
 
       cy.get(UNCOMMON_PROCESSES_TABLE)
         .find(PROCESS_NAME_FIELD)
@@ -62,16 +62,16 @@ describe('Pagination', () => {
         });
       cy.get(UNCOMMON_PROCESSES_TABLE)
         .find(FIRST_PAGE_SELECTOR)
-        .should('not.have.class', 'euiPaginationButton-isActive');
+        .should('not.have.attr', 'aria-current');
       cy.get(UNCOMMON_PROCESSES_TABLE)
         .find(SECOND_PAGE_SELECTOR)
-        .should('have.class', 'euiPaginationButton-isActive');
+        .should('have.attr', 'aria-current');
     });
 
     it('pagination keeps track of page results when tabs change', () => {
       cy.get(UNCOMMON_PROCESSES_TABLE)
         .find(FIRST_PAGE_SELECTOR)
-        .should('have.class', 'euiPaginationButton-isActive');
+        .should('have.attr', 'aria-current');
       goToSecondPage();
       waitForUncommonProcessesToBeLoaded();
 
@@ -81,10 +81,10 @@ describe('Pagination', () => {
         .then((expectedThirdPageResult) => {
           openEvents();
           waitsForEventsToBeLoaded();
-          cy.get(FIRST_PAGE_SELECTOR).should('have.class', 'euiPaginationButton-isActive');
+          cy.get(FIRST_PAGE_SELECTOR).should('have.attr', 'aria-current');
           openUncommonProcesses();
           waitForUncommonProcessesToBeLoaded();
-          cy.get(SECOND_PAGE_SELECTOR).should('have.class', 'euiPaginationButton-isActive');
+          cy.get(SECOND_PAGE_SELECTOR).should('have.attr', 'aria-current');
           cy.get(PROCESS_NAME_FIELD)
             .first()
             .invoke('text')
@@ -97,17 +97,17 @@ describe('Pagination', () => {
     it('pagination resets results and page number to first page when refresh is clicked', () => {
       cy.get(UNCOMMON_PROCESSES_TABLE)
         .find(FIRST_PAGE_SELECTOR)
-        .should('have.class', 'euiPaginationButton-isActive');
+        .should('have.attr', 'aria-current');
       goToSecondPage();
       waitForUncommonProcessesToBeLoaded();
       cy.get(UNCOMMON_PROCESSES_TABLE)
         .find(FIRST_PAGE_SELECTOR)
-        .should('not.have.class', 'euiPaginationButton-isActive');
+        .should('not.have.attr', 'aria-current');
       refreshPage();
       waitForUncommonProcessesToBeLoaded();
       cy.get(UNCOMMON_PROCESSES_TABLE)
         .find(FIRST_PAGE_SELECTOR)
-        .should('have.class', 'euiPaginationButton-isActive');
+        .should('have.attr', 'aria-current');
     });
   });
 
@@ -123,29 +123,21 @@ describe('Pagination', () => {
     it(`reset all Hosts pagination when sorting column`, () => {
       visit(HOSTS_URL);
       goToSecondPage();
-      cy.get(ALL_HOSTS_TABLE)
-        .find(FIRST_PAGE_SELECTOR)
-        .should('not.have.class', 'euiPaginationButton-isActive');
+      cy.get(ALL_HOSTS_TABLE).find(FIRST_PAGE_SELECTOR).should('not.have.attr', 'aria-current');
 
       sortFirstColumn();
 
-      cy.get(ALL_HOSTS_TABLE)
-        .find(FIRST_PAGE_SELECTOR)
-        .should('have.class', 'euiPaginationButton-isActive');
+      cy.get(ALL_HOSTS_TABLE).find(FIRST_PAGE_SELECTOR).should('have.attr', 'aria-current');
     });
 
     it(`reset all users pagination when sorting column`, () => {
       visit(USERS_URL);
       goToSecondPage();
-      cy.get(ALL_USERS_TABLE)
-        .find(FIRST_PAGE_SELECTOR)
-        .should('not.have.class', 'euiPaginationButton-isActive');
+      cy.get(ALL_USERS_TABLE).find(FIRST_PAGE_SELECTOR).should('not.have.attr', 'aria-current');
 
       sortFirstColumn();
 
-      cy.get(ALL_USERS_TABLE)
-        .find(FIRST_PAGE_SELECTOR)
-        .should('have.class', 'euiPaginationButton-isActive');
+      cy.get(ALL_USERS_TABLE).find(FIRST_PAGE_SELECTOR).should('have.attr', 'aria-current');
     });
   });
 });

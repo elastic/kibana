@@ -97,7 +97,15 @@ export interface QueryParams {
   sortField: SortFieldCase;
   sortOrder: 'asc' | 'desc';
 }
+export type UrlQueryParams = Partial<QueryParams>;
 
+export type ParsedUrlQueryParams = Partial<Omit<QueryParams, 'page' | 'perPage'>> & {
+  page?: string;
+  perPage?: string;
+  [index: string]: string | string[] | undefined | null;
+};
+
+export type LocalStorageQueryParams = Partial<Omit<QueryParams, 'page'>>;
 export interface FilterOptions {
   search: string;
   searchFields: string[];
@@ -119,8 +127,11 @@ export type SingleCaseMetricsFeature =
   | 'lifespan';
 
 export enum SortFieldCase {
-  createdAt = 'createdAt',
   closedAt = 'closedAt',
+  createdAt = 'createdAt',
+  severity = 'severity',
+  status = 'status',
+  title = 'title',
 }
 
 export type ElasticUser = SnakeToCamelCase<User>;

@@ -9,12 +9,13 @@
  * This module contains helpers for managing the task manager storage layer.
  */
 import { Subject } from 'rxjs';
-import { omit, defaults } from 'lodash';
+import { omit, defaults, get } from 'lodash';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SavedObjectsBulkDeleteResponse } from '@kbn/core/server';
 
 import {
+  Logger,
   SavedObject,
   ISavedObjectsSerializer,
   SavedObjectsRawDoc,
@@ -34,14 +35,18 @@ import {
 } from './task';
 
 import { TaskTypeDictionary } from './task_type_dictionary';
+import { AdHocTaskCounter } from './lib/adhoc_task_counter';
+import { retryOnBulkUpdateConflict } from './lib/retry_on_bulk_update_conflict';
 
 export interface StoreOpts {
+  logger: Logger;
   esClient: ElasticsearchClient;
   index: string;
   taskManagerId: string;
   definitions: TaskTypeDictionary;
   savedObjectsRepository: ISavedObjectsRepository;
   serializer: ISavedObjectsSerializer;
+  adHocTaskCounter: AdHocTaskCounter;
 }
 
 export interface SearchOpts {
@@ -92,9 +97,11 @@ export class TaskStore {
   public readonly errors$ = new Subject<Error>();
 
   private esClient: ElasticsearchClient;
+  private logger: Logger;
   private definitions: TaskTypeDictionary;
   private savedObjectsRepository: ISavedObjectsRepository;
   private serializer: ISavedObjectsSerializer;
+  private adHocTaskCounter: AdHocTaskCounter;
 
   /**
    * Constructs a new TaskStore.
@@ -108,10 +115,12 @@ export class TaskStore {
   constructor(opts: StoreOpts) {
     this.esClient = opts.esClient;
     this.index = opts.index;
+    this.logger = opts.logger;
     this.taskManagerId = opts.taskManagerId;
     this.definitions = opts.definitions;
     this.serializer = opts.serializer;
     this.savedObjectsRepository = opts.savedObjectsRepository;
+    this.adHocTaskCounter = opts.adHocTaskCounter;
   }
 
   /**
@@ -140,6 +149,9 @@ export class TaskStore {
         taskInstanceToAttributes(taskInstance),
         { id: taskInstance.id, refresh: false }
       );
+      if (get(taskInstance, 'schedule.interval', null) == null) {
+        this.adHocTaskCounter.increment();
+      }
     } catch (e) {
       this.errors$.next(e);
       throw e;
@@ -168,6 +180,11 @@ export class TaskStore {
       savedObjects = await this.savedObjectsRepository.bulkCreate<SerializedConcreteTaskInstance>(
         objects,
         { refresh: false }
+      );
+      this.adHocTaskCounter.increment(
+        taskInstances.filter((task) => {
+          return get(task, 'schedule.interval', null) == null;
+        }).length
       );
     } catch (e) {
       this.errors$.next(e);
@@ -234,34 +251,45 @@ export class TaskStore {
    * @param {Array<TaskDoc>} docs
    * @returns {Promise<Array<TaskDoc>>}
    */
-  public async bulkUpdate(docs: ConcreteTaskInstance[]): Promise<BulkUpdateResult[]> {
+  public async bulkUpdate(
+    docs: ConcreteTaskInstance[],
+    retries: number = 0
+  ): Promise<BulkUpdateResult[]> {
     const attributesByDocId = docs.reduce((attrsById, doc) => {
       attrsById.set(doc.id, taskInstanceToAttributes(doc));
       return attrsById;
     }, new Map());
 
-    let updatedSavedObjects: Array<SavedObjectsUpdateResponse | Error>;
+    let updatedSavedObjects: Array<SavedObjectsUpdateResponse<SerializedConcreteTaskInstance>>;
     try {
-      ({ saved_objects: updatedSavedObjects } =
-        await this.savedObjectsRepository.bulkUpdate<SerializedConcreteTaskInstance>(
-          docs.map((doc) => ({
+      ({ savedObjects: updatedSavedObjects } =
+        await retryOnBulkUpdateConflict<SerializedConcreteTaskInstance>({
+          logger: this.logger,
+          savedObjectsRepository: this.savedObjectsRepository,
+          objects: docs.map((doc) => ({
             type: 'task',
             id: doc.id,
             options: { version: doc.version },
             attributes: attributesByDocId.get(doc.id)!,
           })),
-          {
+          options: {
             refresh: false,
-          }
-        ));
+          },
+          retries,
+        }));
     } catch (e) {
       this.errors$.next(e);
       throw e;
     }
 
-    return updatedSavedObjects.map<BulkUpdateResult>((updatedSavedObject, index) =>
-      isSavedObjectsUpdateResponse(updatedSavedObject)
-        ? asOk(
+    return updatedSavedObjects.map((updatedSavedObject) => {
+      const doc = docs.find((d) => d.id === updatedSavedObject.id);
+      return updatedSavedObject.error !== undefined
+        ? asErr({
+            entity: doc,
+            error: updatedSavedObject,
+          })
+        : asOk(
             savedObjectToConcreteTaskInstance({
               ...updatedSavedObject,
               attributes: defaults(
@@ -269,15 +297,8 @@ export class TaskStore {
                 attributesByDocId.get(updatedSavedObject.id)!
               ),
             })
-          )
-        : asErr({
-            // The SavedObjectsRepository maintains the order of the docs
-            // so we can rely on the index in the `docs` to match an error
-            // on the same index in the `bulkUpdate` result
-            entity: docs[index],
-            error: updatedSavedObject,
-          })
-    );
+          );
+    }) as BulkUpdateResult[];
   }
 
   /**
@@ -522,10 +543,4 @@ function ensureAggregationOnlyReturnsTaskObjects(opts: AggregationOpts): Aggrega
     ...opts,
     query,
   };
-}
-
-function isSavedObjectsUpdateResponse(
-  result: SavedObjectsUpdateResponse | Error
-): result is SavedObjectsUpdateResponse {
-  return result && typeof (result as SavedObjectsUpdateResponse).id === 'string';
 }

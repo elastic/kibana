@@ -29,7 +29,7 @@
           "\nA page to display when Kibana has no data, prompting a person to add integrations or create a new data view."
         ],
         "signature": [
-          "({ onDataViewCreated, noDataConfig }: ",
+          "({ onDataViewCreated, noDataConfig, allowAdHocDataView, }: ",
           "KibanaNoDataPageProps",
           ") => JSX.Element | null"
         ],
@@ -42,7 +42,7 @@
             "id": "def-common.KibanaNoDataPage.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ onDataViewCreated, noDataConfig }",
+            "label": "{\n  onDataViewCreated,\n  noDataConfig,\n  allowAdHocDataView,\n}",
             "description": [],
             "signature": [
               "KibanaNoDataPageProps"

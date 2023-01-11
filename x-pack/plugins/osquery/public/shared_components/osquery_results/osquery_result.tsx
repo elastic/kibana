@@ -13,21 +13,22 @@ import type { OsqueryActionResultsProps } from './types';
 import { useLiveQueryDetails } from '../../actions/use_live_query_details';
 import { ATTACHED_QUERY } from '../../agents/translations';
 import { PackQueriesStatusTable } from '../../live_queries/form/pack_queries_status_table';
+import { AlertAttachmentContext } from '../../common/contexts';
 
-interface OsqueryResultProps extends Omit<OsqueryActionResultsProps, 'alertId'> {
+interface OsqueryResultProps extends OsqueryActionResultsProps {
   actionId: string;
   queryId: string;
   startDate: string;
 }
 
 export const OsqueryResult = React.memo<OsqueryResultProps>(
-  ({ actionId, ruleName, agentIds, startDate }) => {
+  ({ actionId, ruleName, agentIds, startDate, ecsData }) => {
     const { data } = useLiveQueryDetails({
       actionId,
     });
 
     return (
-      <div>
+      <AlertAttachmentContext.Provider value={ecsData}>
         <EuiSpacer size="s" />
         <EuiComment
           username={ruleName && ruleName[0]}
@@ -45,7 +46,7 @@ export const OsqueryResult = React.memo<OsqueryResultProps>(
           />
         </EuiComment>
         <EuiSpacer size="s" />
-      </div>
+      </AlertAttachmentContext.Provider>
     );
   }
 );

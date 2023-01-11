@@ -24,6 +24,7 @@ import {
   NotificationServiceConstructor,
   OverlayServiceConstructor,
   UiSettingsServiceConstructor,
+  SettingsServiceConstructor,
   MockApplicationService,
   MockDocLinksService,
   MockRenderingService,
@@ -38,8 +39,11 @@ import {
   MockAnalyticsService,
   analyticsServiceStartMock,
   fetchOptionalMemoryInfoMock,
+  MockLoggingSystem,
+  LoggingSystemConstructor,
+  MockSettingsService,
 } from './core_system.test.mocks';
-
+import type { EnvironmentMode } from '@kbn/config';
 import { CoreSystem } from './core_system';
 import {
   KIBANA_LOADED_EVENT,
@@ -129,6 +133,7 @@ describe('constructor', () => {
     expect(NotificationServiceConstructor).toHaveBeenCalledTimes(1);
     expect(HttpServiceConstructor).toHaveBeenCalledTimes(1);
     expect(UiSettingsServiceConstructor).toHaveBeenCalledTimes(1);
+    expect(SettingsServiceConstructor).toHaveBeenCalledTimes(1);
     expect(ChromeServiceConstructor).toHaveBeenCalledTimes(1);
     expect(OverlayServiceConstructor).toHaveBeenCalledTimes(1);
     expect(RenderingServiceConstructor).toHaveBeenCalledTimes(1);
@@ -136,6 +141,7 @@ describe('constructor', () => {
     expect(CoreAppConstructor).toHaveBeenCalledTimes(1);
     expect(ThemeServiceConstructor).toHaveBeenCalledTimes(1);
     expect(AnalyticsServiceConstructor).toHaveBeenCalledTimes(1);
+    expect(LoggingSystemConstructor).toHaveBeenCalledTimes(1);
   });
 
   it('passes injectedMetadata param to InjectedMetadataService', () => {
@@ -180,6 +186,47 @@ describe('constructor', () => {
     stopCoreSystem();
     expect(coreSystem.stop).toHaveBeenCalled();
   });
+
+  describe('logging system', () => {
+    it('instantiate the logging system with the correct level when in dev mode', () => {
+      const envMode: EnvironmentMode = {
+        name: 'development',
+        dev: true,
+        prod: false,
+      };
+      const injectedMetadata = { env: { mode: envMode } } as any;
+
+      createCoreSystem({
+        injectedMetadata,
+      });
+
+      expect(LoggingSystemConstructor).toHaveBeenCalledTimes(1);
+      expect(LoggingSystemConstructor).toHaveBeenCalledWith({
+        logLevel: 'all',
+      });
+    });
+    it('instantiate the logging system with the correct level when in production mode', () => {
+      const envMode: EnvironmentMode = {
+        name: 'production',
+        dev: false,
+        prod: true,
+      };
+      const injectedMetadata = { env: { mode: envMode } } as any;
+
+      createCoreSystem({
+        injectedMetadata,
+      });
+
+      expect(LoggingSystemConstructor).toHaveBeenCalledTimes(1);
+      expect(LoggingSystemConstructor).toHaveBeenCalledWith({
+        logLevel: 'warn',
+      });
+    });
+    it('retrieves the logger factory from the logging system', () => {
+      createCoreSystem({});
+      expect(MockLoggingSystem.asLoggerFactory).toHaveBeenCalledTimes(1);
+    });
+  });
 });
 
 describe('#setup()', () => {
@@ -220,6 +267,11 @@ describe('#setup()', () => {
   it('calls uiSettings#setup()', async () => {
     await setupCore();
     expect(MockUiSettingsService.setup).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls settings#setup()', async () => {
+    await setupCore();
+    expect(MockSettingsService.setup).toHaveBeenCalledTimes(1);
   });
 
   it('calls fatalErrors#setup()', async () => {
@@ -365,6 +417,11 @@ describe('#start()', () => {
   it('calls uiSettings#start()', async () => {
     await startCore();
     expect(MockUiSettingsService.start).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls settings#start()', async () => {
+    await startCore();
+    expect(MockSettingsService.start).toHaveBeenCalledTimes(1);
   });
 
   it('calls i18n#start()', async () => {

@@ -7,20 +7,13 @@
 
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import {
-  HOST_NAME,
-  CONTAINER_ID,
-} from '../../../common/elasticsearch_fieldnames';
+import { HOST_NAME, CONTAINER_ID } from '../../../common/es_fields/apm';
 import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
-import {
-  SERVICE_NAME,
-  SERVICE_NODE_NAME,
-} from '../../../common/elasticsearch_fieldnames';
+import { SERVICE_NAME, SERVICE_NODE_NAME } from '../../../common/es_fields/apm';
 import {
   environmentQuery,
   serviceNodeNameQuery,
 } from '../../../common/utils/environment_query';
-import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getServiceNodeMetadata({
@@ -30,6 +23,7 @@ export async function getServiceNodeMetadata({
   apmEventClient,
   start,
   end,
+  environment,
 }: {
   kuery: string;
   serviceName: string;
@@ -37,6 +31,7 @@ export async function getServiceNodeMetadata({
   apmEventClient: APMEventClient;
   start: number;
   end: number;
+  environment: string;
 }) {
   const params = {
     apm: {
@@ -50,7 +45,7 @@ export async function getServiceNodeMetadata({
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
             ...rangeQuery(start, end),
-            ...environmentQuery(ENVIRONMENT_ALL.value),
+            ...environmentQuery(environment),
             ...kqlQuery(kuery),
             ...serviceNodeNameQuery(serviceNodeName),
           ],

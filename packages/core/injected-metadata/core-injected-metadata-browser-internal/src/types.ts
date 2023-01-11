@@ -52,6 +52,10 @@ export interface InternalInjectedMetadataSetup {
       defaults: Record<string, any>;
       user?: Record<string, any> | undefined;
     };
+    globalUiSettings: {
+      defaults: Record<string, any>;
+      user?: Record<string, any> | undefined;
+    };
   };
   getInjectedVar: (name: string, defaultValue?: any) => unknown;
   getInjectedVars: () => {

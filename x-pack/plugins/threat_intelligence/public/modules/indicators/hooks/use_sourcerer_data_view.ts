@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { RawIndicatorFieldId } from '../types';
+import { RawIndicatorFieldId } from '../../../../common/types/indicator';
 import { SecuritySolutionDataViewBase } from '../../../types';
 import { useSecurityContext } from '../../../hooks/use_security_context';
 

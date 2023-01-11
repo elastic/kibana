@@ -9,6 +9,7 @@ import type { PluginInitializerContext } from '@kbn/core/server';
 
 import { FleetPlugin } from './plugin';
 
+export { buildAgentStatusRuntimeField } from './services/agents/build_status_runtime_field';
 export type {
   AgentService,
   AgentClient,
@@ -26,7 +27,7 @@ export type { FleetSetupContract, FleetSetupDeps, FleetStartContract } from './p
 export type {
   ExternalCallback,
   PutPackagePolicyUpdateCallback,
-  PostPackagePolicyDeleteCallback,
+  PostPackagePolicyPostDeleteCallback,
   PostPackagePolicyCreateCallback,
   FleetRequestHandlerContext,
   PostPackagePolicyPostCreateCallback,

@@ -12,7 +12,7 @@ import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mock
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
-import { IntervalSchedule } from '../../types';
+import { IntervalSchedule, RuleNotifyWhen } from '../../types';
 import { RecoveredActionGroup } from '../../../common';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
@@ -87,8 +87,6 @@ describe('update()', () => {
       consumer: 'myApp',
       scheduledTaskId: 'task-123',
       params: {},
-      throttle: null,
-      notifyWhen: null,
       actions: [
         {
           group: 'default',
@@ -97,6 +95,11 @@ describe('update()', () => {
           actionRef: '1',
           params: {
             foo: true,
+          },
+          frequency: {
+            summary: false,
+            notifyWhen: RuleNotifyWhen.CHANGE,
+            throttle: null,
           },
         },
       ],
@@ -886,7 +889,7 @@ describe('update()', () => {
           bar: true,
         },
         throttle: '5m',
-        notifyWhen: null,
+        notifyWhen: 'onThrottleInterval',
         actions: [
           {
             group: 'default',
@@ -1249,6 +1252,11 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            frequency: {
+              summary: false,
+              notifyWhen: 'onActionGroupChange',
+              throttle: null,
+            },
           },
         ],
         scheduledTaskId: 'task-123',
@@ -1292,6 +1300,11 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            frequency: {
+              summary: false,
+              notifyWhen: 'onActionGroupChange',
+              throttle: null,
+            },
           },
         ],
         scheduledTaskId: 'task-123',
@@ -1314,14 +1327,17 @@ describe('update()', () => {
         params: {
           bar: true,
         },
-        throttle: null,
-        notifyWhen: null,
         actions: [
           {
             group: 'default',
             id: '1',
             params: {
               foo: true,
+            },
+            frequency: {
+              summary: false,
+              notifyWhen: 'onActionGroupChange',
+              throttle: null,
             },
           },
         ],
@@ -1390,6 +1406,11 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            frequency: {
+              summary: false,
+              notifyWhen: 'onActionGroupChange',
+              throttle: null,
+            },
           },
           {
             group: 'default',
@@ -1398,6 +1419,11 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            frequency: {
+              summary: false,
+              notifyWhen: 'onActionGroupChange',
+              throttle: null,
+            },
           },
           {
             group: 'default',
@@ -1405,6 +1431,11 @@ describe('update()', () => {
             actionTypeId: 'test2',
             params: {
               foo: true,
+            },
+            frequency: {
+              summary: false,
+              notifyWhen: 'onActionGroupChange',
+              throttle: null,
             },
           },
         ],
@@ -1439,8 +1470,6 @@ describe('update()', () => {
         params: {
           bar: true,
         },
-        throttle: '5m',
-        notifyWhen: null,
         actions: [
           {
             group: 'default',
@@ -1448,6 +1477,11 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            frequency: {
+              summary: false,
+              notifyWhen: 'onThrottleInterval',
+              throttle: '5m',
+            },
           },
           {
             group: 'default',
@@ -1455,12 +1489,22 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            frequency: {
+              summary: false,
+              notifyWhen: 'onThrottleInterval',
+              throttle: '5m',
+            },
           },
           {
             group: 'default',
             id: '2',
             params: {
               foo: true,
+            },
+            frequency: {
+              summary: false,
+              notifyWhen: 'onThrottleInterval',
+              throttle: '5m',
             },
           },
         ],
@@ -1488,14 +1532,17 @@ describe('update()', () => {
           params: {
             bar: true,
           },
-          throttle: null,
-          notifyWhen: null,
           actions: [
             {
               group: 'default',
               id: '1',
               params: {
                 foo: true,
+              },
+              frequency: {
+                summary: false,
+                notifyWhen: 'onActionGroupChange',
+                throttle: null,
               },
             },
           ],
@@ -1572,6 +1619,11 @@ describe('update()', () => {
               params: {
                 foo: true,
               },
+              frequency: {
+                summary: false,
+                notifyWhen: 'onActionGroupChange',
+                throttle: null,
+              },
             },
           ],
           scheduledTaskId: taskId,
@@ -1603,14 +1655,17 @@ describe('update()', () => {
           params: {
             bar: true,
           },
-          throttle: null,
-          notifyWhen: null,
           actions: [
             {
               group: 'default',
               id: '1',
               params: {
                 foo: true,
+              },
+              frequency: {
+                summary: false,
+                notifyWhen: 'onActionGroupChange',
+                throttle: null,
               },
             },
           ],
@@ -1635,8 +1690,6 @@ describe('update()', () => {
           params: {
             bar: true,
           },
-          throttle: null,
-          notifyWhen: null,
           actions: [
             {
               group: 'default',
@@ -1644,12 +1697,194 @@ describe('update()', () => {
               params: {
                 foo: true,
               },
+              frequency: {
+                summary: false,
+                notifyWhen: 'onActionGroupChange',
+                throttle: null,
+              },
             },
           ],
         },
       });
 
       expect(taskManager.bulkUpdateSchedules).not.toHaveBeenCalled();
+    });
+
+    test('throws error when mixing and matching global and per-action frequency values', async () => {
+      const alertId = uuid.v4();
+      const taskId = uuid.v4();
+
+      mockApiCalls(alertId, taskId, { interval: '1m' }, { interval: '1m' });
+      await expect(
+        rulesClient.update({
+          id: alertId,
+          data: {
+            schedule: { interval: '1m' },
+            name: 'abc',
+            tags: ['foo'],
+            params: {
+              bar: true,
+            },
+            throttle: null,
+            notifyWhen: 'onActionGroupChange',
+            actions: [
+              {
+                group: 'default',
+                id: '1',
+                params: {
+                  foo: true,
+                },
+                frequency: {
+                  summary: false,
+                  notifyWhen: 'onActionGroupChange',
+                  throttle: null,
+                },
+              },
+              {
+                group: 'default',
+                id: '2',
+                params: {
+                  foo: true,
+                },
+                frequency: {
+                  summary: false,
+                  notifyWhen: 'onActionGroupChange',
+                  throttle: null,
+                },
+              },
+            ],
+          },
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Cannot specify per-action frequency params when notify_when or throttle are defined at the rule level: default, default"`
+      );
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      expect(taskManager.schedule).not.toHaveBeenCalled();
+
+      await expect(
+        rulesClient.update({
+          id: alertId,
+          data: {
+            schedule: { interval: '1m' },
+            name: 'abc',
+            tags: ['foo'],
+            params: {
+              bar: true,
+            },
+            throttle: null,
+            notifyWhen: null,
+            actions: [
+              {
+                group: 'default',
+                id: '1',
+                params: {
+                  foo: true,
+                },
+                frequency: {
+                  summary: false,
+                  notifyWhen: 'onActionGroupChange',
+                  throttle: null,
+                },
+              },
+              {
+                group: 'default',
+                id: '2',
+                params: {
+                  foo: true,
+                },
+              },
+            ],
+          },
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Cannot specify per-action frequency params when notify_when or throttle are defined at the rule level: default"`
+      );
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      expect(taskManager.schedule).not.toHaveBeenCalled();
+    });
+
+    test('throws error when neither global frequency nor action frequency are defined', async () => {
+      const alertId = uuid.v4();
+      const taskId = uuid.v4();
+
+      mockApiCalls(alertId, taskId, { interval: '1m' }, { interval: '1m' });
+
+      await expect(
+        rulesClient.update({
+          id: alertId,
+          data: {
+            schedule: { interval: '1m' },
+            name: 'abc',
+            tags: ['foo'],
+            params: {
+              bar: true,
+            },
+            notifyWhen: undefined,
+            throttle: undefined,
+            actions: [
+              {
+                group: 'default',
+                id: '1',
+                params: {
+                  foo: true,
+                },
+              },
+            ],
+          },
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Actions missing frequency parameters: default"`
+      );
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      expect(taskManager.schedule).not.toHaveBeenCalled();
+    });
+
+    test('throws error when when some actions are missing frequency params', async () => {
+      const alertId = uuid.v4();
+      const taskId = uuid.v4();
+
+      mockApiCalls(alertId, taskId, { interval: '1m' }, { interval: '1m' });
+
+      await expect(
+        rulesClient.update({
+          id: alertId,
+          data: {
+            schedule: { interval: '1m' },
+            name: 'abc',
+            tags: ['foo'],
+            params: {
+              bar: true,
+            },
+            notifyWhen: undefined,
+            throttle: undefined,
+            actions: [
+              {
+                group: 'default',
+                id: '1',
+                params: {
+                  foo: true,
+                },
+                frequency: {
+                  summary: false,
+                  notifyWhen: 'onActionGroupChange',
+                  throttle: null,
+                },
+              },
+              {
+                group: 'default',
+                id: '2',
+                params: {
+                  foo: true,
+                },
+              },
+            ],
+          },
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Actions missing frequency parameters: default"`
+      );
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      expect(taskManager.schedule).not.toHaveBeenCalled();
     });
 
     test('logs when update of schedule of an alerts underlying task fails', async () => {
@@ -1670,14 +1905,17 @@ describe('update()', () => {
           params: {
             bar: true,
           },
-          throttle: null,
-          notifyWhen: null,
           actions: [
             {
               group: 'default',
               id: '1',
               params: {
                 foo: true,
+              },
+              frequency: {
+                summary: false,
+                notifyWhen: 'onActionGroupChange',
+                throttle: null,
               },
             },
           ],

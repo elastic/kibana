@@ -49,7 +49,7 @@ describe('SubmitCaseButton', () => {
         <SubmitCaseButton />
       </MockHookWrapperComponent>
     );
-    wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
+    wrapper.find(`button[data-test-subj="create-case-submit"]`).first().simulate('click');
     await waitFor(() => expect(onSubmit).toBeCalled());
   });
 
@@ -60,7 +60,7 @@ describe('SubmitCaseButton', () => {
       </MockHookWrapperComponent>
     );
 
-    wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
+    wrapper.find(`button[data-test-subj="create-case-submit"]`).first().simulate('click');
     await waitFor(() =>
       expect(
         wrapper.find(`[data-test-subj="create-case-submit"]`).first().prop('isDisabled')
@@ -75,7 +75,7 @@ describe('SubmitCaseButton', () => {
       </MockHookWrapperComponent>
     );
 
-    wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
+    wrapper.find(`button[data-test-subj="create-case-submit"]`).first().simulate('click');
     await waitFor(() =>
       expect(
         wrapper.find(`[data-test-subj="create-case-submit"]`).first().prop('isLoading')

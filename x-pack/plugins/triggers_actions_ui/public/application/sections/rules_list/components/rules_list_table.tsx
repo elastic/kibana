@@ -9,7 +9,6 @@ import moment from 'moment';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import {
   EuiBasicTable,
@@ -18,7 +17,6 @@ import {
   EuiIconTip,
   EuiLink,
   EuiButtonEmpty,
-  EuiHealth,
   EuiText,
   EuiToolTip,
   EuiTableSortingType,
@@ -32,21 +30,17 @@ import {
 } from '@elastic/eui';
 import {
   RuleExecutionStatus,
-  RuleExecutionStatusErrorReasons,
   formatDuration,
   parseDuration,
   MONITORING_HISTORY_LIMIT,
 } from '@kbn/alerting-plugin/common';
 
 import {
-  rulesStatusesTranslationsMapping,
-  ALERT_STATUS_LICENSE_ERROR,
   SELECT_ALL_RULES,
   CLEAR_SELECTION,
   TOTAL_RULES,
   SELECT_ALL_ARIA_LABEL,
 } from '../translations';
-import { getHealthColor } from './rule_execution_status_filter';
 import {
   Rule,
   RuleTableItem,
@@ -67,15 +61,13 @@ import { hasAllPrivilege } from '../../../lib/capabilities';
 import { RuleTagBadge } from './rule_tag_badge';
 import { RuleStatusDropdown } from './rule_status_dropdown';
 import { RulesListNotifyBadge } from './rules_list_notify_badge';
-import {
-  RulesListColumns,
-  RulesListVisibleColumns,
-  useRulesListColumnSelector,
-} from './rules_list_column_selector';
+import { RulesListTableStatusCell } from './rules_list_table_status_cell';
+import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
+import { RulesListColumns, useRulesListColumnSelector } from './rules_list_column_selector';
 
 interface RuleTypeState {
   isLoading: boolean;
-  isInitialized: boolean;
+  initialLoad: boolean;
   data: RuleTypeIndex;
 }
 
@@ -92,9 +84,9 @@ const percentileOrdinals = {
 };
 
 export const percentileFields = {
-  [Percentiles.P50]: 'monitoring.execution.calculated_metrics.p50',
-  [Percentiles.P95]: 'monitoring.execution.calculated_metrics.p95',
-  [Percentiles.P99]: 'monitoring.execution.calculated_metrics.p99',
+  [Percentiles.P50]: 'monitoring.run.calculated_metrics.p50',
+  [Percentiles.P95]: 'monitoring.run.calculated_metrics.p95',
+  [Percentiles.P99]: 'monitoring.run.calculated_metrics.p99',
 };
 
 const EMPTY_OBJECT = {};
@@ -147,7 +139,7 @@ export interface RulesListTableProps {
     onLoading: (isLoading: boolean) => void
   ) => React.ReactNode;
   renderRuleError?: (rule: RuleTableItem) => React.ReactNode;
-  visibleColumns?: RulesListVisibleColumns[];
+  visibleColumns?: string[];
 }
 
 interface ConvertRulesToTableItemsOpts {
@@ -169,7 +161,7 @@ export function convertRulesToTableItems(opts: ConvertRulesToTableItemsOpts): Ru
       actionsCount: rule.actions.length,
       ruleType: ruleTypeIndex.get(rule.ruleTypeId)?.name ?? rule.ruleTypeId,
       isEditable:
-        hasAllPrivilege(rule, ruleTypeIndex.get(rule.ruleTypeId)) &&
+        hasAllPrivilege(rule.consumer, ruleTypeIndex.get(rule.ruleTypeId)) &&
         (canExecuteActions || (!canExecuteActions && !rule.actions.length)),
       enabledInLicense: !!ruleTypeIndex.get(rule.ruleTypeId)?.enabledInLicense,
       showIntervalWarning: parseDuration(rule.schedule.interval) < minimumDuration,
@@ -218,6 +210,8 @@ export const RulesListTable = (props: RulesListTableProps) => {
   const [tagPopoverOpenIndex, setTagPopoverOpenIndex] = useState<number>(-1);
   const [currentlyOpenNotify, setCurrentlyOpenNotify] = useState<string>();
   const [isLoadingMap, setIsLoadingMap] = useState<Record<string, boolean>>({});
+
+  const isRuleUsingExecutionStatus = getIsExperimentalFeatureEnabled('ruleUseExecutionStatus');
 
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
   const { euiTheme } = useEuiTheme();
@@ -284,7 +278,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
   );
 
   const renderRuleStatusDropdown = useCallback(
-    (ruleEnabled: boolean | undefined, rule: RuleTableItem) => {
+    (rule: RuleTableItem) => {
       return (
         <RuleStatusDropdown
           hideSnoozeOption
@@ -299,58 +293,6 @@ export const RulesListTable = (props: RulesListTableProps) => {
       );
     },
     [isRuleTypeEditableInContext, onDisableRule, onEnableRule, onRuleChanged]
-  );
-
-  const renderRuleExecutionStatus = useCallback(
-    (executionStatus: RuleExecutionStatus, rule: RuleTableItem) => {
-      const healthColor = getHealthColor(executionStatus.status);
-      const tooltipMessage =
-        executionStatus.status === 'error' ? `Error: ${executionStatus?.error?.message}` : null;
-      const isLicenseError =
-        executionStatus.error?.reason === RuleExecutionStatusErrorReasons.License;
-      const statusMessage = isLicenseError
-        ? ALERT_STATUS_LICENSE_ERROR
-        : rulesStatusesTranslationsMapping[executionStatus.status];
-
-      const health = (
-        <EuiHealth data-test-subj={`ruleStatus-${executionStatus.status}`} color={healthColor}>
-          {statusMessage}
-        </EuiHealth>
-      );
-
-      const healthWithTooltip = tooltipMessage ? (
-        <EuiToolTip
-          data-test-subj="ruleStatus-error-tooltip"
-          position="top"
-          content={tooltipMessage}
-        >
-          {health}
-        </EuiToolTip>
-      ) : (
-        health
-      );
-
-      return (
-        <EuiFlexGroup gutterSize="none">
-          <EuiFlexItem>{healthWithTooltip}</EuiFlexItem>
-          {isLicenseError && (
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="xs"
-                data-test-subj="ruleStatus-error-license-fix"
-                onClick={() => onManageLicenseClick(rule)}
-              >
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.rulesList.fixLicenseLink"
-                  defaultMessage="Fix"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      );
-    },
-    [onManageLicenseClick]
   );
 
   const selectionColumn = useMemo(() => {
@@ -381,6 +323,13 @@ export const RulesListTable = (props: RulesListTableProps) => {
       },
     };
   }, [isPageSelected, onSelectPage, onSelectRow, isRowSelected]);
+
+  const ruleOutcomeColumnField = useMemo(() => {
+    if (isRuleUsingExecutionStatus) {
+      return 'executionStatus.status';
+    }
+    return 'lastRun.outcome';
+  }, [isRuleUsingExecutionStatus]);
 
   const getRulesTableColumns = useCallback((): RulesListColumns[] => {
     return [
@@ -684,7 +633,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
       },
       {
         id: 'ruleExecutionSuccessRatio',
-        field: 'monitoring.execution.calculated_metrics.success_ratio',
+        field: 'monitoring.run.calculated_metrics.success_ratio',
         width: '12%',
         selectorName: i18n.translate(
           'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.selector.successRatioTitle',
@@ -719,7 +668,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
       },
       {
         id: 'ruleExecutionStatus',
-        field: 'executionStatus.status',
+        field: ruleOutcomeColumnField,
         name: i18n.translate(
           'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.lastResponseTitle',
           { defaultMessage: 'Last response' }
@@ -729,7 +678,9 @@ export const RulesListTable = (props: RulesListTableProps) => {
         width: '120px',
         'data-test-subj': 'rulesTableCell-lastResponse',
         render: (_executionStatus: RuleExecutionStatus, rule: RuleTableItem) => {
-          return renderRuleExecutionStatus(rule.executionStatus, rule);
+          return (
+            <RulesListTableStatusCell rule={rule} onManageLicenseClick={onManageLicenseClick} />
+          );
         },
       },
       {
@@ -744,7 +695,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
         width: '10%',
         'data-test-subj': 'rulesTableCell-status',
         render: (_enabled: boolean | undefined, rule: RuleTableItem) => {
-          return renderRuleStatusDropdown(rule.enabled, rule);
+          return renderRuleStatusDropdown(rule);
         },
       },
       {
@@ -827,15 +778,16 @@ export const RulesListTable = (props: RulesListTableProps) => {
     onRuleEditClick,
     onSnoozeRule,
     onUnsnoozeRule,
+    onManageLicenseClick,
     renderCollapsedItemActions,
     renderPercentileCellValue,
     renderPercentileColumnName,
     renderRuleError,
-    renderRuleExecutionStatus,
     renderRuleStatusDropdown,
     ruleTypesState.data,
     selectedPercentile,
     tagPopoverOpenIndex,
+    ruleOutcomeColumnField,
   ]);
 
   const allRuleColumns = useMemo(() => getRulesTableColumns(), [getRulesTableColumns]);
@@ -937,7 +889,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
             pageIndex: page.index,
             pageSize: page.size,
             /* Don't display rule count until we have the rule types initialized */
-            totalItemCount: ruleTypesState.isInitialized === false ? 0 : rulesState.totalItemCount,
+            totalItemCount: ruleTypesState.initialLoad ? 0 : rulesState.totalItemCount,
           }}
           onChange={({
             page: changedPage,

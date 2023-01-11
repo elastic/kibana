@@ -6,18 +6,14 @@
  */
 
 import React from 'react';
-import {
-  EuiTitle,
-  EuiPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiSpacer,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiTitle, EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { LoadWhenInView } from '@kbn/observability-plugin/public';
 
+import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
+import { useEarliestStartDate } from '../hooks/use_earliest_start_date';
 import { MonitorErrorSparklines } from './monitor_error_sparklines';
+import { MonitorStatusPanel } from '../monitor_status/monitor_status_panel';
 import { DurationSparklines } from './duration_sparklines';
 import { MonitorDurationTrend } from './duration_trend';
 import { StepDurationPanel } from './step_duration_panel';
@@ -26,32 +22,40 @@ import { DurationPanel } from './duration_panel';
 import { MonitorDetailsPanel } from './monitor_details_panel';
 import { AvailabilitySparklines } from './availability_sparklines';
 import { LastTestRun } from './last_test_run';
-import { LastTenTestRuns } from './last_ten_test_runs';
+import { LAST_10_TEST_RUNS, TestRunsTable } from './test_runs_table';
 import { MonitorErrorsCount } from './monitor_errors_count';
+import { useAbsoluteDate } from '../../../hooks';
 
 export const MonitorSummary = () => {
-  const { euiTheme } = useEuiTheme();
+  const { from: fromRelative } = useEarliestStartDate();
+  const toRelative = 'now';
 
-  // TODO this range needs to be adjusted dynamically https://github.com/elastic/kibana/issues/143472
-  const from = 'now-30d/d';
-  const to = 'now';
+  const { from, to } = useAbsoluteDate({ from: fromRelative, to: toRelative });
+
+  const monitorId = useMonitorQueryId();
+
+  const dateLabel = from === 'now-30d/d' ? LAST_30_DAYS_LABEL : TO_DATE_LABEL;
 
   return (
     <>
       <EuiFlexGroup gutterSize="m">
         <EuiFlexItem grow={1}>
-          <EuiPanel hasShadow={false} hasBorder>
-            <EuiTitle size="xs">
-              <h3>{MONITOR_DETAILS_LABEL}</h3>
-            </EuiTitle>
-            <MonitorDetailsPanel />
-          </EuiPanel>
+          <MonitorDetailsPanel />
         </EuiFlexItem>
         <EuiFlexItem grow={2}>
-          <EuiPanel hasShadow={false} hasBorder paddingSize="s" css={{ height: 158 }}>
-            <EuiTitle size="xs">
-              <h3 css={{ margin: euiTheme.size.s, marginBottom: 0 }}>{LAST_30DAYS_LABEL}</h3>
-            </EuiTitle>
+          <EuiPanel hasShadow={false} hasBorder paddingSize="m" css={{ height: 120 }}>
+            <EuiFlexGroup alignItems="center" gutterSize="m">
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="xs">
+                  <h3>{SUMMARY_LABEL}</h3>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText color="subdued" size="s">
+                  {dateLabel}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem>
                 <AvailabilityPanel from={from} to={to} />
@@ -66,18 +70,20 @@ export const MonitorSummary = () => {
                 <DurationSparklines from={from} to={to} />
               </EuiFlexItem>
               <EuiFlexItem>
-                <MonitorErrorsCount from={from} to={to} />
+                {monitorId && <MonitorErrorsCount from={from} to={to} monitorId={[monitorId]} />}
               </EuiFlexItem>
               <EuiFlexItem>
-                <MonitorErrorSparklines />
+                {monitorId && (
+                  <MonitorErrorSparklines from={from} to={to} monitorId={[monitorId]} />
+                )}
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
           <EuiSpacer size="m" />
           <EuiFlexGroup gutterSize="m">
             <EuiFlexItem>
-              <EuiPanel hasShadow={false} hasBorder>
-                <EuiFlexGroup alignItems="center">
+              <EuiPanel hasShadow={false} paddingSize="m" hasBorder>
+                <EuiFlexGroup alignItems="center" gutterSize="m">
                   <EuiFlexItem grow={false}>
                     <EuiTitle size="xs">
                       <h3>{DURATION_TREND_LABEL}</h3>
@@ -85,7 +91,7 @@ export const MonitorSummary = () => {
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiText color="subdued" size="s">
-                      {LAST_30_DAYS_LABEL}
+                      {dateLabel}
                     </EuiText>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -95,8 +101,13 @@ export const MonitorSummary = () => {
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {/* <EuiSpacer size="l" /> */}
-      {/* <EuiPanel style={{ height: 100 }}>/!* TODO: Add status panel*!/</EuiPanel> */}
+      <EuiSpacer size="m" />
+      <MonitorStatusPanel
+        from={'now-24h'}
+        to={'now'}
+        brushable={false}
+        showViewHistoryButton={true}
+      />
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="m">
         <EuiFlexItem>
@@ -107,17 +118,19 @@ export const MonitorSummary = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <LastTenTestRuns />
+      <LoadWhenInView placeholderTitle={LAST_10_TEST_RUNS}>
+        <TestRunsTable paginable={false} from={from} to={to} />
+      </LoadWhenInView>
     </>
   );
 };
 
-const MONITOR_DETAILS_LABEL = i18n.translate('xpack.synthetics.detailsPanel.monitorDetails', {
-  defaultMessage: 'Monitor details',
+const SUMMARY_LABEL = i18n.translate('xpack.synthetics.detailsPanel.summary', {
+  defaultMessage: 'Summary',
 });
 
-const LAST_30DAYS_LABEL = i18n.translate('xpack.synthetics.detailsPanel.last30Days', {
-  defaultMessage: 'Last 30 days',
+const TO_DATE_LABEL = i18n.translate('xpack.synthetics.detailsPanel.toDate', {
+  defaultMessage: 'To date',
 });
 
 const DURATION_TREND_LABEL = i18n.translate('xpack.synthetics.detailsPanel.durationTrends', {

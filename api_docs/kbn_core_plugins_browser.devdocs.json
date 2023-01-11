@@ -235,20 +235,40 @@
               "{ mode: Readonly<",
               {
                 "pluginId": "@kbn/config",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigPluginApi",
-                "section": "def-server.EnvironmentMode",
+                "section": "def-common.EnvironmentMode",
                 "text": "EnvironmentMode"
               },
               ">; packageInfo: Readonly<",
               {
                 "pluginId": "@kbn/config",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigPluginApi",
-                "section": "def-server.PackageInfo",
+                "section": "def-common.PackageInfo",
                 "text": "PackageInfo"
               },
               ">; }"
+            ],
+            "path": "packages/core/plugins/core-plugins-browser/src/plugin_initializer.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-browser",
+            "id": "def-common.PluginInitializerContext.logger",
+            "type": "Object",
+            "tags": [],
+            "label": "logger",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "common",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-common.LoggerFactory",
+                "text": "LoggerFactory"
+              }
             ],
             "path": "packages/core/plugins/core-plugins-browser/src/plugin_initializer.ts",
             "deprecated": false,

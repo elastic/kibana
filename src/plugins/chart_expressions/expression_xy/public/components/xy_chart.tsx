@@ -47,7 +47,7 @@ import {
   LegendSizeToPixels,
 } from '@kbn/visualizations-plugin/common/constants';
 import { PersistedState } from '@kbn/visualizations-plugin/public';
-import type { FilterEvent, BrushEvent, FormatFactory } from '../types';
+import type { FilterEvent, BrushEvent, FormatFactory, LayerCellValueActions } from '../types';
 import { isTimeChart } from '../../common/helpers';
 import type {
   CommonXYDataLayerConfig,
@@ -121,6 +121,7 @@ export type XYChartRenderProps = Omit<XYChartProps, 'canNavigateToLens'> & {
   minInterval: number | undefined;
   interactive?: boolean;
   onClickValue: (data: FilterEvent['data']) => void;
+  layerCellValueActions: LayerCellValueActions;
   onSelectRange: (data: BrushEvent['data']) => void;
   renderMode: RenderMode;
   syncColors: boolean;
@@ -196,6 +197,7 @@ export function XYChart({
   paletteService,
   minInterval,
   onClickValue,
+  layerCellValueActions,
   onSelectRange,
   interactive = true,
   syncColors,
@@ -275,8 +277,10 @@ export function XYChart({
     [uiState]
   );
 
+  // Exclude the reference layers from the cursor update
+  const cursorSyncLayers = filteredLayers.filter(isDataLayer);
   const handleCursorUpdate = useActiveCursor(chartsActiveCursorService, chartRef, {
-    datatables: filteredLayers.map(({ table }) => table),
+    datatables: cursorSyncLayers.map(({ table }) => table),
   });
 
   const onRenderChange = useCallback(
@@ -826,6 +830,7 @@ export function XYChart({
                 ? getLegendAction(
                     dataLayers,
                     onClickValue,
+                    layerCellValueActions,
                     fieldFormats,
                     formattedDatatables,
                     titles,

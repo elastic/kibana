@@ -8,7 +8,8 @@
 import React, { FunctionComponent } from 'react';
 import { render } from '@testing-library/react';
 import { EuiButtonIcon } from '@elastic/eui';
-import { generateMockIndicator, Indicator, useIndicatorsFiltersContext } from '../../../indicators';
+import { useIndicatorsFiltersContext } from '../../../indicators';
+import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
 import { mockIndicatorsFiltersContext } from '../../../../common/mocks/mock_indicators_filters_context';
 import {
   FilterInButtonEmpty,

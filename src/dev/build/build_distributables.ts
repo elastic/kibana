@@ -16,6 +16,7 @@ export interface BuildOptions {
   dockerContextUseLocalArtifact: boolean | null;
   dockerCrossCompile: boolean;
   dockerPush: boolean;
+  dockerTag: string | null;
   dockerTagQualifier: string | null;
   downloadFreshNode: boolean;
   downloadCloudDependencies: boolean;
@@ -64,10 +65,11 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
   if (options.createGenericFolders) {
     await run(Tasks.CopySource);
     await run(Tasks.CopyBinScripts);
-    await run(Tasks.ReplaceFavicon);
+
     await run(Tasks.CreateEmptyDirsAndFiles);
     await run(Tasks.CreateReadme);
     await run(Tasks.BuildBazelPackages);
+    await run(Tasks.ReplaceFavicon);
     if (options.buildCanvasShareableRuntime) {
       await run(Tasks.BuildCanvasShareableRuntime);
     }

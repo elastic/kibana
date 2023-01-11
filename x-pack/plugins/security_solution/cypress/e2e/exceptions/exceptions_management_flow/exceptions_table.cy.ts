@@ -22,7 +22,7 @@ import {
   clearSearchSelection,
 } from '../../../tasks/exceptions_table';
 import {
-  EXCEPTIONS_TABLE_DELETE_BTN,
+  EXCEPTIONS_OVERFLOW_ACTIONS_BTN,
   EXCEPTIONS_TABLE_LIST_NAME,
   EXCEPTIONS_TABLE_SHOWING_LISTS,
 } from '../../../screens/exceptions';
@@ -65,18 +65,15 @@ describe('Exceptions Table', () => {
     createExceptionList(getExceptionList1(), getExceptionList1().list_id).as(
       'exceptionListResponse'
     );
+  });
 
+  beforeEach(() => {
     visitWithoutDateRange(EXCEPTIONS_URL);
-
-    // Using cy.contains because we do not care about the exact text,
-    // just checking number of lists shown
-    cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '3');
   });
 
   it('Exports exception list', function () {
     cy.intercept(/(\/api\/exception_lists\/_export)/).as('export');
 
-    visitWithoutDateRange(EXCEPTIONS_URL);
     waitForExceptionsTableToBeLoaded();
     exportExceptionList();
 
@@ -91,7 +88,6 @@ describe('Exceptions Table', () => {
   });
 
   it('Filters exception lists on search', () => {
-    visitWithoutDateRange(EXCEPTIONS_URL);
     waitForExceptionsTableToBeLoaded();
 
     // Using cy.contains because we do not care about the exact text,
@@ -142,7 +138,6 @@ describe('Exceptions Table', () => {
   });
 
   it('Deletes exception list without rule reference', () => {
-    visitWithoutDateRange(EXCEPTIONS_URL);
     waitForExceptionsTableToBeLoaded();
 
     // Using cy.contains because we do not care about the exact text,
@@ -188,7 +183,7 @@ describe('Exceptions Table - read only', () => {
     cy.get(EXCEPTIONS_TABLE_SHOWING_LISTS).should('have.text', `Showing 1 list`);
   });
 
-  it('Delete icon is not shown', () => {
-    cy.get(EXCEPTIONS_TABLE_DELETE_BTN).should('not.exist');
+  it('Card menu actions should be disabled', () => {
+    cy.get(EXCEPTIONS_OVERFLOW_ACTIONS_BTN).first().should('be.disabled');
   });
 });

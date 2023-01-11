@@ -28,6 +28,8 @@ export interface LoadActionErrorLogProps {
   perPage?: number;
   page?: number;
   sort?: SortField[];
+  namespace?: string;
+  withAuth?: boolean;
 }
 
 const SORT_MAP: Record<string, string> = {
@@ -60,6 +62,8 @@ export const loadActionErrorLog = ({
   perPage = 10,
   page = 0,
   sort,
+  namespace,
+  withAuth = false,
 }: LoadActionErrorLogProps & { http: HttpSetup }) => {
   const renamedSort = getRenamedSort(sort);
   const filter = getFilter({ runId, message });
@@ -76,6 +80,8 @@ export const loadActionErrorLog = ({
         // whereas data grid sorts are 0 indexed.
         page: page + 1,
         sort: renamedSort.length ? JSON.stringify(renamedSort) : undefined,
+        namespace,
+        with_auth: withAuth,
       },
     }
   );

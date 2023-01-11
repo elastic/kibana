@@ -15,21 +15,21 @@ import { Link, useParams } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { generatePath } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { CspInlineDescriptionList } from '../../../../components/csp_inline_description_list';
 import type { Evaluation } from '../../../../../common/types';
 import { CspFinding } from '../../../../../common/schemas/csp_finding';
 import { CloudPosturePageTitle } from '../../../../components/cloud_posture_page_title';
 import * as TEST_SUBJECTS from '../../test_subjects';
-import { PageTitle, PageTitleText } from '../../layout/findings_layout';
+import { LimitedResultsBar, PageTitle, PageTitleText } from '../../layout/findings_layout';
 import { findingsNavigation } from '../../../../common/navigation/constants';
 import { ResourceFindingsQuery, useResourceFindings } from './use_resource_findings';
 import { useUrlQuery } from '../../../../common/hooks/use_url_query';
+import { usePageSlice } from '../../../../common/hooks/use_page_slice';
+import { usePageSize } from '../../../../common/hooks/use_page_size';
 import type { FindingsBaseURLQuery, FindingsBaseProps } from '../../types';
 import {
   getFindingsPageSizeInfo,
   getFilters,
-  getPaginationQuery,
   getPaginationTableParams,
   useBaseEsQuery,
   usePersistedQuery,
@@ -38,7 +38,8 @@ import { ResourceFindingsTable } from './resource_findings_table';
 import { FindingsSearchBar } from '../../layout/findings_search_bar';
 import { ErrorCallout } from '../../layout/error_callout';
 import { FindingsDistributionBar } from '../../layout/findings_distribution_bar';
-import { LOCAL_STORAGE_PAGE_SIZE_RESOURCE_FINDINGS_KEY } from '../../../../../common/constants';
+import { LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY } from '../../../../common/constants';
+import { useLimitProperties } from '../../utils/get_limit_properties';
 
 const getDefaultQuery = ({
   query,
@@ -48,7 +49,6 @@ const getDefaultQuery = ({
   filters,
   sort: { field: 'result.evaluation' as keyof CspFinding, direction: 'asc' },
   pageIndex: 0,
-  pageSize: 10,
 });
 
 const BackToResourcesButton = () => (
@@ -56,7 +56,7 @@ const BackToResourcesButton = () => (
     <EuiButtonEmpty iconType={'arrowLeft'}>
       <FormattedMessage
         id="xpack.csp.findings.resourceFindings.backToResourcesPageButtonLabel"
-        defaultMessage="Back to group by resource view"
+        defaultMessage="Back to resources"
       />
     </EuiButtonEmpty>
   </Link>
@@ -92,10 +92,7 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
   const params = useParams<{ resourceId: string }>();
   const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
   const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
-  const [pageSize, setPageSize] = useLocalStorage(
-    LOCAL_STORAGE_PAGE_SIZE_RESOURCE_FINDINGS_KEY,
-    urlQuery.pageSize
-  );
+  const { pageSize, setPageSize } = usePageSize(LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY);
 
   /**
    * Page URL query to ES query
@@ -110,10 +107,6 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
    * Page ES query result
    */
   const resourceFindings = useResourceFindings({
-    ...getPaginationQuery({
-      pageSize: pageSize || urlQuery.pageSize,
-      pageIndex: urlQuery.pageIndex,
-    }),
     sort: urlQuery.sort,
     query: baseEsQuery.query,
     resourceId: params.resourceId,
@@ -121,6 +114,14 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
   });
 
   const error = resourceFindings.error || baseEsQuery.error;
+
+  const slicedPage = usePageSlice(resourceFindings.data?.page, urlQuery.pageIndex, pageSize);
+
+  const { isLastLimitedPage, limitedTotalItemCount } = useLimitProperties({
+    total: resourceFindings.data?.total,
+    pageIndex: urlQuery.pageIndex,
+    pageSize,
+  });
 
   const handleDistributionClick = (evaluation: Evaluation) => {
     setUrlQuery({
@@ -190,8 +191,8 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
                 failed: resourceFindings.data.count.failed,
                 ...getFindingsPageSizeInfo({
                   pageIndex: urlQuery.pageIndex,
-                  pageSize: urlQuery.pageSize,
-                  currentPageSize: resourceFindings.data.page.length,
+                  pageSize,
+                  currentPageSize: slicedPage.length,
                 }),
               }}
             />
@@ -199,18 +200,18 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
           <EuiSpacer />
           <ResourceFindingsTable
             loading={resourceFindings.isFetching}
-            items={resourceFindings.data?.page || []}
+            items={slicedPage}
             pagination={getPaginationTableParams({
-              pageSize: pageSize || urlQuery.pageSize,
+              pageSize,
               pageIndex: urlQuery.pageIndex,
-              totalItemCount: resourceFindings.data?.total || 0,
+              totalItemCount: limitedTotalItemCount,
             })}
             sorting={{
               sort: { field: urlQuery.sort.field, direction: urlQuery.sort.direction },
             }}
             setTableOptions={({ page, sort }) => {
               setPageSize(page.size);
-              setUrlQuery({ pageIndex: page.index, pageSize: page.size, sort });
+              setUrlQuery({ pageIndex: page.index, sort });
             }}
             onAddFilter={(field, value, negate) =>
               setUrlQuery({
@@ -227,6 +228,7 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
           />
         </>
       )}
+      {isLastLimitedPage && <LimitedResultsBar />}
     </div>
   );
 };

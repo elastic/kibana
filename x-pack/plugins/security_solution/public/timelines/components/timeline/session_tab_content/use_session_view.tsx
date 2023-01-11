@@ -10,6 +10,7 @@ import { EuiButtonEmpty, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } 
 import styled from 'styled-components';
 import type { EntityType } from '@kbn/timelines-plugin/common';
 import { useDispatch } from 'react-redux';
+import type { TableId } from '../../../../../common/types/data_table';
 import {
   getScopedActions,
   isActiveTimeline,
@@ -18,7 +19,6 @@ import {
 } from '../../../../helpers';
 import { useKibana } from '../../../../common/lib/kibana';
 import * as i18n from './translations';
-import type { TableId } from '../../../../../common/types/timeline';
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { useDetailPanel } from '../../side_panel/hooks/use_detail_panel';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
@@ -40,13 +40,6 @@ import { timelineDefaults } from '../../../store/timeline/defaults';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { dataTableSelectors } from '../../../../common/store/data_table';
 import { tableDefaults } from '../../../../common/store/data_table/defaults';
-
-export interface SessionViewConfig {
-  sessionEntityId: string;
-  jumpToEntityId?: string;
-  jumpToCursor?: string;
-  investigatedAlertId?: string;
-}
 
 const FullScreenButtonIcon = styled(EuiButtonIcon)`
   margin: 4px 0 4px 0;
@@ -295,7 +288,7 @@ export const useSessionView = ({
       return SourcererScopeName.default;
     }
   }, [scopeId]);
-  const { openDetailsPanel, shouldShowDetailsPanel, DetailsPanel } = useDetailPanel({
+  const { openEventDetailsPanel, shouldShowDetailsPanel, DetailsPanel } = useDetailPanel({
     isFlyoutView: !isActiveTimeline(scopeId),
     entityType,
     sourcererScope,
@@ -309,7 +302,7 @@ export const useSessionView = ({
     return sessionViewConfig !== null
       ? sessionView.getSessionView({
           ...sessionViewConfig,
-          loadAlertDetails: openDetailsPanel,
+          loadAlertDetails: openEventDetailsPanel,
           isFullScreen: fullScreen,
           height: heightMinusSearchBar,
           canAccessEndpointManagement,
@@ -319,13 +312,13 @@ export const useSessionView = ({
     height,
     sessionViewConfig,
     sessionView,
-    openDetailsPanel,
+    openEventDetailsPanel,
     fullScreen,
     canAccessEndpointManagement,
   ]);
 
   return {
-    openDetailsPanel,
+    openEventDetailsPanel,
     shouldShowDetailsPanel,
     SessionView: sessionViewComponent,
     DetailsPanel,
