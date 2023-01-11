@@ -24,13 +24,17 @@ import { getQueryRuleParams } from '../../../rule_schema/mocks';
 import { getExceptionListClientMock } from '@kbn/lists-plugin/server/services/exception_lists/exception_list_client.mock';
 import type { loggingSystemMock } from '@kbn/core/server/mocks';
 import { requestContextMock } from '../../../routes/__mocks__/request_context';
+import { savedObjectsExporterMock } from '@kbn/core-saved-objects-import-export-server-mocks';
+import { mockRouter } from '@kbn/core-http-router-server-mocks';
 
 const exceptionsClient = getExceptionListClientMock();
 
+// TODO add tests for connectors
 describe('getExportAll', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   const { clients } = requestContextMock.createTools();
-
+  const exporterMock = savedObjectsExporterMock.create();
+  const requestMock = mockRouter.createKibanaRequest();
   beforeEach(async () => {
     clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse());
   });
@@ -55,7 +59,9 @@ describe('getExportAll', () => {
       rulesClient,
       exceptionsClient,
       clients.savedObjectsClient,
-      logger
+      logger,
+      exporterMock,
+      requestMock
     );
     const rulesJson = JSON.parse(exports.rulesNdjson);
     const detailsJson = JSON.parse(exports.exportDetails);
@@ -114,6 +120,11 @@ describe('getExportAll', () => {
       missing_exception_lists_count: 0,
       missing_rules: [],
       missing_rules_count: 0,
+      excluded_action_connection_count: 0,
+      excluded_action_connections: [],
+      exported_action_connector_count: 0,
+      missing_action_connection_count: 0,
+      missing_action_connections: [],
     });
   });
 
@@ -133,12 +144,15 @@ describe('getExportAll', () => {
       rulesClient,
       exceptionsClient,
       clients.savedObjectsClient,
-      logger
+      logger,
+      exporterMock,
+      requestMock
     );
     expect(exports).toEqual({
       rulesNdjson: '',
       exportDetails: getSampleDetailsAsNdjson(details),
       exceptionLists: '',
+      actionConnectors: '',
     });
   });
 });

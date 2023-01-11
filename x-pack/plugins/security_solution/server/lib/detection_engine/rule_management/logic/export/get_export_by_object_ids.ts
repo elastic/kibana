@@ -69,21 +69,25 @@ export const getExportByObjectIds = async (
     await getRuleExceptionsForExport(exceptions, exceptionsClient);
 
   // Retrieve Action-Connectors
-  const actionConnectors = await getRuleActionConnectorsForExport(rules, actionsExporter, request);
+  const { actionConnectors, actionConnectorDetails } = await getRuleActionConnectorsForExport(
+    rules,
+    actionsExporter,
+    request
+  );
 
   const rulesNdjson = transformDataToNdjson(rules);
   const exportDetails = getExportDetailsNdjson(
     rules,
     missingRules,
     exceptionDetails,
-    actionConnectors.actionConnectorDetails
+    actionConnectorDetails
   );
 
   return {
     rulesNdjson,
     exportDetails,
     exceptionLists,
-    actionConnectors: actionConnectors.actionConnectors,
+    actionConnectors,
   };
 };
 

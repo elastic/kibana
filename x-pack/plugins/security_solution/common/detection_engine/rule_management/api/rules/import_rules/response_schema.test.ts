@@ -14,6 +14,7 @@ import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts
 import type { ErrorSchema } from '../../../../schemas/response/error_schema';
 import { ImportRulesResponse } from './response_schema';
 
+// TODO add tests for the action_connectors_success
 describe('Import rules response schema', () => {
   test('it should validate an empty import response with no errors', () => {
     const payload: ImportRulesResponse = {
@@ -24,6 +25,8 @@ describe('Import rules response schema', () => {
       exceptions_errors: [],
       exceptions_success: true,
       exceptions_success_count: 0,
+      action_connectors_success: true,
+      action_connectors_success_count: 0,
     };
     const decoded = ImportRulesResponse.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -42,6 +45,8 @@ describe('Import rules response schema', () => {
       exceptions_errors: [],
       exceptions_success: true,
       exceptions_success_count: 0,
+      action_connectors_success: true,
+      action_connectors_success_count: 0,
     };
     const decoded = ImportRulesResponse.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -60,6 +65,8 @@ describe('Import rules response schema', () => {
       exceptions_errors: [{ error: { status_code: 400, message: 'some message' } }],
       exceptions_success: true,
       exceptions_success_count: 0,
+      action_connectors_success: true,
+      action_connectors_success_count: 0,
     };
     const decoded = ImportRulesResponse.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -81,6 +88,8 @@ describe('Import rules response schema', () => {
       exceptions_errors: [],
       exceptions_success: true,
       exceptions_success_count: 0,
+      action_connectors_success: true,
+      action_connectors_success_count: 0,
     };
     const decoded = ImportRulesResponse.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -102,6 +111,8 @@ describe('Import rules response schema', () => {
       ],
       exceptions_success: true,
       exceptions_success_count: 0,
+      action_connectors_success: true,
+      action_connectors_success_count: 0,
     };
     const decoded = ImportRulesResponse.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -120,6 +131,8 @@ describe('Import rules response schema', () => {
       exceptions_errors: [],
       exceptions_success: true,
       exceptions_success_count: 0,
+      action_connectors_success: true,
+      action_connectors_success_count: 0,
     };
     const decoded = ImportRulesResponse.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -140,6 +153,8 @@ describe('Import rules response schema', () => {
       exceptions_errors: [],
       exceptions_success: true,
       exceptions_success_count: -1,
+      action_connectors_success: true,
+      action_connectors_success_count: 0,
     };
     const decoded = ImportRulesResponse.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -178,6 +193,8 @@ describe('Import rules response schema', () => {
       exceptions_errors: [],
       exceptions_success: true,
       exceptions_success_count: 0,
+      action_connectors_success: true,
+      action_connectors_success_count: 0,
     };
     const decoded = ImportRulesResponse.decode(payload);
     const checked = exactCheck(payload, decoded as UnsafeCastForTest);
@@ -217,6 +234,8 @@ describe('Import rules response schema', () => {
       exceptions_errors: [],
       exceptions_success: 'hello',
       exceptions_success_count: 0,
+      action_connectors_success: true,
+      action_connectors_success_count: 0,
     };
     const decoded = ImportRulesResponse.decode(payload);
     const checked = exactCheck(payload, decoded as UnsafeCastForTest);
@@ -238,6 +257,8 @@ describe('Import rules response schema', () => {
       exceptions_errors: [],
       exceptions_success: true,
       exceptions_success_count: 0,
+      action_connectors_success: true,
+      action_connectors_success_count: 0,
     };
     const decoded = ImportRulesResponse.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -262,6 +283,8 @@ describe('Import rules response schema', () => {
       exceptions_errors: [],
       exceptions_success: true,
       exceptions_success_count: 0,
+      action_connectors_success: true,
+      action_connectors_success_count: 0,
     };
     const decoded = ImportRulesResponse.decode(payload);
     const checked = exactCheck(payload, decoded);
