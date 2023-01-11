@@ -11,6 +11,16 @@ import { WebElementWrapper } from '../../../../test/functional/services/lib/web_
 import { FtrProviderContext } from '../ftr_provider_context';
 import { logWrapper } from './log_wrapper';
 
+declare global {
+  interface Window {
+    /**
+     * Debug setting to test CSV download
+     */
+    ELASTIC_LENS_CSV_DOWNLOAD_DEBUG?: boolean;
+    ELASTIC_LENS_CSV_CONTENT?: Record<string, { content: string; type: string }>;
+  }
+}
+
 export function LensPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const findService = getService('find');
