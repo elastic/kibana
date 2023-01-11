@@ -63,4 +63,18 @@ export class ESQLWorker implements BaseWorkerDefinition {
       return parseListener.getAutocompleteSuggestions();
     }
   }
+
+  public async provideAutocompleteSuggestionsFromString(text: string) {
+    const inputStream = CharStreams.fromString(text);
+
+    if (inputStream) {
+      const errorListener = new ANTLREErrorListener();
+      const parseListener = new AutocompleteListener();
+      const parser = getParser(inputStream, errorListener, parseListener);
+
+      parser[ROOT_STATEMENT]();
+
+      return parseListener.getAutocompleteSuggestions();
+    }
+  }
 }
