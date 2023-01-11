@@ -27,11 +27,8 @@ export function MachineLearningLensVisualizationsProvider(
     async clickCreateJobFromLayerWithWizard(layerIndex: number) {
       await testSubjects.click(`mlLensLayerCreateWithWizardButton_${layerIndex}`);
     },
-    async assertLensLayerSelectorExists() {
+    async assertLayerSelectorExists() {
       await testSubjects.existOrFail('mlFlyoutLayerSelector');
-    },
-    async assertMapLayerSelectorExists() {
-      await testSubjects.existOrFail('mlGeoJobFlyout');
     },
     async assertMLJobMenuActionDoesNotExist() {
       await testSubjects.missingOrFail('embeddablePanelAction-create-ml-ad-job-action');

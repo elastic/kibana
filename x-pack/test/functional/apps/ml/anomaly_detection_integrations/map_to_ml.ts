@@ -64,7 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await ml.lensVisualizations.clickCreateMLJobMenuAction();
 
-      await ml.lensVisualizations.assertMapLayerSelectorExists();
+      await ml.lensVisualizations.assertLayerSelectorExists();
 
       await ml.lensVisualizations.assertNumberOfCompatibleMapLayers(numberOfCompatibleLayers);
 
