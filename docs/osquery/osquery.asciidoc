@@ -54,7 +54,12 @@ image::images/enter-query.png[Select saved query dropdown name showing query nam
 +
 TIP: To save a single query for future use, click *Save for later* and define the ID, description, and other <<osquery-manage-query,details>>.
 
-. Review the results. Next, navigate to *Discover* to dive deeper into the response or to *Lens* to create visualizations.
+. Review the results and do any of the following:
+
+** Click to *View in Discover* to explore the results in Discover.
+** Click *View in Lens* to navigate to Lens where you can create visualizations.
+** Click *Add to Case* to add the query results to a new or existing case. 
+
 . To view more information about the request, such as failures, open the *Status* tab.
 
 [float]
