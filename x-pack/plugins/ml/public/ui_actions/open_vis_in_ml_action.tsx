@@ -8,14 +8,16 @@
 import { i18n } from '@kbn/i18n';
 import type { Embeddable } from '@kbn/lens-plugin/public';
 import type { MapEmbeddable } from '@kbn/maps-plugin/public';
-import { createAction } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { MlCoreSetup } from '../plugin';
 import { isLensEmbeddable, isMapEmbeddable } from '../application/jobs/new_job/job_from_dashboard';
 
 export const CREATE_LENS_VIS_TO_ML_AD_JOB_ACTION = 'createMLADJobAction';
 
-export function createVisToADJobAction(getStartServices: MlCoreSetup['getStartServices']) {
-  return createAction<{ embeddable: Embeddable | MapEmbeddable }>({
+export function createVisToADJobAction(
+  getStartServices: MlCoreSetup['getStartServices']
+): UiActionsActionDefinition<{ embeddable: Embeddable | MapEmbeddable }> {
+  return {
     id: 'create-ml-ad-job-action',
     type: CREATE_LENS_VIS_TO_ML_AD_JOB_ACTION,
     getIconType(context): string {
@@ -82,5 +84,5 @@ export function createVisToADJobAction(getStartServices: MlCoreSetup['getStartSe
         return false;
       }
     },
-  });
+  };
 }

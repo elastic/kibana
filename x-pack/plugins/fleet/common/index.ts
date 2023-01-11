@@ -95,7 +95,7 @@ export type {
   GetAgentPoliciesRequest,
   GetAgentPoliciesResponse,
   GetAgentPoliciesResponseItem,
-  DeletePackagePoliciesResponse,
+  PostDeletePackagePoliciesResponse,
   GetPackagesResponse,
   BulkInstallPackagesResponse,
   FleetErrorResponse,
