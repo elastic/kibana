@@ -2821,6 +2821,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/chart-expressions-common@link:src/plugins/chart_expressions/common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/chart-icons@link:packages/kbn-chart-icons":
   version "0.0.0"
   uid ""
