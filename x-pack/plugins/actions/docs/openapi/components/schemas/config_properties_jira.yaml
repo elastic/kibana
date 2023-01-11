@@ -1,4 +1,4 @@
-title: Create connector request properties for a Jira connector
+title: Connector request properties for a Jira connector
 required:
   - apiUrl
   - projectKey

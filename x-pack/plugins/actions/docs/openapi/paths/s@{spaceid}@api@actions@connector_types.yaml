@@ -18,6 +18,8 @@ get:
       content:
         application/json:
           schema:
+            title: Get connector types response body properties
+            description: The properties vary for each connector type.
             type: array
             items:
               type: object

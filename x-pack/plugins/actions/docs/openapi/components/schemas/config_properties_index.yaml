@@ -1,4 +1,4 @@
-title: Create connector request properties for an index connector
+title: Connector request properties for an index connector
 required:
   - index
 description: Defines properties for connectors when type is `.index`.

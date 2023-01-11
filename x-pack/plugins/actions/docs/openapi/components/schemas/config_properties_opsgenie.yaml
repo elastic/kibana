@@ -1,4 +1,4 @@
-title: Create connector request properties for an Opsgenie connector
+title: Connector request properties for an Opsgenie connector
 required:
   - apiUrl
 description: Defines properties for connectors when type is `.opsgenie`.

@@ -31,20 +31,28 @@ paths:
         content:
           application/json:
             schema:
+              title: Create connector request body properties
+              description: The properties vary depending on the connector type.
               oneOf:
                 - $ref: '#/components/schemas/create_connector_request_cases_webhook'
+                - $ref: '#/components/schemas/create_connector_request_email'
                 - $ref: '#/components/schemas/create_connector_request_index'
                 - $ref: '#/components/schemas/create_connector_request_jira'
                 - $ref: '#/components/schemas/create_connector_request_opsgenie'
+                - $ref: '#/components/schemas/create_connector_request_pagerduty'
                 - $ref: '#/components/schemas/create_connector_request_resilient'
                 - $ref: '#/components/schemas/create_connector_request_serverlog'
                 - $ref: '#/components/schemas/create_connector_request_servicenow'
                 - $ref: '#/components/schemas/create_connector_request_servicenow_itom'
                 - $ref: '#/components/schemas/create_connector_request_servicenow_sir'
+                - $ref: '#/components/schemas/create_connector_request_slack'
                 - $ref: '#/components/schemas/create_connector_request_swimlane'
+                - $ref: '#/components/schemas/create_connector_request_teams'
+                - $ref: '#/components/schemas/create_connector_request_tines'
+                - $ref: '#/components/schemas/create_connector_request_webhook'
+                - $ref: '#/components/schemas/create_connector_request_xmatters'
               discriminator:
                 propertyName: connector_type_id
-              additionalProperties: true
             examples:
               createIndexConnectorRequest:
                 $ref: '#/components/examples/create_index_connector_request'
@@ -117,20 +125,25 @@ paths:
         content:
           application/json:
             schema:
+              title: Update connector request body properties
+              description: The properties vary depending on the connector type.
               oneOf:
                 - $ref: '#/components/schemas/update_connector_request_cases_webhook'
+                - $ref: '#/components/schemas/update_connector_request_email'
                 - $ref: '#/components/schemas/update_connector_request_index'
                 - $ref: '#/components/schemas/update_connector_request_jira'
                 - $ref: '#/components/schemas/update_connector_request_opsgenie'
+                - $ref: '#/components/schemas/update_connector_request_pagerduty'
                 - $ref: '#/components/schemas/update_connector_request_resilient'
                 - $ref: '#/components/schemas/update_connector_request_serverlog'
                 - $ref: '#/components/schemas/update_connector_request_servicenow'
                 - $ref: '#/components/schemas/update_connector_request_servicenow_itom'
+                - $ref: '#/components/schemas/update_connector_request_slack'
                 - $ref: '#/components/schemas/update_connector_request_swimlane'
-              additionalProperties: true
-            examples:
-              updateIndexConnectorRequest:
-                $ref: '#/components/examples/update_index_connector_request'
+                - $ref: '#/components/schemas/update_connector_request_teams'
+                - $ref: '#/components/schemas/update_connector_request_tines'
+                - $ref: '#/components/schemas/update_connector_request_webhook'
+                - $ref: '#/components/schemas/update_connector_request_xmatters'
       responses:
         '200':
           description: Indicates a successful call.
@@ -160,6 +173,8 @@ paths:
               schema:
                 type: array
                 items:
+                  title: Get connectors response body properties
+                  description: The properties vary for each connector type.
                   type: object
                   required:
                     - connector_type_id
@@ -223,6 +238,8 @@ paths:
           content:
             application/json:
               schema:
+                title: Get connector types response body properties
+                description: The properties vary for each connector type.
                 type: array
                 items:
                   type: object
@@ -299,7 +316,7 @@ components:
         example: df770e30-8b8b-11ed-a780-3b746c987a81
   schemas:
     config_properties_cases_webhook:
-      title: Create connector request properties for Webhook - Case Management connector
+      title: Connector request properties for Webhook - Case Management connector
       required:
         - createIncidentJson
         - createIncidentResponseKey
@@ -442,8 +459,43 @@ components:
           example: my-connector
         secrets:
           $ref: '#/components/schemas/secrets_properties_cases_webhook'
+    config_properties_email:
+      title: Connector request properties for an email connector
+      description: Defines properties for connectors when type is `.email`.
+      type: object
+      additionalProperties: true
+    secrets_properties_email:
+      title: Connector secrets properties for an email connector
+      description: Defines secrets for connectors when type is `.email`.
+      type: object
+      additionalProperties: true
+    create_connector_request_email:
+      title: Create email connector request
+      description: |
+        The email connector uses the SMTP protocol to send mail messages, using an integration of Nodemailer. An exception is Microsoft Exchange, which uses HTTP protocol for sending emails, Send mail. Email message text is sent as both plain text and html text.
+      type: object
+      required:
+        - config
+        - connector_type_id
+        - name
+        - secrets
+      properties:
+        config:
+          $ref: '#/components/schemas/config_properties_email'
+        connector_type_id:
+          type: string
+          description: The type of connector.
+          enum:
+            - .email
+          example: .email
+        name:
+          type: string
+          description: The display name for the connector.
+          example: my-connector
+        secrets:
+          $ref: '#/components/schemas/secrets_properties_email'
     config_properties_index:
-      title: Create connector request properties for an index connector
+      title: Connector request properties for an index connector
       required:
         - index
       description: Defines properties for connectors when type is `.index`.
@@ -484,7 +536,7 @@ components:
           description: The display name for the connector.
           example: my-connector
     config_properties_jira:
-      title: Create connector request properties for a Jira connector
+      title: Connector request properties for a Jira connector
       required:
         - apiUrl
         - projectKey
@@ -536,7 +588,7 @@ components:
         secrets:
           $ref: '#/components/schemas/secrets_properties_jira'
     config_properties_opsgenie:
-      title: Create connector request properties for an Opsgenie connector
+      title: Connector request properties for an Opsgenie connector
       required:
         - apiUrl
       description: Defines properties for connectors when type is `.opsgenie`.
@@ -580,8 +632,43 @@ components:
           example: my-connector
         secrets:
           $ref: '#/components/schemas/secrets_properties_opsgenie'
+    config_properties_pagerduty:
+      title: Connector request properties for a PagerDuty connector
+      description: Defines properties for connectors when type is `.pagerduty`.
+      type: object
+      additionalProperties: true
+    secrets_properties_pagerduty:
+      title: Connector secrets properties for a PagerDuty connector
+      description: Defines secrets for connectors when type is `.pagerduty`.
+      type: object
+      additionalProperties: true
+    create_connector_request_pagerduty:
+      title: Create PagerDuty connector request
+      description: |
+        The PagerDuty connector uses the v2 Events API to trigger, acknowledge, and resolve PagerDuty alerts.
+      type: object
+      required:
+        - config
+        - connector_type_id
+        - name
+        - secrets
+      properties:
+        config:
+          $ref: '#/components/schemas/config_properties_pagerduty'
+        connector_type_id:
+          type: string
+          description: The type of connector.
+          enum:
+            - .pagerduty
+          example: .pagerduty
+        name:
+          type: string
+          description: The display name for the connector.
+          example: my-connector
+        secrets:
+          $ref: '#/components/schemas/secrets_properties_pagerduty'
     config_properties_resilient:
-      title: Create connector request properties for a IBM Resilient connector
+      title: Connector request properties for a IBM Resilient connector
       required:
         - apiUrl
         - orgId
@@ -651,7 +738,7 @@ components:
           description: The display name for the connector.
           example: my-connector
     config_properties_servicenow:
-      title: Create case request properties for a ServiceNow ITSM connector
+      title: Connector request properties for a ServiceNow ITSM connector
       required:
         - apiUrl
       description: Defines properties for connectors when type is `.servicenow`.
@@ -728,7 +815,7 @@ components:
         secrets:
           $ref: '#/components/schemas/secrets_properties_servicenow'
     config_properties_servicenow_itom:
-      title: Create case request properties for a ServiceNow ITSM connector
+      title: Connector request properties for a ServiceNow ITSM connector
       required:
         - apiUrl
       description: Defines properties for connectors when type is `.servicenow`.
@@ -804,8 +891,34 @@ components:
           example: my-connector
         secrets:
           $ref: '#/components/schemas/secrets_properties_servicenow'
+    secrets_properties_slack:
+      title: Connector secrets properties for a Slack connector
+      description: Defines secrets for connectors when type is `.slack`.
+      type: object
+      additionalProperties: true
+    create_connector_request_slack:
+      title: Create Slack connector request
+      description: The Slack connector uses Slack Incoming Webhooks.
+      type: object
+      required:
+        - connector_type_id
+        - name
+        - secrets
+      properties:
+        connector_type_id:
+          type: string
+          description: The type of connector.
+          enum:
+            - .slack
+          example: .slack
+        name:
+          type: string
+          description: The display name for the connector.
+          example: my-connector
+        secrets:
+          $ref: '#/components/schemas/secrets_properties_slack'
     config_properties_swimlane:
-      title: Create connector request properties for a Swimlane connector
+      title: Connector request properties for a Swimlane connector
       required:
         - apiUrl
         - appId
@@ -827,10 +940,12 @@ components:
             - alerts
             - cases
         mappings:
+          title: Connector mappings properties for a Swimlane connector
           description: The field mapping.
           type: object
           properties:
             alertIdConfig:
+              title: Alert identifier mapping
               description: Mapping for the alert ID.
               type: object
               required:
@@ -852,6 +967,7 @@ components:
                   type: string
                   description: The name of the field in Swimlane.
             caseIdConfig:
+              title: Case identifier mapping
               description: Mapping for the case ID.
               type: object
               required:
@@ -873,6 +989,7 @@ components:
                   type: string
                   description: The name of the field in Swimlane.
             caseNameConfig:
+              title: Case name mapping
               description: Mapping for the case name.
               type: object
               required:
@@ -894,6 +1011,7 @@ components:
                   type: string
                   description: The name of the field in Swimlane.
             commentsConfig:
+              title: Case comment mapping
               description: Mapping for the case comments.
               type: object
               required:
@@ -915,6 +1033,7 @@ components:
                   type: string
                   description: The name of the field in Swimlane.
             descriptionConfig:
+              title: Case description mapping
               description: Mapping for the case description.
               type: object
               required:
@@ -936,6 +1055,7 @@ components:
                   type: string
                   description: The name of the field in Swimlane.
             ruleNameConfig:
+              title: Rule name mapping
               description: Mapping for the name of the alert's rule.
               type: object
               required:
@@ -957,6 +1077,7 @@ components:
                   type: string
                   description: The name of the field in Swimlane.
             severityConfig:
+              title: Severity mapping
               description: Mapping for the severity.
               type: object
               required:
@@ -1009,6 +1130,137 @@ components:
           example: my-connector
         secrets:
           $ref: '#/components/schemas/secrets_properties_swimlane'
+    secrets_properties_teams:
+      title: Connector secrets properties for a Microsoft Teams connector
+      description: Defines secrets for connectors when type is `.teams`.
+      type: object
+      additionalProperties: true
+    create_connector_request_teams:
+      title: Create Microsoft Teams connector request
+      description: The Microsoft Teams connector uses Incoming Webhooks.
+      type: object
+      required:
+        - connector_type_id
+        - name
+        - secrets
+      properties:
+        connector_type_id:
+          type: string
+          description: The type of connector.
+          enum:
+            - .teams
+          example: .teams
+        name:
+          type: string
+          description: The display name for the connector.
+          example: my-connector
+        secrets:
+          $ref: '#/components/schemas/secrets_properties_teams'
+    config_properties_tines:
+      title: Connector request properties for a Tines connector
+      description: Defines properties for connectors when type is `.tines`.
+      type: object
+      additionalProperties: true
+    secrets_properties_tines:
+      title: Connector secrets properties for a Tines connector
+      description: Defines secrets for connectors when type is `.tines`.
+      type: object
+      additionalProperties: true
+    create_connector_request_tines:
+      title: Create Tines connector request
+      description: |
+        The Tines connector uses Tines Webhook actions to send events via POST request.
+      type: object
+      required:
+        - config
+        - connector_type_id
+        - name
+        - secrets
+      properties:
+        config:
+          $ref: '#/components/schemas/config_properties_tines'
+        connector_type_id:
+          type: string
+          description: The type of connector.
+          enum:
+            - .tines
+          example: .tines
+        name:
+          type: string
+          description: The display name for the connector.
+          example: my-connector
+        secrets:
+          $ref: '#/components/schemas/secrets_properties_tines'
+    config_properties_webhook:
+      title: Connector request properties for a Webhook connector
+      description: Defines properties for connectors when type is `.webhook`.
+      type: object
+      additionalProperties: true
+    secrets_properties_webhook:
+      title: Connector secrets properties for a Webhook connector
+      description: Defines secrets for connectors when type is `.webhook`.
+      type: object
+      additionalProperties: true
+    create_connector_request_webhook:
+      title: Create Webhook connector request
+      description: |
+        The Webhook connector uses axios to send a POST or PUT request to a web service.
+      type: object
+      required:
+        - config
+        - connector_type_id
+        - name
+        - secrets
+      properties:
+        config:
+          $ref: '#/components/schemas/config_properties_webhook'
+        connector_type_id:
+          type: string
+          description: The type of connector.
+          enum:
+            - .webhook
+          example: .webhook
+        name:
+          type: string
+          description: The display name for the connector.
+          example: my-connector
+        secrets:
+          $ref: '#/components/schemas/secrets_properties_webhook'
+    config_properties_xmatters:
+      title: Connector request properties for a xMatters connector
+      description: Defines properties for connectors when type is `.xmatters`.
+      type: object
+      additionalProperties: true
+    secrets_properties_xmatters:
+      title: Connector secrets properties for an xMatters connector
+      description: Defines secrets for connectors when type is `.xmatters`.
+      type: object
+      additionalProperties: true
+    create_connector_request_xmatters:
+      title: Create xMatters connector request
+      description: |
+        The xMatters connector uses the xMatters Workflow for Elastic to send actionable alerts to on-call xMatters resources.
+      type: object
+      required:
+        - config
+        - connector_type_id
+        - name
+        - secrets
+      properties:
+        config:
+          $ref: '#/components/schemas/config_properties_xmatters'
+        connector_type_id:
+          type: string
+          description: The type of connector.
+          enum:
+            - .xmatters
+          example: .xmatters
+        name:
+          type: string
+          description: The display name for the connector.
+          example: my-connector
+        secrets:
+          $ref: '#/components/schemas/secrets_properties_xmatters'
     is_deprecated:
       type: boolean
       description: Indicates whether the connector type is deprecated.
@@ -1039,6 +1291,36 @@ components:
           type: string
           enum:
             - .cases-webhook
+        id:
+          type: string
+          description: The identifier for the connector.
+        is_deprecated:
+          $ref: '#/components/schemas/is_deprecated'
+        is_missing_secrets:
+          $ref: '#/components/schemas/is_missing_secrets'
+        is_preconfigured:
+          $ref: '#/components/schemas/is_preconfigured'
+        name:
+          type: string
+          description: The display name for the connector.
+    connector_response_properties_email:
+      title: Connector response properties for an email connector
+      type: object
+      required:
+        - config
+        - connector_type_id
+        - id
+        - is_deprecated
+        - is_preconfigured
+        - name
+      properties:
+        config:
+          $ref: '#/components/schemas/config_properties_email'
+        connector_type_id:
+          type: string
+          description: The type of connector.
+          enum:
+            - .email
         id:
           type: string
           description: The identifier for the connector.
@@ -1129,6 +1411,36 @@ components:
           description: The type of connector.
           enum:
             - .opsgenie
+        id:
+          type: string
+          description: The identifier for the connector.
+        is_deprecated:
+          $ref: '#/components/schemas/is_deprecated'
+        is_missing_secrets:
+          $ref: '#/components/schemas/is_missing_secrets'
+        is_preconfigured:
+          $ref: '#/components/schemas/is_preconfigured'
+        name:
+          type: string
+          description: The display name for the connector.
+    connector_response_properties_pagerduty:
+      title: Connector response properties for a PagerDuty connector
+      type: object
+      required:
+        - config
+        - connector_type_id
+        - id
+        - is_deprecated
+        - is_preconfigured
+        - name
+      properties:
+        config:
+          $ref: '#/components/schemas/config_properties_pagerduty'
+        connector_type_id:
+          type: string
+          description: The type of connector.
+          enum:
+            - .pagerduty
         id:
           type: string
           description: The identifier for the connector.
@@ -1292,6 +1604,33 @@ components:
         name:
           type: string
           description: The display name for the connector.
+    connector_response_properties_slack:
+      title: Connector response properties for a Slack connector
+      type: object
+      required:
+        - connector_type_id
+        - id
+        - is_deprecated
+        - is_preconfigured
+        - name
+      properties:
+        connector_type_id:
+          type: string
+          description: The type of connector.
+          enum:
+            - .slack
+        id:
+          type: string
+          description: The identifier for the connector.
+        is_deprecated:
+          $ref: '#/components/schemas/is_deprecated'
+        is_missing_secrets:
+          $ref: '#/components/schemas/is_missing_secrets'
+        is_preconfigured:
+          $ref: '#/components/schemas/is_preconfigured'
+        name:
+          type: string
+          description: The display name for the connector.
     connector_response_properties_swimlane:
       title: Connector response properties for a Swimlane connector
       type: object
@@ -1322,19 +1661,144 @@ components:
         name:
           type: string
           description: The display name for the connector.
+    connector_response_properties_teams:
+      title: Connector response properties for a Microsoft Teams connector
+      type: object
+      required:
+        - connector_type_id
+        - id
+        - is_deprecated
+        - is_preconfigured
+        - name
+      properties:
+        connector_type_id:
+          type: string
+          description: The type of connector.
+          enum:
+            - .teams
+        id:
+          type: string
+          description: The identifier for the connector.
+        is_deprecated:
+          $ref: '#/components/schemas/is_deprecated'
+        is_missing_secrets:
+          $ref: '#/components/schemas/is_missing_secrets'
+        is_preconfigured:
+          $ref: '#/components/schemas/is_preconfigured'
+        name:
+          type: string
+          description: The display name for the connector.
+    connector_response_properties_tines:
+      title: Connector response properties for a Tines connector
+      type: object
+      required:
+        - config
+        - connector_type_id
+        - id
+        - is_deprecated
+        - is_preconfigured
+        - name
+      properties:
+        config:
+          $ref: '#/components/schemas/config_properties_tines'
+        connector_type_id:
+          type: string
+          description: The type of connector.
+          enum:
+            - .tines
+        id:
+          type: string
+          description: The identifier for the connector.
+        is_deprecated:
+          $ref: '#/components/schemas/is_deprecated'
+        is_missing_secrets:
+          $ref: '#/components/schemas/is_missing_secrets'
+        is_preconfigured:
+          $ref: '#/components/schemas/is_preconfigured'
+        name:
+          type: string
+          description: The display name for the connector.
+    connector_response_properties_webhook:
+      title: Connector response properties for a Webhook connector
+      type: object
+      required:
+        - config
+        - connector_type_id
+        - id
+        - is_deprecated
+        - is_preconfigured
+        - name
+      properties:
+        config:
+          $ref: '#/components/schemas/config_properties_webhook'
+        connector_type_id:
+          type: string
+          description: The type of connector.
+          enum:
+            - .webhook
+        id:
+          type: string
+          description: The identifier for the connector.
+        is_deprecated:
+          $ref: '#/components/schemas/is_deprecated'
+        is_missing_secrets:
+          $ref: '#/components/schemas/is_missing_secrets'
+        is_preconfigured:
+          $ref: '#/components/schemas/is_preconfigured'
+        name:
+          type: string
+          description: The display name for the connector.
+    connector_response_properties_xmatters:
+      title: Connector response properties for an xMatters connector
+      type: object
+      required:
+        - config
+        - connector_type_id
+        - id
+        - is_deprecated
+        - is_preconfigured
+        - name
+      properties:
+        config:
+          $ref: '#/components/schemas/config_properties_xmatters'
+        connector_type_id:
+          type: string
+          description: The type of connector.
+          enum:
+            - .xmatters
+        id:
+          type: string
+          description: The identifier for the connector.
+        is_deprecated:
+          $ref: '#/components/schemas/is_deprecated'
+        is_missing_secrets:
+          $ref: '#/components/schemas/is_missing_secrets'
+        is_preconfigured:
+          $ref: '#/components/schemas/is_preconfigured'
+        name:
+          type: string
+          description: The display name for the connector.
     connector_response_properties:
       title: Connector response properties
+      description: The properties vary depending on the connector type.
       oneOf:
         - $ref: '#/components/schemas/connector_response_properties_cases_webhook'
+        - $ref: '#/components/schemas/connector_response_properties_email'
         - $ref: '#/components/schemas/connector_response_properties_index'
         - $ref: '#/components/schemas/connector_response_properties_jira'
         - $ref: '#/components/schemas/connector_response_properties_opsgenie'
+        - $ref: '#/components/schemas/connector_response_properties_pagerduty'
         - $ref: '#/components/schemas/connector_response_properties_resilient'
         - $ref: '#/components/schemas/connector_response_properties_serverlog'
         - $ref: '#/components/schemas/connector_response_properties_servicenow'
         - $ref: '#/components/schemas/connector_response_properties_servicenow_itom'
         - $ref: '#/components/schemas/connector_response_properties_servicenow_sir'
+        - $ref: '#/components/schemas/connector_response_properties_slack'
         - $ref: '#/components/schemas/connector_response_properties_swimlane'
+        - $ref: '#/components/schemas/connector_response_properties_teams'
+        - $ref: '#/components/schemas/connector_response_properties_tines'
+        - $ref: '#/components/schemas/connector_response_properties_webhook'
+        - $ref: '#/components/schemas/connector_response_properties_xmatters'
       discriminator:
         propertyName: connector_type_id
     update_connector_request_cases_webhook:
@@ -1352,6 +1816,20 @@ components:
           example: my-connector
         secrets:
           $ref: '#/components/schemas/secrets_properties_cases_webhook'
+    update_connector_request_email:
+      title: Update email connector request
+      type: object
+      required:
+        - config
+        - name
+      properties:
+        config:
+          $ref: '#/components/schemas/config_properties_email'
+        name:
+          type: string
+          description: The display name for the connector.
+        secrets:
+          $ref: '#/components/schemas/secrets_properties_email'
     update_connector_request_index:
       title: Update index connector request
       type: object
@@ -1394,6 +1872,21 @@ components:
           description: The display name for the connector.
         secrets:
           $ref: '#/components/schemas/secrets_properties_opsgenie'
+    update_connector_request_pagerduty:
+      title: Update PagerDuty connector request
+      type: object
+      required:
+        - config
+        - name
+        - secrets
+      properties:
+        config:
+          $ref: '#/components/schemas/config_properties_pagerduty'
+        name:
+          type: string
+          description: The display name for the connector.
+        secrets:
+          $ref: '#/components/schemas/secrets_properties_pagerduty'
     update_connector_request_resilient:
       title: Update IBM Resilient connector request
       type: object
@@ -1448,6 +1941,18 @@ components:
           description: The display name for the connector.
         secrets:
           $ref: '#/components/schemas/secrets_properties_servicenow'
+    update_connector_request_slack:
+      title: Update Slack connector request
+      type: object
+      required:
+        - name
+        - secrets
+      properties:
+        name:
+          type: string
+          description: The display name for the connector.
+        secrets:
+          $ref: '#/components/schemas/secrets_properties_slack'
     update_connector_request_swimlane:
       title: Update Swimlane connector request
       type: object
@@ -1464,7 +1969,65 @@ components:
           example: my-connector
         secrets:
           $ref: '#/components/schemas/secrets_properties_swimlane'
+    update_connector_request_teams:
+      title: Update Microsoft Teams connector request
+      type: object
+      required:
+        - name
+        - secrets
+      properties:
+        name:
+          type: string
+          description: The display name for the connector.
+        secrets:
+          $ref: '#/components/schemas/secrets_properties_teams'
+    update_connector_request_tines:
+      title: Update Tines connector request
+      type: object
+      required:
+        - config
+        - name
+        - secrets
+      properties:
+        config:
+          $ref: '#/components/schemas/config_properties_tines'
+        name:
+          type: string
+          description: The display name for the connector.
+        secrets:
+          $ref: '#/components/schemas/secrets_properties_tines'
+    update_connector_request_webhook:
+      title: Update Webhook connector request
+      type: object
+      required:
+        - config
+        - name
+        - secrets
+      properties:
+        config:
+          $ref: '#/components/schemas/config_properties_webhook'
+        name:
+          type: string
+          description: The display name for the connector.
+        secrets:
+          $ref: '#/components/schemas/secrets_properties_webhook'
+    update_connector_request_xmatters:
+      title: Update xMatters connector request
+      type: object
+      required:
+        - config
+        - name
+        - secrets
+      properties:
+        config:
+          $ref: '#/components/schemas/config_properties_xmatters'
+        name:
+          type: string
+          description: The display name for the connector.
+        secrets:
+          $ref: '#/components/schemas/secrets_properties_xmatters'
     connector_types:
+      title: Connector types
       type: string
       description: The type of connector. For example, `.email`, `.index`, `.jira`, `.opsgenie`, or `.server-log`.
       enum:
@@ -1526,12 +2089,6 @@ components:
         is_preconfigured: false
         is_deprecated: false
         is_missing_secrets: false
-    update_index_connector_request:
-      summary: Update an index connector.
-      value:
-        name: updated-connector
-        config:
-          index: updated-index
     get_connectors_response:
       summary: A list of connectors
       value:

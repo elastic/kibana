@@ -1,4 +1,4 @@
-title: Create connector request properties for a Swimlane connector
+title: Connector request properties for a Swimlane connector
 required:
   - apiUrl
   - appId
@@ -20,10 +20,12 @@ properties:
       - alerts
       - cases
   mappings:
+    title: Connector mappings properties for a Swimlane connector
     description: The field mapping.
     type: object
     properties:
       alertIdConfig:
+        title: Alert identifier mapping
         description: Mapping for the alert ID.
         type: object
         required:
@@ -34,6 +36,7 @@ properties:
         properties:
           $ref: 'mapping_properties_swimlane.yaml'
       caseIdConfig:
+        title: Case identifier mapping
         description: Mapping for the case ID.
         type: object
         required:
@@ -44,6 +47,7 @@ properties:
         properties:
           $ref: 'mapping_properties_swimlane.yaml'
       caseNameConfig:
+        title: Case name mapping
         description: Mapping for the case name.
         type: object
         required:
@@ -54,6 +58,7 @@ properties:
         properties:
           $ref: 'mapping_properties_swimlane.yaml'
       commentsConfig:
+        title: Case comment mapping
         description: Mapping for the case comments.
         type: object
         required:
@@ -64,6 +69,7 @@ properties:
         properties:
           $ref: 'mapping_properties_swimlane.yaml'
       descriptionConfig:
+        title: Case description mapping
         description: Mapping for the case description.
         type: object
         required:
@@ -74,6 +80,7 @@ properties:
         properties:
           $ref: 'mapping_properties_swimlane.yaml'
       ruleNameConfig:
+        title: Rule name mapping
         description: Mapping for the name of the alert's rule.
         type: object
         required:
@@ -84,6 +91,7 @@ properties:
         properties:
           $ref: 'mapping_properties_swimlane.yaml'
       severityConfig:
+        title: Severity mapping
         description: Mapping for the severity.
         type: object
         required:

@@ -1,4 +1,4 @@
-title: Create case request properties for a ServiceNow ITSM connector
+title: Connector request properties for a ServiceNow ITSM connector
 required:
   - apiUrl
 description: Defines properties for connectors when type is `.servicenow`.

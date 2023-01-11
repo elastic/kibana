@@ -1,4 +1,4 @@
-title: Create connector request properties for a IBM Resilient connector
+title: Connector request properties for a IBM Resilient connector
 required:
   - apiUrl
   - orgId

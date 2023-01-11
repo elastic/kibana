@@ -1,4 +1,4 @@
-title: Create connector request properties for Webhook - Case Management connector
+title: Connector request properties for Webhook - Case Management connector
 required:
   - createIncidentJson
   - createIncidentResponseKey
