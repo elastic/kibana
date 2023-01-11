@@ -78,7 +78,7 @@ export interface DiscoverSidebarProps extends DiscoverSidebarResponsiveProps {
   createNewDataView?: () => void;
 
   /**
-   * All fields: fields from data view and unmapped fields
+   * All fields: fields from data view and unmapped fields or columns from text-based search
    */
   allFields: DataViewField[] | null;
 
@@ -141,9 +141,14 @@ export function DiscoverSidebarComponent({
   >(undefined);
 
   useEffect(() => {
-    const result = getSelectedFields(selectedDataView, columns, allFields);
+    const result = getSelectedFields({
+      dataView: selectedDataView,
+      columns,
+      allFields,
+      isPlainRecord,
+    });
     setSelectedFieldsState(result);
-  }, [selectedDataView, columns, setSelectedFieldsState, allFields]);
+  }, [selectedDataView, columns, setSelectedFieldsState, allFields, isPlainRecord]);
 
   useEffect(() => {
     if (isPlainRecord || !useNewFieldsApi) {
@@ -316,6 +321,7 @@ export function DiscoverSidebarComponent({
           <FieldList
             isProcessing={isProcessing}
             prepend={<FieldListFilters {...fieldListFiltersProps} />}
+            className="dscSidebar__list"
           >
             {showFieldList && (
               <FieldListGrouped

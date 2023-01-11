@@ -429,6 +429,11 @@ describe('discover responsive sidebar', function () {
         fetchStatus: FetchStatus.COMPLETE,
         recordRawType: RecordRawType.PLAIN,
         result: getDataTableRecords(stubLogstashDataView),
+        textBasedQueryColumns: [
+          { id: '1', name: 'extension', meta: { type: 'text' } },
+          { id: '1', name: 'bytes', meta: { type: 'number' } },
+          { id: '1', name: '@timestamp', meta: { type: 'date' } },
+        ],
       }) as DataDocuments$,
     };
     const compInViewerMode = await mountComponent(propsWithTextBasedMode, {
@@ -457,15 +462,15 @@ describe('discover responsive sidebar', function () {
 
     expect(selectedFieldsCount.text()).toBe('2');
     expect(popularFieldsCount.exists()).toBe(false);
-    expect(availableFieldsCount.text()).toBe('4');
+    expect(availableFieldsCount.text()).toBe('3');
     expect(emptyFieldsCount.exists()).toBe(false);
     expect(metaFieldsCount.exists()).toBe(false);
     expect(unmappedFieldsCount.exists()).toBe(false);
 
-    expect(mockCalcFieldCounts.mock.calls.length).toBe(1);
+    expect(mockCalcFieldCounts.mock.calls.length).toBe(0);
 
     expect(findTestSubject(compInViewerMode, 'fieldListGrouped__ariaDescription').text()).toBe(
-      '2 selected fields. 4 available fields.'
+      '2 selected fields. 3 available fields.'
     );
   });
 

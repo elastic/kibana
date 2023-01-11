@@ -323,7 +323,7 @@ export function DiscoverLayout({
           history={history}
         />
         <EuiFlexGroup className="dscPageBody__contents" gutterSize="s">
-          <EuiFlexItem grow={false} className="dscPageBody__sidebar">
+          <EuiFlexItem grow={false}>
             <SidebarMemoized
               documents$={savedSearchData$.documents$}
               onAddField={onAddColumn}

@@ -43,6 +43,8 @@ import {
   DiscoverSidebarReducerStatus,
 } from './lib/sidebar_reducer';
 
+const EMPTY_FIELD_COUNTS = {};
+
 export interface DiscoverSidebarResponsiveProps {
   /**
    * Determines whether add/remove buttons are displayed non only when focused
@@ -156,7 +158,10 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
             type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
             payload: {
               dataView: selectedDataViewRef.current,
-              fieldCounts: calcFieldCounts(documentState.result),
+              fieldCounts: isPlainRecordType
+                ? EMPTY_FIELD_COUNTS
+                : calcFieldCounts(documentState.result),
+              textBasedQueryColumns: documentState.textBasedQueryColumns,
               isPlainRecord: isPlainRecordType,
             },
           });
@@ -166,7 +171,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
             type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
             payload: {
               dataView: selectedDataViewRef.current,
-              fieldCounts: {},
+              fieldCounts: EMPTY_FIELD_COUNTS,
               isPlainRecord: isPlainRecordType,
             },
           });

@@ -28,7 +28,7 @@ import { VIEW_MODE } from '../../../../../common/constants';
 import { DiscoverMainProvider } from '../../services/discover_state_provider';
 import * as ExistingFieldsHookApi from '@kbn/unified-field-list-plugin/public/hooks/use_existing_fields';
 import { ExistenceFetchStatus } from '@kbn/unified-field-list-plugin/public';
-import { getDataViewFieldList } from './lib/get_data_view_field_list';
+import { getDataViewFieldList } from './lib/get_field_list';
 
 const mockGetActions = jest.fn<Promise<Array<Action<object>>>, [string, { fieldName: string }]>(
   () => Promise.resolve([])
@@ -65,7 +65,7 @@ function getCompProps(): DiscoverSidebarProps {
     }
   }
 
-  const allFields = getDataViewFieldList(dataView, fieldCounts, false);
+  const allFields = getDataViewFieldList(dataView, fieldCounts);
 
   (ExistingFieldsHookApi.useExistingFieldsReader as jest.Mock).mockClear();
   (ExistingFieldsHookApi.useExistingFieldsReader as jest.Mock).mockImplementation(() => ({
@@ -270,4 +270,6 @@ describe('discover sidebar', function () {
     const visualizeField = findTestSubject(compInViewerMode, 'textBased-visualize');
     expect(visualizeField.length).toBe(1);
   });
+
+  // TODO: add a test for text-based columns
 });

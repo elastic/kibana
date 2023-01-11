@@ -13,6 +13,7 @@ import { RequestAdapter } from '@kbn/inspector-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { AggregateQuery, Query } from '@kbn/es-query';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { getRawRecordType } from '../utils/get_raw_record_type';
 import { DiscoverServices } from '../../../build_services';
 import { DiscoverSearchSessionManager } from '../services/discover_search_session';
@@ -74,6 +75,7 @@ export interface DataMainMsg extends DataMsg {
 
 export interface DataDocumentsMsg extends DataMsg {
   result?: DataTableRecord[];
+  textBasedQueryColumns?: DatatableColumn[]; // columns from text-based request
 }
 
 export interface DataTotalHitsMsg extends DataMsg {
