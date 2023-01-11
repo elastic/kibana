@@ -812,7 +812,7 @@ export const getGroupedESQuery = (
 };
 
 const getContextAggregation = (params: any) => {
-  const validPrefixForContext = ['host', 'cloud', 'orchestrator', 'labels', 'tags'];
+  const validPrefixForContext = ['host', 'cloud', 'orchestrator', 'container', 'labels', 'tags'];
   const positiveComparators = getPositiveComparators();
   const positiveCriteria = params.criteria.filter((criterion: any) =>
     positiveComparators.includes(criterion.comparator)
