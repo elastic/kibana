@@ -128,7 +128,7 @@ export async function updateTagsBatch(
       agents: agentIds,
       created_at: new Date().toISOString(),
       type: 'UPDATE_TAGS',
-      total: res.total,
+      total: options.total ?? res.total,
     });
   }
 

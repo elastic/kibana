@@ -12,7 +12,7 @@ import { AgentReassignmentError } from '../../errors';
 
 import { SO_SEARCH_LIMIT } from '../../constants';
 
-import { getAgentsById, openPointInTime } from './crud';
+import { getAgentsById, getAgentsByKuery, openPointInTime } from './crud';
 import type { GetAgentsOptions } from '.';
 import { UpdateAgentTagsActionRunner, updateTagsBatch } from './update_agent_tags_action_runner';
 
@@ -50,17 +50,29 @@ export async function updateAgentTags(
       filters.push(`tags:${tagsToRemove[0]}`);
     }
 
+    const kuery = filters.map((filter) => `(${filter})`).join(' AND ');
+    const pitId = await openPointInTime(esClient);
+
+    // calculate total count
+    const res = await getAgentsByKuery(esClient, soClient, {
+      kuery,
+      showInactive: options.showInactive ?? false,
+      perPage: 0,
+      pitId,
+    });
+
     return await new UpdateAgentTagsActionRunner(
       esClient,
       soClient,
       {
         ...options,
-        kuery: filters.map((filter) => `(${filter})`).join(' AND '),
+        kuery,
         tagsToAdd,
         tagsToRemove,
         batchSize,
+        total: res.total,
       },
-      { pitId: await openPointInTime(esClient) }
+      { pitId }
     ).runActionAsyncWithRetry();
   }
 

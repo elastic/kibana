@@ -204,7 +204,7 @@ async function _getActions(
           version: hit._source.data?.version as string,
           startTime: source.start_time,
           type: source.type,
-          nbAgentsActioned: 0,
+          nbAgentsActioned: source.total ?? 0,
           status: isExpired
             ? 'EXPIRED'
             : hasRolloutPeriodPassed(source)
@@ -218,7 +218,6 @@ async function _getActions(
       }
 
       acc[hit._source.action_id].nbAgentsActionCreated += hit._source.agents?.length ?? 0;
-      acc[hit._source.action_id].nbAgentsActioned += hit._source.total ?? 0;
 
       return acc;
     }, {} as { [k: string]: ActionStatus })

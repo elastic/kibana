@@ -126,37 +126,16 @@ describe('update_agent_tags', () => {
     expect(actionResults.body[1].error).not.toBeDefined();
   });
 
-  it('should update action results on success - kuery', async () => {
-    await updateTagsBatch(
-      soClient,
-      esClient,
-      [],
-      {},
-      {
-        tagsToAdd: ['new'],
-        tagsToRemove: [],
-        kuery: '',
-      }
-    );
-
-    const actionResults = esClient.bulk.mock.calls[0][0] as any;
-    const agentIds = actionResults?.body
-      ?.filter((i: any) => i.agent_id)
-      .map((i: any) => i.agent_id);
-    expect(agentIds[0]).toHaveLength(36); // uuid
-    expect(actionResults.body[1].error).not.toBeDefined();
-  });
-
   it('should skip hosted agent from total when agentIds are passed', async () => {
-    const { esClient: esClientMock, agentInHostedDoc } = createClientMock();
+    const { esClient: esClientMock, agentInHostedDoc, agentInRegularDoc } = createClientMock();
 
     esClientMock.updateByQuery.mockReset();
-    esClientMock.updateByQuery.mockResolvedValue({ failures: [], updated: 0, total: 0 } as any);
+    esClientMock.updateByQuery.mockResolvedValue({ failures: [], updated: 1, total: 1 } as any);
 
     await updateAgentTags(
       soClient,
       esClientMock,
-      { agentIds: [agentInHostedDoc._id] },
+      { agentIds: [agentInHostedDoc._id, agentInRegularDoc._id] },
       ['newName'],
       []
     );
@@ -165,9 +144,9 @@ describe('update_agent_tags', () => {
     expect(agentAction?.body).toEqual(
       expect.objectContaining({
         action_id: expect.anything(),
-        agents: [],
+        agents: [agentInRegularDoc._id],
         type: 'UPDATE_TAGS',
-        total: 0,
+        total: 1,
       })
     );
   });
@@ -210,7 +189,7 @@ describe('update_agent_tags', () => {
       updateTagsBatch(
         soClient,
         esClient,
-        [],
+        [{ id: 'agent1' } as Agent],
         {},
         {
           tagsToAdd: ['new'],
@@ -322,14 +301,14 @@ describe('update_agent_tags', () => {
     );
   });
 
-  it('should write total from updateByQuery result if query returns less results', async () => {
+  it('should write total from total param if updateByQuery returns less results', async () => {
     esClient.updateByQuery.mockReset();
     esClient.updateByQuery.mockResolvedValue({ failures: [], updated: 0, total: 50 } as any);
 
     await updateTagsBatch(
       soClient,
       esClient,
-      [],
+      [{ id: 'agent1' } as Agent],
       {},
       {
         tagsToAdd: ['new'],
@@ -343,9 +322,9 @@ describe('update_agent_tags', () => {
     expect(agentAction?.body).toEqual(
       expect.objectContaining({
         action_id: expect.anything(),
-        agents: [],
+        agents: ['agent1'],
         type: 'UPDATE_TAGS',
-        total: 50,
+        total: 100,
       })
     );
   });
