@@ -27,7 +27,7 @@ import {
   EuiBetaBadge,
 } from '@elastic/eui';
 import { isEmpty, partition, some } from 'lodash';
-import { ActionVariable, RuleActionParam } from '@kbn/alerting-plugin/common';
+import { ActionVariable, RuleActionParam, RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import {
   getDurationNumberInItsUnit,
   getDurationUnitValue,
@@ -73,6 +73,7 @@ export type ActionTypeFormProps = {
   | 'setActionParamsProperty'
   | 'messageVariables'
   | 'defaultActionMessage'
+  | 'defaultSummaryMessage'
 >;
 
 const preconfiguredMessage = i18n.translate(
@@ -102,6 +103,7 @@ export const ActionTypeForm = ({
   isActionGroupDisabledForActionType,
   recoveryActionGroup,
   hideNotifyWhen = false,
+  defaultSummaryMessage,
 }: ActionTypeFormProps) => {
   const {
     application: { capabilities },
@@ -123,6 +125,7 @@ export const ActionTypeForm = ({
   const [actionThrottleUnit, setActionThrottleUnit] = useState<string>(
     actionItem.frequency?.throttle ? getDurationUnitValue(actionItem.frequency?.throttle) : 'h'
   );
+  const [selectedNotifyWhen, setSelectedNotifyWhen] = useState<string>();
 
   const getDefaultParams = async () => {
     const connectorType = await actionTypeRegistry.get(actionItem.actionTypeId);
@@ -216,6 +219,7 @@ export const ActionTypeForm = ({
       throttleUnit={actionThrottleUnit}
       onNotifyWhenChange={useCallback(
         (notifyWhen) => {
+          setSelectedNotifyWhen(notifyWhen);
           setActionFrequencyProperty('notifyWhen', notifyWhen, index);
         },
         [setActionFrequencyProperty, index]
@@ -249,6 +253,8 @@ export const ActionTypeForm = ({
   );
 
   const showSelectActionGroup = actionGroups && selectedActionGroup && setActionGroupIdByIndex;
+
+  const showDefaultSummaryMessage = selectedNotifyWhen === RuleNotifyWhen.THROTTLE;
 
   const accordionContent = checkEnabledResult.isEnabled ? (
     <>
@@ -332,7 +338,11 @@ export const ActionTypeForm = ({
               errors={actionParamsErrors.errors}
               editAction={setActionParamsProperty}
               messageVariables={availableActionVariables}
-              defaultMessage={selectedActionGroup?.defaultActionMessage ?? defaultActionMessage}
+              defaultMessage={
+                showDefaultSummaryMessage
+                  ? defaultSummaryMessage
+                  : selectedActionGroup?.defaultActionMessage ?? defaultActionMessage
+              }
               actionConnector={actionConnector}
               executionMode={ActionConnectorMode.ActionForm}
             />

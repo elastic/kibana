@@ -65,6 +65,7 @@ export interface ActionAccordionFormProps {
   isActionGroupDisabledForActionType?: (actionGroupId: string, actionTypeId: string) => boolean;
   hideActionHeader?: boolean;
   hideNotifyWhen?: boolean;
+  defaultSummaryMessage?: string;
 }
 
 interface ActiveActionConnectorState {
@@ -91,6 +92,7 @@ export const ActionForm = ({
   isActionGroupDisabledForActionType,
   hideActionHeader,
   hideNotifyWhen,
+  defaultSummaryMessage,
 }: ActionAccordionFormProps) => {
   const {
     http,
@@ -396,6 +398,7 @@ export const ActionForm = ({
                 setActiveActionItem(undefined);
               }}
               hideNotifyWhen={hideNotifyWhen}
+              defaultSummaryMessage={defaultSummaryMessage}
             />
           );
         })}
