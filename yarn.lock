@@ -2865,7 +2865,23 @@
   version "0.0.0"
   uid ""
 
+"@kbn/content-management-react@link:packages/content-management/react":
+  version "0.0.0"
+  uid ""
+
+"@kbn/content-management-state-mocks@link:packages/content-management/state_mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/content-management-state@link:packages/content-management/state":
+  version "0.0.0"
+  uid ""
+
 "@kbn/content-management-table-list@link:packages/content-management/table_list":
+  version "0.0.0"
+  uid ""
+
+"@kbn/content-management-utils@link:packages/content-management/utils":
   version "0.0.0"
   uid ""
 

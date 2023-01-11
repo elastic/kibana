@@ -1,9 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
+    "outDir": "target/types",
   },
   "extraPublicDirs": ["common"],
   "include": [
@@ -16,6 +14,11 @@
     "./jest_setup.ts"
   ],
   "kbn_references": [
-    { "path": "../../core/tsconfig.json" }
+    "@kbn/core",
+    "@kbn/i18n",
+    "@kbn/content-management-state"
+  ],
+  "exclude": [
+    "target/**/*"
   ]
 }

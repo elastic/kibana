@@ -1,9 +1,7 @@
 {
-  "extends": "../../../tsconfig.bazel.json",
+  "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "outDir": "target_types",
+    "outDir": "target/types",
     "types": [
       "jest",
       "node",
@@ -12,6 +10,13 @@
   },
   "include": [
     "**/*.ts",
-      "**/*.tsx",
+    "**/*.tsx",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/content-management-state",
+    "@kbn/content-management-state-mocks",
   ]
 }
