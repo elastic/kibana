@@ -12,6 +12,7 @@ import { ContentCore, ContentCoreApi } from './core';
 import { wrapError } from './error_wrapper';
 import { initRpcRoutes, FunctionHandler, initRpcHandlers } from './rpc';
 import type { Context as RpcContext } from './rpc';
+import { FooStorage } from './demo';
 
 export class ContentManagementPlugin implements Plugin {
   private readonly logger: Logger;
@@ -38,6 +39,13 @@ export class ContentManagementPlugin implements Plugin {
       context: { core: this.coreApi },
     });
 
+    // --------------- DEMO -------------------
+    // Add a "in memory" content
+    const contentType = 'foo';
+    const storage = new FooStorage(contentType);
+    this.coreApi.register(contentType, {
+      storage,
+    });
 
     const addContent = async () => {
       // Add dummy content
