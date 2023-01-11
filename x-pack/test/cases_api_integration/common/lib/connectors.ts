@@ -238,41 +238,43 @@ export const createCaseWithConnector = async ({
   });
 
   actionsRemover.add(auth?.space ?? 'default', connector.id, 'action', 'actions');
-  const configuration = await createConfiguration(
-    supertest,
-    {
-      ...getConfigurationRequest({
-        id: connector.id,
-        name: connector.name,
-        type: connector.connector_type_id as ConnectorTypes,
-      }),
-      ...configureReq,
-    },
-    200,
-    auth ?? undefined
-  );
 
-  const postedCase = await createCase(
-    supertest,
-    {
-      ...createCaseReq,
-      connector: {
-        id: connector.id,
-        name: connector.name,
-        type: connector.connector_type_id,
-        fields: {
-          urgency: '2',
-          impact: '2',
-          severity: '2',
-          category: 'software',
-          subcategory: 'os',
-        },
-      } as CaseConnector,
-    },
-    200,
-    auth,
-    headers
-  );
+  const [configuration, postedCase] = await Promise.all([
+    createConfiguration(
+      supertest,
+      {
+        ...getConfigurationRequest({
+          id: connector.id,
+          name: connector.name,
+          type: connector.connector_type_id as ConnectorTypes,
+        }),
+        ...configureReq,
+      },
+      200,
+      auth ?? undefined
+    ),
+    createCase(
+      supertest,
+      {
+        ...createCaseReq,
+        connector: {
+          id: connector.id,
+          name: connector.name,
+          type: connector.connector_type_id,
+          fields: {
+            urgency: '2',
+            impact: '2',
+            severity: '2',
+            category: 'software',
+            subcategory: 'os',
+          },
+        } as CaseConnector,
+      },
+      200,
+      auth,
+      headers
+    ),
+  ]);
 
   return { postedCase, connector, configuration };
 };

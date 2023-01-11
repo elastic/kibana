@@ -117,7 +117,11 @@ export const CaseConnectorRt = rt.intersection([
 ]);
 
 export const GetCaseConnectorsResponseRt = rt.array(
-  rt.intersection([rt.type({ needsToBePushed: rt.boolean }), CaseConnectorRt])
+  rt.intersection([
+    rt.type({ needsToBePushed: rt.boolean, hasBeenPushed: rt.boolean }),
+    rt.partial(rt.type({ latestPushDate: rt.string }).props),
+    CaseConnectorRt,
+  ])
 );
 
 export type CaseUserActionConnector = rt.TypeOf<typeof CaseUserActionConnectorRt>;

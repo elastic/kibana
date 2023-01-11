@@ -15,6 +15,4 @@ export interface UserActionGet {
   caseId: string;
 }
 
-export interface GetConnectorsRequest {
-  caseId: string;
-}
+export type GetConnectorsRequest = UserActionGet;

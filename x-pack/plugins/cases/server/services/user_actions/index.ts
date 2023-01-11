@@ -106,7 +106,7 @@ export class CaseUserActionService {
     return this._creator;
   }
 
-  public async getConnectorFieldsBeforePushes(
+  public async getConnectorFieldsUsedInPushes(
     caseId: string,
     pushes: PushInfo[]
   ): Promise<CaseConnectorFields> {
@@ -131,11 +131,11 @@ export class CaseUserActionService {
         page: 1,
         perPage: 1,
         sortField: defaultSortField,
-        aggs: CaseUserActionService.buildConnectorFieldsBeforePushAggs(pushes),
+        aggs: CaseUserActionService.buildConnectorFieldsUsedInPushAggs(pushes),
         filter: connectorsFilter,
       });
 
-      return this.createCaseConnectorFieldsBeforePushes(response.aggregations);
+      return this.createCaseConnectorFieldsUsedInPushes(response.aggregations);
     } catch (error) {
       this.context.log.error(
         `Error while retrieving the connector fields before the last push: ${caseId}: ${error}`
@@ -144,14 +144,14 @@ export class CaseUserActionService {
     }
   }
 
-  private static buildConnectorFieldsBeforePushAggs(
+  private static buildConnectorFieldsUsedInPushAggs(
     pushes: PushInfo[]
   ): Record<string, estypes.AggregationsAggregationContainer> {
     const filters: estypes.AggregationsBuckets<estypes.QueryDslQueryContainer> = {};
 
     /**
      * Group the user actions by the unique connector ids and bound the time range
-     * for that connector's push event
+     * for that connector's push event. We want to search for the fields before the push timestamp.
      */
     for (const push of pushes) {
       filters[push.connectorId] = {
@@ -231,7 +231,7 @@ export class CaseUserActionService {
     };
   }
 
-  private createCaseConnectorFieldsBeforePushes(
+  private createCaseConnectorFieldsUsedInPushes(
     aggsResults?: ConnectorFieldsBeforePushAggsResult
   ): CaseConnectorFields {
     const connectorFields: CaseConnectorFields = new Map();

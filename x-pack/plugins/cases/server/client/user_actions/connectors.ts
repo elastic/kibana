@@ -59,6 +59,8 @@ export const getConnectors = async (
         ...enrichedConnector.connector,
         name: enrichedConnector.name,
         needsToBePushed: hasDataToPush(enrichedConnector),
+        latestPushDate: enrichedConnector.pushInfo?.pushDate.toISOString(),
+        hasBeenPushed: hasBeenPushed(enrichedConnector),
       });
     }
 
@@ -104,6 +106,11 @@ const checkConnectorsAuthorization = async ({
     operation: Operations.getConnectors,
   });
 };
+
+interface EnrichedPushInfo {
+  pushDate: Date;
+  connectorFieldsUsedInPush: CaseConnector;
+}
 
 interface EnrichedConnector {
   connector: CaseConnector;
@@ -171,7 +178,7 @@ const getPushInfo = async ({
     return new Map();
   }
 
-  const priorToPushFields = await userActionService.getConnectorFieldsBeforePushes(
+  const priorToPushFields = await userActionService.getConnectorFieldsUsedInPushes(
     caseId,
     pushRequest
   );
@@ -184,7 +191,7 @@ const getPushInfo = async ({
     if (connectorFields != null) {
       enrichedPushInfo.set(request.connectorId, {
         pushDate: request.date,
-        connectorFieldsBeforePush: connectorFields,
+        connectorFieldsUsedInPush: connectorFields,
       });
     }
   }
@@ -208,11 +215,6 @@ const isDateValid = (date: Date): boolean => {
   return !isNaN(date.getTime());
 };
 
-interface EnrichedPushInfo {
-  pushDate: Date;
-  connectorFieldsBeforePush: CaseConnector;
-}
-
 const getConnectorInfoFromSavedObject = (
   savedObject: SavedObject<CaseUserActionResponse> | undefined
 ): CaseConnector | undefined => {
@@ -229,10 +231,14 @@ const hasDataToPush = (enrichedConnectorInfo: EnrichedConnector): boolean => {
   return (
     !isEqual(
       enrichedConnectorInfo.connector,
-      enrichedConnectorInfo.pushInfo?.connectorFieldsBeforePush
+      enrichedConnectorInfo.pushInfo?.connectorFieldsUsedInPush
     ) ||
     (enrichedConnectorInfo.pushInfo != null &&
       enrichedConnectorInfo.latestUserActionDate != null &&
-      enrichedConnectorInfo.pushInfo.pushDate < enrichedConnectorInfo.latestUserActionDate)
+      enrichedConnectorInfo.latestUserActionDate > enrichedConnectorInfo.pushInfo.pushDate)
   );
+};
+
+const hasBeenPushed = (enrichedConnectorInfo: EnrichedConnector): boolean => {
+  return enrichedConnectorInfo.pushInfo != null;
 };
