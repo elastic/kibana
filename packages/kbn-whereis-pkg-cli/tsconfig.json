@@ -14,14 +14,9 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/repo-linter",
     "@kbn/dev-cli-runner",
     "@kbn/dev-cli-errors",
-    "@kbn/get-repo-files",
     "@kbn/repo-packages",
-    "@kbn/repo-info",
-    "@kbn/ts-projects",
-    "@kbn/repo-file-maps",
-    "@kbn/json-ast",
+    "@kbn/tooling-log"
   ]
 }
