@@ -20,7 +20,7 @@ const DATA_STREAM_DATASET_VAR: RegistryVarsEntry = {
   type: 'text',
   title: 'Dataset name',
   description:
-    "Set the name for your dataset. Changing the dataset will send the data to a different index. You can't use `-` in the name of a dataset and only valid characters for [Elasticsearch index names](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-index_.html).\n",
+    "Set the name for your dataset. Once selected a dataset cannot be changed without creating a new integration policy. You can't use `-` in the name of a dataset and only valid characters for [Elasticsearch index names](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-index_.html) are permitted.\n",
   multi: false,
   required: true,
   show_user: true,
