@@ -60,6 +60,7 @@ import type { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
 import type {
   Capabilities,
+  CoreStart,
   IBasePath,
   IUiSettingsClient,
   KibanaExecutionContext,
@@ -83,6 +84,9 @@ import {
   Datasource,
   IndexPatternMap,
   GetCompatibleCellValueActions,
+  UserMessage,
+  IndexPatternRef,
+  FrameDatasourceAPI,
 } from '../types';
 
 import { getEditPath, DOC_TYPE } from '../../common';
@@ -99,6 +103,7 @@ import {
 } from '../utils';
 import { getLayerMetaInfo, combineQueryAndFilters } from '../app_plugin/show_underlying_data';
 import { convertDataViewIntoLensIndexPattern } from '../data_views_service/loader';
+import { getApplicationUserMessages } from '../app_plugin/get_application_user_messages';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
 
@@ -160,6 +165,7 @@ export interface LensEmbeddableDeps {
     navLinks: Capabilities['navLinks'];
     discover: Capabilities['discover'];
   };
+  coreStart: CoreStart;
   usageCollection?: UsageCollectionSetup;
   spaces?: SpacesPluginStart;
   theme: ThemeServiceStart;
@@ -296,13 +302,7 @@ export class Embeddable
     searchSessionId?: string;
   } = {};
 
-  private activeDataInfo: {
-    activeData?: TableInspectorAdapter;
-    activeDatasource?: Datasource;
-    activeDatasourceState?: unknown;
-    activeVisualization?: Visualization;
-    activeVisualizationState?: unknown;
-  } = {};
+  private activeData?: TableInspectorAdapter;
 
   private indexPatterns: DataView[] = [];
 
@@ -417,6 +417,145 @@ export class Embeddable
     );
   }
 
+  private get activeDatasourceId() {
+    return getActiveDatasourceIdFromDoc(this.savedVis);
+  }
+
+  private get activeDatasource() {
+    if (!this.activeDatasourceId) return;
+    return this.deps.datasourceMap[this.activeDatasourceId];
+  }
+
+  private get activeVisualizationId() {
+    return getActiveVisualizationIdFromDoc(this.savedVis);
+  }
+
+  private get activeVisualization() {
+    const activeVisualizationId = getActiveVisualizationIdFromDoc(this.savedVis);
+    if (!activeVisualizationId) return;
+    return this.deps.visualizationMap[activeVisualizationId];
+  }
+
+  private get activeVisualizationState() {
+    if (!this.activeVisualization) return;
+    return this.activeVisualization.initialize(() => '', this.savedVis?.state.visualization);
+  }
+
+  private get allReferences() {
+    return [
+      ...(this.savedVis?.references || []),
+      ...(this.savedVis?.state.internalReferences || []),
+    ];
+  }
+
+  private _indexPatternsCache?: IndexPatternMap;
+  private async getIndexPatternsCache(): Promise<IndexPatternMap> {
+    if (this._indexPatternsCache) return this._indexPatternsCache;
+
+    if (!this.activeDatasourceId) return {};
+
+    const adHocDataviews = await Promise.all(
+      Object.values(this.savedVis?.state.adHocDataViews || {})
+        .map((persistedSpec) => {
+          return DataViewPersistableStateService.inject(persistedSpec, this.allReferences);
+        })
+        .map((spec) => this.deps.dataViews.create(spec))
+    );
+
+    const allIndexPatterns = [...this.indexPatterns, ...adHocDataviews];
+
+    return allIndexPatterns.reduce(
+      (acc, indexPattern) => ({
+        [indexPattern.id!]: convertDataViewIntoLensIndexPattern(indexPattern),
+        ...acc,
+      }),
+      {}
+    );
+  }
+
+  private get indexPatternRefs(): IndexPatternRef[] {
+    return this.indexPatterns.map((indexPattern) => ({
+      title: indexPattern.title,
+      id: indexPattern.id!,
+      name: indexPattern.name,
+    }));
+  }
+
+  private async getActiveDatasourceState(): Promise<undefined | unknown> {
+    if (!this.activeDatasourceId || !this.activeDatasource) return;
+
+    const docDatasourceState = this.savedVis?.state.datasourceStates[this.activeDatasourceId];
+
+    const indexPatternsCache = await this.getIndexPatternsCache();
+
+    return this.activeDatasource.initialize(
+      docDatasourceState,
+      [...(this.savedVis?.references || []), ...(this.savedVis?.state.internalReferences || [])],
+      undefined,
+      undefined,
+      indexPatternsCache
+    );
+  }
+
+  private async updateUserMessages() {
+    const userMessages: UserMessage[] = [];
+
+    const activeDatasourceState = await this.getActiveDatasourceState();
+    const indexPatterns = await this.getIndexPatternsCache();
+
+    if (this.activeVisualizationState && this.activeDatasource) {
+      userMessages.push(
+        ...getApplicationUserMessages({
+          visualization: {
+            state: this.activeVisualizationState,
+            activeId: this.activeVisualizationId,
+          },
+          visualizationMap: this.deps.visualizationMap,
+          activeDatasource: this.activeDatasource,
+          activeDatasourceState: { state: activeDatasourceState },
+          dataViews: {
+            indexPatterns,
+            indexPatternRefs: this.indexPatternRefs,
+          },
+          core: this.deps.coreStart,
+        })
+      );
+    }
+
+    const mergedSearchContext = this.getMergedSearchContext();
+
+    if (!this.savedVis) {
+      return;
+    }
+
+    const frameDatasourceAPI: FrameDatasourceAPI = {
+      dataViews: {
+        indexPatterns,
+        indexPatternRefs: this.indexPatternRefs,
+      },
+      datasourceLayers: {}, // TODO
+      query: this.savedVis.state.query,
+      filters: mergedSearchContext.filters ?? [],
+      dateRange: {
+        fromDate: mergedSearchContext.timeRange?.from ?? '',
+        toDate: mergedSearchContext.timeRange?.to ?? '',
+      },
+      activeData: this.activeData,
+    };
+
+    userMessages.push(
+      ...(this.activeDatasource?.getUserMessages(activeDatasourceState, {
+        setState: () => {},
+        frame: frameDatasourceAPI,
+      }) ?? []),
+      ...(this.activeVisualization?.getUserMessages?.(this.activeVisualizationState, {
+        frame: frameDatasourceAPI,
+      }) ?? [])
+    );
+
+    console.log(userMessages);
+  }
+
   public reportsEmbeddableLoad() {
     return true;
   }
@@ -509,6 +648,11 @@ export class Embeddable
 
     await this.initializeOutput();
 
+    await this.updateUserMessages();
+
+    // deferred loading of this embeddable is complete
+    this.setInitializationFinished();
+
     this.isInitialized = true;
   }
 
@@ -552,14 +696,12 @@ export class Embeddable
   }
 
   private handleWarnings(adapters?: Partial<DefaultInspectorAdapters>) {
-    const activeDatasourceId = getActiveDatasourceIdFromDoc(this.savedVis);
-
-    if (!activeDatasourceId || !adapters?.requests) {
+    if (!this.activeDatasourceId || !adapters?.requests) {
       return;
     }
 
-    const activeDatasource = this.deps.datasourceMap[activeDatasourceId];
-    const docDatasourceState = this.savedVis?.state.datasourceStates[activeDatasourceId];
+    const activeDatasource = this.deps.datasourceMap[this.activeDatasourceId];
+    const docDatasourceState = this.savedVis?.state.datasourceStates[this.activeDatasourceId];
 
     const requestWarnings = getSearchWarningMessages(
       adapters.requests,
@@ -581,7 +723,7 @@ export class Embeddable
   }
 
   private updateActiveData: ExpressionWrapperProps['onData$'] = (data, adapters) => {
-    this.activeDataInfo.activeData = adapters?.tables?.tables;
+    this.activeData = adapters?.tables?.tables;
     if (this.input.onLoad) {
       // once onData$ is get's called from expression renderer, loading becomes false
       this.input.onLoad(false, adapters);
@@ -594,6 +736,7 @@ export class Embeddable
       error: type === 'error' ? error : undefined,
     });
 
+    this.updateUserMessages();
     this.handleWarnings(adapters);
   };
 
@@ -924,74 +1067,36 @@ export class Embeddable
   }
 
   private async loadViewUnderlyingDataArgs(): Promise<boolean> {
-    if (!this.savedVis || !this.activeDataInfo.activeData) {
+    if (
+      !this.savedVis ||
+      !this.activeData ||
+      !this.activeDatasource ||
+      !this.activeVisualization ||
+      !this.activeVisualizationState
+    ) {
       return false;
     }
+
+    const activeDatasourceState = await this.getActiveDatasourceState();
+
+    if (!activeDatasourceState) {
+      return false;
+    }
+
     const mergedSearchContext = this.getMergedSearchContext();
 
     if (!mergedSearchContext.timeRange) {
       return false;
     }
 
-    const activeDatasourceId = getActiveDatasourceIdFromDoc(this.savedVis);
-    if (!activeDatasourceId) {
-      return false;
-    }
-
-    const activeVisualizationId = getActiveVisualizationIdFromDoc(this.savedVis);
-    if (!activeVisualizationId) {
-      return false;
-    }
-
-    this.activeDataInfo.activeDatasource = this.deps.datasourceMap[activeDatasourceId];
-    this.activeDataInfo.activeVisualization = this.deps.visualizationMap[activeVisualizationId];
-
-    const docDatasourceState = this.savedVis?.state.datasourceStates[activeDatasourceId];
-    const adHocDataviews = await Promise.all(
-      Object.values(this.savedVis?.state.adHocDataViews || {})
-        .map((persistedSpec) => {
-          return DataViewPersistableStateService.inject(persistedSpec, [
-            ...(this.savedVis?.references || []),
-            ...(this.savedVis?.state.internalReferences || []),
-          ]);
-        })
-        .map((spec) => this.deps.dataViews.create(spec))
-    );
-
-    const allIndexPatterns = [...this.indexPatterns, ...adHocDataviews];
-
-    const indexPatternsCache = allIndexPatterns.reduce(
-      (acc, indexPattern) => ({
-        [indexPattern.id!]: convertDataViewIntoLensIndexPattern(indexPattern),
-        ...acc,
-      }),
-      {}
-    );
-
-    if (!this.activeDataInfo.activeDatasourceState) {
-      this.activeDataInfo.activeDatasourceState = this.activeDataInfo.activeDatasource.initialize(
-        docDatasourceState,
-        [...(this.savedVis?.references || []), ...(this.savedVis?.state.internalReferences || [])],
-        undefined,
-        undefined,
-        indexPatternsCache
-      );
-    }
-
-    if (!this.activeDataInfo.activeVisualizationState) {
-      this.activeDataInfo.activeVisualizationState =
-        this.activeDataInfo.activeVisualization.initialize(
-          () => '',
-          this.savedVis?.state.visualization
-        );
-    }
+    const indexPatternsCache = await this.getIndexPatternsCache();
 
     const viewUnderlyingDataArgs = getViewUnderlyingDataArgs({
-      activeDatasource: this.activeDataInfo.activeDatasource,
-      activeDatasourceState: this.activeDataInfo.activeDatasourceState,
-      activeVisualization: this.activeDataInfo.activeVisualization,
-      activeVisualizationState: this.activeDataInfo.activeVisualizationState,
-      activeData: this.activeDataInfo.activeData,
+      activeDatasource: this.activeDatasource,
+      activeDatasourceState,
+      activeVisualization: this.activeVisualization,
+      activeVisualizationState: this.activeVisualizationState,
+      activeData: this.activeData,
       dataViews: this.indexPatterns,
       capabilities: this.deps.capabilities,
       query: mergedSearchContext.query,
@@ -1062,9 +1167,6 @@ export class Embeddable
       editUrl: this.deps.basePath.prepend(`/app/lens${getEditPath(savedObjectId)}`),
       indexPatterns: this.indexPatterns,
     });
-
-    // deferred loading of this embeddable is complete
-    this.setInitializationFinished();
   }
 
   private getIsEditable() {

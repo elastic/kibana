@@ -7,6 +7,7 @@
 
 import type {
   Capabilities,
+  CoreStart,
   HttpSetup,
   IUiSettingsClient,
   ThemeServiceStart,
@@ -38,6 +39,7 @@ export interface LensEmbeddableStartServices {
   data: DataPublicPluginStart;
   timefilter: TimefilterContract;
   coreHttp: HttpSetup;
+  coreStart: CoreStart;
   inspector: InspectorStart;
   attributeService: LensAttributeService;
   capabilities: RecursiveReadonly<Capabilities>;
@@ -106,6 +108,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
         datasourceMap,
         uiActions,
         coreHttp,
+        coreStart,
         attributeService,
         dataViews,
         capabilities,
@@ -139,6 +142,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
             navLinks: capabilities.navLinks,
             discover: capabilities.discover,
           },
+          coreStart,
           usageCollection,
           theme,
           spaces,
