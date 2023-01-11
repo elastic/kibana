@@ -7,6 +7,40 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const ADD_TO_CASE_SUCCESS = i18n.translate(
+  'xpack.securitySolution.dataQualityDashboard.addToCaseSuccessToast',
+  {
+    defaultMessage: 'Successfully added data quality results to the case',
+  }
+);
+
+export const BETA = i18n.translate('xpack.securitySolution.dataQualityDashboard.betaBadge', {
+  defaultMessage: 'Beta',
+});
+
+export const DATA_QUALITY_TITLE = i18n.translate(
+  'xpack.securitySolution.dataQualityDashboard.pageTitle',
+  {
+    defaultMessage: 'Data Quality',
+  }
+);
+
+export const ELASTIC_COMMON_SCHEMA = i18n.translate(
+  'xpack.securitySolution.dataQualityDashboard.elasticCommonSchemaReferenceLink',
+  {
+    defaultMessage: 'Elastic Common Schema (ECS)',
+  }
+);
+
+export const SECURITY_SOLUTION_DEFAULT_INDEX_TOOLTIP = (settingName: string) =>
+  i18n.translate(
+    'xpack.securitySolution.dataQualityDashboard.securitySolutionDefaultIndexTooltip',
+    {
+      values: { settingName },
+      defaultMessage: `Indices and patterns from the {settingName} setting`,
+    }
+  );
+
 export const EVENTS = i18n.translate('xpack.securitySolution.overview.eventsTitle', {
   defaultMessage: 'Event count',
 });
@@ -43,17 +77,6 @@ export const VIEW_EVENTS = i18n.translate('xpack.securitySolution.overview.viewE
   defaultMessage: 'View events',
 });
 
-export const ELASTIC_COMMON_SCHEMA = i18n.translate(
-  'xpack.securitySolution.dataQuality.elasticCommonSchemaReferenceLink',
-  {
-    defaultMessage: 'Elastic Common Schema (ECS)',
-  }
-);
-
-export const DATA_QUALITY_TITLE = i18n.translate('xpack.securitySolution.dataQuality.pageTitle', {
-  defaultMessage: 'Data Quality',
-});
-
 export const DETECTION_RESPONSE_TITLE = i18n.translate(
   'xpack.securitySolution.detectionResponse.pageTitle',
   {
@@ -68,12 +91,6 @@ export const ENTITY_ANALYTICS_LICENSE_DESC = i18n.translate(
       'Detect threats from users and devices within your network with Entity Analytics',
   }
 );
-
-export const SECURITY_SOLUTION_DEFAULT_INDEX_TOOLTIP = (settingName: string) =>
-  i18n.translate('xpack.securitySolution.dataQuality.securitySolutionDefaultIndexTooltip', {
-    values: { settingName },
-    defaultMessage: `Indices and patterns from the {settingName} setting`,
-  });
 
 export const TECHNICAL_PREVIEW = i18n.translate(
   'xpack.securitySolution.entityAnalytics.technicalPreviewLabel',

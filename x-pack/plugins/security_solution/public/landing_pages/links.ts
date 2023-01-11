@@ -15,7 +15,7 @@ import {
 import { DASHBOARDS, EXPLORE } from '../app/translations';
 import type { LinkItem } from '../common/links/types';
 import {
-  dataQualityLinks,
+  ecsDataQualityDashboardLinks,
   detectionResponseLinks,
   entityAnalyticsLinks,
   overviewLinks,
@@ -41,7 +41,7 @@ export const dashboardsLandingLinks: LinkItem = {
     kubernetesLinks,
     cloudSecurityPostureLinks,
     entityAnalyticsLinks,
-    dataQualityLinks,
+    ecsDataQualityDashboardLinks,
   ],
   skipUrlState: true,
 };

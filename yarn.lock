@@ -3669,6 +3669,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ecs-data-quality-dashboard@link:x-pack/packages/kbn-ecs-data-quality-dashboard":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ecs@link:packages/kbn-ecs":
   version "0.0.0"
   uid ""

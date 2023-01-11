@@ -32,14 +32,6 @@ const OverviewRoutes = () => (
   </PluginTemplateWrapper>
 );
 
-const DataQualityRoutes = () => (
-  <PluginTemplateWrapper>
-    <TrackApplicationView viewId={SecurityPageName.dataQuality}>
-      <DataQuality />
-    </TrackApplicationView>
-  </PluginTemplateWrapper>
-);
-
 const DetectionResponseRoutes = () => (
   <PluginTemplateWrapper>
     <TrackApplicationView viewId={SecurityPageName.detectionAndResponse}>
@@ -60,6 +52,14 @@ const EntityAnalyticsRoutes = () => (
   <PluginTemplateWrapper>
     <TrackApplicationView viewId={SecurityPageName.entityAnalytics}>
       <EntityAnalyticsPage />
+    </TrackApplicationView>
+  </PluginTemplateWrapper>
+);
+
+const DataQualityRoutes = () => (
+  <PluginTemplateWrapper>
+    <TrackApplicationView viewId={SecurityPageName.dataQuality}>
+      <DataQuality />
     </TrackApplicationView>
   </PluginTemplateWrapper>
 );

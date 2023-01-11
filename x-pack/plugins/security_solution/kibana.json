@@ -16,7 +16,7 @@
     "cloudSecurityPosture",
     "dashboard",
     "data",
-    "dataQuality",
+    "ecsDataQualityDashboard",
     "dataViews",
     "embeddable",
     "eventLog",

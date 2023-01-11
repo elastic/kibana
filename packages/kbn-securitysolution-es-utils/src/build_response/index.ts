@@ -36,9 +36,12 @@ const statusToErrorMessage = (
   }
 };
 
+/** Creates responses */
 export class ResponseFactory {
+  /** constructor */
   constructor(private response: KibanaResponseFactory) {}
 
+  /** error */
   error<T>({ statusCode, body, headers }: CustomHttpResponseOptions<T>) {
     const contentType: CustomHttpResponseOptions<T>['headers'] = {
       'content-type': 'application/json',
@@ -61,5 +64,6 @@ export class ResponseFactory {
   }
 }
 
+/** builds a response */
 export const buildResponse = (response: KibanaResponseFactory): ResponseFactory =>
   new ResponseFactory(response);
