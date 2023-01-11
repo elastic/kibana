@@ -15,6 +15,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const queryBar = getService('queryBar');
 
   describe('lens share tests', () => {
+    before(async () => {
+      await PageObjects.visualize.gotoVisualizationLandingPage();
+    });
+
     after(async () => {
       await PageObjects.lens.setCSVDownloadDebugFlag(false);
     });
