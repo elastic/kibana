@@ -9,8 +9,8 @@ import React from 'react';
 import type { FC } from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
-import { ContentPreviewSection } from './components';
+import { EuiSpacer } from '@elastic/eui';
+import { SearchContentSection, ContentPreviewSection, CreateContentSection } from './components';
 
 export const App: FC = () => {
   return (
@@ -21,12 +21,16 @@ export const App: FC = () => {
         rightSideItems={[<button>Todo</button>]}
       />
       <KibanaPageTemplate.Section>
-        <EuiTitle>
-          <h2>Search</h2>
-        </EuiTitle>
+        {/* Search */}
+        <SearchContentSection />
         <EuiSpacer size="xl" />
 
+        {/* Content preview */}
         <ContentPreviewSection />
+        <EuiSpacer size="xl" />
+
+        {/* Create memory content */}
+        <CreateContentSection />
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
   );

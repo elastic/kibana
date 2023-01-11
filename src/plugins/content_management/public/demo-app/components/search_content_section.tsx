@@ -6,8 +6,15 @@
  * Side Public License, v 1.
  */
 
-export { ContentPreviewSection } from './content_preview_section';
+import { EuiTitle } from '@elastic/eui';
+import React, { FC } from 'react';
 
-export { CreateContentSection } from './create_content_section';
-
-export { SearchContentSection } from './search_content_section';
+export const SearchContentSection: FC = () => {
+  return (
+    <>
+      <EuiTitle>
+        <h2>Search</h2>
+      </EuiTitle>
+    </>
+  );
+};
