@@ -171,11 +171,6 @@ export enum ActionConnectorMode {
   ActionForm = 'actionForm',
 }
 
-export interface BulkDeleteResponse {
-  errors: BulkOperationError[];
-  total: number;
-}
-
 export interface BulkOperationResponse {
   rules: Rule[];
   errors: BulkOperationError[];
@@ -587,4 +582,47 @@ export interface SnoozeSchedule {
 
 export interface ConnectorServices {
   validateEmailAddresses: ActionsPublicPluginSetup['validateEmailAddresses'];
+}
+
+export interface RulesListFilters {
+  searchText: string;
+  types: string[];
+  actionTypes: string[];
+  ruleExecutionStatuses: string[];
+  ruleLastRunOutcomes: string[];
+  ruleStatuses: RuleStatus[];
+  tags: string[];
+}
+
+export type UpdateFiltersProps =
+  | {
+      filter: 'searchText';
+      value: string;
+    }
+  | {
+      filter: 'ruleStatuses';
+      value: RuleStatus[];
+    }
+  | {
+      filter: 'types' | 'actionTypes' | 'ruleExecutionStatuses' | 'ruleLastRunOutcomes' | 'tags';
+      value: string[];
+    };
+
+export interface RulesPageContainerState {
+  lastResponse: string[];
+  status: RuleStatus[];
+}
+
+export type BulkEditActions =
+  | 'snooze'
+  | 'unsnooze'
+  | 'schedule'
+  | 'unschedule'
+  | 'updateApiKey'
+  | 'delete';
+
+export interface UpdateRulesToBulkEditProps {
+  action: BulkEditActions;
+  rules?: RuleTableItem[];
+  filter?: KueryNode | null;
 }

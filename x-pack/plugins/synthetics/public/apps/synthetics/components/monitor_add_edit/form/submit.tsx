@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { useFormContext } from 'react-hook-form';
 import { useFetcher, FETCH_STATUS } from '@kbn/observability-plugin/public';
 import { DeleteMonitor } from '../../monitors_page/management/monitor_list_table/delete_monitor';
-import { ConfigKey, SourceType, SyntheticsMonitor } from '../types';
+import { SyntheticsMonitor } from '../types';
 import { format } from './formatter';
 import {
   createMonitorAPI,
@@ -33,7 +33,9 @@ export const ActionBar = () => {
     formState: { errors },
   } = useFormContext();
 
-  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+  const [monitorPendingDeletion, setMonitorPendingDeletion] = useState<SyntheticsMonitor | null>(
+    null
+  );
 
   const [monitorData, setMonitorData] = useState<SyntheticsMonitor | undefined>(undefined);
 
@@ -78,7 +80,7 @@ export const ActionBar = () => {
 
   const formSubmitter = (formData: Record<string, any>) => {
     if (!Object.keys(errors).length) {
-      setMonitorData(format(formData) as SyntheticsMonitor);
+      setMonitorData(format(formData));
     }
   };
 
@@ -88,12 +90,12 @@ export const ActionBar = () => {
     <>
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={true}>
-          {isEdit && (
+          {isEdit && monitorObject && (
             <div>
               <EuiButton
                 color="danger"
                 onClick={() => {
-                  setIsDeleteModalVisible(true);
+                  setMonitorPendingDeletion(monitorObject?.attributes);
                 }}
               >
                 {DELETE_MONITOR_LABEL}
@@ -116,17 +118,13 @@ export const ActionBar = () => {
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {isDeleteModalVisible && (
+      {monitorPendingDeletion && monitorObject && (
         <DeleteMonitor
-          configId={monitorId}
-          name={monitorObject?.attributes?.[ConfigKey.NAME] ?? ''}
+          fields={monitorObject?.attributes}
           reloadPage={() => {
             history.push(MONITORS_ROUTE);
           }}
-          isProjectMonitor={
-            monitorObject?.attributes?.[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT
-          }
-          setIsDeleteModalVisible={setIsDeleteModalVisible}
+          setMonitorPendingDeletion={setMonitorPendingDeletion}
         />
       )}
     </>

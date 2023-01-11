@@ -7,16 +7,19 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { cloneDeep, unset } from 'lodash';
+import { cloneDeep, unset, flow } from 'lodash';
 import type { SavedObjectUnsanitizedDoc, SavedObjectSanitizedDoc } from '@kbn/core/server';
 import type { SanitizedCaseOwner } from '.';
 import { addOwnerToSO } from '.';
 import type { ESConnectorFields } from '../../services';
 import type { CaseAttributes } from '../../../common/api';
 import { CaseSeverity, ConnectorTypes } from '../../../common/api';
+
 import {
   CONNECTOR_ID_REFERENCE_NAME,
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
+  SEVERITY_EXTERNAL_TO_ESMODEL,
+  STATUS_EXTERNAL_TO_ESMODEL,
 } from '../../common/constants';
 import {
   transformConnectorIdToReference,
@@ -24,6 +27,7 @@ import {
 } from './user_actions/connector_id';
 import { CASE_TYPE_INDIVIDUAL } from './constants';
 import { pipeMigrations } from './utils';
+import { ESCaseSeverity, ESCaseStatus } from '../../services/cases/types';
 
 interface UnsanitizedCaseConnector {
   connector_id: string;
@@ -131,6 +135,28 @@ export const addAssignees = (
   return { ...doc, attributes: { ...doc.attributes, assignees }, references: doc.references ?? [] };
 };
 
+export const convertSeverity = (
+  doc: SavedObjectUnsanitizedDoc<CaseAttributes>
+): SavedObjectSanitizedDoc<Omit<CaseAttributes, 'severity'> & { severity: ESCaseSeverity }> => {
+  const severity = SEVERITY_EXTERNAL_TO_ESMODEL[doc.attributes.severity] ?? ESCaseSeverity.LOW;
+  return {
+    ...doc,
+    attributes: { ...doc.attributes, severity },
+    references: doc.references ?? [],
+  };
+};
+
+export const convertStatus = (
+  doc: SavedObjectUnsanitizedDoc<CaseAttributes>
+): SavedObjectSanitizedDoc<Omit<CaseAttributes, 'status'> & { status: ESCaseStatus }> => {
+  const status = STATUS_EXTERNAL_TO_ESMODEL[doc.attributes?.status] ?? ESCaseStatus.OPEN;
+  return {
+    ...doc,
+    attributes: { ...doc.attributes, status },
+    references: doc.references ?? [],
+  };
+};
+
 export const caseMigrations = {
   '7.10.0': (
     doc: SavedObjectUnsanitizedDoc<UnsanitizedCaseConnector>
@@ -194,4 +220,5 @@ export const caseMigrations = {
   '8.1.0': removeCaseType,
   '8.3.0': pipeMigrations(addDuration, addSeverity),
   '8.5.0': addAssignees,
+  '8.7.0': flow(convertSeverity, convertStatus),
 };
