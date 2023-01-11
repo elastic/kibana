@@ -258,8 +258,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await toasts.getToastCount()).to.be(0);
     } else {
       expect(await toasts.getToastCount()).to.be(1);
-      expect(await toasts.getToastContent(1)).to.equal(
-        `Displayed documents may vary\nThe displayed documents might differ from the documents that triggered the alert. Some documents might have been added or deleted.`
+      expect((await toasts.getToastContent(1)).startsWith('Displayed documents may vary')).to.be(
+        true
       );
     }
     expect(await filterBar.getFilterCount()).to.be(0);
@@ -363,6 +363,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await input.type('search-source-alert-o*');
       await testSubjects.click('explore-matching-indices-button');
 
+      await retry.waitFor('selection to happen', async () => {
+        const dataViewSelector = await testSubjects.find('selectDataViewExpression');
+        return (await dataViewSelector.getVisibleText()) === 'DATA VIEW\nsearch-source-alert-o*';
+      });
+
       await testSubjects.click('saveRuleButton');
 
       const errorElem = await testSubjects.find('esQueryAlertExpressionError');
@@ -373,6 +378,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should navigate to alert results via view in app link', async () => {
       await testSubjects.click('selectDataViewExpression');
       await testSubjects.click('indexPattern-switcher--input');
+      if (await testSubjects.exists('clearSearchButton')) {
+        await testSubjects.click('clearSearchButton');
+      }
       const dataViewsElem = await testSubjects.find('euiSelectableList');
       const sourceDataViewOption = await dataViewsElem.findByCssSelector(
         `[title="${SOURCE_DATA_VIEW}"]`

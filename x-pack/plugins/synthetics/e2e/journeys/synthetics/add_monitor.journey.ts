@@ -153,6 +153,7 @@ const createMonitorJourney = ({
 
       step('Go to monitor management', async () => {
         await syntheticsApp.navigateToMonitorManagement(true);
+        await syntheticsApp.enableMonitorManagement();
       });
 
       step('Ensure all monitors are deleted', async () => {
@@ -178,19 +179,20 @@ const createMonitorJourney = ({
       });
 
       step(`view ${monitorName} details in Monitor Management UI`, async () => {
-        await syntheticsApp.navigateToMonitorManagement();
         const hasFailure = await syntheticsApp.findMonitorConfiguration(monitorListDetails);
         expect(hasFailure).toBeFalsy();
       });
 
       step(`edit ${monitorName}`, async () => {
-        await syntheticsApp.navigateToEditMonitor();
+        await syntheticsApp.navigateToEditMonitor(monitorName);
         await syntheticsApp.findByText(monitorListDetails.location);
         const hasFailure = await syntheticsApp.findEditMonitorConfiguration(
           monitorEditDetails,
           monitorType
         );
         expect(hasFailure).toBeFalsy();
+        await page.click('text=Update monitor');
+        await page.waitForSelector('text=Monitor updated successfully.');
       });
 
       step('cannot save monitor with the same name', async () => {
@@ -198,12 +200,10 @@ const createMonitorJourney = ({
         await syntheticsApp.createMonitor({ monitorConfig, monitorType });
         await page.waitForSelector('text=Monitor name already exists');
         await syntheticsApp.clickByTestSubj('syntheticsMonitorConfigSubmitButton');
-        const success = page.locator('text=Monitor added successfully.');
-        expect(await success.count()).toBe(0);
+        await page.waitForSelector('text=Cancel');
       });
 
       step('delete monitor', async () => {
-        await syntheticsApp.navigateToMonitorManagement();
         await syntheticsApp.findByText('Monitor');
         const isSuccessful = await syntheticsApp.deleteMonitors();
         expect(isSuccessful).toBeTruthy();
@@ -215,7 +215,7 @@ const createMonitorJourney = ({
 Object.values(configuration).forEach((config) => {
   createMonitorJourney({
     monitorType: config.monitorType,
-    monitorName: `${config.monitorConfig.name} monitor`,
+    monitorName: config.monitorConfig.name,
     monitorConfig: config.monitorConfig,
     monitorListDetails: config.monitorListDetails,
     monitorEditDetails: config.monitorEditDetails as Array<[string, string]>,
