@@ -13,7 +13,7 @@ git init
 git remote add origin https://github.com/elastic/elasticsearch
 git config core.sparsecheckout true
 echo "rest-api-spec/src/main/resources/rest-api-spec/api/*\nx-pack/plugin/src/test/resources/rest-api-spec/api/*" > .git/info/sparse-checkout
-git pull --depth=1 origin master
+git pull --depth=1 origin main
 ```
 
 ### Usage
