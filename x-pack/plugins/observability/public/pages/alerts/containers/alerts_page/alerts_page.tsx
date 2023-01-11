@@ -7,6 +7,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { TimeBuckets, UI_SETTINGS } from '@kbn/data-plugin/common';
 import { BoolQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -60,6 +61,7 @@ function InternalAlertsPage() {
       getAlertsStateTable: AlertsStateTable,
       getAlertSummaryWidget: AlertSummaryWidget,
     },
+    uiSettings,
   } = useKibana<ObservabilityAppServices>().services;
   const alertSearchBarStateProps = useAlertSearchBarStateContainer(URL_STORAGE_KEY);
 
@@ -73,10 +75,19 @@ function InternalAlertsPage() {
   });
   const { hasAnyData, isAllRequestsComplete } = useHasData();
   const [esQuery, setEsQuery] = useState<{ bool: BoolQuery }>();
-  const alertSummaryTimeRange: AlertSummaryTimeRange = getAlertSummaryTimeRange({
-    from: alertSearchBarStateProps.rangeFrom,
-    to: alertSearchBarStateProps.rangeTo,
+  const timeBuckets = new TimeBuckets({
+    'histogram:maxBars': uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS),
+    'histogram:barTarget': uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
+    dateFormat: uiSettings.get('dateFormat'),
+    'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
   });
+  const alertSummaryTimeRange: AlertSummaryTimeRange = getAlertSummaryTimeRange(
+    {
+      from: alertSearchBarStateProps.rangeFrom,
+      to: alertSearchBarStateProps.rangeTo,
+    },
+    timeBuckets
+  );
 
   useBreadcrumbs([
     {

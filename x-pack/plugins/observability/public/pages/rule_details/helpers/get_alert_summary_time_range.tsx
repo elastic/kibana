@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import React from 'react';
-import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
+import moment from 'moment';
+import { getAbsoluteTimeRange, TimeBuckets } from '@kbn/data-plugin/common';
 import { TimeRange } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { AlertSummaryTimeRange } from '@kbn/triggers-actions-ui-plugin/public';
@@ -32,13 +32,19 @@ export const getDefaultAlertSummaryTimeRange = (): AlertSummaryTimeRange => {
   };
 };
 
-export const getAlertSummaryTimeRange = (timeRange: TimeRange): AlertSummaryTimeRange => {
+export const getAlertSummaryTimeRange = (
+  timeRange: TimeRange,
+  timeBuckets: TimeBuckets
+): AlertSummaryTimeRange => {
   const { to, from } = getAbsoluteTimeRange(timeRange);
+  const fixedInterval = getFixedInterval(timeRange);
+  timeBuckets.setInterval(fixedInterval);
 
   return {
     utcFrom: from,
     utcTo: to,
-    fixedInterval: getFixedInterval(timeRange),
+    fixedInterval,
+    dateFormat: timeBuckets.getScaledDateFormat(),
   };
 };
 

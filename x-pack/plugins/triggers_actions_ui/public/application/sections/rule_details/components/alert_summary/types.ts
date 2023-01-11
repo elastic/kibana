@@ -19,6 +19,7 @@ export interface AlertSummaryTimeRange {
   // fixed_interval condition in ES query such as 1m, 1h, 1d
   fixedInterval: string;
   title?: JSX.Element | string;
+  dateFormat?: string;
 }
 
 export interface AlertSummaryWidgetProps {
