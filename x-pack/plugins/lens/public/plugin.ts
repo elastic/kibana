@@ -444,8 +444,6 @@ export class LensPlugin {
       registerTopNavMenuEntryGenerator: (menuEntryGenerator: LensTopNavMenuEntryGenerator) => {
         this.topNavMenuEntries.push(menuEntryGenerator);
       },
-      // @TODO: write custom function here for export short url
-      getShortUrl() {},
     };
   }
 
@@ -595,7 +593,6 @@ export class LensPlugin {
           chartInfo: createChartInfoApi(startDependencies.dataViews, this.editorFrameService),
         };
       },
-      // getShortUrl: async () => {},
     };
   }
 
