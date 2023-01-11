@@ -32,9 +32,6 @@ function reducer(state: ReducerState, action: ReducerAction) {
         selectedDatasets: action.payload.datasets,
       };
     case 'updateDatasetsFilters':
-      // const datasetsToAdd = action.payload.filters;
-      // .filter((filter) => !state.selectedDatasets.includes(filter.meta.params?.query))
-      // .map((filter) => filter.meta.params?.query);
       const datasetsToAdd = action.payload.filters.reduce(
         (prevFilters: string[], nextFilter: Filter) => {
           const query =

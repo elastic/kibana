@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Filter } from '@kbn/es-query';
+
 /** Represents the Timeline data providers */
 
 /** The `is` operator in a KQL query */
@@ -70,20 +70,3 @@ export interface DataProvider {
 }
 
 export type DataProvidersAnd = Pick<DataProvider, Exclude<keyof DataProvider, 'and'>>;
-
-type DataProviders = DataProvider | DataProvider[];
-
-type Filters = Filter | Filter[];
-
-type ConvertedDataProviderOrFilter<T> = T extends DataProviders ? Filters : DataProviders;
-
-export function convertFilterOrProvider<T extends DataProviders | Filters>(
-  dataProvidersOrFilters: DataProviders | Filters
-): ConvertedDataProviderOrFilter<T> {
-  // This is a filter
-  if ('meta' in dataProvidersOrFilters) {
-    return [];
-  } else {
-    return [];
-  }
-}
