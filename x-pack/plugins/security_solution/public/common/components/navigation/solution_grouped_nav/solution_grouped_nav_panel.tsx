@@ -23,7 +23,12 @@ import {
   useIsWithinMinBreakpoint,
 } from '@elastic/eui';
 import classNames from 'classnames';
-import { EuiPanelStyled, EuiTitleStyled, GlobalPanelStyle, panelClass } from './solution_grouped_nav_panel.styles';
+import {
+  EuiPanelStyled,
+  EuiTitleStyled,
+  GlobalPanelStyle,
+  panelClass,
+} from './solution_grouped_nav_panel.styles';
 import type { DefaultSideNavItem } from './types';
 import type { LinkCategories } from '../../../links/types';
 import { NavItemBetaBadge } from '../nav_item_beta_badge';
