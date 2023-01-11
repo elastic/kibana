@@ -195,7 +195,7 @@ export async function _installPackage({
       const dataStreamNames = installedPkg.attributes.installed_es
         .filter((ref) => ref.type === 'index_template')
         // index templates are named {type}-{dataset}, remove everything before first hyphen
-        .map((ref) => ref.id.replace(/.*-$/, ''));
+        .map((ref) => ref.id.replace(/^[^-]+-/, ''));
 
       const dataStreams = dataStreamNames.flatMap((dataStreamName) =>
         getNormalizedDataStreams(packageInfo, dataStreamName)
