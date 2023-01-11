@@ -10,6 +10,7 @@ import {
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import moment from 'moment';
 import { resolveMissingLabels } from '../../routes/status/current_status';
 import { AlertConfigKey } from '../../../common/constants/monitor_management';
 import { getAllLocations } from '../../synthetics_service/get_all_locations';
@@ -135,7 +136,10 @@ export class StatusRuleExecutor {
       const currentStatus = await queryMonitorStatus(
         this.esClient,
         [...listOfLocations],
-        { to: 'now', from: this.previousStartedAt?.toISOString() ?? 'now-1m' },
+        {
+          to: 'now',
+          from: moment(this.previousStartedAt).subtract(15, 'seconds')?.toISOString() ?? 'now-1m',
+        },
         enabledIds
       );
 
