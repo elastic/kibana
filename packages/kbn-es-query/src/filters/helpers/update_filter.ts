@@ -93,7 +93,7 @@ function updateWithRangeOperator(
   rawParams: Filter['meta']['params'] | undefined,
   field: string
 ): Filter {
-  if (filter.meta.params !== undefined && Array.isArray(rawParams)) {
+  if (filter.meta.params !== undefined && typeof rawParams === 'object') {
     const rangeParams: RangeFilterParams = filter.meta.params;
     const params = {
       ...rangeParams,
