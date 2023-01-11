@@ -107,7 +107,6 @@ export const downloadCsvShareProvider = ({
           name: panelTitle,
           icon: 'document',
           disabled: !csvEnabled,
-          ['data-test-subj']: 'csvDownloadMenuItem',
           sortOrder: 1,
         },
         panel: {
