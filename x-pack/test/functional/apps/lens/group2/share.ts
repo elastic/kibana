@@ -94,7 +94,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.navigateTo(url);
       // check that it's the same configuration in the new URL when ready
       await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(await filterBarService.getFiltersLabel()).to.be(['bytes:-1']);
+      expect(await filterBarService.getFiltersLabel()).to.be(['bytes: -1']);
       expect(await queryBar.getQueryString()).to.be('host.keyword www.elastic.co');
       await browser.closeCurrentWindow();
       await browser.switchToWindow(lensWindowHandler);

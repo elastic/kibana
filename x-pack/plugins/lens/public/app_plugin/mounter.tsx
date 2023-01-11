@@ -305,8 +305,8 @@ export async function mountApp(
 
       const initCallback = useCallback(() => {
         // Clear app-specific filters when navigating to Lens. Necessary because Lens
-        // can be loaded without a full page refresh. If the user navigates to Lens from Discover
-        // we keep the filters
+        // can be loaded without a full page refresh.
+        // If the user navigates to Lens from Discover, or comes from a Lens share link we keep the filters
         if (!initialContext) {
           data.query.filterManager.setAppFilters([]);
         }

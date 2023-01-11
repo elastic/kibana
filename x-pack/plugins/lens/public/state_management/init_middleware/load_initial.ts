@@ -126,6 +126,17 @@ export function loadInitial(
     const locatorReferences =
       'references' in initialStateFromLocator ? initialStateFromLocator.references : undefined;
 
+    const newFilters =
+      initialStateFromLocator &&
+      'filters' in initialStateFromLocator &&
+      initialStateFromLocator.filters
+        ? cloneDeep(initialStateFromLocator.filters)
+        : undefined;
+
+    if (newFilters) {
+      data.query.filterManager.setAppFilters(newFilters);
+    }
+
     return initializeSources(
       {
         datasourceMap,

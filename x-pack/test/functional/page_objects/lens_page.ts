@@ -1664,7 +1664,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async isShareActionEnabled(action: 'csvDownload' | 'permalinks') {
       switch (action) {
         case 'csvDownload':
-          return await testSubjects.isEnabled('sharePanel-csvDownloadMenuItem');
+          return await testSubjects.isEnabled('sharePanel-CSVDownload');
         case 'permalinks':
           return await testSubjects.isEnabled('sharePanel-Permalinks');
       }
