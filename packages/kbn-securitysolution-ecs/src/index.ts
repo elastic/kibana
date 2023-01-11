@@ -42,6 +42,7 @@ export * from './ecs_fields';
 export { EventCategory, EventCode };
 
 export type {
+  AgentEcs,
   AuditdEcs,
   CloudEcs,
   CodeSignature,
