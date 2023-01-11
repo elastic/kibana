@@ -23,7 +23,7 @@ export interface EngineViewActions {
 export interface EngineViewValues {
   engineData: typeof FetchEngineApiLogic.values.data;
   engineName: typeof EngineNameLogic.values.engineName;
-  fetchEngineApiError: typeof FetchEngineApiLogic.values.error;
+  fetchEngineApiError?: typeof FetchEngineApiLogic.values.error;
   fetchEngineApiStatus: typeof FetchEngineApiLogic.values.status;
   isLoadingEngine: boolean;
 }

@@ -14,7 +14,8 @@ import { EngineViewLogic, EngineViewValues } from './engine_view_logic';
 const DEFAULT_VALUES: EngineViewValues = {
   engineData: undefined,
   engineName: 'my-test-engine',
-  fetchEngineApiStatus: { status: Status.IDLE },
+  fetchEngineApiError: undefined,
+  fetchEngineApiStatus: Status.IDLE,
   isLoadingEngine: true,
 };
 
