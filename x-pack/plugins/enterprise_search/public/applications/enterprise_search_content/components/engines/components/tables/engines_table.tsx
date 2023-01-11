@@ -13,8 +13,6 @@ import { i18n } from '@kbn/i18n';
 
 import { EnterpriseSearchEngine } from '../../../../../../../common/types/engines';
 
-import { DELETE_BUTTON_LABEL, MANAGE_BUTTON_LABEL } from '../../../../../shared/constants';
-
 import { convertMetaToPagination, Meta } from '../../types';
 
 // add health status
@@ -24,12 +22,14 @@ interface EnginesListTableProps {
   meta: Meta;
   isLoading?: boolean;
   onChange: (criteria: CriteriaWithPagination<EnterpriseSearchEngine>) => void;
+  onDelete: (engine: EnterpriseSearchEngine) => void;
 }
 export const EnginesListTable: React.FC<EnginesListTableProps> = ({
   enginesList,
-  meta,
   isLoading,
+  meta,
   onChange,
+  onDelete,
 }) => {
   const columns: Array<EuiBasicTableColumn<EnterpriseSearchEngine>> = [
     {
@@ -66,19 +66,28 @@ export const EnginesListTable: React.FC<EnginesListTableProps> = ({
       }),
       actions: [
         {
-          name: MANAGE_BUTTON_LABEL,
           description: i18n.translate(
-            'xpack.enterpriseSearch.content.enginesList.table.column.action.manage.buttonDescription',
+            'xpack.enterpriseSearch.content.enginesList.table.column.actions.view.buttonDescription',
             {
-              defaultMessage: 'Manage this engine',
+              defaultMessage: 'View this engine',
             }
           ),
           type: 'icon',
           icon: 'eye',
-          onClick: () => {},
+          name: (engine) =>
+            i18n.translate(
+              'xpack.enterpriseSearch.content.enginesList.table.column.action.view.buttonDescription',
+              {
+                defaultMessage: 'View this engine {engineName}',
+                values: {
+                  engineName: engine.name,
+                },
+              }
+            ),
+          onClick: () => {}, // navigate url to engine view page
         },
         {
-          name: DELETE_BUTTON_LABEL,
+          color: 'danger',
           description: i18n.translate(
             'xpack.enterpriseSearch.content.enginesList.table.column.action.delete.buttonDescription',
             {
@@ -87,8 +96,20 @@ export const EnginesListTable: React.FC<EnginesListTableProps> = ({
           ),
           type: 'icon',
           icon: 'trash',
-          color: 'danger',
-          onClick: () => {},
+          isPrimary: false,
+          name: () =>
+            i18n.translate(
+              'xpack.enterpriseSearch.content.engineList.table.column.actions.deleteEngineLabel',
+              {
+                defaultMessage: 'Delete this engine',
+                // values: {
+                //  // engineName: engine.name,
+                // },
+              }
+            ),
+          onClick: (engine) => {
+            onDelete(engine);
+          },
         },
       ],
     },

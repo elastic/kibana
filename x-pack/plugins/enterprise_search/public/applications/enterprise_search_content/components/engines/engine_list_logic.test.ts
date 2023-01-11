@@ -19,33 +19,33 @@ import { DEFAULT_META } from './types';
 
 const DEFAULT_VALUES = {
   data: undefined,
-  results: [],
+  deleteModalEngine: null,
+  deleteModalEngineName: '',
+  deleteStatus: Status.IDLE,
+  isDeleteLoading: false,
+  isDeleteModalVisible: false,
+  isLoading: false,
   meta: DEFAULT_META,
   parameters: { meta: DEFAULT_META },
+  results: [],
   status: Status.IDLE,
 };
 
-// sample engines list
+// mocked fetchEngine result. May need to call  mock engines response when ready
 
 const results: EnterpriseSearchEngine[] = [
   {
     name: 'engine-name-1',
     indices: ['index-18', 'index-23'],
-    // last_updated: '21 March 2021',
-    // document_count: 18,
   },
   {
     name: 'engine-name-2',
     indices: ['index-180', 'index-230', 'index-8', 'index-2'],
-    // last_updated: '10 Jul 2018',
-    // document_count: 10,
   },
 
   {
     name: 'engine-name-3',
     indices: ['index-2', 'index-3'],
-    // last_updated: '21 December 2022',
-    // document_count: 8,
   },
 ];
 
@@ -83,6 +83,24 @@ describe('EnginesListLogic', () => {
         // });
       });
     });
+    describe('closeDeleteEngineModal', () => {
+      it('set isDeleteModalVisible to false and engineName to empty string', () => {
+        EnginesListLogic.actions.openDeleteEngineModal(results[0]);
+        EnginesListLogic.actions.closeDeleteEngineModal();
+        expect(EnginesListLogic.values).toEqual(DEFAULT_VALUES);
+      });
+    });
+    describe('openDeleteEngineModal', () => {
+      it('set deleteModalEngineName and set isDeleteModalVisible to true', () => {
+        EnginesListLogic.actions.openDeleteEngineModal(results[0]);
+        expect(EnginesListLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          deleteModalEngine: results[0],
+          deleteModalEngineName: 'engine-name-1',
+          isDeleteModalVisible: true,
+        });
+      });
+    });
   });
   describe('reducers', () => {
     describe('meta', () => {
@@ -115,14 +133,62 @@ describe('EnginesListLogic', () => {
         });
       });
     });
+    describe('request to delete Engine', () => {
+      it('should set isDeleteLoading to true on delete engine request', () => {
+        EnginesListLogic.actions.deleteEngine({ engineName: results[0].name });
+        EnginesListLogic.actions.deleteError({} as HttpError);
+        expect(EnginesListLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          deleteStatus: Status.ERROR,
+          isDeleteLoading: false,
+        });
+      });
+      it('should set isDeleteLoading to false on delete apiError', () => {
+        EnginesListLogic.actions.deleteEngine({ engineName: results[0].name });
+        EnginesListLogic.actions.deleteError({} as HttpError);
+        expect(EnginesListLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          deleteStatus: Status.ERROR,
+          isDeleteLoading: false,
+        });
+      });
+      it('should set isDeleteLoading to false on delete apiSuccess', () => {
+        EnginesListLogic.actions.deleteEngine({ engineName: results[0].name });
+        EnginesListLogic.actions.deleteSuccess({ engineName: results[0].name });
+        expect(EnginesListLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          deleteStatus: Status.SUCCESS,
+          isDeleteLoading: false,
+          isLoading: true,
+          status: Status.LOADING, // fetchEngine api status
+        });
+      });
+    });
   });
   describe('listeners', () => {
     it('call flashAPIErrors on apiError', () => {
       EnginesListLogic.actions.apiError({} as HttpError);
-      expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledTimes(1);
+      expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledTimes(2);
+      expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledWith({});
+    });
+    // check for delete engine error
+    it('call flashAPIErrors on deleteError', () => {
+      EnginesListLogic.actions.deleteError({} as HttpError);
+      expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledTimes(2);
       expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledWith({});
     });
 
+    it('calls flashSuccessToast, closeDeleteEngineModal and fetchEngines on deleteSuccess', () => {
+      EnginesListLogic.actions.fetchEngines = jest.fn();
+      EnginesListLogic.actions.closeDeleteEngineModal = jest.fn();
+      EnginesListLogic.actions.deleteSuccess({ engineName: results[0].name });
+
+      expect(mockFlashMessageHelpers.flashSuccessToast).toHaveBeenCalledTimes(1);
+      expect(EnginesListLogic.actions.fetchEngines).toHaveBeenCalledWith(
+        EnginesListLogic.values.parameters
+      );
+      expect(EnginesListLogic.actions.closeDeleteEngineModal).toHaveBeenCalled();
+    });
     it('call makeRequest on fetchEngines', async () => {
       jest.useFakeTimers({ legacyFakeTimers: true });
       EnginesListLogic.actions.makeRequest = jest.fn();
