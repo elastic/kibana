@@ -9,16 +9,11 @@ import type { Action } from 'redux-actions';
 import { call, put, takeLatest } from 'redux-saga/effects';
 import { fetchNetworkEvents } from './api';
 import { SyntheticsNetworkEventsApiResponse } from '../../../../../common/runtime_types';
-import {
-  FetchNetworkEventsParams,
-  getNetworkEvents,
-  getNetworkEventsFail,
-  getNetworkEventsSuccess,
-} from './actions';
+import { FetchNetworkEventsParams, getNetworkEvents } from './actions';
 
 export function* fetchNetworkEventsEffect() {
   yield takeLatest(
-    getNetworkEvents,
+    getNetworkEvents.get,
     function* (action: Action<FetchNetworkEventsParams>): Generator {
       try {
         const response = (yield call(
@@ -27,7 +22,7 @@ export function* fetchNetworkEventsEffect() {
         )) as SyntheticsNetworkEventsApiResponse;
 
         yield put(
-          getNetworkEventsSuccess({
+          getNetworkEvents.success({
             checkGroup: action.payload.checkGroup,
             stepIndex: action.payload.stepIndex,
             ...response,
@@ -35,7 +30,7 @@ export function* fetchNetworkEventsEffect() {
         );
       } catch (e) {
         yield put(
-          getNetworkEventsFail({
+          getNetworkEvents.fail({
             checkGroup: action.payload.checkGroup,
             stepIndex: action.payload.stepIndex,
             error: e,
