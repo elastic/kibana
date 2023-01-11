@@ -128,6 +128,10 @@ export const EngineLogic = kea<MakeLogicType<EngineValues, EngineActions>>({
         return searchKey?.key || '';
       },
     ],
+    hasIncompleteFields: [
+      () => [selectors.engine],
+      ({ incompleteFields }) => incompleteFields?.length > 0,
+    ],
   }),
   listeners: ({ actions, values }) => ({
     initializeEngine: async (_, breakpoint) => {

@@ -28,6 +28,7 @@ export const SchemaCallouts: React.FC = () => {
     hasUnconfirmedFields,
     hasNewUnsearchedFields,
     mostRecentIndexJob: { hasErrors, activeReindexJobId },
+    hasIncompleteFields,
   } = useValues(SchemaLogic);
 
   return (
@@ -45,6 +46,12 @@ export const SchemaCallouts: React.FC = () => {
       {hasUnconfirmedFields && canManageEngines && (
         <>
           {hasNewUnsearchedFields ? <UnsearchedFieldsCallout /> : <UnconfirmedFieldsCallout />}
+          <EuiSpacer />
+        </>
+      )}
+      {hasIncompleteFields && (
+        <>
+          <MissingSubfieldsCallout />
           <EuiSpacer />
         </>
       )}
@@ -127,5 +134,38 @@ export const ConfirmSchemaButton: React.FC = () => {
         defaultMessage: 'Confirm types',
       })}
     </EuiButton>
+  );
+};
+
+export const MissingSubfieldsCallout: React.FC = () => {
+  const { incompleteFields } = useValues(SchemaLogic);
+
+  return (
+    <EuiCallOut
+      iconType="alert"
+      color="warning"
+      title={`${incompleteFields.length} ${i18n.translate(
+        'xpack.enterpriseSearch.appSearch.engine.schema.unconfirmedFields.title',
+        { defaultMessage: 'field(s) are missing subfields' }
+      )}`}
+    >
+      <p>
+        {i18n.translate(
+          'xpack.enterpriseSearch.appSearch.engine.schema.incompleteFields.description',
+          {
+            defaultMessage:
+              'The field(s) are missing one or more subfields used by App Search. Some relevance features may not work until those subfields are added.',
+          }
+        )}{' '}
+        <a
+          href="https://www.elastic.co/guide/en/app-search/current/elasticsearch-engines-text-subfields-support-conventions.html"
+          target="_blank"
+        >
+          {i18n.translate('xpack.enterpriseSearch.appSearch.engine.schema.incompleteFields.link', {
+            defaultMessage: 'Learn more.',
+          })}
+        </a>
+      </p>
+    </EuiCallOut>
   );
 };
