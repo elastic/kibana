@@ -42,13 +42,12 @@ program
     /**
      * Algorithm for checking compatible mappings. Should work in CI or local
      * dev environment.
-     *
      * 1. Extract mappings from code as JSON object
      * 2. Check if extracted mappings is different from current_mappings.json, current_mappings.json represents the mappings from "main"
      * 3. Start a fresh ES node
      * 4. Upload current_mappings.json to ES node
      * 5. Upload extracted mappings.json to ES node
-     * 6. Check result of response to step 8, if bad response the mappings are incompatible
+     * 6. Check result of response to step 5, if bad response the mappings are incompatible
      * 7. If good response, write extracted mappings to current_mappings.json
      */
     async (options = {}) => {
