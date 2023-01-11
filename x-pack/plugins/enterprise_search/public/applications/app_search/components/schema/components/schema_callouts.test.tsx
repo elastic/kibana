@@ -160,7 +160,7 @@ describe('SchemaCallouts', () => {
     it('renders a warning callout about incomplete fields with a link to the subfields support documentation', () => {
       const wrapper = shallow(<MissingSubfieldsCallout />);
 
-      expect(wrapper.prop('title')).toMatch(/^\d+ field\(s\) are missing subfields$/);
+      expect(wrapper.prop('title')).toMatch(/^\d+ fields are missing subfields$/);
       expect(wrapper.find('[data-test-subj="missingSubfieldsLearnMoreLink"]').prop('href')).toEqual(
         'https://www.elastic.co/guide/en/app-search/current/elasticsearch-engines-text-subfields-support-conventions.html'
       );
