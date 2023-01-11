@@ -22,14 +22,19 @@ import {
 } from '../../../../../../common/detection_engine/rule_management/mocks';
 import { getQueryRuleParams } from '../../../rule_schema/mocks';
 import { getExceptionListClientMock } from '@kbn/lists-plugin/server/services/exception_lists/exception_list_client.mock';
+import { savedObjectsExporterMock } from '@kbn/core-saved-objects-import-export-server-mocks';
+import { mockRouter } from '@kbn/core-http-router-server-mocks';
 
 const exceptionsClient = getExceptionListClientMock();
 import type { loggingSystemMock } from '@kbn/core/server/mocks';
 import { requestContextMock } from '../../../routes/__mocks__/request_context';
 
+// TODO add tests for connectors
 describe('get_export_by_object_ids', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   const { clients } = requestContextMock.createTools();
+  const exporterMock = savedObjectsExporterMock.create();
+  const requestMock = mockRouter.createKibanaRequest();
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -50,7 +55,9 @@ describe('get_export_by_object_ids', () => {
         exceptionsClient,
         clients.savedObjectsClient,
         objects,
-        logger
+        logger,
+        exporterMock,
+        requestMock
       );
       const exportsObj = {
         rulesNdjson: JSON.parse(exports.rulesNdjson),
@@ -112,6 +119,11 @@ describe('get_export_by_object_ids', () => {
           missing_exception_lists_count: 0,
           missing_rules: [],
           missing_rules_count: 0,
+          excluded_action_connection_count: 0,
+          excluded_action_connections: [],
+          exported_action_connector_count: 0,
+          missing_action_connection_count: 0,
+          missing_action_connections: [],
         },
       });
     });
@@ -137,7 +149,9 @@ describe('get_export_by_object_ids', () => {
         exceptionsClient,
         clients.savedObjectsClient,
         objects,
-        logger
+        logger,
+        exporterMock,
+        requestMock
       );
       const details = getOutputDetailsSampleWithExceptions({
         missingRules: [{ rule_id: 'rule-1' }],
@@ -147,6 +161,7 @@ describe('get_export_by_object_ids', () => {
         rulesNdjson: '',
         exportDetails: getSampleDetailsAsNdjson(details),
         exceptionLists: '',
+        actionConnectors: '',
       });
     });
   });
