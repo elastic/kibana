@@ -514,60 +514,15 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     return undefined;
   }, [tableView]);
 
-  const dataTable = useMemo(
-    () => (
-      <DataTableComponent
-        additionalControls={alertBulkActions}
-        unitCountText={unitCountText}
-        browserFields={browserFields}
-        data={nonDeletedEvents}
-        disabledCellActions={FIELDS_WITHOUT_CELL_ACTIONS}
-        id={tableId}
-        loadPage={loadPage}
-        renderCellValue={renderCellValue}
-        rowRenderers={rowRenderers}
-        totalItems={totalCountMinusDeleted}
-        bulkActions={bulkActions}
-        fieldBrowserOptions={fieldBrowserOptions}
-        defaultCellActions={defaultCellActions}
-        hasCrudPermissions={hasCrudPermissions}
-        filters={filters}
-        leadingControlColumns={transformedLeadingControlColumns}
-        pagination={{
-          pageIndex: pageInfo.activePage,
-          pageSize: itemsPerPage,
-          pageSizeOptions: itemsPerPageOptions,
-          onChangeItemsPerPage,
-          onChangePage,
-        }}
-        isEventRenderedView={tableView === 'eventRenderedView'}
-        rowHeightsOptions={rowHeightsOptions}
-      />
-    ),
-    [
-      alertBulkActions,
-      browserFields,
-      bulkActions,
-      defaultCellActions,
-      fieldBrowserOptions,
-      filters,
-      hasCrudPermissions,
-      itemsPerPage,
-      itemsPerPageOptions,
-      loadPage,
-      nonDeletedEvents,
+  const pagination = useMemo(
+    () => ({
+      pageIndex: pageInfo.activePage,
+      pageSize: itemsPerPage,
+      pageSizeOptions: itemsPerPageOptions,
       onChangeItemsPerPage,
       onChangePage,
-      pageInfo.activePage,
-      renderCellValue,
-      rowHeightsOptions,
-      rowRenderers,
-      tableId,
-      tableView,
-      totalCountMinusDeleted,
-      transformedLeadingControlColumns,
-      unitCountText,
-    ]
+    }),
+    [itemsPerPage, itemsPerPageOptions, onChangeItemsPerPage, onChangePage, pageInfo.activePage]
   );
 
   return (
@@ -609,7 +564,27 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
                     >
                       <ScrollableFlexItem grow={1}>
                         <StatefulEventContext.Provider value={activeStatefulEventContext}>
-                          {dataTable}
+                          <DataTableComponent
+                            additionalControls={alertBulkActions}
+                            unitCountText={unitCountText}
+                            browserFields={browserFields}
+                            data={nonDeletedEvents}
+                            disabledCellActions={FIELDS_WITHOUT_CELL_ACTIONS}
+                            id={tableId}
+                            loadPage={loadPage}
+                            renderCellValue={renderCellValue}
+                            rowRenderers={rowRenderers}
+                            totalItems={totalCountMinusDeleted}
+                            bulkActions={bulkActions}
+                            fieldBrowserOptions={fieldBrowserOptions}
+                            defaultCellActions={defaultCellActions}
+                            hasCrudPermissions={hasCrudPermissions}
+                            filters={filters}
+                            leadingControlColumns={transformedLeadingControlColumns}
+                            pagination={pagination}
+                            isEventRenderedView={tableView === 'eventRenderedView'}
+                            rowHeightsOptions={rowHeightsOptions}
+                          />
                         </StatefulEventContext.Provider>
                       </ScrollableFlexItem>
                     </FullWidthFlexGroupTable>

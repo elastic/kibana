@@ -107,6 +107,12 @@ const EuiDataGridContainer = styled.div<{ hideLastPage: boolean }>`
   }
 `;
 
+const memoizedColumnHeaders: (
+  headers: ColumnHeaderOptions[],
+  browserFields: BrowserFields,
+  isEventRenderedView: boolean
+) => ColumnHeaderOptions[] = memoizeOne(getColumnHeaders);
+
 export const DataTableComponent = React.memo<DataTableProps>(
   ({
     additionalControls,
@@ -132,12 +138,6 @@ export const DataTableComponent = React.memo<DataTableProps>(
     const {
       triggersActionsUi: { getFieldBrowser },
     } = useKibana().services;
-    const memoizedColumnHeaders: (
-      headers: ColumnHeaderOptions[],
-      browserFields: BrowserFields,
-      isEventRenderedView: boolean
-    ) => ColumnHeaderOptions[] = memoizeOne(getColumnHeaders);
-
     const getDataTable = dataTableSelectors.getTableByIdSelector();
     const dataTable = useShallowEqualSelector((state) => getDataTable(state, id) ?? tableDefaults);
     const { columns, selectedEventIds, showCheckboxes, sort, isLoading, defaultColumns } =
@@ -311,47 +311,45 @@ export const DataTableComponent = React.memo<DataTableProps>(
 
     const columnsWithCellActions: EuiDataGridColumn[] = useMemo(
       () =>
-        !isEventRenderedView
-          ? columnHeaders.map((header) => {
-              const buildAction = (dataTableCellAction: DataTableCellAction) =>
-                dataTableCellAction({
-                  browserFields,
-                  data: data.map((row) => row.data),
-                  ecsData: data.map((row) => row.ecs),
-                  header: columnHeaders.find((h) => h.id === header.id),
-                  pageSize: pagination.pageSize,
-                  scopeId: id,
-                  closeCellPopover: dataGridRef.current?.closeCellPopover,
-                });
-              return {
-                ...header,
-                actions: {
-                  ...header.actions,
-                  additional: [
-                    {
-                      iconType: 'cross',
-                      label: REMOVE_COLUMN,
-                      onClick: () => {
-                        dispatch(dataTableActions.removeColumn({ id, columnId: header.id }));
-                      },
-                      size: 'xs',
-                    },
-                  ],
+        columnHeaders.map((header) => {
+          const buildAction = (dataTableCellAction: DataTableCellAction) =>
+            dataTableCellAction({
+              browserFields,
+              data: data.map((row) => row.data),
+              ecsData: data.map((row) => row.ecs),
+              header: columnHeaders.find((h) => h.id === header.id),
+              pageSize: pagination.pageSize,
+              scopeId: id,
+              closeCellPopover: dataGridRef.current?.closeCellPopover,
+            });
+          return {
+            ...header,
+            actions: {
+              ...header.actions,
+              additional: [
+                {
+                  iconType: 'cross',
+                  label: REMOVE_COLUMN,
+                  onClick: () => {
+                    dispatch(dataTableActions.removeColumn({ id, columnId: header.id }));
+                  },
+                  size: 'xs',
                 },
-                ...(hasCellActions({
-                  columnId: header.id,
-                  disabledCellActions,
-                })
-                  ? {
-                      cellActions:
-                        header.dataTableCellActions?.map(buildAction) ??
-                        defaultCellActions?.map(buildAction),
-                      visibleCellActions: 3,
-                    }
-                  : {}),
-              };
+              ],
+            },
+            ...(hasCellActions({
+              columnId: header.id,
+              disabledCellActions,
             })
-          : columnHeaders,
+              ? {
+                  cellActions:
+                    header.dataTableCellActions?.map(buildAction) ??
+                    defaultCellActions?.map(buildAction),
+                  visibleCellActions: 3,
+                }
+              : {}),
+          };
+        }),
       [
         browserFields,
         columnHeaders,
@@ -360,7 +358,6 @@ export const DataTableComponent = React.memo<DataTableProps>(
         disabledCellActions,
         dispatch,
         id,
-        isEventRenderedView,
         pagination.pageSize,
       ]
     );
@@ -435,7 +432,7 @@ export const DataTableComponent = React.memo<DataTableProps>(
             id={'body-data-grid'}
             data-test-subj="body-data-grid"
             aria-label={DATA_TABLE_ARIA_LABEL}
-            columns={columnsWithCellActions}
+            columns={isEventRenderedView ? columnHeaders : columnsWithCellActions}
             columnVisibility={{ visibleColumns, setVisibleColumns: onSetVisibleColumns }}
             gridStyle={gridStyle(isEventRenderedView)}
             leadingControlColumns={leadingControlColumns}
