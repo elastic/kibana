@@ -270,4 +270,6 @@ describe('discover sidebar', function () {
     const visualizeField = findTestSubject(compInViewerMode, 'textBased-visualize');
     expect(visualizeField.length).toBe(1);
   });
+
+  // TODO: add a test for text-based columns
 });
