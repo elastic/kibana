@@ -64,23 +64,30 @@ export const getFindingsQuery = ({ query, sort }: UseFindingsOptions) => {
   };
 };
 
-const getSortField = (sort: Sort<CspFinding>) => {
-  if (requiredSortingByPainlessScript.includes(sort.field)) {
+/**
+ * By default, ES will sort keyword fields in case-sensitive format, the
+ * following fields are required to have a custom sort for case-sensitive sorting.
+ */
+const fieldsSortingByPainlessScript = ['rule.section', 'resource.name', 'resource.type'];
+
+/**
+ * Generates Painless sorting if the given field is matched or returns default sorting
+ */
+const getSortField = ({ field, direction }: Sort<CspFinding>) => {
+  if (fieldsSortingByPainlessScript.includes(field)) {
     return {
       _script: {
         type: 'string',
-        order: sort.direction,
+        order: direction,
         script: {
-          source: `doc["${sort.field}"].value.toLowerCase()`,
+          source: `doc["${field}"].value.toLowerCase()`,
           lang: 'painless',
         },
       },
     };
   }
-  return { [sort.field]: sort.direction };
+  return { [field]: direction };
 };
-
-const requiredSortingByPainlessScript = ['rule.section', 'resource.name', 'resource.type'];
 
 export const useLatestFindings = (options: UseFindingsOptions) => {
   const {
