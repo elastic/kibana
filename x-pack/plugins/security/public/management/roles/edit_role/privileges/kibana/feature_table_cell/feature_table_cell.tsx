@@ -14,9 +14,10 @@ import type { SecuredFeature } from '../../../../model';
 
 interface Props {
   feature: SecuredFeature;
+  className?: string;
 }
 
-export const FeatureTableCell = ({ feature }: Props) => {
+export const FeatureTableCell = ({ feature, className }: Props) => {
   let tooltipElement = null;
   if (feature.getPrivilegesTooltip()) {
     const tooltipContent = (
@@ -37,7 +38,7 @@ export const FeatureTableCell = ({ feature }: Props) => {
   }
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none" component="span">
+    <EuiFlexGroup className={className} direction="column" gutterSize="none" component="span">
       <EuiFlexItem data-test-subj={`featureTableCell`} component="span">
         <EuiFlexGroup gutterSize="xs">
           <EuiFlexItem className="featurePrivilegeName" grow={false}>

@@ -22,6 +22,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import classNames from 'classnames';
 import type { ReactElement } from 'react';
 import React, { Component } from 'react';
 
@@ -270,14 +271,7 @@ export class FeatureTable extends Component<Props, State> {
 
     if (feature.reserved && primaryFeaturePrivileges.length === 0) {
       const buttonContent = (
-        <EuiFlexGroup gutterSize="xs" direction="row">
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="empty" size="l" />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <FeatureTableCell feature={feature} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <FeatureTableCell className="noSubFeaturePrivileges" feature={feature} />
       );
 
       const extraAction = (
@@ -344,16 +338,10 @@ export class FeatureTable extends Component<Props, State> {
 
     const hasSubFeaturePrivileges = feature.getSubFeaturePrivileges().length > 0;
     const buttonContent = (
-      <EuiFlexGroup gutterSize="xs">
-        {!hasSubFeaturePrivileges && (
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="empty" size="l" />
-          </EuiFlexItem>
-        )}
-        <EuiFlexItem>
-          <FeatureTableCell feature={feature} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <FeatureTableCell
+        className={classNames({ noSubFeaturePrivileges: !hasSubFeaturePrivileges })}
+        feature={feature}
+      />
     );
 
     const extraAction = (
