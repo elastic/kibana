@@ -127,8 +127,9 @@ export const importRulesRoute = (
         const {
           successCount: actionConnectorSuccessCount,
           success: actionConnectorSuccess,
-          warnings: actionConnectorWarnings,
-          errors: actionConnectorErrors,
+          // TODO revert back after the mapping
+          // warnings: actionConnectorWarnings,
+          // errors: actionConnectorErrors,
         } = await importRuleActionConnectors({
           actionConnectors,
           actionsClient,
