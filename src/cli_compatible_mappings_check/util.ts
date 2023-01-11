@@ -10,6 +10,7 @@ import fs from 'fs';
 import path from 'path';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-base-server-internal';
+import { Client } from '@elastic/elasticsearch';
 
 export const CURRENT_MAPPINGS_FILE = path.join(__dirname, 'current_mappings.json');
 export function writeToMappingsFile(mappings: SavedObjectsTypeMappingDefinitions) {
@@ -25,4 +26,34 @@ export function exit(code: number) {
   setTimeout(() => {
     process.exit(code);
   }, 0);
+}
+
+export async function checkIfMappingsAreIncompatible({
+  esClient,
+  index,
+  currentMappings,
+  nextMappings,
+}: {
+  esClient: Client;
+  index: string;
+  currentMappings: SavedObjectsTypeMappingDefinitions;
+  nextMappings: SavedObjectsTypeMappingDefinitions;
+}) {
+  await esClient.indices.create({
+    index,
+    mappings: {
+      dynamic: false,
+      properties: currentMappings,
+    },
+    settings: {
+      mapping: {
+        total_fields: { limit: 1500 },
+      },
+    },
+  });
+
+  return await esClient.indices.putMapping({
+    index,
+    properties: nextMappings,
+  });
 }

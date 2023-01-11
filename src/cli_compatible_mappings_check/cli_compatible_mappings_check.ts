@@ -14,7 +14,13 @@ import { kibanaPackageJson } from '@kbn/repo-info';
 import { createTestServers } from '@kbn/core-test-helpers-kbn-server';
 import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-base-server-internal';
 import { extractMappingsFromPlugins } from './extract_mappings_from_plugins';
-import { CURRENT_MAPPINGS_FILE, exit, log, writeToMappingsFile } from './util';
+import {
+  CURRENT_MAPPINGS_FILE,
+  exit,
+  log,
+  writeToMappingsFile,
+  checkIfMappingsAreIncompatible,
+} from './util';
 
 const program = new Command('bin/compatible-mappings-check');
 
@@ -66,25 +72,17 @@ program
           return;
         }
 
+        // TODO: Implement check for additive only changes.
+
         log.info(`Starting ES node...`);
         const esClient = await startES();
 
-        await esClient.indices.create({
+        log.info(`Checking if mappings are compatible...`);
+        const res = await checkIfMappingsAreIncompatible({
+          esClient,
           index: MY_INDEX,
-          mappings: {
-            dynamic: false,
-            properties: currentMappings,
-          },
-          settings: {
-            mapping: {
-              total_fields: { limit: 1500 },
-            },
-          },
-        });
-
-        const res = await esClient.indices.putMapping({
-          index: MY_INDEX,
-          properties: extractedMappings,
+          nextMappings: extractedMappings,
+          currentMappings,
         });
 
         log.success('Extracted mappings are compatible with existing mappings.');
