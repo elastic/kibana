@@ -6,29 +6,31 @@
  */
 
 import React, { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Route, Switch } from 'react-router-dom';
 
-import { useActions, useValues } from 'kea';
+import { useValues, useActions } from 'kea';
 
 import { EuiButtonEmpty } from '@elastic/eui';
 
 import { Status } from '../../../../../common/types/api';
 
 import { docLinks } from '../../../shared/doc_links';
-import { EngineViewTabs } from '../../routes';
+import { ENGINE_PATH, EngineViewTabs } from '../../routes';
 
 import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_template';
 
 import { EngineError } from './engine_error';
+import { EngineIndices } from './engine_indices';
 import { EngineViewLogic } from './engine_view_logic';
 
 export const EngineView: React.FC = () => {
+  const { fetchEngine } = useActions(EngineViewLogic);
   const { engineName, fetchEngineApiError, fetchEngineApiStatus, isLoadingEngine } =
     useValues(EngineViewLogic);
-  const { fetchEngine } = useActions(EngineViewLogic);
   const { tabId = EngineViewTabs.OVERVIEW } = useParams<{
     tabId?: string;
   }>();
+
   useEffect(() => {
     fetchEngine({ engineName });
   }, [engineName]);
@@ -68,7 +70,9 @@ export const EngineView: React.FC = () => {
       }}
       engineName={engineName}
     >
-      <div />
+      <Switch>
+        <Route exact path={`${ENGINE_PATH}/${EngineViewTabs.INDICES}`} component={EngineIndices} />
+      </Switch>
     </EnterpriseSearchEnginesPageTemplate>
   );
 };
