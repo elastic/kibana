@@ -31,6 +31,12 @@ import {
   getResponseTimeTickFormatter,
 } from '../../../shared/charts/transaction_charts/helper';
 
+const i18nAlertsTriggered = i18n.translate(
+  'xpack.apm.latencyChartHistory.alertsTriggered',
+  {
+    defaultMessage: 'Alerts triggered',
+  }
+);
 interface LatencyAlertsHistoryChartProps {
   serviceName: string;
   start: string;
@@ -142,12 +148,7 @@ export function LatencyAlertsHistoryChart({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText size="s" color="subdued">
-                {i18n.translate(
-                  'xpack.apm.latencyChartHistory.alertsTriggered',
-                  {
-                    defaultMessage: 'Alerts triggered',
-                  }
-                )}
+                {i18nAlertsTriggered}
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -173,7 +174,6 @@ export function LatencyAlertsHistoryChart({
         </EuiFlexGroup>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-      <EuiSpacer size="xl" />
 
       <TimeseriesChart
         id="latencyChart"
@@ -188,7 +188,7 @@ export function LatencyAlertsHistoryChart({
                   return {
                     dataValue: annotation.key,
                     header: String(annotation.doc_count),
-                    details: String(annotation.doc_count),
+                    details: i18nAlertsTriggered,
                   };
                 }) || []
             }
@@ -196,6 +196,13 @@ export function LatencyAlertsHistoryChart({
               line: { strokeWidth: 3, stroke: 'red', opacity: 1 },
             }}
             marker={<EuiIcon type="alert" color={'red'} />}
+            markerBody={(data) => (
+              <EuiBadge color="#BD271E">
+                <EuiText size="xs" color="white">
+                  {data.header}
+                </EuiText>
+              </EuiBadge>
+            )}
             markerPosition={Position.Top}
           />,
         ]}
