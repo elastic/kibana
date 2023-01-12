@@ -46,6 +46,9 @@ export function makeFtrConfigProvider(
       throw new Error('invalid GITHUB_PR_NUMBER environment variable');
     }
 
+    // There is no need to collect performance events for perf data set extraction pipeline
+    const disableTelemetry = !!process.env.PERFORMANCE_DISABLE_TELEMETRY;
+
     const telemetryLabels: Record<string, string | boolean | undefined | number> = {
       branch: process.env.BUILDKITE_BRANCH,
       ciBuildId: process.env.BUILDKITE_BUILD_ID,
@@ -86,7 +89,7 @@ export function makeFtrConfigProvider(
 
         serverArgs: [
           ...baseConfig.kbnTestServer.serverArgs,
-          `--telemetry.optIn=${process.env.TEST_PERFORMANCE_PHASE === 'TEST'}`,
+          `--telemetry.optIn=${!disableTelemetry && process.env.TEST_PERFORMANCE_PHASE === 'TEST'}`,
           `--telemetry.labels=${JSON.stringify(telemetryLabels)}`,
           '--csp.strict=false',
           '--csp.warnLegacyBrowsers=false',
