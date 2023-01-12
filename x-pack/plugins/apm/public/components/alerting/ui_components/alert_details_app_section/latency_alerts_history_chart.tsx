@@ -106,6 +106,7 @@ export function LatencyAlertsHistoryChart({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [data]
   );
+
   const { currentPeriod, previousPeriod } = memoizedData;
   const timeseriesLatency = [currentPeriod, previousPeriod].filter(filterNil);
   const latencyMaxY = getMaxY(timeseriesLatency);
@@ -114,7 +115,15 @@ export function LatencyAlertsHistoryChart({
     features: 'apm',
     ruleId,
   });
-  console.log(triggeredAlertsData);
+  const getFormattedDuration = (avgTimeToRecover: number) => {
+    if (!avgTimeToRecover) return;
+    const time = moment.duration(avgTimeToRecover);
+    if (time.hours() > 0) {
+      return `${time.hours()}h ${time.minutes()}m`;
+    } else {
+      return `${time.minutes()}m ${time.seconds()}s`;
+    }
+  };
   return (
     <EuiPanel hasBorder={true}>
       <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
@@ -158,7 +167,11 @@ export function LatencyAlertsHistoryChart({
           <EuiFlexItem grow={false}>
             <EuiText>
               <EuiTitle size="s">
-                <h3>45 minutes</h3>
+                <h3>
+                  {getFormattedDuration(
+                    triggeredAlertsData?.avgTimeToRecoverMS || 0
+                  )}
+                </h3>
               </EuiTitle>
             </EuiText>
           </EuiFlexItem>

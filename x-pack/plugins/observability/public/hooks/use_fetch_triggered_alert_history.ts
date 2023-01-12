@@ -24,6 +24,7 @@ interface FetchTriggeredAlertsHistory {
     doc_count: number;
   }>;
   error?: string;
+  avgTimeToRecoverMS: number;
 }
 
 interface TriggeredAlertsHistory {
@@ -53,7 +54,7 @@ export function useFetchTriggeredAlertsHistory({
         features,
       });
 
-      const { totalTriggeredAlerts, histogramTriggeredAlerts, error } =
+      const { totalTriggeredAlerts, histogramTriggeredAlerts, error, avgTimeToRecoverMS } =
         await fetchTriggeredAlertsHistory({
           http,
           index,
@@ -65,7 +66,11 @@ export function useFetchTriggeredAlertsHistory({
       if (!isCancelledRef.current) {
         setTriggeredAlertsHistory((oldState: TriggeredAlertsHistory) => ({
           ...oldState,
-          triggeredAlertsData: { totalTriggeredAlerts, histogramTriggeredAlerts },
+          triggeredAlertsData: {
+            totalTriggeredAlerts,
+            histogramTriggeredAlerts,
+            avgTimeToRecoverMS,
+          },
           isLoadingRuleAlertsAggs: false,
         }));
       }
@@ -155,14 +160,24 @@ export async function fetchTriggeredAlertsHistory({
               },
             },
           },
+          avgTimeToRecoverMS: {
+            avg: {
+              script: {
+                source:
+                  "if (!doc['kibana.alert.end'].empty){return(doc['kibana.alert.end'].value.millis) - (doc['kibana.alert.start'].value.millis)}",
+              },
+            },
+          },
         },
       }),
     });
     const totalTriggeredAlerts = res?.hits.total.value;
     const histogramTriggeredAlerts = res?.aggregations?.histogramTriggeredAlerts.buckets;
+    const avgTimeToRecoverMS = res?.aggregations?.avgTimeToRecoverMS.value;
     return {
       totalTriggeredAlerts,
       histogramTriggeredAlerts,
+      avgTimeToRecoverMS,
     };
   } catch (error) {
     console.error(error);
@@ -170,6 +185,7 @@ export async function fetchTriggeredAlertsHistory({
       error,
       totalTriggeredAlerts: 0,
       histogramTriggeredAlerts: [],
+      avgTimeToRecoverMS: 0,
     };
   }
 }
