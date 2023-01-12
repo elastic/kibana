@@ -9,7 +9,7 @@ import { Logger } from '@kbn/core/server';
 import { SanitizedRule, RuleTypeParams } from '../../common';
 
 export interface GetViewInAppUrlFnOpts<Params extends RuleTypeParams> {
-  rule: SanitizedRule<Params>;
+  rule: Omit<SanitizedRule<Params>, 'viewInAppRelativeUrl'>;
 }
 export type GetViewInAppUrlFn<Params extends RuleTypeParams> = (
   opts: GetViewInAppUrlFnOpts<Params>
