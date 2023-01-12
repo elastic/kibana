@@ -47,11 +47,36 @@
         "children": [
           {
             "parentPluginId": "securitySolution",
+            "id": "def-public.Plugin.kibanaBranch",
+            "type": "string",
+            "tags": [],
+            "label": "kibanaBranch",
+            "description": [],
+            "path": "x-pack/plugins/security_solution/public/plugin.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
             "id": "def-public.Plugin.kibanaVersion",
             "type": "string",
             "tags": [],
             "label": "kibanaVersion",
             "description": [],
+            "path": "x-pack/plugins/security_solution/public/plugin.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.Plugin.prebuiltRulesPackageVersion",
+            "type": "string",
+            "tags": [],
+            "label": "prebuiltRulesPackageVersion",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/security_solution/public/plugin.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2007,7 +2032,7 @@
         "label": "ConfigType",
         "description": [],
         "signature": [
-          "Readonly<{} & { signalsIndex: string; maxRuleImportExportSize: number; maxRuleImportPayloadBytes: number; maxTimelineImportExportSize: number; maxTimelineImportPayloadBytes: number; alertMergeStrategy: \"allFields\" | \"missingFields\" | \"noFields\"; alertIgnoreFields: string[]; enableExperimental: string[]; packagerTaskInterval: string; }> & { experimentalFeatures: ",
+          "Readonly<{ prebuiltRulesPackageVersion?: string | undefined; } & { signalsIndex: string; maxRuleImportExportSize: number; maxRuleImportPayloadBytes: number; maxTimelineImportExportSize: number; maxTimelineImportPayloadBytes: number; alertMergeStrategy: \"allFields\" | \"missingFields\" | \"noFields\"; alertIgnoreFields: string[]; enableExperimental: string[]; packagerTaskInterval: string; }> & { experimentalFeatures: ",
           "ExperimentalFeatures",
           "; }"
         ],
