@@ -20,14 +20,11 @@ import {
   ruleExecutionStatusFromRaw,
   convertMonitoringFromRawAndVerify,
   buildViewInAppRelativeUrl,
+  getRuleSnoozeEndTime,
 } from '../../lib';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { getActiveScheduledSnoozes } from '../../lib/is_rule_snoozed';
-import {
-  calculateIsSnoozedUntil,
-  injectReferencesIntoActions,
-  injectReferencesIntoParams,
-} from '../common';
+import { injectReferencesIntoActions, injectReferencesIntoParams } from '../common';
 import { RulesClientContext } from '../types';
 
 export interface GetAlertFromRawParams {
@@ -109,7 +106,7 @@ export function getPartialRuleFromRaw<Params extends RuleTypeParams>(
   const includeSnoozeSchedule =
     snoozeSchedule !== undefined && !isEmpty(snoozeSchedule) && !excludeFromPublicApi;
   const isSnoozedUntil = includeSnoozeSchedule
-    ? calculateIsSnoozedUntil({
+    ? getRuleSnoozeEndTime({
         muteAll: partialRawRule.muteAll ?? false,
         snoozeSchedule,
       })
@@ -131,7 +128,7 @@ export function getPartialRuleFromRaw<Params extends RuleTypeParams>(
             snoozeSchedule,
             muteAll: partialRawRule.muteAll ?? false,
           })?.map((s) => s.id),
-          isSnoozedUntil: isSnoozedUntil ? new Date(isSnoozedUntil) : null,
+          isSnoozedUntil,
         }
       : {}),
     ...(updatedAt ? { updatedAt: new Date(updatedAt) } : {}),
