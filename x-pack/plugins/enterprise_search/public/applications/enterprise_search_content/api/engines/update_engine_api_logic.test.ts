@@ -18,14 +18,15 @@ describe('UpdateEngineApiLogic', () => {
   });
   describe('updateEngine', () => {
     it('calls correct api', async () => {
-      const promise = Promise.resolve('result');
-      http.get.mockReturnValue(promise);
-      const result = updateEngine({ engineName: 'my-engine', indices: ['an-index'] });
+      const engine = { engineName: 'my-engine', indices: ['an-index'] };
+      const promise = Promise.resolve(engine);
+      http.put.mockReturnValue(promise);
+      const result = updateEngine(engine);
       await nextTick();
       expect(http.put).toHaveBeenCalledWith('/internal/enterprise_search/engines/my-engine', {
-        body: '{"indices": ["an-index"],"name": "my-engine"}',
+        body: '{"indices":["an-index"],"name":"my-engine"}',
       });
-      await expect(result).resolves.toEqual('result');
+      await expect(result).resolves.toEqual(engine);
     });
   });
 });
