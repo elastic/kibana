@@ -1100,6 +1100,9 @@
             }
           }
         }
+      },
+      "running": {
+        "type": "boolean"
       }
     }
   },
@@ -2088,6 +2091,10 @@
       },
       "proxy_id": {
         "type": "keyword"
+      },
+      "shipper": {
+        "dynamic": false,
+        "properties": {}
       }
     }
   },
