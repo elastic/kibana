@@ -7,12 +7,24 @@
  */
 
 export class PluginSystemOverrides {
-  private static allPluginsEnabled: true | undefined = undefined;
+  /**
+   * Setting this value to "true" will enable ALL plugins regardless of their
+   * default config or Kibana config settings.
+   */
+  private static allPluginsEnabled: undefined | true = undefined;
 
+  /**
+   * Enable all plugins.
+   *
+   * @note must called be early: pre-preboot to have desired effect.
+   */
   public static setAllPluginsEnabled(): void {
     PluginSystemOverrides.allPluginsEnabled = true;
   }
-  public static getEnableAllPlugins(): true | undefined {
+  /**
+   * Only an explicit "true" value should indicate all plugins are enabled
+   */
+  public static getEnableAllPlugins(): undefined | true {
     return PluginSystemOverrides.allPluginsEnabled;
   }
 }
