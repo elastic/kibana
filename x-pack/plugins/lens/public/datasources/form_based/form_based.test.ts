@@ -3005,7 +3005,7 @@ describe('IndexPattern Data Source', () => {
             Object {
               "displayLocations": Array [
                 Object {
-                  "id": "workspace",
+                  "id": "visualization",
                 },
                 Object {
                   "id": "suggestionPanel",
@@ -3019,7 +3019,7 @@ describe('IndexPattern Data Source', () => {
             Object {
               "displayLocations": Array [
                 Object {
-                  "id": "workspace",
+                  "id": "visualization",
                 },
                 Object {
                   "id": "suggestionPanel",
@@ -3063,7 +3063,7 @@ describe('IndexPattern Data Source', () => {
             Object {
               "displayLocations": Array [
                 Object {
-                  "id": "workspace",
+                  "id": "visualization",
                 },
                 Object {
                   "id": "suggestionPanel",
@@ -3088,7 +3088,7 @@ describe('IndexPattern Data Source', () => {
             Object {
               "displayLocations": Array [
                 Object {
-                  "id": "workspace",
+                  "id": "visualization",
                 },
                 Object {
                   "id": "suggestionPanel",
@@ -3259,11 +3259,11 @@ describe('IndexPattern Data Source', () => {
         });
 
         expect(extractTranslationIdsFromWarnings(warnings)).toMatchInlineSnapshot(`
-        Array [
-          "xpack.lens.indexPattern.timeShiftSmallWarning",
-          "xpack.lens.indexPattern.timeShiftMultipleWarning",
-        ]
-      `);
+                  Array [
+                    "xpack.lens.indexPattern.timeShiftSmallWarning",
+                    "xpack.lens.indexPattern.timeShiftMultipleWarning",
+                  ]
+              `);
       });
 
       it('should show different types of warning messages', () => {
@@ -3275,12 +3275,12 @@ describe('IndexPattern Data Source', () => {
         });
 
         expect(extractTranslationIdsFromWarnings(warnings)).toMatchInlineSnapshot(`
-        Array [
-          "xpack.lens.indexPattern.timeShiftSmallWarning",
-          "xpack.lens.indexPattern.timeShiftMultipleWarning",
-          "xpack.lens.indexPattern.precisionErrorWarning.accuracyDisabled",
-        ]
-      `);
+                  Array [
+                    "xpack.lens.indexPattern.timeShiftSmallWarning",
+                    "xpack.lens.indexPattern.timeShiftMultipleWarning",
+                    "xpack.lens.indexPattern.precisionErrorWarning.accuracyDisabled",
+                  ]
+              `);
       });
     });
   });

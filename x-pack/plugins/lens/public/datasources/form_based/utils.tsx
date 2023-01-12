@@ -211,7 +211,7 @@ export function getShardFailuresWarningMessages(
                   uniqueId: `unsupported_aggregation_on_downsampled_index--${label}`,
                   severity: 'warning',
                   fixableInEditor: true,
-                  displayLocations: [{ id: 'toolbar' }],
+                  displayLocations: [{ id: 'toolbar' }, { id: 'embeddableBadge' }],
                   shortMessage: '',
                   longMessage: i18n.translate('xpack.lens.indexPattern.tsdbRollupWarning', {
                     defaultMessage:
@@ -229,7 +229,7 @@ export function getShardFailuresWarningMessages(
               uniqueId: `shard_failure`,
               severity: 'warning',
               fixableInEditor: true,
-              displayLocations: [{ id: 'toolbar' }],
+              displayLocations: [{ id: 'toolbar' }, { id: 'embeddableBadge' }],
               shortMessage: '',
               longMessage: (
                 <>

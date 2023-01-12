@@ -104,7 +104,7 @@ const dropProps = {
     id: 'lnsWorkspace',
     humanData: {
       label: i18n.translate('xpack.lens.editorFrame.workspaceLabel', {
-        defaultMessage: 'Workspace',
+        defaultMessage: 'visualization',
       }),
     },
   },
@@ -277,7 +277,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     ? visualizationMap[visualization.activeId]
     : null;
 
-  const workspaceErrors = getUserMessages('workspace', { severity: 'error' });
+  const workspaceErrors = getUserMessages('visualization', { severity: 'error' });
 
   // if the expression is undefined, it means we hit an error that should be displayed to the user
   const unappliedExpression = useMemo(() => {
@@ -310,7 +310,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
             uniqueId: EXPRESSION_BUILD_ERROR_ID,
             severity: 'error',
             fixableInEditor: true,
-            displayLocations: [{ id: 'workspace' }, { id: 'suggestionPanel' }],
+            displayLocations: [{ id: 'visualization' }, { id: 'suggestionPanel' }],
             shortMessage: i18n.translate('xpack.lens.editorFrame.buildExpressionError', {
               defaultMessage: 'An unexpected error occurred while preparing the chart',
             }),

@@ -618,7 +618,7 @@ describe('heatmap', () => {
           Object {
             "displayLocations": Array [
               Object {
-                "id": "workspace",
+                "id": "visualization",
               },
               Object {
                 "id": "suggestionPanel",

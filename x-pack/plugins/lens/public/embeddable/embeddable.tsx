@@ -87,6 +87,8 @@ import {
   UserMessage,
   IndexPatternRef,
   FrameDatasourceAPI,
+  AddUserMessages,
+  isMessageRemovable,
 } from '../types';
 
 import { getEditPath, DOC_TYPE } from '../../common';
@@ -103,7 +105,10 @@ import {
 } from '../utils';
 import { getLayerMetaInfo, combineQueryAndFilters } from '../app_plugin/show_underlying_data';
 import { convertDataViewIntoLensIndexPattern } from '../data_views_service/loader';
-import { getApplicationUserMessages } from '../app_plugin/get_application_user_messages';
+import {
+  filterUserMessages,
+  getApplicationUserMessages,
+} from '../app_plugin/get_application_user_messages';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
 
@@ -497,7 +502,8 @@ export class Embeddable
     );
   }
 
-  private async updateUserMessages() {
+  // loads all available user messages
+  private async getUserMessages() {
     const userMessages: UserMessage[] = [];
 
     const activeDatasourceState = await this.getActiveDatasourceState();
@@ -515,7 +521,7 @@ export class Embeddable
           activeDatasourceState: { state: activeDatasourceState },
           dataViews: {
             indexPatterns,
-            indexPatternRefs: this.indexPatternRefs,
+            indexPatternRefs: this.indexPatternRefs, // TODO - are these actually used?
           },
           core: this.deps.coreStart,
         })
@@ -525,7 +531,7 @@ export class Embeddable
     const mergedSearchContext = this.getMergedSearchContext();
 
     if (!this.savedVis) {
-      return;
+      return userMessages;
     }
 
     const frameDatasourceAPI: FrameDatasourceAPI = {
@@ -553,8 +559,61 @@ export class Embeddable
       }) ?? [])
     );
 
-    console.log(userMessages);
+    userMessages.push(...Object.values(this.additionalUserMessages));
+
+    return userMessages;
   }
+
+  // displays user messages to the user
+  private async displayUserMessages() {
+    const userMessages = await this.getUserMessages();
+
+    const warningsToDisplay = filterUserMessages(userMessages, 'embeddableBadge', {
+      severity: 'warning',
+    });
+
+    if (userMessages.length && this.warningDomNode) {
+      render(
+        <KibanaThemeProvider theme$={this.deps.theme.theme$}>
+          <Warnings warnings={warningsToDisplay.map((message) => message.longMessage)} compressed />
+        </KibanaThemeProvider>,
+        this.warningDomNode
+      );
+    }
+  }
+
+  private additionalUserMessages: Record<string, UserMessage> = {};
+
+  // used to add warnings and errors from elsewhere in the embeddable
+  addUserMessages: AddUserMessages = (messages) => {
+    const newMessageMap = {
+      ...this.additionalUserMessages,
+    };
+
+    const addedMessageIds: string[] = [];
+    messages.forEach((message) => {
+      if (!newMessageMap[message.uniqueId]) {
+        addedMessageIds.push(message.uniqueId);
+        newMessageMap[message.uniqueId] = message;
+      }
+    });
+
+    if (addedMessageIds.length) {
+      this.additionalUserMessages = newMessageMap;
+    }
+
+    this.displayUserMessages();
+
+    return () => {
+      const withMessagesRemoved = {
+        ...this.additionalUserMessages,
+      };
+
+      messages.map(({ uniqueId }) => uniqueId).forEach((id) => delete withMessagesRemoved[id]);
+
+      this.additionalUserMessages = withMessagesRemoved;
+    };
+  };
 
   public reportsEmbeddableLoad() {
     return true;
@@ -648,7 +707,7 @@ export class Embeddable
 
     await this.initializeOutput();
 
-    await this.updateUserMessages();
+    await this.displayUserMessages();
 
     // deferred loading of this embeddable is complete
     this.setInitializationFinished();
@@ -695,34 +754,29 @@ export class Embeddable
     return isDirty;
   }
 
-  private handleWarnings(adapters?: Partial<DefaultInspectorAdapters>) {
-    if (!this.activeDatasourceId || !adapters?.requests) {
-      return;
+  private getSearchWarningMessages(adapters?: Partial<DefaultInspectorAdapters>): UserMessage[] {
+    if (!this.activeDatasource || !this.activeDatasourceId || !adapters?.requests) {
+      return [];
     }
 
-    const activeDatasource = this.deps.datasourceMap[this.activeDatasourceId];
     const docDatasourceState = this.savedVis?.state.datasourceStates[this.activeDatasourceId];
 
     const requestWarnings = getSearchWarningMessages(
       adapters.requests,
-      activeDatasource,
+      this.activeDatasource,
       docDatasourceState,
       {
         searchService: this.deps.data.search,
       }
     );
 
-    if (requestWarnings.length && this.warningDomNode) {
-      render(
-        <KibanaThemeProvider theme$={this.deps.theme.theme$}>
-          <Warnings warnings={requestWarnings} compressed />
-        </KibanaThemeProvider>,
-        this.warningDomNode
-      );
-    }
+    return [...requestWarnings];
   }
 
+  private removeActiveDataWarningMessages: () => void = () => {};
   private updateActiveData: ExpressionWrapperProps['onData$'] = (data, adapters) => {
+    this.removeActiveDataWarningMessages();
+
     this.activeData = adapters?.tables?.tables;
     if (this.input.onLoad) {
       // once onData$ is get's called from expression renderer, loading becomes false
@@ -736,8 +790,10 @@ export class Embeddable
       error: type === 'error' ? error : undefined,
     });
 
-    this.updateUserMessages();
-    this.handleWarnings(adapters);
+    const searchWarningMessages = this.getSearchWarningMessages(adapters);
+    this.removeActiveDataWarningMessages = this.addUserMessages(
+      searchWarningMessages.filter(isMessageRemovable)
+    );
   };
 
   private onRender: ExpressionWrapperProps['onRender$'] = () => {

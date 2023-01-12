@@ -549,7 +549,7 @@ describe('Textbased Data Source', () => {
           Object {
             "displayLocations": Array [
               Object {
-                "id": "workspace",
+                "id": "visualization",
               },
               Object {
                 "id": "suggestionPanel",
@@ -566,7 +566,7 @@ describe('Textbased Data Source', () => {
           Object {
             "displayLocations": Array [
               Object {
-                "id": "workspace",
+                "id": "visualization",
               },
               Object {
                 "id": "suggestionPanel",

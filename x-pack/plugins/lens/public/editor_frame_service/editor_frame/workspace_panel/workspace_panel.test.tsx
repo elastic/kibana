@@ -359,7 +359,7 @@ describe('workspace_panel', () => {
       {
         severity: 'error',
         fixableInEditor: true,
-        displayLocations: [{ id: 'workspace' }],
+        displayLocations: [{ id: 'visualization' }],
         shortMessage: 'hey there',
         longMessage: "i'm another error",
       },
@@ -676,14 +676,14 @@ describe('workspace_panel', () => {
       {
         severity: 'error',
         fixableInEditor: true,
-        displayLocations: [{ id: 'workspace' }],
+        displayLocations: [{ id: 'visualization' }],
         shortMessage: 'hey there',
         longMessage: "i'm an error",
       },
       {
         severity: 'error',
         fixableInEditor: true,
-        displayLocations: [{ id: 'workspace' }],
+        displayLocations: [{ id: 'visualization' }],
         shortMessage: 'hey there',
         longMessage: "i'm another error",
       },
@@ -707,7 +707,7 @@ describe('workspace_panel', () => {
       instance.find('[data-test-subj="configuration-failure-more-errors"]').last().text()
     ).toEqual(' +1 error');
     expect(instance.find(expressionRendererMock)).toHaveLength(0);
-    expect(getUserMessages).toHaveBeenCalledWith('workspace', { severity: 'error' });
+    expect(getUserMessages).toHaveBeenCalledWith('visualization', { severity: 'error' });
   });
 
   it('should NOT display config errors for unapplied changes', async () => {
@@ -751,7 +751,7 @@ describe('workspace_panel', () => {
       {
         severity: 'error',
         fixableInEditor: true,
-        displayLocations: [{ id: 'workspace' }],
+        displayLocations: [{ id: 'visualization' }],
         shortMessage: 'hey there',
         longMessage: "i'm another error",
       },

@@ -11,7 +11,13 @@ import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { DataViewsState, VisualizationState } from '../state_management';
-import type { Datasource, UserMessage, VisualizationMap } from '../types';
+import type {
+  Datasource,
+  UserMessage,
+  UserMessageFilters,
+  UserMessagesDisplayLocationId,
+  VisualizationMap,
+} from '../types';
 import { getMissingIndexPattern } from '../editor_frame_service/editor_frame/state_helpers';
 
 /**
@@ -55,7 +61,7 @@ function getUnknownVisualizationTypeError(visType: string): UserMessage {
   return {
     severity: 'error',
     fixableInEditor: false,
-    displayLocations: [{ id: 'workspace' }, { id: 'suggestionPanel' }],
+    displayLocations: [{ id: 'visualization' }, { id: 'suggestionPanel' }],
     shortMessage: i18n.translate('xpack.lens.unknownVisType.shortMessage', {
       defaultMessage: `Unknown visualization type`,
     }),
@@ -80,7 +86,7 @@ function getMissingIndexPatternsError(
   return {
     severity: 'error',
     fixableInEditor: canFix,
-    displayLocations: [{ id: 'workspace' }, { id: 'suggestionPanel' }],
+    displayLocations: [{ id: 'visualization' }, { id: 'suggestionPanel' }],
     shortMessage: '',
     longMessage: (
       <>
@@ -124,3 +130,22 @@ function getMissingIndexPatternsError(
     ),
   };
 }
+
+export const filterUserMessages = (
+  userMessages: UserMessage[],
+  locationId: UserMessagesDisplayLocationId,
+  { dimensionId, layerId, severity }: UserMessageFilters
+) =>
+  userMessages.filter(
+    (message) =>
+      Boolean(
+        message.displayLocations.find(
+          (location) =>
+            location.id === locationId &&
+            (location.id === 'dimensionTrigger' && dimensionId
+              ? dimensionId === location.dimensionId
+              : true) &&
+            (location.id === 'dimensionTrigger' && layerId ? layerId === location.layerId : true)
+        )
+      ) && (severity ? message.severity === severity : true)
+  );

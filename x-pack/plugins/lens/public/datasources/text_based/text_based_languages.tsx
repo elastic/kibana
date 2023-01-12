@@ -178,7 +178,7 @@ export function getTextBasedDatasource({
           severity: 'error',
           fixableInEditor: true,
           displayLocations: [
-            { id: 'workspace' },
+            { id: 'visualization' },
             { id: 'suggestionPanel' },
             { id: 'textBasedLanguagesQueryInput' },
           ],
