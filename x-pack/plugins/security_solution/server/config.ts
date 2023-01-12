@@ -111,10 +111,10 @@ export const configSchema = schema.object({
   packagerTaskInterval: schema.string({ defaultValue: '60s' }),
 
   /**
-   * Specify which version of the Detection Rules fleet package to install when upgrading rules.
-   * If not provided, the latest compatible package will be installed, or if running from a dev
-   * environment or -SNAPSHOT build, the latest pre-release package will be used (if fleet is
-   * available or not within an airgapped environment).
+   * For internal use. Specify which version of the Detection Rules fleet package to install
+   * when upgrading rules. If not provided, the latest compatible package will be installed,
+   * or if running from a dev environment or -SNAPSHOT build, the latest pre-release package
+   * will be used (if fleet is available or not within an airgapped environment).
    *
    * Note: This is for `upgrade only`, which occurs by means of the `useUpgradeSecurityPackages`
    * hook when navigating to a Security Solution page. The package version specified in

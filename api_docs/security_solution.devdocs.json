@@ -51,7 +51,9 @@
             "type": "string",
             "tags": [],
             "label": "kibanaBranch",
-            "description": [],
+            "description": [
+              "\nThe current Kibana branch. e.g. 'main'"
+            ],
             "path": "x-pack/plugins/security_solution/public/plugin.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -62,7 +64,9 @@
             "type": "string",
             "tags": [],
             "label": "kibanaVersion",
-            "description": [],
+            "description": [
+              "\nThe current Kibana version. e.g. '8.0.0' or '8.0.0-SNAPSHOT'"
+            ],
             "path": "x-pack/plugins/security_solution/public/plugin.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -73,7 +77,9 @@
             "type": "string",
             "tags": [],
             "label": "prebuiltRulesPackageVersion",
-            "description": [],
+            "description": [
+              "\nFor internal use. Specify which version of the Detection Rules fleet package to install\nwhen upgrading rules. If not provided, the latest compatible package will be installed,\nor if running from a dev environment or -SNAPSHOT build, the latest pre-release package\nwill be used (if fleet is available or not within an airgapped environment).\n\nNote: This is for `upgrade only`, which occurs by means of the `useUpgradeSecurityPackages`\nhook when navigating to a Security Solution page. The package version specified in\n`fleet_packages.json` in project root will always be installed first on Kibana start if\nthe package is not already installed."
+            ],
             "signature": [
               "string | undefined"
             ],
