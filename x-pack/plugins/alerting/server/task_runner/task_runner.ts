@@ -457,13 +457,11 @@ export class TaskRunner<
           processedAlertsRecovered
         );
 
-        const { trimmedAlertsRecovered, trimmedAlertsRecoveredCurrent, earlyRecoveredAlerts } =
-          trimRecoveredAlerts(
-            this.logger,
-            processedAlertsRecovered,
-            processedAlertsRecoveredCurrent,
-            this.maxAlerts
-          );
+        const { trimmedAlertsRecovered, earlyRecoveredAlerts } = trimRecoveredAlerts(
+          this.logger,
+          processedAlertsRecovered,
+          this.maxAlerts
+        );
 
         const alerts = getAlertsForNotification<
           State,
@@ -475,7 +473,7 @@ export class TaskRunner<
           processedAlertsNew,
           processedAlertsActive,
           trimmedAlertsRecovered,
-          trimmedAlertsRecoveredCurrent
+          processedAlertsRecoveredCurrent
         );
         alerts.currentRecoveredAlerts = merge(alerts.currentRecoveredAlerts, earlyRecoveredAlerts);
 

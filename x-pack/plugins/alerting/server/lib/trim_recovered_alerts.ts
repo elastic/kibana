@@ -16,7 +16,6 @@ interface TrimmedRecoveredAlertsResult<
   RecoveryActionGroupIds extends string
 > {
   trimmedAlertsRecovered: Record<string, Alert<State, Context, RecoveryActionGroupIds>>;
-  trimmedAlertsRecoveredCurrent: Record<string, Alert<State, Context, RecoveryActionGroupIds>>;
   earlyRecoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupIds>>;
 }
 
@@ -32,7 +31,6 @@ export function trimRecoveredAlerts<
 >(
   logger: Logger,
   recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupIds>> = {},
-  currentRecoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupIds>> = {},
   maxAlerts: number
 ): TrimmedRecoveredAlertsResult<State, Context, RecoveryActionGroupIds> {
   const alerts = map(recoveredAlerts, (value, key) => {
@@ -49,11 +47,9 @@ export function trimRecoveredAlerts<
     earlyRecoveredAlerts[opt.key] = recoveredAlerts[opt.key];
 
     delete recoveredAlerts[opt.key];
-    delete currentRecoveredAlerts[opt.key];
   });
   return {
     trimmedAlertsRecovered: recoveredAlerts,
-    trimmedAlertsRecoveredCurrent: currentRecoveredAlerts,
     earlyRecoveredAlerts,
   };
 }

@@ -34,15 +34,10 @@ describe('trimRecoveredAlerts', () => {
       '2': alert2,
       '3': alert3,
     };
-    const recoveredAlertsCurrent = {
-      '1': alert1,
-      '2': alert2,
-    };
 
-    const trimmedAlerts = trimRecoveredAlerts(logger, recoveredAlerts, recoveredAlertsCurrent, 2);
+    const trimmedAlerts = trimRecoveredAlerts(logger, recoveredAlerts, 2);
     expect(trimmedAlerts).toEqual({
       trimmedAlertsRecovered: { 1: alert1, 3: alert3 },
-      trimmedAlertsRecoveredCurrent: { 1: alert1 },
       earlyRecoveredAlerts: {
         2: new Alert('2', {
           meta: { flappingHistory: new Array(20).fill(false), flapping: false },
@@ -57,15 +52,10 @@ describe('trimRecoveredAlerts', () => {
       '2': alert2,
       '3': alert3,
     };
-    const recoveredAlertsCurrent = {
-      '1': alert1,
-      '2': alert2,
-    };
 
-    const trimmedAlerts = trimRecoveredAlerts(logger, recoveredAlerts, recoveredAlertsCurrent, 3);
+    const trimmedAlerts = trimRecoveredAlerts(logger, recoveredAlerts, 3);
     expect(trimmedAlerts).toEqual({
       trimmedAlertsRecovered: recoveredAlerts,
-      trimmedAlertsRecoveredCurrent: recoveredAlertsCurrent,
       earlyRecoveredAlerts: {},
     });
   });
