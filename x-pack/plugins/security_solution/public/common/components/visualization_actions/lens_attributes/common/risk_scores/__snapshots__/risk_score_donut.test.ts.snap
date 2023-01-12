@@ -1,0 +1,105 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getRiskScoreDonutAttributes should render 1`] = `
+Object {
+  "description": "",
+  "references": Array [],
+  "state": Object {
+    "adHocDataViews": Object {
+      "40a4d4c8-b5da-4bb7-8961-a84ce0b73fa0": Object {
+        "allowNoIndex": false,
+        "fieldAttrs": Object {},
+        "fieldFormats": Object {},
+        "id": "40a4d4c8-b5da-4bb7-8961-a84ce0b73fa0",
+        "name": "ml_host_risk_score_latest_mockSpaceId",
+        "runtimeFieldMap": Object {},
+        "sourceFilters": Array [],
+        "timeFieldName": "@timestamp",
+        "title": "ml_host_risk_score_latest_mockSpaceId",
+      },
+    },
+    "datasourceStates": Object {
+      "formBased": Object {
+        "layers": Object {
+          "4aa7cf71-cf20-4e62-8ca6-ca6be6b0988b": Object {
+            "columnOrder": Array [
+              "f04a71a3-399f-4d32-9efc-8a005e989991",
+            ],
+            "columns": Object {
+              "f04a71a3-399f-4d32-9efc-8a005e989991": Object {
+                "dataType": "number",
+                "isBucketed": false,
+                "label": "Count of records",
+                "operationType": "count",
+                "params": Object {
+                  "emptyAsNull": true,
+                },
+                "scale": "ratio",
+                "sourceField": "___records___",
+              },
+            },
+            "incompleteColumns": Object {},
+            "sampling": 1,
+          },
+        },
+      },
+      "textBased": Object {
+        "layers": Object {},
+      },
+    },
+    "filters": Array [
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "host.id",
+          "negate": false,
+          "params": Object {
+            "query": "123",
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "match_phrase": Object {
+            "host.id": "123",
+          },
+        },
+      },
+    ],
+    "internalReferences": Array [
+      Object {
+        "id": "40a4d4c8-b5da-4bb7-8961-a84ce0b73fa0",
+        "name": "indexpattern-datasource-layer-4aa7cf71-cf20-4e62-8ca6-ca6be6b0988b",
+        "type": "index-pattern",
+      },
+    ],
+    "query": Object {
+      "language": "kql",
+      "query": "host.name: *",
+    },
+    "visualization": Object {
+      "layers": Array [
+        Object {
+          "categoryDisplay": "hide",
+          "emptySizeRatio": 0.8,
+          "layerId": "4aa7cf71-cf20-4e62-8ca6-ca6be6b0988b",
+          "layerType": "data",
+          "legendDisplay": "hide",
+          "legendPosition": "right",
+          "legendSize": "xlarge",
+          "metrics": Array [
+            "f04a71a3-399f-4d32-9efc-8a005e989991",
+          ],
+          "nestedLegend": true,
+          "numberDisplay": "value",
+          "percentDecimals": 2,
+          "primaryGroups": Array [],
+        },
+      ],
+      "shape": "donut",
+    },
+  },
+  "title": "host risk donut",
+  "visualizationType": "lnsPie",
+}
+`;

@@ -7,7 +7,10 @@
 
 import type { GetLensAttributes } from '../../../types';
 
-export const getRiskScoreDonutAttributes: GetLensAttributes = (stackByField, extraOptions) => ({
+export const getRiskScoreDonutAttributes: GetLensAttributes = (
+  stackByField,
+  extraOptions = { spaceId: 'default' }
+) => ({
   title: `${stackByField} risk donut`,
   description: '',
   visualizationType: 'lnsPie',
@@ -73,14 +76,14 @@ export const getRiskScoreDonutAttributes: GetLensAttributes = (stackByField, ext
     adHocDataViews: {
       '40a4d4c8-b5da-4bb7-8961-a84ce0b73fa0': {
         id: '40a4d4c8-b5da-4bb7-8961-a84ce0b73fa0',
-        title: `ml_${stackByField}_risk_score_latest_${extraOptions?.spaceId}`,
+        title: `ml_${stackByField}_risk_score_latest_${extraOptions.spaceId}`,
         timeFieldName: '@timestamp',
         sourceFilters: [],
         fieldFormats: {},
         runtimeFieldMap: {},
         fieldAttrs: {},
         allowNoIndex: false,
-        name: `ml_${stackByField}_risk_score_latest_${extraOptions?.spaceId}`,
+        name: `ml_${stackByField}_risk_score_latest_${extraOptions.spaceId}`,
       },
     },
   },

@@ -14,7 +14,7 @@ import type {
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { inputsSelectors } from '../../store/inputs';
 import { DonutChartWrapper } from '../charts/donutchart';
-import { VisualizationEmbeddable } from './lens_embeddable_managed';
+import { VisualizationEmbeddable } from './visualization_embeddable';
 import { parseVisualizationData } from './utils';
 
 const DonutEmbeddableComponent: React.FC<DonutEmbeddableProps> = (props) => {

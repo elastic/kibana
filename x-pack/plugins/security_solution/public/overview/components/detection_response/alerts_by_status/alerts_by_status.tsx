@@ -274,14 +274,14 @@ export const AlertsByStatus = ({
                       {isChartEmbeddablesEnabled ? (
                         <DonutEmbeddable
                           extraOptions={closedDonutOptions}
+                          getLensAttributes={getAlertsByStatusAttributes}
                           height={ChartSize}
                           id={`${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-closed`}
                           label={STATUS_CLOSED}
                           scopeId={SourcererScopeName.detections}
+                          stackByField="kibana.alert.workflow_status"
                           timerange={timerange}
                           width={ChartSize}
-                          getLensAttributes={getAlertsByStatusAttributes}
-                          stackByField="kibana.alert.workflow_status"
                         />
                       ) : (
                         <DonutChart

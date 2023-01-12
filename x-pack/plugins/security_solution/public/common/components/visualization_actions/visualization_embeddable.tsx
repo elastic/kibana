@@ -54,6 +54,12 @@ const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> =
     );
   }, [dispatch, inputId, id, refetchByRestartingSession, session]);
 
+  useEffect(() => {
+    return () => {
+      dispatch(inputsActions.deleteOneQuery({ inputId, id }));
+    };
+  }, [dispatch, id, inputId]);
+
   return <LensEmbeddable {...lensPorps} id={id} onLoad={onEmbeddableLoad} />;
 };
 
