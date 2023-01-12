@@ -63,7 +63,7 @@ export function SloEditFormDefinitionCustomKql({ control, trigger }: Props) {
             required: true,
             validate: (value) => indices.some((index) => valueMatchIndex(value, index.name)),
           }}
-          render={({ field }) => (
+          render={({ field, fieldState }) => (
             <EuiSuggest
               fullWidth
               isClearable
@@ -73,7 +73,10 @@ export function SloEditFormDefinitionCustomKql({ control, trigger }: Props) {
               onItemClick={({ label }) => {
                 field.onChange(label);
               }}
-              isInvalid={!indicesNames.some((index) => valueMatchIndex(field.value, index.label))}
+              isInvalid={
+                fieldState.isDirty &&
+                !indicesNames.some((index) => valueMatchIndex(field.value, index.label))
+              }
               placeholder={i18n.translate(
                 'xpack.observability.slos.sloEdit.sloDefinition.customKql.index.selectIndex',
                 {
