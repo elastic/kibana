@@ -8,7 +8,7 @@
 import { ConfigProps, SeriesConfig } from '../../types';
 import { FieldLabels, RECORDS_FIELD, ReportTypes } from '../constants';
 
-export function getAlertsSingleMetricConfig(configProps: ConfigProps): SeriesConfig {
+export function getAlertsSingleMetricConfig({ spaceId }: ConfigProps): SeriesConfig {
   return {
     seriesTypes: [],
     defaultSeriesType: 'line',
@@ -37,5 +37,9 @@ export function getAlertsSingleMetricConfig(configProps: ConfigProps): SeriesCon
       },
     ],
     labels: { ...FieldLabels },
+    query: {
+      language: 'kuery',
+      query: `kibana.space_ids: "${spaceId}"`,
+    },
   };
 }
