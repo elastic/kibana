@@ -22,6 +22,12 @@ describe('getTruncatedText', () => {
     expect(res).toEqual('');
   });
 
+  it('should return empty text if text is empty and truncate length is 0', () => {
+    const res = getTruncatedText('', 0);
+
+    expect(res).toEqual('');
+  });
+
   it('should return original text if truncate length is negative', () => {
     const sampleText = 'This is a sample text!!';
     const res = getTruncatedText(sampleText, -4);

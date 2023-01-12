@@ -34,7 +34,7 @@ const TestSpan = () => (
 );
 
 const longTitle = `Lorem Ipsum is simply dummy text of the printing and typesetting industry. 
-  Lorem Ipsum has been the industry standard dummy text ever since the 1500s!! Lorem!!!`; // maximum length of case title is 160 characters
+  Lorem Ipsum has been the industry standard dummy text ever since the 1500s!! Lorem!!!`;
 
 const longDescription = `Lorem Ipsum is simply dummy text of the printing and typesetting industry. 
   Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer 
