@@ -24,7 +24,7 @@ describe('<ControlGeneralView />', () => {
   const WrappedComponent = ({ policy = getCloudDefendNewPolicyMock() }) => {
     return (
       <TestProvider params={params}>
-        <ControlGeneralView policy={policy} onChange={onChange} />;
+        <ControlGeneralView policy={policy} onChange={onChange} show />;
       </TestProvider>
     );
   };

@@ -17,7 +17,7 @@ describe('<ControlYamlView />', () => {
   const WrappedComponent = ({ policy = getCloudDefendNewPolicyMock() }) => {
     return (
       <TestProvider>
-        <ControlYamlView policy={policy} onChange={onChange} />;
+        <ControlYamlView policy={policy} onChange={onChange} show />;
       </TestProvider>
     );
   };
