@@ -11,12 +11,10 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 export const OPTIONS_LIST_DASHBOARD_NAME = 'Test Options List Control';
 
 export default function ({ loadTestFile, getService, getPageObjects }: FtrProviderContext) {
-  const kibanaServer = getService('kibanaServer');
   const elasticChart = getService('elasticChart');
-  const esArchiver = getService('esArchiver');
   const security = getService('security');
 
-  const { dashboardControls, common, timePicker, dashboard } = getPageObjects([
+  const { timePicker, dashboard } = getPageObjects([
     'dashboardControls',
     'timePicker',
     'dashboard',
@@ -24,21 +22,7 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
   ]);
 
   async function setup() {
-    await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/dashboard/current/data');
-    await kibanaServer.savedObjects.cleanStandardList();
-    await kibanaServer.importExport.load(
-      'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
-    );
     await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader', 'animals']);
-    await kibanaServer.uiSettings.replace({
-      defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
-    });
-
-    // enable the controls lab and navigate to the dashboard listing page to start
-    await common.navigateToApp('dashboard');
-    await dashboardControls.enableControlsLab();
-    await common.navigateToApp('dashboard');
-    await dashboard.preserveCrossAppState();
 
     await dashboard.gotoDashboardLandingPage();
     await dashboard.clickNewDashboard();
@@ -51,9 +35,7 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
   }
 
   async function teardown() {
-    await esArchiver.unload('test/functional/fixtures/es_archiver/dashboard/current/data');
     await security.testUser.restoreDefaults();
-    await kibanaServer.savedObjects.cleanStandardList();
   }
 
   describe('Options list control', function () {
