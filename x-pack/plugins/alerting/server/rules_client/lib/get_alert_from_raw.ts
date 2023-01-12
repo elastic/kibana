@@ -102,8 +102,8 @@ export function getPartialRuleFromRaw<Params extends RuleTypeParams>(
     ...s,
     rRule: {
       ...s.rRule,
-      dtstart: new Date(s.rRule.dtstart),
-      ...(s.rRule.until ? { until: new Date(s.rRule.until) } : {}),
+      dtstart: new Date(s.rRule.dtstart).toISOString(),
+      ...(s.rRule.until ? { until: new Date(s.rRule.until).toISOString() } : {}),
     },
   }));
   const includeSnoozeSchedule =
@@ -115,7 +115,7 @@ export function getPartialRuleFromRaw<Params extends RuleTypeParams>(
       })
     : null;
   const includeMonitoring = monitoring && !excludeFromPublicApi;
-  const rule = {
+  const rule: PartialRule<Params> = {
     id,
     notifyWhen,
     ...omit(partialRawRule, excludeFromPublicApi ? [...context.fieldsToExcludeFromPublicApi] : ''),
@@ -131,7 +131,7 @@ export function getPartialRuleFromRaw<Params extends RuleTypeParams>(
             snoozeSchedule,
             muteAll: partialRawRule.muteAll ?? false,
           })?.map((s) => s.id),
-          isSnoozedUntil,
+          isSnoozedUntil: isSnoozedUntil ? new Date(isSnoozedUntil) : null,
         }
       : {}),
     ...(updatedAt ? { updatedAt: new Date(updatedAt) } : {}),
@@ -164,11 +164,17 @@ export function getPartialRuleFromRaw<Params extends RuleTypeParams>(
       getViewInAppUrl: ruleType.getViewInAppUrl,
     });
     if (viewInAppRelativeUrl) {
-      (rule as PartialRule<Params>).viewInAppRelativeUrl = viewInAppRelativeUrl;
+      rule.viewInAppRelativeUrl = viewInAppRelativeUrl;
     }
   }
 
-  return includeLegacyId
-    ? ({ ...rule, legacyId } as PartialRuleWithLegacyId<Params>)
-    : (rule as PartialRule<Params>);
+  if (includeLegacyId) {
+    const result: PartialRuleWithLegacyId<Params> = {
+      ...rule,
+      legacyId,
+    };
+    return result;
+  }
+
+  return rule;
 }
