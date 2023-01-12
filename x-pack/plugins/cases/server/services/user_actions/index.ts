@@ -72,6 +72,7 @@ import type { IndexRefresh } from '../types';
 import { isAssigneesArray, isStringArray } from './type_guards';
 import type { CaseSavedObject } from '../../common/types';
 import { UserActionAuditLogger } from './audit_logger';
+import { UserActionFinder } from './find';
 
 export interface UserActionItem {
   attributes: CaseUserActionAttributesWithoutConnectorId;
@@ -126,6 +127,7 @@ export class CaseUserActionService {
   private readonly persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   private readonly log: Logger;
   private readonly auditLogger: UserActionAuditLogger;
+  private readonly _finder: UserActionFinder;
 
   constructor({
     log,
@@ -147,6 +149,16 @@ export class CaseUserActionService {
     });
 
     this.auditLogger = new UserActionAuditLogger(auditLogger);
+
+    this._finder = new UserActionFinder({
+      log,
+      persistableStateAttachmentTypeRegistry,
+      unsecuredSavedObjectsClient,
+    });
+  }
+
+  public get finder() {
+    return this._finder;
   }
 
   private getUserActionItemByDifference(params: GetUserActionItemByDifference): UserActionEvent[] {

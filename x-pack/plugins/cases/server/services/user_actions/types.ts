@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectReference } from '@kbn/core/server';
+import type { SavedObjectReference, SavedObjectsClientContract, Logger } from '@kbn/core/server';
 import type { CaseAssignees } from '../../../common/api/cases/assignee';
 import type {
   CasePostRequest,
@@ -125,4 +125,10 @@ export type CommonBuilderArguments = CommonArguments & {
 
 export interface BuilderDeps {
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
+}
+
+export interface ServiceContext {
+  log: Logger;
+  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
+  unsecuredSavedObjectsClient: SavedObjectsClientContract;
 }

@@ -34,6 +34,7 @@ export * from './status';
 export * from './tags';
 export * from './title';
 export * from './assignees';
+export * from './operations';
 
 const CommonUserActionsRt = rt.union([
   DescriptionUserActionRt,
