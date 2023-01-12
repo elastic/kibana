@@ -78,8 +78,10 @@ journey(`MonitorSummaryTab`, async ({ page, params }) => {
   });
 
   step('Shows the alerts panel', async () => {
-    await page.waitForSelector(
-      `${byTestId('monitorActiveAlertsCount')}  .legacyMtrVis__value:has-text("1")`
-    );
+    await retry.try(async () => {
+      await page.waitForSelector(
+        `${byTestId('monitorActiveAlertsCount')}  .legacyMtrVis__value:has-text("1")`
+      );
+    });
   });
 });
