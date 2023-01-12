@@ -17,16 +17,16 @@ import React from 'react';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { TruncateWithTooltip } from './truncate_with_tooltip';
 import { truncate, unit } from '../../utils/style';
 import { useApmRouter } from '../../hooks/use_apm_router';
 import { AgentIcon } from './agent_icon';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { ApmRoutes } from '../routing/apm_route_config';
 import { isMobileAgentName } from '../../../common/agent_name';
-import { TruncateWithTooltip } from '@kbn/apm-plugin/public/components/shared/truncate_with_tooltip';
-import { NOT_AVAILABLE_LABEL } from '@kbn/apm-plugin/common/i18n';
-import { PopoverTooltip } from '@kbn/apm-plugin/public/components/shared/popover_tooltip';
-import { FormattedMessage } from 'react-intl';
+import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
+import { PopoverTooltip } from './popover_tooltip';
 
 const StyledLink = euiStyled(EuiLink)`${truncate('100%')};`;
 
