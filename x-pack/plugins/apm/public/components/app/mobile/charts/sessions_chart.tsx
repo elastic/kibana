@@ -25,10 +25,6 @@ const INITIAL_STATE = {
   timeseries: [],
 };
 
-function yLabelFormat(y?: number | null) {
-  return y;
-}
-
 type SessionsChart =
   APIReturnType<'GET /internal/apm/mobile-services/{serviceName}/transactions/charts/sessions'>;
 export function SessionsChart({

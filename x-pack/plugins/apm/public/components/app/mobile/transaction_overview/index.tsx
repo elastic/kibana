@@ -39,7 +39,7 @@ export function MobileTransactionOverview() {
     },
   } = useApmParams('/mobile-services/{serviceName}/transactions');
 
-  const kueryWithFilters = getKueryWithMobileFilters({
+  const kueryWithMobileFilters = getKueryWithMobileFilters({
     device,
     osVersion,
     appVersion,
@@ -76,7 +76,7 @@ export function MobileTransactionOverview() {
       <MobileTransactionCharts
         transactionType={transactionType}
         serviceName={serviceName}
-        kuery={kueryWithFilters}
+        kuery={kueryWithMobileFilters}
         environment={environment}
         start={start}
         end={end}
@@ -88,7 +88,7 @@ export function MobileTransactionOverview() {
           numberOfTransactionsPerPage={25}
           showAggregationAccurateCallout
           environment={environment}
-          kuery={kueryWithFilters}
+          kuery={kueryWithMobileFilters}
           start={start}
           end={end}
           saveTableOptionsToUrl

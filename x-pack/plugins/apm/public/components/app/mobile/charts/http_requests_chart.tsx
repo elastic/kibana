@@ -14,7 +14,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useFetcher } from '../../../../hooks/use_fetcher';
-import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { TimeseriesChartWithContext } from '../../../shared/charts/timeseries_chart_with_context';
 import { getComparisonChartTheme } from '../../../shared/time_comparison/get_comparison_chart_theme';
 import {
@@ -24,9 +23,6 @@ import {
 const INITIAL_STATE = {
   timeseries: [],
 };
-
-type HttpRequests =
-  APIReturnType<'GET /internal/apm/mobile-services/{serviceName}/transactions/charts/http_requests'>;
 
 export function HttpRequestsChart({
   kuery,
