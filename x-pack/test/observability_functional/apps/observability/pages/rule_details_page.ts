@@ -12,7 +12,6 @@
  */
 
 import expect from '@kbn/expect';
-import dateMath from '@kbn/datemath';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -148,7 +147,7 @@ export default ({ getService }: FtrProviderContext) => {
         await observability.alerts.common.navigateToRuleDetailsByRuleId(uptimeRuleId);
       });
 
-      it('shows alert summary widget component in the rule summary', async () => {
+      it('shows component on the rule detils page', async () => {
         await observability.components.alertSummaryWidget.getCompactComponentSelectorOrFail();
 
         const timeRangeTitle =
@@ -156,46 +155,32 @@ export default ({ getService }: FtrProviderContext) => {
         expect(timeRangeTitle).to.be('Last 30 days');
       });
 
-      it('handles alert summary widget component active click correctly', async () => {
+      it('handles clicking on active correctly', async () => {
         const activeAlerts =
           await observability.components.alertSummaryWidget.getCompactActiveAlertSelector();
         await activeAlerts.click();
 
         const url = await browser.getCurrentUrl();
-        const fromMoment = dateMath.parse(
-          await (await testSubjects.find('superDatePickerstartDatePopoverButton')).getVisibleText()
-        );
-        const from = fromMoment?.format('YYYY-MM-DDTHH:mm:ss.SSS').replaceAll(':', '%3A');
-        const toMoment = dateMath.parse(
-          await (await testSubjects.find('superDatePickerendDatePopoverButton')).getVisibleText()
-        );
-        const to = toMoment?.format('YYYY-MM-DDTHH:mm:ss.SSS').replaceAll(':', '%3A');
+        const { from, to } = await observability.components.alertSearchBar.getAbsoluteTimeRange();
 
         expect(url.includes('tabId=alerts')).to.be(true);
         expect(url.includes('status%3Aactive')).to.be(true);
-        expect(url.includes(from)).to.be(true);
-        expect(url.includes(to)).to.be(true);
+        expect(url.includes(from.replaceAll(':', '%3A'))).to.be(true);
+        expect(url.includes(to.replaceAll(':', '%3A'))).to.be(true);
       });
 
-      it('handles alert summary widget component recovered click correctly', async () => {
+      it('handles clicking on recovered correctly', async () => {
         const recoveredAlerts =
           await observability.components.alertSummaryWidget.getCompactRecoveredAlertSelector();
         await recoveredAlerts.click();
 
         const url = await browser.getCurrentUrl();
-        const fromMoment = dateMath.parse(
-          await (await testSubjects.find('superDatePickerstartDatePopoverButton')).getVisibleText()
-        );
-        const from = fromMoment?.format('YYYY-MM-DDTHH:mm:ss.SSS').replaceAll(':', '%3A');
-        const toMoment = dateMath.parse(
-          await (await testSubjects.find('superDatePickerendDatePopoverButton')).getVisibleText()
-        );
-        const to = toMoment?.format('YYYY-MM-DDTHH:mm:ss.SSS').replaceAll(':', '%3A');
+        const { from, to } = await observability.components.alertSearchBar.getAbsoluteTimeRange();
 
         expect(url.includes('tabId=alerts')).to.be(true);
         expect(url.includes('status%3Arecovered')).to.be(true);
-        expect(url.includes(from)).to.be(true);
-        expect(url.includes(to)).to.be(true);
+        expect(url.includes(from.replaceAll(':', '%3A'))).to.be(true);
+        expect(url.includes(to.replaceAll(':', '%3A'))).to.be(true);
       });
     });
 

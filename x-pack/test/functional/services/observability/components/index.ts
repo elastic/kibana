@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import { ObservabilityAlertSearchBarProvider } from './alert_search_bar';
 import { ObservabilityAlertSummaryWidgetProvider } from './alert_summary_widget';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export function ObservabilityComponentsProvider(context: FtrProviderContext) {
+  const alertSearchBar = ObservabilityAlertSearchBarProvider(context);
   const alertSummaryWidget = ObservabilityAlertSummaryWidgetProvider(context);
 
   return {
+    alertSearchBar,
     alertSummaryWidget,
   };
 }
