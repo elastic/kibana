@@ -11,7 +11,9 @@ that bring clarity to your data, tell a story about your data, and allow you to 
 [role="screenshot"]
 image:images/dashboard_ecommerceRevenueDashboard_7.15.0.png[Example dashboard]
 
+ifeval::["{feature-8-7-preview}"=="yes"]
 Panels display your data in charts, tables, maps, and more, which allow you to compare your data side-by-side to identify patterns and connections. Dashboards support several types of panels to display your data, and several options to create panels.
+endif::[]
 
 [cols="2"]
 |===
