@@ -184,6 +184,7 @@ export const stripNonEcsFields = (doc: SourceFieldRecord): StripNonEcsFieldsRetu
     if (parent && !computeIsEcsCompliant(document, fullPath)) {
       const documentReference = parent[documentKey];
       // if document reference in parent is array, remove only this item from array
+      // e.g. a boolean mapped field with values ['not-boolean', 'true'] should strip 'not-boolean' and leave 'true'
       if (isArray(documentReference)) {
         const indexToDelete = documentReference.findIndex((item) => item === document);
         documentReference.splice(indexToDelete, 1);
