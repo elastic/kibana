@@ -75,7 +75,10 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the alert details page currently only accessible via the alert details flyout and alert table context menu
    */
   alertDetailsPageEnabled: false,
-
+  /**
+   * Enables the new security flyout over the current alert details flyout
+   */
+  securityFlyoutEnabled: false,
   /**
    * Enables the `get-file` endpoint response action
    */

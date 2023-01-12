@@ -11,6 +11,7 @@ import React, { useCallback, useEffect } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 import { useDispatch } from 'react-redux';
 
+import { SecurityFlyout } from '../../../../flyout';
 import {
   SELECTOR_TIMELINE_IS_VISIBLE_CSS_CLASS_NAME,
   TIMELINE_EUI_THEME_ZINDEX_LEVEL,
@@ -32,6 +33,10 @@ const StyledEuiFlyout = styled(EuiFlyout)<EuiFlyoutProps>`
   animation: none;
   min-width: 150px;
   z-index: ${({ theme }) => theme.eui[TIMELINE_EUI_THEME_ZINDEX_LEVEL]};
+`;
+
+const StyledSecurityFlyout = styled(SecurityFlyout)`
+  z-index: ${({ theme }) => theme.eui[TIMELINE_EUI_THEME_ZINDEX_LEVEL] + 1};
 `;
 
 // SIDE EFFECT: the following creates a global class selector
@@ -76,6 +81,7 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
         style={{ display: visible ? 'block' : 'none' }}
       >
         <IndexPatternFieldEditorOverlayGlobalStyle />
+        <StyledSecurityFlyout flyoutScope="timelineFlyout" />
         <StatefulTimeline
           renderCellValue={DefaultCellRenderer}
           rowRenderers={defaultRowRenderers}

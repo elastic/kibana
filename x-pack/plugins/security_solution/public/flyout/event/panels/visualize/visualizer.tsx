@@ -17,25 +17,25 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { useDispatch } from 'react-redux';
 import styled, { css } from 'styled-components';
 import {
-  getScopedActions,
-  isActiveTimeline,
-  isInTableScope,
-  isTimelineScope,
-} from '../../../helpers';
-import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
-import { InputsModelId } from '../../../common/store/inputs/constants';
-import {
   useGlobalFullScreen,
   useTimelineFullScreen,
-} from '../../../common/containers/use_full_screen';
-import { isFullScreen } from '../timeline/body/column_headers';
-import { inputsActions } from '../../../common/store/actions';
-import { Resolver } from '../../../resolver/view';
-import { timelineSelectors } from '../../store/timeline';
-import { timelineDefaults } from '../../store/timeline/defaults';
-import { dataTableSelectors } from '../../../common/store/data_table';
-import { tableDefaults } from '../../../common/store/data_table/defaults';
-import { useGlobalOrTimelineFilters } from '@kbn/security-solution-plugin/public/common/hooks/use_global_or_timeline_filters';
+} from '../../../../common/containers/use_full_screen';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import { dataTableSelectors } from '../../../../common/store/data_table';
+import { tableDefaults } from '../../../../common/store/data_table/defaults';
+import { inputsActions } from '../../../../common/store/inputs';
+import { InputsModelId } from '../../../../common/store/inputs/constants';
+import {
+  isInTableScope,
+  isTimelineScope,
+  isActiveTimeline,
+  getScopedActions,
+} from '../../../../helpers';
+import { isFullScreen } from '../../../../timelines/components/timeline/body/column_headers';
+import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
+import { timelineSelectors } from '../../../../timelines/store/timeline';
+import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
+import { Resolver } from '../../../../resolver/view';
 
 const SESSION_VIEW_FULL_SCREEN = 'sessionViewFullScreen';
 
@@ -129,7 +129,7 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({
     };
   }, [dispatch, scopeId]);
 
-  const { from, to, shouldUpdate, selectedPatterns } = useGlobalOrTimelineFilters(
+  const { from, to, shouldUpdate, selectedPatterns } = useTimelineDataFilters(
     isActiveTimeline(scopeId)
   );
 

@@ -6,7 +6,7 @@
  */
 import { useQuery } from '@tanstack/react-query';
 import { useHttp } from '../../lib/kibana';
-import { useTimelineDataFilters } from '../../../timelines/containers/use_timeline_data_filters';
+import { useGlobalOrTimelineFilters } from '../../hooks/use_global_or_timeline_filters';
 
 export const DETECTIONS_ALERTS_COUNT_ID = 'detections-alerts-count';
 
@@ -99,7 +99,7 @@ export function useAlertPrevalenceFromProcessTree({
 }: UseAlertPrevalenceFromProcessTree): UserAlertPrevalenceFromProcessTreeResult {
   const http = useHttp();
 
-  const { selectedPatterns } = useTimelineDataFilters(isActiveTimeline);
+  const { selectedPatterns } = useGlobalOrTimelineFilters(isActiveTimeline);
   const alertAndOriginalIndices = [...new Set(selectedPatterns.concat(indices))];
   const { loading, id, schema } = useAlertDocumentAnalyzerSchema({
     documentId,

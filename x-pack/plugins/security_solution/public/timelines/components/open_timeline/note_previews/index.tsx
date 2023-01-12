@@ -18,6 +18,7 @@ import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { TimelineResultNote } from '../types';
 import { getEmptyValue, defaultToEmptyTag } from '../../../../common/components/empty_value';
 import { MarkdownRenderer } from '../../../../common/components/markdown_editor';
@@ -29,6 +30,7 @@ import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { SaveTimelineButton } from '../../timeline/header/save_timeline_button';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { openSecurityFlyoutByScope } from '../../../../common/store/flyout/actions';
 
 export const NotePreviewsContainer = styled.section`
   padding-top: ${({ theme }) => `${theme.eui.euiSizeS}`};
@@ -46,21 +48,37 @@ const ToggleEventDetailsButtonComponent: React.FC<ToggleEventDetailsButtonProps>
   timelineId,
 }) => {
   const dispatch = useDispatch();
+  const isSecurityFlyoutEnabled = useIsExperimentalFeatureEnabled('securityFlyoutEnabled');
   const { selectedPatterns } = useSourcererDataView(SourcererScopeName.timeline);
 
   const handleClick = useCallback(() => {
-    dispatch(
-      timelineActions.toggleDetailPanel({
-        panelView: 'eventDetail',
-        tabType: TimelineTabs.notes,
-        id: timelineId,
-        params: {
-          eventId,
-          indexName: selectedPatterns.join(','),
-        },
-      })
-    );
-  }, [dispatch, eventId, selectedPatterns, timelineId]);
+    if (isSecurityFlyoutEnabled) {
+      dispatch(
+        openSecurityFlyoutByScope({
+          flyoutScope: 'timelineFlyout',
+          right: {
+            panelKind: 'event',
+            params: {
+              eventId,
+              indexName: selectedPatterns.join(','),
+            },
+          },
+        })
+      );
+    } else {
+      dispatch(
+        timelineActions.toggleDetailPanel({
+          panelView: 'eventDetail',
+          tabType: TimelineTabs.notes,
+          id: timelineId,
+          params: {
+            eventId,
+            indexName: selectedPatterns.join(','),
+          },
+        })
+      );
+    }
+  }, [dispatch, eventId, isSecurityFlyoutEnabled, selectedPatterns, timelineId]);
 
   return (
     <EuiButtonIcon

@@ -8,6 +8,8 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { openSecurityFlyoutByScope } from '../../../../../common/store/flyout/actions';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import type {
   ColumnHeaderOptions,
@@ -102,6 +104,7 @@ const StatefulEventComponent: React.FC<Props> = ({
 }) => {
   const trGroupRef = useRef<HTMLDivElement | null>(null);
   const dispatch = useDispatch();
+  const isSecurityFlyoutEnabled = useIsExperimentalFeatureEnabled('securityFlyoutEnabled');
   // Store context in state rather than creating object in provider value={} to prevent re-renders caused by a new object being created
   const [activeStatefulEventContext] = useState({
     timelineID: timelineId,
@@ -199,18 +202,32 @@ const StatefulEventComponent: React.FC<Props> = ({
       },
     };
 
-    dispatch(
-      timelineActions.toggleDetailPanel({
-        ...updatedExpandedDetail,
-        tabType,
-        id: timelineId,
-      })
-    );
-
+    if (isSecurityFlyoutEnabled) {
+      dispatch(
+        openSecurityFlyoutByScope({
+          flyoutScope: 'timelineFlyout',
+          right: {
+            panelKind: 'event',
+            params: {
+              eventId,
+              indexName,
+            },
+          },
+        })
+      );
+    } else {
+      dispatch(
+        timelineActions.toggleDetailPanel({
+          ...updatedExpandedDetail,
+          tabType,
+          id: timelineId,
+        })
+      );
+    }
     if (timelineId === TimelineId.active && tabType === TimelineTabs.query) {
       activeTimeline.toggleExpandedDetail({ ...updatedExpandedDetail });
     }
-  }, [dispatch, event._id, event._index, refetch, tabType, timelineId]);
+  }, [dispatch, event._id, event._index, isSecurityFlyoutEnabled, refetch, tabType, timelineId]);
 
   const associateNote = useCallback(
     (noteId: string) => {

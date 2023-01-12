@@ -11,6 +11,8 @@ import { EuiThemeProvider, useEuiTheme } from '@elastic/eui';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
+import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { SecurityFlyout } from '../../../flyout';
 import { useSecuritySolutionNavigation } from '../../../common/components/navigation/use_security_solution_navigation';
 import { TimelineId } from '../../../../common/types/timeline';
 import { getTimelineShowStatusByIdSelector } from '../../../timelines/components/flyout/selectors';
@@ -25,6 +27,7 @@ import { useShowTimeline } from '../../../common/utils/timeline/use_show_timelin
 import { useShowPagesWithEmptyView } from '../../../common/utils/empty_view/use_show_pages_with_empty_view';
 import { useIsPolicySettingsBarVisible } from '../../../management/pages/policy/view/policy_hooks';
 import { useIsGroupedNavigationEnabled } from '../../../common/components/navigation/helpers';
+import { useSourcererDataView } from '../../../common/containers/sourcerer';
 
 const NO_DATA_PAGE_MAX_WIDTH = 950;
 
@@ -59,6 +62,8 @@ export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplatePr
     const solutionNav = useSecuritySolutionNavigation();
     const isPolicySettingsVisible = useIsPolicySettingsBarVisible();
     const [isTimelineBottomBarVisible] = useShowTimeline();
+    const { browserFields, runtimeMappings } = useSourcererDataView(SourcererScopeName.timeline);
+
     const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
     const { show: isShowingTimelineOverlay } = useDeepEqualSelector((state) =>
       getTimelineShowStatus(state, TimelineId.active)
@@ -107,6 +112,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplatePr
             </EuiThemeProvider>
           </KibanaPageTemplate.BottomBar>
         )}
+        <SecurityFlyout flyoutScope="globalFlyout" />
       </StyledKibanaPageTemplate>
     );
   });
