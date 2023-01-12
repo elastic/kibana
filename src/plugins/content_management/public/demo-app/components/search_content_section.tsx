@@ -53,6 +53,12 @@ export const SearchContentSection: FC = () => {
         </p>
       ),
     },
+    {
+      field: 'meta.updatedAt',
+      name: 'Last update',
+      sortable: true,
+      truncateText: false,
+    },
   ];
 
   const renderToolsRight = () => {
@@ -93,6 +99,7 @@ export const SearchContentSection: FC = () => {
         itemId="id"
         columns={columns}
         search={search}
+        sorting={true}
       />
     </>
   );
