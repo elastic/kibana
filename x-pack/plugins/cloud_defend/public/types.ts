@@ -94,7 +94,7 @@ export const DefaultResponse: ControlResponse = {
 
 export interface OnChangeDeps {
   isValid: boolean;
-  updatedPolicy?: NewPackagePolicy;
+  updatedPolicy: NewPackagePolicy;
 }
 
 export interface SettingsDeps {

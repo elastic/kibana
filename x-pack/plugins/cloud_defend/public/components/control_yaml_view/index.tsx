@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiSpacer, EuiText, EuiFlexGroup, EuiFlexItem, EuiForm } from '@elastic/eui';
+import { EuiSpacer, EuiText, EuiFlexGroup, EuiFlexItem, EuiForm, EuiPanel } from '@elastic/eui';
 import { CodeEditor, YamlLang } from '@kbn/kibana-react-plugin/public';
 import { monaco } from '@kbn/monaco';
 import yaml from 'js-yaml';
@@ -43,14 +43,14 @@ export const ControlYamlView = ({ policy, onChange, show }: ViewDeps) => {
         return error;
       });
 
-      onChange({ isValid: actionsValid && errs.length === 0 });
+      onChange({ isValid: actionsValid && errs.length === 0, updatedPolicy: policy });
       setErrors(errs);
     });
 
     return () => {
       listener.dispose();
     };
-  }, [actionsValid, onChange]);
+  }, [actionsValid, onChange, policy]);
 
   // for now we force 'alert' action on all responses. This restriction may be removed in future when we have a plan to record all responses. e.g. audit
   const validateActions = useCallback((value) => {
@@ -94,7 +94,7 @@ export const ControlYamlView = ({ policy, onChange, show }: ViewDeps) => {
         </EuiText>
         <EuiSpacer size="s" />
         {!actionsValid && <EuiForm isInvalid={true} error={i18n.errorAlertActionRequired} />}
-        <div css={styles.yamlEditor}>
+        <EuiPanel css={styles.yamlEditor} hasShadow={false} paddingSize="none" hasBorder>
           <CodeEditor
             languageId={YamlLang}
             options={{
@@ -104,7 +104,7 @@ export const ControlYamlView = ({ policy, onChange, show }: ViewDeps) => {
             onChange={onYamlChange}
             value={configuration}
           />
-        </div>
+        </EuiPanel>
         <EuiSpacer size="s" />
       </EuiFlexItem>
     </EuiFlexGroup>
