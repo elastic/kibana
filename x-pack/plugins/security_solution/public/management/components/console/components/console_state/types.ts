@@ -89,7 +89,7 @@ export interface ConsoleDataState {
 }
 
 /** State that is provided/received to Argument Value Selectors */
-interface ArgSelectorState {
+export interface ArgSelectorState {
   value: any;
   valueText: string | undefined;
 }

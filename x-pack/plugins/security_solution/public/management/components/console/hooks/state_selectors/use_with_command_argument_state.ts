@@ -7,14 +7,14 @@
 
 import { useMemo } from 'react';
 import { useConsoleStore } from '../../components/console_state/console_state';
-import type { CommandArgumentState } from '../../components/console_state/types';
+import type { ArgSelectorState } from '../../components/console_state/types';
 
 /**
  * Returns the Command argument state for a given argument name. Should be used ONLY when a
  * command has been entered that matches a `CommandDefinition`
  * @param argName
  */
-export const useWithCommandArgumentState = (argName: string): CommandArgumentState => {
+export const useWithCommandArgumentState = (argName: string): ArgSelectorState => {
   const enteredCommand = useConsoleStore().state.input.enteredCommand;
 
   return useMemo(() => {
