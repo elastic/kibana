@@ -50,10 +50,13 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--logging.loggers[0].name=plugins.security',
         '--logging.loggers[0].level=debug',
         `--logging.loggers[0].appenders=${JSON.stringify(['console'])}`,
+<<<<<<< Updated upstream
         '--logging.loggers[1].name=plugins.taskManager',
         '--logging.loggers[1].level=debug',
         `--logging.loggers[1].appenders=${JSON.stringify(['console'])}`,
         '--xpack.task_manager.monitored_stats_required_freshness=100000000',
+=======
+>>>>>>> Stashed changes
         '--xpack.security.session.concurrentSessions.maxSessions=2',
         `--xpack.security.authc.providers=${JSON.stringify({
           basic: { basic1: { order: 0 } },
