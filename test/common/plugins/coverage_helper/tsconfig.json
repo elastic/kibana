@@ -11,6 +11,5 @@
     "target/**/*",
   ],
   "kbn_references": [
-    "@kbn/core",
   ]
 }
