@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+export { ContentDetailsSection } from './content_details_section';
+
 export { ContentPreviewSection } from './content_preview_section';
 
 export { CreateContentSection } from './create_content_section';

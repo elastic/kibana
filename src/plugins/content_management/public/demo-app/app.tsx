@@ -10,7 +10,12 @@ import type { FC } from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { EuiSpacer } from '@elastic/eui';
-import { SearchContentSection, ContentPreviewSection, CreateContentSection } from './components';
+import {
+  SearchContentSection,
+  ContentPreviewSection,
+  CreateContentSection,
+  ContentDetailsSection,
+} from './components';
 
 export const App: FC = () => {
   return (
@@ -23,6 +28,10 @@ export const App: FC = () => {
       <KibanaPageTemplate.Section>
         {/* Search */}
         <SearchContentSection />
+        <EuiSpacer size="xl" />
+
+        {/* Content details */}
+        <ContentDetailsSection />
         <EuiSpacer size="xl" />
 
         {/* Content preview */}
