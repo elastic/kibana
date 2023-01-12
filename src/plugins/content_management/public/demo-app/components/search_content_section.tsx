@@ -6,15 +6,94 @@
  * Side Public License, v 1.
  */
 
-import { EuiTitle } from '@elastic/eui';
-import React, { FC } from 'react';
+import React, { FC, useEffect, useState, useCallback } from 'react';
+import { EuiButton, EuiInMemoryTable, EuiSpacer, EuiTitle } from '@elastic/eui';
+
+import { KibanaContent } from '../../../common';
+import { useApp } from '../context';
 
 export const SearchContentSection: FC = () => {
+  const { rpc } = useApp();
+  const [items, setItems] = useState<KibanaContent[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const sendSearch = useCallback(async () => {
+    setIsLoading(true);
+
+    const { hits } = (await rpc.search({})) as {
+      hits: Array<{ _id: string; _source: KibanaContent }>;
+    };
+
+    setItems(hits.map((hit) => ({ ...hit._source, id: hit._id })));
+    setIsLoading(false);
+  }, [rpc]);
+
+  const columns = [
+    {
+      field: 'id',
+      name: 'Id',
+      sortable: false,
+      truncateText: false,
+    },
+    {
+      field: 'type',
+      name: 'Type',
+      sortable: true,
+      truncateText: false,
+    },
+    {
+      field: 'title',
+      name: 'Title & descr',
+      truncateText: true,
+      render: (_: string, { title, description }: { title: string; description?: string }) => (
+        <p>
+          {title}
+          <br />
+          {description}
+        </p>
+      ),
+    },
+  ];
+
+  const renderToolsRight = () => {
+    return [
+      <EuiButton
+        key="refresh"
+        onClick={() => {
+          sendSearch();
+        }}
+        isDisabled={isLoading}
+      >
+        Refresh
+      </EuiButton>,
+    ];
+  };
+
+  const search = {
+    toolsRight: renderToolsRight(),
+    box: {
+      incremental: true,
+    },
+  };
+
+  useEffect(() => {
+    sendSearch();
+  }, [sendSearch]);
+
   return (
     <>
       <EuiTitle>
         <h2>Search</h2>
       </EuiTitle>
+      <EuiSpacer />
+
+      <EuiInMemoryTable
+        tableCaption="Demo of Content management Search layer"
+        items={items}
+        itemId="id"
+        columns={columns}
+        search={search}
+      />
     </>
   );
 };

@@ -55,6 +55,13 @@ export const Calls = {
     }),
     o: kibanaContent,
   }),
+  search: () => ({
+    i: t.partial({
+      type: t.string,
+      term: t.string,
+    }),
+    o: t.unknown, // TODO: set proper type
+  }),
 };
 
 export interface FN<I, O> {

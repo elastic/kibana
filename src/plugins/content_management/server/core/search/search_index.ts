@@ -75,7 +75,10 @@ export class ContentSearchIndex {
       );
     }
 
-    return this.esClient.search(searchRequest);
+    return this.esClient.search({
+      ...searchRequest,
+      index: indexName,
+    });
   }
 
   private async createIndexIfNotExist(

@@ -8,7 +8,7 @@
 import type { CommonFields } from '../../common';
 import type { EventBus } from './event_bus';
 import type { ContentRegistry } from './registry';
-import { ContentStorage, CommonFields, InternalFields, SearchOptions } from './types';
+import type { ContentStorage } from './types';
 
 export class ContentCrud<UniqueFields extends object = Record<string, unknown>>
   implements ContentStorage<UniqueFields>

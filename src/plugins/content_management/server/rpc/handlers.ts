@@ -46,6 +46,10 @@ export function initRpcHandlers(fnHandler: FunctionHandler<Context>) {
 
       return contentCreated;
     });
+
+    register(Calls.search)(async (ctx, payload) => {
+      const { hits } = await ctx.core.searchIndexer.search({});
+      return hits;
     });
   });
 }

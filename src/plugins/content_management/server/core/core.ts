@@ -18,6 +18,7 @@ export interface ContentCoreApi {
     contentType: string
   ) => ContentCrud<UniqueFields>;
   eventBus: EventBus;
+  searchIndexer: ContentSearchIndex;
 }
 
 export class ContentCore {
@@ -50,6 +51,7 @@ export class ContentCore {
       register: this.contentRegistry.register.bind(this.contentRegistry),
       crud,
       eventBus: this.eventBus,
+      searchIndexer: this.searchIndex,
     };
   }
 
