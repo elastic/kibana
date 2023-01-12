@@ -5,8 +5,16 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
-import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiImage, EuiText, EuiTitle } from '@elastic/eui';
+import React from 'react';
+import {
+  EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiImage,
+  EuiText,
+  EuiTitle,
+  EuiDataGridToolBarAdditionalControlsOptions,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import icon from './assets/illustration_product_no_results_magnifying_glass.svg';
 
@@ -21,7 +29,7 @@ const panelStyle = {
 
 export const EmptyState: React.FC<{
   height?: keyof typeof heights;
-  controls?: { right?: ReactNode };
+  controls?: EuiDataGridToolBarAdditionalControlsOptions;
 }> = ({ height = 'tall', controls }) => {
   return (
     <EuiPanel color="subdued" data-test-subj="alertsStateTableEmptyState">
