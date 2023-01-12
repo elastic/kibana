@@ -6,8 +6,6 @@
  */
 
 export const esPackageResponse = () => {
-  //   const esIndex = `.ds-metrics-elasticsearch.stack_monitoring.node-default-${date}-000001`;
-
   return {
     monitoredClusters: {
       clusters: {
@@ -32,18 +30,16 @@ export const esPackageResponse = () => {
       },
       products: {
         elasticsearch: {
-          node: [
+          'elasticsearch.stack_monitoring.node_stats': [
             {
-              lastSeen: '2023-01-12T15:18:48.533Z',
+              lastSeen: '2023-01-13T15:11:40.458Z',
               message:
-                'error determining if connected Elasticsearch node is master: error making http request: Get "http://localhost:9200/_nodes/_local/nodes": dial tcp [::1]:9200: connect: cannot assign requested address',
+                'error making http request: Get "http://localhost:9200/_nodes/_local/stats": dial tcp [::1]:9200: connect: cannot assign requested address',
             },
-          ],
-          node_stats: [
             {
-              lastSeen: '2023-01-12T15:18:48.796Z',
+              lastSeen: '2023-01-13T15:11:30.458Z',
               message:
-                'error determining if connected Elasticsearch node is master: error making http request: Get "http://localhost:9200/_nodes/_local/nodes": dial tcp [::1]:9200: connect: cannot assign requested address',
+                'error making http request: Get "http://localhost:9200/_nodes/_local/stats": dial tcp 127.0.0.1:9200: connect: connection refused',
             },
           ],
         },

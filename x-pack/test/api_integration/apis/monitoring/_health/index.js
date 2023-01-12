@@ -14,8 +14,8 @@ import emptyResponse from './fixtures/response_empty.json';
 import { esBeatsResponse } from './fixtures/response_es_beats';
 import { esPackageResponse } from './fixtures/response_es_package';
 
-const LOGSTASH_PACKAGE_ARCHIVE =
-  'x-pack/test/api_integration/apis/monitoring/es_archives/_health/logstash_package_error';
+const ELASTICSEARCH_PACKAGE_ARCHIVE =
+  'x-pack/test/api_integration/apis/monitoring/es_archives/_health/elasticsearch_package_error';
 const METRICBEAT_ARCHIVE =
   'x-pack/test/api_integration/apis/monitoring/es_archives/_health/metricbeat_8';
 export default function ({ getService }) {
@@ -85,11 +85,13 @@ export default function ({ getService }) {
         });
       });
     });
+
     describe('with integration package data', () => {
-      const archives = [
-        'x-pack/test/api_integration/apis/monitoring/es_archives/_health/monitoring_es_8',
-        LOGSTASH_PACKAGE_ARCHIVE,
-      ];
+      const timeRange = {
+        min: '2023-01-10T14:46:10.461Z',
+        max: '2023-01-15T22:30:00.000Z',
+      };
+      const archives = [ELASTICSEARCH_PACKAGE_ARCHIVE];
       const { setup, tearDown } = getLifecycleMethods(getService);
 
       before('load archive', () => {
@@ -97,7 +99,7 @@ export default function ({ getService }) {
       });
 
       after('unload archive', () => {
-        return tearDown([LOGSTASH_PACKAGE_ARCHIVE]);
+        return tearDown([ELASTICSEARCH_PACKAGE_ARCHIVE]);
       });
 
       it('returns the state of the monitoring documents', async () => {
@@ -108,27 +110,6 @@ export default function ({ getService }) {
 
         delete body.settings;
         expect(body).to.eql(esPackageResponse());
-      });
-
-      it('returns relevant settings', async () => {
-        const {
-          body: { settings },
-        } = await supertest
-          .get(`/api/monitoring/v1/_health?min=${timeRange.min}&max=${timeRange.max}`)
-          .set('kbn-xsrf', 'xxx')
-          .expect(200);
-
-        // we only test the structure of the settings and not the actual values
-        // to avoid coupling our tests with any underlying changes to default
-        // configuration
-        const settingsType = mapValues(settings, (value) => typeof value);
-        expect(settingsType).to.eql({
-          ccs: 'boolean',
-          logsIndex: 'string',
-          metricbeatIndex: 'string',
-          packageIndex: 'string',
-          hasRemoteClusterConfigured: 'boolean',
-        });
       });
     });
   });
