@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { merge } from 'rxjs';
-import { debounceTime, filter, skip, tap } from 'rxjs/operators';
+import { debounceTime, filter, tap } from 'rxjs/operators';
 
 import type {
   AutoRefreshDoneFn,
@@ -38,7 +38,7 @@ export function getFetch$({
 }) {
   const { timefilter } = data.query.timefilter;
   const { filterManager } = data.query;
-  let fetch$ = merge(
+  return merge(
     refetch$,
     filterManager.getFetches$(),
     timefilter.getFetch$(),
@@ -60,13 +60,4 @@ export function getFetch$({
     data.query.queryString.getUpdates$(),
     searchSessionManager.newSearchSessionIdFromURL$.pipe(filter((sessionId) => !!sessionId))
   ).pipe(debounceTime(100));
-
-  /**
-   * Skip initial fetch when discover:searchOnPageLoad is disabled.
-   */
-  if (initialFetchStatus === FetchStatus.UNINITIALIZED) {
-    fetch$ = fetch$.pipe(skip(1));
-  }
-
-  return fetch$;
 }

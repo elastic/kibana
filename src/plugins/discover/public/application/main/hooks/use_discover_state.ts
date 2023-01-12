@@ -181,6 +181,13 @@ export function useDiscoverState({
       }
 
       if (
+        dataViewChanged &&
+        stateContainer.dataState.initialFetchStatus === FetchStatus.UNINITIALIZED
+      ) {
+        return;
+      }
+
+      if (
         chartDisplayChanged ||
         chartIntervalChanged ||
         breakdownFieldChanged ||

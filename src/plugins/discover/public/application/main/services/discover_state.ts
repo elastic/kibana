@@ -257,11 +257,10 @@ export function getDiscoverStateContainer({
     searchSessionManager,
     getAppState: appStateContainer.getState,
     getSavedSearch: () => {
-      return { savedSearch, searchSource: savedSearch.searchSource.createChild() };
+      return { ...savedSearch, searchSource: savedSearch.searchSource.createChild() };
     },
     appStateContainer,
   });
-
   const setDataView = (dataView: DataView) => {
     internalStateContainer.transitions.setDataView(dataView);
   };
