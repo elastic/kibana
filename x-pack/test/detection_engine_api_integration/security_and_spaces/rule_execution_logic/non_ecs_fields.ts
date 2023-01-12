@@ -52,7 +52,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     const { items } = await indexDocuments([getDocument(documentId, document)]);
 
-    // trow error if document wasn't indexed, so test will be terminated earlier and no false positives can happen
+    // throw error if document wasn't indexed, so test will be terminated earlier and no false positives can happen
     items.some(({ index } = {}) => {
       if (index?.error) {
         log.error(
