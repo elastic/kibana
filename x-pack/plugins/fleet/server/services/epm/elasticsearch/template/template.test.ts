@@ -738,7 +738,7 @@ describe('EPM template', () => {
     expect(mappings).toEqual(expectedMapping);
   });
 
-  it('tests processing metric_type field', () => {
+  it('tests processing metric_type field with index mode time series', () => {
     const literalYml = `
 - name: total.norm.pct
   type: scaled_float
@@ -756,7 +756,6 @@ describe('EPM template', () => {
                   scaling_factor: 1000,
                   type: 'scaled_float',
                   meta: {
-                    metric_type: 'gauge',
                     unit: 'percent',
                   },
                   time_series_metric: 'gauge',
@@ -769,7 +768,67 @@ describe('EPM template', () => {
     };
     const fields: Field[] = safeLoad(literalYml);
     const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
+    const mappings = generateMappings(processedFields, { isIndexModeTimeSeries: true });
+    expect(mappings).toEqual(expectedMapping);
+  });
+
+  it('tests processing metric_type field with index mode time series disabled', () => {
+    const literalYml = `
+- name: total.norm.pct
+  type: scaled_float
+  metric_type: gauge
+  unit: percent
+  format: percent
+`;
+    const expectedMapping = {
+      properties: {
+        total: {
+          properties: {
+            norm: {
+              properties: {
+                pct: {
+                  scaling_factor: 1000,
+                  type: 'scaled_float',
+                  meta: {
+                    unit: 'percent',
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(literalYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields, { isIndexModeTimeSeries: false });
+    expect(mappings).toEqual(expectedMapping);
+  });
+
+  it('tests processing metric_type field with long field and index mode timeseries', () => {
+    const literalYml = `
+    - name: total
+      type: long
+      format: bytes
+      unit: byte
+      metric_type: gauge
+      description: |
+        Total swap memory.
+`;
+    const expectedMapping = {
+      properties: {
+        total: {
+          type: 'long',
+          meta: {
+            unit: 'byte',
+          },
+          time_series_metric: 'gauge',
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(literalYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields, { isIndexModeTimeSeries: true });
     expect(mappings).toEqual(expectedMapping);
   });
 
