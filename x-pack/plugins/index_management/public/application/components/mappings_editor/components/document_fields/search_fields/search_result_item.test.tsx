@@ -90,4 +90,33 @@ describe('SearchResultItem', () => {
       true
     );
   });
+
+  it('should fall back to source type if the field type is not found in the type definition', () => {
+    const itemWithUnknownType = {
+      ...item,
+      field: {
+        ...item.field,
+        isMultiField: true,
+        source: {
+          ...item.field.source,
+          type: 'unknown',
+        },
+      },
+    };
+
+    const tree = mountWithIntl(
+      <StateProvider>
+        <SearchResultItem
+          item={itemWithUnknownType as SearchResult}
+          areActionButtonsVisible={true}
+          isHighlighted={false}
+          isDimmed={false}
+        />
+      </StateProvider>
+    );
+
+    expect(
+      tree.find('SearchResultItem').find('[data-test-subj="fieldType"]').last().text()
+    ).toEqual('unknown multi-field');
+  });
 });
