@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { PluginInitializerContext } from '@kbn/core-plugins-server';
+import type { PluginInitializerContext } from '@kbn/core/server';
 
 import { ContentManagementPlugin } from './plugin';
 
@@ -13,12 +13,4 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new ContentManagementPlugin(initializerContext);
 }
 
-export type {
-  ContentCore,
-  ContentStorage,
-  CommonFields,
-  ContentConfig,
-  InternalFields,
-  KibanaContent,
-  SearchOptions,
-} from './core';
+export type { ContentCore, ContentStorage, ContentConfig, SearchOptions } from './core';

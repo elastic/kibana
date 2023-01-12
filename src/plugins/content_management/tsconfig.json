@@ -9,7 +9,10 @@
     "@kbn/config-schema",
     "@kbn/utility-types-jest",
     "@kbn/i18n",
+    "@kbn/i18n-react",
     "@kbn/std",
+    "@kbn/shared-ux-page-kibana-template",
+    "@kbn/management-plugin"
   ],
   "exclude": [
     "target/**/*",

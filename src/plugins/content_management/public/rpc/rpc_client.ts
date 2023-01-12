@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { HttpSetup } from '@kbn/core-http-browser';
+import { HttpSetup } from '@kbn/core/public';
 
 import { API_ENDPOINT, Calls, Payload } from '../../common';
 import type { AsyncFN, NamedFnDef, CommonFields } from '../../common';
