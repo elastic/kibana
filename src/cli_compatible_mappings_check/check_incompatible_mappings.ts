@@ -6,20 +6,19 @@
  * Side Public License, v 1.
  */
 
-import type { Client } from '@elastic/elasticsearch';
-import { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-base-server-internal';
+import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-base-server-internal';
+import { startES } from './util';
 
 export async function throwIfMappingsAreIncompatible({
-  esClient,
   index,
   currentMappings,
   nextMappings,
 }: {
-  esClient: Client;
   index: string;
   currentMappings: SavedObjectsTypeMappingDefinitions;
   nextMappings: SavedObjectsTypeMappingDefinitions;
 }) {
+  const esClient = await startES();
   await esClient.indices.create({
     index,
     mappings: {

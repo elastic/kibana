@@ -12,8 +12,9 @@ import { kibanaPackageJson } from '@kbn/repo-info';
 
 import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-base-server-internal';
 import { extractMappingsFromPlugins } from './extract_mappings_from_plugins';
-import { log, exit, startES, writeToMappingsFile, CURRENT_MAPPINGS_FILE } from './util';
+import { log, exit, writeToMappingsFile, CURRENT_MAPPINGS_FILE } from './util';
 
+import { throwIfMappedFieldRemoved } from './check_additive_only_change';
 import { throwIfMappingsAreIncompatible } from './check_incompatible_mappings';
 
 const program = new Command('bin/compatible-mappings-check');
@@ -52,21 +53,24 @@ program
         const currentMappings: SavedObjectsTypeMappingDefinitions = require(CURRENT_MAPPINGS_FILE);
         log.info('Extracting mappings from plugins...');
         const extractedMappings = await extractMappingsFromPlugins();
-        log.info(`Got mappings from plugins.`);
+        log.info(`Got mappings for ${Object.keys(extractedMappings).length} types from plugins.`);
 
         if (deepEqual(currentMappings, extractedMappings)) {
           log.success('Mappings are unchanged.');
           return;
         }
 
-        // TODO: Implement check to enforce additive only changes.
-
-        log.info(`Starting ES node...`);
-        const esClient = await startES();
+        log.info('Checking for additive-only changes...');
+        const { checkedCount: checkedProperties } = throwIfMappedFieldRemoved(
+          currentMappings,
+          extractedMappings
+        );
+        log.success(
+          `Checked ${checkedProperties} existing properties. All present in extracted mappings.`
+        );
 
         log.info(`Checking if mappings are compatible...`);
         const res = await throwIfMappingsAreIncompatible({
-          esClient,
           index: MY_INDEX,
           nextMappings: extractedMappings,
           currentMappings,
@@ -99,9 +103,9 @@ program
   );
 
 program.command('generateSnapshot').action(async () => {
-  log.info(`Extracting mappings from plugins and writing to ${CURRENT_MAPPINGS_FILE}...`);
+  log.info('Extracting mappings from plugins...');
   writeToMappingsFile(await extractMappingsFromPlugins());
-  log.success(`Done!`);
+  log.success(`Snapshot extracted and written to ${CURRENT_MAPPINGS_FILE}`);
   exit(0);
 });
 
