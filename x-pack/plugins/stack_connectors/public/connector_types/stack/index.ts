@@ -15,3 +15,4 @@ export { getTeamsConnectorType } from './teams';
 export { getWebhookConnectorType } from './webhook';
 export { getOpsgenieConnectorType } from './opsgenie';
 export { getXmattersConnectorType } from './xmatters';
+export { getNewSlackConnectorType } from './new_slack';

@@ -13,6 +13,7 @@ import {
   getServerLogConnectorType,
   getServiceNowITOMConnectorType,
   getSlackConnectorType,
+  getNewSlackConnectorType,
   getTeamsConnectorType,
   getWebhookConnectorType,
   getOpsgenieConnectorType,
@@ -34,6 +35,7 @@ export type {
   PagerDutyActionParams,
   ServerLogActionParams,
   SlackActionParams,
+  NewSlackActionParams,
   TeamsActionParams,
   WebhookActionParams,
   XmattersActionParams,
@@ -45,6 +47,7 @@ export {
   ServiceNowITOMConnectorTypeId,
   ServerLogConnectorTypeId,
   SlackConnectorTypeId,
+  NewSlackConnectorTypeId,
   TeamsConnectorTypeId,
   WebhookConnectorTypeId,
   XmattersConnectorTypeId,
@@ -76,6 +79,7 @@ export function registerConnectorTypes({
   actions.registerType(getSwimlaneConnectorType());
   actions.registerType(getServerLogConnectorType());
   actions.registerType(getSlackConnectorType({}));
+  actions.registerType(getNewSlackConnectorType());
   actions.registerType(getWebhookConnectorType());
   actions.registerType(getCasesWebhookConnectorType());
   actions.registerType(getXmattersConnectorType());
@@ -86,6 +90,7 @@ export function registerConnectorTypes({
   actions.registerType(getResilientConnectorType());
   actions.registerType(getTeamsConnectorType());
 
+  // actions.registerSubActionConnectorType(getNewSlackConnectorType());
   actions.registerSubActionConnectorType(getOpsgenieConnectorType());
   actions.registerSubActionConnectorType(getTinesConnectorType());
 }

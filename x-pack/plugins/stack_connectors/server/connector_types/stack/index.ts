@@ -38,6 +38,12 @@ export {
 export type { ActionParamsType as SlackActionParams } from './slack';
 
 export {
+  getConnectorType as getNewSlackConnectorType,
+  ConnectorTypeId as NewSlackConnectorTypeId,
+} from './new_slack';
+export type { ActionParamsType as NewSlackActionParams } from './new_slack';
+
+export {
   getConnectorType as getTeamsConnectorType,
   ConnectorTypeId as TeamsConnectorTypeId,
 } from './teams';

@@ -18,6 +18,7 @@ import {
   getWebhookConnectorType,
   getOpsgenieConnectorType,
   getXmattersConnectorType,
+  getNewSlackConnectorType,
 } from './stack';
 
 import {
@@ -47,6 +48,7 @@ export function registerConnectorTypes({
 }) {
   connectorTypeRegistry.register(getServerLogConnectorType());
   connectorTypeRegistry.register(getSlackConnectorType());
+  connectorTypeRegistry.register(getNewSlackConnectorType());
   connectorTypeRegistry.register(getEmailConnectorType(services));
   connectorTypeRegistry.register(getIndexConnectorType());
   connectorTypeRegistry.register(getPagerDutyConnectorType());

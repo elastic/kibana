@@ -32,9 +32,9 @@ import * as i18n from './translations';
 
 export type ActionParamsType = TypeOf<typeof ExecutorParamsSchema>;
 
-const supportedSubActions = ['getChannels', 'publishMessage'];
+const supportedSubActions = ['getChannels', 'postMessage'];
 
-export const ConnectorTypeId = '.slack';
+export const ConnectorTypeId = '.new_slack';
 
 export const getConnectorType = (): ConnectorType<
   {}, // SlackPublicConfigurationType,
