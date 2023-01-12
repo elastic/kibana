@@ -16,7 +16,7 @@ export const BackToAlertDetailsButton = () => {
   const onClick = useCallback(
     () =>
       updateFlyoutPanels({
-        right: { id: EventDetailsPanelKey },
+        right: { panelKind: EventDetailsPanelKey },
       }),
     [updateFlyoutPanels]
   );

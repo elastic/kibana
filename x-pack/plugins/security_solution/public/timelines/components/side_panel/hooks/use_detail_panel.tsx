@@ -154,7 +154,6 @@ export const useDetailPanel = ({
       shouldShowDetailsPanel ? (
         <DetailsPanelComponent
           browserFields={browserFields}
-          entityType={entityType}
           handleOnPanelClosed={handleOnDetailsPanelClosed}
           isFlyoutView={isFlyoutView}
           runtimeMappings={runtimeMappings}
@@ -164,7 +163,6 @@ export const useDetailPanel = ({
       ) : null,
     [
       browserFields,
-      entityType,
       handleOnDetailsPanelClosed,
       isFlyoutView,
       runtimeMappings,

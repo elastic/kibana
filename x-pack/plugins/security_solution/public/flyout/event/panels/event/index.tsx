@@ -15,6 +15,7 @@ import { eventTabIds } from './tabs';
 
 export const EventDetailsPanelKey: EventPanel['panelKind'] = 'event';
 
+// TODO: You can pull path from the expandableFlyoutContext params instead of passing it
 export const EventDetailsPanel: React.FC<EventPanel> = React.memo(({ path }) => {
   const { updateFlyoutPanels } = useExpandableFlyoutContext();
 
@@ -26,7 +27,7 @@ export const EventDetailsPanel: React.FC<EventPanel> = React.memo(({ path }) => 
 
   const setSelectedTabId = (tabId: EventTabsType[number]['id']) => {
     updateFlyoutPanels({
-      right: { panelKind: 'event', path: [tabId] },
+      right: { path: [tabId] },
     });
   };
 
