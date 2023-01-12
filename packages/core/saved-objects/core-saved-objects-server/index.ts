@@ -80,8 +80,6 @@ export type {
   AddAuditEventParams,
   RedactNamespacesParams,
   ISavedObjectsSecurityExtension,
-  BaseAuthorizeOptions,
-  CollectMultiNamespaceReferencesOptions,
   AuthorizeCreateObject,
   AuthorizeUpdateObject,
   AuditOptions,
