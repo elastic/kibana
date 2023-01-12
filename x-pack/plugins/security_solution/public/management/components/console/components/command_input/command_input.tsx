@@ -128,7 +128,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
 
   const handleSubmitButton = useCallback<MouseEventHandler>(() => {
     setCommandToExecute({
-      input: fullTextEntered,
+      input: userInput.getFullText(true),
       enteredCommand,
       parsedInput,
     });
@@ -142,7 +142,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
         rightOfCursorText: '',
       },
     });
-  }, [dispatch, enteredCommand, fullTextEntered, parsedInput]);
+  }, [dispatch, enteredCommand, parsedInput, userInput]);
 
   const handleOnChangeFocus = useCallback<NonNullable<InputCaptureProps['onChangeFocus']>>(
     (hasFocus) => {

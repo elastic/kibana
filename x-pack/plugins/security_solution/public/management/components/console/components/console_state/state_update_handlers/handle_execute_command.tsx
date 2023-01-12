@@ -126,7 +126,7 @@ const createCommandHistoryEntry = (
 export const handleExecuteCommand: ConsoleStoreReducer<
   ConsoleDataAction & { type: 'executeCommand' }
 > = (state, action) => {
-  const { parsedInput, enteredCommand } = action.payload;
+  const { parsedInput, enteredCommand, input: fullInputText } = action.payload;
 
   if (parsedInput.name === '') {
     return state;
@@ -140,7 +140,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
       state,
       createCommandHistoryEntry(
         {
-          input: parsedInput.input,
+          input: fullInputText,
           args: parsedInput,
           commandDefinition: {
             ...UnknownCommandDefinition,
@@ -154,7 +154,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
   }
 
   const command = {
-    input: parsedInput.input,
+    input: fullInputText,
     args: parsedInput,
     commandDefinition,
   };
@@ -337,6 +337,12 @@ export const handleExecuteCommand: ConsoleStoreReducer<
                         dataValidationError = executionTranslations.mustBeGreaterThanZero(argName);
                       }
                     }
+                  }
+
+                  // If no errors, then update (mutate) the value so that correct
+                  // format reaches the execution component
+                  if (!dataValidationError) {
+                    argInput[index] = valueNumber;
                   }
                 }
                 break;

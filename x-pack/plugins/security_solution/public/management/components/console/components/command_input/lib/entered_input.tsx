@@ -11,7 +11,7 @@ import type { MaybeImmutable } from '../../../../../../../common/endpoint/types'
 import type { ArgumentSelectorWrapperProps } from '../components/argument_selector_wrapper';
 import { ArgumentSelectorWrapper } from '../components/argument_selector_wrapper';
 import type { ParsedCommandInterface } from '../../../service/types';
-import type { EnteredCommand } from '../../console_state/types';
+import type { ArgSelectorState, EnteredCommand } from '../../console_state/types';
 
 interface InputCharacter {
   value: string;
@@ -19,6 +19,7 @@ interface InputCharacter {
   isArgSelector: boolean;
   argName: string;
   argInstance: number; // zero based
+  argState: undefined | ArgSelectorState;
 }
 
 const createInputCharacter = (overrides: Partial<InputCharacter> = {}): InputCharacter => {
@@ -28,6 +29,7 @@ const createInputCharacter = (overrides: Partial<InputCharacter> = {}): InputCha
     isArgSelector: false,
     argName: '',
     argInstance: 0,
+    argState: undefined,
     ...overrides,
   };
 };
@@ -47,6 +49,19 @@ const toReactJsxFragment = (prefix: string, item: InputCharacter, index: number)
       {item.renderValue}
     </React.Fragment>
   );
+};
+
+const toInputCharacterDisplayString = (
+  includeArgSelectorValues: boolean,
+  item: InputCharacter
+): string => {
+  let response = item.value;
+
+  if (includeArgSelectorValues && item.isArgSelector) {
+    response += `="${item.argState?.valueText ?? ''}"`;
+  }
+
+  return response;
 };
 
 /**
@@ -100,6 +115,7 @@ export class EnteredInput {
               { length: argChrLength },
               createInputCharacter
             );
+            const argState = enteredCommand.argState[argName]?.at(argInstance);
 
             replaceValues[0] = createInputCharacter({
               value: argNameMatch,
@@ -112,6 +128,7 @@ export class EnteredInput {
               isArgSelector: true,
               argName,
               argInstance,
+              argState,
             });
 
             items.splice(pos, argChrLength, ...replaceValues);
@@ -155,16 +172,23 @@ export class EnteredInput {
     this.rightOfCursorContent = fullContent;
   }
 
-  getLeftOfCursorText(): string {
-    return this.leftOfCursorContent.map((item) => item.value).join('');
+  getLeftOfCursorText(includeArgSelectorValues: boolean = false): string {
+    return this.leftOfCursorContent
+      .map(toInputCharacterDisplayString.bind(null, includeArgSelectorValues))
+      .join('');
   }
 
-  getRightOfCursorText(): string {
-    return this.rightOfCursorContent.map((item) => item.value).join('');
+  getRightOfCursorText(includeArgSelectorValues: boolean = false): string {
+    return this.rightOfCursorContent
+      .map(toInputCharacterDisplayString.bind(null, includeArgSelectorValues))
+      .join('');
   }
 
-  getFullText(): string {
-    return this.getLeftOfCursorText() + this.getRightOfCursorText();
+  getFullText(includeArgSelectorValues: boolean = false): string {
+    return (
+      this.getLeftOfCursorText(includeArgSelectorValues) +
+      this.getRightOfCursorText(includeArgSelectorValues)
+    );
   }
 
   getLeftOfCursorRenderingContent(): ReactNode {
