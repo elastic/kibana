@@ -6,6 +6,13 @@
  * Side Public License, v 1.
  */
 
+/**
+ * This class is used to override the default behavior of the plugin system.
+ *
+ * @note this is for internal use only!
+ *
+ * @internal
+ */
 export class PluginSystemOverrides {
   /**
    * Setting this value to "true" will enable ALL plugins regardless of their
