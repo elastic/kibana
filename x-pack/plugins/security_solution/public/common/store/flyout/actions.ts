@@ -19,4 +19,5 @@ export const openSecurityFlyoutByScope = actionCreator<
   SecurityFlyoutActionWithScope<SecurityFlyout>
 >('OPEN_SECURITY_FLYOUT_BY_SCOPE');
 
-export const closeSecurityFlyoutByScope = actionCreator<SecurityFlyoutActionWithScope>('CLOSE_FLYOUT');
+export const closeSecurityFlyoutByScope =
+  actionCreator<SecurityFlyoutActionWithScope>('CLOSE_FLYOUT');

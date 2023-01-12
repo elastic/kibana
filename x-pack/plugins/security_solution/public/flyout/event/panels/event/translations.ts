@@ -67,7 +67,6 @@ export const HIGHLIGHTED_FIELDS_TITLE = i18n.translate(
   }
 );
 
-
 export const EXPAND_DETAILS = i18n.translate(
   'xpack.securitySolution.flyout.eventDetails.summaryView',
   {

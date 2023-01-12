@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiPanel } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useMemo, useState } from 'react';
 import { HeaderSection } from '../../../../common/components/header_section';

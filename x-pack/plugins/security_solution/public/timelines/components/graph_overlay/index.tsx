@@ -16,6 +16,7 @@ import {
 import { euiThemeVars } from '@kbn/ui-theme';
 import { useDispatch } from 'react-redux';
 import styled, { css } from 'styled-components';
+import { useGlobalOrTimelineFilters } from '../../../common/hooks/use_global_or_timeline_filters';
 import {
   getScopedActions,
   isActiveTimeline,
@@ -35,7 +36,6 @@ import { timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../store/timeline/defaults';
 import { dataTableSelectors } from '../../../common/store/data_table';
 import { tableDefaults } from '../../../common/store/data_table/defaults';
-import { useGlobalOrTimelineFilters } from '@kbn/security-solution-plugin/public/common/hooks/use_global_or_timeline_filters';
 
 const SESSION_VIEW_FULL_SCREEN = 'sessionViewFullScreen';
 
