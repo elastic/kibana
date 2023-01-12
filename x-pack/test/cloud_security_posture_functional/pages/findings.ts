@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import Chance from 'chance';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -14,14 +15,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const retry = getService('retry');
   const pageObjects = getPageObjects(['common', 'findings']);
+  const numberOfFindings = 10;
+  const chance = new Chance();
 
-  const data = Array.from({ length: 2 }, (_, id) => {
+  const data = Array.from({ length: numberOfFindings }, (_, id) => {
     return {
       resource: { id, name: `Resource ${id}` },
       result: { evaluation: id === 0 ? 'passed' : 'failed' },
       rule: {
         name: `Rule ${id}`,
-        section: 'Kubelet',
+        section: chance.string({ pool: 'abcdefghABCDEFGH', length: 10 }),
         tags: ['Kubernetes'],
         type: 'process',
       },
@@ -32,7 +35,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const ruleName2 = data[1].rule.name;
 
   // Failing: See https://github.com/elastic/kibana/issues/147998
-  describe.skip('Findings Page', () => {
+  describe('Findings Page', () => {
     let findings: typeof pageObjects.findings;
     let table: typeof pageObjects.findings.table;
     let distributionBar: typeof pageObjects.findings.distributionBar;
@@ -103,12 +106,30 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('Table Sort', () => {
-      it('sorts by rule name', async () => {
-        await table.toggleColumnSortOrFail('Rule', 'asc');
-      });
-
-      it('sorts by resource name', async () => {
-        await table.toggleColumnSortOrFail('Resource Name', 'desc');
+      it('sorts by a column, should be case sensitive/insensitive depending on the column', async () => {
+        type SortDirection = 'asc' | 'desc';
+        type TestCase = [string, string, SortDirection, Intl.CollatorOptions];
+        const testCases: TestCase[] = [
+          ['Rule', 'en', 'asc', {}],
+          ['Rule', 'en', 'desc', {}],
+          ['Resource Name', 'en', 'asc', {}],
+          ['Resource Name', 'en', 'desc', {}],
+          ['CIS Section', 'en', 'desc', { sensitivity: 'base' }],
+          ['CIS Section', 'en', 'desc', { sensitivity: 'base' }],
+        ];
+        for (const [columnName, locale, dir, sortingOptions] of testCases) {
+          await table.toggleColumnSort(columnName, dir);
+          const values = (await table.getColumnValues(columnName)).filter(Boolean);
+          expect(values).to.not.be.empty();
+          const sorted = values
+            .slice()
+            .sort((a, b) =>
+              dir === 'asc'
+                ? a.localeCompare(b, locale, sortingOptions)
+                : b.localeCompare(a, locale, sortingOptions)
+            );
+          values.forEach((value, i) => expect(value).to.be(sorted[i]));
+        }
       });
     });
 
