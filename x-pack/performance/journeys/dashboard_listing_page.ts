@@ -18,7 +18,7 @@ export const journey = new Journey({
     await page.goto(kbnUrl.get(`/app/dashboards`));
     await page.waitForSelector(`[data-test-subj="table-is-ready"]`);
   })
-  .step('Search dashboards page', async ({ page, inputDelays }) => {
+  .step('Search dashboards', async ({ page, inputDelays }) => {
     await page.type('[data-test-subj="tableListSearchBox"]', 'Web', {
       delay: inputDelays.TYPING,
     });
@@ -29,4 +29,13 @@ export const journey = new Journey({
     await page.click('[data-test-subj="deleteSelectedItems"]');
     await page.click('[data-test-subj="confirmModalConfirmButton"]');
     await page.waitForSelector(`[data-test-subj="table-is-ready"]`);
+  })
+  .step('Add  dashboard', async ({ page, inputDelays }) => {
+    await page.click('[data-test-subj="newItemButton"]');
+    await page.click('[data-test-subj="dashboardSaveMenuItem"]');
+    await page.type('[data-test-subj="savedObjectTitle"]', 'foobar dashboard', {
+      delay: inputDelays.TYPING,
+    });
+    await page.click('[data-test-subj="confirmSaveSavedObjectButton"]');
+    await page.locator('text="Editing foobar dashboard"');
   });
