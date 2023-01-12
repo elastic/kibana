@@ -1,0 +1,225 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import expect from '@kbn/expect';
+import { sortBy } from 'lodash';
+import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import { skipIfNoDockerRegistry } from '../../helpers';
+import { setupFleetAndAgents } from '../agents/services';
+const PACKAGE_NAME = 'input_package_upgrade';
+const START_VERSION = '1.0.0';
+const UPGRADE_VERSION = '1.1.0';
+
+const expectIdArraysEqual = (arr1: any[], arr2: any[]) => {
+  expect(sortBy(arr1, 'id')).to.eql(sortBy(arr2, 'id'));
+};
+export default function (providerContext: FtrProviderContext) {
+  const { getService } = providerContext;
+  const supertest = getService('supertest');
+  const es = getService('es');
+  const uninstallPackage = async (name: string, version: string) => {
+    await supertest.delete(`/api/fleet/epm/packages/${name}/${version}`).set('kbn-xsrf', 'xxxx');
+  };
+
+  const installPackage = async (name: string, version: string) => {
+    return await supertest
+      .post(`/api/fleet/epm/packages/${name}/${version}`)
+      .set('kbn-xsrf', 'xxxx')
+      .send({ force: true })
+      .expect(200);
+  };
+
+  const getInstallationSavedObject = async (name: string, version: string) => {
+    const res = await supertest.get(`/api/fleet/epm/packages/${name}-${version}`).expect(200);
+    return res.body.item.savedObject.attributes;
+  };
+
+  const createPackagePolicyWithDataset = async (agentPolicyId: string, dataset: string) => {
+    const policy = {
+      policy_id: agentPolicyId,
+      package: {
+        name: PACKAGE_NAME,
+        version: START_VERSION,
+      },
+      name: 'test-policy-' + dataset,
+      description: '',
+      namespace: 'default',
+      inputs: {
+        'logs-logfile': {
+          enabled: true,
+          streams: {
+            'input_package_upgrade.logs': {
+              enabled: true,
+              vars: {
+                paths: ['/tmp/test/log'],
+                tags: ['tag1'],
+                ignore_older: '72h',
+                'data_stream.dataset': dataset,
+              },
+            },
+          },
+        },
+      },
+    };
+    const res = await supertest
+      .post(`/api/fleet/package_policies`)
+      .set('kbn-xsrf', 'xxxx')
+      .send(policy)
+      .expect(200);
+
+    return res.body.item;
+  };
+
+  const deletePackagePolicy = (id: string) => {
+    return supertest
+      .delete(`/api/fleet/package_policies/${id}`)
+      .set('kbn-xsrf', 'xxxx')
+      .expect(200);
+  };
+
+  const createAgentPolicy = async (name = 'Input Package Test 1') => {
+    const res = await supertest
+      .post(`/api/fleet/agent_policies`)
+      .set('kbn-xsrf', 'xxxx')
+      .send({
+        name,
+        namespace: 'default',
+      })
+      .expect(200);
+    return res.body.item;
+  };
+
+  const deleteAgentPolicy = async (agentPolicyId: string) => {
+    if (!agentPolicyId) return;
+    return supertest
+      .post(`/api/fleet/agent_policies/delete`)
+      .set('kbn-xsrf', 'xxxx')
+      .send({ agentPolicyId });
+  };
+
+  const getComponentTemplate = async (name: string) => {
+    // use es client to get component template
+
+    try {
+      const { component_templates: templates } = await es.cluster.getComponentTemplate({ name });
+
+      return templates?.[0] || null;
+    } catch (e) {
+      if (e.statusCode === 404) {
+        return null;
+      }
+
+      throw e;
+    }
+  };
+
+  describe('Package Policy - input package behavior', async function () {
+    skipIfNoDockerRegistry(providerContext);
+
+    let agentPolicyId: string;
+    const packagePolicyIds: string[] = [];
+    before(async () => {
+      installPackage(PACKAGE_NAME, START_VERSION);
+      const agentPolicy = await createAgentPolicy();
+      agentPolicyId = agentPolicy.id;
+    });
+
+    after(async () => {
+      await deleteAgentPolicy(agentPolicyId);
+    });
+
+    setupFleetAndAgents(providerContext);
+
+    it('should not have created any ES assets on install', async () => {
+      const installation = await getInstallationSavedObject(PACKAGE_NAME, START_VERSION);
+      expect(installation.installed_es).to.eql([]);
+    });
+
+    it('should create index templates and update installed_es on package policy creation', async () => {
+      const packagePolicy = await createPackagePolicyWithDataset(agentPolicyId, 'dataset1');
+      packagePolicyIds.push(packagePolicy.id);
+      const installation = await getInstallationSavedObject(PACKAGE_NAME, START_VERSION);
+      expectIdArraysEqual(installation.installed_es, [
+        { id: 'logs-dataset1-1.0.0', type: 'ingest_pipeline' },
+        { id: 'logs-dataset1', type: 'index_template' },
+        { id: 'logs-dataset1@package', type: 'component_template' },
+        { id: 'logs-dataset1@custom', type: 'component_template' },
+      ]);
+
+      // now check the package component template was created correctly
+      const packageComponentTemplate = await getComponentTemplate('logs-dataset1@package');
+      expect(packageComponentTemplate).eql({
+        name: 'logs-dataset1@package',
+        component_template: {
+          template: {
+            settings: {
+              index: {
+                lifecycle: { name: 'logs' },
+                codec: 'best_compression',
+                default_pipeline: 'logs-dataset1-1.0.0',
+                mapping: { total_fields: { limit: '10000' } },
+              },
+            },
+            mappings: { properties: {} },
+          },
+          _meta: {
+            package: { name: 'input_package_upgrade' },
+            managed_by: 'fleet',
+            managed: true,
+          },
+        },
+      });
+    });
+
+    it('should create index templates and update installed_es on second package policy creation', async () => {
+      const packagePolicy = await createPackagePolicyWithDataset(agentPolicyId, 'dataset2');
+      packagePolicyIds.push(packagePolicy.id);
+      const installation = await getInstallationSavedObject(PACKAGE_NAME, START_VERSION);
+      expectIdArraysEqual(installation.installed_es, [
+        { id: 'logs-dataset1-1.0.0', type: 'ingest_pipeline' },
+        { id: 'logs-dataset1', type: 'index_template' },
+        { id: 'logs-dataset1@package', type: 'component_template' },
+        { id: 'logs-dataset1@custom', type: 'component_template' },
+        { id: 'logs-dataset2-1.0.0', type: 'ingest_pipeline' },
+        { id: 'logs-dataset2', type: 'index_template' },
+        { id: 'logs-dataset2@package', type: 'component_template' },
+        { id: 'logs-dataset2@custom', type: 'component_template' },
+      ]);
+    });
+
+    it('should update all index templates created by package policies when the package is upgraded', async () => {
+      // version 1.1.0 of the test package introduces elasticsearch mappings to the index
+      // templates, upgrading the package should add this field to both package component templates
+      await installPackage(PACKAGE_NAME, UPGRADE_VERSION);
+
+      const dataset1PkgComponentTemplate = await getComponentTemplate('logs-dataset1@package');
+      expect(dataset1PkgComponentTemplate).not.eql(null);
+      expect(dataset1PkgComponentTemplate!.component_template.template?.mappings?.properties).eql({
+        '@timestamp': { ignore_malformed: false, type: 'date' },
+      });
+
+      const dataset2PkgComponentTemplate = await getComponentTemplate('logs-dataset2@package');
+      expect(dataset2PkgComponentTemplate).not.eql(null);
+      expect(dataset2PkgComponentTemplate!.component_template.template?.mappings?.properties).eql({
+        '@timestamp': { ignore_malformed: false, type: 'date' },
+      });
+    });
+
+    it('should delete all index templates created by package policies when the package is uninstalled', async () => {
+      for (const packagePolicyId of packagePolicyIds) {
+        await deletePackagePolicy(packagePolicyId);
+      }
+      await deleteAgentPolicy(agentPolicyId);
+      await uninstallPackage(PACKAGE_NAME, UPGRADE_VERSION);
+
+      const dataset1PkgComponentTemplate = await getComponentTemplate('logs-dataset1@package');
+      expect(dataset1PkgComponentTemplate).eql(null);
+
+      const dataset2PkgComponentTemplate = await getComponentTemplate('logs-dataset2@package');
+      expect(dataset2PkgComponentTemplate).eql(null);
+    });
+  });
+}
