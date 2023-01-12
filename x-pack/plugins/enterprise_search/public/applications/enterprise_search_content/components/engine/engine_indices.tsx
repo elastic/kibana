@@ -13,11 +13,8 @@ import {
   EuiBasicTableColumn,
   EuiButton,
   EuiConfirmModal,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiIcon,
   EuiInMemoryTable,
-  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -28,11 +25,13 @@ import { CANCEL_BUTTON_LABEL } from '../../../shared/constants';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
-import { SEARCH_INDEX_PATH } from '../../routes';
+import { SEARCH_INDEX_PATH, EngineViewTabs } from '../../routes';
 import { IngestionMethod } from '../../types';
 import { ingestionMethodToText } from '../../utils/indices';
+import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_template';
 
 import { EngineIndicesLogic } from './engine_indices_logic';
+import { EngineViewLogic } from './engine_view_logic';
 
 const healthColorsMap = {
   green: 'success',
@@ -42,6 +41,7 @@ const healthColorsMap = {
 };
 
 export const EngineIndices: React.FC = () => {
+  const { engineName, isLoadingEngine } = useValues(EngineViewLogic);
   const { engineData } = useValues(EngineIndicesLogic);
   const { removeIndexFromEngine } = useActions(EngineIndicesLogic);
   const { navigateToUrl } = useValues(KibanaLogic);
@@ -167,65 +167,73 @@ export const EngineIndices: React.FC = () => {
     },
   ];
   return (
-    <>
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-        <EuiFlexItem />
-        <EuiFlexItem grow={false}>
+    <EnterpriseSearchEnginesPageTemplate
+      pageChrome={[engineName]}
+      pageViewTelemetry={EngineViewTabs.INDICES}
+      isLoading={isLoadingEngine}
+      pageHeader={{
+        pageTitle: i18n.translate('xpack.enterpriseSearch.content.engine.indices.pageTitle', {
+          defaultMessage: 'Indices',
+        }),
+        rightSideItems: [
           <EuiButton data-test-subj="engine-add-new-indices-btn" iconType="plusInCircle" fill>
             {i18n.translate('xpack.enterpriseSearch.content.engine.indices.addNewIndicesButton', {
               defaultMessage: 'Add new indices',
             })}
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer />
-      <EuiInMemoryTable
-        items={indices}
-        columns={columns}
-        search={{
-          box: {
-            incremental: true,
-            schema: true,
-          },
-        }}
-        pagination
-        sorting
-      />
-      {removeIndexConfirm !== null && (
-        <EuiConfirmModal
-          onCancel={() => setConfirmRemoveIndex(null)}
-          onConfirm={() => {
-            removeIndexFromEngine(removeIndexConfirm);
-            setConfirmRemoveIndex(null);
+          </EuiButton>,
+        ],
+      }}
+      engineName={engineName}
+    >
+      <>
+        <EuiInMemoryTable
+          items={indices}
+          columns={columns}
+          search={{
+            box: {
+              incremental: true,
+              schema: true,
+            },
           }}
-          title={i18n.translate(
-            'xpack.enterpriseSearch.content.engine.indices.removeIndexConfirm.title',
-            { defaultMessage: 'Remove this index from the engine' }
-          )}
-          buttonColor="danger"
-          cancelButtonText={CANCEL_BUTTON_LABEL}
-          confirmButtonText={i18n.translate(
-            'xpack.enterpriseSearch.content.engine.indices.removeIndexConfirm.text',
-            {
-              defaultMessage: 'Yes, Remove This Index',
-            }
-          )}
-          defaultFocusedButton="confirm"
-          maxWidth
-        >
-          <EuiText>
-            <p>
-              {i18n.translate(
-                'xpack.enterpriseSearch.content.engine.indices.removeIndexConfirm.description',
-                {
-                  defaultMessage:
-                    "This won't delete the index. You may add it back to this engine at a later time.",
-                }
-              )}
-            </p>
-          </EuiText>
-        </EuiConfirmModal>
-      )}
-    </>
+          pagination
+          sorting
+        />
+        {removeIndexConfirm !== null && (
+          <EuiConfirmModal
+            onCancel={() => setConfirmRemoveIndex(null)}
+            onConfirm={() => {
+              removeIndexFromEngine(removeIndexConfirm);
+              setConfirmRemoveIndex(null);
+            }}
+            title={i18n.translate(
+              'xpack.enterpriseSearch.content.engine.indices.removeIndexConfirm.title',
+              { defaultMessage: 'Remove this index from the engine' }
+            )}
+            buttonColor="danger"
+            cancelButtonText={CANCEL_BUTTON_LABEL}
+            confirmButtonText={i18n.translate(
+              'xpack.enterpriseSearch.content.engine.indices.removeIndexConfirm.text',
+              {
+                defaultMessage: 'Yes, Remove This Index',
+              }
+            )}
+            defaultFocusedButton="confirm"
+            maxWidth
+          >
+            <EuiText>
+              <p>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.engine.indices.removeIndexConfirm.description',
+                  {
+                    defaultMessage:
+                      "This won't delete the index. You may add it back to this engine at a later time.",
+                  }
+                )}
+              </p>
+            </EuiText>
+          </EuiConfirmModal>
+        )}
+      </>
+    </EnterpriseSearchEnginesPageTemplate>
   );
 };
