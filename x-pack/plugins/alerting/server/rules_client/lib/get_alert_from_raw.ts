@@ -158,11 +158,14 @@ export function getPartialRuleFromRaw<Params extends RuleTypeParams>(
 
   // Need the `rule` object to build a URL
   if (!excludeFromPublicApi) {
-    (rule as PartialRule<Params>).viewInAppRelativeUrl = buildViewInAppRelativeUrl({
+    const viewInAppRelativeUrl = buildViewInAppRelativeUrl({
       spaceId: context.spaceId,
       opts: { rule: rule as Rule<Params> },
       getViewInAppUrl: ruleType.getViewInAppUrl,
     });
+    if (viewInAppRelativeUrl) {
+      (rule as PartialRule<Params>).viewInAppRelativeUrl = viewInAppRelativeUrl;
+    }
   }
 
   return includeLegacyId
