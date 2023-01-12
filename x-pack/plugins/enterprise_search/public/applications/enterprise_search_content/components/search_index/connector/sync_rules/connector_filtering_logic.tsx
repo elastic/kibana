@@ -9,10 +9,6 @@ import { kea, MakeLogicType } from 'kea';
 
 import { isEqual } from 'lodash';
 
-import { v4 as uuidv4 } from 'uuid';
-
-import { i18n } from '@kbn/i18n';
-
 import { Status } from '../../../../../../../common/types/api';
 
 import {
@@ -24,11 +20,7 @@ import {
   FilteringValidationState,
 } from '../../../../../../../common/types/connectors';
 import { Actions } from '../../../../../shared/api_logic/create_api_logic';
-import {
-  flashAPIErrors,
-  flashSuccessToast,
-  clearFlashMessages,
-} from '../../../../../shared/flash_messages';
+import { clearFlashMessages } from '../../../../../shared/flash_messages';
 import {
   ConnectorFilteringApiLogic,
   PutConnectorFilteringArgs,
@@ -48,7 +40,7 @@ import { isConnectorIndex } from '../../../../utils/indices';
 
 type ConnectorFilteringActions = Pick<
   Actions<PutConnectorFilteringArgs, PutConnectorFilteringResponse>,
-  'apiError' | 'apiSuccess' | 'makeRequest'
+  'apiSuccess' | 'makeRequest'
 > & {
   addFilteringRule(filteringRule: FilteringRule): FilteringRule;
   applyDraft: () => void;
@@ -97,6 +89,20 @@ interface ConnectorFilteringValues {
   status: Status;
 }
 
+function createDefaultRule(order: number) {
+  const now = new Date().toISOString();
+  return {
+    created_at: now,
+    field: '_',
+    id: 'DEFAULT',
+    order,
+    policy: FilteringPolicy.INCLUDE,
+    rule: FilteringRuleRule.REGEX,
+    updated_at: now,
+    value: '.*',
+  };
+}
+
 export const ConnectorFilteringLogic = kea<
   MakeLogicType<ConnectorFilteringValues, ConnectorFilteringActions>
 >({
@@ -122,7 +128,7 @@ export const ConnectorFilteringLogic = kea<
   connect: {
     actions: [
       ConnectorFilteringApiLogic,
-      ['apiError', 'apiSuccess', 'makeRequest'],
+      ['apiSuccess', 'makeRequest'],
       ConnectorFilteringDraftApiLogic,
       [
         'apiError as draftApiError',
@@ -141,15 +147,6 @@ export const ConnectorFilteringLogic = kea<
       ),
   }),
   listeners: ({ actions, values }) => ({
-    apiError: (error) => flashAPIErrors(error),
-    apiSuccess: () => {
-      flashSuccessToast(
-        i18n.translate(
-          'xpack.enterpriseSearch.content.index.connector.filtering.successToastRules.title',
-          { defaultMessage: 'Sync rules updated' }
-        )
-      );
-    },
     applyDraft: () => {
       if (isConnectorIndex(values.index)) {
         actions.makeRequest({
@@ -159,16 +156,6 @@ export const ConnectorFilteringLogic = kea<
         });
       }
     },
-    draftApiError: (error) => flashAPIErrors(error),
-    draftApiSuccess: () => {
-      flashSuccessToast(
-        i18n.translate(
-          'xpack.enterpriseSearch.content.index.connector.syncRules.successToastDraft.title',
-          { defaultMessage: 'Draft rules saved' }
-        )
-      );
-    },
-    draftMakeRequest: () => clearFlashMessages(),
     fetchIndexApiSuccess: (index) => {
       if (
         !values.isEditing &&
@@ -255,19 +242,7 @@ export const ConnectorFilteringLogic = kea<
                 filteringRule,
                 filteringRules[filteringRules.length - 1],
               ]
-            : [
-                filteringRule,
-                {
-                  created_at: new Date().toISOString(),
-                  field: '_',
-                  id: uuidv4(),
-                  order: 0,
-                  policy: FilteringPolicy.INCLUDE,
-                  rule: FilteringRuleRule.REGEX,
-                  updated_at: new Date().toISOString(),
-                  value: '.*',
-                },
-              ];
+            : [filteringRule, createDefaultRule(1)];
           return newFilteringRules.map((rule, index) => ({ ...rule, order: index }));
         },
         deleteFilteringRule: (filteringRules, filteringRule) =>
@@ -275,16 +250,7 @@ export const ConnectorFilteringLogic = kea<
         reorderFilteringRules: (filteringRules, newFilteringRules) => {
           const lastItem = filteringRules.length
             ? filteringRules[filteringRules.length - 1]
-            : {
-                created_at: new Date().toISOString(),
-                field: '_',
-                id: uuidv4(),
-                order: 0,
-                policy: FilteringPolicy.INCLUDE,
-                rule: FilteringRuleRule.REGEX,
-                updated_at: new Date().toISOString(),
-                value: '.*',
-              };
+            : createDefaultRule(0);
           return [...newFilteringRules, lastItem].map((rule, index) => ({ ...rule, order: index }));
         },
         setLocalFilteringRules: (_, filteringRules) => filteringRules,

@@ -22,15 +22,15 @@ import {
   ALERT_RULE_TYPE,
   ALERT_RULE_NOTE,
   ALERT_RULE_PARAMETERS,
+  ALERT_RULE_CREATED_BY,
   ALERT_SUPPRESSION_START,
   ALERT_SUPPRESSION_END,
   ALERT_SUPPRESSION_DOCS_COUNT,
   ALERT_SUPPRESSION_TERMS,
 } from '@kbn/rule-data-utils';
 
-import type { TGridModel } from '@kbn/timelines-plugin/public';
-
 import { lastValueFrom } from 'rxjs';
+import type { DataTableModel } from '../../../common/store/data_table/types';
 import {
   ALERT_ORIGINAL_TIME,
   ALERT_GROUP_ID,
@@ -448,7 +448,7 @@ const createThresholdTimeline = async (
     filters?: Filter[];
     query?: string;
     dataProviders?: DataProvider[];
-    columns?: TGridModel['columns'];
+    columns?: DataTableModel['columns'];
   },
   getExceptionFilter: GetExceptionFilter
 ) => {
@@ -474,6 +474,7 @@ const createThresholdTimeline = async (
 
     const alertDoc = formattedAlertData[0];
     const params = getField(alertDoc, ALERT_RULE_PARAMETERS);
+    const ruleAuthor = getField(alertDoc, ALERT_RULE_CREATED_BY);
     const filters: Filter[] =
       (params as MightHaveFilters).filters ??
       (alertDoc.signal?.rule as MightHaveFilters)?.filters ??
@@ -522,6 +523,7 @@ const createThresholdTimeline = async (
       },
       to: thresholdTo,
       ruleNote: noteContent,
+      ruleAuthor,
     });
   } catch (error) {
     const { toasts } = KibanaServices.get().notifications;
@@ -603,7 +605,7 @@ const createNewTermsTimeline = async (
     filters?: Filter[];
     query?: string;
     dataProviders?: DataProvider[];
-    columns?: TGridModel['columns'];
+    columns?: DataTableModel['columns'];
   },
   getExceptionFilter: GetExceptionFilter
 ) => {
@@ -722,18 +724,32 @@ const getSuppressedAlertData = (ecsData: Ecs | Ecs[]) => {
   );
   const dataProviderPartials = terms.map((term) => {
     const fieldId = term.field.replace('.', '-');
-    return {
-      id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-${fieldId}-${term.value}`,
-      name: fieldId,
-      enabled: true,
-      excluded: false,
-      kqlQuery: '',
-      queryMatch: {
-        field: term.field,
-        value: term.value,
-        operator: ':' as const,
-      },
-    };
+    const id = `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-${fieldId}-${term.value}`;
+    return term.value == null
+      ? {
+          id,
+          name: fieldId,
+          enabled: true,
+          excluded: true,
+          kqlQuery: '',
+          queryMatch: {
+            field: term.field,
+            value: '',
+            operator: ':*' as const,
+          },
+        }
+      : {
+          id,
+          name: fieldId,
+          enabled: true,
+          excluded: false,
+          kqlQuery: '',
+          queryMatch: {
+            field: term.field,
+            value: term.value,
+            operator: ':' as const,
+          },
+        };
   });
   const dataProvider = {
     ...dataProviderPartials[0],
@@ -754,7 +770,7 @@ const createSuppressedTimeline = async (
     filters?: Filter[];
     query?: string;
     dataProviders?: DataProvider[];
-    columns?: TGridModel['columns'];
+    columns?: DataTableModel['columns'];
   },
   getExceptionFilter: GetExceptionFilter
 ) => {
@@ -927,6 +943,7 @@ export const sendAlertToTimelineAction = async ({
 
   const ecsData: Ecs = Array.isArray(ecs) ? ecs[0] : ecs;
   const ruleNote = getField(ecsData, ALERT_RULE_NOTE);
+  const ruleAuthor = getField(ecsData, ALERT_RULE_CREATED_BY);
   const noteContent = Array.isArray(ruleNote) && ruleNote.length > 0 ? ruleNote[0] : '';
   const ruleTimelineId = getField(ecsData, ALERT_RULE_TIMELINE_ID);
   const timelineId = !isEmpty(ruleTimelineId)
@@ -1049,6 +1066,7 @@ export const sendAlertToTimelineAction = async ({
             },
             to,
             ruleNote: noteContent,
+            ruleAuthor,
             notes: notes ?? null,
           });
         }
@@ -1114,6 +1132,7 @@ export const sendAlertToTimelineAction = async ({
       },
       to,
       ruleNote: noteContent,
+      ruleAuthor,
     });
   }
 };

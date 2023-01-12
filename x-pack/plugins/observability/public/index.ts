@@ -47,6 +47,7 @@ export * from './components/shared/action_menu';
 
 export type { UXMetrics } from './components/shared/core_web_vitals';
 export { DatePickerContextProvider } from './context/date_picker_context';
+
 export {
   getCoreVitalsComponent,
   HeaderMenuPortal,
@@ -57,6 +58,7 @@ export {
   ExploratoryView,
   DatePicker,
   LoadWhenInView,
+  ObservabilityAlertSearchBar,
 } from './components/shared';
 
 export type { LazyObservabilityPageTemplateProps } from './components/shared';

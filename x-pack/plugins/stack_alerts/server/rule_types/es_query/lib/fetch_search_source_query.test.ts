@@ -38,6 +38,9 @@ const defaultParams: OnlySearchSourceRuleParams = {
   searchConfiguration: {},
   searchType: 'searchSource',
   excludeHitsFromPreviousRun: true,
+  aggType: 'count',
+  groupBy: 'all',
+  timeField: 'time',
 };
 
 describe('fetchSearchSourceQuery', () => {
@@ -61,10 +64,12 @@ describe('fetchSearchSourceQuery', () => {
 
       const { searchSource, dateStart, dateEnd } = updateSearchSource(
         searchSourceInstance,
+        dataViewMock,
         params,
         undefined
       );
       const searchRequest = searchSource.getSearchRequestBody();
+      expect(searchRequest.size).toMatchInlineSnapshot(`100`);
       expect(searchRequest.query).toMatchInlineSnapshot(`
         Object {
           "bool": Object {
@@ -85,6 +90,7 @@ describe('fetchSearchSourceQuery', () => {
           },
         }
       `);
+      expect(searchRequest.aggs).toMatchInlineSnapshot(`Object {}`);
       expect(dateStart).toMatch('2020-02-09T23:10:41.941Z');
       expect(dateEnd).toMatch('2020-02-09T23:15:41.941Z');
     });
@@ -96,10 +102,12 @@ describe('fetchSearchSourceQuery', () => {
 
       const { searchSource } = updateSearchSource(
         searchSourceInstance,
+        dataViewMock,
         params,
         '2020-02-09T23:12:41.941Z'
       );
       const searchRequest = searchSource.getSearchRequestBody();
+      expect(searchRequest.size).toMatchInlineSnapshot(`100`);
       expect(searchRequest.query).toMatchInlineSnapshot(`
         Object {
           "bool": Object {
@@ -127,6 +135,7 @@ describe('fetchSearchSourceQuery', () => {
           },
         }
       `);
+      expect(searchRequest.aggs).toMatchInlineSnapshot(`Object {}`);
     });
 
     it('with latest timestamp in before the given time range ', async () => {
@@ -136,10 +145,12 @@ describe('fetchSearchSourceQuery', () => {
 
       const { searchSource } = updateSearchSource(
         searchSourceInstance,
+        dataViewMock,
         params,
         '2020-01-09T22:12:41.941Z'
       );
       const searchRequest = searchSource.getSearchRequestBody();
+      expect(searchRequest.size).toMatchInlineSnapshot(`100`);
       expect(searchRequest.query).toMatchInlineSnapshot(`
         Object {
           "bool": Object {
@@ -160,6 +171,7 @@ describe('fetchSearchSourceQuery', () => {
           },
         }
       `);
+      expect(searchRequest.aggs).toMatchInlineSnapshot(`Object {}`);
     });
 
     it('does not add time range if excludeHitsFromPreviousRun is false', async () => {
@@ -169,10 +181,12 @@ describe('fetchSearchSourceQuery', () => {
 
       const { searchSource } = updateSearchSource(
         searchSourceInstance,
+        dataViewMock,
         params,
         '2020-02-09T23:12:41.941Z'
       );
       const searchRequest = searchSource.getSearchRequestBody();
+      expect(searchRequest.size).toMatchInlineSnapshot(`100`);
       expect(searchRequest.query).toMatchInlineSnapshot(`
         Object {
           "bool": Object {
@@ -190,6 +204,78 @@ describe('fetchSearchSourceQuery', () => {
             "must": Array [],
             "must_not": Array [],
             "should": Array [],
+          },
+        }
+      `);
+      expect(searchRequest.aggs).toMatchInlineSnapshot(`Object {}`);
+    });
+
+    it('should set size: 0 and top hits size to size parameter if grouping alerts', async () => {
+      const params = {
+        ...defaultParams,
+        excludeHitsFromPreviousRun: false,
+        groupBy: 'top',
+        termField: 'host.name',
+        termSize: 10,
+      };
+
+      const searchSourceInstance = createSearchSourceMock({ index: dataViewMock });
+
+      const { searchSource } = updateSearchSource(
+        searchSourceInstance,
+        dataViewMock,
+        params,
+        '2020-02-09T23:12:41.941Z'
+      );
+      const searchRequest = searchSource.getSearchRequestBody();
+      expect(searchRequest.size).toMatchInlineSnapshot(`0`);
+      expect(searchRequest.query).toMatchInlineSnapshot(`
+        Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "range": Object {
+                  "time": Object {
+                    "format": "strict_date_optional_time",
+                    "gte": "2020-02-09T23:10:41.941Z",
+                    "lte": "2020-02-09T23:15:41.941Z",
+                  },
+                },
+              },
+            ],
+            "must": Array [],
+            "must_not": Array [],
+            "should": Array [],
+          },
+        }
+      `);
+      expect(searchRequest.aggs).toMatchInlineSnapshot(`
+        Object {
+          "groupAgg": Object {
+            "aggs": Object {
+              "conditionSelector": Object {
+                "bucket_selector": Object {
+                  "buckets_path": Object {
+                    "compareValue": "_count",
+                  },
+                  "script": "params.compareValue < 0L",
+                },
+              },
+              "topHitsAgg": Object {
+                "top_hits": Object {
+                  "size": 100,
+                },
+              },
+            },
+            "terms": Object {
+              "field": "host.name",
+              "size": 10,
+            },
+          },
+          "groupAggCount": Object {
+            "stats_bucket": Object {
+              "buckets_path": "groupAgg._count",
+            },
           },
         }
       `);

@@ -147,7 +147,7 @@ describe('fleet usage telemetry', () => {
         },
         {
           create: {
-            _id: 'inactive',
+            _id: 'unenrolled',
           },
         },
         {
@@ -175,6 +175,32 @@ describe('fleet usage telemetry', () => {
             },
           },
         },
+      },
+      refresh: 'wait_for',
+    });
+
+    await esClient.create({
+      index: 'logs-elastic_agent-default',
+      id: 'log1',
+      body: {
+        log: {
+          level: 'error',
+        },
+        '@timestamp': new Date().toISOString(),
+        message: 'stderr panic close of closed channel',
+      },
+      refresh: 'wait_for',
+    });
+
+    await esClient.create({
+      index: 'logs-elastic_agent.fleet_server-default',
+      id: 'log2',
+      body: {
+        log: {
+          level: 'error',
+        },
+        '@timestamp': new Date().toISOString(),
+        message: 'failed to unenroll offline agents',
       },
       refresh: 'wait_for',
     });
@@ -225,6 +251,8 @@ describe('fleet usage telemetry', () => {
           total_enrolled: 2,
           healthy: 0,
           unhealthy: 0,
+          inactive: 0,
+          unenrolled: 1,
           offline: 2,
           total_all_statuses: 3,
           updating: 0,
@@ -239,7 +267,10 @@ describe('fleet usage telemetry', () => {
           num_host_urls: 0,
         },
         packages: [],
-        agent_versions: ['8.5.1', '8.6.0'],
+        agents_per_version: [
+          { version: '8.5.1', count: 1 },
+          { version: '8.6.0', count: 1 },
+        ],
         agent_checkin_status: { error: 1, degraded: 1 },
         agents_per_policy: [2],
         fleet_server_config: {
@@ -255,6 +286,8 @@ describe('fleet usage telemetry', () => {
           ],
         },
         agent_policies: { count: 3, output_types: ['elasticsearch'] },
+        agent_logs_top_errors: ['stderr panic close of closed channel'],
+        fleet_server_logs_top_errors: ['failed to unenroll offline agents'],
       })
     );
   });

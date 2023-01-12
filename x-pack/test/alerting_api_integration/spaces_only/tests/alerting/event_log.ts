@@ -7,14 +7,9 @@
 
 import expect from '@kbn/expect';
 import { IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
+import { ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
 import { Spaces } from '../../scenarios';
-import {
-  getUrlPrefix,
-  getTestRuleData,
-  ObjectRemover,
-  getEventLog,
-  ESTestIndexTool,
-} from '../../../common/lib';
+import { getUrlPrefix, getTestRuleData, ObjectRemover, getEventLog } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -529,6 +524,153 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             numNewAlerts: 0,
             numRecoveredAlerts: 0,
           });
+        });
+
+        it('should generate expected events for flapping alerts that are mainly active', async () => {
+          const { body: createdAction } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'MY action',
+              connector_type_id: 'test.noop',
+              config: {},
+              secrets: {},
+            })
+            .expect(200);
+
+          // pattern of when the alert should fire
+          const instance = [true, false, true, false].concat(new Array(22).fill(true));
+          const pattern = {
+            instance,
+          };
+
+          const response = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+            .set('kbn-xsrf', 'foo')
+            .send(
+              getTestRuleData({
+                rule_type_id: 'test.patternFiring',
+                schedule: { interval: '1s' },
+                throttle: null,
+                params: {
+                  pattern,
+                },
+                actions: [
+                  {
+                    id: createdAction.id,
+                    group: 'default',
+                    params: {},
+                  },
+                ],
+              })
+            );
+
+          expect(response.status).to.eql(200);
+          const alertId = response.body.id;
+          objectRemover.add(space.id, alertId, 'rule', 'alerting');
+
+          // get the events we're expecting
+          const events = await retry.try(async () => {
+            return await getEventLog({
+              getService,
+              spaceId: space.id,
+              type: 'alert',
+              id: alertId,
+              provider: 'alerting',
+              actions: new Map([
+                // make sure the counts of the # of events per type are as expected
+                ['execute-start', { gte: 25 }],
+                ['execute', { gte: 25 }],
+                ['execute-action', { equal: 23 }],
+                ['new-instance', { equal: 3 }],
+                ['active-instance', { gte: 23 }],
+                ['recovered-instance', { equal: 2 }],
+              ]),
+            });
+          });
+
+          const flapping = events
+            .filter(
+              (event) =>
+                event?.event?.action === 'active-instance' ||
+                event?.event?.action === 'recovered-instance'
+            )
+            .map((event) => event?.kibana?.alert?.flapping);
+          const result = [false, false, false].concat(new Array(21).fill(true)).concat([false]);
+          expect(flapping).to.eql(result);
+        });
+
+        it('should generate expected events for flapping alerts that are mainly recovered', async () => {
+          const { body: createdAction } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'MY action',
+              connector_type_id: 'test.noop',
+              config: {},
+              secrets: {},
+            })
+            .expect(200);
+
+          // pattern of when the alert should fire
+          const instance = [true, false, true].concat(new Array(18).fill(false)).concat(true);
+          const pattern = {
+            instance,
+          };
+
+          const response = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+            .set('kbn-xsrf', 'foo')
+            .send(
+              getTestRuleData({
+                rule_type_id: 'test.patternFiring',
+                schedule: { interval: '1s' },
+                throttle: null,
+                params: {
+                  pattern,
+                },
+                actions: [
+                  {
+                    id: createdAction.id,
+                    group: 'default',
+                    params: {},
+                  },
+                ],
+              })
+            );
+
+          expect(response.status).to.eql(200);
+          const alertId = response.body.id;
+          objectRemover.add(space.id, alertId, 'rule', 'alerting');
+
+          // get the events we're expecting
+          const events = await retry.try(async () => {
+            return await getEventLog({
+              getService,
+              spaceId: space.id,
+              type: 'alert',
+              id: alertId,
+              provider: 'alerting',
+              actions: new Map([
+                // make sure the counts of the # of events per type are as expected
+                ['execute-start', { gte: 20 }],
+                ['execute', { gte: 20 }],
+                ['execute-action', { equal: 3 }],
+                ['new-instance', { equal: 3 }],
+                ['active-instance', { gte: 3 }],
+                ['recovered-instance', { equal: 3 }],
+              ]),
+            });
+          });
+
+          const flapping = events
+            .filter(
+              (event) =>
+                event?.event?.action === 'active-instance' ||
+                event?.event?.action === 'recovered-instance'
+            )
+            .map((event) => event?.kibana?.alert?.flapping);
+          expect(flapping).to.eql([false, false, false, true, false, false]);
         });
       });
     }

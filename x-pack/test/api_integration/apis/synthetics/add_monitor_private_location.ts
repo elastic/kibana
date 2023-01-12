@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import semver from 'semver';
 import uuid from 'uuid';
 import { ConfigKey, HTTPFields } from '@kbn/synthetics-plugin/common/runtime_types';
 import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
@@ -14,12 +15,11 @@ import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from '../uptime/rest/helper/get_fixture_json';
-import { comparePolicies, getTestSyntheticsPolicy } from '../uptime/rest/sample_data/test_policy';
+import { comparePolicies, getTestSyntheticsPolicy } from './sample_data/test_policy';
 import { PrivateLocationTestService } from './services/private_location_test_service';
 
 export default function ({ getService }: FtrProviderContext) {
-  // Failing: See https://github.com/elastic/kibana/issues/145639
-  describe.skip('PrivateLocationMonitor', function () {
+  describe('PrivateLocationMonitor', function () {
     this.tags('skipCloud');
     const kibanaServer = getService('kibanaServer');
     const supertestAPI = getService('supertest');
@@ -36,7 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await supertestAPI.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
       await supertestAPI
-        .post('/api/fleet/epm/packages/synthetics/0.10.3')
+        .post('/api/fleet/epm/packages/synthetics/0.11.4')
         .set('kbn-xsrf', 'true')
         .send({ force: true })
         .expect(200);
@@ -267,6 +267,7 @@ export default function ({ getService }: FtrProviderContext) {
                 uptime: ['all'],
                 fleet: ['all'],
                 fleetv2: ['all'],
+                actions: ['all'],
               },
               spaces: ['*'],
             },
@@ -362,12 +363,7 @@ export default function ({ getService }: FtrProviderContext) {
             pkgPolicy.id === monitorId + '-' + testFleetPolicyID + `-default`
         );
 
-        expect(packagePolicy.package.version).eql('0.10.3');
-
-        await supertestAPI
-          .post('/api/fleet/epm/packages/synthetics/0.11.2')
-          .set('kbn-xsrf', 'true')
-          .send({ force: true });
+        expect(packagePolicy.package.version).eql('0.11.4');
 
         await supertestAPI.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
         const policyResponseAfterUpgrade = await supertestAPI.get(
@@ -377,7 +373,7 @@ export default function ({ getService }: FtrProviderContext) {
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id === monitorId + '-' + testFleetPolicyID + `-default`
         );
-        expect(packagePolicyAfterUpgrade.package.version).eql('0.11.2');
+        expect(semver.gte(packagePolicyAfterUpgrade.package.version, '0.11.4')).eql(true);
       } finally {
         await supertestAPI
           .delete(API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)

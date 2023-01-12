@@ -343,7 +343,12 @@ export function LayerPanel(
           isOnlyLayer,
           isTextBasedLanguage,
           hasLayerSettings: Boolean(
-            activeVisualization.renderLayerSettings ||
+            (activeVisualization.hasLayerSettings?.({
+              layerId,
+              state: visualizationState,
+              frame: props.framePublicAPI,
+            }) &&
+              activeVisualization.renderLayerSettings) ||
               (layerDatasource?.renderLayerSettings && DISPLAY_RANDOM_SAMPLING_SETTINGS)
           ),
           openLayerSettings: () => setPanelSettingsOpen(true),
@@ -356,11 +361,12 @@ export function LayerPanel(
       core,
       isOnlyLayer,
       isTextBasedLanguage,
-      layerDatasource,
+      layerDatasource?.renderLayerSettings,
       layerId,
       layerIndex,
       onCloneLayer,
       onRemoveLayer,
+      props.framePublicAPI,
       updateVisualization,
       visualizationState,
     ]
@@ -560,7 +566,8 @@ export function LayerPanel(
                                     layerDatasourceState,
                                     dataViews.indexPatterns,
                                     layerId,
-                                    columnId
+                                    columnId,
+                                    dateRange
                                   )
                                 }
                               >
