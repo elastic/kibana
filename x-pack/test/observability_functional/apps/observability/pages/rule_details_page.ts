@@ -141,6 +141,12 @@ export default ({ getService }: FtrProviderContext) => {
         const ruleType = await testSubjects.getVisibleText('ruleSummaryRuleType');
         expect(ruleType).to.be('Log threshold');
       });
+    });
+
+    describe('Alert summary widget component', () => {
+      before(async () => {
+        await observability.alerts.common.navigateToRuleDetailsByRuleId(uptimeRuleId);
+      });
 
       it('shows alert summary widget component in the rule summary', async () => {
         await observability.components.alertSummaryWidget.getCompactComponentSelectorOrFail();
