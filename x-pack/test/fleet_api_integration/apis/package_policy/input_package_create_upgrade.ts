@@ -37,8 +37,14 @@ export default function (providerContext: FtrProviderContext) {
     return res.body.item.savedObject.attributes;
   };
 
-  const createPackagePolicyWithDataset = async (agentPolicyId: string, dataset: string) => {
+  const createPackagePolicyWithDataset = async (
+    agentPolicyId: string,
+    dataset: string,
+    expectStatusCode = 200,
+    force = false
+  ) => {
     const policy = {
+      force,
       policy_id: agentPolicyId,
       package: {
         name: PACKAGE_NAME,
@@ -68,7 +74,7 @@ export default function (providerContext: FtrProviderContext) {
       .post(`/api/fleet/package_policies`)
       .set('kbn-xsrf', 'xxxx')
       .send(policy)
-      .expect(200);
+      .expect(expectStatusCode);
 
     return res.body.item;
   };
@@ -80,7 +86,7 @@ export default function (providerContext: FtrProviderContext) {
       .expect(200);
   };
 
-  const createAgentPolicy = async (name = 'Input Package Test 1') => {
+  const createAgentPolicy = async (name = 'Input Package Test 3') => {
     const res = await supertest
       .post(`/api/fleet/agent_policies`)
       .set('kbn-xsrf', 'xxxx')
@@ -116,6 +122,46 @@ export default function (providerContext: FtrProviderContext) {
     }
   };
 
+  const createFakeFleetDataStream = async (dataset: string, pkgName = PACKAGE_NAME) => {
+    const templateName = `logs-${dataset}`;
+    const indexName = `logs-${dataset}-default`;
+    const template = {
+      name: templateName,
+      index_patterns: [`${templateName}-*`],
+      priority: 200,
+      _meta: {
+        package: {
+          name: pkgName,
+        },
+        managed_by: 'fleet',
+        managed: true,
+      },
+      data_stream: {},
+      template: {
+        settings: {
+          number_of_shards: 1,
+        },
+        mappings: {
+          properties: {},
+        },
+      },
+    };
+    const templateRes = await es.indices.putIndexTemplate(template);
+
+    const indexRes = await es.index({
+      index: indexName,
+      body: {
+        '@timestamp': new Date().toISOString(),
+        message: 'test',
+      },
+    });
+  };
+
+  const deleteDataStream = async (streamName: string) => {
+    const deleteDSRes = await es.indices.deleteDataStream({ name: streamName + '-default' });
+    const deleteTemplateRes = await es.indices.deleteIndexTemplate({ name: streamName });
+  };
+
   describe('Package Policy - input package behavior', async function () {
     skipIfNoDockerRegistry(providerContext);
 
@@ -130,7 +176,6 @@ export default function (providerContext: FtrProviderContext) {
     after(async () => {
       await deleteAgentPolicy(agentPolicyId);
     });
-
     setupFleetAndAgents(providerContext);
 
     it('should not have created any ES assets on install', async () => {
@@ -188,6 +233,54 @@ export default function (providerContext: FtrProviderContext) {
         { id: 'logs-dataset2@package', type: 'component_template' },
         { id: 'logs-dataset2@custom', type: 'component_template' },
       ]);
+    });
+
+    it('should allow data to be sent to existing stream if owned by package and should not create templates', async () => {
+      await createFakeFleetDataStream('dataset3');
+
+      const packagePolicy = await createPackagePolicyWithDataset(agentPolicyId, 'dataset3');
+      packagePolicyIds.push(packagePolicy.id);
+      const installation = await getInstallationSavedObject(PACKAGE_NAME, START_VERSION);
+      expectIdArraysEqual(installation.installed_es, [
+        { id: 'logs-dataset1-1.0.0', type: 'ingest_pipeline' },
+        { id: 'logs-dataset1', type: 'index_template' },
+        { id: 'logs-dataset1@package', type: 'component_template' },
+        { id: 'logs-dataset1@custom', type: 'component_template' },
+        { id: 'logs-dataset2-1.0.0', type: 'ingest_pipeline' },
+        { id: 'logs-dataset2', type: 'index_template' },
+        { id: 'logs-dataset2@package', type: 'component_template' },
+        { id: 'logs-dataset2@custom', type: 'component_template' },
+      ]);
+
+      const dataset3PkgComponentTemplate = await getComponentTemplate('logs-dataset3@package');
+      expect(dataset3PkgComponentTemplate).eql(null);
+
+      await deleteDataStream('logs-dataset3');
+    });
+
+    it('should not allow data to be sent to existing stream if not owned by package', async () => {
+      await createFakeFleetDataStream('dataset4', 'different_package');
+
+      const expectedStatusCode = 400;
+      await createPackagePolicyWithDataset(agentPolicyId, 'dataset4', expectedStatusCode);
+
+      const dataset4PkgComponentTemplate = await getComponentTemplate('logs-dataset4@package');
+      expect(dataset4PkgComponentTemplate).eql(null);
+
+      await deleteDataStream('logs-dataset4');
+    });
+
+    it('should allow data to be sent to existing stream if not owned by package if force flag provided', async () => {
+      await createFakeFleetDataStream('dataset5', 'different_package');
+
+      const expectedStatusCode = 200;
+      const force = true;
+      await createPackagePolicyWithDataset(agentPolicyId, 'dataset5', expectedStatusCode, force);
+
+      const dataset4PkgComponentTemplate = await getComponentTemplate('logs-dataset5@package');
+      expect(dataset4PkgComponentTemplate).eql(null);
+
+      await deleteDataStream('logs-dataset5');
     });
 
     it('should update all index templates created by package policies when the package is upgraded', async () => {
