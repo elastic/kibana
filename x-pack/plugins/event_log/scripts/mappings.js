@@ -187,17 +187,21 @@ exports.EcsCustomPropertyMappings = {
       version: {
         type: 'version',
       },
-    },
-  },
-  action: {
-    properties: {
-      name: {
-        ignore_above: 1024,
-        type: 'keyword',
-      },
-      uuid: {
-        ignore_above: 1024,
-        type: 'keyword',
+      action: {
+        properties: {
+          name: {
+            ignore_above: 1024,
+            type: 'keyword',
+          },
+          execution: {
+            properties: {
+              uuid: {
+                ignore_above: 1024,
+                type: 'keyword',
+              },
+            },
+          },
+        },
       },
     },
   },
@@ -219,7 +223,6 @@ exports.EcsPropertiesToGenerate = [
   'rule',
   'user.name',
   'kibana',
-  'action',
 ];
 
 /**

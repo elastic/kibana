@@ -12,9 +12,9 @@ export function getFormattedSuccessRatio(successRatio: number) {
   return `${formatted}%`;
 }
 
-export function getFormattedDuration(value: number) {
+export function getFormattedDuration(value: number, includeMs: boolean = false) {
   if (!value) {
-    return '00:00';
+    return includeMs ? '00:00:00' : '00:00';
   }
 
   const duration = moment.duration(value);
@@ -30,7 +30,10 @@ export function getFormattedDuration(value: number) {
     }
   }
 
-  return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  const formattedDuration = `${minutes.toString().padStart(2, '0')}:${seconds
+    .toString()
+    .padStart(2, '0')}`;
+  return includeMs ? `${formattedDuration}:${ms.toString().padStart(2, '0')}` : formattedDuration;
 }
 
 export function getFormattedMilliseconds(value: number) {

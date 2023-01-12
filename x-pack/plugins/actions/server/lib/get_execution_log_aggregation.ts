@@ -17,7 +17,7 @@ const DEFAULT_MAX_BUCKETS_LIMIT = 1000; // do not retrieve more than this number
 const DEFAULT_MAX_KPI_BUCKETS_LIMIT = 10000;
 
 const SPACE_ID_FIELD = 'kibana.space_ids';
-const ACTION_NAME_FIELD = 'action.name';
+const ACTION_NAME_FIELD = 'kibana.action.name';
 const START_FIELD = 'event.start';
 const ACTION_FIELD = 'event.action';
 const OUTCOME_FIELD = 'event.outcome';
@@ -26,7 +26,7 @@ const MESSAGE_FIELD = 'message';
 const VERSION_FIELD = 'kibana.version';
 const ERROR_MESSAGE_FIELD = 'error.message';
 const SCHEDULE_DELAY_FIELD = 'kibana.task.schedule_delay';
-const EXECUTION_UUID_FIELD = 'action.uuid';
+const EXECUTION_UUID_FIELD = 'kibana.action.execution.uuid';
 
 const Millis2Nanos = 1000 * 1000;
 
@@ -98,11 +98,7 @@ export const getExecutionKPIAggregation = (filter?: IExecutionLogAggOptions['fil
 
   return {
     executionKpiAgg: {
-      filter: {
-        bool: {
-          ...(dslFilterQuery ? { filter: dslFilterQuery } : {}),
-        },
-      },
+      ...(dslFilterQuery ? { filter: { bool: { filter: dslFilterQuery } } } : {}),
       aggs: {
         executionUuid: {
           // Bucket by execution UUID
@@ -194,11 +190,7 @@ export function getExecutionLogAggregation({
 
   return {
     executionLogAgg: {
-      filter: {
-        bool: {
-          ...(dslFilterQuery ? { filter: dslFilterQuery } : {}),
-        },
-      },
+      ...(dslFilterQuery ? { filter: { bool: { filter: dslFilterQuery } } } : {}),
       aggs: {
         // Get total number of executions
         executionUuidCardinality: {

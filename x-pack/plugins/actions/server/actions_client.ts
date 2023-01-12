@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import uuid from 'uuid';
 import Boom from '@hapi/boom';
 import url from 'url';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -675,12 +676,15 @@ export class ActionsClient {
     } else {
       trackLegacyRBACExemption('execute', this.usageCounter);
     }
+
+    const actionExecutionId = uuid();
     return this.actionExecutor.execute({
       actionId,
       params,
       source,
       request: this.request,
       relatedSavedObjects,
+      actionExecutionId,
     });
   }
 

@@ -12,17 +12,18 @@ import { getFormattedDuration, getFormattedMilliseconds } from '../../../lib/mon
 interface Props {
   duration: number;
   allowZero?: boolean;
+  includeMs?: boolean;
 }
 
 export const RuleDurationFormat = memo((props: Props) => {
-  const { duration, allowZero = true } = props;
+  const { duration, allowZero = true, includeMs = false } = props;
 
   const formattedDuration = useMemo(() => {
     if (allowZero || typeof duration === 'number') {
-      return getFormattedDuration(duration);
+      return getFormattedDuration(duration, includeMs);
     }
     return 'N/A';
-  }, [duration, allowZero]);
+  }, [duration, allowZero, includeMs]);
 
   const formattedTooltip = useMemo(() => {
     if (allowZero || typeof duration === 'number') {

@@ -36,6 +36,7 @@ interface EventLogListCellRendererProps {
   ruleId?: string;
   spaceIds?: string[];
   useExecutionStatus?: boolean;
+  durationIncludeMs?: boolean;
 }
 
 export const EventLogListCellRenderer = (props: EventLogListCellRendererProps) => {
@@ -47,6 +48,7 @@ export const EventLogListCellRenderer = (props: EventLogListCellRendererProps) =
     ruleId,
     spaceIds,
     useExecutionStatus = true,
+    durationIncludeMs,
   } = props;
   const spacesData = useSpacesData();
   const { http } = useKibana().services;
@@ -129,7 +131,9 @@ export const EventLogListCellRenderer = (props: EventLogListCellRendererProps) =
   }
 
   if (RULE_EXECUTION_LOG_DURATION_COLUMNS.includes(columnId)) {
-    return <RuleDurationFormat duration={parseInt(value as string, 10)} />;
+    return (
+      <RuleDurationFormat duration={parseInt(value as string, 10)} includeMs={durationIncludeMs} />
+    );
   }
 
   return <>{value}</>;

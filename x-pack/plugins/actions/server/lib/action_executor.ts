@@ -59,6 +59,7 @@ export interface TaskInfo {
 
 export interface ExecuteOptions<Source = unknown> {
   actionId: string;
+  actionExecutionId: string;
   isEphemeral?: boolean;
   request: KibanaRequest;
   params: Record<string, unknown>;
@@ -67,7 +68,6 @@ export interface ExecuteOptions<Source = unknown> {
   executionId?: string;
   consumer?: string;
   relatedSavedObjects?: RelatedSavedObjects;
-  actionExecutionId?: string;
 }
 
 export type ActionExecutorContract = PublicMethodsOf<ActionExecutor>;
@@ -304,13 +304,13 @@ export class ActionExecutor {
     actionExecutionId,
   }: {
     actionId: string;
+    actionExecutionId: string;
     request: KibanaRequest;
     taskInfo?: TaskInfo;
     executionId?: string;
     relatedSavedObjects: RelatedSavedObjects;
     source?: ActionExecutionSource<Source>;
     consumer?: string;
-    actionExecutionId?: string;
   }) {
     const {
       spaces,

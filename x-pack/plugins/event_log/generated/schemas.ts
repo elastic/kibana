@@ -175,12 +175,16 @@ export const EventSchema = schema.maybe(
         ),
         space_ids: ecsStringMulti(),
         version: ecsVersion(),
-      })
-    ),
-    action: schema.maybe(
-      schema.object({
-        name: ecsString(),
-        uuid: ecsString(),
+        action: schema.maybe(
+          schema.object({
+            name: ecsString(),
+            execution: schema.maybe(
+              schema.object({
+                uuid: ecsString(),
+              })
+            ),
+          })
+        ),
       })
     ),
   })

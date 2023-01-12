@@ -77,12 +77,14 @@ export function createActionEventLogRecordObject(params: CreateActionEventLogRec
       })),
       ...(spaceId ? { space_ids: [spaceId] } : {}),
       ...(task ? { task: { scheduled: task.scheduled, schedule_delay: task.scheduleDelay } } : {}),
+      action: {
+        name,
+        execution: {
+          uuid: actionExecutionId,
+        },
+      },
     },
     ...(message ? { message } : {}),
-    action: {
-      name,
-      uuid: actionExecutionId,
-    },
   };
 
   for (const relatedSavedObject of relatedSavedObjects || []) {
