@@ -574,7 +574,9 @@ export function XYChart({
       if (layer.splitAccessors?.length !== 1) return;
 
       const splitAccessor = getAccessorByDimension(layer.splitAccessors[0], table.columns);
-      const filterValues = tooltipSelectedValues.map((v) => v.datum?.[splitAccessor]);
+      const filterValues = tooltipSelectedValues
+        .map((v) => v.datum?.[splitAccessor])
+        .filter((item) => item !== undefined);
       const finalValues = filterValues.map((v) => {
         const splitPointRowIndex = formattedDatatables[layer.layerId].table.rows.findIndex(
           (row) => {
