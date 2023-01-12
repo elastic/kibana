@@ -39,14 +39,12 @@ const results: EnterpriseSearchEngine[] = [
     indices: ['index-18', 'index-23'],
     name: 'engine-name-1',
     updated: '1999-12-31T23:59:59Z',
-
   },
   {
     created: '1999-12-31T23:59:59Z',
     indices: ['index-180', 'index-230', 'index-8', 'index-2'],
     name: 'engine-name-2',
     updated: '1999-12-31T23:59:59Z',
-
   },
   {
     created: '1999-12-31T23:59:59Z',

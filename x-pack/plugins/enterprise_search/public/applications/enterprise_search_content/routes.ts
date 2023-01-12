@@ -36,5 +36,4 @@ export enum EngineViewTabs {
   API = 'api',
 }
 
-
 export const ML_MANAGE_TRAINED_MODELS_PATH = '/app/ml/trained_models';

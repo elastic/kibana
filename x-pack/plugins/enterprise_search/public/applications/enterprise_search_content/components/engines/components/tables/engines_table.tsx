@@ -15,7 +15,6 @@ import { i18n } from '@kbn/i18n';
 
 import { EnterpriseSearchEngine } from '../../../../../../../common/types/engines';
 
-import { DELETE_BUTTON_LABEL, MANAGE_BUTTON_LABEL } from '../../../../../shared/constants';
 import { generateEncodedPath } from '../../../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../../../shared/kibana';
 import { EuiLinkTo } from '../../../../../shared/react_router_helpers';
