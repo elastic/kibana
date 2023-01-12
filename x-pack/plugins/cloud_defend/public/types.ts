@@ -45,6 +45,10 @@ export enum ControlSelectorOperation {
   execMemFd = 'execMemFd',
 }
 
+export enum ControlSelectorOrchestratorType {
+  kubernetes = 'kubernetes',
+}
+
 export interface ControlSelectorConditionUIOptions {
   [key: string]: {
     values: string[];
@@ -53,6 +57,7 @@ export interface ControlSelectorConditionUIOptions {
 
 export const ControlSelectorConditionUIOptionsMap: ControlSelectorConditionUIOptions = {
   operation: { values: Object.values(ControlSelectorOperation) },
+  orchestratorType: { values: Object.values(ControlSelectorOrchestratorType) },
 };
 
 export interface ControlSelector {
