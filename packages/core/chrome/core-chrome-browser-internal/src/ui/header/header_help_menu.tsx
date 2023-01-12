@@ -159,21 +159,6 @@ export class HeaderHelpMenu extends Component<Props, State> {
 
         <EuiSpacer size="xs" />
 
-        <EuiButtonEmpty
-          href="https://ela.st/cloud-migration"
-          target="_blank"
-          size="s"
-          flush="left"
-          data-test-subj="migrate_data_to_cloud__help_menu_link"
-        >
-          <FormattedMessage
-            id="core.ui.chrome.headerGlobalNav.helpMenuMoveDataTitle"
-            defaultMessage="Move data to Elastic Cloud"
-          />
-        </EuiButtonEmpty>
-
-        <EuiSpacer size="xs" />
-
         <EuiButtonEmpty href={helpSupportUrl} target="_blank" size="s" flush="left">
           <FormattedMessage
             id="core.ui.chrome.headerGlobalNav.helpMenuAskElasticTitle"

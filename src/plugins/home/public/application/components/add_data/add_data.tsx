@@ -144,11 +144,7 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
 
           <EuiFlexItem>
             {isManagementEnabled && !isCloudEnabled ? (
-              <MoveData
-                addBasePath={addBasePath}
-                isManagementEnabled={isManagementEnabled}
-                trackUiMetric={trackUiMetric}
-              />
+              <MoveData addBasePath={addBasePath} />
             ) : (
               <EuiImage
                 alt={i18n.translate('home.addData.illustration.alt.text', {

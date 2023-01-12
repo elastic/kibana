@@ -18,20 +18,15 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { createAppNavigationHandler } from '../app_navigation_handler';
 
 interface Props {
   addBasePath: (path: string) => string;
-  isManagementEnabled: boolean;
-  trackUiMetric: (type: UiCounterMetricType, eventNames: string | string[], count?: number) => void;
 }
 
-export const MoveData: FC<Props> = ({ addBasePath, isManagementEnabled, trackUiMetric }) => {
-  const migrateDataUrl = isManagementEnabled
-    ? '/app/management/data/migrate_data'
-    : 'https://ela.st/cloud-migration';
+export const MoveData: FC<Props> = ({ addBasePath }) => {
+  const migrateDataUrl = '/app/management/data/migrate_data';
   const buttonLabel = (
     <FormattedMessage
       id="home.addData.moveYourDataButtonLabel"
@@ -67,34 +62,17 @@ export const MoveData: FC<Props> = ({ addBasePath, isManagementEnabled, trackUiM
             />
           </EuiText>
           <EuiSpacer size="m" />
-          {isManagementEnabled ? (
-            // eslint-disable-next-line @elastic/eui/href-or-on-click
-            <EuiButton
-              color="primary"
-              href={addBasePath(migrateDataUrl)}
-              onClick={(event: MouseEvent) => {
-                trackUiMetric(METRIC_TYPE.CLICK, 'migrate_data_to_cloud__home_self_managed_link');
-                createAppNavigationHandler(migrateDataUrl)(event);
-              }}
-            >
-              {buttonLabel}
-            </EuiButton>
-          ) : (
-            // eslint-disable-next-line @elastic/eui/href-or-on-click
-            <EuiButton
-              fill={true}
-              target="_blank"
-              href={migrateDataUrl}
-              onClick={() => {
-                trackUiMetric(
-                  METRIC_TYPE.CLICK,
-                  'migrate_data_to_cloud__home_management_disabled_link'
-                );
-              }}
-            >
-              {buttonLabel}
-            </EuiButton>
-          )}
+          {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+          <EuiButton
+            data-test-subj="migrate_data_to_cloud__migrate_data_docs_link"
+            color="primary"
+            href={addBasePath(migrateDataUrl)}
+            onClick={(event: MouseEvent) => {
+              createAppNavigationHandler(migrateDataUrl)(event);
+            }}
+          >
+            {buttonLabel}
+          </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

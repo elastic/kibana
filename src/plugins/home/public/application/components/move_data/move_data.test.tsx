@@ -13,29 +13,8 @@ import { shallowWithIntl } from '@kbn/test-jest-helpers';
 const addBasePathMock = jest.fn((path: string) => (path ? path : 'path'));
 
 describe('MoveData', () => {
-  test('render when management NOT enabled', () => {
-    const component = shallowWithIntl(
-      <MoveData
-        addBasePath={addBasePathMock}
-        isManagementEnabled={false}
-        trackUiMetric={jest.fn()}
-      />
-    );
-
-    const button = component.find('EuiButton');
-    const buttonProps = button.props();
-    expect(buttonProps.href).toBe('https://ela.st/cloud-migration');
-    expect(buttonProps.target).toBe('_blank');
-  });
-
-  test('render when management enabled', () => {
-    const component = shallowWithIntl(
-      <MoveData
-        addBasePath={addBasePathMock}
-        isManagementEnabled={true}
-        trackUiMetric={jest.fn()}
-      />
-    );
+  test('renders as expected', () => {
+    const component = shallowWithIntl(<MoveData addBasePath={addBasePathMock} />);
 
     const $button = component.find('EuiButton');
     expect($button.props().href).toBe('/app/management/data/migrate_data');
