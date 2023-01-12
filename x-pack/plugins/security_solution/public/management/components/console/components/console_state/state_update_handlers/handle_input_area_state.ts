@@ -72,7 +72,14 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
         input: {
           ...state.input,
           // Keeping the last 100 entries only for now
-          history: [{ id: uuidV4(), input: payload.command }, ...state.input.history.slice(0, 99)],
+          history: [
+            {
+              id: uuidV4(),
+              input: payload.command,
+              display: payload.display ?? payload.command,
+            },
+            ...state.input.history.slice(0, 99),
+          ],
         },
       };
 

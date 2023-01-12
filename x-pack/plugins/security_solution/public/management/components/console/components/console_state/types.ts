@@ -109,7 +109,10 @@ export interface EnteredCommand {
 
 export interface InputHistoryItem {
   id: string;
+  /** The command that will be used internally if entry is selected again from the popup */
   input: string;
+  /** The display value in the UI's input history popup */
+  display: string;
 }
 
 export interface CommandHistoryItem {
@@ -187,7 +190,10 @@ export type ConsoleDataAction =
   | {
       type: 'updateInputHistoryState';
       payload: {
+        /** The command that will be used internally if entry is selected again from the popup */
         command: string;
+        /** The display value in the UI's input history popup. Defaults to `command` */
+        display?: string;
       };
     }
   | {
