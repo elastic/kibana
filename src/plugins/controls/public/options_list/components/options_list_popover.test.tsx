@@ -58,7 +58,6 @@ describe('Options list popover', () => {
   test('available options list width responds to container size', async () => {
     let popover = await mountComponent({ popoverProps: { width: 301 } });
     let popoverDiv = findTestSubject(popover, 'optionsList-control-popover');
-    // console.log(availableOptionsDiv.getDOMNode().scrollWidth);
     expect(popoverDiv.getDOMNode().getAttribute('style')).toBe('width: 301px;');
 
     // the div cannot be smaller than 301 pixels wide
