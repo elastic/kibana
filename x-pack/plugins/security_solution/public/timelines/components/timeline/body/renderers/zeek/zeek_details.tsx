@@ -9,7 +9,7 @@ import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 
-import type { SecurityEcs as Ecs } from '@kbn/securitysolution-ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 
 import { NetflowRenderer } from '../netflow';
 import { ZeekSignature } from './zeek_signature';

@@ -9,7 +9,7 @@ import { render, screen } from '@testing-library/react';
 import { omit } from 'lodash/fp';
 import React from 'react';
 
-import type { SecurityEcs as Ecs } from '@kbn/securitysolution-ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TestProviders } from '../../../../../../common/mock';
 import {
   DESTINATION_IP,

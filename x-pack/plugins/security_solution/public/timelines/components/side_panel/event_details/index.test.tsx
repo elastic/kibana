@@ -10,7 +10,7 @@ import { EventDetailsPanel } from '.';
 import '../../../../common/mock/match_media';
 import { TestProviders } from '../../../../common/mock';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
-import type { SecurityEcs as Ecs } from '@kbn/securitysolution-ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import {
   KibanaServices,
   useKibana,

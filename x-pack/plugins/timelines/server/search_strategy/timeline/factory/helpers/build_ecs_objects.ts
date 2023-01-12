@@ -6,7 +6,7 @@
  */
 
 import { has, merge } from 'lodash/fp';
-import { SecurityEcs as Ecs } from '@kbn/securitysolution-ecs';
+import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { EventHit } from '../../../../../common/search_strategy';
 import { ECS_METADATA_FIELDS, TIMELINE_EVENTS_FIELDS } from './constants';
 import { getTimestamp } from './get_timestamp';

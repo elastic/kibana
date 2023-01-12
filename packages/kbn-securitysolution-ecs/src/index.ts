@@ -98,7 +98,7 @@ type OverrideTypes =
   | 'user';
 
 // Security Solution Extension of the Elastic Common Schema
-export interface SecurityEcs extends Omit<Ecs, OverrideTypes> {
+export interface EcsSecurityExtension extends Omit<Ecs, OverrideTypes> {
   // Ecs Overrides
   // overrides Ecs to support multiple values for security entities
   agent?: AgentEcs;

@@ -7,7 +7,7 @@
 
 import { isEmpty } from 'lodash/fp';
 
-import type { SecurityEcs as Ecs } from '@kbn/securitysolution-ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
 import type { TimelineEventsType, TimelineTypeLiteral } from '../../../../../common/types/timeline';
 import { TimelineType } from '../../../../../common/types/timeline';

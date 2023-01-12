@@ -8,7 +8,7 @@
 import { JsonObject } from '@kbn/utility-types';
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
-import { SecurityEcs as Ecs } from '@kbn/securitysolution-ecs';
+import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { Inspect, Maybe } from '../../../common';
 import { TimelineRequestOptionsPaginated } from '../..';
 

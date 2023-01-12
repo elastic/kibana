@@ -34,7 +34,7 @@ import { getNewExceptionItem, addIdToEntries } from '@kbn/securitysolution-list-
 import type { DataViewBase } from '@kbn/es-query';
 import { removeIdFromExceptionItemsEntries } from '@kbn/securitysolution-list-hooks';
 
-import type { SecurityEcs as Ecs, CodeSignature } from '@kbn/securitysolution-ecs';
+import type { EcsSecurityExtension as Ecs, CodeSignature } from '@kbn/securitysolution-ecs';
 import * as i18n from './translations';
 import type { AlertData, Flattened } from './types';
 

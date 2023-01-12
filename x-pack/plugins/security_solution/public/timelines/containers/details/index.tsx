@@ -14,7 +14,7 @@ import { Subscription } from 'rxjs';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import { EntityType } from '@kbn/timelines-plugin/common';
-import type { SecurityEcs as Ecs } from '@kbn/securitysolution-ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { useKibana } from '../../../common/lib/kibana';
 import type {
   SearchHit,

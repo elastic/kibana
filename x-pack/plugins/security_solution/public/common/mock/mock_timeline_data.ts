@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SecurityEcs as Ecs } from '@kbn/securitysolution-ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 
 export { demoTimelineData as mockTimelineData } from '../demo_data/timeline';
 export { demoEndpointRegistryModificationEvent as mockEndpointRegistryModificationEvent } from '../demo_data/endpoint/registry_modification_event';

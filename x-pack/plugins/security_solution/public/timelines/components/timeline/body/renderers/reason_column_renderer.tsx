@@ -9,7 +9,7 @@ import { EuiPanel, EuiText } from '@elastic/eui';
 import { isEqual } from 'lodash/fp';
 import React, { useMemo } from 'react';
 
-import type { SecurityEcs as Ecs } from '@kbn/securitysolution-ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { ColumnHeaderOptions, RowRenderer } from '../../../../../../common/types';
 import { TableId } from '../../../../../../common/types';
 import type { ColumnRenderer } from './column_renderer';

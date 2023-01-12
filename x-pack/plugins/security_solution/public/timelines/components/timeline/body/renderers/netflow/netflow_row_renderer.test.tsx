@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 
 import '../../../../../../common/mock/match_media';
-import type { SecurityEcs as Ecs } from '@kbn/securitysolution-ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { getMockNetflowData, TestProviders } from '../../../../../../common/mock';
 
 import {

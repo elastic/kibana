@@ -7,7 +7,7 @@
 
 import { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import { SecurityEcs as Ecs } from '@kbn/securitysolution-ecs';
+import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { ColumnHeaderOptions, RowRenderer } from '../..';
 import { BrowserFields, TimelineNonEcsData } from '../../../search_strategy';
 

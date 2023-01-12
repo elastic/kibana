@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import type { SecurityEcs as Ecs } from '@kbn/securitysolution-ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { RowRenderer, RowRendererId } from '../../../../../../../common/types';
 
 export const combineRenderers = ({

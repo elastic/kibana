@@ -8,7 +8,7 @@
 import { get } from 'lodash/fp';
 import React from 'react';
 
-import type { SecurityEcs as Ecs } from '@kbn/securitysolution-ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { Details, isNillEmptyOrNotFinite } from '../helpers';
 
 import { RegistryEventDetailsLine } from './registry_event_details_line';

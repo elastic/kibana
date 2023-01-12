@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
-import type { SecurityEcs as Ecs } from '@kbn/securitysolution-ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { defaultRowRenderers } from '../../../../../../timelines/components/timeline/body/renderers';
 import { getRowRenderer } from '../../../../../../timelines/components/timeline/body/renderers/get_row_renderer';
 import { TimelineId } from '../../../../../../../common/types';
