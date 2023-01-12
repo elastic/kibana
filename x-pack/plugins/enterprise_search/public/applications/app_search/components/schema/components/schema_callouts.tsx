@@ -9,7 +9,7 @@ import React from 'react';
 
 import { useValues, useActions } from 'kea';
 
-import { EuiCallOut, EuiButton, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiCallOut, EuiButton, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { EuiButtonTo } from '../../../../shared/react_router_helpers';
@@ -161,16 +161,16 @@ export const MissingSubfieldsCallout: React.FC = () => {
               'Some fields are missing one or more subfields used by App Search. Some search features may not work until those subfields are added.',
           }
         )}{' '}
-        <a
-          href="https://www.elastic.co/guide/en/app-search/current/elasticsearch-engines-text-subfields-support-conventions.html"
-          data-test-subj="missingSubfieldsLearnMoreLink"
-          target="_blank"
-        >
-          {i18n.translate('xpack.enterpriseSearch.appSearch.engine.schema.incompleteFields.link', {
-            defaultMessage: 'Learn more.',
-          })}
-        </a>
       </p>
+      <EuiLink
+        href="https://www.elastic.co/guide/en/app-search/current/elasticsearch-engines-text-subfields-support-conventions.html"
+        data-test-subj="missingSubfieldsLearnMoreLink"
+        target="_blank"
+      >
+        {i18n.translate('xpack.enterpriseSearch.appSearch.engine.schema.incompleteFields.link', {
+          defaultMessage: 'Learn more.',
+        })}
+      </EuiLink>
     </EuiCallOut>
   );
 };
