@@ -66,6 +66,21 @@ paths:
               examples:
                 createIndexConnectorResponse:
                   $ref: '#/components/examples/create_index_connector_response'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Unauthorized
+                  message:
+                    type: string
+                  statusCode:
+                    type: integer
+                    example: 401
       servers:
         - url: https://localhost:5601
     servers:
@@ -91,6 +106,37 @@ paths:
               examples:
                 getConnectorResponse:
                   $ref: '#/components/examples/get_connector_response'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Unauthorized
+                  message:
+                    type: string
+                  statusCode:
+                    type: integer
+                    example: 401
+        '404':
+          description: Object is not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Not Found
+                  message:
+                    type: string
+                    example: Saved object [action/baf33fc0-920c-11ed-b36a-874bd1548a00] not found
+                  statusCode:
+                    type: integer
+                    example: 404
       servers:
         - url: https://localhost:5601
     delete:
@@ -107,6 +153,37 @@ paths:
       responses:
         '204':
           description: Indicates a successful call.
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Unauthorized
+                  message:
+                    type: string
+                  statusCode:
+                    type: integer
+                    example: 401
+        '404':
+          description: Object is not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Not Found
+                  message:
+                    type: string
+                    example: Saved object [action/baf33fc0-920c-11ed-b36a-874bd1548a00] not found
+                  statusCode:
+                    type: integer
+                    example: 404
       servers:
         - url: https://localhost:5601
     put:
@@ -147,6 +224,53 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/connector_response_properties'
+        '400':
+          description: Indicates a bad request.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Bad Request
+                  message:
+                    type: string
+                    example: 'error validating action type config: [index]: expected value of type [string] but got [undefined]'
+                  statusCode:
+                    type: integer
+                    example: 400
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Unauthorized
+                  message:
+                    type: string
+                  statusCode:
+                    type: integer
+                    example: 401
+        '404':
+          description: Object is not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Not Found
+                  message:
+                    type: string
+                    example: Saved object [action/baf33fc0-920c-11ed-b36a-874bd1548a00] not found
+                  statusCode:
+                    type: integer
+                    example: 404
       servers:
         - url: https://localhost:5601
     servers:
@@ -209,6 +333,21 @@ paths:
               examples:
                 getConnectorsResponse:
                   $ref: '#/components/examples/get_connectors_response'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Unauthorized
+                  message:
+                    type: string
+                  statusCode:
+                    type: integer
+                    example: 401
       servers:
         - url: https://localhost:5601
     servers:
@@ -274,6 +413,21 @@ paths:
               examples:
                 getConnectorTypesResponse:
                   $ref: '#/components/examples/get_connector_types_response'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Unauthorized
+                  message:
+                    type: string
+                  statusCode:
+                    type: integer
+                    example: 401
       servers:
         - url: https://localhost:5601
     servers:

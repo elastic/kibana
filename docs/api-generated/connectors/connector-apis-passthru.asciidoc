@@ -88,6 +88,9 @@ Any modifications made to this file will be overwritten.
     <h4 class="field-label">200</h4>
     Indicates a successful call.
         <a href="#connector_response_properties">connector_response_properties</a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#createConnector_401_response">createConnector_401_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="deleteConnector"/>
@@ -122,11 +125,23 @@ Any modifications made to this file will be overwritten.
     <!--Todo: process Response Object and its headers, schema, examples -->
 
 
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
 
     <h3 class="field-label">Responses</h3>
     <h4 class="field-label">204</h4>
     Indicates a successful call.
         <a href="#"></a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#createConnector_401_response">createConnector_401_response</a>
+    <h4 class="field-label">404</h4>
+    Object is not found.
+        <a href="#getConnector_404_response">getConnector_404_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="getConnector"/>
@@ -173,6 +188,12 @@ Any modifications made to this file will be overwritten.
     <h4 class="field-label">200</h4>
     Indicates a successful call.
         <a href="#connector_response_properties">connector_response_properties</a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#createConnector_401_response">createConnector_401_response</a>
+    <h4 class="field-label">404</h4>
+    Object is not found.
+        <a href="#getConnector_404_response">getConnector_404_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="getConnectorTypes"/>
@@ -231,6 +252,9 @@ Any modifications made to this file will be overwritten.
     <h4 class="field-label">200</h4>
     Indicates a successful call.
         
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#createConnector_401_response">createConnector_401_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="getConnectors"/>
@@ -286,6 +310,9 @@ Any modifications made to this file will be overwritten.
     <h4 class="field-label">200</h4>
     Indicates a successful call.
         
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#createConnector_401_response">createConnector_401_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="updateConnector"/>
@@ -351,6 +378,15 @@ Any modifications made to this file will be overwritten.
     <h4 class="field-label">200</h4>
     Indicates a successful call.
         <a href="#connector_response_properties">connector_response_properties</a>
+    <h4 class="field-label">400</h4>
+    Indicates a bad request.
+        <a href="#updateConnector_400_response">updateConnector_400_response</a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#createConnector_401_response">createConnector_401_response</a>
+    <h4 class="field-label">404</h4>
+    Object is not found.
+        <a href="#getConnector_404_response">getConnector_404_response</a>
   </div> <!-- method -->
   <hr/>
 
@@ -398,6 +434,7 @@ Any modifications made to this file will be overwritten.
     <li><a href="#connector_response_properties_webhook"><code>connector_response_properties_webhook</code> - Connector response properties for a Webhook connector</a></li>
     <li><a href="#connector_response_properties_xmatters"><code>connector_response_properties_xmatters</code> - Connector response properties for an xMatters connector</a></li>
     <li><a href="#connector_types"><code>connector_types</code> - Connector types</a></li>
+    <li><a href="#createConnector_401_response"><code>createConnector_401_response</code> - </a></li>
     <li><a href="#create_connector_request_cases_webhook"><code>create_connector_request_cases_webhook</code> - Create Webhook - Case Managment connector request</a></li>
     <li><a href="#create_connector_request_email"><code>create_connector_request_email</code> - Create email connector request</a></li>
     <li><a href="#create_connector_request_index"><code>create_connector_request_index</code> - Create index connector request</a></li>
@@ -416,12 +453,14 @@ Any modifications made to this file will be overwritten.
     <li><a href="#create_connector_request_webhook"><code>create_connector_request_webhook</code> - Create Webhook connector request</a></li>
     <li><a href="#create_connector_request_xmatters"><code>create_connector_request_xmatters</code> - Create xMatters connector request</a></li>
     <li><a href="#features"><code>features</code> - </a></li>
+    <li><a href="#getConnector_404_response"><code>getConnector_404_response</code> - </a></li>
     <li><a href="#secrets_properties_cases_webhook"><code>secrets_properties_cases_webhook</code> - Connector secrets properties for Webhook - Case Management connector</a></li>
     <li><a href="#secrets_properties_jira"><code>secrets_properties_jira</code> - Connector secrets properties for a Jira connector</a></li>
     <li><a href="#secrets_properties_opsgenie"><code>secrets_properties_opsgenie</code> - Connector secrets properties for an Opsgenie connector</a></li>
     <li><a href="#secrets_properties_resilient"><code>secrets_properties_resilient</code> - Connector secrets properties for IBM Resilient connector</a></li>
     <li><a href="#secrets_properties_servicenow"><code>secrets_properties_servicenow</code> - Connector secrets properties for ServiceNow ITOM, ServiceNow ITSM, and ServiceNow SecOps connectors</a></li>
     <li><a href="#secrets_properties_swimlane"><code>secrets_properties_swimlane</code> - Connector secrets properties for a Swimlane connector</a></li>
+    <li><a href="#updateConnector_400_response"><code>updateConnector_400_response</code> - </a></li>
     <li><a href="#update_connector_request_cases_webhook"><code>update_connector_request_cases_webhook</code> - Update Webhook - Case Managment connector request</a></li>
     <li><a href="#update_connector_request_index"><code>update_connector_request_index</code> - Update index connector request</a></li>
     <li><a href="#update_connector_request_jira"><code>update_connector_request_jira</code> - Update Jira connector request</a></li>
@@ -933,6 +972,15 @@ Any modifications made to this file will be overwritten.
           </div>  <!-- field-items -->
   </div>
   <div class="model">
+    <h3><a name="createConnector_401_response"><code>createConnector_401_response</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">error (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">message (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">statusCode (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
     <h3><a name="create_connector_request_cases_webhook"><code>create_connector_request_cases_webhook</code> - Create Webhook - Case Managment connector request</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'>The Webhook - Case Management connector uses axios to send POST, PUT, and GET requests to a case management RESTful API web service.</div>
     <div class="field-items">
@@ -1138,6 +1186,15 @@ Any modifications made to this file will be overwritten.
           </div>  <!-- field-items -->
   </div>
   <div class="model">
+    <h3><a name="getConnector_404_response"><code>getConnector_404_response</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">error (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">message (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">statusCode (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
     <h3><a name="secrets_properties_cases_webhook"><code>secrets_properties_cases_webhook</code> - Connector secrets properties for Webhook - Case Management connector</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
@@ -1184,6 +1241,15 @@ Any modifications made to this file will be overwritten.
     <div class='model-description'>Defines secrets for connectors when type is <code>.swimlane</code>.</div>
     <div class="field-items">
       <div class="param">apiToken (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Swimlane API authentication token. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="updateConnector_400_response"><code>updateConnector_400_response</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">error (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">message (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">statusCode (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
