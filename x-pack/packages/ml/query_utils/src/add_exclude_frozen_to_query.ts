@@ -10,7 +10,7 @@ import { cloneDeep } from 'lodash';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 /**
- * Extends an exiting query with a clause to exclude the frozen tier.
+ * Extends an existing query with a clause to exclude the frozen tier.
  *
  * @param originalQuery - the original query
  * @returns the original query exluding the frozen tier
