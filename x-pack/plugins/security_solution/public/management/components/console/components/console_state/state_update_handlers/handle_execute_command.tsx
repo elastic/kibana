@@ -71,7 +71,10 @@ const updateStateWithNewCommandHistoryItem = (
 ): ConsoleDataState => {
   const updatedState = handleInputAreaState(state, {
     type: 'updateInputHistoryState',
-    payload: { command: newHistoryItem.command.input },
+    payload: {
+      command: newHistoryItem.command.input,
+      display: newHistoryItem.command.inputDisplay,
+    },
   });
 
   updatedState.commandHistory = [...state.commandHistory, newHistoryItem];
@@ -140,7 +143,8 @@ export const handleExecuteCommand: ConsoleStoreReducer<
       state,
       createCommandHistoryEntry(
         {
-          input: fullInputText,
+          input: parsedInput.input,
+          inputDisplay: fullInputText,
           args: parsedInput,
           commandDefinition: {
             ...UnknownCommandDefinition,
@@ -153,8 +157,9 @@ export const handleExecuteCommand: ConsoleStoreReducer<
     );
   }
 
-  const command = {
-    input: fullInputText,
+  const command: Command = {
+    input: parsedInput.input,
+    inputDisplay: fullInputText,
     args: parsedInput,
     commandDefinition,
   };

@@ -147,6 +147,11 @@ export interface Command<
 > {
   /** The raw input entered by the user */
   input: string;
+  /**
+   * The input value for display on the UI. This could differ from
+   * `input` when Argument Value Selectors were used.
+   */
+  inputDisplay: string;
   /** An object with the arguments entered by the user and their value */
   args: ParsedCommandInterface<TArgs>;
   /** The command definition associated with this user command */

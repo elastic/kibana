@@ -208,7 +208,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
             // ENTER  = Execute command and blank out the input area
             case 13:
               setCommandToExecute({
-                input: inputText.getFullText(),
+                input: inputText.getFullText(true),
                 enteredCommand: prevEnteredCommand as ConsoleDataState['input']['enteredCommand'],
                 parsedInput: prevParsedInput as ConsoleDataState['input']['parsedInput'],
               });
