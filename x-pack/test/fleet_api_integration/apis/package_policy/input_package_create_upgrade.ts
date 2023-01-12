@@ -146,9 +146,9 @@ export default function (providerContext: FtrProviderContext) {
         },
       },
     };
-    const templateRes = await es.indices.putIndexTemplate(template);
+    await es.indices.putIndexTemplate(template);
 
-    const indexRes = await es.index({
+    await es.index({
       index: indexName,
       body: {
         '@timestamp': new Date().toISOString(),
@@ -158,8 +158,8 @@ export default function (providerContext: FtrProviderContext) {
   };
 
   const deleteDataStream = async (streamName: string) => {
-    const deleteDSRes = await es.indices.deleteDataStream({ name: streamName + '-default' });
-    const deleteTemplateRes = await es.indices.deleteIndexTemplate({ name: streamName });
+    await es.indices.deleteDataStream({ name: streamName + '-default' });
+    await es.indices.deleteIndexTemplate({ name: streamName });
   };
 
   describe('Package Policy - input package behavior', async function () {
