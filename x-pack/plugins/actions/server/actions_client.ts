@@ -667,7 +667,9 @@ export class ActionsClient {
     params,
     source,
     relatedSavedObjects,
-  }: Omit<ExecuteOptions, 'request'>): Promise<ActionTypeExecutorResult<unknown>> {
+  }: Omit<ExecuteOptions, 'request' | 'actionExecutionId'>): Promise<
+    ActionTypeExecutorResult<unknown>
+  > {
     if (
       (await getAuthorizationModeBySource(this.unsecuredSavedObjectsClient, source)) ===
       AuthorizationMode.RBAC
@@ -677,14 +679,13 @@ export class ActionsClient {
       trackLegacyRBACExemption('execute', this.usageCounter);
     }
 
-    const actionExecutionId = uuid();
     return this.actionExecutor.execute({
       actionId,
       params,
       source,
       request: this.request,
       relatedSavedObjects,
-      actionExecutionId,
+      actionExecutionId: uuid.v4(),
     });
   }
 

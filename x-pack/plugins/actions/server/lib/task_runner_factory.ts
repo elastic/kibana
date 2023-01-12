@@ -85,7 +85,7 @@ export class TaskRunnerFactory {
       scheduled: taskInstance.runAt,
       attempts: taskInstance.attempts,
     };
-    const actionExecutionId = uuid();
+    const actionExecutionId = uuid.v4();
 
     return {
       async run() {

@@ -83,6 +83,10 @@ jest.mock('./lib/get_oauth_client_credentials_access_token', () => ({
   getOAuthClientCredentialsAccessToken: jest.fn(),
 }));
 
+jest.mock('uuid', () => ({
+  v4: () => 'uuidv4',
+}));
+
 const defaultKibanaIndex = '.kibana';
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
@@ -2209,6 +2213,7 @@ describe('execute()', () => {
 
   test('calls the actionExecutor with the appropriate parameters', async () => {
     const actionId = uuid.v4();
+    const actionExecutionId = uuid.v4();
     actionExecutor.execute.mockResolvedValue({ status: 'ok', actionId });
     await expect(
       actionsClient.execute({
@@ -2225,6 +2230,7 @@ describe('execute()', () => {
       params: {
         name: 'my name',
       },
+      actionExecutionId,
     });
 
     await expect(
@@ -2256,6 +2262,7 @@ describe('execute()', () => {
           type: 'some-type',
         },
       ],
+      actionExecutionId,
     });
 
     await expect(
@@ -2289,6 +2296,7 @@ describe('execute()', () => {
           namespace: 'some-namespace',
         },
       ],
+      actionExecutionId,
     });
   });
 });

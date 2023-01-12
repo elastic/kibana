@@ -94,7 +94,7 @@ describe('getExecutionLogAggregation', () => {
                           'error.message',
                           'kibana.version',
                           'kibana.space_ids',
-                          'action.name',
+                          'kibana.action.name',
                         ],
                       },
                     },
@@ -148,7 +148,7 @@ describe('getExecutionLogAggregation', () => {
               },
             },
             terms: {
-              field: 'action.uuid',
+              field: 'kibana.action.execution.uuid',
               order: [
                 {
                   'actionExecution>executeStartTime': 'asc',
@@ -164,7 +164,7 @@ describe('getExecutionLogAggregation', () => {
             aggs: {
               executionUuidCardinality: {
                 cardinality: {
-                  field: 'action.uuid',
+                  field: 'kibana.action.execution.uuid',
                 },
               },
             },
@@ -180,9 +180,6 @@ describe('getExecutionLogAggregation', () => {
               },
             },
           },
-        },
-        filter: {
-          bool: {},
         },
       },
     });
@@ -222,7 +219,7 @@ describe('getExecutionLogAggregation', () => {
                           'error.message',
                           'kibana.version',
                           'kibana.space_ids',
-                          'action.name',
+                          'kibana.action.name',
                         ],
                       },
                     },
@@ -276,7 +273,7 @@ describe('getExecutionLogAggregation', () => {
               },
             },
             terms: {
-              field: 'action.uuid',
+              field: 'kibana.action.execution.uuid',
               order: [
                 {
                   'actionExecution>executeStartTime': 'asc',
@@ -292,7 +289,7 @@ describe('getExecutionLogAggregation', () => {
             aggs: {
               executionUuidCardinality: {
                 cardinality: {
-                  field: 'action.uuid',
+                  field: 'kibana.action.execution.uuid',
                 },
               },
             },
@@ -363,7 +360,7 @@ describe('getExecutionLogAggregation', () => {
                           'error.message',
                           'kibana.version',
                           'kibana.space_ids',
-                          'action.name',
+                          'kibana.action.name',
                         ],
                       },
                     },
@@ -417,7 +414,7 @@ describe('getExecutionLogAggregation', () => {
               },
             },
             terms: {
-              field: 'action.uuid',
+              field: 'kibana.action.execution.uuid',
               order: [
                 {
                   'actionExecution>executeStartTime': 'asc',
@@ -433,7 +430,7 @@ describe('getExecutionLogAggregation', () => {
             aggs: {
               executionUuidCardinality: {
                 cardinality: {
-                  field: 'action.uuid',
+                  field: 'kibana.action.execution.uuid',
                 },
               },
             },
@@ -724,7 +721,7 @@ describe('getExecutionKPIAggregation', () => {
               },
             },
             terms: {
-              field: 'action.uuid',
+              field: 'kibana.action.execution.uuid',
               order: [
                 {
                   'actionExecution>executeStartTime': 'desc',
@@ -733,9 +730,6 @@ describe('getExecutionKPIAggregation', () => {
               size: 10000,
             },
           },
-        },
-        filter: {
-          bool: {},
         },
       },
     });
@@ -792,7 +786,7 @@ describe('getExecutionKPIAggregation', () => {
               },
             },
             terms: {
-              field: 'action.uuid',
+              field: 'kibana.action.execution.uuid',
               order: [
                 {
                   'actionExecution>executeStartTime': 'desc',
@@ -873,7 +867,7 @@ describe('getExecutionKPIAggregation', () => {
               },
             },
             terms: {
-              field: 'action.uuid',
+              field: 'kibana.action.execution.uuid',
               order: [
                 {
                   'actionExecution>executeStartTime': 'desc',

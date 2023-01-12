@@ -15,7 +15,7 @@ import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
 import { spacesServiceMock } from '@kbn/spaces-plugin/server/spaces_service/spaces_service.mock';
 import { ActionType } from '../types';
 import { actionsMock, actionsClientMock } from '../mocks';
-import { map, omit, pick } from 'lodash';
+import { pick } from 'lodash';
 
 const actionExecutor = new ActionExecutor({ isESOCanEncrypt: true });
 const services = actionsMock.createServices();
@@ -32,6 +32,7 @@ const executeParams = {
   },
   executionId: '123abc',
   request: {} as KibanaRequest,
+  actionExecutionId: '2',
 };
 
 const spacesMock = spacesServiceMock.createStartContract();
@@ -130,72 +131,81 @@ test('successfully executes', async () => {
   });
 
   expect(loggerMock.debug).toBeCalledWith('executing action test:1: 1');
-  expect(map(eventLogger.logEvent.mock.calls, (event) => omit(event[0], 'action.uuid')))
-    .toMatchInlineSnapshot(`
+  expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
     Array [
-      Object {
-        "action": Object {
-          "name": "1",
-        },
-        "event": Object {
-          "action": "execute-start",
-          "kind": "action",
-        },
-        "kibana": Object {
-          "alert": Object {
-            "rule": Object {
+      Array [
+        Object {
+          "event": Object {
+            "action": "execute-start",
+            "kind": "action",
+          },
+          "kibana": Object {
+            "action": Object {
               "execution": Object {
-                "uuid": "123abc",
+                "uuid": "2",
+              },
+              "name": "1",
+            },
+            "alert": Object {
+              "rule": Object {
+                "execution": Object {
+                  "uuid": "123abc",
+                },
               },
             },
+            "saved_objects": Array [
+              Object {
+                "id": "1",
+                "namespace": "some-namespace",
+                "rel": "primary",
+                "type": "action",
+                "type_id": "test",
+              },
+            ],
+            "space_ids": Array [
+              "some-namespace",
+            ],
           },
-          "saved_objects": Array [
-            Object {
-              "id": "1",
-              "namespace": "some-namespace",
-              "rel": "primary",
-              "type": "action",
-              "type_id": "test",
-            },
-          ],
-          "space_ids": Array [
-            "some-namespace",
-          ],
+          "message": "action started: test:1: 1",
         },
-        "message": "action started: test:1: 1",
-      },
-      Object {
-        "action": Object {
-          "name": "1",
-        },
-        "event": Object {
-          "action": "execute",
-          "kind": "action",
-          "outcome": "success",
-        },
-        "kibana": Object {
-          "alert": Object {
-            "rule": Object {
+      ],
+      Array [
+        Object {
+          "event": Object {
+            "action": "execute",
+            "kind": "action",
+            "outcome": "success",
+          },
+          "kibana": Object {
+            "action": Object {
               "execution": Object {
-                "uuid": "123abc",
+                "uuid": "2",
+              },
+              "name": "1",
+            },
+            "alert": Object {
+              "rule": Object {
+                "execution": Object {
+                  "uuid": "123abc",
+                },
               },
             },
+            "saved_objects": Array [
+              Object {
+                "id": "1",
+                "namespace": "some-namespace",
+                "rel": "primary",
+                "type": "action",
+                "type_id": "test",
+              },
+            ],
+            "space_ids": Array [
+              "some-namespace",
+            ],
           },
-          "saved_objects": Array [
-            Object {
-              "id": "1",
-              "namespace": "some-namespace",
-              "rel": "primary",
-              "type": "action",
-              "type_id": "test",
-            },
-          ],
-          "space_ids": Array [
-            "some-namespace",
-          ],
+          "message": "action executed: test:1: 1",
         },
-        "message": "action executed: test:1: 1",
-      },
+      ],
     ]
   `);
 });
@@ -234,72 +244,81 @@ test('successfully executes with preconfigured connector', async () => {
   });
 
   expect(loggerMock.debug).toBeCalledWith('executing action test:preconfigured: Preconfigured');
-  expect(map(eventLogger.logEvent.mock.calls, (event) => omit(event[0], 'action.uuid')))
-    .toMatchInlineSnapshot(`
+  expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
     Array [
-      Object {
-        "action": Object {
-          "name": "Preconfigured",
-        },
-        "event": Object {
-          "action": "execute-start",
-          "kind": "action",
-        },
-        "kibana": Object {
-          "alert": Object {
-            "rule": Object {
+      Array [
+        Object {
+          "event": Object {
+            "action": "execute-start",
+            "kind": "action",
+          },
+          "kibana": Object {
+            "action": Object {
               "execution": Object {
-                "uuid": "123abc",
+                "uuid": "2",
+              },
+              "name": "Preconfigured",
+            },
+            "alert": Object {
+              "rule": Object {
+                "execution": Object {
+                  "uuid": "123abc",
+                },
               },
             },
+            "saved_objects": Array [
+              Object {
+                "id": "preconfigured",
+                "namespace": "some-namespace",
+                "rel": "primary",
+                "type": "action",
+                "type_id": "test",
+              },
+            ],
+            "space_ids": Array [
+              "some-namespace",
+            ],
           },
-          "saved_objects": Array [
-            Object {
-              "id": "preconfigured",
-              "namespace": "some-namespace",
-              "rel": "primary",
-              "type": "action",
-              "type_id": "test",
-            },
-          ],
-          "space_ids": Array [
-            "some-namespace",
-          ],
+          "message": "action started: test:preconfigured: Preconfigured",
         },
-        "message": "action started: test:preconfigured: Preconfigured",
-      },
-      Object {
-        "action": Object {
-          "name": "Preconfigured",
-        },
-        "event": Object {
-          "action": "execute",
-          "kind": "action",
-          "outcome": "success",
-        },
-        "kibana": Object {
-          "alert": Object {
-            "rule": Object {
+      ],
+      Array [
+        Object {
+          "event": Object {
+            "action": "execute",
+            "kind": "action",
+            "outcome": "success",
+          },
+          "kibana": Object {
+            "action": Object {
               "execution": Object {
-                "uuid": "123abc",
+                "uuid": "2",
+              },
+              "name": "Preconfigured",
+            },
+            "alert": Object {
+              "rule": Object {
+                "execution": Object {
+                  "uuid": "123abc",
+                },
               },
             },
+            "saved_objects": Array [
+              Object {
+                "id": "preconfigured",
+                "namespace": "some-namespace",
+                "rel": "primary",
+                "type": "action",
+                "type_id": "test",
+              },
+            ],
+            "space_ids": Array [
+              "some-namespace",
+            ],
           },
-          "saved_objects": Array [
-            Object {
-              "id": "preconfigured",
-              "namespace": "some-namespace",
-              "rel": "primary",
-              "type": "action",
-              "type_id": "test",
-            },
-          ],
-          "space_ids": Array [
-            "some-namespace",
-          ],
+          "message": "action executed: test:preconfigured: Preconfigured",
         },
-        "message": "action executed: test:preconfigured: Preconfigured",
-      },
+      ],
     ]
   `);
 });
@@ -689,72 +708,81 @@ test('should not throw error if action is preconfigured and isESOCanEncrypt is f
   });
 
   expect(loggerMock.debug).toBeCalledWith('executing action test:preconfigured: Preconfigured');
-  expect(map(eventLogger.logEvent.mock.calls, (event) => omit(event[0], 'action.uuid')))
-    .toMatchInlineSnapshot(`
+  expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
     Array [
-      Object {
-        "action": Object {
-          "name": "Preconfigured",
-        },
-        "event": Object {
-          "action": "execute-start",
-          "kind": "action",
-        },
-        "kibana": Object {
-          "alert": Object {
-            "rule": Object {
+      Array [
+        Object {
+          "event": Object {
+            "action": "execute-start",
+            "kind": "action",
+          },
+          "kibana": Object {
+            "action": Object {
               "execution": Object {
-                "uuid": "123abc",
+                "uuid": "2",
+              },
+              "name": "Preconfigured",
+            },
+            "alert": Object {
+              "rule": Object {
+                "execution": Object {
+                  "uuid": "123abc",
+                },
               },
             },
+            "saved_objects": Array [
+              Object {
+                "id": "preconfigured",
+                "namespace": "some-namespace",
+                "rel": "primary",
+                "type": "action",
+                "type_id": "test",
+              },
+            ],
+            "space_ids": Array [
+              "some-namespace",
+            ],
           },
-          "saved_objects": Array [
-            Object {
-              "id": "preconfigured",
-              "namespace": "some-namespace",
-              "rel": "primary",
-              "type": "action",
-              "type_id": "test",
-            },
-          ],
-          "space_ids": Array [
-            "some-namespace",
-          ],
+          "message": "action started: test:preconfigured: Preconfigured",
         },
-        "message": "action started: test:preconfigured: Preconfigured",
-      },
-      Object {
-        "action": Object {
-          "name": "Preconfigured",
-        },
-        "event": Object {
-          "action": "execute",
-          "kind": "action",
-          "outcome": "success",
-        },
-        "kibana": Object {
-          "alert": Object {
-            "rule": Object {
+      ],
+      Array [
+        Object {
+          "event": Object {
+            "action": "execute",
+            "kind": "action",
+            "outcome": "success",
+          },
+          "kibana": Object {
+            "action": Object {
               "execution": Object {
-                "uuid": "123abc",
+                "uuid": "2",
+              },
+              "name": "Preconfigured",
+            },
+            "alert": Object {
+              "rule": Object {
+                "execution": Object {
+                  "uuid": "123abc",
+                },
               },
             },
+            "saved_objects": Array [
+              Object {
+                "id": "preconfigured",
+                "namespace": "some-namespace",
+                "rel": "primary",
+                "type": "action",
+                "type_id": "test",
+              },
+            ],
+            "space_ids": Array [
+              "some-namespace",
+            ],
           },
-          "saved_objects": Array [
-            Object {
-              "id": "preconfigured",
-              "namespace": "some-namespace",
-              "rel": "primary",
-              "type": "action",
-              "type_id": "test",
-            },
-          ],
-          "space_ids": Array [
-            "some-namespace",
-          ],
+          "message": "action executed: test:preconfigured: Preconfigured",
         },
-        "message": "action executed: test:preconfigured: Preconfigured",
-      },
+      ],
     ]
   `);
 });
@@ -824,45 +852,43 @@ test('writes to event log for execute timeout', async () => {
     consumer: 'test-consumer',
     relatedSavedObjects: [],
     request: {} as KibanaRequest,
+    actionExecutionId: '2',
   });
   expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
-  expect(map(eventLogger.logEvent.mock.calls, (event) => omit(event[0], 'action.uuid')))
-    .toMatchInlineSnapshot(`
-    Array [
-      Object {
-        "action": Object {
-          "name": undefined,
+  expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
+    event: {
+      action: 'execute-timeout',
+      kind: 'action',
+    },
+    kibana: {
+      action: {
+        execution: {
+          uuid: '2',
         },
-        "event": Object {
-          "action": "execute-timeout",
-          "kind": "action",
-        },
-        "kibana": Object {
-          "alert": Object {
-            "rule": Object {
-              "consumer": "test-consumer",
-              "execution": Object {
-                "uuid": "123abc",
-              },
-            },
-          },
-          "saved_objects": Array [
-            Object {
-              "id": "action1",
-              "namespace": "some-namespace",
-              "rel": "primary",
-              "type": "action",
-              "type_id": "test",
-            },
-          ],
-          "space_ids": Array [
-            "some-namespace",
-          ],
-        },
-        "message": "action: test:action1: 'action-1' execution cancelled due to timeout - exceeded default timeout of \\"5m\\"",
+        name: undefined,
       },
-    ]
-  `);
+      alert: {
+        rule: {
+          consumer: 'test-consumer',
+          execution: {
+            uuid: '123abc',
+          },
+        },
+      },
+      saved_objects: [
+        {
+          id: 'action1',
+          namespace: 'some-namespace',
+          rel: 'primary',
+          type: 'action',
+          type_id: 'test',
+        },
+      ],
+      space_ids: ['some-namespace'],
+    },
+    message:
+      'action: test:action1: \'action-1\' execution cancelled due to timeout - exceeded default timeout of "5m"',
+  });
 });
 
 test('writes to event log for execute and execute start', async () => {
@@ -873,74 +899,38 @@ test('writes to event log for execute and execute start', async () => {
   });
   await actionExecutor.execute(executeParams);
   expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
-  expect(map(eventLogger.logEvent.mock.calls, (event) => omit(event[0], 'action.uuid')))
-    .toMatchInlineSnapshot(`
-    Array [
-      Object {
-        "action": Object {
-          "name": "action-1",
+  expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
+    event: {
+      action: 'execute-start',
+      kind: 'action',
+    },
+    kibana: {
+      action: {
+        execution: {
+          uuid: '2',
         },
-        "event": Object {
-          "action": "execute-start",
-          "kind": "action",
-        },
-        "kibana": Object {
-          "alert": Object {
-            "rule": Object {
-              "execution": Object {
-                "uuid": "123abc",
-              },
-            },
-          },
-          "saved_objects": Array [
-            Object {
-              "id": "1",
-              "namespace": "some-namespace",
-              "rel": "primary",
-              "type": "action",
-              "type_id": "test",
-            },
-          ],
-          "space_ids": Array [
-            "some-namespace",
-          ],
-        },
-        "message": "action started: test:1: action-1",
+        name: 'action-1',
       },
-      Object {
-        "action": Object {
-          "name": "action-1",
-        },
-        "event": Object {
-          "action": "execute",
-          "kind": "action",
-          "outcome": "success",
-        },
-        "kibana": Object {
-          "alert": Object {
-            "rule": Object {
-              "execution": Object {
-                "uuid": "123abc",
-              },
-            },
+      alert: {
+        rule: {
+          execution: {
+            uuid: '123abc',
           },
-          "saved_objects": Array [
-            Object {
-              "id": "1",
-              "namespace": "some-namespace",
-              "rel": "primary",
-              "type": "action",
-              "type_id": "test",
-            },
-          ],
-          "space_ids": Array [
-            "some-namespace",
-          ],
         },
-        "message": "action executed: test:1: action-1",
       },
-    ]
-  `);
+      saved_objects: [
+        {
+          id: '1',
+          namespace: 'some-namespace',
+          rel: 'primary',
+          type: 'action',
+          type_id: 'test',
+        },
+      ],
+      space_ids: ['some-namespace'],
+    },
+    message: 'action started: test:1: action-1',
+  });
 });
 
 test('writes to event log for execute and execute start when consumer and related saved object are defined', async () => {
@@ -961,92 +951,47 @@ test('writes to event log for execute and execute start when consumer and relate
     ],
   });
   expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
-  expect(map(eventLogger.logEvent.mock.calls, (event) => omit(event[0], 'action.uuid')))
-    .toMatchInlineSnapshot(`
-    Array [
-      Object {
-        "action": Object {
-          "name": "action-1",
+  expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
+    event: {
+      action: 'execute-start',
+      kind: 'action',
+    },
+    kibana: {
+      action: {
+        execution: {
+          uuid: '2',
         },
-        "event": Object {
-          "action": "execute-start",
-          "kind": "action",
-        },
-        "kibana": Object {
-          "alert": Object {
-            "rule": Object {
-              "consumer": "test-consumer",
-              "execution": Object {
-                "uuid": "123abc",
-              },
-              "rule_type_id": ".rule-type",
-            },
-          },
-          "saved_objects": Array [
-            Object {
-              "id": "1",
-              "namespace": "some-namespace",
-              "rel": "primary",
-              "type": "action",
-              "type_id": "test",
-            },
-            Object {
-              "id": "12",
-              "namespace": undefined,
-              "rel": "primary",
-              "type": "alert",
-              "type_id": ".rule-type",
-            },
-          ],
-          "space_ids": Array [
-            "some-namespace",
-          ],
-        },
-        "message": "action started: test:1: action-1",
+        name: 'action-1',
       },
-      Object {
-        "action": Object {
-          "name": "action-1",
-        },
-        "event": Object {
-          "action": "execute",
-          "kind": "action",
-          "outcome": "success",
-        },
-        "kibana": Object {
-          "alert": Object {
-            "rule": Object {
-              "consumer": "test-consumer",
-              "execution": Object {
-                "uuid": "123abc",
-              },
-              "rule_type_id": ".rule-type",
-            },
+      alert: {
+        rule: {
+          consumer: 'test-consumer',
+          execution: {
+            uuid: '123abc',
           },
-          "saved_objects": Array [
-            Object {
-              "id": "1",
-              "namespace": "some-namespace",
-              "rel": "primary",
-              "type": "action",
-              "type_id": "test",
-            },
-            Object {
-              "id": "12",
-              "namespace": undefined,
-              "rel": "primary",
-              "type": "alert",
-              "type_id": ".rule-type",
-            },
-          ],
-          "space_ids": Array [
-            "some-namespace",
-          ],
+          rule_type_id: '.rule-type',
         },
-        "message": "action executed: test:1: action-1",
       },
-    ]
-  `);
+      saved_objects: [
+        {
+          id: '1',
+          namespace: 'some-namespace',
+          rel: 'primary',
+          type: 'action',
+          type_id: 'test',
+        },
+        {
+          id: '12',
+          namespace: undefined,
+          rel: 'primary',
+          type: 'alert',
+          type_id: '.rule-type',
+        },
+      ],
+      space_ids: ['some-namespace'],
+    },
+    message: 'action started: test:1: action-1',
+  });
 });
 
 function setupActionExecutorMock() {
