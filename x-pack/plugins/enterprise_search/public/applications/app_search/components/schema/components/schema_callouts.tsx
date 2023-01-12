@@ -144,10 +144,14 @@ export const MissingSubfieldsCallout: React.FC = () => {
     <EuiCallOut
       iconType="alert"
       color="warning"
-      title={`${incompleteFields.length} ${i18n.translate(
+      title={i18n.translate(
         'xpack.enterpriseSearch.appSearch.engine.schema.incompleteFields.title',
-        { defaultMessage: 'fields are missing subfields' }
-      )}`}
+        {
+          defaultMessage:
+            '{count, plural, one {A field is} other {# fields are}} missing subfields',
+          values: { count: incompleteFields.length },
+        }
+      )}
     >
       <p>
         {i18n.translate(
