@@ -9,20 +9,20 @@ import { mockHttpValues } from '../../../__mocks__/kea_logic';
 
 import { nextTick } from '@kbn/test-jest-helpers';
 
-import { fetchIndex } from './fetch_index_api_logic';
+import { fetchEngine } from './fetch_engine_api_logic';
 
-describe('FetchIndexApiLogic', () => {
+describe('FetchEngineApiLogic', () => {
   const { http } = mockHttpValues;
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  describe('fetchIndex', () => {
+  describe('fetchEngine', () => {
     it('calls correct api', async () => {
       const promise = Promise.resolve('result');
       http.get.mockReturnValue(promise);
-      const result = fetchIndex({ indexName: 'indexName' });
+      const result = fetchEngine({ engineName: 'my-engine' });
       await nextTick();
-      expect(http.get).toHaveBeenCalledWith('/internal/enterprise_search/indices/indexName');
+      expect(http.get).toHaveBeenCalledWith('/internal/enterprise_search/engines/my-engine');
       await expect(result).resolves.toEqual('result');
     });
   });
