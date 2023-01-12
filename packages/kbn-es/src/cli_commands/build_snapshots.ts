@@ -9,16 +9,14 @@
 import dedent from 'dedent';
 import { resolve, basename } from 'path';
 import { createHash } from 'crypto';
+import getopts from 'getopts';
+import del from 'del';
+import { buildSnapshot, log } from '../utils';
+import { Command } from './types';
 const { Transform } = require('stream');
 const { pipeline } = require('stream/promises');
 const { createWriteStream, createReadStream } = require('fs');
 const { mkdir, writeFile } = require('fs/promises');
-
-import getopts from 'getopts';
-import del from 'del';
-
-import { buildSnapshot, log } from '../utils';
-import { Command } from './types';
 
 export const buildSnapshots: Command = {
   description: 'Build and collect ES snapshots',
