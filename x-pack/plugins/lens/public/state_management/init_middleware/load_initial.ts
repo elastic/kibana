@@ -103,6 +103,7 @@ export function loadInitial(
     datasourceMap,
     embeddableEditorIncomingState,
     initialContext,
+    initialStateFromLocator,
     visualizationMap,
   } = storeDeps;
   const { resolvedDateRange, searchSessionId, isLinkedToOriginatingApp, ...emptyState } =
@@ -119,6 +120,76 @@ export function loadInitial(
   let activeDatasourceId: string | undefined;
   if (initialContext && 'query' in initialContext) {
     activeDatasourceId = 'textBased';
+  }
+
+  if (initialStateFromLocator) {
+    const locatorReferences =
+      'references' in initialStateFromLocator ? initialStateFromLocator.references : undefined;
+
+    const newFilters =
+      initialStateFromLocator &&
+      'filters' in initialStateFromLocator &&
+      initialStateFromLocator.filters
+        ? cloneDeep(initialStateFromLocator.filters)
+        : undefined;
+
+    if (newFilters) {
+      data.query.filterManager.setAppFilters(newFilters);
+    }
+
+    return initializeSources(
+      {
+        datasourceMap,
+        visualizationMap,
+        visualizationState: emptyState.visualization,
+        datasourceStates: emptyState.datasourceStates,
+        initialContext,
+        adHocDataViews: lens.persistedDoc?.state.adHocDataViews,
+        references: locatorReferences,
+        ...loaderSharedArgs,
+      },
+      {
+        isFullEditor: true,
+      }
+    )
+      .then(({ datasourceStates, visualizationState, indexPatterns, indexPatternRefs }) => {
+        const currentSessionId =
+          initialStateFromLocator?.searchSessionId || data.search.session.getSessionId();
+        store.dispatch(
+          setState({
+            isSaveable: true,
+            filters: initialStateFromLocator.filters || data.query.filterManager.getFilters(),
+            query: initialStateFromLocator.query || emptyState.query,
+            searchSessionId: currentSessionId,
+            activeDatasourceId: emptyState.activeDatasourceId,
+            visualization: {
+              activeId: emptyState.visualization.activeId,
+              state: visualizationState,
+            },
+            dataViews: getInitialDataViewsObject(indexPatterns, indexPatternRefs),
+            datasourceStates: Object.entries(datasourceStates).reduce(
+              (state, [datasourceId, datasourceState]) => ({
+                ...state,
+                [datasourceId]: {
+                  ...datasourceState,
+                  isLoading: false,
+                },
+              }),
+              {}
+            ),
+            isLoading: false,
+          })
+        );
+
+        if (autoApplyDisabled) {
+          store.dispatch(disableAutoApply());
+        }
+      })
+      .catch((e: { message: string }) => {
+        notifications.toasts.addDanger({
+          title: e.message,
+        });
+      });
   }
 
   if (

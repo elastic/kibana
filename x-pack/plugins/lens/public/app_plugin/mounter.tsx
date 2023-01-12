@@ -52,12 +52,42 @@ import {
 } from '../state_management';
 import { getPreloadedState, setState } from '../state_management/lens_slice';
 import { getLensInspectorService } from '../lens_inspector_service';
+import {
+  LensAppLocator,
+  LENS_SHARE_STATE_ACTION,
+  MainHistoryLocationState,
+} from '../../common/locator/locator';
+
+function getInitialContext(history: AppMountParameters['history']) {
+  const historyLocationState = history.location.state as
+    | MainHistoryLocationState
+    | HistoryLocationState
+    | undefined;
+
+  if (historyLocationState) {
+    if (historyLocationState.type === LENS_SHARE_STATE_ACTION) {
+      return {
+        contextType: historyLocationState.type,
+        initialStateFromLocator: historyLocationState.payload,
+      };
+    }
+    // get state from location, used for navigating from Visualize/Discover to Lens
+    if ([ACTION_VISUALIZE_LENS_FIELD, ACTION_CONVERT_TO_LENS].includes(historyLocationState.type)) {
+      return {
+        contextType: historyLocationState.type,
+        initialContext: historyLocationState.payload,
+        originatingApp: historyLocationState.originatingApp,
+      };
+    }
+  }
+}
 
 export async function getLensServices(
   coreStart: CoreStart,
   startDependencies: LensPluginStartDependencies,
   attributeService: LensAttributeService,
-  initialContext?: VisualizeFieldContext | VisualizeEditorContext
+  initialContext?: VisualizeFieldContext | VisualizeEditorContext,
+  locator?: LensAppLocator
 ): Promise<LensAppServices> {
   const {
     data,
@@ -112,6 +142,7 @@ export async function getLensServices(
     share,
     unifiedSearch,
     docLinks: coreStart.docLinks,
+    locator,
   };
 }
 
@@ -123,6 +154,7 @@ export async function mountApp(
     attributeService: LensAttributeService;
     getPresentationUtilContext: () => FC;
     topNavMenuEntryGenerators: LensTopNavMenuEntryGenerator[];
+    locator?: LensAppLocator;
   }
 ) {
   const {
@@ -130,26 +162,22 @@ export async function mountApp(
     attributeService,
     getPresentationUtilContext,
     topNavMenuEntryGenerators,
+    locator,
   } = mountProps;
   const [[coreStart, startDependencies], instance] = await Promise.all([
     core.getStartServices(),
     createEditorFrame(),
   ]);
-  const historyLocationState = params.history.location.state as HistoryLocationState;
 
-  // get state from location, used for navigating from Visualize/Discover to Lens
-  const initialContext =
-    historyLocationState &&
-    (historyLocationState.type === ACTION_VISUALIZE_LENS_FIELD ||
-      historyLocationState.type === ACTION_CONVERT_TO_LENS)
-      ? historyLocationState.payload
-      : undefined;
+  const { contextType, initialContext, initialStateFromLocator, originatingApp } =
+    getInitialContext(params.history) || {};
 
   const lensServices = await getLensServices(
     coreStart,
     startDependencies,
     attributeService,
-    initialContext
+    initialContext,
+    locator
   );
 
   const { stateTransfer, data } = lensServices;
@@ -195,8 +223,9 @@ export async function mountApp(
   const redirectToOrigin = (props?: RedirectToOriginProps) => {
     const contextOriginatingApp =
       initialContext && 'originatingApp' in initialContext ? initialContext.originatingApp : null;
-    const originatingApp = embeddableEditorIncomingState?.originatingApp ?? contextOriginatingApp;
-    if (!originatingApp) {
+    const mergedOriginatingApp =
+      embeddableEditorIncomingState?.originatingApp ?? contextOriginatingApp;
+    if (!mergedOriginatingApp) {
       throw new Error('redirectToOrigin called without an originating app');
     }
     let embeddableId = embeddableEditorIncomingState?.embeddableId;
@@ -205,7 +234,7 @@ export async function mountApp(
     }
     if (stateTransfer && props?.input) {
       const { input, isCopied } = props;
-      stateTransfer.navigateToWithEmbeddablePackage(originatingApp, {
+      stateTransfer.navigateToWithEmbeddablePackage(mergedOriginatingApp, {
         path: embeddableEditorIncomingState?.originatingPath,
         state: {
           embeddableId: isCopied ? undefined : embeddableId,
@@ -215,17 +244,17 @@ export async function mountApp(
         },
       });
     } else {
-      coreStart.application.navigateToApp(originatingApp, {
+      coreStart.application.navigateToApp(mergedOriginatingApp, {
         path: embeddableEditorIncomingState?.originatingPath,
       });
     }
   };
 
-  if (historyLocationState && historyLocationState.type === ACTION_VISUALIZE_LENS_FIELD) {
+  if (contextType === ACTION_VISUALIZE_LENS_FIELD && initialContext?.originatingApp) {
     // remove originatingApp from context when visualizing a field in Lens
     // so Lens does not try to return to the original app on Save
     // see https://github.com/elastic/kibana/issues/128695
-    delete initialContext?.originatingApp;
+    delete initialContext.originatingApp;
   }
 
   if (embeddableEditorIncomingState?.searchSessionId) {
@@ -239,6 +268,7 @@ export async function mountApp(
     visualizationMap,
     embeddableEditorIncomingState,
     initialContext,
+    initialStateFromLocator,
   };
   const lensStore: LensRootStore = makeConfigureStore(storeDeps, {
     lens: getPreloadedState(storeDeps) as LensAppState,
@@ -247,6 +277,7 @@ export async function mountApp(
   const EditorRenderer = React.memo(
     (props: { id?: string; history: History<unknown>; editByValue?: boolean }) => {
       const [editorState, setEditorState] = useState<'loading' | 'no_data' | 'data'>('loading');
+
       useEffect(() => {
         const kbnUrlStateStorage = createKbnUrlStateStorage({
           history: props.history,
@@ -268,14 +299,14 @@ export async function mountApp(
         },
         [props.history]
       );
-      const initialInput = useMemo(
-        () => getInitialInput(props.id, props.editByValue),
-        [props.editByValue, props.id]
-      );
+      const initialInput = useMemo(() => {
+        return getInitialInput(props.id, props.editByValue);
+      }, [props.editByValue, props.id]);
+
       const initCallback = useCallback(() => {
         // Clear app-specific filters when navigating to Lens. Necessary because Lens
-        // can be loaded without a full page refresh. If the user navigates to Lens from Discover
-        // we keep the filters
+        // can be loaded without a full page refresh.
+        // If the user navigates to Lens from Discover, or comes from a Lens share link we keep the filters
         if (!initialContext) {
           data.query.filterManager.setAppFilters([]);
         }
@@ -330,7 +361,7 @@ export async function mountApp(
             datasourceMap={datasourceMap}
             visualizationMap={visualizationMap}
             initialContext={initialContext}
-            contextOriginatingApp={historyLocationState?.originatingApp}
+            contextOriginatingApp={originatingApp}
             topNavMenuEntryGenerators={topNavMenuEntryGenerators}
             theme$={core.theme.theme$}
           />
