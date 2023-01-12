@@ -5,7 +5,11 @@
  * 2.0.
  */
 
+import { RefreshInterval } from '@kbn/data-plugin/public';
+import { TimeRange } from '@kbn/es-query';
 import { actions, ActorRefFrom, createMachine, EmittedFrom } from 'xstate';
+import { datemathToEpochMillis } from '../../../../utils/datemath';
+import { createLogStreamPositionStateMachine } from '../../../log_stream_position_state/src/state_machine';
 import {
   createLogStreamQueryStateMachine,
   LogStreamQueryStateMachineDependencies,
@@ -17,7 +21,9 @@ import type {
   LogStreamPageContext,
   LogStreamPageContextWithLogView,
   LogStreamPageContextWithLogViewError,
+  LogStreamPageContextWithPositions,
   LogStreamPageContextWithQuery,
+  LogStreamPageContextWithTime,
   LogStreamPageEvent,
   LogStreamPageTypestate,
 } from './types';
@@ -95,7 +101,7 @@ export const createPureLogStreamPageStateMachine = (initialContext: LogStreamPag
               on: {
                 RECEIVED_INITIAL_PARAMETERS: {
                   target: 'initialized',
-                  actions: 'storeQuery',
+                  actions: ['storeQuery', 'storeTime', 'storePositions'],
                 },
 
                 VALID_QUERY_CHANGED: {
@@ -109,6 +115,16 @@ export const createPureLogStreamPageStateMachine = (initialContext: LogStreamPag
                   internal: true,
                   actions: 'forwardToInitialParameters',
                 },
+                TIME_CHANGED: {
+                  target: 'uninitialized',
+                  internal: true,
+                  actions: 'forwardToInitialParameters',
+                },
+                POSITIONS_CHANGED: {
+                  target: 'uninitialized',
+                  internal: true,
+                  actions: 'forwardToInitialParameters',
+                },
               },
             },
             initialized: {
@@ -118,14 +134,50 @@ export const createPureLogStreamPageStateMachine = (initialContext: LogStreamPag
                   internal: true,
                   actions: 'storeQuery',
                 },
+                TIME_CHANGED: {
+                  target: 'initialized',
+                  internal: true,
+                  actions: ['storeTime', 'forwardToLogPosition'],
+                },
+                POSITIONS_CHANGED: {
+                  target: 'initialized',
+                  internal: true,
+                  actions: ['storePositions'],
+                },
+                JUMP_TO_TARGET_POSITION: {
+                  target: 'initialized',
+                  internal: true,
+                  actions: ['forwardToLogPosition'],
+                },
+                REPORT_VISIBLE_POSITIONS: {
+                  target: 'initialized',
+                  internal: true,
+                  actions: ['forwardToLogPosition'],
+                },
+                UPDATE_TIME_RANGE: {
+                  target: 'initialized',
+                  internal: true,
+                  actions: ['forwardToLogStreamQuery'],
+                },
+                UPDATE_REFRESH_INTERVAL: {
+                  target: 'initialized',
+                  internal: true,
+                  actions: ['forwardToLogStreamQuery'],
+                },
               },
             },
           },
 
-          invoke: {
-            src: 'logStreamQuery',
-            id: 'logStreamQuery',
-          },
+          invoke: [
+            {
+              src: 'logStreamQuery',
+              id: 'logStreamQuery',
+            },
+            {
+              src: 'logStreamPosition',
+              id: 'logStreamPosition',
+            },
+          ],
         },
         missingLogViewIndices: {},
       },
@@ -133,6 +185,8 @@ export const createPureLogStreamPageStateMachine = (initialContext: LogStreamPag
     {
       actions: {
         forwardToInitialParameters: actions.forwardTo('waitForInitialParameters'),
+        forwardToLogPosition: actions.forwardTo('logStreamPosition'),
+        forwardToLogStreamQuery: actions.forwardTo('logStreamQuery'),
         storeLogViewError: actions.assign((_context, event) =>
           event.type === 'LOADING_LOG_VIEW_FAILED'
             ? ({ logViewError: event.error } as LogStreamPageContextWithLogViewError)
@@ -157,6 +211,26 @@ export const createPureLogStreamPageStateMachine = (initialContext: LogStreamPag
               } as LogStreamPageContextWithQuery)
             : {}
         ),
+        storeTime: actions.assign((_context, event) => {
+          return 'timeRange' in event && 'refreshInterval' in event && 'timestamps' in event
+            ? ({
+                timeRange: event.timeRange,
+                refreshInterval: event.refreshInterval,
+                timestamps: event.timestamps,
+              } as LogStreamPageContextWithTime)
+            : {};
+        }),
+        storePositions: actions.assign((_context, event) => {
+          return 'targetPosition' in event &&
+            'visiblePositions' in event &&
+            'latestPosition' in event
+            ? ({
+                targetPosition: event.targetPosition,
+                visiblePositions: event.visiblePositions,
+                latestPosition: event.latestPosition,
+              } as LogStreamPageContextWithPositions)
+            : {};
+        }),
       },
       guards: {
         hasLogViewIndices: (_context, event) =>
@@ -169,6 +243,7 @@ export const createPureLogStreamPageStateMachine = (initialContext: LogStreamPag
 export type LogStreamPageStateMachine = ReturnType<typeof createPureLogStreamPageStateMachine>;
 export type LogStreamPageActorRef = OmitDeprecatedState<ActorRefFrom<LogStreamPageStateMachine>>;
 export type LogStreamPageState = EmittedFrom<LogStreamPageActorRef>;
+export type LogStreamPageSend = LogStreamPageActorRef['send'];
 
 export type LogStreamPageStateMachineDependencies = {
   logViewStateNotifications: LogViewNotificationChannel;
@@ -181,6 +256,7 @@ export const createLogStreamPageStateMachine = ({
   toastsService,
   filterManagerService,
   urlStateStorage,
+  timeFilterService,
 }: LogStreamPageStateMachineDependencies) =>
   createPureLogStreamPageStateMachine().withConfig({
     services: {
@@ -190,9 +266,31 @@ export const createLogStreamPageStateMachine = ({
           throw new Error('Failed to spawn log stream query service: no LogView in context');
         }
 
+        const nowTimestamp = Date.now();
+
+        const initialTimeRangeExpression: TimeRange = {
+          from: 'now-1d',
+          to: 'now',
+        };
+
+        const initialRefreshInterval: RefreshInterval = {
+          pause: true,
+          value: 5000,
+        };
+
         return createLogStreamQueryStateMachine(
           {
             dataViews: [context.resolvedLogView.dataViewReference],
+            timeRange: {
+              ...initialTimeRangeExpression,
+              lastChangedCompletely: nowTimestamp,
+            },
+            timestamps: {
+              startTimestamp: datemathToEpochMillis(initialTimeRangeExpression.from, 'down') ?? 0,
+              endTimestamp: datemathToEpochMillis(initialTimeRangeExpression.to, 'up') ?? 0,
+              lastChangedTimestamp: nowTimestamp,
+            },
+            refreshInterval: initialRefreshInterval,
           },
           {
             kibanaQuerySettings,
@@ -200,6 +298,26 @@ export const createLogStreamPageStateMachine = ({
             toastsService,
             filterManagerService,
             urlStateStorage,
+            timeFilterService,
+          }
+        );
+      },
+      logStreamPosition: (context) => {
+        return createLogStreamPositionStateMachine(
+          {
+            targetPosition: null,
+            latestPosition: null,
+            visiblePositions: {
+              endKey: null,
+              middleKey: null,
+              startKey: null,
+              pagesBeforeStart: Infinity,
+              pagesAfterEnd: Infinity,
+            },
+          },
+          {
+            urlStateStorage,
+            toastsService,
           }
         );
       },

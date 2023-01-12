@@ -6,7 +6,18 @@
  */
 
 import type { LogViewStatus } from '../../../../../common/log_views';
-import { ParsedQuery } from '../../../log_stream_query_state';
+import {
+  JumpToTargetPositionEvent,
+  LogStreamPositionContext,
+  ReportVisiblePositionsEvent,
+} from '../../../log_stream_position_state';
+import { LogStreamPositionNotificationEvent } from '../../../log_stream_position_state/src/notifications';
+import {
+  LogStreamQueryContextWithTime,
+  ParsedQuery,
+  UpdateRefreshIntervalEvent,
+  UpdateTimeRangeEvent,
+} from '../../../log_stream_query_state';
 import { LogStreamQueryNotificationEvent } from '../../../log_stream_query_state/src/notifications';
 import type {
   LogViewContextWithError,
@@ -17,10 +28,21 @@ import type {
 export type LogStreamPageEvent =
   | LogViewNotificationEvent
   | LogStreamQueryNotificationEvent
+  | LogStreamPositionNotificationEvent
   | {
       type: 'RECEIVED_INITIAL_PARAMETERS';
       validatedQuery: ParsedQuery;
-    };
+      timeRange: LogStreamPageContextWithTime['timeRange'];
+      refreshInterval: LogStreamPageContextWithTime['refreshInterval'];
+      timestamps: LogStreamPageContextWithTime['timestamps'];
+      targetPosition: LogStreamPageContextWithPositions['targetPosition'];
+      latestPosition: LogStreamPageContextWithPositions['latestPosition'];
+      visiblePositions: LogStreamPageContextWithPositions['visiblePositions'];
+    }
+  | JumpToTargetPositionEvent
+  | ReportVisiblePositionsEvent
+  | UpdateTimeRangeEvent
+  | UpdateRefreshIntervalEvent;
 
 export interface LogStreamPageContextWithLogView {
   logViewStatus: LogViewStatus;
@@ -34,6 +56,9 @@ export interface LogStreamPageContextWithLogViewError {
 export interface LogStreamPageContextWithQuery {
   parsedQuery: ParsedQuery;
 }
+
+export type LogStreamPageContextWithTime = LogStreamQueryContextWithTime;
+export type LogStreamPageContextWithPositions = LogStreamPositionContext;
 
 export type LogStreamPageTypestate =
   | {
@@ -58,7 +83,10 @@ export type LogStreamPageTypestate =
     }
   | {
       value: { hasLogViewIndices: 'initialized' };
-      context: LogStreamPageContextWithLogView & LogStreamPageContextWithQuery;
+      context: LogStreamPageContextWithLogView &
+        LogStreamPageContextWithQuery &
+        LogStreamPageContextWithTime &
+        LogStreamPageContextWithPositions;
     }
   | {
       value: 'missingLogViewIndices';

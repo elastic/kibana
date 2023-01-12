@@ -6,24 +6,15 @@
  */
 
 import createContainer from 'constate';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import useInterval from 'react-use/lib/useInterval';
+import { useCallback, useEffect, useMemo } from 'react';
 import useThrottle from 'react-use/lib/useThrottle';
-import { TimeKey } from '../../../../common/time';
-import { withReduxDevTools } from '../../../utils/state_container_devtools';
-import { TimefilterState } from '../../../utils/timefilter_state_storage';
-import { useObservableState } from '../../../utils/use_observable';
-import { wrapStateContainer } from '../../../utils/wrap_state_container';
+import { VisiblePositions } from '../../../observability_logs/log_stream_position_state/src/types';
 import {
-  createLogPositionStateContainer,
-  getTimefilterState,
-  getUrlState,
-  LogPositionState,
-  updateStateFromTimefilterState,
-  updateStateFromUrlState,
-} from './log_position_state';
-import { useLogPositionTimefilterStateSync } from './log_position_timefilter_state';
-import { LogPositionUrlState, useLogPositionUrlStateSync } from './use_log_position_url_state_sync';
+  LogStreamPageActorRef,
+  LogStreamPageSend,
+} from '../../../observability_logs/log_stream_page/state';
+import { MatchedStateFromActor } from '../../../observability_logs/xstate_helpers';
+import { TimeKey } from '../../../../common/time';
 
 type TimeKeyOrNull = TimeKey | null;
 
@@ -34,14 +25,6 @@ interface DateRange {
   endTimestamp: number;
   timestampsLastUpdate: number;
   lastCompleteDateRangeExpressionUpdate: number;
-}
-
-interface VisiblePositions {
-  startKey: TimeKeyOrNull;
-  middleKey: TimeKeyOrNull;
-  endKey: TimeKeyOrNull;
-  pagesAfterEnd: number;
-  pagesBeforeStart: number;
 }
 
 export type LogPositionStateParams = DateRange & {
@@ -71,65 +54,26 @@ type UpdateDateRangeFn = (
 const DESIRED_BUFFER_PAGES = 2;
 const RELATIVE_END_UPDATE_DELAY = 1000;
 
-export const useLogPositionState: () => LogPositionStateParams & LogPositionCallbacks = () => {
-  const { initialStateFromUrl, startSyncingWithUrl } = useLogPositionUrlStateSync();
-  const { initialStateFromTimefilter, startSyncingWithTimefilter } =
-    useLogPositionTimefilterStateSync();
+export const useLogPositionState = ({
+  logStreamPageState,
+  logStreamPageSend,
+}: {
+  logStreamPageState: InitializedLogStreamPageState;
+  logStreamPageSend: LogStreamPageSend;
+}): LogPositionStateParams & LogPositionCallbacks => {
+  const dateRange = useMemo(() => getLegacyDateRange(logStreamPageState), [logStreamPageState]);
 
-  const [logPositionStateContainer] = useState(() =>
-    withReduxDevTools(
-      createLogPositionStateContainer({
-        initialStateFromUrl,
-        initialStateFromTimefilter,
-      }),
-      {
-        name: 'logPosition',
-      }
-    )
-  );
-
-  useEffect(() => {
-    return startSyncingWithUrl(
-      wrapStateContainer<LogPositionState, LogPositionUrlState>({
-        wrapGet: getUrlState,
-        wrapSet: updateStateFromUrlState,
-      })(logPositionStateContainer)
-    );
-  }, [logPositionStateContainer, startSyncingWithUrl]);
-
-  useEffect(() => {
-    return startSyncingWithTimefilter(
-      wrapStateContainer<LogPositionState, TimefilterState>({
-        wrapGet: getTimefilterState,
-        wrapSet: updateStateFromTimefilterState,
-      })(logPositionStateContainer)
-    );
-  }, [logPositionStateContainer, startSyncingWithTimefilter, startSyncingWithUrl]);
-
-  const { latestValue: latestLogPositionState } = useObservableState(
-    logPositionStateContainer.state$,
-    () => logPositionStateContainer.get()
-  );
-
-  const dateRange = useMemo(
-    () => getLegacyDateRange(latestLogPositionState),
-    [latestLogPositionState]
-  );
-
-  const { targetPosition, visiblePositions } = latestLogPositionState;
-
-  const isStreaming = useMemo(
-    () => !latestLogPositionState.refreshInterval.pause,
-    [latestLogPositionState]
-  );
+  const { refreshInterval, timeRange, targetPosition, visiblePositions, latestPosition } =
+    logStreamPageState.context;
+  const isStreaming = useMemo(() => !refreshInterval.pause, [refreshInterval]);
 
   const updateDateRange = useCallback<UpdateDateRangeFn>(
     (newDateRange: Partial<Pick<DateRange, 'startDateExpression' | 'endDateExpression'>>) =>
-      logPositionStateContainer.transitions.updateTimeRange({
-        from: newDateRange.startDateExpression,
-        to: newDateRange.endDateExpression,
+      logStreamPageSend({
+        type: 'UPDATE_TIME_RANGE',
+        timeRange: { from: newDateRange.startDateExpression, to: newDateRange.endDateExpression },
       }),
-    [logPositionStateContainer]
+    [logStreamPageSend]
   );
 
   const visibleTimeInterval = useMemo(
@@ -146,23 +90,62 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
     RELATIVE_END_UPDATE_DELAY
   );
   useEffect(() => {
-    if (dateRange.endDateExpression !== 'now') {
+    if (timeRange.to !== 'now') {
       return;
     }
 
     // User is close to the bottom edge of the scroll.
     if (throttledPagesAfterEnd <= DESIRED_BUFFER_PAGES) {
-      logPositionStateContainer.transitions.updateTimeRange({ to: 'now' });
+      logStreamPageSend({
+        type: 'UPDATE_TIME_RANGE',
+        timeRange: { to: 'now' },
+      });
     }
-  }, [dateRange.endDateExpression, throttledPagesAfterEnd, logPositionStateContainer]);
+  }, [timeRange.to, throttledPagesAfterEnd, logStreamPageSend]);
 
-  useInterval(
-    () => logPositionStateContainer.transitions.updateTimeRange({ from: 'now-1d', to: 'now' }),
-    latestLogPositionState.refreshInterval.pause ||
-      latestLogPositionState.refreshInterval.value <= 0
-      ? null
-      : latestLogPositionState.refreshInterval.value
+  const jumpToTargetPosition = useCallback(
+    (_targetPosition: TimeKey | null) => {
+      logStreamPageSend({
+        type: 'JUMP_TO_TARGET_POSITION',
+        targetPosition: _targetPosition,
+      });
+    },
+    [logStreamPageSend]
   );
+
+  const jumpToTargetPositionTime = useCallback(
+    (time: number) => {
+      logStreamPageSend({
+        type: 'JUMP_TO_TARGET_POSITION',
+        targetPosition: { time },
+      });
+    },
+    [logStreamPageSend]
+  );
+
+  const reportVisiblePositions = useCallback(
+    (_visiblePositions: VisiblePositions) => {
+      logStreamPageSend({
+        type: 'REPORT_VISIBLE_POSITIONS',
+        visiblePositions: _visiblePositions,
+      });
+    },
+    [logStreamPageSend]
+  );
+
+  const startLiveStreaming = useCallback(() => {
+    logStreamPageSend({
+      type: 'UPDATE_REFRESH_INTERVAL',
+      refreshInterval: { pause: false },
+    });
+  }, [logStreamPageSend]);
+
+  const stopLiveStreaming = useCallback(() => {
+    logStreamPageSend({
+      type: 'UPDATE_REFRESH_INTERVAL',
+      refreshInterval: { pause: true },
+    });
+  }, [logStreamPageSend]);
 
   return {
     // position state
@@ -174,16 +157,16 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
     firstVisiblePosition: visiblePositions.startKey,
     pagesBeforeStart: visiblePositions.pagesBeforeStart,
     pagesAfterEnd: visiblePositions.pagesAfterEnd,
-    visibleMidpoint: latestLogPositionState.latestPosition,
-    visibleMidpointTime: latestLogPositionState.latestPosition?.time ?? null,
+    visibleMidpoint: latestPosition,
+    visibleMidpointTime: latestPosition?.time ?? null,
     visibleTimeInterval,
 
     // actions
-    jumpToTargetPosition: logPositionStateContainer.transitions.jumpToTargetPosition,
-    jumpToTargetPositionTime: logPositionStateContainer.transitions.jumpToTargetPositionTime,
-    reportVisiblePositions: logPositionStateContainer.transitions.reportVisiblePositions,
-    startLiveStreaming: logPositionStateContainer.transitions.startLiveStreaming,
-    stopLiveStreaming: logPositionStateContainer.transitions.stopLiveStreaming,
+    jumpToTargetPosition,
+    jumpToTargetPositionTime,
+    reportVisiblePositions,
+    startLiveStreaming,
+    stopLiveStreaming,
     updateDateRange,
   };
 };
@@ -191,11 +174,19 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
 export const [LogPositionStateProvider, useLogPositionStateContext] =
   createContainer(useLogPositionState);
 
-const getLegacyDateRange = (logPositionState: LogPositionState): DateRange => ({
-  endDateExpression: logPositionState.timeRange.expression.to,
-  endTimestamp: logPositionState.timestamps.endTimestamp,
-  lastCompleteDateRangeExpressionUpdate: logPositionState.timeRange.lastChangedCompletely,
-  startDateExpression: logPositionState.timeRange.expression.from,
-  startTimestamp: logPositionState.timestamps.startTimestamp,
-  timestampsLastUpdate: logPositionState.timestamps.lastChangedTimestamp,
-});
+const getLegacyDateRange = (logStreamPageState: InitializedLogStreamPageState): DateRange => {
+  return {
+    startDateExpression: logStreamPageState.context.timeRange.from,
+    endDateExpression: logStreamPageState.context.timeRange.to,
+    startTimestamp: logStreamPageState.context.timestamps.startTimestamp,
+    endTimestamp: logStreamPageState.context.timestamps.endTimestamp,
+    lastCompleteDateRangeExpressionUpdate:
+      logStreamPageState.context.timeRange.lastChangedCompletely,
+    timestampsLastUpdate: logStreamPageState.context.timestamps.lastChangedTimestamp,
+  };
+};
+
+type InitializedLogStreamPageState = MatchedStateFromActor<
+  LogStreamPageActorRef,
+  { hasLogViewIndices: 'initialized' }
+>;

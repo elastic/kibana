@@ -21,6 +21,7 @@ export const useLogStreamPageState = ({
   filterManagerService,
   urlStateStorage,
   useDevTools = isDevMode(),
+  timeFilterService,
 }: {
   useDevTools?: boolean;
 } & LogStreamPageStateMachineDependencies) => {
@@ -33,6 +34,7 @@ export const useLogStreamPageState = ({
         toastsService,
         filterManagerService,
         urlStateStorage,
+        timeFilterService,
       }),
     { devTools: useDevTools }
   );

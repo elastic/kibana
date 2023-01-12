@@ -9,6 +9,7 @@ import { useActor } from '@xstate/react';
 import React from 'react';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import {
+  LogStreamPageSend,
   LogStreamPageState,
   useLogStreamPageStateContext,
 } from '../../../observability_logs/log_stream_page/state';
@@ -20,16 +21,24 @@ import { LogStreamPageContentProviders } from './page_providers';
 
 export const ConnectedStreamPageContent: React.FC = () => {
   const logStreamPageStateService = useLogStreamPageStateContext();
-
-  const [logStreamPageState] = useActor(logStreamPageStateService);
-
-  return <StreamPageContentForState logStreamPageState={logStreamPageState} />;
+  const [logStreamPageState, logStreamPageSend] = useActor(logStreamPageStateService);
+  return (
+    <StreamPageContentForState
+      logStreamPageState={logStreamPageState}
+      logStreamPageSend={logStreamPageSend}
+    />
+  );
 };
 
-export const StreamPageContentForState: React.FC<{ logStreamPageState: LogStreamPageState }> = ({
-  logStreamPageState,
-}) => {
-  if (logStreamPageState.matches('uninitialized') || logStreamPageState.matches('loadingLogView')) {
+export const StreamPageContentForState: React.FC<{
+  logStreamPageState: LogStreamPageState;
+  logStreamPageSend: LogStreamPageSend;
+}> = ({ logStreamPageState, logStreamPageSend }) => {
+  if (
+    logStreamPageState.matches('uninitialized') ||
+    logStreamPageState.matches({ hasLogViewIndices: 'uninitialized' }) ||
+    logStreamPageState.matches('loadingLogView')
+  ) {
     return <SourceLoadingPage />;
   } else if (logStreamPageState.matches('loadingLogViewFailed')) {
     return <ConnectedLogViewErrorPage />;
@@ -37,8 +46,14 @@ export const StreamPageContentForState: React.FC<{ logStreamPageState: LogStream
     return <StreamPageMissingIndicesContent />;
   } else if (logStreamPageState.matches({ hasLogViewIndices: 'initialized' })) {
     return (
-      <LogStreamPageContentProviders logStreamPageState={logStreamPageState}>
-        <StreamPageLogsContentForState logStreamPageState={logStreamPageState} />
+      <LogStreamPageContentProviders
+        logStreamPageState={logStreamPageState}
+        logStreamPageSend={logStreamPageSend}
+      >
+        <StreamPageLogsContentForState
+          logStreamPageState={logStreamPageState}
+          logStreamPageSend={logStreamPageSend}
+        />
       </LogStreamPageContentProviders>
     );
   } else {
