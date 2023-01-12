@@ -606,7 +606,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           expect(updatedAlert.hits.hits[0]._source?.[ALERT_CASE_IDS]).eql(caseIds);
 
-          return updatedAlert;
+          return { updatedAlert, cases };
         };
 
         it('should change the status of the alerts if sync alert is on', async () => {
@@ -625,8 +625,25 @@ export default ({ getService }: FtrProviderContext): void => {
           await bulkCreateAlertsAndVerifyCaseIdsInAlertSchema(2);
         });
 
+        it('should remove cases with the same ID from the case_ids alerts field', async () => {
+          const { updatedAlert, cases } = await bulkCreateAlertsAndVerifyCaseIdsInAlertSchema(1);
+          const postedCase = cases[0];
+          const alert = updatedAlert.hits.hits[0];
+
+          await bulkCreateCommentAndRefreshIndex({
+            caseId: postedCase.id,
+            alertId: alert._id,
+            alertIndex: alert._index,
+          });
+
+          const updatedAlertSecondTime = await getSecuritySolutionAlerts(supertest, [alert._id]);
+          expect(updatedAlertSecondTime.hits.hits[0]._source?.[ALERT_CASE_IDS]).eql([
+            postedCase.id,
+          ]);
+        });
+
         it('should not add more than 10 cases to an alert', async () => {
-          const updatedAlert = await bulkCreateAlertsAndVerifyCaseIdsInAlertSchema(10);
+          const { updatedAlert } = await bulkCreateAlertsAndVerifyCaseIdsInAlertSchema(10);
           const alert = updatedAlert.hits.hits[0];
 
           const postedCase = await createCase(supertest, {
@@ -691,7 +708,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       describe('observability', () => {
         const alertId = 'NoxgpHkBqbdrfX07MqXV';
-        const ampIndex = '.alerts-observability.apm.alerts';
+        const apmIndex = '.alerts-observability.apm.alerts';
 
         beforeEach(async () => {
           await esArchiver.load('x-pack/test/functional/es_archives/rule_registry/alerts');
@@ -719,7 +736,7 @@ export default ({ getService }: FtrProviderContext): void => {
               params: [
                 {
                   alertId,
-                  index: ampIndex,
+                  index: apmIndex,
                   rule: {
                     id: 'id',
                     name: 'name',
@@ -734,7 +751,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const alert = await getAlertById({
             supertest,
             id: alertId,
-            index: ampIndex,
+            index: apmIndex,
             auth: { user: superUser, space: 'space1' },
           });
 
@@ -742,7 +759,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           expect(alert['kibana.alert.case_ids']).eql(caseIds);
 
-          return alert;
+          return { alert, cases };
         };
 
         it('should add the case ID to the alert schema', async () => {
@@ -751,6 +768,37 @@ export default ({ getService }: FtrProviderContext): void => {
 
         it('should add multiple case ids to the alert schema', async () => {
           await bulkCreateAlertsAndVerifyCaseIdsInAlertSchema(2);
+        });
+
+        it('should remove cases with the same ID from the case_ids alerts field', async () => {
+          const { cases } = await bulkCreateAlertsAndVerifyCaseIdsInAlertSchema(1);
+          const postedCase = cases[0];
+
+          await bulkCreateAttachments({
+            supertest,
+            caseId: postedCase.id,
+            params: [
+              {
+                alertId,
+                index: apmIndex,
+                rule: {
+                  id: 'id',
+                  name: 'name',
+                },
+                owner: 'observabilityFixture',
+                type: CommentType.alert,
+              },
+            ],
+          });
+
+          const alert = await getAlertById({
+            supertest,
+            id: alertId,
+            index: apmIndex,
+            auth: { user: superUser, space: 'space1' },
+          });
+
+          expect(alert['kibana.alert.case_ids']).eql([postedCase.id]);
         });
 
         it('should not add more than 10 cases to an alert', async () => {
@@ -767,7 +815,7 @@ export default ({ getService }: FtrProviderContext): void => {
             params: [
               {
                 alertId,
-                index: ampIndex,
+                index: apmIndex,
                 rule: {
                   id: 'id',
                   name: 'name',
@@ -798,7 +846,7 @@ export default ({ getService }: FtrProviderContext): void => {
             params: [
               {
                 alertId,
-                index: ampIndex,
+                index: apmIndex,
                 rule: {
                   id: 'id',
                   name: 'name',
@@ -830,7 +878,7 @@ export default ({ getService }: FtrProviderContext): void => {
             params: [
               {
                 alertId,
-                index: ampIndex,
+                index: apmIndex,
                 rule: {
                   id: 'id',
                   name: 'name',
