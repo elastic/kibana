@@ -43,7 +43,7 @@ export const CommandInputHistory = memo(() => {
   const selectableHistoryOptions = useMemo(() => {
     return inputHistory.map<EuiSelectableProps['options'][number]>((inputItem, index) => {
       return {
-        label: inputItem.input,
+        label: inputItem.display,
         key: inputItem.id,
         data: inputItem,
       };
@@ -96,7 +96,10 @@ export const CommandInputHistory = memo(() => {
       if (selected) {
         dispatch({
           type: 'updateInputTextEnteredState',
-          payload: { leftOfCursorText: selected.label, rightOfCursorText: '' },
+          payload: {
+            leftOfCursorText: (selected.data as InputHistoryItem).input,
+            rightOfCursorText: '',
+          },
         });
       }
 
