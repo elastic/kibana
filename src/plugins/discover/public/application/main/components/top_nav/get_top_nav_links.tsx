@@ -9,7 +9,6 @@
 import { i18n } from '@kbn/i18n';
 import type { ISearchSource } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { unhashUrl } from '@kbn/kibana-utils-plugin/public';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { showOpenSearchPanel } from './show_open_search_panel';
@@ -159,8 +158,7 @@ export const getTopNavLinks = ({
     }),
     testId: 'shareTopNavButton',
     run: async (anchorElement: HTMLElement) => {
-      const updatedDataView = await persistDataView(dataView);
-      if (!services.share || !updatedDataView) {
+      if (!services.share) {
         return;
       }
       const sharingData = await getSharingData(searchSource, state.appState.getState(), services);
@@ -169,7 +167,16 @@ export const getTopNavLinks = ({
         anchorElement,
         allowEmbed: false,
         allowShortUrl: !!services.capabilities.discover.createShortUrl,
-        shareableUrl: unhashUrl(window.location.href),
+        shareableUrl: services.locator.getRedirectUrl({
+          dataViewId: dataView.isPersisted() ? dataView.id : undefined,
+          dataViewSpec: dataView.isPersisted() ? dataView.toSpec(false) : undefined,
+          filters: state.appState.getState().filters,
+          query: state.appState.getState().query,
+          sort: state.appState.getState().sort,
+          columns: state.appState.getState().columns,
+          breakdownField: state.appState.getState().breakdownField,
+          viewMode: state.appState.getState().viewMode,
+        }),
         objectId: savedSearch.id,
         objectType: 'search',
         sharingData: {
