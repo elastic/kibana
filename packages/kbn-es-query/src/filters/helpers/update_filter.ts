@@ -89,8 +89,6 @@ function updateWithRangeOperator(
   rawParams: RangeFilterParams,
   field: string
 ) {
-  console.dir(filter);
-  console.dir(rawParams);
   const rangeParams = {
     ...pickBy(rawParams, identity),
   };
