@@ -78,6 +78,7 @@ export default function ({ getService }) {
           ccs: 'boolean',
           logsIndex: 'string',
           metricbeatIndex: 'string',
+          packageIndex: 'string',
           hasRemoteClusterConfigured: 'boolean',
         });
       });

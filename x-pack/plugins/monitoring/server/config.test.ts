@@ -97,6 +97,9 @@ describe('config schema', () => {
             "index": "metricbeat-*",
           },
           "min_interval_seconds": 10,
+          "package": Object {
+            "index": "metrics-*",
+          },
           "show_license_expiration": true,
         },
       }
