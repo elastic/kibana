@@ -198,11 +198,14 @@ export function LatencyAlertsHistoryChart({
             }}
             marker={<EuiIcon type="alert" color={'red'} />}
             markerBody={(data) => (
-              <EuiBadge color="#BD271E">
-                <EuiText size="xs" color="white">
-                  {data.header}
-                </EuiText>
-              </EuiBadge>
+              <>
+                <EuiBadge color="#BD271E">
+                  <EuiText size="xs" color="white">
+                    {data.header}
+                  </EuiText>
+                </EuiBadge>
+                <EuiSpacer size="xs" />
+              </>
             )}
             markerPosition={Position.Top}
           />,
