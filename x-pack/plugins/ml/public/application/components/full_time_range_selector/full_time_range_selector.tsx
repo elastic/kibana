@@ -22,9 +22,15 @@ import {
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { useStorage } from '@kbn/ml-local-storage';
 import { setFullTimeRange } from './full_time_range_selector_service';
-import { useStorage } from '../../contexts/storage';
-import { ML_FROZEN_TIER_PREFERENCE } from '../../../../common/types/storage';
+import {
+  ML_FROZEN_TIER_PREFERENCE,
+  FROZEN_TIER_PREFERENCE,
+  type MlStorageKey,
+  type TMlStorageMapped,
+  type FrozenTierPreference,
+} from '../../../../common/types/storage';
 import { GetTimeFieldRangeResponse } from '../../services/ml_api_service';
 
 interface Props {
@@ -33,13 +39,6 @@ interface Props {
   disabled: boolean;
   callback?: (a: GetTimeFieldRangeResponse) => void;
 }
-
-const FROZEN_TIER_PREFERENCE = {
-  EXCLUDE: 'exclude-frozen',
-  INCLUDE: 'include-frozen',
-} as const;
-
-type FrozenTierPreference = typeof FROZEN_TIER_PREFERENCE[keyof typeof FROZEN_TIER_PREFERENCE];
 
 // Component for rendering a button which automatically sets the range of the time filter
 // to the time range of data in the index(es) mapped to the supplied Kibana index pattern or query.
@@ -53,10 +52,10 @@ export const FullTimeRangeSelector: FC<Props> = ({ dataView, query, disabled, ca
   }
 
   const [isPopoverOpen, setPopover] = useState(false);
-  const [frozenDataPreference, setFrozenDataPreference] = useStorage(
-    ML_FROZEN_TIER_PREFERENCE,
-    FROZEN_TIER_PREFERENCE.EXCLUDE
-  );
+  const [frozenDataPreference, setFrozenDataPreference] = useStorage<
+    MlStorageKey,
+    TMlStorageMapped<typeof ML_FROZEN_TIER_PREFERENCE>
+  >(ML_FROZEN_TIER_PREFERENCE, FROZEN_TIER_PREFERENCE.EXCLUDE);
 
   const onButtonClick = () => {
     setPopover(!isPopoverOpen);

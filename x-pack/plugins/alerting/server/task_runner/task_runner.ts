@@ -72,6 +72,7 @@ import { getPublicAlertFactory } from '../alert/create_alert_factory';
 import { TaskRunnerTimer, TaskRunnerTimerSpan } from './task_runner_timer';
 import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
 import { ILastRun, lastRunFromState, lastRunToRaw } from '../lib/last_run_status';
+import { RunningHandler } from './running_handler';
 import { RuleResultService } from '../monitoring/rule_result_service';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
@@ -116,6 +117,7 @@ export class TaskRunner<
   private cancelled: boolean;
   private stackTraceLog: StackTraceLog | null;
   private ruleMonitoring: RuleMonitoringService;
+  private ruleRunning: RunningHandler;
   private ruleResult: RuleResultService;
 
   constructor(
@@ -150,10 +152,15 @@ export class TaskRunner<
     this.alertingEventLogger = new AlertingEventLogger(this.context.eventLogger);
     this.stackTraceLog = null;
     this.ruleMonitoring = new RuleMonitoringService();
+    this.ruleRunning = new RunningHandler(
+      this.context.internalSavedObjectsRepository,
+      this.logger,
+      loggerId
+    );
     this.ruleResult = new RuleResultService();
   }
 
-  private async updateRuleSavedObject(
+  private async updateRuleSavedObjectPostRun(
     ruleId: string,
     namespace: string | undefined,
     attributes: {
@@ -165,11 +172,25 @@ export class TaskRunner<
   ) {
     const client = this.context.internalSavedObjectsRepository;
     try {
-      await partiallyUpdateAlert(client, ruleId, attributes, {
-        ignore404: true,
-        namespace,
-        refresh: false,
-      });
+      // Future engineer -> Here we are just checking if we need to wait for
+      // the update of the attribute `running` in the rule's saved object
+      // and we are swallowing the error because we still want to move forward
+      // with the update of our rule since we are putting back the running attribute
+      // back to false
+      await this.ruleRunning.waitFor();
+      // eslint-disable-next-line no-empty
+    } catch {}
+    try {
+      await partiallyUpdateAlert(
+        client,
+        ruleId,
+        { ...attributes, running: false },
+        {
+          ignore404: true,
+          namespace,
+          refresh: false,
+        }
+      );
     } catch (err) {
       this.logger.error(`error updating rule for ${this.ruleType.id}:${ruleId} ${err.message}`);
     }
@@ -327,6 +348,11 @@ export class TaskRunner<
             includedHiddenTypes: ['alert', 'action'],
           });
 
+          const dataViews = await this.context.dataViews.dataViewsServiceFactory(
+            savedObjectsClient,
+            scopedClusterClient.asInternalUser
+          );
+
           updatedState = await this.context.executionContext.withContext(ctx, () =>
             this.ruleType.executor({
               executionId: this.executionId,
@@ -339,6 +365,8 @@ export class TaskRunner<
                 shouldWriteAlerts: () => this.shouldLogAndScheduleActionsForAlerts(),
                 shouldStopExecution: () => this.cancelled,
                 ruleMonitoringService: this.ruleMonitoring.getLastRunMetricsSetters(),
+                dataViews,
+                share: this.context.share,
                 ruleResultService: this.ruleResult.getLastRunSetters(),
               },
               params,
@@ -665,8 +693,7 @@ export class TaskRunner<
           executionStatus
         )} - ${JSON.stringify(lastRun)}`
       );
-
-      await this.updateRuleSavedObject(ruleId, namespace, {
+      await this.updateRuleSavedObjectPostRun(ruleId, namespace, {
         executionStatus: ruleExecutionStatusToRaw(executionStatus),
         nextRun,
         lastRun: lastRunToRaw(lastRun),
@@ -685,6 +712,7 @@ export class TaskRunner<
       schedule: taskSchedule,
     } = this.taskInstance;
 
+    this.ruleRunning.start(ruleId, this.context.spaceIdToNamespace(spaceId));
     const runDate = new Date();
     this.logger.debug(`executing rule ${this.ruleType.id}:${ruleId} at ${runDate.toISOString()}`);
 
@@ -863,7 +891,7 @@ export class TaskRunner<
     this.logger.debug(
       `Updating rule task for ${this.ruleType.id} rule with id ${ruleId} - execution error due to timeout`
     );
-    await this.updateRuleSavedObject(ruleId, namespace, {
+    await this.updateRuleSavedObjectPostRun(ruleId, namespace, {
       executionStatus: ruleExecutionStatusToRaw(executionStatus),
       lastRun: {
         outcome: 'failed',

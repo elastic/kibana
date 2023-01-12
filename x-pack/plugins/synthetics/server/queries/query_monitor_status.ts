@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/types';
+import { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { SUMMARY_FILTER } from '../../common/constants/client_defaults';
 import { UptimeEsClient } from '../legacy_uptime/lib/lib';
 import { OverviewStatus, OverviewStatusMetaData, Ping } from '../../common/runtime_types';
@@ -14,15 +14,16 @@ const DEFAULT_MAX_ES_BUCKET_SIZE = 10000;
 
 export async function queryMonitorStatus(
   esClient: UptimeEsClient,
-  maxLocations: number,
+  listOfLocations: string[],
   range: { from: string | number; to: string },
-  ids: string[]
+  ids: string[],
+  monitorLocationsMap?: Record<string, string[]>
 ): Promise<Omit<OverviewStatus, 'disabledCount'>> {
-  const idSize = Math.trunc(DEFAULT_MAX_ES_BUCKET_SIZE / maxLocations);
+  const idSize = Math.trunc(DEFAULT_MAX_ES_BUCKET_SIZE / listOfLocations.length || 1);
   const pageCount = Math.ceil(ids.length / idSize);
   const promises: Array<Promise<any>> = [];
   for (let i = 0; i < pageCount; i++) {
-    const params: estypes.SearchRequest = {
+    const params: SearchRequest = {
       size: 0,
       query: {
         bool: {
@@ -43,6 +44,15 @@ export async function queryMonitorStatus(
                 'monitor.id': (ids as string[]).slice(i * idSize, i * idSize + idSize),
               },
             },
+            ...(listOfLocations.length > 0
+              ? [
+                  {
+                    terms: {
+                      'observer.geo.name': listOfLocations,
+                    },
+                  },
+                ]
+              : []),
           ],
         },
       },
@@ -56,7 +66,7 @@ export async function queryMonitorStatus(
             location: {
               terms: {
                 field: 'observer.geo.name',
-                size: maxLocations,
+                size: listOfLocations.length || 100,
               },
               aggs: {
                 status: {
@@ -90,43 +100,54 @@ export async function queryMonitorStatus(
       },
     };
 
-    promises.push(esClient.baseESClient.search(params));
+    promises.push(esClient.search({ body: params }, 'getCurrentStatusOverview' + i));
   }
   let up = 0;
   let down = 0;
   const upConfigs: Record<string, OverviewStatusMetaData> = {};
   const downConfigs: Record<string, OverviewStatusMetaData> = {};
   for await (const response of promises) {
-    response.aggregations?.id.buckets.forEach(({ location }: { key: string; location: any }) => {
-      location.buckets.forEach(({ status }: { key: string; status: any }) => {
-        const ping = status.hits.hits[0]._source as Ping;
+    response.body.aggregations?.id.buckets.forEach(
+      ({ location, key: queryId }: { location: any; key: string }) => {
+        location.buckets.forEach(({ status }: { key: string; status: any }) => {
+          const ping = status.hits.hits[0]._source as Ping & { '@timestamp': string };
 
-        const downCount = ping.summary?.down ?? 0;
-        const upCount = ping.summary?.up ?? 0;
-        const configId = ping.config_id!;
-        const monitorQueryId = ping.monitor.id;
-        const locationName = ping.observer?.geo?.name!;
-        if (upCount > 0) {
-          up += 1;
-          upConfigs[`${configId}-${locationName}`] = {
-            ping,
-            configId,
-            monitorQueryId,
-            location: locationName,
-            status: 'up',
-          };
-        } else if (downCount > 0) {
-          down += 1;
-          downConfigs[`${configId}-${locationName}`] = {
-            ping,
-            configId,
-            monitorQueryId,
-            location: locationName,
-            status: 'down',
-          };
-        }
-      });
-    });
+          const locationName = ping.observer?.geo?.name!;
+
+          const monLocations = monitorLocationsMap?.[queryId];
+          if (monLocations && !monLocations.includes(locationName)) {
+            // discard any locations that are not in the monitorLocationsMap for the given monitor
+            return;
+          }
+
+          const downCount = ping.summary?.down ?? 0;
+          const upCount = ping.summary?.up ?? 0;
+          const configId = ping.config_id!;
+          const monitorQueryId = ping.monitor.id;
+          if (upCount > 0) {
+            up += 1;
+            upConfigs[`${configId}-${locationName}`] = {
+              ping,
+              configId,
+              monitorQueryId,
+              location: locationName,
+              status: 'up',
+              timestamp: ping['@timestamp'],
+            };
+          } else if (downCount > 0) {
+            down += 1;
+            downConfigs[`${configId}-${locationName}`] = {
+              ping,
+              configId,
+              monitorQueryId,
+              location: locationName,
+              status: 'down',
+              timestamp: ping['@timestamp'],
+            };
+          }
+        });
+      }
+    );
   }
   return { up, down, upConfigs, downConfigs, enabledIds: ids };
 }

@@ -21,16 +21,14 @@ interface TrimmedRecoveredAlertsResult<
 }
 
 export interface TrimRecoveredOpts {
-  index: number | string;
+  key: string;
   flappingHistory: boolean[];
-  trackedEvents?: boolean;
 }
 
 export function trimRecoveredAlerts<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
-  RecoveryActionGroupIds extends string,
-  ActionGroupIds extends string
+  RecoveryActionGroupIds extends string
 >(
   logger: Logger,
   recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupIds>> = {},
@@ -39,19 +37,19 @@ export function trimRecoveredAlerts<
 ): TrimmedRecoveredAlertsResult<State, Context, RecoveryActionGroupIds> {
   const alerts = map(recoveredAlerts, (value, key) => {
     return {
-      index: key,
+      key,
       flappingHistory: value.getFlappingHistory() || [],
     };
   });
   const earlyRecoveredAlertOpts = getEarlyRecoveredAlerts(logger, alerts, maxAlerts);
   const earlyRecoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupIds>> = {};
   earlyRecoveredAlertOpts.forEach((opt) => {
-    const alert = recoveredAlerts[opt.index];
+    const alert = recoveredAlerts[opt.key];
     alert.setFlapping(false);
-    earlyRecoveredAlerts[opt.index] = recoveredAlerts[opt.index];
+    earlyRecoveredAlerts[opt.key] = recoveredAlerts[opt.key];
 
-    delete recoveredAlerts[opt.index];
-    delete currentRecoveredAlerts[opt.index];
+    delete recoveredAlerts[opt.key];
+    delete currentRecoveredAlerts[opt.key];
   });
   return {
     trimmedAlertsRecovered: recoveredAlerts,
@@ -71,9 +69,9 @@ export function getEarlyRecoveredAlerts(
       return a.flappingHistory.length - b.flappingHistory.length;
     });
 
-    earlyRecoveredAlerts = recoveredAlerts.splice(maxAlerts);
+    earlyRecoveredAlerts = recoveredAlerts.slice(maxAlerts);
     logger.warn(
-      `Recovered alerts have exceeded the max alert limit: dropping ${
+      `Recovered alerts have exceeded the max alert limit of ${maxAlerts} : dropping ${
         earlyRecoveredAlerts.length
       } ${earlyRecoveredAlerts.length > 1 ? 'alerts' : 'alert'}.`
     );

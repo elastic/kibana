@@ -47,7 +47,6 @@ import { fetchExistingAlerts } from './fetch_existing_alerts';
 import { getCommonAlertFields } from './get_common_alert_fields';
 import { getUpdatedFlappingHistory } from './get_updated_flapping_history';
 import { fetchAlertByAlertUUID } from './fetch_alert_by_uuid';
-import { trimRecoveredAlerts } from './trim_recovered_alerts';
 import { getAlertsForNotification } from './get_alerts_for_notification';
 
 type ImplicitTechnicalFieldName = CommonAlertFieldNameLatest | CommonAlertIdFieldNameLatest;
@@ -326,19 +325,13 @@ export const createLifecycleExecutor =
         };
       });
 
+    const trackedEventsToIndex = makeEventsDataMapFor(trackedAlertIds);
     const newEventsToIndex = makeEventsDataMapFor(newAlertIds);
-    const { trackedEventsToIndex, trackedRecoveredEventsToIndex, earlyRecoveredEvents } =
-      trimRecoveredAlerts<InstanceState, InstanceContext, ActionGroupIds>(
-        makeEventsDataMapFor(trackedAlertRecoveredIds),
-        makeEventsDataMapFor(trackedAlertIds),
-        alertFactory
-      );
-
-    const allTrackedEventsToIndex = [
+    const trackedRecoveredEventsToIndex = makeEventsDataMapFor(trackedAlertRecoveredIds);
+    const allEventsToIndex = [
       ...getAlertsForNotification(trackedEventsToIndex),
       ...newEventsToIndex,
     ];
-    const allEventsToIndex = [...allTrackedEventsToIndex, ...earlyRecoveredEvents];
 
     // Only write alerts if:
     // - writing is enabled
@@ -367,7 +360,7 @@ export const createLifecycleExecutor =
     }
 
     const nextTrackedAlerts = Object.fromEntries(
-      allTrackedEventsToIndex
+      allEventsToIndex
         .filter(({ event }) => event[ALERT_STATUS] !== ALERT_STATUS_RECOVERED)
         .map(({ event, flappingHistory, flapping, pendingRecoveredCount }) => {
           const alertId = event[ALERT_INSTANCE_ID]!;
@@ -381,7 +374,7 @@ export const createLifecycleExecutor =
     );
 
     const nextTrackedAlertsRecovered = Object.fromEntries(
-      [...allTrackedEventsToIndex, ...trackedRecoveredEventsToIndex]
+      [...allEventsToIndex, ...trackedRecoveredEventsToIndex]
         .filter(
           ({ event, flappingHistory, flapping }) =>
             // return recovered alerts if they are flapping or if the flapping array is not at capacity

@@ -16,15 +16,15 @@ describe('trimRecoveredAlerts', () => {
   const alert2 = new Alert('2', { meta: { flappingHistory: new Array(20).fill(false) } });
   const alert3 = new Alert('3', { meta: { flappingHistory: [true, true] } });
   const alert4 = {
-    index: 4,
+    key: '4',
     flappingHistory: [true, true, true, true],
   };
   const alert5 = {
-    index: 5,
+    key: '5',
     flappingHistory: new Array(20).fill(false),
   };
   const alert6 = {
-    index: 6,
+    key: '6',
     flappingHistory: [true, true],
   };
 
@@ -76,7 +76,7 @@ describe('trimRecoveredAlerts', () => {
     expect(trimmedAlerts).toEqual([alert5]);
 
     expect(logger.warn).toBeCalledWith(
-      'Recovered alerts have exceeded the max alert limit: dropping 1 alert.'
+      'Recovered alerts have exceeded the max alert limit of 2 : dropping 1 alert.'
     );
   });
 

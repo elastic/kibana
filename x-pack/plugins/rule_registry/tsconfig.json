@@ -31,7 +31,7 @@
     "@kbn/logging-mocks",
     "@kbn/logging",
     "@kbn/securitysolution-io-ts-utils",
-    "@kbn/core-logging-server-mocks",
+    "@kbn/share-plugin",
   ],
   "exclude": [
     "target/**/*",

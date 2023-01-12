@@ -9,7 +9,7 @@ import { Logger } from '@kbn/core/server';
 import { cloneDeep } from 'lodash';
 import { AlertInstanceContext, AlertInstanceState } from '../types';
 import { Alert, PublicAlert } from './alert';
-import { getEarlyRecoveredAlerts, processAlerts, TrimRecoveredOpts } from '../lib';
+import { processAlerts } from '../lib';
 
 export interface AlertFactory<
   State extends AlertInstanceState,
@@ -21,7 +21,6 @@ export interface AlertFactory<
     getValue: () => number;
     setLimitReached: (reached: boolean) => void;
     checkLimitUsage: () => void;
-    getEarlyRecoveredAlerts: (recoveredAlerts: TrimRecoveredOpts[]) => TrimRecoveredOpts[];
   };
   hasReachedAlertLimit: () => boolean;
   done: () => AlertFactoryDoneUtils<State, Context, ActionGroupIds>;
@@ -34,7 +33,7 @@ export type PublicAlertFactory<
 > = Pick<AlertFactory<State, Context, ActionGroupIds>, 'create' | 'done'> & {
   alertLimit: Pick<
     AlertFactory<State, Context, ActionGroupIds>['alertLimit'],
-    'getValue' | 'setLimitReached' | 'getEarlyRecoveredAlerts'
+    'getValue' | 'setLimitReached'
   >;
 };
 
@@ -117,9 +116,6 @@ export function createAlertFactory<
           );
         }
       },
-      getEarlyRecoveredAlerts: (recoveredAlerts: TrimRecoveredOpts[]) => {
-        return getEarlyRecoveredAlerts(logger, recoveredAlerts, maxAlerts);
-      },
     },
     hasReachedAlertLimit: (): boolean => hasReachedAlertLimit,
     done: (): AlertFactoryDoneUtils<State, Context, ActionGroupIds> => {
@@ -168,8 +164,6 @@ export function getPublicAlertFactory<
     alertLimit: {
       getValue: (): number => alertFactory.alertLimit.getValue(),
       setLimitReached: (...args): void => alertFactory.alertLimit.setLimitReached(...args),
-      getEarlyRecoveredAlerts: (...args): TrimRecoveredOpts[] =>
-        alertFactory.alertLimit.getEarlyRecoveredAlerts(...args),
     },
     done: (): AlertFactoryDoneUtils<State, Context, ActionGroupIds> => alertFactory.done(),
   };

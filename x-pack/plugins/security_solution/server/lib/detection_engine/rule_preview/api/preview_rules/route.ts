@@ -91,7 +91,7 @@ export const previewRulesRoute = async (
         return siemResponse.error({ statusCode: 400, body: validationErrors });
       }
       try {
-        const [, { data, security: securityService }] = await getStartServices();
+        const [, { data, security: securityService, share, dataViews }] = await getStartServices();
         const searchSourceClient = await data.search.searchSource.asScoped(request);
         const savedObjectsClient = coreContext.savedObjects.client;
         const siemClient = (await context.securitySolution).getAppClient();
@@ -197,7 +197,6 @@ export const previewRulesRoute = async (
             alertLimit: {
               getValue: () => number;
               setLimitReached: () => void;
-              getEarlyRecoveredAlerts: () => [];
             };
             done: () => { getRecoveredAlerts: () => [] };
           }
@@ -230,6 +229,11 @@ export const previewRulesRoute = async (
 
           let invocationStartTime;
 
+          const dataViewsService = await dataViews.dataViewsServiceFactory(
+            savedObjectsClient,
+            coreContext.elasticsearch.client.asInternalUser
+          );
+
           while (invocationCount > 0 && !isAborted) {
             invocationStartTime = moment();
 
@@ -252,6 +256,8 @@ export const previewRulesRoute = async (
                   searchSourceClient,
                 }),
                 uiSettingsClient: coreContext.uiSettings.client,
+                dataViews: dataViewsService,
+                share,
               },
               spaceId,
               startedAt: startedAt.toDate(),
@@ -307,7 +313,6 @@ export const previewRulesRoute = async (
                 alertLimit: {
                   getValue: () => 1000,
                   setLimitReached: () => {},
-                  getEarlyRecoveredAlerts: () => [],
                 },
                 done: () => ({ getRecoveredAlerts: () => [] }),
               }
@@ -333,7 +338,6 @@ export const previewRulesRoute = async (
                 alertLimit: {
                   getValue: () => 1000,
                   setLimitReached: () => {},
-                  getEarlyRecoveredAlerts: () => [],
                 },
                 done: () => ({ getRecoveredAlerts: () => [] }),
               }
@@ -354,7 +358,6 @@ export const previewRulesRoute = async (
                 alertLimit: {
                   getValue: () => 1000,
                   setLimitReached: () => {},
-                  getEarlyRecoveredAlerts: () => [],
                 },
                 done: () => ({ getRecoveredAlerts: () => [] }),
               }
@@ -375,7 +378,6 @@ export const previewRulesRoute = async (
                 alertLimit: {
                   getValue: () => 1000,
                   setLimitReached: () => {},
-                  getEarlyRecoveredAlerts: () => [],
                 },
                 done: () => ({ getRecoveredAlerts: () => [] }),
               }
@@ -394,7 +396,6 @@ export const previewRulesRoute = async (
                 alertLimit: {
                   getValue: () => 1000,
                   setLimitReached: () => {},
-                  getEarlyRecoveredAlerts: () => [],
                 },
                 done: () => ({ getRecoveredAlerts: () => [] }),
               }
@@ -413,7 +414,6 @@ export const previewRulesRoute = async (
                 alertLimit: {
                   getValue: () => 1000,
                   setLimitReached: () => {},
-                  getEarlyRecoveredAlerts: () => [],
                 },
                 done: () => ({ getRecoveredAlerts: () => [] }),
               }
@@ -432,7 +432,6 @@ export const previewRulesRoute = async (
                 alertLimit: {
                   getValue: () => 1000,
                   setLimitReached: () => {},
-                  getEarlyRecoveredAlerts: () => [],
                 },
                 done: () => ({ getRecoveredAlerts: () => [] }),
               }
