@@ -37,7 +37,6 @@ interface Props {
 export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isCloudEnabled }) => {
   const { trackUiMetric } = getServices();
   const { navLinks } = application.capabilities;
-  const { management: isManagementEnabled } = navLinks;
   const canAccessIntegrations = navLinks.integrations;
   if (canAccessIntegrations) {
     return (
@@ -143,7 +142,7 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
           </EuiFlexItem>
 
           <EuiFlexItem>
-            {isManagementEnabled && !isCloudEnabled ? (
+            {!isCloudEnabled ? (
               <MoveData addBasePath={addBasePath} />
             ) : (
               <EuiImage
