@@ -10,6 +10,7 @@ import {
   ClusterPutComponentTemplateResponse,
   ClusterPutSettingsResponse,
   IndicesPutIndexTemplateResponse,
+  IndicesCreateResponse,
   IlmPutLifecycleResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import IlmApi from '@elastic/elasticsearch/lib/api/api/ilm';
@@ -32,6 +33,9 @@ export async function applySetup(client: ElasticsearchClient): Promise<any> {
     })
     .then(() => {
       return putIndexTemplates(client.indices);
+    })
+    .then(() => {
+      return bootstrapIndices(client.indices);
     })
     .catch((error) => {
       throw new Error(error);
@@ -321,8 +325,8 @@ async function putIndexTemplates(client: IndicesApi): Promise<IndicesPutIndexTem
       .map((name) =>
         client.putIndexTemplate({
           name,
-          // Fail if the index template already exists
-          create: true,
+          // Don't fail if the index template already exists, simply overwrite the format
+          create: false,
           index_patterns: [name + '*'],
           data_stream: {
             hidden: false,
@@ -338,8 +342,8 @@ async function putIndexTemplates(client: IndicesApi): Promise<IndicesPutIndexTem
         ['profiling-executables', 'profiling-stacktraces', 'profiling-stackframes'].map((name) =>
           client.putIndexTemplate({
             name,
-            // Fail if the index template already exists
-            create: true,
+            // Don't fail if the index template already exists, simply overwrite the format
+            create: false,
             index_patterns: [name + '*'],
             composed_of: [name],
             _meta: {
@@ -349,4 +353,131 @@ async function putIndexTemplates(client: IndicesApi): Promise<IndicesPutIndexTem
         )
       )
   );
+}
+
+async function bootstrapIndices(client: IndicesApi): Promise<IndicesCreateResponse[]> {
+  return bootstrapKVIndicesWithAliases(client)
+    .then(() => bootstrapLockingIndices(client))
+    .then(() => bootstrapSymbolizationIndices(client));
+}
+
+// Bootstrap the initial indices to store K/V data.
+// This will fail if the indices already exist.
+async function bootstrapKVIndicesWithAliases(client: IndicesApi): Promise<IndicesCreateResponse[]> {
+  const kvIndices = ['profiling-stacktraces', 'profiling-stackframes', 'profiling-executables'];
+  const indicesNames = kvIndices.flatMap((index) => [`${index}-000001`, `${index}-000002`]);
+  const aliasesNames = kvIndices.flatMap((index) => [`${index}`, `${index}-next`]);
+  // Create a request for each index/alias pair to create it
+  return Promise.all(
+    indicesNames.map((index, entryIndex) =>
+      client.create({
+        index,
+        aliases: {
+          [aliasesNames[entryIndex]]: {
+            is_write_index: true,
+          },
+        },
+      })
+    )
+  );
+}
+
+async function bootstrapSymbolizationIndices(client: IndicesApi): Promise<IndicesCreateResponse[]> {
+  return Promise.all([
+    // Symbolization Queue executables index
+    client.create({
+      index: 'profiling-sq-executables',
+      settings: {
+        index: {
+          refresh_interval: '10s',
+        },
+      },
+      mappings: {
+        _source: {
+          mode: 'synthetic',
+        },
+        properties: {
+          'ecs.version': {
+            type: 'keyword',
+            index: true,
+          },
+          'Executable.file.id': {
+            type: 'keyword',
+            index: false,
+          },
+          'Time.created': {
+            type: 'date',
+            index: true,
+          },
+          'Symbolization.time.next': {
+            type: 'date',
+            index: true,
+          },
+          'Symbolization.retries': {
+            type: 'short',
+            index: true,
+          },
+        },
+      },
+    }),
+    // Symbolization Queue leaf frames index
+    client.create({
+      index: 'profiling-sq-leafframes',
+      settings: {
+        index: {
+          refresh_interval: '10s',
+        },
+      },
+      mappings: {
+        _source: {
+          mode: 'synthetic',
+        },
+        properties: {
+          'ecs.version': {
+            type: 'keyword',
+            index: true,
+          },
+          'Stacktrace.frame.id': {
+            type: 'keyword',
+            index: false,
+          },
+          'Time.created': {
+            type: 'date',
+            index: true,
+          },
+          'Symbolization.time.next': {
+            type: 'date',
+            index: true,
+          },
+          'Symbolization.retries': {
+            type: 'short',
+            index: true,
+          },
+        },
+      },
+    }),
+  ]);
+}
+
+// Create the custom ILM locking index used to track ILM execution on K/V indices
+async function bootstrapLockingIndices(client: IndicesApi) {
+  return client.create({
+    index: '.profiling-ilm-lock',
+    settings: {
+      index: {
+        hidden: true,
+      },
+    },
+    mappings: {
+      properties: {
+        '@timestamp': {
+          type: 'date',
+          format: 'epoch_second',
+        },
+        phase: {
+          type: 'keyword',
+        },
+      },
+    },
+  });
 }
