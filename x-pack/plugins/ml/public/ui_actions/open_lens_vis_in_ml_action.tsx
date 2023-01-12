@@ -7,13 +7,15 @@
 
 import { i18n } from '@kbn/i18n';
 import type { Embeddable } from '@kbn/lens-plugin/public';
-import { createAction } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { MlCoreSetup } from '../plugin';
 
 export const CREATE_LENS_VIS_TO_ML_AD_JOB_ACTION = 'createMLADJobAction';
 
-export function createLensVisToADJobAction(getStartServices: MlCoreSetup['getStartServices']) {
-  return createAction<{ embeddable: Embeddable }>({
+export function createLensVisToADJobAction(
+  getStartServices: MlCoreSetup['getStartServices']
+): UiActionsActionDefinition<{ embeddable: Embeddable }> {
+  return {
     id: 'create-ml-ad-job-action',
     type: CREATE_LENS_VIS_TO_ML_AD_JOB_ACTION,
     getIconType(context): string {
@@ -44,7 +46,7 @@ export function createLensVisToADJobAction(getStartServices: MlCoreSetup['getSta
         return false;
       }
 
-      const [{ getJobsItemsFromEmbeddable, isCompatibleVisualizationType }, [coreStart]] =
+      const [{ getJobsItemsFromEmbeddable, isCompatibleVisualizationType }, [coreStart, { lens }]] =
         await Promise.all([
           import('../application/jobs/new_job/job_from_lens'),
           getStartServices(),
@@ -58,13 +60,13 @@ export function createLensVisToADJobAction(getStartServices: MlCoreSetup['getSta
       }
 
       try {
-        const { vis } = getJobsItemsFromEmbeddable(context.embeddable);
-        return isCompatibleVisualizationType(vis);
+        const { chartInfo } = await getJobsItemsFromEmbeddable(context.embeddable, lens);
+        return isCompatibleVisualizationType(chartInfo);
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error('Error attempting to check for ML job compatibility', error);
         return false;
       }
     },
-  });
+  };
 }

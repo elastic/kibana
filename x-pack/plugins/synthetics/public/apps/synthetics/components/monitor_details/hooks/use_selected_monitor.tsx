@@ -15,10 +15,15 @@ import {
   selectEncryptedSyntheticsSavedMonitors,
   selectMonitorListState,
   selectorMonitorDetailsState,
+  selectorError,
 } from '../../../state';
 
-export const useSelectedMonitor = () => {
-  const { monitorId } = useParams<{ monitorId: string }>();
+export const useSelectedMonitor = (monId?: string) => {
+  let monitorId = monId;
+  const { monitorId: urlMonitorId } = useParams<{ monitorId: string }>();
+  if (!monitorId) {
+    monitorId = urlMonitorId;
+  }
   const monitorsList = useSelector(selectEncryptedSyntheticsSavedMonitors);
   const { loading: monitorListLoading } = useSelector(selectMonitorListState);
 
@@ -26,8 +31,10 @@ export const useSelectedMonitor = () => {
     () => monitorsList.find((monitor) => monitor[ConfigKey.CONFIG_ID] === monitorId) ?? null,
     [monitorId, monitorsList]
   );
-  const { lastRefresh } = useSyntheticsRefreshContext();
-  const { syntheticsMonitor, syntheticsMonitorLoading } = useSelector(selectorMonitorDetailsState);
+  const error = useSelector(selectorError);
+  const { lastRefresh, refreshInterval } = useSyntheticsRefreshContext();
+  const { syntheticsMonitor, syntheticsMonitorLoading, syntheticsMonitorDispatchedAt } =
+    useSelector(selectorMonitorDetailsState);
   const dispatch = useDispatch();
 
   const isMonitorFromListValid =
@@ -47,11 +54,29 @@ export const useSelectedMonitor = () => {
   }, [dispatch, monitorId, availableMonitor, syntheticsMonitorLoading]);
 
   useEffect(() => {
-    dispatch(getMonitorAction.get({ monitorId }));
-  }, [dispatch, monitorId, lastRefresh]);
+    // Only perform periodic refresh if the last dispatch was earlier enough
+    if (
+      monitorId &&
+      !syntheticsMonitorLoading &&
+      !monitorListLoading &&
+      syntheticsMonitorDispatchedAt > 0 &&
+      Date.now() - syntheticsMonitorDispatchedAt > refreshInterval
+    ) {
+      dispatch(getMonitorAction.get({ monitorId }));
+    }
+  }, [
+    dispatch,
+    lastRefresh,
+    refreshInterval,
+    monitorId,
+    monitorListLoading,
+    syntheticsMonitorLoading,
+    syntheticsMonitorDispatchedAt,
+  ]);
 
   return {
     monitor: availableMonitor,
     loading: syntheticsMonitorLoading || monitorListLoading,
+    error,
   };
 };

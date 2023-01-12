@@ -80,6 +80,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       async executor() {
         const [coreStart] = await core.getStartServices();
         await coreStart.elasticsearch.client.asInternalUser.ping();
+        return { state: {} };
       },
     });
 

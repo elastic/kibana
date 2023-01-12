@@ -85,20 +85,16 @@ export const IndicesStats: React.FC = () => {
             </EuiPanel>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiPanel
-              color={data?.long_running ? 'warning' : 'subdued'}
-              hasShadow={false}
-              paddingSize="l"
-            >
+            <EuiPanel color={data?.stuck ? 'warning' : 'subdued'} hasShadow={false} paddingSize="l">
               <EuiStat
                 description={i18n.translate(
                   'xpack.enterpriseSearch.content.searchIndices.jobStats.longRunningSyncs',
                   {
-                    defaultMessage: 'Long running syncs',
+                    defaultMessage: 'Stuck syncs',
                   }
                 )}
                 isLoading={isLoading}
-                title={data?.long_running}
+                title={data?.stuck}
               />
             </EuiPanel>
           </EuiFlexItem>

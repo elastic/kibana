@@ -58,8 +58,17 @@ export const OverviewGrid = memo(() => {
   const dispatch = useDispatch();
 
   const setFlyoutConfigCallback = useCallback(
-    ({ configId, id, location }: { configId: string; id: string; location: string }) =>
-      dispatch(setFlyoutConfig({ configId, id, location })),
+    ({
+      configId,
+      id,
+      location,
+      locationId,
+    }: {
+      configId: string;
+      id: string;
+      location: string;
+      locationId: string;
+    }) => dispatch(setFlyoutConfig({ configId, id, location, locationId })),
     [dispatch]
   );
   const hideFlyout = useCallback(() => dispatch(setFlyoutConfig(null)), [dispatch]);
@@ -132,9 +141,9 @@ export const OverviewGrid = memo(() => {
       ) : (
         <OverviewLoader />
       )}
-      <span ref={intersectionRef}>
+      <div ref={intersectionRef}>
         <EuiSpacer size="l" />
-      </span>
+      </div>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         {currentMonitors.length === monitors.length && (
           <EuiFlexItem grow={false}>
@@ -159,6 +168,7 @@ export const OverviewGrid = memo(() => {
           configId={flyoutConfig.configId}
           id={flyoutConfig.id}
           location={flyoutConfig.location}
+          locationId={flyoutConfig.locationId}
           onClose={hideFlyout}
           onEnabledChange={forceRefreshCallback}
           onLocationChange={setFlyoutConfigCallback}

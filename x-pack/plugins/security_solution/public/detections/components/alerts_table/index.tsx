@@ -11,10 +11,12 @@ import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch, useSelector } from 'react-redux';
 import type { Filter } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { combineQueries } from '../../../common/lib/kuery';
+import type { AlertWorkflowStatus } from '../../../common/types';
+import type { TableIdLiteral } from '../../../../common/types';
 import { tableDefaults } from '../../../common/store/data_table/defaults';
 import { dataTableActions, dataTableSelectors } from '../../../common/store/data_table';
 import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
-import type { TableIdLiteral } from '../../../../common/types/timeline';
 import { eventsViewerSelector } from '../../../common/components/events_viewer/selectors';
 import { StatefulEventsViewer } from '../../../common/components/events_viewer';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
@@ -28,7 +30,6 @@ import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
-import { combineQueries } from '../../../common/lib/kuery';
 import { getColumns, RenderCellValue } from '../../configurations/security_solution_detections';
 import { AdditionalFiltersAction } from './additional_filters_action';
 import {
@@ -77,7 +78,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   showOnlyThreatIndicatorAlerts,
   tableId,
   to,
-  filterGroup = 'open',
+  filterGroup,
 }) => {
   const dispatch = useDispatch();
 
@@ -129,7 +130,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   useEffect(() => {
     if (isSelectAllChecked) {
       dispatch(
-        dataTableActions.setTGridSelectAll({
+        dataTableActions.setDataTableSelectAll({
           id: tableId,
           selectAll: false,
         })
@@ -157,21 +158,24 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   );
 
   const defaultFiltersMemo = useMemo(() => {
-    const alertStatusFilter = buildAlertStatusFilter(filterGroup);
-
+    let alertStatusFilter: Filter[] = [];
+    if (filterGroup) {
+      alertStatusFilter = buildAlertStatusFilter(filterGroup);
+    }
     if (isEmpty(defaultFilters)) {
       return alertStatusFilter;
     } else if (defaultFilters != null && !isEmpty(defaultFilters)) {
       return [...defaultFilters, ...alertStatusFilter];
     }
   }, [defaultFilters, filterGroup]);
+
   const { filterManager } = kibana.services.data.query;
 
   const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
 
   useEffect(() => {
     dispatch(
-      dataTableActions.initializeTGridSettings({
+      dataTableActions.initializeDataTableSettings({
         defaultColumns: getColumns(license).map((c) =>
           !tGridEnabled && c.initialWidth == null
             ? {
@@ -224,20 +228,19 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   return (
     <StatefulEventsViewer
       additionalFilters={additionalFiltersComponent}
-      currentFilter={filterGroup}
+      currentFilter={filterGroup as AlertWorkflowStatus}
       defaultCellActions={defaultCellActions}
       defaultModel={getAlertsDefaultModel(license)}
       end={to}
       bulkActions={bulkActions}
-      entityType="events"
-      hasAlertsCrud={hasIndexWrite && hasIndexMaintenance}
+      hasCrudPermissions={hasIndexWrite && hasIndexMaintenance}
       tableId={tableId}
       leadingControlColumns={leadingControlColumns}
       onRuleChange={onRuleChange}
       pageFilters={defaultFiltersMemo}
       renderCellValue={RenderCellValue}
       rowRenderers={defaultRowRenderers}
-      scopeId={SourcererScopeName.detections}
+      sourcererScope={SourcererScopeName.detections}
       start={from}
     />
   );

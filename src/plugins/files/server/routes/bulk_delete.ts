@@ -7,8 +7,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { CreateHandler, FilesRouter } from './types';
 import { FILES_MANAGE_PRIVILEGE } from '../../common/constants';
+import { FilesClient } from '../../common/files_client';
+import type { CreateHandler, FilesRouter } from './types';
 import { FILES_API_ROUTES, CreateRouteDefinition } from './api_routes';
 
 const method = 'delete' as const;
@@ -19,18 +20,20 @@ const rt = {
   }),
 };
 
-interface Result {
-  /**
-   * The files that were deleted
-   */
-  succeeded: string[];
-  /**
-   * Any failed deletions. Only included in the response if there were failures.
-   */
-  failed?: Array<[id: string, reason: string]>;
-}
-
-export type Endpoint = CreateRouteDefinition<typeof rt, Result>;
+export type Endpoint = CreateRouteDefinition<
+  typeof rt,
+  {
+    /**
+     * The files that were deleted
+     */
+    succeeded: string[];
+    /**
+     * Any failed deletions. Only included in the response if there were failures.
+     */
+    failed?: Array<[id: string, reason: string]>;
+  },
+  FilesClient['bulkDelete']
+>;
 
 const handler: CreateHandler<Endpoint> = async ({ files }, req, res) => {
   const fileService = (await files).fileService.asCurrentUser();
@@ -38,8 +41,8 @@ const handler: CreateHandler<Endpoint> = async ({ files }, req, res) => {
     body: { ids },
   } = req;
 
-  const succeeded: Result['succeeded'] = [];
-  const failed: Result['failed'] = [];
+  const succeeded: string[] = [];
+  const failed: Array<[string, string]> = [];
   for (const id of ids) {
     try {
       await fileService.delete({ id });

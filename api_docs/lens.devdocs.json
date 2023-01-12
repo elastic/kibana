@@ -742,22 +742,6 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-public.Embeddable.getChartInfo",
-            "type": "Function",
-            "tags": [],
-            "label": "getChartInfo",
-            "description": [],
-            "signature": [
-              "() => Readonly<ChartInfo | undefined>"
-            ],
-            "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1130,6 +1114,81 @@
               " | undefined; } | undefined"
             ],
             "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/cardinality.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-public.ChartInfo",
+        "type": "Interface",
+        "tags": [],
+        "label": "ChartInfo",
+        "description": [],
+        "path": "x-pack/plugins/lens/public/chart_info_api.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.ChartInfo.layers",
+            "type": "Array",
+            "tags": [],
+            "label": "layers",
+            "description": [],
+            "signature": [
+              "ChartLayerDescriptor",
+              "[]"
+            ],
+            "path": "x-pack/plugins/lens/public/chart_info_api.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.ChartInfo.visualizationType",
+            "type": "string",
+            "tags": [],
+            "label": "visualizationType",
+            "description": [],
+            "path": "x-pack/plugins/lens/public/chart_info_api.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.ChartInfo.filters",
+            "type": "Array",
+            "tags": [],
+            "label": "filters",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]"
+            ],
+            "path": "x-pack/plugins/lens/public/chart_info_api.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.ChartInfo.query",
+            "type": "Object",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "{ query: string | { [key: string]: any; }; language: string; }"
+            ],
+            "path": "x-pack/plugins/lens/public/chart_info_api.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2271,7 +2330,15 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ") => ",
+              ", dateRange?: ",
+              {
+                "pluginId": "lens",
+                "scope": "common",
+                "docId": "kibLensPluginApi",
+                "section": "def-common.DateRange",
+                "text": "DateRange"
+              },
+              " | undefined) => ",
               {
                 "pluginId": "lens",
                 "scope": "public",
@@ -2449,6 +2516,28 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.FormulaPublicApi.insertOrReplaceFormulaColumn.$5",
+                "type": "Object",
+                "tags": [],
+                "label": "dateRange",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "lens",
+                    "scope": "common",
+                    "docId": "kibLensPluginApi",
+                    "section": "def-common.DateRange",
+                    "text": "DateRange"
+                  },
+                  " | undefined"
+                ],
+                "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/formula/formula_public_api.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -3258,6 +3347,8 @@
                 "section": "def-public.FormulaPublicApi",
                 "text": "FormulaPublicApi"
               },
+              "; chartInfo: ",
+              "ChartInfoApi",
               "; }>"
             ],
             "path": "x-pack/plugins/lens/public/plugin.ts",
@@ -3821,6 +3912,20 @@
             "description": [],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/lens/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.SharedPieLayerState.colorsByDimension",
+            "type": "Object",
+            "tags": [],
+            "label": "colorsByDimension",
+            "description": [],
+            "signature": [
+              "Record<string, string> | undefined"
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,
@@ -6027,6 +6132,43 @@
                 "signature": [
                   "GetDropPropsArgs",
                   "<unknown>"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.Visualization.hasLayerSettings",
+            "type": "Function",
+            "tags": [],
+            "label": "hasLayerSettings",
+            "description": [
+              "\nAllows the visualization to announce whether or not it has any settings to show"
+            ],
+            "signature": [
+              "((props: ",
+              "VisualizationConfigProps",
+              "<T>) => boolean) | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.hasLayerSettings.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "VisualizationConfigProps",
+                  "<T>"
                 ],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
@@ -9198,6 +9340,21 @@
       },
       {
         "parentPluginId": "lens",
+        "id": "def-public.LENS_EMBEDDABLE_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "LENS_EMBEDDABLE_TYPE",
+        "description": [],
+        "signature": [
+          "\"lens\""
+        ],
+        "path": "x-pack/plugins/lens/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
         "id": "def-public.LensEmbeddableInput",
         "type": "Type",
         "tags": [],
@@ -9839,9 +9996,9 @@
           " implements ",
           {
             "pluginId": "@kbn/core-plugins-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCorePluginsServerPluginApi",
-            "section": "def-server.Plugin",
+            "section": "def-common.Plugin",
             "text": "Plugin"
           },
           "<",
@@ -9885,9 +10042,9 @@
               "(core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreLifecycleServerPluginApi",
-                "section": "def-server.CoreSetup",
+                "section": "def-common.CoreSetup",
                 "text": "CoreSetup"
               },
               "<",
@@ -9946,9 +10103,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreLifecycleServerPluginApi",
-                    "section": "def-server.CoreSetup",
+                    "section": "def-common.CoreSetup",
                     "text": "CoreSetup"
                   },
                   "<",
@@ -10001,9 +10158,9 @@
               "(core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreLifecycleServerPluginApi",
-                "section": "def-server.CoreStart",
+                "section": "def-common.CoreStart",
                 "text": "CoreStart"
               },
               ", plugins: ",
@@ -10030,9 +10187,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreLifecycleServerPluginApi",
-                    "section": "def-server.CoreStart",
+                    "section": "def-common.CoreStart",
                     "text": "CoreStart"
                   }
                 ],
@@ -12075,6 +12232,20 @@
           },
           {
             "parentPluginId": "lens",
+            "id": "def-common.SharedPieLayerState.colorsByDimension",
+            "type": "Object",
+            "tags": [],
+            "label": "colorsByDimension",
+            "description": [],
+            "signature": [
+              "Record<string, string> | undefined"
+            ],
+            "path": "x-pack/plugins/lens/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
             "id": "def-common.SharedPieLayerState.collapseFns",
             "type": "Object",
             "tags": [],
@@ -12379,9 +12550,9 @@
           "<{}, ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
+            "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
           "> | undefined) => ",
@@ -12416,9 +12587,9 @@
               "<{}, ",
               {
                 "pluginId": "@kbn/utility-types",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
+                "section": "def-common.SerializableRecord",
                 "text": "SerializableRecord"
               },
               "> | undefined"

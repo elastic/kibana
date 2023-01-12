@@ -29,7 +29,9 @@ export type {
   AlertingApiRequestHandlerContext,
   RuleParamsAndRefs,
   GetSummarizedAlertsFnOpts,
+  ExecutorType,
 } from './types';
+export { RuleNotifyWhen } from '../common';
 export type { PluginSetupContract, PluginStartContract } from './plugin';
 export type {
   FindResult,

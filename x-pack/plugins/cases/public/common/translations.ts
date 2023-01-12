@@ -70,9 +70,12 @@ export const ARIA_KEYPAD_LEGEND = i18n.translate(
   }
 );
 
-export const COMMENT_REQUIRED = i18n.translate('xpack.cases.caseView.commentFieldRequiredError', {
-  defaultMessage: 'A comment is required.',
-});
+export const EMPTY_COMMENTS_NOT_ALLOWED = i18n.translate(
+  'xpack.cases.caseView.commentFieldRequiredError',
+  {
+    defaultMessage: 'Empty comments are not allowed.',
+  }
+);
 
 export const REQUIRED_FIELD = i18n.translate('xpack.cases.caseView.fieldRequiredError', {
   defaultMessage: 'Required field',
@@ -306,6 +309,13 @@ export const ADD_TAG_CUSTOM_OPTION_LABEL = (searchValue: string) =>
   i18n.translate('xpack.cases.configure.addTagCustomOptionLabel', {
     defaultMessage: 'Add {searchValue} as a tag',
     values: { searchValue },
+  });
+
+export const VERSION_CONFLICT_WARNING = (markdownId: string) =>
+  i18n.translate('xpack.cases.configure.commentVersionConflictWarning', {
+    defaultMessage:
+      'This {markdownId} has been updated by another user. Saving your {markdownId} will overwrite their update.',
+    values: { markdownId },
   });
 
 /**

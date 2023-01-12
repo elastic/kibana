@@ -384,11 +384,11 @@
           },
           {
             "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/wizard/search_selection/search_selection.tsx"
+            "path": "src/plugins/visualizations/public/wizard/search_selection/show_saved_object.ts"
           },
           {
             "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/wizard/search_selection/search_selection.tsx"
+            "path": "src/plugins/visualizations/public/wizard/search_selection/show_saved_object.ts"
           },
           {
             "plugin": "visualizations",
@@ -668,7 +668,11 @@
           },
           {
             "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/types.ts"
+            "path": "x-pack/plugins/alerting/server/rules_client/common/inject_references.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/rules_client/common/inject_references.ts"
           },
           {
             "plugin": "alerting",
@@ -700,11 +704,7 @@
           },
           {
             "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/rules_client/rules_client.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/rules_client/rules_client.ts"
+            "path": "x-pack/plugins/alerting/server/types.ts"
           },
           {
             "plugin": "canvas",
@@ -760,11 +760,11 @@
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/server/saved_objects/migrations/migrate_extract_panel_references.ts"
+            "path": "src/plugins/dashboard/server/dashboard_saved_object/migrations/migrate_extract_panel_references.ts"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/server/saved_objects/migrations/migrate_extract_panel_references.ts"
+            "path": "src/plugins/dashboard/server/dashboard_saved_object/migrations/migrate_extract_panel_references.ts"
           },
           {
             "plugin": "dashboard",
@@ -816,35 +816,35 @@
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/persistable_state/dashboard_saved_object_references.ts"
+            "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/persistable_state/dashboard_saved_object_references.ts"
+            "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/persistable_state/dashboard_saved_object_references.ts"
+            "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/persistable_state/dashboard_saved_object_references.ts"
+            "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/persistable_state/dashboard_saved_object_references.ts"
+            "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/persistable_state/dashboard_saved_object_references.ts"
+            "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/persistable_state/dashboard_saved_object_references.ts"
+            "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/persistable_state/dashboard_saved_object_references.ts"
+            "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts"
           },
           {
             "plugin": "ml",
@@ -853,10 +853,6 @@
           {
             "plugin": "ml",
             "path": "x-pack/plugins/ml/common/types/modules.ts"
-          },
-          {
-            "plugin": "core",
-            "path": "src/core/server/types.ts"
           },
           {
             "plugin": "alerting",

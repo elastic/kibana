@@ -7,6 +7,25 @@
 
 import type { RootSchema } from '@kbn/analytics-client';
 
+export const fleetAgentsSchema: RootSchema<any> = {
+  agents_per_version: {
+    properties: {
+      version: {
+        type: 'keyword',
+        _meta: {
+          description: 'Agent version enrolled to this kibana',
+        },
+      },
+      count: {
+        type: 'long',
+        _meta: {
+          description: 'Number of agents enrolled that use this version',
+        },
+      },
+    },
+  },
+};
+
 export const fleetUsagesSchema: RootSchema<any> = {
   agents_enabled: { type: 'boolean', _meta: { description: 'agents enabled' } },
   agents: {
@@ -39,6 +58,18 @@ export const fleetUsagesSchema: RootSchema<any> = {
         type: 'long',
         _meta: {
           description: 'The total number of enrolled agents currently offline',
+        },
+      },
+      inactive: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of enrolled agents currently inactive',
+        },
+      },
+      unenrolled: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of unenrolled agents',
         },
       },
       total_all_statuses: {
@@ -94,6 +125,18 @@ export const fleetUsagesSchema: RootSchema<any> = {
           description: 'The number of Fleet Server hosts configured in Fleet settings.',
         },
       },
+      inactive: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of enrolled agents currently inactive',
+        },
+      },
+      unenrolled: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of unenrolled agents',
+        },
+      },
     },
   },
   packages: {
@@ -104,13 +147,6 @@ export const fleetUsagesSchema: RootSchema<any> = {
         version: { type: 'keyword' },
         enabled: { type: 'boolean' },
       },
-    },
-  },
-  agent_versions: {
-    type: 'array',
-    items: {
-      type: 'keyword',
-      _meta: { description: 'The agent versions enrolled in this deployment.' },
     },
   },
   agents_per_policy: {
@@ -163,6 +199,20 @@ export const fleetUsagesSchema: RootSchema<any> = {
           description: 'Count of agent last checkin status degraded',
         },
       },
+    },
+  },
+  agent_logs_top_errors: {
+    type: 'array',
+    items: {
+      type: 'text',
+      _meta: { description: 'Top messages from agent error logs' },
+    },
+  },
+  fleet_server_logs_top_errors: {
+    type: 'array',
+    items: {
+      type: 'text',
+      _meta: { description: 'Top messages from fleet server error logs' },
     },
   },
 };
