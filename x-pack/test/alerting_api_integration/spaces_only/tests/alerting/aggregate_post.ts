@@ -14,15 +14,17 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 export default function createAggregateTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  describe('aggregate', () => {
+  describe('aggregate post', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     afterEach(() => objectRemover.removeAll());
 
     it('should aggregate when there are no alerts', async () => {
-      const response = await supertest.post(
-        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_aggregate`
-      );
+      const response = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_aggregate`)
+        .set('kbn-xsrf', 'foo')
+        .send({});
+
       expect(response.status).to.eql(200);
       expect(response.body).to.eql({
         rule_enabled_status: {
@@ -104,9 +106,11 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
       // calls are successful, the call to aggregate may return stale totals if called
       // too early.
       await delay(1000);
-      const response = await supertest.post(
-        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_aggregate`
-      );
+      const response = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_aggregate`)
+        .set('kbn-xsrf', 'foo')
+        .send({});
+
       expect(response.status).to.eql(200);
       expect(response.body).to.eql({
         rule_enabled_status: {
@@ -158,9 +162,10 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
           })
         );
 
-        const response = await supertest.post(
-          `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_aggregate`
-        );
+        const response = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_aggregate`)
+          .set('kbn-xsrf', 'foo')
+          .send({});
 
         expect(response.body.rule_tags.length).to.eql(50);
       });
