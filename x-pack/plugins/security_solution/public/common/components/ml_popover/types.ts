@@ -121,6 +121,9 @@ export interface SecurityJob extends MlSummaryJob {
   isCompatible: boolean;
   isInstalled: boolean;
   isElasticJob: boolean;
+  customSettings?: {
+    security_app_display_name?: string;
+  };
 }
 
 export interface AugmentedSecurityJobFields {
