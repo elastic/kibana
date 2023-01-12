@@ -144,34 +144,6 @@ export function initRoutes(
     }
   }
 
-  /**
-   * Hacky workaround for the Task Manager behaviour when it's disabled while running.
-   */
-  async function disableTask(taskManager: TaskManagerStartContract): Promise<BulkUpdateTaskResult> {
-    let bulkDisableResult = await taskManager.bulkDisable([SESSION_INDEX_CLEANUP_TASK_NAME]);
-    if (bulkDisableResult.tasks[0].status === 'idle') {
-      logger.info('Session cleanup task was disabled in idle state.');
-      return bulkDisableResult;
-    }
-
-    // If, because of a race condition, task was disabled while it was running, re-enable it, wait until it's idle, and
-    // disable it again.
-    logger.warn(
-      'Session cleanup task was disabled in non-idle state. Re-enabling and waiting until idle again.'
-    );
-    await taskManager.bulkEnable([SESSION_INDEX_CLEANUP_TASK_NAME], true /** runSoon **/);
-    await waitUntilTaskIsIdle(taskManager);
-
-    bulkDisableResult = await taskManager.bulkDisable([SESSION_INDEX_CLEANUP_TASK_NAME]);
-    if (bulkDisableResult.tasks[0].status === 'idle') {
-      return bulkDisableResult;
-    }
-
-    logger.error('Failed to disable task while in idle state.');
-
-    return bulkDisableResult;
-  }
-
   router.post(
     {
       path: '/session/toggle_cleanup_task',
@@ -189,7 +161,12 @@ export function initRoutes(
             true /** runSoon **/
           );
         } else {
-          bulkEnableDisableResult = await disableTask(taskManager);
+          bulkEnableDisableResult = await taskManager.bulkDisable([
+            SESSION_INDEX_CLEANUP_TASK_NAME,
+          ]);
+
+          // Make sure that the task enters idle state before acknowledging that task was disabled.
+          await waitUntilTaskIsIdle(taskManager);
         }
       } catch (err) {
         logger.error(
