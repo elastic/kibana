@@ -149,3 +149,11 @@ steps:
     timeout_in_minutes: 10
     agents:
       queue: kibana-default
+
+  - wait
+
+  - command: .buildkite/scripts/steps/on_merge_container_image.sh
+    label: Trigger container image build
+    timeout_in_minutes: 10
+    agents:
+      queue: kibana-default
