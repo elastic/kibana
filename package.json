@@ -748,6 +748,7 @@
     "@jest/reporters": "^29.3.1",
     "@jest/transform": "^29.3.1",
     "@jest/types": "^29.3.1",
+    "@kbn/alerting-api-integration-helpers": "link:x-pack/test/alerting_api_integration/packages/helpers",
     "@kbn/ambient-common-types": "link:packages/kbn-ambient-common-types",
     "@kbn/ambient-ftr-types": "link:packages/kbn-ambient-ftr-types",
     "@kbn/ambient-storybook-types": "link:packages/kbn-ambient-storybook-types",

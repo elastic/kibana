@@ -2729,6 +2729,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/alerting-api-integration-helpers@link:x-pack/test/alerting_api_integration/packages/helpers":
+  version "0.0.0"
+  uid ""
+
 "@kbn/alerts@link:packages/kbn-alerts":
   version "0.0.0"
   uid ""
