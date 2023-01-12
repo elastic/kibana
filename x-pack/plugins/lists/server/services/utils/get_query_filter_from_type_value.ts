@@ -60,43 +60,6 @@ export const getEmptyQuery = ({ listId }: { listId: string }): QueryFilterType =
   },
 ];
 
-// /**
-//  * Returns a terms query against a large value based list. If it detects that an array or item has a "null"
-//  * value it will filter that value out. If it has arrays within arrays it will flatten those out as well.
-//  * @param value The value which can be unknown
-//  * @param type The list type type
-//  * @param listId The list id
-//  */
-// export const getTermsQuery = ({
-//   value,
-//   type,
-//   listId,
-// }: {
-//   value: unknown[];
-//   type: Type;
-//   listId: string;
-// }): QueryFilterType => {
-//   const should = value.reduce<unknown[]>((accum, item, index) => {
-//     if (Array.isArray(item)) {
-//       const itemFlattened = item
-//         .flat(Infinity)
-//         .filter((singleValue) => singleValue != null && !isObject(singleValue));
-//       if (itemFlattened.length === 0) {
-//         return accum;
-//       } else {
-//         return [...accum, { terms: { _name: `${index}.0`, [type]: itemFlattened } }];
-//       }
-//     } else {
-//       if (item == null || isObject(item)) {
-//         return accum;
-//       } else {
-//         return [...accum, { term: { [type]: { _name: `${index}.0`, value: item } } }];
-//       }
-//     }
-//   }, []);
-//   return getShouldQuery({ listId, should });
-// };
-
 /**
  * Returns a terms query against a large value based list. If it detects that an array or item has a "null"
  * value it will filter that value out. If it has arrays within arrays it will flatten those out as well.
@@ -113,7 +76,7 @@ export const getTermsQuery = ({
   type: Type;
   listId: string;
 }): QueryFilterType => {
-  const terms = value.reduce<unknown[]>((accum, item) => {
+  const should = value.reduce<unknown[]>((accum, item, index) => {
     if (Array.isArray(item)) {
       const itemFlattened = item
         .flat(Infinity)
@@ -121,25 +84,17 @@ export const getTermsQuery = ({
       if (itemFlattened.length === 0) {
         return accum;
       } else {
-        return [...accum, ...itemFlattened];
+        return [...accum, { terms: { _name: `${index}.0`, [type]: itemFlattened } }];
       }
     } else {
       if (item == null || isObject(item)) {
         return accum;
       } else {
-        return [...accum, item];
+        return [...accum, { term: { [type]: { _name: `${index}.0`, value: item } } }];
       }
     }
   }, []);
-
-  return [
-    { term: { list_id: listId } },
-    {
-      terms: {
-        [type]: [...new Set(terms)],
-      },
-    },
-  ];
+  return getShouldQuery({ listId, should });
 };
 
 /**

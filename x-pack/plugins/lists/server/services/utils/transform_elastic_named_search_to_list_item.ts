@@ -34,9 +34,6 @@ export const transformElasticNamedSearchToListItem = ({
 }: TransformElasticMSearchToListItemOptions): SearchListItemArraySchema => {
   return value.map((singleValue, index) => {
     const matchingHits = response.hits.hits.filter((hit) => {
-      if (!hit.matched_queries && type !== 'text') {
-        return matchNonTextValues(hit, type, singleValue);
-      }
       if (hit.matched_queries != null) {
         return hit.matched_queries.some((matchedQuery) => {
           const [matchedQueryIndex] = matchedQuery.split('.');
@@ -52,32 +49,4 @@ export const transformElasticNamedSearchToListItem = ({
       value: singleValue,
     };
   });
-};
-
-/**
- * finds if values list hit has match with searched values for non-text items
- * @param hit - values list document
- * @param type - values list type
- * @param singleValue - searched value
- * @returns boolean
- */
-const matchNonTextValues = (
-  hit: estypes.SearchResponse<SearchEsListItemSchema>['hits']['hits'][number],
-  type: Type,
-  singleValue: unknown
-): boolean => {
-  const hitValue = hit._source?.[type];
-  if (Array.isArray(hitValue)) {
-    if (Array.isArray(singleValue)) {
-      return hitValue.some((hv) => singleValue.includes(hv));
-    } else {
-      return hitValue.includes(singleValue);
-    }
-  } else {
-    if (Array.isArray(singleValue)) {
-      return singleValue.includes(hitValue);
-    } else {
-      return singleValue === hitValue;
-    }
-  }
 };

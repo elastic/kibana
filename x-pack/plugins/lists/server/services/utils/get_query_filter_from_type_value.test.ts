@@ -33,8 +33,9 @@ describe('get_query_filter_from_type_value', () => {
       const expected: QueryFilterType = [
         { term: { list_id: 'list-123' } },
         {
-          terms: {
-            ip: ['127.0.0.1'],
+          bool: {
+            minimum_should_match: 1,
+            should: [{ term: { ip: { _name: '0.0', value: '127.0.0.1' } } }],
           },
         },
       ];
@@ -50,8 +51,12 @@ describe('get_query_filter_from_type_value', () => {
       const expected: QueryFilterType = [
         { term: { list_id: 'list-123' } },
         {
-          terms: {
-            ip: ['127.0.0.1', '127.0.0.2'],
+          bool: {
+            minimum_should_match: 1,
+            should: [
+              { term: { ip: { _name: '0.0', value: '127.0.0.1' } } },
+              { term: { ip: { _name: '1.0', value: '127.0.0.2' } } },
+            ],
           },
         },
       ];
@@ -67,8 +72,9 @@ describe('get_query_filter_from_type_value', () => {
       const expected: QueryFilterType = [
         { term: { list_id: 'list-123' } },
         {
-          terms: {
-            keyword: ['host-name-1'],
+          bool: {
+            minimum_should_match: 1,
+            should: [{ term: { keyword: { _name: '0.0', value: 'host-name-1' } } }],
           },
         },
       ];
@@ -84,8 +90,12 @@ describe('get_query_filter_from_type_value', () => {
       const expected: QueryFilterType = [
         { term: { list_id: 'list-123' } },
         {
-          terms: {
-            keyword: ['host-name-1', 'host-name-2'],
+          bool: {
+            minimum_should_match: 1,
+            should: [
+              { term: { keyword: { _name: '0.0', value: 'host-name-1' } } },
+              { term: { keyword: { _name: '1.0', value: 'host-name-2' } } },
+            ],
           },
         },
       ];
@@ -173,7 +183,10 @@ describe('get_query_filter_from_type_value', () => {
       const expected: QueryFilterType = [
         { term: { list_id: 'list-123' } },
         {
-          terms: { ip: ['host-name-1'] },
+          bool: {
+            minimum_should_match: 1,
+            should: [{ term: { ip: { _name: '1.0', value: 'host-name-1' } } }],
+          },
         },
       ];
       expect(query).toEqual(expected);
@@ -188,7 +201,10 @@ describe('get_query_filter_from_type_value', () => {
       const expected: QueryFilterType = [
         { term: { list_id: 'list-123' } },
         {
-          terms: { ip: ['host-name-1'] },
+          bool: {
+            minimum_should_match: 1,
+            should: [{ term: { ip: { _name: '1.0', value: 'host-name-1' } } }],
+          },
         },
       ];
       expect(query).toEqual(expected);
@@ -253,8 +269,9 @@ describe('get_query_filter_from_type_value', () => {
         const expected: QueryFilterType = [
           { term: { list_id: 'list-123' } },
           {
-            terms: {
-              ip: ['127.0.0.1'],
+            bool: {
+              minimum_should_match: 1,
+              should: [{ term: { ip: { _name: '0.0', value: '127.0.0.1' } } }],
             },
           },
         ];
@@ -270,8 +287,12 @@ describe('get_query_filter_from_type_value', () => {
         const expected: QueryFilterType = [
           { term: { list_id: 'list-123' } },
           {
-            terms: {
-              ip: ['127.0.0.1', '127.0.0.2'],
+            bool: {
+              minimum_should_match: 1,
+              should: [
+                { term: { ip: { _name: '0.0', value: '127.0.0.1' } } },
+                { term: { ip: { _name: '1.0', value: '127.0.0.2' } } },
+              ],
             },
           },
         ];
@@ -287,8 +308,12 @@ describe('get_query_filter_from_type_value', () => {
         const expected: QueryFilterType = [
           { term: { list_id: 'list-123' } },
           {
-            terms: {
-              ip: [5, 3],
+            bool: {
+              minimum_should_match: 1,
+              should: [
+                { term: { ip: { _name: '0.0', value: 5 } } },
+                { term: { ip: { _name: '1.0', value: 3 } } },
+              ],
             },
           },
         ];
@@ -304,8 +329,12 @@ describe('get_query_filter_from_type_value', () => {
         const expected: QueryFilterType = [
           { term: { list_id: 'list-123' } },
           {
-            terms: {
-              ip: [5, '3'],
+            bool: {
+              minimum_should_match: 1,
+              should: [
+                { term: { ip: { _name: '0.0', value: 5 } } },
+                { term: { ip: { _name: '1.0', value: '3' } } },
+              ],
             },
           },
         ];
@@ -321,8 +350,9 @@ describe('get_query_filter_from_type_value', () => {
         const expected: QueryFilterType = [
           { term: { list_id: 'list-123' } },
           {
-            terms: {
-              ip: ['host-name-1'],
+            bool: {
+              minimum_should_match: 1,
+              should: [{ term: { ip: { _name: '1.0', value: 'host-name-1' } } }],
             },
           },
         ];
@@ -338,8 +368,9 @@ describe('get_query_filter_from_type_value', () => {
         const expected: QueryFilterType = [
           { term: { list_id: 'list-123' } },
           {
-            terms: {
-              ip: ['host-name-1'],
+            bool: {
+              minimum_should_match: 1,
+              should: [{ term: { ip: { _name: '1.0', value: 'host-name-1' } } }],
             },
           },
         ];
@@ -357,8 +388,9 @@ describe('get_query_filter_from_type_value', () => {
         const expected: QueryFilterType = [
           { term: { list_id: 'list-123' } },
           {
-            terms: {
-              ip: ['127.0.0.1'],
+            bool: {
+              minimum_should_match: 1,
+              should: [{ terms: { _name: '0.0', ip: ['127.0.0.1'] } }],
             },
           },
         ];
@@ -374,8 +406,12 @@ describe('get_query_filter_from_type_value', () => {
         const expected: QueryFilterType = [
           { term: { list_id: 'list-123' } },
           {
-            terms: {
-              ip: ['127.0.0.1', '127.0.0.2'],
+            bool: {
+              minimum_should_match: 1,
+              should: [
+                { terms: { _name: '0.0', ip: ['127.0.0.1'] } },
+                { terms: { _name: '1.0', ip: ['127.0.0.2'] } },
+              ],
             },
           },
         ];
@@ -391,8 +427,9 @@ describe('get_query_filter_from_type_value', () => {
         const expected: QueryFilterType = [
           { term: { list_id: 'list-123' } },
           {
-            terms: {
-              ip: [5, 3],
+            bool: {
+              minimum_should_match: 1,
+              should: [{ terms: { _name: '0.0', ip: [5] } }, { terms: { _name: '1.0', ip: [3] } }],
             },
           },
         ];
@@ -408,8 +445,12 @@ describe('get_query_filter_from_type_value', () => {
         const expected: QueryFilterType = [
           { term: { list_id: 'list-123' } },
           {
-            terms: {
-              ip: [5, '3'],
+            bool: {
+              minimum_should_match: 1,
+              should: [
+                { terms: { _name: '0.0', ip: [5] } },
+                { terms: { _name: '1.0', ip: ['3'] } },
+              ],
             },
           },
         ];
@@ -425,8 +466,9 @@ describe('get_query_filter_from_type_value', () => {
         const expected: QueryFilterType = [
           { term: { list_id: 'list-123' } },
           {
-            terms: {
-              ip: ['host-name-1'],
+            bool: {
+              minimum_should_match: 1,
+              should: [{ terms: { _name: '1.0', ip: ['host-name-1'] } }],
             },
           },
         ];
@@ -442,8 +484,9 @@ describe('get_query_filter_from_type_value', () => {
         const expected: QueryFilterType = [
           { term: { list_id: 'list-123' } },
           {
-            terms: {
-              ip: ['host-name-1'],
+            bool: {
+              minimum_should_match: 1,
+              should: [{ terms: { _name: '1.0', ip: ['host-name-1'] } }],
             },
           },
         ];
@@ -466,14 +509,16 @@ describe('get_query_filter_from_type_value', () => {
         const expected: QueryFilterType = [
           { term: { list_id: 'list-123' } },
           {
-            terms: {
-              ip: [
-                'host-name-1',
-                'host-name-2',
-                'host-name-3',
-                'host-name-4',
-                'host-name-5',
-                'host-name-6',
+            bool: {
+              minimum_should_match: 1,
+              should: [
+                {
+                  terms: {
+                    _name: '1.0',
+                    ip: ['host-name-1', 'host-name-2', 'host-name-3', 'host-name-4', 'host-name-5'],
+                  },
+                },
+                { terms: { _name: '2.0', ip: ['host-name-6'] } },
               ],
             },
           },
