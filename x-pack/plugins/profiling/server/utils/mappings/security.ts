@@ -6,7 +6,10 @@
  */
 
 import SecurityApi from '@elastic/elasticsearch/lib/api/api/security';
-import { SecurityPutRoleResponse } from '@elastic/elasticsearch/lib/api/types';
+import {
+  SecurityCreateApiKeyResponse,
+  SecurityPutRoleResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 
 export async function createReaderRole(client: SecurityApi): Promise<SecurityPutRoleResponse> {
   return client.putRole({
@@ -18,5 +21,33 @@ export async function createReaderRole(client: SecurityApi): Promise<SecurityPut
       },
     ],
     cluster: ['monitor'],
+  });
+}
+
+export async function createIngestAPIKey(
+  client: SecurityApi
+): Promise<SecurityCreateApiKeyResponse> {
+  return client.createApiKey({
+    name: 'profiling-manager',
+    role_descriptors: {
+      profiling_manager: {
+        indices: [
+          {
+            names: ['profiling-*', '.profiling-*'],
+            privileges: [
+              'read',
+              'create_doc',
+              'create',
+              'write',
+              'index',
+              'create_index',
+              'view_index_metadata',
+              'manage',
+            ],
+          },
+        ],
+        cluster: ['monitor'],
+      },
+    },
   });
 }

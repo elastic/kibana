@@ -8,6 +8,7 @@
 import type { IRouter, Logger } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 import {
   ProfilingPluginSetupDeps,
   ProfilingPluginStartDeps,
@@ -42,6 +43,7 @@ export interface RouteRegisterParameters {
       request: KibanaRequest;
       esClient: ElasticsearchClient;
     }) => ProfilingESClient;
+    savedObjectsClient: SavedObjectsClientContract;
   };
 }
 

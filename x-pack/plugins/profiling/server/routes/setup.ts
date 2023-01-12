@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { applySetup } from '../utils/mappings/setup';
+import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { applySetup, configureFleetPolicy } from '../utils/mappings/setup';
 import { getClient } from './compat';
 import { getRoutePaths } from '../../common';
 import { RouteRegisterParameters } from '.';
@@ -43,11 +44,16 @@ export function registerSetupRoute({
     async (context, request, response) => {
       try {
         const esClient = await getClient(context);
+        // FIXME
+        // @dgieselaar: not sure how to get the client...
+        const soClient = {} as SavedObjectsClientContract;
         logger.info('applying initial setup of Elasticsearch resources');
 
-        return await applySetup(esClient).then((_) => {
-          return response.ok();
-        });
+        return await applySetup(esClient)
+          .then((_) => configureFleetPolicy(esClient, soClient))
+          .then((_) => {
+            return response.ok();
+          });
       } catch (error) {
         return handleRouteHandlerError({ error, logger, response });
       }
