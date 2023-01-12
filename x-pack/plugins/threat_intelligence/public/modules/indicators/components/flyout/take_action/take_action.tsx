@@ -14,15 +14,8 @@ import { AddToNewCase } from '../../../../cases/components/add_to_new_case/add_t
 import { AddToExistingCase } from '../../../../cases/components/add_to_existing_case/add_to_existing_case';
 import { Indicator } from '../../../../../../common/types/indicator';
 import { InvestigateInTimelineContextMenu } from '../../../../timeline';
-
-export const TAKE_ACTION_BUTTON_TEST_ID = 'tiIndicatorFlyoutTakeActionButton';
-export const INVESTIGATE_IN_TIMELINE_CONTEXT_MENU_TEST_ID =
-  'tiIndicatorFlyoutInvestigateInTimelineContextMenu';
-export const ADD_TO_EXISTING_CASE_CONTEXT_MENU_TEST_ID =
-  'tiIndicatorFlyoutAddToExistingCaseContextMenu';
-export const ADD_TO_NEW_CASE_CONTEXT_MENU_TEST_ID = 'tiIndicatorFlyoutAddToNewCaseContextMenu';
-export const ADD_TO_BLOCK_LIST_CONTEXT_MENU_TEST_ID = 'tiIndicatorFlyoutAddToBlockListContextMenu';
 import {
+  ADD_TO_BLOCK_LIST_TEST_ID,
   ADD_TO_EXISTING_CASE_TEST_ID,
   ADD_TO_NEW_CASE_TEST_ID,
   INVESTIGATE_IN_TIMELINE_TEST_ID,
@@ -69,7 +62,7 @@ export const TakeAction: VFC<TakeActionProps> = ({ indicator }) => {
     <AddToBlockListContextMenu
       data={indicatorValue}
       onClick={closePopover}
-      data-test-subj={ADD_TO_BLOCK_LIST_CONTEXT_MENU_TEST_ID}
+      data-test-subj={ADD_TO_BLOCK_LIST_TEST_ID}
     />,
   ];
 
