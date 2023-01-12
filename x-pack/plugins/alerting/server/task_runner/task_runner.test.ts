@@ -58,8 +58,6 @@ import {
   DATE_1970,
   DATE_1970_5_MIN,
   DATE_9999,
-  getSummarizedAlertsMock,
-  mockAAD,
 } from './fixtures';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { IN_MEMORY_METRICS } from '../monitoring';
