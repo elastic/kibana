@@ -393,11 +393,13 @@ When you download visualization panels with multiple layers, each layer produces
 
 To share the dashboard with a larger audience, click *Share* in the toolbar. For detailed information about the sharing options, refer to <<reporting-getting-started,Reporting>>.
 
+ifeval::["{feature-8-7-preview}"=="yes"]
 [float]
 [[import-dashboards]]
 == Export dashboards
 
 To automate {kib}, you can export dashboards as NDJSON using the <<saved-objects-api-export, Export objects API>>. It is important to export dashboards with all necessary references.
+endif::[]
 
 --
 include::tutorial-create-a-dashboard-of-lens-panels.asciidoc[]
