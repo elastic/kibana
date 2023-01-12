@@ -103,6 +103,8 @@ steps:
     agents:
       queue: n2-16-spot
     timeout_in_minutes: 60
+    depends_on:
+      - build
     retry:
       automatic:
         - exit_status: '-1'
