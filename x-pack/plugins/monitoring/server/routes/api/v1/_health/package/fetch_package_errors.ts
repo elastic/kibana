@@ -19,16 +19,12 @@ interface PackageResponse {
 
 export const fetchPackageErrors = async ({
   timeout,
-  packageIndex,
   timeRange,
   search,
   logger,
-}: FetchParameters & {
-  packageIndex: string;
-}): Promise<PackageResponse> => {
+}: FetchParameters): Promise<PackageResponse> => {
   const getPackageErrors = async () => {
     const { aggregations, timed_out: timedOut } = await search({
-      index: packageIndex,
       body: errorsQuery({
         timeRange,
         timeout,

@@ -78,7 +78,6 @@ export function registerV1HealthRoute(server: MonitoringCore) {
       const packageErrorsFn = () =>
         fetchPackageErrors({
           ...fetchArgs,
-          packageIndex: config.ui.package.index,
         }).catch((err: Error) => {
           logger.error(`_health: failed to retrieve package data:\n${err.stack}`);
           return { error: err.message };
@@ -100,7 +99,6 @@ function extractSettings(config: MonitoringConfig) {
     ccs: config.ui.ccs.enabled,
     logsIndex: config.ui.logs.index,
     metricbeatIndex: config.ui.metricbeat.index,
-    packageIndex: config.ui.package.index,
     hasRemoteClusterConfigured: (config.ui.elasticsearch.hosts || []).some(Boolean),
   };
 }
