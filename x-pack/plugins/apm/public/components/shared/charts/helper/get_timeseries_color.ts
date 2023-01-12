@@ -17,6 +17,7 @@ export enum ChartType {
   MEMORY_USAGE,
   SESSIONS,
   HTTP_REQUESTS,
+  ERROR_OCCURRENCES,
 }
 
 const palette = euiPaletteColorBlind({ rotations: 2 });
@@ -60,6 +61,10 @@ const timeSeriesColorMap: Record<
   [ChartType.SESSIONS]: {
     currentPeriodColor: palette[2],
     previousPeriodColor: palette[12],
+  },
+  [ChartType.ERROR_OCCURRENCES]: {
+    currentPeriodColor: palette[3],
+    previousPeriodColor: palette[13],
   },
 };
 

@@ -12,6 +12,7 @@ import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 import { getHttpRequestsChart } from './get_http_requests_chart';
 import { getMobileFilters } from './get_mobile_filters';
 import { getSessionsChart } from './get_sessions_chart';
+import { getMobileStats, MobileStats } from './get_mobile_stats';
 
 const mobileFiltersRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/mobile/filters',
@@ -49,6 +50,42 @@ const mobileFiltersRoute = createApmServerRoute({
       apmEventClient,
     });
     return { mobileFilters: filters };
+  },
+});
+
+const mobileStatsRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/mobile-services/{serviceName}/stats',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([
+      kueryRt,
+      rangeRt,
+      environmentRt,
+      t.partial({
+        transactionType: t.string,
+      }),
+    ]),
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async (resources): Promise<MobileStats> => {
+    const apmEventClient = await getApmEventClient(resources);
+    const { params } = resources;
+    const { serviceName } = params.path;
+    const { kuery, environment, start, end, transactionType } = params.query;
+
+    const stats = await getMobileStats({
+      kuery,
+      environment,
+      transactionType,
+      start,
+      end,
+      serviceName,
+      apmEventClient,
+    });
+
+    return stats;
   },
 });
 
@@ -136,4 +173,5 @@ export const mobileRouteRepository = {
   ...mobileFiltersRoute,
   ...sessionsChartRoute,
   ...httpRequestsChartRoute,
+  ...mobileStatsRoute,
 };
