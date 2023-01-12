@@ -14,6 +14,14 @@ export const useStyles = () => {
       height: '400px',
     };
 
-    return { yamlEditor };
+    // for some reason, switching back to monaco (by virtue of including the editor when yaml view selector, causes the editor not not update properly when switching views.
+    // instead I just hide it visually, and show when we switch back which seems
+    // to fix the issue.
+    const hide: CSSObject = {
+      visibility: 'hidden',
+      position: 'absolute',
+    };
+
+    return { yamlEditor, hide };
   }, []);
 };

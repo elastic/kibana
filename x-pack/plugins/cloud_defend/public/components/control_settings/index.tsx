@@ -6,25 +6,15 @@
  */
 import React, { useState, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTabs, EuiTab } from '@elastic/eui';
-import { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import * as i18n from './translations';
 import { ControlGeneralView } from '../control_general_view';
 import { ControlYamlView } from '../control_yaml_view';
+import { SettingsDeps, OnChangeDeps } from '../../types';
 
 const VIEW_MODE_GENERAL = 'general';
 const VIEW_MODE_YAML = 'yaml';
 
-interface OnChangeDeps {
-  isValid: boolean;
-  updatedPolicy: NewPackagePolicy;
-}
-
-interface ControlSettingsDeps {
-  policy: NewPackagePolicy;
-  onChange(opts: OnChangeDeps): void;
-}
-
-export const ControlSettings = ({ policy, onChange }: ControlSettingsDeps) => {
+export const ControlSettings = ({ policy, onChange }: SettingsDeps) => {
   const [viewMode, setViewMode] = useState(VIEW_MODE_GENERAL);
   const [isValid, setIsValid] = useState(true);
 
@@ -41,10 +31,14 @@ export const ControlSettings = ({ policy, onChange }: ControlSettingsDeps) => {
 
   const onChanges = useCallback(
     (opts: OnChangeDeps) => {
+      if (!opts.updatedPolicy) {
+        opts.updatedPolicy = policy;
+      }
+
       onChange(opts);
       setIsValid(opts.isValid);
     },
-    [onChange]
+    [onChange, policy]
   );
 
   return (
@@ -72,8 +66,8 @@ export const ControlSettings = ({ policy, onChange }: ControlSettingsDeps) => {
         </EuiTabs>
       </EuiFlexItem>
       <EuiFlexItem>
-        {isGeneralViewSelected && <ControlGeneralView policy={policy} onChange={onChanges} />}
-        {isYamlViewSelected && <ControlYamlView policy={policy} onChange={onChanges} />}
+        <ControlGeneralView show={isGeneralViewSelected} policy={policy} onChange={onChanges} />
+        <ControlYamlView show={isYamlViewSelected} policy={policy} onChange={onChanges} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

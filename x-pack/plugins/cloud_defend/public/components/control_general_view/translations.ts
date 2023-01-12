@@ -53,6 +53,10 @@ export const actionBlock = i18n.translate('xpack.cloudDefend.controlResponseActi
   defaultMessage: 'Block',
 });
 
+export const actionAlertAndBlock = i18n.translate('xpack.cloudDefend.controlResponseActionAlert', {
+  defaultMessage: 'Alert and block',
+});
+
 export const addResponse = i18n.translate('xpack.cloudDefend.addResponse', {
   defaultMessage: 'Add response',
 });

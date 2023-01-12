@@ -20,6 +20,10 @@ export const useStyles = () => {
       paddingBottom: '12px',
     };
 
-    return { panel, draggable };
+    const hide: CSSObject = {
+      display: 'none',
+    };
+
+    return { panel, draggable, hide };
   }, []);
 };

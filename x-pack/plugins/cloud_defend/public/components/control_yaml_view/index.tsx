@@ -14,7 +14,7 @@ import { useStyles } from './styles';
 import { useConfigModel } from './hooks/use_config_model';
 import { getInputFromPolicy } from '../../common/utils';
 import * as i18n from './translations';
-import { ControlResponseAction, SettingsDeps } from '../../types';
+import { ControlResponseAction, ViewDeps } from '../../types';
 
 const { editor } = monaco;
 
@@ -23,7 +23,7 @@ interface ConfigError {
   message: string;
 }
 
-export const ControlYamlView = ({ policy, onChange }: SettingsDeps) => {
+export const ControlYamlView = ({ policy, onChange, show }: ViewDeps) => {
   const styles = useStyles();
   const [errors, setErrors] = useState<ConfigError[]>([]);
   const [actionsValid, setActionsValid] = useState(true);
@@ -43,14 +43,14 @@ export const ControlYamlView = ({ policy, onChange }: SettingsDeps) => {
         return error;
       });
 
-      onChange({ isValid: actionsValid && errs.length === 0, updatedPolicy: policy });
+      onChange({ isValid: actionsValid && errs.length === 0 });
       setErrors(errs);
     });
 
     return () => {
       listener.dispose();
     };
-  }, [actionsValid, onChange, policy]);
+  }, [actionsValid, onChange]);
 
   // for now we force 'alert' action on all responses. This restriction may be removed in future when we have a plan to record all responses. e.g. audit
   const validateActions = useCallback((value) => {
@@ -87,7 +87,7 @@ export const ControlYamlView = ({ policy, onChange }: SettingsDeps) => {
   );
 
   return (
-    <EuiFlexGroup direction="column">
+    <EuiFlexGroup direction="column" css={!show && styles.hide}>
       <EuiFlexItem>
         <EuiText color="subdued" size="s">
           {i18n.controlYamlHelp}

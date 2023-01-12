@@ -83,8 +83,12 @@ describe('<ControlGeneralViewSelector />', () => {
     const { getByTestId, queryByTestId } = render(<WrappedComponent />);
     expect(getByTestId('cloud-defend-responsematch').querySelector('.euiBadge__text')).toBeTruthy();
     expect(queryByTestId('cloud-defend-responseexclude')).toBeFalsy();
-    expect(getByTestId('cloud-defend-chkalertaction')).toBeChecked();
-    expect(getByTestId('cloud-defend-chkblockaction')).not.toBeChecked();
+    expect(
+      getByTestId('cloud-defend-chkalertaction').querySelector('.euiRadio__input')
+    ).toBeChecked();
+    expect(
+      getByTestId('cloud-defend-chkblockaction').querySelector('.euiRadio__input')
+    ).not.toBeChecked();
   });
 
   it('allows the user to add more selectors to match on', () => {
@@ -163,17 +167,15 @@ describe('<ControlGeneralViewSelector />', () => {
   });
 
   it('allows the user to enable block action (which should force alert action on)', () => {
-    const { getByTestId, rerender } = render(<WrappedComponent />);
-
-    userEvent.click(getByTestId('cloud-defend-chkblockaction'));
+    const { getByTestId } = render(<WrappedComponent />);
+    const radioBtn = getByTestId('cloud-defend-chkblockaction').querySelector('.euiRadio__input');
+    if (radioBtn) {
+      userEvent.click(radioBtn);
+    }
 
     const response: ControlResponse = onChange.mock.calls[0][0];
     expect(response.actions).toContain(ControlResponseAction.alert);
     expect(response.actions).toContain(ControlResponseAction.block);
-
-    rerender(<WrappedComponent response={response} />);
-
-    expect(getByTestId('cloud-defend-chkalertaction')).toBeDisabled();
   });
 
   it('allows the user to remove the response', async () => {

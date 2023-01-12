@@ -26,15 +26,15 @@ import { getInputFromPolicy } from '../../common/utils';
 import {
   ControlSelector,
   ControlResponse,
-  SettingsDeps,
   DefaultSelector,
   DefaultResponse,
+  ViewDeps,
 } from '../../types';
 import * as i18n from './translations';
 import { ControlGeneralViewSelector } from '../control_general_view_selector';
 import { ControlGeneralViewResponse } from '../control_general_view_response';
 
-export const ControlGeneralView = ({ policy, onChange }: SettingsDeps) => {
+export const ControlGeneralView = ({ policy, onChange, show }: ViewDeps) => {
   const styles = useStyles();
   const input = getInputFromPolicy(policy, INPUT_CONTROL);
   const configuration = input?.vars?.configuration?.value || '';
@@ -167,7 +167,9 @@ export const ControlGeneralView = ({ policy, onChange }: SettingsDeps) => {
   const onSelectorChange = useCallback(
     (updatedSelector: ControlSelector, index: number) => {
       const old = selectors[index];
-      let updatedResponses: ControlResponse[] = responses;
+
+      const updatedSelectors: ControlSelector[] = [...selectors];
+      let updatedResponses: ControlResponse[] = [...responses];
 
       if (old.name !== updatedSelector.name) {
         // update all references to this selector in responses
@@ -190,16 +192,18 @@ export const ControlGeneralView = ({ policy, onChange }: SettingsDeps) => {
         });
       }
 
-      selectors[index] = updatedSelector;
-      onUpdateYaml(selectors, updatedResponses);
+      updatedSelectors[index] = updatedSelector;
+      onUpdateYaml(updatedSelectors, updatedResponses);
     },
     [onUpdateYaml, responses, selectors]
   );
 
   const onResponseChange = useCallback(
     (updatedResponse: ControlResponse, index: number) => {
-      responses[index] = updatedResponse;
-      onUpdateYaml(selectors, responses);
+      const updatedResponses: ControlResponse[] = [...responses];
+
+      updatedResponses[index] = updatedResponse;
+      onUpdateYaml(selectors, updatedResponses);
     },
     [onUpdateYaml, responses, selectors]
   );
@@ -215,7 +219,12 @@ export const ControlGeneralView = ({ policy, onChange }: SettingsDeps) => {
   );
 
   return (
-    <EuiFlexGroup gutterSize="m" direction="column" data-test-subj="cloud-defend-generalview">
+    <EuiFlexGroup
+      css={!show && styles.hide}
+      gutterSize="m"
+      direction="column"
+      data-test-subj="cloud-defend-generalview"
+    >
       <EuiFlexItem>
         <EuiTitle size="xs">
           <h4>{i18n.selectors}</h4>

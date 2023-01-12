@@ -16,7 +16,7 @@ import {
   EuiForm,
   EuiFormRow,
   EuiComboBox,
-  EuiCheckbox,
+  EuiRadio,
   EuiComboBoxOptionOption,
   EuiSpacer,
 } from '@elastic/eui';
@@ -111,37 +111,24 @@ export const ControlGeneralViewResponse = ({
     onChange(updatedResponse, index);
   }, [index, onChange, response]);
 
-  const alertSelected = response.actions.includes(ControlResponseAction.alert);
+  const alertSelected = !response.actions.includes(ControlResponseAction.block);
   const blockSelected = response.actions.includes(ControlResponseAction.block);
 
-  const onToggleAlert = useCallback(() => {
-    const updatedResponse = { ...response };
-    if (alertSelected) {
-      updatedResponse.actions.splice(response.actions.indexOf(ControlResponseAction.alert), 1);
-    } else {
-      updatedResponse.actions.push(ControlResponseAction.alert);
-    }
-    onChange(updatedResponse, index);
-  }, [alertSelected, index, onChange, response]);
-
-  const onToggleBlock = useCallback(() => {
+  const onSelectAlertAction = useCallback(() => {
     const updatedResponse = { ...response };
 
-    if (blockSelected) {
-      updatedResponse.actions.splice(
-        updatedResponse.actions.indexOf(ControlResponseAction.block),
-        1
-      );
-    } else {
-      updatedResponse.actions.push(ControlResponseAction.block);
+    updatedResponse.actions = [ControlResponseAction.alert];
 
-      // alert is required if block enabled
-      if (!alertSelected) {
-        onToggleAlert();
-      }
-    }
     onChange(updatedResponse, index);
-  }, [alertSelected, blockSelected, index, onChange, onToggleAlert, response]);
+  }, [index, onChange, response]);
+
+  const onSelectAlertAndBlockAction = useCallback(() => {
+    const updatedResponse = { ...response };
+
+    updatedResponse.actions = [ControlResponseAction.alert, ControlResponseAction.block];
+
+    onChange(updatedResponse, index);
+  }, [index, onChange, response]);
 
   const errors = useMemo(() => {
     const errs: string[] = [];
@@ -197,24 +184,23 @@ export const ControlGeneralViewResponse = ({
             <EuiFlexGroup direction="row">
               <EuiFlexItem grow={false}>
                 <EuiSpacer size="s" />
-                <EuiCheckbox
+                <EuiRadio
                   id={'alert' + index}
                   data-test-subj="cloud-defend-chkalertaction"
-                  disabled={blockSelected}
                   label={i18n.actionAlert}
                   checked={alertSelected}
-                  onChange={onToggleAlert}
+                  onChange={onSelectAlertAction}
                 />
               </EuiFlexItem>
               <EuiSpacer size="m" />
               <EuiFlexItem>
                 <EuiSpacer size="s" />
-                <EuiCheckbox
+                <EuiRadio
                   id={'block' + index}
                   data-test-subj="cloud-defend-chkblockaction"
-                  label={i18n.actionBlock}
+                  label={i18n.actionAlertAndBlock}
                   checked={blockSelected}
-                  onChange={onToggleBlock}
+                  onChange={onSelectAlertAndBlockAction}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

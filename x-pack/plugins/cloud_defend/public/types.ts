@@ -92,14 +92,18 @@ export const DefaultResponse: ControlResponse = {
   actions: [ControlResponseAction.alert],
 };
 
-interface OnChangeDeps {
+export interface OnChangeDeps {
   isValid: boolean;
-  updatedPolicy: NewPackagePolicy;
+  updatedPolicy?: NewPackagePolicy;
 }
 
 export interface SettingsDeps {
   policy: NewPackagePolicy;
   onChange(opts: OnChangeDeps): void;
+}
+
+export interface ViewDeps extends SettingsDeps {
+  show: boolean;
 }
 
 export interface ControlGeneralViewSelectorDeps {
