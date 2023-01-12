@@ -21,14 +21,14 @@ export function MobileTransactionCharts({
   environment,
   start,
   end,
-  transactionName,
+  transactionType,
 }: {
   serviceName: string;
   kuery: string;
   environment: string;
   start: string;
   end: string;
-  transactionName?: string;
+  transactionType?: string;
 }) {
   return (
     <AnnotationsContextProvider
@@ -45,7 +45,7 @@ export function MobileTransactionCharts({
               end={end}
               environment={environment}
               serviceName={serviceName}
-              transactionName={transactionName}
+              transactionType={transactionType}
             />
           </EuiFlexItem>
           <EuiFlexItem style={{ flexShrink: 1 }}>
@@ -55,7 +55,7 @@ export function MobileTransactionCharts({
               end={end}
               environment={environment}
               serviceName={serviceName}
-              transactionName={transactionName}
+              transactionType={transactionType}
             />
           </EuiFlexItem>
         </EuiFlexGrid>
@@ -69,10 +69,7 @@ export function MobileTransactionCharts({
             </EuiPanel>
           </EuiFlexItem>
           <EuiFlexItem style={{ flexShrink: 1 }}>
-            <ServiceOverviewThroughputChart
-              kuery={kuery}
-              transactionName={transactionName}
-            />
+            <ServiceOverviewThroughputChart kuery={kuery} />
           </EuiFlexItem>
           <EuiFlexItem grow={1}>
             <FailedTransactionRateChart kuery={kuery} />
