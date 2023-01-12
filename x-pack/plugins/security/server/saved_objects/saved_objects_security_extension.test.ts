@@ -6,7 +6,7 @@
  */
 
 import { AuditAction } from '@kbn/core-saved-objects-server';
-import type { EcsEventOutcome, SavedObjectsClient } from '@kbn/core/server';
+import type { EcsEvent, SavedObjectsClient } from '@kbn/core/server';
 
 import { auditLoggerMock } from '../audit/mocks';
 import type { CheckSavedObjectsPrivileges } from '../authorization';
@@ -472,7 +472,7 @@ describe('#addAuditEvent', () => {
   test(`adds an unknown audit event`, async () => {
     const { auditLogger, securityExtension } = setup();
     const action = AuditAction.UPDATE_OBJECTS_SPACES;
-    const outcome: EcsEventOutcome = 'unknown';
+    const outcome: EcsEvent['outcome'] = 'unknown';
     const savedObject = { type: 'dashboard', id: '3' };
     const spaces = ['space-id'];
 
@@ -505,7 +505,7 @@ describe('#addAuditEvent', () => {
   test(`adds a success audit event`, async () => {
     const { auditLogger, securityExtension } = setup();
     const action = AuditAction.UPDATE_OBJECTS_SPACES;
-    const outcome: EcsEventOutcome = 'success';
+    const outcome: EcsEvent['outcome'] = 'success';
     const savedObject = { type: 'dashboard', id: '3' };
     const spaces = ['space-id'];
 
@@ -538,7 +538,7 @@ describe('#addAuditEvent', () => {
   test(`adds a failure audit event`, async () => {
     const { auditLogger, securityExtension } = setup();
     const action = AuditAction.DELETE;
-    const outcome: EcsEventOutcome = 'failure';
+    const outcome: EcsEvent['outcome'] = 'failure';
     const savedObject = { type: 'dashboard', id: '3' };
     const error: Error = {
       name: 'test_error',
