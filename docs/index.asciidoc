@@ -17,8 +17,6 @@ include::{docs-root}/shared/versions/stack/{source_branch}.asciidoc[]
 :data-sources:    data views
 :a-data-source:   a data view
 
-:feature-8-7-preview: no
-
 include::{docs-root}/shared/attributes.asciidoc[]
 
 :blob: {kib-repo}blob/{branch}/
