@@ -7,8 +7,7 @@
  */
 
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { getVisualizeInformation, useQuerySubscriber } from '@kbn/unified-field-list-plugin/public';
+import { useQuerySubscriber } from '@kbn/unified-field-list-plugin/public';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   UnifiedHistogramFetchStatus,
@@ -17,10 +16,8 @@ import {
 } from '@kbn/unified-histogram-plugin/public';
 import type { UnifiedHistogramChartLoadEvent } from '@kbn/unified-histogram-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
-import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { Subject } from 'rxjs';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
-import { getUiActions } from '../../../../kibana_services';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useDataState } from '../../hooks/use_data_state';
 import type { DataFetch$, SavedSearchData } from '../../services/discover_data_state_container';
@@ -38,7 +35,6 @@ export interface UseDiscoverHistogramProps {
   stateContainer: DiscoverStateContainer;
   savedSearchData$: SavedSearchData;
   dataView: DataView;
-  savedSearch: SavedSearch;
   isTimeBased: boolean;
   isPlainRecord: boolean;
   inspectorAdapters: InspectorAdapters;
@@ -50,55 +46,18 @@ export const useDiscoverHistogram = ({
   stateContainer,
   savedSearchData$,
   dataView,
-  savedSearch,
   isTimeBased,
   isPlainRecord,
   inspectorAdapters,
   searchSessionManager,
   savedSearchFetch$,
 }: UseDiscoverHistogramProps) => {
-  const { storage, data, lens } = useDiscoverServices();
+  const { storage, data } = useDiscoverServices();
   const [hideChart, interval, breakdownField] = useAppStateSelector((state) => [
     state.hideChart,
     state.interval,
     state.breakdownField,
   ]);
-
-  /**
-   * Visualize
-   */
-
-  const timeField = dataView.timeFieldName && dataView.getFieldByName(dataView.timeFieldName);
-  const [canVisualize, setCanVisualize] = useState(false);
-
-  useEffect(() => {
-    if (!timeField) {
-      return;
-    }
-    getVisualizeInformation(
-      getUiActions(),
-      timeField,
-      dataView,
-      savedSearch.columns || [],
-      []
-    ).then((info) => {
-      setCanVisualize(Boolean(info));
-    });
-  }, [dataView, savedSearch.columns, timeField]);
-
-  const onEditVisualization = useCallback(
-    (lensAttributes: TypedLensByValueInput['attributes']) => {
-      if (!timeField) {
-        return;
-      }
-      lens.navigateToPrefilledEditor({
-        id: '',
-        timeRange: data.query.timefilter.timefilter.getTime(),
-        attributes: lensAttributes,
-      });
-    },
-    [data.query.timefilter.timefilter, lens, timeField]
-  );
 
   /**
    * Height
@@ -248,11 +207,7 @@ export const useDiscoverHistogram = ({
    * Search params
    */
 
-  const { query, filters, fromDate: from, toDate: to } = useQuerySubscriber({ data });
-  const timeRange = useMemo(
-    () => (from && to ? { from, to } : data.query.timefilter.timefilter.getTimeDefaults()),
-    [data.query.timefilter.timefilter, from, to]
-  );
+  const { query, filters, timeRange } = useQuerySubscriber({ data });
 
   /**
    * Request
@@ -316,7 +271,6 @@ export const useDiscoverHistogram = ({
         breakdown,
         disableAutoFetching: true,
         input$,
-        onEditVisualization: canVisualize ? onEditVisualization : undefined,
         onTopPanelHeightChange,
         onChartHiddenChange,
         onTimeIntervalChange,

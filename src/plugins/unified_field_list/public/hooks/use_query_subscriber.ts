@@ -8,7 +8,7 @@
 
 import { useEffect, useState } from 'react';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
+import type { AggregateQuery, Query, Filter, TimeRange } from '@kbn/es-query';
 import { getResolvedDateRange } from '../utils/get_resolved_date_range';
 
 /**
@@ -24,6 +24,7 @@ export interface QuerySubscriberParams {
 export interface QuerySubscriberResult {
   query: Query | AggregateQuery | undefined;
   filters: Filter[] | undefined;
+  timeRange: TimeRange | undefined;
   fromDate: string | undefined;
   toDate: string | undefined;
 }
@@ -41,13 +42,14 @@ export const useQuerySubscriber = ({ data }: QuerySubscriberParams) => {
     return {
       query: state?.query,
       filters: state?.filters,
+      timeRange: state?.time,
       fromDate: dateRange.fromDate,
       toDate: dateRange.toDate,
     };
   });
 
   useEffect(() => {
-    const subscription = data.search.session.state$.subscribe((sessionState) => {
+    const subscription = data.search.session.state$.subscribe(() => {
       const dateRange = getResolvedDateRange(timefilter);
       setResult((prevState) => ({
         ...prevState,
@@ -61,11 +63,12 @@ export const useQuerySubscriber = ({ data }: QuerySubscriberParams) => {
 
   useEffect(() => {
     const subscription = data.query.state$.subscribe(({ state, changes }) => {
-      if (changes.query || changes.filters) {
+      if (changes.query || changes.filters || changes.time) {
         setResult((prevState) => ({
           ...prevState,
           query: state.query,
           filters: state.filters,
+          timeRange: state.time,
         }));
       }
     });
@@ -86,6 +89,8 @@ export const hasQuerySubscriberData = (
 ): result is {
   query: Query | AggregateQuery;
   filters: Filter[];
+  timeRange: TimeRange;
   fromDate: string;
   toDate: string;
-} => Boolean(result.query && result.filters && result.fromDate && result.toDate);
+} =>
+  Boolean(result.query && result.filters && result.timeRange && result.fromDate && result.toDate);

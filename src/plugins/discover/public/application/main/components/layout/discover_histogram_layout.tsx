@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { RefObject, useCallback, useEffect, useState } from 'react';
+import React, { RefObject, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   UnifiedHistogramLayout,
   UnifiedHistogramLayoutContainer,
@@ -19,6 +19,7 @@ import type { DiscoverSearchSessionManager } from '../../services/discover_searc
 import type { InspectorAdapters } from '../../hooks/use_inspector';
 import { type DiscoverMainContentProps, DiscoverMainContent } from './discover_main_content';
 import { ResetSearchButton } from './reset_search_button';
+import { getUiActions } from '../../../../kibana_services';
 
 export interface DiscoverHistogramLayoutProps extends DiscoverMainContentProps {
   resetSavedSearch: () => void;
@@ -40,13 +41,16 @@ export const DiscoverHistogramLayout = ({
   searchSessionManager,
   ...mainContentProps
 }: DiscoverHistogramLayoutProps) => {
-  const services = useDiscoverServices();
+  const discoverServices = useDiscoverServices();
+  const services = useMemo(
+    () => ({ ...discoverServices, uiActions: getUiActions() }),
+    [discoverServices]
+  );
 
   const commonProps = {
     dataView,
     isPlainRecord,
     stateContainer,
-    savedSearch,
     savedSearchData$: stateContainer.dataState.data$,
   };
 
@@ -99,6 +103,7 @@ export const DiscoverHistogramLayout = ({
         <DiscoverMainContent
           {...commonProps}
           {...mainContentProps}
+          savedSearch={savedSearch}
           // The documents grid doesn't rerender when the chart visibility changes
           // which causes it to render blank space, so we need to force a rerender
           key={`docKey${histogramProps.chart?.hidden}`}
