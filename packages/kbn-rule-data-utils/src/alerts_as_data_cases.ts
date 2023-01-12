@@ -6,9 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './src/technical_field_names';
-export * from './src/alerts_as_data_rbac';
-export * from './src/alerts_as_data_severity';
-export * from './src/alerts_as_data_status';
-export * from './src/alerts_as_data_cases';
-export * from './src/routes/stack_rule_paths';
+export const MAX_CASES_PER_ALERT = 10;

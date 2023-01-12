@@ -22,6 +22,7 @@ import {
   ALERT_END,
   ALERT_STATUS_ACTIVE,
   ALERT_CASE_IDS,
+  MAX_CASES_PER_ALERT,
 } from '@kbn/rule-data-utils';
 
 import {
@@ -126,9 +127,6 @@ interface SingleSearchAfterAndAudit {
   sort?: estypes.SortOptions[] | undefined;
   lastSortIds?: Array<string | number> | undefined;
 }
-
-// TODO: Maybe move it to Cases or to @kbn/rule-data-utils
-const MAX_CASES_PER_ALERT = 10;
 
 /**
  * Provides apis to interact with alerts as data
@@ -786,14 +784,10 @@ export class AlertsClient {
 
   public async bulkUpdateCases({ ids, index, caseIds }: BulkUpdateCasesOptions) {
     /**
-     * First check in case the caseIds are more that the allowed limit.
-     * We do this check to avoid any mget calls or authorization checks
-     *
-     * The check below does not ensure that an alert may exceed the limit
-     * if we add the casedIds. We need to also throw in case
-     * alert.caseIds + caseIds > MAX_CASES_PER_ALERT. The validateTotalCasesPerAlert
-     * function ensures that.
-     *
+     * We do this check to avoid any mget calls or authorization checks.
+     * The check below does not ensure that an alert may exceed the limit.
+     * We need to also throw in case alert.caseIds + caseIds > MAX_CASES_PER_ALERT.
+     * The validateTotalCasesPerAlert function ensures that.
      */
     if (caseIds.length > MAX_CASES_PER_ALERT) {
       throw Boom.badRequest(`You cannot attach more than ${MAX_CASES_PER_ALERT} cases to an alert`);
@@ -802,6 +796,11 @@ export class AlertsClient {
     return this.mgetAlertsAuditOperate({
       ids,
       indexName: index,
+      /**
+       * A user with read access to an alert and write access to a case should be able to link
+       * the case to the alert (update the alert's data to include the case ids).
+       * For that reason, the operation is a read operation.
+       */
       operation: ReadOperations.Get,
       fieldToUpdate: (source) => this.getAlertCaseIdsFieldUpdate(source, caseIds),
       validate: (source) => this.validateTotalCasesPerAlert(source, caseIds),

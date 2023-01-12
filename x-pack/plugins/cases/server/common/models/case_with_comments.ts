@@ -363,8 +363,7 @@ export class CaseCommentModel {
       );
     } catch (error) {
       throw createCaseError({
-        // TODO:  better error message
-        message: `Failed to update alerts case schema: ${error}`,
+        message: `Failed to add case info to alerts for caseId ${this.caseInfo.id}: ${error}`,
         error,
         logger: this.params.logger,
       });
