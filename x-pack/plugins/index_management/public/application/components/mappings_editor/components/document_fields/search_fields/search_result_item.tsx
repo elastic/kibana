@@ -56,7 +56,11 @@ export const SearchResultItem = React.memo(function FieldListItemFlatComponent({
     );
 
     return (
-      <EuiFlexGroup gutterSize="s" className="mappingsEditor__fieldsListItem__actions">
+      <EuiFlexGroup
+        gutterSize="s"
+        className="mappingsEditor__fieldsListItem__actions"
+        data-test-subj="fieldActions"
+      >
         <EuiFlexItem grow={false}>
           <EuiToolTip content={editButtonLabel}>
             <EuiButtonIcon
@@ -105,11 +109,15 @@ export const SearchResultItem = React.memo(function FieldListItemFlatComponent({
               'mappingsEditor__fieldsListItem__content--multiField': isMultiField,
             })}
           >
-            <EuiFlexItem grow={false} className="mappingsEditor__fieldsListItem__name">
+            <EuiFlexItem
+              grow={false}
+              className="mappingsEditor__fieldsListItem__name"
+              data-test-subj="fieldName"
+            >
               {display}
             </EuiFlexItem>
 
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} data-test-subj="fieldType">
               <EuiBadge color="hollow">
                 {isMultiField
                   ? i18n.translate('xpack.idxMgmt.mappingsEditor.multiFieldBadgeLabel', {
@@ -129,3 +137,5 @@ export const SearchResultItem = React.memo(function FieldListItemFlatComponent({
     </div>
   );
 });
+
+SearchResultItem.displayName = 'SearchResultItem'; // display name required for tests to work with React.memo
