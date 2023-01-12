@@ -45,9 +45,9 @@ export const ControlGeneralViewResponse = ({
   }, []);
 
   const onRemoveClicked = useCallback(() => {
-    onRemove(response);
+    onRemove(index);
     closePopover();
-  }, [closePopover, onRemove, response]);
+  }, [closePopover, index, onRemove]);
 
   const onDuplicateClicked = useCallback(() => {
     onDuplicate(response);
@@ -59,9 +59,9 @@ export const ControlGeneralViewResponse = ({
       response.match = options.map((option: EuiComboBoxOptionOption) => option.value);
       response.hasErrors = response.match.length === 0;
 
-      onChange(response);
+      onChange(response, index);
     },
-    [onChange, response]
+    [index, onChange, response]
   );
 
   const onChangeExcludes = useCallback(
@@ -72,9 +72,9 @@ export const ControlGeneralViewResponse = ({
         delete response.exclude;
       }
 
-      onChange(response);
+      onChange(response, index);
     },
-    [onChange, response]
+    [index, onChange, response]
   );
 
   const selectorOptions = useMemo(() => {
@@ -106,35 +106,42 @@ export const ControlGeneralViewResponse = ({
   );
 
   const onShowExclude = useCallback(() => {
-    response.exclude = [];
-    onChange(response);
-  }, [onChange, response]);
+    const updatedResponse = { ...response };
+    updatedResponse.exclude = [];
+    onChange(updatedResponse, index);
+  }, [index, onChange, response]);
 
   const alertSelected = response.actions.includes(ControlResponseAction.alert);
   const blockSelected = response.actions.includes(ControlResponseAction.block);
 
   const onToggleAlert = useCallback(() => {
+    const updatedResponse = { ...response };
     if (alertSelected) {
-      response.actions.splice(response.actions.indexOf(ControlResponseAction.alert), 1);
+      updatedResponse.actions.splice(response.actions.indexOf(ControlResponseAction.alert), 1);
     } else {
-      response.actions.push(ControlResponseAction.alert);
+      updatedResponse.actions.push(ControlResponseAction.alert);
     }
-    onChange(response);
-  }, [alertSelected, onChange, response]);
+    onChange(updatedResponse, index);
+  }, [alertSelected, index, onChange, response]);
 
   const onToggleBlock = useCallback(() => {
+    const updatedResponse = { ...response };
+
     if (blockSelected) {
-      response.actions.splice(response.actions.indexOf(ControlResponseAction.block), 1);
+      updatedResponse.actions.splice(
+        updatedResponse.actions.indexOf(ControlResponseAction.block),
+        1
+      );
     } else {
-      response.actions.push(ControlResponseAction.block);
+      updatedResponse.actions.push(ControlResponseAction.block);
 
       // alert is required if block enabled
       if (!alertSelected) {
         onToggleAlert();
       }
     }
-    onChange(response);
-  }, [alertSelected, blockSelected, onChange, onToggleAlert, response]);
+    onChange(updatedResponse, index);
+  }, [alertSelected, blockSelected, index, onChange, onToggleAlert, response]);
 
   const errors = useMemo(() => {
     const errs: string[] = [];

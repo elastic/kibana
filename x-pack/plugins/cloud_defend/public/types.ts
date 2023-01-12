@@ -105,8 +105,9 @@ export interface SettingsDeps {
 export interface ControlGeneralViewSelectorDeps {
   selector: ControlSelector;
   selectors: ControlSelector[];
-  onChange(selector: ControlSelector): void;
-  onRemove(selector: ControlSelector): void;
+  index: number;
+  onChange(selector: ControlSelector, index: number): void;
+  onRemove(index: number): void;
   onDuplicate(selector: ControlSelector): void;
 }
 
@@ -115,8 +116,8 @@ export interface ControlGeneralViewResponseDeps {
   selectors: ControlSelector[];
   responses: ControlResponse[];
   index: number;
-  onChange(response: ControlResponse): void;
-  onRemove(response: ControlResponse): void;
+  onChange(response: ControlResponse, index: number): void;
+  onRemove(index: number): void;
   onDuplicate(response: ControlResponse): void;
 }
 

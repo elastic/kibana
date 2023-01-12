@@ -34,6 +34,7 @@ import { VALID_SELECTOR_NAME_REGEX, MAX_CONDITION_VALUE_LENGTH } from '../../com
 export const ControlGeneralViewSelector = ({
   selector,
   selectors,
+  index,
   onRemove,
   onDuplicate,
   onChange,
@@ -61,11 +62,11 @@ export const ControlGeneralViewSelector = ({
   const onRemoveClicked = useCallback(() => {
     // we prevent the removal of the last selector to avoid an empty state
     if (selectors.length > 1) {
-      onRemove(selector);
+      onRemove(index);
     }
 
     closePopover();
-  }, [closePopover, onRemove, selector, selectors.length]);
+  }, [closePopover, index, onRemove, selectors.length]);
 
   const onDuplicateClicked = useCallback(() => {
     onDuplicate(selector);
@@ -96,17 +97,22 @@ export const ControlGeneralViewSelector = ({
       }
 
       setErrorMap({ ...errorMap });
-      selector.name = value;
-      selector.hasErrors = Object.keys(errorMap).length > 0;
 
-      onChange(selector);
+      const updatedSelector = { ...selector };
+
+      updatedSelector.name = value;
+      updatedSelector.hasErrors = Object.keys(errorMap).length > 0;
+
+      onChange(updatedSelector, index);
     },
-    [errorMap, onChange, selector, selectors]
+    [errorMap, index, onChange, selector, selectors]
   );
 
   const onChangeCondition = useCallback(
     (prop: string, values: string[]) => {
-      setControlSelectorValueForProp(prop, values, selector);
+      const updatedSelector = { ...selector };
+
+      setControlSelectorValueForProp(prop, values, updatedSelector);
 
       const errors = [];
 
@@ -126,12 +132,12 @@ export const ControlGeneralViewSelector = ({
         delete errorMap[prop];
       }
 
-      selector.hasErrors = Object.keys(errorMap).length > 0;
+      updatedSelector.hasErrors = Object.keys(errorMap).length > 0;
       setErrorMap({ ...errorMap });
 
-      onChange(selector);
+      onChange(updatedSelector, index);
     },
-    [errorMap, onChange, selector]
+    [errorMap, index, onChange, selector]
   );
 
   const onAddCondition = useCallback(
@@ -144,11 +150,17 @@ export const ControlGeneralViewSelector = ({
 
   const onRemoveCondition = useCallback(
     (prop: string) => {
-      delete (selector as any)[prop];
-      onChange(selector);
+      const updatedSelector = { ...selector };
+      delete (updatedSelector as any)[prop];
+
+      delete errorMap[prop];
+      setErrorMap({ ...errorMap });
+      updatedSelector.hasErrors = Object.keys(errorMap).length > 0;
+
+      onChange(updatedSelector, index);
       closeAddCondition();
     },
-    [closeAddCondition, onChange, selector]
+    [closeAddCondition, errorMap, index, onChange, selector]
   );
 
   const onAddValueToCondition = useCallback(
@@ -184,6 +196,7 @@ export const ControlGeneralViewSelector = ({
       paddingSize="m"
       buttonContent={selector.name}
       css={styles.accordion}
+      initialIsOpen={index === 0}
       extraAction={
         <EuiPopover
           id={selector.name}
@@ -238,6 +251,7 @@ export const ControlGeneralViewSelector = ({
             onChange={onNameChange}
             isInvalid={errorMap.hasOwnProperty('name')}
             data-test-subj="cloud-defend-selectorcondition-name"
+            maxLength={MAX_CONDITION_VALUE_LENGTH}
           />
         </EuiFormRow>
         {Object.keys(selector).map((prop: string) => {

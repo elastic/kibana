@@ -116,9 +116,32 @@ export const ControlGeneralView = ({ policy, onChange }: SettingsDeps) => {
   );
 
   const onRemoveSelector = useCallback(
-    (selector: ControlSelector) => {
-      const newSelectors = selectors.filter((sel) => sel !== selector);
-      onUpdateYaml(newSelectors, responses);
+    (index: number) => {
+      const oldName = selectors[index].name;
+      const newSelectors = [...selectors];
+      newSelectors.splice(index, 1);
+
+      // remove reference from all responses
+      const updatedResponses = responses.map((r) => {
+        const response = { ...r };
+        const matchIndex = response.match.indexOf(oldName);
+
+        if (matchIndex !== -1) {
+          response.match.splice(matchIndex, 1);
+        }
+
+        if (response.exclude) {
+          const excludeIndex = response.exclude.indexOf(oldName);
+
+          if (excludeIndex !== -1) {
+            response.exclude.splice(excludeIndex, 1);
+          }
+        }
+
+        return response;
+      });
+
+      onUpdateYaml(newSelectors, updatedResponses);
     },
     [onUpdateYaml, responses, selectors]
   );
@@ -133,24 +156,49 @@ export const ControlGeneralView = ({ policy, onChange }: SettingsDeps) => {
   );
 
   const onRemoveResponse = useCallback(
-    (response: ControlResponse) => {
-      const newResponses = responses.filter((resp) => resp !== response);
+    (index: number) => {
+      const newResponses = { ...responses };
+      newResponses.splice(index, 1);
       onUpdateYaml(selectors, newResponses);
     },
     [onUpdateYaml, responses, selectors]
   );
 
   const onSelectorChange = useCallback(
-    (updatedSelector: ControlSelector) => {
-      selectors[selectors.indexOf(updatedSelector)] = updatedSelector;
-      onUpdateYaml(selectors, responses);
+    (updatedSelector: ControlSelector, index: number) => {
+      const old = selectors[index];
+      let updatedResponses: ControlResponse[] = responses;
+
+      if (old.name !== updatedSelector.name) {
+        // update all references to this selector in responses
+        updatedResponses = responses.map((response) => {
+          let oldNameIndex = response.match.indexOf(old.name);
+
+          if (oldNameIndex !== -1) {
+            response.match[oldNameIndex] = updatedSelector.name;
+          }
+
+          if (response.exclude) {
+            oldNameIndex = response.exclude.indexOf(old.name);
+
+            if (oldNameIndex !== -1) {
+              response.exclude[oldNameIndex] = updatedSelector.name;
+            }
+          }
+
+          return response;
+        });
+      }
+
+      selectors[index] = updatedSelector;
+      onUpdateYaml(selectors, updatedResponses);
     },
     [onUpdateYaml, responses, selectors]
   );
 
   const onResponseChange = useCallback(
-    (updatedResponse: ControlResponse) => {
-      responses[responses.indexOf(updatedResponse)] = updatedResponse;
+    (updatedResponse: ControlResponse, index: number) => {
+      responses[index] = updatedResponse;
       onUpdateYaml(selectors, responses);
     },
     [onUpdateYaml, responses, selectors]
@@ -182,6 +230,7 @@ export const ControlGeneralView = ({ policy, onChange }: SettingsDeps) => {
           <EuiFlexItem key={i}>
             <ControlGeneralViewSelector
               key={i}
+              index={i}
               selector={selector}
               selectors={selectors}
               onDuplicate={onDuplicateSelector}
@@ -191,6 +240,7 @@ export const ControlGeneralView = ({ policy, onChange }: SettingsDeps) => {
           </EuiFlexItem>
         );
       })}
+
       <EuiButton
         fullWidth
         color="primary"

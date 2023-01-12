@@ -184,7 +184,7 @@ describe('<ControlGeneralViewSelector />', () => {
     await waitFor(() => userEvent.click(getByTestId('cloud-defend-btndeleteresponse')));
 
     expect(onRemove.mock.calls).toHaveLength(1);
-    expect(onRemove.mock.calls[0][0]).toEqual(mockResponse);
+    expect(onRemove.mock.calls[0][0]).toEqual(0);
   });
 
   it('prevents the last response from being removed', async () => {

@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import yaml from 'js-yaml';
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import userEvent from '@testing-library/user-event';
 import { TestProvider } from '../../test/test_provider';
@@ -74,5 +74,36 @@ describe('<ControlGeneralView />', () => {
     } catch (err) {
       throw err;
     }
+  });
+
+  it('updates selector name used in response.match, if its name is changed', async () => {
+    const { getByTitle, getAllByTestId, rerender } = render(<WrappedComponent />);
+
+    const input = await waitFor(
+      () => getAllByTestId('cloud-defend-selectorcondition-name')[1] as HTMLInputElement
+    );
+
+    userEvent.type(input, '2');
+
+    const policy = onChange.mock.calls[0][0].updatedPolicy;
+    rerender(<WrappedComponent policy={policy} />);
+
+    expect(getByTitle('Remove nginxOnly2 from selection in this group')).toBeTruthy(); // would be 'nginxOnly' had the update not worked
+  });
+
+  it('updates selector name used in response.exclude, if its name is changed', async () => {
+    const { getByTitle, getAllByTestId, rerender } = render(<WrappedComponent />);
+
+    const input = await waitFor(
+      () => getAllByTestId('cloud-defend-selectorcondition-name')[2] as HTMLInputElement
+    );
+
+    userEvent.type(input, '3');
+
+    const policy = onChange.mock.calls[0][0].updatedPolicy;
+
+    rerender(<WrappedComponent policy={policy} />);
+
+    expect(getByTitle('Remove excludeCustomNginxBuild3 from selection in this group')).toBeTruthy();
   });
 });

@@ -53,13 +53,13 @@ describe('<ControlSettings />', () => {
   });
 
   it('should prevent ability to switch views if there are errors', async () => {
-    const { rerender } = render(<WrappedComponent />);
+    const { rerender, getAllByTestId } = render(<WrappedComponent />);
 
-    userEvent.click(screen.getByTitle('Remove createExecutable from selection in this group'));
-    userEvent.click(screen.getByTitle('Remove modifyExecutable from selection in this group'));
-    userEvent.click(screen.getByTitle('Remove execMemFd from selection in this group'));
+    const btnClear = await waitFor(() => getAllByTestId('comboBoxClearButton')[0]);
 
-    const updated = onChange.mock.calls[2][0].updatedPolicy;
+    userEvent.click(btnClear);
+
+    const updated = onChange.mock.calls[0][0].updatedPolicy;
 
     rerender(<WrappedComponent policy={updated} />);
 

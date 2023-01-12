@@ -43,6 +43,7 @@ describe('<ControlGeneralViewSelector />', () => {
         <ControlGeneralViewSelector
           selectors={selectors || [selector, mockSelector2]}
           selector={selector}
+          index={0}
           onChange={onChange}
           onRemove={onRemove}
           onDuplicate={onDuplicate}
@@ -135,12 +136,16 @@ describe('<ControlGeneralViewSelector />', () => {
   });
 
   it('prevents conditions from having values that exceed MAX_CONDITION_VALUE_LENGTH', async () => {
-    const { getByText, getByTestId } = render(<WrappedComponent />);
+    const { getByText, getByTestId, rerender } = render(<WrappedComponent />);
 
     const addConditionBtn = getByTestId('cloud-defend-btnaddselectorcondition');
     userEvent.click(addConditionBtn);
 
     await waitFor(() => userEvent.click(getByText('Container image name'))); // add containerImageName
+
+    const updatedSelector: ControlSelector = onChange.mock.calls[0][0];
+
+    rerender(<WrappedComponent selector={updatedSelector} />);
 
     const el = getByTestId('cloud-defend-selectorcondition-containerImageName').querySelector(
       'input'
@@ -180,7 +185,7 @@ describe('<ControlGeneralViewSelector />', () => {
     await waitFor(() => userEvent.click(getByTestId('cloud-defend-btndeleteselector')));
 
     expect(onRemove.mock.calls).toHaveLength(1);
-    expect(onRemove.mock.calls[0][0]).toEqual(mockSelector);
+    expect(onRemove.mock.calls[0][0]).toEqual(0);
 
     onRemove.mockClear();
 
