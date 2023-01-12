@@ -16,7 +16,7 @@ import {
   RULES_SETTINGS_SAVED_OBJECT_TYPE,
 } from '../common';
 
-export const alertingFeatures: KibanaFeatureConfig = {
+export const rulesSettingsFeature: KibanaFeatureConfig = {
   id: RULES_SETTINGS_FEATURE_ID,
   name: i18n.translate('xpack.alerting.feature.rulesSettingsFeatureName', {
     defaultMessage: 'Rules Settings',

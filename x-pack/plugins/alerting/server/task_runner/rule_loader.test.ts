@@ -13,6 +13,7 @@ import { getRuleAttributes, getFakeKibanaRequest, loadRule } from './rule_loader
 import { TaskRunnerContext } from './task_runner_factory';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { rulesClientMock } from '../rules_client.mock';
+import { rulesSettingsClientMock } from '../rules_settings_client.mock';
 import { Rule } from '../types';
 import { MONITORING_HISTORY_LIMIT, RuleExecutionStatusErrorReasons } from '../../common';
 import { getReasonFromError } from '../lib/error_with_reason';
@@ -20,6 +21,7 @@ import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_e
 
 // create mocks
 const rulesClient = rulesClientMock.create();
+const rulesSettingsClient = rulesSettingsClientMock.create();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const alertingEventLogger = alertingEventLoggerMock.create();
 const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
@@ -185,6 +187,7 @@ describe('rule_loader', () => {
       expect(result.fakeRequest).toEqual(expect.any(CoreKibanaRequest));
       expect(result.rule.alertTypeId).toBe(ruleTypeId);
       expect(result.rulesClient).toBeTruthy();
+      expect(result.rulesSettingsClient).toBeTruthy();
       expect(contextMock.spaceIdToNamespace.mock.calls[0]).toEqual(['default']);
 
       const esoArgs = encryptedSavedObjects.getDecryptedAsInternalUser.mock.calls[0];
@@ -201,6 +204,7 @@ describe('rule_loader', () => {
       expect(result.fakeRequest).toEqual(expect.any(CoreKibanaRequest));
       expect(result.rule.alertTypeId).toBe(ruleTypeId);
       expect(result.rulesClient).toBeTruthy();
+      expect(result.rulesSettingsClient).toBeTruthy();
       expect(contextMock.spaceIdToNamespace.mock.calls[0]).toEqual([spaceId]);
 
       const esoArgs = encryptedSavedObjects.getDecryptedAsInternalUser.mock.calls[0];
@@ -292,6 +296,7 @@ function getTaskRunnerContext(ruleParameters: unknown, historyElements: number) 
     encryptedSavedObjectsClient: encryptedSavedObjects,
     basePathService: mockBasePathService,
     getRulesClientWithRequest,
+    getRulesSettingsClientWithRequest,
   };
 
   function getRulesClientWithRequest() {
@@ -307,5 +312,9 @@ function getTaskRunnerContext(ruleParameters: unknown, historyElements: number) 
       },
     } as Rule);
     return rulesClient;
+  }
+
+  function getRulesSettingsClientWithRequest() {
+    return rulesSettingsClient;
   }
 }

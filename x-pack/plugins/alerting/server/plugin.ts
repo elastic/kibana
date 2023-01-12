@@ -86,7 +86,7 @@ import { getSecurityHealth, SecurityHealth } from './lib/get_security_health';
 import { registerNodeCollector, registerClusterCollector, InMemoryMetrics } from './monitoring';
 import { getRuleTaskTimeout } from './lib/get_rule_task_timeout';
 import { getActionsConfigMap } from './lib/get_actions_config_map';
-import { alertingFeatures } from './feature';
+import { rulesSettingsFeature } from './rules_settings_feature';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -218,7 +218,7 @@ export class AlertingPlugin {
       };
     });
 
-    plugins.features.registerKibanaFeature(alertingFeatures);
+    plugins.features.registerKibanaFeature(rulesSettingsFeature);
 
     this.isESOCanEncrypt = plugins.encryptedSavedObjects.canEncrypt;
 

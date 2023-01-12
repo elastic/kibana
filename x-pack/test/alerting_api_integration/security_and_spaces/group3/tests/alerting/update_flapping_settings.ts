@@ -102,7 +102,7 @@ export default function updateFlappingSettingsTest({ getService }: FtrProviderCo
         .expect(400);
 
       expect(response.body.message).to.eql(
-        'Invalid statusChangeThreshold value, must be between 3 and 20, but got: 200.'
+        'Invalid statusChangeThreshold value, must be between 2 and 20, but got: 200.'
       );
 
       response = await supertestWithoutAuth
@@ -146,8 +146,8 @@ export default function updateFlappingSettingsTest({ getService }: FtrProviderCo
 
         expect(getResponse.statusCode).to.eql(200);
         expect(getResponse.body.enabled).to.eql(true);
-        expect(getResponse.body.lookBackWindow).to.eql(10);
-        expect(getResponse.body.statusChangeThreshold).to.eql(10);
+        expect(getResponse.body.lookBackWindow).to.eql(20);
+        expect(getResponse.body.statusChangeThreshold).to.eql(4);
       });
     });
   });

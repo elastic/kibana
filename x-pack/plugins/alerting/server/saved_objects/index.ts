@@ -13,7 +13,8 @@ import type {
 } from '@kbn/core/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
-import { alertMappings, rulesSettingsMappings } from './mappings';
+import { alertMappings } from './mappings';
+import { rulesSettingsMappings } from './rules_settings_mappings';
 import { getMigrations } from './migrations';
 import { transformRulesForExport } from './transform_rule_for_export';
 import { RawRule } from '../types';

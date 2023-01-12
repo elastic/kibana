@@ -6,16 +6,16 @@
  */
 
 import React from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { act } from 'react-dom/test-utils';
-import { render } from '@testing-library/react';
+import { render, cleanup, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { coreMock } from '@kbn/core/public/mocks';
 import { RulesSettingsFlapping } from '@kbn/alerting-plugin/common';
 import { RulesSettingsLink } from './rules_settings_link';
 import { useKibana } from '../../../common/lib/kibana';
-import { getFlappingSettings } from '../../lib/rule_api/get_flapping_settings';
-import { updateFlappingSettings } from '../../lib/rule_api/update_flapping_settings';
+import { getFlappingSettings } from '../../lib/rule_api';
+import { updateFlappingSettings } from '../../lib/rule_api';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../lib/rule_api/get_flapping_settings', () => ({
@@ -24,6 +24,15 @@ jest.mock('../../lib/rule_api/get_flapping_settings', () => ({
 jest.mock('../../lib/rule_api/update_flapping_settings', () => ({
   updateFlappingSettings: jest.fn(),
 }));
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+      cacheTime: 0,
+    },
+  },
+});
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
@@ -46,15 +55,16 @@ const mockFlappingSetting: RulesSettingsFlapping = {
   updatedAt: new Date().toISOString(),
 };
 
-const RulesSettingsLinkWithLocale: React.FunctionComponent<{}> = () => (
+const RulesSettingsLinkWithProviders: React.FunctionComponent<{}> = () => (
   <IntlProvider locale="en">
-    <RulesSettingsLink />
+    <QueryClientProvider client={queryClient}>
+      <RulesSettingsLink />
+    </QueryClientProvider>
   </IntlProvider>
 );
 
 describe('rules_settings_link', () => {
   beforeEach(async () => {
-    jest.clearAllMocks();
     const [
       {
         application: { capabilities },
@@ -73,26 +83,35 @@ describe('rules_settings_link', () => {
     updateFlappingSettingsMock.mockResolvedValue(mockFlappingSetting);
   });
 
-  test('renders the rules setting link correctly', async () => {
-    const result = render(<RulesSettingsLinkWithLocale />);
-    await act(() => Promise.resolve());
+  afterEach(() => {
+    jest.clearAllMocks();
+    queryClient.clear();
+    cleanup();
+  });
 
-    expect(result.getByText('Settings')).toBeInTheDocument();
+  test('renders the rules setting link correctly', async () => {
+    const result = render(<RulesSettingsLinkWithProviders />);
+    await waitFor(() => {
+      expect(result.getByText('Settings')).toBeInTheDocument();
+    });
     expect(result.getByText('Settings')).not.toBeDisabled();
     expect(result.queryByTestId('rulesSettingsModal')).toBe(null);
   });
 
   test('clicking the settings link opens the rules settings modal', async () => {
-    const result = render(<RulesSettingsLinkWithLocale />);
-    await act(() => Promise.resolve());
+    const result = render(<RulesSettingsLinkWithProviders />);
+    await waitFor(() => {
+      expect(result.queryByTestId('rulesSettingsModal')).toBe(null);
+    });
 
-    expect(result.queryByTestId('rulesSettingsModal')).toBe(null);
     userEvent.click(result.getByText('Settings'));
-    await act(() => Promise.resolve());
-    expect(result.queryByTestId('rulesSettingsModal')).not.toBe(null);
+
+    await waitFor(() => {
+      expect(result.queryByTestId('rulesSettingsModal')).not.toBe(null);
+    });
   });
 
-  test('link is disabled when provided with insufficient read permissions', async () => {
+  test('link is hidden when provided with insufficient read permissions', async () => {
     const [
       {
         application: { capabilities },
@@ -108,8 +127,9 @@ describe('rules_settings_link', () => {
       },
     };
 
-    const result = render(<RulesSettingsLinkWithLocale />);
-    await act(() => Promise.resolve());
-    expect(result.getByTestId('rulesSettingsLink')).toBeDisabled();
+    const result = render(<RulesSettingsLinkWithProviders />);
+    await waitFor(() => {
+      expect(result.queryByTestId('rulesSettingsLink')).toBe(null);
+    });
   });
 });

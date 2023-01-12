@@ -16,6 +16,7 @@ import {
   RULES_SETTINGS_FEATURE_ID,
   RULES_SETTINGS_SAVED_OBJECT_TYPE,
   RULES_SETTINGS_SAVED_OBJECT_ID,
+  DEFAULT_FLAPPING_SETTINGS,
   RulesSettings,
 } from '../../common';
 
@@ -32,9 +33,9 @@ const rulesSettingsClientParams: jest.Mocked<RulesSettingsClientConstructorOptio
 const getMockRulesSettings = (): RulesSettings => {
   return {
     flapping: {
-      enabled: true,
-      lookBackWindow: 10,
-      statusChangeThreshold: 10,
+      enabled: DEFAULT_FLAPPING_SETTINGS.enabled,
+      lookBackWindow: DEFAULT_FLAPPING_SETTINGS.lookBackWindow,
+      statusChangeThreshold: DEFAULT_FLAPPING_SETTINGS.statusChangeThreshold,
       createdBy: 'test name',
       updatedBy: 'test name',
       createdAt: new Date().toISOString(),
@@ -299,7 +300,7 @@ describe('RulesSettingsClient', () => {
         statusChangeThreshold: 500,
       })
     ).rejects.toThrowError(
-      'Invalid statusChangeThreshold value, must be between 3 and 20, but got: 500.'
+      'Invalid statusChangeThreshold value, must be between 2 and 20, but got: 500.'
     );
 
     await expect(

@@ -17,13 +17,16 @@ export const RulesSettingsLink = () => {
     application: { capabilities },
   } = useKibana().services;
 
+  if (!capabilities.rulesSettings.show) {
+    return null;
+  }
+
   return (
     <>
       <EuiButtonEmpty
         onClick={() => setIsVisible(true)}
         iconType="gear"
         data-test-subj="rulesSettingsLink"
-        disabled={!capabilities.rulesSettings.show}
       >
         <FormattedMessage
           id="xpack.triggersActionsUI.rulesSettings.link.title"

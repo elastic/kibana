@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { act } from 'react-dom/test-utils';
-import { render, fireEvent } from '@testing-library/react';
+import { render, fireEvent, cleanup, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { coreMock } from '@kbn/core/public/mocks';
 import { IToasts } from '@kbn/core/public';
@@ -26,6 +26,15 @@ jest.mock('../../lib/rule_api/update_flapping_settings', () => ({
   updateFlappingSettings: jest.fn(),
 }));
 
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+      cacheTime: 0,
+    },
+  },
+});
+
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 const mocks = coreMock.createSetup();
@@ -40,7 +49,7 @@ const updateFlappingSettingsMock = updateFlappingSettings as unknown as jest.Moc
 const mockFlappingSetting: RulesSettingsFlapping = {
   enabled: true,
   lookBackWindow: 10,
-  statusChangeThreshold: 11,
+  statusChangeThreshold: 10,
   createdBy: 'test user',
   updatedBy: 'test user',
   createdAt: new Date().toISOString(),
@@ -54,16 +63,18 @@ const modalProps: RulesSettingsModalProps = {
   onSave: jest.fn(),
 };
 
-const RulesSettingsModalWithLocale: React.FunctionComponent<RulesSettingsModalProps> = (props) => (
+const RulesSettingsModalWithProviders: React.FunctionComponent<RulesSettingsModalProps> = (
+  props
+) => (
   <IntlProvider locale="en">
-    <RulesSettingsModal {...props} />
+    <QueryClientProvider client={queryClient}>
+      <RulesSettingsModal {...props} />
+    </QueryClientProvider>
   </IntlProvider>
 );
 
 describe('rules_settings_modal', () => {
   beforeEach(async () => {
-    jest.clearAllMocks();
-
     const [
       {
         application: { capabilities },
@@ -90,46 +101,56 @@ describe('rules_settings_modal', () => {
     updateFlappingSettingsMock.mockResolvedValue(mockFlappingSetting);
   });
 
-  test('renders flapping settings correctly', async () => {
-    const result = render(<RulesSettingsModalWithLocale {...modalProps} />);
-    await act(() => Promise.resolve());
+  afterEach(() => {
+    jest.clearAllMocks();
+    queryClient.clear();
+    cleanup();
+  });
 
+  test('renders flapping settings correctly', async () => {
+    const result = render(<RulesSettingsModalWithProviders {...modalProps} />);
     expect(getFlappingSettingsMock).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      expect(result.queryByTestId('centerJustifiedSpinner')).toBe(null);
+    });
     expect(result.getByTestId('rulesSettingsModalEnableSwitch').getAttribute('aria-checked')).toBe(
       'true'
     );
     expect(result.getByTestId('lookBackWindowRangeInput').getAttribute('value')).toBe('10');
-    expect(result.getByTestId('statusChangeThresholdRangeInput').getAttribute('value')).toBe('11');
+    expect(result.getByTestId('statusChangeThresholdRangeInput').getAttribute('value')).toBe('10');
 
     expect(result.getByTestId('rulesSettingsModalCancelButton')).toBeInTheDocument();
     expect(result.getByTestId('rulesSettingsModalSaveButton').getAttribute('disabled')).toBeFalsy();
   });
 
   test('can save flapping settings', async () => {
-    const result = render(<RulesSettingsModalWithLocale {...modalProps} />);
-    await act(() => Promise.resolve());
+    const result = render(<RulesSettingsModalWithProviders {...modalProps} />);
+    await waitFor(() => {
+      expect(result.queryByTestId('centerJustifiedSpinner')).toBe(null);
+    });
 
     const lookBackWindowInput = result.getByTestId('lookBackWindowRangeInput');
     const statusChangeThresholdInput = result.getByTestId('statusChangeThresholdRangeInput');
 
-    fireEvent.change(lookBackWindowInput, { target: { value: 5 } });
-    fireEvent.change(statusChangeThresholdInput, { target: { value: 20 } });
+    fireEvent.change(lookBackWindowInput, { target: { value: 20 } });
+    fireEvent.change(statusChangeThresholdInput, { target: { value: 5 } });
 
-    expect(lookBackWindowInput.getAttribute('value')).toBe('5');
-    expect(statusChangeThresholdInput.getAttribute('value')).toBe('20');
+    expect(lookBackWindowInput.getAttribute('value')).toBe('20');
+    expect(statusChangeThresholdInput.getAttribute('value')).toBe('5');
 
     // Try saving
     userEvent.click(result.getByTestId('rulesSettingsModalSaveButton'));
 
-    expect(modalProps.setUpdatingRulesSettings).toHaveBeenCalledWith(true);
+    await waitFor(() => {
+      expect(modalProps.setUpdatingRulesSettings).toHaveBeenCalledWith(true);
+    });
     expect(modalProps.onClose).toHaveBeenCalledTimes(1);
-    await act(() => Promise.resolve());
     expect(updateFlappingSettingsMock).toHaveBeenCalledWith(
       expect.objectContaining({
         flappingSettings: {
           enabled: true,
-          lookBackWindow: 5,
-          statusChangeThreshold: 20,
+          lookBackWindow: 20,
+          statusChangeThreshold: 5,
         },
       })
     );
@@ -138,25 +159,53 @@ describe('rules_settings_modal', () => {
     expect(modalProps.onSave).toHaveBeenCalledTimes(1);
   });
 
+  test('should prevent statusChangeThreshold from being greater than lookBackWindow', async () => {
+    const result = render(<RulesSettingsModalWithProviders {...modalProps} />);
+    await waitFor(() => {
+      expect(result.queryByTestId('centerJustifiedSpinner')).toBe(null);
+    });
+
+    const lookBackWindowInput = result.getByTestId('lookBackWindowRangeInput');
+    const statusChangeThresholdInput = result.getByTestId('statusChangeThresholdRangeInput');
+
+    // Change lookBackWindow to a smaller value
+    fireEvent.change(lookBackWindowInput, { target: { value: 5 } });
+    // statusChangeThresholdInput gets pinned to be 5
+    expect(statusChangeThresholdInput.getAttribute('value')).toBe('5');
+
+    // Try making statusChangeThreshold bigger
+    fireEvent.change(statusChangeThresholdInput, { target: { value: 20 } });
+    // Still pinned
+    expect(statusChangeThresholdInput.getAttribute('value')).toBe('5');
+
+    fireEvent.change(statusChangeThresholdInput, { target: { value: 3 } });
+    expect(statusChangeThresholdInput.getAttribute('value')).toBe('3');
+  });
+
   test('handles errors when saving settings', async () => {
     updateFlappingSettingsMock.mockRejectedValue('failed!');
 
-    const result = render(<RulesSettingsModalWithLocale {...modalProps} />);
-    await act(() => Promise.resolve());
+    const result = render(<RulesSettingsModalWithProviders {...modalProps} />);
+    await waitFor(() => {
+      expect(result.queryByTestId('centerJustifiedSpinner')).toBe(null);
+    });
 
     // Try saving
     userEvent.click(result.getByTestId('rulesSettingsModalSaveButton'));
-    expect(modalProps.setUpdatingRulesSettings).toHaveBeenCalledWith(true);
+    await waitFor(() => {
+      expect(modalProps.setUpdatingRulesSettings).toHaveBeenCalledWith(true);
+    });
     expect(modalProps.onClose).toHaveBeenCalledTimes(1);
-    await act(() => Promise.resolve());
     expect(useKibanaMock().services.notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
     expect(modalProps.setUpdatingRulesSettings).toHaveBeenCalledWith(true);
     expect(modalProps.onSave).toHaveBeenCalledTimes(1);
   });
 
   test('displays flapping detection off prompt when flapping is disabled', async () => {
-    const result = render(<RulesSettingsModalWithLocale {...modalProps} />);
-    await act(() => Promise.resolve());
+    const result = render(<RulesSettingsModalWithProviders {...modalProps} />);
+    await waitFor(() => {
+      expect(result.queryByTestId('centerJustifiedSpinner')).toBe(null);
+    });
 
     expect(result.queryByTestId('rulesSettingsModalFlappingOffPrompt')).toBe(null);
     userEvent.click(result.getByTestId('rulesSettingsModalEnableSwitch'));
@@ -178,8 +227,10 @@ describe('rules_settings_modal', () => {
         readFlappingSettingsUI: true,
       },
     };
-    const result = render(<RulesSettingsModalWithLocale {...modalProps} />);
-    await act(() => Promise.resolve());
+    const result = render(<RulesSettingsModalWithProviders {...modalProps} />);
+    await waitFor(() => {
+      expect(result.queryByTestId('centerJustifiedSpinner')).toBe(null);
+    });
 
     expect(result.getByTestId('rulesSettingsModalEnableSwitch')).toBeDisabled();
     expect(result.getByTestId('lookBackWindowRangeInput')).toBeDisabled();
@@ -203,8 +254,10 @@ describe('rules_settings_modal', () => {
       },
     };
 
-    const result = render(<RulesSettingsModalWithLocale {...modalProps} />);
-    await act(() => Promise.resolve());
+    const result = render(<RulesSettingsModalWithProviders {...modalProps} />);
+    await waitFor(() => {
+      expect(result.queryByTestId('centerJustifiedSpinner')).toBe(null);
+    });
 
     expect(result.getByTestId('rulesSettingsErrorPrompt')).toBeInTheDocument();
   });

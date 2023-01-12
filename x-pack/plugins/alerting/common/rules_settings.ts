@@ -26,7 +26,7 @@ export interface RulesSettings {
 
 export const MIN_LOOK_BACK_WINDOW = 2;
 export const MAX_LOOK_BACK_WINDOW = 20;
-export const MIN_STATUS_CHANGE_THRESHOLD = 3;
+export const MIN_STATUS_CHANGE_THRESHOLD = 2;
 export const MAX_STATUS_CHANGE_THRESHOLD = 20;
 
 export const RULES_SETTINGS_FEATURE_ID = 'rulesSettings';
@@ -41,8 +41,11 @@ export const API_PRIVILEGES = {
 export const RULES_SETTINGS_SAVED_OBJECT_TYPE = 'rules-settings';
 export const RULES_SETTINGS_SAVED_OBJECT_ID = 'rules-settings';
 
+export const DEFAULT_LOOK_BACK_WINDOW = 20;
+export const DEFAULT_STATUS_CHANGE_THRESHOLD = 4;
+
 export const DEFAULT_FLAPPING_SETTINGS = {
   enabled: true,
-  lookBackWindow: 10,
-  statusChangeThreshold: 10,
+  lookBackWindow: 20,
+  statusChangeThreshold: 4,
 };

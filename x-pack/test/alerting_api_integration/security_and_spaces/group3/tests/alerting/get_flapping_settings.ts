@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
 import { UserAtSpaceScenarios } from '../../../scenarios';
 import { getUrlPrefix } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -39,9 +40,11 @@ export default function getFlappingSettingsTests({ getService }: FtrProviderCont
             case 'superuser at space1':
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
-              expect(response.body.enabled).to.eql(true);
-              expect(response.body.lookBackWindow).to.eql(10);
-              expect(response.body.statusChangeThreshold).to.eql(10);
+              expect(response.body.enabled).to.eql(DEFAULT_FLAPPING_SETTINGS.enabled);
+              expect(response.body.lookBackWindow).to.eql(DEFAULT_FLAPPING_SETTINGS.lookBackWindow);
+              expect(response.body.statusChangeThreshold).to.eql(
+                DEFAULT_FLAPPING_SETTINGS.statusChangeThreshold
+              );
               expect(response.body.createdBy).to.be.a('string');
               expect(response.body.updatedBy).to.be.a('string');
               expect(Date.parse(response.body.createdAt)).to.be.greaterThan(0);

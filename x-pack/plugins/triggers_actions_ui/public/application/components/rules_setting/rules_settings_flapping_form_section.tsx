@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -89,7 +89,18 @@ export const RulesSettingsFlappingTitle = () => {
   );
 };
 
-export const RulesSettingsRange = (props: RulesSettingsRangeProps) => {
+export const RulesSettingsFlappingDescription = () => {
+  return (
+    <EuiText color="subdued" size="s">
+      <FormattedMessage
+        id="xpack.triggersActionsUI.rulesSettings.flapping.alertFlappingDetectionDescription"
+        defaultMessage="Modify the frequency that an alert can go between active and recovered over a period of rule runs."
+      />
+    </EuiText>
+  );
+};
+
+export const RulesSettingsRange = memo((props: RulesSettingsRangeProps) => {
   const { label, labelPopoverText, min, max, value, disabled, onChange, ...rest } = props;
 
   const renderLabel = () => {
@@ -117,110 +128,88 @@ export const RulesSettingsRange = (props: RulesSettingsRangeProps) => {
       />
     </EuiFormRow>
   );
-};
+});
 
-interface RulesSettingsFlappingFormSectionProps {
+export interface RulesSettingsFlappingFormSectionProps {
   flappingSettings: RulesSettingsFlappingProperties;
   compressed?: boolean;
   onChange: (key: OnChangeKey, value: number) => void;
 }
 
-export const RulesSettingsFlappingFormSection = (props: RulesSettingsFlappingFormSectionProps) => {
-  const { flappingSettings, compressed = false, onChange } = props;
+export const RulesSettingsFlappingFormSection = memo(
+  (props: RulesSettingsFlappingFormSectionProps) => {
+    const { flappingSettings, compressed = false, onChange } = props;
 
-  const { lookBackWindow, statusChangeThreshold } = flappingSettings;
+    const { lookBackWindow, statusChangeThreshold } = flappingSettings;
 
-  const {
-    application: { capabilities },
-  } = useKibana().services;
+    const {
+      application: { capabilities },
+    } = useKibana().services;
 
-  const {
-    rulesSettings: { save, writeFlappingSettingsUI },
-  } = capabilities;
+    const {
+      rulesSettings: { save, writeFlappingSettingsUI },
+    } = capabilities;
 
-  const canWriteFlappingSettings = save && writeFlappingSettingsUI;
+    const canWriteFlappingSettings = save && writeFlappingSettingsUI;
 
-  const renderTitle = () => {
     return (
-      <EuiFlexItem>
-        <EuiTitle size="xs">
-          <h5>
-            <FormattedMessage
-              id="xpack.triggersActionsUI.rulesSettings.flapping.alertFlappingDetectionTitle"
-              defaultMessage="Alert Flapping Detection"
-            />
-          </h5>
-        </EuiTitle>
-      </EuiFlexItem>
-    );
-  };
-
-  const renderDescription = () => {
-    return (
-      <EuiFlexItem>
-        <EuiText color="subdued" size="s">
-          <FormattedMessage
-            id="xpack.triggersActionsUI.rulesSettings.flapping.alertFlappingDetectionDescription"
-            defaultMessage="Modify the frequency that an alert can go between active and recovered over a period of rule runs."
+      <EuiFlexGroup direction="column">
+        {compressed && (
+          <>
+            <EuiFlexItem>
+              <EuiFlexGroup direction="column" gutterSize="s">
+                <EuiFlexItem>
+                  <RulesSettingsFlappingTitle />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <RulesSettingsFlappingDescription />
+                </EuiFlexItem>
+                <EuiSpacer size="s" />
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </>
+        )}
+        <EuiFlexItem grow={false}>
+          <RulesSettingsRange
+            data-test-subj="lookBackWindowRangeInput"
+            min={MIN_LOOK_BACK_WINDOW}
+            max={MAX_LOOK_BACK_WINDOW}
+            value={lookBackWindow}
+            onChange={(e) => onChange('lookBackWindow', parseInt(e.currentTarget.value, 10))}
+            label={lookBackWindowLabel}
+            labelPopoverText="TODO: look back window helper text"
+            disabled={!canWriteFlappingSettings}
           />
-        </EuiText>
-      </EuiFlexItem>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <RulesSettingsRange
+            data-test-subj="statusChangeThresholdRangeInput"
+            min={MIN_STATUS_CHANGE_THRESHOLD}
+            max={MAX_STATUS_CHANGE_THRESHOLD}
+            value={statusChangeThreshold}
+            onChange={(e) => onChange('statusChangeThreshold', parseInt(e.currentTarget.value, 10))}
+            label={statusChangeThresholdLabel}
+            labelPopoverText="TODO: status threshold helper text"
+            disabled={!canWriteFlappingSettings}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiPanel borderRadius="none" color="subdued">
+            <EuiText size="s">
+              <FormattedMessage
+                id="xpack.triggersActionsUI.rulesSettings.flapping.flappingSettingsDescription"
+                defaultMessage="An alert will be considered flapping if it changes status {statusChangeThreshold} within the last {lookBackWindow}."
+                values={{
+                  lookBackWindow: <b>{getLookBackWindowLabelRuleRuns(lookBackWindow)}</b>,
+                  statusChangeThreshold: (
+                    <b>{getStatusChangeThresholdRuleRuns(statusChangeThreshold)}</b>
+                  ),
+                }}
+              />
+            </EuiText>
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
-  };
-
-  return (
-    <EuiFlexGroup direction="column">
-      {compressed && (
-        <>
-          <EuiFlexItem>
-            <EuiFlexGroup direction="column" gutterSize="s">
-              {renderTitle()}
-              {renderDescription()}
-              <EuiSpacer size="s" />
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </>
-      )}
-      <EuiFlexItem grow={false}>
-        <RulesSettingsRange
-          data-test-subj="lookBackWindowRangeInput"
-          min={MIN_LOOK_BACK_WINDOW}
-          max={MAX_LOOK_BACK_WINDOW}
-          value={lookBackWindow}
-          onChange={(e) => onChange('lookBackWindow', parseInt(e.currentTarget.value, 10))}
-          label={lookBackWindowLabel}
-          labelPopoverText="TODO: look back window helper text"
-          disabled={!canWriteFlappingSettings}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <RulesSettingsRange
-          data-test-subj="statusChangeThresholdRangeInput"
-          min={MIN_STATUS_CHANGE_THRESHOLD}
-          max={MAX_STATUS_CHANGE_THRESHOLD}
-          value={statusChangeThreshold}
-          onChange={(e) => onChange('statusChangeThreshold', parseInt(e.currentTarget.value, 10))}
-          label={statusChangeThresholdLabel}
-          labelPopoverText="TODO: status threshold helper text"
-          disabled={!canWriteFlappingSettings}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiPanel borderRadius="none" color="subdued">
-          <EuiText size="s">
-            <FormattedMessage
-              id="xpack.triggersActionsUI.rulesSettings.flapping.flappingSettingsDescription"
-              defaultMessage="An alert will be considered flapping if it changes status {statusChangeThreshold} within the last {lookBackWindow} ."
-              values={{
-                lookBackWindow: <b>{getLookBackWindowLabelRuleRuns(lookBackWindow)}</b>,
-                statusChangeThreshold: (
-                  <b>{getStatusChangeThresholdRuleRuns(statusChangeThreshold)}</b>
-                ),
-              }}
-            />
-          </EuiText>
-        </EuiPanel>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
+  }
+);
