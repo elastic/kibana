@@ -16,7 +16,7 @@ import type { EmbeddableData, VisualizationEmbeddableProps } from './types';
 const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> = (props) => {
   const dispatch = useDispatch();
   const { inputId = InputsModelId.global, id, onLoad, ...lensPorps } = props;
-  const { searchSessionId, refetchByRestartingSession } = useRefetchByRestartingSession({
+  const { session, refetchByRestartingSession } = useRefetchByRestartingSession({
     inputId,
     queryId: id,
   });
@@ -27,7 +27,7 @@ const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> =
         inputsActions.setQuery({
           inputId,
           id,
-          searchSessionId,
+          searchSessionId: session.current.start(),
           refetch: refetchByRestartingSession,
           loading: isLoading,
           inspect: { dsl: requests, response: responses },
@@ -38,7 +38,7 @@ const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> =
         onLoad({ requests, responses, isLoading });
       }
     },
-    [dispatch, inputId, onLoad, id, refetchByRestartingSession, searchSessionId]
+    [dispatch, inputId, id, session, refetchByRestartingSession, onLoad]
   );
 
   useEffect(() => {
@@ -46,13 +46,13 @@ const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> =
       inputsActions.setQuery({
         inputId,
         id,
-        searchSessionId,
+        searchSessionId: session.current.start(),
         refetch: refetchByRestartingSession,
         loading: false,
         inspect: null,
       })
     );
-  }, [dispatch, inputId, id, refetchByRestartingSession, searchSessionId]);
+  }, [dispatch, inputId, id, refetchByRestartingSession, session]);
 
   return <LensEmbeddable {...lensPorps} id={id} onLoad={onEmbeddableLoad} />;
 };
