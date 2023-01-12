@@ -108,14 +108,14 @@ describe('useAllCasesQueryParams', () => {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
-    expect(useHistory().replace).toHaveBeenCalled();
+    expect(useHistory().replace).toHaveBeenCalledTimes(1);
     expect(useHistory().push).toHaveBeenCalledTimes(0);
 
     act(() => {
       result.current.setQueryParams({ perPage: DEFAULT_TABLE_LIMIT + 10 });
     });
 
-    expect(useHistory().replace).toHaveBeenCalled();
+    expect(useHistory().replace).toHaveBeenCalledTimes(2);
     expect(useHistory().push).toHaveBeenCalledTimes(0);
   });
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
 import { isEqual } from 'lodash';
 
@@ -179,30 +179,40 @@ export function useAllCasesState(
     isFirstRenderRef.current = false;
   }
 
-  if (!isModalView) {
-    const parsedUrlParams = parse(location.search);
-    const stateUrlParams = {
-      ...parsedUrlParams,
-      ...queryParams,
-      page: queryParams.page.toString(),
-      perPage: queryParams.perPage.toString(),
-      severity: filterOptions.severity,
-      status: filterOptions.status,
-    };
+  useEffect(() => {
+    if (!isModalView) {
+      const parsedUrlParams = parse(location.search);
+      const stateUrlParams = {
+        ...parsedUrlParams,
+        ...queryParams,
+        page: queryParams.page.toString(),
+        perPage: queryParams.perPage.toString(),
+        severity: filterOptions.severity,
+        status: filterOptions.status,
+      };
 
-    if (!isEqual(parsedUrlParams, stateUrlParams)) {
-      try {
-        const newHistory = {
-          ...location,
-          search: stringify({ ...parsedUrlParams, ...stateUrlParams }),
-        };
-
-        history.replace(newHistory);
-      } catch {
-        // silently fail
+      if (!isEqual(parsedUrlParams, stateUrlParams)) {
+        try {
+          const newHistory = {
+            ...location,
+            search: stringify({ ...parsedUrlParams, ...stateUrlParams }),
+          };
+          history.replace(newHistory);
+        } catch {
+          // silently fail
+        }
       }
     }
-  }
+  }, [
+    filterOptions,
+    history,
+    initialFilterOptions,
+    isModalView,
+    location,
+    persistAndUpdateFilterOptions,
+    persistAndUpdateQueryParams,
+    queryParams,
+  ]);
 
   return {
     queryParams,
