@@ -1042,7 +1042,7 @@
     "cypress-pipe": "^2.0.0",
     "cypress-react-selector": "^3.0.0",
     "cypress-real-events": "^1.7.6",
-    "cypress-recurse": "^1.26.0",
+    "cypress-recurse": "^1.27.0",
     "debug": "^2.6.9",
     "delete-empty": "^2.0.0",
     "dependency-check": "^4.1.0",

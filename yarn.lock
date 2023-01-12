@@ -11769,10 +11769,10 @@ cypress-real-events@^1.7.6:
   resolved "https://registry.yarnpkg.com/cypress-real-events/-/cypress-real-events-1.7.6.tgz#6f17e0b2ceea1d6dc60f6737d8f84cc517bbbb4c"
   integrity sha512-yP6GnRrbm6HK5q4DH6Nnupz37nOfZu/xn1xFYqsE2o4G73giPWQOdu6375QYpwfU1cvHNCgyD2bQ2hPH9D7NMw==
 
-cypress-recurse@^1.26.0:
-  version "1.26.0"
-  resolved "https://registry.yarnpkg.com/cypress-recurse/-/cypress-recurse-1.26.0.tgz#e897b8c849af25214ce8785c57479a7fd98d20a5"
-  integrity sha512-FioASB4kPgO8G0l4SkjPyFnm2VMvfG0zbjr3N/FqOiiq+YRtsXqGvFIYK9jKay90Ciqq3hKVLTuMCaNpniXYfA==
+cypress-recurse@^1.27.0:
+  version "1.27.0"
+  resolved "https://registry.yarnpkg.com/cypress-recurse/-/cypress-recurse-1.27.0.tgz#0c61e809c5f7740a7e907714614c49c72dcb5c1f"
+  integrity sha512-BCD83UqaxlD+JiqZn1PvIhHRXasgfCt57vLC1Fcyifvxh4QklELRcYUJV3MdhKamMkmajaErLfnCNbZ8VJ5SIg==
   dependencies:
     humanize-duration "^3.27.3"
 
