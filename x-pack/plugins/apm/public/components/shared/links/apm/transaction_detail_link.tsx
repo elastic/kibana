@@ -38,7 +38,7 @@ const persistedFilters: Array<keyof APMQueryParams> = [
   'serviceVersion',
 ];
 
-const txGroupsDroppedBucketName = 'other';
+const txGroupsDroppedBucketName = '_other';
 
 export function TransactionDetailLink({
   serviceName,
@@ -111,7 +111,7 @@ export function TransactionDetailLink({
                     target="_blank"
                   >
                     {i18n.translate(
-                      'xpack.apm.agentExplorerInstanceTable.noServiceNodeName.configurationOptions',
+                      'xpack.apm.transactionDetail.tooltip.apmServerDocs',
                       {
                         defaultMessage: 'APM Server docs',
                       }

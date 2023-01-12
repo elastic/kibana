@@ -4,32 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { TransactionDetailLink } from './transaction_detail_link';
-import { createMemoryHistory } from 'history';
+import { Location } from 'history';
 import React from 'react';
-import { Router } from 'react-router-dom';
-import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
-import { render } from '@testing-library/react';
-
-const history = createMemoryHistory();
-
-function Wrapper({ children }: { children: React.ReactElement }) {
-  return (
-    <MockApmPluginContextWrapper>
-      <Router history={history}>{children}</Router>
-    </MockApmPluginContextWrapper>
-  );
-}
+import { getRenderedHref } from '../../../../utils/test_helpers';
+import { TransactionDetailLink } from './transaction_detail_link';
 
 describe('TransactionDetailLink', () => {
-  function getHref(container: HTMLElement) {
-    return ((container as HTMLDivElement).children[0] as HTMLAnchorElement)
-      .href;
-  }
   describe('With comparison in the url', () => {
-    it('returns comparison defined in the url', () => {
-      const { container } = render(
-        <Wrapper>
+    it('returns comparison defined in the url', async () => {
+      const href = await getRenderedHref(
+        () => (
           <TransactionDetailLink
             serviceName="foo"
             transactionName="bar"
@@ -41,18 +25,20 @@ describe('TransactionDetailLink', () => {
           >
             Transaction
           </TransactionDetailLink>
-        </Wrapper>
+        ),
+        {} as Location
       );
-      expect(getHref(container)).toEqual(
-        'http://localhost/basepath/app/apm/services/foo/transactions/view?traceId=baz&transactionId=123&transactionName=bar&transactionType=request&comparisonEnabled=true&offset=1w'
+
+      expect(href).toMatchInlineSnapshot(
+        '"/basepath/app/apm/services/foo/transactions/view?traceId=baz&transactionId=123&transactionName=bar&transactionType=request&comparisonEnabled=true&offset=1w"'
       );
     });
   });
 
   describe('use default comparison', () => {
-    it('returns default comparison', () => {
-      const { container } = render(
-        <Wrapper>
+    it('returns default comparison', async () => {
+      const href = await getRenderedHref(
+        () => (
           <TransactionDetailLink
             serviceName="foo"
             transactionName="bar"
@@ -62,10 +48,12 @@ describe('TransactionDetailLink', () => {
           >
             Transaction
           </TransactionDetailLink>
-        </Wrapper>
+        ),
+        {} as Location
       );
-      expect(getHref(container)).toEqual(
-        'http://localhost/basepath/app/apm/services/foo/transactions/view?traceId=baz&transactionId=123&transactionName=bar&transactionType=request&comparisonEnabled=true&offset=1d'
+
+      expect(href).toMatchInlineSnapshot(
+        '"/basepath/app/apm/services/foo/transactions/view?traceId=baz&transactionId=123&transactionName=bar&transactionType=request&comparisonEnabled=true&offset=1d"'
       );
     });
   });
