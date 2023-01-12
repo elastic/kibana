@@ -534,7 +534,7 @@ export interface AlertsTableConfigurationRegistry {
     width?: number;
   };
   useBulkActions?: UseBulkActionsRegistry;
-  persistentControls?: {
+  usePersistentControls?: () => {
     right?: ReactNode;
   };
 }

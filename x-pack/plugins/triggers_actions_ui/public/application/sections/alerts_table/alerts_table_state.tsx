@@ -106,7 +106,7 @@ const AlertsTableState = ({
 
   const storage = useRef(new Storage(window.localStorage));
   const localAlertsTableConfig = storage.current.get(id) as Partial<AlertsTableStorage>;
-  const persistentControls = alertsTableConfiguration?.persistentControls;
+  const persistentControls = alertsTableConfiguration?.usePersistentControls?.();
 
   const columnsLocal =
     localAlertsTableConfig &&
