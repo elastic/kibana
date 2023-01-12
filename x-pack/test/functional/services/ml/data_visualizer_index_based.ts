@@ -44,7 +44,7 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
       randomSamplerOption: RandomSamplerOption = 'dvRandomSamplerOptionOff'
     ) {
       await retry.tryForTime(30 * 1000, async () => {
-        await testSubjects.clickWhenNotDisabledWithoutRetry('dataVisualizerButtonUseFullData');
+        await testSubjects.clickWhenNotDisabledWithoutRetry('mlDatePickerButtonUseFullData');
         await testSubjects.clickWhenNotDisabledWithoutRetry('superDatePickerApplyTimeButton');
         await this.setRandomSamplingOption(randomSamplerOption);
         await await this.assertTotalDocumentCount(expectedFormattedTotalDocCount);
