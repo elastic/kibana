@@ -29,7 +29,7 @@ import {
 import {
   ExternalCallback,
   FleetStartContract,
-  PostPackagePolicyDeleteCallback,
+  PostPackagePolicyPostDeleteCallback,
   PostPackagePolicyPostCreateCallback,
 } from '@kbn/fleet-plugin/server';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
@@ -298,9 +298,9 @@ describe('Cloud Security Posture Plugin', () => {
         const deletedPackagePolicyMock = deletePackagePolicyMock();
         deletedPackagePolicyMock[0].package!.name = CLOUD_SECURITY_POSTURE_PACKAGE_NAME;
 
-        const packagePolicyPostDeleteCallbacks: PostPackagePolicyDeleteCallback[] = [];
+        const packagePolicyPostDeleteCallbacks: PostPackagePolicyPostDeleteCallback[] = [];
         fleetMock.registerExternalCallback.mockImplementation((...args) => {
-          if (args[0] === 'postPackagePolicyDelete') {
+          if (args[0] === 'packagePolicyPostDelete') {
             packagePolicyPostDeleteCallbacks.push(args[1]);
           }
         });
