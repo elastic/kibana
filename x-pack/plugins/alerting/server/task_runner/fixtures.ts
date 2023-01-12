@@ -110,7 +110,8 @@ export const generateSavedObjectParams = ({
     },
     lastRun: {
       outcome,
-      outcomeMsg: error?.message || warning?.message || null,
+      outcomeMsg:
+        (error?.message && [error?.message]) || (warning?.message && [warning?.message]) || null,
       warning: error?.reason || warning?.reason || null,
       alertsCount: {
         active: 0,
@@ -121,6 +122,7 @@ export const generateSavedObjectParams = ({
       },
     },
     nextRun,
+    running: false,
   },
   { refresh: false, namespace: undefined },
 ];

@@ -11,7 +11,7 @@ import { resolve, basename } from 'path';
 import { promisify } from 'util';
 
 import { ToolingLog } from '@kbn/tooling-log';
-import { kibanaPackageJson } from '@kbn/utils';
+import { kibanaPackageJson } from '@kbn/repo-info';
 
 import { write, copyAll, mkdirp, exec, Config, Build } from '../../../lib';
 import * as dockerTemplates from './templates';
@@ -74,6 +74,7 @@ export async function runDockerGenerator(
   ];
 
   const dockerPush = config.getDockerPush();
+  const dockerTag = config.getDockerTag();
   const dockerTagQualifier = config.getDockerTagQualfiier();
   const dockerCrossCompile = config.getDockerCrossCompile();
   const publicArtifactSubdomain = config.isRelease ? 'artifacts' : 'snapshots-no-kpi';
@@ -90,6 +91,7 @@ export async function runDockerGenerator(
     dockerBuildDir,
     dockerTargetFilename,
     dockerPush,
+    dockerTag,
     dockerTagQualifier,
     dockerCrossCompile,
     baseImageName,

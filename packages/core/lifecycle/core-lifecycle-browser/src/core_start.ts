@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { InjectedMetadataStart } from '@kbn/core-injected-metadata-browser';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
@@ -21,6 +20,7 @@ import type { SavedObjectsStart } from '@kbn/core-saved-objects-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { ChromeStart } from '@kbn/core-chrome-browser';
+import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 
 /**
  * Core services exposed to the `Plugin` start lifecycle
@@ -38,6 +38,8 @@ export interface CoreStart {
   application: ApplicationStart;
   /** {@link ChromeStart} */
   chrome: ChromeStart;
+  /** {@link CustomBrandingStart} */
+  customBranding: CustomBrandingStart;
   /** {@link DocLinksStart} */
   docLinks: DocLinksStart;
   /** {@link ExecutionContextStart} */
@@ -63,6 +65,4 @@ export interface CoreStart {
   deprecations: DeprecationsServiceStart;
   /** {@link ThemeServiceStart} */
   theme: ThemeServiceStart;
-  /** {@link InjectedMetadataStart} */
-  injectedMetadata: InjectedMetadataStart;
 }

@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
@@ -21,12 +20,14 @@ import { savedObjectsServiceMock } from '@kbn/core-saved-objects-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
+import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
 
 export function createCoreStartMock({ basePath = '' } = {}) {
   const mock = {
     analytics: analyticsServiceMock.createAnalyticsServiceStart(),
     application: applicationServiceMock.createStartContract(),
     chrome: chromeServiceMock.createStartContract(),
+    customBranding: customBrandingServiceMock.createStartContract(),
     docLinks: docLinksServiceMock.createStartContract(),
     executionContext: executionContextServiceMock.createStartContract(),
     http: httpServiceMock.createStartContract({ basePath }),
@@ -38,9 +39,6 @@ export function createCoreStartMock({ basePath = '' } = {}) {
     savedObjects: savedObjectsServiceMock.createStartContract(),
     deprecations: deprecationsServiceMock.createStartContract(),
     theme: themeServiceMock.createStartContract(),
-    injectedMetadata: {
-      getInjectedVar: injectedMetadataServiceMock.createStartContract().getInjectedVar,
-    },
     fatalErrors: fatalErrorsServiceMock.createStartContract(),
   };
 
