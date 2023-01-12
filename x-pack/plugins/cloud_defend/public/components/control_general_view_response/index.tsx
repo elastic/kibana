@@ -24,7 +24,6 @@ import {
 import { useStyles } from './styles';
 import { ControlGeneralViewResponseDeps, ControlResponseAction } from '../../types';
 import * as i18n from '../control_general_view/translations';
-import {colors} from '@kbn/chart-icons/src/assets/common_styles';
 
 export const ControlGeneralViewResponse = ({
   response,
