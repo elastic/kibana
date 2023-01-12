@@ -291,7 +291,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
                 {repeatedValues.length > 0 && !valuesBadges.length ? (
                   <FormattedMessage
                     id="xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.onlyMoreRepeatedLabel"
-                    defaultMessage="{count, plural, one {# field/value pair} other {# more field/value pairs}} also appearing in other groups"
+                    defaultMessage="{count, plural, one {# field/value pair} other {# field/value pairs}} also appearing in other groups"
                     values={{ count: repeatedValues.length }}
                   />
                 ) : null}
