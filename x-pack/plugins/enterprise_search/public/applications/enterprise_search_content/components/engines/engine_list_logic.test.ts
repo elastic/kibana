@@ -35,17 +35,24 @@ const DEFAULT_VALUES = {
 
 const results: EnterpriseSearchEngine[] = [
   {
-    name: 'engine-name-1',
+    created: '1999-12-31T23:59:59Z',
     indices: ['index-18', 'index-23'],
-  },
-  {
-    name: 'engine-name-2',
-    indices: ['index-180', 'index-230', 'index-8', 'index-2'],
-  },
+    name: 'engine-name-1',
+    updated: '1999-12-31T23:59:59Z',
 
+  },
   {
-    name: 'engine-name-3',
+    created: '1999-12-31T23:59:59Z',
+    indices: ['index-180', 'index-230', 'index-8', 'index-2'],
+    name: 'engine-name-2',
+    updated: '1999-12-31T23:59:59Z',
+
+  },
+  {
+    created: '1999-12-31T23:59:59Z',
     indices: ['index-2', 'index-3'],
+    name: 'engine-name-3',
+    updated: '1999-12-31T23:59:59Z',
   },
 ];
 
