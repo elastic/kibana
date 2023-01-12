@@ -17,6 +17,7 @@ export interface ContentCoreApi {
   crud: <UniqueFields extends object = Record<string, unknown>>(
     contentType: string
   ) => ContentCrud<UniqueFields>;
+  eventBus: EventBus;
 }
 
 export class ContentCore {
@@ -38,9 +39,17 @@ export class ContentCore {
       });
     };
 
+    this.eventBus.events$.subscribe((event) => {
+      if (event.type === 'createItemSuccess') {
+        // Index the data
+        this.searchIndex.index(event.data);
+      }
+    });
+
     return {
       register: this.contentRegistry.register.bind(this.contentRegistry),
       crud,
+      eventBus: this.eventBus,
     };
   }
 

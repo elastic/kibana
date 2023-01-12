@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import moment from 'moment';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { KibanaContent } from '../../../common';
@@ -14,6 +15,8 @@ interface Dependencies {
 }
 
 const indexName = '.kibana-content-mgt';
+
+const getTimestamp = () => moment().toISOString();
 
 export class ContentSearchIndex {
   private esClient: ElasticsearchClient | undefined;
@@ -35,12 +38,32 @@ export class ContentSearchIndex {
       );
     }
 
+    const {
+      id,
+      title,
+      description,
+      type,
+      meta: { updatedBy },
+    } = content;
+
+    const document = {
+      title,
+      description,
+      type,
+      meta: {
+        updatedAt: getTimestamp(),
+        updatedBy: updatedBy.$id,
+      },
+    };
+
     return this.esClient
       .index({
         index: indexName,
+        id: `${type}#${id}`,
         document,
       })
       .catch((e) => {
+        console.log(e);
         this.logger.error(new Error(`Could not add content to search index.`, { cause: e }));
       });
   }
@@ -89,7 +112,7 @@ export class ContentSearchIndex {
                     type: 'object',
                     dynamic: 'false',
                     properties: {
-                      createdAt: {
+                      updatedAt: {
                         type: 'date',
                       },
                       updatedBy: {

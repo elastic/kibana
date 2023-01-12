@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import type { CommonFields } from '../../common';
 import type { EventBus } from './event_bus';
 import type { ContentRegistry } from './registry';
 import { ContentStorage, CommonFields, InternalFields, SearchOptions } from './types';

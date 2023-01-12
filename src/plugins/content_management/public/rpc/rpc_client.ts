@@ -25,6 +25,10 @@ export class RpcClient {
     return this.realize(Calls.create)({ type, data });
   }
 
+  public search({ type, term }: { term?: string; type?: string }) {
+    return this.realize(Calls.search)({ type, term });
+  }
+
   private sendMessage = async <I, O>(name: string, input: I): Promise<O> => {
     const payload = Payload.encode({ fn: name, arg: input });
     const { result } = await this.http.post<{ result: O }>(API_ENDPOINT, {

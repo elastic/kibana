@@ -14,14 +14,38 @@ export function initRpcHandlers(fnHandler: FunctionHandler<Context>) {
   fnHandler.load((register) => {
     // Get single content
     register(Calls.get)(async (ctx, payload) => {
+      ctx.core.eventBus.emit({
+        type: 'getItemStart',
+        contentType: payload.type,
+        contentId: payload.id,
+      });
+
       const crudInstance = ctx.core.crud(payload.type);
-      return crudInstance.get(payload.id);
+      const content = await crudInstance.get(payload.id);
+
+      ctx.core.eventBus.emit({
+        type: 'getItemSuccess',
+        contentType: payload.type,
+        contentId: payload.id,
+        data: content,
+      });
+
+      return content;
     });
 
     // Create a content
     register(Calls.create)(async (ctx, payload) => {
       const crudInstance = ctx.core.crud(payload.type);
-      return crudInstance.create(payload.data);
+      const contentCreated = await crudInstance.create(payload.data);
+
+      ctx.core.eventBus.emit({
+        type: 'createItemSuccess',
+        contentType: payload.type,
+        data: contentCreated,
+      });
+
+      return contentCreated;
+    });
     });
   });
 }

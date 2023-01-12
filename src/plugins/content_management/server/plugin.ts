@@ -37,7 +37,9 @@ export class ContentManagementPlugin implements Plugin {
 
     const fnHandler = new FunctionHandler<RpcContext>();
     initRpcHandlers(fnHandler);
+
     const router = core.http.createRouter();
+
     initRpcRoutes(router, {
       logger: this.logger,
       wrapError,
@@ -55,12 +57,11 @@ export class ContentManagementPlugin implements Plugin {
 
     const addContent = async () => {
       // Add dummy content
-      const { id } = await storage.create({
+      await storage.create({
         title: 'Foo',
         description: 'Some description',
         foo: false,
       });
-      console.log('>>>>>>>>> Content created:', id);
     };
     addContent();
     // ----------------------------------------

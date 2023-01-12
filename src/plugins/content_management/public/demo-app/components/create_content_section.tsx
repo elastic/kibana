@@ -47,6 +47,7 @@ export const CreateContentSection: FC = () => {
       <EuiSpacer />
       <EuiDescribedFormGroup
         title={<h3>Create a new content</h3>}
+        style={{ maxWidth: '100%' }}
         description={
           <p>
             Create a new <EuiCode>foo</EuiCode> type content. This content is persisted in memory.
