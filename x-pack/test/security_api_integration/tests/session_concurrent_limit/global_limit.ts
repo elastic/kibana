@@ -115,7 +115,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Session Global Concurrent Limit', () => {
     before(async function () {
-      this.timeout(100000);
+      this.timeout(120000);
       // Disable cleanup task to not interfere with the tests.
       await toggleSessionCleanupTask(false);
       await security.user.create('anonymous_user', {

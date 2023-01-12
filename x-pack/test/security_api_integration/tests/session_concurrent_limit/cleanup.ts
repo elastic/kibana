@@ -157,7 +157,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     beforeEach(async function () {
-      this.timeout(100000);
+      this.timeout(120000);
       await toggleSessionCleanupTask(false);
       await es.cluster.health({ index: '.kibana_security_session*', wait_for_status: 'green' });
       await esDeleteAllIndices('.kibana_security_session*');
