@@ -249,7 +249,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   const existingDocsCount =
                     existingAlert._source?.[ALERT_SUPPRESSION_DOCS_COUNT] ?? 0;
                   return [
-                    { update: { _id: existingAlert._id } },
+                    { update: { _id: existingAlert._id, _index: existingAlert._index } },
                     {
                       doc: {
                         [ALERT_LAST_DETECTED]: currentTimeOverride ?? new Date(),
