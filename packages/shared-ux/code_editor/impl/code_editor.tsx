@@ -137,12 +137,12 @@ export const CodeEditor: React.FC<Props> = ({
   value,
   onChange,
   width,
-  height,
   options,
   overrideEditorWillMount,
   editorDidMount,
   editorWillMount,
   useDarkTheme,
+  transparentBackground,
   suggestionProvider,
   signatureProvider,
   hoverProvider,
@@ -435,6 +435,11 @@ export const CodeEditor: React.FC<Props> = ({
     };
   }, [placeholder, value, euiTheme]);
 
+  useEffect(() => {
+    // register theme for dark or light
+    monaco.editor.defineTheme('euiColors', useDarkTheme ? DARK_THEME : LIGHT_THEME);
+  }, [useDarkTheme, transparentBackground]);
+
   const { CopyButton } = useCopy({ isCopyable, value });
 
   const controlStyles = useMemo(() => {
@@ -460,11 +465,14 @@ export const CodeEditor: React.FC<Props> = ({
           </div>
         ) : null}
         <MonacoEditor
+          theme={useMemo(() => {
+            return options?.theme ?? (transparentBackground ? 'euiColorsTransparent' : 'euiColors');
+          }, [options?.theme, transparentBackground])}
           language={languageId}
           value={value}
           onChange={onChange}
-          width={isFullScreen ? '100vw' : '100%'}
-          // previously defaulted to 100% but this makes it unviewable
+          width={isFullScreen ? '100vw' : width}
+          // previously defaulted to height which defaulted to 100% but this makes it unviewable
           height={isFullScreen ? '100vh' : '100px'}
           editorWillMount={_editorWillMount}
           editorDidMount={_editorDidMount}

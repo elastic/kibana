@@ -10,6 +10,9 @@ import { ComponentSelector, css, CSSObject, SerializedStyles } from '@emotion/re
 import { ArrayCSSInterpolation } from '@emotion/serialize';
 import { Property } from 'csstype';
 
+import { monaco } from '@kbn/monaco';
+import { euiLightVars as lightTheme, euiDarkVars as darkTheme } from '@kbn/ui-theme';
+
 // .react-monaco-editor-container .monaco-editor .inputarea:focus
 export const codeEditorMonacoStyles = () => css`
    {
@@ -113,17 +116,6 @@ export const codeEditorControlsWithinFullScreenStyles = (size: string) => css`
 }`;
 
 // Previously editor_theme.ts
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
- */
-
-import { monaco } from '@kbn/monaco';
-
-import { euiLightVars as lightTheme, euiDarkVars as darkTheme } from '@kbn/ui-theme';
 
 // NOTE: For talk around where this theme information will ultimately live,
 // please see this discuss issue: https://github.com/elastic/kibana/issues/43814

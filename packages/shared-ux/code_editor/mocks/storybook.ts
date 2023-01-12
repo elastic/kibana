@@ -11,7 +11,12 @@ import type { Props as CodeEditorProps } from '@kbn/code-editor-types';
 
 type PropArguments = Pick<
   CodeEditorProps,
-  'languageId' | 'value' | 'aria-label' | 'allowFullScreen'
+  | 'languageId'
+  | 'value'
+  | 'aria-label'
+  | 'allowFullScreen'
+  | 'useDarkTheme'
+  | 'transparentBackground'
 >;
 
 export type Params = Record<keyof PropArguments, any>;
@@ -51,6 +56,18 @@ export class CodeEditorStorybookMock extends AbstractStorybookMock<
       },
       defaultValue: false,
     },
+    useDarkTheme: {
+      control: {
+        type: 'boolean',
+      },
+      defaultValue: false,
+    },
+    transparentBackground: {
+      control: {
+        type: 'boolean',
+      },
+      defaultValue: false,
+    },
   };
 
   serviceArguments = {};
@@ -62,6 +79,8 @@ export class CodeEditorStorybookMock extends AbstractStorybookMock<
       value: this.getArgumentValue('value', params),
       'aria-label': this.getArgumentValue('aria-label', params),
       allowFullScreen: this.getArgumentValue('allowFullScreen', params),
+      useDarkTheme: this.getArgumentValue('useDarkTheme', params),
+      transparentBackground: this.getArgumentValue('transparentBackground', params),
     };
   }
 
