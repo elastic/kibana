@@ -60,7 +60,7 @@ program
           return;
         }
 
-        log.info('Checking for additive-only changes...');
+        log.info('Checking if any mappings have been removed...');
         const { checkedCount: checkedProperties } = throwIfMappedFieldRemoved(
           currentMappings,
           extractedMappings
