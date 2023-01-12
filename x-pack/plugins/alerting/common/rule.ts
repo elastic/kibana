@@ -139,6 +139,7 @@ export interface Rule<Params extends RuleTypeParams = never> {
   isSnoozedUntil?: Date | null;
   lastRun?: RuleLastRun | null;
   nextRun?: Date | null;
+  running?: boolean | null;
   viewInAppRelativeUrl?: string;
 }
 
