@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { applySetup } from '../utils/mappings/mapping';
+import { applySetup } from '../utils/mappings/setup';
 import { getClient } from './compat';
 import { getRoutePaths } from '../../common';
 import { RouteRegisterParameters } from '.';
