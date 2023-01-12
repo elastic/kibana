@@ -34,7 +34,7 @@ const rolesMapping: { [id: string]: Omit<Role, 'name'> } = {
   t1Analyst: getT1Analyst(),
   t2Analyst: getT2Analyst(),
   hunter: getHunter(),
-  threadIntelligenceAnalyst: getThreatIntelligenceAnalyst(),
+  threatIntelligenceAnalyst: getThreatIntelligenceAnalyst(),
   socManager: getSocManager(),
   platformEngineer: getPlatformEngineer(),
   endpointOperationsAnalyst: getEndpointOperationsAnalyst(),
