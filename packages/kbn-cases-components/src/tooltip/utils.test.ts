@@ -31,7 +31,7 @@ describe('getTruncatedText', () => {
 
   it('should return original text if text is smaller than truncate length number', () => {
     const sampleText = 'This is a sample text!!';
-    const res = getTruncatedText(sampleText, sampleText.length + 1);
+    const res = getTruncatedText(sampleText, 50);
 
     expect(res).toEqual(sampleText);
   });

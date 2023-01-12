@@ -19,7 +19,7 @@ import { Status, CaseStatuses } from '@kbn/cases-components';
 The component renders the tooltip with case details on hover of an Element. Usage:
 
 ```
-import { Tooltip } from '@kbn/cases-components';
+import { Tooltip, CaseStatuses } from '@kbn/cases-components';
 import type { CaseTooltipProps } from '@kbn/cases-components';
 
 const tooltipProps = {
@@ -31,7 +31,7 @@ const tooltipProps = {
     username: 'elastic',
   },
   totalComments: 1,
-  status: 'open',
+  status: CaseStatuses.open,
 }
 
 <Tooltip {...tooltipProps}>
