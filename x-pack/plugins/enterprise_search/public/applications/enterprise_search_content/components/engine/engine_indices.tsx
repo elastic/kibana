@@ -192,6 +192,10 @@ export const EngineIndices: React.FC = () => {
           search={{
             box: {
               incremental: true,
+              placeholder: i18n.translate(
+                'xpack.enterpriseSearch.content.engine.indices.searchPlaceholder',
+                { defaultMessage: 'Filter indices' }
+              ),
               schema: true,
             },
           }}
