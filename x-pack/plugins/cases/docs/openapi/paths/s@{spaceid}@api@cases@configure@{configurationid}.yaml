@@ -50,6 +50,12 @@ patch:
               type: object
               properties:
                 $ref: '../components/schemas/case_configure_response_properties.yaml'
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../entrypoint.yaml/#/components/schemas/cases4xxResponse'
   servers:
         - url: https://localhost:5601
 servers:

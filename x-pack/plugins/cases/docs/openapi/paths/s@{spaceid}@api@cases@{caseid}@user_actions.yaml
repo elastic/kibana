@@ -23,6 +23,12 @@ get:
           examples:
             getCaseActivityResponse:
               $ref: '../components/examples/get_case_activity_response.yaml'
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../entrypoint.yaml/#/components/schemas/cases4xxResponse'
   servers:
     - url: https://localhost:5601
 servers:

@@ -13,22 +13,17 @@ A guide about the openApi specification can be found at [https://swagger.io/docs
 
 ## Tools
 
-It is possible to validate the docs before bundling them with the following
-command in the `x-pack/plugins/cases/docs/openapi/` folder:
-
-  ```
-    npx swagger-cli validate entrypoint.yaml
-  ```
-
-Then you can generate the `bundled` files by running the following commands:
+Generate the `bundled` files by running the following commands in the
+`x-pack/plugins/cases/docs/openapi/` folder:
 
   ```
     npx @redocly/cli bundle entrypoint.yaml --output bundled.yaml --ext yaml
     npx @redocly/cli bundle entrypoint.yaml --output bundled.json --ext json
   ```
 
-You can run additional linting with the following command:
+You can run additional validation and linting with the following commands:
 
   ```
+     npx swagger-cli validate bundled.yaml
      npx @redocly/cli lint bundled.json
   ```

@@ -23,6 +23,12 @@ get:
           examples:
             findConnectorResponse:
               $ref: '../components/examples/find_connector_response.yaml'
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../entrypoint.yaml/#/components/schemas/cases4xxResponse'
   servers:
     - url: https://localhost:5601
 servers:
