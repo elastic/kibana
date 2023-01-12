@@ -6,7 +6,7 @@
  */
 
 const CLOUD_SECURITY_PACKAGE_NAME = 'cloud_security_posture';
-const CLOUD_SECURITY_PACKAGE_VERSION = '1.2.5';
+const CLOUD_SECURITY_PACKAGE_VERSION = '1.0.8';
 
 /**
  * Package version is fixed (not latest) so FTR won't suddenly break when package is changed.
