@@ -18,7 +18,6 @@ import type {
   SavedObjectsIncrementCounterOptions,
 } from '@kbn/core-saved-objects-api-server';
 import {
-  SecurityAction,
   type ISavedObjectsEncryptionExtension,
   type ISavedObjectsSecurityExtension,
   type ISavedObjectTypeRegistry,
@@ -26,7 +25,6 @@ import {
 } from '@kbn/core-saved-objects-server';
 import {
   SavedObjectsErrorHelpers,
-  SavedObjectsUtils,
   type DecoratedError,
 } from '@kbn/core-saved-objects-utils-server';
 import {
@@ -271,88 +269,13 @@ export async function internalBulkResolve<T>(
     { refresh: false }
   ).catch(() => {}); // if the call fails for some reason, intentionally swallow the error
 
-  const redacted = await authorizeAuditAndRedact(resolvedObjects, securityExtension, namespace);
-  return { resolved_objects: redacted };
-}
+  if (!securityExtension) return { resolved_objects: resolvedObjects };
 
-/**
- * Checks authorization, writes audit events, and redacts namespaces from the bulkResolve response. In other SavedObjectsRepository
- * functions we do this before decrypting attributes. However, because of the bulkResolve logic involved in deciding between the exact match
- * or alias match, it's cleaner to do authorization, auditing, and redaction all afterwards.
- */
-async function authorizeAuditAndRedact<T>(
-  resolvedObjects: Array<SavedObjectsResolveResponse<T> | InternalBulkResolveError>,
-  securityExtension: ISavedObjectsSecurityExtension | undefined,
-  namespace: string | undefined
-) {
-  if (!securityExtension) {
-    return resolvedObjects;
-  }
-
-  const namespaceString = SavedObjectsUtils.namespaceIdToString(namespace);
-  const typesAndSpaces = new Map<string, Set<string>>();
-  const spacesToAuthorize = new Set<string>();
-  const auditableObjects: Array<{ type: string; id: string }> = [];
-
-  for (const result of resolvedObjects) {
-    let auditableObject: { type: string; id: string } | undefined;
-    if (isBulkResolveError(result)) {
-      const { type, id, error } = result;
-      if (!SavedObjectsErrorHelpers.isBadRequestError(error)) {
-        // Only "not found" errors should show up as audit events (not "unsupported type" errors)
-        auditableObject = { type, id };
-      }
-    } else {
-      const { type, id, namespaces = [] } = result.saved_object;
-      auditableObject = { type, id };
-      for (const space of namespaces) {
-        spacesToAuthorize.add(space);
-      }
-    }
-    if (auditableObject) {
-      auditableObjects.push(auditableObject);
-      const spacesToEnforce =
-        typesAndSpaces.get(auditableObject.type) ?? new Set([namespaceString]); // Always enforce authZ for the active space
-      spacesToEnforce.add(namespaceString);
-      typesAndSpaces.set(auditableObject.type, spacesToEnforce);
-      spacesToAuthorize.add(namespaceString);
-    }
-  }
-
-  if (typesAndSpaces.size === 0) {
-    // We only had "unsupported type" errors, there are no types to check privileges for, just return early
-    return resolvedObjects;
-  }
-
-  const { typeMap } = (await securityExtension?.authorize({
-    actions: new Set([SecurityAction.INTERNAL_BULK_RESOLVE]),
-    types: new Set(typesAndSpaces.keys()),
-    spaces: spacesToAuthorize,
-    enforceMap: typesAndSpaces,
-    auditOptions: { useSuccessOutcome: true },
-    // auditCallback: (error) => {
-    //   for (const { type, id } of auditableObjects) {
-    //     securityExtension.addAuditEvent({
-    //       action: AuditAction.RESOLVE,
-    //       savedObject: { type, id },
-    //       error,
-    //     });
-    //   }
-    // },
-  })) ?? { typeMap: new Map() }; // ToDo: Not sure if this is the best approach
-
-  return resolvedObjects.map((result) => {
-    if (isBulkResolveError(result)) {
-      return result;
-    }
-    return {
-      ...result,
-      saved_object: securityExtension.redactNamespaces({
-        typeMap,
-        savedObject: result.saved_object,
-      }),
-    };
+  const redactedObjects = await securityExtension?.authorizeAndRedactInternalBulkResolve({
+    namespace,
+    objects: resolvedObjects,
   });
+  return { resolved_objects: redactedObjects };
 }
 
 /** Separates valid and invalid object types */

@@ -50,6 +50,7 @@ import {
 } from '@kbn/core-elasticsearch-client-server-mocks';
 import { DocumentMigrator } from '@kbn/core-saved-objects-migration-server-internal';
 import {
+  AuthorizeAndRedactInternalBulkResolveParams,
   AuthorizeBulkCreateParams,
   AuthorizeBulkUpdateParams,
 } from '@kbn/core-saved-objects-server/src/extensions/security';
@@ -335,6 +336,26 @@ export const setupAuthorizeEnforceFailure = (
     // auditCallback?.(enforceError);
     throw enforceError;
   });
+};
+
+export const setupAuthorizeAndRedactInternalBulkResolveEnforceFailure = (
+  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>
+) => {
+  mockSecurityExt.authorizeAndRedactInternalBulkResolve.mockImplementation(
+    (params: AuthorizeAndRedactInternalBulkResolveParams<unknown>) => {
+      throw enforceError;
+    }
+  );
+};
+
+export const setupAuthorizeAndRedactInternalBulkResolveSuccess = (
+  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>
+) => {
+  mockSecurityExt.authorizeAndRedactInternalBulkResolve.mockImplementation(
+    (params: AuthorizeAndRedactInternalBulkResolveParams<unknown>) => {
+      return Promise.resolve(params.objects);
+    }
+  );
 };
 
 export const setupAuthorizeAndRedactMultiNamespaceReferenecesEnforceFailure = (

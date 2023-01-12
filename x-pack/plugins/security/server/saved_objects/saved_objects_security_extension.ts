@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import type { SavedObjectReferenceWithContext } from '@kbn/core-saved-objects-api-server';
+import type {
+  SavedObjectReferenceWithContext,
+  SavedObjectsResolveResponse,
+} from '@kbn/core-saved-objects-api-server';
 import type { SavedObjectsClient } from '@kbn/core-saved-objects-api-server-internal';
+import type { InternalBulkResolveError } from '@kbn/core-saved-objects-api-server-internal/src/lib/internal_bulk_resolve';
+import { isBulkResolveError } from '@kbn/core-saved-objects-api-server-internal/src/lib/internal_bulk_resolve';
 import type { SavedObject } from '@kbn/core-saved-objects-common';
 import { AuditAction, SecurityAction } from '@kbn/core-saved-objects-server';
 import type {
@@ -27,11 +32,16 @@ import type {
   UpdateSpacesAuditOptions,
 } from '@kbn/core-saved-objects-server';
 import type {
+  AuthorizeAndRedactInternalBulkResolveParams,
   AuthorizeBulkCreateParams,
   AuthorizeBulkUpdateParams,
   InternalAuthorizeOptions,
 } from '@kbn/core-saved-objects-server/src/extensions/security';
-import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
+import {
+  ALL_NAMESPACES_STRING,
+  SavedObjectsErrorHelpers,
+  SavedObjectsUtils,
+} from '@kbn/core-saved-objects-utils-server';
 
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../common/constants';
 import type { AuditLogger } from '../audit';
@@ -185,7 +195,6 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         if (missingPrivilegesAtResource) {
           return acc;
         }
-
         let objTypes: string[];
         let action: A;
         if (privilege === this.actions.login) {
@@ -724,6 +733,72 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     });
 
     return filteredAndRedactedObjects;
+  }
+
+  /**
+   * Checks authorization, writes audit events, and redacts namespaces from the bulkResolve response. In other SavedObjectsRepository
+   * functions we do this before decrypting attributes. However, because of the bulkResolve logic involved in deciding between the exact match
+   * or alias match, it's cleaner to do authorization, auditing, and redaction all afterwards.
+   */
+  async authorizeAndRedactInternalBulkResolve<T = unknown>(
+    params: AuthorizeAndRedactInternalBulkResolveParams<T>
+  ): Promise<Array<SavedObjectsResolveResponse<T> | InternalBulkResolveError>> {
+    const { namespace, objects } = params;
+    const namespaceString = SavedObjectsUtils.namespaceIdToString(namespace); // ToDo: prefer this methodology for other methods (as opposed to having to pass in the qualified namespaceString)?
+    const typesAndSpaces = new Map<string, Set<string>>();
+    const spacesToAuthorize = new Set<string>();
+    const auditableObjects: Array<{ type: string; id: string }> = [];
+
+    for (const result of objects) {
+      let auditableObject: { type: string; id: string } | undefined;
+      if (isBulkResolveError(result)) {
+        const { type, id, error } = result;
+        if (!SavedObjectsErrorHelpers.isBadRequestError(error)) {
+          // Only "not found" errors should show up as audit events (not "unsupported type" errors)
+          auditableObject = { type, id };
+        }
+      } else {
+        const { type, id, namespaces = [] } = result.saved_object;
+        auditableObject = { type, id };
+        for (const space of namespaces) {
+          spacesToAuthorize.add(space);
+        }
+      }
+      if (auditableObject) {
+        auditableObjects.push(auditableObject);
+        const spacesToEnforce =
+          typesAndSpaces.get(auditableObject.type) ?? new Set([namespaceString]); // Always enforce authZ for the active space
+        spacesToEnforce.add(namespaceString);
+        typesAndSpaces.set(auditableObject.type, spacesToEnforce);
+        spacesToAuthorize.add(namespaceString);
+      }
+    }
+
+    if (typesAndSpaces.size === 0) {
+      // We only had "unsupported type" errors, there are no types to check privileges for, just return early
+      return objects;
+    }
+
+    const { typeMap } = (await this.authorize({
+      actions: new Set([SecurityAction.INTERNAL_BULK_RESOLVE]),
+      types: new Set(typesAndSpaces.keys()),
+      spaces: spacesToAuthorize,
+      enforceMap: typesAndSpaces,
+      auditOptions: { useSuccessOutcome: true },
+    })) ?? { typeMap: new Map() }; // ToDo: Not sure if this is the best approach
+
+    return objects.map((result) => {
+      if (isBulkResolveError(result)) {
+        return result;
+      }
+      return {
+        ...result,
+        saved_object: this.redactNamespaces({
+          typeMap,
+          savedObject: result.saved_object,
+        }),
+      };
+    });
   }
 }
 

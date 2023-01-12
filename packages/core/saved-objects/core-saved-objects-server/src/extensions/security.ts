@@ -6,7 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectReferenceWithContext } from '@kbn/core-saved-objects-api-server';
+import { InternalBulkResolveError } from '@kbn/core-saved-objects-api-server-internal/src/lib/internal_bulk_resolve';
+
+import {
+  SavedObjectReferenceWithContext,
+  SavedObjectsResolveResponse,
+} from '@kbn/core-saved-objects-api-server';
 import type { SavedObject } from '@kbn/core-saved-objects-common';
 import { EcsEventOutcome } from '@kbn/ecs';
 
@@ -376,23 +381,16 @@ export interface AuthorizeAndRedactMultiNamespaceReferencesParams {
   options?: MultiNamespaceReferencesOptions;
 }
 
+export interface AuthorizeAndRedactInternalBulkResolveParams<T> {
+  namespace: string | undefined;
+  objects: Array<SavedObjectsResolveResponse<T> | InternalBulkResolveError>;
+}
+
 /**
  * The ISavedObjectsSecurityExtension interface defines the functions of a saved objects repository security extension.
  * It contains functions for checking & enforcing authorization, adding audit events, and redacting namespaces.
  */
 export interface ISavedObjectsSecurityExtension {
-  // ToDo: Document
-  // authorizeCreate: <T extends string>(
-  //   action: SecurityAction.CREATE | SecurityAction.BULK_CREATE,
-  //   namespaceString: string,
-  //   objects: Array<{
-  //     type: string;
-  //     id: string;
-  //     initialNamespaces: string[] | undefined;
-  //     existingNamespaces: string[] | undefined;
-  //   }>
-  // ) => Promise<CheckAuthorizationResult<T> | undefined>;
-
   /**
    * Performs authorization for create actions
    * @param params - actions, types & spaces map, audit callback, options (enforce bypassed if enforce map is undefined)
@@ -415,9 +413,28 @@ export interface ISavedObjectsSecurityExtension {
     params: AuthorizeBulkUpdateParams
   ) => Promise<CheckAuthorizationResult<string> | undefined>;
 
+  /**
+   * Checks/enforces authorization, writes audit events, filters the object graph, and redacts spaces from the share_to_space/bulk_get
+   * response. In other SavedObjectsRepository functions we do this before decrypting attributes. However, because of the
+   * share_to_space/bulk_get response logic involved in deciding between the exact match or alias match, it's cleaner to do authorization,
+   * auditing, filtering, and redaction all afterwards.
+   * @param params - ToDo:
+   * @returns
+   */
   authorizeAndRedactMultiNamespaceReferences: (
     params: AuthorizeAndRedactMultiNamespaceReferencesParams
   ) => Promise<SavedObjectReferenceWithContext[]>;
+
+  /**
+   * Checks authorization, writes audit events, and redacts namespaces from the bulkResolve response. In other SavedObjectsRepository
+   * functions we do this before decrypting attributes. However, because of the bulkResolve logic involved in deciding between the exact match
+   * or alias match, it's cleaner to do authorization, auditing, and redaction all afterwards.
+   * @param params - ToDo:
+   * @returns
+   */
+  authorizeAndRedactInternalBulkResolve: <T = unknown>(
+    params: AuthorizeAndRedactInternalBulkResolveParams<T>
+  ) => Promise<Array<SavedObjectsResolveResponse<T> | InternalBulkResolveError>>;
 
   /**
    * Performs authorization (check & enforce) of actions on specified types in specified spaces.
@@ -427,13 +444,6 @@ export interface ISavedObjectsSecurityExtension {
   authorize: <T extends string>(
     params: AuthorizeParams<T>
   ) => Promise<CheckAuthorizationResult<T> | undefined>;
-
-  /**
-   * Enforces authorization of a single action on specified types in specified spaces.
-   * Throws error if authorization map does not cover specified parameters.
-   * @param params - map of types/spaces, action to check, and authz map (from CheckAuthorizationResult)
-   */
-  // enforceAuthorization: <T extends string>(params: EnforceAuthorizationParams<T>) => void;
 
   /**
    * Adds an audit event for the specified action with relevant information
