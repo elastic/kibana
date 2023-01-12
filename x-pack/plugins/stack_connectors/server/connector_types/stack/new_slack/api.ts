@@ -7,10 +7,10 @@
 
 import { ExternalServiceApi, ExternalService, PostMessageParams } from './types';
 
-// const getChannelsHandler = async ({ externalService }: { externalService: ExternalServiceApi }) => {
-//   const res = await externalService.getChannels({});
-//   return res;
-// };
+const getChannelsHandler = async ({ externalService }: { externalService: ExternalService }) => {
+  const res = await externalService.getChannels({});
+  return res;
+};
 
 const postMessageHandler = async ({
   externalService,
@@ -24,6 +24,6 @@ const postMessageHandler = async ({
 };
 
 export const api: ExternalServiceApi = {
-  // getChannels: getChannelsHandler,
+  getChannels: getChannelsHandler,
   postMessage: postMessageHandler,
 };

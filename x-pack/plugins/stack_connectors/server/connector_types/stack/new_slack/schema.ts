@@ -16,26 +16,21 @@ import { schema } from '@kbn/config-schema';
 //   ExternalSlackServiceConfiguration
 // );
 
-const ExternalSlackServiceSecretConfiguration = {
+export const ExternalSlackServiceSecretConfigurationSchema = schema.object({
   token: schema.string(),
-};
+});
 
-export const ExternalSlackServiceSecretConfigurationSchema = schema.object(
-  ExternalSlackServiceSecretConfiguration
-);
-
-// make types more clear
-// export const ExecutorSubActionGetChannelsParamsSchema = schema.object({});
+export const ExecutorSubActionGetChannelsParamsSchema = schema.object({});
 export const ExecutorSubActionPostMessageParamsSchema = schema.object({
   channel: schema.string(),
   text: schema.string(),
 });
 
 export const ExecutorParamsSchema = schema.oneOf([
-  // schema.object({
-  //   subAction: schema.literal('getChannels'),
-  //   subActionParams: ExecutorSubActionGetChannelsParamsSchema,
-  // }),
+  schema.object({
+    subAction: schema.literal('getChannels'),
+    subActionParams: ExecutorSubActionGetChannelsParamsSchema,
+  }),
   schema.object({
     subAction: schema.literal('postMessage'),
     subActionParams: ExecutorSubActionPostMessageParamsSchema,

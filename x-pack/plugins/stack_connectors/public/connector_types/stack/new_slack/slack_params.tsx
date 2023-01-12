@@ -15,6 +15,10 @@ import { SlackActionParams } from './types';
 const SlackParamsFields: React.FunctionComponent<
   ActionParamsProps<SlackActionParams['subActionParams']>
 > = ({ actionParams, editAction, index, errors, messageVariables, defaultMessage }) => {
+  console.log('1', actionParams);
+  console.log('2', editAction);
+  console.log('3', index);
+  console.log('4', errors);
   const { channel, text } = actionParams;
   const [[isUsingDefault, defaultMessageUsed], setDefaultMessageUsage] = useState<
     [boolean, string | undefined]

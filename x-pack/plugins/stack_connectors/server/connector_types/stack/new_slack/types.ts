@@ -42,10 +42,25 @@ export interface PostMessageResponse {
     ts: string;
   };
 }
-// export interface GetChannelsResponse {}
+export type GetChannelsResponse = Array<{
+  ok: true;
+  channels: [
+    {
+      id: string;
+      name: string;
+      is_channel: boolean;
+      is_archived: boolean;
+      is_private: boolean;
+    }
+  ];
+}>;
 
 export interface ExternalServiceApi {
-  // getChannels: (args: any) => Promise<GetChannelsResponse>;
+  getChannels: ({
+    externalService,
+  }: {
+    externalService: ExternalService;
+  }) => Promise<GetChannelsResponse>;
   postMessage: ({
     externalService,
     params,
@@ -75,6 +90,7 @@ export interface PostMessageParams {
   text: string;
 }
 export interface ExternalService {
+  getChannels: ({}) => Promise<GetChannelsResponse>;
   postMessage: ({ channel, text }: PostMessageParams) => Promise<PostMessageResponse>;
 }
 
