@@ -8,11 +8,8 @@
 
 import { createHash } from 'crypto';
 import * as fs from 'fs';
+import { pipeline } from 'stream/promises';
 import { zipObject } from 'lodash';
-import * as stream from 'stream';
-import * as util from 'util';
-
-const pipeline = util.promisify(stream.pipeline);
 
 export type Hash = string;
 

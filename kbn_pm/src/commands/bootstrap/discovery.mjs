@@ -12,7 +12,7 @@ import ChildProcess from 'child_process';
 import { promisify } from 'util';
 
 import { REPO_ROOT } from '../../lib/paths.mjs';
-const execAsync = promisify(ChildProcess.execFile);
+const execFile = promisify(ChildProcess.execFile);
 
 export async function discovery() {
   const { getPluginSearchPaths, simpleKibanaPlatformPluginDiscovery } = await import(
@@ -26,7 +26,7 @@ export async function discovery() {
     '../../../../packages/kbn-repo-packages/index.js'
   );
 
-  const proc = await execAsync('git', ['ls-files', '-comt', '--exclude-standard'], {
+  const proc = await execFile('git', ['ls-files', '-comt', '--exclude-standard'], {
     cwd: REPO_ROOT,
     encoding: 'utf8',
     maxBuffer: Infinity,

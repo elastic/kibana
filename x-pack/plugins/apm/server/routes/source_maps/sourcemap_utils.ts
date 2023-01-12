@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { deflate } from 'zlib';
+import { deflate as deflateCb } from 'zlib';
 import { BinaryLike, createHash } from 'crypto';
 import { promisify } from 'util';
 import { SourceMap } from './route';
 
-const deflateAsync = promisify(deflate);
+const deflate = promisify(deflateCb);
 
 function asSha256Encoded(content: BinaryLike): string {
   return createHash('sha256').update(content).digest('hex');
@@ -18,7 +18,7 @@ function asSha256Encoded(content: BinaryLike): string {
 
 export async function getEncodedContent(sourceMapContent: SourceMap) {
   const contentBuffer = Buffer.from(JSON.stringify(sourceMapContent));
-  const contentZipped = await deflateAsync(contentBuffer);
+  const contentZipped = await deflate(contentBuffer);
   const contentEncoded = contentZipped.toString('base64');
   const contentHash = asSha256Encoded(contentZipped);
   return { contentEncoded, contentHash };

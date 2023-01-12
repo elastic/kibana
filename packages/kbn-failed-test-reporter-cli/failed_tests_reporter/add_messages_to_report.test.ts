@@ -18,13 +18,11 @@ expect.addSnapshotSerializer({
   serialize: (v) => v.replace(/</g, '‹').replace(/>/g, '›').replace(/^\s+$/gm, ''),
 });
 
-jest.mock('fs', () => {
-  const realFs = jest.requireActual('fs');
+jest.mock('fs/promises', () => {
+  const realFs = jest.requireActual('fs/promises');
   return {
     ...realFs,
-    writeFile: (...args: any[]) => {
-      setTimeout(args[args.length - 1], 0);
-    },
+    writeFile: (...args: any[]) => Promise.resolve(''),
   };
 });
 

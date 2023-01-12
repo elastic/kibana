@@ -9,7 +9,8 @@
 import { generateFileHashMock, getFileCacheKeyMock } from './file_hash.test.mocks';
 
 import { resolve } from 'path';
-import { Stats } from 'fs';
+import type { Stats } from 'fs';
+import type { FileHandle } from 'fs/promises';
 import { getFileHash } from './file_hash';
 import { IFileHashCache } from './file_hash_cache';
 
@@ -21,7 +22,7 @@ const mockedCache = (): jest.Mocked<IFileHashCache> => ({
 
 describe('getFileHash', () => {
   const sampleFilePath = resolve(__dirname, 'foo.js');
-  const fd = 42;
+  const fileHandle = { fd: 42 } as FileHandle;
   const stats: Stats = { ino: 42, size: 9000 } as any;
 
   beforeEach(() => {
@@ -37,7 +38,7 @@ describe('getFileHash', () => {
     const cache = mockedCache();
     cache.get.mockReturnValue(Promise.resolve('cached-hash'));
 
-    const hash = await getFileHash(cache, sampleFilePath, stats, fd);
+    const hash = await getFileHash(cache, sampleFilePath, stats, fileHandle);
 
     expect(cache.get).toHaveBeenCalledTimes(1);
     expect(generateFileHashMock).not.toHaveBeenCalled();
@@ -50,10 +51,10 @@ describe('getFileHash', () => {
 
     generateFileHashMock.mockReturnValue(Promise.resolve('computed-hash'));
 
-    const hash = await getFileHash(cache, sampleFilePath, stats, fd);
+    const hash = await getFileHash(cache, sampleFilePath, stats, fileHandle);
 
     expect(generateFileHashMock).toHaveBeenCalledTimes(1);
-    expect(generateFileHashMock).toHaveBeenCalledWith(fd);
+    expect(generateFileHashMock).toHaveBeenCalledWith(fileHandle);
     expect(hash).toEqual('computed-hash');
   });
 
@@ -64,7 +65,7 @@ describe('getFileHash', () => {
     const cache = mockedCache();
     cache.get.mockReturnValue(undefined);
 
-    await getFileHash(cache, sampleFilePath, stats, fd);
+    await getFileHash(cache, sampleFilePath, stats, fileHandle);
 
     expect(cache.set).toHaveBeenCalledTimes(1);
     expect(cache.set).toHaveBeenCalledWith(`${sampleFilePath}-${stats.ino}`, expect.any(Promise));

@@ -7,16 +7,11 @@
 
 /* eslint-disable import/no-extraneous-dependencies */
 
-const fs = require('fs');
-const { promisify } = require('util');
+const { readFile, writeFile, unlink } = require('fs/promises');
 const path = require('path');
 const json5 = require('json5');
 const execa = require('execa');
 const { omit } = require('lodash');
-
-const readFile = promisify(fs.readFile);
-const writeFile = promisify(fs.writeFile);
-const unlink = promisify(fs.unlink);
 
 const {
   kibanaRoot,

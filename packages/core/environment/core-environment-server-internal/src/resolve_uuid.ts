@@ -8,10 +8,10 @@
 
 import uuid from 'uuid';
 import { join } from 'path';
+import { readFile, writeFile } from 'fs/promises';
 import { PathConfigType } from '@kbn/utils';
 import type { Logger } from '@kbn/logging';
 import { uuidRegexp } from '@kbn/core-base-server-internal';
-import { readFile, writeFile } from './fs';
 import { HttpConfigType } from './types';
 
 const FILE_ENCODING = 'utf8';

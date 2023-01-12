@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import Fs from 'fs';
-import { promisify } from 'util';
+import { mkdir } from 'fs/promises';
 import path from 'path';
 
 import del from 'del';
@@ -18,8 +17,6 @@ import { extract, getPackData } from './pack';
 import { renamePlugin } from './rename';
 import { errorIfXPackInstall } from '../lib/error_if_x_pack';
 import { existingInstall, assertVersion } from './kibana';
-
-const mkdir = promisify(Fs.mkdir);
 
 export async function install(settings, logger) {
   try {

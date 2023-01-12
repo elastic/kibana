@@ -11,15 +11,15 @@ import { Observable } from 'rxjs';
 import { catchError, concatMap, finalize } from 'rxjs/operators';
 import { Logger } from '@kbn/core/server';
 import { Stream, PassThrough } from 'stream';
-import { constants, deflate } from 'zlib';
+import { constants, deflate as deflateCb } from 'zlib';
 
 const delimiter = '\n';
-const pDeflate = promisify(deflate);
+const deflate = promisify(deflateCb);
 
 async function zipMessageToStream(output: PassThrough, message: string) {
   return new Promise(async (resolve, reject) => {
     try {
-      const gzipped = await pDeflate(message, {
+      const gzipped = await deflate(message, {
         flush: constants.Z_SYNC_FLUSH,
       });
       output.write(gzipped.toString('base64'));

@@ -28,9 +28,7 @@ afterEach(() => {
 });
 
 test('return error when manifest is empty', async () => {
-  mockReadFile.mockImplementation((path, cb) => {
-    cb(null, Buffer.from(''));
-  });
+  mockReadFile.mockImplementation((path) => Promise.resolve(Buffer.from('')));
 
   await expect(parseManifest(pluginPath, packageInfo)).rejects.toMatchObject({
     message: `Unexpected end of JSON input (invalid-manifest, ${pluginManifestPath})`,
@@ -40,9 +38,7 @@ test('return error when manifest is empty', async () => {
 });
 
 test('return error when manifest content is null', async () => {
-  mockReadFile.mockImplementation((path, cb) => {
-    cb(null, Buffer.from('null'));
-  });
+  mockReadFile.mockImplementation((path) => Promise.resolve(Buffer.from('null')));
 
   await expect(parseManifest(pluginPath, packageInfo)).rejects.toMatchObject({
     message: `Plugin manifest must contain a JSON encoded object. (invalid-manifest, ${pluginManifestPath})`,
@@ -52,9 +48,7 @@ test('return error when manifest content is null', async () => {
 });
 
 test('return error when manifest content is not a valid JSON', async () => {
-  mockReadFile.mockImplementation((path, cb) => {
-    cb(null, Buffer.from('not-json'));
-  });
+  mockReadFile.mockImplementation((path) => Promise.resolve(Buffer.from('not-json')));
 
   await expect(parseManifest(pluginPath, packageInfo)).rejects.toMatchObject({
     message: `Unexpected token o in JSON at position 1 (invalid-manifest, ${pluginManifestPath})`,
@@ -64,9 +58,11 @@ test('return error when manifest content is not a valid JSON', async () => {
 });
 
 test('return error when plugin id is missing', async () => {
-  mockReadFile.mockImplementation((path, cb) => {
-    cb(null, Buffer.from(JSON.stringify({ version: 'some-version', owner: { name: 'foo' } })));
-  });
+  mockReadFile.mockImplementation((path) =>
+    Promise.resolve(
+      Buffer.from(JSON.stringify({ version: 'some-version', owner: { name: 'foo' } }))
+    )
+  );
 
   await expect(parseManifest(pluginPath, packageInfo)).rejects.toMatchObject({
     message: `Plugin manifest must contain an "id" property. (invalid-manifest, ${pluginManifestPath})`,
@@ -76,14 +72,13 @@ test('return error when plugin id is missing', async () => {
 });
 
 test('return error when plugin id includes `.` characters', async () => {
-  mockReadFile.mockImplementation((path, cb) => {
-    cb(
-      null,
+  mockReadFile.mockImplementation((path) =>
+    Promise.resolve(
       Buffer.from(
         JSON.stringify({ id: 'some.name', version: 'some-version', owner: { name: 'foo' } })
       )
-    );
-  });
+    )
+  );
 
   await expect(parseManifest(pluginPath, packageInfo)).rejects.toMatchObject({
     message: `Plugin "id" must not include \`.\` characters. (invalid-manifest, ${pluginManifestPath})`,
@@ -94,14 +89,13 @@ test('return error when plugin id includes `.` characters', async () => {
 
 test('return error when pluginId is not in camelCase format', async () => {
   expect.assertions(1);
-  mockReadFile.mockImplementation((path, cb) => {
-    cb(
-      null,
+  mockReadFile.mockImplementation((path) =>
+    Promise.resolve(
       Buffer.from(
         JSON.stringify({ id: 'some_name', version: 'kibana', server: true, owner: { name: 'foo' } })
       )
-    );
-  });
+    )
+  );
 
   await expect(parseManifest(pluginPath, packageInfo)).rejects.toMatchObject({
     message: `Plugin "id" must be camelCase, but found: some_name. (invalid-manifest, ${pluginManifestPath})`,
@@ -111,9 +105,9 @@ test('return error when pluginId is not in camelCase format', async () => {
 });
 
 test('return error when plugin version is missing', async () => {
-  mockReadFile.mockImplementation((path, cb) => {
-    cb(null, Buffer.from(JSON.stringify({ id: 'someId', owner: { name: 'foo' } })));
-  });
+  mockReadFile.mockImplementation((path) =>
+    Promise.resolve(Buffer.from(JSON.stringify({ id: 'someId', owner: { name: 'foo' } })))
+  );
 
   await expect(parseManifest(pluginPath, packageInfo)).rejects.toMatchObject({
     message: `Plugin manifest for "someId" must contain a "version" property. (invalid-manifest, ${pluginManifestPath})`,
@@ -123,12 +117,11 @@ test('return error when plugin version is missing', async () => {
 });
 
 test('return error when plugin expected Kibana version is lower than actual version', async () => {
-  mockReadFile.mockImplementation((path, cb) => {
-    cb(
-      null,
+  mockReadFile.mockImplementation((path) =>
+    Promise.resolve(
       Buffer.from(JSON.stringify({ id: 'someId', version: '6.4.2', owner: { name: 'foo' } }))
-    );
-  });
+    )
+  );
 
   await expect(parseManifest(pluginPath, packageInfo)).rejects.toMatchObject({
     message: `Plugin "someId" is only compatible with Kibana version "6.4.2", but used Kibana version is "7.0.0-alpha1". (incompatible-version, ${pluginManifestPath})`,
@@ -138,9 +131,8 @@ test('return error when plugin expected Kibana version is lower than actual vers
 });
 
 test('return error when plugin expected Kibana version cannot be interpreted as semver', async () => {
-  mockReadFile.mockImplementation((path, cb) => {
-    cb(
-      null,
+  mockReadFile.mockImplementation((path) =>
+    Promise.resolve(
       Buffer.from(
         JSON.stringify({
           id: 'someId',
@@ -149,8 +141,8 @@ test('return error when plugin expected Kibana version cannot be interpreted as 
           owner: { name: 'foo' },
         })
       )
-    );
-  });
+    )
+  );
 
   await expect(parseManifest(pluginPath, packageInfo)).rejects.toMatchObject({
     message: `Plugin "someId" is only compatible with Kibana version "non-sem-ver", but used Kibana version is "7.0.0-alpha1". (incompatible-version, ${pluginManifestPath})`,
@@ -160,14 +152,13 @@ test('return error when plugin expected Kibana version cannot be interpreted as 
 });
 
 test('return error when plugin config path is not a string', async () => {
-  mockReadFile.mockImplementation((path, cb) => {
-    cb(
-      null,
+  mockReadFile.mockImplementation((path) =>
+    Promise.resolve(
       Buffer.from(
         JSON.stringify({ id: 'someId', version: '7.0.0', configPath: 2, owner: { name: 'foo' } })
       )
-    );
-  });
+    )
+  );
 
   await expect(parseManifest(pluginPath, packageInfo)).rejects.toMatchObject({
     message: `The "configPath" in plugin manifest for "someId" should either be a string or an array of strings. (invalid-manifest, ${pluginManifestPath})`,
@@ -177,9 +168,8 @@ test('return error when plugin config path is not a string', async () => {
 });
 
 test('return error when plugin config path is an array that contains non-string values', async () => {
-  mockReadFile.mockImplementation((path, cb) => {
-    cb(
-      null,
+  mockReadFile.mockImplementation((path) =>
+    Promise.resolve(
       Buffer.from(
         JSON.stringify({
           id: 'someId',
@@ -188,8 +178,8 @@ test('return error when plugin config path is an array that contains non-string 
           owner: { name: 'foo' },
         })
       )
-    );
-  });
+    )
+  );
 
   await expect(parseManifest(pluginPath, packageInfo)).rejects.toMatchObject({
     message: `The "configPath" in plugin manifest for "someId" should either be a string or an array of strings. (invalid-manifest, ${pluginManifestPath})`,
@@ -199,12 +189,11 @@ test('return error when plugin config path is an array that contains non-string 
 });
 
 test('return error when plugin expected Kibana version is higher than actual version', async () => {
-  mockReadFile.mockImplementation((path, cb) => {
-    cb(
-      null,
+  mockReadFile.mockImplementation((path) =>
+    Promise.resolve(
       Buffer.from(JSON.stringify({ id: 'someId', version: '7.0.1', owner: { name: 'foo' } }))
-    );
-  });
+    )
+  );
 
   await expect(parseManifest(pluginPath, packageInfo)).rejects.toMatchObject({
     message: `Plugin "someId" is only compatible with Kibana version "7.0.1", but used Kibana version is "7.0.0-alpha1". (incompatible-version, ${pluginManifestPath})`,
@@ -214,12 +203,11 @@ test('return error when plugin expected Kibana version is higher than actual ver
 });
 
 test('return error when both `server` and `ui` are set to `false` or missing', async () => {
-  mockReadFile.mockImplementation((path, cb) => {
-    cb(
-      null,
+  mockReadFile.mockImplementation((path) =>
+    Promise.resolve(
       Buffer.from(JSON.stringify({ id: 'someId', version: '7.0.0', owner: { name: 'foo' } }))
-    );
-  });
+    )
+  );
 
   await expect(parseManifest(pluginPath, packageInfo)).rejects.toMatchObject({
     message: `Both "server" and "ui" are missing or set to "false" in plugin manifest for "someId", but at least one of these must be set to "true". (invalid-manifest, ${pluginManifestPath})`,
@@ -227,9 +215,8 @@ test('return error when both `server` and `ui` are set to `false` or missing', a
     path: pluginManifestPath,
   });
 
-  mockReadFile.mockImplementation((path, cb) => {
-    cb(
-      null,
+  mockReadFile.mockImplementation((path) =>
+    Promise.resolve(
       Buffer.from(
         JSON.stringify({
           id: 'someId',
@@ -239,8 +226,8 @@ test('return error when both `server` and `ui` are set to `false` or missing', a
           owner: { name: 'foo' },
         })
       )
-    );
-  });
+    )
+  );
 
   await expect(parseManifest(pluginPath, packageInfo)).rejects.toMatchObject({
     message: `Both "server" and "ui" are missing or set to "false" in plugin manifest for "someId", but at least one of these must be set to "true". (invalid-manifest, ${pluginManifestPath})`,
@@ -250,9 +237,8 @@ test('return error when both `server` and `ui` are set to `false` or missing', a
 });
 
 test('return error when manifest contains unrecognized properties', async () => {
-  mockReadFile.mockImplementation((path, cb) => {
-    cb(
-      null,
+  mockReadFile.mockImplementation((path) =>
+    Promise.resolve(
       Buffer.from(
         JSON.stringify({
           id: 'someId',
@@ -263,8 +249,8 @@ test('return error when manifest contains unrecognized properties', async () => 
           owner: { name: 'foo' },
         })
       )
-    );
-  });
+    )
+  );
 
   await expect(parseManifest(pluginPath, packageInfo)).rejects.toMatchObject({
     message: `Manifest for plugin "someId" contains the following unrecognized properties: unknownOne,unknownTwo. (invalid-manifest, ${pluginManifestPath})`,
@@ -274,9 +260,8 @@ test('return error when manifest contains unrecognized properties', async () => 
 });
 
 test('returns error when manifest contains unrecognized `type`', async () => {
-  mockReadFile.mockImplementation((path, cb) => {
-    cb(
-      null,
+  mockReadFile.mockImplementation((path) =>
+    Promise.resolve(
       Buffer.from(
         JSON.stringify({
           id: 'someId',
@@ -287,8 +272,8 @@ test('returns error when manifest contains unrecognized `type`', async () => {
           owner: { name: 'foo' },
         })
       )
-    );
-  });
+    )
+  );
 
   await expect(parseManifest(pluginPath, packageInfo)).rejects.toMatchObject({
     message: `The "type" in manifest for plugin "someId" is set to "unknown", but it should either be "standard" or "preboot". (invalid-manifest, ${pluginManifestPath})`,
@@ -299,37 +284,34 @@ test('returns error when manifest contains unrecognized `type`', async () => {
 
 describe('configPath', () => {
   test('falls back to plugin id if not specified', async () => {
-    mockReadFile.mockImplementation((path, cb) => {
-      cb(
-        null,
+    mockReadFile.mockImplementation((path) =>
+      Promise.resolve(
         Buffer.from(
           JSON.stringify({ id: 'plugin', version: '7.0.0', server: true, owner: { name: 'foo' } })
         )
-      );
-    });
+      )
+    );
 
     const manifest = await parseManifest(pluginPath, packageInfo);
     expect(manifest.configPath).toBe(manifest.id);
   });
 
   test('falls back to plugin id in snakeCase format', async () => {
-    mockReadFile.mockImplementation((path, cb) => {
-      cb(
-        null,
+    mockReadFile.mockImplementation((path) =>
+      Promise.resolve(
         Buffer.from(
           JSON.stringify({ id: 'someId', version: '7.0.0', server: true, owner: { name: 'foo' } })
         )
-      );
-    });
+      )
+    );
 
     const manifest = await parseManifest(pluginPath, packageInfo);
     expect(manifest.configPath).toBe('some_id');
   });
 
   test('not formatted to snakeCase if defined explicitly as string', async () => {
-    mockReadFile.mockImplementation((path, cb) => {
-      cb(
-        null,
+    mockReadFile.mockImplementation((path) =>
+      Promise.resolve(
         Buffer.from(
           JSON.stringify({
             id: 'someId',
@@ -339,17 +321,16 @@ describe('configPath', () => {
             owner: { name: 'foo' },
           })
         )
-      );
-    });
+      )
+    );
 
     const manifest = await parseManifest(pluginPath, packageInfo);
     expect(manifest.configPath).toBe('somePath');
   });
 
   test('not formatted to snakeCase if defined explicitly as an array of strings', async () => {
-    mockReadFile.mockImplementation((path, cb) => {
-      cb(
-        null,
+    mockReadFile.mockImplementation((path) =>
+      Promise.resolve(
         Buffer.from(
           JSON.stringify({
             id: 'someId',
@@ -359,8 +340,8 @@ describe('configPath', () => {
             owner: { name: 'foo' },
           })
         )
-      );
-    });
+      )
+    );
 
     const manifest = await parseManifest(pluginPath, packageInfo);
     expect(manifest.configPath).toEqual(['somePath']);
@@ -368,14 +349,13 @@ describe('configPath', () => {
 });
 
 test('set defaults for all missing optional fields', async () => {
-  mockReadFile.mockImplementation((path, cb) => {
-    cb(
-      null,
+  mockReadFile.mockImplementation((path) =>
+    Promise.resolve(
       Buffer.from(
         JSON.stringify({ id: 'someId', version: '7.0.0', server: true, owner: { name: 'foo' } })
       )
-    );
-  });
+    )
+  );
 
   await expect(parseManifest(pluginPath, packageInfo)).resolves.toEqual({
     id: 'someId',
@@ -393,9 +373,8 @@ test('set defaults for all missing optional fields', async () => {
 });
 
 test('return all set optional fields as they are in manifest', async () => {
-  mockReadFile.mockImplementation((path, cb) => {
-    cb(
-      null,
+  mockReadFile.mockImplementation((path) =>
+    Promise.resolve(
       Buffer.from(
         JSON.stringify({
           id: 'someId',
@@ -410,8 +389,8 @@ test('return all set optional fields as they are in manifest', async () => {
           enabledOnAnonymousPages: true,
         })
       )
-    );
-  });
+    )
+  );
 
   await expect(parseManifest(pluginPath, packageInfo)).resolves.toEqual({
     id: 'someId',
@@ -430,9 +409,8 @@ test('return all set optional fields as they are in manifest', async () => {
 });
 
 test('return manifest when plugin expected Kibana version matches actual version', async () => {
-  mockReadFile.mockImplementation((path, cb) => {
-    cb(
-      null,
+  mockReadFile.mockImplementation((path) =>
+    Promise.resolve(
       Buffer.from(
         JSON.stringify({
           id: 'someId',
@@ -444,8 +422,8 @@ test('return manifest when plugin expected Kibana version matches actual version
           owner: { name: 'foo' },
         })
       )
-    );
-  });
+    )
+  );
 
   await expect(parseManifest(pluginPath, packageInfo)).resolves.toEqual({
     id: 'someId',
@@ -463,9 +441,8 @@ test('return manifest when plugin expected Kibana version matches actual version
 });
 
 test('return manifest when plugin expected Kibana version is `kibana`', async () => {
-  mockReadFile.mockImplementation((path, cb) => {
-    cb(
-      null,
+  mockReadFile.mockImplementation((path) =>
+    Promise.resolve(
       Buffer.from(
         JSON.stringify({
           id: 'someId',
@@ -477,8 +454,8 @@ test('return manifest when plugin expected Kibana version is `kibana`', async ()
           owner: { name: 'foo' },
         })
       )
-    );
-  });
+    )
+  );
 
   await expect(parseManifest(pluginPath, packageInfo)).resolves.toEqual({
     id: 'someId',

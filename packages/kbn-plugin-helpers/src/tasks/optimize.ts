@@ -6,16 +6,13 @@
  * Side Public License, v 1.
  */
 
-import Fs from 'fs';
+import { unlink, rename } from 'fs/promises';
 import Path from 'path';
-import { promisify } from 'util';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import { OptimizerConfig, runOptimizer, logOptimizerState } from '@kbn/optimizer';
 
 import { BuildContext } from '../build_context';
-
-const asyncRename = promisify(Fs.rename);
 
 export async function optimize({ log, plugin, sourceDir, buildDir }: BuildContext) {
   if (!plugin.manifest.ui) {
@@ -38,10 +35,10 @@ export async function optimize({ log, plugin, sourceDir, buildDir }: BuildContex
     await runOptimizer(config).pipe(logOptimizerState(log, config)).toPromise();
 
     // clean up unnecessary files
-    Fs.unlinkSync(Path.resolve(target, 'public/metrics.json'));
-    Fs.unlinkSync(Path.resolve(target, 'public/.kbn-optimizer-cache'));
+    await unlink(Path.resolve(target, 'public/metrics.json'));
+    await unlink(Path.resolve(target, 'public/.kbn-optimizer-cache'));
 
     // move target into buildDir
-    await asyncRename(target, Path.resolve(buildDir, 'target'));
+    await rename(target, Path.resolve(buildDir, 'target'));
   });
 }

@@ -7,14 +7,15 @@
  */
 
 import { createReadStream, Stats } from 'fs';
+import type { FileHandle } from 'fs/promises';
 import { createHash } from 'crypto';
 import * as Rx from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 
-export const generateFileHash = (fd: number): Promise<string> => {
+export const generateFileHash = (fileHandle: FileHandle): Promise<string> => {
   const hash = createHash('sha1');
   const read = createReadStream(null as any, {
-    fd,
+    fd: fileHandle,
     start: 0,
     autoClose: false,
   });

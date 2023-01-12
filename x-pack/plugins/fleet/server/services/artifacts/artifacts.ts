@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { deflate } from 'zlib';
+import { deflate as deflateCb } from 'zlib';
 import { promisify } from 'util';
 
 import type { BinaryLike } from 'crypto';
@@ -37,7 +37,7 @@ import {
   uniqueIdFromArtifact,
 } from './mappings';
 
-const deflateAsync = promisify(deflate);
+const deflate = promisify(deflateCb);
 
 export const getArtifact = async (
   esClient: ElasticsearchClient,
@@ -188,7 +188,7 @@ export const encodeArtifactContent = async (
   content: ArtifactsClientCreateOptions['content']
 ): Promise<ArtifactEncodedMetadata> => {
   const decodedContentBuffer = Buffer.from(content);
-  const encodedContentBuffer = await deflateAsync(decodedContentBuffer);
+  const encodedContentBuffer = await deflate(decodedContentBuffer);
 
   const encodedArtifact: ArtifactEncodedMetadata = {
     compressionAlgorithm: 'zlib',

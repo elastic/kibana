@@ -7,8 +7,7 @@
  */
 
 import Path from 'path';
-import Fs from 'fs';
-import Util from 'util';
+import { unlink } from 'fs/promises';
 import {
   createTestServers,
   createRootWithCorePlugins,
@@ -20,11 +19,9 @@ import { getMigrationDocLink } from './test_utils';
 const migrationDocLink = getMigrationDocLink().resolveMigrationFailures;
 const logFilePath = Path.join(__dirname, 'collects_corrupt_docs.log');
 
-const asyncUnlink = Util.promisify(Fs.unlink);
-
 async function removeLogFile() {
   // ignore errors if it doesn't exist
-  await asyncUnlink(logFilePath).catch(() => void 0);
+  await unlink(logFilePath).catch(() => void 0);
 }
 
 describe('migration v2 with corrupt saved object documents', () => {

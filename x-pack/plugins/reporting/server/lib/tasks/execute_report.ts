@@ -10,8 +10,8 @@ import type { Logger } from '@kbn/core/server';
 import moment from 'moment';
 import * as Rx from 'rxjs';
 import { timeout } from 'rxjs/operators';
-import { finished, Writable } from 'stream';
-import { promisify } from 'util';
+import { Writable } from 'stream';
+import { finished } from 'stream/promises';
 import type {
   RunContext,
   TaskManagerStartContract,
@@ -377,7 +377,7 @@ export class ExecuteReportTask implements ReportingTask {
 
             stream.end();
 
-            await promisify(finished)(stream, { readable: false });
+            await finished(stream, { readable: false });
 
             report._seq_no = stream.getSeqNo()!;
             report._primary_term = stream.getPrimaryTerm()!;

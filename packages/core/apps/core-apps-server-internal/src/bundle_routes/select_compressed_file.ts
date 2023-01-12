@@ -8,7 +8,7 @@
 
 import { extname } from 'path';
 import Accept from '@hapi/accept';
-import { open } from './fs';
+import { open, type FileHandle } from 'fs/promises';
 
 declare module '@hapi/accept' {
   // @types/accept does not include the `preferences` argument so we override the type to include it
@@ -28,7 +28,7 @@ async function tryToOpenFile(filePath: string) {
 }
 
 export async function selectCompressedFile(acceptEncodingHeader: string | undefined, path: string) {
-  let fd: number | undefined;
+  let fileHandle: FileHandle | undefined;
   let fileEncoding: 'gzip' | 'br' | undefined;
   const ext = extname(path);
 
@@ -38,15 +38,15 @@ export async function selectCompressedFile(acceptEncodingHeader: string | undefi
   if (ext === '.js' || ext === '.css') {
     if (supportedEncodings[0] === 'br') {
       fileEncoding = 'br';
-      fd = await tryToOpenFile(`${path}.br`);
+      fileHandle = await tryToOpenFile(`${path}.br`);
     }
   }
 
-  if (!fd) {
+  if (!fileHandle) {
     fileEncoding = undefined;
     // Use raw open to trigger exception if it does not exist
-    fd = await open(path, 'r');
+    fileHandle = await open(path, 'r');
   }
 
-  return { fd, fileEncoding };
+  return { fileHandle, fileEncoding };
 }

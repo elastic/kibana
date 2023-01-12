@@ -9,7 +9,7 @@
 import Chalk from 'chalk';
 import Readline from 'readline';
 import * as Rx from 'rxjs';
-import Util from 'util';
+import { promisify } from 'util';
 
 import * as Ansi from './ansi';
 
@@ -30,7 +30,7 @@ export async function ask(options: Options) {
     output: process.stderr,
   });
 
-  const q = Util.promisify(int.question) as unknown as (q: string) => Promise<string>;
+  const q = promisify(int.question) as unknown as (q: string) => Promise<string>;
 
   try {
     return await Rx.firstValueFrom(

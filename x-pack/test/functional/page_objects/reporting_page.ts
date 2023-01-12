@@ -6,16 +6,12 @@
  */
 
 import expect from '@kbn/expect';
-import fs from 'fs';
+import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
 import type SuperTest from 'supertest';
 import { format as formatUrl } from 'url';
-import { promisify } from 'util';
 import { REPORT_TABLE_ID, REPORT_TABLE_ROW_ID } from '@kbn/reporting-plugin/common/constants';
 import { FtrService } from '../ftr_provider_context';
-
-const writeFileAsync = promisify(fs.writeFile);
-const mkdirAsync = promisify(fs.mkdir);
 
 export class ReportingPageObject extends FtrService {
   private readonly browser = this.ctx.getService('browser');
@@ -194,9 +190,9 @@ export class ReportingPageObject extends FtrService {
 
   async writeSessionReport(name: string, reportExt: string, rawPdf: Buffer, folder: string) {
     const sessionDirectory = path.resolve(folder, 'session');
-    await mkdirAsync(sessionDirectory, { recursive: true });
+    await mkdir(sessionDirectory, { recursive: true });
     const sessionReportPath = path.resolve(sessionDirectory, `${name}.${reportExt}`);
-    await writeFileAsync(sessionReportPath, rawPdf);
+    await writeFile(sessionReportPath, rawPdf);
     this.log.debug(`sessionReportPath (${sessionReportPath})`);
     return sessionReportPath;
   }

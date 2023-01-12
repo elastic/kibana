@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { mockMakeDirAsync, mockWriteFileAsync } from './integrate_locale_files.test.mocks';
+import { mockMkdir, mockWriteFile } from './integrate_locale_files.test.mocks';
 
 import path from 'path';
 import { integrateLocaleFiles, verifyMessages } from './integrate_locale_files';
@@ -155,8 +155,8 @@ Map {
     test('splits locale file by plugins and writes them into the right folders', async () => {
       await integrateLocaleFiles(mockDefaultMessagesMap, defaultIntegrateOptions);
 
-      const [[path1, json1], [path2, json2]] = mockWriteFileAsync.mock.calls;
-      const [[dirPath1], [dirPath2]] = mockMakeDirAsync.mock.calls;
+      const [[path1, json1], [path2, json2]] = mockWriteFile.mock.calls;
+      const [[dirPath1], [dirPath2]] = mockMkdir.mock.calls;
 
       expect([normalizePath(path1), json1]).toMatchSnapshot();
       expect([normalizePath(path2), json2]).toMatchSnapshot();

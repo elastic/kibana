@@ -7,14 +7,11 @@
  */
 
 import Path from 'path';
-import Fs from 'fs';
-import { promisify } from 'util';
+import { stat } from 'fs/promises';
 
 import { CiStatsMetric } from '@kbn/ci-stats-reporter';
 
 import { mkdirp, compressTar, compressZip, Task } from '../lib';
-
-const asyncStat = promisify(Fs.stat);
 
 export const CreateArchives: Task = {
   description: 'Creating the archives for each platform',
@@ -79,7 +76,7 @@ export const CreateArchives: Task = {
       metrics.push({
         group: `distributable size`,
         id: format,
-        value: (await asyncStat(path)).size,
+        value: (await stat(path)).size,
       });
 
       metrics.push({

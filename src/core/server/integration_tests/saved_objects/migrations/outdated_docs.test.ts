@@ -7,8 +7,7 @@
  */
 
 import Path from 'path';
-import Fs from 'fs';
-import Util from 'util';
+import { unlink } from 'fs/promises';
 import { kibanaPackageJson as pkg } from '@kbn/repo-info';
 import {
   createRootWithCorePlugins,
@@ -20,10 +19,9 @@ import { Root } from '@kbn/core-root-server-internal';
 
 const logFilePath = Path.join(__dirname, 'outdated_docs.log');
 
-const asyncUnlink = Util.promisify(Fs.unlink);
 async function removeLogFile() {
   // ignore errors if it doesn't exist
-  await asyncUnlink(logFilePath).catch(() => void 0);
+  await unlink(logFilePath).catch(() => void 0);
 }
 
 describe('migration v2', () => {

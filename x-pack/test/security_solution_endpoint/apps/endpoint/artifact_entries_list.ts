@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { unzip } from 'zlib';
+import { unzip as unzipCb } from 'zlib';
 import { promisify } from 'util';
 import expect from '@kbn/expect';
 import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { ArtifactBodyType, ArtifactResponseType, getArtifactsListTestsData } from './mocks';
+
+const unzip = promisify(unzipCb);
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'artifactEntriesList']);
@@ -20,7 +22,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const policyTestResources = getService('policyTestResources');
   const retry = getService('retry');
   const esClient = getService('es');
-  const unzipPromisify = promisify(unzip);
 
   describe('For each artifact list under management', function () {
     let indexedData: IndexedHostsAndAlertsResponse;
@@ -64,7 +65,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       updatedArtifact!._source.created = expectedArtifact._source.created;
       const bodyFormBuffer = Buffer.from(updatedArtifact!._source.body, 'base64');
-      const unzippedBody = await unzipPromisify(bodyFormBuffer);
+      const unzippedBody = await unzip(bodyFormBuffer);
 
       // Check decoded body first to detect possible body changes
       expect(JSON.parse(unzippedBody.toString())).eql(expectedDecodedBodyArtifact);

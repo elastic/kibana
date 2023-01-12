@@ -24,7 +24,7 @@ const {
 } = require('./utils');
 const { createCliError } = require('./errors');
 const { promisify } = require('util');
-const treeKillAsync = promisify(require('tree-kill'));
+const kill = promisify(require('tree-kill'));
 const { parseSettings, SettingsFilter } = require('./settings');
 const { CA_CERT_PATH, ES_NOPASSWORD_P12_PATH, extract } = require('@kbn/dev-utils');
 
@@ -276,7 +276,7 @@ exports.Cluster = class Cluster {
       throw new Error('ES has not been started');
     }
 
-    await treeKillAsync(this._process.pid);
+    await kill(this._process.pid);
 
     await this._outcome;
   }
@@ -295,7 +295,7 @@ exports.Cluster = class Cluster {
       throw new Error('ES has not been started');
     }
 
-    await treeKillAsync(this._process.pid, 'SIGKILL');
+    await kill(this._process.pid, 'SIGKILL');
     await this._outcome;
   }
 

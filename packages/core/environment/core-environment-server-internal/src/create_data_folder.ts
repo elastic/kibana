@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { mkdir } from 'fs/promises';
 import type { PathConfigType } from '@kbn/utils';
 import type { Logger } from '@kbn/logging';
-import { mkdir } from './fs';
 
 export async function createDataFolder({
   pathConfig,

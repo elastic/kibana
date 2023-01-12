@@ -7,17 +7,13 @@
  */
 
 import { resolve, dirname } from 'path';
-import { writeFile, readFileSync, mkdir } from 'fs';
-import { promisify } from 'util';
+import { writeFile, readFile, mkdir } from 'fs/promises';
 
 import del from 'del';
 
 import { comparePngs } from '../lib/compare_pngs';
 import { FtrProviderContext, FtrService } from '../../ftr_provider_context';
 import { WebElementWrapper } from '../lib/web_element_wrapper';
-
-const mkdirAsync = promisify(mkdir);
-const writeFileAsync = promisify(writeFile);
 
 export class ScreenshotsService extends FtrService {
   private readonly log = this.ctx.getService('log');
@@ -58,11 +54,11 @@ export class ScreenshotsService extends FtrService {
     if (updateBaselines) {
       this.log.debug('Updating baseline snapshot');
       // Make the directory if it doesn't exist
-      await mkdirAsync(dirname(baselinePath), { recursive: true });
-      await writeFileAsync(baselinePath, readFileSync(sessionPath));
+      await mkdir(dirname(baselinePath), { recursive: true });
+      await writeFile(baselinePath, await readFile(sessionPath));
       return 0;
     } else {
-      await mkdirAsync(this.FAILURE_DIRECTORY, { recursive: true });
+      await mkdir(this.FAILURE_DIRECTORY, { recursive: true });
       return await comparePngs(
         sessionPath,
         baselinePath,
@@ -87,8 +83,8 @@ export class ScreenshotsService extends FtrService {
     try {
       this.log.info(`Taking screenshot "${path}"`);
       const screenshot = await (el ? el.takeScreenshot() : this.browser.takeScreenshot());
-      await mkdirAsync(dirname(path), { recursive: true });
-      await writeFileAsync(path, screenshot, 'base64');
+      await mkdir(dirname(path), { recursive: true });
+      await writeFile(path, screenshot, 'base64');
     } catch (err) {
       this.log.error('SCREENSHOT FAILED');
       this.log.error(err);

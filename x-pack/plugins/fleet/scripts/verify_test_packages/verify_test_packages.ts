@@ -6,8 +6,8 @@
  */
 
 import path from 'path';
-import { readdirSync, statSync, readFile } from 'fs';
-import { promisify } from 'util';
+import { readdirSync, statSync } from 'fs';
+import { readFile } from 'fs/promises';
 
 import partition from 'lodash/partition';
 import type { Logger } from '@kbn/core/server';
@@ -18,8 +18,6 @@ import {
   _generatePackageInfoFromPaths,
   generatePackageInfoFromArchiveBuffer,
 } from '../../server/services/epm/archive/parse';
-
-const readFileAsync = promisify(readFile);
 
 const TEST_PACKAGE_DIRECTORIES = [
   '../../../../test/fleet_api_integration/apis/fixtures/bundled_packages',
@@ -73,7 +71,7 @@ export const verifyAllTestPackages = async (
     const [zips, dirs] = partition(packageVersionPaths, (p) => p.endsWith('.zip'));
 
     for (const zipPath of zips) {
-      const buffer = await readFileAsync(zipPath);
+      const buffer = await readFile(zipPath);
 
       try {
         const { packageInfo } = await generatePackageInfoFromArchiveBuffer(

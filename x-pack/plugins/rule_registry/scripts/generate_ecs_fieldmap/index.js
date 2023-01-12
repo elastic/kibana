@@ -5,16 +5,13 @@
  * 2.0.
  */
 const path = require('path');
-const fs = require('fs');
-const util = require('util');
+const { readFile, writeFile } = require('fs/promises');
+const { promisify } = require('util');
 const yaml = require('js-yaml');
 const { exec: execCb } = require('child_process');
 const { reduce } = require('lodash');
 
-const exists = util.promisify(fs.exists);
-const readFile = util.promisify(fs.readFile);
-const writeFile = util.promisify(fs.writeFile);
-const exec = util.promisify(execCb);
+const exec = promisify(execCb);
 
 const ecsDir = path.resolve(__dirname, '../../../../../../ecs');
 const ecsYamlFilename = path.join(ecsDir, 'generated/ecs/ecs_flat.yml');
@@ -24,13 +21,18 @@ const outputDir = path.join(__dirname, '../../common/assets/field_maps');
 const outputFieldMapFilename = path.join(outputDir, 'ecs_field_map.ts');
 
 async function generate() {
-  if (!(await exists(ecsYamlFilename))) {
-    throw new Error(
-      `Directory not found: ${ecsYamlFilename} - did you checkout elastic/ecs as a peer of this repo?`
-    );
-  }
-
-  const flatYaml = await yaml.safeLoad(await readFile(ecsYamlFilename));
+  const flatYaml = await yaml.safeLoad(
+    await readFile(ecsYamlFilename).catch((err) => {
+      if (err.code === 'ENOENT') {
+        throw new Error(
+          `Directory not found: ${ecsYamlFilename} - did you checkout elastic/ecs as a peer of this repo?`,
+          { cause: err }
+        );
+      } else {
+        throw err;
+      }
+    })
+  );
 
   const fields = reduce(
     flatYaml,

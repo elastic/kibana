@@ -12,6 +12,8 @@ import { promisify } from 'util';
 
 import licenseChecker from 'license-checker';
 
+const init = promisify(licenseChecker.init);
+
 export type InstalledPackage = NonNullable<ReturnType<typeof readModuleInfo>>;
 interface Options {
   directory: string;
@@ -77,7 +79,7 @@ function readModuleInfo(
 }
 
 async function _getInstalledPackages(dev: boolean, options: Options) {
-  const lcResult = await promisify(licenseChecker.init)({
+  const lcResult = await init({
     start: options.directory,
     development: dev,
     production: !dev,

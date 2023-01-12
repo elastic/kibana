@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { readFile } from 'fs/promises';
 import { createFailError } from '@kbn/dev-cli-errors';
 import { matchEntriesWithExctractors } from '../extract_default_translations';
 import { I18nConfig } from '../config';
-import { normalizePath, readFileAsync, ErrorReporter } from '../utils';
+import { normalizePath, ErrorReporter } from '../utils';
 
 function filterEntries(entries: string[], exclude: string[]) {
   return entries.filter((entry: string) =>
@@ -59,7 +60,7 @@ export async function extractUntrackedMessagesTask({
         })
         .map(async (entry: any) => ({
           name: entry,
-          content: await readFileAsync(entry),
+          content: await readFile(entry),
         }))
     );
 

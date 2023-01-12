@@ -7,10 +7,11 @@
  */
 
 import path from 'path';
+import { readFile } from 'fs/promises';
 import globby from 'globby';
 
 import { extractCodeMessages } from './extractors';
-import { readFileAsync, normalizePath } from './utils';
+import { normalizePath } from './utils';
 
 import { createFailError, isFailError } from '@kbn/dev-cli-errors';
 
@@ -83,7 +84,7 @@ export async function extractMessagesFromPathToMap(inputPath, targetMap, config,
     filterEntries(entries, config.exclude).map(async (entry) => {
       return {
         name: entry,
-        content: await readFileAsync(entry),
+        content: await readFile(entry),
       };
     })
   );

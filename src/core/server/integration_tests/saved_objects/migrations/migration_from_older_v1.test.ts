@@ -7,8 +7,7 @@
  */
 
 import Path from 'path';
-import Fs from 'fs';
-import Util from 'util';
+import { unlink } from 'fs/promises';
 import Semver from 'semver';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { Env } from '@kbn/config';
@@ -27,10 +26,9 @@ const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.
 
 const logFilePath = Path.join(__dirname, 'migration_from_older_v1.log');
 
-const asyncUnlink = Util.promisify(Fs.unlink);
 async function removeLogFile() {
   // ignore errors if it doesn't exist
-  await asyncUnlink(logFilePath).catch(() => void 0);
+  await unlink(logFilePath).catch(() => void 0);
 }
 const assertMigratedDocuments = (arr: any[], target: any[]) => target.every((v) => arr.includes(v));
 

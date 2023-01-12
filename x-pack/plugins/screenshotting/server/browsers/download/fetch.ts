@@ -7,10 +7,10 @@
 
 import Axios from 'axios';
 import { createHash } from 'crypto';
-import { closeSync, mkdirSync, openSync, writeSync } from 'fs';
+import { mkdir, open } from 'fs/promises';
 import { dirname } from 'path';
-import { finished, Readable } from 'stream';
-import { promisify } from 'util';
+import { Readable } from 'stream';
+import { finished } from 'stream/promises';
 import type { Logger } from '@kbn/core/server';
 
 /**
@@ -21,8 +21,8 @@ export async function fetch(url: string, path: string, logger?: Logger): Promise
 
   const hash = createHash('md5');
 
-  mkdirSync(dirname(path), { recursive: true });
-  const handle = openSync(path, 'w');
+  await mkdir(dirname(path), { recursive: true });
+  const handle = await open(path, 'w');
 
   try {
     const response = await Axios.request<Readable>({
@@ -31,19 +31,19 @@ export async function fetch(url: string, path: string, logger?: Logger): Promise
       responseType: 'stream',
     });
 
-    response.data.on('data', (chunk: Buffer) => {
-      writeSync(handle, chunk);
+    response.data.on('data', async (chunk: Buffer) => {
+      await handle.write(chunk);
       hash.update(chunk);
     });
 
-    await promisify(finished)(response.data, { writable: false });
+    await finished(response.data, { writable: false });
     logger?.info(`Downloaded ${url}`);
   } catch (error) {
     logger?.error(error);
 
     throw new Error(`Unable to download ${url}: ${error}`);
   } finally {
-    closeSync(handle);
+    await handle.close();
   }
 
   return hash.digest('hex');

@@ -10,14 +10,14 @@ import {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { promisify } from 'util';
-import { unzip } from 'zlib';
+import { unzip as unzipCb } from 'zlib';
 import { Artifact } from '@kbn/fleet-plugin/server';
 import { SourceMap } from '../source_maps/route';
 import { APMPluginStartDependencies } from '../../types';
 import { getApmPackagePolicies } from './get_apm_package_policies';
 import { getPackagePolicyWithSourceMap } from './get_package_policy_decorators';
 
-const doUnzip = promisify(unzip);
+const unzip = promisify(unzipCb);
 
 interface ApmSourceMapArtifactBody {
   serviceName: string;
@@ -32,7 +32,7 @@ export type ArtifactSourceMap = Omit<Artifact, 'body'> & {
 export type FleetPluginStart = NonNullable<APMPluginStartDependencies['fleet']>;
 
 export async function getUnzippedArtifactBody(artifactBody: string) {
-  const unzippedBody = await doUnzip(Buffer.from(artifactBody, 'base64'));
+  const unzippedBody = await unzip(Buffer.from(artifactBody, 'base64'));
   return JSON.parse(unzippedBody.toString()) as ApmSourceMapArtifactBody;
 }
 

@@ -6,16 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { setImmediate } from 'timers/promises';
 import { Readable } from 'stream';
-import { promisify } from 'util';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { Semaphore } from '@kbn/std';
 
 import { ElasticsearchBlobStorageClient } from './es';
-
-const setImmediate = promisify(global.setImmediate);
 
 describe('ElasticsearchBlobStorageClient', () => {
   let esClient: ElasticsearchClient;

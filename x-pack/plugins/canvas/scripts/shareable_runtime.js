@@ -9,14 +9,11 @@ require('@kbn/babel-register').install();
 
 const fs = require('fs');
 const path = require('path');
-const { pipeline } = require('stream');
-const { promisify } = require('util');
+const { pipeline } = require('stream/promises');
 
 const del = require('del');
 const { run } = require('@kbn/dev-cli-runner');
 const execa = require('execa');
-
-const asyncPipeline = promisify(pipeline);
 
 const {
   SHAREABLE_RUNTIME_SRC,
@@ -78,7 +75,7 @@ run(
           stdio: ['ignore', 'pipe', 'inherit'],
         }
       );
-      await asyncPipeline(output.stdout, fs.createWriteStream(STATS_OUTPUT));
+      await pipeline(output.stdout, fs.createWriteStream(STATS_OUTPUT));
       log.success('...output written to', STATS_OUTPUT);
       return;
     }

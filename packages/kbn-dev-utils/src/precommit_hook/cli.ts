@@ -7,17 +7,13 @@
  */
 
 import Path from 'path';
-import { chmod, writeFile } from 'fs';
-import { promisify } from 'util';
+import { chmod, writeFile } from 'fs/promises';
 import { REPO_ROOT } from '@kbn/repo-info';
 
 import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
 import { SCRIPT_SOURCE } from './script_source';
 import { getGitDir, isCorrectGitVersionInstalled } from './git_utils';
-
-const chmodAsync = promisify(chmod);
-const writeFileAsync = promisify(writeFile);
 
 run(
   async ({ log }) => {
@@ -32,8 +28,8 @@ run(
       const installPath = Path.resolve(REPO_ROOT, gitDir, 'hooks/pre-commit');
 
       log.info(`Registering Kibana pre-commit git hook...`);
-      await writeFileAsync(installPath, SCRIPT_SOURCE);
-      await chmodAsync(installPath, 0o755);
+      await writeFile(installPath, SCRIPT_SOURCE);
+      await chmod(installPath, 0o755);
       log.success(`Kibana pre-commit git hook was installed successfully.`);
     } catch (e) {
       log.error(`Kibana pre-commit git hook was not installed as an error occur.`);

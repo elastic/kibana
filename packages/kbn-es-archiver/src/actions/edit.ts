@@ -7,14 +7,12 @@
  */
 
 import { relative } from 'path';
-import Fs from 'fs';
+import { createReadStream, createWriteStream } from 'fs';
+import { unlink } from 'fs/promises';
 import { createGunzip, createGzip, constants } from 'zlib';
-import { promisify } from 'util';
 import globby from 'globby';
 import { ToolingLog } from '@kbn/tooling-log';
 import { createPromiseFromStreams } from '@kbn/utils';
-
-const unlinkAsync = promisify(Fs.unlink);
 
 export async function editAction({
   path,
@@ -38,12 +36,12 @@ export async function editAction({
   await Promise.all(
     archives.map(async (archive) => {
       await createPromiseFromStreams([
-        Fs.createReadStream(archive.path),
+        createReadStream(archive.path),
         createGunzip(),
-        Fs.createWriteStream(archive.rawPath),
+        createWriteStream(archive.rawPath),
       ]);
 
-      await unlinkAsync(archive.path);
+      await unlink(archive.path);
 
       log.info(
         `Extracted %s to %s`,
@@ -58,12 +56,12 @@ export async function editAction({
   await Promise.all(
     archives.map(async (archive) => {
       await createPromiseFromStreams([
-        Fs.createReadStream(archive.rawPath),
+        createReadStream(archive.rawPath),
         createGzip({ level: constants.Z_BEST_COMPRESSION }),
-        Fs.createWriteStream(archive.path),
+        createWriteStream(archive.path),
       ]);
 
-      await unlinkAsync(archive.rawPath);
+      await unlink(archive.rawPath);
 
       log.info(
         `Archived %s to %s`,

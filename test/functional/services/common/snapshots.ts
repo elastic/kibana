@@ -7,15 +7,11 @@
  */
 
 import { dirname, resolve } from 'path';
-import { writeFile, readFileSync, mkdir } from 'fs';
-import { promisify } from 'util';
+import { writeFile, readFile, mkdir } from 'fs/promises';
 
 import expect from '@kbn/expect';
 import del from 'del';
 import { FtrProviderContext, FtrService } from '../../ftr_provider_context';
-
-const mkdirAsync = promisify(mkdir);
-const writeFileAsync = promisify(writeFile);
 
 export class SnapshotsService extends FtrService {
   private readonly log = this.ctx.getService('log');
@@ -48,17 +44,17 @@ export class SnapshotsService extends FtrService {
     const baselinePath = resolve(this.BASELINE_DIRECTORY, `${name}.json`);
 
     if (updateBaselines) {
-      await writeFileAsync(baselinePath, readFileSync(sessionPath));
+      await writeFile(baselinePath, await readFile(sessionPath));
       return 0;
     } else {
       this.log.debug('comparing');
-      return this.compare(sessionPath, baselinePath);
+      return await this.compare(sessionPath, baselinePath);
     }
   }
 
-  private compare(sessionPath: string, baselinePath: string) {
-    const currentObject = readFileSync(sessionPath, { encoding: 'utf8' });
-    const baselineObject = readFileSync(baselinePath, { encoding: 'utf8' });
+  private async compare(sessionPath: string, baselinePath: string) {
+    const currentObject = await readFile(sessionPath, { encoding: 'utf8' });
+    const baselineObject = await readFile(baselinePath, { encoding: 'utf8' });
     expect(currentObject).to.eql(baselineObject);
     return 0;
   }
@@ -69,8 +65,8 @@ export class SnapshotsService extends FtrService {
 
   private async _take(path: string, snapshot?: object) {
     try {
-      await mkdirAsync(dirname(path), { recursive: true });
-      await writeFileAsync(path, JSON.stringify(snapshot), 'utf8');
+      await mkdir(dirname(path), { recursive: true });
+      await writeFile(path, JSON.stringify(snapshot), 'utf8');
     } catch (err) {
       this.log.error('SNAPSHOT FAILED');
       this.log.error(err);

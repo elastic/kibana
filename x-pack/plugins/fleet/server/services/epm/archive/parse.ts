@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { readFile } from 'fs';
+import { readFile } from 'fs/promises';
 
-import { promisify } from 'util';
 import path from 'path';
 
 import { merge } from '@kbn/std';
@@ -37,7 +36,6 @@ import { pkgToPkgKey } from '../registry';
 
 import { unpackBufferEntries } from '.';
 
-const readFileAsync = promisify(readFile);
 const MANIFEST_NAME = 'manifest.yml';
 
 const DEFAULT_RELEASE_VALUE = 'ga';
@@ -166,7 +164,7 @@ export async function _generatePackageInfoFromPaths(
   const manifests: ManifestMap = {};
   await Promise.all(
     paths.map(async (filePath) => {
-      if (filePath.endsWith(MANIFEST_NAME)) manifests[filePath] = await readFileAsync(filePath);
+      if (filePath.endsWith(MANIFEST_NAME)) manifests[filePath] = await readFile(filePath);
     })
   );
   return parseAndVerifyArchive(paths, manifests, topLevelDir);

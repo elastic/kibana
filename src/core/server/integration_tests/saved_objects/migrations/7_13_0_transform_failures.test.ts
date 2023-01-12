@@ -7,8 +7,7 @@
  */
 
 import Path from 'path';
-import Fs from 'fs';
-import Util from 'util';
+import { unlink } from 'fs/promises';
 import { Env } from '@kbn/config';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { getEnvOptions } from '@kbn/config-mocks';
@@ -25,11 +24,9 @@ import {
 const migrationDocLink = getMigrationDocLink().resolveMigrationFailures;
 const logFilePath = Path.join(__dirname, '7_13_corrupt_transform_failures.log');
 
-const asyncUnlink = Util.promisify(Fs.unlink);
-
 async function removeLogFile() {
   // ignore errors if it doesn't exist
-  await asyncUnlink(logFilePath).catch(() => void 0);
+  await unlink(logFilePath).catch(() => void 0);
 }
 
 describe('migration v2', () => {
