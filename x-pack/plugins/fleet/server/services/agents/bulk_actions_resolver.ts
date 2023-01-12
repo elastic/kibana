@@ -142,15 +142,10 @@ export function createRetryTask(
 
       const { esClient, soClient } = await getDeps();
 
-      // update tags will retry with tags filter
-      const retryParams: RetryParams =
-        taskInstance.taskType === BulkActionTaskType.UPDATE_AGENT_TAGS_RETRY
-          ? {
-              ...taskInstance.params.retryParams,
-              pitId: undefined,
-              searchAfter: undefined,
-            }
-          : taskInstance.params.retryParams;
+      const retryParams: RetryParams = getRetryParams(
+        taskInstance.taskType,
+        taskInstance.params.retryParams
+      );
 
       appContextService
         .getLogger()
@@ -170,4 +165,15 @@ export function createRetryTask(
 
     async cancel() {},
   };
+}
+
+export function getRetryParams(taskType: string, retryParams: RetryParams): RetryParams {
+  // update tags will retry with tags filter
+  return taskType === BulkActionTaskType.UPDATE_AGENT_TAGS_RETRY
+    ? {
+        ...retryParams,
+        pitId: undefined,
+        searchAfter: undefined,
+      }
+    : retryParams;
 }

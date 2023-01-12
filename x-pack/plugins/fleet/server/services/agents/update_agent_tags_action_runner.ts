@@ -73,8 +73,15 @@ export async function updateTagsBatch(
 
   const actionId = options.actionId ?? uuid();
   if (agentIds.length === 0) {
+    appContextService.getLogger().debug('No agents to update tags, returning');
     return { actionId, updated: 0, took: 0 };
   }
+
+  appContextService
+    .getLogger()
+    .debug(
+      `Agents to update tags in batch: ${agentIds.length}, tagsToAdd: ${options.tagsToAdd}, tagsToRemove: ${options.tagsToRemove}`
+    );
 
   let res;
   try {

@@ -21,8 +21,9 @@ import { SO_SEARCH_LIMIT } from '../../../common/constants';
 import { getAgentActions } from './actions';
 import { closePointInTime, getAgentsByKuery } from './crud';
 import type { BulkActionsResolver } from './bulk_actions_resolver';
+import { getRetryParams } from './bulk_actions_resolver';
 
-export const MAX_RETRY_COUNT = 5;
+export const MAX_RETRY_COUNT = 10;
 
 export interface ActionParams {
   kuery: string;
@@ -35,7 +36,7 @@ export interface ActionParams {
 }
 
 export interface RetryParams {
-  pitId: string;
+  pitId?: string;
   searchAfter?: SortResults;
   retryCount?: number;
   taskId?: string;
@@ -155,10 +156,12 @@ export abstract class ActionRunner {
       this.actionParams.actionId!,
       this.getTaskType() + ':check'
     );
+    const retryParams: RetryParams = getRetryParams(this.getTaskType(), this.retryParams);
+
     return await this.bulkActionsResolver!.run(
       this.actionParams,
       {
-        ...this.retryParams,
+        ...retryParams,
         retryCount: 1,
       },
       this.getTaskType(),
