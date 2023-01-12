@@ -35,6 +35,10 @@ import {
   codeEditorFullScreenStyles,
   codeEditorKeyboardHintStyles,
   codeEditorStyles,
+  DARK_THEME,
+  LIGHT_THEME,
+  DARK_THEME_TRANSPARENT,
+  LIGHT_THEME_TRANSPARENT,
 } from './editor.styles';
 
 export interface Props {
@@ -138,6 +142,7 @@ export const CodeEditor: React.FC<Props> = ({
   overrideEditorWillMount,
   editorDidMount,
   editorWillMount,
+  useDarkTheme,
   suggestionProvider,
   signatureProvider,
   hoverProvider,
@@ -324,32 +329,35 @@ export const CodeEditor: React.FC<Props> = ({
 
       editorWillMount?.();
 
-      monaco.languages.onLanguage(
-        languageId,
-        () => {
-          if (suggestionProvider) {
-            monaco.languages.registerCompletionItemProvider(languageId, suggestionProvider);
-          }
-
-          if (signatureProvider) {
-            monaco.languages.registerSignatureHelpProvider(languageId, signatureProvider);
-          }
-
-          if (hoverProvider) {
-            monaco.languages.registerHoverProvider(languageId, hoverProvider);
-          }
-
-          if (languageConfiguration) {
-            monaco.languages.setLanguageConfiguration(languageId, languageConfiguration);
-          }
+      monaco.languages.onLanguage(languageId, () => {
+        if (suggestionProvider) {
+          monaco.languages.registerCompletionItemProvider(languageId, suggestionProvider);
         }
-        // Register themes
+
+        if (signatureProvider) {
+          monaco.languages.registerSignatureHelpProvider(languageId, signatureProvider);
+        }
+
+        if (hoverProvider) {
+          monaco.languages.registerHoverProvider(languageId, hoverProvider);
+        }
+
+        if (languageConfiguration) {
+          monaco.languages.setLanguageConfiguration(languageId, languageConfiguration);
+        }
+      });
+      // Register themes
+      monaco.editor.defineTheme('euiColors', useDarkTheme ? DARK_THEME : LIGHT_THEME);
+      monaco.editor.defineTheme(
+        'euiColorsTransparent',
+        useDarkTheme ? DARK_THEME_TRANSPARENT : LIGHT_THEME_TRANSPARENT
       );
     },
     [
       overrideEditorWillMount,
       editorWillMount,
       languageId,
+      useDarkTheme,
       suggestionProvider,
       signatureProvider,
       hoverProvider,
