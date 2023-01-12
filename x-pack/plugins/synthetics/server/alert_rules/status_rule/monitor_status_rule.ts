@@ -131,7 +131,9 @@ export const registerSyntheticsStatusCheckRule = (
         staleDownConfigs,
       });
 
-      return updateState(ruleState, !isEmpty(downConfigs), { downConfigs });
+      return {
+        state: updateState(ruleState, !isEmpty(downConfigs), { downConfigs }),
+      };
     },
   });
 };
