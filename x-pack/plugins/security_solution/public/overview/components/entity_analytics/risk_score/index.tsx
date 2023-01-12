@@ -47,12 +47,14 @@ import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_ex
 import { DonutEmbeddable } from '../../../../common/components/visualization_actions/donut_embeddable';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { getRiskScoreDonutAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/risk_scores/risk_score_donut';
+import { TOTAL_LABEL } from '../common/translations';
 
 const HOST_RISK_TABLE_QUERY_ID = 'hostRiskDashboardTable';
 const HOST_RISK_KPI_QUERY_ID = 'headerHostRiskScoreKpiQuery';
 const USER_RISK_TABLE_QUERY_ID = 'userRiskDashboardTable';
 const USER_RISK_KPI_QUERY_ID = 'headerUserRiskScoreKpiQuery';
 
+// eslint-disable-next-line complexity
 const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskScoreEntity }) => {
   const { deleteQuery, setQuery, from, to } = useGlobalTime();
   const [updatedAt, setUpdatedAt] = useState<number>(Date.now());
@@ -276,15 +278,15 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
         {toggleStatus && (
           <EuiFlexGroup data-test-subj="entity_analytics_content">
             <EuiFlexItem grow={false}>
-              {isChartEmbeddablesEnabled && spaceId ? (
+              {isChartEmbeddablesEnabled && spaceId && data && data.length > 0 ? (
                 <DonutEmbeddable
-                  id={`${entity.kpiQueryId}-table`}
+                  id={`${entity.kpiQueryId}-donut`}
                   timerange={timerange}
-                  label={'Total'}
+                  label={TOTAL_LABEL}
                   getLensAttributes={getRiskScoreDonutAttributes}
                   stackByField={riskEntity}
                   extraOptions={extraOptions}
-                  height="135px"
+                  height="120px"
                 />
               ) : (
                 <RiskScoreDonutChart severityCount={severityCount ?? EMPTY_SEVERITY_COUNT} />
