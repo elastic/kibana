@@ -5,28 +5,21 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiLink,
-  EuiText,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import React from 'react';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { TruncateWithTooltip } from './truncate_with_tooltip';
 import { truncate, unit } from '../../utils/style';
 import { useApmRouter } from '../../hooks/use_apm_router';
 import { AgentIcon } from './agent_icon';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { ApmRoutes } from '../routing/apm_route_config';
 import { isMobileAgentName } from '../../../common/agent_name';
-import { TruncateWithTooltip } from '@kbn/apm-plugin/public/components/shared/truncate_with_tooltip';
-import { NOT_AVAILABLE_LABEL } from '@kbn/apm-plugin/common/i18n';
-import { PopoverTooltip } from '@kbn/apm-plugin/public/components/shared/popover_tooltip';
-import { FormattedMessage } from 'react-intl';
+import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
+import { PopoverTooltip } from './popover_tooltip';
 
 const StyledLink = euiStyled(EuiLink)`${truncate('100%')};`;
 
@@ -55,65 +48,45 @@ export function ServiceLink({
 
   if (serviceName === serviceDroppedBucketName) {
     return (
-      <>
-        <EuiToolTip
-          content={i18n.translate('xpack.apm.serviceLink.tooltip.message', {
-            defaultMessage:
-              "The maximum number of services were reached. Please see the APM Server docs for 'aggregation.service.max_groups' to increase this",
+      <EuiFlexGroup alignItems="center" gutterSize="xs">
+        <EuiFlexItem grow={false}>
+          {i18n.translate('xpack.apm.serviceLink.other.label', {
+            defaultMessage: '_other',
           })}
-        >
-          <EuiFlexGroup alignItems="center" gutterSize="xs">
-            <EuiFlexItem>
-              {i18n.translate('xpack.apm.serviceLink.other.label', {
-                defaultMessage: '_other',
-              })}
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiIcon size="s" color="subdued" type="alert" />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiToolTip>
-
-        <EuiFlexGroup alignItems="center" gutterSize="xs">
-          <EuiFlexItem grow={false}>
-            {i18n.translate('xpack.apm.serviceLink.other.label', {
-              defaultMessage: '_other',
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <PopoverTooltip
+            ariaLabel={i18n.translate('xpack.apm.serviceLink.tooltip', {
+              defaultMessage: 'Max service groups reached tooltip',
             })}
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <PopoverTooltip
-              ariaLabel={i18n.translate('xpack.apm.serviceLink.tooltip', {
-                defaultMessage: 'Max service groups reached tooltip',
-              })}
-              iconType="alert"
-            >
-              <EuiText style={{ width: `${unit * 28}px` }} size="s">
-                <FormattedMessage
-                  defaultMessage="The service group limit has been reached. Please see the {apmServerDocs} for 'aggregation.service.max_groups' to increase this."
-                  id="xpack.apm.serviceLink.tooltip.message"
-                  values={{
-                    apmServerDocs: (
-                      <EuiLink
-                        href={
-                          'https://www.elastic.co/guide/en/apm/guide/current/transaction-metrics.html#transactions-max_groups'
+            iconType="alert"
+          >
+            <EuiText style={{ width: `${unit * 28}px` }} size="s">
+              <FormattedMessage
+                defaultMessage="The service group limit has been reached. Please see the {apmServerDocs} for 'aggregation.service.max_groups' to increase this."
+                id="xpack.apm.serviceLink.tooltip.message"
+                values={{
+                  apmServerDocs: (
+                    <EuiLink
+                      href={
+                        'https://www.elastic.co/guide/en/apm/guide/current/transaction-metrics.html#transactions-max_groups'
+                      }
+                      target="_blank"
+                    >
+                      {i18n.translate(
+                        'xpack.apm.serviceLink.tooltip.apmServerDocs',
+                        {
+                          defaultMessage: 'APM Server docs',
                         }
-                        target="_blank"
-                      >
-                        {i18n.translate(
-                          'xpack.apm.serviceLink.tooltip.apmServerDocs',
-                          {
-                            defaultMessage: 'APM Server docs',
-                          }
-                        )}
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              </EuiText>
-            </PopoverTooltip>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </>
+                      )}
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </EuiText>
+          </PopoverTooltip>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 
