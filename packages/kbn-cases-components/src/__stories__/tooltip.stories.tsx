@@ -90,4 +90,11 @@ storiesOf('Tooltip', module)
         <TestSpan />
       </Tooltip>
     </I18nProvider>
+  ))
+  .add('full name as user', () => (
+    <I18nProvider>
+      <Tooltip {...tooltipProps} createdBy={{ fullName: 'Elastic User' }}>
+        <TestSpan />
+      </Tooltip>
+    </I18nProvider>
   ));
