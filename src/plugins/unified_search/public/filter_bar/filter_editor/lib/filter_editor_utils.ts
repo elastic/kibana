@@ -67,6 +67,10 @@ export function isFilterValid(
     return false;
   }
 
+  if (operator.type !== 'exists' && operator.type !== 'range' && !params) {
+    return false;
+  }
+
   switch (operator.type) {
     case 'phrase':
       return validateParams(params, field);
