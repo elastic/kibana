@@ -23,7 +23,7 @@ import { Controller, useForm } from 'react-hook-form';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 
 import { useKibana } from '../../../utils/kibana_react';
-import { useCreateOrUpdateSlo as useCreateOrUpdateSlo } from '../../../hooks/slo/use_create_slo';
+import { useCreateOrUpdateSlo } from '../../../hooks/slo/use_create_slo';
 import { useCheckFormPartialValidities } from '../helpers/use_check_form_partial_validities';
 import { SloEditFormDefinitionCustomKql } from './slo_edit_form_definition_custom_kql';
 import { SloEditFormDescription } from './slo_edit_form_description';
