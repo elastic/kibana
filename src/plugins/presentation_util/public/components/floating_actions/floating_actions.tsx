@@ -31,17 +31,13 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
   const [areFloatingActionsVisible, setFloatingActionsVisible] = useState<boolean>(false);
 
   const showFloatingActions = useCallback(
-    () => setFloatingActionsVisible(true),
-    [setFloatingActionsVisible]
+    () => isEnabled && setFloatingActionsVisible(true),
+    [isEnabled, setFloatingActionsVisible]
   );
   const hideFloatingActions = useCallback(
-    () => setFloatingActionsVisible(false),
-    [setFloatingActionsVisible]
+    () => isEnabled && setFloatingActionsVisible(false),
+    [isEnabled, setFloatingActionsVisible]
   );
-
-  if (!isEnabled) {
-    return children;
-  }
 
   const anchorBoundingRect = anchorRef.current?.getBoundingClientRect();
   const actionsBoundingRect = actionsRef.current?.getBoundingClientRect();
@@ -79,11 +75,12 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
         ref={anchorRef}
         onMouseOver={showFloatingActions}
         onFocus={showFloatingActions}
-        onMouseOut={hideFloatingActions}
+        onMouseLeave={hideFloatingActions}
         onBlur={hideFloatingActions}
       >
         {children}
       </span>
+
       <EuiPortal>
         <div
           ref={actionsRef}

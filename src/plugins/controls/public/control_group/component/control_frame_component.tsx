@@ -23,11 +23,7 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Markdown } from '@kbn/kibana-react-plugin/public';
-import {
-  useReduxEmbeddableContext,
-  withSuspense,
-  LazyFloatingActions,
-} from '@kbn/presentation-util-plugin/public';
+import { useReduxEmbeddableContext, FloatingActions } from '@kbn/presentation-util-plugin/public';
 import { ControlGroupReduxState } from '../types';
 import { pluginServices } from '../../services';
 import { EditControlButton } from '../editor/edit_control';
@@ -36,8 +32,6 @@ import { useChildEmbeddable } from '../../hooks/use_child_embeddable';
 import { TIME_SLIDER_CONTROL } from '../../../common';
 import { controlGroupReducers } from '../state/control_group_reducers';
 import { ControlGroupContainer } from '..';
-
-const FloatingActions = withSuspense(LazyFloatingActions);
 
 interface ControlFrameErrorProps {
   error: Error;

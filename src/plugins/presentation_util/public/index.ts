@@ -36,7 +36,7 @@ export {
   withSuspense,
   LazyDataViewPicker,
   LazyFieldPicker,
-  LazyFloatingActions,
+  FloatingActions,
 } from './components';
 
 export {

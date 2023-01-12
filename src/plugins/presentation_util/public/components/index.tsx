@@ -42,7 +42,7 @@ export const LazyDataViewPicker = React.lazy(() => import('./data_view_picker/da
 
 export const LazyFieldPicker = React.lazy(() => import('./field_picker/field_picker'));
 
-export const LazyFloatingActions = React.lazy(() => import('./floating_actions/floating_actions'));
+export const FloatingActions = React.lazy(() => import('./floating_actions/floating_actions'));
 
 /**
  * A lazily-loaded ExpressionInput component.
