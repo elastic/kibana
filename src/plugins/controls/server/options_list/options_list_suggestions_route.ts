@@ -118,11 +118,6 @@ export const setupOptionsListSuggestionsRoute = (
       aggs: {
         ...suggestionAggregation,
         ...validationAggregations,
-        unique_terms: {
-          cardinality: {
-            field: fieldName,
-          },
-        },
       },
       runtime_mappings: {
         ...runtimeFieldMap,
@@ -138,16 +133,16 @@ export const setupOptionsListSuggestionsRoute = (
     /**
      * Parse ES response into Options List Response
      */
-    const totalCardinality = get(rawEsResult, 'aggregations.unique_terms.value');
-    const remainingSuggestionCount = totalCardinality - ((request.page ?? 1) - 1) * 10;
     const results = suggestionBuilder.parse(rawEsResult);
+    const totalCardinality = results.totalCardinality;
+    const remainingSuggestionCount = totalCardinality - ((request.page ?? 1) - 1) * 10;
     const suggestions = takeRight(
-      Object.keys(results),
+      Object.keys(results.suggestions),
       remainingSuggestionCount >= 10 ? 10 : remainingSuggestionCount
     );
     const invalidSelections = validationBuilder.parse(rawEsResult);
     return {
-      suggestions: pick(results, suggestions),
+      suggestions: pick(results.suggestions, suggestions),
       totalCardinality,
       invalidSelections,
       rejected: false,

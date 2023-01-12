@@ -10,12 +10,17 @@ import { get, isEmpty } from 'lodash';
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { getFieldSubtypeNested } from '@kbn/data-views-plugin/common';
 
-import { OptionsListRequestBody, OptionsListSuggestions } from '../../common/options_list/types';
+import {
+  OptionsListRequestBody,
+  OptionsListSuggestions,
+  OptionsListSuggestionResult,
+} from '../../common/options_list/types';
 import {
   OPTIONS_LIST_DEFAULT_SORT,
   OptionsListSortingType,
 } from '../../common/options_list/suggestions_sorting';
 import { getIpRangeQuery, type IpRangeQuery } from '../../common/options_list/ip_search';
+import { raw } from '@storybook/react';
 
 export interface OptionsListValidationAggregationBuilder {
   buildAggregation: (req: OptionsListRequestBody) => unknown;
@@ -24,7 +29,7 @@ export interface OptionsListValidationAggregationBuilder {
 
 export interface OptionsListSuggestionAggregationBuilder {
   buildAggregation: (req: OptionsListRequestBody) => unknown;
-  parse: (response: SearchResponse) => OptionsListSuggestions;
+  parse: (response: SearchResponse) => OptionsListSuggestionResult;
 }
 
 interface EsBucket {
@@ -131,13 +136,18 @@ const suggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBu
         },
       },
     }),
-    parse: (rawEsResult) =>
-      get(rawEsResult, 'aggregations.suggestions.keywordSuggestions.buckets')?.reduce(
-        (suggestions: OptionsListSuggestions, suggestion: EsBucket) => {
-          return { ...suggestions, [suggestion.key]: { doc_count: suggestion.doc_count } };
-        },
-        {}
-      ),
+    parse: (rawEsResult) => {
+      const suggestions = get(
+        rawEsResult,
+        'aggregations.suggestions.keywordSuggestions.buckets'
+      )?.reduce((acc: OptionsListSuggestions, suggestion: EsBucket) => {
+        return { ...acc, [suggestion.key]: { doc_count: suggestion.doc_count } };
+      }, {});
+      return {
+        suggestions,
+        totalCardinality: get(rawEsResult, 'aggregations.suggestions.unique_terms.value'),
+      };
+    },
   },
 
   /**
@@ -152,16 +162,18 @@ const suggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBu
         order: getSortType(sort),
       },
     }),
-    parse: (rawEsResult) =>
-      get(rawEsResult, 'aggregations.suggestions.buckets')?.reduce(
-        (suggestions: OptionsListSuggestions, suggestion: EsBucket & { key_as_string: string }) => {
+    parse: (rawEsResult) => {
+      const suggestions = get(rawEsResult, 'aggregations.suggestions.buckets')?.reduce(
+        (acc: OptionsListSuggestions, suggestion: EsBucket & { key_as_string: string }) => {
           return {
-            ...suggestions,
+            ...acc,
             [suggestion.key_as_string]: { doc_count: suggestion.doc_count },
           };
         },
         {}
-      ),
+      );
+      return { suggestions, totalCardinality: suggestions.length }; // cardinality is only ever 0, 1, or 2 so safe to use length here
+    },
   },
 
   /**
@@ -217,17 +229,24 @@ const suggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBu
       if (!Boolean(rawEsResult.aggregations?.suggestions)) {
         // if this is happens, that means there is an invalid search that snuck through to the server side code;
         // so, might as well early return with no suggestions
-        return [];
+        return { suggestions: {}, totalCardinality: 0 };
       }
 
       const buckets: EsBucket[] = [];
       getIpBuckets(rawEsResult, buckets, 'ipv4'); // modifies buckets array directly, i.e. "by reference"
       getIpBuckets(rawEsResult, buckets, 'ipv6');
-      return buckets
+      const suggestions: OptionsListSuggestions = buckets
         .sort((bucketA: EsBucket, bucketB: EsBucket) => bucketB.doc_count - bucketA.doc_count)
-        .reduce((suggestions, suggestion: EsBucket) => {
-          return { ...suggestions, [suggestion.key]: { doc_count: suggestion.doc_count } };
+        .reduce((acc: OptionsListSuggestions, suggestion: EsBucket) => {
+          return { ...acc, [suggestion.key]: { doc_count: suggestion.doc_count } };
         }, {});
+      const totalCardinality =
+        (get(rawEsResult, `aggregations.suggestions.buckets.ipv4.unique_terms.value`) ?? 0) +
+        (get(rawEsResult, `aggregations.suggestions.buckets.ipv6.unique_terms.value`) ?? 0);
+      return {
+        suggestions,
+        totalCardinality,
+      };
     },
   },
 

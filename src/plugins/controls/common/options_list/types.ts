@@ -32,6 +32,11 @@ export interface OptionsListSuggestions {
   [key: string]: { doc_count: number };
 }
 
+export interface OptionsListSuggestionResult {
+  suggestions: OptionsListSuggestions;
+  totalCardinality: number;
+}
+
 /**
  * The Options list response is returned from the serverside Options List route.
  */
