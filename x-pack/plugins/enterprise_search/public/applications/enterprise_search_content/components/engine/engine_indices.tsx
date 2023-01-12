@@ -108,6 +108,7 @@ export const EngineIndices: React.FC = () => {
     {
       actions: [
         {
+          'data-test-subj': 'engine-view-index-btn',
           description: i18n.translate(
             'xpack.enterpriseSearch.content.engine.indices.actions.viewIndex.title',
             {
@@ -136,6 +137,7 @@ export const EngineIndices: React.FC = () => {
         },
         {
           color: 'danger',
+          'data-test-subj': 'engine-remove-index-btn',
           description: i18n.translate(
             'xpack.enterpriseSearch.content.engine.indices.actions.removeIndex.title',
             {
@@ -169,7 +171,7 @@ export const EngineIndices: React.FC = () => {
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem />
         <EuiFlexItem grow={false}>
-          <EuiButton iconType="plusInCircle" fill>
+          <EuiButton data-test-subj="engine-add-new-indices-btn" iconType="plusInCircle" fill>
             {i18n.translate('xpack.enterpriseSearch.content.engine.indices.addNewIndicesButton', {
               defaultMessage: 'Add new indices',
             })}

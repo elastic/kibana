@@ -60,6 +60,7 @@ export const EngineView: React.FC = () => {
         pageTitle: engineName,
         rightSideItems: [
           <EuiButtonEmpty
+            data-test-subj="engine-documentation-link"
             href={docLinks.appSearchElasticsearchIndexedEngines} // TODO: replace with real docLinks when it's created
             target="_blank"
             iconType="documents"
