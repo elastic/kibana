@@ -34,12 +34,21 @@ export const kibanaContent = t.intersection([
 ]);
 
 export const Calls = {
-  get: () => ({
+  // Hit our search layer and returns a KibanaContent by id
+  getPreview: () => ({
     i: t.type({
       type: t.string, // content type
       id: t.string, // content ID
     }),
     o: kibanaContent,
+  }),
+  // Hits the storage layer and return an unknow object (unique to each content)
+  get: () => ({
+    i: t.type({
+      type: t.string, // content type
+      id: t.string, // content ID
+    }),
+    o: t.unknown,
   }),
   create: () => ({
     i: t.type({

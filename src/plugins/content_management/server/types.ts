@@ -5,10 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-import type { ContentCoreApi } from '../core';
 
-export interface Context {
-  core: ContentCoreApi;
-  requestHandlerContext?: RequestHandlerContext;
-}
+import { ContentCoreApi } from './core';
+
+export type ContentManagementSetup = ContentCoreApi;

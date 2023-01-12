@@ -27,7 +27,7 @@ export const ContentPreview: FC<{ type: string; id: string }> = ({ type, id }) =
   useDebounce(
     () => {
       const load = async () => {
-        const res: KibanaContent = await rpc.get({ type, id });
+        const res: KibanaContent = await rpc.getPreview({ type, id });
         setContent(res);
       };
 

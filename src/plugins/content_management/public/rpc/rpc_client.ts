@@ -17,6 +17,12 @@ export class RpcClient {
   // --------------------
   // Public API
   // --------------------
+  // Get a KibanaContent (common schema). Usefull for preview
+  public getPreview({ type, id }: { type: string; id: string }) {
+    return this.realize(Calls.getPreview)({ type, id });
+  }
+
+  // Get a full content details from its storage layer (Schema is unknown)
   public get({ type, id }: { type: string; id: string }) {
     return this.realize(Calls.get)({ type, id });
   }

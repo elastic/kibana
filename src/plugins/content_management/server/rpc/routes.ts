@@ -41,7 +41,12 @@ export function initRpcRoutes(
     },
     async (context, request, response) => {
       try {
-        return response.ok({ body: await fnHandler.call(rpcContext, request.body) });
+        return response.ok({
+          body: await fnHandler.call(
+            { ...rpcContext, requestHandlerContext: context },
+            request.body
+          ),
+        });
       } catch (e) {
         return response.customError(wrapError(e));
       }

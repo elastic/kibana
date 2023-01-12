@@ -7,13 +7,16 @@
  */
 
 import uuid from 'uuid';
+import moment from 'moment';
 
 import type { CommonFields, InternalFields, KibanaContent } from '../../common';
 import { ContentStorage } from '../core';
 import { FooUniqueFields } from './types';
 
+const getTimestamp = () => moment().toISOString();
+
 const generateMeta = (): InternalFields['meta'] => {
-  const now = new Date().toDateString();
+  const now = getTimestamp();
 
   return {
     updatedAt: now,
