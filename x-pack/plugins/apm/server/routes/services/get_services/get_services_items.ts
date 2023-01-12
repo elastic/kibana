@@ -19,7 +19,7 @@ import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm
 import { getServicesAlerts } from './get_service_alerts';
 import { ApmAlertsClient } from '../../../lib/helpers/get_apm_alerts_client';
 
-export const MAX_NUMBER_OF_SERVICES = 500;
+export const MAX_NUMBER_OF_SERVICES = 10_000;
 
 export async function getServicesItems({
   environment,
