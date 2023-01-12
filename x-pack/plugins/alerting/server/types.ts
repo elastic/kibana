@@ -123,7 +123,7 @@ export type ExecutorType<
   ActionGroupIds extends string = never
 > = (
   options: RuleExecutorOptions<Params, State, InstanceState, InstanceContext, ActionGroupIds>
-) => Promise<State | void>;
+) => Promise<{ state: State }>;
 
 export interface RuleTypeParamsValidator<Params extends RuleTypeParams> {
   validate: (object: unknown) => Params;
@@ -290,6 +290,7 @@ export interface RawRule extends SavedObjectAttributes {
   isSnoozedUntil?: string | null;
   lastRun?: RawRuleLastRun | null;
   nextRun?: string | null;
+  running?: boolean | null;
 }
 
 export interface AlertingPlugin {

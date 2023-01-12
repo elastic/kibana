@@ -261,5 +261,7 @@ export function getRuleType(
       const recoveryContext = addMessages(name, baseContext, params, true);
       recoveredAlert.setContext(recoveryContext);
     }
+
+    return { state: {} };
   }
 }

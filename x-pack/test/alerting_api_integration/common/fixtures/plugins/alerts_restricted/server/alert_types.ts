@@ -22,7 +22,9 @@ export function defineAlertTypes(
     minimumLicenseRequired: 'basic',
     isExportable: true,
     recoveryActionGroup: { id: 'restrictedRecovered', name: 'Restricted Recovery' },
-    async executor() {},
+    async executor() {
+      return { state: {} };
+    },
   };
   const noopUnrestrictedAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
     id: 'test.unrestricted-noop',
@@ -32,7 +34,9 @@ export function defineAlertTypes(
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
     isExportable: true,
-    async executor() {},
+    async executor() {
+      return { state: {} };
+    },
   };
   alerting.registerType(noopRestrictedAlertType);
   alerting.registerType(noopUnrestrictedAlertType);
