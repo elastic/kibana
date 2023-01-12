@@ -59,8 +59,6 @@ export async function getServiceTransactionGroups({
   start: number;
   end: number;
 }) {
-  const bucketSize = config.ui.transactionGroupBucketSize;
-
   const field = getDurationFieldForTransactions(searchAggregatedTransactions);
 
   const response = await apmEventClient.search(
@@ -93,7 +91,7 @@ export async function getServiceTransactionGroups({
           transaction_groups: {
             terms: {
               field: TRANSACTION_NAME,
-              size: bucketSize,
+              size: 1000,
               order: { _count: 'desc' },
             },
             aggs: {
@@ -149,6 +147,5 @@ export async function getServiceTransactionGroups({
     isAggregationAccurate:
       (response.aggregations?.transaction_groups.sum_other_doc_count ?? 0) ===
       0,
-    bucketSize,
   };
 }

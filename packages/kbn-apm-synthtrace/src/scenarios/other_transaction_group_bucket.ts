@@ -37,7 +37,7 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
 
       const transactionGroupRange = [
         ...lodashRange(0, 10).map((groupId) => `transaction-${groupId}`),
-        'other',
+        '_other',
       ];
 
       return range

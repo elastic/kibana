@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiCode } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -100,7 +101,7 @@ export function TransactionDetailLink({
         >
           <EuiText style={{ width: `${unit * 28}px` }} size="s">
             <FormattedMessage
-              defaultMessage="The transaction group limit has been reached. Please see the {apmServerDocs} for 'aggregation.transaction.max_groups' to increase this."
+              defaultMessage="The transaction group limit has been reached. Please see the {apmServerDocs} for {codeBlock} to increase this."
               id="xpack.apm.transactionDetail.tooltip.message"
               values={{
                 apmServerDocs: (
@@ -117,6 +118,9 @@ export function TransactionDetailLink({
                       }
                     )}
                   </EuiLink>
+                ),
+                codeBlock: (
+                  <EuiCode>aggregation.transaction.max_groups</EuiCode>
                 ),
               }}
             />

@@ -98,11 +98,6 @@ If you feel like you'd be losing valuable information by following this naming c
 You can always add additional metadata to your transactions using {apm-guide-ref-v}/metadata.html#labels-fields[labels] (indexed) or
 {apm-guide-ref-v}/metadata.html#custom-fields[custom context] (non-indexed).
 
-After ensuring you've correctly named your transactions,
-you might still see an error in the APM app related to too many transaction names.
-If this is the case, you can increase the default number of transaction groups displayed in the APM app by configuring
-<<apm-settings-kb,`xpack.apm.ui.transactionGroupBucketSize`>>.
-
 **More information**
 
 While this can happen with any APM Agent, it typically occurs with the RUM Agent.

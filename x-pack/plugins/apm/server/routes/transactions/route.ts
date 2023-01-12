@@ -54,7 +54,6 @@ const transactionGroupsMainStatisticsRoute = createApmServerRoute({
       impact: number;
     }>;
     isAggregationAccurate: boolean;
-    bucketSize: number;
   }> => {
     const { params, config } = resources;
     const apmEventClient = await getApmEventClient(resources);

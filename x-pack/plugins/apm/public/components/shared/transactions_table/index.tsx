@@ -7,34 +7,32 @@
 
 import {
   EuiBasicTable,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { orderBy } from 'lodash';
 import React, { useMemo, useState } from 'react';
-import uuid from 'uuid';
-import { EuiCallOut } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCode } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
-import { APIReturnType } from '../../../services/rest/create_call_apm_api';
+import uuid from 'uuid';
+import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
+import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
+import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import {
   FETCH_STATUS,
   isPending,
   useFetcher,
 } from '../../../hooks/use_fetcher';
+import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { TransactionOverviewLink } from '../links/apm/transaction_overview_link';
-import { OverviewTableContainer } from '../overview_table_container';
-import { getColumns } from './get_columns';
-import { ElasticDocsLink } from '../links/elastic_docs_link';
-import { useBreakpoints } from '../../../hooks/use_breakpoints';
-import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
-import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { fromQuery, toQuery } from '../links/url_helpers';
+import { OverviewTableContainer } from '../overview_table_container';
 import { isTimeComparison } from '../time_comparison/get_comparison_options';
+import { getColumns } from './get_columns';
 
 type ApiResponse =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;
@@ -51,7 +49,6 @@ const INITIAL_STATE: InitialState = {
   mainStatisticsData: {
     transactionGroups: [],
     isAggregationAccurate: true,
-    bucketSize: 0,
     transactionGroupsTotalItems: 0,
   },
 };
@@ -194,7 +191,6 @@ export function TransactionsTable({
     mainStatisticsData: {
       transactionGroups,
       isAggregationAccurate,
-      bucketSize,
       transactionGroupsTotalItems,
     },
   } = data;
@@ -321,25 +317,9 @@ export function TransactionsTable({
           >
             <p>
               <FormattedMessage
-                id="xpack.apm.transactionsTable.cardinalityWarning.body"
-                defaultMessage="The number of unique transaction names exceeds the configured value of {bucketSize}. Try reconfiguring your agents to group similar transactions or increase the value of {codeBlock}"
-                values={{
-                  bucketSize,
-                  codeBlock: (
-                    <EuiCode>xpack.apm.ui.transactionGroupBucketSize</EuiCode>
-                  ),
-                }}
+                id="xpack.apm.transactionsTable.transactiongrouplimit.exceeded"
+                defaultMessage="The number of unique transaction names limit was exceeded. Try narrowing down your results using the search bar."
               />
-
-              <ElasticDocsLink
-                section="/kibana"
-                path="/troubleshooting.html#troubleshooting-too-many-transactions"
-              >
-                {i18n.translate(
-                  'xpack.apm.transactionsTable.cardinalityWarning.docsLink',
-                  { defaultMessage: 'Learn more in the docs' }
-                )}
-              </ElasticDocsLink>
             </p>
           </EuiCallOut>
         </EuiFlexItem>
