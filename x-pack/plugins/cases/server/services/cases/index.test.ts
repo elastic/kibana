@@ -63,7 +63,7 @@ const createUpdateSOResponse = ({
     externalService,
   });
 
-  let attributes: Partial<ESCaseAttributes> = {};
+  let attributes: Partial<ESCaseAttributes> = { total_alerts: -1, total_comments: -1 };
 
   if (connector) {
     const { id, ...restConnector } = connector;
@@ -77,13 +77,11 @@ const createUpdateSOResponse = ({
     attributes = { ...attributes, external_service: null };
   }
 
-  if (severity || severity === 0) {
-    attributes = { ...attributes, severity };
-  }
-
-  if (status || status === 0) {
-    attributes = { ...attributes, status };
-  }
+  attributes = {
+    ...attributes,
+    ...((severity || severity === 0) && { severity }),
+    ...((status || status === 0) && { status }),
+  };
 
   return {
     type: CASE_SAVED_OBJECT,
@@ -1015,6 +1013,33 @@ describe('CasesService', () => {
         expect(res.saved_objects[1].attributes.status).toEqual(CaseStatuses['in-progress']);
         expect(res.saved_objects[2].attributes.status).toEqual(CaseStatuses.closed);
       });
+
+      it('does not include total_alerts and total_comments fields in the response', async () => {
+        unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+          saved_objects: [
+            createCaseSavedObjectResponse({}),
+            createCaseSavedObjectResponse({}),
+            createCaseSavedObjectResponse({}),
+          ],
+        });
+
+        const res = await service.patchCases({
+          cases: [
+            {
+              caseId: '1',
+              updatedAttributes: createCasePostParams({ connector: getNoneCaseConnector() }),
+              originalCase: {} as CaseSavedObject,
+            },
+          ],
+        });
+
+        expect(res.saved_objects[0].attributes).not.toHaveProperty('total_alerts');
+        expect(res.saved_objects[0].attributes).not.toHaveProperty('total_comments');
+        expect(res.saved_objects[1].attributes).not.toHaveProperty('total_alerts');
+        expect(res.saved_objects[1].attributes).not.toHaveProperty('total_comments');
+        expect(res.saved_objects[2].attributes).not.toHaveProperty('total_alerts');
+        expect(res.saved_objects[2].attributes).not.toHaveProperty('total_comments');
+      });
     });
 
     describe('patch', () => {
@@ -1366,12 +1391,7 @@ describe('CasesService', () => {
       );
 
       it('does not include total_alerts and total_comments fields in the response', async () => {
-        unsecuredSavedObjectsClient.create.mockResolvedValue(
-          createCaseSavedObjectResponse({
-            connector: createESJiraConnector(),
-            externalService: createExternalService(),
-          })
-        );
+        unsecuredSavedObjectsClient.create.mockResolvedValue(createCaseSavedObjectResponse({}));
 
         const res = await service.postNewCase({
           attributes: createCasePostParams({ connector: getNoneCaseConnector() }),
@@ -1700,7 +1720,12 @@ describe('CasesService', () => {
       );
 
       it('does not include total_alerts and total_comments fields in the response', async () => {
-        unsecuredSavedObjectsClient.get.mockResolvedValue({} as SavedObject<ESCaseAttributes>);
+        unsecuredSavedObjectsClient.get.mockResolvedValue({
+          attributes: {
+            total_alerts: -1,
+            total_comments: -1,
+          },
+        } as unknown as SavedObject<ESCaseAttributes>);
 
         const res = await service.getCase({ id: 'a' });
         expect(res.attributes).not.toHaveProperty('total_alerts');
