@@ -36,8 +36,7 @@ interface Props {
 
 export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isCloudEnabled }) => {
   const { trackUiMetric } = getServices();
-  const { navLinks } = application.capabilities;
-  const canAccessIntegrations = navLinks.integrations;
+  const canAccessIntegrations = application.capabilities.navLinks.integrations;
   if (canAccessIntegrations) {
     return (
       <KibanaPageTemplate.Section
