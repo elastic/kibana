@@ -68,7 +68,7 @@ describe('Error details', () => {
       it('shows errors distribution chart', () => {
         cy.visitKibana(errorDetailsPageHref);
         cy.contains('Error group 00000');
-        cy.getByTestSubj('errorDistribution').contains('Occurrences');
+        cy.getByTestSubj('errorDistribution').contains('Error occurrences');
       });
 
       it('shows top erroneous transactions table', () => {
