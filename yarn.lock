@@ -3809,6 +3809,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-date-picker@link:x-pack/packages/ml/date_picker":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-is-defined@link:x-pack/packages/ml/is_defined":
   version "0.0.0"
   uid ""
@@ -3822,6 +3826,10 @@
   uid ""
 
 "@kbn/ml-nested-property@link:x-pack/packages/ml/nested_property":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-query-utils@link:x-pack/packages/ml/query_utils":
   version "0.0.0"
   uid ""
 
