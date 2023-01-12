@@ -8,6 +8,10 @@
 import { schema } from '@kbn/config-schema';
 import { errors } from '@elastic/elasticsearch';
 import { CoreSetup, PluginInitializerContext } from '@kbn/core/server';
+import type {
+  TaskManagerStartContract,
+  ConcreteTaskInstance,
+} from '@kbn/task-manager-plugin/server';
 import { PluginStartDependencies } from '.';
 
 export const SESSION_INDEX_CLEANUP_TASK_NAME = 'session_cleanup';
@@ -103,6 +107,42 @@ export function initRoutes(
     }
   );
 
+  async function waitUntilTaskIsIdle(taskManager: TaskManagerStartContract) {
+    logger.debug(`Waiting until session cleanup task is in idle.`);
+
+    const RETRY_SCALE_DURATION = 500;
+    let retriesElapsed = 0;
+    let taskInstance: ConcreteTaskInstance;
+    while (retriesElapsed < 12 /** max around ~40s **/) {
+      await new Promise((resolve) => setTimeout(resolve, retriesElapsed * RETRY_SCALE_DURATION));
+
+      try {
+        taskInstance = await taskManager.get(SESSION_INDEX_CLEANUP_TASK_NAME);
+        if (taskInstance.status === 'idle') {
+          logger.info(`Session cleanup task is in idle state: ${JSON.stringify(taskInstance)}.`);
+          return;
+        }
+      } catch (err) {
+        logger.error(`Failed to fetch task: ${err?.message || err}.`);
+        throw err;
+      }
+
+      if (++retriesElapsed < 12) {
+        logger.debug(
+          `Session cleanup task is NOT in idle state (waiting for ${
+            retriesElapsed * RETRY_SCALE_DURATION
+          }ms before retrying): ${JSON.stringify(taskInstance)}.`
+        );
+      } else {
+        logger.error(
+          `Failed to wait until session cleanup tasks enters an idle state: ${JSON.stringify(
+            taskInstance
+          )}.`
+        );
+      }
+    }
+  }
+
   router.post(
     {
       path: '/session/toggle_cleanup_task',
@@ -112,22 +152,10 @@ export function initRoutes(
       const [, { taskManager }] = await core.getStartServices();
       logger.info(`Toggle session cleanup task (enabled: ${request.body.enabled}).`);
 
-      // Before enabling/disable task wait until it's in an idle state.
-      for (let i = 0; i < 10; i++) {
-        try {
-          const taskStatus = (await taskManager.get(SESSION_INDEX_CLEANUP_TASK_NAME)).status;
-          if (taskStatus === 'idle') {
-            break;
-          } else if (i < 9) {
-            logger.debug(`Waiting for 2s before re-fetching cleanup task.`);
-            await new Promise((resolve) => setTimeout(resolve, 2000));
-          }
-        } catch (err) {
-          logger.error(
-            `Failed to fetch task (enabled: ${request.body.enabled}): ${err?.message || err}.`
-          );
-          throw err;
-        }
+      // Before disabling the task we should make sure that the task isn't running, otherwise after enabling the task,
+      // it might take a considerable amount of time before it's re-tried.
+      if (!request.body.enabled) {
+        await waitUntilTaskIsIdle(taskManager);
       }
 
       let bulkEnableDisableResult;
