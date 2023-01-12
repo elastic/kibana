@@ -32,13 +32,7 @@ import { buildExpression } from './expression_helpers';
 import { showMemoizedErrorNotification } from '../../lens_ui_errors';
 import { Document } from '../../persistence/saved_object_store';
 import { getActiveDatasourceIdFromDoc, sortDataViewRefs } from '../../utils';
-import type { ErrorMessage } from '../types';
-import {
-  getMissingCurrentDatasource,
-  getMissingIndexPatterns,
-  getMissingVisualizationTypeError,
-  getUnknownVisualizationTypeError,
-} from '../error_helper';
+import { getMissingIndexPatterns, getMissingVisualizationTypeError } from '../error_helper';
 import type { DatasourceStates, DataViewsState, VisualizationState } from '../../state_management';
 import { readFromStorage } from '../../settings_storage';
 import { loadIndexPatternRefs, loadIndexPatterns } from '../../data_views_service/loader';
@@ -325,7 +319,7 @@ export async function persistedStateToExpression(
     dataViews: DataViewsContract;
     timefilter: TimefilterContract;
   }
-): Promise<{ ast: Ast | null; errors: ErrorMessage[] | undefined }> {
+): Promise<Ast | null> {
   const {
     state: {
       visualization: persistedVisualizationState,
@@ -339,15 +333,10 @@ export async function persistedStateToExpression(
     description,
   } = doc;
   if (!visualizationType) {
+    return null;
     return {
       ast: null,
       errors: [{ shortMessage: '', longMessage: getMissingVisualizationTypeError() }],
-    };
-  }
-  if (!visualizations[visualizationType]) {
-    return {
-      ast: null,
-      errors: [getUnknownVisualizationTypeError(visualizationType)],
     };
   }
   const visualization = visualizations[visualizationType!];
@@ -389,6 +378,7 @@ export async function persistedStateToExpression(
 
   const datasourceId = getActiveDatasourceIdFromDoc(doc);
   if (datasourceId == null) {
+    return null;
     return {
       ast: null,
       errors: [{ shortMessage: '', longMessage: getMissingCurrentDatasource() }],
@@ -402,35 +392,26 @@ export async function persistedStateToExpression(
   );
 
   if (indexPatternValidation) {
+    return null;
     return {
       ast: null,
       errors: indexPatternValidation,
     };
   }
 
-  const validationResult = validateDatasourceAndVisualization(
-    datasourceMap[datasourceId],
-    datasourceStates[datasourceId].state,
-    visualization,
-    visualizationState,
-    { datasourceLayers, dataViews: { indexPatterns } as DataViewsState }
-  );
   const currentTimeRange = services.timefilter.getAbsoluteTime();
 
-  return {
-    ast: buildExpression({
-      title,
-      description,
-      visualization,
-      visualizationState,
-      datasourceMap,
-      datasourceStates,
-      datasourceLayers,
-      indexPatterns,
-      dateRange: { fromDate: currentTimeRange.from, toDate: currentTimeRange.to },
-    }),
-    errors: validationResult,
-  };
+  return buildExpression({
+    title,
+    description,
+    visualization,
+    visualizationState,
+    datasourceMap,
+    datasourceStates,
+    datasourceLayers,
+    indexPatterns,
+    dateRange: { fromDate: currentTimeRange.from, toDate: currentTimeRange.to },
+  });
 }
 
 export function getMissingIndexPattern(
@@ -452,7 +433,7 @@ const validateRequiredIndexPatterns = (
   currentDatasource: Datasource,
   currentDatasourceState: { state: unknown } | null,
   indexPatterns: IndexPatternMap
-): ErrorMessage[] | undefined => {
+): UserMessage[] | undefined => {
   const missingIds = getMissingIndexPattern(
     currentDatasource,
     currentDatasourceState,
@@ -463,7 +444,7 @@ const validateRequiredIndexPatterns = (
     return;
   }
 
-  return [{ shortMessage: '', longMessage: getMissingIndexPatterns(missingIds), type: 'fixable' }];
+  return [{ shortMessage: '', longMessage: getMissingIndexPatterns(missingIds) }];
 };
 
 export const validateDatasourceAndVisualization = (

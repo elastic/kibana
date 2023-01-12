@@ -31,7 +31,6 @@ import type { LensByReferenceInput, LensEmbeddableInput } from './embeddable';
 import type { Document } from '../persistence/saved_object_store';
 import type { LensAttributeService } from '../lens_attribute_service';
 import { DOC_TYPE } from '../../common/constants';
-import type { ErrorMessage } from '../editor_frame_service/types';
 import { extract, inject } from '../../common/embeddable_factory';
 import type { DatasourceMap, VisualizationMap } from '../types';
 
@@ -47,9 +46,7 @@ export interface LensEmbeddableStartServices {
   dataViews: DataViewsContract;
   uiActions?: UiActionsStart;
   usageCollection?: UsageCollectionSetup;
-  documentToExpression: (
-    doc: Document
-  ) => Promise<{ ast: Ast | null; errors: ErrorMessage[] | undefined }>;
+  documentToExpression: (doc: Document) => Promise<Ast | null>;
   injectFilterReferences: FilterManager['inject'];
   visualizationMap: VisualizationMap;
   datasourceMap: DatasourceMap;

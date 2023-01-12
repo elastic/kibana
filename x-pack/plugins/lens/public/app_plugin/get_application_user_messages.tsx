@@ -44,6 +44,10 @@ export const getApplicationUserMessages = ({
     messages.push(getUnknownVisualizationTypeError(visualization.activeId));
   }
 
+  if (!activeDatasource) {
+    messages.push(getUnknownDatasourceTypeError());
+  }
+
   const missingIndexPatterns = getMissingIndexPattern(
     activeDatasource,
     activeDatasourceState,
@@ -70,6 +74,20 @@ function getUnknownVisualizationTypeError(visType: string): UserMessage {
       values: {
         visType,
       },
+    }),
+  };
+}
+
+function getUnknownDatasourceTypeError(): UserMessage {
+  return {
+    severity: 'error',
+    fixableInEditor: false,
+    displayLocations: [{ id: 'visualization' }, { id: 'suggestionPanel' }],
+    shortMessage: i18n.translate('xpack.lens.unknownVisType.shortMessage', {
+      defaultMessage: `Unknown datasource type`,
+    }),
+    longMessage: i18n.translate('xpack.lens.editorFrame.expressionMissingDatasource', {
+      defaultMessage: 'Could not find datasource for the visualization',
     }),
   };
 }

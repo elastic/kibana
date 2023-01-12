@@ -93,7 +93,7 @@ import {
 
 import { getEditPath, DOC_TYPE } from '../../common';
 import { LensAttributeService } from '../lens_attribute_service';
-import type { ErrorMessage, TableInspectorAdapter } from '../editor_frame_service/types';
+import type { TableInspectorAdapter } from '../editor_frame_service/types';
 import { getLensInspectorService, LensInspector } from '../lens_inspector_service';
 import { SharingSavedObjectProps, VisualizationDisplayOptions } from '../types';
 import {
@@ -151,9 +151,7 @@ export interface LensEmbeddableOutput extends EmbeddableOutput {
 export interface LensEmbeddableDeps {
   attributeService: LensAttributeService;
   data: DataPublicPluginStart;
-  documentToExpression: (
-    doc: Document
-  ) => Promise<{ ast: Ast | null; errors: ErrorMessage[] | undefined }>;
+  documentToExpression: (doc: Document) => Promise<Ast | null>;
   injectFilterReferences: FilterManager['inject'];
   visualizationMap: VisualizationMap;
   datasourceMap: DatasourceMap;
@@ -189,11 +187,8 @@ const getExpressionFromDocument = async (
   document: Document,
   documentToExpression: LensEmbeddableDeps['documentToExpression']
 ) => {
-  const { ast, errors } = await documentToExpression(document);
-  return {
-    expression: ast ? toExpression(ast) : null,
-    errors,
-  };
+  const ast = await documentToExpression(document);
+  return ast ? toExpression(ast) : null;
 };
 
 function getViewUnderlyingDataArgs({
@@ -287,7 +282,6 @@ export class Embeddable
   private warningDomNode: HTMLElement | Element | undefined;
   private subscription: Subscription;
   private isInitialized = false;
-  private errors: ErrorMessage[] | undefined;
   private inputReloadSubscriptions: Subscription[];
   private isDestroyed?: boolean;
   private embeddableTitle?: string;
@@ -330,6 +324,7 @@ export class Embeddable
     this.expressionRenderer = deps.expressionRenderer;
     let containerStateChangedCalledAlready = false;
     this.initializeSavedVis(initialInput)
+      .then(() => this.loadUserMessages())
       .then(() => {
         if (!containerStateChangedCalledAlready) {
           this.onContainerStateChanged(initialInput);
@@ -502,8 +497,18 @@ export class Embeddable
     );
   }
 
+  private get userMessages() {
+    return [...this._userMessages, ...Object.values(this.additionalUserMessages)];
+  }
+
+  private get hasAnyErrors() {
+    return this.userMessages.some((message) => message.severity === 'error');
+  }
+
+  private _userMessages: UserMessage[] = [];
+
   // loads all available user messages
-  private async getUserMessages() {
+  private async loadUserMessages() {
     const userMessages: UserMessage[] = [];
 
     const activeDatasourceState = await this.getActiveDatasourceState();
@@ -559,27 +564,7 @@ export class Embeddable
       }) ?? [])
     );
 
-    userMessages.push(...Object.values(this.additionalUserMessages));
-
-    return userMessages;
-  }
-
-  // displays user messages to the user
-  private async displayUserMessages() {
-    const userMessages = await this.getUserMessages();
-
-    const warningsToDisplay = filterUserMessages(userMessages, 'embeddableBadge', {
-      severity: 'warning',
-    });
-
-    if (userMessages.length && this.warningDomNode) {
-      render(
-        <KibanaThemeProvider theme$={this.deps.theme.theme$}>
-          <Warnings warnings={warningsToDisplay.map((message) => message.longMessage)} compressed />
-        </KibanaThemeProvider>,
-        this.warningDomNode
-      );
-    }
+    this._userMessages = userMessages;
   }
 
   private additionalUserMessages: Record<string, UserMessage> = {};
@@ -602,7 +587,7 @@ export class Embeddable
       this.additionalUserMessages = newMessageMap;
     }
 
-    this.displayUserMessages();
+    this.reload();
 
     return () => {
       const withMessagesRemoved = {
@@ -631,54 +616,6 @@ export class Embeddable
     return this.lensInspector.adapters;
   }
 
-  private maybeAddConflictError(
-    errors?: ErrorMessage[],
-    sharingSavedObjectProps?: SharingSavedObjectProps
-  ) {
-    const ret = [...(errors || [])];
-
-    if (sharingSavedObjectProps?.outcome === 'conflict' && !!this.deps.spaces) {
-      ret.push({
-        shortMessage: i18n.translate('xpack.lens.embeddable.legacyURLConflict.shortMessage', {
-          defaultMessage: `You've encountered a URL conflict`,
-        }),
-        longMessage: (
-          <this.deps.spaces.ui.components.getEmbeddableLegacyUrlConflict
-            targetType={DOC_TYPE}
-            sourceId={sharingSavedObjectProps.sourceId!}
-          />
-        ),
-      });
-    }
-
-    return ret?.length ? ret : undefined;
-  }
-
-  private maybeAddTimeRangeError(
-    errors: ErrorMessage[] | undefined,
-    input: LensEmbeddableInput,
-    indexPatterns: DataView[]
-  ) {
-    // if at least one indexPattern is time based, then the Lens embeddable requires the timeRange prop
-    if (
-      input.timeRange == null &&
-      indexPatterns.some((indexPattern) => indexPattern.isTimeBased())
-    ) {
-      return [
-        ...(errors || []),
-        {
-          shortMessage: i18n.translate('xpack.lens.embeddable.missingTimeRangeParam.shortMessage', {
-            defaultMessage: `Missing timeRange property`,
-          }),
-          longMessage: i18n.translate('xpack.lens.embeddable.missingTimeRangeParam.longMessage', {
-            defaultMessage: `The timeRange property is required for the given configuration`,
-          }),
-        },
-      ];
-    }
-    return errors;
-  }
-
   async initializeSavedVis(input: LensEmbeddableInput) {
     const unwrapResult: LensUnwrapResult | false = await this.deps.attributeService
       .unwrapAttributes(input)
@@ -698,16 +635,32 @@ export class Embeddable
       savedObjectId: (input as LensByReferenceInput)?.savedObjectId,
     };
 
-    const { expression, errors } = await getExpressionFromDocument(
+    this.expression = await getExpressionFromDocument(
       this.savedVis,
       this.deps.documentToExpression
     );
-    this.expression = expression;
-    this.errors = this.maybeAddConflictError(errors, metaInfo?.sharingSavedObjectProps);
+
+    if (metaInfo?.sharingSavedObjectProps?.outcome === 'conflict' && !!this.deps.spaces) {
+      this.addUserMessages([
+        {
+          uniqueId: 'url-conflict',
+          severity: 'error',
+          displayLocations: [{ id: 'visualization' }],
+          shortMessage: i18n.translate('xpack.lens.embeddable.legacyURLConflict.shortMessage', {
+            defaultMessage: `You've encountered a URL conflict`,
+          }),
+          longMessage: (
+            <this.deps.spaces.ui.components.getEmbeddableLegacyUrlConflict
+              targetType={DOC_TYPE}
+              sourceId={metaInfo?.sharingSavedObjectProps?.sourceId!}
+            />
+          ),
+          fixableInEditor: false,
+        },
+      ]);
+    }
 
     await this.initializeOutput();
-
-    await this.displayUserMessages();
 
     // deferred loading of this embeddable is complete
     this.setInitializationFinished();
@@ -861,25 +814,6 @@ export class Embeddable
     }
   }
 
-  private getError(): Error | undefined {
-    const message =
-      typeof this.errors?.[0]?.longMessage === 'string'
-        ? this.errors[0].longMessage
-        : this.errors?.[0]?.shortMessage;
-
-    if (message != null) {
-      return new Error(message);
-    }
-
-    if (!this.expression) {
-      return new Error(
-        i18n.translate('xpack.lens.embeddable.failure', {
-          defaultMessage: "Visualization couldn't be displayed",
-        })
-      );
-    }
-  }
-
   /**
    *
    * @param {HTMLElement} domNode
@@ -897,15 +831,22 @@ export class Embeddable
 
     this.domNode.setAttribute('data-shared-item', '');
 
-    const error = this.getError();
-
-    this.updateOutput({
-      ...this.getOutput(),
-      loading: true,
-      error,
+    const errors = filterUserMessages(this.userMessages, 'visualization', {
+      severity: 'error',
     });
 
-    if (error) {
+    this.updateOutput({
+      loading: true,
+      error: errors.length
+        ? new Error(
+            typeof errors[0].longMessage === 'string'
+              ? errors[0].longMessage
+              : errors[0].shortMessage
+          )
+        : undefined,
+    });
+
+    if (errors.length) {
       this.renderComplete.dispatchError();
     } else {
       this.renderComplete.dispatchInProgress();
@@ -918,7 +859,7 @@ export class Embeddable
         <ExpressionWrapper
           ExpressionRenderer={this.expressionRenderer}
           expression={this.expression || null}
-          errors={this.errors}
+          errors={errors}
           lensInspector={this.lensInspector}
           searchContext={this.getMergedSearchContext()}
           variables={{
@@ -962,6 +903,19 @@ export class Embeddable
       </KibanaThemeProvider>,
       domNode
     );
+
+    const warningsToDisplay = filterUserMessages(this.userMessages, 'embeddableBadge', {
+      severity: 'warning',
+    });
+
+    if (warningsToDisplay.length && this.warningDomNode) {
+      render(
+        <KibanaThemeProvider theme$={this.deps.theme.theme$}>
+          <Warnings warnings={warningsToDisplay.map((message) => message.longMessage)} compressed />
+        </KibanaThemeProvider>,
+        this.warningDomNode
+      );
+    }
   }
 
   private readonly hasCompatibleActions = async (
@@ -1101,13 +1055,12 @@ export class Embeddable
       newVis.state.visualization = this.onEditAction(newVis.state.visualization, event);
       this.savedVis = newVis;
 
-      const { expression, errors } = await getExpressionFromDocument(
+      this.expression = await getExpressionFromDocument(
         this.savedVis,
         this.deps.documentToExpression
       );
-      this.expression = expression;
-      this.errors = errors;
 
+      await this.loadUserMessages();
       this.reload();
     }
   };
@@ -1206,16 +1159,34 @@ export class Embeddable
     // config dropdown correctly.
     const input = this.getInput();
 
-    this.errors = this.maybeAddTimeRangeError(this.errors, input, this.indexPatterns);
+    // if at least one indexPattern is time based, then the Lens embeddable requires the timeRange prop
+    if (
+      input.timeRange == null &&
+      indexPatterns.some((indexPattern) => indexPattern.isTimeBased())
+    ) {
+      this.addUserMessages([
+        {
+          uniqueId: 'missing-time-range-on-embeddable',
+          severity: 'error',
+          fixableInEditor: false,
+          displayLocations: [{ id: 'visualization' }],
+          shortMessage: i18n.translate('xpack.lens.embeddable.missingTimeRangeParam.shortMessage', {
+            defaultMessage: `Missing timeRange property`,
+          }),
+          longMessage: i18n.translate('xpack.lens.embeddable.missingTimeRangeParam.longMessage', {
+            defaultMessage: `The timeRange property is required for the given configuration`,
+          }),
+        },
+      ]);
+    }
 
-    if (this.errors) {
+    if (this.hasAnyErrors) {
       this.logError('validation');
     }
 
     const title = input.hidePanelTitles ? '' : input.title ?? this.savedVis.title;
     const savedObjectId = (input as LensByReferenceInput).savedObjectId;
     this.updateOutput({
-      ...this.getOutput(),
       defaultTitle: this.savedVis.title,
       editable: this.getIsEditable(),
       title,
