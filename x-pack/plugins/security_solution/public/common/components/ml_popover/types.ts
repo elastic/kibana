@@ -74,6 +74,7 @@ export interface ModuleJob {
     custom_settings: {
       created_by: string;
       custom_urls: CustomURL[];
+      security_app_display_name?: string;
     };
     job_type: string;
   };
