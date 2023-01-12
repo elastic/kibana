@@ -18,8 +18,8 @@ import { SendEnterpriseSearchTelemetry } from '../../../shared/telemetry';
 
 import { ENGINES_PATH } from '../../routes';
 
-export const EngineError: React.FC<{ error: HttpError }> = ({ error }) => {
-  if (error.body?.statusCode === 404) {
+export const EngineError: React.FC<{ error: HttpError | undefined }> = ({ error }) => {
+  if (error?.body?.statusCode === 404) {
     return (
       <>
         <SendEnterpriseSearchTelemetry action="error" metric="not_found" />
