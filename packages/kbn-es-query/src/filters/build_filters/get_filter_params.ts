@@ -6,31 +6,26 @@
  * Side Public License, v 1.
  */
 
-import type { PhrasesFilter } from './phrases_filter';
+import { isPhrasesFilter, PhrasesFilter } from './phrases_filter';
 import { isPhraseFilter } from './phrase_filter';
 import { isMetaRangeFilter } from './range_filter';
-import { Filter, FILTERS } from './types';
+import { Filter } from './types';
 
 /**
  * @internal used only by the filter bar to create filter pills.
  */
 export function getFilterParams(filter: Filter): Filter['meta']['params'] {
-  switch (filter.meta.type) {
-    case FILTERS.PHRASE:
-      if (isPhraseFilter(filter)) {
-        return filter.meta.params?.query;
-      }
-    case FILTERS.PHRASES:
-      return (filter as PhrasesFilter).meta.params;
-    case FILTERS.RANGE:
-      if (isMetaRangeFilter(filter) && filter.meta.params) {
-        const { gte, gt, lte, lt } = filter.meta.params;
-        return {
-          from: gte ?? gt,
-          to: lt ?? lte,
-        };
-      }
-    default:
-      return filter.meta.params;
+  if (isPhraseFilter(filter)) {
+    return filter.meta.params?.query;
+  } else if (isPhrasesFilter(filter)) {
+    return (filter as PhrasesFilter).meta.params;
+  } else if (isMetaRangeFilter(filter) && filter.meta.params) {
+    const { gte, gt, lte, lt } = filter.meta.params;
+    return {
+      from: gte ?? gt,
+      to: lt ?? lte,
+    };
+  } else {
+    return filter.meta.params;
   }
 }
