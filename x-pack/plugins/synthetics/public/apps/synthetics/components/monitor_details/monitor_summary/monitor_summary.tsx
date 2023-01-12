@@ -116,6 +116,7 @@ export const MonitorSummary = () => {
         </EuiFlexItem>
         <EuiFlexItem>
           <MonitorAlerts dateLabel={dateLabel} from={from} to={to} />
+          <EuiSpacer size="m" />
           <StepDurationPanel />
         </EuiFlexItem>
       </EuiFlexGroup>

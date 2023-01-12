@@ -86,8 +86,8 @@ export const MonitorAlerts = ({
           <AlertActions monitorId={monitorId} from={from} to={to} />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem style={{ width: 100 }} grow={false}>
+      <EuiFlexGroup gutterSize="xs">
+        <EuiFlexItem style={{ width: 80 }} grow={false}>
           <ExploratoryViewEmbeddable
             dataTestSubj="monitorActiveAlertsCount"
             customHeight={'120px'}
@@ -135,7 +135,7 @@ export const MonitorAlerts = ({
             ]}
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={false} style={{ width: 100 }}>
+        <EuiFlexItem grow={false} style={{ width: 85, marginLeft: 40 }}>
           <ExploratoryViewEmbeddable
             customHeight={'120px'}
             reportType="single-metric"
