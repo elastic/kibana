@@ -596,6 +596,13 @@ describe('collectMultiNamespaceReferences', () => {
         expect(mockSecurityExt.authorizeAndRedactMultiNamespaceReferences).toHaveBeenCalledTimes(1);
         expect(result.objects).toEqual(expectedObjects);
       });
+      test(`returns empty arry when no objects are provided`, async () => {
+        setupAuthorizeAndRedactMultiNamespaceReferenecesSuccess(mockSecurityExt);
+
+        const result = await collectMultiNamespaceReferences({ ...params, objects: [] });
+        expect(result).toEqual({ objects: [] });
+        expect(mockSecurityExt.authorizeAndRedactMultiNamespaceReferences).not.toHaveBeenCalled();
+      });
     });
   });
 });

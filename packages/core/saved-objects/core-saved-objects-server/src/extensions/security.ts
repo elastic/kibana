@@ -36,10 +36,10 @@ export enum SecurityAction {
 }
 
 /**
- * The BaseAuthorizeOptions interface contains basic options
- * for authorize methods of the ISavedObjectsSecurityExtension.
+ * The InternalAuthorizeOptions interface contains basic options
+ * for internal authorize methods of the ISavedObjectsSecurityExtension.
  */
-export interface BaseAuthorizeOptions {
+export interface InternalAuthorizeOptions {
   /**
    * Whether or not to force the use of the bulk action for the authorization.
    * By default this will be based on the number of objects passed to the
@@ -49,10 +49,14 @@ export interface BaseAuthorizeOptions {
 }
 
 /**
- * The CollectMultiNamespaceReferencesOptions interface contains options
+ * The MultiNamespaceReferencesOptions interface contains options
  * specific for authorizing CollectMultiNamespaceReferences actions.
  */
-export interface CollectMultiNamespaceReferencesOptions {
+export interface MultiNamespaceReferencesOptions {
+  /**
+   * The purpose of the call to 'collectMultiNamespaceReferences'.
+   * Default is 'collectMultiNamespaceReferences'.
+   */
   purpose?: 'collectMultiNamespaceReferences' | 'updateObjectsSpaces';
 }
 
@@ -347,21 +351,29 @@ export interface AuthorizeUpdateObject {
   existingNamespaces?: string[];
 }
 
-export interface AuthorizeCreateParams {
+export interface AuthorizeBulkCreateParams {
   namespaceString: string;
   objects: AuthorizeCreateObject[];
-  options?: BaseAuthorizeOptions;
+}
+
+export interface AuthorizeCreateParams {
+  namespaceString: string;
+  object: AuthorizeCreateObject;
 }
 
 export interface AuthorizeUpdateParams {
   namespaceString: string;
+  object: AuthorizeUpdateObject;
+}
+
+export interface AuthorizeBulkUpdateParams {
+  namespaceString: string;
   objects: AuthorizeUpdateObject[];
-  options?: BaseAuthorizeOptions;
 }
 export interface AuthorizeAndRedactMultiNamespaceReferencesParams {
   namespaceString: string;
   objects: SavedObjectReferenceWithContext[];
-  options: CollectMultiNamespaceReferencesOptions;
+  options?: MultiNamespaceReferencesOptions;
 }
 
 /**
@@ -391,8 +403,16 @@ export interface ISavedObjectsSecurityExtension {
     params: AuthorizeCreateParams
   ) => Promise<CheckAuthorizationResult<string> | undefined>;
 
+  authorizeBulkCreate: (
+    params: AuthorizeBulkCreateParams
+  ) => Promise<CheckAuthorizationResult<string> | undefined>;
+
   authorizeUpdate: (
     params: AuthorizeUpdateParams
+  ) => Promise<CheckAuthorizationResult<string> | undefined>;
+
+  authorizeBulkUpdate: (
+    params: AuthorizeBulkUpdateParams
   ) => Promise<CheckAuthorizationResult<string> | undefined>;
 
   authorizeAndRedactMultiNamespaceReferences: (

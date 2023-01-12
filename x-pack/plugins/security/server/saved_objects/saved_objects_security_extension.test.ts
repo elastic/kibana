@@ -7,7 +7,11 @@
 
 import type { AuthorizeCreateObject, AuthorizeUpdateObject } from '@kbn/core-saved-objects-server';
 import { AuditAction, SecurityAction } from '@kbn/core-saved-objects-server';
-import type { EcsEventOutcome, SavedObjectsClient } from '@kbn/core/server';
+import type {
+  EcsEventOutcome,
+  SavedObjectReferenceWithContext,
+  SavedObjectsClient,
+} from '@kbn/core/server';
 
 import { auditLoggerMock } from '../audit/mocks';
 import type { CheckSavedObjectsPrivileges } from '../authorization';
@@ -22,6 +26,10 @@ const checkAuthorizationSpy = jest.spyOn(
 const enforceAuthorizationSpy = jest.spyOn(
   SavedObjectsSecurityExtension.prototype as any,
   'enforceAuthorization'
+);
+const redactNamespacesSpy = jest.spyOn(
+  SavedObjectsSecurityExtension.prototype as any,
+  'redactNamespaces'
 );
 const authorizeSpy = jest.spyOn(SavedObjectsSecurityExtension.prototype as any, 'authorize');
 const auditHelperSpy = jest.spyOn(SavedObjectsSecurityExtension.prototype as any, 'auditHelper');
@@ -188,7 +196,12 @@ describe.skip('#authorize (private)', () => {
   beforeEach(() => {
     checkAuthorizationSpy.mockClear();
     enforceAuthorizationSpy.mockClear();
+    redactNamespacesSpy.mockClear();
+    authorizeSpy.mockClear();
+    auditHelperSpy.mockClear();
+    addAuditEventSpy.mockClear();
   });
+
   describe('without enforce', () => {
     const fullyAuthorizedCheckPrivilegesResponse = {
       hasAllRequested: true,
@@ -1546,66 +1559,39 @@ describe('#redactNamespaces', () => {
   });
 });
 
-describe('#authorizeCreate', () => {
+describe('#create', () => {
   const namespace = 'x';
-
-  const fullyAuthorizedBulkResponse = {
-    hasAllRequested: true,
-    privileges: {
-      kibana: [
-        { privilege: 'mock-saved_object:a/bulk_create', authorized: true },
-        { privilege: 'login:', authorized: true },
-        { resource: 'x', privilege: 'mock-saved_object:b/bulk_create', authorized: true },
-        { resource: 'x', privilege: 'mock-saved_object:c/bulk_create', authorized: true },
-        { resource: 'x', privilege: 'mock-saved_object:d/bulk_create', authorized: true },
-        { resource: 'bar', privilege: 'mock-saved_object:c/bulk_create', authorized: true },
-        { resource: 'y', privilege: 'mock-saved_object:d/bulk_create', authorized: true },
-        { resource: 'z', privilege: 'mock-saved_object:d/bulk_create', authorized: true },
-      ],
-    },
-  } as CheckPrivilegesResponse;
 
   beforeEach(() => {
     checkAuthorizationSpy.mockClear();
     enforceAuthorizationSpy.mockClear();
+    redactNamespacesSpy.mockClear();
     authorizeSpy.mockClear();
     auditHelperSpy.mockClear();
     addAuditEventSpy.mockClear();
   });
 
-  test('throws an error when `namespaceString` is empty and there are no object spaces', async () => {
-    const { securityExtension, checkPrivileges } = setup();
-    checkPrivileges.mockResolvedValue(fullyAuthorizedBulkResponse);
-
-    await expect(
-      securityExtension.authorizeCreate({
-        namespaceString: '',
-        objects: [{ ...obj1, initialNamespaces: undefined }, obj2],
-      })
-    ).rejects.toThrowError('No spaces specified for authorization');
-    expect(checkPrivileges).not.toHaveBeenCalled();
-  });
-
-  test('throws an error when checkAuthorization fails', async () => {
-    const { securityExtension, checkPrivileges } = setup();
-    checkPrivileges.mockRejectedValue(new Error('Oh no!'));
-
-    await expect(
-      securityExtension.authorizeCreate({ namespaceString: namespace, objects: [obj1] })
-    ).rejects.toThrowError('Oh no!');
-  });
-
-  describe(`create action`, () => {
+  describe(`#authorizeCreate`, () => {
     const actionString = 'create';
 
-    test('throws an error when `objects` is empty', async () => {
+    test('throws an error when `namespaceString` is empty and there are no object spaces', async () => {
       const { securityExtension, checkPrivileges } = setup();
-      const emptyObjects: AuthorizeCreateObject[] = [];
+      await expect(
+        securityExtension.authorizeCreate({
+          namespaceString: '',
+          object: { ...obj1, initialNamespaces: undefined },
+        })
+      ).rejects.toThrowError('No spaces specified for authorization');
+      expect(checkPrivileges).not.toHaveBeenCalled();
+    });
+
+    test('throws an error when checkAuthorization fails', async () => {
+      const { securityExtension, checkPrivileges } = setup();
+      checkPrivileges.mockRejectedValue(new Error('Oh no!'));
 
       await expect(
-        securityExtension.authorizeCreate({ namespaceString: namespace, objects: emptyObjects })
-      ).rejects.toThrowError('No objects specified for create authorization');
-      expect(checkPrivileges).not.toHaveBeenCalled();
+        securityExtension.authorizeCreate({ namespaceString: namespace, object: obj1 })
+      ).rejects.toThrowError('Oh no!');
     });
 
     test(`calls internal authorize methods with expected actions, types, spaces, and enforce map`, async () => {
@@ -1622,7 +1608,7 @@ describe('#authorizeCreate', () => {
 
       await securityExtension.authorizeCreate({
         namespaceString: namespace,
-        objects: [obj1],
+        object: obj1,
       });
 
       expect(authorizeSpy).toHaveBeenCalledTimes(1);
@@ -1681,7 +1667,7 @@ describe('#authorizeCreate', () => {
 
       const result = await securityExtension.authorizeCreate({
         namespaceString: namespace,
-        objects: [obj1],
+        object: obj1,
       });
       expect(result).toEqual({
         status: 'fully_authorized',
@@ -1707,7 +1693,7 @@ describe('#authorizeCreate', () => {
 
       await securityExtension.authorizeCreate({
         namespaceString: namespace,
-        objects: [obj1],
+        object: obj1,
       });
 
       expect(auditHelperSpy).toHaveBeenCalledTimes(1);
@@ -1745,7 +1731,7 @@ describe('#authorizeCreate', () => {
       await expect(
         securityExtension.authorizeCreate({
           namespaceString: namespace,
-          objects: [obj1],
+          object: obj1,
         })
       ).rejects.toThrow(`Unable to create ${obj1.type}`);
       expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
@@ -1766,7 +1752,7 @@ describe('#authorizeCreate', () => {
       await expect(
         securityExtension.authorizeCreate({
           namespaceString: namespace,
-          objects: [obj1],
+          object: obj1,
         })
       ).rejects.toThrow(`Unable to create ${obj1.type}`);
 
@@ -1794,9 +1780,10 @@ describe('#authorizeCreate', () => {
     });
   });
 
-  describe(`bulk create action`, () => {
+  describe(`@authorizeBulkCreate`, () => {
     const actionString = 'bulk_create';
     const objects = [obj1, obj2, obj3, obj4];
+
     const fullyAuthorizedCheckPrivilegesResponse = {
       hasAllRequested: true,
       privileges: {
@@ -1854,48 +1841,43 @@ describe('#authorizeCreate', () => {
       const emptyObjects: AuthorizeCreateObject[] = [];
 
       await expect(
-        securityExtension.authorizeCreate({
+        securityExtension.authorizeBulkCreate({
           namespaceString: namespace,
           objects: emptyObjects,
-          options: { forceBulkAction: true },
         })
       ).rejects.toThrowError('No objects specified for bulk_create authorization');
       expect(checkPrivileges).not.toHaveBeenCalled();
     });
 
-    test('uses bulk_create action by default when objects length is more than 1', async () => {
+    test('throws an error when `namespaceString` is empty and there are no object spaces', async () => {
       const { securityExtension, checkPrivileges } = setup();
-      checkPrivileges.mockResolvedValue({
-        hasAllRequested: false,
-        privileges: {
-          kibana: [
-            { privilege: 'mock-saved_object:a/create', authorized: false },
-            { privilege: 'login:', authorized: true },
-          ],
-        },
-      } as CheckPrivilegesResponse);
+      checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
 
       await expect(
-        securityExtension.authorizeCreate({
-          namespaceString: namespace,
-          objects: [obj1, obj2],
+        securityExtension.authorizeBulkCreate({
+          namespaceString: '',
+          objects: [{ ...obj1, initialNamespaces: undefined }, obj2],
         })
-      ).rejects.toThrow(`Unable to bulk_create ${obj1.type},${obj2.type}`);
+      ).rejects.toThrowError('No spaces specified for authorization');
+      expect(checkPrivileges).not.toHaveBeenCalled();
+    });
 
-      expect(authorizeSpy).toHaveBeenCalledTimes(1);
-      expect(authorizeSpy).toHaveBeenCalledWith(
-        expect.objectContaining({ actions: new Set([SecurityAction.BULK_CREATE]) })
-      );
+    test('throws an error when checkAuthorization fails', async () => {
+      const { securityExtension, checkPrivileges } = setup();
+      checkPrivileges.mockRejectedValue(new Error('Oh no!'));
+
+      await expect(
+        securityExtension.authorizeBulkCreate({ namespaceString: namespace, objects: [obj1] })
+      ).rejects.toThrowError('Oh no!');
     });
 
     test(`calls internal authorize methods with expected actions, types, spaces, and enforce map`, async () => {
       const { securityExtension, checkPrivileges } = setup();
       checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse); // Return any well-formed response to avoid an unhandled error
 
-      await securityExtension.authorizeCreate({
+      await securityExtension.authorizeBulkCreate({
         namespaceString: namespace,
         objects,
-        options: { forceBulkAction: true },
       });
 
       expect(authorizeSpy).toHaveBeenCalledTimes(1);
@@ -1943,10 +1925,9 @@ describe('#authorizeCreate', () => {
       const { securityExtension, checkPrivileges } = setup();
       checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
 
-      const result = await securityExtension.authorizeCreate({
+      const result = await securityExtension.authorizeBulkCreate({
         namespaceString: namespace,
         objects,
-        options: { forceBulkAction: true },
       });
       expect(result).toEqual({
         status: 'fully_authorized',
@@ -1973,10 +1954,9 @@ describe('#authorizeCreate', () => {
         },
       } as CheckPrivilegesResponse);
 
-      const result = await securityExtension.authorizeCreate({
+      const result = await securityExtension.authorizeBulkCreate({
         namespaceString: namespace,
         objects,
-        options: { forceBulkAction: true },
       });
       expect(result).toEqual({
         status: 'partially_authorized',
@@ -2005,10 +1985,9 @@ describe('#authorizeCreate', () => {
       const { securityExtension, checkPrivileges, auditLogger } = setup();
       checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
 
-      await securityExtension.authorizeCreate({
+      await securityExtension.authorizeBulkCreate({
         namespaceString: namespace,
         objects,
-        options: { forceBulkAction: true },
       });
 
       expect(auditHelperSpy).toHaveBeenCalledTimes(1);
@@ -2046,10 +2025,9 @@ describe('#authorizeCreate', () => {
       } as CheckPrivilegesResponse);
 
       await expect(
-        securityExtension.authorizeCreate({
+        securityExtension.authorizeBulkCreate({
           namespaceString: namespace,
           objects,
-          options: { forceBulkAction: true },
         })
       ).rejects.toThrow(`Unable to bulk_create ${obj2.type},${obj3.type},${obj4.type}`);
       expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
@@ -2068,10 +2046,9 @@ describe('#authorizeCreate', () => {
       } as CheckPrivilegesResponse);
 
       await expect(
-        securityExtension.authorizeCreate({
+        securityExtension.authorizeBulkCreate({
           namespaceString: namespace,
           objects,
-          options: { forceBulkAction: true },
         })
       ).rejects.toThrow(
         `Unable to bulk_create ${obj1.type},${obj2.type},${obj3.type},${obj4.type}`
@@ -2103,65 +2080,39 @@ describe('#authorizeCreate', () => {
   });
 });
 
-describe('#authorizeUpdate', () => {
+describe('update', () => {
   const namespace = 'x';
-
-  const fullyAuthorizedBulkResponse = {
-    hasAllRequested: true,
-    privileges: {
-      kibana: [
-        { privilege: 'mock-saved_object:a/bulk_update', authorized: true },
-        { privilege: 'login:', authorized: true },
-        { resource: 'x', privilege: 'mock-saved_object:b/bulk_update', authorized: true },
-        { resource: 'x', privilege: 'mock-saved_object:c/bulk_update', authorized: true },
-        { resource: 'x', privilege: 'mock-saved_object:d/bulk_update', authorized: true },
-        { resource: 'bar', privilege: 'mock-saved_object:c/bulk_update', authorized: true },
-        { resource: 'y', privilege: 'mock-saved_object:d/bulk_update', authorized: true },
-        { resource: 'z', privilege: 'mock-saved_object:d/bulk_update', authorized: true },
-      ],
-    },
-  } as CheckPrivilegesResponse;
 
   beforeEach(() => {
     checkAuthorizationSpy.mockClear();
     enforceAuthorizationSpy.mockClear();
+    redactNamespacesSpy.mockClear();
     authorizeSpy.mockClear();
     auditHelperSpy.mockClear();
     addAuditEventSpy.mockClear();
   });
 
-  test('throws an error when `namespaceString` is empty and there are no object spaces', async () => {
-    const { securityExtension, checkPrivileges } = setup();
-    checkPrivileges.mockResolvedValue(fullyAuthorizedBulkResponse);
-
-    await expect(
-      securityExtension.authorizeUpdate({
-        namespaceString: '',
-        objects: [{ ...obj1, objectNamespace: undefined }, obj2],
-      })
-    ).rejects.toThrowError('No spaces specified for authorization');
-    expect(checkPrivileges).not.toHaveBeenCalled();
-  });
-
-  test('throws an error when checkAuthorization fails', async () => {
-    const { securityExtension, checkPrivileges } = setup();
-    checkPrivileges.mockRejectedValue(new Error('Oh no!'));
-
-    await expect(
-      securityExtension.authorizeUpdate({ namespaceString: namespace, objects: [obj1] })
-    ).rejects.toThrowError('Oh no!');
-  });
-
-  describe(`update action`, () => {
+  describe(`#authorizeUpdate`, () => {
     const actionString = 'update';
-    test('throws an error when `objects` is empty', async () => {
+
+    test('throws an error when `namespaceString` is empty and there are no object spaces', async () => {
       const { securityExtension, checkPrivileges } = setup();
-      const emptyObjects: AuthorizeUpdateObject[] = [];
+      await expect(
+        securityExtension.authorizeBulkUpdate({
+          namespaceString: '',
+          objects: [{ ...obj1, objectNamespace: undefined }, obj2],
+        })
+      ).rejects.toThrowError('No spaces specified for authorization');
+      expect(checkPrivileges).not.toHaveBeenCalled();
+    });
+
+    test('throws an error when checkAuthorization fails', async () => {
+      const { securityExtension, checkPrivileges } = setup();
+      checkPrivileges.mockRejectedValue(new Error('Oh no!'));
 
       await expect(
-        securityExtension.authorizeUpdate({ namespaceString: namespace, objects: emptyObjects })
-      ).rejects.toThrowError('No objects specified for update authorization');
-      expect(checkPrivileges).not.toHaveBeenCalled();
+        securityExtension.authorizeBulkUpdate({ namespaceString: namespace, objects: [obj1] })
+      ).rejects.toThrowError('Oh no!');
     });
 
     test(`calls internal authorize methods with expected actions, types, spaces, and enforce map`, async () => {
@@ -2178,7 +2129,7 @@ describe('#authorizeUpdate', () => {
 
       await securityExtension.authorizeUpdate({
         namespaceString: namespace,
-        objects: [obj1],
+        object: obj1,
       });
 
       expect(authorizeSpy).toHaveBeenCalledTimes(1);
@@ -2236,7 +2187,7 @@ describe('#authorizeUpdate', () => {
 
       const result = await securityExtension.authorizeUpdate({
         namespaceString: namespace,
-        objects: [obj1],
+        object: obj1,
       });
       expect(result).toEqual({
         status: 'fully_authorized',
@@ -2262,7 +2213,7 @@ describe('#authorizeUpdate', () => {
 
       await securityExtension.authorizeUpdate({
         namespaceString: namespace,
-        objects: [obj1],
+        object: obj1,
       });
 
       expect(auditHelperSpy).toHaveBeenCalledTimes(1);
@@ -2300,7 +2251,7 @@ describe('#authorizeUpdate', () => {
       await expect(
         securityExtension.authorizeUpdate({
           namespaceString: namespace,
-          objects: [obj1],
+          object: obj1,
         })
       ).rejects.toThrow(`Unable to update ${obj1.type}`);
       expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
@@ -2321,7 +2272,7 @@ describe('#authorizeUpdate', () => {
       await expect(
         securityExtension.authorizeUpdate({
           namespaceString: namespace,
-          objects: [obj1],
+          object: obj1,
         })
       ).rejects.toThrow(`Unable to update ${obj1.type}`);
 
@@ -2349,7 +2300,7 @@ describe('#authorizeUpdate', () => {
     });
   });
 
-  describe(`bulk update action`, () => {
+  describe(`@authorizeBulkUpdate`, () => {
     const actionString = 'bulk_update';
     const objects = [obj1, obj2, obj3, obj4];
     const fullyAuthorizedCheckPrivilegesResponse = {
@@ -2409,48 +2360,43 @@ describe('#authorizeUpdate', () => {
       const emptyObjects: AuthorizeUpdateObject[] = [];
 
       await expect(
-        securityExtension.authorizeUpdate({
+        securityExtension.authorizeBulkUpdate({
           namespaceString: namespace,
           objects: emptyObjects,
-          options: { forceBulkAction: true },
         })
       ).rejects.toThrowError('No objects specified for bulk_update authorization');
       expect(checkPrivileges).not.toHaveBeenCalled();
     });
 
-    test('uses bulk_create action by default when objects length is more than 1', async () => {
+    test('throws an error when `namespaceString` is empty and there are no object spaces', async () => {
       const { securityExtension, checkPrivileges } = setup();
-      checkPrivileges.mockResolvedValue({
-        hasAllRequested: false,
-        privileges: {
-          kibana: [
-            { privilege: 'mock-saved_object:a/create', authorized: false },
-            { privilege: 'login:', authorized: true },
-          ],
-        },
-      } as CheckPrivilegesResponse);
+      checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
 
       await expect(
-        securityExtension.authorizeUpdate({
-          namespaceString: namespace,
-          objects: [obj1, obj2],
+        securityExtension.authorizeBulkUpdate({
+          namespaceString: '',
+          objects: [{ ...obj1, objectNamespace: undefined }, obj2],
         })
-      ).rejects.toThrow(`Unable to bulk_update ${obj1.type},${obj2.type}`);
+      ).rejects.toThrowError('No spaces specified for authorization');
+      expect(checkPrivileges).not.toHaveBeenCalled();
+    });
 
-      expect(authorizeSpy).toHaveBeenCalledTimes(1);
-      expect(authorizeSpy).toHaveBeenCalledWith(
-        expect.objectContaining({ actions: new Set([SecurityAction.BULK_UPDATE]) })
-      );
+    test('throws an error when checkAuthorization fails', async () => {
+      const { securityExtension, checkPrivileges } = setup();
+      checkPrivileges.mockRejectedValue(new Error('Oh no!'));
+
+      await expect(
+        securityExtension.authorizeBulkUpdate({ namespaceString: namespace, objects: [obj1] })
+      ).rejects.toThrowError('Oh no!');
     });
 
     test(`calls authorize methods with expected actions, types, spaces, and enforce map`, async () => {
       const { securityExtension, checkPrivileges } = setup();
       checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse); // Return any well-formed response to avoid an unhandled error
 
-      await securityExtension.authorizeUpdate({
+      await securityExtension.authorizeBulkUpdate({
         namespaceString: namespace,
         objects,
-        options: { forceBulkAction: true },
       });
 
       expect(authorizeSpy).toHaveBeenCalledTimes(1);
@@ -2497,10 +2443,9 @@ describe('#authorizeUpdate', () => {
       const { securityExtension, checkPrivileges } = setup();
       checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
 
-      const result = await securityExtension.authorizeUpdate({
+      const result = await securityExtension.authorizeBulkUpdate({
         namespaceString: namespace,
         objects,
-        options: { forceBulkAction: true },
       });
       expect(result).toEqual({
         status: 'fully_authorized',
@@ -2527,10 +2472,9 @@ describe('#authorizeUpdate', () => {
         },
       } as CheckPrivilegesResponse);
 
-      const result = await securityExtension.authorizeUpdate({
+      const result = await securityExtension.authorizeBulkUpdate({
         namespaceString: namespace,
         objects,
-        options: { forceBulkAction: true },
       });
       expect(result).toEqual({
         status: 'partially_authorized',
@@ -2559,10 +2503,9 @@ describe('#authorizeUpdate', () => {
       const { securityExtension, checkPrivileges, auditLogger } = setup();
       checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
 
-      await securityExtension.authorizeUpdate({
+      await securityExtension.authorizeBulkUpdate({
         namespaceString: namespace,
         objects,
-        options: { forceBulkAction: true },
       });
 
       expect(auditHelperSpy).toHaveBeenCalledTimes(1);
@@ -2600,10 +2543,9 @@ describe('#authorizeUpdate', () => {
       } as CheckPrivilegesResponse);
 
       await expect(
-        securityExtension.authorizeUpdate({
+        securityExtension.authorizeBulkUpdate({
           namespaceString: namespace,
           objects,
-          options: { forceBulkAction: true },
         })
       ).rejects.toThrow(`Unable to bulk_update ${obj2.type},${obj3.type},${obj4.type}`);
       expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
@@ -2622,10 +2564,9 @@ describe('#authorizeUpdate', () => {
       } as CheckPrivilegesResponse);
 
       await expect(
-        securityExtension.authorizeUpdate({
+        securityExtension.authorizeBulkUpdate({
           namespaceString: namespace,
           objects,
-          options: { forceBulkAction: true },
         })
       ).rejects.toThrow(
         `Unable to bulk_update ${obj1.type},${obj2.type},${obj3.type},${obj4.type}`
@@ -2655,4 +2596,440 @@ describe('#authorizeUpdate', () => {
       }
     });
   });
+});
+
+describe('#AuthorizeAndRedactMultiNamespaceReferences', () => {
+  const namespace = 'x';
+
+  beforeEach(() => {
+    checkAuthorizationSpy.mockClear();
+    enforceAuthorizationSpy.mockClear();
+    redactNamespacesSpy.mockClear();
+    authorizeSpy.mockClear();
+    auditHelperSpy.mockClear();
+    addAuditEventSpy.mockClear();
+  });
+
+  // NOTE: This comment should inform our test cases...
+  // Now, filter/redact the results. Most SOR functions just redact the `namespaces` field from each returned object. However, this function
+  // will actually filter the returned object graph itself.
+  // This is done in two steps: (1) objects which the user can't access *in this space* are filtered from the graph, and the
+  // graph is rearranged to avoid leaking information. (2) any spaces that the user can't access are redacted from each individual object.
+  // After we finish filtering, we can write audit events for each object that is going to be returned to the user.
+
+  describe('purpose `collectMultiNamespaceReferences`', () => {
+    const actionString = 'bulk_get';
+
+    const refObj1 = {
+      id: 'id-1',
+      inboundReferences: [],
+      originId: undefined,
+      spaces: ['default', 'space-1'],
+      spacesWithMatchingAliases: ['space-2', 'space-3', 'space-4'],
+      spacesWithMatchingOrigins: undefined,
+      type: 'a',
+    };
+    const refObj2 = {
+      id: 'id-2',
+      inboundReferences: [],
+      originId: undefined,
+      spaces: ['default', 'space-2'],
+      spacesWithMatchingAliases: undefined,
+      spacesWithMatchingOrigins: ['space-1', 'space-3'],
+      type: 'b',
+    };
+    const refObj3 = {
+      id: 'id-3',
+      inboundReferences: [{ id: 'id-1', name: 'ref-name', type: 'a' }],
+      originId: undefined,
+      spaces: ['default', 'space-1', 'space-4'],
+      spacesWithMatchingAliases: undefined,
+      spacesWithMatchingOrigins: undefined,
+      type: 'c',
+    };
+    const objects = [refObj1, refObj2, refObj3];
+
+    const fullyAuthorizedCheckPrivilegesResponse = {
+      hasAllRequested: true,
+      privileges: {
+        kibana: [
+          { privilege: 'mock-saved_object:a/bulk_get', authorized: true },
+          { privilege: 'login:', authorized: true },
+          {
+            resource: 'x',
+            privilege: 'mock-saved_object:b/bulk_get',
+            authorized: true,
+          },
+          {
+            resource: 'space-1',
+            privilege: 'mock-saved_object:b/bulk_get',
+            authorized: true,
+          },
+          {
+            resource: 'space-2',
+            privilege: 'mock-saved_object:b/bulk_get',
+            authorized: true,
+          },
+          {
+            resource: 'space-3',
+            privilege: 'mock-saved_object:b/bulk_get',
+            authorized: true,
+          },
+          {
+            resource: 'x',
+            privilege: 'mock-saved_object:c/bulk_get',
+            authorized: true,
+          },
+          {
+            resource: 'space-1',
+            privilege: 'mock-saved_object:c/bulk_get',
+            authorized: true,
+          },
+          {
+            resource: 'space-4',
+            privilege: 'mock-saved_object:c/bulk_get',
+            authorized: true,
+          },
+        ],
+      },
+    } as CheckPrivilegesResponse;
+
+    const partiallyAuthorizedCheckPrivilegesResponse = {
+      hasAllRequested: false,
+      privileges: {
+        kibana: [
+          { privilege: 'mock-saved_object:a/bulk_get', authorized: true },
+          // { privilege: 'login:', authorized: true },
+          {
+            resource: 'x',
+            privilege: 'login:',
+            authorized: true,
+          },
+          {
+            resource: 'space-1',
+            privilege: 'login:',
+            authorized: true,
+          },
+          {
+            resource: 'space-2',
+            privilege: 'login:',
+            authorized: true,
+          },
+          {
+            resource: 'x',
+            privilege: 'mock-saved_object:b/bulk_get',
+            authorized: true,
+          },
+          {
+            resource: 'space-1',
+            privilege: 'mock-saved_object:b/bulk_get',
+            authorized: true,
+          },
+          {
+            resource: 'space-2',
+            privilege: 'mock-saved_object:b/bulk_get',
+            authorized: true,
+          },
+          {
+            resource: 'x',
+            privilege: 'mock-saved_object:c/bulk_get',
+            authorized: true,
+          },
+          {
+            resource: 'space-1',
+            privilege: 'mock-saved_object:c/bulk_get',
+            authorized: true,
+          },
+        ],
+      },
+    } as CheckPrivilegesResponse;
+
+    const redactedObjects = [
+      {
+        ...refObj1,
+        spaces: ['space-1', '?'],
+        spacesWithMatchingAliases: ['space-2', '?', '?'],
+      },
+      { ...refObj2, spaces: ['space-2', '?'], spacesWithMatchingOrigins: ['space-1', '?'] },
+      { ...refObj3, spaces: ['space-1', '?', '?'] },
+    ];
+
+    const expectedTypes = new Set(objects.map((obj) => obj.type));
+    const expectedActions = new Set([SecurityAction.COLLECT_MULTINAMESPACE_REFERENCES]);
+    const expectedSpaces = new Set([
+      namespace,
+      ...refObj1.spaces,
+      ...refObj1.spacesWithMatchingAliases,
+      ...refObj2.spaces,
+      ...refObj2.spacesWithMatchingOrigins,
+      ...refObj3.spaces,
+    ]);
+
+    const expectedEnforceMap = new Map([
+      [refObj1.type, new Set([namespace])],
+      [refObj2.type, new Set([namespace])],
+      [refObj3.type, new Set([namespace])],
+    ]);
+
+    const fullyAuthorizedTypeMap = new Map()
+      .set('a', {
+        bulk_get: { isGloballyAuthorized: true, authorizedSpaces: [] },
+        ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+      })
+      .set('b', {
+        bulk_get: { authorizedSpaces: ['x', 'space-1', 'space-2', 'space-3'] },
+        ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+      })
+      .set('c', {
+        bulk_get: { authorizedSpaces: ['x', 'space-1', 'space-4'] },
+        ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+      });
+
+    const partiallyAuthorizedTypeMap = new Map()
+      .set('a', {
+        bulk_get: { isGloballyAuthorized: true, authorizedSpaces: [] },
+        ['login:']: { authorizedSpaces: ['x', 'space-1', 'space-2'] },
+      })
+      .set('b', {
+        bulk_get: { authorizedSpaces: ['x', 'space-1', 'space-2'] },
+        ['login:']: { authorizedSpaces: ['x', 'space-1', 'space-2'] },
+      })
+      .set('c', {
+        bulk_get: { authorizedSpaces: ['x', 'space-1'] },
+        ['login:']: { authorizedSpaces: ['x', 'space-1', 'space-2'] },
+      });
+
+    test('returns empty arry when no objects are provided`', async () => {
+      const { securityExtension } = setup();
+      const emptyObjects: SavedObjectReferenceWithContext[] = [];
+
+      const result = await securityExtension.authorizeAndRedactMultiNamespaceReferences({
+        namespaceString: namespace,
+        objects: emptyObjects,
+      });
+      expect(result).toEqual(emptyObjects);
+    });
+
+    test('throws an error when `namespaceString` is empty and there are no object spaces', async () => {
+      const { securityExtension, checkPrivileges } = setup();
+      await expect(
+        securityExtension.authorizeAndRedactMultiNamespaceReferences({
+          namespaceString: '',
+          objects: [
+            { ...refObj1, spaces: [], spacesWithMatchingAliases: undefined },
+            { ...refObj2, spaces: [], spacesWithMatchingOrigins: undefined },
+          ],
+        })
+      ).rejects.toThrowError('No spaces specified for authorization');
+      expect(checkPrivileges).not.toHaveBeenCalled();
+    });
+
+    test('throws an error when checkAuthorization fails', async () => {
+      const { securityExtension, checkPrivileges } = setup();
+      checkPrivileges.mockRejectedValue(new Error('Oh no!'));
+
+      await expect(
+        securityExtension.authorizeAndRedactMultiNamespaceReferences({
+          namespaceString: namespace,
+          objects,
+        })
+      ).rejects.toThrowError('Oh no!');
+    });
+
+    test(`calls authorize methods with expected actions, types, spaces, and enforce map`, async () => {
+      const { securityExtension, checkPrivileges } = setup();
+      checkPrivileges.mockResolvedValue(partiallyAuthorizedCheckPrivilegesResponse); // Return any well-formed response to avoid an unhandled error
+
+      await securityExtension.authorizeAndRedactMultiNamespaceReferences({
+        namespaceString: namespace,
+        objects,
+      });
+
+      expect(authorizeSpy).toHaveBeenCalledTimes(1);
+      expect(authorizeSpy).toHaveBeenCalledWith({
+        actions: expectedActions,
+        types: expectedTypes,
+        spaces: expectedSpaces,
+        enforceMap: expectedEnforceMap,
+        auditOptions: {
+          bypassOnSuccess: true,
+        },
+      });
+
+      expect(checkAuthorizationSpy).toHaveBeenCalledTimes(1);
+      expect(checkAuthorizationSpy).toHaveBeenCalledWith({
+        actions: new Set([actionString]),
+        spaces: expectedSpaces,
+        types: expectedTypes,
+        options: { allowGlobalResource: false },
+      });
+
+      expect(checkPrivileges).toHaveBeenCalledTimes(1);
+      expect(checkPrivileges).toHaveBeenCalledWith(
+        [
+          `mock-saved_object:${refObj1.type}/${actionString}`,
+          `mock-saved_object:${refObj2.type}/${actionString}`,
+          `mock-saved_object:${refObj3.type}/${actionString}`,
+          'login:',
+        ],
+        [...expectedSpaces]
+      );
+
+      expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(4);
+      // Called once with complete enforce map (bypasses audit on success)
+      expect(enforceAuthorizationSpy).toHaveBeenNthCalledWith(1, {
+        action: SecurityAction.COLLECT_MULTINAMESPACE_REFERENCES,
+        typesAndSpaces: expectedEnforceMap,
+        typeMap: partiallyAuthorizedTypeMap,
+        auditOptions: { bypassOnSuccess: true },
+      });
+      // Called once per object afterward
+      let i = 2;
+      for (const obj of objects) {
+        expect(enforceAuthorizationSpy).toHaveBeenNthCalledWith(i++, {
+          action: SecurityAction.COLLECT_MULTINAMESPACE_REFERENCES,
+          typesAndSpaces: new Map([[obj.type, new Set([namespace])]]),
+          typeMap: partiallyAuthorizedTypeMap,
+          auditOptions: { bypassOnSuccess: true, bypassOnFailure: true },
+        });
+      }
+    });
+
+    test(`returns unredacted result when fully authorized`, async () => {
+      const { securityExtension, checkPrivileges } = setup();
+      checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse); // Return any well-formed response to avoid an unhandled error
+
+      const result = await securityExtension.authorizeAndRedactMultiNamespaceReferences({
+        namespaceString: namespace,
+        objects,
+      });
+
+      expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(4);
+      expect(enforceAuthorizationSpy).toHaveBeenNthCalledWith(1, {
+        action: SecurityAction.COLLECT_MULTINAMESPACE_REFERENCES,
+        typesAndSpaces: expectedEnforceMap,
+        typeMap: fullyAuthorizedTypeMap,
+        auditOptions: { bypassOnSuccess: true },
+      });
+      let i = 2;
+      for (const obj of objects) {
+        expect(enforceAuthorizationSpy).toHaveBeenNthCalledWith(i++, {
+          action: SecurityAction.COLLECT_MULTINAMESPACE_REFERENCES,
+          typesAndSpaces: new Map([[obj.type, new Set([namespace])]]),
+          typeMap: fullyAuthorizedTypeMap,
+          auditOptions: { bypassOnSuccess: true, bypassOnFailure: true },
+        });
+      }
+      expect(result).toEqual(objects);
+    });
+
+    test(`returns redacted result when partially authorized`, async () => {
+      const { securityExtension, checkPrivileges } = setup();
+      checkPrivileges.mockResolvedValue(partiallyAuthorizedCheckPrivilegesResponse); // Return any well-formed response to avoid an unhandled error
+
+      const result = await securityExtension.authorizeAndRedactMultiNamespaceReferences({
+        namespaceString: namespace,
+        objects,
+      });
+      expect(redactNamespacesSpy).toHaveBeenCalledTimes(5); // spaces x3, spaces of aliases x1, spaces of origins x1
+      expect(result).toEqual(redactedObjects);
+    });
+
+    test(`adds an audit event per object when successful`, async () => {
+      const { securityExtension, checkPrivileges, auditLogger } = setup();
+      checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse); // Return any well-formed response to avoid an unhandled error
+
+      await securityExtension.authorizeAndRedactMultiNamespaceReferences({
+        namespaceString: namespace,
+        objects,
+      });
+
+      // the audit helper is not called during this action
+      // the addAuditEvent method is called directly
+      expect(auditHelperSpy).not.toHaveBeenCalled();
+      expect(addAuditEventSpy).toHaveBeenCalledTimes(objects.length);
+      expect(auditLogger.log).toHaveBeenCalledTimes(objects.length);
+      let i = 1;
+      for (const obj of objects) {
+        expect(auditLogger.log).toHaveBeenNthCalledWith(i++, {
+          error: undefined,
+          event: {
+            action: AuditAction.COLLECT_MULTINAMESPACE_REFERENCES,
+            category: ['database'],
+            outcome: 'success',
+            type: ['access'],
+          },
+          kibana: {
+            add_to_spaces: undefined,
+            delete_from_spaces: undefined,
+            saved_object: { type: obj.type, id: obj.id },
+          },
+          message: `User has collected references and spaces of ${obj.type} [id=${obj.id}]`,
+        });
+      }
+    });
+
+    test(`throws when unauthorized`, async () => {
+      const { securityExtension, checkPrivileges } = setup();
+      checkPrivileges.mockResolvedValue({
+        hasAllRequested: false,
+        privileges: {
+          kibana: [
+            { privilege: 'mock-saved_object:a/bulk_get', authorized: true },
+            { privilege: 'login:', authorized: true },
+          ],
+        },
+      } as CheckPrivilegesResponse);
+
+      await expect(
+        securityExtension.authorizeAndRedactMultiNamespaceReferences({
+          namespaceString: namespace,
+          objects,
+        })
+      ).rejects.toThrow(`Unable to bulk_get ${refObj2.type},${refObj3.type}`);
+      expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
+    });
+
+    test(`adds a single audit event when unauthorized`, async () => {
+      const { securityExtension, checkPrivileges, auditLogger } = setup();
+      checkPrivileges.mockResolvedValue({
+        hasAllRequested: false,
+        privileges: {
+          kibana: [{ privilege: 'login:', authorized: true }],
+        },
+      } as CheckPrivilegesResponse);
+
+      await expect(
+        securityExtension.authorizeAndRedactMultiNamespaceReferences({
+          namespaceString: namespace,
+          objects,
+        })
+      ).rejects.toThrow(`Unable to bulk_get ${refObj1.type},${refObj2.type},${refObj3.type}`);
+      expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
+
+      expect(addAuditEventSpy).toHaveBeenCalledTimes(1);
+      expect(auditLogger.log).toHaveBeenCalledTimes(1);
+      expect(auditLogger.log).toHaveBeenCalledWith({
+        error: {
+          code: 'Error',
+          message: `Unable to bulk_get ${refObj1.type},${refObj2.type},${refObj3.type}`,
+        },
+        event: {
+          action: AuditAction.COLLECT_MULTINAMESPACE_REFERENCES,
+          category: ['database'],
+          outcome: 'failure',
+          type: ['access'],
+        },
+        kibana: {
+          add_to_spaces: undefined,
+          delete_from_spaces: undefined,
+          saved_object: undefined,
+        },
+        message: `Failed attempt to collect references and spaces of saved objects`,
+      });
+    });
+  });
+
+  // ToDo:
+  // describe('purpose `updateObjectsSpaces`', () => {});
 });

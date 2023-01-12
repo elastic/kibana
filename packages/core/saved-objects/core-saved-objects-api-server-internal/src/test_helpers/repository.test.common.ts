@@ -49,6 +49,10 @@ import {
   ElasticsearchClientMock,
 } from '@kbn/core-elasticsearch-client-server-mocks';
 import { DocumentMigrator } from '@kbn/core-saved-objects-migration-server-internal';
+import {
+  AuthorizeBulkCreateParams,
+  AuthorizeBulkUpdateParams,
+} from '@kbn/core-saved-objects-server/src/extensions/security';
 import { mockGetSearchDsl } from '../lib/repository.test.mock';
 import { SavedObjectsRepository } from '../lib/repository';
 
@@ -258,8 +262,18 @@ export const setupAuthorizeCreate = (
   mockSecurityExt.authorizeCreate.mockImplementation(
     (params: AuthorizeCreateParams): Promise<CheckAuthorizationResult<string>> => {
       if (status === 'unauthorized') throw enforceError;
-      // const { auditCallback } = params;
-      // auditCallback?.(undefined);
+      return Promise.resolve({ status, typeMap: authMap });
+    }
+  );
+};
+
+export const setupAuthorizeBulkCreate = (
+  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>,
+  status: 'fully_authorized' | 'partially_authorized' | 'unauthorized'
+) => {
+  mockSecurityExt.authorizeBulkCreate.mockImplementation(
+    (params: AuthorizeBulkCreateParams): Promise<CheckAuthorizationResult<string>> => {
+      if (status === 'unauthorized') throw enforceError;
       return Promise.resolve({ status, typeMap: authMap });
     }
   );
@@ -272,8 +286,18 @@ export const setupAuthorizeUpdate = (
   mockSecurityExt.authorizeUpdate.mockImplementation(
     (params: AuthorizeUpdateParams): Promise<CheckAuthorizationResult<string>> => {
       if (status === 'unauthorized') throw enforceError;
-      // const { auditCallback } = params;
-      // auditCallback?.(undefined);
+      return Promise.resolve({ status, typeMap: authMap });
+    }
+  );
+};
+
+export const setupAuthorizeBulkUpdate = (
+  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>,
+  status: 'fully_authorized' | 'partially_authorized' | 'unauthorized'
+) => {
+  mockSecurityExt.authorizeBulkUpdate.mockImplementation(
+    (params: AuthorizeBulkUpdateParams): Promise<CheckAuthorizationResult<string>> => {
+      if (status === 'unauthorized') throw enforceError;
       return Promise.resolve({ status, typeMap: authMap });
     }
   );

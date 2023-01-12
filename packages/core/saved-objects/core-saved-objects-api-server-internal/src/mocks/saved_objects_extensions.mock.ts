@@ -21,10 +21,11 @@ const createEncryptionExtension = (): jest.Mocked<ISavedObjectsEncryptionExtensi
 
 const createSecurityExtension = (): jest.Mocked<ISavedObjectsSecurityExtension> => ({
   authorizeCreate: jest.fn(),
+  authorizeBulkCreate: jest.fn(),
   authorizeUpdate: jest.fn(),
+  authorizeBulkUpdate: jest.fn(),
   authorizeAndRedactMultiNamespaceReferences: jest.fn(),
   authorize: jest.fn(),
-  // enforceAuthorization: jest.fn(),
   addAuditEvent: jest.fn(),
   redactNamespaces: jest.fn(),
 });

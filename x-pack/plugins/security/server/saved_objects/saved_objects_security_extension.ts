@@ -26,6 +26,11 @@ import type {
   UpdateSpacesAuditHelperParams,
   UpdateSpacesAuditOptions,
 } from '@kbn/core-saved-objects-server';
+import type {
+  AuthorizeBulkCreateParams,
+  AuthorizeBulkUpdateParams,
+  InternalAuthorizeOptions,
+} from '@kbn/core-saved-objects-server/src/extensions/security';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../common/constants';
@@ -410,7 +415,23 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
   async authorizeCreate(
     params: AuthorizeCreateParams
   ): Promise<CheckAuthorizationResult<string> | undefined> {
-    const { namespaceString, objects, options } = params;
+    return this.internalAuthorizeCreate({
+      namespaceString: params.namespaceString,
+      objects: [params.object],
+    });
+  }
+
+  async authorizeBulkCreate(
+    params: AuthorizeBulkCreateParams
+  ): Promise<CheckAuthorizationResult<string> | undefined> {
+    return this.internalAuthorizeCreate(params, { forceBulkAction: true });
+  }
+
+  private async internalAuthorizeCreate(
+    params: AuthorizeBulkCreateParams,
+    options?: InternalAuthorizeOptions
+  ): Promise<CheckAuthorizationResult<string> | undefined> {
+    const { namespaceString, objects } = params;
 
     const action =
       options?.forceBulkAction || objects.length > 1
@@ -457,7 +478,23 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
   async authorizeUpdate(
     params: AuthorizeUpdateParams
   ): Promise<CheckAuthorizationResult<string> | undefined> {
-    const { options, namespaceString, objects } = params;
+    return this.internalAuthorizeUpdate({
+      namespaceString: params.namespaceString,
+      objects: [params.object],
+    });
+  }
+
+  async authorizeBulkUpdate(
+    params: AuthorizeBulkUpdateParams
+  ): Promise<CheckAuthorizationResult<string> | undefined> {
+    return this.internalAuthorizeUpdate(params, { forceBulkAction: true });
+  }
+
+  async internalAuthorizeUpdate(
+    params: AuthorizeBulkUpdateParams,
+    options?: InternalAuthorizeOptions
+  ): Promise<CheckAuthorizationResult<string> | undefined> {
+    const { namespaceString, objects } = params;
 
     const action =
       options?.forceBulkAction || objects.length > 1
@@ -514,8 +551,8 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     params: AuthorizeAndRedactMultiNamespaceReferencesParams
   ): Promise<SavedObjectReferenceWithContext[]> {
     const { namespaceString, objects, options = {} } = params;
+    if (objects.length === 0) return objects;
     const { purpose } = options;
-    // const namespaceString = SavedObjectsUtils.namespaceIdToString(namespace);
 
     // Check authorization based on all *found* object types / spaces
     const typesToAuthorize = new Set<string>();
@@ -578,13 +615,11 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       // Is the user authorized to access this object in this space?
       let isAuthorizedForObject = true;
       try {
-        // ToDo: this is the only remaining call to enforceAuthorization outside of the security extension
-        // This was a bit complicated to change now, but can ultimately be removed when authz logic is
-        // migrated from the repo level to the extension level.
         this.enforceAuthorization({
           typesAndSpaces: new Map([[type, new Set([namespaceString])]]),
           action,
           typeMap,
+          auditOptions: { bypassOnSuccess: true, bypassOnFailure: true }, // never audit here
         });
       } catch (err) {
         isAuthorizedForObject = false;
