@@ -93,6 +93,12 @@ export type RangeFilter = Filter & {
  */
 export const isRangeFilter = (filter?: Filter): filter is RangeFilter => has(filter, 'query.range');
 
+/**
+ * @param filter
+ * @returns Type guard derived from the meta.type field
+ *
+ * @public
+ */
 export const isMetaRangeFilter = (filter?: Filter): filter is RangeFilter => {
   return get(filter, 'meta.type') === 'range';
 };
