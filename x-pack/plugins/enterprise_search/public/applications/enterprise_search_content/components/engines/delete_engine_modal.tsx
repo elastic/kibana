@@ -33,15 +33,19 @@ export const DeleteEngineModal: React.FC = () => {
         onConfirm={() => {
           deleteEngine({ engineName });
         }}
-        cancelButtonText="No, cancel"
+        cancelButtonText={i18n.translate(
+          'xpack.enterpriseSearch.content.engineList.deleteEngineModal.closeButton.title',
+          {
+            defaultMessage: 'Cancel',
+          }
+        )}
         confirmButtonText={i18n.translate(
           'xpack.enterpriseSearch.content.engineList.deleteEngineModal.confirmButton.title',
           {
-            defaultMessage: 'Yes, Delete this engine',
+            defaultMessage: 'Yes, delete this engine ',
           }
         )}
         buttonColor="danger"
-        defaultFocusedButton="confirm"
         isLoading={isDeleteLoading}
       >
         <p>

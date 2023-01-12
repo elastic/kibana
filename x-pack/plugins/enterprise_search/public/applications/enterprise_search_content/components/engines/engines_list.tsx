@@ -55,23 +55,32 @@ export const EnginesList: React.FC = () => {
               iconType="plusInCircle"
               data-test-subj="enterpriseSearchContentEnginesCreationButton"
               href={'TODO'}
-            />,
+            >
+              {i18n.translate('xpack.enterpriseSearch.content.engines.createEngineButtonLabel', {
+                defaultMessage: 'Create engine',
+              })}
+            </EuiButton>,
           ],
         }}
         pageViewTelemetry="Engines"
         isLoading={false}
       >
         <EuiText>
-          {i18n.translate('xpack.enterpriseSearch.content.engines.description', {
-            defaultMessage:
-              'Engines allow you to query indexed data with a complete set of relevance, analytics and personalization tools. To learn more about how engines work in Enterprise search ',
-          })}
-
-          <EuiLink data-test-subj="documentationLink" href="TODO" target="_blank">
-            {i18n.translate('xpack.enterpriseSearch.content.engines.documentation', {
-              defaultMessage: 'explore our Engines documentation',
-            })}
-          </EuiLink>
+          <FormattedMessage
+            id="xpack.enterpriseSearch.content.engines.description"
+            defaultMessage="Engines allow you to query indexed data with a complete set of relevance, analytics and personalization tools. To learn more about how engines work in Enterprise search {documentationUrl}"
+            values={{
+              documentationUrl: (
+                <EuiLink data-test-subj="documentationLink" href="TODO" target="_blank">
+                  {' '}
+                  {/* TODO: navigate to documentation url */}{' '}
+                  {i18n.translate('xpack.enterpriseSearch.content.engines.documentation', {
+                    defaultMessage: 'explore our Engines documentation',
+                  })}
+                </EuiLink>
+              ),
+            }}
+          />
         </EuiText>
         <EuiSpacer />
         <div>

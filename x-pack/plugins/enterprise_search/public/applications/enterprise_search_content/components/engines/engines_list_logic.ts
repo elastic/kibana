@@ -16,7 +16,6 @@ import {
 
 import { Actions } from '../../../shared/api_logic/create_api_logic';
 
-import { flashAPIErrors } from '../../../shared/flash_messages';
 import {
   DeleteEngineAPILogic,
   DeleteEnginesApiLogicActions,
@@ -127,10 +126,6 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
     meta: [() => [selectors.parameters], (parameters) => parameters.meta],
   }),
   listeners: ({ actions, values }) => ({
-    apiError: (e) => flashAPIErrors(e),
-    deleteError: (e) => {
-      flashAPIErrors(e);
-    },
     deleteSuccess: () => {
       actions.closeDeleteEngineModal();
       actions.fetchEngines(values.parameters);

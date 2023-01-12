@@ -166,18 +166,6 @@ describe('EnginesListLogic', () => {
     });
   });
   describe('listeners', () => {
-    it('call flashAPIErrors on apiError', () => {
-      EnginesListLogic.actions.apiError({} as HttpError);
-      expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledTimes(2);
-      expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledWith({});
-    });
-    // check for delete engine error
-    it('call flashAPIErrors on deleteError', () => {
-      EnginesListLogic.actions.deleteError({} as HttpError);
-      expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledTimes(2);
-      expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledWith({});
-    });
-
     it('calls flashSuccessToast, closeDeleteEngineModal and fetchEngines on deleteSuccess', () => {
       EnginesListLogic.actions.fetchEngines = jest.fn();
       EnginesListLogic.actions.closeDeleteEngineModal = jest.fn();

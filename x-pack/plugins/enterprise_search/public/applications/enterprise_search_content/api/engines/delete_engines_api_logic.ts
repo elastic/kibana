@@ -30,7 +30,7 @@ export const DeleteEngineAPILogic = createApiLogic(
   {
     showSuccessFlashFn: ({ engineName }) =>
       i18n.translate('xpack.enterpriseSearch.content.engineList.deleteEngine.successToast.title', {
-        defaultMessage: '{engineName} is successfully deleted',
+        defaultMessage: '{engineName} has been deleted',
         values: {
           engineName,
         },

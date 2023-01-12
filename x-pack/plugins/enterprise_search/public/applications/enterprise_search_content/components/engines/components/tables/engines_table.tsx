@@ -84,7 +84,7 @@ export const EnginesListTable: React.FC<EnginesListTableProps> = ({
                 },
               }
             ),
-          onClick: () => {}, // navigate url to engine view page
+          onClick: () => {}, // TODO: navigate to engine overview url
         },
         {
           color: 'danger',
