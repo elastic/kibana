@@ -19,10 +19,12 @@ import {
   EuiRadio,
   EuiComboBoxOptionOption,
   EuiSpacer,
+  euiPaletteColorBlindBehindText,
 } from '@elastic/eui';
 import { useStyles } from './styles';
 import { ControlGeneralViewResponseDeps, ControlResponseAction } from '../../types';
 import * as i18n from '../control_general_view/translations';
+import {colors} from '@kbn/chart-icons/src/assets/common_styles';
 
 export const ControlGeneralViewResponse = ({
   response,
@@ -35,6 +37,7 @@ export const ControlGeneralViewResponse = ({
 }: ControlGeneralViewResponseDeps) => {
   const [isPopoverOpen, setPopoverOpen] = useState(false);
   const styles = useStyles();
+  const visColorsBehindText = euiPaletteColorBlindBehindText();
 
   const onTogglePopover = useCallback(() => {
     setPopoverOpen(!isPopoverOpen);
@@ -91,8 +94,9 @@ export const ControlGeneralViewResponse = ({
       response.match.map((selector) => ({
         label: selector as unknown as string,
         value: selector as unknown as string,
+        color: visColorsBehindText[0],
       })),
-    [response.match]
+    [response.match, visColorsBehindText]
   );
 
   const selectedExcludes = useMemo(
@@ -101,8 +105,9 @@ export const ControlGeneralViewResponse = ({
       response.exclude.map((selector) => ({
         label: selector as unknown as string,
         value: selector as unknown as string,
+        color: visColorsBehindText[5],
       })),
-    [response.exclude]
+    [response.exclude, visColorsBehindText]
   );
 
   const onShowExclude = useCallback(() => {
