@@ -22,7 +22,9 @@ export const noopAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
   defaultActionGroupId: 'default',
   minimumLicenseRequired: 'basic',
   isExportable: true,
-  async executor() {},
+  async executor() {
+    return { state: {} };
+  },
   producer: 'alerts',
 };
 
@@ -58,8 +60,10 @@ export const alwaysFiringAlertType: RuleType<
     });
 
     return {
-      globalStateValue: true,
-      groupInSeriesIndex: (state.groupInSeriesIndex || 0) + 1,
+      state: {
+        globalStateValue: true,
+        groupInSeriesIndex: (state.groupInSeriesIndex || 0) + 1,
+      },
     };
   },
 };
