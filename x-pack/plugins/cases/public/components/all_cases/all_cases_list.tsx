@@ -143,8 +143,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     const onFilterChangedCallback = useCallback(
       (newFilterOptions: Partial<FilterOptions>) => {
         if (
-          newFilterOptions.status &&
-          newFilterOptions.status === CaseStatuses.closed &&
+          newFilterOptions?.status === CaseStatuses.closed &&
           queryParams.sortField === SortFieldCase.createdAt
         ) {
           setQueryParams({ sortField: SortFieldCase.closedAt });

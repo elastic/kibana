@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useRef, useState, useEffect } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
 import { isEqual } from 'lodash';
 
@@ -38,7 +38,6 @@ export const getFilterOptionsLocalStorageKey = (appId: string) => {
 
 const getQueryParams = (
   params: PartialQueryParams,
-  queryParams: PartialQueryParams,
   urlParams: PartialQueryParams,
   localStorageQueryParams?: LocalStorageQueryParams
 ): QueryParams => {
@@ -70,7 +69,7 @@ const getQueryParams = (
 const getFilterOptions = (
   filterOptions: FilterOptions,
   params: FilterOptions,
-  urlParams?: PartialFilterOptions,
+  urlParams: PartialFilterOptions,
   localStorageFilterOptions?: PartialFilterOptions
 ): FilterOptions => {
   const severity =
@@ -87,8 +86,8 @@ const getFilterOptions = (
   return {
     ...filterOptions,
     ...params,
-    ...(severity && { severity }),
-    ...(status && { status }),
+    severity,
+    status,
   };
 };
 
@@ -124,7 +123,6 @@ export function useAllCasesState(
       const urlParams: PartialQueryParams = parseUrlQueryParams(parsedUrlParams);
       const newQueryParams: QueryParams = getQueryParams(
         params,
-        queryParams,
         urlParams,
         localStorageQueryParams
       );
@@ -136,7 +134,7 @@ export function useAllCasesState(
       setLocalStorageQueryParams(newLocalStorageQueryParams);
       setQueryParams(newQueryParams);
     },
-    [isModalView, location.search, queryParams, localStorageQueryParams, setLocalStorageQueryParams]
+    [isModalView, location.search, localStorageQueryParams, setLocalStorageQueryParams]
   );
 
   const persistAndUpdateFilterOptions = useCallback(
@@ -154,8 +152,8 @@ export function useAllCasesState(
       );
 
       const newPersistedFilterOptions: PartialFilterOptions = {
-        ...(newFilterOptions.severity && { severity: newFilterOptions.severity }),
-        ...(newFilterOptions.status && { status: newFilterOptions.status }),
+        severity: newFilterOptions.severity,
+        status: newFilterOptions.status,
       };
 
       const newLocalStorageFilterOptions: PartialFilterOptions = {
@@ -174,21 +172,12 @@ export function useAllCasesState(
     ]
   );
 
-  useEffect(() => {
-    if (isFirstRenderRef.current) {
-      persistAndUpdateQueryParams(isModalView ? queryParams : {});
-      persistAndUpdateFilterOptions(isModalView ? filterOptions : initialFilterOptions);
+  if (isFirstRenderRef.current) {
+    persistAndUpdateQueryParams(isModalView ? queryParams : {});
+    persistAndUpdateFilterOptions(isModalView ? filterOptions : initialFilterOptions);
 
-      isFirstRenderRef.current = false;
-    }
-  }, [
-    filterOptions,
-    initialFilterOptions,
-    isModalView,
-    persistAndUpdateFilterOptions,
-    persistAndUpdateQueryParams,
-    queryParams,
-  ]);
+    isFirstRenderRef.current = false;
+  }
 
   if (!isModalView) {
     const parsedUrlParams = parse(location.search);

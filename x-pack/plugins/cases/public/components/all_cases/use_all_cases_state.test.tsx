@@ -82,14 +82,12 @@ describe('useAllCasesQueryParams', () => {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
-    expect(JSON.parse(localStorage.getItem(LOCALSTORAGE_QUERY_PARAMS_KEY) ?? '{}')).toMatchObject({
+    expect(JSON.parse(localStorage.getItem(LOCALSTORAGE_QUERY_PARAMS_KEY)!)).toMatchObject({
       ...LOCAL_STORAGE_QUERY_PARAMS_DEFAULTS,
     });
-    expect(JSON.parse(localStorage.getItem(LOCALSTORAGE_FILTER_OPTIONS_KEY) ?? '{}')).toMatchObject(
-      {
-        ...LOCAL_STORAGE_FILTER_OPTIONS_DEFAULTS,
-      }
-    );
+    expect(JSON.parse(localStorage.getItem(LOCALSTORAGE_FILTER_OPTIONS_KEY)!)).toMatchObject({
+      ...LOCAL_STORAGE_FILTER_OPTIONS_DEFAULTS,
+    });
   });
 
   it('takes into account input filter options', () => {
