@@ -30,36 +30,6 @@ export function exit(code: number) {
   }, 0);
 }
 
-export async function checkIfMappingsAreIncompatible({
-  esClient,
-  index,
-  currentMappings,
-  nextMappings,
-}: {
-  esClient: Client;
-  index: string;
-  currentMappings: SavedObjectsTypeMappingDefinitions;
-  nextMappings: SavedObjectsTypeMappingDefinitions;
-}) {
-  await esClient.indices.create({
-    index,
-    mappings: {
-      dynamic: false,
-      properties: currentMappings,
-    },
-    settings: {
-      mapping: {
-        total_fields: { limit: 1500 },
-      },
-    },
-  });
-
-  return await esClient.indices.putMapping({
-    index,
-    properties: nextMappings,
-  });
-}
-
 export async function startES(): Promise<Client> {
   const servers = createTestServers({ adjustTimeout: () => {} });
   const esServer = await servers.startES();

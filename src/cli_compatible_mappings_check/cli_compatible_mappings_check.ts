@@ -12,14 +12,9 @@ import { kibanaPackageJson } from '@kbn/repo-info';
 
 import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-base-server-internal';
 import { extractMappingsFromPlugins } from './extract_mappings_from_plugins';
-import {
-  log,
-  exit,
-  startES,
-  writeToMappingsFile,
-  CURRENT_MAPPINGS_FILE,
-  checkIfMappingsAreIncompatible,
-} from './util';
+import { log, exit, startES, writeToMappingsFile, CURRENT_MAPPINGS_FILE } from './util';
+
+import { throwIfMappingsAreIncompatible } from './check_incompatible_mappings';
 
 const program = new Command('bin/compatible-mappings-check');
 
@@ -70,7 +65,7 @@ program
         const esClient = await startES();
 
         log.info(`Checking if mappings are compatible...`);
-        const res = await checkIfMappingsAreIncompatible({
+        const res = await throwIfMappingsAreIncompatible({
           esClient,
           index: MY_INDEX,
           nextMappings: extractedMappings,
