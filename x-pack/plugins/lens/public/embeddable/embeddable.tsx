@@ -89,6 +89,7 @@ import {
   FrameDatasourceAPI,
   AddUserMessages,
   isMessageRemovable,
+  UserMessagesGetter,
 } from '../types';
 
 import { getEditPath, DOC_TYPE } from '../../common';
@@ -497,12 +498,16 @@ export class Embeddable
     );
   }
 
-  private get userMessages() {
-    return [...this._userMessages, ...Object.values(this.additionalUserMessages)];
-  }
+  private getUserMessages: UserMessagesGetter = (locationId, filters) => {
+    return filterUserMessages(
+      [...this._userMessages, ...Object.values(this.additionalUserMessages)],
+      locationId,
+      filters
+    );
+  };
 
   private get hasAnyErrors() {
-    return this.userMessages.some((message) => message.severity === 'error');
+    return this.getUserMessages(undefined, { severity: 'error' }).length > 0;
   }
 
   private _userMessages: UserMessage[] = [];
@@ -831,7 +836,7 @@ export class Embeddable
 
     this.domNode.setAttribute('data-shared-item', '');
 
-    const errors = filterUserMessages(this.userMessages, 'visualization', {
+    const errors = this.getUserMessages('visualization', {
       severity: 'error',
     });
 
@@ -904,7 +909,7 @@ export class Embeddable
       domNode
     );
 
-    const warningsToDisplay = filterUserMessages(this.userMessages, 'embeddableBadge', {
+    const warningsToDisplay = this.getUserMessages('embeddableBadge', {
       severity: 'warning',
     });
 

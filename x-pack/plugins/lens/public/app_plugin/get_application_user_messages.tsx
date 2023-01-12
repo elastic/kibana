@@ -151,7 +151,7 @@ function getMissingIndexPatternsError(
 
 export const filterUserMessages = (
   userMessages: UserMessage[],
-  locationId: UserMessagesDisplayLocationId,
+  locationId: UserMessagesDisplayLocationId | undefined,
   { dimensionId, layerId, severity }: UserMessageFilters
 ) =>
   userMessages.filter(

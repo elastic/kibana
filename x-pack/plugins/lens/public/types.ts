@@ -306,7 +306,7 @@ export interface UserMessageFilters {
 }
 
 export type UserMessagesGetter = (
-  locationId: UserMessagesDisplayLocationId,
+  locationId: UserMessagesDisplayLocationId | undefined,
   filters: UserMessageFilters
 ) => UserMessage[];
 
