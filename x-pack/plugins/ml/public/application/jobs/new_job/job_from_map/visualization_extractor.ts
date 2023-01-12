@@ -9,6 +9,7 @@ import { asyncForEach } from '@kbn/std';
 import type { MapEmbeddable } from '@kbn/maps-plugin/public';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { Query } from '@kbn/es-query';
 import { categoryFieldTypes } from '../../../../../common/util/fields_utils';
 
 export interface LayerResult {
@@ -18,6 +19,7 @@ export interface LayerResult {
   dataViewId: string;
   dataView: DataView | undefined;
   splitFieldOptions?: EuiComboBoxOptionOption[];
+  query: Query | null;
 }
 
 export class VisualizationExtractor {
@@ -38,6 +40,7 @@ export class VisualizationExtractor {
         : undefined;
       const layerDisplayName = await layer.getDisplayName();
       const layerId = await layer.getId();
+      const query = await layer.getQuery();
 
       if (geoField && dataViewId && layerGeoFields[geoField] === undefined) {
         layerGeoFields[geoField] = true;
@@ -49,6 +52,7 @@ export class VisualizationExtractor {
           geoField,
           dataViewId,
           dataView,
+          query,
           ...(dataView
             ? { splitFieldOptions: await this.getSplitFieldOptions(dataView) }
             : { splitFieldOptions: [] }),

@@ -70,7 +70,7 @@ export class QuickJobCreatorBase {
     datafeedConfig: Datafeed;
     jobConfig: Job;
     createdByLabel: CREATED_BY_LABEL;
-    dashboard: any;
+    dashboard: Dashboard;
     start: number | undefined;
     end: number | undefined;
     startJob: boolean;

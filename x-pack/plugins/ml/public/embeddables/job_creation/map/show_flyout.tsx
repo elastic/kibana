@@ -11,7 +11,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { MapEmbeddable } from '@kbn/maps-plugin/public';
 
 import { GeoJobFlyout } from './flyout';
-import { getFlyoutSession } from '../common/get_flyout_session';
+import { createFlyout } from '../common/create_flyout';
 
 export async function showMapVisToADJobFlyout(
   embeddable: MapEmbeddable,
@@ -19,5 +19,5 @@ export async function showMapVisToADJobFlyout(
   share: SharePluginStart,
   data: DataPublicPluginStart
 ): Promise<void> {
-  return getFlyoutSession(GeoJobFlyout, embeddable, coreStart, share, data);
+  return createFlyout(GeoJobFlyout, embeddable, coreStart, share, data);
 }

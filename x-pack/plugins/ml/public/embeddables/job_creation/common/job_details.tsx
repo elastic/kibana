@@ -345,7 +345,6 @@ export const JobDetails: FC<Props> = ({
 
       {state === STATE.SAVE_SUCCESS ? (
         <>
-          <EuiSpacer size="m" />
           <EuiFlexGroup
             gutterSize="s"
             data-test-subj={`mlLensLayerCompatible.jobCreated.success_${layerIndex}`}
@@ -393,7 +392,6 @@ export const JobDetails: FC<Props> = ({
 
       {state === STATE.SAVING && incomingCreateError === undefined ? (
         <>
-          <EuiSpacer size="m" />
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <FormattedMessage

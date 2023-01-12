@@ -45,8 +45,7 @@ export const GeoJobFlyout: FC<Props> = ({ onClose, embeddable }) => {
         console.error('Layers could not be extracted from embeddable', error);
         onClose();
       });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [embeddable]);
+  }, [embeddable, onClose]);
 
   return (
     <>
