@@ -48,6 +48,7 @@ export interface Props {
   selectedCategory: ExtendedIntegrationCategory;
   setSelectedCategory: (category: string) => void;
   categories: CategoryFacet[];
+  subCategories?: CategoryFacet[];
   onSearchChange: (search: string) => void;
   showMissingIntegrationMessage?: boolean;
   callout?: JSX.Element | null;
@@ -113,7 +114,6 @@ export const PackageListGrid: FunctionComponent<Props> = ({
     return promoteFeaturedIntegrations(filteredList, selectedCategory);
   }, [isLoading, list, localSearchRef, searchTerm, selectedCategory]);
 
-  const controlsContent = <ControlsColumn title={title} controls={controls} sticky={isSticky} />;
   let gridContent: JSX.Element;
 
   if (isLoading || !localSearchRef.current) {
@@ -137,7 +137,7 @@ export const PackageListGrid: FunctionComponent<Props> = ({
           data-test-subj="epmList.integrationCards"
         >
           <EuiFlexItem grow={1} className={isSticky ? 'kbnStickyMenu' : ''}>
-            {controlsContent}
+            <ControlsColumn controls={controls} title={title} sticky={isSticky} />
           </EuiFlexItem>
           <EuiFlexItem grow={5}>
             <EuiFieldSearch
@@ -248,11 +248,11 @@ interface GridColumnProps {
   showCardLabels?: boolean;
 }
 
-function GridColumn({
+const GridColumn = ({
   list,
   showMissingIntegrationMessage = false,
   showCardLabels = false,
-}: GridColumnProps) {
+}: GridColumnProps) => {
   return (
     <EuiFlexGrid gutterSize="l" columns={3}>
       {list.length ? (
@@ -294,7 +294,7 @@ function GridColumn({
       )}
     </EuiFlexGrid>
   );
-}
+};
 
 interface MissingIntegrationContentProps {
   resetQuery: () => void;
