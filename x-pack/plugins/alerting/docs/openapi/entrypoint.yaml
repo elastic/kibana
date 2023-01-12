@@ -25,8 +25,8 @@ paths:
     $ref: 'paths/s@{spaceid}@api@alerting@rules@_find.yaml'
 #  '/s/{spaceId}/api/alerting/_health':
 #   $ref: paths/s@{spaceid}@api@alerting@_health.yaml
-#  '/s/{spaceId}/api/alerting/rule_types':
-#   $ref: 'paths/s@{spaceid}@api@alerting@rule_types.yaml'
+  '/s/{spaceId}/api/alerting/rule_types':
+    $ref: 'paths/s@{spaceid}@api@alerting@rule_types.yaml'
   '/s/{spaceId}/api/alerting/rule/{ruleId}/_mute_all':
     $ref: 'paths/s@{spaceid}@api@alerting@rule@{ruleid}@_mute_all.yaml'
   '/s/{spaceId}/api/alerting/rule/{ruleId}/_unmute_all':
