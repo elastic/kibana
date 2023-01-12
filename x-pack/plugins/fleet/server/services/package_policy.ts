@@ -210,7 +210,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       if (pkgInfo.type === 'integration') elasticsearch = pkgInfo.elasticsearch;
 
       if (pkgInfo.type === 'input') {
-        installAssetsForInputPackagePolicy({
+        await installAssetsForInputPackagePolicy({
           soClient,
           esClient,
           pkgInfo,
