@@ -677,7 +677,7 @@ export const VisualizationWrapper = ({
               expandError: !prevState.expandError,
             }));
           }}
-          data-test-subj="configuration-failure-more-errors"
+          data-test-subj="more-workspace-errors-button"
         >
           {i18n.translate('xpack.lens.editorFrame.configurationFailureMoreErrors', {
             defaultMessage: ` +{errors} {errors, plural, one {error} other {errors}}`,
@@ -695,12 +695,12 @@ export const VisualizationWrapper = ({
             actions={showExtraErrorsAction}
             body={
               <>
-                <div data-test-subj="configuration-failure-error">{firstMessage.longMessage}</div>
+                <div data-test-subj="workspace-error-message">{firstMessage.longMessage}</div>
                 {localState.expandError && (
                   <>
                     <EuiSpacer />
                     {rest.map((message) => (
-                      <div>
+                      <div data-test-subj="workspace-error-message">
                         {message.longMessage}
                         <EuiSpacer />
                       </div>
