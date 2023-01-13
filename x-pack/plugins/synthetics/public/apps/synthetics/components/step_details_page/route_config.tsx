@@ -15,7 +15,7 @@ import { StepDetailsStatus } from './step_details_status';
 import { MonitorDetailsLocation } from '../monitor_details/monitor_details_location';
 import { StepDetailPage } from './step_detail_page';
 import { RouteProps } from '../../routes';
-import { STEP_DETAIL_ROUTE } from '../../../../../common/constants';
+import { SYNTHETICS_STEP_DETAIL_ROUTE } from '../../../../../common/constants';
 import { MonitorDetailsLinkPortalNode } from '../monitor_add_edit/portals';
 import { StepTitle } from './step_title';
 
@@ -29,7 +29,7 @@ export const getStepDetailsRoute = (
       defaultMessage: 'Step details | {baseTitle}',
       values: { baseTitle },
     }),
-    path: STEP_DETAIL_ROUTE,
+    path: SYNTHETICS_STEP_DETAIL_ROUTE,
     component: StepDetailPage,
     dataTestSubj: 'syntheticsMonitorEditPage',
     pageHeader: {

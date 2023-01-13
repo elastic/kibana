@@ -29,7 +29,10 @@ export const SYNTHETICS_SETTINGS_ROUTE = '/settings/:tabId';
 
 export const CERTIFICATES_ROUTE = '/certificates';
 
-export const STEP_DETAIL_ROUTE = '/monitor/:monitorId/test-run/:checkGroupId/step/:stepIndex';
+export const SYNTHETICS_STEP_DETAIL_ROUTE =
+  '/monitor/:monitorId/test-run/:checkGroupId/step/:stepIndex';
+
+export const STEP_DETAIL_ROUTE = '/journey/:checkGroupId/step/:stepIndex';
 
 export const SYNTHETIC_CHECK_STEPS_ROUTE = '/journey/:checkGroupId/steps';
 
