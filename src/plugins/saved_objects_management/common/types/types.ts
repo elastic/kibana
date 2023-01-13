@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObject } from '@kbn/core/types';
-
 import type {
   SavedObjectGetRelationshipsResponseV1,
   SavedObjectInvalidRelationV1,
@@ -15,6 +13,7 @@ import type {
   SavedObjectRelationV1,
   SavedObjectRelationKindV1,
   SavedObjectMetadataV1,
+  SavedObjectWithMetadataV1,
 } from './v1';
 
 /**
@@ -25,10 +24,10 @@ export type SavedObjectMetadata = SavedObjectMetadataV1;
 
 /**
  * A {@link SavedObject | saved object} enhanced with meta properties used by the client-side plugin.
+ *
+ * Directly using "SavedObject" interface. Assume that this is versionable interface.
  */
-export type SavedObjectWithMetadata<T = unknown> = SavedObject<T> & {
-  meta: SavedObjectMetadata;
-};
+export type SavedObjectWithMetadata<T = unknown> = SavedObjectWithMetadataV1<T>;
 
 export type SavedObjectRelationKind = SavedObjectRelationKindV1;
 

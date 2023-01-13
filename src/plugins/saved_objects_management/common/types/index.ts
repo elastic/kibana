@@ -19,7 +19,7 @@ export type {
 export type {
   BulkGetHTTPBodyV1,
   BulkGetHTTPResponseV1,
-  FindBodyHTTPV1,
+  FindQueryHTTPV1,
   FindResponseHTTPV1,
   FindSearchOperatorHTTPV1,
   ReferenceHTTPV1,
@@ -30,4 +30,6 @@ export type {
   ScrollCountResponseHTTPV1,
   RelationshipsResponseHTTPV1,
   GetAllowedTypesResponseHTTPV1,
+  DeleteObjectBodyHTTPV1,
+  DeleteObjectResponseHTTPV1,
 } from './v1';

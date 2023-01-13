@@ -16,7 +16,7 @@ export type {
   SavedObjectManagementTypeInfo,
   BulkGetHTTPBodyV1,
   BulkGetHTTPResponseV1,
-  FindBodyHTTPV1,
+  FindQueryHTTPV1,
   FindResponseHTTPV1,
   FindSearchOperatorHTTPV1,
   FindSortOrderHTTPV1,
