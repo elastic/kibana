@@ -17,6 +17,7 @@ import {
   ALERT_SUPPRESSION_DOCS_COUNT,
   ALERT_SUPPRESSION_TERMS,
   TIMESTAMP,
+  ALERT_LAST_DETECTED,
 } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
@@ -755,6 +756,8 @@ export default ({ getService }: FtrProviderContext) => {
                 value: 'host-0',
               },
             ],
+            [TIMESTAMP]: '2020-10-28T05:30:00.000Z',
+            [ALERT_LAST_DETECTED]: '2020-10-28T05:30:00.000Z',
             [ALERT_ORIGINAL_TIME]: '2020-10-28T05:00:00.000Z',
             [ALERT_SUPPRESSION_START]: '2020-10-28T05:00:00.000Z',
             [ALERT_SUPPRESSION_END]: '2020-10-28T05:00:02.000Z',
@@ -768,6 +771,8 @@ export default ({ getService }: FtrProviderContext) => {
                 value: 'host-0',
               },
             ],
+            [TIMESTAMP]: '2020-10-28T06:30:00.000Z',
+            [ALERT_LAST_DETECTED]: '2020-10-28T06:30:00.000Z',
             [ALERT_ORIGINAL_TIME]: '2020-10-28T06:00:00.000Z',
             [ALERT_SUPPRESSION_START]: '2020-10-28T06:00:00.000Z',
             [ALERT_SUPPRESSION_END]: '2020-10-28T06:00:02.000Z',
@@ -804,13 +809,14 @@ export default ({ getService }: FtrProviderContext) => {
           expect(previewAlerts.length).to.eql(1);
           expect(previewAlerts[0]._source).to.eql({
             ...previewAlerts[0]._source,
-            [TIMESTAMP]: '2020-10-28T05:30:00.000Z',
             [ALERT_SUPPRESSION_TERMS]: [
               {
                 field: 'host.name',
                 value: 'host-0',
               },
             ],
+            [TIMESTAMP]: '2020-10-28T05:30:00.000Z',
+            [ALERT_LAST_DETECTED]: '2020-10-28T06:30:00.000Z', // Note: ALERT_LAST_DETECTED gets updated, timestamp does not
             [ALERT_ORIGINAL_TIME]: '2020-10-28T05:00:00.000Z',
             [ALERT_SUPPRESSION_START]: '2020-10-28T05:00:00.000Z',
             [ALERT_SUPPRESSION_END]: '2020-10-28T06:00:02.000Z',
@@ -847,13 +853,14 @@ export default ({ getService }: FtrProviderContext) => {
           expect(previewAlerts.length).to.eql(3);
           expect(previewAlerts[0]._source).to.eql({
             ...previewAlerts[0]._source,
-            [TIMESTAMP]: '2020-10-28T05:30:00.000Z',
             [ALERT_SUPPRESSION_TERMS]: [
               {
                 field: 'host.name',
                 value: 'host-0',
               },
             ],
+            [TIMESTAMP]: '2020-10-28T05:30:00.000Z',
+            [ALERT_LAST_DETECTED]: '2020-10-28T06:30:00.000Z',
             [ALERT_ORIGINAL_TIME]: '2020-10-28T05:00:00.000Z',
             [ALERT_SUPPRESSION_START]: '2020-10-28T05:00:00.000Z',
             [ALERT_SUPPRESSION_END]: '2020-10-28T06:00:02.000Z',
@@ -861,13 +868,14 @@ export default ({ getService }: FtrProviderContext) => {
           });
           expect(previewAlerts[1]._source).to.eql({
             ...previewAlerts[1]._source,
-            [TIMESTAMP]: '2020-10-28T05:30:00.000Z',
             [ALERT_SUPPRESSION_TERMS]: [
               {
                 field: 'host.name',
                 value: 'host-1',
               },
             ],
+            [TIMESTAMP]: '2020-10-28T05:30:00.000Z',
+            [ALERT_LAST_DETECTED]: '2020-10-28T06:30:00.000Z',
             [ALERT_ORIGINAL_TIME]: '2020-10-28T05:00:00.000Z',
             [ALERT_SUPPRESSION_START]: '2020-10-28T05:00:00.000Z',
             [ALERT_SUPPRESSION_END]: '2020-10-28T06:00:02.000Z',
@@ -875,13 +883,14 @@ export default ({ getService }: FtrProviderContext) => {
           });
           expect(previewAlerts[2]._source).to.eql({
             ...previewAlerts[2]._source,
-            [TIMESTAMP]: '2020-10-28T05:30:00.000Z',
             [ALERT_SUPPRESSION_TERMS]: [
               {
                 field: 'host.name',
                 value: 'host-2',
               },
             ],
+            [TIMESTAMP]: '2020-10-28T05:30:00.000Z',
+            [ALERT_LAST_DETECTED]: '2020-10-28T06:30:00.000Z',
             [ALERT_ORIGINAL_TIME]: '2020-10-28T05:00:00.000Z',
             [ALERT_SUPPRESSION_START]: '2020-10-28T05:00:00.000Z',
             [ALERT_SUPPRESSION_END]: '2020-10-28T06:00:02.000Z',
@@ -918,17 +927,74 @@ export default ({ getService }: FtrProviderContext) => {
           expect(previewAlerts.length).to.eql(3);
           expect(previewAlerts[2]._source).to.eql({
             ...previewAlerts[2]._source,
-            [TIMESTAMP]: '2020-10-28T05:30:00.000Z',
             [ALERT_SUPPRESSION_TERMS]: [
               {
                 field: 'destination.ip',
                 value: null,
               },
             ],
+            [TIMESTAMP]: '2020-10-28T05:30:00.000Z',
+            [ALERT_LAST_DETECTED]: '2020-10-28T06:30:00.000Z',
             [ALERT_ORIGINAL_TIME]: '2020-10-28T05:00:00.000Z',
             [ALERT_SUPPRESSION_START]: '2020-10-28T05:00:00.000Z',
             [ALERT_SUPPRESSION_END]: '2020-10-28T06:00:02.000Z',
             [ALERT_SUPPRESSION_DOCS_COUNT]: 34,
+          });
+        });
+
+        describe('with host risk index', async () => {
+          before(async () => {
+            await esArchiver.load('x-pack/test/functional/es_archives/entity/host_risk');
+          });
+
+          after(async () => {
+            await esArchiver.unload('x-pack/test/functional/es_archives/entity/host_risk');
+          });
+
+          it('should be enriched with host risk score', async () => {
+            const rule: QueryRuleCreateProps = {
+              ...getRuleForSignalTesting(['suppression-data']),
+              query: `host.name: "host-0"`,
+              alert_suppression: {
+                group_by: ['host.name'],
+                duration: {
+                  value: 30,
+                  unit: 'm',
+                },
+              },
+              from: 'now-1h',
+              interval: '1h',
+            };
+
+            const { previewId } = await previewRule({
+              supertest,
+              rule,
+              timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+              invocationCount: 1,
+            });
+            const previewAlerts = await getPreviewAlerts({
+              es,
+              previewId,
+              sort: [ALERT_ORIGINAL_TIME],
+            });
+            expect(previewAlerts.length).to.eql(1);
+            expect(previewAlerts[0]._source).to.eql({
+              ...previewAlerts[0]._source,
+              [ALERT_SUPPRESSION_TERMS]: [
+                {
+                  field: 'host.name',
+                  value: 'host-0',
+                },
+              ],
+              [TIMESTAMP]: '2020-10-28T06:30:00.000Z',
+              [ALERT_LAST_DETECTED]: '2020-10-28T06:30:00.000Z',
+              [ALERT_ORIGINAL_TIME]: '2020-10-28T06:00:00.000Z',
+              [ALERT_SUPPRESSION_START]: '2020-10-28T06:00:00.000Z',
+              [ALERT_SUPPRESSION_END]: '2020-10-28T06:00:02.000Z',
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 5,
+            });
+            expect(previewAlerts[0]._source?.host?.risk?.calculated_level).to.eql('Low');
+            expect(previewAlerts[0]._source?.host?.risk?.calculated_score_norm).to.eql(1);
           });
         });
       });

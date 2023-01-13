@@ -68,7 +68,6 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                       aggs: {
                         uuids: {
                           terms: {
-                            // TODO: we can probably use `include` here instead of the query above on `ids`
                             field: ALERT_UUID,
                             size: CHUNK_SIZE,
                           },

@@ -27,11 +27,7 @@ interface DurationInputProps {
   durationUnitOptions?: Array<{ value: 's' | 'm' | 'h' | 'd'; text: string }>;
 }
 
-// TODO: share with ScheduleItem impl
 const getNumberFromUserInput = (input: string, minimumValue = 0): number | undefined => {
-  if (input == null || input.length === 0) {
-    return undefined;
-  }
   const number = parseInt(input, 10);
   if (Number.isNaN(number)) {
     return minimumValue;
@@ -76,6 +72,9 @@ const MyEuiSelect = styled(EuiSelect)`
   width: auto;
 `;
 
+// This component is similar to the ScheduleItem component, but instead of combining the value
+// and unit into a single string it keeps them separate. This makes the component simpler and
+// allows for easier validation of values and units in APIs as well.
 const DurationInputComponent: React.FC<DurationInputProps> = ({
   durationValueField,
   durationUnitField,

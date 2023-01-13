@@ -45,11 +45,12 @@ import { SeverityBadge } from '../severity_badge';
 import type {
   AboutStepRiskScore,
   AboutStepSeverity,
+  Duration,
 } from '../../../pages/detection_engine/rules/types';
+import { GroupByOptions } from '../../../pages/detection_engine/rules/types';
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
 import { ThreatEuiFlexGroup } from './threat_description';
 import type { LicenseService } from '../../../../../common/license';
-import type { Duration } from '../../../pages/detection_engine/rules/types';
 
 const NoteDescriptionContainer = styled(EuiFlexItem)`
   height: 105px;
@@ -560,13 +561,13 @@ export const buildAlertSuppressionDescription = (
 export const buildAlertSuppressionWindowDescription = (
   label: string,
   value: Duration,
-  license: LicenseService
+  license: LicenseService,
+  groupByRadioSelection: GroupByOptions
 ): ListItems[] => {
-  console.log(typeof value.value);
-  if (value.value == null) {
-    return [];
-  }
-  const description = `${value.value}${value.unit}`;
+  const description =
+    groupByRadioSelection === GroupByOptions.PerTimePeriod
+      ? `${value.value}${value.unit}`
+      : i18n.ALERT_SUPPRESSION_PER_RULE_EXECUTION;
 
   const title = (
     <>

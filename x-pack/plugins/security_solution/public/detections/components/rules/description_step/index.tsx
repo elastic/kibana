@@ -27,7 +27,6 @@ import type {
   AboutStepSeverity,
   Duration,
 } from '../../../pages/detection_engine/rules/types';
-import { GroupByOptions } from '../../../pages/detection_engine/rules/types';
 import type { FieldValueTimeline } from '../pick_timeline';
 import type { FormSchema } from '../../../../shared_imports';
 import type { ListItems } from './types';
@@ -205,17 +204,16 @@ export const getDescriptionItem = (
   } else if (field === 'groupByRadioSelection') {
     return [];
   } else if (field === 'groupByDuration') {
-    if (get('groupByRadioSelection', data) === GroupByOptions.PerTimePeriod) {
+    if (get('groupByFields', data).length > 0) {
       const value: Duration = get(field, data);
-      return buildAlertSuppressionWindowDescription(label, value, license);
-    } else if (get('groupByRadioSelection', data) === GroupByOptions.PerRuleExecution) {
-      return [
-        {
-          title: label,
-          // TODO: copywriting and i18n
-          description: 'One rule execution',
-        },
-      ];
+      return buildAlertSuppressionWindowDescription(
+        label,
+        value,
+        license,
+        get('groupByRadioSelection', data)
+      );
+    } else {
+      return [];
     }
   } else if (field === 'eqlOptions') {
     const eqlOptions: EqlOptionsSelected = get(field, data);

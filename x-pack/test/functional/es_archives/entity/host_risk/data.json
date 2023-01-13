@@ -98,3 +98,23 @@
   }
 }
 
+{
+  "type": "doc",
+  "value": {
+    "id": "5",
+    "index": "ml_host_risk_score_latest_default",
+    "source": {
+      "host": {
+        "name": "host-0",
+        "risk": {
+          "calculated_score_norm": 1,
+          "calculated_level": "Low"
+        }
+      },
+      "ingest_timestamp": "2022-08-15T16:32:16.142561766Z",
+      "@timestamp": "2022-08-12T14:45:36.171Z"
+    },
+    "type": "_doc"
+  }
+}
+
