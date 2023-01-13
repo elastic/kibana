@@ -28,7 +28,7 @@ export interface SavedObjectMetadataV1 {
 /**
  * A {@link SavedObject | saved object} enhanced with meta properties used by the client-side plugin.
  */
-export type SavedObjectWithMetadata<T = unknown> = SavedObject<T> & {
+export type SavedObjectWithMetadataV1<T = unknown> = SavedObject<T> & {
   meta: SavedObjectMetadataV1;
 };
 
@@ -87,7 +87,7 @@ export type BulkGetHTTPBodyV1 = Array<{
  *
  * However, we can better control the output of this API if we used our own, domain-specific type.
  */
-export type BulkGetHTTPResponseV1 = Array<SavedObject<unknown>>;
+export type BulkGetHTTPResponseV1 = SavedObjectWithMetadataV1[];
 
 export type FindSearchOperatorHTTPV1 = 'AND' | 'OR';
 export type FindSortOrderHTTPV1 = 'asc' | 'desc';
@@ -142,6 +142,15 @@ export interface ScrollCountBodyHTTPV1 {
   // TODO: Fix. this API allows writing an arbitrary query that is passed straight to our persistence layer, thus leaking SO attributes to the public...
   searchString?: string;
   references?: Array<{ type: string; id: string }>;
+}
+
+export interface DeleteObjectBodyHTTPV1 {
+  id: string;
+  type: string;
+}
+
+export interface DeleteObjectResponseHTTPV1 {
+  id: string;
 }
 
 /**
