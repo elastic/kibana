@@ -27,9 +27,9 @@ export interface AlertFactory<
 }
 
 export type PublicAlertFactory<
-  State extends AlertInstanceState = AlertInstanceState,
-  Context extends AlertInstanceContext = AlertInstanceContext,
-  ActionGroupIds extends string = string
+  State extends AlertInstanceState,
+  Context extends AlertInstanceContext,
+  ActionGroupIds extends string
 > = Pick<AlertFactory<State, Context, ActionGroupIds>, 'create' | 'done'> & {
   alertLimit: Pick<
     AlertFactory<State, Context, ActionGroupIds>['alertLimit'],
@@ -130,11 +130,8 @@ export function createAlertFactory<
           }
 
           const { recovered } = categorizeAlerts<Alert<State, Context>>({
-            reportedAlerts: splitAlerts(alerts, originalAlerts),
-            trackedAlerts: {
-              active: originalAlerts,
-              recovered: {},
-            },
+            reportedAlerts: splitAlerts<State, Context>(alerts, originalAlerts),
+            trackedAlerts: originalAlerts,
             hasReachedAlertLimit,
             alertLimit: maxAlerts,
           });
@@ -145,9 +142,14 @@ export function createAlertFactory<
   };
 }
 
+/**
+ * Split reported alerts into reported active and reported recovered
+ * based on whether or not actions have been scheduled for the alert
+ *
+ */
 export function splitAlerts<State extends AlertInstanceState, Context extends AlertInstanceContext>(
   reportedAlerts: Record<string, Alert<State, Context>>,
-  trackedAlerts: Record<string, Alert<State, Context>>
+  trackedActiveAlerts: Record<string, Alert<State, Context>>
 ): CategorizeAlertTypes<Alert<State, Context>> {
   const alerts: CategorizeAlertTypes<Alert<State, Context>> = {
     active: {},
@@ -158,7 +160,7 @@ export function splitAlerts<State extends AlertInstanceState, Context extends Al
     if (reportedAlerts.hasOwnProperty(id)) {
       if (reportedAlerts[id].hasScheduledActions()) {
         alerts.active[id] = reportedAlerts[id];
-      } else if (trackedAlerts[id]) {
+      } else if (trackedActiveAlerts[id]) {
         alerts.recovered[id] = reportedAlerts[id];
       }
     }

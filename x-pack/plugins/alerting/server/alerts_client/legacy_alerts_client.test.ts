@@ -17,6 +17,11 @@ import { Alert } from '../alert/alert';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
 import { ruleRunMetricsStoreMock } from '../lib/rule_run_metrics_store.mock';
 import { categorizeAlerts, setFlappingLegacy } from '../lib';
+import {
+  prepareNewAlerts,
+  prepareOngoingAlerts,
+  prepareRecoveredAlerts,
+} from '../lib/prepare_alerts';
 import { logAlerts } from '../task_runner/log_alerts';
 
 const scheduleActions = jest.fn();
@@ -66,6 +71,12 @@ jest.mock('../lib', () => {
     setFlappingLegacy: jest.fn(),
   };
 });
+
+jest.mock('../lib/prepare_alerts', () => ({
+  prepareNewAlerts: jest.fn(),
+  prepareOngoingAlerts: jest.fn(),
+  prepareRecoveredAlerts: jest.fn(),
+}));
 
 jest.mock('../task_runner/log_alerts', () => ({ logAlerts: jest.fn() }));
 
@@ -190,7 +201,7 @@ describe('Legacy Alerts Client', () => {
     expect(mockCreateAlertFactory.hasReachedAlertLimit).toHaveBeenCalled();
   });
 
-  test('processAndLogAlerts() should call categorizeAlerts, setFlappingLegacy and logAlerts and store results', () => {
+  test('processAndLogAlerts() should call categorizeAlerts, prepareAlerts, setFlappingLegacy and logAlerts and store results', () => {
     (splitAlerts as jest.Mock).mockReturnValue({
       active: {
         '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', testAlert1),
@@ -242,42 +253,18 @@ describe('Legacy Alerts Client', () => {
         recovered: {},
       },
       trackedAlerts: {
-        active: {
-          '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', testAlert1),
-          '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),
-        },
-        recovered: {},
+        '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', testAlert1),
+        '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),
       },
       hasReachedAlertLimit: false,
       alertLimit: 1000,
     });
 
-    expect(setFlappingLegacy).toHaveBeenCalledWith(
-      {
-        '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', testAlert1),
-        '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),
-      },
-      {}
-    );
+    expect(prepareNewAlerts).toHaveBeenCalled();
+    expect(prepareOngoingAlerts).toHaveBeenCalled();
+    expect(prepareRecoveredAlerts).toHaveBeenCalled();
 
-    expect(logAlerts).toHaveBeenCalledWith({
-      logger,
-      alertingEventLogger,
-      newAlerts: {},
-      activeAlerts: {
-        '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', testAlert1),
-        '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),
-      },
-      recoveredAlerts: {},
-      ruleLogPrefix: 'ruleLogPrefix',
-      ruleRunMetricsStore,
-      canSetRecoveryContext: false,
-      shouldPersistAlerts: true,
-    });
-
-    expect(alertsClient.getProcessedAlerts('active')).toEqual({
-      '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', testAlert1),
-      '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),
-    });
+    expect(setFlappingLegacy).toHaveBeenCalled();
+    expect(logAlerts).toHaveBeenCalled();
   });
 });

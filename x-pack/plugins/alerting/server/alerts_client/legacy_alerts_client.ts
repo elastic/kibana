@@ -112,7 +112,7 @@ export class LegacyAlertsClient<
 
     const categorized = categorizeAlerts<Alert<State, Context>>({
       reportedAlerts: splitAlerts<State, Context>(this.reportedAlerts, this.trackedAlerts.active),
-      trackedAlerts: this.trackedAlerts,
+      trackedAlerts: this.trackedAlerts.active,
       hasReachedAlertLimit: this.alertFactory!.hasReachedAlertLimit(),
       alertLimit: this.options.maxAlerts,
     });

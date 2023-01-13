@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-export interface IAlertLimitServices {
+export interface IAlertLimitService {
   hasReachedAlertLimit(): void;
   getAlertLimitValue(): void;
   setAlertLimitReached(reached: boolean, externalReport?: boolean): void;
   checkLimitUsage(): void;
 }
 
-interface AlertLimitServicesParams {
+interface AlertLimitServiceParams {
   maxAlerts: number;
 }
 
-export class AlertLimitServices implements IAlertLimitServices {
+export class AlertLimitService implements IAlertLimitService {
   private limitRequested: boolean = false;
   private limitReached: boolean = false;
   private limitReported: boolean = false;
 
-  constructor(private readonly options: AlertLimitServicesParams) {}
+  constructor(private readonly options: AlertLimitServiceParams) {}
 
   public hasReachedAlertLimit() {
     return this.limitReached;

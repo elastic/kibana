@@ -19,9 +19,9 @@ interface CategorizeAlertsOpts<Alert> {
   reportedAlerts: CategorizeAlertTypes<Alert>;
 
   /**
-   * Active and recovered alerts from previous rule execution
+   * Active alerts from previous rule execution
    */
-  trackedAlerts: CategorizeAlertTypes<Alert>;
+  trackedAlerts: Record<string, Alert>;
 
   /**
    * Whether the alert circuit breaker has been reached
@@ -53,10 +53,10 @@ export function categorizeAlerts<Alert>({
 
 function categorizeAlertsHelper<Alert>(
   reportedAlerts: CategorizeAlertTypes<Alert>,
-  trackedAlerts: CategorizeAlertTypes<Alert>
+  trackedAlerts: Record<string, Alert>
 ): CategorizeAlertsResult<Alert> {
   // Alerts tracked from previous execution
-  const trackedActiveAlertIds = new Set(Object.keys(trackedAlerts.active));
+  const trackedActiveAlertIds = new Set(Object.keys(trackedAlerts));
 
   // Alerts that were active this execution but not the previous
   const newAlerts: Record<string, Alert> = {};
@@ -92,11 +92,11 @@ function categorizeAlertsHelper<Alert>(
 
 function categorizeAlertsLimitReached<Alert>(
   reportedAlerts: CategorizeAlertTypes<Alert>,
-  trackedAlerts: CategorizeAlertTypes<Alert>,
+  trackedAlerts: Record<string, Alert>,
   alertLimit: number
 ): CategorizeAlertsResult<Alert> {
   // Alerts tracked from previous execution
-  const trackedActiveAlertIds = new Set(Object.keys(trackedAlerts.active));
+  const trackedActiveAlertIds = new Set(Object.keys(trackedAlerts));
 
   // When the alert limit has been reached,
   // - skip determination of recovered alerts
@@ -107,10 +107,18 @@ function categorizeAlertsLimitReached<Alert>(
   const newAlerts: Record<string, Alert> = {};
 
   // Alerts that were active this execution and the previous execution
-  const activeAlerts: Record<string, Alert> = cloneDeep(trackedAlerts.active);
+  const activeAlerts: Record<string, Alert> = cloneDeep(trackedAlerts);
+
+  for (const id in activeAlerts) {
+    if (activeAlerts.hasOwnProperty(id)) {
+      if (reportedAlerts.active.hasOwnProperty(id)) {
+        activeAlerts[id] = reportedAlerts.active[id];
+      }
+    }
+  }
 
   function hasCapacityForNewAlerts() {
-    return Object.keys(activeAlerts).length < alertLimit;
+    return Object.keys(activeAlerts).length + Object.keys(newAlerts).length < alertLimit;
   }
 
   // if we don't have capacity for new alerts, return
@@ -123,7 +131,6 @@ function categorizeAlertsLimitReached<Alert>(
     if (reportedAlerts.active.hasOwnProperty(id)) {
       // if this alert did not exist in previous run, it is considered "new"
       if (!trackedActiveAlertIds.has(id)) {
-        activeAlerts[id] = reportedAlerts.active[id];
         newAlerts[id] = reportedAlerts.active[id];
 
         if (!hasCapacityForNewAlerts()) {

@@ -184,6 +184,9 @@ describe('mappingFromFieldMap', () => {
     expect(mappingFromFieldMap(alertFieldMap)).toEqual({
       dynamic: 'strict',
       properties: {
+        '@timestamp': {
+          type: 'date',
+        },
         kibana: {
           properties: {
             alert: {
@@ -202,6 +205,9 @@ describe('mappingFromFieldMap', () => {
                   type: 'date',
                 },
                 flapping: {
+                  type: 'boolean',
+                },
+                flapping_history: {
                   type: 'boolean',
                 },
                 id: {

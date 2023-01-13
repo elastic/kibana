@@ -8,7 +8,7 @@
 import sinon from 'sinon';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { Alert } from './alert';
-import { createAlertFactory, getPublicAlertFactory } from './create_alert_factory';
+import { createAlertFactory, getPublicAlertFactory, splitAlerts } from './create_alert_factory';
 import { categorizeAlerts } from '../lib';
 
 jest.mock('../lib', () => ({
@@ -326,5 +326,78 @@ describe('getPublicAlertFactory', () => {
     expect(publicAlertFactory.alertLimit.checkLimitUsage).not.toBeDefined();
     // @ts-expect-error
     expect(publicAlertFactory.hasReachedAlertLimit).not.toBeDefined();
+  });
+});
+
+describe('splitAlerts', () => {
+  test('correctly splits alerts into active and recovered', () => {
+    const alert1 = new Alert<{ foo: boolean }, {}, string>('1', {
+      state: { foo: true },
+      meta: { lastScheduledActions: { group: 'default', date: new Date() } },
+    });
+    alert1.scheduleActions('default', {});
+    const alert2 = new Alert<{ foo: boolean }, {}, string>('2', {
+      state: { foo: false },
+      meta: { lastScheduledActions: { group: 'default', date: new Date() } },
+    }).scheduleActions('default', {});
+    const alert3 = new Alert<{ foo: boolean }, {}, string>('3', {
+      state: { foo: false },
+      meta: { lastScheduledActions: { group: 'default', date: new Date() } },
+    });
+
+    expect(
+      splitAlerts(
+        {
+          '1': alert1 as Alert<{ foo: boolean }, {}>,
+          '2': alert2 as Alert<{ foo: boolean }, {}>,
+          '3': alert3 as Alert<{ foo: boolean }, {}>,
+        },
+        { '3': alert3 as Alert<{ foo: boolean }, {}> }
+      )
+    ).toEqual({
+      // active alerts 1 and 2 have scheduled actions
+      active: {
+        '1': alert1,
+        '2': alert2,
+      },
+      // alert3 does not have scheduled actions and was a tracked alert so it is recovered
+      recovered: { '3': alert3 },
+    });
+  });
+
+  test('does not consider alert recovered if it was not tracked', () => {
+    const alert1 = new Alert<{ foo: boolean }, {}, string>('1', {
+      state: { foo: true },
+      meta: { lastScheduledActions: { group: 'default', date: new Date() } },
+    });
+    alert1.scheduleActions('default', {});
+    const alert2 = new Alert<{ foo: boolean }, {}, string>('2', {
+      state: { foo: false },
+      meta: { lastScheduledActions: { group: 'default', date: new Date() } },
+    });
+    alert2.scheduleActions('default', {});
+    const alert3 = new Alert<{ foo: boolean }, {}, string>('3', {
+      state: { foo: false },
+      meta: { lastScheduledActions: { group: 'default', date: new Date() } },
+    });
+
+    expect(
+      splitAlerts(
+        {
+          '1': alert1 as Alert<{ foo: boolean }, {}>,
+          '2': alert2 as Alert<{ foo: boolean }, {}>,
+          '3': alert3 as Alert<{ foo: boolean }, {}>,
+        },
+        {}
+      )
+    ).toEqual({
+      // active alerts 1 and 2 have scheduled actions
+      active: {
+        '1': alert1,
+        '2': alert2,
+      },
+      // alert3 does not have scheduled actions but was not a tracked alert so is not recovered
+      recovered: {},
+    });
   });
 });

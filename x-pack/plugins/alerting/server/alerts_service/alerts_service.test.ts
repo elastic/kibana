@@ -9,9 +9,14 @@ import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mo
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { ReplaySubject, Subject } from 'rxjs';
 import { AlertsService } from './alerts_service';
+import { UntypedNormalizedRuleType } from '../rule_type_registry';
+import { RecoveredActionGroup } from '../types';
+import { AlertsClient } from '../alerts_client/alerts_client';
 
 let logger: ReturnType<typeof loggingSystemMock['createLogger']>;
 const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+jest.mock('../alerts_client/alerts_client');
 
 const SimulateTemplateResponse = {
   template: {
@@ -108,6 +113,21 @@ const TestRegistrationContext = {
   fieldMap: { field: { type: 'keyword', required: false } },
 };
 
+const TestRuleType: UntypedNormalizedRuleType = {
+  id: 'test',
+  name: 'My test rule',
+  actionGroups: [{ id: 'default', name: 'Default' }, RecoveredActionGroup],
+  defaultActionGroupId: 'default',
+  minimumLicenseRequired: 'basic',
+  isExportable: true,
+  recoveryActionGroup: RecoveredActionGroup,
+  executor: jest.fn(),
+  producer: 'alerts',
+  cancelAlertsOnRuleTimeout: true,
+  ruleTaskTimeout: '5m',
+  alerts: TestRegistrationContext,
+};
+
 const AnotherRegistrationContext = {
   context: 'another',
   fieldMap: { field: { type: 'keyword', required: false } },
@@ -132,6 +152,7 @@ describe('Alerts Service', () => {
     pluginStop$.next();
     pluginStop$.complete();
   });
+
   describe('initialize()', () => {
     test('should correctly initialize common resources', async () => {
       const alertsService = new AlertsService({
@@ -775,6 +796,54 @@ describe('Alerts Service', () => {
       expect(clusterClient.indices.putMapping).toHaveBeenCalled();
       expect(clusterClient.indices.get).toHaveBeenCalled();
       expect(clusterClient.indices.create).toHaveBeenCalled();
+    });
+  });
+
+  describe('createAlertsClient()', () => {
+    let alertsService: AlertsService;
+    beforeEach(async () => {
+      alertsService = new AlertsService({
+        logger,
+        elasticsearchClientPromise: Promise.resolve(clusterClient),
+        pluginStop$,
+      });
+
+      alertsService.initialize();
+      await new Promise((r) => setTimeout(r, 50));
+      expect(alertsService.isInitialized()).toEqual(true);
+
+      alertsService.register(TestRegistrationContext);
+      await new Promise((r) => setTimeout(r, 50));
+    });
+
+    test('should create and return AlertsClient if initialized is true and rule type has alerts definition', () => {
+      alertsService.createAlertsClient(TestRuleType, 1000);
+      expect(AlertsClient).toHaveBeenCalledWith({
+        logger,
+        elasticsearchClientPromise: Promise.resolve(clusterClient),
+        resourceInstallationPromise: Promise.resolve(true),
+        ruleType: TestRuleType,
+        maxAlerts: 1000,
+      });
+    });
+
+    test('should return null if AlertsService is not initialized', async () => {
+      clusterClient.ilm.putLifecycle.mockRejectedValueOnce(new Error('fail'));
+      alertsService = new AlertsService({
+        logger,
+        elasticsearchClientPromise: Promise.resolve(clusterClient),
+        pluginStop$,
+      });
+
+      alertsService.initialize();
+      await new Promise((r) => setTimeout(r, 50));
+      expect(alertsService.createAlertsClient(TestRuleType, 1000)).toBeNull();
+    });
+
+    test('should return null if rule type does not have alerts definition', () => {
+      expect(
+        alertsService.createAlertsClient({ ...TestRuleType, alerts: undefined }, 1000)
+      ).toBeNull();
     });
   });
 
