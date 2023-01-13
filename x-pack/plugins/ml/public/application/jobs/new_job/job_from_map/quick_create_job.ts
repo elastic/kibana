@@ -35,6 +35,7 @@ interface VisDescriptor {
   geoField: string;
   splitField: string | null;
   bucketSpan?: string;
+  layerLevelQuery?: Query | null;
 }
 
 export class QuickGeoJobCreator extends QuickJobCreatorBase {
@@ -57,6 +58,7 @@ export class QuickGeoJobCreator extends QuickJobCreatorBase {
     sourceDataView,
     geoField,
     splitField,
+    layerLevelQuery,
   }: {
     jobId: string;
     bucketSpan: string;
@@ -67,6 +69,7 @@ export class QuickGeoJobCreator extends QuickJobCreatorBase {
     sourceDataView?: DataView;
     geoField: string;
     splitField: string | null;
+    layerLevelQuery: Query | null;
   }): Promise<CreateState> {
     const {
       query: dashboardQuery,
@@ -92,6 +95,7 @@ export class QuickGeoJobCreator extends QuickJobCreatorBase {
       filters: dashboardFilters,
       embeddableQuery,
       embeddableFilters,
+      layerLevelQuery,
       geoField,
       splitField,
       bucketSpan,
@@ -165,6 +169,7 @@ export class QuickGeoJobCreator extends QuickJobCreatorBase {
     filters,
     embeddableQuery,
     embeddableFilters,
+    layerLevelQuery,
     geoField,
     splitField,
     bucketSpan,
@@ -177,6 +182,7 @@ export class QuickGeoJobCreator extends QuickJobCreatorBase {
     filters: Filter[];
     embeddableQuery: Query;
     embeddableFilters: Filter[];
+    layerLevelQuery?: Query | null;
     geoField: string;
     splitField: string | null;
     bucketSpan?: string;
@@ -186,6 +192,7 @@ export class QuickGeoJobCreator extends QuickJobCreatorBase {
       dataViewId,
       dashboard: { query, filters },
       embeddable: { query: embeddableQuery, filters: embeddableFilters },
+      layerLevelQuery,
       geoField,
       splitField,
       ...(bucketSpan ? { bucketSpan } : {}),
@@ -234,6 +241,7 @@ export class QuickGeoJobCreator extends QuickJobCreatorBase {
     dataViewId,
     dashboard,
     embeddable,
+    layerLevelQuery,
     bucketSpan,
     geoField,
     splitField,
@@ -244,10 +252,12 @@ export class QuickGeoJobCreator extends QuickJobCreatorBase {
 
     const jobConfig = createEmptyJob();
     const datafeedConfig = createEmptyDatafeed(dataView.getIndexPattern());
+
     const combinedFiltersAndQueries = this.combineQueriesAndFilters(
       dashboard,
       embeddable,
-      dataView!
+      dataView!,
+      layerLevelQuery ? { query: layerLevelQuery, filters: [] } : undefined
     );
 
     datafeedConfig.query = combinedFiltersAndQueries;

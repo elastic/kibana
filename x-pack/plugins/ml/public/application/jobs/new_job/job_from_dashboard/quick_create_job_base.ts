@@ -173,11 +173,57 @@ export class QuickJobCreatorBase {
     return result;
   }
 
+  protected combineQueries(
+    intialQuery: estypes.QueryDslQueryContainer,
+    queryToCombine: estypes.QueryDslQueryContainer
+  ): estypes.QueryDslQueryContainer {
+    if (queryToCombine.bool === undefined) {
+      queryToCombine.bool = {};
+    }
+
+    const incomingMust = Array.isArray(queryToCombine.bool.must) ? queryToCombine.bool.must : [];
+    const incomingShould = Array.isArray(queryToCombine.bool.should)
+      ? queryToCombine.bool.should
+      : [];
+    const incomingMustNot = Array.isArray(queryToCombine.bool.must_not)
+      ? queryToCombine.bool.must_not
+      : [];
+
+    if (intialQuery.bool === undefined) {
+      intialQuery.bool = {
+        minimum_should_match: 1,
+      };
+    }
+
+    if (!Array.isArray(intialQuery.bool.must_not)) {
+      intialQuery.bool.must_not =
+        intialQuery.bool.must_not === undefined ? [] : [intialQuery.bool.must_not];
+    }
+
+    if (!Array.isArray(intialQuery.bool.must)) {
+      intialQuery.bool.must = intialQuery.bool.must === undefined ? [] : [intialQuery.bool.must];
+    }
+
+    if (!Array.isArray(intialQuery.bool.should)) {
+      intialQuery.bool.should =
+        intialQuery.bool.should === undefined ? [] : [intialQuery.bool.should];
+    }
+
+    intialQuery.bool.must = [...intialQuery.bool.must, ...incomingMust];
+    intialQuery.bool.should = [...intialQuery.bool.should, ...incomingShould];
+    intialQuery.bool.must_not = [...intialQuery.bool.must_not, ...incomingMustNot];
+
+    return intialQuery;
+  }
+
   protected combineQueriesAndFilters(
     dashboard: { query: Query; filters: Filter[] },
     vis: { query: Query; filters: Filter[] },
-    dataView: DataViewBase
+    dataView: DataViewBase,
+    layerQuery?: { query: Query; filters: Filter[] }
   ): estypes.QueryDslQueryContainer {
+    let mergedVisAndLayerQueries;
+
     const { combinedQuery: dashboardQueries } = createQueries(
       {
         query: dashboard.query,
@@ -196,9 +242,22 @@ export class QuickJobCreatorBase {
       this.kibanaConfig
     );
 
+    if (layerQuery) {
+      const { combinedQuery: layerQueries } = createQueries(
+        {
+          query: layerQuery.query,
+          filter: layerQuery.filters,
+        },
+        dataView,
+        this.kibanaConfig
+      );
+      // combine vis and layer queries if layer-level query exists
+      mergedVisAndLayerQueries = this.combineQueries(visQueries, layerQueries);
+    }
+
     const mergedQueries = mergeWith(
       dashboardQueries,
-      visQueries,
+      mergedVisAndLayerQueries ? mergedVisAndLayerQueries : visQueries,
       (objValue: estypes.QueryDslQueryContainer, srcValue: estypes.QueryDslQueryContainer) => {
         if (Array.isArray(objValue)) {
           const combinedQuery = objValue.concat(srcValue);
