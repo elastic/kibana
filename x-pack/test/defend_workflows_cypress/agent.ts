@@ -144,7 +144,6 @@ export class AgentManager extends Manager {
       `multipass exec ${VM_NAME} --working-directory /home/ubuntu/elastic-agent-8.6.0-SNAPSHOT-linux-arm64 -- sudo ./elastic-agent &>/dev/null &`
     );
 
-
     // TODO: try to wait for the endpoint agent to be online
 
     // // Wait til we see the agent is online
