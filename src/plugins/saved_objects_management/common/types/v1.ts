@@ -97,21 +97,19 @@ export interface ReferenceHTTPV1 {
   id: string;
 }
 
-export interface FindBodyHTTPV1 {
-  query: {
-    perPage: number;
-    page: number;
-    type: string | string[];
-    // TODO: Fix. this API allows writing an arbitrary query that is passed straight to our persistence layer, thus leaking SO attributes to the public...
-    search?: string;
-    defaultSearchOperator: FindSearchOperatorHTTPV1;
-    // TODO: Fix. this API allows sorting by any field, thus leaking SO attributes to the public...
-    sortField: string;
-    sortOrder: FindSortOrderHTTPV1;
-    hasReference?: ReferenceHTTPV1 | ReferenceHTTPV1[];
-    hasReferenceOperator: FindSearchOperatorHTTPV1;
-    fields: string | string[];
-  };
+export interface FindQueryHTTPV1 {
+  perPage: number;
+  page: number;
+  type: string | string[];
+  // TODO: Fix. this API allows writing an arbitrary query that is passed straight to our persistence layer, thus leaking SO attributes to the public...
+  search?: string;
+  defaultSearchOperator: FindSearchOperatorHTTPV1;
+  // TODO: Fix. this API allows sorting by any field, thus leaking SO attributes to the public...
+  sortField: string;
+  sortOrder: FindSortOrderHTTPV1;
+  hasReference?: ReferenceHTTPV1 | ReferenceHTTPV1[];
+  hasReferenceOperator: FindSearchOperatorHTTPV1;
+  fields: string | string[];
 }
 
 /**
