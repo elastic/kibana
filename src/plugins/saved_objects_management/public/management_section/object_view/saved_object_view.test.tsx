@@ -16,7 +16,6 @@ import {
   httpServiceMock,
   overlayServiceMock,
   notificationServiceMock,
-  savedObjectsServiceMock,
   applicationServiceMock,
   uiSettingsServiceMock,
   scopedHistoryMock,
@@ -55,7 +54,6 @@ describe('SavedObjectEdition', () => {
     http = httpServiceMock.createStartContract();
     overlays = overlayServiceMock.createStartContract();
     notifications = notificationServiceMock.createStartContract();
-    savedObjects = savedObjectsServiceMock.createStartContract();
     uiSettings = uiSettingsServiceMock.createStartContract();
     history = scopedHistoryMock.create();
     docLinks = docLinksServiceMock.createStartContract();
