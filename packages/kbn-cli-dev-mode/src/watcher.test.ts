@@ -47,7 +47,7 @@ const defaultOptions: Options = {
   log,
   paths: ['foo.js', 'bar.js'],
   ignore: [/^f/],
-  cwd: '/app/repo',
+  repoRoot: '/app/repo',
 };
 
 afterEach(() => {
