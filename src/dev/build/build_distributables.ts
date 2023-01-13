@@ -15,6 +15,7 @@ export interface BuildOptions {
   isRelease: boolean;
   dockerContextUseLocalArtifact: boolean | null;
   dockerCrossCompile: boolean;
+  dockerNamespace: string | null;
   dockerPush: boolean;
   dockerTag: string | null;
   dockerTagQualifier: string | null;

@@ -42,6 +42,7 @@ import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transact
 import { LatencyChart } from '../../../shared/charts/latency_chart';
 import { useFiltersForEmbeddableCharts } from '../../../../hooks/use_filters_for_embeddable_charts';
 import { getKueryWithMobileFilters } from '../../../../../common/utils/get_kuery_with_mobile_filters';
+import { MobileStats } from './stats';
 /**
  * The height a chart should be if it's next to a table with 5 rows and a title.
  * Add the height of the pagination row.
@@ -146,6 +147,13 @@ export function MobileServiceOverview() {
               <AggregatedTransactionsBadge />
             </EuiFlexItem>
           )}
+          <EuiFlexItem>
+            <MobileStats
+              start={start}
+              end={end}
+              kuery={kueryWithMobileFilters}
+            />
+          </EuiFlexItem>
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem grow={5}>
