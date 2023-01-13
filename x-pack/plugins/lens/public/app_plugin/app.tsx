@@ -478,6 +478,7 @@ export function App({
           }) ?? []
         : []),
       ...getApplicationUserMessages({
+        visualizationType: persistedDoc?.visualizationType,
         visualizationMap,
         visualization,
         activeDatasource: activeDatasourceId ? datasourceMap[activeDatasourceId] : null,
@@ -493,6 +494,7 @@ export function App({
     datasourceStates,
     dispatch,
     frameDatasourceAPI,
+    persistedDoc?.visualizationType,
     visualization,
     visualizationMap,
   ]);
