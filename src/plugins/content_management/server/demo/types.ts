@@ -6,6 +6,20 @@
  * Side Public License, v 1.
  */
 
-export interface FooUniqueFields {
+export interface FooContent {
+  id: string;
+  title: string;
+  type: 'foo';
+  description?: string;
   foo: boolean;
+  meta: {
+    updatedAt: string;
+    createdAt: string;
+    updatedBy: {
+      $id: string;
+    };
+    createdBy: {
+      $id: string;
+    };
+  };
 }

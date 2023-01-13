@@ -8,4 +8,4 @@
 
 export { FooStorage } from './foo_storage';
 
-export type { FooUniqueFields } from './types';
+export type { FooContent } from './types';

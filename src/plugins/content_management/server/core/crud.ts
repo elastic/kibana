@@ -5,15 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { CommonFields } from '../../common';
 import type { EventBus } from './event_bus';
 import type { ContentRegistry } from './registry';
 import type { ContentStorage } from './types';
 
-export class ContentCrud<UniqueFields extends object = Record<string, unknown>>
-  implements ContentStorage<UniqueFields>
-{
-  private storage: ContentStorage<UniqueFields>;
+export class ContentCrud implements ContentStorage {
+  private storage: ContentStorage;
   private eventBus: EventBus;
   public contentType: string;
 
@@ -25,7 +22,7 @@ export class ContentCrud<UniqueFields extends object = Record<string, unknown>>
     }
   ) {
     this.contentType = contentType;
-    this.storage = deps.contentRegistry.getStorage<UniqueFields>(contentType);
+    this.storage = deps.contentRegistry.getStorage(contentType);
     this.eventBus = deps.eventBus;
   }
 
@@ -60,27 +57,35 @@ export class ContentCrud<UniqueFields extends object = Record<string, unknown>>
       });
   }
 
-  public mget(ids: string[], options?: unknown) {
-    return this.storage.mget(ids, options);
+  // public mget(ids: string[], options?: unknown) {
+  //   return this.storage.mget(ids, options);
+  // }
+
+  public async create(fields: object, options?: unknown) {
+    const result = await this.storage.create(fields, options);
+
+    this.eventBus.emit({
+      type: 'createItemSuccess',
+      contentType: this.contentType,
+      data: result,
+    });
+
+    return result;
   }
 
-  public create(fields: UniqueFields & CommonFields, options?: unknown) {
-    return this.storage.create(fields, options);
-  }
+  // public update<T extends Partial<UniqueFields & CommonFields>>(
+  //   id: string,
+  //   fields: T,
+  //   options?: unknown
+  // ): Promise<Partial<T & InternalFields>> {
+  //   return this.storage.update(id, fields, options);
+  // }
 
-  public update<T extends Partial<UniqueFields & CommonFields>>(
-    id: string,
-    fields: T,
-    options?: unknown
-  ): Promise<Partial<T & InternalFields>> {
-    return this.storage.update(id, fields, options);
-  }
+  // public delete(id: string, options?: unknown) {
+  //   return this.storage.delete(id, options);
+  // }
 
-  public delete(id: string, options?: unknown) {
-    return this.storage.delete(id, options);
-  }
-
-  public search<O extends SearchOptions = SearchOptions>(options: O) {
-    return this.storage.search(options);
-  }
+  // public search<O extends SearchOptions = SearchOptions>(options: O) {
+  //   return this.storage.search(options);
+  // }
 }

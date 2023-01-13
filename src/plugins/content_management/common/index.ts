@@ -8,8 +8,20 @@
 
 export { PLUGIN_ID, API_ENDPOINT } from './constants';
 
-export { Payload, Calls } from './rpc';
+export { schemas } from './rpc';
 
-export type { NamedFnDef, FN, AsyncFN } from './rpc';
-
-export type { CommonFields, InternalFields, KibanaContent, Ref } from './types';
+export type {
+  Calls,
+  GetDetailsIn,
+  GetDetailsOut,
+  GetPreviewIn,
+  GetPreviewOut,
+  CreateIn,
+  CreateOut,
+  SearchIn,
+  SearchOut,
+  Ref,
+  Content,
+  InternalFields,
+  CommonFields,
+} from './rpc';

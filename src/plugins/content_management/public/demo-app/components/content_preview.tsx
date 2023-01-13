@@ -16,18 +16,18 @@ import {
   EuiCode,
 } from '@elastic/eui';
 
-import { KibanaContent } from '../../../common';
+import { Content } from '../../../common';
 import { useApp } from '../context';
 
 export const ContentPreview: FC<{ type: string; id: string }> = ({ type, id }) => {
   const { rpc } = useApp();
-  const [content, setContent] = useState<KibanaContent | null>(null);
+  const [content, setContent] = useState<Content | null>(null);
   const isIdEmpty = id.trim() === '';
 
   useDebounce(
     () => {
       const load = async () => {
-        const res: KibanaContent = await rpc.getPreview({ type, id });
+        const res = await rpc.getPreview({ type, id });
         setContent(res);
       };
 
@@ -52,7 +52,9 @@ export const ContentPreview: FC<{ type: string; id: string }> = ({ type, id }) =
       <EuiSplitPanel.Inner>
         <EuiText>
           <EuiDescriptionListTitle>{content.title}</EuiDescriptionListTitle>
-          <EuiDescriptionListDescription>{content.description}</EuiDescriptionListDescription>
+          {Boolean(content.description) && (
+            <EuiDescriptionListDescription>{content.description}</EuiDescriptionListDescription>
+          )}
         </EuiText>
       </EuiSplitPanel.Inner>
       <EuiSplitPanel.Inner grow={false} color="subdued">

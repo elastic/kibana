@@ -6,45 +6,36 @@
  * Side Public License, v 1.
  */
 
-import type { CommonFields, InternalFields, KibanaContent } from '../../common';
+import type { Content } from '../../common';
 
-export interface ContentStorage<
-  UniqueFields extends object = Record<string, unknown>,
-  UserFields extends CommonFields = UniqueFields & CommonFields,
-  Content extends KibanaContent = InternalFields & UserFields
-> {
+export interface ContentStorage {
   /** Get a single item */
-  get(id: string, options?: unknown): Promise<Content>;
+  get(id: string, options: unknown): Promise<object>;
 
   /** Get multiple items */
-  mget(ids: string[], options?: unknown): Promise<Content[]>;
+  // TODO
+  // mget(ids: string[], options: unknown): Promise<object[]>;
 
   /** Create an item */
-  create(fields: UserFields, options?: unknown): Promise<Content>;
+  create(fields: object, options: unknown): Promise<object>;
 
-  // /** Update an item */
-  update<T extends Partial<UserFields>>(
-    id: string,
-    fields: T,
-    options?: unknown
-  ): Promise<Partial<T & InternalFields>>;
+  /** Update an item */
+  // TODO
+  // update(id: string, fields: object, options: unknown): Promise<object>;
 
   /** Delete an item */
-  delete(id: string, options?: unknown): Promise<Content>;
-
-  search<O extends SearchOptions = SearchOptions>(options: O): Promise<KibanaContent>;
+  // TODO
+  // delete(id: string, options: unknown): Promise<{ status: 'success' | 'error' }>;
 }
 
 // --- CONFIG
 
-export interface ContentConfig<S extends ContentStorage> {
+export interface ContentConfig<
+  S extends ContentStorage,
+  T extends object = Record<string, unknown>
+> {
   /** The storage layer for the content.*/
   storage: S;
   /** Optional handler to convert the DB item to a KibanaContent */
-  dbToKibanaContentSerializer?: (item: any) => KibanaContent;
-}
-
-export interface SearchOptions {
-  limit?: number;
-  pageCursor?: string;
+  toKibanaContentSerializer?: (item: T) => Content;
 }

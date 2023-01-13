@@ -8,7 +8,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { KibanaContent } from '../../../common';
+import type { Content } from '../../../common';
 
 interface Dependencies {
   logger: Logger;
@@ -29,7 +29,7 @@ export class ContentSearchIndex {
     this.createIndexIfNotExist(indexName);
   }
 
-  index<C extends KibanaContent>(content: C) {
+  index(content: Content) {
     const { id, title, description, type, meta } = content;
 
     const document = {
@@ -46,7 +46,7 @@ export class ContentSearchIndex {
         document,
       })
       .catch((e) => {
-        console.log(e);
+        // console.log(e); // Temp for debugging
         this.logger.error(new Error(`Could not add content to search index.`, { cause: e }));
       });
   }

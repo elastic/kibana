@@ -49,9 +49,8 @@ export class ContentManagementPlugin implements Plugin {
 
     // --------------- DEMO -------------------
     // Add a "in memory" content
-    const contentType = 'foo';
-    const storage = new FooStorage(contentType);
-    this.coreApi.register(contentType, {
+    const storage = new FooStorage();
+    this.coreApi.register('foo', {
       storage,
     });
 

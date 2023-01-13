@@ -5,49 +5,41 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { isLeft } from 'fp-ts/lib/These';
+import { Type } from '@kbn/config-schema';
+import { Calls } from '../../common';
 
-import { Payload } from '../../common';
-import type { FN, NamedFnDef } from '../../common';
-
-interface Registry<Context> {
-  [key: string]: {
-    fn: (ctx: Context, msg: any) => Promise<any>;
-    type: FN<any, any>;
+interface CallConfig<Context> {
+  fn: (ctx: Context, input: any) => Promise<any>;
+  schemas: {
+    in: Type<any>;
+    out: Type<any>;
   };
 }
 
-type AsyncFnCall<C, I, O> = (ctx: C, msg: I) => Promise<O>;
-
-type RegisterFunction<C> = <I, O>(type: NamedFnDef<I, O>) => (fn: AsyncFnCall<C, I, O>) => void;
+interface Registry<Context> {
+  [fnName: string]: CallConfig<Context>;
+}
 
 export class FunctionHandler<Context> {
   private registry: Registry<Context> = {};
 
-  load(loader: (register: RegisterFunction<Context>) => void) {
-    loader((type) => (fn) => {
-      this.registry[type.name] = { type: type(), fn };
-    });
+  register(fnName: Calls, config: CallConfig<Context>) {
+    this.registry[fnName] = config;
   }
 
-  async call(context: Context, msg: any): Promise<{ token?: string; result?: any }> {
-    const payload = Payload.decode(msg);
+  async call(
+    context: Context,
+    fnName: Calls,
+    input: any
+  ): Promise<{ token?: string; result?: any }> {
+    // TODO: validate input
 
-    if (isLeft(payload)) {
-      throw new Error(`Payload error: ${payload}`);
-    }
+    const handler = this.registry[fnName];
+    if (!handler) throw new Error(`Handler missing for ${fnName}`);
 
-    const { fn, arg } = payload.right;
-    const handler = this.registry[fn];
-    if (!handler) throw new Error(`Handler missing for ${fn}`);
+    const result = await handler.fn(context, input);
 
-    const input = handler.type.i.decode(arg);
-    if (isLeft(input)) throw new Error(`Invalid input for ${fn}: ${input}`);
-
-    const result = await handler.fn(context, input.right);
-
-    const output = handler.type.o.decode(result);
-    if (isLeft(output)) throw new Error(`Invalid output for ${fn}: ${JSON.stringify(output.left)}`);
+    // TODO: validate result
 
     return { result };
   }

@@ -21,13 +21,13 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { KibanaContent } from '../../../common';
+import { CreateOut } from '../../../common';
 import { useApp } from '../context';
 
 export const CreateContentSection: FC = () => {
   const [title, setContentType] = useState('');
   const [description, setContentId] = useState('');
-  const [contentCreated, setContentCreated] = useState<KibanaContent | null>(null);
+  const [contentCreated, setContentCreated] = useState<CreateOut | null>(null);
 
   const { rpc } = useApp();
 

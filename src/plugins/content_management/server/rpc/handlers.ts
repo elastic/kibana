@@ -6,65 +6,80 @@
  * Side Public License, v 1.
  */
 
-import { Calls } from '../../common';
+import type {
+  SearchIn,
+  SearchOut,
+  Content,
+  CreateIn,
+  CreateOut,
+  GetDetailsIn,
+  GetDetailsOut,
+  GetPreviewIn,
+  GetPreviewOut,
+} from '../../common';
+import { schemas } from '../../common';
 import { FunctionHandler } from './function_handler';
 import { Context } from './types';
 
 export function initRpcHandlers(fnHandler: FunctionHandler<Context>) {
-  fnHandler.load((register) => {
-    // Get preview of a content
-    register(Calls.getPreview)(async (ctx, payload) => {
-      const response = await ctx.core.searchIndexer.getById(payload.type, payload.id);
-      const [item = { _id: '', _source: {} }] = response.hits?.hits ?? [];
+  fnHandler.register('search', {
+    schemas: schemas.api.search,
+    fn: async (ctx, input: SearchIn): Promise<SearchOut> => {
+      const response = await ctx.core.searchIndexer.search({});
+      if (!Array.isArray(response.hits?.hits)) {
+        return {
+          total: 0,
+          hits: [],
+        };
+      }
+      return {
+        total: response.hits.total! as number,
+        hits: response.hits.hits.map((hit) => ({ ...(hit._source as Content), id: hit._id })),
+      };
+    },
+  });
+
+  fnHandler.register('get', {
+    schemas: schemas.api.create,
+    fn: async (ctx, input: GetDetailsIn): Promise<GetDetailsOut> => {
+      const crudInstance = ctx.core.crud(input.type);
+      const options = {
+        ...(input.options ?? {}),
+        requestHandlerContext: ctx.requestHandlerContext,
+      };
+      return crudInstance.get(input.id, options);
+    },
+  });
+
+  fnHandler.register('getPreview', {
+    schemas: schemas.api.create,
+    fn: async (ctx, input: GetPreviewIn): Promise<GetPreviewOut> => {
+      // We read the content preview from the Search index
+      const response = await ctx.core.searchIndexer.getById(input.type, input.id);
+
+      if (!response.hits) {
+        // TODO: improve Error handling. We want to return a 404 here
+        throw new Error(`Content [${input.type} | ${input.id}] not found.`);
+      }
+
+      const [content = { _id: '', _source: {} }] = response.hits?.hits ?? [];
 
       return {
-        id: item._id,
-        ...(item._source as any), // adding "any" to move forward...
+        ...(content._source as Content),
+        id: content._id,
       };
-    });
+    },
+  });
 
-    // Get single content
-    register(Calls.get)(async (ctx, payload) => {
-      ctx.core.eventBus.emit({
-        type: 'getItemStart',
-        contentType: payload.type,
-        contentId: payload.id,
-      });
-
-      const crudInstance = ctx.core.crud(payload.type);
-      const content = await crudInstance.get(payload.id, {
+  fnHandler.register('create', {
+    schemas: schemas.api.create,
+    fn: async (ctx, input: CreateIn): Promise<CreateOut> => {
+      const crudInstance = ctx.core.crud(input.type);
+      const options = {
+        ...(input.options ?? {}),
         requestHandlerContext: ctx.requestHandlerContext,
-      });
-
-      ctx.core.eventBus.emit({
-        type: 'getItemSuccess',
-        contentType: payload.type,
-        contentId: payload.id,
-        data: content,
-      });
-
-      return content;
-    });
-
-    // Create a content
-    register(Calls.create)(async (ctx, payload) => {
-      const crudInstance = ctx.core.crud(payload.type);
-      const contentCreated = await crudInstance.create(payload.data as any, {
-        requestHandlerContext: ctx.requestHandlerContext,
-      });
-
-      ctx.core.eventBus.emit({
-        type: 'createItemSuccess',
-        contentType: payload.type,
-        data: contentCreated,
-      });
-
-      return contentCreated;
-    });
-
-    register(Calls.search)(async (ctx, payload) => {
-      const { hits } = await ctx.core.searchIndexer.search({});
-      return hits;
-    });
+      };
+      return crudInstance.create(input.data, options);
+    },
   });
 }

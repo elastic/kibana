@@ -9,13 +9,12 @@
 import uuid from 'uuid';
 import moment from 'moment';
 
-import type { CommonFields, InternalFields, KibanaContent } from '../../common';
 import { ContentStorage } from '../core';
-import { FooUniqueFields } from './types';
+import type { FooContent } from './types';
 
 const getTimestamp = () => moment().toISOString();
 
-const generateMeta = (): InternalFields['meta'] => {
+const generateMeta = (): FooContent['meta'] => {
   const now = getTimestamp();
 
   return {
@@ -26,15 +25,11 @@ const generateMeta = (): InternalFields['meta'] => {
   };
 };
 
-export class FooStorage implements ContentStorage<FooUniqueFields> {
-  private db: Map<string, KibanaContent<FooUniqueFields>> = new Map();
+export class FooStorage implements ContentStorage {
+  private db: Map<string, FooContent> = new Map();
+  private contentType = 'foo' as const;
 
-  constructor(private contentType: string) {}
-
-  async get(
-    id: string,
-    options?: unknown
-  ): Promise<InternalFields & FooUniqueFields & CommonFields> {
+  async get(id: string, options?: unknown): Promise<FooContent> {
     const content = this.db.get(id);
 
     if (!content) {
@@ -44,13 +39,10 @@ export class FooStorage implements ContentStorage<FooUniqueFields> {
     return content;
   }
 
-  async create(
-    fields: FooUniqueFields & CommonFields,
-    options?: unknown
-  ): Promise<InternalFields & FooUniqueFields & CommonFields> {
+  async create(fields: Pick<FooContent, 'title' | 'description' | 'foo'>): Promise<FooContent> {
     const id = uuid.v4();
 
-    const content: KibanaContent<FooUniqueFields> = {
+    const content: FooContent = {
       ...fields,
       id,
       type: this.contentType,

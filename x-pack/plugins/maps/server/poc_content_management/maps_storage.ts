@@ -6,15 +6,12 @@
  */
 import type { ContentStorage } from '@kbn/content-management-plugin/server';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import { SavedObjectsCreateOptions } from '@kbn/core-saved-objects-api-browser';
 
 import type { MapSavedObjectAttributes } from '../../common/map_saved_object_type';
 
-type MapsUniqueFields = Pick<
-  MapSavedObjectAttributes,
-  'layerListJSON' | 'mapStateJSON' | 'uiStateJSON'
->;
-
-export class MapsStorage implements ContentStorage<MapsUniqueFields> {
+const SO_TYPE = 'map';
+export class MapsStorage implements ContentStorage {
   constructor() {}
 
   async get(
@@ -24,31 +21,30 @@ export class MapsStorage implements ContentStorage<MapsUniqueFields> {
     }
   ): Promise<any> {
     const { savedObjects } = await options.requestHandlerContext.core;
-    const object = await savedObjects.client.get('map', id);
+    const object = await savedObjects.client.get(SO_TYPE, id);
     return object;
   }
 
-  // TODO: type the payload + response
   async create(
-    payload: any,
+    attributes: MapSavedObjectAttributes,
     options: {
       requestHandlerContext: RequestHandlerContext;
-      overwrite?: boolean;
-    }
+    } & Pick<
+      SavedObjectsCreateOptions,
+      'migrationVersion' | 'coreMigrationVersion' | 'references' | 'overwrite'
+    >
   ): Promise<any> {
-    const { attributes, migrationVersion, coreMigrationVersion, references, initialNamespaces } =
-      payload;
+    const { migrationVersion, coreMigrationVersion, references, overwrite } = options;
 
     const createOptions = {
-      overwrite: options.overwrite,
+      overwrite,
       migrationVersion,
       coreMigrationVersion,
       references,
-      initialNamespaces,
     };
 
     const { savedObjects } = await options.requestHandlerContext.core;
-    const result = await savedObjects.client.create('map', attributes, createOptions);
+    const result = await savedObjects.client.create(SO_TYPE, attributes, createOptions);
 
     return result;
   }

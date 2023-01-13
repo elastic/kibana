@@ -26,17 +26,22 @@ export function initRpcRoutes(
   /**
    * @apiGroup ContentManagement
    *
-   * @api {post} /content_management/rpc Execute RPC command
+   * @api {post} /content_management/rpc/{call} Execute RPC call
    * @apiName RPC
    */
   router.post(
     {
-      path: '/api/content_management/rpc',
+      path: '/api/content_management/rpc/{call}',
       validate: {
-        body: schema.object({
-          fn: schema.string(),
-          arg: schema.object({}, { unknowns: 'allow' }),
+        params: schema.object({
+          call: schema.oneOf([
+            schema.literal('getPreview'),
+            schema.literal('get'),
+            schema.literal('create'),
+            schema.literal('search'),
+          ]),
         }),
+        body: schema.maybe(schema.object({}, { unknowns: 'allow' })),
       },
     },
     async (context, request, response) => {
@@ -44,6 +49,7 @@ export function initRpcRoutes(
         return response.ok({
           body: await fnHandler.call(
             { ...rpcContext, requestHandlerContext: context },
+            request.params.call,
             request.body
           ),
         });
