@@ -291,7 +291,8 @@ export const useResponseActionsLogTable = ({
             <StyledFacetButton
               icon={
                 <EuiAvatar
-                  name={userId}
+                  // this will be not needed, I just messed up database actions by not providing user
+                  name={userId ?? 'elastic'}
                   data-test-subj={getTestId('column-user-avatar')}
                   size="s"
                 />

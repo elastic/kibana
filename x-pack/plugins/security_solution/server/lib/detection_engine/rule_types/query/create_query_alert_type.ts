@@ -29,6 +29,7 @@ export const createQueryAlertType = (
     version,
     osqueryCreateAction,
     licensing,
+    endpointAppContext,
     id,
     name,
   } = createOptions;
@@ -85,6 +86,7 @@ export const createQueryAlertType = (
         bucketHistory: state.suppressionGroupHistory,
         osqueryCreateAction,
         licensing,
+        endpointAppContext,
       });
     },
   };

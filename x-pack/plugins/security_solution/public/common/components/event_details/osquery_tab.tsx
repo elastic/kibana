@@ -9,6 +9,7 @@ import { EuiCode, EuiEmptyPrompt, EuiNotificationBadge, EuiSpacer } from '@elast
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EndpointResults } from './endpoint_results';
 import type { Ecs } from '../../../../common/ecs';
 import { PERMISSION_DENIED } from '../../../detection_engine/rule_response_actions/osquery/translations';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
@@ -135,6 +136,7 @@ export const useOsqueryTab = ({
             emptyPrompt
           ) : (
             <>
+              <EndpointResults alertId={alertId} agentIds={agentIds} />
               <OsqueryResults
                 agentIds={agentIds}
                 ruleName={ruleName}

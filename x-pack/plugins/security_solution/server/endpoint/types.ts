@@ -7,6 +7,7 @@
 
 import type { LoggerFactory } from '@kbn/core/server';
 
+import type { CoreSetup } from '@kbn/core/server';
 import type { ConfigType } from '../config';
 import type { EndpointAppContextService } from './endpoint_app_context_services';
 import type { HostMetadata } from '../../common/endpoint/types';
@@ -19,6 +20,7 @@ export interface EndpointAppContext {
   logFactory: LoggerFactory;
   config(): Promise<ConfigType>;
   experimentalFeatures: ExperimentalFeatures;
+  getStartServices: CoreSetup['getStartServices'];
 
   /**
    * Object readiness is tied to plugin start method

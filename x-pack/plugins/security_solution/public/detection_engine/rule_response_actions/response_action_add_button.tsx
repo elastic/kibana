@@ -48,7 +48,7 @@ export const ResponseActionAddButton = ({
 
   const renderAddResponseActionButton = useMemo(() => {
     return (
-      <EuiFlexGroup>
+      <EuiFlexGroup direction={'row'}>
         <EuiFlexItem grow={false}>
           <EuiSpacer size="m" />
           <EuiButton
@@ -95,7 +95,11 @@ export const ResponseActionAddButton = ({
 
   return (
     <>
-      {isAddResponseActionButtonShown ? renderAddResponseActionButton : renderResponseActionTypes}
+      {isAddResponseActionButtonShown ? (
+        renderAddResponseActionButton
+      ) : (
+        <EuiFlexGroup direction={'row'}>{renderResponseActionTypes}</EuiFlexGroup>
+      )}
     </>
   );
 };

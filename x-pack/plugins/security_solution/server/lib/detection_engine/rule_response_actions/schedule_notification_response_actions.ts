@@ -7,6 +7,7 @@
 
 import type { Ecs } from '@kbn/ecs';
 import { uniq, reduce, some, each } from 'lodash';
+import { createResponseActionHandler } from '../../../endpoint/routes/actions/create_response_action_handler';
 import type { RuleResponseAction } from '../../../../common/detection_engine/rule_response_actions/schemas';
 import { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/rule_response_actions/schemas';
 import type { SetupPlugins } from '../../../plugin_contract';
@@ -21,11 +22,13 @@ interface AlertsWithAgentType {
   agents: string[];
   alertIds: string[];
 }
+
 const CONTAINS_DYNAMIC_PARAMETER_REGEX = /\{{([^}]+)\}}/g; // when there are 2 opening and 2 closing curly brackets (including brackets)
 
 export const scheduleNotificationResponseActions = (
   { signals, responseActions }: ScheduleNotificationActions,
-  osqueryCreateAction?: SetupPlugins['osquery']['osqueryCreateAction']
+  osqueryCreateAction?: SetupPlugins['osquery']['osqueryCreateAction'],
+  endpointAppContext: any
 ) => {
   const filteredAlerts = (signals as Ecs[]).filter((alert) => alert.agent?.id);
 
@@ -77,6 +80,25 @@ export const scheduleNotificationResponseActions = (
             alert_ids: [(alert as unknown as { _id: string })._id],
           },
           alert
+        );
+      });
+    }
+    if (responseAction.actionTypeId === RESPONSE_ACTION_TYPES.ENDPOINT) {
+      each(alerts, (alert) => {
+        return createResponseActionHandler(
+          endpointAppContext,
+          {
+            endpoint_ids: agentIds,
+            ...(responseAction.params.command === 'kill-process'
+              ? { parameters: { pid: alert.process.pid } }
+              : {}),
+            alertIds,
+            comment: responseAction.params.comment,
+          },
+          {
+            command: responseAction.params.command,
+            metadata: { currentUser: { username: 'Alert' } },
+          }
         );
       });
     }

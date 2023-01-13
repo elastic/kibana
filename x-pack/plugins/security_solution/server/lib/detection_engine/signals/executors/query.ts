@@ -36,6 +36,7 @@ export const queryExecutor = async ({
   bucketHistory,
   osqueryCreateAction,
   licensing,
+  endpointAppContext,
 }: {
   runOpts: RunOpts<UnifiedQueryRuleParams>;
   experimentalFeatures: ExperimentalFeatures;
@@ -105,7 +106,8 @@ export const queryExecutor = async ({
             signals: result.createdSignals,
             responseActions: completeRule.ruleParams.responseActions,
           },
-          osqueryCreateAction
+          osqueryCreateAction,
+          endpointAppContext
         );
       }
     }
