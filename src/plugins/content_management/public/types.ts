@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ContentManagementPlugin } from './plugin';
+import { RpcClient } from './rpc';
 
-export function plugin() {
-  return new ContentManagementPlugin();
+export interface ContentManagementPublicStart {
+  rpc: RpcClient;
 }
-
-export type { ContentManagementPublicStart } from './types';

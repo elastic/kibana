@@ -9,7 +9,7 @@
 import { HttpSetup } from '@kbn/core/public';
 
 import { API_ENDPOINT, Calls, Payload } from '../../common';
-import type { AsyncFN, NamedFnDef, CommonFields } from '../../common';
+import type { AsyncFN, NamedFnDef } from '../../common';
 
 export class RpcClient {
   constructor(private http: { post: HttpSetup['post'] }) {}
@@ -27,7 +27,8 @@ export class RpcClient {
     return this.realize(Calls.get)({ type, id });
   }
 
-  public create({ type, data }: { type: string; data: CommonFields }) {
+  // TODO: improve typings
+  public create({ type, data }: { type: string; data: any }) {
     return this.realize(Calls.create)({ type, data });
   }
 

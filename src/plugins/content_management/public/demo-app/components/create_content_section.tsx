@@ -36,7 +36,7 @@ export const CreateContentSection: FC = () => {
 
     setContentCreated(null);
     const created = await rpc.create({ type: 'foo', data: content });
-    setContentCreated(created);
+    setContentCreated(created as any);
   };
 
   return (

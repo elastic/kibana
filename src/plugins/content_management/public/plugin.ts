@@ -11,6 +11,7 @@ import { ManagementAppMountParams, ManagementSetup } from '@kbn/management-plugi
 import { PLUGIN_ID } from '../common';
 import { RpcClient } from './rpc';
 import type { Context } from './demo-app';
+import { ContentManagementPublicStart } from './types';
 
 interface SetupDependencies {
   management: ManagementSetup;
@@ -46,7 +47,7 @@ export class ContentManagementPlugin implements Plugin {
     });
   }
 
-  public start() {
+  public start(): ContentManagementPublicStart {
     if (!this.rpcClient) {
       throw new Error('Rcp client has not been initialized');
     }

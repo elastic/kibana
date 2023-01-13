@@ -53,16 +53,9 @@ export const Calls = {
   create: () => ({
     i: t.type({
       type: t.string, // content type
-      data: t.intersection([
-        t.type({
-          title: t.string,
-        }),
-        t.partial({
-          description: t.string,
-        }),
-      ]),
+      data: t.unknown,
     }),
-    o: kibanaContent,
+    o: t.unknown,
   }),
   search: () => ({
     i: t.partial({
