@@ -41,7 +41,8 @@ export const errorsQuery = ({
               },
               {
                 terms: {
-                  'event.module': Object.values(products),
+                  [errorQueryIsDataStream ? 'service.type' : 'event.module']:
+                    Object.values(products),
                 },
               },
               {
