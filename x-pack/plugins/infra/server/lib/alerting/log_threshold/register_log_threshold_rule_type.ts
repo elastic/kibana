@@ -7,6 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { PluginSetupContract } from '@kbn/alerting-plugin/server';
+import { SavedObjectReference } from '@kbn/core-saved-objects-common';
+import { logViewSavedObjectName } from '../../../saved_objects';
+import { logViewReferenceRT } from '../../../../common/log_views';
 import { createLogThresholdExecutor, FIRED_ACTIONS } from './log_threshold_executor';
 import {
   LOG_DOCUMENT_COUNT_RULE_TYPE_ID,
@@ -19,6 +22,8 @@ import {
   alertDetailUrlActionVariableDescription,
   groupByKeysActionVariableDescription,
 } from '../common/messages';
+
+const LOG_VIEW_REFERENCE_NAME = 'log-view-reference-0';
 
 const timestampActionVariableDescription = i18n.translate(
   'xpack.infra.logs.alerting.threshold.timestampActionVariableDescription',
@@ -146,5 +151,49 @@ export async function registerLogThresholdRuleType(
     },
     producer: 'logs',
     getSummarizedAlerts: libs.logsRules.createGetSummarizedAlerts(),
+    useSavedObjectReferences: {
+      extractReferences: (params) => {
+        if (logViewReferenceRT.is(params.logView)) {
+          const reference: SavedObjectReference = {
+            name: LOG_VIEW_REFERENCE_NAME,
+            type: logViewSavedObjectName,
+            id: params.logView.logViewId,
+          };
+
+          const newParams = {
+            ...params,
+            logView: {
+              ...params.logView,
+              logViewId: LOG_VIEW_REFERENCE_NAME,
+            },
+          };
+
+          return { params: newParams, references: [reference] };
+        }
+
+        return { params, references: [] };
+      },
+      injectReferences: (params, references) => {
+        const decodedParams = decodeOrThrow(ruleParamsRT)(params);
+
+        if (logViewReferenceRT.is(decodedParams.logView)) {
+          const matchedReference = references.find((ref) => ref.name === LOG_VIEW_REFERENCE_NAME);
+
+          if (!matchedReference) {
+            throw new Error(`Could not find reference for ${LOG_VIEW_REFERENCE_NAME}`);
+          }
+
+          return {
+            ...decodedParams,
+            logView: {
+              ...decodedParams.logView,
+              logViewId: matchedReference.id,
+            },
+          };
+        }
+
+        return decodedParams;
+      },
+    },
   });
 }
