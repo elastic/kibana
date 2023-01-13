@@ -185,8 +185,6 @@ export class SingleMetricLensAttributes extends LensAttributes {
   getMetricState(): MetricState {
     const { color } = this.layerConfigs[0];
 
-    console.log(this.layerConfigs[0]);
-
     const metricStateOptions: MetricOption['metricStateOptions'] = {
       ...(this.metricStateOptions ?? {}),
       ...(color ? { colorMode: 'Labels', palette: getColorPalette(color) } : {}),
