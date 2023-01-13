@@ -63,6 +63,10 @@ import {
 } from './dashboard_constants';
 import { PlaceholderEmbeddableFactory } from './placeholder_embeddable';
 import { DashboardMountContextProps } from './dashboard_app/types';
+import {
+  DashboardSavedObjectService,
+  FindDashboardsService,
+} from './services/dashboard_saved_object/types';
 
 export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
@@ -108,6 +112,7 @@ export interface DashboardSetup {
 export interface DashboardStart {
   locator?: DashboardAppLocator;
   dashboardFeatureFlagConfig: DashboardFeatureFlagConfig;
+  findDashboardsService: () => Promise<FindDashboardsService>;
 }
 
 export class DashboardPlugin
@@ -120,6 +125,7 @@ export class DashboardPlugin
   private stopUrlTracking: (() => void) | undefined = undefined;
   private currentHistory: ScopedHistory | undefined = undefined;
   private dashboardFeatureFlagConfig?: DashboardFeatureFlagConfig;
+  private dashboardSavedObjectService?: DashboardSavedObjectService;
   private locator?: DashboardAppLocator;
 
   private async startDashboardKibanaServices(
@@ -144,12 +150,10 @@ export class DashboardPlugin
           useHashedUrl: core.uiSettings.get('state:storeInSessionStorage'),
           getDashboardFilterFields: async (dashboardId: string) => {
             const { pluginServices } = await import('./services/plugin_services');
-            const {
-              dashboardSavedObject: { loadDashboardStateFromSavedObject },
-            } = pluginServices.getServices();
+            const { dashboardSavedObject } = pluginServices.getServices();
             return (
-              (await loadDashboardStateFromSavedObject({ id: dashboardId })).dashboardInput
-                ?.filters ?? []
+              (await dashboardSavedObject.loadDashboardStateFromSavedObject({ id: dashboardId }))
+                .dashboardInput?.filters ?? []
             );
           },
         })
@@ -302,10 +306,16 @@ export class DashboardPlugin
         allowByValueEmbeddables: this.dashboardFeatureFlagConfig?.allowByValueEmbeddables,
       });
     });
-
     return {
       locator: this.locator,
       dashboardFeatureFlagConfig: this.dashboardFeatureFlagConfig!,
+      findDashboardsService: async () => {
+        const { pluginServices } = await import('./services/plugin_services');
+        const {
+          dashboardSavedObject: { findDashboards },
+        } = pluginServices.getServices();
+        return findDashboards;
+      },
     };
   }
 

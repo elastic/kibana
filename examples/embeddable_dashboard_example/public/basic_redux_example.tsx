@@ -6,38 +6,44 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useState } from 'react';
+import React from 'react';
 
-import {
-  DashboardContainerRenderer,
-  DashboardCreationOptions,
-  DashboardContainer,
-} from '@kbn/dashboard-plugin/public';
-import { EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { DashboardContainerRenderer } from '@kbn/dashboard-plugin/public';
+import { EuiCode, EuiPanel, EuiPortal, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { css } from '@emotion/react';
 
-export const BasicReduxExample = ({ dataViewId }: { dataViewId: string }) => {
-  const [dashboardContainer, setDashboardContainer] = useState<DashboardContainer>();
-
-  const getCreationOptions = useCallback((): DashboardCreationOptions => {
-    return {};
-  }, []);
-
-  return (
+export const BasicReduxExample = ({ dashboardId }: { dashboardId?: string }) => {
+  return dashboardId ? (
     <>
       <EuiTitle>
-        <h2>Redux example</h2>
+        <h2>Static dashboard from library example</h2>
       </EuiTitle>
       <EuiText>
-        <p>Use the redux context from the control group to set layout style.</p>
+        <p>
+          Loads a static, non-editable version of the <EuiCode>[Logs] Web Traffic</EuiCode>{' '}
+          dashboard.
+        </p>
       </EuiText>
       <EuiSpacer size="m" />
-      <EuiPanel hasBorder={true}>
+      <EuiPanel
+        hasBorder={true}
+        // Waiting on Catherine's PR so that the dashboard is contained by its parent before we can set the height of the panel
+        // css={css`
+        //   height: 300px;
+        // `}
+      >
         <DashboardContainerRenderer
-          savedObjectId={'test-id'}
-          getCreationOptions={getCreationOptions}
-          onDashboardContainerLoaded={(container) => setDashboardContainer(container)}
+          savedObjectId={dashboardId}
+          getCreationOptions={() => {
+            return {}; // no special creation options - just loading a saved object
+          }}
+          onDashboardContainerLoaded={(container) => {
+            return; // this example is static, so don't need to do anything with the dashboard container
+          }}
         />
       </EuiPanel>
     </>
+  ) : (
+    <div>Ensure that the web logs sample dashboard is loaded to view this example.</div>
   );
 };

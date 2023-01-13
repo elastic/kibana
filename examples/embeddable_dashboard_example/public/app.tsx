@@ -11,21 +11,26 @@ import ReactDOM from 'react-dom';
 
 import { AppMountParameters } from '@kbn/core/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { ControlsExampleStartDeps } from './plugin';
+import { EmbeddableDashboardsExampleStartDeps } from './plugin';
 import { BasicReduxExample } from './basic_redux_example';
 
 export const renderApp = async (
-  { data, navigation }: ControlsExampleStartDeps,
+  { data, dashboard }: EmbeddableDashboardsExampleStartDeps,
   { element }: AppMountParameters
 ) => {
   const dataViews = await data.dataViews.find('kibana_sample_data_logs');
+  const findDashboardsService = await dashboard.findDashboardsService();
+
+  const logsSampleDashboardId = (await findDashboardsService?.findByTitle('[Logs] Web Traffic'))
+    ?.id;
+
   const examples =
     dataViews.length > 0 ? (
       <>
-        <BasicReduxExample dataViewId={dataViews[0].id!} />
+        <BasicReduxExample dashboardId={logsSampleDashboardId} />
       </>
     ) : (
-      <div>{'Install web logs sample data to run controls examples.'}</div>
+      <div>{'Install web logs sample data to run the embeddable dashboard examples.'}</div>
     );
 
   ReactDOM.render(

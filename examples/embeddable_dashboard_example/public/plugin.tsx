@@ -12,10 +12,12 @@ import {
   CoreSetup,
   CoreStart,
   Plugin,
+  SavedObjectsClientContract,
 } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import img from './control_group_image.png';
 import { PLUGIN_ID } from './constants';
 
@@ -24,8 +26,10 @@ interface SetupDeps {
 }
 
 export interface EmbeddableDashboardsExampleStartDeps {
+  dashboard: DashboardStart;
   data: DataPublicPluginStart;
   navigation: NavigationPublicPluginStart;
+  savedObjectsClient: SavedObjectsClientContract;
 }
 
 export class EmbeddableDashboardsExamplePlugin
@@ -54,7 +58,7 @@ export class EmbeddableDashboardsExamplePlugin
     });
   }
 
-  public start(core: CoreStart) {}
+  public async start(core: CoreStart, { dashboard }: EmbeddableDashboardsExampleStartDeps) {}
 
   public stop() {}
 }
