@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiSwitch, EuiSpacer, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { INPUT_CONTROL } from '../../../common/constants';
 import { getInputFromPolicy } from '../../common/utils';
@@ -15,6 +15,7 @@ import type { SettingsDeps } from '../../types';
 export const PolicySettings = ({ policy, onChange }: SettingsDeps) => {
   const controlInput = getInputFromPolicy(policy, INPUT_CONTROL);
   const controlEnabled = !!controlInput?.enabled;
+  const policyCopy = useMemo(() => JSON.parse(JSON.stringify(policy)), [policy]);
 
   const onToggleEnabled = useCallback(
     (e) => {
@@ -44,7 +45,7 @@ export const PolicySettings = ({ policy, onChange }: SettingsDeps) => {
       {controlEnabled && (
         <ControlSettings
           data-test-subj="cloud-defend-controlsettings"
-          policy={policy}
+          policy={policyCopy}
           onChange={onChange}
         />
       )}

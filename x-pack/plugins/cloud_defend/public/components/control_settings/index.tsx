@@ -31,10 +31,7 @@ export const ControlSettings = ({ policy, onChange }: SettingsDeps) => {
 
   const onChanges = useCallback(
     (opts: OnChangeDeps) => {
-      if (!opts.updatedPolicy) {
-        opts.updatedPolicy = policy;
-      }
-
+      opts.updatedPolicy = policy;
       onChange(opts);
       setIsValid(opts.isValid);
     },
