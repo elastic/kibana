@@ -503,8 +503,22 @@ export interface BulkActionsConfig {
   'data-test-subj'?: string;
   disableOnQuery: boolean;
   disabledLabel?: string;
-  onClick: (selectedIds: TimelineItem[], isAllSelected: boolean) => void;
+  onClick: (
+    selectedIds: TimelineItem[],
+    isAllSelected: boolean,
+    setIsBulkActionsLoading: (isLoading: boolean) => void
+  ) => void;
 }
+
+export type UseActionsColumnRegistry = () => {
+  renderCustomActionsRow: (
+    alert: EcsFieldsResponse,
+    setFlyoutAlert: (data: unknown) => void,
+    id?: string,
+    setIsActionLoading?: (isLoading: boolean) => void
+  ) => JSX.Element;
+  width?: number;
+};
 
 export type UseBulkActionsRegistry = () => BulkActionsConfig[];
 
@@ -519,14 +533,7 @@ export interface AlertsTableConfigurationRegistry {
   };
   sort?: SortCombinations[];
   getRenderCellValue?: GetRenderCellValue;
-  useActionsColumn?: () => {
-    renderCustomActionsRow: (
-      alert: EcsFieldsResponse,
-      setFlyoutAlert: (data: unknown) => void,
-      id?: string
-    ) => JSX.Element;
-    width?: number;
-  };
+  useActionsColumn?: UseActionsColumnRegistry;
   useBulkActions?: UseBulkActionsRegistry;
 }
 
@@ -537,8 +544,8 @@ export enum BulkActionsVerbs {
   selectCurrentPage = 'selectCurrentPage',
   selectAll = 'selectAll',
   rowCountUpdate = 'rowCountUpdate',
-  setRowLoading = 'setRowLoading',
-  setAllRowLoading = 'setAllRowLoading',
+  updateRowLoadingState = 'updateRowLoadingState',
+  updateAllLoadingState = 'updateAllLoadingState',
 }
 
 export interface BulkActionsReducerAction {

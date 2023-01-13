@@ -35,13 +35,13 @@ export const bulkActionsReducer = (
     nextState.isAllSelected = false;
   } else if (action === BulkActionsVerbs.rowCountUpdate && rowCount !== undefined) {
     nextState.rowCount = rowCount;
-  } else if (action === BulkActionsVerbs.setAllRowLoading) {
+  } else if (action === BulkActionsVerbs.updateAllLoadingState) {
     const nextRowSelection = new Map(
-      Array.from(rowSelection.keys()).map((idx: number) => [idx, true])
+      Array.from(rowSelection.keys()).map((idx: number) => [idx, isLoading])
     );
     nextState.rowSelection = nextRowSelection;
-  } else if (action === BulkActionsVerbs.setRowLoading && rowIndex !== undefined) {
-    nextState.rowSelection.set(rowIndex, true);
+  } else if (action === BulkActionsVerbs.updateRowLoadingState && rowIndex !== undefined) {
+    nextState.rowSelection.set(rowIndex, isLoading);
   }
 
   nextState.areAllVisibleRowsSelected = nextState.rowSelection.size === nextState.rowCount;
