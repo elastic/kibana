@@ -22,7 +22,7 @@ import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getBucketSize } from '../../lib/helpers/get_bucket_size';
 
-type Props = {
+interface Props {
   apmEventClient: APMEventClient;
   serviceName: string;
   transactionType?: string;
@@ -32,7 +32,7 @@ type Props = {
   end: number;
   kuery: string;
   offset?: string;
-};
+}
 
 async function getSessionTimeseries({
   apmEventClient,
