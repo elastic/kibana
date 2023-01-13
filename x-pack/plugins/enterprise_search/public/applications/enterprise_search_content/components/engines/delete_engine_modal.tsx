@@ -11,8 +11,9 @@ import { useActions, useValues } from 'kea';
 import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { EnginesListLogic } from './engines_list_logic';
 import { CANCEL_BUTTON_LABEL } from '../../../shared/constants';
+
+import { EnginesListLogic } from './engines_list_logic';
 
 export const DeleteEngineModal: React.FC = () => {
   const { closeDeleteEngineModal, deleteEngine } = useActions(EnginesListLogic);

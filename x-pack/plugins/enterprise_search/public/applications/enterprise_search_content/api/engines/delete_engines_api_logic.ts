@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 
 import { Actions, createApiLogic } from '../../../shared/api_logic/create_api_logic';
-import { flashAPIErrors } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 
 export interface DeleteEnginesApiLogicArguments {

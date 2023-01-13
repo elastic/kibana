@@ -16,13 +16,13 @@ import { i18n } from '@kbn/i18n';
 import { EnterpriseSearchEngine } from '../../../../../../../common/types/engines';
 
 import { generateEncodedPath } from '../../../../../shared/encode_path_params';
+import { FormattedDateTime } from '../../../../../shared/formatted_date_time';
 import { KibanaLogic } from '../../../../../shared/kibana';
 import { EuiLinkTo } from '../../../../../shared/react_router_helpers';
 
 import { ENGINE_PATH } from '../../../../routes';
 
 import { convertMetaToPagination, Meta } from '../../types';
-import { FormattedDateTime } from '@kbn/enterprise-search-plugin/public/applications/shared/formatted_date_time';
 
 // add health status
 interface EnginesListTableProps {
