@@ -10,6 +10,7 @@ import { FormulaPublicApi, MetricState, OperationType } from '@kbn/lens-plugin/p
 import type { DataView } from '@kbn/data-views-plugin/common';
 
 import { Query } from '@kbn/es-query';
+import { getColorPalette } from '../synthetics/single_metric_config';
 import { FORMULA_COLUMN, RECORDS_FIELD } from '../constants';
 import { ColumnFilter, MetricOption } from '../../types';
 import { SeriesConfig } from '../../../../..';
@@ -182,11 +183,20 @@ export class SingleMetricLensAttributes extends LensAttributes {
   }
 
   getMetricState(): MetricState {
+    const { color } = this.layerConfigs[0];
+
+    console.log(this.layerConfigs[0]);
+
+    const metricStateOptions: MetricOption['metricStateOptions'] = {
+      ...(this.metricStateOptions ?? {}),
+      ...(color ? { colorMode: 'Labels', palette: getColorPalette(color) } : {}),
+    };
+
     return {
       accessor: this.columnId,
       layerId: 'layer0',
       layerType: 'data',
-      ...(this.metricStateOptions ?? {}),
+      ...metricStateOptions,
       size: 's',
     };
   }

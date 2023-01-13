@@ -74,7 +74,11 @@ export function getLayerConfigs(
         getFiltersFromDefs(series.textReportDefinitions)
       );
 
-      const color = `euiColorVis${seriesIndex}`;
+      const color = (theme.eui as unknown as Record<string, string>)[`euiColorVis${seriesIndex}`];
+      let seriesColor = series.color!;
+      if (reportType !== 'single-metric') {
+        seriesColor = series.color ?? color;
+      }
 
       layerConfigs.push({
         filters,
@@ -82,12 +86,12 @@ export function getLayerConfigs(
         seriesConfig,
         time: series.time,
         name: series.name,
+        color: seriesColor,
         breakdown: series.breakdown === LABEL_FIELDS_BREAKDOWN ? undefined : series.breakdown,
         seriesType: series.seriesType,
         operationType: series.operationType,
         reportDefinitions: series.reportDefinitions ?? {},
         selectedMetricField: series.selectedMetricField,
-        color: series.color ?? (theme.eui as unknown as Record<string, string>)[color],
         showPercentileAnnotations: series.showPercentileAnnotations,
       });
     }
