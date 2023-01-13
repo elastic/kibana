@@ -80,6 +80,9 @@ export const getBrowserFields = memoizeOne(
         accumulator[field.category].fields = {};
       }
       accumulator[field.category].fields[field.name] = field as unknown as BrowserField;
+      if (!accumulator[field.category].name) {
+        accumulator[field.category].name = field.category;
+      }
       return accumulator;
     }, {});
   },

@@ -52,7 +52,7 @@ describe('getColumns', () => {
       type: 'someType',
       category: 'agent',
       field: 'agent.id',
-      ...mockDataToUse,
+      ...mockDataToUse.fields,
     } as EventFieldsData;
 
     beforeEach(() => {
