@@ -14,12 +14,15 @@ const SYNTHETICS_RUNNER = Symbol.for('SYNTHETICS_RUNNER');
 // @ts-ignore
 export const runner: Runner = global[SYNTHETICS_RUNNER];
 
-export const recordVideo = (page: Page) => {
+export const recordVideo = (page: Page, postfix = '') => {
   after(async () => {
     try {
       const videoFilePath = await page.video()?.path();
       const pathToVideo = videoFilePath?.replace('.journeys/videos/', '').replace('.webm', '');
-      const newVideoPath = videoFilePath?.replace(pathToVideo!, runner.currentJourney!.name);
+      const newVideoPath = videoFilePath?.replace(
+        pathToVideo!,
+        runner.currentJourney!.name + `-${postfix}`
+      );
       fs.renameSync(videoFilePath!, newVideoPath!);
     } catch (e) {
       // eslint-disable-next-line no-console
