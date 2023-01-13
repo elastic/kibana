@@ -14,3 +14,6 @@ export const getAggsTypeFromRule = (
   if (ruleAggType === '99th') return LatencyAggregationType.p99;
   return LatencyAggregationType.avg;
 };
+
+export const isLatencyThresholdRuleType = (ruleTypeId: string) =>
+  ruleTypeId === 'apm.transaction_duration';

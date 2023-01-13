@@ -37,7 +37,7 @@ export const TEST_RUN_DETAILS_ROUTE = '/monitor/:monitorId/test-run/:checkGroupI
 
 export const MAPPING_ERROR_ROUTE = '/mapping-error';
 
-export const ERROR_DETAILS_ROUTE = '/error-details/:errorStateId';
+export const ERROR_DETAILS_ROUTE = '/monitor/:monitorId/errors/:errorStateId';
 
 export enum STATUS {
   UP = 'up',

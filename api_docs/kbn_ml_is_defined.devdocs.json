@@ -1,0 +1,65 @@
+{
+  "id": "@kbn/ml-is-defined",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/ml-is-defined",
+        "id": "def-common.isDefined",
+        "type": "Function",
+        "tags": [],
+        "label": "isDefined",
+        "description": [
+          "\nChecks whether the supplied argument is not `undefined` and not `null`.\n"
+        ],
+        "signature": [
+          "(argument: T | null | undefined) => boolean"
+        ],
+        "path": "x-pack/packages/ml/is_defined/src/is_defined.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-is-defined",
+            "id": "def-common.isDefined.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "argument",
+            "description": [],
+            "signature": [
+              "T | null | undefined"
+            ],
+            "path": "x-pack/packages/ml/is_defined/src/is_defined.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "boolean"
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

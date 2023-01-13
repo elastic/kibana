@@ -117,6 +117,19 @@
           },
           {
             "parentPluginId": "@kbn/repo-path",
+            "id": "def-common.RepoPath.repoRelDir",
+            "type": "string",
+            "tags": [],
+            "label": "repoRelDir",
+            "description": [
+              "\nrepoRelDir of the path\n(lazy and cached getter)"
+            ],
+            "path": "packages/kbn-repo-path/repo_path.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/repo-path",
             "id": "def-common.RepoPath.isTypeScript",
             "type": "Function",
             "tags": [],

@@ -8,6 +8,7 @@
 export { COMPARATORS, builtInComparators } from './comparators';
 export { AGGREGATION_TYPES, builtInAggregationTypes } from './aggregation_types';
 export { builtInGroupByTypes } from './group_by_types';
+export * from './action_frequency_types';
 
 export const VIEW_LICENSE_OPTIONS_LINK = 'https://www.elastic.co/subscriptions';
 

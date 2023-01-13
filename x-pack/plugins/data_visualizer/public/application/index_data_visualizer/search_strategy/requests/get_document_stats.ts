@@ -10,7 +10,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { DataPublicPluginStart, ISearchOptions } from '@kbn/data-plugin/public';
 import seedrandom from 'seedrandom';
-import { isDefined } from '../../../common/util/is_defined';
+import { isDefined } from '@kbn/ml-is-defined';
 import { RANDOM_SAMPLER_PROBABILITIES } from '../../constants/random_sampler';
 import { buildBaseFilterCriteria } from '../../../../../common/utils/query_utils';
 import type {

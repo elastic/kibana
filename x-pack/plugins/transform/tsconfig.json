@@ -45,6 +45,7 @@
     "@kbn/ui-theme",
     "@kbn/field-types",
     "@kbn/ml-nested-property",
+    "@kbn/ml-is-defined",
   ],
   "exclude": [
     "target/**/*",

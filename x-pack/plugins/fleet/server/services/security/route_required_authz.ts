@@ -11,6 +11,8 @@ import type { RouteMethod } from '@kbn/core-http-server';
 
 import { PACKAGE_POLICY_API_ROUTES, AGENT_API_ROUTES } from '../../../common';
 
+import { EPM_API_ROUTES } from '../../constants';
+
 import type { FleetRouteRequiredAuthz } from './types';
 
 /**
@@ -137,6 +139,40 @@ const ROUTE_AUTHZ_REQUIREMENTS = deepFreeze<Record<string, FleetRouteRequiredAut
         endpoint: {
           actions: {
             readPolicyManagement: {
+              executePackageAction: true,
+            },
+          },
+        },
+      },
+    },
+  },
+
+  // EPM Package Info API
+  [`get:${EPM_API_ROUTES.INFO_PATTERN}`]: {
+    any: {
+      integrations: {
+        readPackageInfo: true,
+      },
+      packagePrivileges: {
+        endpoint: {
+          actions: {
+            readSecuritySolution: {
+              executePackageAction: true,
+            },
+          },
+        },
+      },
+    },
+  },
+  [`get:${EPM_API_ROUTES.INFO_PATTERN_DEPRECATED}`]: {
+    any: {
+      integrations: {
+        readPackageInfo: true,
+      },
+      packagePrivileges: {
+        endpoint: {
+          actions: {
+            readSecuritySolution: {
               executePackageAction: true,
             },
           },

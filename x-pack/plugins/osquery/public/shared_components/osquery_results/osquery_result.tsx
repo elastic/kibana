@@ -15,7 +15,7 @@ import { ATTACHED_QUERY } from '../../agents/translations';
 import { PackQueriesStatusTable } from '../../live_queries/form/pack_queries_status_table';
 import { AlertAttachmentContext } from '../../common/contexts';
 
-interface OsqueryResultProps extends Omit<OsqueryActionResultsProps, 'alertId'> {
+interface OsqueryResultProps extends OsqueryActionResultsProps {
   actionId: string;
   queryId: string;
   startDate: string;

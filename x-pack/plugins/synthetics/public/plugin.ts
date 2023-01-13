@@ -273,7 +273,7 @@ function registerSyntheticsRoutesWithNavigation(
                   }),
                   app: 'synthetics',
                   path: OVERVIEW_ROUTE,
-                  matchFullPath: true,
+                  matchFullPath: false,
                   ignoreTrailingSlash: true,
                 },
               ],

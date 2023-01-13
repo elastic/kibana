@@ -3132,7 +3132,7 @@
           "StringC",
           "; sourcemap: ",
           "Type",
-          "<{ version: number; sources: string[]; mappings: string; } & { names?: string[] | undefined; file?: string | undefined; sourceRoot?: string | undefined; sourcesContent?: string[] | undefined; }, string | Buffer, unknown>; }>; }>, ",
+          "<{ version: number; sources: string[]; mappings: string; } & { names?: string[] | undefined; file?: string | undefined; sourceRoot?: string | undefined; sourcesContent?: (string | null)[] | undefined; }, string | Buffer, unknown>; }>; }>, ",
           {
             "pluginId": "apm",
             "scope": "server",

@@ -84,6 +84,59 @@
           },
           {
             "parentPluginId": "@kbn/slo-schema",
+            "id": "def-common.Duration.add",
+            "type": "Function",
+            "tags": [],
+            "label": "add",
+            "description": [],
+            "signature": [
+              "(other: ",
+              {
+                "pluginId": "@kbn/slo-schema",
+                "scope": "common",
+                "docId": "kibKbnSloSchemaPluginApi",
+                "section": "def-common.Duration",
+                "text": "Duration"
+              },
+              ") => ",
+              {
+                "pluginId": "@kbn/slo-schema",
+                "scope": "common",
+                "docId": "kibKbnSloSchemaPluginApi",
+                "section": "def-common.Duration",
+                "text": "Duration"
+              }
+            ],
+            "path": "packages/kbn-slo-schema/src/models/duration.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/slo-schema",
+                "id": "def-common.Duration.add.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "other",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/slo-schema",
+                    "scope": "common",
+                    "docId": "kibKbnSloSchemaPluginApi",
+                    "section": "def-common.Duration",
+                    "text": "Duration"
+                  }
+                ],
+                "path": "packages/kbn-slo-schema/src/models/duration.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/slo-schema",
             "id": "def-common.Duration.isShorterThan",
             "type": "Function",
             "tags": [],

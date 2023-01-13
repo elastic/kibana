@@ -70,6 +70,7 @@ export const useKibana = jest.fn().mockReturnValue({
     },
     osquery: {
       OsqueryResults: jest.fn().mockReturnValue(null),
+      fetchAllLiveQueries: jest.fn().mockReturnValue({ data: { data: { items: [] } } }),
     },
     timelines: createTGridMocks(),
     savedObjectsTagging: {

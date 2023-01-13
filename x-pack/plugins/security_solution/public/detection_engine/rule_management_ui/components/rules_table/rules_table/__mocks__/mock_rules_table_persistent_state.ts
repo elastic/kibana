@@ -19,9 +19,7 @@ export function mockRulesTablePersistedState({
   urlState: RulesTableUrlSavedState | null;
   storageState: RulesTableStorageSavedState | null;
 }): void {
-  (useGetInitialUrlParamValue as jest.Mock).mockReturnValue(
-    jest.fn().mockReturnValue({ decodedParam: urlState })
-  );
+  (useGetInitialUrlParamValue as jest.Mock).mockReturnValue(jest.fn().mockReturnValue(urlState));
   (useKibana as jest.Mock).mockReturnValue({
     services: { sessionStorage: { get: jest.fn().mockReturnValue(storageState) } },
   });
