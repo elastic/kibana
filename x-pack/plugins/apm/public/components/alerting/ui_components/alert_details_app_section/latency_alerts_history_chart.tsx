@@ -193,6 +193,7 @@ export function LatencyAlertsHistoryChart({
         annotations={[
           <LineAnnotation
             id="annotations"
+            key={'annotationsAlertHistory'}
             domainType={AnnotationDomainType.XDomain}
             dataValues={
               triggeredAlertsData?.histogramTriggeredAlerts
