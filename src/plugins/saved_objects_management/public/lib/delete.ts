@@ -7,13 +7,13 @@
  */
 
 import { HttpStart } from '@kbn/core/public';
-import { SavedObjectWithMetadata } from '../types';
+import { DeleteObjectBodyHTTPV1, DeleteObjectResponseHTTPV1 } from '../../common/types';
 
 export async function deleteObject(
   http: HttpStart,
-  object: { type: string; id: string }
-): Promise<SavedObjectWithMetadata[]> {
-  return await http.delete<SavedObjectWithMetadata[]>(
+  object: DeleteObjectBodyHTTPV1
+): Promise<DeleteObjectResponseHTTPV1> {
+  return await http.delete<DeleteObjectResponseHTTPV1>(
     `/api/kibana/management/saved_objects/_delete`,
     { body: JSON.stringify(object) }
   );

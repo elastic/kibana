@@ -7,13 +7,13 @@
  */
 
 import { HttpStart } from '@kbn/core/public';
-import { SavedObjectWithMetadata } from '../types';
+import { BulkGetHTTPBodyV1, BulkGetHTTPResponseV1 } from '../../common/types';
 
 export async function bulkGetObjects(
   http: HttpStart,
-  objects: Array<{ type: string; id: string }>
-): Promise<SavedObjectWithMetadata[]> {
-  return await http.post<SavedObjectWithMetadata[]>(
+  objects: BulkGetHTTPBodyV1
+): Promise<BulkGetHTTPResponseV1[]> {
+  return await http.post<BulkGetHTTPResponseV1[]>(
     `/api/kibana/management/saved_objects/_bulk_get`,
     { body: JSON.stringify(objects) }
   );
