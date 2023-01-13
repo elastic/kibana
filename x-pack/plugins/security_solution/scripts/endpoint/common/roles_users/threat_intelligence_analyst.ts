@@ -17,7 +17,7 @@ export const getThreatIntelligenceAnalyst: () => Omit<Role, 'name'> = () => {
         ...noResponseActionsRole.kibana[0],
         feature: {
           ...noResponseActionsRole.kibana[0].feature,
-          siem: ['minimal_all', 'actions_log_management_read'],
+          siem: ['actions_log_management_read', 'minimal_all'],
         },
       },
     ],

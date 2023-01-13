@@ -38,21 +38,28 @@ export const getNoResponseActionsRole: () => Omit<Role, 'name'> = () => ({
         savedObjectsManagement: ['all'],
         savedObjectsTagging: ['all'],
         siem: [
-          'minimal_all',
-          'endpoint_list_all',
-          'endpoint_list_read',
-          'trusted_applications_all',
-          'trusted_applications_read',
-          'host_isolation_exceptions_all',
-          'host_isolation_exceptions_read',
-          'blocklist_all',
-          'blocklist_read',
-          'event_filters_all',
-          'event_filters_read',
-          'policy_management_all',
-          'policy_management_read',
           'actions_log_management_all',
           'actions_log_management_read',
+
+          'blocklist_all',
+          'blocklist_read',
+
+          'endpoint_list_all',
+          'endpoint_list_read',
+
+          'host_isolation_exceptions_all',
+          'host_isolation_exceptions_read',
+
+          'event_filters_all',
+          'event_filters_read',
+
+          'minimal_all',
+
+          'policy_management_all',
+          'policy_management_read',
+
+          'trusted_applications_all',
+          'trusted_applications_read',
         ],
         stackAlerts: ['all'],
       },
