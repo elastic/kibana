@@ -43,7 +43,12 @@ export class ContentCore {
     this.eventBus.events$.subscribe((event) => {
       if (event.type === 'createItemSuccess') {
         // Index the data
-        this.searchIndex.index(event.data);
+        console.log('>>>>>>> Content created.');
+        console.log(JSON.stringify(event.data));
+        const serializer = this.contentRegistry.getConfig(
+          event.data.type
+        )?.dbToKibanaContentSerializer;
+        this.searchIndex.index(serializer ? serializer(event.data) : event.data);
       }
     });
 
