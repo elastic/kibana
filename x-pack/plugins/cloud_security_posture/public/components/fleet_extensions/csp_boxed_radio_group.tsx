@@ -65,7 +65,10 @@ export const RadioGroup = ({ idSelected, size, options, disabled, onChange }: Pr
               // Use empty string to fallback to no color
               // @ts-ignore
               color={isChecked ? 'primary' : ''}
-              onClick={() => onChange(option.id)}
+              onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                e.preventDefault();
+                onChange(option.id);
+              }}
               iconType={option.icon}
               iconSide="right"
               contentProps={{
