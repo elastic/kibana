@@ -1054,8 +1054,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.host_isolation.allowed',
       {
-        defaultMessage:
-          'Message TBD. Default: true',
+        defaultMessage: 'Message TBD. Default: true',
       }
     ),
   },
