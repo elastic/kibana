@@ -13,9 +13,8 @@ import {
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   SERVICE_NAME,
-  TRANSACTION_TYPE,
   SESSION_ID,
-  SPAN_SUBTYPE,
+  SERVICE_TARGET_TYPE,
   APP_LAUNCH_TIME,
   EVENT_NAME,
 } from '../../../common/es_fields/apm';
@@ -59,7 +58,7 @@ export async function getMobileStats({
       cardinality: { field: SESSION_ID },
     },
     requests: {
-      filter: { term: { [SPAN_SUBTYPE]: 'http' } },
+      filter: { term: { [SERVICE_TARGET_TYPE]: 'http' } },
     },
     maxLoadTime: {
       max: { field: APP_LAUNCH_TIME },
@@ -84,7 +83,6 @@ export async function getMobileStats({
         bool: {
           filter: [
             ...termQuery(SERVICE_NAME, serviceName),
-            ...termQuery(TRANSACTION_TYPE, transactionType),
             ...rangeQuery(start, end),
             ...environmentQuery(environment),
             ...kqlQuery(kuery),

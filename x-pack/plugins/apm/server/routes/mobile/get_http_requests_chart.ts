@@ -14,7 +14,7 @@ import {
 import {
   SERVICE_NAME,
   TRANSACTION_NAME,
-  SPAN_SUBTYPE,
+  SERVICE_TARGET_TYPE,
 } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
@@ -56,14 +56,14 @@ async function getHttpRequestsTimeseries({
   });
 
   const response = await apmEventClient.search('get_http_requests_chart', {
-    apm: { events: [ProcessorEvent.span] },
+    apm: { events: [ProcessorEvent.metric] },
     body: {
       track_total_hits: false,
       size: 0,
       query: {
         bool: {
           filter: [
-            { exists: { field: SPAN_SUBTYPE } },
+            { exists: { field: SERVICE_TARGET_TYPE } },
             ...termQuery(SERVICE_NAME, serviceName),
             ...termQuery(TRANSACTION_NAME, transactionName),
             ...rangeQuery(startWithOffset, endWithOffset),
@@ -82,7 +82,7 @@ async function getHttpRequestsTimeseries({
           },
           aggs: {
             requests: {
-              filter: { term: { [SPAN_SUBTYPE]: 'http' } },
+              filter: { term: { [SERVICE_TARGET_TYPE]: 'http' } },
             },
           },
         },
