@@ -35,7 +35,7 @@ import { millisToNanos } from '@kbn/event-log-plugin/server';
 import { type Alert } from '../../common';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { getIndexTemplateAndPattern } from '../alerts_service/types';
-import { AlertLimitServices, IAlertLimitServices } from './alert_limit';
+import { AlertLimitService, IAlertLimitService } from './alert_limit_service';
 import { ReportedAlert } from './types';
 import { categorizeAlerts } from '../lib/categorize_alerts';
 import { updateFlappingHistory, setFlapping } from '../lib';
@@ -101,7 +101,7 @@ export interface IAlertsClient {
 }
 
 export type PublicAlertsClient = Pick<IAlertsClient, 'create'> &
-  Pick<IAlertLimitServices, 'getAlertLimitValue' | 'setAlertLimitReached'> /* & {
+  Pick<IAlertLimitService, 'getAlertLimitValue' | 'setAlertLimitReached'> /* & {
   getExistingAlerts(): Alert[];
 }*/;
 
@@ -139,7 +139,7 @@ interface InitializeOpts {
 }
 
 export class AlertsClient implements IAlertsClient {
-  private alertLimitServices: AlertLimitServices;
+  private alertLimitServices: AlertLimitService;
   private rule: AlertRuleSchema | null = null;
   private ruleLogPrefix: string;
 
@@ -160,7 +160,7 @@ export class AlertsClient implements IAlertsClient {
 
   constructor(private readonly options: AlertsClientParams) {
     this.ruleLogPrefix = `${this.options.ruleType.id}`;
-    this.alertLimitServices = new AlertLimitServices({ maxAlerts: options.maxAlerts });
+    this.alertLimitServices = new AlertLimitService({ maxAlerts: options.maxAlerts });
   }
 
   public hasReachedAlertLimit() {
@@ -310,7 +310,7 @@ export class AlertsClient implements IAlertsClient {
         // todo is there a way to report a recovered alert?
         recovered: {},
       },
-      trackedAlerts: this.trackedAlerts,
+      trackedAlerts: this.trackedAlerts.active,
       hasReachedAlertLimit: this.hasReachedAlertLimit(),
       alertLimit: this.options.maxAlerts,
     });

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { pick } from 'lodash';
 import {
   ALERT_ACTION_GROUP,
   ALERT_FLAPPING,
