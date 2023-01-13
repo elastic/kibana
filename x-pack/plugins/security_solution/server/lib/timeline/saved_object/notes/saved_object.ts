@@ -15,6 +15,7 @@ import { identity } from 'fp-ts/lib/function';
 
 import type { SavedObjectsFindOptions } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
+import { getUserDisplayName } from '@kbn/user-profile-components';
 import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import type {
   SavedNote,
@@ -258,17 +259,17 @@ export const convertSavedObjectToSavedNote = (
     }, identity)
   );
 
-const pickSavedNote = (
+export const pickSavedNote = (
   noteId: string | null,
   savedNote: SavedNote,
   userInfo: AuthenticatedUser | null
 ) => {
   if (noteId == null) {
     savedNote.created = new Date().valueOf();
-    savedNote.createdBy = userInfo?.username ?? UNAUTHENTICATED_USER;
+    savedNote.createdBy = userInfo ? getUserDisplayName(userInfo) : UNAUTHENTICATED_USER;
   }
 
   savedNote.updated = new Date().valueOf();
-  savedNote.updatedBy = userInfo?.username ?? UNAUTHENTICATED_USER;
+  savedNote.updatedBy = userInfo ? getUserDisplayName(userInfo) : UNAUTHENTICATED_USER;
   return savedNote;
 };

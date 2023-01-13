@@ -10,9 +10,10 @@ import React, { CSSProperties } from 'react';
 import { EuiBasicTable, EuiBasicTableColumn, EuiText, useEuiTheme } from '@elastic/eui';
 import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 
-import { StepDetailsLinkIcon } from '../links/step_details_link';
-import { JourneyStepScreenshotContainer } from '../screenshot/journey_step_screenshot_container';
 import { JourneyStep } from '../../../../../../common/runtime_types';
+import { JourneyStepScreenshotContainer } from '../screenshot/journey_step_screenshot_container';
+import { ScreenshotImageSize, THUMBNAIL_SCREENSHOT_SIZE } from '../screenshot/screenshot_size';
+import { StepDetailsLinkIcon } from '../links/step_details_link';
 
 import { StatusBadge, parseBadgeStatus, getTextColorForMonitorStatus } from './status_badge';
 import { StepDurationText } from './step_duration_text';
@@ -22,6 +23,7 @@ interface Props {
   error?: Error;
   loading: boolean;
   showStepNumber: boolean;
+  screenshotImageSize?: ScreenshotImageSize;
   compressed?: boolean;
 }
 
@@ -33,12 +35,12 @@ export const BrowserStepsList = ({
   steps,
   error,
   loading,
+  screenshotImageSize = THUMBNAIL_SCREENSHOT_SIZE,
   showStepNumber = false,
   compressed = true,
 }: Props) => {
   const { euiTheme } = useEuiTheme();
   const stepEnds: JourneyStep[] = steps.filter(isStepEnd);
-  const stepLabels = stepEnds.map((stepEnd) => stepEnd?.synthetics?.step?.name ?? '');
 
   const columns: Array<EuiBasicTableColumn<JourneyStep>> = [
     ...(showStepNumber
@@ -59,11 +61,11 @@ export const BrowserStepsList = ({
       render: (_timestamp: string, step) => (
         <JourneyStepScreenshotContainer
           checkGroup={step.monitor.check_group}
-          initialStepNo={step.synthetics?.step?.index}
+          initialStepNumber={step.synthetics?.step?.index}
           stepStatus={step.synthetics.payload?.status}
           allStepsLoaded={true}
-          stepLabels={stepLabels}
           retryFetchOnRevisit={false}
+          size={screenshotImageSize}
         />
       ),
       mobileOptions: {
@@ -120,6 +122,7 @@ export const BrowserStepsList = ({
         <StepDetailsLinkIcon
           checkGroup={item.monitor.check_group}
           stepIndex={item.synthetics?.step?.index}
+          configId={item.config_id!}
         />
       ),
     },
