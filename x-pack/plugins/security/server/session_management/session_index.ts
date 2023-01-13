@@ -533,6 +533,8 @@ export class SessionIndex {
       // If we couldn't fetch or delete sessions, throw an error so the task will be retried.
       throw error;
     }
+
+    logger.debug(`Session cleanup routine completed.`);
   }
 
   /**
