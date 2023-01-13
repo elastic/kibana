@@ -108,6 +108,18 @@ export const createSLO = (params: Partial<SLO> = {}): SLO => {
   });
 };
 
+export const createSLOWithTimeslicesBudgetingMethod = (params: Partial<SLO> = {}): SLO => {
+  return createSLO({
+    budgetingMethod: 'timeslices',
+    objective: {
+      target: 0.98,
+      timesliceTarget: 0.95,
+      timesliceWindow: new Duration(5, DurationUnit.Minute),
+    },
+    ...params,
+  });
+};
+
 export const createSLOWithCalendarTimeWindow = (params: Partial<SLO> = {}): SLO => {
   return createSLO({
     timeWindow: {
