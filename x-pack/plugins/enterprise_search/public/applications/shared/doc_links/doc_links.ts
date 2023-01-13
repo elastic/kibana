@@ -276,7 +276,6 @@ class DocLinks {
     this.clientsNetIntroduction = docLinks.links.clients.netIntroduction;
     this.clientsNetNest = docLinks.links.clients.netNest;
     this.clientsNetSingleNode = docLinks.links.clients.netSingleNode;
-    this.clientsPerlGuide = docLinks.links.clients.perlGuide;
     this.clientsPhpConnecting = docLinks.links.clients.phpConnecting;
     this.clientsPhpGuide = docLinks.links.clients.phpGuide;
     this.clientsPhpInstallation = docLinks.links.clients.phpInstallation;
