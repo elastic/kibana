@@ -41,6 +41,12 @@ const CommandInputContainer = styled.div`
     border-bottom-color: ${({ theme: { eui } }) => eui.euiColorDanger};
   }
 
+  .inputDisplay {
+    min-height: ${({ theme: { eui } }) => {
+      return `calc(${eui.euiLineHeight}em + 0.5em)`;
+    }};
+  }
+
   .textEntered {
     white-space: break-spaces;
   }
@@ -278,7 +284,12 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
                     onChangeFocus={handleOnChangeFocus}
                     focusRef={focusRef}
                   >
-                    <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
+                    <EuiFlexGroup
+                      responsive={false}
+                      alignItems="center"
+                      gutterSize="none"
+                      className="inputDisplay"
+                    >
                       <EuiFlexItem grow={false}>
                         <div data-test-subj={getTestId('cmdInput-leftOfCursor')}>
                           {userInput.getLeftOfCursorRenderingContent()}

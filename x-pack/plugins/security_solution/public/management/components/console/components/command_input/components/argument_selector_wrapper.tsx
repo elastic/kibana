@@ -14,6 +14,10 @@ import type { CommandArgDefinition, CommandArgumentValueSelectorProps } from '..
 
 const ArgumentSelectorWrapperContainer = styled.span`
   user-select: none;
+
+  .selectorContainer {
+    max-width: 25vw;
+  }
 `;
 
 // Type to ensure that `SelectorComponent` is defined
@@ -48,17 +52,19 @@ export const ArgumentSelectorWrapper = memo<ArgumentSelectorWrapperProps>(
       [argName, dispatch]
     );
 
-    // FIXME:PT wrapper component needs to have bounds on width and overflow so that it does not disrupt the Input UI
     return (
       <ArgumentSelectorWrapperContainer className="eui-displayInlineBlock">
-        <EuiFlexGroup responsive={false} gutterSize="none">
+        <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
           <EuiFlexItem grow={false}>{`--${argName}="`}</EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <SelectorComponent
-              value={value}
-              valueText={valueText ?? ''}
-              onChange={handleSelectorComponentOnChange}
-            />
+            {/* `div` below ensures that the `SelectorComponent` does NOT inherit the styles of a `flex` container */}
+            <div className="selectorContainer eui-textTruncate">
+              <SelectorComponent
+                value={value}
+                valueText={valueText ?? ''}
+                onChange={handleSelectorComponentOnChange}
+              />
+            </div>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>{'"'}</EuiFlexItem>
         </EuiFlexGroup>

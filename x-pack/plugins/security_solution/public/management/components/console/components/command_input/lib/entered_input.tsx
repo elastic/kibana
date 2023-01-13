@@ -44,11 +44,7 @@ const getInputCharacters = (input: string): InputCharacter[] => {
 };
 
 const toReactJsxFragment = (prefix: string, item: InputCharacter, index: number) => {
-  return (
-    <React.Fragment key={`${prefix}.${index}.${item.value ?? '$'}`}>
-      {item.renderValue}
-    </React.Fragment>
-  );
+  return <span key={`${prefix}.${index}.${item.value ?? '$'}`}>{item.renderValue}</span>;
 };
 
 const toInputCharacterDisplayString = (
