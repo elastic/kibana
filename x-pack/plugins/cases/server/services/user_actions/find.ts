@@ -6,6 +6,7 @@
  */
 
 import type { KueryNode } from '@kbn/es-query';
+import { fromKueryExpression } from '@kbn/es-query';
 import type { SavedObjectsFindResponse } from '@kbn/core-saved-objects-api-server';
 import type {
   CaseUserActionAttributesWithoutConnectorId,
@@ -13,13 +14,14 @@ import type {
   FindTypes,
   UserActionFindRequest,
   ActionTypeValues,
+  FindTypeField,
 } from '../../../common/api';
 import { ActionTypes, CommentType } from '../../../common/api';
 import { CASE_SAVED_OBJECT, CASE_USER_ACTION_SAVED_OBJECT } from '../../../common/constants';
 
 import type { ServiceContext } from './types';
 import { transformFindResponseToExternalModel } from '.';
-import { buildFilter, combineFilters } from '../../client/utils';
+import { buildFilter, combineFilters, NodeBuilderOperators } from '../../client/utils';
 
 interface FindOptions extends UserActionFindRequest {
   caseId: string;
@@ -31,27 +33,26 @@ export class UserActionFinder {
 
   public async find({
     caseId,
-    action,
     sortOrder,
-    type,
-    searchAfter,
+    types,
+    page,
     perPage,
     filter,
   }: FindOptions): Promise<SavedObjectsFindResponse<CaseUserActionResponse>> {
     try {
       this.context.log.debug(`Attempting to find user actions for case id: ${caseId}`);
 
-      const finalFilter = combineFilters([filter, UserActionFinder.buildFilter({ action, type })]);
+      const finalFilter = combineFilters([filter, UserActionFinder.buildFilter(types)]);
 
       const userActions =
         await this.context.unsecuredSavedObjectsClient.find<CaseUserActionAttributesWithoutConnectorId>(
           {
             type: CASE_USER_ACTION_SAVED_OBJECT,
             hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
+            page,
             perPage,
             sortField: 'created_at',
             sortOrder,
-            searchAfter,
             filter: finalFilter,
           }
         );
@@ -66,88 +67,85 @@ export class UserActionFinder {
     }
   }
 
-  private static buildFilter({
-    action,
-    type,
-  }: {
-    action: FindOptions['action'];
-    type: FindOptions['type'];
-  }) {
-    const actionFilter = buildFilter({
-      filters: [action],
-      field: 'action',
-      operator: 'or',
-      type: CASE_USER_ACTION_SAVED_OBJECT,
-    });
-
+  private static buildFilter(types: FindOptions['types']) {
     let typeFilter: KueryNode | undefined;
 
-    switch (type) {
-      case 'action':
-        typeFilter = UserActionFinder.buildActionFilter();
-        break;
-      case 'user':
-      case 'alert':
-        typeFilter = UserActionFinder.buildUserAndAlertFilter(type);
-        break;
-      case 'attachment':
-        typeFilter = UserActionFinder.buildAttachmentsFilter();
-        break;
-      default:
-        typeFilter = UserActionFinder.buildGenericTypeFilter(type);
-        break;
+    for (const type of types) {
+      typeFilter = combineFilters(
+        [typeFilter, UserActionFinder.buildFilterType(type)],
+        NodeBuilderOperators.or
+      );
     }
 
-    return combineFilters([actionFilter, typeFilter]);
+    return typeFilter;
+  }
+
+  private static buildFilterType(type: FindTypeField): KueryNode | undefined {
+    switch (type) {
+      case 'action':
+        return UserActionFinder.buildActionFilter();
+      case 'user':
+      case 'alert':
+        return UserActionFinder.buildUserAndAlertFilter(type);
+      case 'attachment':
+        return UserActionFinder.buildAttachmentsFilter();
+      default:
+        return UserActionFinder.buildGenericTypeFilter(type);
+    }
   }
 
   private static buildActionFilter(): KueryNode | undefined {
-    const actionTypesExceptComment = Object.keys(ActionTypes).filter(
-      (actionType) => actionType !== ActionTypes.comment
+    const filterForUserActionsExcludingComment = fromKueryExpression(
+      `not ${CASE_USER_ACTION_SAVED_OBJECT}.attributes.type: ${ActionTypes.comment}`
     );
 
-    return buildFilter({
-      filters: actionTypesExceptComment,
-      field: 'type',
-      operator: 'or',
-      type: CASE_USER_ACTION_SAVED_OBJECT,
-    });
+    return filterForUserActionsExcludingComment;
   }
 
   private static buildUserAndAlertFilter(
     type: typeof FindTypes.alert | typeof FindTypes.user
   ): KueryNode | undefined {
-    return combineFilters([
-      buildFilter({
-        filters: [ActionTypes.comment],
-        field: 'type',
-        operator: 'or',
-        type: CASE_USER_ACTION_SAVED_OBJECT,
-      }),
-      buildFilter({
-        filters: [type],
-        field: 'payload.comment.type',
-        operator: 'or',
-        type: CASE_USER_ACTION_SAVED_OBJECT,
-      }),
-    ]);
+    return combineFilters(
+      [
+        buildFilter({
+          filters: [ActionTypes.comment],
+          field: 'type',
+          operator: 'or',
+          type: CASE_USER_ACTION_SAVED_OBJECT,
+        }),
+        buildFilter({
+          filters: [type],
+          field: 'payload.comment.type',
+          operator: 'or',
+          type: CASE_USER_ACTION_SAVED_OBJECT,
+        }),
+      ],
+      NodeBuilderOperators.and
+    );
   }
 
   private static buildAttachmentsFilter(): KueryNode | undefined {
-    return combineFilters([
-      buildFilter({
-        filters: [ActionTypes.comment],
-        field: 'type',
-        operator: 'or',
-        type: CASE_USER_ACTION_SAVED_OBJECT,
-      }),
-      buildFilter({
-        filters: [CommentType.persistableState, CommentType.externalReference],
-        field: 'payload.comment.type',
-        operator: 'or',
-        type: CASE_USER_ACTION_SAVED_OBJECT,
-      }),
-    ]);
+    return combineFilters(
+      [
+        buildFilter({
+          filters: [ActionTypes.comment],
+          field: 'type',
+          operator: 'or',
+          type: CASE_USER_ACTION_SAVED_OBJECT,
+        }),
+        buildFilter({
+          filters: [
+            CommentType.persistableState,
+            CommentType.externalReference,
+            CommentType.actions,
+          ],
+          field: 'payload.comment.type',
+          operator: 'or',
+          type: CASE_USER_ACTION_SAVED_OBJECT,
+        }),
+      ],
+      NodeBuilderOperators.and
+    );
   }
 
   private static buildGenericTypeFilter(type: ActionTypeValues): KueryNode | undefined {

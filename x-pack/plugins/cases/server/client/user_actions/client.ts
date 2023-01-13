@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import type { ICaseUserActionsResponse } from '../typedoc_interfaces';
+import type {
+  CaseUserActionsResponse,
+  UserActionFindRequest,
+  UserActionFindResponse,
+} from '../../../common/api';
 import type { CasesClientArgs } from '../types';
 import { get } from './get';
+import { find } from './find';
 
 /**
  * Parameters for retrieving user actions for a particular case
@@ -19,14 +24,20 @@ export interface UserActionGet {
   caseId: string;
 }
 
+export interface UserActionFind {
+  queryOptions: UserActionFindRequest;
+  caseId: string;
+}
+
 /**
  * API for interacting the actions performed by a user when interacting with the cases entities.
  */
 export interface UserActionsSubClient {
+  find(clientArgs: UserActionFind): Promise<UserActionFindResponse>;
   /**
    * Retrieves all user actions for a particular case.
    */
-  getAll(clientArgs: UserActionGet): Promise<ICaseUserActionsResponse>;
+  getAll(clientArgs: UserActionGet): Promise<CaseUserActionsResponse>;
 }
 
 /**
@@ -36,6 +47,7 @@ export interface UserActionsSubClient {
  */
 export const createUserActionsSubClient = (clientArgs: CasesClientArgs): UserActionsSubClient => {
   const attachmentSubClient: UserActionsSubClient = {
+    find: (params) => find(params, clientArgs),
     getAll: (params: UserActionGet) => get(params, clientArgs),
   };
 
