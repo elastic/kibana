@@ -10,8 +10,8 @@ import expect from '@kbn/expect';
 import { promisify } from 'util';
 import httpProxy from 'http-proxy';
 import { KBN_KEY_PATH } from '@kbn/dev-utils';
+import { getHttpProxyServer } from '@kbn/alerting-api-integration-helpers';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-import { getHttpProxyServer } from '../../../../../common/lib/get_proxy_server';
 import {
   ExternalServiceSimulator,
   getExternalServiceSimulatorPath,

@@ -18,8 +18,8 @@ import {
   RuleTypeParams,
 } from '@kbn/alerting-plugin/server';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { FixtureStartDeps, FixtureSetupDeps } from './plugin';
-import { ES_TEST_INDEX_NAME } from '../../../lib';
 
 export const EscapableStrings = {
   escapableBold: '*bold*',

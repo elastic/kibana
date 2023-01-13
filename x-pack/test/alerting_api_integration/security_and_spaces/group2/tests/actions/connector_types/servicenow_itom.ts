@@ -11,7 +11,7 @@ import { asyncForEach } from '@kbn/std';
 import getPort from 'get-port';
 import http from 'http';
 
-import { getHttpProxyServer } from '../../../../../common/lib/get_proxy_server';
+import { getHttpProxyServer } from '@kbn/alerting-api-integration-helpers';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getServiceNowServer } from '../../../../../common/plugins/actions_simulators/server/plugin';
 
