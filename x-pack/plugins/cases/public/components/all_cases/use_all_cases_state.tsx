@@ -91,6 +91,13 @@ const getFilterOptions = (
   };
 };
 
+const getSupportedFilterOptions = (filterOptions: FilterOptions): PartialFilterOptions => {
+  return {
+    ...(filterOptions.severity && { severity: filterOptions.severity }),
+    ...(filterOptions.status && { status: filterOptions.status }),
+  };
+};
+
 export function useAllCasesState(
   isModalView: boolean = false,
   initialFilterOptions?: PartialFilterOptions
@@ -151,10 +158,8 @@ export function useAllCasesState(
         localStorageFilterOptions
       );
 
-      const newPersistedFilterOptions: PartialFilterOptions = {
-        severity: newFilterOptions.severity,
-        status: newFilterOptions.status,
-      };
+      const newPersistedFilterOptions: PartialFilterOptions =
+        getSupportedFilterOptions(newFilterOptions);
 
       const newLocalStorageFilterOptions: PartialFilterOptions = {
         ...localStorageFilterOptions,
@@ -172,6 +177,29 @@ export function useAllCasesState(
     ]
   );
 
+  const updateLocation = useCallback(() => {
+    const parsedUrlParams = parse(location.search);
+    const stateUrlParams = {
+      ...parsedUrlParams,
+      ...queryParams,
+      ...getSupportedFilterOptions(filterOptions),
+      page: queryParams.page.toString(),
+      perPage: queryParams.perPage.toString(),
+    };
+
+    if (!isEqual(parsedUrlParams, stateUrlParams)) {
+      try {
+        const newHistory = {
+          ...location,
+          search: stringify({ ...parsedUrlParams, ...stateUrlParams }),
+        };
+        history.replace(newHistory);
+      } catch {
+        // silently fail
+      }
+    }
+  }, [filterOptions, history, location, queryParams]);
+
   if (isFirstRenderRef.current) {
     persistAndUpdateQueryParams(isModalView ? queryParams : {});
     persistAndUpdateFilterOptions(isModalView ? filterOptions : initialFilterOptions);
@@ -181,38 +209,9 @@ export function useAllCasesState(
 
   useEffect(() => {
     if (!isModalView) {
-      const parsedUrlParams = parse(location.search);
-      const stateUrlParams = {
-        ...parsedUrlParams,
-        ...queryParams,
-        page: queryParams.page.toString(),
-        perPage: queryParams.perPage.toString(),
-        severity: filterOptions.severity,
-        status: filterOptions.status,
-      };
-
-      if (!isEqual(parsedUrlParams, stateUrlParams)) {
-        try {
-          const newHistory = {
-            ...location,
-            search: stringify({ ...parsedUrlParams, ...stateUrlParams }),
-          };
-          history.replace(newHistory);
-        } catch {
-          // silently fail
-        }
-      }
+      updateLocation();
     }
-  }, [
-    filterOptions,
-    history,
-    initialFilterOptions,
-    isModalView,
-    location,
-    persistAndUpdateFilterOptions,
-    persistAndUpdateQueryParams,
-    queryParams,
-  ]);
+  }, [isModalView, updateLocation]);
 
   return {
     queryParams,
