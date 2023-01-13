@@ -700,9 +700,6 @@ export class Embeddable
 
   private removeActiveDataWarningMessages: () => void = () => {};
   private updateActiveData: ExpressionWrapperProps['onData$'] = (data, adapters) => {
-    this.removeActiveDataWarningMessages();
-
-    this.activeData = adapters?.tables?.tables;
     if (this.input.onLoad) {
       // once onData$ is get's called from expression renderer, loading becomes false
       this.input.onLoad(false, adapters);
@@ -710,15 +707,23 @@ export class Embeddable
 
     const { type, error } = data as { type: string; error: ErrorLike };
     this.updateOutput({
-      ...this.getOutput(),
       loading: false,
       error: type === 'error' ? error : undefined,
     });
 
-    const searchWarningMessages = this.getSearchWarningMessages(adapters);
-    this.removeActiveDataWarningMessages = this.addUserMessages(
-      searchWarningMessages.filter(isMessageRemovable)
-    );
+    const newActiveData = adapters?.tables?.tables;
+
+    if (!fastIsEqual(this.activeData, newActiveData)) {
+      // we check equality because this.addUserMessage triggers a render, so we get an infinite loop
+      // if we just execute without checking if the data has changed
+      this.removeActiveDataWarningMessages();
+      const searchWarningMessages = this.getSearchWarningMessages(adapters);
+      this.removeActiveDataWarningMessages = this.addUserMessages(
+        searchWarningMessages.filter(isMessageRemovable)
+      );
+    }
+
+    this.activeData = newActiveData;
   };
 
   private onRender: ExpressionWrapperProps['onRender$'] = () => {

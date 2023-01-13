@@ -1171,9 +1171,6 @@ describe('embeddable', () => {
     );
 
     await embeddable.initializeSavedVis({ id: '123' } as LensEmbeddableInput);
-
-    await new Promise((resolve) => setTimeout(resolve, 20));
-
     embeddable.render(mountpoint);
 
     expect(onLoad).toHaveBeenCalledWith(true);
