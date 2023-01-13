@@ -13,7 +13,6 @@ import { get } from 'lodash';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
   Capabilities,
-  SavedObjectsClientContract,
   OverlayStart,
   NotificationsStart,
   ScopedHistory,
@@ -22,7 +21,7 @@ import {
   DocLinksStart,
 } from '@kbn/core/public';
 import { Header, Inspect, NotFoundErrors } from './components';
-import { bulkGetObjects } from '../../lib/bulk_get_objects';
+import { bulkGetObjects, deleteObject } from '../../lib';
 import { SavedObjectWithMetadata } from '../../types';
 import './saved_object_view.scss';
 export interface SavedObjectEditionProps {
@@ -33,7 +32,6 @@ export interface SavedObjectEditionProps {
   overlays: OverlayStart;
   notifications: NotificationsStart;
   notFoundType?: string;
-  savedObjectsClient: SavedObjectsClientContract;
   history: ScopedHistory;
   uiSettings: IUiSettingsClient;
   docLinks: DocLinksStart['links'];
@@ -129,7 +127,7 @@ export class SavedObjectEdition extends Component<
   }
 
   async delete() {
-    const { id, savedObjectsClient, overlays, notifications } = this.props;
+    const { id, overlays, notifications } = this.props;
     const { type, object } = this.state;
 
     const confirmed = await overlays.openConfirm(
@@ -153,7 +151,7 @@ export class SavedObjectEdition extends Component<
       }
     );
     if (confirmed) {
-      await savedObjectsClient.delete(type, id);
+      await deleteObject(this.props.http, { type, id });
       notifications.toasts.addSuccess(`Deleted '${object!.attributes.title}' ${type} object`);
       this.redirectToListing();
     }

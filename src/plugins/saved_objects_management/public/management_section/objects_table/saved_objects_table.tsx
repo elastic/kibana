@@ -12,13 +12,7 @@ import { debounce } from 'lodash';
 import { saveAs } from '@elastic/filesaver';
 import { EuiSpacer, Query, CriteriaWithPagination } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  SavedObjectsClientContract,
-  HttpStart,
-  OverlayStart,
-  NotificationsStart,
-  ApplicationStart,
-} from '@kbn/core/public';
+import { HttpStart, OverlayStart, NotificationsStart, ApplicationStart } from '@kbn/core/public';
 import type { SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
 import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
 import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
@@ -33,10 +27,12 @@ import {
   fetchExportByTypeAndSearch,
   findObjects,
   bulkGetObjects,
+  deleteObject,
   extractExportDetails,
   SavedObjectsExportResultDetails,
   getTagFindReferences,
 } from '../../lib';
+
 import { SavedObjectWithMetadata } from '../../types';
 import {
   SavedObjectsManagementActionServiceStart,
@@ -60,7 +56,6 @@ export interface SavedObjectsTableProps {
   allowedTypes: SavedObjectManagementTypeInfo[];
   actionRegistry: SavedObjectsManagementActionServiceStart;
   columnRegistry: SavedObjectsManagementColumnServiceStart;
-  savedObjectsClient: SavedObjectsClientContract;
   dataViews: DataViewsContract;
   taggingApi?: SavedObjectsTaggingApi;
   http: HttpStart;
@@ -507,7 +502,6 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   };
 
   delete = async () => {
-    const { savedObjectsClient } = this.props;
     const { selectedSavedObjects, isDeleting } = this.state;
 
     if (isDeleting) {
@@ -523,7 +517,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
     const deletes = selectedSavedObjects
       .filter((object) => !object.meta.hiddenType)
-      .map((object) => savedObjectsClient.delete(object.type, object.id, { force: true }));
+      .map((object) => deleteObject(this.props.http, object));
     await Promise.all(deletes);
 
     // Unset this

@@ -36,7 +36,6 @@ describe('SavedObjectEdition', () => {
   let http: ReturnType<typeof httpServiceMock.createStartContract>;
   let overlays: ReturnType<typeof overlayServiceMock.createStartContract>;
   let notifications: ReturnType<typeof notificationServiceMock.createStartContract>;
-  let savedObjects: ReturnType<typeof savedObjectsServiceMock.createStartContract>;
   let uiSettings: ReturnType<typeof uiSettingsServiceMock.createStartContract>;
   let history: ReturnType<typeof scopedHistoryMock.create>;
   let applications: ReturnType<typeof applicationServiceMock.createStartContract>;
@@ -81,7 +80,6 @@ describe('SavedObjectEdition', () => {
       capabilities: applications.capabilities,
       overlays,
       notifications,
-      savedObjectsClient: savedObjects.client,
       history,
       uiSettings,
       docLinks: docLinks.links,
@@ -236,10 +234,6 @@ describe('SavedObjectEdition', () => {
 
     it('should display a confirmation message on deleting the saved object', async () => {
       bulkGetObjectsMock.mockImplementation(() => Promise.resolve([savedObjectItem]));
-      const mockSavedObjectsClient = {
-        ...defaultProps.savedObjectsClient,
-        delete: jest.fn().mockImplementation(() => ({})),
-      };
       applications.capabilities = {
         navLinks: {},
         management: {},
@@ -253,7 +247,6 @@ describe('SavedObjectEdition', () => {
       overlays.openConfirm.mockResolvedValue(false);
       const component = shallowRender({
         capabilities: applications.capabilities,
-        savedObjectsClient: mockSavedObjectsClient,
         overlays,
       });
 
@@ -273,10 +266,6 @@ describe('SavedObjectEdition', () => {
 
     it('should route back if action is confirm and user accepted', async () => {
       bulkGetObjectsMock.mockImplementation(() => Promise.resolve([savedObjectItem]));
-      const mockSavedObjectsClient = {
-        ...defaultProps.savedObjectsClient,
-        delete: jest.fn().mockImplementation(() => ({})),
-      };
       applications.capabilities = {
         navLinks: {},
         management: {},
@@ -290,7 +279,6 @@ describe('SavedObjectEdition', () => {
       overlays.openConfirm.mockResolvedValue(true);
       const component = shallowRender({
         capabilities: applications.capabilities,
-        savedObjectsClient: mockSavedObjectsClient,
         overlays,
       });
 

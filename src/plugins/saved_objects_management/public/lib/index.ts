@@ -19,6 +19,7 @@ export { processImportResponse } from './process_import_response';
 export { getDefaultTitle } from './get_default_title';
 export { findObjects } from './find_objects';
 export { bulkGetObjects } from './bulk_get_objects';
+export { deleteObject } from './delete';
 export type { SavedObjectsExportResultDetails } from './extract_export_details';
 export { extractExportDetails } from './extract_export_details';
 export { getAllowedTypes } from './get_allowed_types';
