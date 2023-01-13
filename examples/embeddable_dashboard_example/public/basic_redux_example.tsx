@@ -9,14 +9,11 @@
 import React, { useCallback, useState } from 'react';
 
 import {
-  LazyDashboardContainerRenderer,
+  DashboardContainerRenderer,
   DashboardCreationOptions,
   DashboardContainer,
 } from '@kbn/dashboard-plugin/public';
-import { withSuspense } from '@kbn/presentation-util-plugin/public';
 import { EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-
-const DashboardContainerRenderer = withSuspense(LazyDashboardContainerRenderer);
 
 export const BasicReduxExample = ({ dataViewId }: { dataViewId: string }) => {
   const [dashboardContainer, setDashboardContainer] = useState<DashboardContainer>();

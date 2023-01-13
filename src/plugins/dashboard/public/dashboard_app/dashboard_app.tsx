@@ -35,7 +35,7 @@ import type { DashboardContainer } from '../dashboard_container';
 import { type DashboardEmbedSettings, DashboardRedirect } from './types';
 import { useDashboardMountContext } from './hooks/dashboard_mount_context';
 import { useDashboardOutcomeValidation } from './hooks/use_dashboard_outcome_validation';
-import DashboardContainerRenderer from '../dashboard_container/dashboard_container_renderer';
+import { DashboardContainerRenderer } from '../dashboard_container';
 import { loadDashboardHistoryLocationState } from './locator/load_dashboard_history_location_state';
 import type { DashboardCreationOptions } from '../dashboard_container/embeddable/dashboard_container_factory';
 

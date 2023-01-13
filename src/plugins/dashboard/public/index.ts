@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-
 import { PluginInitializerContext } from '@kbn/core/public';
 
 import { DashboardPlugin } from './plugin';
@@ -20,6 +18,7 @@ export {
   DASHBOARD_CONTAINER_TYPE,
   type DashboardContainer,
   type DashboardCreationOptions,
+  DashboardContainerRenderer,
 } from './dashboard_container';
 export type { DashboardSetup, DashboardStart, DashboardFeatureFlagConfig } from './plugin';
 
@@ -32,7 +31,3 @@ export {
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DashboardPlugin(initializerContext);
 }
-
-export const LazyDashboardContainerRenderer = React.lazy(
-  () => import('./dashboard_container/dashboard_container_renderer')
-);
