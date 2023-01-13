@@ -63,7 +63,7 @@ export function ServiceLink({
           >
             <EuiText style={{ width: `${unit * 28}px` }} size="s">
               <FormattedMessage
-                defaultMessage="The service group limit has been reached. Please see the {apmServerDocs} for 'aggregation.service.max_groups' to increase this."
+                defaultMessage="The maximum number of unique services has been reached. Please see the {apmServerDocs} for 'aggregation.service.max_groups' to increase this."
                 id="xpack.apm.serviceLink.tooltip.message"
                 values={{
                   apmServerDocs: (
