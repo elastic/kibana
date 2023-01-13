@@ -18,7 +18,7 @@ const CodeEditorContainer = styled(EuiPanel)`
   padding: 0;
 `;
 
-interface Props {
+export interface CodeEditorProps {
   ariaLabel: string;
   id: string;
   languageId: MonacoEditorLangId;
@@ -36,7 +36,7 @@ export const CodeEditor = ({
   value,
   placeholder,
   height = '250px',
-}: Props) => {
+}: CodeEditorProps) => {
   return (
     <CodeEditorContainer borderRadius="none" hasShadow={false} hasBorder={true}>
       <MonacoCodeContainer

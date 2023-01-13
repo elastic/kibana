@@ -134,6 +134,7 @@ export const mockState: SyntheticsAppState = {
     loading: {},
     error: {},
   },
+  manualTestRuns: {},
 };
 
 function getBrowserJourneyMockSlice() {

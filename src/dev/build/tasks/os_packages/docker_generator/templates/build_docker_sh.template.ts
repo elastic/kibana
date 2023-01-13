@@ -22,7 +22,8 @@ function generator({
   baseImageName,
   architecture,
 }: TemplateContext) {
-  const tag = dockerTag ? dockerTag : version + dockerTagQualifier ? '-' + dockerTagQualifier : '';
+  const tag =
+    (dockerTag ? dockerTag : version) + (dockerTagQualifier ? '-' + dockerTagQualifier : '');
   const dockerTargetName = `${imageTag}${imageFlavor}:${tag}`;
   const dockerArchitecture = architecture === 'aarch64' ? 'linux/arm64' : 'linux/amd64';
   const dockerBuild = dockerCrossCompile
