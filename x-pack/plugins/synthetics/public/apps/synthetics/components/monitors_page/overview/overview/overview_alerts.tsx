@@ -45,7 +45,7 @@ export const OverviewAlerts = () => {
         <EuiLoadingContent lines={3} />
       ) : (
         <EuiFlexGroup alignItems="center" gutterSize="m">
-          <EuiFlexItem style={{ width: 80 }} grow={false}>
+          <EuiFlexItem grow={false}>
             <ExploratoryViewEmbeddable
               dataTestSubj="monitorActiveAlertsCount"
               reportType="single-metric"
