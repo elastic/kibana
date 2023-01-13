@@ -17,8 +17,10 @@ import {
 } from '../../../state';
 
 export const useJourneySteps = (checkGroup?: string, lastRefresh?: number) => {
-  const { stepIndex } = useParams<{ stepIndex: string }>();
-  const { checkGroupId: urlCheckGroup } = useParams<{ checkGroupId: string }>();
+  const { stepIndex, checkGroupId: urlCheckGroup } = useParams<{
+    stepIndex: string;
+    checkGroupId: string;
+  }>();
   const checkGroupId = checkGroup ?? urlCheckGroup;
 
   const journeyData = useSelector(selectBrowserJourney(checkGroupId));
