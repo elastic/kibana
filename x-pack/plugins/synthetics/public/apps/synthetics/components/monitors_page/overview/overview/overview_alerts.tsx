@@ -24,7 +24,7 @@ import { ClientPluginsStart } from '../../../../../../plugin';
 import { selectOverviewStatus } from '../../../../state';
 
 export const OverviewAlerts = () => {
-  const { from, to } = useAbsoluteDate({ from: 'now-12h/h', to: 'now' });
+  const { from, to } = useAbsoluteDate({ from: 'now-12h', to: 'now' });
 
   const { observability } = useKibana<ClientPluginsStart>().services;
   const { ExploratoryViewEmbeddable } = observability;

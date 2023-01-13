@@ -27,7 +27,7 @@ export function OverviewErrors() {
 
   const loading = !status?.enabledIds || status?.enabledIds.length === 0;
 
-  const { from, to } = useAbsoluteDate({ from: 'now-6h/h', to: 'now' });
+  const { from, to } = useAbsoluteDate({ from: 'now-6h', to: 'now' });
 
   return (
     <EuiPanel style={{ width: 500 }} hasShadow={false} hasBorder>
