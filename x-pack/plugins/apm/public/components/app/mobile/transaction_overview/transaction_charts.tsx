@@ -22,6 +22,8 @@ export function MobileTransactionCharts({
   start,
   end,
   transactionType,
+  offset,
+  comparisonEnabled,
 }: {
   serviceName: string;
   kuery: string;
@@ -29,6 +31,8 @@ export function MobileTransactionCharts({
   start: string;
   end: string;
   transactionType?: string;
+  offset?: string;
+  comparisonEnabled: boolean;
 }) {
   return (
     <AnnotationsContextProvider
@@ -46,6 +50,8 @@ export function MobileTransactionCharts({
               environment={environment}
               serviceName={serviceName}
               transactionType={transactionType}
+              offset={offset}
+              comparisonEnabled={comparisonEnabled}
             />
           </EuiFlexItem>
           <EuiFlexItem style={{ flexShrink: 1 }}>

@@ -9,6 +9,7 @@ import * as t from 'io-ts';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
+import { offsetRt } from '../../../common/comparison_rt';
 import { getHttpRequestsChart } from './get_http_requests_chart';
 import { getMobileFilters } from './get_mobile_filters';
 import { getSessionsChart } from './get_sessions_chart';
@@ -100,6 +101,7 @@ const sessionsChartRoute = createApmServerRoute({
       kueryRt,
       rangeRt,
       environmentRt,
+      offsetRt,
       t.partial({
         transactionType: t.string,
         transactionName: t.string,
@@ -111,10 +113,17 @@ const sessionsChartRoute = createApmServerRoute({
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const { serviceName } = params.path;
-    const { kuery, environment, start, end, transactionType, transactionName } =
-      params.query;
+    const {
+      kuery,
+      environment,
+      start,
+      end,
+      transactionType,
+      transactionName,
+      offset,
+    } = params.query;
 
-    const { timeseries } = await getSessionsChart({
+    const { currentPeriod, previousPeriod } = await getSessionsChart({
       kuery,
       environment,
       transactionType,
@@ -123,9 +132,10 @@ const sessionsChartRoute = createApmServerRoute({
       end,
       serviceName,
       apmEventClient,
+      offset,
     });
 
-    return { timeseries };
+    return { currentPeriod, previousPeriod };
   },
 });
 

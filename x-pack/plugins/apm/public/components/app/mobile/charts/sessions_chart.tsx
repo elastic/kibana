@@ -21,12 +21,16 @@ import {
   getTimeSeriesColor,
   ChartType,
 } from '../../../shared/charts/helper/get_timeseries_color';
+import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_text';
+
 const INITIAL_STATE = {
-  timeseries: [],
+  currentPeriod: [],
+  previousPeriod: [],
 };
 
 type SessionsChart =
   APIReturnType<'GET /internal/apm/mobile-services/{serviceName}/transactions/charts/sessions'>;
+
 export function SessionsChart({
   kuery,
   serviceName,
@@ -35,6 +39,8 @@ export function SessionsChart({
   transactionType,
   transactionName,
   environment,
+  offset,
+  comparisonEnabled,
 }: {
   kuery: string;
   serviceName: string;
@@ -43,9 +49,13 @@ export function SessionsChart({
   transactionType?: string;
   transactionName?: string;
   environment: string;
+  offset?: string;
+  comparisonEnabled: boolean;
 }) {
   const comparisonChartTheme = getComparisonChartTheme();
-  const { currentPeriodColor } = getTimeSeriesColor(ChartType.HTTP_REQUESTS);
+  const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
+    ChartType.HTTP_REQUESTS
+  );
 
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
@@ -63,6 +73,7 @@ export function SessionsChart({
               end,
               transactionType,
               transactionName,
+              offset: comparisonEnabled ? offset : undefined,
             },
           },
         }
@@ -76,18 +87,31 @@ export function SessionsChart({
       end,
       transactionType,
       transactionName,
+      offset,
+      comparisonEnabled,
     ]
   );
+  const previousPeriodLabel = usePreviousPeriodLabel();
 
   const timeseries = [
     {
-      data: data.timeseries,
+      data: data.currentPeriod,
       type: 'linemark',
       color: currentPeriodColor,
       title: i18n.translate('xpack.apm.transactions.sessionsChartTitle', {
         defaultMessage: 'Sessions',
       }),
     },
+    ...(comparisonEnabled
+      ? [
+          {
+            data: data.previousPeriod,
+            type: 'area',
+            color: previousPeriodColor,
+            title: previousPeriodLabel,
+          },
+        ]
+      : []),
   ];
   return (
     <EuiPanel hasBorder={true}>

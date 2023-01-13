@@ -36,6 +36,8 @@ export function MobileTransactionOverview() {
       appVersion,
       netConnectionType,
       kuery,
+      offset,
+      comparisonEnabled,
     },
   } = useApmParams('/mobile-services/{serviceName}/transactions');
 
@@ -80,6 +82,8 @@ export function MobileTransactionOverview() {
         environment={environment}
         start={start}
         end={end}
+        offset={offset}
+        comparisonEnabled={comparisonEnabled}
       />
       <EuiSpacer size="s" />
       <EuiPanel hasBorder={true}>

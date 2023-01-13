@@ -42,7 +42,7 @@ export function HttpRequestsChart({
   environment: string;
 }) {
   const comparisonChartTheme = getComparisonChartTheme();
-  const { currentPeriodColor } = getTimeSeriesColor(ChartType.SESSIONS);
+  const { currentPeriodColor } = getTimeSeriesColor(ChartType.HTTP_REQUESTS);
 
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
