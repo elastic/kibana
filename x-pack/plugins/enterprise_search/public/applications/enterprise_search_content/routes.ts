@@ -23,6 +23,7 @@ export const SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH = `${SEARCH_INDEX_PATH}/cra
 export const SEARCH_INDEX_SELECT_CONNECTOR_PATH = `${SEARCH_INDEX_PATH}/select_connector`;
 
 export const ENGINES_PATH = `${ROOT_PATH}engines`;
+
 export const ENGINE_CREATION_PATH = `${ENGINES_PATH}/new`;
 export const ENGINE_PATH = `${ENGINES_PATH}/:engineName`;
 export const ENGINE_TAB_PATH = `${ENGINE_PATH}/:tabId`;

@@ -15,12 +15,12 @@ import { i18n } from '@kbn/i18n';
 
 import { EnterpriseSearchEngine } from '../../../../../../../common/types/engines';
 
-import { DELETE_BUTTON_LABEL, MANAGE_BUTTON_LABEL } from '../../../../../shared/constants';
 import { generateEncodedPath } from '../../../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../../../shared/kibana';
 import { EuiLinkTo } from '../../../../../shared/react_router_helpers';
 
 import { ENGINE_PATH } from '../../../../routes';
+
 import { convertMetaToPagination, Meta } from '../../types';
 
 // add health status
@@ -30,12 +30,14 @@ interface EnginesListTableProps {
   loading: boolean;
   meta: Meta;
   onChange: (criteria: CriteriaWithPagination<EnterpriseSearchEngine>) => void;
+  onDelete: (engine: EnterpriseSearchEngine) => void;
 }
 export const EnginesListTable: React.FC<EnginesListTableProps> = ({
   enginesList,
-  meta,
   isLoading,
+  meta,
   onChange,
+  onDelete,
 }) => {
   const { navigateToUrl } = useValues(KibanaLogic);
   const columns: Array<EuiBasicTableColumn<EnterpriseSearchEngine>> = [
@@ -81,11 +83,10 @@ export const EnginesListTable: React.FC<EnginesListTableProps> = ({
       }),
       actions: [
         {
-          name: MANAGE_BUTTON_LABEL,
           description: i18n.translate(
-            'xpack.enterpriseSearch.content.enginesList.table.column.action.manage.buttonDescription',
+            'xpack.enterpriseSearch.content.enginesList.table.column.actions.view.buttonDescription',
             {
-              defaultMessage: 'Manage this engine',
+              defaultMessage: 'View this engine',
             }
           ),
           type: 'icon',
@@ -98,7 +99,7 @@ export const EnginesListTable: React.FC<EnginesListTableProps> = ({
             ),
         },
         {
-          name: DELETE_BUTTON_LABEL,
+          color: 'danger',
           description: i18n.translate(
             'xpack.enterpriseSearch.content.enginesList.table.column.action.delete.buttonDescription',
             {
@@ -107,8 +108,17 @@ export const EnginesListTable: React.FC<EnginesListTableProps> = ({
           ),
           type: 'icon',
           icon: 'trash',
-          color: 'danger',
-          onClick: () => {},
+          isPrimary: false,
+          name: () =>
+            i18n.translate(
+              'xpack.enterpriseSearch.content.engineList.table.column.actions.deleteEngineLabel',
+              {
+                defaultMessage: 'Delete this engine',
+              }
+            ),
+          onClick: (engine) => {
+            onDelete(engine);
+          },
         },
       ],
     },
