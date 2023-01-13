@@ -17,7 +17,6 @@ import {
   ALERT_SEVERITY,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
-  ALERT_SUPPRESSION_DOCS_COUNT,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
   EVENT_ACTION,
@@ -237,8 +236,6 @@ describe('buildAlert', () => {
         [EVENT_DATASET]: 'socket',
         [EVENT_KIND]: 'event',
         [EVENT_MODULE]: 'system',
-        // This field should be removed in the final alert
-        [ALERT_SUPPRESSION_DOCS_COUNT]: 7,
       },
     };
     const completeRule = getCompleteRuleMock(getQueryRuleParams());
