@@ -17,7 +17,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     require.resolve('../functional/config.base.js')
   );
 
-  const testEndpointsPlugin = resolve(__dirname, './fixtures/common/test_endpoints');
+  const testEndpointsPlugin = resolve(__dirname, './plugins/test_endpoints');
 
   return {
     testFiles: [resolve(__dirname, './tests/user_profiles')],
