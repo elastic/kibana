@@ -13,7 +13,7 @@ import {
   ForLastExpression,
   RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { ResolvedLogViewField } from '../../../../../common/log_views';
+import { LogViewReference, ResolvedLogViewField } from '../../../../../common/log_views';
 import {
   Comparator,
   isOptimizableGroupedThreshold,
@@ -35,6 +35,7 @@ import { errorsRT } from '../../validation';
 import { Criteria } from './criteria';
 import { Threshold } from './threshold';
 import { TypeSwitcher } from './type_switcher';
+import { LogViewSwitcher } from './log_view_switcher';
 
 export interface ExpressionCriteria {
   field?: string;
@@ -63,7 +64,7 @@ const createDefaultCriterion = (
 
 const createDefaultCountRuleParams = (
   availableFields: ResolvedLogViewField[]
-): PartialCountRuleParams => ({
+): Omit<PartialCountRuleParams, 'logView'> => ({
   ...DEFAULT_BASE_EXPRESSION,
   count: {
     value: 75,
@@ -74,7 +75,7 @@ const createDefaultCountRuleParams = (
 
 const createDefaultRatioRuleParams = (
   availableFields: ResolvedLogViewField[]
-): PartialRatioRuleParams => ({
+): Omit<PartialRatioRuleParams, 'logView'> => ({
   ...DEFAULT_BASE_EXPRESSION,
   count: {
     value: 2,
@@ -233,7 +234,11 @@ export const Editor: React.FC<RuleTypeParamsExpressionProps<PartialRuleParams, L
   );
 
   useMount(() => {
-    const newAlertParams = { ...defaultCountAlertParams, ...ruleParams };
+    const logView: LogViewReference = {
+      logViewId,
+      type: 'log-view-reference',
+    };
+    const newAlertParams = { ...defaultCountAlertParams, ...ruleParams, logView };
     for (const [key, value] of Object.entries(newAlertParams) as ObjectEntries<
       typeof newAlertParams
     >) {
@@ -268,6 +273,8 @@ export const Editor: React.FC<RuleTypeParamsExpressionProps<PartialRuleParams, L
 
   return (
     <>
+      {resolvedLogView && <LogViewSwitcher logView={resolvedLogView} />}
+
       <TypeSwitcher criteria={ruleParams.criteria || []} updateType={updateType} />
 
       {ruleParams.criteria && !isRatioRule(ruleParams.criteria) && criteriaComponent}
