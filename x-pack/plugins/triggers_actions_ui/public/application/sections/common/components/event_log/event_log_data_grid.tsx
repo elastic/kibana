@@ -61,7 +61,6 @@ export interface EventLogDataGrid {
   dateFormat: string;
   pageSizeOptions?: number[];
   selectedRunLog?: ExecutionLog;
-  durationIncludeMs?: boolean;
   onChangeItemsPerPage: (pageSize: number) => void;
   onChangePage: (pageIndex: number) => void;
   onFlyoutOpen?: (runLog: IExecutionLog) => void;
@@ -163,7 +162,6 @@ export const EventLogDataGrid = (props: EventLogDataGrid) => {
     dateFormat,
     visibleColumns,
     selectedRunLog,
-    durationIncludeMs,
     setVisibleColumns,
     setSortingColumns,
     onChangeItemsPerPage,
@@ -345,7 +343,6 @@ export const EventLogDataGrid = (props: EventLogDataGrid) => {
             ruleId={ruleId}
             spaceIds={spaceIds}
             useExecutionStatus={isRuleUsingExecutionStatus}
-            durationIncludeMs={durationIncludeMs}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

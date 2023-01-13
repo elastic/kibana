@@ -476,7 +476,6 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
           sortingColumns={sortingColumns}
           visibleColumns={visibleColumns}
           dateFormat={dateFormat}
-          durationIncludeMs={true}
           onChangeItemsPerPage={onChangeItemsPerPage}
           onChangePage={onChangePage}
           setVisibleColumns={setVisibleColumns}
