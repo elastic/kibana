@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiSpacer, EuiText, EuiFlexGroup, EuiFlexItem, EuiForm, EuiPanel } from '@elastic/eui';
+import { EuiSpacer, EuiText, EuiFlexGroup, EuiFlexItem, EuiForm, useEuiTheme } from '@elastic/eui';
 import { CodeEditor, YamlLang } from '@kbn/kibana-react-plugin/public';
 import { monaco } from '@kbn/monaco';
 import yaml from 'js-yaml';
@@ -18,12 +18,15 @@ import { ControlResponseAction, ViewDeps } from '../../types';
 
 const { editor } = monaco;
 
+const TEXT_EDITOR_PADDING = 10;
+
 interface ConfigError {
   line: number;
   message: string;
 }
 
 export const ControlYamlView = ({ policy, onChange, show }: ViewDeps) => {
+  const { euiTheme } = useEuiTheme();
   const styles = useStyles();
   const [errors, setErrors] = useState<ConfigError[]>([]);
   const [actionsValid, setActionsValid] = useState(true);
@@ -94,17 +97,20 @@ export const ControlYamlView = ({ policy, onChange, show }: ViewDeps) => {
         </EuiText>
         <EuiSpacer size="s" />
         {!actionsValid && <EuiForm isInvalid={true} error={i18n.errorAlertActionRequired} />}
-        <EuiPanel css={styles.yamlEditor} hasShadow={false} paddingSize="none" hasBorder>
+        <div css={styles.yamlEditor}>
           <CodeEditor
+            width="100%"
             languageId={YamlLang}
             options={{
               wordWrap: 'off',
               model: currentModel,
+              automaticLayout: true,
+              padding: { top: TEXT_EDITOR_PADDING, bottom: TEXT_EDITOR_PADDING },
             }}
             onChange={onYamlChange}
             value={configuration}
           />
-        </EuiPanel>
+        </div>
         <EuiSpacer size="s" />
       </EuiFlexItem>
     </EuiFlexGroup>

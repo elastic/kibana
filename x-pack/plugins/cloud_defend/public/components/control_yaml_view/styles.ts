@@ -7,11 +7,16 @@
 
 import { useMemo } from 'react';
 import { CSSObject } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
 
 export const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+  const { border } = euiTheme;
+
   return useMemo(() => {
     const yamlEditor: CSSObject = {
-      height: '400px',
+      height: '500px',
+      border: border.thin,
     };
 
     // for some reason, switching back to monaco (by virtue of including the editor when yaml view selector, causes the editor not not update properly when switching views.
@@ -23,5 +28,5 @@ export const useStyles = () => {
     };
 
     return { yamlEditor, hide };
-  }, []);
+  }, [border.thin]);
 };
