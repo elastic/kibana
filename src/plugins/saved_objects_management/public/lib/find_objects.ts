@@ -6,21 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { HttpStart, SavedObjectsFindOptions } from '@kbn/core/public';
+import { HttpStart } from '@kbn/core/public';
 import { keysToCamelCaseShallow } from './case_conversion';
-import { SavedObjectWithMetadata } from '../types';
-
-interface SavedObjectsFindResponse {
-  total: number;
-  page: number;
-  perPage: number;
-  savedObjects: SavedObjectWithMetadata[];
-}
+import { FindQueryHTTPV1, FindResponseHTTPV1 } from '../../common/types';
 
 export async function findObjects(
   http: HttpStart,
-  findOptions: SavedObjectsFindOptions
-): Promise<SavedObjectsFindResponse> {
+  findOptions: FindQueryHTTPV1
+): Promise<FindResponseHTTPV1> {
   const response = await http.get<Record<string, any>>(
     '/api/kibana/management/saved_objects/_find',
     {
@@ -33,5 +26,5 @@ export async function findObjects(
     }
   );
 
-  return keysToCamelCaseShallow(response) as SavedObjectsFindResponse;
+  return keysToCamelCaseShallow(response) as FindResponseHTTPV1;
 }

@@ -7,6 +7,7 @@
  */
 
 import { HttpStart, SavedObjectsFindOptionsReference } from '@kbn/core/public';
+import type { ScrollCountResponseHTTPV1 } from '../../common/types';
 
 export async function getSavedObjectCounts({
   http,
@@ -18,8 +19,8 @@ export async function getSavedObjectCounts({
   typesToInclude: string[];
   searchString?: string;
   references?: SavedObjectsFindOptionsReference[];
-}): Promise<Record<string, number>> {
-  return await http.post<Record<string, number>>(
+}): Promise<ScrollCountResponseHTTPV1> {
+  return await http.post<ScrollCountResponseHTTPV1>(
     `/api/kibana/management/saved_objects/scroll/counts`,
     { body: JSON.stringify({ typesToInclude, searchString, references }) }
   );

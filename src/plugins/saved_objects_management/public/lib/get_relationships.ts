@@ -8,19 +8,19 @@
 
 import { HttpStart } from '@kbn/core/public';
 import { get } from 'lodash';
-import { SavedObjectGetRelationshipsResponse } from '../types';
+import type { RelationshipsResponseHTTPV1 } from '../../common/types';
 
 export async function getRelationships(
   http: HttpStart,
   type: string,
   id: string,
   savedObjectTypes: string[]
-): Promise<SavedObjectGetRelationshipsResponse> {
+): Promise<RelationshipsResponseHTTPV1> {
   const url = `/api/kibana/management/saved_objects/relationships/${encodeURIComponent(
     type
   )}/${encodeURIComponent(id)}`;
   try {
-    return await http.get<SavedObjectGetRelationshipsResponse>(url, {
+    return await http.get<RelationshipsResponseHTTPV1>(url, {
       query: {
         savedObjectTypes,
       },
