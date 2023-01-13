@@ -38,6 +38,10 @@ export default function ({ getService }: FtrProviderContext) {
             setLimitReached: sinon.fake(),
           } as SinonSpiesOf<LogThresholdAlertLimit>;
           const ruleParams = {
+            logView: {
+              logViewId: 'Default',
+              type: 'log-view-reference',
+            },
             count: {
               comparator: Comparator.GT_OR_EQ,
               value: 1,
@@ -96,6 +100,10 @@ export default function ({ getService }: FtrProviderContext) {
             setLimitReached: sinon.fake(),
           } as SinonSpiesOf<LogThresholdAlertLimit>;
           const ruleParams = {
+            logView: {
+              logViewId: 'Default',
+              type: 'log-view-reference',
+            },
             count: {
               comparator: Comparator.GT_OR_EQ,
               value: 1,
@@ -156,6 +164,10 @@ export default function ({ getService }: FtrProviderContext) {
             setLimitReached: sinon.fake(),
           } as SinonSpiesOf<LogThresholdAlertLimit>;
           const ruleParams = {
+            logView: {
+              logViewId: 'Default',
+              type: 'log-view-reference',
+            },
             count: {
               comparator: Comparator.GT_OR_EQ,
               value: 1,
@@ -223,6 +235,10 @@ export default function ({ getService }: FtrProviderContext) {
             setLimitReached: sinon.fake(),
           } as SinonSpiesOf<LogThresholdAlertLimit>;
           const ruleParams = {
+            logView: {
+              logViewId: 'Default',
+              type: 'log-view-reference',
+            },
             count: {
               comparator: Comparator.GT_OR_EQ,
               value: 0.5,
@@ -278,6 +294,10 @@ export default function ({ getService }: FtrProviderContext) {
             setLimitReached: sinon.fake(),
           } as SinonSpiesOf<LogThresholdAlertLimit>;
           const ruleParams = {
+            logView: {
+              logViewId: 'Default',
+              type: 'log-view-reference',
+            },
             count: {
               comparator: Comparator.GT_OR_EQ,
               value: 0.5,
