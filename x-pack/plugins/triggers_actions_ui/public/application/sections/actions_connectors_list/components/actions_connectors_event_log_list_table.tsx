@@ -427,6 +427,16 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
         ),
         isSortable: getIsColumnSortable('schedule_delay'),
       },
+      {
+        id: 'timed_out',
+        displayAsText: i18n.translate(
+          'xpack.triggersActionsUI.sections.connectorEventLogList.eventLogColumn.timedOut',
+          {
+            defaultMessage: 'Timed out',
+          }
+        ),
+        isSortable: getIsColumnSortable('timed_out'),
+      },
       ...(showFromAllSpaces
         ? [
             {

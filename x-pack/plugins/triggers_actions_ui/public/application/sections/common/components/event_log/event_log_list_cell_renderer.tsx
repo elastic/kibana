@@ -136,5 +136,9 @@ export const EventLogListCellRenderer = (props: EventLogListCellRendererProps) =
     );
   }
 
+  if (columnId === 'timed_out') {
+    return value ? 'true' : 'false';
+  }
+
   return <>{value}</>;
 };

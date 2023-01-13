@@ -17,6 +17,7 @@ export interface IExecutionLog {
   schedule_delay_ms: number;
   space_ids: string[];
   connector_name: string;
+  timed_out: boolean;
 }
 
 export interface IExecutionLogResult {

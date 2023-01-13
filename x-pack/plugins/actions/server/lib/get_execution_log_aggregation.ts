@@ -53,6 +53,7 @@ interface IExecutionUuidKpiAggBucket extends estypes.AggregationsStringTermsBuck
   };
 }
 interface IExecutionUuidAggBucket extends estypes.AggregationsStringTermsBucketKeys {
+  timeoutMessage: estypes.AggregationsMultiBucketBase;
   actionExecution: {
     executeStartTime: estypes.AggregationsMinAggregate;
     executionDuration: estypes.AggregationsMaxAggregate;
@@ -275,6 +276,20 @@ export function getExecutionLogAggregation({
                 },
               },
             },
+            // If there was a timeout, this filter will return non-zero doc count
+            timeoutMessage: {
+              filter: {
+                bool: {
+                  must: [
+                    {
+                      match: {
+                        [ACTION_FIELD]: 'execute-timeout',
+                      },
+                    },
+                  ],
+                },
+              },
+            },
             // Filter out execution UUID buckets where actionExecution doc count is 0
             minExecutionUuidBucket: {
               bucket_selector: {
@@ -323,7 +338,8 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
   const version = outcomeAndMessage.kibana?.version ?? '';
 
   const spaceIds = outcomeAndMessage ? outcomeAndMessage?.kibana?.space_ids ?? [] : [];
-  const actionName = outcomeAndMessage ? outcomeAndMessage.action?.name ?? '' : '';
+  const actionName = outcomeAndMessage ? outcomeAndMessage?.kibana.action?.name ?? '' : '';
+  const timedOut = (bucket?.timeoutMessage?.doc_count ?? 0) > 0;
   return {
     id: bucket?.key ?? '',
     timestamp: bucket?.actionExecution?.executeStartTime.value_as_string ?? '',
@@ -334,6 +350,7 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
     schedule_delay_ms: scheduleDelayUs / Millis2Nanos,
     space_ids: spaceIds,
     connector_name: actionName,
+    timed_out: timedOut,
   };
 }
 
