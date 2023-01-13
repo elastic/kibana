@@ -1,6 +1,11 @@
 {
   "journeyName": "GET /internal/security/user_profile",
   "scalabilitySetup": {
+    "responseTimeThreshold": {
+      "threshold1": 1000,
+      "threshold2": 3000,
+      "threshold3": 5000
+    },
     "warmup": [
       {
         "action": "constantUsersPerSec",
