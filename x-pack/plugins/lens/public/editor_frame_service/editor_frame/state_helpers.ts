@@ -318,7 +318,11 @@ export async function persistedStateToExpression(
     dataViews: DataViewsContract;
     timefilter: TimefilterContract;
   }
-): Promise<Ast | null> {
+): Promise<{
+  ast: Ast | null;
+  indexPatterns: IndexPatternMap;
+  indexPatternRefs: IndexPatternRef[];
+}> {
   const {
     state: {
       visualization: persistedVisualizationState,
@@ -332,7 +336,7 @@ export async function persistedStateToExpression(
     description,
   } = doc;
   if (!visualizationType) {
-    return null;
+    return { ast: null, indexPatterns: {}, indexPatternRefs: [] };
   }
   const visualization = visualizations[visualizationType!];
   const visualizationState = initializeVisualization({
@@ -373,22 +377,30 @@ export async function persistedStateToExpression(
 
   const datasourceId = getActiveDatasourceIdFromDoc(doc);
   if (datasourceId == null) {
-    return null;
+    return {
+      ast: null,
+      indexPatterns,
+      indexPatternRefs,
+    };
   }
 
   const currentTimeRange = services.timefilter.getAbsoluteTime();
 
-  return buildExpression({
-    title,
-    description,
-    visualization,
-    visualizationState,
-    datasourceMap,
-    datasourceStates,
-    datasourceLayers,
+  return {
+    ast: buildExpression({
+      title,
+      description,
+      visualization,
+      visualizationState,
+      datasourceMap,
+      datasourceStates,
+      datasourceLayers,
+      indexPatterns,
+      dateRange: { fromDate: currentTimeRange.from, toDate: currentTimeRange.to },
+    }),
     indexPatterns,
-    dateRange: { fromDate: currentTimeRange.from, toDate: currentTimeRange.to },
-  });
+    indexPatternRefs,
+  };
 }
 
 export function getMissingIndexPattern(

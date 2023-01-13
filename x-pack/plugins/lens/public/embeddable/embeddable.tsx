@@ -68,7 +68,7 @@ import type {
 } from '@kbn/core/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { BrushTriggerEvent, ClickTriggerEvent, Warnings } from '@kbn/charts-plugin/public';
-import { DataViewPersistableStateService, DataViewSpec } from '@kbn/data-views-plugin/common';
+import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { getExecutionContextEvents, trackUiCounterEvents } from '../lens_ui_telemetry';
 import { Document } from '../persistence';
 import { ExpressionWrapper, ExpressionWrapperProps } from './expression_wrapper';
@@ -105,7 +105,6 @@ import {
   inferTimeField,
 } from '../utils';
 import { getLayerMetaInfo, combineQueryAndFilters } from '../app_plugin/show_underlying_data';
-import { convertDataViewIntoLensIndexPattern } from '../data_views_service/loader';
 import {
   filterUserMessages,
   getApplicationUserMessages,
@@ -152,7 +151,11 @@ export interface LensEmbeddableOutput extends EmbeddableOutput {
 export interface LensEmbeddableDeps {
   attributeService: LensAttributeService;
   data: DataPublicPluginStart;
-  documentToExpression: (doc: Document) => Promise<Ast | null>;
+  documentToExpression: (doc: Document) => Promise<{
+    ast: Ast | null;
+    indexPatterns: IndexPatternMap;
+    indexPatternRefs: IndexPatternRef[];
+  }>;
   injectFilterReferences: FilterManager['inject'];
   visualizationMap: VisualizationMap;
   datasourceMap: DatasourceMap;
@@ -188,8 +191,8 @@ const getExpressionFromDocument = async (
   document: Document,
   documentToExpression: LensEmbeddableDeps['documentToExpression']
 ) => {
-  const ast = await documentToExpression(document);
-  return ast ? toExpression(ast) : null;
+  const { ast, indexPatterns, indexPatternRefs } = await documentToExpression(document);
+  return { ast: ast ? toExpression(ast) : null, indexPatterns, indexPatternRefs };
 };
 
 function getViewUnderlyingDataArgs({
@@ -304,7 +307,7 @@ export class Embeddable
 
   private activeData?: TableInspectorAdapter;
 
-  private indexPatterns: DataView[] = [];
+  private dataViews: DataView[] = [];
 
   private viewUnderlyingDataArgs?: ViewUnderlyingDataArgs;
 
@@ -325,8 +328,8 @@ export class Embeddable
     this.expressionRenderer = deps.expressionRenderer;
     let containerStateChangedCalledAlready = false;
     this.initializeSavedVis(initialInput)
-      .then(() => this.loadUserMessages())
       .then(() => {
+        this.loadUserMessages();
         if (!containerStateChangedCalledAlready) {
           this.onContainerStateChanged(initialInput);
         } else {
@@ -442,59 +445,21 @@ export class Embeddable
     return this.activeVisualization.initialize(() => '', this.savedVis?.state.visualization);
   }
 
-  private get allReferences() {
-    return [
-      ...(this.savedVis?.references || []),
-      ...(this.savedVis?.state.internalReferences || []),
-    ];
-  }
+  private indexPatterns: IndexPatternMap = {};
 
-  private _indexPatternsCache?: IndexPatternMap;
-  private async getIndexPatternsCache(): Promise<IndexPatternMap> {
-    if (this._indexPatternsCache) return this._indexPatternsCache;
+  private indexPatternRefs: IndexPatternRef[] = [];
 
-    if (!this.activeDatasourceId) return {};
-
-    const adHocDataviews = await Promise.all(
-      Object.values(this.savedVis?.state.adHocDataViews || {})
-        .map((persistedSpec) => {
-          return DataViewPersistableStateService.inject(persistedSpec, this.allReferences);
-        })
-        .map((spec) => this.deps.dataViews.create(spec))
-    );
-
-    const allIndexPatterns = [...this.indexPatterns, ...adHocDataviews];
-
-    return allIndexPatterns.reduce(
-      (acc, indexPattern) => ({
-        [indexPattern.id!]: convertDataViewIntoLensIndexPattern(indexPattern),
-        ...acc,
-      }),
-      {}
-    );
-  }
-
-  private get indexPatternRefs(): IndexPatternRef[] {
-    return this.indexPatterns.map((indexPattern) => ({
-      title: indexPattern.title,
-      id: indexPattern.id!,
-      name: indexPattern.name,
-    }));
-  }
-
-  private async getActiveDatasourceState(): Promise<undefined | unknown> {
+  private get activeDatasourceState(): undefined | unknown {
     if (!this.activeDatasourceId || !this.activeDatasource) return;
 
     const docDatasourceState = this.savedVis?.state.datasourceStates[this.activeDatasourceId];
-
-    const indexPatternsCache = await this.getIndexPatternsCache();
 
     return this.activeDatasource.initialize(
       docDatasourceState,
       [...(this.savedVis?.references || []), ...(this.savedVis?.state.internalReferences || [])],
       undefined,
       undefined,
-      indexPatternsCache
+      this.indexPatterns
     );
   }
 
@@ -513,11 +478,8 @@ export class Embeddable
   private _userMessages: UserMessage[] = [];
 
   // loads all available user messages
-  private async loadUserMessages() {
+  private loadUserMessages() {
     const userMessages: UserMessage[] = [];
-
-    const activeDatasourceState = await this.getActiveDatasourceState();
-    const indexPatterns = await this.getIndexPatternsCache();
 
     if (this.activeVisualizationState && this.activeDatasource) {
       userMessages.push(
@@ -529,9 +491,9 @@ export class Embeddable
           },
           visualizationMap: this.deps.visualizationMap,
           activeDatasource: this.activeDatasource,
-          activeDatasourceState: { state: activeDatasourceState },
+          activeDatasourceState: { state: this.activeDatasourceState },
           dataViews: {
-            indexPatterns,
+            indexPatterns: this.indexPatterns,
             indexPatternRefs: this.indexPatternRefs, // TODO - are these actually used?
           },
           core: this.deps.coreStart,
@@ -547,7 +509,7 @@ export class Embeddable
 
     const frameDatasourceAPI: FrameDatasourceAPI = {
       dataViews: {
-        indexPatterns,
+        indexPatterns: this.indexPatterns,
         indexPatternRefs: this.indexPatternRefs,
       },
       datasourceLayers: {}, // TODO
@@ -561,7 +523,7 @@ export class Embeddable
     };
 
     userMessages.push(
-      ...(this.activeDatasource?.getUserMessages(activeDatasourceState, {
+      ...(this.activeDatasource?.getUserMessages(this.activeDatasourceState, {
         setState: () => {},
         frame: frameDatasourceAPI,
       }) ?? []),
@@ -641,10 +603,14 @@ export class Embeddable
       savedObjectId: (input as LensByReferenceInput)?.savedObjectId,
     };
 
-    this.expression = await getExpressionFromDocument(
+    const { ast, indexPatterns, indexPatternRefs } = await getExpressionFromDocument(
       this.savedVis,
       this.deps.documentToExpression
     );
+
+    this.expression = ast;
+    this.indexPatterns = indexPatterns;
+    this.indexPatternRefs = indexPatternRefs;
 
     if (metaInfo?.sharingSavedObjectProps?.outcome === 'conflict' && !!this.deps.spaces) {
       this.addUserMessages([
@@ -1061,12 +1027,14 @@ export class Embeddable
       newVis.state.visualization = this.onEditAction(newVis.state.visualization, event);
       this.savedVis = newVis;
 
-      this.expression = await getExpressionFromDocument(
+      const { ast } = await getExpressionFromDocument(
         this.savedVis,
         this.deps.documentToExpression
       );
 
-      await this.loadUserMessages();
+      this.expression = ast;
+
+      this.loadUserMessages();
       this.reload();
     }
   };
@@ -1092,9 +1060,7 @@ export class Embeddable
       return false;
     }
 
-    const activeDatasourceState = await this.getActiveDatasourceState();
-
-    if (!activeDatasourceState) {
+    if (!this.activeDatasourceState) {
       return false;
     }
 
@@ -1104,21 +1070,19 @@ export class Embeddable
       return false;
     }
 
-    const indexPatternsCache = await this.getIndexPatternsCache();
-
     const viewUnderlyingDataArgs = getViewUnderlyingDataArgs({
       activeDatasource: this.activeDatasource,
-      activeDatasourceState,
+      activeDatasourceState: this.activeDatasourceState,
       activeVisualization: this.activeVisualization,
       activeVisualizationState: this.activeVisualizationState,
       activeData: this.activeData,
-      dataViews: this.indexPatterns,
+      dataViews: this.dataViews,
       capabilities: this.deps.capabilities,
       query: mergedSearchContext.query,
       filters: mergedSearchContext.filters || [],
       timeRange: mergedSearchContext.timeRange,
       esQueryConfig: getEsQueryConfig(this.deps.uiSettings),
-      indexPatternsCache,
+      indexPatternsCache: this.indexPatterns,
     });
 
     const loaded = typeof viewUnderlyingDataArgs !== 'undefined';
@@ -1158,7 +1122,7 @@ export class Embeddable
       )
     ).forEach((dataView) => indexPatterns.push(dataView));
 
-    this.indexPatterns = uniqBy(indexPatterns, 'id');
+    this.dataViews = uniqBy(indexPatterns, 'id');
 
     // passing edit url and index patterns to the output of this embeddable for
     // the container to pick them up and use them to configure filter bar and
@@ -1198,7 +1162,7 @@ export class Embeddable
       title,
       editPath: getEditPath(savedObjectId),
       editUrl: this.deps.basePath.prepend(`/app/lens${getEditPath(savedObjectId)}`),
-      indexPatterns: this.indexPatterns,
+      indexPatterns: this.dataViews,
     });
   }
 

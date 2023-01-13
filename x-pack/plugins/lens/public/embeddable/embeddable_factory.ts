@@ -32,7 +32,7 @@ import type { Document } from '../persistence/saved_object_store';
 import type { LensAttributeService } from '../lens_attribute_service';
 import { DOC_TYPE } from '../../common/constants';
 import { extract, inject } from '../../common/embeddable_factory';
-import type { DatasourceMap, VisualizationMap } from '../types';
+import type { DatasourceMap, IndexPatternMap, IndexPatternRef, VisualizationMap } from '../types';
 
 export interface LensEmbeddableStartServices {
   data: DataPublicPluginStart;
@@ -46,7 +46,11 @@ export interface LensEmbeddableStartServices {
   dataViews: DataViewsContract;
   uiActions?: UiActionsStart;
   usageCollection?: UsageCollectionSetup;
-  documentToExpression: (doc: Document) => Promise<Ast | null>;
+  documentToExpression: (doc: Document) => Promise<{
+    ast: Ast | null;
+    indexPatterns: IndexPatternMap;
+    indexPatternRefs: IndexPatternRef[];
+  }>;
   injectFilterReferences: FilterManager['inject'];
   visualizationMap: VisualizationMap;
   datasourceMap: DatasourceMap;
