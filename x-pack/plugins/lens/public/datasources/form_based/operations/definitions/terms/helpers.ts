@@ -252,6 +252,16 @@ export function isSortableByColumn(layer: FormBasedLayer, columnId: string) {
   );
 }
 
+export function isRuntimeField(field: IndexPatternField): boolean;
+export function isRuntimeField(fieldName: string, indexPattern: IndexPattern): boolean;
+export function isRuntimeField(fieldName: string | IndexPatternField, indexPattern?: IndexPattern) {
+  if (typeof fieldName === 'string') {
+    const field = indexPattern?.getFieldByName(fieldName);
+    return field && field.runtime;
+  }
+  return fieldName.runtime;
+}
+
 export function isScriptedField(field: IndexPatternField): boolean;
 export function isScriptedField(fieldName: string, indexPattern: IndexPattern): boolean;
 export function isScriptedField(
