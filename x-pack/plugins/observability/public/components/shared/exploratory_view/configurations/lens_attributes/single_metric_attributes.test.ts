@@ -38,7 +38,6 @@ describe('SingleMetricAttributes', () => {
     dataView: mockDataView,
     reportDefinitions: {},
     time: { from: 'now-15m', to: 'now' },
-    color: 'green',
     name: 'Page load time',
     selectedMetricField: TRANSACTION_DURATION,
   };
@@ -198,7 +197,6 @@ describe('SingleMetricAttributes', () => {
       dataView: mockDataView,
       reportDefinitions: {},
       time: { from: 'now-15m', to: 'now' },
-      color: 'green',
       name: 'Availability',
       selectedMetricField: 'monitor_availability',
     };
