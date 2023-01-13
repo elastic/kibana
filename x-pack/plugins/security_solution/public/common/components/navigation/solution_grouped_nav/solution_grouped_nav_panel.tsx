@@ -23,7 +23,12 @@ import {
   useIsWithinMinBreakpoint,
 } from '@elastic/eui';
 import classNames from 'classnames';
-import { EuiPanelStyled, EuiTitleStyled } from './solution_grouped_nav_panel.styles';
+import {
+  EuiPanelStyled,
+  EuiTitleStyled,
+  GlobalPanelStyle,
+  panelClass,
+} from './solution_grouped_nav_panel.styles';
 import type { DefaultSideNavItem } from './types';
 import type { LinkCategories } from '../../../links/types';
 import { NavItemBetaBadge } from '../nav_item_beta_badge';
@@ -58,7 +63,7 @@ const SolutionNavPanelComponent: React.FC<SolutionNavPanelProps> = ({
   bottomOffset,
 }) => {
   const isLargerBreakpoint = useIsWithinMinBreakpoint('l');
-  const panelClasses = classNames('eui-yScroll');
+  const panelClasses = classNames(panelClass, 'eui-yScroll');
 
   // Only larger breakpoint needs to add bottom offset, other sizes should have full height
   const bottomOffsetLargerBreakpoint = isLargerBreakpoint ? bottomOffset : undefined;
@@ -75,6 +80,7 @@ const SolutionNavPanelComponent: React.FC<SolutionNavPanelProps> = ({
 
   return (
     <>
+      <GlobalPanelStyle />
       <EuiWindowEvent event="keydown" handler={onKeyDown} />
       <EuiPortal>
         <EuiFocusTrap autoFocus>
