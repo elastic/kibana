@@ -10,6 +10,7 @@ import {
   ALERT_DURATION,
   ALERT_END,
   ALERT_FLAPPING,
+  ALERT_FLAPPING_HISTORY,
   ALERT_ID,
   ALERT_REASON,
   ALERT_RULE_CATEGORY,
@@ -111,7 +112,7 @@ export const alertFieldMap = {
   [ALERT_ACTION_GROUP]: {
     type: 'keyword',
     array: false,
-    required: false,
+    required: true,
   },
   [ALERT_REASON]: {
     type: 'keyword',
@@ -146,6 +147,11 @@ export const alertFieldMap = {
   [ALERT_FLAPPING]: {
     type: 'boolean',
     array: false,
+    required: false,
+  },
+  [ALERT_FLAPPING_HISTORY]: {
+    type: 'boolean',
+    array: true,
     required: false,
   },
 };

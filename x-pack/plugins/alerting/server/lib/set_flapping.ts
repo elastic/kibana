@@ -5,33 +5,30 @@
  * 2.0.
  */
 
+import { ALERT_FLAPPING, ALERT_FLAPPING_HISTORY } from '@kbn/rule-data-utils';
 import { keys } from 'lodash';
-import { Alert } from '../alert';
-import { AlertInstanceState, AlertInstanceContext } from '../types';
+import { type Alert } from '../../common';
 import { isFlapping } from './flapping_utils';
 
-export function setFlapping<State extends AlertInstanceState, Context extends AlertInstanceContext>(
-  activeAlerts: Record<string, Alert<State, Context>> = {},
-  recoveredAlerts: Record<string, Alert<State, Context>> = {}
+export function setFlapping(
+  activeAlerts: Record<string, Alert> = {},
+  recoveredAlerts: Record<string, Alert> = {}
 ) {
   for (const id of keys(activeAlerts)) {
     const alert = activeAlerts[id];
     const flapping = isAlertFlapping(alert);
-    alert.setFlapping(flapping);
+    alert[ALERT_FLAPPING] = flapping;
   }
 
   for (const id of keys(recoveredAlerts)) {
     const alert = recoveredAlerts[id];
     const flapping = isAlertFlapping(alert);
-    alert.setFlapping(flapping);
+    alert[ALERT_FLAPPING] = flapping;
   }
 }
 
-export function isAlertFlapping<
-  State extends AlertInstanceState,
-  Context extends AlertInstanceContext
->(alert: Alert<State, Context>): boolean {
-  const flappingHistory: boolean[] = alert.getFlappingHistory() || [];
-  const isCurrentlyFlapping = alert.getFlapping();
+export function isAlertFlapping(alert: Alert): boolean {
+  const flappingHistory: boolean[] = alert[ALERT_FLAPPING_HISTORY] ?? [];
+  const isCurrentlyFlapping = alert[ALERT_FLAPPING] ?? false;
   return isFlapping(flappingHistory, isCurrentlyFlapping);
 }

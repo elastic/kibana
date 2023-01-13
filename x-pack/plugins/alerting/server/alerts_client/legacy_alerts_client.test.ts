@@ -8,16 +8,21 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { AlertInstanceContext, RecoveredActionGroup } from '../types';
 import { LegacyAlertsClient } from './legacy_alerts_client';
-import { createAlertFactory, getPublicAlertFactory } from '../alert/create_alert_factory';
+import {
+  createAlertFactory,
+  splitAlerts,
+  getPublicAlertFactory,
+} from '../alert/create_alert_factory';
 import { Alert } from '../alert/alert';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
 import { ruleRunMetricsStoreMock } from '../lib/rule_run_metrics_store.mock';
-import { processAlerts, setFlapping } from '../lib';
+import { categorizeAlerts, setFlappingLegacy } from '../lib';
 import { logAlerts } from '../task_runner/log_alerts';
 
 const scheduleActions = jest.fn();
-const replaceState = jest.fn(() => ({ scheduleActions }));
-const mockCreateAlert = jest.fn(() => ({ replaceState, scheduleActions }));
+const hasScheduledActions = jest.fn().mockReturnValue(true);
+const replaceState = jest.fn(() => ({ scheduleActions, hasScheduledActions }));
+const mockCreateAlert = jest.fn(() => ({ replaceState, scheduleActions, hasScheduledActions }));
 const mockGetRecoveredAlerts = jest.fn().mockReturnValue([]);
 const mockSetLimitReached = jest.fn();
 const mockCreateAlertFactory = {
@@ -36,6 +41,7 @@ jest.mock('../alert/create_alert_factory', () => {
   const original = jest.requireActual('../alert/create_alert_factory');
   return {
     ...original,
+    splitAlerts: jest.fn(),
     getPublicAlertFactory: jest.fn().mockImplementation(() => {
       return {
         create: mockCreateAlert,
@@ -56,8 +62,8 @@ jest.mock('../lib', () => {
   const original = jest.requireActual('../lib');
   return {
     ...original,
-    processAlerts: jest.fn(),
-    setFlapping: jest.fn(),
+    categorizeAlerts: jest.fn(),
+    setFlappingLegacy: jest.fn(),
   };
 });
 
@@ -184,15 +190,21 @@ describe('Legacy Alerts Client', () => {
     expect(mockCreateAlertFactory.hasReachedAlertLimit).toHaveBeenCalled();
   });
 
-  test('processAndLogAlerts() should call processAlerts, setFlapping and logAlerts and store results', () => {
-    (processAlerts as jest.Mock).mockReturnValue({
-      newAlerts: {},
-      activeAlerts: {
+  test('processAndLogAlerts() should call categorizeAlerts, setFlappingLegacy and logAlerts and store results', () => {
+    (splitAlerts as jest.Mock).mockReturnValue({
+      active: {
         '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', testAlert1),
         '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),
       },
-      currentRecoveredAlerts: {},
-      recoveredAlerts: {},
+      recovered: {},
+    });
+    (categorizeAlerts as jest.Mock).mockReturnValue({
+      new: {},
+      ongoing: {
+        '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', testAlert1),
+        '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),
+      },
+      recovered: {},
     });
     const alertsClient = new LegacyAlertsClient({
       logger,
@@ -215,22 +227,32 @@ describe('Legacy Alerts Client', () => {
       shouldLogAndScheduleActionsForAlerts: true,
     });
 
-    expect(processAlerts).toHaveBeenCalledWith({
-      alerts: {
-        '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', testAlert1),
-        '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),
+    const alert1 = new Alert<AlertInstanceContext, AlertInstanceContext, string>('1', testAlert1);
+    alert1.scheduleActions('default');
+
+    const alert2 = new Alert<AlertInstanceContext, AlertInstanceContext, string>('1', testAlert1);
+    alert2.scheduleActions('default');
+
+    expect(categorizeAlerts).toHaveBeenCalledWith({
+      reportedAlerts: {
+        active: {
+          '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', testAlert1),
+          '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),
+        },
+        recovered: {},
       },
-      existingAlerts: {
-        '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', testAlert1),
-        '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),
+      trackedAlerts: {
+        active: {
+          '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', testAlert1),
+          '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),
+        },
+        recovered: {},
       },
-      previouslyRecoveredAlerts: {},
       hasReachedAlertLimit: false,
       alertLimit: 1000,
-      setFlapping: true,
     });
 
-    expect(setFlapping).toHaveBeenCalledWith(
+    expect(setFlappingLegacy).toHaveBeenCalledWith(
       {
         '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', testAlert1),
         '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),

@@ -32,12 +32,13 @@ export {
   convertMonitoringFromRawAndVerify,
 } from './monitoring';
 export { getNextRun } from './next_run';
-export { processAlerts } from './process_alerts';
+export { categorizeAlerts, type CategorizeAlertTypes } from './categorize_alerts';
 export { createWrappedScopedClusterClientFactory } from './wrap_scoped_cluster_client';
 export { isRuleSnoozed, getRuleSnoozeEndTime } from './is_rule_snoozed';
 export { convertRuleIdsToKueryNode } from './convert_rule_ids_to_kuery_node';
 export { convertEsSortToEventLogSort } from './convert_es_sort_to_event_log_sort';
 export * from './snooze';
 export { setFlapping } from './set_flapping';
+export { setFlappingLegacy } from './set_flapping_legacy';
 export { determineAlertsToReturn } from './determine_alerts_to_return';
 export { updateFlappingHistory, isFlapping } from './flapping_utils';

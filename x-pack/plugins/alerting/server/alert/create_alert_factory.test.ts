@@ -9,10 +9,10 @@ import sinon from 'sinon';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { Alert } from './alert';
 import { createAlertFactory, getPublicAlertFactory } from './create_alert_factory';
-import { processAlerts } from '../lib';
+import { categorizeAlerts } from '../lib';
 
 jest.mock('../lib', () => ({
-  processAlerts: jest.fn(),
+  categorizeAlerts: jest.fn(),
 }));
 
 let clock: sinon.SinonFakeTimers;
@@ -139,8 +139,8 @@ describe('createAlertFactory()', () => {
   });
 
   test('returns recovered alerts when setsRecoveryContext is true', () => {
-    (processAlerts as jest.Mock).mockReturnValueOnce({
-      currentRecoveredAlerts: {
+    (categorizeAlerts as jest.Mock).mockReturnValueOnce({
+      recovered: {
         z: {
           id: 'z',
           state: { foo: true },
@@ -178,7 +178,7 @@ describe('createAlertFactory()', () => {
   });
 
   test('returns empty array if no recovered alerts', () => {
-    (processAlerts as jest.Mock).mockReturnValueOnce({ recoveredAlerts: {} });
+    (categorizeAlerts as jest.Mock).mockReturnValueOnce({ recoveredAlerts: {} });
     const alertFactory = createAlertFactory({
       alerts: {},
       logger,
@@ -203,7 +203,7 @@ describe('createAlertFactory()', () => {
   });
 
   test('returns empty array if recovered alerts are null', () => {
-    (processAlerts as jest.Mock).mockReturnValueOnce({ recoveredAlerts: null });
+    (categorizeAlerts as jest.Mock).mockReturnValueOnce({ recoveredAlerts: null });
     const alertFactory = createAlertFactory({
       alerts: {},
       logger,

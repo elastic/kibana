@@ -88,7 +88,7 @@ export interface RuleExecutorServices<
    * @deprecated
    */
   alertFactory: PublicAlertFactory<State, Context, ActionGroupIds>;
-  alertsClient: PublicAlertsClient;
+  alertsClient: PublicAlertsClient | undefined;
   shouldWriteAlerts: () => boolean;
   shouldStopExecution: () => boolean;
   ruleMonitoringService?: PublicRuleMonitoringService;

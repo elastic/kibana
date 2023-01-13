@@ -5,19 +5,27 @@
  * 2.0.
  */
 import { Logger } from '@kbn/core/server';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, mapValues } from 'lodash';
 import { Alert } from '../alert/alert';
 import {
   AlertFactory,
   createAlertFactory,
   getPublicAlertFactory,
+  splitAlerts,
 } from '../alert/create_alert_factory';
-import { determineAlertsToReturn, processAlerts, setFlapping } from '../lib';
+import { determineAlertsToReturn, setFlappingLegacy, updateFlappingHistory } from '../lib';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
+import { categorizeAlerts } from '../lib';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { logAlerts } from '../task_runner/log_alerts';
 import { AlertInstanceContext, AlertInstanceState, RawAlertInstance } from '../types';
+import {
+  prepareNewAlerts,
+  prepareOngoingAlerts,
+  prepareRecoveredAlerts,
+  UpdateValuesOpts,
+} from '../lib/prepare_alerts';
 
 interface ConstructorOpts {
   logger: Logger;
@@ -30,9 +38,16 @@ export class LegacyAlertsClient<
   Context extends AlertInstanceContext,
   ActionGroupIds extends string
 > {
-  private activeAlertsFromPreviousExecution: Record<string, Alert<State, Context>>;
-  private recoveredAlertsFromPreviousExecution: Record<string, Alert<State, Context>>;
-  private alerts: Record<string, Alert<State, Context>>;
+  // Alerts that were reported as active or recovered in the previous rule execution
+  private trackedAlerts: {
+    active: Record<string, Alert<State, Context>>;
+    recovered: Record<string, Alert<State, Context>>;
+  } = {
+    active: {},
+    recovered: {},
+  };
+
+  private reportedAlerts: Record<string, Alert<State, Context>> = {};
   private processedAlerts: {
     new: Record<string, Alert<State, Context>>;
     active: Record<string, Alert<State, Context>>;
@@ -42,9 +57,6 @@ export class LegacyAlertsClient<
 
   private alertFactory?: AlertFactory<State, Context, ActionGroupIds>;
   constructor(private readonly options: ConstructorOpts) {
-    this.alerts = {};
-    this.activeAlertsFromPreviousExecution = {};
-    this.recoveredAlertsFromPreviousExecution = {};
     this.processedAlerts = {
       new: {},
       active: {},
@@ -59,26 +71,23 @@ export class LegacyAlertsClient<
   ) {
     for (const id in activeAlertsFromState) {
       if (activeAlertsFromState.hasOwnProperty(id)) {
-        this.activeAlertsFromPreviousExecution[id] = new Alert<State, Context>(
-          id,
-          activeAlertsFromState[id]
-        );
+        this.trackedAlerts.active[id] = new Alert<State, Context>(id, activeAlertsFromState[id]);
       }
     }
 
     for (const id in recoveredAlertsFromState) {
       if (recoveredAlertsFromState.hasOwnProperty(id)) {
-        this.recoveredAlertsFromPreviousExecution[id] = new Alert<State, Context>(
+        this.trackedAlerts.recovered[id] = new Alert<State, Context>(
           id,
           recoveredAlertsFromState[id]
         );
       }
     }
 
-    this.alerts = cloneDeep(this.activeAlertsFromPreviousExecution);
+    this.reportedAlerts = cloneDeep(this.trackedAlerts.active);
 
     this.alertFactory = createAlertFactory<State, Context, ActionGroupIds>({
-      alerts: this.alerts,
+      alerts: this.reportedAlerts,
       logger: this.options.logger,
       maxAlerts: this.options.maxAlerts,
       canSetRecoveryContext: this.options.ruleType.doesSetRecoveryContext ?? false,
@@ -96,33 +105,106 @@ export class LegacyAlertsClient<
     shouldLogAndScheduleActionsForAlerts: boolean;
     ruleRunMetricsStore: RuleRunMetricsStore;
   }) {
-    const {
-      newAlerts: processedAlertsNew,
-      activeAlerts: processedAlertsActive,
-      currentRecoveredAlerts: processedAlertsRecoveredCurrent,
-      recoveredAlerts: processedAlertsRecovered,
-    } = processAlerts<State, Context>({
-      alerts: this.alerts,
-      existingAlerts: this.activeAlertsFromPreviousExecution,
-      previouslyRecoveredAlerts: this.recoveredAlertsFromPreviousExecution,
+    const trackedRecoveredAlertIds = new Set(Object.keys(this.trackedAlerts.recovered));
+    const activeAlerts: Record<string, Alert<State, Context>> = {};
+    // recovered alerts from current execution + the ones being tracked
+    const allRecoveredAlerts: Record<string, Alert<State, Context>> = {};
+
+    const categorized = categorizeAlerts<Alert<State, Context>>({
+      reportedAlerts: splitAlerts<State, Context>(this.reportedAlerts, this.trackedAlerts.active),
+      trackedAlerts: this.trackedAlerts,
       hasReachedAlertLimit: this.alertFactory!.hasReachedAlertLimit(),
       alertLimit: this.options.maxAlerts,
-      setFlapping: true,
     });
 
-    setFlapping<State, Context>(processedAlertsActive, processedAlertsRecovered);
+    const updateAlertValues = ({
+      alert,
+      start,
+      duration,
+      end,
+      flappingHistory,
+    }: {
+      alert: Alert<State, Context>;
+      start?: string;
+      duration?: string;
+      end?: string;
+      flappingHistory: boolean[];
+    }) => {
+      const state = alert.getState();
+      alert.replaceState({
+        ...state,
+        ...(start ? { start } : {}),
+        ...(end ? { end } : {}),
+        ...(duration !== undefined ? { duration } : {}),
+      });
+      alert.setFlappingHistory(flappingHistory);
+    };
 
-    this.processedAlerts.new = processedAlertsNew;
-    this.processedAlerts.active = processedAlertsActive;
-    this.processedAlerts.recovered = processedAlertsRecovered;
-    this.processedAlerts.recoveredCurrent = processedAlertsRecoveredCurrent;
+    const getStartTimes = (alerts: Record<string, Alert<State, Context>>) =>
+      mapValues(alerts, (alert) => {
+        const state = alert.getState();
+        return state.start as string;
+      });
+
+    const getFlappingHistories = (alerts: Record<string, Alert<State, Context>>) =>
+      mapValues(alerts, (alert) => alert.getFlappingHistory() ?? []);
+
+    // For alerts categorized as new, set the start time and duration
+    // and check to see if it's a flapping alert
+    prepareNewAlerts<Alert<State, Context>>(
+      categorized.new,
+      getFlappingHistories(this.trackedAlerts.recovered),
+      (opts: UpdateValuesOpts<Alert<State, Context>>) => {
+        updateAlertValues(opts);
+        activeAlerts[opts.id] = opts.alert;
+      }
+    );
+
+    // For alerts categorized as ongoing, update the duration
+    prepareOngoingAlerts<Alert<State, Context>>(
+      categorized.ongoing,
+      getStartTimes(categorized.ongoing),
+      getFlappingHistories(categorized.ongoing),
+      (opts: UpdateValuesOpts<Alert<State, Context>>) => {
+        updateAlertValues(opts);
+        activeAlerts[opts.id] = opts.alert;
+      }
+    );
+
+    // For alerts categorized as recovered, update the duration and set end time
+    prepareRecoveredAlerts<Alert<State, Context>>(
+      categorized.recovered,
+      getStartTimes(categorized.recovered),
+      getFlappingHistories(categorized.recovered),
+      (opts: UpdateValuesOpts<Alert<State, Context>>) => {
+        updateAlertValues(opts);
+        allRecoveredAlerts[opts.id] = opts.alert;
+      }
+    );
+
+    // alerts are still recovered
+    for (const id of trackedRecoveredAlertIds) {
+      allRecoveredAlerts[id] = this.trackedAlerts.recovered[id];
+      const updatedFlappingHistory = updateFlappingHistory(
+        allRecoveredAlerts[id].getFlappingHistory() || [],
+        false
+      );
+      allRecoveredAlerts[id].setFlappingHistory(updatedFlappingHistory);
+    }
+
+    setFlappingLegacy<State, Context>(activeAlerts, allRecoveredAlerts);
+
+    this.processedAlerts.new = categorized.new;
+    this.processedAlerts.active = activeAlerts;
+    this.processedAlerts.recovered = allRecoveredAlerts;
+    this.processedAlerts.recoveredCurrent = categorized.recovered;
 
     logAlerts({
       logger: this.options.logger,
       alertingEventLogger: eventLogger,
-      newAlerts: processedAlertsNew,
-      activeAlerts: processedAlertsActive,
-      recoveredAlerts: processedAlertsRecoveredCurrent,
+      newAlerts: this.processedAlerts.new,
+      activeAlerts,
+      recoveredAlerts: allRecoveredAlerts,
       ruleLogPrefix: ruleLabel,
       ruleRunMetricsStore,
       canSetRecoveryContext: this.options.ruleType.doesSetRecoveryContext ?? false,
@@ -156,4 +238,12 @@ export class LegacyAlertsClient<
   public getExecutorServices() {
     return getPublicAlertFactory(this.alertFactory!);
   }
+}
+
+export function updateAlertFlappingHistory<
+  State extends AlertInstanceState,
+  Context extends AlertInstanceContext
+>(alert: Alert<State, Context>, state: boolean) {
+  const updatedFlappingHistory = updateFlappingHistory(alert.getFlappingHistory() || [], state);
+  alert.setFlappingHistory(updatedFlappingHistory);
 }

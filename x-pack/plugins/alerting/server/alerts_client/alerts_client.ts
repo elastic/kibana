@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { cloneDeep, get, omit } from 'lodash';
+import uuid from 'uuid';
+import { cloneDeep, isEmpty, mapValues, omit } from 'lodash';
 import { Logger, ElasticsearchClient } from '@kbn/core/server';
 import {
   ALERT_ACTION_GROUP,
   ALERT_DURATION,
   ALERT_END,
+  ALERT_FLAPPING_HISTORY,
   ALERT_ID,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
@@ -22,86 +24,86 @@ import {
   ALERT_RULE_UUID,
   ALERT_START,
   ALERT_STATUS,
+  ALERT_STATUS_ACTIVE,
+  ALERT_STATUS_RECOVERED,
   ALERT_UUID,
   SPACE_IDS,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
+import { SearchHit, SearchTotalHits } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { millisToNanos } from '@kbn/event-log-plugin/server';
 import { type Alert } from '../../common';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { getIndexTemplateAndPattern } from '../alerts_service/types';
-import { IAlertsClient, InitializeOpts } from './types';
+import { AlertLimitServices, IAlertLimitServices } from './alert_limit';
+import { ReportedAlert } from './types';
+import { categorizeAlerts } from '../lib/categorize_alerts';
+import { updateFlappingHistory, setFlapping } from '../lib';
+import {
+  prepareNewAlerts,
+  prepareOngoingAlerts,
+  prepareRecoveredAlerts,
+  UpdateValuesOpts,
+} from '../lib/prepare_alerts';
 
-// export interface IAlertsClient {
-//   /**
-//    * Sets information about the rule.
-//    */
-//   setRuleData(rule: SetRuleDataOpts): void;
+const QUERY_SIZE = 1000;
 
-//   /**
-//    * Flag indicating whether max number of allowed alerts has been reported.
-//    */
-//   hasReachedAlertLimit(): boolean;
+export interface IAlertsClient {
+  /**
+   * Initialize the client with alerts that were created or updated
+   * during the previous execution.
+   */
+  initialize(opts: InitializeOpts): Promise<void>;
 
-//   /**
-//    * Get alerts matching given rule ID and rule execution uuid
-//    * - Allow specifying a different index than the default (for security alerts)
-//    */
-//   loadExistingAlerts(params: LoadExistingAlertsParams): Promise<void>;
+  /**
+   * Returns whether the alert limit has been hit
+   */
+  hasReachedAlertLimit(): void;
+  checkLimitUsage(): void;
 
-//   /**
-//    * Creates new alert document
-//    */
-//   create(alert: Alert): void;
+  /**
+   * Creates new alert document
+   */
+  create(alert: Alert): void;
 
-//   /**
-//    * Returns alerts from previous rule execution
-//    * - Returns a copy so the original list cannot be corrupted
-//    */
-//   get existingAlerts(): Alert[];
+  processAndLogAlerts(): void;
 
-//   /**
-//    * Returns list of recovered alerts, as determined by framework
-//    */
-//   getRecoveredAlerts(): Alert[];
-
-//   /**
-//    * Partially update an alert document
-//    * - Can use this for recovery alerts
-//    * - Control which fields can be updated?
-//    */
-//   update(id: string, updatedAlert: Partial<Alert>): void;
-
-//   // /**
-//   //  * Triggers auto-recovery detection unless rule type has opted out
-//   //  * Writes all alerts to default index.
-//   //  * Handles logging to event log as well
-//   //  */
-//   // writeAlerts(params?: WriteAlertParams): void;
-
-//   // /**
-//   //  * This might not belong on the AlertsClient but putting it here for now
-//   //  */
-//   // scheduleActions(params: ScheduleActionsParams): void;
-
-//   /**
-//    * Returns subset of functions available to rule executors
-//    * Don't expose any functions with direct read or write access to the alerts index
-//    */
-//   getExecutorServices(): PublicAlertsClient;
-// }
-
-export type PublicAlertsClient = Pick<IAlertsClient<Alert>, 'create' | 'getRecoveredAlerts'> & {
-  getExistingAlerts(): Alert[];
-};
-
-export interface SetRuleDataOpts {
-  consumer: string;
-  executionId: string;
-  id: string;
-  name: string;
-  tags: string[];
-  spaceId: string;
+  //   /**
+  //    * Returns alerts from previous rule execution
+  //    * - Returns a copy so the original list cannot be corrupted
+  //    */
+  //   get existingAlerts(): Alert[];
+  //   /**
+  //    * Returns list of recovered alerts, as determined by framework
+  //    */
+  //   getRecoveredAlerts(): Alert[];
+  //   /**
+  //    * Partially update an alert document
+  //    * - Can use this for recovery alerts
+  //    * - Control which fields can be updated?
+  //    */
+  //   update(id: string, updatedAlert: Partial<Alert>): void;
+  //   // /**
+  //   //  * Triggers auto-recovery detection unless rule type has opted out
+  //   //  * Writes all alerts to default index.
+  //   //  * Handles logging to event log as well
+  //   //  */
+  //   // writeAlerts(params?: WriteAlertParams): void;
+  //   // /**
+  //   //  * This might not belong on the AlertsClient but putting it here for now
+  //   //  */
+  //   // scheduleActions(params: ScheduleActionsParams): void;
+  /**
+   * Returns subset of functions available to rule executors
+   * Don't expose any functions with direct read or write access to the alerts index
+   */
+  getExecutorServices(): PublicAlertsClient;
 }
+
+export type PublicAlertsClient = Pick<IAlertsClient, 'create'> &
+  Pick<IAlertLimitServices, 'getAlertLimitValue' | 'setAlertLimitReached'> /* & {
+  getExistingAlerts(): Alert[];
+}*/;
 
 // todo would be nice to infer this from AlertSchema
 export interface AlertRuleSchema {
@@ -116,7 +118,7 @@ export interface AlertRuleSchema {
   [SPACE_IDS]: string[];
 }
 
-interface AlertsClientParams {
+export interface AlertsClientParams {
   logger: Logger;
   ruleType: UntypedNormalizedRuleType;
   maxAlerts: number;
@@ -124,91 +126,92 @@ interface AlertsClientParams {
   resourceInstallationPromise: Promise<boolean>;
 }
 
-interface LoadExistingAlertsParams {
-  ruleId: string;
-  previousRuleExecutionUuid: string;
+interface InitializeOpts {
+  rule: {
+    consumer: string;
+    executionId: string;
+    id: string;
+    name: string;
+    tags: string[];
+    spaceId: string;
+  };
+  previousRuleExecutionUuid?: string;
 }
 
-export class AlertsClient implements IAlertsClient<Alert> {
+export class AlertsClient implements IAlertsClient {
+  private alertLimitServices: AlertLimitServices;
   private rule: AlertRuleSchema | null = null;
   private ruleLogPrefix: string;
 
   private hasCalledGetRecoveredAlerts: boolean = false;
-  private reachedAlertLimit: boolean = false;
 
-  // private alertIdsWithActionGroupChanges: string[] = [];
+  // Alerts that were reported as active or recovered in the previous rule execution
+  private trackedAlerts: {
+    active: Record<string, Alert>;
+    recovered: Record<string, Alert>;
+  } = {
+    active: {},
+    recovered: {},
+  };
 
-  // Alerts from the previous rule execution
-  private previousAlerts: Alert[] = [];
-
-  // Alerts created during the current rule execution
-  private createdAlerts: Alert[] = [];
-
-  // // Alerts ready to be written
-  // private preparedAlerts: AlertSchema[] = [];
-
-  // Alerts with partial updates during the current rule execution
-  private updatedAlerts: Array<Partial<Alert>> = [];
+  // Alerts reported by rule executor during the current rule execution
+  private numAlertsReported: number = 0;
+  private reportedAlerts: Record<string, Alert> = {};
 
   constructor(private readonly options: AlertsClientParams) {
     this.ruleLogPrefix = `${this.options.ruleType.id}`;
-  }
-
-  private setRuleData(rule: SetRuleDataOpts) {
-    this.rule = {
-      [ALERT_RULE_CATEGORY]: this.options.ruleType.name,
-      [ALERT_RULE_CONSUMER]: rule.consumer,
-      [ALERT_RULE_EXECUTION_UUID]: rule.executionId,
-      [ALERT_RULE_NAME]: rule.name,
-      [ALERT_RULE_PRODUCER]: this.options.ruleType.producer,
-      [ALERT_RULE_TAGS]: rule.tags,
-      [ALERT_RULE_TYPE_ID]: this.options.ruleType.id,
-      [ALERT_RULE_UUID]: rule.id,
-      [SPACE_IDS]: [rule.spaceId],
-    };
-    this.ruleLogPrefix = `${this.options.ruleType.id}:${rule.id}: '${rule.name}'`;
+    this.alertLimitServices = new AlertLimitServices({ maxAlerts: options.maxAlerts });
   }
 
   public hasReachedAlertLimit() {
-    return this.reachedAlertLimit;
+    return this.alertLimitServices.hasReachedAlertLimit();
+  }
+
+  public checkLimitUsage() {
+    this.alertLimitServices.checkLimitUsage();
   }
 
   public async initialize({ rule, previousRuleExecutionUuid }: InitializeOpts): Promise<void> {
+    this.setRuleData(rule);
     if (!previousRuleExecutionUuid) {
+      this.options.logger.warn(
+        `${this.ruleLogPrefix}: AlertsClient.initialize() did not query for existing alerts because previousRuleExecutionUuid is not specified.`
+      );
       return;
     }
 
-    this.options.logger.info(
-      `loadExistingAlerts rule id ${rule.id}, execution ${previousRuleExecutionUuid}`
+    this.options.logger.debug(
+      `${this.ruleLogPrefix}: AlertsClient.initialize() called for rule ID ${rule.id}, execution ID ${previousRuleExecutionUuid}`
     );
 
-    this.setRuleData(rule);
     const context = this.options.ruleType.alerts?.context;
     const esClient = await this.options.elasticsearchClientPromise;
     const resourceInstalled = await this.options.resourceInstallationPromise;
 
     if (!resourceInstalled) {
-      this.options.logger.warn(`Something went wrong installing resources for context ${context}`);
+      // TODO RETRY INSTALLATION
+      this.options.logger.warn(
+        `${this.ruleLogPrefix}: Something went wrong installing resources for context ${context}`
+      );
       return;
     }
     const indexTemplateAndPattern = getIndexTemplateAndPattern(context!);
 
-    try {
-      // TODO - should iterate query to make sure we get all the alerts
-      // if the total is above the size param
+    const query = async (results: Array<SearchHit<Alert>>, from: number = 0) => {
       const {
         hits: { hits, total },
       } = await esClient.search<Alert>({
         index: indexTemplateAndPattern.pattern,
         track_total_hits: true,
         body: {
-          size: 1000,
+          from,
+          size: QUERY_SIZE,
           query: {
             bool: {
               filter: [
                 {
                   term: {
-                    [ALERT_RULE_UUID]: ruleId,
+                    [ALERT_RULE_UUID]: rule.id,
                   },
                 },
                 {
@@ -222,49 +225,171 @@ export class AlertsClient implements IAlertsClient<Alert> {
         },
       });
 
-      this.previousAlerts = hits.map((hit) => hit._source!);
+      // add hits to running result
+      results.push(...hits);
+      const hitsTotal = (total as SearchTotalHits).value ?? total ?? 0;
+      if (from + QUERY_SIZE >= hitsTotal) {
+        return;
+      }
+
+      await query(results, from + QUERY_SIZE);
+    };
+
+    try {
+      // Query for all alerts that were updated in the last execution
+      const results: Array<SearchHit<Alert>> = [];
+      await query(results);
+
+      for (const hit of results) {
+        const alertHit: Alert = hit._source as Alert;
+        const alertStatus = alertHit[ALERT_STATUS];
+        if (alertStatus === ALERT_STATUS_ACTIVE) {
+          this.trackedAlerts.active[alertHit[ALERT_ID]] = alertHit;
+        } else if (alertStatus === ALERT_STATUS_RECOVERED) {
+          this.trackedAlerts.recovered[alertHit[ALERT_ID]] = alertHit;
+        } else {
+          this.options.logger.debug(
+            `${this.ruleLogPrefix}: Found alert with status ${alertStatus} which is not recognized.`
+          );
+        }
+      }
     } catch (err) {
       this.options.logger.error(
-        `Error searching for alerts from previous execution - ${err.message}`
+        `${this.ruleLogPrefix}: Error searching for alerts from previous execution - ${err.message}`
       );
     }
   }
 
-  public create(alertToCreate: Alert) {
-    if (!this.options.ruleType.alerts) {
-      throw new Error(
-        `Can't create alert in AlertsClient because rule type has not registered alert configuration.`
-      );
+  public create(alert: ReportedAlert) {
+    const currentTime = new Date().toISOString();
+    const alertId = alert[ALERT_ID];
+
+    if (!alertId || isEmpty(alertId)) {
+      throw new Error(`Reported alert must include non-empty ${ALERT_ID} field`);
     }
 
     if (this.hasCalledGetRecoveredAlerts) {
       throw new Error(`Can't create new alerts after calling getRecoveredAlerts()!`);
     }
 
-    if (
-      this.createdAlerts.find(
-        (alert: Alert) => get(alert, ALERT_ID) === get(alertToCreate, ALERT_ID)
-      )
-    ) {
-      throw new Error(`Can't create alert with id ${get(alertToCreate, ALERT_ID)} multiple times!`);
+    if (this.alertHasBeenReported(alertId)) {
+      throw new Error(`Can't report alert with id ${alertId} multiple times!`);
     }
 
-    if (this.createdAlerts.length + 1 >= this.options.maxAlerts) {
-      this.reachedAlertLimit = true;
-      throw new Error(`Can't create new alerts as max allowed alerts have been created!`);
+    if (this.numAlertsReported++ >= this.options.maxAlerts) {
+      this.alertLimitServices.setAlertLimitReached(true);
+      throw new Error(
+        `Can't report more than ${this.options.maxAlerts} alerts in a single rule run!`
+      );
     }
 
-    // Fill in rule information
-    this.createdAlerts.push({
+    // Augment the reported alert with framework required fields
+    // - alert status
+    // - timestamp
+    // - required rule metadata, including current execution UUID
+    const augmentedAlert: Alert = {
       ...alert,
       ...this.rule,
       [ALERT_STATUS]: 'active',
-      [TIMESTAMP]: new Date().toISOString(),
-    } as Alert);
+      [TIMESTAMP]: currentTime, // TODO - should this be task.startedAt?
+    } as Alert;
+
+    this.reportedAlerts[alertId] = augmentedAlert;
   }
 
-  public get existingAlerts(): Alert[] {
-    return cloneDeep(this.previousAlerts);
+  public processAndLogAlerts() {
+    const trackedRecoveredAlertIds = new Set(Object.keys(this.trackedAlerts.recovered));
+
+    const activeAlerts: Record<string, Alert> = {};
+    // recovered alerts from current execution + the ones being tracked
+    const allRecoveredAlerts: Record<string, Alert> = {};
+
+    const categorized = categorizeAlerts<Alert>({
+      reportedAlerts: {
+        active: this.reportedAlerts,
+        // todo is there a way to report a recovered alert?
+        recovered: {},
+      },
+      trackedAlerts: this.trackedAlerts,
+      hasReachedAlertLimit: this.hasReachedAlertLimit(),
+      alertLimit: this.options.maxAlerts,
+    });
+
+    const updateAlertValues = ({
+      alert,
+      start,
+      duration,
+      end,
+      flappingHistory,
+    }: {
+      alert: Alert;
+      start?: string;
+      duration?: string;
+      end?: string;
+      flappingHistory: boolean[];
+    }) => {
+      alert = {
+        ...alert,
+        ...(start ? { [ALERT_START]: start } : {}),
+        ...(end ? { [ALERT_END]: end } : {}),
+        ...(duration !== undefined ? { [ALERT_DURATION]: duration } : {}),
+        [ALERT_FLAPPING_HISTORY]: flappingHistory,
+      };
+    };
+
+    const getFlappingHistories = (alerts: Record<string, Alert>) =>
+      mapValues(alerts, (alert) => alert[ALERT_FLAPPING_HISTORY] ?? []);
+
+    const getStartTimes = (alerts: Record<string, Alert>) =>
+      mapValues(alerts, (alert) => alert[ALERT_START]);
+
+    // For alerts categorized as new, set the start time and duration
+    // and check to see if it's a flapping alert
+    prepareNewAlerts<Alert>(
+      categorized.new,
+      getFlappingHistories(this.trackedAlerts.recovered),
+      (opts: UpdateValuesOpts<Alert>) => {
+        updateAlertValues(opts);
+        activeAlerts[opts.id] = opts.alert;
+      }
+    );
+
+    // For alerts categorized as ongoing, update the duration
+    prepareOngoingAlerts<Alert>(
+      categorized.ongoing,
+      getStartTimes(categorized.ongoing),
+      getFlappingHistories(categorized.ongoing),
+      (opts: UpdateValuesOpts<Alert>) => {
+        updateAlertValues(opts);
+        activeAlerts[opts.id] = opts.alert;
+      }
+    );
+
+    // For alerts categorized as recovered, update the duration and set end time
+    prepareRecoveredAlerts<Alert>(
+      categorized.recovered,
+      getStartTimes(categorized.recovered),
+      getFlappingHistories(categorized.recovered),
+      (opts: UpdateValuesOpts<Alert>) => {
+        updateAlertValues(opts);
+        allRecoveredAlerts[opts.id] = opts.alert;
+      }
+    );
+
+    // alerts are still recovered
+    for (const id of trackedRecoveredAlertIds) {
+      allRecoveredAlerts[id] = this.trackedAlerts.recovered[id];
+      const updatedFlappingHistory = updateFlappingHistory(
+        allRecoveredAlerts[id][ALERT_FLAPPING_HISTORY] ?? [],
+        false
+      );
+      allRecoveredAlerts[id] = {
+        ...allRecoveredAlerts[id],
+        [ALERT_FLAPPING_HISTORY]: updatedFlappingHistory,
+      };
+    }
+
+    setFlapping(activeAlerts, allRecoveredAlerts);
   }
 
   public getRecoveredAlerts(): Alert[] {
@@ -285,7 +410,7 @@ export class AlertsClient implements IAlertsClient<Alert> {
     // alerts cannot be accidentally mutated
     return this.existingAlerts.filter(
       (previousAlert: Alert) =>
-        !this.createdAlerts.some(
+        !this.reportedAlerts.some(
           (alert: Alert) => get(alert, ALERT_ID) === get(previousAlert, ALERT_ID)
         )
     );
@@ -396,9 +521,37 @@ export class AlertsClient implements IAlertsClient<Alert> {
   public getExecutorServices(): PublicAlertsClient {
     return {
       create: (...args) => this.create(...args),
-      getExistingAlerts: () => this.existingAlerts,
-      getRecoveredAlerts: () => this.getRecoveredAlerts(),
+      getAlertLimitValue: () => this.alertLimitServices.getAlertLimitValue(),
+      setAlertLimitReached: (...args) => this.alertLimitServices.setAlertLimitReached(...args),
+      // getExistingAlerts: () => this.existingAlerts,
+      // getRecoveredAlerts: () => this.getRecoveredAlerts(),
     };
+  }
+
+  private alertHasBeenReported(alertId: string) {
+    return !!this.reportedAlerts.active[alertId] || !!this.reportedAlerts.new[alertId];
+  }
+
+  private setRuleData(rule: {
+    consumer: string;
+    executionId: string;
+    id: string;
+    name: string;
+    tags: string[];
+    spaceId: string;
+  }) {
+    this.rule = {
+      [ALERT_RULE_CATEGORY]: this.options.ruleType.name,
+      [ALERT_RULE_CONSUMER]: rule.consumer,
+      [ALERT_RULE_EXECUTION_UUID]: rule.executionId,
+      [ALERT_RULE_NAME]: rule.name,
+      [ALERT_RULE_PRODUCER]: this.options.ruleType.producer,
+      [ALERT_RULE_TAGS]: rule.tags,
+      [ALERT_RULE_TYPE_ID]: this.options.ruleType.id,
+      [ALERT_RULE_UUID]: rule.id,
+      [SPACE_IDS]: [rule.spaceId],
+    };
+    this.ruleLogPrefix = `${this.options.ruleType.id}:${rule.id}: '${rule.name}'`;
   }
 
   // private prepareAlerts(shouldRecover: boolean) {

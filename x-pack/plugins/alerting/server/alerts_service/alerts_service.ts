@@ -30,8 +30,6 @@ import {
   ResourceInstallationHelper,
 } from './create_resource_installation_helper';
 import { AlertsClient } from '../alerts_client/alerts_client';
-import { IAlertsClient } from '../alerts_client';
-import { type Alert } from '../../common';
 
 const TOTAL_FIELDS_LIMIT = 2500;
 const INSTALLATION_TIMEOUT = 20 * 60 * 1000; // 20 minutes
@@ -72,7 +70,12 @@ interface IAlertsService {
 
   isInitialized(): boolean;
 
-  createAlertsClient(ruleType: UntypedNormalizedRuleType, maxAlerts: number): IAlertsClient | null;
+  /**
+   * If the rule type has registered an alert context, initialize and return an AlertsClient,
+   * otherwise return null. Currently registering an alert context is optional but in the future
+   * we will make it a requirement for all rule types and this function should not return null.
+   */
+  createAlertsClient(ruleType: UntypedNormalizedRuleType, maxAlerts: number): AlertsClient | null;
 }
 
 export class AlertsService implements IAlertsService {
@@ -147,6 +150,8 @@ export class AlertsService implements IAlertsService {
   }
 
   public createAlertsClient(ruleType: UntypedNormalizedRuleType, maxAlerts: number) {
+    // TODO - if context specific installation has failed during plugin setup,
+    // we want to retry it here but we probably only want to do N retries before just logging an error.
     return this.initialized && ruleType.alerts
       ? new AlertsClient({
           logger: this.options.logger,

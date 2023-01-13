@@ -7,9 +7,9 @@
 
 import { Logger } from '@kbn/core/server';
 import { cloneDeep } from 'lodash';
+import { type CategorizeAlertTypes, categorizeAlerts } from '../lib';
 import { AlertInstanceContext, AlertInstanceState } from '../types';
 import { Alert, PublicAlert } from './alert';
-import { processAlerts } from '../lib';
 
 export interface AlertFactory<
   State extends AlertInstanceState,
@@ -129,22 +129,42 @@ export function createAlertFactory<
             return [];
           }
 
-          const { currentRecoveredAlerts } = processAlerts<State, Context>({
-            alerts,
-            existingAlerts: originalAlerts,
-            previouslyRecoveredAlerts: {},
+          const { recovered } = categorizeAlerts<Alert<State, Context>>({
+            reportedAlerts: splitAlerts(alerts, originalAlerts),
+            trackedAlerts: {
+              active: originalAlerts,
+              recovered: {},
+            },
             hasReachedAlertLimit,
             alertLimit: maxAlerts,
-            // setFlapping is false, as we only want to use this function to get the recovered alerts
-            setFlapping: false,
           });
-          return Object.keys(currentRecoveredAlerts ?? {}).map(
-            (alertId: string) => currentRecoveredAlerts[alertId]
-          );
+          return Object.keys(recovered ?? {}).map((alertId: string) => recovered[alertId]);
         },
       };
     },
   };
+}
+
+export function splitAlerts<State extends AlertInstanceState, Context extends AlertInstanceContext>(
+  reportedAlerts: Record<string, Alert<State, Context>>,
+  trackedAlerts: Record<string, Alert<State, Context>>
+): CategorizeAlertTypes<Alert<State, Context>> {
+  const alerts: CategorizeAlertTypes<Alert<State, Context>> = {
+    active: {},
+    recovered: {},
+  };
+
+  for (const id in reportedAlerts) {
+    if (reportedAlerts.hasOwnProperty(id)) {
+      if (reportedAlerts[id].hasScheduledActions()) {
+        alerts.active[id] = reportedAlerts[id];
+      } else if (trackedAlerts[id]) {
+        alerts.recovered[id] = reportedAlerts[id];
+      }
+    }
+  }
+
+  return alerts;
 }
 
 export function getPublicAlertFactory<
