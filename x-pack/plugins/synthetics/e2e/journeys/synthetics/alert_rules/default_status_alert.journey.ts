@@ -105,21 +105,16 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
       timestamp: downCheckTime,
       status: 'is down.',
     });
-    await services.addTestSummaryDocument({
-      docType: 'summaryDown',
-    });
+
     await retry.tryForTime(3 * 60 * 1000, async () => {
       await page.click(byTestId('querySubmitButton'));
-      expect(
-        await page.isVisible(`text=1 Alert`, {
-          timeout: 10 * 1000,
-        })
-      ).toBe(true);
+
+      const alerts = await page.waitForSelector(`text=1 Alert`, { timeout: 20 * 1000 });
+      expect(await alerts.isVisible()).toBe(true);
 
       const text = await page.textContent(`${byTestId('dataGridRowCell')} .euiLink`);
 
       expect(text).toBe(reasonMessage);
-      expect(await page.isVisible(`text=1 Alert`)).toBe(true);
     });
   });
 
@@ -173,9 +168,9 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
 
     await retry.tryForTime(3 * 60 * 1000, async () => {
       await page.click(byTestId('querySubmitButton'));
-      await page.isVisible(`text=2 Alerts`, { timeout: 5 * 1000 });
+      await page.waitForSelector(`text=2 Alerts`, { timeout: 10 * 1000 });
       const alertReasonElem = await page.waitForSelector(`text=${reasonMessage}`, {
-        timeout: 5 * 1000,
+        timeout: 10 * 1000,
       });
 
       expect(await alertReasonElem?.innerText()).toBe(reasonMessage);
@@ -187,7 +182,9 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
     await page.click(byTestId('alert-status-filter-recovered-button'));
     await retry.tryForTime(3 * 60 * 1000, async () => {
       await page.click(byTestId('querySubmitButton'));
-      expect(await page.isVisible(`text=1 Alert`)).toBe(true);
+
+      const alertsCount = await page.waitForSelector(`text=1 Alert`, { timeout: 10 * 1000 });
+      expect(await alertsCount.isVisible()).toBe(true);
     });
 
     await page.click('[aria-label="View in app"]');
