@@ -14,6 +14,7 @@ import {
 import { verifyAccessAndContext } from './verify_access_and_context';
 import { ActionsRequestHandlerContext } from '../types';
 import { ILicenseState } from '../lib';
+import { rewriteNamespaces } from './rewrite_namespaces';
 
 const querySchema = schema.object({
   date_start: schema.string(),
@@ -25,9 +26,11 @@ const querySchema = schema.object({
 const rewriteReq: RewriteRequestCase<GetGlobalExecutionKPIParams> = ({
   date_start: dateStart,
   date_end: dateEnd,
+  namespaces,
   ...rest
 }) => ({
   ...rest,
+  namespaces: rewriteNamespaces(namespaces),
   dateStart,
   dateEnd,
 });

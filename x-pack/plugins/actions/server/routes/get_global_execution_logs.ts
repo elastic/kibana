@@ -15,6 +15,7 @@ import {
   RewriteRequestCase,
 } from '../../common';
 import { verifyAccessAndContext } from './verify_access_and_context';
+import { rewriteNamespaces } from './rewrite_namespaces';
 
 const sortOrderSchema = schema.oneOf([schema.literal('asc'), schema.literal('desc')]);
 
@@ -44,7 +45,7 @@ const rewriteBodyReq: RewriteRequestCase<GetGlobalExecutionLogParams> = ({
   per_page: perPage,
   namespaces,
   ...rest
-}) => ({ ...rest, dateStart, dateEnd, perPage });
+}) => ({ ...rest, namespaces: rewriteNamespaces(namespaces), dateStart, dateEnd, perPage });
 
 export const getGlobalExecutionLogRoute = (
   router: IRouter<ActionsRequestHandlerContext>,

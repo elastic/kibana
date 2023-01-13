@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { lazy, useEffect } from 'react';
+import React, { lazy, useCallback, useEffect } from 'react';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer, EuiButtonEmpty, EuiPageHeader } from '@elastic/eui';
+import { EuiSpacer, EuiButtonEmpty, EuiPageHeader, EuiPageTemplate } from '@elastic/eui';
 import { routeToConnectors, routeToLogs, Section } from '../../../constants';
 import { getAlertingSectionBreadcrumb } from '../../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
@@ -19,17 +19,6 @@ import { HealthCheck } from '../../../components/health_check';
 import { useKibana } from '../../../../common/lib/kibana';
 import ConnectorEventLogListTableWithApi from './actions_connectors_event_log_list_table';
 
-const LogsList = () => {
-  return suspendedComponentWithProps(
-    ConnectorEventLogListTableWithApi,
-    'xl'
-  )({
-    refreshToken: 0,
-    initialPageSize: 50,
-    hasConnectorNames: true,
-    hasAllSpaceSwitch: true,
-  });
-};
 const ConnectorsList = lazy(() => import('./actions_connectors_list'));
 
 export interface MatchParams {
@@ -48,7 +37,6 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
     id: Section;
     name: React.ReactNode;
   }> = [];
-
   tabs.push({
     id: 'connectors',
     name: (
@@ -58,7 +46,6 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
       />
     ),
   });
-
   tabs.push({
     id: 'logs',
     name: (
@@ -78,6 +65,22 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
     setBreadcrumbs([getAlertingSectionBreadcrumb(section || 'connectors')]);
     chrome.docTitle.change(getCurrentDocTitle(section || 'connectors'));
   }, [section, chrome, setBreadcrumbs]);
+
+  const renderLogsList = useCallback(() => {
+    return (
+      <EuiPageTemplate.Section grow={false} paddingSize="none">
+        {suspendedComponentWithProps(
+          ConnectorEventLogListTableWithApi,
+          'xl'
+        )({
+          refreshToken: 0,
+          initialPageSize: 50,
+          hasConnectorNames: true,
+          hasAllSpaceSwitch: true,
+        })}
+      </EuiPageTemplate.Section>
+    );
+  }, []);
 
   return (
     <>
@@ -117,7 +120,7 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
       <HealthContextProvider>
         <HealthCheck waitForCheck={true}>
           <Switch>
-            <Route exact path={routeToLogs} component={LogsList} />
+            <Route exact path={routeToLogs} component={renderLogsList} />
             <Route
               exact
               path={routeToConnectors}
