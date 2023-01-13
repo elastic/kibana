@@ -64,7 +64,7 @@ describe('convert_anomalies_to_hosts', () => {
         },
         ip: '127.0.0.1',
         type: 'source.ip',
-        jobName: undefined,
+        jobName: 'job-1',
       },
     ];
     expect(entities).toEqual(expected);
@@ -117,7 +117,7 @@ describe('convert_anomalies_to_hosts', () => {
         },
         ip: '127.0.0.1',
         type: 'destination.ip',
-        jobName: undefined,
+        jobName: 'job-1',
       },
     ];
     expect(entities).toEqual(expected);
@@ -167,7 +167,7 @@ describe('convert_anomalies_to_hosts', () => {
         },
         ip: '127.0.0.1',
         type: 'source.ip',
-        jobName: undefined,
+        jobName: 'job-1',
       },
     ];
     expect(entities).toEqual(expected);
@@ -217,7 +217,7 @@ describe('convert_anomalies_to_hosts', () => {
         },
         ip: '127.0.0.1',
         type: 'destination.ip',
-        jobName: undefined,
+        jobName: 'job-1',
       },
     ];
     expect(entities).toEqual(expected);
@@ -281,7 +281,7 @@ describe('convert_anomalies_to_hosts', () => {
         },
         ip: '127.0.0.1',
         type: 'source.ip',
-        jobName: undefined,
+        jobName: 'job-1',
       },
     ];
     expect(entities).toEqual(expected);
@@ -339,7 +339,7 @@ describe('convert_anomalies_to_hosts', () => {
         },
         ip: '127.0.0.1',
         type: 'destination.ip',
-        jobName: undefined,
+        jobName: 'job-1',
       },
     ];
     expect(entities).toEqual(expected);
@@ -397,7 +397,7 @@ describe('convert_anomalies_to_hosts', () => {
         },
         ip: '127.0.0.1',
         type: 'source.ip',
-        jobName: undefined,
+        jobName: 'job-1',
       },
     ];
     expect(entities).toEqual(expected);
@@ -455,7 +455,7 @@ describe('convert_anomalies_to_hosts', () => {
         },
         ip: '127.0.0.1',
         type: 'destination.ip',
-        jobName: undefined,
+        jobName: 'job-1',
       },
     ];
     expect(entities).toEqual(expected);

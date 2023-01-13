@@ -20,7 +20,11 @@ export const convertAnomaliesToHosts = (
       if (getHostNameFromEntity(item, hostName)) {
         return [
           ...accum,
-          { hostName: item.entityValue, jobName: jobNameById[item.jobId], anomaly: item },
+          {
+            hostName: item.entityValue,
+            jobName: jobNameById[item.jobId] ?? item.jobId,
+            anomaly: item,
+          },
         ];
       } else {
         const hostNameFromInfluencers = getHostNameFromInfluencers(item.influencers, hostName);
@@ -29,7 +33,7 @@ export const convertAnomaliesToHosts = (
             ...accum,
             {
               hostName: hostNameFromInfluencers,
-              jobName: jobNameById[item.jobId],
+              jobName: jobNameById[item.jobId] ?? item.jobId,
               anomaly: item,
             },
           ];

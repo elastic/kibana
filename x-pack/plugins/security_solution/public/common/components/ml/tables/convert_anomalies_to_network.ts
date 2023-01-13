@@ -24,7 +24,7 @@ export const convertAnomaliesToNetwork = (
           {
             ip: item.entityValue,
             type: item.entityName,
-            jobName: jobNameById[item.jobId],
+            jobName: jobNameById[item.jobId] ?? item.jobId,
             anomaly: item,
           },
         ];
@@ -33,7 +33,12 @@ export const convertAnomaliesToNetwork = (
         if (network != null) {
           return [
             ...accum,
-            { ip: network.ip, type: network.type, jobName: jobNameById[item.jobId], anomaly: item },
+            {
+              ip: network.ip,
+              type: network.type,
+              jobName: jobNameById[item.jobId] ?? item.jobId,
+              anomaly: item,
+            },
           ];
         } else {
           return accum;

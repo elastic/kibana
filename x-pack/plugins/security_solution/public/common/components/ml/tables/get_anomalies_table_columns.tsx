@@ -32,14 +32,14 @@ export const getAnomaliesDefaultTableColumns = (
 ] => [
   {
     name: i18n.DETECTOR,
-    field: 'anomaly.jobId',
+    field: 'jobName',
     sortable: true,
-    render: (jobId, anomalyBy) => (
+    render: (jobName, anomalyBy) => (
       <ExplorerLink
         score={anomalyBy.anomaly}
         startDate={startDate}
         endDate={endDate}
-        linkName={anomalyBy.jobName ?? jobId}
+        linkName={jobName}
       />
     ),
   },

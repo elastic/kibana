@@ -17,12 +17,12 @@ describe('convert_anomalies_to_users', () => {
       {
         anomaly: mockAnomalies.anomalies[0],
         userName: 'root',
-        jobName: undefined,
+        jobName: 'job-1',
       },
       {
         anomaly: mockAnomalies.anomalies[1],
         userName: 'root',
-        jobName: undefined,
+        jobName: 'job-2',
       },
     ];
     expect(entities).toEqual(expected);
@@ -57,7 +57,7 @@ describe('convert_anomalies_to_users', () => {
       {
         anomaly: anomalies.anomalies[1],
         userName: 'root',
-        jobName: undefined,
+        jobName: 'job-2',
       },
     ];
     expect(entities).toEqual(expected);
@@ -90,7 +90,7 @@ describe('convert_anomalies_to_users', () => {
       {
         anomaly: anomalies.anomalies[1],
         userName: 'root',
-        jobName: undefined,
+        jobName: 'job-2',
       },
     ];
     expect(entities).toEqual(expected);

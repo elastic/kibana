@@ -61,7 +61,7 @@ describe('convert_anomalies_to_hosts', () => {
           time: 1560664800000,
         },
         hostName: 'zeek-iowa',
-        jobName: undefined,
+        jobName: 'job-1',
       },
       {
         anomaly: {
@@ -104,7 +104,7 @@ describe('convert_anomalies_to_hosts', () => {
           time: 1560664800000,
         },
         hostName: 'zeek-iowa',
-        jobName: undefined,
+        jobName: 'job-2',
       },
     ];
     expect(entities).toEqual(expected);
@@ -168,7 +168,7 @@ describe('convert_anomalies_to_hosts', () => {
           time: 1560664800000,
         },
         hostName: 'zeek-iowa',
-        jobName: undefined,
+        jobName: 'job-2',
       },
     ];
     expect(entities).toEqual(expected);
@@ -228,7 +228,7 @@ describe('convert_anomalies_to_hosts', () => {
           time: 1560664800000,
         },
         hostName: 'zeek-iowa',
-        jobName: undefined,
+        jobName: 'job-2',
       },
     ];
     expect(entities).toEqual(expected);

@@ -22,7 +22,7 @@ export const convertAnomaliesToUsers = (
           ...accum,
           {
             userName: item.entityValue,
-            jobName: jobNameById[item.jobId],
+            jobName: jobNameById[item.jobId] ?? item.jobId,
             anomaly: item,
           },
         ];
@@ -31,7 +31,11 @@ export const convertAnomaliesToUsers = (
         if (userNameFromInfluencers != null) {
           return [
             ...accum,
-            { userName: userNameFromInfluencers, jobName: jobNameById[item.jobId], anomaly: item },
+            {
+              userName: userNameFromInfluencers,
+              jobName: jobNameById[item.jobId] ?? item.jobId,
+              anomaly: item,
+            },
           ];
         } else {
           return accum;
