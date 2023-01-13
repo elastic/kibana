@@ -284,7 +284,7 @@ export const generateRunnerResult = ({
     state: {
       ...(state && { alertInstances }),
       ...(state && { alertRecoveredInstances }),
-      ...(state && { alertTypeState: undefined }),
+      ...(state && { alertTypeState: {} }),
       ...(state && { previousStartedAt: new Date('1970-01-01T00:00:00.000Z') }),
       ...(state && { summaryActions }),
     },

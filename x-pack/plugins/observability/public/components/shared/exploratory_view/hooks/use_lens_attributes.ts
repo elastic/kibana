@@ -9,6 +9,7 @@ import { useMemo } from 'react';
 import { isEmpty } from 'lodash';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import { useKibanaSpace } from '../../../../hooks/use_kibana_space';
 import { HeatMapLensAttributes } from '../configurations/lens_attributes/heatmap_attributes';
 import { useLensFormulaHelper } from './use_lens_formula_helper';
 import { ALL_VALUES_SELECTED } from '../configurations/constants/url_constants';
@@ -46,7 +47,8 @@ export function getLayerConfigs(
   reportType: ReportViewType,
   theme: EuiTheme,
   dataViews: DataViewState,
-  reportConfigMap: ReportConfigMap
+  reportConfigMap: ReportConfigMap,
+  spaceId?: string
 ) {
   const layerConfigs: LayerConfig[] = [];
 
@@ -64,6 +66,7 @@ export function getLayerConfigs(
         dataView,
         dataType: series.dataType,
         reportConfigMap,
+        spaceId,
       });
 
       const filters: UrlFilter[] = (series.filters ?? []).concat(
@@ -98,6 +101,8 @@ export const useLensAttributes = (): TypedLensByValueInput['attributes'] | null 
 
   const { dataViews } = useAppDataViewContext();
 
+  const spaceId = useKibanaSpace();
+
   const { reportConfigMap } = useExploratoryView();
 
   const theme = useTheme();
@@ -117,7 +122,8 @@ export const useLensAttributes = (): TypedLensByValueInput['attributes'] | null 
       reportTypeT,
       theme,
       dataViews,
-      reportConfigMap
+      reportConfigMap,
+      spaceId.space?.id
     );
 
     if (layerConfigs.length < 1) {
