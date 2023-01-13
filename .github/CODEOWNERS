@@ -897,6 +897,7 @@ packages/kbn-babel-transform @elastic/kibana-operations
 packages/kbn-bazel-runner @elastic/kibana-operations
 packages/kbn-cases-components @elastic/response-ops
 packages/kbn-chart-icons @elastic/kibana-visualizations
+packages/kbn-check-mappings-update-cli @elastic/kibana-core
 packages/kbn-ci-stats-core @elastic/kibana-operations
 packages/kbn-ci-stats-performance-metrics @elastic/kibana-operations
 packages/kbn-ci-stats-reporter @elastic/kibana-operations
