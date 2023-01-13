@@ -24,7 +24,6 @@ import {
   threat_query,
   threatIndicatorPathOrUndefined,
 } from '@kbn/securitysolution-io-ts-alerting-types';
-import { NonEmptyString } from '@kbn/securitysolution-io-ts-types';
 import {
   SIGNALS_ID,
   EQL_RULE_TYPE_ID,
