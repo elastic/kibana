@@ -55,11 +55,13 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
 
   const checkIndexPatternExists = async () => {
     try {
-      const dv = (await dataViews.find(indexName)).find(({ title }) => title === indexName);
-      if (dv !== undefined) {
-        setIndexPatternExists(true);
-      } else {
-        setIndexPatternExists(false);
+      if (indexName !== '') {
+        const dv = (await dataViews.find(indexName)).find(({ title }) => title === indexName);
+        if (dv !== undefined) {
+          setIndexPatternExists(true);
+        } else {
+          setIndexPatternExists(false);
+        }
       }
       setIsLoading(false);
     } catch (e) {
