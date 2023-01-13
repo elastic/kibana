@@ -1,7 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types"
+    "outDir": "target/types",
   },
   "include": [
     "common/**/*",
@@ -9,7 +9,7 @@
     "public/**/*.json",
     "server/**/*",
     "typings/**/*",
-    "../../../typings/**/*"
+    "../../../typings/**/*",
   ],
   "kbn_references": [
     "@kbn/core",
@@ -69,5 +69,7 @@
     "@kbn/slo-schema",
     "@kbn/core-http-server-internal"
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*",
+  ]
 }
