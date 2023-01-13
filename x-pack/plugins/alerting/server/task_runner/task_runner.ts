@@ -66,8 +66,7 @@ import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
 import { ILastRun, lastRunFromState, lastRunToRaw } from '../lib/last_run_status';
 import { RunningHandler } from './running_handler';
 import { RuleResultService } from '../monitoring/rule_result_service';
-import { AlertsClient, PublicAlertsClient } from '../alerts_client/alerts_client';
-import { IAlertsClient } from '../alerts_client';
+import { AlertsClient } from '../alerts_client/alerts_client';
 import { LegacyAlertsClient } from '../alerts_client/legacy_alerts_client';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
@@ -106,7 +105,7 @@ export class TaskRunner<
   private readonly maxAlerts: number;
   private timer: TaskRunnerTimer;
   private alertingEventLogger: AlertingEventLogger;
-  private alertsClient: IAlertsClient | null;
+  private alertsClient: AlertsClient | null;
   private usageCounter?: UsageCounter;
   private searchAbortController: AbortController;
   private cancelled: boolean;
@@ -158,12 +157,12 @@ export class TaskRunner<
     );
     this.ruleResult = new RuleResultService();
 
-    this.alertsClient = context.alertsService
-      ? context.alertsService.createAlertsClient(
-          ruleType as UntypedNormalizedRuleType,
-          this.maxAlerts
-        )
-      : null;
+    // this.alertsClient = context.alertsService
+    //   ? context.alertsService.createAlertsClient(
+    //       ruleType as UntypedNormalizedRuleType,
+    //       this.maxAlerts
+    //     )
+    //   : null;
     this.legacyAlertsClient = new LegacyAlertsClient({
       logger: this.logger,
       maxAlerts: context.maxAlerts,
@@ -310,9 +309,8 @@ export class TaskRunner<
       TaskRunnerTimerSpan.RuleTypeRun,
       async () => {
         this.legacyAlertsClient.initialize(alertRawInstances, alertRecoveredRawInstances);
-        // this.alertsClient.initialize({
-        //   previousExecutionUuid,
-        //   deserializedAlerts: alertRawInstances,
+        // this.alertsClient?.initialize({
+        //   previousRuleExecutionUuid: previousExecutionUuid,
         //   rule: {
         //     id: rule.id,
         //     name: rule.name,
@@ -322,25 +320,11 @@ export class TaskRunner<
         //     executionId: this.executionId,
         //   },
         // });
-        // if (previousExecutionUuid) {
-        //   // This rule type has registered an alert configuration with the framework so we should use
-        //   // the FAAD API to query for alerts from previous execution
-        //   this.alertsClient.loadExistingAlerts({
-        //     ruleId,
-        //     previousRuleExecutionUuid: previousExecutionUuid,
-        //   });
-
-        // } else {
-        //   // Use legacy method of de-serializing alerts from the task document
-        //   for (const id in alertRawInstances) {
-        //     if (alertRawInstances.hasOwnProperty(id)) {
-        //       this.alerts[id] = new Alert<State, Context>(id, alertRawInstances[id]);
-        //     }
-        //   }
-        // }
 
         const checkHasReachedAlertLimit = () => {
-          const reachedLimit = this.legacyAlertsClient.hasReachedAlertLimit();
+          const reachedLimit =
+            this.legacyAlertsClient.hasReachedAlertLimit() ||
+            /* this.alertsClient?.hasReachedAlertLimit() ??*/ false;
           if (reachedLimit) {
             this.logger.warn(
               `rule execution generated greater than ${this.maxAlerts} alerts: ${ruleLabel}`
@@ -384,7 +368,7 @@ export class TaskRunner<
                  * @deprecated
                  */
                 alertFactory: this.legacyAlertsClient.getExecutorServices(),
-                alertsClient: this.alertsClient.getExecutorServices(),
+                // alertsClient: this.alertsClient?.getExecutorServices(),
                 // can move to alertsclient
                 shouldWriteAlerts: () => this.shouldLogAndScheduleActionsForAlerts(),
                 // can move to alertsclient
@@ -428,6 +412,7 @@ export class TaskRunner<
           // If neither of these apply, this check will throw an error
           // These errors should show up during rule type development
           this.legacyAlertsClient.checkLimitUsage();
+          // this.alertsClient?.checkLimitUsage();
         } catch (err) {
           // Check if this error is due to reaching the alert limit
           if (!checkHasReachedAlertLimit()) {
@@ -459,16 +444,13 @@ export class TaskRunner<
     );
 
     await this.timer.runWithTimer(TaskRunnerTimerSpan.ProcessAlerts, async () => {
-      if (this.useLegacyApi) {
-        this.legacyAlertsClient.processAndLogAlerts({
-          eventLogger: this.alertingEventLogger,
-          ruleLabel,
-          ruleRunMetricsStore,
-          shouldLogAndScheduleActionsForAlerts: this.shouldLogAndScheduleActionsForAlerts(),
-        });
-      } else {
-        await this.alertsClient!.writeAlerts();
-      }
+      this.legacyAlertsClient.processAndLogAlerts({
+        eventLogger: this.alertingEventLogger,
+        ruleLabel,
+        ruleRunMetricsStore,
+        shouldLogAndScheduleActionsForAlerts: this.shouldLogAndScheduleActionsForAlerts(),
+      });
+      // await this.alertsClient?.processAndLogAlerts();
     });
 
     const executionHandler = new ExecutionHandler({
@@ -744,7 +726,7 @@ export class TaskRunner<
       return {
         ...omit(runStateWithMetrics, ['metrics']),
         previousStartedAt: startedAt,
-        previousExecutionUuid: this.executionId,
+        // previousExecutionUuid: this.executionId,
       };
     };
 

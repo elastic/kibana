@@ -7,28 +7,23 @@
 
 import apm from 'elastic-apm-node';
 import { Logger } from '@kbn/core/server';
-import { Alert } from '../alert';
 import { EVENT_LOG_ACTIONS } from '../plugin';
-import { AlertInstanceContext, AlertInstanceState } from '../types';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 
-export interface LogAlertsParams<
-  State extends AlertInstanceState,
-  Context extends AlertInstanceContext
-> {
+export interface LogAlertsParams<Alert> {
   logger: Logger;
   alertingEventLogger: AlertingEventLogger;
-  newAlerts: Record<string, Alert<State, Context>>;
-  activeAlerts: Record<string, Alert<State, Context>>;
-  recoveredAlerts: Record<string, Alert<State, Context>>;
+  newAlerts: Record<string, Alert>;
+  activeAlerts: Record<string, Alert>;
+  recoveredAlerts: Record<string, Alert>;
   ruleLogPrefix: string;
   ruleRunMetricsStore: RuleRunMetricsStore;
   canSetRecoveryContext: boolean;
   shouldPersistAlerts: boolean;
 }
 
-export function logAlerts<State extends AlertInstanceState, Context extends AlertInstanceContext>({
+export function logAlerts<Alert>({
   logger,
   alertingEventLogger,
   newAlerts,
@@ -38,7 +33,7 @@ export function logAlerts<State extends AlertInstanceState, Context extends Aler
   ruleRunMetricsStore,
   canSetRecoveryContext,
   shouldPersistAlerts,
-}: LogAlertsParams<State, Context>) {
+}: LogAlertsParams<Alert>) {
   const newAlertIds = Object.keys(newAlerts);
   const activeAlertIds = Object.keys(activeAlerts);
   const recoveredAlertIds = Object.keys(recoveredAlerts);
