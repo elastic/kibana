@@ -55,6 +55,7 @@ import {
   packagePolicyService,
   _applyIndexPrivileges,
   _compilePackagePolicyInputs,
+  _validateRestrictedFieldsNotModifiedOrThrow,
 } from './package_policy';
 import { appContextService } from './app_context';
 
@@ -4576,5 +4577,132 @@ describe('_applyIndexPrivileges()', () => {
 
     const streamOut = _applyIndexPrivileges(packageStream, inputStream);
     expect(streamOut).toEqual(expectedStream);
+  });
+});
+
+describe('_validateRestrictedFieldsNotModifiedOrThrow()', () => {
+  const pkgInfo = {
+    name: 'custom_logs',
+    title: 'Custom Logs',
+    version: '1.0.0',
+    type: 'input',
+  } as any as PackageInfo;
+
+  const createInputPkgPolicy = (opts: { namespace: string; dataset: string }) => {
+    const { namespace, dataset } = opts;
+    return {
+      id: 'id-1234',
+      version: 'WzI1MywxXQ==',
+      name: 'custom_logs-1',
+      namespace,
+      description: '',
+      enabled: true,
+      policy_id: '1234',
+      revision: 1,
+      created_at: '2023-01-04T14:51:53.061Z',
+      created_by: 'elastic',
+      updated_at: '2023-01-04T14:51:53.061Z',
+      updated_by: 'elastic',
+      vars: {},
+      inputs: [
+        {
+          type: 'logfile',
+          policy_template: 'logs',
+          enabled: true,
+          streams: [
+            {
+              enabled: true,
+              data_stream: {
+                type: 'logs',
+                dataset: 'custom_logs.logs',
+              },
+              vars: {
+                'data_stream.dataset': {
+                  type: 'text',
+                  value: dataset,
+                },
+              },
+              id: 'logfile-custom_logs.logs-1',
+            },
+          ],
+        },
+      ],
+      package: {
+        name: 'custom_logs',
+        title: 'Custom Logs',
+        version: '1.0.0',
+      },
+    };
+  };
+  it('should not throw if restricted fields are not modified', () => {
+    const oldPackagePolicy = createInputPkgPolicy({
+      namespace: 'default',
+      dataset: 'custom_logs.logs',
+    });
+    expect(() =>
+      _validateRestrictedFieldsNotModifiedOrThrow({
+        oldPackagePolicy,
+        packagePolicyUpdate: oldPackagePolicy,
+        pkgInfo,
+      })
+    ).not.toThrow();
+  });
+
+  it('should throw if namespace is modified', () => {
+    const oldPackagePolicy = createInputPkgPolicy({
+      namespace: 'default',
+      dataset: 'custom_logs.logs',
+    });
+    const newPackagePolicy = createInputPkgPolicy({
+      namespace: 'new-namespace',
+      dataset: 'custom_logs.logs',
+    });
+    expect(() =>
+      _validateRestrictedFieldsNotModifiedOrThrow({
+        oldPackagePolicy,
+        packagePolicyUpdate: newPackagePolicy,
+        pkgInfo,
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"Package policy namespace cannot be modified for input only packages, please create a new package policy."`
+    );
+  });
+
+  it('should throw if dataset is modified', () => {
+    const oldPackagePolicy = createInputPkgPolicy({
+      namespace: 'default',
+      dataset: 'custom_logs.logs',
+    });
+    const newPackagePolicy = createInputPkgPolicy({
+      namespace: 'default',
+      dataset: 'new-dataset',
+    });
+    expect(() =>
+      _validateRestrictedFieldsNotModifiedOrThrow({
+        oldPackagePolicy,
+        packagePolicyUpdate: newPackagePolicy,
+        pkgInfo,
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"Package policy dataset cannot be modified for input only packages, please create a new package policy."`
+    );
+  });
+
+  it('should not throw if dataset is modified but package is integration package', () => {
+    const oldPackagePolicy = createInputPkgPolicy({
+      namespace: 'default',
+      dataset: 'custom_logs.logs',
+    });
+    const newPackagePolicy = createInputPkgPolicy({
+      namespace: 'default',
+      dataset: 'new-dataset',
+    });
+    expect(() =>
+      _validateRestrictedFieldsNotModifiedOrThrow({
+        oldPackagePolicy,
+        packagePolicyUpdate: newPackagePolicy,
+        pkgInfo: { ...pkgInfo, type: 'integration' },
+      })
+    ).not.toThrow();
   });
 });

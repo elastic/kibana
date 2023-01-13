@@ -184,14 +184,14 @@ export class ServiceAPIClient {
             tap((result) => {
               this.logger.debug(result.data);
               this.logger.debug(
-                `Successfully called service with method ${method} with ${allMonitors.length} monitors `
+                `Successfully called service location ${url} with method ${method} with ${locMonitors.length} monitors `
               );
             }),
             catchError((err: AxiosError<{ reason: string; status: number }>) => {
               pushErrors.push({ locationId: id, error: err.response?.data! });
               const reason = err.response?.data?.reason ?? '';
 
-              err.message = `Failed to call service location ${url} with method ${method} with ${allMonitors.length} monitors:  ${err.message}, ${reason}`;
+              err.message = `Failed to call service location ${url} with method ${method} with ${locMonitors.length} monitors:  ${err.message}, ${reason}`;
               this.logger.error(err);
               sendErrorTelemetryEvents(this.logger, this.server.telemetry, {
                 reason: err.response?.data?.reason,

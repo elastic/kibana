@@ -7,9 +7,11 @@
 
 import expect from '@kbn/expect';
 
+import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
+
 import { Spaces } from '../../../../scenarios';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-import { ES_TEST_INDEX_NAME, getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
+import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 import {
   createConnector,
   ES_GROUPS_TO_WRITE,

@@ -50,23 +50,21 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
   agentPolicy?: AgentPolicy;
   packageInfo: PackageInfo;
   packagePolicy: NewPackagePolicy;
-  integrationToEnable?: string;
   updatePackagePolicy: (fields: Partial<NewPackagePolicy>) => void;
   validationResults: PackagePolicyValidationResults;
   submitAttempted: boolean;
-  isUpdate?: boolean;
+  isEditPage?: boolean;
   noAdvancedToggle?: boolean;
 }> = memo(
   ({
     agentPolicy,
     packageInfo,
     packagePolicy,
-    integrationToEnable,
-    isUpdate,
     updatePackagePolicy,
     validationResults,
     submitAttempted,
     noAdvancedToggle = false,
+    isEditPage = false,
   }) => {
     const { docLinks } = useStartServices();
 
@@ -251,7 +249,6 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
             )}
 
             {/* Advanced options content */}
-            {/* Todo: Populate list of existing namespaces */}
             {isShowingAdvanced ? (
               <EuiFlexItem>
                 <EuiFlexGroup direction="column" gutterSize="m">
@@ -266,27 +263,35 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                         />
                       }
                       helpText={
-                        <FormattedMessage
-                          id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceHelpLabel"
-                          defaultMessage="Change the default namespace inherited from the selected Agent policy. This setting changes the name of the integration's data stream. {learnMore}."
-                          values={{
-                            learnMore: (
-                              <EuiLink
-                                href={docLinks.links.fleet.datastreamsNamingScheme}
-                                target="_blank"
-                              >
-                                {i18n.translate(
-                                  'xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceHelpLearnMoreLabel',
-                                  { defaultMessage: 'Learn more' }
-                                )}
-                              </EuiLink>
-                            ),
-                          }}
-                        />
+                        isEditPage && packageInfo.type === 'input' ? (
+                          <FormattedMessage
+                            id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyInputOnlyEditNamespaceHelpLabel"
+                            defaultMessage="The namespace cannot be changed for this integration. Create a new integration policy to use a different namespace."
+                          />
+                        ) : (
+                          <FormattedMessage
+                            id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceHelpLabel"
+                            defaultMessage="Change the default namespace inherited from the selected Agent policy. This setting changes the name of the integration's data stream. {learnMore}."
+                            values={{
+                              learnMore: (
+                                <EuiLink
+                                  href={docLinks.links.fleet.datastreamsNamingScheme}
+                                  target="_blank"
+                                >
+                                  {i18n.translate(
+                                    'xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceHelpLearnMoreLabel',
+                                    { defaultMessage: 'Learn more' }
+                                  )}
+                                </EuiLink>
+                              ),
+                            }}
+                          />
+                        )
                       }
                     >
                       <EuiComboBox
                         noSuggestions
+                        isDisabled={isEditPage && packageInfo.type === 'input'}
                         singleSelection={true}
                         selectedOptions={
                           packagePolicy.namespace ? [{ label: packagePolicy.namespace }] : []

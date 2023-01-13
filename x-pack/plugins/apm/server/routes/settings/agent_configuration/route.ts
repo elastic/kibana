@@ -143,7 +143,7 @@ const deleteAgentConfigurationRoute = createApmServerRoute({
 
     if (resources.plugins.fleet) {
       await syncAgentConfigsToApmPackagePolicies({
-        core,
+        coreStartPromise: core.start(),
         fleetPluginStart: await resources.plugins.fleet.start(),
         internalESClient,
         telemetryUsageCounter,
@@ -214,7 +214,7 @@ const createOrUpdateAgentConfigurationRoute = createApmServerRoute({
 
     if (resources.plugins.fleet) {
       await syncAgentConfigsToApmPackagePolicies({
-        core,
+        coreStartPromise: core.start(),
         fleetPluginStart: await resources.plugins.fleet.start(),
         internalESClient,
         telemetryUsageCounter,

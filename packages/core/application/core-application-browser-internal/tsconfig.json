@@ -31,6 +31,8 @@
     "@kbn/core-theme-browser-mocks",
     "@kbn/core-http-browser-internal",
     "@kbn/test-jest-helpers",
+    "@kbn/core-custom-branding-browser",
+    "@kbn/core-custom-branding-browser-mocks",
   ],
   "exclude": [
     "target/**/*",
