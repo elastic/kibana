@@ -79,17 +79,6 @@ export const integrations: LanguageIntegration[] = [
     docUrlTemplate: `${ELASTICSEARCH_CLIENT_URL}/php-api/{branch}/index.html`,
   },
   {
-    id: 'perl',
-    title: i18n.translate('customIntegrations.languageclients.PerlTitle', {
-      defaultMessage: 'Elasticsearch Perl Client',
-    }),
-    icon: 'perl.svg',
-    description: i18n.translate('customIntegrations.languageclients.PerlDescription', {
-      defaultMessage: 'Index data to Elasticsearch with the Perl client.',
-    }),
-    docUrlTemplate: `${ELASTICSEARCH_CLIENT_URL}/perl-api/{branch}/index.html`,
-  },
-  {
     id: 'python',
     title: i18n.translate('customIntegrations.languageclients.PythonTitle', {
       defaultMessage: 'Elasticsearch Python Client',
