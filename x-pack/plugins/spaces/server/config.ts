@@ -12,6 +12,7 @@ import { schema } from '@kbn/config-schema';
 import type { PluginInitializerContext } from '@kbn/core/server';
 
 export const ConfigSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: true }),
   maxSpaces: schema.number({ defaultValue: 1000 }),
 });
 
