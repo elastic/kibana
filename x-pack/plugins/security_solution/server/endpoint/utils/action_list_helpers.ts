@@ -99,8 +99,6 @@ export const getActions = async ({
     },
   };
 
-  console.log('actionsSearchQuery: ', JSON.stringify(actionsSearchQuery));
-
   const actionRequests: TransportResult<
     estypes.SearchResponse<LogsEndpointAction>,
     unknown
