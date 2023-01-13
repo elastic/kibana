@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import {
+  ISOLATE_HOST_ROUTE_V2,
+  HOST_METADATA_LIST_ROUTE,
+} from '../../../../common/endpoint/constants';
 import { login, loginWithRole, ROLE } from '../tasks/login';
 import { setupLicense } from '../tasks/license';
 import { licenses } from '../fixtures/licenses';
@@ -21,27 +25,31 @@ describe('Endpoint list', () => {
     loadEndpointIfNoneExist();
   });
 
-  it('Loads the endpoints page', () => {
-    cy.visit('/app/security/administration/endpoints');
-    cy.contains('Hosts running Elastic Defend').should('exist');
-  });
-
   describe('Platinum license', () => {
     beforeEach(() => {
       setupLicense(licenses.platinum);
     });
 
-    it('should display isolate action item for an endpoint', () => {
+    it('should allow isolating endpoint', () => {
       loginWithWriteAccess('/app/security/administration/endpoints');
-      cy.getBySel('endpointTableRowActions').first().click();
-      cy.getBySel('isolateLink').should('exist');
-    });
-
-    it('should display isolate action item for an endpoint on details flyout', () => {
-      loginWithWriteAccess('/app/security/administration/endpoints');
-      cy.getBySel('hostnameCellLink').first().click();
-      cy.getBySel('endpointDetailsActionsButton').click();
-      cy.getBySel('isolateLink').should('exist');
+      cy.request('GET', HOST_METADATA_LIST_ROUTE)
+        .then((metadataResponse) => {
+          const endpointIds = metadataResponse.body.data.map(
+            (endpoint: { metadata: { agent: { id: string } } }) => endpoint.metadata.agent.id
+          );
+          cy.request({
+            method: 'POST',
+            url: ISOLATE_HOST_ROUTE_V2,
+            headers: { 'kbn-xsrf': 'kibana' },
+            body: {
+              endpoint_ids: [endpointIds[0]],
+              comment: 'Isolating from Cypress',
+            },
+          });
+        })
+        .then((response) => {
+          expect(response.status).to.eq(200);
+        });
     });
   });
 
@@ -50,17 +58,29 @@ describe('Endpoint list', () => {
       setupLicense(licenses.gold);
     });
 
-    it('should not display isolate action item for an endpoint', () => {
+    it('should not allow isolating endpoint', () => {
       loginWithWriteAccess('/app/security/administration/endpoints');
-      cy.getBySel('endpointTableRowActions').first().click();
-      cy.getBySel('isolateLink').should('not.exist');
-    });
 
-    it('should not display isolate action item for an endpoint on details flyout', () => {
-      loginWithWriteAccess('/app/security/administration/endpoints');
-      cy.getBySel('hostnameCellLink').first().click();
-      cy.getBySel('endpointDetailsActionsButton').click();
-      cy.getBySel('isolateLink').should('not.exist');
+      cy.request('GET', HOST_METADATA_LIST_ROUTE)
+        .then((metadataResponse) => {
+          const endpointIds = metadataResponse.body.data.map(
+            (endpoint: { metadata: { agent: { id: string } } }) => endpoint.metadata.agent.id
+          );
+          cy.request({
+            method: 'POST',
+            url: ISOLATE_HOST_ROUTE_V2,
+            headers: { 'kbn-xsrf': 'kibana' },
+            body: {
+              endpoint_ids: [endpointIds[0]],
+              comment: 'Isolating from Cypress',
+            },
+          });
+        })
+        .then((response) => {
+          expect(response.status).to.eq(403);
+          expect(response.body).to.have.property('error', 'Forbidden');
+          expect(response.body).to.have.property('message', 'Endpoint authorization failure');
+        });
     });
   });
 });
