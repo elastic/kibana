@@ -72,19 +72,17 @@ function updateWithIsOperator(
   params?: Filter['meta']['params'],
   fieldType?: string
 ) {
-  if (fieldType === 'number' && !params) {
-    params = 0;
-  }
+  const safeParams = fieldType === 'number' && !params ? 0 : params;
   return {
     ...filter,
     meta: {
       ...filter.meta,
       negate: operator?.negate,
       type: operator?.type,
-      params: { ...filter.meta.params, query: params },
+      params: { ...filter.meta.params, query: safeParams },
       value: undefined,
     },
-    query: { match_phrase: { [filter.meta.key!]: params ?? '' } },
+    query: { match_phrase: { [filter.meta.key!]: safeParams ?? '' } },
   };
 }
 

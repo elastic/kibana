@@ -53,10 +53,7 @@ export function validateParams(params: any, field: DataViewField) {
       }
       return true;
     case 'boolean':
-      if (typeof params !== 'boolean') {
-        return false;
-      }
-      return true;
+      return typeof params === 'boolean';
     default:
       return true;
   }
