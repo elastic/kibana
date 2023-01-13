@@ -41,6 +41,9 @@ export const isPostureInput = (
   SUPPORTED_POLICY_TEMPLATES.includes(input.policy_template as PosturePolicyTemplate) &&
   SUPPORTED_CLOUDBEAT_INPUTS.includes(input.type as PostureInput);
 
+export const isPosturePolicyTemplate = (name: string): name is PosturePolicyTemplate =>
+  SUPPORTED_POLICY_TEMPLATES.includes(name as PosturePolicyTemplate);
+
 const getInputPolicyTemplate = (inputs: NewPackagePolicyInput[], inputType: PostureInput) =>
   inputs.filter(isPostureInput).find((i) => i.type === inputType)!.policy_template;
 
@@ -93,11 +96,15 @@ export const getPolicyTemplateInputOptions = (policyTemplate: PosturePolicyTempl
     disabled: o.disabled,
   }));
 
-export const getEnabledPostureInput = (policy: NewPackagePolicy) => {
-  // Take first enabled input
-  const input = policy.inputs.find((i) => i.enabled);
+export const getEnabledPostureInput = (
+  policy: NewPackagePolicy,
+  defaultInputType: PostureInput
+) => {
+  // Prefer enabled input, fallback to default input type
+  let input = policy.inputs.find((i) => i.enabled);
+  if (!input) input = policy.inputs.find((i) => i.type === defaultInputType);
 
-  assert(input, 'Missing enabled input'); // We can't provide a default input without knowing the policy template
+  assert(input, 'Missing enabled input');
   assert(isPostureInput(input), 'Invalid enabled input');
 
   return input;

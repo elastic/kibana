@@ -4,12 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { memo, useEffect } from 'react';
+import React, { memo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import type {
   NewPackagePolicy,
   PackagePolicyCreateExtensionComponentProps,
 } from '@kbn/fleet-plugin/public';
+import { useParams } from 'react-router-dom';
+import { assertNever } from '@kbn/std';
+import { assert } from '../../../common/utils/helpers';
 import type { PostureInput } from '../../../common/types';
 import { CLOUDBEAT_AWS, CLOUDBEAT_VANILLA } from '../../../common/constants';
 import {
@@ -17,9 +20,11 @@ import {
   INPUTS_WITH_AWS_VARS,
   getEnabledPostureInput,
   type NewPackagePolicyPostureInput,
+  isPosturePolicyTemplate,
 } from './utils';
 import { AwsCredentialsForm, type AwsCredentialsType } from './aws_credentials_form';
 import { PolicyInputSelector } from './policy_template_input_selector';
+import type { PosturePolicyTemplate } from '../../../common/types';
 
 const DEFAULT_INPUT_TYPE = {
   kspm: CLOUDBEAT_VANILLA,
@@ -43,13 +48,20 @@ const PolicyVarsForm = ({ input, ...props }: PolicyVarsFormProps) => {
     case 'cloudbeat/cis_aws':
     case 'cloudbeat/cis_eks':
       return <AwsCredentialsForm {...props} input={input} />;
-    default:
+    case 'cloudbeat/cis_k8s':
+    case 'cloudbeat/cis_gcp':
+    case 'cloudbeat/cis_azure':
       return null;
   }
+
+  assertNever(input);
 };
 
 export const CspPolicyTemplateForm = memo<Props>(({ newPolicy, onChange, edit }) => {
-  const input = getEnabledPostureInput(newPolicy);
+  const params = useParams<{ integration: PosturePolicyTemplate }>();
+  assert(isPosturePolicyTemplate(params.integration), 'Invalid policy template');
+
+  const input = getEnabledPostureInput(newPolicy, DEFAULT_INPUT_TYPE[params.integration]);
 
   const updatePolicy = (updatedPolicy: NewPackagePolicy) =>
     onChange({
@@ -71,15 +83,6 @@ export const CspPolicyTemplateForm = memo<Props>(({ newPolicy, onChange, edit })
           : undefined
       )
     );
-
-  useEffect(() => {
-    // Pick default input type for policy template.
-    // Only 1 enabled input is supported when all inputs are initially enabled.
-    if (!edit) setEnabledPolicyInput(DEFAULT_INPUT_TYPE[input.policy_template]);
-
-    // Required for mount only to ensure a single input type is selected
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [edit]);
 
   return (
     <div>
