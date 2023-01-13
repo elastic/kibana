@@ -354,7 +354,6 @@ export interface DocLinks {
     readonly javaIndex: string;
     readonly jsIntro: string;
     readonly netGuide: string;
-    readonly perlGuide: string;
     readonly phpGuide: string;
     readonly pythonGuide: string;
     readonly rubyOverview: string;
