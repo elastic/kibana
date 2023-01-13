@@ -22,6 +22,9 @@
     "@kbn/stdio-dev-helpers",
     "@kbn/tooling-log",
     "@kbn/repo-packages",
+    "@kbn/repo-source-classifier",
+    "@kbn/import-resolver",
+    "@kbn/picomatcher",
   ],
   "exclude": [
     "target/**/*",
