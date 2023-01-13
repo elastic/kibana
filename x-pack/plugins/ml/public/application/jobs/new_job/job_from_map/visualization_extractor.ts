@@ -27,8 +27,8 @@ export class VisualizationExtractor {
 
   public async getResultLayersFromEmbeddable(embeddable: MapEmbeddable): Promise<LayerResult[]> {
     const layers: LayerResult[] = [];
-    const dataViews: DataView[] =
-      (embeddable.getRoot() as DashboardContainer)?.getAllDataViews() ?? [];
+    // @ts-ignore
+    const dataViews: DataView[] = embeddable.getRoot()?.getAllDataViews() ?? [];
 
     // Keep track of geoFields for layers as they can be repeated
     const layerGeoFields: Record<string, boolean> = {};
