@@ -142,6 +142,12 @@ export const OptionsListStrings = {
           'Appears in {documentCount, number} {documentCount, plural, one {document} other {documents}}',
         values: { documentCount },
       }),
+    getCardinalityBadge: (start: number, end: number, cardinality: number) =>
+      i18n.translate('controls.optionsList.popover.cardinalityBadge', {
+        defaultMessage:
+          '{cardinality, plural, one {1 of 1} other {{start}-{end} of {cardinality}}}',
+        values: { start, end, cardinality },
+      }),
   },
   controlAndPopover: {
     getExists: (negate: number = +false) =>

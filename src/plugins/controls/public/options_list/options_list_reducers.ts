@@ -45,6 +45,7 @@ export const optionsListReducers = {
     state: WritableDraft<OptionsListReduxState>,
     action: PayloadAction<Partial<OptionsListSortingType>>
   ) => {
+    state.componentState.page = 1;
     state.explicitInput.sort = {
       ...(state.explicitInput.sort ?? OPTIONS_LIST_DEFAULT_SORT),
       ...action.payload,
