@@ -198,7 +198,6 @@ export function LatencyAlertsHistoryChart({
               triggeredAlertsData?.histogramTriggeredAlerts
                 .filter((annotation) => annotation.doc_count > 0)
                 .map((annotation) => {
-                  console.log(annotation);
                   return {
                     dataValue: annotation.key,
                     header: String(annotation.doc_count),
