@@ -16,7 +16,7 @@ import {
   getExternalServiceSimulatorPath,
   ExternalServiceSimulator,
   getWebhookServer,
-} from '../../../../../common/fixtures/plugins/actions_simulators/server/plugin';
+} from '../../../../../common/plugins/actions_simulators/server/plugin';
 
 const defaultValues: Record<string, any> = {
   headers: null,

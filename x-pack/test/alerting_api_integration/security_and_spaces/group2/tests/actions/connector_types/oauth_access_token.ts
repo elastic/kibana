@@ -15,7 +15,7 @@ import { getHttpProxyServer } from '../../../../../common/lib/get_proxy_server';
 import {
   ExternalServiceSimulator,
   getExternalServiceSimulatorPath,
-} from '../../../../../common/fixtures/plugins/actions_simulators/server/plugin';
+} from '../../../../../common/plugins/actions_simulators/server/plugin';
 
 // eslint-disable-next-line import/no-default-export
 export default function oAuthAccessTokenTest({ getService }: FtrProviderContext) {

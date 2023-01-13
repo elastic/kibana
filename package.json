@@ -530,7 +530,7 @@
     "deepmerge": "^4.2.2",
     "del": "^6.1.0",
     "elastic-apm-http-client": "^11.0.1",
-    "elastic-apm-node": "^3.41.0",
+    "elastic-apm-node": "^3.41.1",
     "email-addresses": "^5.0.0",
     "execa": "^4.0.2",
     "expiry-js": "0.1.7",

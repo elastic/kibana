@@ -13,7 +13,7 @@ import http from 'http';
 
 import { getHttpProxyServer } from '../../../../../common/lib/get_proxy_server';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-import { getServiceNowServer } from '../../../../../common/fixtures/plugins/actions_simulators/server/plugin';
+import { getServiceNowServer } from '../../../../../common/plugins/actions_simulators/server/plugin';
 
 // eslint-disable-next-line import/no-default-export
 export default function serviceNowITOMTest({ getService }: FtrProviderContext) {

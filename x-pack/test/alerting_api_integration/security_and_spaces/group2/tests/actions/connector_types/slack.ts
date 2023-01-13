@@ -12,7 +12,7 @@ import getPort from 'get-port';
 import { getHttpProxyServer } from '../../../../../common/lib/get_proxy_server';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
-import { getSlackServer } from '../../../../../common/fixtures/plugins/actions_simulators/server/plugin';
+import { getSlackServer } from '../../../../../common/plugins/actions_simulators/server/plugin';
 
 // eslint-disable-next-line import/no-default-export
 export default function slackTest({ getService }: FtrProviderContext) {

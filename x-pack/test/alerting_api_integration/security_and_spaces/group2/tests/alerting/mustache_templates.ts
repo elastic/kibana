@@ -21,7 +21,7 @@ import expect from '@kbn/expect';
 import { Spaces } from '../../../scenarios';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { getSlackServer } from '../../../../common/fixtures/plugins/actions_simulators/server/plugin';
+import { getSlackServer } from '../../../../common/plugins/actions_simulators/server/plugin';
 import { getHttpProxyServer } from '../../../../common/lib/get_proxy_server';
 
 // eslint-disable-next-line import/no-default-export

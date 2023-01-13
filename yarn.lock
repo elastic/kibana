@@ -13047,10 +13047,48 @@ elastic-apm-http-client@11.0.4, elastic-apm-http-client@^11.0.1:
     semver "^6.3.0"
     stream-chopper "^3.0.1"
 
-elastic-apm-node@^3.38.0, elastic-apm-node@^3.41.0:
+elastic-apm-node@^3.38.0:
   version "3.41.0"
   resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.41.0.tgz#ff0b5ecf6d126a2eb312ecc936bd55bc3f1e3ce6"
   integrity sha512-cX745ryAwQCFEhkYttLrdjQDO0vCHspCbKg6bCguvBURZUHkLnZcP5z5m3R20dnGfTDXGg2q6nMi65iIVMCYFA==
+  dependencies:
+    "@elastic/ecs-pino-format" "^1.2.0"
+    "@opentelemetry/api" "^1.1.0"
+    after-all-results "^2.0.0"
+    async-cache "^1.1.0"
+    async-value-promise "^1.1.1"
+    basic-auth "^2.0.1"
+    cookie "^0.5.0"
+    core-util-is "^1.0.2"
+    elastic-apm-http-client "11.0.4"
+    end-of-stream "^1.4.4"
+    error-callsites "^2.0.4"
+    error-stack-parser "^2.0.6"
+    escape-string-regexp "^4.0.0"
+    fast-safe-stringify "^2.0.7"
+    http-headers "^3.0.2"
+    is-native "^1.0.1"
+    lru-cache "^6.0.0"
+    measured-reporting "^1.51.1"
+    monitor-event-loop-delay "^1.0.0"
+    object-filter-sequence "^1.0.0"
+    object-identity-map "^1.0.2"
+    original-url "^1.2.3"
+    pino "^6.11.2"
+    relative-microtime "^2.0.0"
+    require-in-the-middle "^5.2.0"
+    semver "^6.3.0"
+    set-cookie-serde "^1.0.0"
+    shallow-clone-shim "^2.0.0"
+    source-map "^0.8.0-beta.0"
+    sql-summary "^1.0.1"
+    traverse "^0.6.6"
+    unicode-byte-truncate "^1.0.0"
+
+elastic-apm-node@^3.41.1:
+  version "3.41.1"
+  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.41.1.tgz#e0829d69d5e8a6062ef567d0a8db0ec0e3736ea8"
+  integrity sha512-bLCVIyAgQC+ZfY5fd/UaAId+8dh3vusaxZF2A0YtHBAwx1YGpIA3dqOt5zc1UuYmbjCdsEAiUjaUEAHOWdjTzA==
   dependencies:
     "@elastic/ecs-pino-format" "^1.2.0"
     "@opentelemetry/api" "^1.1.0"
