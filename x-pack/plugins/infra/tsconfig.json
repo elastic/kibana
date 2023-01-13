@@ -53,6 +53,9 @@
     "@kbn/logging-mocks",
     "@kbn/field-types",
     "@kbn/es-types",
+    "@kbn/ui-actions-plugin",
+    "@kbn/charts-plugin",
+    "@kbn/lens-plugin",
   ],
   "exclude": [
     "target/**/*",
