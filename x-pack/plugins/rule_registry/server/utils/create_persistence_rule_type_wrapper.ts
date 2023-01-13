@@ -159,7 +159,6 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
             },
             alertWithSuppression: async (
               alerts,
-              refresh,
               suppressionWindow,
               enrichAlerts,
               currentTimeOverride
@@ -180,7 +179,6 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
               if (writeAlerts && alerts.length > 0) {
                 const commonRuleFields = getCommonAlertFields(options);
 
-                // TODO: proper error handling if suppressionWindowStart is undefined
                 const suppressionWindowStart = dateMath.parse(suppressionWindow, {
                   forceNow: currentTimeOverride,
                 });
@@ -249,7 +247,13 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   const existingDocsCount =
                     existingAlert._source?.[ALERT_SUPPRESSION_DOCS_COUNT] ?? 0;
                   return [
-                    { update: { _id: existingAlert._id, _index: existingAlert._index } },
+                    {
+                      update: {
+                        _id: existingAlert._id,
+                        _index: existingAlert._index,
+                        require_alias: false,
+                      },
+                    },
                     {
                       doc: {
                         [ALERT_LAST_DETECTED]: currentTimeOverride ?? new Date(),
@@ -292,7 +296,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
 
                 const bulkResponse = await ruleDataClientWriter.bulk({
                   body: [...duplicateAlertUpdates, ...newAlertCreates],
-                  refresh: 'wait_for',
+                  refresh: true,
                 });
 
                 if (bulkResponse == null) {
@@ -311,7 +315,6 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                       };
                     })
                     .filter((_, idx) => bulkResponse.body.items[idx].create?.status === 201),
-                  // updatedAlerts: TODO: add updated alerts in response and to context
                   errors: errorAggregator(bulkResponse.body, [409]),
                 };
               } else {

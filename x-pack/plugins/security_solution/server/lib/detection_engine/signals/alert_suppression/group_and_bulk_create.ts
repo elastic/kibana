@@ -24,7 +24,7 @@ import { singleSearchAfter } from '../single_search_after';
 import { bulkCreateWithSuppression } from '../../rule_types/factories/bulk_create_with_suppression';
 
 export interface BucketHistory {
-  key: Record<string, string | number>;
+  key: Record<string, string | number | null>;
   endDate: string;
 }
 
@@ -51,11 +51,21 @@ export const buildBucketHistoryFilter = ({
         must_not: bucketHistory.map((bucket) => ({
           bool: {
             filter: [
-              ...Object.entries(bucket.key).map(([field, value]) => ({
-                term: {
-                  [field]: value,
-                },
-              })),
+              ...Object.entries(bucket.key).map(([field, value]) =>
+                value != null
+                  ? {
+                      term: {
+                        [field]: value,
+                      },
+                    }
+                  : {
+                      must_not: {
+                        exists: {
+                          field,
+                        },
+                      },
+                    }
+              ),
               buildTimeRangeFilter({
                 to: bucket.endDate,
                 from: from.toISOString(),
@@ -194,7 +204,6 @@ export const groupAndBulkCreate = async ({
         const suppressionWindow = `now-${suppressionDuration.value}${suppressionDuration.unit}`;
         const bulkCreateResult = await bulkCreateWithSuppression({
           alertWithSuppression: runOpts.alertWithSuppression,
-          refreshForBulkCreate: runOpts.refreshOnIndexingAlerts,
           ruleExecutionLogger: runOpts.ruleExecutionLogger,
           wrappedDocs: wrappedAlerts,
           services,
@@ -208,21 +217,15 @@ export const groupAndBulkCreate = async ({
         runOpts.ruleExecutionLogger.debug(`created ${bulkCreateResult.createdItemsCount} signals`);
       }
 
-      const newBucketHistory: BucketHistory[] = buckets
-        .filter((bucket) => {
-          return !Object.values(bucket.key).includes(null);
-        })
-        .map((bucket) => {
-          return {
-            // This cast should be safe as we just filtered out buckets where any key has a null value.
-            key: bucket.key as Record<string, string | number>,
-            endDate: bucket.max_timestamp.value_as_string
-              ? bucket.max_timestamp.value_as_string
-              : tuple.to.toISOString(),
-          };
-        });
+      const newBucketHistory: BucketHistory[] = buckets.map((bucket) => {
+        return {
+          key: bucket.key,
+          endDate: bucket.max_timestamp.value_as_string
+            ? bucket.max_timestamp.value_as_string
+            : tuple.to.toISOString(),
+        };
+      });
 
-      // TODO: combine history buckets with identical keys
       toReturn.state.suppressionGroupHistory.push(...newBucketHistory);
     } catch (exc) {
       toReturn.success = false;

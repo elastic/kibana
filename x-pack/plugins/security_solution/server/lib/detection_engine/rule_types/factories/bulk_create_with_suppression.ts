@@ -12,7 +12,6 @@ import type { SuppressedAlertService } from '@kbn/rule-registry-plugin/server';
 import type { AlertWithCommonFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { makeFloatString } from '../../signals/utils';
-import type { RefreshTypes } from '../../types';
 import type {
   BaseFieldsLatest,
   SuppressionFieldsLatest,
@@ -32,7 +31,6 @@ export interface GenericBulkCreateResponse<T extends BaseFieldsLatest> {
 
 export const bulkCreateWithSuppression = async <T extends SuppressionFieldsLatest>({
   alertWithSuppression,
-  refreshForBulkCreate,
   ruleExecutionLogger,
   wrappedDocs,
   services,
@@ -40,7 +38,6 @@ export const bulkCreateWithSuppression = async <T extends SuppressionFieldsLates
   alertTimestampOverride,
 }: {
   alertWithSuppression: SuppressedAlertService;
-  refreshForBulkCreate: RefreshTypes;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
   wrappedDocs: Array<WrappedFieldsLatest<T>>;
   services: RuleServices;
@@ -86,7 +83,6 @@ export const bulkCreateWithSuppression = async <T extends SuppressionFieldsLates
       // `fields` should have already been merged into `doc._source`
       _source: doc._source,
     })),
-    refreshForBulkCreate,
     suppressionWindow,
     enrichAlertsWrapper,
     alertTimestampOverride

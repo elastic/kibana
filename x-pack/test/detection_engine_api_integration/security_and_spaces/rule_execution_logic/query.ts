@@ -16,6 +16,7 @@ import {
   ALERT_SUPPRESSION_END,
   ALERT_SUPPRESSION_DOCS_COUNT,
   ALERT_SUPPRESSION_TERMS,
+  TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
@@ -671,6 +672,264 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_SUPPRESSION_START]: '2020-10-28T05:00:00.000Z',
           [ALERT_SUPPRESSION_END]: '2020-10-28T05:00:02.000Z',
           [ALERT_SUPPRESSION_DOCS_COUNT]: 16,
+        });
+      });
+
+      it('should correctly deduplicate null values across rule runs', async () => {
+        // We set a long lookback then run the rule twice so both runs cover all documents from the test data.
+        // The last alert, with null for destination.ip, should be found by the first rule run but not duplicated
+        // by the second run.
+        const rule: QueryRuleCreateProps = {
+          ...getRuleForSignalTesting(['suppression-data']),
+          query: `*:*`,
+          alert_suppression: {
+            group_by: ['destination.ip'],
+          },
+          from: 'now-2h',
+          interval: '1h',
+        };
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T07:30:00.000Z'),
+          invocationCount: 2,
+        });
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          size: 1000,
+          sort: ['destination.ip'],
+        });
+        expect(previewAlerts.length).to.eql(3);
+
+        // We also expect to have a separate group for documents that don't populate the groupBy field
+        expect(previewAlerts[2]._source).to.eql({
+          ...previewAlerts[2]._source,
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'destination.ip',
+              value: null,
+            },
+          ],
+          [ALERT_ORIGINAL_TIME]: '2020-10-28T05:00:00.000Z',
+          [ALERT_SUPPRESSION_START]: '2020-10-28T05:00:00.000Z',
+          [ALERT_SUPPRESSION_END]: '2020-10-28T06:00:02.000Z',
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 34,
+        });
+      });
+
+      describe('with a suppression time window', async () => {
+        it('should generate an alert per rule run when duration is less than rule interval', async () => {
+          const rule: QueryRuleCreateProps = {
+            ...getRuleForSignalTesting(['suppression-data']),
+            query: `host.name: "host-0"`,
+            alert_suppression: {
+              group_by: ['host.name'],
+              duration: {
+                value: 30,
+                unit: 'm',
+              },
+            },
+            from: 'now-1h',
+            interval: '1h',
+          };
+
+          const { previewId } = await previewRule({
+            supertest,
+            rule,
+            timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+            invocationCount: 2,
+          });
+          const previewAlerts = await getPreviewAlerts({
+            es,
+            previewId,
+            sort: [ALERT_ORIGINAL_TIME],
+          });
+          expect(previewAlerts.length).to.eql(2);
+          expect(previewAlerts[0]._source).to.eql({
+            ...previewAlerts[0]._source,
+            [ALERT_SUPPRESSION_TERMS]: [
+              {
+                field: 'host.name',
+                value: 'host-0',
+              },
+            ],
+            [ALERT_ORIGINAL_TIME]: '2020-10-28T05:00:00.000Z',
+            [ALERT_SUPPRESSION_START]: '2020-10-28T05:00:00.000Z',
+            [ALERT_SUPPRESSION_END]: '2020-10-28T05:00:02.000Z',
+            [ALERT_SUPPRESSION_DOCS_COUNT]: 5,
+          });
+          expect(previewAlerts[1]._source).to.eql({
+            ...previewAlerts[1]._source,
+            [ALERT_SUPPRESSION_TERMS]: [
+              {
+                field: 'host.name',
+                value: 'host-0',
+              },
+            ],
+            [ALERT_ORIGINAL_TIME]: '2020-10-28T06:00:00.000Z',
+            [ALERT_SUPPRESSION_START]: '2020-10-28T06:00:00.000Z',
+            [ALERT_SUPPRESSION_END]: '2020-10-28T06:00:02.000Z',
+            [ALERT_SUPPRESSION_DOCS_COUNT]: 5,
+          });
+        });
+
+        it('should update an existing alert in the time window', async () => {
+          const rule: QueryRuleCreateProps = {
+            ...getRuleForSignalTesting(['suppression-data']),
+            query: `host.name: "host-0"`,
+            alert_suppression: {
+              group_by: ['host.name'],
+              duration: {
+                value: 2,
+                unit: 'h',
+              },
+            },
+            from: 'now-1h',
+            interval: '1h',
+          };
+
+          const { previewId } = await previewRule({
+            supertest,
+            rule,
+            timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+            invocationCount: 2,
+          });
+          const previewAlerts = await getPreviewAlerts({
+            es,
+            previewId,
+            sort: [ALERT_ORIGINAL_TIME],
+          });
+          expect(previewAlerts.length).to.eql(1);
+          expect(previewAlerts[0]._source).to.eql({
+            ...previewAlerts[0]._source,
+            [TIMESTAMP]: '2020-10-28T05:30:00.000Z',
+            [ALERT_SUPPRESSION_TERMS]: [
+              {
+                field: 'host.name',
+                value: 'host-0',
+              },
+            ],
+            [ALERT_ORIGINAL_TIME]: '2020-10-28T05:00:00.000Z',
+            [ALERT_SUPPRESSION_START]: '2020-10-28T05:00:00.000Z',
+            [ALERT_SUPPRESSION_END]: '2020-10-28T06:00:02.000Z',
+            [ALERT_SUPPRESSION_DOCS_COUNT]: 11,
+          });
+        });
+
+        it('should update the correct alerts based on group_by field-value pair', async () => {
+          const rule: QueryRuleCreateProps = {
+            ...getRuleForSignalTesting(['suppression-data']),
+            query: `host.name: *`,
+            alert_suppression: {
+              group_by: ['host.name'],
+              duration: {
+                value: 2,
+                unit: 'h',
+              },
+            },
+            from: 'now-1h',
+            interval: '1h',
+          };
+
+          const { previewId } = await previewRule({
+            supertest,
+            rule,
+            timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+            invocationCount: 2,
+          });
+          const previewAlerts = await getPreviewAlerts({
+            es,
+            previewId,
+            sort: ['host.name', ALERT_ORIGINAL_TIME],
+          });
+          expect(previewAlerts.length).to.eql(3);
+          expect(previewAlerts[0]._source).to.eql({
+            ...previewAlerts[0]._source,
+            [TIMESTAMP]: '2020-10-28T05:30:00.000Z',
+            [ALERT_SUPPRESSION_TERMS]: [
+              {
+                field: 'host.name',
+                value: 'host-0',
+              },
+            ],
+            [ALERT_ORIGINAL_TIME]: '2020-10-28T05:00:00.000Z',
+            [ALERT_SUPPRESSION_START]: '2020-10-28T05:00:00.000Z',
+            [ALERT_SUPPRESSION_END]: '2020-10-28T06:00:02.000Z',
+            [ALERT_SUPPRESSION_DOCS_COUNT]: 11,
+          });
+          expect(previewAlerts[1]._source).to.eql({
+            ...previewAlerts[1]._source,
+            [TIMESTAMP]: '2020-10-28T05:30:00.000Z',
+            [ALERT_SUPPRESSION_TERMS]: [
+              {
+                field: 'host.name',
+                value: 'host-1',
+              },
+            ],
+            [ALERT_ORIGINAL_TIME]: '2020-10-28T05:00:00.000Z',
+            [ALERT_SUPPRESSION_START]: '2020-10-28T05:00:00.000Z',
+            [ALERT_SUPPRESSION_END]: '2020-10-28T06:00:02.000Z',
+            [ALERT_SUPPRESSION_DOCS_COUNT]: 11,
+          });
+          expect(previewAlerts[2]._source).to.eql({
+            ...previewAlerts[2]._source,
+            [TIMESTAMP]: '2020-10-28T05:30:00.000Z',
+            [ALERT_SUPPRESSION_TERMS]: [
+              {
+                field: 'host.name',
+                value: 'host-2',
+              },
+            ],
+            [ALERT_ORIGINAL_TIME]: '2020-10-28T05:00:00.000Z',
+            [ALERT_SUPPRESSION_START]: '2020-10-28T05:00:00.000Z',
+            [ALERT_SUPPRESSION_END]: '2020-10-28T06:00:02.000Z',
+            [ALERT_SUPPRESSION_DOCS_COUNT]: 11,
+          });
+        });
+
+        it('should update the correct alerts based on group_by field-value pair even when value is null', async () => {
+          const rule: QueryRuleCreateProps = {
+            ...getRuleForSignalTesting(['suppression-data']),
+            query: `host.name: *`,
+            alert_suppression: {
+              group_by: ['destination.ip'], // Only 1 document populates destination.ip
+              duration: {
+                value: 2,
+                unit: 'h',
+              },
+            },
+            from: 'now-1h',
+            interval: '1h',
+          };
+
+          const { previewId } = await previewRule({
+            supertest,
+            rule,
+            timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+            invocationCount: 2,
+          });
+          const previewAlerts = await getPreviewAlerts({
+            es,
+            previewId,
+            sort: ['destination.ip', ALERT_ORIGINAL_TIME],
+          });
+          expect(previewAlerts.length).to.eql(3);
+          expect(previewAlerts[2]._source).to.eql({
+            ...previewAlerts[2]._source,
+            [TIMESTAMP]: '2020-10-28T05:30:00.000Z',
+            [ALERT_SUPPRESSION_TERMS]: [
+              {
+                field: 'destination.ip',
+                value: null,
+              },
+            ],
+            [ALERT_ORIGINAL_TIME]: '2020-10-28T05:00:00.000Z',
+            [ALERT_SUPPRESSION_START]: '2020-10-28T05:00:00.000Z',
+            [ALERT_SUPPRESSION_END]: '2020-10-28T06:00:02.000Z',
+            [ALERT_SUPPRESSION_DOCS_COUNT]: 34,
+          });
         });
       });
     });

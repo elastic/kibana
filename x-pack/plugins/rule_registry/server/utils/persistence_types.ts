@@ -46,7 +46,6 @@ export type SuppressedAlertService = <T extends SuppressionFields>(
     _id: string;
     _source: T;
   }>,
-  refresh: boolean | 'wait_for',
   suppressionWindow: string,
   enrichAlerts?: (
     alerts: Array<{ _id: string; _source: T }>,
