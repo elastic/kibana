@@ -22,12 +22,7 @@ export const deleteEngine = async ({
   engineName,
 }: DeleteEnginesApiLogicArguments): Promise<DeleteEnginesApiLogicResponse> => {
   const route = `/internal/enterprise_search/engines/${engineName}`;
-  try{
-    await HttpLogic.values.http.delete<DeleteEnginesApiLogicResponse>(route);
-  }
-  catch(e){
-    flashAPIErrors(e);
-  }
+  await HttpLogic.values.http.delete<DeleteEnginesApiLogicResponse>(route);
   return { engineName };
 };
 export const DeleteEngineAPILogic = createApiLogic(
