@@ -16,6 +16,7 @@
     "@kbn/core",
     "@kbn/developer-examples-plugin",
     "@kbn/data-plugin",
+    "@kbn/dashboard-plugin",
     "@kbn/controls-plugin",
     "@kbn/navigation-plugin",
     "@kbn/presentation-util-plugin",

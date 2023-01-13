@@ -9,6 +9,7 @@
   "ui": true,
   "requiredPlugins": [
     "controls",
+    "dashboard",
     "data",
     "developerExamples",
     "embeddable",
