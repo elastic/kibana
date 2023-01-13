@@ -367,10 +367,7 @@ export const lastValueOperation: OperationDefinition<
                 }
                 compressed={true}
                 checked={Boolean(currentColumn.params.showArrayValues)}
-                disabled={
-                  isScriptedField(currentColumn.sourceField, indexPattern) ||
-                  isRuntimeField(currentColumn.sourceField, indexPattern)
-                }
+                disabled={isScriptedField(currentColumn.sourceField, indexPattern)}
                 onChange={() => setShowArrayValues(!currentColumn.params.showArrayValues)}
               />
             </EuiToolTip>

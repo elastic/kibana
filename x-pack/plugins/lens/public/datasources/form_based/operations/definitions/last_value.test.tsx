@@ -833,23 +833,6 @@ describe('last_value', () => {
         expect(new Harness(instance).showArrayValuesSwitchDisabled).toBeTruthy();
       });
 
-      it('should set showArrayValues and disable switch when runtime field', () => {
-        (layer.columns.col2 as LastValueIndexPatternColumn).sourceField = 'runtime';
-
-        const updateLayerSpy = jest.fn();
-        const instance = shallow(
-          <InlineOptions
-            {...defaultProps}
-            layer={layer}
-            paramEditorUpdater={updateLayerSpy}
-            columnId="col2"
-            currentColumn={layer.columns.col2 as LastValueIndexPatternColumn}
-          />
-        );
-
-        expect(new Harness(instance).showArrayValuesSwitchDisabled).toBeTruthy();
-      });
-
       it('should not display an array for the last value if the column is referenced', () => {
         const updateLayerSpy = jest.fn();
         const instance = shallow(
