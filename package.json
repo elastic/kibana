@@ -713,7 +713,7 @@
   "devDependencies": {
     "@apidevtools/swagger-parser": "^10.0.3",
     "@babel/cli": "^7.20.7",
-    "@babel/core": "^7.20.7",
+    "@babel/core": "^7.20.12",
     "@babel/eslint-parser": "^7.19.1",
     "@babel/eslint-plugin": "^7.19.1",
     "@babel/generator": "^7.20.7",
@@ -730,7 +730,7 @@
     "@babel/preset-react": "^7.18.6",
     "@babel/preset-typescript": "^7.18.6",
     "@babel/register": "^7.18.9",
-    "@babel/traverse": "^7.20.10",
+    "@babel/traverse": "^7.20.12",
     "@babel/types": "^7.20.7",
     "@bazel/ibazel": "^0.16.2",
     "@bazel/typescript": "4.6.2",
