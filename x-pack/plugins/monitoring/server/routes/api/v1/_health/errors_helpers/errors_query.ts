@@ -16,6 +16,7 @@ const MAX_BUCKET_SIZE = 50;
 interface ErrorsQueryOptions extends QueryOptions {
   products: MetricbeatMonitoredProduct[] | PackagesMonitoredProduct[];
   errorQueryType: 'metricbeatErrorsQuery' | 'packageErrorsQuery';
+  errorQueryIsDataStream?: boolean;
 }
 
 export const errorsQuery = ({
@@ -23,6 +24,7 @@ export const errorsQuery = ({
   timeout,
   products,
   errorQueryType,
+  errorQueryIsDataStream,
 }: ErrorsQueryOptions) => {
   if (!timeRange) throw new Error(`${errorQueryType}: missing timeRange parameter`);
   return {
@@ -56,7 +58,7 @@ export const errorsQuery = ({
       },
     },
     aggs: {
-      errors_aggregation: errorsAggregation,
+      errors_aggregation: errorsAggregation(errorQueryIsDataStream),
     },
   };
 };
@@ -84,11 +86,34 @@ const errorsByMetricset = {
   },
 };
 
-const errorsAggregation = {
+const errorsByDataStream = {
+  terms: {
+    field: 'data_stream.dataset',
+  },
+  aggs: {
+    latest_docs: {
+      top_hits: {
+        sort: [
+          {
+            '@timestamp': {
+              order: 'desc',
+            },
+          },
+        ],
+        size: MAX_BUCKET_SIZE,
+        _source: {
+          includes: ['@timestamp', 'error', 'data_stream'],
+        },
+      },
+    },
+  },
+};
+
+const errorsAggregation = (errorQueryIsDataStream?: boolean) => ({
   terms: {
     field: 'event.module',
   },
   aggs: {
-    errors_by_dataset: errorsByMetricset,
+    errors_by_dataset: errorQueryIsDataStream ? errorsByDataStream : errorsByMetricset,
   },
-};
+});

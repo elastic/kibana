@@ -35,6 +35,7 @@ export const fetchPackageErrors = async ({
           MonitoredProduct.Logstash,
         ],
         errorQueryType: 'packageErrorsQuery',
+        errorQueryIsDataStream: true,
       }),
       size: 0,
       ignore_unavailable: true,

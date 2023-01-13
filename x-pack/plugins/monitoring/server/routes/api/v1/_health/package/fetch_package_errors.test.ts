@@ -33,7 +33,7 @@ describe(__filename, () => {
                   sum_other_doc_count: 0,
                   buckets: [
                     {
-                      key: 'pending_tasks',
+                      key: 'elasticsearch.stack_monitoring.pending_tasks',
                       doc_count: 22,
                       latest_docs: {
                         hits: {
@@ -65,7 +65,7 @@ describe(__filename, () => {
                       },
                     },
                     {
-                      key: 'node',
+                      key: 'elasticsearch.stack_monitoring.node',
                       doc_count: 22,
                       latest_docs: {
                         hits: {
@@ -120,14 +120,14 @@ describe(__filename, () => {
         },
         products: {
           elasticsearch: {
-            node: [
+            'elasticsearch.stack_monitoring.node': [
               {
                 message:
                   'error making http request: Get "https://localhost:9200/_nodes/_local": dial tcp [::1]:9200: connect: cannot assign requested address',
                 lastSeen: '2023-01-10T14:39:37.156Z',
               },
             ],
-            pending_tasks: [
+            'elasticsearch.stack_monitoring.pending_tasks': [
               {
                 message:
                   'error making http request: Get "https://localhost:9200/_nodes/_local": dial tcp [::1]:9200: connect: cannot assign requested address',
