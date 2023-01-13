@@ -168,7 +168,9 @@ describe('ruleType', () => {
 
       expect(result).toMatchInlineSnapshot(`
         Object {
-          "latestTimestamp": undefined,
+          "state": Object {
+            "latestTimestamp": undefined,
+          },
         }
       `);
     });
@@ -218,7 +220,9 @@ describe('ruleType', () => {
       });
 
       expect(result).toMatchObject({
-        latestTimestamp: new Date(newestDocumentTimestamp).toISOString(),
+        state: {
+          latestTimestamp: new Date(newestDocumentTimestamp).toISOString(),
+        },
       });
     });
 
@@ -270,7 +274,9 @@ describe('ruleType', () => {
       });
 
       expect(result).toMatchObject({
-        latestTimestamp: new Date(newestDocumentTimestamp).toISOString(),
+        state: {
+          latestTimestamp: new Date(newestDocumentTimestamp).toISOString(),
+        },
       });
     });
 
@@ -316,7 +322,9 @@ describe('ruleType', () => {
       });
 
       expect(result).toMatchObject({
-        latestTimestamp: new Date(oldestDocumentTimestamp).toISOString(),
+        state: {
+          latestTimestamp: new Date(oldestDocumentTimestamp).toISOString(),
+        },
       });
     });
 
@@ -358,7 +366,7 @@ describe('ruleType', () => {
         dateEnd: expect.any(String),
       });
 
-      expect(result).toMatchObject({
+      expect(result?.state).toMatchObject({
         latestTimestamp: new Date(oldestDocumentTimestamp).toISOString(),
       });
 
@@ -379,7 +387,7 @@ describe('ruleType', () => {
       const secondResult = await invokeExecutor({
         params,
         ruleServices,
-        state: result as EsQueryRuleState,
+        state: result?.state as EsQueryRuleState,
       });
 
       const existingInstance: AlertInstanceMock =
@@ -391,7 +399,9 @@ describe('ruleType', () => {
       });
 
       expect(secondResult).toMatchObject({
-        latestTimestamp: new Date(newestDocumentTimestamp).toISOString(),
+        state: {
+          latestTimestamp: new Date(newestDocumentTimestamp).toISOString(),
+        },
       });
     });
 
@@ -440,7 +450,9 @@ describe('ruleType', () => {
       });
 
       expect(result).toMatchObject({
-        latestTimestamp: new Date(oldestDocumentTimestamp).toISOString(),
+        state: {
+          latestTimestamp: new Date(oldestDocumentTimestamp).toISOString(),
+        },
       });
     });
 
@@ -490,7 +502,9 @@ describe('ruleType', () => {
       });
 
       expect(result).toMatchObject({
-        latestTimestamp: new Date(oldestDocumentTimestamp - 1000).toISOString(),
+        state: {
+          latestTimestamp: new Date(oldestDocumentTimestamp - 1000).toISOString(),
+        },
       });
     });
   });

@@ -8,7 +8,7 @@
   "kbn_references": [
     { "path": "../../shared/cypress/tsconfig.json" },
     // cypress projects that are nested inside of other ts project use code
-    // from the parent ts project in ways that can't be auto-matically deteceted
+    // from the parent ts project in ways that can't be automatically deteceted
     // at this time so we have to force the inclusion of this reference
     {
       "path": "../../../../tsconfig.json",
