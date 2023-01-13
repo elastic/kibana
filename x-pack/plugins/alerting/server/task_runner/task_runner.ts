@@ -331,7 +331,7 @@ export class TaskRunner<
           return reachedLimit;
         };
 
-        let updatedState: void | Record<string, unknown>;
+        let executorResult: { state: RuleState } | undefined;
         try {
           const ctx = {
             type: 'alert',
@@ -351,7 +351,7 @@ export class TaskRunner<
             scopedClusterClient.asInternalUser
           );
 
-          updatedState = await this.context.executionContext.withContext(ctx, () =>
+          executorResult = await this.context.executionContext.withContext(ctx, () =>
             this.ruleType.executor({
               executionId: this.executionId,
               services: {
@@ -428,7 +428,7 @@ export class TaskRunner<
         return {
           originalAlerts: alertsCopy,
           originalRecoveredAlerts: recoveredAlerts,
-          updatedRuleTypeState: updatedState || undefined,
+          updatedRuleTypeState: executorResult?.state || undefined,
           hasReachedAlertLimit: alertFactory.hasReachedAlertLimit(),
         };
       });

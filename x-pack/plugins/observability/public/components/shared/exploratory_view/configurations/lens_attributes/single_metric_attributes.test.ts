@@ -39,7 +39,7 @@ describe('SingleMetricAttributes', () => {
     reportDefinitions: {},
     time: { from: 'now-15m', to: 'now' },
     color: 'green',
-    name: 'test-series',
+    name: 'Page load time',
     selectedMetricField: TRANSACTION_DURATION,
   };
 
@@ -199,7 +199,7 @@ describe('SingleMetricAttributes', () => {
       reportDefinitions: {},
       time: { from: 'now-15m', to: 'now' },
       color: 'green',
-      name: 'test-series',
+      name: 'Availability',
       selectedMetricField: 'monitor_availability',
     };
 
