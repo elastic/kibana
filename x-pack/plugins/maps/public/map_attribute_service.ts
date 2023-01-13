@@ -9,6 +9,7 @@ import { SavedObjectReference } from '@kbn/core/types';
 import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
 import { AttributeService } from '@kbn/embeddable-plugin/public';
 import { checkForDuplicateTitle, OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import { SavedObjectsCreateOptions } from '@kbn/core-saved-objects-api-browser';
 import { MapSavedObjectAttributes } from '../common/map_saved_object_type';
 import { MAP_SAVED_OBJECT_TYPE } from '../common/constants';
 import { getMapEmbeddableDisplayName } from '../common/i18n_getters';
@@ -74,10 +75,14 @@ export function getMapAttributeService(): MapAttributeService {
             updatedAttributes,
             { references }
           )
-        : getContentManagement().rpc.create({
+        : getContentManagement().rpc.create<
+            MapSavedObjectAttributes,
+            any, // We probably want to type the response
+            SavedObjectsCreateOptions
+          >({
             type: 'map',
-            data: {
-              attributes: updatedAttributes,
+            data: updatedAttributes,
+            options: {
               references,
             },
           }));

@@ -6,7 +6,7 @@
  */
 
 import { SimpleSavedObject } from '@kbn/core-saved-objects-api-browser';
-import type { KibanaContent } from '@kbn/content-management-plugin/common';
+import type { Content } from '@kbn/content-management-plugin/common';
 
 import { MapSavedObjectAttributes } from '../../common/map_saved_object_type';
 
@@ -19,7 +19,7 @@ import { MapSavedObjectAttributes } from '../../common/map_saved_object_type';
  */
 export const savedObjectToKibanaContent = (
   map: SimpleSavedObject<MapSavedObjectAttributes>
-): KibanaContent => {
+): Content => {
   return {
     id: map.id,
     type: map.type,
