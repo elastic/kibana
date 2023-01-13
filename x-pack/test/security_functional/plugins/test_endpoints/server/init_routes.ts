@@ -114,7 +114,7 @@ export function initRoutes(
     const RETRY_SCALE_DURATION = 1000;
     let retriesElapsed = 0;
     let taskInstance: ConcreteTaskInstance;
-    while (retriesElapsed <= 15 /** max around ~120s **/) {
+    while (retriesElapsed < 15 /** max around ~100s **/) {
       await new Promise((resolve) => setTimeout(resolve, retriesElapsed * RETRY_SCALE_DURATION));
 
       try {
@@ -128,7 +128,7 @@ export function initRoutes(
         throw err;
       }
 
-      if (++retriesElapsed <= 15) {
+      if (++retriesElapsed < 15) {
         logger.warn(
           `Session cleanup task is NOT in idle state (waiting for ${
             retriesElapsed * RETRY_SCALE_DURATION
