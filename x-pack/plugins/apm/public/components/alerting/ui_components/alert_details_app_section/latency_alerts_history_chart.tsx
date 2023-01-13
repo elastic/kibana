@@ -32,12 +32,6 @@ import {
   getResponseTimeTickFormatter,
 } from '../../../shared/charts/transaction_charts/helper';
 
-const i18nAlertsTriggered = i18n.translate(
-  'xpack.apm.latencyChartHistory.alertsTriggered',
-  {
-    defaultMessage: 'Alerts triggered',
-  }
-);
 interface LatencyAlertsHistoryChartProps {
   serviceName: string;
   start: string;
@@ -158,7 +152,12 @@ export function LatencyAlertsHistoryChart({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText size="s" color="subdued">
-                {i18nAlertsTriggered}
+                {i18n.translate(
+                  'xpack.apm.latencyChartHistory.alertsTriggered',
+                  {
+                    defaultMessage: 'Alerts triggered',
+                  }
+                )}
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -199,10 +198,13 @@ export function LatencyAlertsHistoryChart({
               triggeredAlertsData?.histogramTriggeredAlerts
                 .filter((annotation) => annotation.doc_count > 0)
                 .map((annotation) => {
+                  console.log(annotation);
                   return {
                     dataValue: annotation.key,
                     header: String(annotation.doc_count),
-                    details: i18nAlertsTriggered,
+                    details: moment(annotation.key_as_string).format(
+                      'yyyy-MM-DD'
+                    ),
                   };
                 }) || []
             }
