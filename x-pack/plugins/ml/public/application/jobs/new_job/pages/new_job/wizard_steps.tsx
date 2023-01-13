@@ -84,7 +84,7 @@ export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
           <Title data-test-subj="mlJobWizardStepTitlePickFields">
             <FormattedMessage
               id="xpack.ml.newJob.wizard.stepComponentWrapper.pickFieldsTitle"
-              defaultMessage="Pick fields"
+              defaultMessage="Choose fields"
             />
           </Title>
           <PickFieldsStep

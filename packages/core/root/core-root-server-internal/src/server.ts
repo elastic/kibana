@@ -58,6 +58,7 @@ import {
 import { CoreUsageDataService } from '@kbn/core-usage-data-server-internal';
 import { StatusService, statusConfig } from '@kbn/core-status-server-internal';
 import { UiSettingsService, uiSettingsConfig } from '@kbn/core-ui-settings-server-internal';
+import { CustomBrandingService } from '@kbn/core-custom-branding-server-internal';
 import {
   CoreRouteHandlerContext,
   PrebootCoreRouteHandlerContext,
@@ -125,6 +126,7 @@ export class Server {
   private readonly executionContext: ExecutionContextService;
   private readonly prebootService: PrebootService;
   private readonly docLinks: DocLinksService;
+  private readonly customBranding: CustomBrandingService;
 
   private readonly savedObjectsStartPromise: Promise<SavedObjectsServiceStart>;
   private resolveSavedObjectsStartPromise?: (value: SavedObjectsServiceStart) => void;
@@ -170,6 +172,7 @@ export class Server {
     this.executionContext = new ExecutionContextService(core);
     this.prebootService = new PrebootService(core);
     this.docLinks = new DocLinksService(core);
+    this.customBranding = new CustomBrandingService(core);
 
     this.savedObjectsStartPromise = new Promise((resolve) => {
       this.resolveSavedObjectsStartPromise = resolve;
@@ -323,11 +326,14 @@ export class Server {
       coreUsageData: coreUsageDataSetup,
     });
 
+    const customBrandingSetup = this.customBranding.setup();
+
     const renderingSetup = await this.rendering.setup({
       elasticsearch: elasticsearchServiceSetup,
       http: httpSetup,
       status: statusSetup,
       uiPlugins,
+      customBranding: customBrandingSetup,
     });
 
     const httpResourcesSetup = this.httpResources.setup({
@@ -341,6 +347,7 @@ export class Server {
       analytics: analyticsSetup,
       capabilities: capabilitiesSetup,
       context: contextServiceSetup,
+      customBranding: customBrandingSetup,
       docLinks: docLinksSetup,
       elasticsearch: elasticsearchServiceSetup,
       environment: environmentSetup,
@@ -391,6 +398,7 @@ export class Server {
     soStartSpan?.end();
     const capabilitiesStart = this.capabilities.start();
     const uiSettingsStart = await this.uiSettings.start();
+    const customBrandingStart = this.customBranding.start();
     const metricsStart = await this.metrics.start();
     const httpStart = this.http.getStartContract();
     const coreUsageDataStart = this.coreUsageData.start({
@@ -404,6 +412,7 @@ export class Server {
     this.coreStart = {
       analytics: analyticsStart,
       capabilities: capabilitiesStart,
+      customBranding: customBrandingStart,
       docLinks: docLinkStart,
       elasticsearch: elasticsearchStart,
       executionContext: executionContextStart,
@@ -440,6 +449,7 @@ export class Server {
     await this.metrics.stop();
     await this.status.stop();
     await this.logging.stop();
+    await this.customBranding.stop();
     this.node.stop();
     this.deprecations.stop();
   }

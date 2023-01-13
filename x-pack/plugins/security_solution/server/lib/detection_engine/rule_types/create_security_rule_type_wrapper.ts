@@ -190,7 +190,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 message: errorMessage,
               });
 
-              return result.state;
+              return { state: result.state };
             }
           }
 
@@ -294,10 +294,11 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               spaceId,
               indicesToQuery: inputIndex,
               alertTimestampOverride,
+              ruleExecutionLogger,
             });
 
             const wrapSequences = wrapSequencesFactory({
-              logger,
+              ruleExecutionLogger,
               ignoreFields: [...ignoreFields, ...legacySignalFields],
               mergeStrategy,
               completeRule,
@@ -497,7 +498,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             }
           }
 
-          return result.state;
+          return { state: result.state };
         });
       },
     });

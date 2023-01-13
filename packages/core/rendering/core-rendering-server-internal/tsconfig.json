@@ -34,6 +34,9 @@
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/core-status-server-mocks",
     "@kbn/utility-types",
+    "@kbn/core-custom-branding-server-internal",
+    "@kbn/core-custom-branding-common",
+    "@kbn/core-custom-branding-server-mocks",
   ],
   "exclude": [
     "target/**/*",
