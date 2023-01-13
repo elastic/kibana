@@ -111,6 +111,11 @@ export class AgentManager extends Manager {
       (item) => item.policy_id === agentPolicyId
     ).api_key;
 
+    const hostIp = execa.commandSync(
+      "ipconfig getifaddr `scutil --dns |awk -F'[()]' '$1~/if_index/ {print $2;exit;}'`",
+      { shell: true }
+    ).stdout;
+
     // TODO: Receive the name of the VM and store in the variable
     execa.commandSync(`multipass launch --name ${VM_NAME}`, { forceKillAfterTimeout: false });
 
@@ -129,7 +134,7 @@ export class AgentManager extends Manager {
 
     // TODO: Use config service to retrieve the proper --url
     execa.commandSync(
-      `multipass exec ${VM_NAME} --working-directory /home/ubuntu/elastic-agent-8.6.0-SNAPSHOT-linux-arm64 -- sudo ./elastic-agent enroll --url=https://192.168.1.15:8220 --enrollment-token=${enrollmentToken} --insecure`,
+      `multipass exec ${VM_NAME} --working-directory /home/ubuntu/elastic-agent-8.6.0-SNAPSHOT-linux-arm64 -- sudo ./elastic-agent enroll --url=https://${hostIp}:8220 --enrollment-token=${enrollmentToken} --insecure`,
       { forceKillAfterTimeout: false }
     );
 
