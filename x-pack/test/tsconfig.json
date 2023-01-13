@@ -21,6 +21,8 @@
   "exclude": [
     "target/**/*",
     "*/plugins/**/*",
+    "*/packages/**/*",
+    "*/*/packages/**/*",
   ],
   "kbn_references": [
     { "path": "../../test/tsconfig.json" },
@@ -110,6 +112,7 @@
     "@kbn/journeys",
     "@kbn/alerting-fixture-plugin",
     "@kbn/stdio-dev-helpers",
+    "@kbn/alerting-api-integration-helpers",
     "@kbn/securitysolution-ecs",
   ]
 }

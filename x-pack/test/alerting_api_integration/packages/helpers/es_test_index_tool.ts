@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { Client } from '@elastic/elasticsearch';
+
 export const ES_TEST_INDEX_NAME = '.kibana-alerting-test-data';
 
 export class ESTestIndexTool {

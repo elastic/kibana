@@ -8,7 +8,7 @@
 import getPort from 'get-port';
 import http from 'http';
 import httpProxy from 'http-proxy';
-import { getProxyPort } from '../../../lib/get_proxy_server';
+import { getProxyPort } from '@kbn/alerting-api-integration-helpers';
 import { getDataFromRequest } from './data_handler';
 
 export interface ProxyArgs {
