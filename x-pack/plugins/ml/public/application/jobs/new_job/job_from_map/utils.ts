@@ -40,6 +40,16 @@ export async function redirectToGeoJobWizard(
   window.open(url, '_blank');
 }
 
+export function isCompatibleMapVisualization(embeddable: MapEmbeddable) {
+  return embeddable.getLayerList().some((layer) => {
+    const geoField = layer.getGeoFieldNames().length ? layer.getGeoFieldNames()[0] : undefined;
+    const dataViewId = layer.getIndexPatternIds().length
+      ? layer.getIndexPatternIds()[0]
+      : undefined;
+    return geoField && dataViewId;
+  });
+}
+
 export async function getJobsItemsFromEmbeddable(embeddable: MapEmbeddable) {
   // Get dashboard level query/filters
   const { filters, timeRange, ...input } = embeddable.getInput();
