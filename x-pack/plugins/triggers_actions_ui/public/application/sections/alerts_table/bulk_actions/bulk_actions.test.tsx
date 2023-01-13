@@ -6,7 +6,7 @@
  */
 import React, { useReducer } from 'react';
 
-import { render, within } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
@@ -121,7 +121,7 @@ describe('AlertsTable.BulkActions', () => {
   };
 
   const defaultBulkActionsState = {
-    rowSelection: new Set<number>(),
+    rowSelection: new Map<number, boolean>(),
     isAllSelected: false,
     areAllVisibleRowsSelected: false,
     rowCount: 2,
@@ -167,32 +167,33 @@ describe('AlertsTable.BulkActions', () => {
 
     describe('and click on select all', () => {
       it('should check that all rows are selected', async () => {
-        const { getAllByTestId, getByTestId } = render(
-          <AlertsTableWithBulkActionsContext {...tablePropsWithBulkActions} />
-        );
-        const bulkActionsCells = getAllByTestId('bulk-actions-row-cell') as HTMLInputElement[];
+        render(<AlertsTableWithBulkActionsContext {...tablePropsWithBulkActions} />);
+        let bulkActionsCells = screen.getAllByTestId('bulk-actions-row-cell') as HTMLInputElement[];
         expect(bulkActionsCells[0].checked).toBeFalsy();
         expect(bulkActionsCells[1].checked).toBeFalsy();
 
-        userEvent.click(getByTestId('bulk-actions-header'));
+        userEvent.click(screen.getByTestId('bulk-actions-header'));
 
+        bulkActionsCells = screen.getAllByTestId('bulk-actions-row-cell') as HTMLInputElement[];
         expect(bulkActionsCells[0].checked).toBeTruthy();
         expect(bulkActionsCells[1].checked).toBeTruthy();
       });
 
-      it('should show the right amount of alerts selected', () => {
+      it('should show the right amount of alerts selected', async () => {
         const props = {
           ...tablePropsWithBulkActions,
           initialBulkActionsState: {
             ...defaultBulkActionsState,
             areAllVisibleRowsSelected: true,
-            rowSelection: new Set([0, 1]),
+            rowSelection: new Map([
+              [0, false],
+              [1, false],
+            ]),
           },
         };
 
-        const { getByTestId } = render(<AlertsTableWithBulkActionsContext {...props} />);
-        const { getByText } = within(getByTestId('selectedShowBulkActionsButton'));
-        expect(getByText('Selected 2 alerts')).toBeDefined();
+        render(<AlertsTableWithBulkActionsContext {...props} />);
+        expect(await screen.findByText('Selected 2 alerts')).toBeDefined();
       });
 
       describe('and clicking on a single row', () => {
@@ -203,23 +204,29 @@ describe('AlertsTable.BulkActions', () => {
             initialBulkActionsState: {
               ...defaultBulkActionsState,
               areAllVisibleRowsSelected: true,
-              rowSelection: new Set([0, 1]),
+              rowSelection: new Map([
+                [0, false],
+                [1, false],
+              ]),
             },
           };
-          const { getAllByTestId, getByTestId } = render(
-            <AlertsTableWithBulkActionsContext {...props} />
-          );
-          const bulkActionsCells = getAllByTestId('bulk-actions-row-cell') as HTMLInputElement[];
-          const columnHeader = getByTestId('bulk-actions-header') as HTMLInputElement;
-          expect(columnHeader.checked).toBeTruthy();
+          render(<AlertsTableWithBulkActionsContext {...props} />);
+          const bulkActionsCells = screen.getAllByTestId(
+            'bulk-actions-row-cell'
+          ) as HTMLInputElement[];
+          expect(
+            (screen.getByTestId('bulk-actions-header') as HTMLInputElement).checked
+          ).toBeTruthy();
 
           userEvent.click(bulkActionsCells[1]);
-          expect(columnHeader.checked).toBeFalsy();
+          expect(
+            (screen.getByTestId('bulk-actions-header') as HTMLInputElement).checked
+          ).toBeFalsy();
         });
       });
 
       describe('and its a page with count of alerts different than page size', () => {
-        it('should show the right amount of alerts selected', () => {
+        it('should show the right amount of alerts selected', async () => {
           const secondPageAlerts = [
             {
               [AlertsField.name]: ['five'],
@@ -241,58 +248,64 @@ describe('AlertsTable.BulkActions', () => {
             initialBulkActionsState: {
               ...defaultBulkActionsState,
               areAllVisibleRowsSelected: true,
-              rowSelection: new Set([0]),
+              rowSelection: new Map([[0, false]]),
             },
           };
-          const { getByTestId, getAllByTestId } = render(
-            <AlertsTableWithBulkActionsContext {...props} />
-          );
-          const { getByText } = within(getByTestId('selectedShowBulkActionsButton'));
-          expect(getByText('Selected 1 alert')).toBeDefined();
-          expect(getAllByTestId('bulk-actions-row-cell').length).toBe(1);
+          render(<AlertsTableWithBulkActionsContext {...props} />);
+
+          expect(await screen.findByText('Selected 1 alert')).toBeDefined();
+          expect((await screen.findAllByTestId('bulk-actions-row-cell')).length).toBe(1);
         });
       });
     });
 
     describe('and clicking unselect all', () => {
-      it('should uncheck all rows', () => {
+      it('should uncheck all rows', async () => {
         // state after having already clicked on select all before
         const props = {
           ...tablePropsWithBulkActions,
           initialBulkActionsState: {
             ...defaultBulkActionsState,
             areAllVisibleRowsSelected: true,
-            rowSelection: new Set([0, 1]),
+            rowSelection: new Map([
+              [0, false],
+              [1, false],
+            ]),
           },
         };
-        const { getAllByTestId, getByTestId } = render(
-          <AlertsTableWithBulkActionsContext {...props} />
-        );
-        const bulkActionsCells = getAllByTestId('bulk-actions-row-cell') as HTMLInputElement[];
-        expect(bulkActionsCells[0].checked).toBeTruthy();
-        expect(bulkActionsCells[1].checked).toBeTruthy();
+        render(<AlertsTableWithBulkActionsContext {...props} />);
+        expect(
+          ((await screen.findAllByTestId('bulk-actions-row-cell')) as HTMLInputElement[])[0].checked
+        ).toBeTruthy();
+        expect(
+          ((await screen.findAllByTestId('bulk-actions-row-cell')) as HTMLInputElement[])[1].checked
+        ).toBeTruthy();
 
-        userEvent.click(getByTestId('bulk-actions-header'));
+        userEvent.click(await screen.findByTestId('bulk-actions-header'));
 
-        expect(bulkActionsCells[0].checked).toBeFalsy();
-        expect(bulkActionsCells[1].checked).toBeFalsy();
+        expect(
+          ((await screen.findAllByTestId('bulk-actions-row-cell')) as HTMLInputElement[])[0].checked
+        ).toBeFalsy();
+        expect(
+          ((await screen.findAllByTestId('bulk-actions-row-cell')) as HTMLInputElement[])[1].checked
+        ).toBeFalsy();
       });
     });
 
     describe('and a row is selected', () => {
-      it('should show the toolbar', () => {
-        const { queryByTestId, getAllByTestId, getByTestId } = render(
-          <AlertsTableWithBulkActionsContext {...tablePropsWithBulkActions} />
-        );
+      it('should show the toolbar', async () => {
+        render(<AlertsTableWithBulkActionsContext {...tablePropsWithBulkActions} />);
 
-        expect(queryByTestId('selectedShowBulkActionsButton')).toBeNull();
-        expect(queryByTestId('selectAllAlertsButton')).toBeNull();
+        expect(screen.queryByTestId('selectedShowBulkActionsButton')).toBeNull();
+        expect(screen.queryByTestId('selectAllAlertsButton')).toBeNull();
 
-        const bulkActionsCells = getAllByTestId('bulk-actions-row-cell') as HTMLInputElement[];
+        const bulkActionsCells = screen.getAllByTestId(
+          'bulk-actions-row-cell'
+        ) as HTMLInputElement[];
         userEvent.click(bulkActionsCells[0]);
 
-        expect(getByTestId('selectedShowBulkActionsButton')).toBeDefined();
-        expect(getByTestId('selectAllAlertsButton')).toBeDefined();
+        expect(await screen.findByTestId('selectedShowBulkActionsButton')).toBeDefined();
+        expect(await screen.findByTestId('selectAllAlertsButton')).toBeDefined();
       });
 
       describe('and the last remaining row is unchecked', () => {
@@ -302,7 +315,7 @@ describe('AlertsTable.BulkActions', () => {
             ...tablePropsWithBulkActions,
             initialBulkActionsState: {
               ...defaultBulkActionsState,
-              rowSelection: new Set([0]),
+              rowSelection: new Map([[0, false]]),
             },
           };
           const { queryByTestId, getAllByTestId, getByTestId } = render(
@@ -329,11 +342,10 @@ describe('AlertsTable.BulkActions', () => {
             ...tablePropsWithBulkActions,
             initialBulkActionsState: {
               ...defaultBulkActionsState,
-              rowSelection: new Set([1]),
+              rowSelection: new Map([[1, false]]),
             },
             alertsTableConfiguration: {
               ...alertsTableConfiguration,
-
               useBulkActions: () => [
                 {
                   label: 'Fake Bulk Action',
@@ -346,84 +358,106 @@ describe('AlertsTable.BulkActions', () => {
             },
           };
 
-          const { getByText, getByTestId } = render(
-            <AlertsTableWithBulkActionsContext {...props} />
-          );
+          render(<AlertsTableWithBulkActionsContext {...props} />);
 
-          userEvent.click(getByTestId('selectedShowBulkActionsButton'));
+          userEvent.click(await screen.findByTestId('selectedShowBulkActionsButton'));
           await waitForEuiPopoverOpen();
 
-          userEvent.click(getByText('Fake Bulk Action'));
-          expect(mockedFn.mock.calls[0]).toEqual([
-            [
-              {
+          userEvent.click(await screen.findByText('Fake Bulk Action'));
+          expect(mockedFn.mock.calls[0][0]).toEqual([
+            {
+              _id: 'alert1',
+              _index: 'idx1',
+              data: [
+                {
+                  field: 'kibana.alert.rule.name',
+                  value: ['three'],
+                },
+                {
+                  field: 'kibana.alert.rule.uuid',
+                  value: ['uuidtwo'],
+                },
+              ],
+              ecs: {
                 _id: 'alert1',
                 _index: 'idx1',
-                data: [
-                  {
-                    field: 'kibana.alert.rule.name',
-                    value: ['three'],
-                  },
-                  {
-                    field: 'kibana.alert.rule.uuid',
-                    value: ['uuidtwo'],
-                  },
-                ],
-                ecs: {
-                  _id: 'alert1',
-                  _index: 'idx1',
-                },
               },
-            ],
-            false,
+            },
           ]);
+          expect(mockedFn.mock.calls[0][1]).toEqual(false);
+          expect(mockedFn.mock.calls[0][2]).toBeDefined(); // it's a callback
         });
       });
 
       describe('and select all is clicked', () => {
-        it('should check all the visible rows', () => {
+        it('should check all the visible rows', async () => {
           const props = {
             ...tablePropsWithBulkActions,
             initialBulkActionsState: {
               ...defaultBulkActionsState,
-              rowSelection: new Set([0]),
+              rowSelection: new Map([[0, false]]),
             },
           };
 
-          const { getAllByTestId, getByTestId } = render(
-            <AlertsTableWithBulkActionsContext {...props} />
-          );
+          render(<AlertsTableWithBulkActionsContext {...props} />);
 
-          const bulkActionsCells = getAllByTestId('bulk-actions-row-cell') as HTMLInputElement[];
-          expect(bulkActionsCells[0].checked).toBeTruthy();
-          expect(bulkActionsCells[1].checked).toBeFalsy();
-          userEvent.click(getByTestId('selectAllAlertsButton'));
-          expect(bulkActionsCells[0].checked).toBeTruthy();
-          expect(bulkActionsCells[1].checked).toBeTruthy();
+          expect(
+            ((await screen.findAllByTestId('bulk-actions-row-cell')) as HTMLInputElement[])[0]
+              .checked
+          ).toBeTruthy();
+          expect(
+            ((await screen.findAllByTestId('bulk-actions-row-cell')) as HTMLInputElement[])[1]
+              .checked
+          ).toBeFalsy();
+
+          userEvent.click(screen.getByTestId('selectAllAlertsButton'));
+
+          expect(
+            ((await screen.findAllByTestId('bulk-actions-row-cell')) as HTMLInputElement[])[0]
+              .checked
+          ).toBeTruthy();
+          expect(
+            ((await screen.findAllByTestId('bulk-actions-row-cell')) as HTMLInputElement[])[1]
+              .checked
+          ).toBeTruthy();
         });
 
         describe('and clear the selection is clicked', () => {
-          it('should turn off the toolbar', () => {
+          it('should turn off the toolbar', async () => {
             const props = {
               ...tablePropsWithBulkActions,
               initialBulkActionsState: {
                 ...defaultBulkActionsState,
                 areAllVisibleRowsSelected: true,
                 isAllSelected: true,
-                rowSelection: new Set([0, 1]),
+                rowSelection: new Map([
+                  [0, false],
+                  [1, false],
+                ]),
               },
             };
 
-            const { getAllByTestId, getByTestId } = render(
-              <AlertsTableWithBulkActionsContext {...props} />
-            );
+            render(<AlertsTableWithBulkActionsContext {...props} />);
 
-            const bulkActionsCells = getAllByTestId('bulk-actions-row-cell') as HTMLInputElement[];
-            expect(bulkActionsCells[0].checked).toBeTruthy();
-            expect(bulkActionsCells[1].checked).toBeTruthy();
-            userEvent.click(getByTestId('selectAllAlertsButton'));
-            expect(bulkActionsCells[0].checked).toBeFalsy();
-            expect(bulkActionsCells[1].checked).toBeFalsy();
+            expect(
+              ((await screen.findAllByTestId('bulk-actions-row-cell')) as HTMLInputElement[])[0]
+                .checked
+            ).toBeTruthy();
+            expect(
+              ((await screen.findAllByTestId('bulk-actions-row-cell')) as HTMLInputElement[])[1]
+                .checked
+            ).toBeTruthy();
+
+            userEvent.click(screen.getByTestId('selectAllAlertsButton'));
+
+            expect(
+              ((await screen.findAllByTestId('bulk-actions-row-cell')) as HTMLInputElement[])[0]
+                .checked
+            ).toBeFalsy();
+            expect(
+              ((await screen.findAllByTestId('bulk-actions-row-cell')) as HTMLInputElement[])[1]
+                .checked
+            ).toBeFalsy();
           });
         });
 
@@ -436,7 +470,10 @@ describe('AlertsTable.BulkActions', () => {
                 ...defaultBulkActionsState,
                 isAllSelected: true,
                 rowCount: 2,
-                rowSelection: new Set([0, 1]),
+                rowSelection: new Map([
+                  [0, false],
+                  [1, false],
+                ]),
               },
               alertsTableConfiguration: {
                 ...alertsTableConfiguration,
@@ -460,47 +497,46 @@ describe('AlertsTable.BulkActions', () => {
             await waitForEuiPopoverOpen();
 
             userEvent.click(getByText('Fake Bulk Action'));
-            expect(mockedFn.mock.calls[0]).toEqual([
-              [
-                {
+            expect(mockedFn.mock.calls[0][0]).toEqual([
+              {
+                _id: 'alert0',
+                _index: 'idx0',
+                data: [
+                  {
+                    field: 'kibana.alert.rule.name',
+                    value: ['one'],
+                  },
+                  {
+                    field: 'kibana.alert.rule.uuid',
+                    value: ['uuidone'],
+                  },
+                ],
+                ecs: {
                   _id: 'alert0',
                   _index: 'idx0',
-                  data: [
-                    {
-                      field: 'kibana.alert.rule.name',
-                      value: ['one'],
-                    },
-                    {
-                      field: 'kibana.alert.rule.uuid',
-                      value: ['uuidone'],
-                    },
-                  ],
-                  ecs: {
-                    _id: 'alert0',
-                    _index: 'idx0',
-                  },
                 },
-                {
+              },
+              {
+                _id: 'alert1',
+                _index: 'idx1',
+                data: [
+                  {
+                    field: 'kibana.alert.rule.name',
+                    value: ['three'],
+                  },
+                  {
+                    field: 'kibana.alert.rule.uuid',
+                    value: ['uuidtwo'],
+                  },
+                ],
+                ecs: {
                   _id: 'alert1',
                   _index: 'idx1',
-                  data: [
-                    {
-                      field: 'kibana.alert.rule.name',
-                      value: ['three'],
-                    },
-                    {
-                      field: 'kibana.alert.rule.uuid',
-                      value: ['uuidtwo'],
-                    },
-                  ],
-                  ecs: {
-                    _id: 'alert1',
-                    _index: 'idx1',
-                  },
                 },
-              ],
-              true,
+              },
             ]);
+            expect(mockedFn.mock.calls[0][1]).toEqual(true);
+            expect(mockedFn.mock.calls[0][2]).toBeDefined();
           });
         });
       });
