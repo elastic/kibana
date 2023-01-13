@@ -19,8 +19,8 @@ import { createPackagePolicyMock, deletePackagePolicyMock } from '@kbn/fleet-plu
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { CspPlugin } from './plugin';
 import { CspServerPluginStartDeps } from './types';
+import { createFleetAuthzMock } from '@kbn/fleet-plugin/common/mocks';
 import {
-  createFleetAuthzMock,
   Installation,
   ListResult,
   PackagePolicy,
