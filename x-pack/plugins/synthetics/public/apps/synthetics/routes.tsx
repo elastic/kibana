@@ -16,6 +16,7 @@ import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useInspectorContext } from '@kbn/observability-plugin/public';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
+import { getTestRunDetailsRoute } from './components/test_run_details/route_config';
 import { getSettingsRouteConfig } from './components/settings/route_config';
 import { TestRunDetails } from './components/test_run_details/test_run_details';
 import { StepTitle } from './components/step_details_page/step_title';
@@ -84,6 +85,7 @@ const getRoutes = (
   return [
     ...getSettingsRouteConfig(history, syntheticsPath, baseTitle),
     getErrorDetailsRouteConfig(history, syntheticsPath, baseTitle),
+    getTestRunDetailsRoute(history, syntheticsPath, baseTitle),
     {
       title: i18n.translate('xpack.synthetics.gettingStartedRoute.title', {
         defaultMessage: 'Synthetics Getting Started | {baseTitle}',

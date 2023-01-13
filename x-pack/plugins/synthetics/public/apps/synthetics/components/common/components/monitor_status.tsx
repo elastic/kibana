@@ -41,7 +41,7 @@ export const MonitorStatus = ({
   );
 };
 
-const STATUS_LABEL = i18n.translate('xpack.synthetics.monitorStatus.statusLabel', {
+export const STATUS_LABEL = i18n.translate('xpack.synthetics.monitorStatus.statusLabel', {
   defaultMessage: 'Status',
 });
 

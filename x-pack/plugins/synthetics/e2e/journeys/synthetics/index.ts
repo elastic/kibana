@@ -18,4 +18,5 @@ export * from './alerting_default.journey';
 export * from './global_parameters.journey';
 export * from './detail_flyout';
 export * from './alert_rules/default_status_alert.journey';
+export * from './test_now_mode.journey';
 export * from './data_retention.journey';

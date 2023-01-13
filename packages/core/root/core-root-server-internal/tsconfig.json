@@ -65,6 +65,8 @@
     "@kbn/repo-info",
     "@kbn/config-schema",
     "@kbn/apm-config-loader",
+    "@kbn/core-custom-branding-server-internal",
+    "@kbn/core-custom-branding-server-mocks",
   ],
   "exclude": [
     "target/**/*",

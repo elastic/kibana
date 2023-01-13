@@ -30,7 +30,7 @@ const AlertDonutEmbeddableComponent: React.FC<AlertDonutEmbeddableProps> = ({
 }) => {
   const dispatch = useDispatch();
   const queryId = `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-${status}`;
-  const { searchSessionId, refetchByRestartingSession } = useRefetchByRestartingSession({
+  const { session, refetchByRestartingSession } = useRefetchByRestartingSession({
     inputId: InputsModelId.global,
     queryId,
   });
@@ -46,14 +46,14 @@ const AlertDonutEmbeddableComponent: React.FC<AlertDonutEmbeddableProps> = ({
         inputsActions.setQuery({
           inputId: InputsModelId.global,
           id: queryId,
-          searchSessionId,
+          searchSessionId: session.current.start(),
           refetch: refetchByRestartingSession,
           loading: isLoading,
           inspect: { dsl: requests, response: responses },
         })
       );
     },
-    [dispatch, queryId, refetchByRestartingSession, searchSessionId]
+    [dispatch, queryId, refetchByRestartingSession, session]
   );
 
   const extraOptions = useMemo(() => ({ status, filters }), [status, filters]);
@@ -63,13 +63,24 @@ const AlertDonutEmbeddableComponent: React.FC<AlertDonutEmbeddableProps> = ({
       inputsActions.setQuery({
         inputId: InputsModelId.global,
         id: queryId,
-        searchSessionId,
+        searchSessionId: session.current.start(),
         refetch: refetchByRestartingSession,
         loading: false,
         inspect: null,
       })
     );
-  }, [dispatch, queryId, refetchByRestartingSession, searchSessionId, status]);
+  }, [dispatch, queryId, refetchByRestartingSession, session, status]);
+
+  useEffect(() => {
+    return () => {
+      dispatch(
+        inputsActions.deleteOneQuery({
+          inputId: InputsModelId.global,
+          id: queryId,
+        })
+      );
+    };
+  }, [dispatch, queryId]);
 
   const dataExists = visualizationData != null && visualizationData[0].hits.total !== 0;
 
