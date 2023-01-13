@@ -8,27 +8,27 @@
 import React from 'react';
 import { takeUntil, distinctUntilChanged, skip } from 'rxjs/operators';
 import { from } from 'rxjs';
-import type { Embeddable } from '@kbn/lens-plugin/public';
-import type { CoreStart } from '@kbn/core/public';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { LensPublicStart } from '@kbn/lens-plugin/public';
-
 import {
   toMountPoint,
   wrapWithTheme,
   KibanaContextProvider,
 } from '@kbn/kibana-react-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { MapEmbeddable } from '@kbn/maps-plugin/public';
+import type { Embeddable } from '@kbn/lens-plugin/public';
 
-import { getMlGlobalServices } from '../../application/app';
-import { LensLayerSelectionFlyout } from './lens_vis_layer_selection_flyout';
+import { getMlGlobalServices } from '../../../application/app';
 
-export async function showLensVisToADJobFlyout(
-  embeddable: Embeddable,
+export function createFlyout(
+  FlyoutComponent: React.FunctionComponent<any>,
+  embeddable: MapEmbeddable | Embeddable,
   coreStart: CoreStart,
   share: SharePluginStart,
   data: DataPublicPluginStart,
-  lens: LensPublicStart
+  lens?: LensPublicStart
 ): Promise<void> {
   const {
     http,
@@ -56,7 +56,7 @@ export async function showLensVisToADJobFlyout(
                 mlServices: getMlGlobalServices(http),
               }}
             >
-              <LensLayerSelectionFlyout
+              <FlyoutComponent
                 embeddable={embeddable}
                 onClose={() => {
                   onFlyoutClose();
@@ -68,7 +68,7 @@ export async function showLensVisToADJobFlyout(
           )
         ),
         {
-          'data-test-subj': 'mlFlyoutLensLayerSelector',
+          'data-test-subj': 'mlFlyoutLayerSelector',
           ownFocus: true,
           closeButtonAriaLabel: 'jobSelectorFlyout',
           onClose: onFlyoutClose,
