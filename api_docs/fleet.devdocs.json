@@ -8297,6 +8297,47 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-server.PostPackagePolicyDeleteCallback",
+        "type": "Type",
+        "tags": [],
+        "label": "PostPackagePolicyDeleteCallback",
+        "description": [],
+        "signature": [
+          "(packagePolicies: ",
+          "DeletePackagePoliciesResponse",
+          ") => Promise<void>"
+        ],
+        "path": "x-pack/plugins/fleet/server/types/extensions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-server.PostPackagePolicyDeleteCallback.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "packagePolicies",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.PackagePolicy",
+                "text": "PackagePolicy"
+              },
+              "[]"
+            ],
+            "path": "x-pack/plugins/fleet/server/types/extensions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-server.PostPackagePolicyPostCreateCallback",
         "type": "Type",
         "tags": [],

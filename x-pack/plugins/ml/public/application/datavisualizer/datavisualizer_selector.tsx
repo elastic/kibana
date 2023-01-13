@@ -20,8 +20,9 @@ import {
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useTimefilter } from '@kbn/ml-date-picker';
 import { isFullLicense } from '../license';
-import { useTimefilter, useMlKibana, useNavigateToPath } from '../contexts/kibana';
+import { useMlKibana, useNavigateToPath } from '../contexts/kibana';
 import { HelpMenu } from '../components/help_menu';
 import { MlPageHeader } from '../components/page_header';
 
