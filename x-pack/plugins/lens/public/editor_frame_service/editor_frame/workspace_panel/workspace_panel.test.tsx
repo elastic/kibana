@@ -703,9 +703,9 @@ describe('workspace_panel', () => {
     instance = mounted.instance;
 
     // EuiFlexItem duplicates internally the attribute, so we need to filter only the most inner one here
-    expect(
-      instance.find('[data-test-subj="configuration-failure-more-errors"]').last().text()
-    ).toEqual(' +1 error');
+    expect(instance.find('[data-test-subj="workspace-more-errors-button"]').last().text()).toEqual(
+      ' +1 error'
+    );
     expect(instance.find(expressionRendererMock)).toHaveLength(0);
     expect(getUserMessages).toHaveBeenCalledWith(['visualization', 'visualizationInEditor'], {
       severity: 'error',
@@ -735,9 +735,7 @@ describe('workspace_panel', () => {
     instance = mounted.instance;
     const lensStore = mounted.lensStore;
 
-    const showingErrors = () =>
-      instance.exists('[data-test-subj="configuration-failure-error"]') ||
-      instance.exists('[data-test-subj="configuration-failure-more-errors"]');
+    const showingErrors = () => instance.exists('[data-test-subj="workspace-error-message"]');
 
     expect(showingErrors()).toBeFalsy();
 

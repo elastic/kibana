@@ -831,11 +831,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     /** Counts the visible warnings in the config panel */
     async getWorkspaceErrorCount() {
-      const moreButton = await testSubjects.exists('more-workspace-errors-button');
+      const moreButton = await testSubjects.exists('workspace-more-errors-button');
       if (moreButton) {
         await retry.try(async () => {
-          await testSubjects.click('more-workspace-errors-button');
-          await testSubjects.missingOrFail('more-workspace-errors-button');
+          await testSubjects.click('workspace-more-errors-button');
+          await testSubjects.missingOrFail('workspace-more-errors-button');
         });
       }
       const errors = await testSubjects.findAll('workspace-error-message');

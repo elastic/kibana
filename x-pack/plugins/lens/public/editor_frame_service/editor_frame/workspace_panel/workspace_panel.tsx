@@ -677,7 +677,7 @@ export const VisualizationWrapper = ({
               expandError: !prevState.expandError,
             }));
           }}
-          data-test-subj="more-workspace-errors-button"
+          data-test-subj="workspace-more-errors-button"
         >
           {i18n.translate('xpack.lens.editorFrame.configurationFailureMoreErrors', {
             defaultMessage: ` +{errors} {errors, plural, one {error} other {errors}}`,
@@ -689,7 +689,7 @@ export const VisualizationWrapper = ({
     const [firstMessage, ...rest] = errors;
 
     return (
-      <EuiFlexGroup data-test-subj="configuration-failure">
+      <EuiFlexGroup>
         <EuiFlexItem>
           <EuiEmptyPrompt
             actions={showExtraErrorsAction}
