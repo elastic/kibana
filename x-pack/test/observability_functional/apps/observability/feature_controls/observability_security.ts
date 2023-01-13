@@ -31,7 +31,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/cases/default');
-      // Since the above unload will reset the default config,
+      // Since the above unload removes the default config,
       // the following command will set it back to avoid changing the test environment
       await kibanaServer.uiSettings.update(config.get('uiSettings.defaults'));
     });
