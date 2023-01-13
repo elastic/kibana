@@ -29,7 +29,7 @@ export const StepDetailPage = () => {
   useTrackPageview({ app: 'synthetics', path: 'stepDetail' });
   useTrackPageview({ app: 'synthetics', path: 'stepDetail', delay: 15000 });
 
-  const { data, isFailed, currentStep, stepLabels } = useJourneySteps();
+  const { data, isFailed, currentStep } = useJourneySteps();
 
   useStepDetailsBreadcrumbs();
 
