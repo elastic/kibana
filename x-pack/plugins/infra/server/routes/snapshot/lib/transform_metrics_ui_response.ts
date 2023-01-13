@@ -11,15 +11,13 @@ import {
   MetricsAPIResponse,
   SnapshotNodeResponse,
   MetricsAPIRequest,
-  MetricsExplorerColumnType,
   MetricsAPIRow,
   SnapshotRequest,
-  SnapshotNodePath,
-  SnapshotNodeMetric,
   SnapshotNode,
+  MetricsAPISeries,
+  SnapshotNodeMetric,
 } from '../../../../common/http_api';
 import { META_KEY } from './constants';
-import { InfraSource } from '../../../lib/sources';
 import { applyMetadataToLastPath } from './apply_metadata_to_last_path';
 
 const getMetricValue = (row: MetricsAPIRow) => {
@@ -45,52 +43,70 @@ const getLastValue = (rows: MetricsAPIRow[]) => {
 export const transformMetricsApiResponseToSnapshotResponse = (
   options: MetricsAPIRequest,
   snapshotRequest: SnapshotRequest,
-  source: InfraSource,
   metricsApiResponse: MetricsAPIResponse
 ): SnapshotNodeResponse => {
   const nodes = metricsApiResponse.series
     .map((series) => {
       const node = {
-        metrics: options.metrics
-          .filter((m) => m.id !== META_KEY)
-          .map((metric) => {
-            const name = metric.id as SnapshotMetricType;
-            const timeseries = {
-              id: name,
-              columns: [
-                { name: 'timestamp', type: 'date' as MetricsExplorerColumnType },
-                { name: 'metric_0', type: 'number' as MetricsExplorerColumnType },
-              ],
-              rows: series.rows.map((row) => {
-                return { timestamp: row.timestamp, metric_0: get(row, metric.id, null) };
-              }),
-            };
-            const maxValue = calculateMax(timeseries.rows);
-            const avg = calculateAvg(timeseries.rows);
-            const value = getLastValue(timeseries.rows);
-            const nodeMetric: SnapshotNodeMetric = { name, max: maxValue, value, avg };
-            if (snapshotRequest.includeTimeseries) {
-              nodeMetric.timeseries = timeseries;
-            }
-            return nodeMetric;
-          }),
-        path:
-          series.keys?.map((key) => {
-            return { value: key, label: key } as SnapshotNodePath;
-          }) ?? [],
         name: '',
+        metrics: getMetrics(options, snapshotRequest, series),
+        path: (series.keys ?? []).map((key) => {
+          return { value: key, label: key };
+        }),
       };
 
       const isNoData = node.metrics.every((m) => m.value === null);
       const isAPMNode = series.metricsets?.includes('app');
       if (isNoData && isAPMNode) return null;
 
-      const path = applyMetadataToLastPath(series, node, snapshotRequest, source);
-      const lastPath = last(path);
-      const name = lastPath?.label ?? 'N/A';
+      const path = applyMetadataToLastPath(series, node, snapshotRequest);
+      const name = last(path)?.label ?? 'N/A';
 
       return { ...node, path, name };
     })
     .filter((n) => n !== null) as SnapshotNode[];
-  return { nodes, interval: `${metricsApiResponse.info.interval}s` };
+
+  return {
+    nodes,
+    interval:
+      metricsApiResponse.info.interval !== undefined
+        ? `${metricsApiResponse.info.interval}s`
+        : undefined,
+  };
+};
+
+const getMetrics = (
+  options: MetricsAPIRequest,
+  snapshotRequest: SnapshotRequest,
+  series: MetricsAPIResponse['series'][number]
+): SnapshotNodeMetric[] => {
+  return options.metrics
+    .filter((m) => m.id !== META_KEY)
+    .map((metric) => {
+      const name = metric.id as SnapshotMetricType;
+
+      const metrics = series.rows.map((row) => ({
+        timestamp: row.timestamp,
+        metric_0: get(row, metric.id, null),
+      }));
+
+      const timeseries = snapshotRequest.includeTimeseries
+        ? ({
+            id: name,
+            columns: [
+              { name: 'timestamp', type: 'date' },
+              { name: 'metric_0', type: 'number' },
+            ],
+            rows: [...metrics],
+          } as MetricsAPISeries)
+        : undefined;
+
+      return {
+        name,
+        value: getLastValue(metrics),
+        max: calculateMax(metrics),
+        avg: calculateAvg(metrics),
+        timeseries,
+      };
+    });
 };

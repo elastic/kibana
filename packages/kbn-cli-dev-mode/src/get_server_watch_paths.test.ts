@@ -9,14 +9,49 @@
 import Path from 'path';
 
 import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
+import type { KibanaPackageType } from '@kbn/repo-packages';
+
+const TYPES = Object.keys(
+  (() => {
+    const asObj: { [k in KibanaPackageType]: true } = {
+      'functional-tests': true,
+      'plugin-browser': true,
+      'plugin-server': true,
+      'shared-browser': true,
+      'shared-common': true,
+      'shared-scss': true,
+      'shared-server': true,
+      'test-helper': true,
+    };
+    return asObj;
+  })()
+);
 
 import { getServerWatchPaths } from './get_server_watch_paths';
+
+jest.mock('@kbn/repo-packages', () => ({
+  getPackages: jest.fn(),
+  getPluginPackagesFilter: jest.fn().mockReturnValue(() => true),
+}));
+const mockGetPluginPackagesFilter = jest.requireMock('@kbn/repo-packages').getPluginPackagesFilter;
+const mockGetPackages = jest.requireMock('@kbn/repo-packages').getPackages;
 
 expect.addSnapshotSerializer(createAbsolutePathSerializer());
 
 it('produces the right watch and ignore list', () => {
+  mockGetPackages.mockReturnValue(
+    TYPES.flatMap((type) => ({
+      isPlugin: type.startsWith('plugin-'),
+      directory: Path.resolve(REPO_ROOT, 'packages', type),
+      manifest: {
+        type,
+      },
+    }))
+  );
+
   const { watchPaths, ignorePaths } = getServerWatchPaths({
+    runExamples: false,
     pluginPaths: [Path.resolve(REPO_ROOT, 'x-pack/test/plugin_functional/plugins/resolver_test')],
     pluginScanDirs: [
       Path.resolve(REPO_ROOT, 'src/plugins'),
@@ -33,6 +68,9 @@ it('produces the right watch and ignore list', () => {
       <absolute path>/src/plugins,
       <absolute path>/test/plugin_functional/plugins,
       <absolute path>/x-pack/plugins,
+      <absolute path>/packages/plugin-server,
+      <absolute path>/packages/shared-common,
+      <absolute path>/packages/shared-server,
     ]
   `);
 
@@ -79,6 +117,24 @@ it('produces the right watch and ignore list', () => {
       <absolute path>/x-pack/plugins/synthetics/e2e,
       <absolute path>/x-pack/plugins/ux/e2e,
       <absolute path>/x-pack/plugins/observability/e2e,
+    ]
+  `);
+
+  expect(mockGetPluginPackagesFilter.mock.calls).toMatchInlineSnapshot(`
+    Array [
+      Array [
+        Object {
+          "examples": false,
+          "parentDirs": Array [
+            <absolute path>/src/plugins,
+            <absolute path>/test/plugin_functional/plugins,
+            <absolute path>/x-pack/plugins,
+          ],
+          "paths": Array [
+            <absolute path>/x-pack/test/plugin_functional/plugins/resolver_test,
+          ],
+        },
+      ],
     ]
   `);
 });

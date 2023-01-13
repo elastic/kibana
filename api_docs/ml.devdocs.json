@@ -885,7 +885,7 @@
             "label": "capabilities",
             "description": [],
             "signature": [
-              "{ canAccessML: boolean; canGetJobs: boolean; canGetDatafeeds: boolean; canGetCalendars: boolean; canFindFileStructure: boolean; canGetDataFrameAnalytics: boolean; canGetAnnotations: boolean; canCreateAnnotation: boolean; canDeleteAnnotation: boolean; canUseMlAlerts: boolean; canGetTrainedModels: boolean; canTestTrainedModels: boolean; } & { canCreateJob: boolean; canDeleteJob: boolean; canOpenJob: boolean; canCloseJob: boolean; canResetJob: boolean; canUpdateJob: boolean; canForecastJob: boolean; canCreateDatafeed: boolean; canDeleteDatafeed: boolean; canStartStopDatafeed: boolean; canUpdateDatafeed: boolean; canPreviewDatafeed: boolean; canGetFilters: boolean; canCreateCalendar: boolean; canDeleteCalendar: boolean; canCreateFilter: boolean; canDeleteFilter: boolean; canCreateDataFrameAnalytics: boolean; canDeleteDataFrameAnalytics: boolean; canStartStopDataFrameAnalytics: boolean; canCreateMlAlerts: boolean; canUseMlAlerts: boolean; canViewMlNodes: boolean; canCreateTrainedModels: boolean; canDeleteTrainedModels: boolean; canStartStopTrainedModels: boolean; }"
+              "{ canGetJobs: boolean; canGetDatafeeds: boolean; canGetCalendars: boolean; canFindFileStructure: boolean; canGetDataFrameAnalytics: boolean; canGetAnnotations: boolean; canCreateAnnotation: boolean; canDeleteAnnotation: boolean; canUseMlAlerts: boolean; canGetTrainedModels: boolean; canTestTrainedModels: boolean; canGetFieldInfo: boolean; canGetMlInfo: boolean; } & { canCreateJob: boolean; canDeleteJob: boolean; canOpenJob: boolean; canCloseJob: boolean; canResetJob: boolean; canUpdateJob: boolean; canForecastJob: boolean; canCreateDatafeed: boolean; canDeleteDatafeed: boolean; canStartStopDatafeed: boolean; canUpdateDatafeed: boolean; canPreviewDatafeed: boolean; canGetFilters: boolean; canCreateCalendar: boolean; canDeleteCalendar: boolean; canCreateFilter: boolean; canDeleteFilter: boolean; canCreateDataFrameAnalytics: boolean; canDeleteDataFrameAnalytics: boolean; canStartStopDataFrameAnalytics: boolean; canCreateMlAlerts: boolean; canUseMlAlerts: boolean; canViewMlNodes: boolean; canCreateTrainedModels: boolean; canDeleteTrainedModels: boolean; canStartStopTrainedModels: boolean; }"
             ],
             "path": "x-pack/plugins/ml/common/types/capabilities.ts",
             "deprecated": false,
@@ -3141,17 +3141,17 @@
         " & { alertingServiceProvider(savedObjectsClient: ",
         {
           "pluginId": "@kbn/core-saved-objects-api-server",
-          "scope": "server",
+          "scope": "common",
           "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-          "section": "def-server.SavedObjectsClientContract",
+          "section": "def-common.SavedObjectsClientContract",
           "text": "SavedObjectsClientContract"
         },
         ", request: ",
         {
           "pluginId": "@kbn/core-http-server",
-          "scope": "server",
+          "scope": "common",
           "docId": "kibKbnCoreHttpServerPluginApi",
-          "section": "def-server.KibanaRequest",
+          "section": "def-common.KibanaRequest",
           "text": "KibanaRequest"
         },
         "<unknown, unknown, unknown, any>): { preview: (args_0: Readonly<{} & { timeRange: string; alertParams: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"bucket\" | \"record\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>; sampleSize: number; }>) => Promise<any>; execute: (params: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"bucket\" | \"record\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>) => Promise<{ context: ",

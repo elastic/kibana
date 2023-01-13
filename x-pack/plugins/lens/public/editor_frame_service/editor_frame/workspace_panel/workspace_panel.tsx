@@ -824,6 +824,7 @@ export const VisualizationWrapper = ({
                     href={core.application.getUrlForApp('management', {
                       path: '/kibana/indexPatterns/create',
                     })}
+                    style={{ width: '100%' }}
                     data-test-subj="configuration-failure-reconfigure-indexpatterns"
                   >
                     {i18n.translate('xpack.lens.editorFrame.dataViewReconfigure', {

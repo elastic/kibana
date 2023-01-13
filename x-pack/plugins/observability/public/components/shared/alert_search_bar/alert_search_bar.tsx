@@ -10,7 +10,6 @@ import React, { useCallback, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { Query } from '@kbn/es-query';
-import { useServices } from './services';
 import { AlertsStatusFilter } from './components';
 import { observabilityAlertFeatureIds } from '../../../config';
 import { ALERT_STATUS_QUERY, DEFAULT_QUERIES, DEFAULT_QUERY_STRING } from './constants';
@@ -35,9 +34,9 @@ export function ObservabilityAlertSearchBar({
   kuery,
   rangeFrom,
   rangeTo,
+  services: { AlertsSearchBar, timeFilterService, useToasts },
   status,
 }: ObservabilityAlertSearchBarProps) {
-  const { AlertsSearchBar, timeFilterService, useToasts } = useServices();
   const toasts = useToasts();
 
   const onAlertStatusChange = useCallback(

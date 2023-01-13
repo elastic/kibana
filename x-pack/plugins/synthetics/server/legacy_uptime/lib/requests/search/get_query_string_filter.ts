@@ -8,8 +8,8 @@
 export const getQueryStringFilter = (query: string) => {
   let queryString = query;
   if (hasReservedCharsF(query) && !includesOperator(query.toLowerCase())) {
-    // if user doesn't specify any query string syntax we user wildcard buy default
-    queryString = `${query}* or tags:${query}*`;
+    // if user doesn't specify any query string syntax we use wildcard by default
+    queryString = `*${query}* or tags:${query}*`;
   }
 
   if (Number(query)) {

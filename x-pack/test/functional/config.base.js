@@ -14,7 +14,7 @@ import { pageObjects } from './page_objects';
 // This hash comes from the latest successful build of the Production Distribution of the Package Registry, for
 // example: https://internal-ci.elastic.co/blue/organizations/jenkins/package_storage%2Findexing-job/detail/main/1884/pipeline/147.
 // It should be updated any time there is a new package published.
-export const dockerImage = 'docker.elastic.co/package-registry/distribution:production';
+export const dockerImage = 'docker.elastic.co/package-registry/distribution:lite';
 
 // the default export of config files must be a config provider
 // that returns an object with the projects config values
@@ -55,6 +55,7 @@ export default async function ({ readConfigFile }) {
         '--xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled=true',
         '--savedObjects.maxImportPayloadBytes=10485760', // for OSS test management/_import_objects,
         '--uiSettings.overrides.observability:enableNewSyntheticsView=true', // for OSS test management/_import_objects,
+        '--uiSettings.overrides.observability:enableInfrastructureHostsView=true', // for Infra/Hosts View test,
       ],
     },
     uiSettings: {

@@ -78,13 +78,20 @@ export const getPreloadedState = ({
     // only if Lens was opened with the intention to visualize a field (e.g. coming from Discover)
     query: !initialContext
       ? data.query.queryString.getDefaultQuery()
+      : 'searchQuery' in initialContext && initialContext.searchQuery
+      ? initialContext.searchQuery
       : (data.query.queryString.getQuery() as Query),
     filters: !initialContext
       ? data.query.filterManager.getGlobalFilters()
+      : 'searchFilters' in initialContext && initialContext.searchFilters
+      ? initialContext.searchFilters
       : data.query.filterManager.getFilters(),
     searchSessionId: data.search.session.getSessionId(),
     resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
-    isLinkedToOriginatingApp: Boolean(embeddableEditorIncomingState?.originatingApp),
+    isLinkedToOriginatingApp: Boolean(
+      embeddableEditorIncomingState?.originatingApp ||
+        (initialContext && 'isEmbeddable' in initialContext && initialContext?.isEmbeddable)
+    ),
     activeDatasourceId: initialDatasourceId,
     datasourceStates,
     visualization: {

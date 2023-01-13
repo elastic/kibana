@@ -11,8 +11,11 @@ export type DatasourceMock = jest.Mocked<Datasource> & {
   publicAPIMock: jest.Mocked<DatasourcePublicAPI>;
 };
 
-export function createMockDatasource(id: string): DatasourceMock {
-  const publicAPIMock: jest.Mocked<DatasourcePublicAPI> = {
+export function createMockDatasource(
+  id: string,
+  customPublicApi: Partial<DatasourcePublicAPI> = {}
+): DatasourceMock {
+  const publicAPIMock = {
     datasourceId: id,
     getTableSpec: jest.fn(() => []),
     getOperationForColumnId: jest.fn(),
@@ -22,7 +25,8 @@ export function createMockDatasource(id: string): DatasourceMock {
     getMaxPossibleNumValues: jest.fn(),
     isTextBasedLanguage: jest.fn(() => false),
     hasDefaultTimeField: jest.fn(() => true),
-  };
+    ...customPublicApi,
+  } as jest.Mocked<DatasourcePublicAPI>;
 
   return {
     id: 'testDatasource',

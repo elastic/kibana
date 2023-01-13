@@ -7,7 +7,7 @@
 
 export type { AuditServiceSetup, AuditLogger } from './audit_service';
 export { AuditService } from './audit_service';
-export type { AuditEvent } from './audit_events';
+export type { AuditEvent, AuditHttp, AuditKibana, AuditRequest } from './audit_events';
 export {
   userLoginEvent,
   userLogoutEvent,

@@ -6,10 +6,13 @@
  */
 
 import { journey, step, expect, before, Page } from '@elastic/synthetics';
-import { syntheticsAppPageProvider } from '../../page_objects/synthetics_app';
+import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
+import { syntheticsAppPageProvider } from '../../page_objects/synthetics/synthetics_app';
 import { cleanTestMonitors } from './services/add_monitor';
 
 journey(`Getting Started Page`, async ({ page, params }: { page: Page; params: any }) => {
+  recordVideo(page);
+
   const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });
 
   const createBasicMonitor = async () => {

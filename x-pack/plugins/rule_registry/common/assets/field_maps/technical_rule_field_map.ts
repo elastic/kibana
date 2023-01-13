@@ -79,6 +79,11 @@ export const technicalRuleFieldMap = {
     array: false,
     required: false,
   },
+  [Fields.ALERT_CASE_IDS]: {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
   [Fields.ALERT_RULE_AUTHOR]: {
     type: 'keyword',
     array: false,

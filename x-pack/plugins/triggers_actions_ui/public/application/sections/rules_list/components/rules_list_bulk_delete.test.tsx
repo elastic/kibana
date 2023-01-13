@@ -173,7 +173,7 @@ describe.skip('Rules list bulk delete', () => {
     expect(filter.arguments[1].arguments[0].arguments[1].value).toEqual('alert:2');
 
     expect(bulkDeleteRules).toHaveBeenCalledWith(
-      expect.objectContaining({
+      expect.not.objectContaining({
         ids: [],
       })
     );

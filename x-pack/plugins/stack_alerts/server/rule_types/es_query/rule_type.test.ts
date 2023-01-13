@@ -110,6 +110,8 @@ describe('ruleType', () => {
         thresholdComparator: Comparator.LT,
         threshold: [0],
         searchType: 'esQuery',
+        aggType: 'count',
+        groupBy: 'all',
       };
 
       expect(ruleType.validate?.params?.validate(params)).toBeTruthy();
@@ -129,6 +131,8 @@ describe('ruleType', () => {
         thresholdComparator: Comparator.BETWEEN,
         threshold: [0],
         searchType: 'esQuery',
+        aggType: 'count',
+        groupBy: 'all',
       };
 
       expect(() => paramsSchema.validate(params)).toThrowErrorMatchingInlineSnapshot(
@@ -144,10 +148,12 @@ describe('ruleType', () => {
         size: 100,
         timeWindowSize: 5,
         timeWindowUnit: 'm',
-        thresholdComparator: Comparator.BETWEEN,
+        thresholdComparator: Comparator.GT,
         threshold: [0],
         searchType: 'esQuery',
         excludeHitsFromPreviousRun: true,
+        aggType: 'count',
+        groupBy: 'all',
       };
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
@@ -162,7 +168,9 @@ describe('ruleType', () => {
 
       expect(result).toMatchInlineSnapshot(`
         Object {
-          "latestTimestamp": undefined,
+          "state": Object {
+            "latestTimestamp": undefined,
+          },
         }
       `);
     });
@@ -179,6 +187,8 @@ describe('ruleType', () => {
         threshold: [0],
         searchType: 'esQuery',
         excludeHitsFromPreviousRun: true,
+        aggType: 'count',
+        groupBy: 'all',
       };
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
@@ -210,7 +220,9 @@ describe('ruleType', () => {
       });
 
       expect(result).toMatchObject({
-        latestTimestamp: new Date(newestDocumentTimestamp).toISOString(),
+        state: {
+          latestTimestamp: new Date(newestDocumentTimestamp).toISOString(),
+        },
       });
     });
 
@@ -226,6 +238,8 @@ describe('ruleType', () => {
         threshold: [0],
         searchType: 'esQuery',
         excludeHitsFromPreviousRun: true,
+        aggType: 'count',
+        groupBy: 'all',
       };
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
@@ -260,7 +274,9 @@ describe('ruleType', () => {
       });
 
       expect(result).toMatchObject({
-        latestTimestamp: new Date(newestDocumentTimestamp).toISOString(),
+        state: {
+          latestTimestamp: new Date(newestDocumentTimestamp).toISOString(),
+        },
       });
     });
 
@@ -276,6 +292,8 @@ describe('ruleType', () => {
         threshold: [0],
         searchType: 'esQuery',
         excludeHitsFromPreviousRun: true,
+        aggType: 'count',
+        groupBy: 'all',
       };
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
@@ -304,7 +322,9 @@ describe('ruleType', () => {
       });
 
       expect(result).toMatchObject({
-        latestTimestamp: new Date(oldestDocumentTimestamp).toISOString(),
+        state: {
+          latestTimestamp: new Date(oldestDocumentTimestamp).toISOString(),
+        },
       });
     });
 
@@ -320,6 +340,8 @@ describe('ruleType', () => {
         threshold: [0],
         searchType: 'esQuery',
         excludeHitsFromPreviousRun: true,
+        aggType: 'count',
+        groupBy: 'all',
       };
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
@@ -344,7 +366,7 @@ describe('ruleType', () => {
         dateEnd: expect.any(String),
       });
 
-      expect(result).toMatchObject({
+      expect(result?.state).toMatchObject({
         latestTimestamp: new Date(oldestDocumentTimestamp).toISOString(),
       });
 
@@ -365,7 +387,7 @@ describe('ruleType', () => {
       const secondResult = await invokeExecutor({
         params,
         ruleServices,
-        state: result as EsQueryRuleState,
+        state: result?.state as EsQueryRuleState,
       });
 
       const existingInstance: AlertInstanceMock =
@@ -377,7 +399,9 @@ describe('ruleType', () => {
       });
 
       expect(secondResult).toMatchObject({
-        latestTimestamp: new Date(newestDocumentTimestamp).toISOString(),
+        state: {
+          latestTimestamp: new Date(newestDocumentTimestamp).toISOString(),
+        },
       });
     });
 
@@ -393,6 +417,8 @@ describe('ruleType', () => {
         threshold: [0],
         searchType: 'esQuery',
         excludeHitsFromPreviousRun: true,
+        aggType: 'count',
+        groupBy: 'all',
       };
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
@@ -424,7 +450,9 @@ describe('ruleType', () => {
       });
 
       expect(result).toMatchObject({
-        latestTimestamp: new Date(oldestDocumentTimestamp).toISOString(),
+        state: {
+          latestTimestamp: new Date(oldestDocumentTimestamp).toISOString(),
+        },
       });
     });
 
@@ -440,6 +468,8 @@ describe('ruleType', () => {
         threshold: [0],
         searchType: 'esQuery',
         excludeHitsFromPreviousRun: true,
+        aggType: 'count',
+        groupBy: 'all',
       };
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
@@ -472,7 +502,9 @@ describe('ruleType', () => {
       });
 
       expect(result).toMatchObject({
-        latestTimestamp: new Date(oldestDocumentTimestamp - 1000).toISOString(),
+        state: {
+          latestTimestamp: new Date(oldestDocumentTimestamp - 1000).toISOString(),
+        },
       });
     });
   });
@@ -500,6 +532,9 @@ describe('ruleType', () => {
           aggregatable: false,
         },
       ],
+      toSpec: () => {
+        return { id: 'test-id', title: 'test-title', timeFieldName: 'time-field' };
+      },
     };
     const defaultParams: OnlySearchSourceRuleParams = {
       size: 100,
@@ -510,6 +545,8 @@ describe('ruleType', () => {
       searchConfiguration: {},
       searchType: 'searchSource',
       excludeHitsFromPreviousRun: true,
+      aggType: 'count',
+      groupBy: 'all',
     };
 
     afterAll(() => {
@@ -530,6 +567,8 @@ describe('ruleType', () => {
         threshold: [0],
         esQuery: '',
         searchType: 'searchSource',
+        aggType: 'count',
+        groupBy: 'all',
       };
 
       expect(() => paramsSchema.validate(params)).toThrowErrorMatchingInlineSnapshot(
@@ -542,9 +581,15 @@ describe('ruleType', () => {
       const searchResult: ESSearchResponse<unknown, {}> = generateResults([]);
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
-      (searchSourceInstanceMock.getField as jest.Mock).mockImplementationOnce((name: string) => {
+      (ruleServices.dataViews.create as jest.Mock).mockResolvedValueOnce({
+        toSpec: () => dataViewMock.toSpec(),
+      });
+      (searchSourceInstanceMock.getField as jest.Mock).mockImplementation((name: string) => {
         if (name === 'index') {
           return dataViewMock;
+        }
+        if (name === 'filter') {
+          return [];
         }
       });
       (searchSourceInstanceMock.fetch as jest.Mock).mockResolvedValueOnce(searchResult);
@@ -573,9 +618,15 @@ describe('ruleType', () => {
       const params = { ...defaultParams, thresholdComparator: Comparator.GT_OR_EQ, threshold: [3] };
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
-      (searchSourceInstanceMock.getField as jest.Mock).mockImplementationOnce((name: string) => {
+      (ruleServices.dataViews.create as jest.Mock).mockResolvedValueOnce({
+        toSpec: () => dataViewMock.toSpec(),
+      });
+      (searchSourceInstanceMock.getField as jest.Mock).mockImplementation((name: string) => {
         if (name === 'index') {
           return dataViewMock;
+        }
+        if (name === 'filter') {
+          return [];
         }
       });
 

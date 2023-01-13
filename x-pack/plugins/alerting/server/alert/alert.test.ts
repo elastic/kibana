@@ -49,7 +49,7 @@ describe('isThrottled', () => {
     });
     clock.tick(30000);
     alert.scheduleActions('default');
-    expect(alert.isThrottled('1m')).toEqual(true);
+    expect(alert.isThrottled({ throttle: '1m' })).toEqual(true);
   });
 
   test(`shouldn't throttle when group didn't change and throttle period expired`, () => {
@@ -63,7 +63,7 @@ describe('isThrottled', () => {
     });
     clock.tick(30000);
     alert.scheduleActions('default');
-    expect(alert.isThrottled('15s')).toEqual(false);
+    expect(alert.isThrottled({ throttle: '15s' })).toEqual(false);
   });
 
   test(`shouldn't throttle when group changes`, () => {
@@ -77,7 +77,58 @@ describe('isThrottled', () => {
     });
     clock.tick(5000);
     alert.scheduleActions('other-group');
-    expect(alert.isThrottled('1m')).toEqual(false);
+    expect(alert.isThrottled({ throttle: '1m' })).toEqual(false);
+  });
+
+  test(`throttle a specific action`, () => {
+    const alert = new Alert<never, never, 'default' | 'other-group'>('1', {
+      meta: {
+        lastScheduledActions: {
+          date: new Date(),
+          group: 'default',
+          actions: {
+            'slack:1h': { date: new Date() },
+          },
+        },
+      },
+    });
+    clock.tick(5000);
+    alert.scheduleActions('other-group');
+    expect(alert.isThrottled({ throttle: '1m', actionHash: 'slack:1h' })).toEqual(false);
+  });
+
+  test(`shouldn't throttle a specific action when group didn't change and throttle period expired`, () => {
+    const alert = new Alert<never, never, 'default' | 'other-group'>('1', {
+      meta: {
+        lastScheduledActions: {
+          date: new Date('2020-01-01'),
+          group: 'default',
+          actions: {
+            'slack:1h': { date: new Date() },
+          },
+        },
+      },
+    });
+    clock.tick(30000);
+    alert.scheduleActions('default');
+    expect(alert.isThrottled({ throttle: '15s', actionHash: 'slack:1h' })).toEqual(false);
+  });
+
+  test(`shouldn't throttle a specific action when group changes`, () => {
+    const alert = new Alert<never, never, 'default' | 'other-group'>('1', {
+      meta: {
+        lastScheduledActions: {
+          date: new Date(),
+          group: 'default',
+          actions: {
+            'slack:1h': { date: new Date() },
+          },
+        },
+      },
+    });
+    clock.tick(5000);
+    alert.scheduleActions('other-group');
+    expect(alert.isThrottled({ throttle: '1m', actionHash: 'slack:1h' })).toEqual(false);
   });
 });
 
@@ -185,7 +236,7 @@ describe('scheduleActions()', () => {
       },
     });
     alert.replaceState({ otherField: true }).scheduleActions('default', { field: true });
-    expect(alert.isThrottled('1m')).toEqual(true);
+    expect(alert.isThrottled({ throttle: '1m' })).toEqual(true);
   });
 
   test('make isThrottled() return false when throttled expired', () => {
@@ -200,7 +251,7 @@ describe('scheduleActions()', () => {
     });
     clock.tick(120000);
     alert.replaceState({ otherField: true }).scheduleActions('default', { field: true });
-    expect(alert.isThrottled('1m')).toEqual(false);
+    expect(alert.isThrottled({ throttle: '1m' })).toEqual(false);
   });
 
   test('makes getScheduledActionOptions() return given options', () => {
@@ -253,6 +304,26 @@ describe('updateLastScheduledActions()', () => {
           group: 'default',
         },
         flappingHistory: [],
+      },
+    });
+  });
+
+  test('replaces previous lastScheduledActions with a scheduled action', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      meta: {},
+    });
+    alert.updateLastScheduledActions('default', 'actionId1');
+    expect(alert.toJSON()).toEqual({
+      state: {},
+      meta: {
+        flappingHistory: [],
+        lastScheduledActions: {
+          date: new Date().toISOString(),
+          group: 'default',
+          actions: {
+            actionId1: { date: new Date().toISOString() },
+          },
+        },
       },
     });
   });

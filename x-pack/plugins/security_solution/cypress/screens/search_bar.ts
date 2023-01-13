@@ -15,7 +15,7 @@ export const ADD_FILTER_FORM_FIELD_INPUT =
   '[data-test-subj="filterFieldSuggestionList"] input[data-test-subj="comboBoxSearchInput"]';
 
 export const ADD_FILTER_FORM_FIELD_OPTION = (value: string) =>
-  `[data-test-subj="comboBoxOptionsList filterFieldSuggestionList-optionsList"] button[title="${value}"] mark`;
+  `[data-test-subj="comboBoxOptionsList filterFieldSuggestionList-optionsList"] button[title="${value}"]`;
 
 export const ADD_FILTER_FORM_OPERATOR_FIELD =
   '[data-test-subj="filterOperatorList"] input[data-test-subj="comboBoxSearchInput"]';

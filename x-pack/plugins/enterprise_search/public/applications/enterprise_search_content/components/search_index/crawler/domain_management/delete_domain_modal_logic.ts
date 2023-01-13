@@ -13,11 +13,8 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { i18n } from '@kbn/i18n';
-
 import { Status } from '../../../../../../../common/types/api';
 import { Actions } from '../../../../../shared/api_logic/create_api_logic';
-import { flashAPIErrors, flashSuccessToast } from '../../../../../shared/flash_messages';
 import {
   DeleteCrawlerDomainApiLogic,
   DeleteCrawlerDomainResponse,
@@ -74,18 +71,7 @@ export const DeleteDomainModalLogic = kea<
     ],
   },
   listeners: ({ values }) => ({
-    apiError: (error) => {
-      flashAPIErrors(error);
-    },
-    apiSuccess: ({ domain }) => {
-      flashSuccessToast(
-        i18n.translate('xpack.enterpriseSearch.crawler.domainsTable.action.delete.successMessage', {
-          defaultMessage: "Successfully deleted domain '{domainUrl}'",
-          values: {
-            domainUrl: domain.url,
-          },
-        })
-      );
+    apiSuccess: () => {
       CrawlerLogic.actions.fetchCrawlerData();
     },
     deleteDomain: () => {

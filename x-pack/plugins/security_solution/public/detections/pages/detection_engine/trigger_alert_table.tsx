@@ -19,11 +19,11 @@ import { alertTableViewModeSelector } from '../../../common/store/alert_table/se
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { SHOW_EXTERNAL_ALERTS } from '../../../common/components/events_tab/translations';
 import { RightTopMenu } from '../../../common/components/events_viewer/right_top_menu';
-import { ALERTS_TABLE_VIEW_SELECTION_KEY } from '../../../common/components/event_rendered_view/helpers';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import type { TableId } from '../../../../common/types';
 import { useKibana } from '../../../common/lib/kibana';
 import type { ViewSelection } from '../../../common/components/events_viewer/summary_view_select';
+import { ALERTS_TABLE_VIEW_SELECTION_KEY } from '../../../common/components/events_viewer/summary_view_select';
 import { AdditionalFiltersAction } from '../../components/alerts_table/additional_filters_action';
 import { changeAlertTableViewMode } from '../../../common/store/alert_table/actions';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';

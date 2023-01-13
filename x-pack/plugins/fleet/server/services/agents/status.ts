@@ -5,120 +5,142 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
-import pMap from 'p-map';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
-import type { KueryNode } from '@kbn/es-query';
+import { toElasticsearchQuery } from '@kbn/es-query';
 import { fromKueryExpression } from '@kbn/es-query';
 
-import { AGENTS_PREFIX } from '../../constants';
+import type {
+  AggregationsTermsAggregateBase,
+  AggregationsTermsBucketBase,
+  QueryDslQueryContainer,
+} from '@elastic/elasticsearch/lib/api/types';
+
+import { AGENTS_INDEX } from '../../constants';
 import type { AgentStatus } from '../../types';
-import { AgentStatusKueryHelper } from '../../../common/services';
 import { FleetUnauthorizedError } from '../../errors';
 
 import { appContextService } from '../app_context';
 
-import {
-  closePointInTime,
-  getAgentById,
-  getAgentsByKuery,
-  openPointInTime,
-  removeSOAttributes,
-} from './crud';
+import { getAgentById, removeSOAttributes } from './crud';
+import { buildAgentStatusRuntimeField } from './build_status_runtime_field';
+
+interface AggregationsStatusTermsBucketKeys extends AggregationsTermsBucketBase {
+  key: AgentStatus;
+}
 
 const DATA_STREAM_INDEX_PATTERN = 'logs-*-*,metrics-*-*,traces-*-*,synthetics-*-*';
 const MAX_AGENT_DATA_PREVIEW_SIZE = 20;
 export async function getAgentStatusById(
   esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract,
   agentId: string
 ): Promise<AgentStatus> {
-  return (await getAgentById(esClient, agentId)).status!;
-}
-
-export const getAgentStatus = AgentStatusKueryHelper.getAgentStatus;
-
-function joinKuerys(...kuerys: Array<string | undefined>) {
-  return kuerys
-    .filter((kuery) => kuery !== undefined)
-    .reduce((acc: KueryNode | undefined, kuery: string | undefined): KueryNode | undefined => {
-      if (kuery === undefined) {
-        return acc;
-      }
-      const normalizedKuery: KueryNode = fromKueryExpression(removeSOAttributes(kuery || ''));
-
-      if (!acc) {
-        return normalizedKuery;
-      }
-
-      return {
-        type: 'function',
-        function: 'and',
-        arguments: [acc, normalizedKuery],
-      };
-    }, undefined as KueryNode | undefined);
+  return (await getAgentById(esClient, soClient, agentId)).status!;
 }
 
 export async function getAgentStatusForAgentPolicy(
   esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract,
   agentPolicyId?: string,
   filterKuery?: string
 ) {
-  let pitId: string | undefined;
+  const logger = appContextService.getLogger();
+  const runtimeFields = await buildAgentStatusRuntimeField(soClient);
+
+  const clauses: QueryDslQueryContainer[] = [];
+
+  if (filterKuery) {
+    const kueryAsElasticsearchQuery = toElasticsearchQuery(
+      fromKueryExpression(removeSOAttributes(filterKuery))
+    );
+    clauses.push(kueryAsElasticsearchQuery);
+  }
+
+  if (agentPolicyId) {
+    clauses.push({
+      term: {
+        policy_id: agentPolicyId,
+      },
+    });
+  }
+
+  const query =
+    clauses.length > 0
+      ? {
+          bool: {
+            must: clauses,
+          },
+        }
+      : undefined;
+
+  const statuses: Record<AgentStatus, number> = {
+    online: 0,
+    error: 0,
+    inactive: 0,
+    offline: 0,
+    updating: 0,
+    unenrolled: 0,
+    degraded: 0,
+    enrolling: 0,
+    unenrolling: 0,
+  };
+
+  let response;
+
   try {
-    pitId = await openPointInTime(esClient);
+    response = await esClient.search<
+      null,
+      { status: AggregationsTermsAggregateBase<AggregationsStatusTermsBucketKeys> }
+    >({
+      index: AGENTS_INDEX,
+      size: 0,
+      query,
+      fields: Object.keys(runtimeFields),
+      runtime_mappings: runtimeFields,
+      aggregations: {
+        status: {
+          terms: {
+            field: 'status',
+            size: Object.keys(statuses).length,
+          },
+        },
+      },
+    });
   } catch (error) {
-    if (error.statusCode === 404) {
-      appContextService
-        .getLogger()
-        .debug('Index .fleet-agents does not exist yet, skipping point in time.');
-    } else {
-      throw error;
-    }
-  }
-  const [all, allActive, online, error, offline, updating] = await pMap(
-    [
-      undefined, // All agents, including inactive
-      undefined, // All active agents
-      AgentStatusKueryHelper.buildKueryForOnlineAgents(),
-      AgentStatusKueryHelper.buildKueryForErrorAgents(),
-      AgentStatusKueryHelper.buildKueryForOfflineAgents(),
-      AgentStatusKueryHelper.buildKueryForUpdatingAgents(),
-    ],
-    (kuery, index) =>
-      getAgentsByKuery(esClient, {
-        showInactive: index === 0,
-        perPage: 0,
-        page: 1,
-        pitId,
-        kuery: joinKuerys(
-          ...[
-            kuery,
-            filterKuery,
-            agentPolicyId ? `${AGENTS_PREFIX}.policy_id:"${agentPolicyId}"` : undefined,
-          ]
-        ),
-      }),
-    {
-      concurrency: 1,
-    }
-  );
-
-  if (pitId) {
-    await closePointInTime(esClient, pitId);
+    logger.warn(`Error getting agent statuses: ${error}`);
+    throw error;
   }
 
-  const result = {
-    total: allActive.total,
-    inactive: all.total - allActive.total,
-    online: online.total,
-    error: error.total,
-    offline: offline.total,
-    updating: updating.total,
-    other: all.total - online.total - error.total - offline.total,
+  const buckets = (response?.aggregations?.status?.buckets ||
+    []) as AggregationsStatusTermsBucketKeys[];
+
+  buckets.forEach((bucket) => {
+    if (statuses[bucket.key] !== undefined) {
+      statuses[bucket.key] = bucket.doc_count;
+    }
+  });
+
+  const combinedStatuses = {
+    online: statuses.online,
+    error: statuses.error + statuses.degraded,
+    inactive: statuses.inactive,
+    offline: statuses.offline,
+    updating: statuses.updating + statuses.enrolling + statuses.unenrolling,
+    unenrolled: statuses.unenrolled,
+  };
+
+  return {
+    ...combinedStatuses,
+    /* @deprecated no agents will have other status */
+    other: 0,
     /* @deprecated Agent events do not exists anymore */
     events: 0,
+    total:
+      Object.values(statuses).reduce((acc, val) => acc + val, 0) -
+      combinedStatuses.unenrolled -
+      combinedStatuses.inactive,
   };
-  return result;
 }
 export async function getIncomingDataByAgentsId(
   esClient: ElasticsearchClient,

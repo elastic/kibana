@@ -125,3 +125,7 @@ export const getFilterEventData = (
     return acc;
   }, []);
 };
+
+export const getSeriesValueColumnIndex = (value: string, visData: Datatable): number => {
+  return visData.columns.findIndex(({ id }) => !!visData.rows.find((r) => r[id] === value));
+};

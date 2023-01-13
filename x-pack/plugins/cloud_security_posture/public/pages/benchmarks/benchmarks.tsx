@@ -7,22 +7,23 @@
 
 import React, { useState } from 'react';
 import {
+  EuiButton,
   EuiFieldSearch,
   EuiFieldSearchProps,
-  EuiButton,
-  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTextColor,
-  EuiText,
   EuiPageHeader,
+  EuiSpacer,
+  EuiText,
+  EuiTextColor,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
+import { KSPM_POLICY_TEMPLATE } from '../../../common/constants';
+import { useCspIntegrationLink } from '../../common/navigation/use_csp_integration_link';
 import { CloudPosturePageTitle } from '../../components/cloud_posture_page_title';
 import { CloudPosturePage } from '../../components/cloud_posture_page';
-import { useCISIntegrationLink } from '../../common/navigation/use_navigate_to_cis_integration';
 import { BenchmarksTable } from './benchmarks_table';
 import {
   useCspBenchmarkIntegrations,
@@ -35,8 +36,9 @@ import { usePageSize } from '../../common/hooks/use_page_size';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
+// TODO: CIS AWS - add cspm integration button as well
 const AddCisIntegrationButton = () => {
-  const cisIntegrationLink = useCISIntegrationLink();
+  const cisIntegrationLink = useCspIntegrationLink(KSPM_POLICY_TEMPLATE);
 
   return (
     <EuiButton

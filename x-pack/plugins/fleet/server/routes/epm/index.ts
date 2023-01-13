@@ -7,6 +7,14 @@
 
 import type { IKibanaResponse } from '@kbn/core/server';
 
+import type { FleetAuthz } from '../../../common';
+
+import {
+  calculateRouteAuthz,
+  type FleetAuthzRouter,
+  getRouteRequiredAuthz,
+} from '../../services/security';
+
 import type {
   DeletePackageResponse,
   GetInfoResponse,
@@ -32,7 +40,6 @@ import {
   UpdatePackageRequestSchema,
   UpdatePackageRequestSchemaDeprecated,
 } from '../../types';
-import type { FleetAuthzRouter } from '../security';
 
 import {
   getCategoriesHandler,
@@ -110,9 +117,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     {
       path: EPM_API_ROUTES.INFO_PATTERN,
       validate: GetInfoRequestSchema,
-      fleetAuthz: {
-        integrations: { readPackageInfo: true },
-      },
+      fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
+        calculateRouteAuthz(fleetAuthz, getRouteRequiredAuthz('get', EPM_API_ROUTES.INFO_PATTERN))
+          .granted,
     },
     getInfoHandler
   );
@@ -185,9 +192,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     {
       path: EPM_API_ROUTES.INFO_PATTERN_DEPRECATED,
       validate: GetInfoRequestSchemaDeprecated,
-      fleetAuthz: {
-        integrations: { readPackageInfo: true },
-      },
+      fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
+        calculateRouteAuthz(
+          fleetAuthz,
+          getRouteRequiredAuthz('get', EPM_API_ROUTES.INFO_PATTERN_DEPRECATED)
+        ).granted,
     },
     async (context, request, response) => {
       const newRequest = { ...request, params: splitPkgKey(request.params.pkgkey) } as any;

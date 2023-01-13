@@ -22,6 +22,7 @@ export const LocationsStatus = () => {
     <EuiBadgeGroup>
       {locations.map((loc) => (
         <EuiBadge
+          key={loc.observer?.geo?.name}
           iconType={() => (
             <EuiIcon
               size="s"

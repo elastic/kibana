@@ -71,7 +71,7 @@ They take care of the nitty gritty so you can focus on creative
 solutions to your particular problem sphere. Some examples of common
 services you should consider:
 
-* {kib-repo}tree/{branch}/src/plugins/data/README.md[Data
+* {kib-repo}tree/{branch}/src/plugins/data/README.mdx[Data
 services]
 ** {kib-repo}tree/{branch}/src/plugins/data/README.mdx#search[Search
 strategies]

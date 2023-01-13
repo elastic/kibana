@@ -8,8 +8,8 @@
 import React from 'react';
 import { ComponentStory } from '@storybook/react';
 
+import { anSLO } from '../../../data/slo';
 import { SloDetails as Component, Props } from './slo_details';
-import { anSLO } from '../mocks/slo';
 
 export default {
   component: Component,

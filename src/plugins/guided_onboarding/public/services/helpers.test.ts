@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { testGuideConfig } from '../../common';
+import { testGuideConfig, testGuideId } from '../../common';
 import type { GuidesConfig } from '../../common';
 import {
   findGuideConfigByGuideId,
@@ -22,7 +22,6 @@ import {
 import {
   mockPluginStateInProgress,
   mockPluginStateNotStarted,
-  testGuide,
   testGuideFirstStep,
   testGuideLastStep,
   testGuideManualCompletionStep,
@@ -37,7 +36,7 @@ describe('GuidedOnboarding ApiService helpers', () => {
     it('returns undefined if the config is not found', () => {
       const config = findGuideConfigByGuideId(
         { testGuide: testGuideConfig } as GuidesConfig,
-        'security'
+        'siem'
       );
       expect(config).toBeUndefined();
     });
@@ -45,7 +44,7 @@ describe('GuidedOnboarding ApiService helpers', () => {
     it('returns the correct config guide', () => {
       const config = findGuideConfigByGuideId(
         { testGuide: testGuideConfig } as GuidesConfig,
-        testGuide
+        testGuideId
       );
       expect(config).not.toBeUndefined();
     });
@@ -53,24 +52,24 @@ describe('GuidedOnboarding ApiService helpers', () => {
 
   describe('getStepConfig', () => {
     it('returns undefined if the config is not found', async () => {
-      const config = getStepConfig(undefined, testGuide, testGuideFirstStep);
+      const config = getStepConfig(undefined, testGuideId, testGuideFirstStep);
       expect(config).toBeUndefined();
     });
 
     it('returns the config for the step', async () => {
-      const config = getStepConfig(testGuideConfig, testGuide, testGuideFirstStep);
+      const config = getStepConfig(testGuideConfig, testGuideId, testGuideFirstStep);
       expect(config).toHaveProperty('title');
     });
   });
 
   describe('isLastStep', () => {
     it('returns true if the passed params are for the last step', () => {
-      const result = isLastStep(testGuideConfig, testGuide, testGuideLastStep);
+      const result = isLastStep(testGuideConfig, testGuideId, testGuideLastStep);
       expect(result).toBe(true);
     });
 
     it('returns false if the passed params are not for the last step', () => {
-      const result = isLastStep(testGuideConfig, testGuide, testGuideFirstStep);
+      const result = isLastStep(testGuideConfig, testGuideId, testGuideFirstStep);
       expect(result).toBe(false);
     });
   });
@@ -105,7 +104,7 @@ describe('GuidedOnboarding ApiService helpers', () => {
 
   describe('isGuideActive', () => {
     it('returns false if plugin state is undefined', () => {
-      const isActive = isGuideActive(undefined, testGuide);
+      const isActive = isGuideActive(undefined, testGuideId);
       expect(isActive).toBe(false);
     });
 
@@ -120,26 +119,26 @@ describe('GuidedOnboarding ApiService helpers', () => {
     });
 
     it('returns false if guide is not in progress', () => {
-      const isActive = isGuideActive(mockPluginStateInProgress, 'security');
+      const isActive = isGuideActive(mockPluginStateInProgress, 'siem');
       expect(isActive).toBe(false);
     });
 
     it('returns true if guide is in progress', () => {
-      const isActive = isGuideActive(mockPluginStateInProgress, testGuide);
+      const isActive = isGuideActive(mockPluginStateInProgress, testGuideId);
       expect(isActive).toBe(true);
     });
   });
 
   describe('isStepInProgress', () => {
     it('returns false if guide state is undefined', () => {
-      const isInProgress = isStepInProgress(undefined, testGuide, testGuideFirstStep);
+      const isInProgress = isStepInProgress(undefined, testGuideId, testGuideFirstStep);
       expect(isInProgress).toBe(false);
     });
 
     it('returns false if guide is not active', () => {
       const isInProgress = isStepInProgress(
         testGuideStep1InProgressState,
-        'security',
+        'siem',
         testGuideFirstStep
       );
       expect(isInProgress).toBe(false);
@@ -148,7 +147,7 @@ describe('GuidedOnboarding ApiService helpers', () => {
     it('returns false if step is not in progress', () => {
       const isInProgress = isStepInProgress(
         testGuideStep1InProgressState,
-        testGuide,
+        testGuideId,
         testGuideLastStep
       );
       expect(isInProgress).toBe(false);
@@ -157,7 +156,7 @@ describe('GuidedOnboarding ApiService helpers', () => {
     it('returns true if step is in progress', () => {
       const isInProgress = isStepInProgress(
         testGuideStep1InProgressState,
-        testGuide,
+        testGuideId,
         testGuideFirstStep
       );
       expect(isInProgress).toBe(true);
@@ -166,14 +165,14 @@ describe('GuidedOnboarding ApiService helpers', () => {
 
   describe('isStepReadyToComplete', () => {
     it('returns false if guide state is undefined', () => {
-      const isReadyToComplete = isStepReadyToComplete(undefined, testGuide, testGuideFirstStep);
+      const isReadyToComplete = isStepReadyToComplete(undefined, testGuideId, testGuideFirstStep);
       expect(isReadyToComplete).toBe(false);
     });
 
     it('returns false if guide is not active', () => {
       const isReadyToComplete = isStepReadyToComplete(
         testGuideStep1InProgressState,
-        'security',
+        'siem',
         testGuideFirstStep
       );
       expect(isReadyToComplete).toBe(false);
@@ -182,7 +181,7 @@ describe('GuidedOnboarding ApiService helpers', () => {
     it('returns false if step is not ready not complete', () => {
       const isReadyToComplete = isStepReadyToComplete(
         testGuideStep2ReadyToCompleteState,
-        testGuide,
+        testGuideId,
         testGuideLastStep
       );
       expect(isReadyToComplete).toBe(false);
@@ -191,7 +190,7 @@ describe('GuidedOnboarding ApiService helpers', () => {
     it('returns true if step is ready to complete', () => {
       const isInProgress = isStepReadyToComplete(
         testGuideStep2ReadyToCompleteState,
-        testGuide,
+        testGuideId,
         testGuideManualCompletionStep
       );
       expect(isInProgress).toBe(true);

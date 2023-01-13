@@ -18,7 +18,6 @@ import { useBoolState } from '../../../../common/hooks/use_bool_state';
 import { useValueChanged } from '../../../../common/hooks/use_value_changed';
 import { PrePackagedRulesPrompt } from '../../../../detections/components/rules/pre_packaged_rules/load_empty_prompt';
 import type { Rule, RulesSortingFields } from '../../../rule_management/logic';
-import { usePrePackagedRulesStatus } from '../../../rule_management/logic/use_pre_packaged_rules_status';
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
 import type { EuiBasicTableOnChange } from '../../../../detections/pages/detection_engine/rules/types';
 import { BulkActionDryRunConfirmation } from './bulk_actions/bulk_action_dry_run_confirmation';
@@ -39,6 +38,7 @@ import { useBulkDuplicateExceptionsConfirmation } from './bulk_actions/use_bulk_
 import { BulkActionDuplicateExceptionsConfirmation } from './bulk_actions/bulk_duplicate_exceptions_confirmation';
 import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
 import { RULES_TABLE_PAGE_SIZE_OPTIONS } from './constants';
+import { useRuleManagementFilters } from '../../../rule_management/logic/use_rule_management_filters';
 
 const INITIAL_SORT_FIELD = 'enabled';
 
@@ -65,8 +65,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
 
   const tableRef = useRef<EuiBasicTable>(null);
   const rulesTableContext = useRulesTableContext();
-  const { data: prePackagedRulesStatus, isLoading: isPrepackagedStatusLoading } =
-    usePrePackagedRulesStatus();
+  const { data: ruleManagementFilters } = useRuleManagementFilters();
 
   const {
     state: {
@@ -214,14 +213,13 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
   }, [rules, isAllSelected, setIsAllSelected, setSelectedRuleIds]);
 
   const isTableEmpty =
-    !isPrepackagedStatusLoading &&
-    prePackagedRulesStatus?.rules_custom_installed === 0 &&
-    prePackagedRulesStatus.rules_installed === 0;
+    ruleManagementFilters?.rules_summary.custom_count === 0 &&
+    ruleManagementFilters?.rules_summary.prebuilt_installed_count === 0;
 
-  const shouldShowRulesTable = !isPrepackagedStatusLoading && !isLoading && !isTableEmpty;
+  const shouldShowRulesTable = !isLoading && !isTableEmpty;
 
   const tableProps =
-    selectedTab === AllRulesTabs.rules
+    selectedTab === AllRulesTabs.management
       ? {
           'data-test-subj': 'rules-table',
           columns: rulesColumns,

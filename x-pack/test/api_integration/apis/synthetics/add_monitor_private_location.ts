@@ -15,7 +15,7 @@ import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from '../uptime/rest/helper/get_fixture_json';
-import { comparePolicies, getTestSyntheticsPolicy } from '../uptime/rest/sample_data/test_policy';
+import { comparePolicies, getTestSyntheticsPolicy } from './sample_data/test_policy';
 import { PrivateLocationTestService } from './services/private_location_test_service';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -36,7 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await supertestAPI.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
       await supertestAPI
-        .post('/api/fleet/epm/packages/synthetics/0.10.3')
+        .post('/api/fleet/epm/packages/synthetics/0.11.4')
         .set('kbn-xsrf', 'true')
         .send({ force: true })
         .expect(200);
@@ -267,6 +267,7 @@ export default function ({ getService }: FtrProviderContext) {
                 uptime: ['all'],
                 fleet: ['all'],
                 fleetv2: ['all'],
+                actions: ['all'],
               },
               spaces: ['*'],
             },
@@ -362,7 +363,7 @@ export default function ({ getService }: FtrProviderContext) {
             pkgPolicy.id === monitorId + '-' + testFleetPolicyID + `-default`
         );
 
-        expect(packagePolicy.package.version).eql('0.10.3');
+        expect(packagePolicy.package.version).eql('0.11.4');
 
         await supertestAPI.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
         const policyResponseAfterUpgrade = await supertestAPI.get(
@@ -372,7 +373,7 @@ export default function ({ getService }: FtrProviderContext) {
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id === monitorId + '-' + testFleetPolicyID + `-default`
         );
-        expect(semver.gt(packagePolicyAfterUpgrade.package.version, '0.10.3')).eql(true);
+        expect(semver.gte(packagePolicyAfterUpgrade.package.version, '0.11.4')).eql(true);
       } finally {
         await supertestAPI
           .delete(API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)

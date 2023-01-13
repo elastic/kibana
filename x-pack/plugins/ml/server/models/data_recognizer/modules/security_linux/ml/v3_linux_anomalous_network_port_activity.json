@@ -57,6 +57,7 @@
         "url_name": "Hosts Overview by user name",
         "url_value": "security/hosts/ml-hosts?_g=()&query=(query:'user.name%20:%20%22$user.name$%22',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
       }
-    ]
+    ],
+    "security_app_display_name": "Unusual Linux Network Port Activity"
   }
 }

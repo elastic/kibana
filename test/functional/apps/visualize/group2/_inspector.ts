@@ -17,8 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const monacoEditor = getService('monacoEditor');
   const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'timePicker']);
 
-  // Failing: See https://github.com/elastic/kibana/issues/147292
-  describe.skip('inspector', function describeIndexTests() {
+  describe('inspector', function describeIndexTests() {
     before(async function () {
       await PageObjects.visualize.initTests();
       await PageObjects.visualize.navigateToNewAggBasedVisualization();
@@ -102,11 +101,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           ]);
 
           await inspector.filterForTableCell(1, 1);
+          await PageObjects.visChart.waitForVisualization();
           await inspector.expectTableData([['win 8', '2,904', '13,031,579,645.108']]);
         });
 
         it('should allow filtering out values', async function () {
           await inspector.filterOutTableCell(1, 1);
+          await PageObjects.visChart.waitForVisualization();
           await inspector.expectTableData([
             ['win xp', '2,858', '13,073,190,186.423'],
             ['win 7', '2,814', '13,186,695,551.251'],
@@ -116,6 +117,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('should allow filtering for other values', async function () {
           await inspector.filterForTableCell(1, 3);
+          await PageObjects.visChart.waitForVisualization();
           await inspector.expectTableData([
             ['win 7', '2,814', '13,186,695,551.251'],
             ['ios', '2,784', '13,009,497,206.823'],
@@ -125,6 +127,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('should allow filtering out other values', async function () {
           await inspector.filterOutTableCell(1, 3);
+          await PageObjects.visChart.waitForVisualization();
           await inspector.expectTableData([
             ['win 8', '2,904', '13,031,579,645.108'],
             ['win xp', '2,858', '13,073,190,186.423'],

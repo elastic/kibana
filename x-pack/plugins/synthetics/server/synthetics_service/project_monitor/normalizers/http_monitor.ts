@@ -22,7 +22,7 @@ import {
   getOptionalListField,
   getOptionalArrayField,
   getUnsupportedKeysError,
-  getMultipleUrlsOrHostsError,
+  getInvalidUrlsOrHostsError,
 } from './common_fields';
 
 export const getNormalizeHTTPFields = ({
@@ -47,10 +47,9 @@ export const getNormalizeHTTPFields = ({
 
   /* Check if monitor has multiple urls */
   const urls = getOptionalListField(monitor.urls);
-  if (urls.length > 1) {
-    errors.push(getMultipleUrlsOrHostsError(monitor, 'urls', version));
+  if (urls.length !== 1) {
+    errors.push(getInvalidUrlsOrHostsError(monitor, 'urls', version));
   }
-
   if (unsupportedKeys.length) {
     errors.push(getUnsupportedKeysError(monitor, unsupportedKeys, version));
   }

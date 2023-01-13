@@ -29,7 +29,6 @@ import type { Writable } from '@kbn/utility-types';
 
 // @ts-ignore
 import { SeriesEditor } from '../series_editor';
-// @ts-expect-error not typed yet
 import { IndexPattern } from '../index_pattern';
 import { createSelectHandler } from '../lib/create_select_handler';
 import { ColorRules } from '../color_rules';

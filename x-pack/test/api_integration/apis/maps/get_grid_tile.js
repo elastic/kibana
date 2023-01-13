@@ -144,20 +144,20 @@ export default function ({ getService }) {
       expect(gridFeature.id).to.be(undefined);
       expect(gridFeature.properties).to.eql({
         _count: 1,
-        _key: '85264a33fffffff',
+        _key: '84264a3ffffffff',
         'avg_of_bytes.value': 9252,
       });
 
       // assert feature geometry is hex
       expect(gridFeature.loadGeometry()).to.eql([
         [
-          { x: 102, y: 669 },
-          { x: 96, y: 676 },
-          { x: 86, y: 674 },
-          { x: 83, y: 664 },
+          { x: 111, y: 698 },
+          { x: 89, y: 710 },
+          { x: 67, y: 696 },
+          { x: 67, y: 669 },
           { x: 89, y: 657 },
-          { x: 99, y: 659 },
-          { x: 102, y: 669 },
+          { x: 112, y: 672 },
+          { x: 111, y: 698 },
         ],
       ]);
     });
@@ -182,11 +182,11 @@ export default function ({ getService }) {
       expect(labelFeature.id).to.be(undefined);
       expect(labelFeature.properties).to.eql({
         _count: 1,
-        _key: '85264a33fffffff',
+        _key: '84264a3ffffffff',
         'avg_of_bytes.value': 9252,
         _mvt_label_position: true,
       });
-      expect(labelFeature.loadGeometry()).to.eql([[{ x: 93, y: 667 }]]);
+      expect(labelFeature.loadGeometry()).to.eql([[{ x: 89, y: 684 }]]);
     });
 
     it('should return vector tile with meta layer', async () => {

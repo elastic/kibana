@@ -18,7 +18,8 @@ export interface TextBasedLayerPanelProps extends DatasourceLayerPanelProps<Text
 
 export function LayerPanel({ state, layerId, dataViews }: TextBasedLayerPanelProps) {
   const layer = state.layers[layerId];
-  const dataView = dataViews.indexPatternRefs.find((ref) => ref.id === layer.index);
+  const dataView = state.indexPatternRefs.find((ref) => ref.id === layer.index);
+
   const notFoundTitleLabel = i18n.translate('xpack.lens.layerPanel.missingDataView', {
     defaultMessage: 'Data view not found',
   });

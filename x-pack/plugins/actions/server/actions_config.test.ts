@@ -534,3 +534,38 @@ describe('validateEmailAddresses()', () => {
     );
   });
 });
+
+describe('getMaxAttempts()', () => {
+  test('returns the maxAttempts defined in config', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      run: { maxAttempts: 1 },
+    });
+    const maxAttempts = acu.getMaxAttempts({ actionTypeMaxAttempts: 2, actionTypeId: 'slack' });
+    expect(maxAttempts).toEqual(1);
+  });
+
+  test('returns the maxAttempts defined in config for the action type', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      run: { maxAttempts: 1, connectorTypeOverrides: [{ id: 'slack', maxAttempts: 4 }] },
+    });
+    const maxAttempts = acu.getMaxAttempts({ actionTypeMaxAttempts: 2, actionTypeId: 'slack' });
+    expect(maxAttempts).toEqual(4);
+  });
+
+  test('returns the maxAttempts passed by the action type', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    const maxAttempts = acu.getMaxAttempts({ actionTypeMaxAttempts: 2, actionTypeId: 'slack' });
+    expect(maxAttempts).toEqual(2);
+  });
+
+  test('returns the default maxAttempts', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    const maxAttempts = acu.getMaxAttempts({
+      actionTypeMaxAttempts: undefined,
+      actionTypeId: 'slack',
+    });
+    expect(maxAttempts).toEqual(3);
+  });
+});

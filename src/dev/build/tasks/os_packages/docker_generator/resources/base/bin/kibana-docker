@@ -165,6 +165,7 @@ kibana_vars=(
     server.securityResponseHeaders.referrerPolicy
     server.securityResponseHeaders.strictTransportSecurity
     server.securityResponseHeaders.xContentTypeOptions
+    server.securityResponseHeaders.crossOriginOpenerPolicy
     server.shutdownTimeout
     server.socketTimeout
     server.ssl.cert

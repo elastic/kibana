@@ -14,7 +14,7 @@ import type { ChangePoint } from '@kbn/ml-agg-utils';
 import type { Query } from '@kbn/es-query';
 
 import { buildBaseFilterCriteria } from './application/utils/query_utils';
-import { GroupTableItem } from './components/spike_analysis_table/spike_analysis_table_groups';
+import { GroupTableItem } from './components/spike_analysis_table/types';
 
 export interface DocumentCountStats {
   interval?: number;
@@ -71,7 +71,11 @@ export const getDocumentCountStatsRequest = (params: DocumentStatsSearchStrategy
       date_histogram: {
         field: timeFieldName,
         fixed_interval: `${intervalMs}ms`,
-        min_doc_count: 1,
+        min_doc_count: 0,
+        extended_bounds: {
+          min: earliestMs,
+          max: latestMs,
+        },
       },
     },
   };

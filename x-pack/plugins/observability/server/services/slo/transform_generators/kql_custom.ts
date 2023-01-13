@@ -7,9 +7,9 @@
 
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { kqlCustomIndicatorSchema } from '@kbn/slo-schema';
 
 import { InvalidTransformError } from '../../../errors';
-import { kqlCustomIndicatorSchema } from '../../../types/schema';
 import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
 import { TransformGenerator } from '.';
 import {

@@ -22,6 +22,8 @@ import type {
   EuiDataGridProps,
 } from '@elastic/eui';
 import { EuiDataGridColumn, EuiDataGridControlColumn, EuiDataGridSorting } from '@elastic/eui';
+import { HttpSetup } from '@kbn/core/public';
+import { KueryNode } from '@kbn/es-query';
 import {
   ActionType,
   AlertHistoryEsIndexConnectorId,
@@ -179,22 +181,27 @@ export enum ActionConnectorMode {
   ActionForm = 'actionForm',
 }
 
-export interface BulkDeleteResponse {
-  errors: BulkOperationError[];
-  total: number;
-}
-
-export interface BulkEnableResponse {
+export interface BulkOperationResponse {
   rules: Rule[];
   errors: BulkOperationError[];
   total: number;
 }
 
-export interface BulkDisableResponse {
-  rules: Rule[];
-  errors: BulkOperationError[];
-  total: number;
+interface BulkOperationAttributesByIds {
+  ids: string[];
+  filter?: never;
 }
+interface BulkOperationAttributesByFilter {
+  ids?: never;
+  filter: KueryNode | null;
+}
+export type BulkOperationAttributesWithoutHttp =
+  | BulkOperationAttributesByIds
+  | BulkOperationAttributesByFilter;
+
+export type BulkOperationAttributes = BulkOperationAttributesWithoutHttp & {
+  http: HttpSetup;
+};
 
 export interface ActionParamsProps<TParams> {
   actionParams: Partial<TParams>;
@@ -208,6 +215,7 @@ export interface ActionParamsProps<TParams> {
   isDisabled?: boolean;
   showEmailSubjectAndMessage?: boolean;
   executionMode?: ActionConnectorMode;
+  onBlur?: (field?: string) => void;
 }
 
 export interface Pagination {
@@ -624,4 +632,47 @@ export interface SnoozeSchedule {
 
 export interface ConnectorServices {
   validateEmailAddresses: ActionsPublicPluginSetup['validateEmailAddresses'];
+}
+
+export interface RulesListFilters {
+  searchText: string;
+  types: string[];
+  actionTypes: string[];
+  ruleExecutionStatuses: string[];
+  ruleLastRunOutcomes: string[];
+  ruleStatuses: RuleStatus[];
+  tags: string[];
+}
+
+export type UpdateFiltersProps =
+  | {
+      filter: 'searchText';
+      value: string;
+    }
+  | {
+      filter: 'ruleStatuses';
+      value: RuleStatus[];
+    }
+  | {
+      filter: 'types' | 'actionTypes' | 'ruleExecutionStatuses' | 'ruleLastRunOutcomes' | 'tags';
+      value: string[];
+    };
+
+export interface RulesPageContainerState {
+  lastResponse: string[];
+  status: RuleStatus[];
+}
+
+export type BulkEditActions =
+  | 'snooze'
+  | 'unsnooze'
+  | 'schedule'
+  | 'unschedule'
+  | 'updateApiKey'
+  | 'delete';
+
+export interface UpdateRulesToBulkEditProps {
+  action: BulkEditActions;
+  rules?: RuleTableItem[];
+  filter?: KueryNode | null;
 }

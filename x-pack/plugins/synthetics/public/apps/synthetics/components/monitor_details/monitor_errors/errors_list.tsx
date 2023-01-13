@@ -8,7 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import React, { MouseEvent, useMemo, useState } from 'react';
 import { EuiBasicTable, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
+import { useSelectedLocation } from '../hooks/use_selected_location';
 import { useKibanaDateFormat } from '../../../../../hooks/use_kibana_date_format';
 import { Ping } from '../../../../../../common/runtime_types';
 import { useErrorFailedStep } from '../hooks/use_error_failed_step';
@@ -26,6 +27,8 @@ export const ErrorsList = () => {
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
   const { errorStates, loading } = useMonitorErrors();
+
+  const { monitorId } = useParams<{ monitorId: string }>();
 
   const items = errorStates.slice(pageIndex * pageSize, pageIndex * pageSize + pageSize);
 
@@ -45,6 +48,8 @@ export const ErrorsList = () => {
 
   const format = useKibanaDateFormat();
 
+  const selectedLocation = useSelectedLocation();
+
   const columns = [
     {
       field: '@timestamp',
@@ -52,7 +57,14 @@ export const ErrorsList = () => {
       sortable: true,
       render: (value: string, item: Ping) => {
         return (
-          <EuiLink href={`${basePath}/app/synthetics/error-details/${item.state?.id}`}>
+          <EuiLink
+            href={getErrorDetailsUrl({
+              basePath,
+              monitorId,
+              locationId: selectedLocation!.id,
+              stateId: item.state?.id!,
+            })}
+          >
             {formatTestRunAt(item.state!.started_at, format)}
           </EuiLink>
         );
@@ -99,7 +111,9 @@ export const ErrorsList = () => {
         height: '85px',
         'data-test-subj': `row-${state.id}`,
         onClick: (evt: MouseEvent) => {
-          history.push(`/error-details/${state.id}`);
+          history.push(
+            `/monitor/${monitorId}/errors/${state.id}?locationId=${selectedLocation?.id}`
+          );
         },
       };
     }
@@ -134,6 +148,20 @@ export const ErrorsList = () => {
       />
     </div>
   );
+};
+
+export const getErrorDetailsUrl = ({
+  basePath,
+  monitorId,
+  stateId,
+  locationId,
+}: {
+  stateId: string;
+  basePath: string;
+  monitorId: string;
+  locationId: string;
+}) => {
+  return `${basePath}/app/synthetics/monitor/${monitorId}/errors/${stateId}?locationId=${locationId}`;
 };
 
 const ERRORS_LIST_LABEL = i18n.translate('xpack.synthetics.errorsList.label', {

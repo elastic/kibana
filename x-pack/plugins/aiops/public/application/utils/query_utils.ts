@@ -8,15 +8,11 @@
 // TODO Consolidate with duplicate query utils in
 // `x-pack/plugins/data_visualizer/common/utils/query_utils.ts`
 
-import { cloneDeep } from 'lodash';
-
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { Query } from '@kbn/es-query';
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import type { ChangePoint } from '@kbn/ml-agg-utils';
-import type { GroupTableItem } from '../../components/spike_analysis_table/spike_analysis_table_groups';
+import type { Query } from '@kbn/es-query';
+import type { ChangePoint, FieldValuePair } from '@kbn/ml-agg-utils';
+import type { GroupTableItem } from '../../components/spike_analysis_table/types';
 
 /*
  * Contains utility functions for building and processing queries.
@@ -52,11 +48,10 @@ export function buildBaseFilterCriteria(
 
   const groupFilter = [];
   if (selectedGroup) {
-    const allItems = { ...selectedGroup.group, ...selectedGroup.repeatedValues };
-    for (const fieldName in allItems) {
-      if (allItems.hasOwnProperty(fieldName)) {
-        groupFilter.push({ term: { [fieldName]: allItems[fieldName] } });
-      }
+    const allItems: FieldValuePair[] = [...selectedGroup.group, ...selectedGroup.repeatedValues];
+    for (const item of allItems) {
+      const { fieldName, fieldValue } = item;
+      groupFilter.push({ term: { [fieldName]: fieldValue } });
     }
   }
 
@@ -94,46 +89,3 @@ export function buildBaseFilterCriteria(
 
   return filterCriteria;
 }
-
-export const addExcludeFrozenToQuery = (originalQuery: QueryDslQueryContainer | undefined) => {
-  const FROZEN_TIER_TERM = {
-    term: {
-      _tier: {
-        value: 'data_frozen',
-      },
-    },
-  };
-
-  if (!originalQuery) {
-    return {
-      bool: {
-        must_not: [FROZEN_TIER_TERM],
-      },
-    };
-  }
-
-  const query = cloneDeep(originalQuery);
-
-  delete query.match_all;
-
-  if (isPopulatedObject(query.bool)) {
-    // Must_not can be both arrays or singular object
-    if (Array.isArray(query.bool.must_not)) {
-      query.bool.must_not.push(FROZEN_TIER_TERM);
-    } else {
-      // If there's already a must_not condition
-      if (isPopulatedObject(query.bool.must_not)) {
-        query.bool.must_not = [query.bool.must_not, FROZEN_TIER_TERM];
-      }
-      if (query.bool.must_not === undefined) {
-        query.bool.must_not = [FROZEN_TIER_TERM];
-      }
-    }
-  } else {
-    query.bool = {
-      must_not: [FROZEN_TIER_TERM],
-    };
-  }
-
-  return query;
-};

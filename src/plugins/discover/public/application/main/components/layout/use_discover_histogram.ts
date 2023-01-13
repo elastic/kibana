@@ -17,11 +17,12 @@ import {
 import type { UnifiedHistogramChartLoadEvent } from '@kbn/unified-histogram-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { getUiActions } from '../../../../kibana_services';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useDataState } from '../../hooks/use_data_state';
 import type { SavedSearchData } from '../../hooks/use_saved_search';
-import type { AppState, GetStateReturn } from '../../services/discover_state';
+import type { DiscoverStateContainer } from '../../services/discover_state';
 import { FetchStatus } from '../../../types';
 import type { DiscoverSearchSessionManager } from '../../services/discover_search_session';
 import type { InspectorAdapters } from '../../hooks/use_inspector';
@@ -31,19 +32,8 @@ export const CHART_HIDDEN_KEY = 'discover:chartHidden';
 export const HISTOGRAM_HEIGHT_KEY = 'discover:histogramHeight';
 export const HISTOGRAM_BREAKDOWN_FIELD_KEY = 'discover:histogramBreakdownField';
 
-export const useDiscoverHistogram = ({
-  stateContainer,
-  state,
-  savedSearchData$,
-  dataView,
-  savedSearch,
-  isTimeBased,
-  isPlainRecord,
-  inspectorAdapters,
-  searchSessionManager,
-}: {
-  stateContainer: GetStateReturn;
-  state: AppState;
+export interface UseDiscoverHistogramProps {
+  stateContainer: DiscoverStateContainer;
   savedSearchData$: SavedSearchData;
   dataView: DataView;
   savedSearch: SavedSearch;
@@ -51,8 +41,24 @@ export const useDiscoverHistogram = ({
   isPlainRecord: boolean;
   inspectorAdapters: InspectorAdapters;
   searchSessionManager: DiscoverSearchSessionManager;
-}) => {
+}
+
+export const useDiscoverHistogram = ({
+  stateContainer,
+  savedSearchData$,
+  dataView,
+  savedSearch,
+  isTimeBased,
+  isPlainRecord,
+  inspectorAdapters,
+  searchSessionManager,
+}: UseDiscoverHistogramProps) => {
   const { storage, data, lens } = useDiscoverServices();
+  const [hideChart, interval, breakdownField] = useAppStateSelector((state) => [
+    state.hideChart,
+    state.interval,
+    state.breakdownField,
+  ]);
 
   /**
    * Visualize
@@ -210,16 +216,16 @@ export const useDiscoverHistogram = ({
     [inspectorAdapters]
   );
 
-  const [chartHidden, setChartHidden] = useState(state.hideChart);
+  const [chartHidden, setChartHidden] = useState(hideChart);
   const chart = useMemo(
     () =>
       isPlainRecord || !isTimeBased
         ? undefined
         : {
             hidden: chartHidden,
-            timeInterval: state.interval,
+            timeInterval: interval,
           },
-    [chartHidden, isPlainRecord, isTimeBased, state.interval]
+    [chartHidden, interval, isPlainRecord, isTimeBased]
   );
 
   // Clear the Lens request adapter when the chart is hidden
@@ -233,7 +239,7 @@ export const useDiscoverHistogram = ({
   // requests, so instead of using state.chartHidden directly, we update chartHidden
   // when searchSessionId changes
   useEffect(() => {
-    setChartHidden(state.hideChart);
+    setChartHidden(hideChart);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchSessionId]);
 
@@ -242,15 +248,15 @@ export const useDiscoverHistogram = ({
    */
 
   const onBreakdownFieldChange = useCallback(
-    (breakdownField: DataViewField | undefined) => {
-      stateContainer.setAppState({ breakdownField: breakdownField?.name });
+    (newBreakdownField: DataViewField | undefined) => {
+      stateContainer.setAppState({ breakdownField: newBreakdownField?.name });
     },
     [stateContainer]
   );
 
   const field = useMemo(
-    () => (state.breakdownField ? dataView.getFieldByName(state.breakdownField) : undefined),
-    [dataView, state.breakdownField]
+    () => (breakdownField ? dataView.getFieldByName(breakdownField) : undefined),
+    [dataView, breakdownField]
   );
 
   const breakdown = useMemo(
@@ -258,8 +264,12 @@ export const useDiscoverHistogram = ({
     [field, isPlainRecord, isTimeBased]
   );
 
-  // Don't render the unified histogram layout until the first search has been requested
-  return searchSessionId
+  // Initialized when the first search has been requested or
+  // when in SQL mode since search sessions are not supported
+  const isInitialized = Boolean(searchSessionId) || isPlainRecord;
+
+  // Don't render the unified histogram layout until initialized
+  return isInitialized
     ? {
         topPanelHeight,
         request,

@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { CaseStatuses } from '@kbn/cases-plugin/common';
 import { CaseSeverity } from '@kbn/cases-plugin/common/api';
 import { SeverityAll } from '@kbn/cases-plugin/common/ui';
+import { UserProfile } from '@kbn/user-profile-components';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   createUsersAndRoles,
@@ -168,6 +169,112 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           expect(case3.tags).eql(['two', 'five', 'tw']);
           expect(case2.tags).eql(['two', 'four', 'tw']);
           expect(case1.tags).eql(['one', 'three']);
+        });
+      });
+
+      describe('assignees', () => {
+        let caseIds: string[] = [];
+        let profiles: UserProfile[] = [];
+
+        const findAssigneeByUserName = (username: string) =>
+          profiles.find((profile) => profile.user.username === username);
+
+        before(async () => {
+          await createUsersAndRoles(getService, users, roles);
+          await cases.api.activateUserProfiles(users);
+
+          profiles = await cases.api.suggestUserProfiles({
+            name: '',
+            owners: ['cases'],
+          });
+        });
+
+        beforeEach(async () => {
+          caseIds = [];
+          const casesAll = findAssigneeByUserName('cases_all_user')!;
+          const casesAll2 = findAssigneeByUserName('cases_all_user2')!;
+          const casesNoDelete = findAssigneeByUserName('cases_no_delete_user')!;
+
+          const case1 = await cases.api.createCase({
+            title: 'case 1',
+            assignees: [{ uid: casesAll.uid }],
+          });
+
+          const case2 = await cases.api.createCase({
+            title: 'case 2',
+            assignees: [{ uid: casesAll2.uid }, { uid: casesNoDelete.uid }],
+          });
+
+          const case3 = await cases.api.createCase({
+            title: 'case 3',
+            assignees: [{ uid: casesAll2.uid }],
+          });
+
+          caseIds.push(case1.id);
+          caseIds.push(case2.id);
+          caseIds.push(case3.id);
+
+          await header.waitUntilLoadingHasFinished();
+          await cases.casesTable.waitForCasesToBeListed();
+        });
+
+        afterEach(async () => {
+          await cases.api.deleteAllCases();
+          await cases.casesTable.waitForCasesToBeDeleted();
+        });
+
+        after(async () => {
+          await deleteUsersAndRoles(getService, users, roles);
+        });
+
+        it('bulk edit assignees', async () => {
+          const casesAll2 = findAssigneeByUserName('cases_all_user2')!;
+          const casesNoDelete = findAssigneeByUserName('cases_no_delete_user')!;
+          const casesAll = findAssigneeByUserName('cases_all_user')!;
+
+          /**
+           * Case 3 assignees: cases_all_user2
+           * Case 2 assignees: cases_all_user2, cases_no_delete_user
+           * Case 1 assignees: cases_all_user
+           * All assignees: cases_all_user, cases_all_user2, cases_read_delete_user, cases_no_delete_user
+           *
+           * It selects Case 3 and Case 2 because the table orders
+           * the cases in descending order by creation date and clicks
+           * the cases_all_user2, cases_no_delete_user
+           */
+
+          await cases.casesTable.bulkEditAssignees([0, 1], [casesAll2.uid, casesNoDelete.uid]);
+
+          await header.waitUntilLoadingHasFinished();
+
+          const case1 = await cases.api.getCase({ caseId: caseIds[0] });
+          const case2 = await cases.api.getCase({ caseId: caseIds[1] });
+          const case3 = await cases.api.getCase({ caseId: caseIds[2] });
+
+          expect(case3.assignees).eql([{ uid: casesNoDelete.uid }]);
+          expect(case2.assignees).eql([{ uid: casesNoDelete.uid }]);
+          expect(case1.assignees).eql([{ uid: casesAll.uid }]);
+        });
+
+        it('adds a new assignee', async () => {
+          const casesNoDelete = findAssigneeByUserName('cases_no_delete_user')!;
+          const casesAll = findAssigneeByUserName('cases_all_user')!;
+          const casesAll2 = findAssigneeByUserName('cases_all_user2')!;
+
+          await cases.casesTable.bulkAddNewAssignees([0, 1], 'cases all_user');
+          await header.waitUntilLoadingHasFinished();
+
+          const case1 = await cases.api.getCase({ caseId: caseIds[0] });
+          const case2 = await cases.api.getCase({ caseId: caseIds[1] });
+          const case3 = await cases.api.getCase({ caseId: caseIds[2] });
+
+          expect(case3.assignees).eql([{ uid: casesAll2.uid }, { uid: casesAll.uid }]);
+          expect(case2.assignees).eql([
+            { uid: casesAll2.uid },
+            { uid: casesNoDelete.uid },
+            { uid: casesAll.uid },
+          ]);
+          expect(case1.assignees).eql([{ uid: casesAll.uid }]);
         });
       });
     });
@@ -427,7 +534,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
       });
 
-      describe('Severity', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/148468
+      // FLAKY: https://github.com/elastic/kibana/issues/148469
+      describe.skip('Severity', () => {
         before(async () => {
           await cases.api.createNthRandomCases(1);
           await header.waitUntilLoadingHasFinished();

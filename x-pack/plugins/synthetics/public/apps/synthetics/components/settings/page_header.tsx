@@ -55,6 +55,13 @@ export const getSettingsPageHeader = (
         href: replaceTab('private-locations'),
       },
       {
+        label: i18n.translate('xpack.synthetics.settingsTabs.params', {
+          defaultMessage: 'Global Parameters',
+        }),
+        isSelected: tabId === 'params' || !tabId,
+        href: replaceTab('params'),
+      },
+      {
         label: i18n.translate('xpack.synthetics.settingsTabs.dataRetention', {
           defaultMessage: 'Data Retention',
         }),

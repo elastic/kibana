@@ -45,7 +45,8 @@ const ProgressLoader = styled(EuiProgress)`
 `;
 
 const getSortField = (field: string): SortFieldCase =>
-  field === SortFieldCase.closedAt ? SortFieldCase.closedAt : SortFieldCase.createdAt;
+  // @ts-ignore
+  SortFieldCase[field] ?? SortFieldCase.title;
 
 export interface AllCasesListProps {
   hiddenStatuses?: CaseStatusWithAllStatus[];

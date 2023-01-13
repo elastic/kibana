@@ -136,10 +136,10 @@ describe('toDateRange', () => {
 function aCalendarTimeWindow(duration: Duration, startTime: Date): TimeWindow {
   return {
     duration,
-    calendar: { start_time: startTime },
+    calendar: { startTime },
   };
 }
 
 function aRollingTimeWindow(duration: Duration): TimeWindow {
-  return { duration, is_rolling: true };
+  return { duration, isRolling: true };
 }

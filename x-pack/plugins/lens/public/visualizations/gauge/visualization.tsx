@@ -250,12 +250,12 @@ export const getGaugeVisualization = ({
                 palette
                   ? {
                       columnId: metricAccessor,
-                      triggerIcon: 'colorBy',
+                      triggerIconType: 'colorBy',
                       palette,
                     }
                   : {
                       columnId: metricAccessor,
-                      triggerIcon: 'none',
+                      triggerIconType: 'none',
                     },
               ]
             : [],

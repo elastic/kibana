@@ -98,16 +98,16 @@ const getMetricLayerConfiguration = (
     const hasDynamicColoring = !!props.state.palette;
     return hasDynamicColoring
       ? {
-          triggerIcon: 'colorBy',
+          triggerIconType: 'colorBy',
           palette: stops.map(({ color }) => color),
         }
       : hasStaticColoring
       ? {
-          triggerIcon: 'color',
+          triggerIconType: 'color',
           color: props.state.color,
         }
       : {
-          triggerIcon: 'color',
+          triggerIconType: 'color',
           color: getDefaultColor(props.state),
         };
   };
@@ -209,7 +209,7 @@ const getMetricLayerConfiguration = (
           ? [
               {
                 columnId: props.state.breakdownByAccessor,
-                triggerIcon: props.state.collapseFn ? ('aggregate' as const) : undefined,
+                triggerIconType: props.state.collapseFn ? ('aggregate' as const) : undefined,
               },
             ]
           : [],

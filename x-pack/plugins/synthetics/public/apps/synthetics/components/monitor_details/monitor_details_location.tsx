@@ -11,6 +11,7 @@ import {
   EuiHealth,
   EuiIcon,
   EuiLink,
+  EuiLoadingContent,
   EuiPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -50,7 +51,7 @@ export const MonitorDetailsLocation: React.FC = () => {
       );
 
       const menuItems = loadingLocationsStatus
-        ? [<span>Loading...</span>]
+        ? [<span key="loading">Loading...</span>]
         : monitor.locations
             .map((location) => {
               const fullLocation = locations.find((l) => l.id === location.id);
@@ -120,7 +121,11 @@ export const MonitorDetailsLocation: React.FC = () => {
   ]);
 
   if (!selectedLocation || !monitor) {
-    return null;
+    return (
+      <EuiDescriptionList
+        listItems={[{ title: LOCATION_LABEL, description: <EuiLoadingContent lines={1} /> }]}
+      />
+    );
   }
 
   return <EuiDescriptionList listItems={[{ title: LOCATION_LABEL, description: locationList }]} />;

@@ -9,8 +9,8 @@
 import Path from 'path';
 
 import { v4 as uuidV4 } from 'uuid';
-import { REPO_ROOT } from '@kbn/utils';
-import { FtrConfigProviderContext, FtrConfigProvider } from '@kbn/test';
+import { REPO_ROOT } from '@kbn/repo-info';
+import type { FtrConfigProviderContext, FtrConfigProvider } from '@kbn/test';
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
 
 import { AnyStep } from './journey';

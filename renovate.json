@@ -258,6 +258,25 @@
       "labels": ["Team: AWP: Visualization", "release_note:skip", "backport:skip"],
       "enabled": true,
       "prCreation": "immediate"
+    },
+    {
+      "groupName": "Cloud Defend",
+      "matchPackageNames": ["monaco-yaml"],
+      "reviewers": ["team:sec-cloudnative-integrations"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team: Cloud Native Integrations", "release_note:skip", "backport:skip"],
+      "enabled": true,
+      "prCreation": "immediate"
+    },
+    {
+      "groupName": "XState",
+      "matchPackageNames": ["xstate"],
+      "matchPackagePrefixes": ["@xstate/"],
+      "reviewers": ["team:infra-monitoring-ui"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Infra Monitoring UI", "release_note:skip"],
+      "enabled": true,
+      "prCreation": "immediate"
     }
   ]
 }

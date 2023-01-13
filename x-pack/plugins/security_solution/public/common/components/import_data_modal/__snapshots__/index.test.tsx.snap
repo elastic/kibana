@@ -76,6 +76,7 @@ Object {
                     <span
                       aria-hidden="true"
                       class="euiFilePicker__icon"
+                      color="primary"
                       data-euiicon-type="importAction"
                     />
                     <div

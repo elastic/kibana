@@ -23,6 +23,7 @@ import {
   getPipelineNameForDatastream,
   getFileDataIndexName,
   getFileMetadataIndexName,
+  getRegistryDataStreamAssetBaseName,
 } from '../../../../../common/services';
 import type {
   RegistryDataStream,
@@ -35,6 +36,7 @@ import type {
   TemplateMap,
   EsAssetReference,
   PackageInfo,
+  ExperimentalDataStreamFeature,
 } from '../../../../types';
 import { loadFieldsFromYaml, processFields } from '../../fields/field';
 import { getAsset, getPathParts } from '../../archive';
@@ -61,7 +63,8 @@ const FLEET_COMPONENT_TEMPLATE_NAMES = FLEET_COMPONENT_TEMPLATES.map((tmpl) => t
 export const prepareToInstallTemplates = (
   installablePackage: InstallablePackage,
   paths: string[],
-  esReferences: EsAssetReference[]
+  esReferences: EsAssetReference[],
+  experimentalDataStreamFeatures: ExperimentalDataStreamFeature[] = []
 ): {
   assetsToAdd: EsAssetReference[];
   assetsToRemove: EsAssetReference[];
@@ -78,9 +81,15 @@ export const prepareToInstallTemplates = (
   const dataStreams = installablePackage.data_streams;
   if (!dataStreams) return { assetsToAdd: [], assetsToRemove, install: () => Promise.resolve([]) };
 
-  const templates = dataStreams.map((dataStream) =>
-    prepareTemplate({ pkg: installablePackage, dataStream })
-  );
+  const templates = dataStreams.map((dataStream) => {
+    const experimentalDataStreamFeature = experimentalDataStreamFeatures.find(
+      (datastreamFeature) =>
+        datastreamFeature.data_stream === getRegistryDataStreamAssetBaseName(dataStream)
+    );
+
+    return prepareTemplate({ pkg: installablePackage, dataStream, experimentalDataStreamFeature });
+  });
+
   const assetsToAdd = getAllTemplateRefs(templates.map((template) => template.indexTemplate));
 
   return {
@@ -243,6 +252,7 @@ export function buildComponentTemplates(params: {
   packageName: string;
   pipelineName?: string;
   defaultSettings: IndexTemplate['template']['settings'];
+  experimentalDataStreamFeature?: ExperimentalDataStreamFeature;
 }) {
   const {
     templateName,
@@ -271,6 +281,15 @@ export function buildComponentTemplates(params: {
     (dynampingTemplate) => Object.keys(dynampingTemplate)[0]
   );
 
+  const isTimeSeriesEnabledByDefault = registryElasticsearch?.index_mode === 'time_series';
+  const isSyntheticSourceEnabledByDefault = registryElasticsearch?.source_mode === 'synthetic';
+
+  const sourceModeSynthetic =
+    params.experimentalDataStreamFeature?.features.synthetic_source !== false &&
+    (params.experimentalDataStreamFeature?.features.synthetic_source === true ||
+      isSyntheticSourceEnabledByDefault ||
+      isTimeSeriesEnabledByDefault);
+
   templatesMap[packageTemplateName] = {
     template: {
       settings: {
@@ -291,13 +310,11 @@ export function buildComponentTemplates(params: {
         properties: mappingsProperties,
         dynamic_templates: mappingsDynamicTemplates.length ? mappingsDynamicTemplates : undefined,
         ...omit(indexTemplateMappings, 'properties', 'dynamic_templates', '_source'),
-        ...(indexTemplateMappings?._source || registryElasticsearch?.source_mode
+        ...(indexTemplateMappings?._source || sourceModeSynthetic
           ? {
               _source: {
                 ...indexTemplateMappings?._source,
-                ...(registryElasticsearch?.source_mode === 'synthetic'
-                  ? { mode: 'synthetic' }
-                  : {}),
+                ...(sourceModeSynthetic ? { mode: 'synthetic' } : {}),
               },
             }
           : {}),
@@ -465,14 +482,21 @@ export async function ensureAliasHasWriteIndex(opts: {
 export function prepareTemplate({
   pkg,
   dataStream,
+  experimentalDataStreamFeature,
 }: {
   pkg: Pick<PackageInfo, 'name' | 'version' | 'type'>;
   dataStream: RegistryDataStream;
+  experimentalDataStreamFeature?: ExperimentalDataStreamFeature;
 }): { componentTemplates: TemplateMap; indexTemplate: IndexTemplateEntry } {
   const { name: packageName, version: packageVersion } = pkg;
   const fields = loadFieldsFromYaml(pkg, dataStream.path);
   const validFields = processFields(fields);
-  const mappings = generateMappings(validFields);
+
+  const isIndexModeTimeSeries =
+    dataStream.elasticsearch?.index_mode === 'time_series' ||
+    experimentalDataStreamFeature?.features.tsdb;
+
+  const mappings = generateMappings(validFields, { isIndexModeTimeSeries });
   const templateName = generateTemplateName(dataStream);
   const templateIndexPattern = generateTemplateIndexPattern(dataStream);
   const templatePriority = getTemplatePriority(dataStream);
@@ -494,6 +518,7 @@ export function prepareTemplate({
     templateName,
     pipelineName,
     registryElasticsearch: dataStream.elasticsearch,
+    experimentalDataStreamFeature,
   });
 
   const template = getTemplate({
@@ -502,6 +527,9 @@ export function prepareTemplate({
     composedOfTemplates: Object.keys(componentTemplates),
     templatePriority,
     hidden: dataStream.hidden,
+    registryElasticsearch: dataStream.elasticsearch,
+    mappings,
+    isIndexModeTimeSeries,
   });
 
   return {

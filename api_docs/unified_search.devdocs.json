@@ -9,33 +9,34 @@
         "type": "Function",
         "tags": [],
         "label": "DataViewPicker",
-        "description": [],
+        "description": [
+          "\nA `DataViewPicker` component that is wrapped by the `withSuspense` HOC. This component can\nbe used directly by consumers and will load the `DataViewPickerLazy` component lazily with\na predefined fallback and error boundary."
+        ],
         "signature": [
-          "({ isMissingCurrent, currentDataViewId, adHocDataViews, savedDataViews, onChangeDataView, onEditDataView, onAddField, onDataViewCreated, trigger, selectableProps, textBasedLanguages, onSaveTextLanguageQuery, onTextLangQuerySubmit, textBasedLanguage, onCreateDefaultAdHocDataView, isDisabled, }: ",
+          "React.ForwardRefExoticComponent<",
           "DataViewPickerPropsExtended",
-          ") => JSX.Element"
+          " & React.RefAttributes<{}>>"
         ],
         "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
+        "returnComment": [],
         "children": [
           {
             "parentPluginId": "unifiedSearch",
             "id": "def-public.DataViewPicker.$1",
-            "type": "Object",
+            "type": "Uncategorized",
             "tags": [],
-            "label": "{\n  isMissingCurrent,\n  currentDataViewId,\n  adHocDataViews,\n  savedDataViews,\n  onChangeDataView,\n  onEditDataView,\n  onAddField,\n  onDataViewCreated,\n  trigger,\n  selectableProps,\n  textBasedLanguages,\n  onSaveTextLanguageQuery,\n  onTextLangQuerySubmit,\n  textBasedLanguage,\n  onCreateDefaultAdHocDataView,\n  isDisabled,\n}",
+            "label": "props",
             "description": [],
             "signature": [
-              "DataViewPickerPropsExtended"
+              "P"
             ],
-            "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
+            "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
+            "trackAdoption": false
           }
         ],
-        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -44,31 +45,34 @@
         "type": "Function",
         "tags": [],
         "label": "DataViewSelector",
-        "description": [],
-        "signature": [
-          "({ currentDataViewId, searchListInputId, dataViewsList, selectableProps, isTextBasedLangSelected, setPopoverIsOpen, onChangeDataView, onCreateDefaultAdHocDataView, }: DataViewSelectorProps) => JSX.Element"
+        "description": [
+          "\nA `DataViewSelector` component that is wrapped by the `withSuspense` HOC. This component can\nbe used directly by consumers and will load the `DataViewSelectorLazy` component lazily with\na predefined fallback and error boundary."
         ],
-        "path": "src/plugins/unified_search/public/dataview_picker/data_view_selector.tsx",
+        "signature": [
+          "React.ForwardRefExoticComponent<",
+          "DataViewSelectorProps",
+          " & React.RefAttributes<{}>>"
+        ],
+        "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
+        "returnComment": [],
         "children": [
           {
             "parentPluginId": "unifiedSearch",
             "id": "def-public.DataViewSelector.$1",
-            "type": "Object",
+            "type": "Uncategorized",
             "tags": [],
-            "label": "{\n  currentDataViewId,\n  searchListInputId,\n  dataViewsList,\n  selectableProps,\n  isTextBasedLangSelected,\n  setPopoverIsOpen,\n  onChangeDataView,\n  onCreateDefaultAdHocDataView,\n}",
+            "label": "props",
             "description": [],
             "signature": [
-              "DataViewSelectorProps"
+              "P"
             ],
-            "path": "src/plugins/unified_search/public/dataview_picker/data_view_selector.tsx",
+            "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
+            "trackAdoption": false
           }
         ],
-        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -77,33 +81,70 @@
         "type": "Function",
         "tags": [],
         "label": "DataViewsList",
-        "description": [],
-        "signature": [
-          "({\n  dataViewsList,\n  onChangeDataView,\n  isTextBasedLangSelected,\n  currentDataViewId,\n  selectableProps,\n  searchListInputId,\n}: ",
-          "DataViewsListProps",
-          ") => JSX.Element"
+        "description": [
+          "\nA `DataViewsList` component that is wrapped by the `withSuspense` HOC. This component can\nbe used directly by consumers and will load the `DataViewsLazy` component lazily with\na predefined fallback and error boundary."
         ],
-        "path": "src/plugins/unified_search/public/dataview_picker/dataview_list.tsx",
+        "signature": [
+          "React.ForwardRefExoticComponent<",
+          "DataViewsListProps",
+          " & React.RefAttributes<{}>>"
+        ],
+        "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
+        "returnComment": [],
         "children": [
           {
             "parentPluginId": "unifiedSearch",
             "id": "def-public.DataViewsList.$1",
-            "type": "Object",
+            "type": "Uncategorized",
             "tags": [],
-            "label": "{\n  dataViewsList,\n  onChangeDataView,\n  isTextBasedLangSelected,\n  currentDataViewId,\n  selectableProps,\n  searchListInputId,\n}",
+            "label": "props",
             "description": [],
             "signature": [
-              "DataViewsListProps"
+              "P"
             ],
-            "path": "src/plugins/unified_search/public/dataview_picker/dataview_list.tsx",
+            "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
+            "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedSearch",
+        "id": "def-public.FilterBadgeGroup",
+        "type": "Function",
+        "tags": [],
+        "label": "FilterBadgeGroup",
+        "description": [
+          "\nA `FilterBadgeGroup` component that is wrapped by the `withSuspense` HOC. This component can\nbe used directly by consumers and will load the `FilterBadgeGroupLazy` component lazily with\na predefined fallback and error boundary."
+        ],
+        "signature": [
+          "React.ForwardRefExoticComponent<",
+          "FilterBadgeGroupProps",
+          " & React.RefAttributes<{}>>"
+        ],
+        "path": "src/plugins/unified_search/public/filter_badge/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.FilterBadgeGroup.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -116,9 +157,11 @@
           "\nRenders a single filter pill"
         ],
         "signature": [
-          "(props: ",
+          "(props: Omit<",
           "FilterItemProps",
-          ") => JSX.Element"
+          ", keyof ",
+          "WithCloseFilterEditorConfirmModalProps",
+          ">) => JSX.Element"
         ],
         "path": "src/plugins/unified_search/public/filter_bar/index.tsx",
         "deprecated": false,
@@ -132,7 +175,11 @@
             "label": "props",
             "description": [],
             "signature": [
-              "FilterItemProps"
+              "Omit<",
+              "FilterItemProps",
+              ", keyof ",
+              "WithCloseFilterEditorConfirmModalProps",
+              ">"
             ],
             "path": "src/plugins/unified_search/public/filter_bar/index.tsx",
             "deprecated": false,
@@ -200,43 +247,6 @@
                 "text": "FilterItemsProps"
               },
               ", \"filters\" | \"indexPatterns\" | \"readOnly\" | \"onFiltersUpdated\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\">, any, any>>"
-            ],
-            "path": "src/plugins/unified_search/public/filter_bar/index.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "unifiedSearch",
-        "id": "def-public.FilterLabel",
-        "type": "Function",
-        "tags": [],
-        "label": "FilterLabel",
-        "description": [
-          "\nRenders the label for a single filter pill"
-        ],
-        "signature": [
-          "(props: ",
-          "FilterLabelProps",
-          ") => JSX.Element"
-        ],
-        "path": "src/plugins/unified_search/public/filter_bar/index.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "unifiedSearch",
-            "id": "def-public.FilterLabel.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "FilterLabelProps"
             ],
             "path": "src/plugins/unified_search/public/filter_bar/index.tsx",
             "deprecated": false,
@@ -365,15 +375,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[] | undefined; savedQuery?: ",
-              {
-                "pluginId": "data",
-                "scope": "public",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-public.SavedQuery",
-                "text": "SavedQuery"
-              },
-              " | undefined; refreshInterval?: number | undefined; placeholder?: string | undefined; iconType?: ",
+              "[] | undefined; refreshInterval?: number | undefined; placeholder?: string | undefined; iconType?: ",
               "IconType",
               " | undefined; indexPatterns?: ",
               {
@@ -393,7 +395,15 @@
               },
               " | undefined; customSubmitButton?: React.ReactNode; screenTitle?: string | undefined; showQueryMenu?: boolean | undefined; showQueryInput?: boolean | undefined; showFilterBar?: boolean | undefined; showDatePicker?: boolean | undefined; showAutoRefreshOnly?: boolean | undefined; hiddenFilterPanelOptions?: ",
               "FilterPanelOption",
-              "[] | undefined; isRefreshPaused?: boolean | undefined; dateRangeFrom?: string | undefined; dateRangeTo?: string | undefined; showSaveQuery?: boolean | undefined; onQueryChange?: ((payload: { dateRange: ",
+              "[] | undefined; isRefreshPaused?: boolean | undefined; dateRangeFrom?: string | undefined; dateRangeTo?: string | undefined; showSaveQuery?: boolean | undefined; savedQuery?: ",
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-public.SavedQuery",
+                "text": "SavedQuery"
+              },
+              " | undefined; onQueryChange?: ((payload: { dateRange: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -587,7 +597,7 @@
         "tags": [],
         "label": "DataViewPickerProps",
         "description": [],
-        "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
+        "path": "src/plugins/unified_search/public/dataview_picker/data_view_picker.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -604,7 +614,7 @@
               "EuiButtonProps",
               " & { label: string; title?: string | undefined; }"
             ],
-            "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
+            "path": "src/plugins/unified_search/public/dataview_picker/data_view_picker.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -620,7 +630,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
+            "path": "src/plugins/unified_search/public/dataview_picker/data_view_picker.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -636,7 +646,7 @@
             "signature": [
               "(newId: string) => void"
             ],
-            "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
+            "path": "src/plugins/unified_search/public/dataview_picker/data_view_picker.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -650,7 +660,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
+                "path": "src/plugins/unified_search/public/dataview_picker/data_view_picker.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -678,7 +688,7 @@
               },
               ") => void) | undefined"
             ],
-            "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
+            "path": "src/plugins/unified_search/public/dataview_picker/data_view_picker.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -698,7 +708,7 @@
                     "text": "DataView"
                   }
                 ],
-                "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
+                "path": "src/plugins/unified_search/public/dataview_picker/data_view_picker.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -718,7 +728,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
+            "path": "src/plugins/unified_search/public/dataview_picker/data_view_picker.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -741,7 +751,7 @@
               },
               "[] | undefined"
             ],
-            "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
+            "path": "src/plugins/unified_search/public/dataview_picker/data_view_picker.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -764,7 +774,7 @@
               },
               "[] | undefined"
             ],
-            "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
+            "path": "src/plugins/unified_search/public/dataview_picker/data_view_picker.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -781,7 +791,7 @@
               "EuiSelectableProps",
               "<{}> | undefined"
             ],
-            "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
+            "path": "src/plugins/unified_search/public/dataview_picker/data_view_picker.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -797,7 +807,7 @@
             "signature": [
               "(() => void) | undefined"
             ],
-            "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
+            "path": "src/plugins/unified_search/public/dataview_picker/data_view_picker.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -815,7 +825,7 @@
             "signature": [
               "(() => void) | undefined"
             ],
-            "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
+            "path": "src/plugins/unified_search/public/dataview_picker/data_view_picker.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -831,7 +841,7 @@
             "signature": [
               "((pattern: string) => void) | undefined"
             ],
-            "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
+            "path": "src/plugins/unified_search/public/dataview_picker/data_view_picker.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -845,7 +855,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
+                "path": "src/plugins/unified_search/public/dataview_picker/data_view_picker.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -866,7 +876,7 @@
               "TextBasedLanguages",
               "[] | undefined"
             ],
-            "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
+            "path": "src/plugins/unified_search/public/dataview_picker/data_view_picker.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -884,7 +894,7 @@
               "OnSaveTextLanguageQueryProps",
               ") => void) | undefined"
             ],
-            "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
+            "path": "src/plugins/unified_search/public/dataview_picker/data_view_picker.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -898,7 +908,7 @@
                 "signature": [
                   "OnSaveTextLanguageQueryProps"
                 ],
-                "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
+                "path": "src/plugins/unified_search/public/dataview_picker/data_view_picker.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -918,7 +928,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
+            "path": "src/plugins/unified_search/public/dataview_picker/data_view_picker.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2126,9 +2136,9 @@
           " implements ",
           {
             "pluginId": "@kbn/core-plugins-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCorePluginsServerPluginApi",
-            "section": "def-server.Plugin",
+            "section": "def-common.Plugin",
             "text": "Plugin"
           },
           "<",
@@ -2169,9 +2179,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-plugins-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCorePluginsServerPluginApi",
-                    "section": "def-server.PluginInitializerContext",
+                    "section": "def-common.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
                   "<Readonly<{} & { autocomplete: Readonly<{} & { querySuggestions: Readonly<{} & { enabled: boolean; }>; valueSuggestions: Readonly<{} & { timeout: moment.Duration; enabled: boolean; tiers: string[]; terminateAfter: moment.Duration; }>; }>; }>>"
@@ -2195,9 +2205,9 @@
               "(core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreLifecycleServerPluginApi",
-                "section": "def-server.CoreSetup",
+                "section": "def-common.CoreSetup",
                 "text": "CoreSetup"
               },
               "<",
@@ -2217,25 +2227,25 @@
               "<Readonly<{ elasticsearch: Readonly<{ readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly pingTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; }>; path: Readonly<{ readonly data: string; }>; savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.ByteSizeValue",
+                "section": "def-common.ByteSizeValue",
                 "text": "ByteSizeValue"
               },
               ") => boolean; isLessThan: (other: ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.ByteSizeValue",
+                "section": "def-common.ByteSizeValue",
                 "text": "ByteSizeValue"
               },
               ") => boolean; isEqualTo: (other: ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.ByteSizeValue",
+                "section": "def-common.ByteSizeValue",
                 "text": "ByteSizeValue"
               },
               ") => boolean; getValueInBytes: () => number; toString: (returnUnit?: ",
@@ -2243,25 +2253,25 @@
               " | undefined) => string; }>; }>; }>>; get: () => Readonly<{ elasticsearch: Readonly<{ readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly pingTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; }>; path: Readonly<{ readonly data: string; }>; savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.ByteSizeValue",
+                "section": "def-common.ByteSizeValue",
                 "text": "ByteSizeValue"
               },
               ") => boolean; isLessThan: (other: ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.ByteSizeValue",
+                "section": "def-common.ByteSizeValue",
                 "text": "ByteSizeValue"
               },
               ") => boolean; isEqualTo: (other: ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.ByteSizeValue",
+                "section": "def-common.ByteSizeValue",
                 "text": "ByteSizeValue"
               },
               ") => boolean; getValueInBytes: () => number; toString: (returnUnit?: ",
@@ -2284,9 +2294,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreLifecycleServerPluginApi",
-                    "section": "def-server.CoreSetup",
+                    "section": "def-common.CoreSetup",
                     "text": "CoreSetup"
                   },
                   "<",
@@ -2335,9 +2345,9 @@
               "(core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreLifecycleServerPluginApi",
-                "section": "def-server.CoreStart",
+                "section": "def-common.CoreStart",
                 "text": "CoreStart"
               },
               ", {}: ",
@@ -2358,9 +2368,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreLifecycleServerPluginApi",
-                    "section": "def-server.CoreStart",
+                    "section": "def-common.CoreStart",
                     "text": "CoreStart"
                   }
                 ],
@@ -2450,25 +2460,25 @@
             "<Readonly<{ elasticsearch: Readonly<{ readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly pingTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; }>; path: Readonly<{ readonly data: string; }>; savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
             {
               "pluginId": "@kbn/config-schema",
-              "scope": "server",
+              "scope": "common",
               "docId": "kibKbnConfigSchemaPluginApi",
-              "section": "def-server.ByteSizeValue",
+              "section": "def-common.ByteSizeValue",
               "text": "ByteSizeValue"
             },
             ") => boolean; isLessThan: (other: ",
             {
               "pluginId": "@kbn/config-schema",
-              "scope": "server",
+              "scope": "common",
               "docId": "kibKbnConfigSchemaPluginApi",
-              "section": "def-server.ByteSizeValue",
+              "section": "def-common.ByteSizeValue",
               "text": "ByteSizeValue"
             },
             ") => boolean; isEqualTo: (other: ",
             {
               "pluginId": "@kbn/config-schema",
-              "scope": "server",
+              "scope": "common",
               "docId": "kibKbnConfigSchemaPluginApi",
-              "section": "def-server.ByteSizeValue",
+              "section": "def-common.ByteSizeValue",
               "text": "ByteSizeValue"
             },
             ") => boolean; getValueInBytes: () => number; toString: (returnUnit?: ",
@@ -2476,25 +2486,25 @@
             " | undefined) => string; }>; }>; }>>; get: () => Readonly<{ elasticsearch: Readonly<{ readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly pingTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; }>; path: Readonly<{ readonly data: string; }>; savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
             {
               "pluginId": "@kbn/config-schema",
-              "scope": "server",
+              "scope": "common",
               "docId": "kibKbnConfigSchemaPluginApi",
-              "section": "def-server.ByteSizeValue",
+              "section": "def-common.ByteSizeValue",
               "text": "ByteSizeValue"
             },
             ") => boolean; isLessThan: (other: ",
             {
               "pluginId": "@kbn/config-schema",
-              "scope": "server",
+              "scope": "common",
               "docId": "kibKbnConfigSchemaPluginApi",
-              "section": "def-server.ByteSizeValue",
+              "section": "def-common.ByteSizeValue",
               "text": "ByteSizeValue"
             },
             ") => boolean; isEqualTo: (other: ",
             {
               "pluginId": "@kbn/config-schema",
-              "scope": "server",
+              "scope": "common",
               "docId": "kibKbnConfigSchemaPluginApi",
-              "section": "def-server.ByteSizeValue",
+              "section": "def-common.ByteSizeValue",
               "text": "ByteSizeValue"
             },
             ") => boolean; getValueInBytes: () => number; toString: (returnUnit?: ",

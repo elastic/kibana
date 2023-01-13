@@ -44,10 +44,15 @@ describe('Timeline notes tab', () => {
         refreshTimelinesUntilTimeLinePresent(timelineId)
           // This cy.wait is here because we cannot do a pipe on a timeline as that will introduce multiple URL
           // request responses and indeterminism since on clicks to activates URL's.
-          .then(() => cy.wait(1000))
-          .then(() => openTimelineById(timelineId))
-          .then(() => goToNotesTab())
+          .then(() => cy.wrap(timelineId).as('timelineId'))
       );
+  });
+
+  beforeEach(function () {
+    visitWithoutDateRange(TIMELINES_URL);
+    openTimelineById(this?.timelineId as string)
+      .then(() => goToNotesTab())
+      .then(() => cy.wait(1000));
   });
 
   it('should render mockdown', () => {

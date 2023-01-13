@@ -8,7 +8,8 @@
 
 const { USES_STYLED_COMPONENTS } = require('./styled_components_files');
 
-module.exports = (_, options = {}) => {
+/** @type {import('@babel/core').ConfigFunction} */
+module.exports = (api, options = {}) => {
   return {
     presets: [
       [
@@ -18,8 +19,9 @@ module.exports = (_, options = {}) => {
           modules: false,
           // Please read the explanation for this
           // in node_preset.js
-          corejs: '3.26.1',
+          corejs: '3.27.1',
           bugfixes: true,
+          browserslistEnv: api.env('production') ? 'production' : 'dev',
         },
       ],
       [require('./common_preset'), options],

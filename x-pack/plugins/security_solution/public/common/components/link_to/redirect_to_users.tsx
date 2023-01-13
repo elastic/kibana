@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { UsersTableType } from '../../../users/store/model';
+import type { UsersTableType } from '../../../explore/users/store/model';
 import { appendSearch } from './helpers';
 
 export const getUsersDetailsUrl = (detailName: string, search?: string) =>

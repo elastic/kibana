@@ -205,6 +205,11 @@ export const packageToPackagePolicy = (
   description?: string,
   integrationToEnable?: string
 ): NewPackagePolicy => {
+  const experimentalDataStreamFeatures =
+    'savedObject' in packageInfo
+      ? packageInfo.savedObject?.attributes?.experimental_data_stream_features
+      : undefined;
+
   const packagePolicy: NewPackagePolicy = {
     name: packagePolicyName || `${packageInfo.name}-1`,
     namespace,
@@ -213,6 +218,9 @@ export const packageToPackagePolicy = (
       name: packageInfo.name,
       title: packageInfo.title,
       version: packageInfo.version,
+      ...(experimentalDataStreamFeatures
+        ? { experimental_data_stream_features: experimentalDataStreamFeatures }
+        : undefined),
     },
     enabled: true,
     policy_id: agentPolicyId,

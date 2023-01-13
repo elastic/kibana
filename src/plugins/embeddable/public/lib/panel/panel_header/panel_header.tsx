@@ -19,7 +19,6 @@ import {
 import classNames from 'classnames';
 import React from 'react';
 import { Action } from '@kbn/ui-actions-plugin/public';
-import { uiToReactComponent } from '@kbn/kibana-react-plugin/public';
 import { PanelOptionsMenu } from './panel_options_menu';
 import { IEmbeddable } from '../../embeddables';
 import { EmbeddableContext, panelBadgeTrigger, panelNotificationTrigger } from '../../triggers';
@@ -30,7 +29,10 @@ export interface PanelHeaderProps {
   index?: number;
   isViewMode: boolean;
   hidePanelTitle: boolean;
-  getActionContextMenuPanel: () => Promise<EuiContextMenuPanelDescriptor[]>;
+  getActionContextMenuPanel: () => Promise<{
+    panels: EuiContextMenuPanelDescriptor[];
+    actions: Action[];
+  }>;
   closeContextMenu: boolean;
   badges: Array<Action<EmbeddableContext>>;
   notifications: Array<Action<EmbeddableContext>>;
@@ -62,7 +64,7 @@ function renderNotifications(
     const context = { embeddable };
 
     let badge = notification.MenuItem ? (
-      React.createElement(uiToReactComponent(notification.MenuItem), {
+      React.createElement(notification.MenuItem, {
         key: notification.id,
         context: {
           embeddable,
@@ -213,12 +215,14 @@ export function PanelHeader({
     );
   };
 
+  const titleClasses = classNames('embPanel__title', { 'embPanel--dragHandle': !isViewMode });
+
   return (
     <figcaption
       className={classes}
       data-test-subj={`embeddablePanelHeading-${(title || '').replace(/\s/g, '')}`}
     >
-      <h2 data-test-subj="dashboardPanelTitle" className="embPanel__title embPanel__dragger">
+      <h2 data-test-subj="dashboardPanelTitle" className={titleClasses}>
         <EuiScreenReaderOnly>{getAriaLabel()}</EuiScreenReaderOnly>
         {renderTitle()}
         {renderBadges(badges, embeddable)}

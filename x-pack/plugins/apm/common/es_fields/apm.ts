@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+export const TIMESTAMP = 'timestamp.us';
 export const AGENT = 'agent';
 export const AGENT_NAME = 'agent.name';
 export const AGENT_VERSION = 'agent.version';
@@ -81,6 +81,13 @@ export const SPAN_LINKS = 'span.links';
 export const SPAN_LINKS_TRACE_ID = 'span.links.trace.id';
 export const SPAN_LINKS_SPAN_ID = 'span.links.span.id';
 
+export const SPAN_COMPOSITE_COUNT = 'span.composite.count';
+export const SPAN_COMPOSITE_SUM = 'span.composite.sum.us';
+export const SPAN_COMPOSITE_COMPRESSION_STRATEGY =
+  'span.composite.compression_strategy';
+
+export const SPAN_SYNC = 'span.sync';
+
 // Parent ID for a transaction or span
 export const PARENT_ID = 'parent.id';
 
@@ -89,6 +96,7 @@ export const ERROR_GROUP_ID = 'error.grouping_key';
 export const ERROR_CULPRIT = 'error.culprit';
 export const ERROR_LOG_LEVEL = 'error.log.level';
 export const ERROR_LOG_MESSAGE = 'error.log.message';
+export const ERROR_EXCEPTION = 'error.exception';
 export const ERROR_EXC_MESSAGE = 'error.exception.message'; // only to be used in es queries, since error.exception is now an array
 export const ERROR_EXC_HANDLED = 'error.exception.handled'; // only to be used in es queries, since error.exception is now an array
 export const ERROR_EXC_TYPE = 'error.exception.type';
@@ -151,3 +159,8 @@ export const INDEX = '_index';
 // Mobile
 export const NETWORK_CONNECTION_TYPE = 'network.connection.type';
 export const DEVICE_MODEL_NAME = 'device.model.name';
+export const SESSION_ID = 'session.id';
+export const APP_LAUNCH_TIME = 'application.launch.time';
+export const EVENT_NAME = 'event.name';
+
+export const CHILD_ID = 'child.id';

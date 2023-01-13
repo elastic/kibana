@@ -20,7 +20,7 @@ import { ApmMlDetectorType } from '../../../../common/anomaly_detection/apm_ml_d
 import { asExactTransactionRate } from '../../../../common/utils/formatters';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useEnvironmentsContext } from '../../../context/environments_context/use_environments_context';
-import { useApmParams } from '../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { usePreferredServiceAnomalyTimeseries } from '../../../hooks/use_preferred_service_anomaly_timeseries';
 import { useTimeRange } from '../../../hooks/use_time_range';
@@ -47,7 +47,10 @@ export function ServiceOverviewThroughputChart({
 }) {
   const {
     query: { rangeFrom, rangeTo, comparisonEnabled, offset },
-  } = useApmParams('/services/{serviceName}');
+  } = useAnyOfApmParams(
+    '/services/{serviceName}',
+    '/mobile-services/{serviceName}'
+  );
 
   const { environment } = useEnvironmentsContext();
 

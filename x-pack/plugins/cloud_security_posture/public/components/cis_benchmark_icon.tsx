@@ -9,7 +9,6 @@ import React from 'react';
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import { CSSInterpolation } from '@emotion/serialize';
 import type { BenchmarkId } from '../../common/types';
-import cisK8sVanillaIcon from '../assets/icons/k8s_logo.svg';
 import cisEksIcon from '../assets/icons/cis_eks_logo.svg';
 
 interface Props {
@@ -24,7 +23,7 @@ const getBenchmarkIdIconType = (props: Props): string => {
       return cisEksIcon;
     case 'cis_k8s':
     default:
-      return cisK8sVanillaIcon;
+      return 'logoKubernetes';
   }
 };
 

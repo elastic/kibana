@@ -46,6 +46,7 @@ export interface UsageStats {
   'observability:apmAWSLambdaRequestCostPerMillion': number;
   'observability:enableInfrastructureHostsView': boolean;
   'observability:apmAgentExplorerView': boolean;
+  'observability:profilingElasticsearchPlugin': boolean;
   'visualize:enableLabs': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:colorMapping': string;
@@ -142,7 +143,6 @@ export interface UsageStats {
   isDefaultIndexMigrated: boolean;
   'lens:useFieldExistenceSampling': boolean;
   'metrics:allowCheckingForFailedShards': boolean;
-  'observability:apmOperationsTab': boolean;
   'observability:apmLabsButton': boolean;
   'observability:enableAwsLambdaMetrics': boolean;
   'observability:apmProgressiveLoading': string;
@@ -153,6 +153,5 @@ export interface UsageStats {
   'securitySolution:enableGroupedNav': boolean;
   'securitySolution:showRelatedIntegrations': boolean;
   'visualization:visualize:legacyGaugeChartsLibrary': boolean;
-  'enterpriseSearch:enableBehavioralAnalyticsSection': boolean;
   'enterpriseSearch:enableEnginesSection': boolean;
 }

@@ -32,13 +32,30 @@ export interface PluginState {
   activeGuide?: GuideState;
 }
 
+/* To append a link to the description, specify its text and url in the properties.
+ * An example:
+ * {
+ *   description: 'This is a description with a link'.
+ *   linkText: 'My link',
+ *   linkUrl: 'example.com',
+ *   isLinkExternal: true,
+ * }
+ *
+ */
+export interface StepDescriptionWithLink {
+  descriptionText: string;
+  linkText: string;
+  linkUrl: string;
+  isLinkExternal?: boolean;
+}
+
 export interface StepConfig {
   id: GuideStepIds;
   title: string;
   // description is displayed as a single paragraph, can be combined with description list
-  description?: string;
+  description?: string | StepDescriptionWithLink;
   // description list is displayed as an unordered list, can be combined with description
-  descriptionList?: Array<string | React.ReactNode>;
+  descriptionList?: Array<string | StepDescriptionWithLink>;
   location?: {
     appID: string;
     path: string;
@@ -56,6 +73,7 @@ export interface GuideConfig {
   title: string;
   description: string;
   guideName: string;
+  telemetryId: string;
   docs?: {
     text: string;
     url: string;

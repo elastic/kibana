@@ -6,14 +6,17 @@
  */
 
 import { journey, step, expect, before, after } from '@elastic/synthetics';
+import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
 import {
   addTestMonitor,
   cleanTestMonitors,
   enableMonitorManagedViaApi,
 } from './services/add_monitor';
-import { syntheticsAppPageProvider } from '../../page_objects/synthetics_app';
+import { syntheticsAppPageProvider } from '../../page_objects/synthetics/synthetics_app';
 
 journey(`MonitorManagementList`, async ({ page, params }) => {
+  recordVideo(page);
+
   const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });
   const testMonitor1 = 'Test monitor 1';
   const testMonitor2 = 'Test monitor 2';
@@ -50,10 +53,10 @@ journey(`MonitorManagementList`, async ({ page, params }) => {
   });
 
   step(
-    'Click text=Showing 1-3 of 3 MonitorsSortingThis table contains 3 rows out of 3 rows; Page 1',
+    'Click text=Showing 1-3 of 3 ConfigurationsSortingThis table contains 3 rows out of 3 rows; Page 1',
     async () => {
       await page.click(
-        'text=Showing 1-3 of 3 MonitorsSortingThis table contains 3 rows out of 3 rows; Page 1'
+        'text=Showing 1-3 of 3 ConfigurationsSortingThis table contains 3 rows out of 3 rows; Page 1'
       );
       await page.click('[aria-label="expands filter group for Type filter"]');
     }
@@ -78,7 +81,7 @@ journey(`MonitorManagementList`, async ({ page, params }) => {
       ]);
       await page.click('text=1-1');
       await page.click(
-        'text=Showing 1-1 of 1 MonitorSortingThis table contains 1 rows out of 1 rows; Page 1 '
+        'text=Showing 1-1 of 1 ConfigurationSortingThis table contains 1 rows out of 1 rows; Page 1 '
       );
     }
   );

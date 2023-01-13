@@ -8,7 +8,7 @@
 import type { CoreStart } from '@kbn/core/public';
 import type { StartPlugins } from '../../../types';
 
-type GlobalServices = Pick<CoreStart, 'http' | 'uiSettings' | 'notifications'> &
+type GlobalServices = Pick<CoreStart, 'application' | 'http' | 'uiSettings' | 'notifications'> &
   Pick<StartPlugins, 'data' | 'unifiedSearch'>;
 
 export class KibanaServices {
@@ -17,13 +17,21 @@ export class KibanaServices {
 
   public static init({
     http,
+    application,
     data,
     unifiedSearch,
     kibanaVersion,
     uiSettings,
     notifications,
   }: GlobalServices & { kibanaVersion: string }) {
-    this.services = { data, http, uiSettings, unifiedSearch, notifications };
+    this.services = {
+      application,
+      data,
+      http,
+      uiSettings,
+      unifiedSearch,
+      notifications,
+    };
     this.kibanaVersion = kibanaVersion;
   }
 

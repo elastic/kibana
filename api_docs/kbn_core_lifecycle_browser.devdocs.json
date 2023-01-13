@@ -141,6 +141,28 @@
           },
           {
             "parentPluginId": "@kbn/core-lifecycle-browser",
+            "id": "def-common.CoreSetup.customBranding",
+            "type": "Object",
+            "tags": [],
+            "label": "customBranding",
+            "description": [
+              "{@link CustomBrandingSetup}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-custom-branding-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreCustomBrandingBrowserPluginApi",
+                "section": "def-common.CustomBrandingSetup",
+                "text": "CustomBrandingSetup"
+              }
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_setup.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-browser",
             "id": "def-common.CoreSetup.fatalErrors",
             "type": "Object",
             "tags": [],
@@ -209,10 +231,12 @@
             "parentPluginId": "@kbn/core-lifecycle-browser",
             "id": "def-common.CoreSetup.uiSettings",
             "type": "Object",
-            "tags": [],
+            "tags": [
+              "Deprecated"
+            ],
             "label": "uiSettings",
             "description": [
-              "{@link IUiSettingsClient}"
+              "{@link IUiSettingsClient}\n"
             ],
             "signature": [
               {
@@ -221,6 +245,28 @@
                 "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
                 "section": "def-common.IUiSettingsClient",
                 "text": "IUiSettingsClient"
+              }
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_setup.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-browser",
+            "id": "def-common.CoreSetup.settings",
+            "type": "Object",
+            "tags": [],
+            "label": "settings",
+            "description": [
+              "{@link SettingsStart}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-ui-settings-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+                "section": "def-common.SettingsStart",
+                "text": "SettingsStart"
               }
             ],
             "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_setup.ts",
@@ -243,28 +289,6 @@
                 "docId": "kibKbnCoreExecutionContextBrowserPluginApi",
                 "section": "def-common.ExecutionContextSetup",
                 "text": "ExecutionContextSetup"
-              }
-            ],
-            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_setup.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-lifecycle-browser",
-            "id": "def-common.CoreSetup.injectedMetadata",
-            "type": "Object",
-            "tags": [],
-            "label": "injectedMetadata",
-            "description": [
-              "{@link InjectedMetadataSetup}"
-            ],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-injected-metadata-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreInjectedMetadataBrowserPluginApi",
-                "section": "def-common.InjectedMetadataSetup",
-                "text": "InjectedMetadataSetup"
               }
             ],
             "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_setup.ts",
@@ -407,6 +431,28 @@
                 "docId": "kibKbnCoreChromeBrowserPluginApi",
                 "section": "def-common.ChromeStart",
                 "text": "ChromeStart"
+              }
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-browser",
+            "id": "def-common.CoreStart.customBranding",
+            "type": "Object",
+            "tags": [],
+            "label": "customBranding",
+            "description": [
+              "{@link CustomBrandingStart}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-custom-branding-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreCustomBrandingBrowserPluginApi",
+                "section": "def-common.CustomBrandingStart",
+                "text": "CustomBrandingStart"
               }
             ],
             "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts",
@@ -571,10 +617,12 @@
             "parentPluginId": "@kbn/core-lifecycle-browser",
             "id": "def-common.CoreStart.uiSettings",
             "type": "Object",
-            "tags": [],
+            "tags": [
+              "Deprecated"
+            ],
             "label": "uiSettings",
             "description": [
-              "{@link IUiSettingsClient}"
+              "{@link IUiSettingsClient}\n"
             ],
             "signature": [
               {
@@ -583,6 +631,28 @@
                 "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
                 "section": "def-common.IUiSettingsClient",
                 "text": "IUiSettingsClient"
+              }
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-browser",
+            "id": "def-common.CoreStart.settings",
+            "type": "Object",
+            "tags": [],
+            "label": "settings",
+            "description": [
+              "{@link SettingsStart}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-ui-settings-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+                "section": "def-common.SettingsStart",
+                "text": "SettingsStart"
               }
             ],
             "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts",
@@ -649,28 +719,6 @@
                 "docId": "kibKbnCoreThemeBrowserPluginApi",
                 "section": "def-common.ThemeServiceStart",
                 "text": "ThemeServiceStart"
-              }
-            ],
-            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-lifecycle-browser",
-            "id": "def-common.CoreStart.injectedMetadata",
-            "type": "Object",
-            "tags": [],
-            "label": "injectedMetadata",
-            "description": [
-              "{@link InjectedMetadataStart}"
-            ],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-injected-metadata-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreInjectedMetadataBrowserPluginApi",
-                "section": "def-common.InjectedMetadataStart",
-                "text": "InjectedMetadataStart"
               }
             ],
             "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts",

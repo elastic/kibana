@@ -27,6 +27,7 @@ import {
   FieldPopoverHeader,
   FieldPopoverHeaderProps,
   FieldPopoverVisualize,
+  wrapFieldNameOnDot,
 } from '@kbn/unified-field-list-plugin/public';
 import { DiscoverFieldStats } from './discover_field_stats';
 import { getTypeForFieldIcon } from '../../../../utils/get_type_for_field_icon';
@@ -36,13 +37,6 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { SHOW_LEGACY_FIELD_TOP_VALUES, PLUGIN_ID } from '../../../../../common';
 import { getUiActions } from '../../../../kibana_services';
 import { type DataDocuments$ } from '../../hooks/use_saved_search';
-
-function wrapOnDot(str?: string) {
-  // u200B is a non-width white-space character, which allows
-  // the browser to efficiently word-wrap right after the dot
-  // without us having to draw a lot of extra DOM elements, etc
-  return str ? str.replace(/\./g, '.\u200B') : '';
-}
 
 const FieldInfoIcon: React.FC = memo(() => (
   <EuiToolTip
@@ -86,12 +80,12 @@ const FieldName: React.FC<{ field: DataViewField; highlight?: string }> = memo(
 
     return (
       <EuiHighlight
-        search={wrapOnDot(highlight)}
+        search={wrapFieldNameOnDot(highlight)}
         data-test-subj={`field-${field.name}`}
         title={title}
         className="dscSidebarField__name"
       >
-        {wrapOnDot(field.displayName)}
+        {wrapFieldNameOnDot(field.displayName)}
       </EuiHighlight>
     );
   }

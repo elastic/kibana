@@ -11,7 +11,7 @@ import {
   Logger,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { LogView, LogViewAttributes } from '../../../common/log_views';
+import { defaultLogViewAttributes, LogView, LogViewAttributes } from '../../../common/log_views';
 import { LogViewsClient } from './log_views_client';
 import { LogViewsServiceSetup, LogViewsServiceStart, LogViewsServiceStartDeps } from './types';
 
@@ -24,11 +24,11 @@ export class LogViewsService {
     const { internalLogViews } = this;
 
     return {
-      defineInternalLogView(logViewId: string, logViewAttributes: LogViewAttributes) {
+      defineInternalLogView(logViewId: string, logViewAttributes: Partial<LogViewAttributes>) {
         internalLogViews.set(logViewId, {
           id: logViewId,
           origin: 'internal',
-          attributes: logViewAttributes,
+          attributes: { ...defaultLogViewAttributes, ...logViewAttributes },
           updatedAt: Date.now(),
         });
       },

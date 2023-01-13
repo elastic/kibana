@@ -26,6 +26,8 @@ import {
   KibanaRequestState,
   KibanaRouteOptions,
   KibanaRequestRouteOptions,
+  RawRequest,
+  FakeRawRequest,
 } from '@kbn/core-http-server';
 import { isSafeMethod } from './route';
 import { KibanaSocket } from './socket';
@@ -52,7 +54,7 @@ export class CoreKibanaRequest<
    * @internal
    */
   public static from<P, Q, B>(
-    req: Request,
+    req: RawRequest,
     routeSchemas: RouteValidator<P, Q, B> | RouteValidatorFullConfig<P, Q, B> = {},
     withoutSecretHeaders: boolean = true
   ) {
@@ -74,13 +76,16 @@ export class CoreKibanaRequest<
    * @internal
    */
   private static validate<P, Q, B>(
-    req: Request,
+    req: RawRequest,
     routeValidator: RouteValidator<P, Q, B>
   ): {
     params: P;
     query: Q;
     body: B;
   } {
+    if (isFakeRawRequest(req)) {
+      return { query: {} as Q, params: {} as P, body: {} as B };
+    }
     const params = routeValidator.getParams(req.params, 'request params');
     const query = routeValidator.getQuery(req.query, 'request query');
     const body = routeValidator.getBody(req.payload, 'request body');
@@ -105,6 +110,8 @@ export class CoreKibanaRequest<
   public readonly events: KibanaRequestEvents;
   /** {@inheritDoc IKibanaRequest.auth} */
   public readonly auth: KibanaRequestAuth;
+  /** {@inheritDoc IKibanaRequest.isFakeRequest} */
+  public readonly isFakeRequest: boolean;
   /** {@inheritDoc IKibanaRequest.rewrittenUrl} */
   public readonly rewrittenUrl?: URL;
 
@@ -112,7 +119,7 @@ export class CoreKibanaRequest<
   protected readonly [requestSymbol]: Request;
 
   constructor(
-    request: Request,
+    request: RawRequest,
     public readonly params: Params,
     public readonly query: Query,
     public readonly body: Body,
@@ -128,9 +135,10 @@ export class CoreKibanaRequest<
     this.uuid = appState?.requestUuid ?? uuid.v4();
     this.rewrittenUrl = appState?.rewrittenUrl;
 
-    this.url = request.url;
-    this.headers = deepFreeze({ ...request.headers });
-    this.isSystemRequest = request.headers['kbn-system-request'] === 'true';
+    this.url = request.url ?? new URL('https://fake-request/url');
+    this.headers = isRealRawRequest(request) ? deepFreeze({ ...request.headers }) : request.headers;
+    this.isSystemRequest = this.headers['kbn-system-request'] === 'true';
+    this.isFakeRequest = isFakeRawRequest(request);
 
     // prevent Symbol exposure via Object.getOwnPropertySymbols()
     Object.defineProperty(this, requestSymbol, {
@@ -139,17 +147,19 @@ export class CoreKibanaRequest<
     });
 
     this.route = deepFreeze(this.getRouteInfo(request));
-    this.socket = new KibanaSocket(request.raw.req.socket);
+    this.socket = isRealRawRequest(request)
+      ? new KibanaSocket(request.raw.req.socket)
+      : KibanaSocket.getFakeSocket();
     this.events = this.getEvents(request);
 
     this.auth = {
       // missing in fakeRequests, so we cast to false
-      isAuthenticated: Boolean(request.auth?.isAuthenticated),
+      isAuthenticated: request.auth?.isAuthenticated ?? false,
     };
   }
 
-  private getEvents(request: Request): KibanaRequestEvents {
-    if (!request.raw.res) {
+  private getEvents(request: RawRequest): KibanaRequestEvents {
+    if (isFakeRawRequest(request)) {
       return {
         aborted$: NEVER,
         completed$: NEVER,
@@ -166,19 +176,18 @@ export class CoreKibanaRequest<
     } as const;
   }
 
-  private getRouteInfo(request: Request): KibanaRequestRoute<Method> {
-    const method = request.method as Method;
+  private getRouteInfo(request: RawRequest): KibanaRequestRoute<Method> {
+    const method = (request.method as Method) ?? 'get';
     const {
       parse,
       maxBytes,
       allow,
       output,
       timeout: payloadTimeout,
-    } = request.route.settings.payload || {};
+    } = request.route?.settings?.payload || {};
 
-    // net.Socket#timeout isn't documented, yet, and isn't part of the types... https://github.com/nodejs/node/pull/34543
-    // the socket is also undefined when using @hapi/shot, or when a "fake request" is used
-    const socketTimeout = (request.raw.req.socket as any)?.timeout;
+    // the socket is undefined when using @hapi/shot, or when a "fake request" is used
+    const socketTimeout = isRealRawRequest(request) ? request.raw.req.socket?.timeout : undefined;
     const options = {
       authRequired: this.getAuthRequired(request),
       // TypeScript note: Casting to `RouterOptions` to fix the following error:
@@ -190,8 +199,9 @@ export class CoreKibanaRequest<
       // a mistake. In v19, the `RouteSettings` interface does have an `app`
       // property.
       xsrfRequired:
-        ((request.route.settings as RouteOptions).app as KibanaRouteOptions)?.xsrfRequired ?? true, // some places in LP call KibanaRequest.from(request) manually. remove fallback to true before v8
-      tags: request.route.settings.tags || [],
+        ((request.route?.settings as RouteOptions)?.app as KibanaRouteOptions)?.xsrfRequired ??
+        true, // some places in LP call KibanaRequest.from(request) manually. remove fallback to true before v8
+      tags: request.route?.settings?.tags || [],
       timeout: {
         payload: payloadTimeout,
         idleSocket: socketTimeout === 0 ? undefined : socketTimeout,
@@ -207,13 +217,17 @@ export class CoreKibanaRequest<
     } as unknown as KibanaRequestRouteOptions<Method>; // TS does not understand this is OK so I'm enforced to do this enforced casting
 
     return {
-      path: request.path,
+      path: request.path ?? '/',
       method,
       options,
     };
   }
 
-  private getAuthRequired(request: Request): boolean | 'optional' {
+  private getAuthRequired(request: RawRequest): boolean | 'optional' {
+    if (isFakeRawRequest(request)) {
+      return true;
+    }
+
     const authOptions = request.route.settings.auth;
     if (typeof authOptions === 'object') {
       // 'try' is used in the legacy platform
@@ -231,7 +245,9 @@ export class CoreKibanaRequest<
     }
 
     // @ts-expect-error According to @types/hapi__hapi, `route.settings` should be of type `RouteSettings`, but it seems that it's actually `RouteOptions` (https://github.com/hapijs/hapi/blob/v18.4.2/lib/route.js#L139)
-    if (authOptions === false) return false;
+    if (authOptions === false) {
+      return false;
+    }
     throw new Error(
       `unexpected authentication options: ${JSON.stringify(authOptions)} for route: ${
         this.url.pathname
@@ -255,12 +271,21 @@ export function isKibanaRequest(request: unknown): request is CoreKibanaRequest 
   return request instanceof CoreKibanaRequest;
 }
 
-function isRequest(request: any): request is Request {
+function isRealRawRequest(request: any): request is Request {
   try {
-    return request.raw.req && typeof request.raw.req === 'object';
+    return (
+      request.raw.req &&
+      typeof request.raw.req === 'object' &&
+      request.raw.res &&
+      typeof request.raw.res === 'object'
+    );
   } catch {
     return false;
   }
+}
+
+function isFakeRawRequest(request: RawRequest): request is FakeRawRequest {
+  return !isRealRawRequest(request);
 }
 
 /**
@@ -268,7 +293,7 @@ function isRequest(request: any): request is Request {
  * @internal
  */
 export function isRealRequest(request: unknown): request is KibanaRequest | Request {
-  return isKibanaRequest(request) || isRequest(request);
+  return isKibanaRequest(request) || isRealRawRequest(request);
 }
 
 function isCompleted(request: Request) {

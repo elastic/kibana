@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+// We're using the mocks for jest unit tests as expected data in the integration tests here.
+// This makes sure should the assertions for the integration tests need to be updated,
+// that also the jest unit tests use mocks that are not outdated.
+import { changePoints as artificialLogChangePoints } from '@kbn/aiops-plugin/common/__mocks__/artificial_logs/change_points';
+import { finalChangePointGroups as artificialLogsChangePointGroups } from '@kbn/aiops-plugin/common/__mocks__/artificial_logs/final_change_point_groups';
+
 import type { TestData } from './types';
 
 export const explainLogRateSpikesTestData: TestData[] = [
@@ -86,71 +92,8 @@ export const explainLogRateSpikesTestData: TestData[] = [
       groupHistogramFilter: 'add_change_point_group_histogram',
       histogramFilter: 'add_change_points_histogram',
       errorFilter: 'add_error',
-      changePoints: [
-        {
-          fieldName: 'response_code',
-          fieldValue: '500',
-          doc_count: 1821,
-          bg_count: 553,
-          total_doc_count: 4671,
-          total_bg_count: 1975,
-          score: 26.546201745993947,
-          pValue: 2.9589053032077285e-12,
-          normalizedScore: 0.7814127409489161,
-        },
-        {
-          fieldName: 'url',
-          fieldValue: 'home.php',
-          doc_count: 1742,
-          bg_count: 632,
-          total_doc_count: 4671,
-          total_bg_count: 1975,
-          score: 4.53094842981472,
-          pValue: 0.010770456205312423,
-          normalizedScore: 0.10333028878375965,
-        },
-        {
-          fieldName: 'url',
-          fieldValue: 'login.php',
-          doc_count: 1742,
-          bg_count: 632,
-          total_doc_count: 4671,
-          total_bg_count: 1975,
-          score: 4.53094842981472,
-          pValue: 0.010770456205312423,
-          normalizedScore: 0.10333028878375965,
-        },
-        {
-          fieldName: 'user',
-          fieldValue: 'Peter',
-          doc_count: 1981,
-          bg_count: 553,
-          total_doc_count: 4671,
-          total_bg_count: 1975,
-          score: 47.34435085428873,
-          pValue: 2.7454255728359757e-21,
-          normalizedScore: 0.8327337555873047,
-        },
-      ],
-      groups: [
-        {
-          id: '2038579476',
-          group: [
-            { fieldName: 'response_code', fieldValue: '500', duplicate: false },
-            { fieldName: 'url', fieldValue: 'home.php', duplicate: false },
-            { fieldName: 'url', fieldValue: 'home.php', duplicate: false },
-            { fieldName: 'url', fieldValue: 'login.php', duplicate: false },
-          ],
-          docCount: 792,
-          pValue: 0.010770456205312423,
-        },
-        {
-          id: '817080373',
-          group: [{ fieldName: 'user', fieldValue: 'Peter', duplicate: false }],
-          docCount: 1981,
-          pValue: 2.7454255728359757e-21,
-        },
-      ],
+      changePoints: artificialLogChangePoints,
+      groups: artificialLogsChangePointGroups,
       histogramLength: 20,
     },
   },

@@ -42,7 +42,8 @@ describe('UpdateSLO', () => {
         expect.objectContaining({ ...slo, name: newName, updated_at: expect.anything() })
       );
       expect(response.name).toBe(newName);
-      expect(response.updated_at).not.toBe(slo.updated_at);
+      expect(response.updatedAt).not.toBe(slo.updatedAt);
+      expect(response.revision).toBe(slo.revision);
     });
   });
 

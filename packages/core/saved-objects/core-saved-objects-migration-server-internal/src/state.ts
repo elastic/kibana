@@ -173,6 +173,12 @@ export interface PostInitState extends BaseState {
   readonly sourceIndex: Option.Option<string>;
   /** The target index is the index to which the migration writes */
   readonly targetIndex: string;
+  /**
+   * Unaltered mappings retrieved from the current target index.
+   *
+   * See also {@link BaseState['targetIndexMappings']}.
+   */
+  readonly targetIndexRawMappings?: IndexMapping;
   readonly versionIndexReadyActions: Option.Option<AliasAction[]>;
   readonly outdatedDocumentsQuery: QueryDslQueryContainer;
 }
@@ -180,6 +186,21 @@ export interface PostInitState extends BaseState {
 export interface DoneState extends PostInitState {
   /** Migration completed successfully */
   readonly controlState: 'DONE';
+}
+
+/**
+ * Compatibe migrations do not require migrating to a new index because all
+ * schema changes are compatible with current index mappings.
+ *
+ * Before running the compatible migration we need to prepare. For example, we
+ * need to make sure that no older Kibana versions are still writing to target
+ * index.
+ */
+export interface PrepareCompatibleMigration extends PostInitState {
+  /** We have found a schema-compatible migration, this means we can optimise our migration steps */
+  readonly controlState: 'PREPARE_COMPATIBLE_MIGRATION';
+  /** Alias-level actions that prepare for this migration */
+  readonly preTransformDocsActions: AliasAction[];
 }
 
 export interface FatalState extends BaseState {
@@ -451,6 +472,7 @@ export interface LegacyDeleteState extends LegacyBaseState {
 export type State = Readonly<
   | FatalState
   | InitState
+  | PrepareCompatibleMigration
   | WaitForMigrationCompletionState
   | DoneState
   | WaitForYellowSourceState

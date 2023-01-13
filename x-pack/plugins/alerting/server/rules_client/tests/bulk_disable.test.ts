@@ -196,6 +196,9 @@ describe('bulkDisableRules', () => {
       })
       .mockResolvedValueOnce({
         saved_objects: [savedObjectWith409Error],
+      })
+      .mockResolvedValueOnce({
+        saved_objects: [savedObjectWith409Error],
       });
 
     encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
@@ -217,11 +220,17 @@ describe('bulkDisableRules', () => {
         find: function* asyncGenerator() {
           yield { saved_objects: [enabledRule2] };
         },
+      })
+      .mockResolvedValueOnce({
+        close: jest.fn(),
+        find: function* asyncGenerator() {
+          yield { saved_objects: [enabledRule2] };
+        },
       });
 
     const result = await rulesClient.bulkDisableRules({ ids: ['id1', 'id2'] });
 
-    expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(3);
+    expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(4);
     expect(taskManager.bulkDisable).toHaveBeenCalledTimes(1);
     expect(taskManager.bulkDisable).toHaveBeenCalledWith(['id1']);
     expect(result).toStrictEqual({

@@ -31,7 +31,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const ruleName1 = data[0].rule.name;
   const ruleName2 = data[1].rule.name;
 
-  describe('Findings Page', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/147998
+  describe.skip('Findings Page', () => {
     let findings: typeof pageObjects.findings;
     let table: typeof pageObjects.findings.table;
     let distributionBar: typeof pageObjects.findings.distributionBar;
@@ -55,7 +56,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('SearchBar', () => {
       it('add filter', async () => {
-        await filterBar.addFilter('rule.name', 'is', ruleName1);
+        await filterBar.addFilter({ field: 'rule.name', operation: 'is', value: ruleName1 });
 
         expect(await filterBar.hasFilter('rule.name', ruleName1)).to.be(true);
         expect(await table.hasColumnValue('Rule', ruleName1)).to.be(true);

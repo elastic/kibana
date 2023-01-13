@@ -31,7 +31,6 @@ export function loginPageProvider({
       } catch (e) {
         // ignore
       }
-
       if (isRemote) {
         await page.click('text="Log in with Elasticsearch"');
       }

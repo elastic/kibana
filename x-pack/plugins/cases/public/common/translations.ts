@@ -311,6 +311,13 @@ export const ADD_TAG_CUSTOM_OPTION_LABEL = (searchValue: string) =>
     values: { searchValue },
   });
 
+export const VERSION_CONFLICT_WARNING = (markdownId: string) =>
+  i18n.translate('xpack.cases.configure.commentVersionConflictWarning', {
+    defaultMessage:
+      'This {markdownId} has been updated by another user. Saving your {markdownId} will overwrite their update.',
+    values: { markdownId },
+  });
+
 /**
  * EUI checkbox replace {searchValue} with the current
  * search value. We need to put the template variable

@@ -7,23 +7,24 @@
  */
 
 import Path from 'path';
-import Fs from 'fs';
 
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { getPackages, getPluginPackagesFilter } from '@kbn/repo-packages';
 
 interface Options {
+  runExamples: boolean;
   pluginPaths: string[];
   pluginScanDirs: string[];
 }
 
 export type WatchPaths = ReturnType<typeof getServerWatchPaths>;
 
-export function getServerWatchPaths({ pluginPaths, pluginScanDirs }: Options) {
+export function getServerWatchPaths(opts: Options) {
   const fromRoot = (p: string) => Path.resolve(REPO_ROOT, p);
 
-  const pluginInternalDirsIgnore = pluginScanDirs
+  const pluginInternalDirsIgnore = opts.pluginScanDirs
     .map((scanDir) => Path.resolve(scanDir, '*'))
-    .concat(pluginPaths)
+    .concat(opts.pluginPaths)
     .reduce(
       (acc: string[], path) => [
         ...acc,
@@ -37,18 +38,33 @@ export function getServerWatchPaths({ pluginPaths, pluginScanDirs }: Options) {
       []
     );
 
+  function getServerPkgDirs() {
+    const pluginFilter = getPluginPackagesFilter({
+      examples: opts.runExamples,
+      paths: opts.pluginPaths,
+      parentDirs: opts.pluginScanDirs,
+    });
+
+    return getPackages(REPO_ROOT).flatMap((p) => {
+      if (p.isPlugin) {
+        return pluginFilter(p) && p.manifest.type === 'plugin-server' ? p.directory : [];
+      }
+
+      return p.manifest.type === 'shared-common' || p.manifest.type === 'shared-server'
+        ? p.directory
+        : [];
+    });
+  }
+
   const watchPaths = Array.from(
-    new Set(
-      [
-        fromRoot('src/core'),
-        fromRoot('src/legacy/server'),
-        fromRoot('src/legacy/utils'),
-        fromRoot('config'),
-        ...pluginPaths,
-        ...pluginScanDirs,
-      ].map((path) => Path.resolve(path))
-    )
-  ).filter((path) => Fs.existsSync(fromRoot(path)));
+    new Set([
+      fromRoot('src/core'),
+      fromRoot('config'),
+      ...opts.pluginPaths.map((path) => Path.resolve(path)),
+      ...opts.pluginScanDirs.map((path) => Path.resolve(path)),
+      ...getServerPkgDirs(),
+    ])
+  );
 
   const ignorePaths = [
     /[\\\/](\..*|node_modules|bower_components|target|public|__[a-z0-9_]+__|coverage)([\\\/]|$)/,

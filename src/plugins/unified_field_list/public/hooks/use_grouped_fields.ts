@@ -9,6 +9,7 @@
 import { groupBy } from 'lodash';
 import { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { type CoreStart } from '@kbn/core-lifecycle-browser';
 import { type DataView, type DataViewField } from '@kbn/data-views-plugin/common';
 import { type DataViewsContract } from '@kbn/data-views-plugin/public';
 import {
@@ -19,55 +20,72 @@ import {
   FieldsGroupNames,
   ExistenceFetchStatus,
 } from '../types';
-import { type ExistingFieldsReader } from './use_existing_fields';
+import { useExistingFieldsReader } from './use_existing_fields';
+import {
+  useFieldFilters,
+  type FieldFiltersResult,
+  type FieldFiltersParams,
+} from './use_field_filters';
 
 export interface GroupedFieldsParams<T extends FieldListItem> {
   dataViewId: string | null; // `null` is for text-based queries
   allFields: T[] | null; // `null` is for loading indicator
   services: {
     dataViews: DataViewsContract;
+    core: Pick<CoreStart, 'docLinks'>;
   };
-  fieldsExistenceReader?: ExistingFieldsReader; // use `undefined` for text-based queries
   isAffectedByGlobalFilter?: boolean;
   popularFieldsLimit?: number;
   sortedSelectedFields?: T[];
+  getCustomFieldType?: FieldFiltersParams<T>['getCustomFieldType'];
   onOverrideFieldGroupDetails?: (
     groupName: FieldsGroupNames
   ) => Partial<FieldsGroupDetails> | undefined | null;
   onSupportedFieldFilter?: (field: T) => boolean;
   onSelectedFieldFilter?: (field: T) => boolean;
-  onFilterField?: (field: T) => boolean;
+  onFilterField?: (field: T) => boolean; // TODO: deprecate after integrating the unified field search and field filters into Discover
 }
 
 export interface GroupedFieldsResult<T extends FieldListItem> {
-  fieldGroups: FieldListGroups<T>;
-  scrollToTopResetCounter: number;
-  fieldsExistenceStatus: ExistenceFetchStatus;
-  fieldsExistInIndex: boolean;
+  fieldListFiltersProps: FieldFiltersResult<T>['fieldListFiltersProps'];
+  fieldListGroupedProps: {
+    fieldGroups: FieldListGroups<T>;
+    scrollToTopResetCounter: number;
+    fieldsExistenceStatus: ExistenceFetchStatus;
+    fieldsExistInIndex: boolean;
+    screenReaderDescriptionId?: string;
+  };
 }
 
 export function useGroupedFields<T extends FieldListItem = DataViewField>({
   dataViewId,
   allFields,
   services,
-  fieldsExistenceReader,
   isAffectedByGlobalFilter = false,
   popularFieldsLimit,
   sortedSelectedFields,
+  getCustomFieldType,
   onOverrideFieldGroupDetails,
   onSupportedFieldFilter,
   onSelectedFieldFilter,
   onFilterField,
 }: GroupedFieldsParams<T>): GroupedFieldsResult<T> {
+  const fieldsExistenceReader = useExistingFieldsReader();
+  const fieldListFilters = useFieldFilters<T>({
+    allFields,
+    services,
+    getCustomFieldType,
+    onSupportedFieldFilter,
+  });
+  const onFilterFieldList = onFilterField ?? fieldListFilters.onFilterField;
   const [dataView, setDataView] = useState<DataView | null>(null);
   const isAffectedByTimeFilter = Boolean(dataView?.timeFieldName);
   const fieldsExistenceInfoUnavailable: boolean = dataViewId
-    ? fieldsExistenceReader?.isFieldsExistenceInfoUnavailable(dataViewId) ?? false
+    ? fieldsExistenceReader.isFieldsExistenceInfoUnavailable(dataViewId)
     : true;
-  const hasFieldDataHandler =
-    dataViewId && fieldsExistenceReader
-      ? fieldsExistenceReader.hasFieldData
-      : hasFieldDataByDefault;
+  const hasFieldDataHandler = dataViewId
+    ? fieldsExistenceReader.hasFieldData
+    : hasFieldDataByDefault;
 
   useEffect(() => {
     const getDataView = async () => {
@@ -86,8 +104,11 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
     }
   }, [dataView, setDataView, dataViewId]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const scrollToTopResetCounter: number = useMemo(() => Date.now(), [dataViewId, onFilterField]);
+  const scrollToTopResetCounter: number = useMemo(
+    () => Date.now(),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [dataViewId, onFilterFieldList]
+  );
 
   const unfilteredFieldGroups: FieldListGroups<T> = useMemo(() => {
     const containsData = (field: T) => {
@@ -297,17 +318,21 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
   ]);
 
   const fieldGroups: FieldListGroups<T> = useMemo(() => {
-    if (!onFilterField) {
+    if (!onFilterFieldList) {
       return unfilteredFieldGroups;
     }
 
     return Object.fromEntries(
       Object.entries(unfilteredFieldGroups).map(([name, group]) => [
         name,
-        { ...group, fields: group.fields.filter(onFilterField) },
+        {
+          ...group,
+          fieldSearchHighlight: fieldListFilters.fieldSearchHighlight,
+          fields: group.fields.filter(onFilterFieldList),
+        },
       ])
     ) as FieldListGroups<T>;
-  }, [unfilteredFieldGroups, onFilterField]);
+  }, [unfilteredFieldGroups, onFilterFieldList, fieldListFilters.fieldSearchHighlight]);
 
   const hasDataLoaded = Boolean(allFields);
   const allFieldsLength = allFields?.length;
@@ -327,14 +352,28 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
     return fieldsExistenceReader.getFieldsExistenceStatus(dataViewId);
   }, [dataViewId, hasDataLoaded, fieldsExistenceReader]);
 
-  return useMemo(() => {
+  const screenReaderDescriptionId =
+    fieldListFilters.fieldListFiltersProps.screenReaderDescriptionId;
+  const fieldListGroupedProps = useMemo(() => {
     return {
       fieldGroups,
       scrollToTopResetCounter,
       fieldsExistInIndex,
       fieldsExistenceStatus,
+      screenReaderDescriptionId,
     };
-  }, [fieldGroups, scrollToTopResetCounter, fieldsExistInIndex, fieldsExistenceStatus]);
+  }, [
+    fieldGroups,
+    scrollToTopResetCounter,
+    fieldsExistInIndex,
+    fieldsExistenceStatus,
+    screenReaderDescriptionId,
+  ]);
+
+  return {
+    fieldListGroupedProps,
+    fieldListFiltersProps: fieldListFilters.fieldListFiltersProps,
+  };
 }
 
 const collator = new Intl.Collator(undefined, {

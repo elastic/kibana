@@ -87,7 +87,12 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const [selectedAgentPolicies, setSelectedAgentPolicies] = useState<string[]>([]);
 
   // Status for filtering
-  const [selectedStatus, setSelectedStatus] = useState<string[]>([]);
+  const [selectedStatus, setSelectedStatus] = useState<string[]>([
+    'healthy',
+    'unhealthy',
+    'updating',
+    'offline',
+  ]);
 
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
@@ -183,6 +188,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
               return AgentStatusKueryHelper.buildKueryForUpdatingAgents();
             case 'inactive':
               return AgentStatusKueryHelper.buildKueryForInactiveAgents();
+            case 'unenrolled':
+              return AgentStatusKueryHelper.buildKueryForUnenrolledAgents();
           }
 
           return undefined;
@@ -201,7 +208,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   }, [search, selectedAgentPolicies, selectedTags, selectedStatus]);
 
   const showInactive = useMemo(() => {
-    return selectedStatus.includes('inactive');
+    return selectedStatus.some((status) => status === 'inactive' || status === 'unenrolled');
   }, [selectedStatus]);
 
   const [agents, setAgents] = useState<Agent[]>([]);
@@ -309,7 +316,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             unhealthy: agentsStatusResponse.data.results.error,
             offline: agentsStatusResponse.data.results.offline,
             updating: agentsStatusResponse.data.results.updating,
-            inactive: agentsResponse.data.totalInactive,
+            inactive: agentsStatusResponse.data.results.inactive,
+            unenrolled: agentsStatusResponse.data.results.unenrolled,
           });
 
           const newAllTags = agentTagsResponse.data.items;

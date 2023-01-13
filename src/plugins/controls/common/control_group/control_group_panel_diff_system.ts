@@ -8,7 +8,7 @@
 
 import deepEqual from 'fast-deep-equal';
 import { omit, isEqual } from 'lodash';
-import { DEFAULT_SORT } from '../options_list/suggestions_sorting';
+import { OPTIONS_LIST_DEFAULT_SORT } from '../options_list/suggestions_sorting';
 import { OptionsListEmbeddableInput, OPTIONS_LIST_CONTROL } from '../options_list/types';
 
 import { ControlPanelState } from './types';
@@ -65,7 +65,7 @@ export const ControlPanelDiffSystems: {
         Boolean(singleSelectA) === Boolean(singleSelectB) &&
         Boolean(existsSelectedA) === Boolean(existsSelectedB) &&
         Boolean(runPastTimeoutA) === Boolean(runPastTimeoutB) &&
-        deepEqual(sortA ?? DEFAULT_SORT, sortB ?? DEFAULT_SORT) &&
+        deepEqual(sortA ?? OPTIONS_LIST_DEFAULT_SORT, sortB ?? OPTIONS_LIST_DEFAULT_SORT) &&
         isEqual(selectedA ?? [], selectedB ?? []) &&
         deepEqual(inputA, inputB)
       );

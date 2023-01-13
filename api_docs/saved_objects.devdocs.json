@@ -641,11 +641,11 @@
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/top_nav/save_modal.tsx"
+            "path": "src/plugins/dashboard/public/dashboard_container/embeddable/api/overlays/save_modal.tsx"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/top_nav/save_modal.tsx"
+            "path": "src/plugins/dashboard/public/dashboard_container/embeddable/api/overlays/save_modal.tsx"
           },
           {
             "plugin": "discover",
@@ -1708,15 +1708,15 @@
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/actions/clone_panel_action.tsx"
+            "path": "src/plugins/dashboard/public/dashboard_actions/clone_panel_action.tsx"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/actions/clone_panel_action.tsx"
+            "path": "src/plugins/dashboard/public/dashboard_actions/clone_panel_action.tsx"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/actions/clone_panel_action.tsx"
+            "path": "src/plugins/dashboard/public/dashboard_actions/clone_panel_action.tsx"
           }
         ],
         "children": [

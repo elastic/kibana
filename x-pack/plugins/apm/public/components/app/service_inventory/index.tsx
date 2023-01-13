@@ -202,6 +202,10 @@ export function ServiceInventory() {
     ...preloadedServices,
   ].some((item) => 'healthStatus' in item);
 
+  const displayAlerts = [...mainStatisticsItems, ...preloadedServices].some(
+    (item) => ServiceInventoryFieldName.AlertsCount in item
+  );
+
   const useOptimizedSorting =
     useKibana().services.uiSettings?.get<boolean>(
       apmServiceInventoryOptimizedSorting
@@ -298,6 +302,7 @@ export function ServiceInventory() {
               comparisonFetch.status === FETCH_STATUS.LOADING
             }
             displayHealthStatus={displayHealthStatus}
+            displayAlerts={displayAlerts}
             initialSortField={initialSortField}
             initialSortDirection={initialSortDirection}
             sortFn={(itemsToSort, sortField, sortDirection) => {

@@ -1859,9 +1859,9 @@
             "(request: ",
             {
               "pluginId": "@kbn/core-http-server",
-              "scope": "server",
+              "scope": "common",
               "docId": "kibKbnCoreHttpServerPluginApi",
-              "section": "def-server.KibanaRequest",
+              "section": "def-common.KibanaRequest",
               "text": "KibanaRequest"
             },
             "<unknown, unknown, unknown, any>) => ",
@@ -1887,9 +1887,9 @@
               "signature": [
                 {
                   "pluginId": "@kbn/core-http-server",
-                  "scope": "server",
+                  "scope": "common",
                   "docId": "kibKbnCoreHttpServerPluginApi",
-                  "section": "def-server.KibanaRequest",
+                  "section": "def-common.KibanaRequest",
                   "text": "KibanaRequest"
                 },
                 "<unknown, unknown, unknown, any>"

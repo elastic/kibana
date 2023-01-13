@@ -55,6 +55,17 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   minimumScheduleInterval: { value: '1m', enforce: false },
 };
 
+const getBulkOperationStatusErrorResponse = (statusCode: number) => ({
+  id: 'id2',
+  type: 'alert',
+  success: false,
+  error: {
+    error: '',
+    message: 'UPS',
+    statusCode,
+  },
+});
+
 beforeEach(() => {
   getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
   jest.clearAllMocks();
@@ -108,7 +119,9 @@ describe('bulkDelete', () => {
       minimumLicenseRequired: 'basic',
       isExportable: true,
       recoveryActionGroup: RecoveredActionGroup,
-      async executor() {},
+      async executor() {
+        return { state: {} };
+      },
       producer: 'alerts',
     });
   });
@@ -117,16 +130,7 @@ describe('bulkDelete', () => {
     unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
       statuses: [
         { id: 'id1', type: 'alert', success: true },
-        {
-          id: 'id2',
-          type: 'alert',
-          success: false,
-          error: {
-            error: '',
-            message: 'UPS',
-            statusCode: 500,
-          },
-        },
+        getBulkOperationStatusErrorResponse(500),
       ],
     });
 
@@ -158,45 +162,17 @@ describe('bulkDelete', () => {
       .mockResolvedValueOnce({
         statuses: [
           { id: 'id1', type: 'alert', success: true },
-          {
-            id: 'id2',
-            type: 'alert',
-            success: false,
-            error: {
-              error: '',
-              message: 'UPS',
-              statusCode: 409,
-            },
-          },
+          getBulkOperationStatusErrorResponse(409),
         ],
       })
       .mockResolvedValueOnce({
-        statuses: [
-          {
-            id: 'id2',
-            type: 'alert',
-            success: false,
-            error: {
-              error: '',
-              message: 'UPS',
-              statusCode: 409,
-            },
-          },
-        ],
+        statuses: [getBulkOperationStatusErrorResponse(409)],
       })
       .mockResolvedValueOnce({
-        statuses: [
-          {
-            id: 'id2',
-            type: 'alert',
-            success: false,
-            error: {
-              error: '',
-              message: 'UPS',
-              statusCode: 409,
-            },
-          },
-        ],
+        statuses: [getBulkOperationStatusErrorResponse(409)],
+      })
+      .mockResolvedValueOnce({
+        statuses: [getBulkOperationStatusErrorResponse(409)],
       });
 
     encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
@@ -218,11 +194,17 @@ describe('bulkDelete', () => {
         find: function* asyncGenerator() {
           yield { saved_objects: [enabledRule2] };
         },
+      })
+      .mockResolvedValueOnce({
+        close: jest.fn(),
+        find: function* asyncGenerator() {
+          yield { saved_objects: [enabledRule2] };
+        },
       });
 
     const result = await rulesClient.bulkDeleteRules({ ids: ['id1', 'id2'] });
 
-    expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledTimes(3);
+    expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledTimes(4);
     expect(taskManager.bulkRemoveIfExist).toHaveBeenCalledTimes(1);
     expect(taskManager.bulkRemoveIfExist).toHaveBeenCalledWith(['id1']);
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
@@ -244,16 +226,7 @@ describe('bulkDelete', () => {
       .mockResolvedValueOnce({
         statuses: [
           { id: 'id1', type: 'alert', success: true },
-          {
-            id: 'id2',
-            type: 'alert',
-            success: false,
-            error: {
-              error: '',
-              message: 'UPS',
-              statusCode: 409,
-            },
-          },
+          getBulkOperationStatusErrorResponse(409),
         ],
       })
       .mockResolvedValueOnce({
@@ -355,16 +328,7 @@ describe('bulkDelete', () => {
             type: 'alert',
             success: true,
           },
-          {
-            id: 'id2',
-            type: 'alert',
-            success: false,
-            error: {
-              error: '',
-              message: 'UPS',
-              statusCode: 500,
-            },
-          },
+          getBulkOperationStatusErrorResponse(500),
         ],
       }));
 

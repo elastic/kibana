@@ -136,6 +136,8 @@ export default function (providerContext: FtrProviderContext) {
         healthy: 3,
         unhealthy: 3,
         offline: 1,
+        unenrolled: 0,
+        inactive: 0,
         updating: 1,
         total_all_statuses: 8,
       });

@@ -6,8 +6,9 @@
  */
 import uuid from 'uuid';
 import { journey, step, expect, Page } from '@elastic/synthetics';
-import { FormMonitorType } from '../../../common/runtime_types/monitor_management';
-import { syntheticsAppPageProvider } from '../../page_objects/synthetics_app';
+import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
+import { FormMonitorType } from '../../../common/runtime_types';
+import { syntheticsAppPageProvider } from '../../page_objects/synthetics/synthetics_app';
 
 const customLocation = process.env.SYNTHETICS_TEST_LOCATION;
 
@@ -146,10 +147,13 @@ const createMonitorJourney = ({
   journey(
     `SyntheticsAddMonitor - ${monitorName}`,
     async ({ page, params }: { page: Page; params: any }) => {
+      recordVideo(page);
+
       const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });
 
       step('Go to monitor management', async () => {
         await syntheticsApp.navigateToMonitorManagement(true);
+        await syntheticsApp.enableMonitorManagement();
       });
 
       step('Ensure all monitors are deleted', async () => {
@@ -175,19 +179,20 @@ const createMonitorJourney = ({
       });
 
       step(`view ${monitorName} details in Monitor Management UI`, async () => {
-        await syntheticsApp.navigateToMonitorManagement();
         const hasFailure = await syntheticsApp.findMonitorConfiguration(monitorListDetails);
         expect(hasFailure).toBeFalsy();
       });
 
       step(`edit ${monitorName}`, async () => {
-        await syntheticsApp.navigateToEditMonitor();
+        await syntheticsApp.navigateToEditMonitor(monitorName);
         await syntheticsApp.findByText(monitorListDetails.location);
         const hasFailure = await syntheticsApp.findEditMonitorConfiguration(
           monitorEditDetails,
           monitorType
         );
         expect(hasFailure).toBeFalsy();
+        await page.click('text=Update monitor');
+        await page.waitForSelector('text=Monitor updated successfully.');
       });
 
       step('cannot save monitor with the same name', async () => {
@@ -195,13 +200,11 @@ const createMonitorJourney = ({
         await syntheticsApp.createMonitor({ monitorConfig, monitorType });
         await page.waitForSelector('text=Monitor name already exists');
         await syntheticsApp.clickByTestSubj('syntheticsMonitorConfigSubmitButton');
-        const success = page.locator('text=Monitor added successfully.');
-        expect(await success.count()).toBe(0);
+        await page.waitForSelector('text=Cancel');
       });
 
       step('delete monitor', async () => {
-        await syntheticsApp.navigateToMonitorManagement();
-        await syntheticsApp.findByText('Monitor name');
+        await syntheticsApp.findByText('Monitor');
         const isSuccessful = await syntheticsApp.deleteMonitors();
         expect(isSuccessful).toBeTruthy();
       });
@@ -212,7 +215,7 @@ const createMonitorJourney = ({
 Object.values(configuration).forEach((config) => {
   createMonitorJourney({
     monitorType: config.monitorType,
-    monitorName: `${config.monitorConfig.name} monitor`,
+    monitorName: config.monitorConfig.name,
     monitorConfig: config.monitorConfig,
     monitorListDetails: config.monitorListDetails,
     monitorEditDetails: config.monitorEditDetails as Array<[string, string]>,

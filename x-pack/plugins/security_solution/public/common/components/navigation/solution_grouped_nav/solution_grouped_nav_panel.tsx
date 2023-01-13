@@ -15,15 +15,15 @@ import {
   EuiFocusTrap,
   EuiHorizontalRule,
   EuiOutsideClickDetector,
+  EuiPanel,
   EuiPortal,
   EuiSpacer,
-  EuiTitle,
   EuiWindowEvent,
   keys,
   useIsWithinMinBreakpoint,
 } from '@elastic/eui';
 import classNames from 'classnames';
-import { EuiPanelStyled, FlexLink } from './solution_grouped_nav_panel.styles';
+import { EuiPanelStyled, EuiTitleStyled } from './solution_grouped_nav_panel.styles';
 import type { DefaultSideNavItem } from './types';
 import type { LinkCategories } from '../../../links/types';
 import { NavItemBetaBadge } from '../nav_item_beta_badge';
@@ -84,14 +84,14 @@ const SolutionNavPanelComponent: React.FC<SolutionNavPanelProps> = ({
               hasShadow={!bottomOffsetLargerBreakpoint}
               $bottomOffset={bottomOffsetLargerBreakpoint}
               borderRadius="none"
-              paddingSize="l"
+              paddingSize="m"
               data-test-subj="groupedNavPanel"
             >
               <EuiFlexGroup direction="column" gutterSize="l" alignItems="flexStart">
                 <EuiFlexItem>
-                  <EuiTitle size="xs">
+                  <EuiTitleStyled size="xs" $paddingTop>
                     <strong>{title}</strong>
-                  </EuiTitle>
+                  </EuiTitleStyled>
                 </EuiFlexItem>
 
                 <EuiFlexItem>
@@ -141,10 +141,10 @@ const SolutionNavPanelCategories: React.FC<SolutionNavPanelCategoriesProps> = ({
 
         return (
           <Fragment key={label}>
-            <EuiTitle size="xxxs">
+            <EuiTitleStyled size="xxxs">
               <h2>{label}</h2>
-            </EuiTitle>
-            <EuiHorizontalRule margin="s" />
+            </EuiTitleStyled>
+            <EuiHorizontalRule margin="xs" />
             <SolutionNavPanelItems items={links} onClose={onClose} />
             <EuiSpacer size="l" />
           </Fragment>
@@ -154,27 +154,31 @@ const SolutionNavPanelCategories: React.FC<SolutionNavPanelCategoriesProps> = ({
   );
 };
 
-const SolutionNavPanelItems: React.FC<SolutionNavPanelItemsProps> = ({ items, onClose }) => (
-  <>
-    {items.map(({ id, href, onClick, label, description, isBeta, betaOptions }) => (
-      <Fragment key={id}>
-        <EuiDescriptionListTitle>
-          <FlexLink
-            data-test-subj={`groupedNavPanelLink-${id}`}
-            href={href}
-            onClick={(ev) => {
-              onClose();
-              if (onClick) {
-                onClick(ev);
-              }
-            }}
-          >
-            {label}
-            {isBeta && <NavItemBetaBadge text={betaOptions?.text} />}
-          </FlexLink>
-        </EuiDescriptionListTitle>
-        <EuiDescriptionListDescription>{description}</EuiDescriptionListDescription>
-      </Fragment>
-    ))}
-  </>
-);
+const SolutionNavPanelItems: React.FC<SolutionNavPanelItemsProps> = ({ items, onClose }) => {
+  const panelLinkClassNames = classNames('solutionGroupedNavPanelLink');
+  const panelLinkItemClassNames = classNames('solutionGroupedNavPanelLinkItem');
+  return (
+    <>
+      {items.map(({ id, href, onClick, label, description, isBeta, betaOptions }) => (
+        <a
+          key={id}
+          className={panelLinkClassNames}
+          data-test-subj={`groupedNavPanelLink-${id}`}
+          href={href}
+          onClick={(ev) => {
+            onClose();
+            onClick?.(ev);
+          }}
+        >
+          <EuiPanel hasShadow={false} className={panelLinkItemClassNames} paddingSize="s">
+            <EuiDescriptionListTitle>
+              {label}
+              {isBeta && <NavItemBetaBadge text={betaOptions?.text} />}
+            </EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>{description}</EuiDescriptionListDescription>
+          </EuiPanel>
+        </a>
+      ))}
+    </>
+  );
+};

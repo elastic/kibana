@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { HttpSetup } from '@kbn/core/public';
 
-import type { SLO, SLOList } from '../../typings/slo';
+import { FindSLOResponse } from '@kbn/slo-schema';
 import { useDataFetcher } from '../use_data_fetcher';
 
-const EMPTY_LIST = {
+const EMPTY_LIST: FindSLOResponse = {
   results: [],
   total: 0,
   page: 0,
@@ -20,78 +20,77 @@ const EMPTY_LIST = {
 
 interface SLOListParams {
   name?: string;
+  page?: number;
+  sortBy?: string;
+  indicatorTypes?: string[];
 }
 
-interface UseFetchSloListResponse {
+export interface UseFetchSloListResponse {
+  sloList: FindSLOResponse;
   loading: boolean;
-  sloList: SLOList;
+  error: boolean;
 }
 
-const useFetchSloList = (name?: string): UseFetchSloListResponse => {
-  const params: SLOListParams = useMemo(() => ({ name }), [name]);
+export function useFetchSloList({
+  name,
+  page,
+  refetch,
+  sortBy,
+  indicatorTypes,
+}: SLOListParams & {
+  refetch: boolean;
+}): UseFetchSloListResponse {
+  const [sloList, setSloList] = useState(EMPTY_LIST);
+
+  const params: SLOListParams = useMemo(
+    () => ({ name, page, sortBy, indicatorTypes }),
+    [name, page, sortBy, indicatorTypes]
+  );
   const shouldExecuteApiCall = useCallback(
-    (apiCallParams: SLOListParams) => apiCallParams.name === params.name,
-    [params]
+    (apiCallParams: SLOListParams) =>
+      apiCallParams.name === params.name ||
+      apiCallParams.page === params.page ||
+      apiCallParams.sortBy === params.sortBy ||
+      apiCallParams.indicatorTypes === params.indicatorTypes ||
+      refetch,
+    [params, refetch]
   );
 
-  const { loading, data: sloList } = useDataFetcher<SLOListParams, SLOList>({
+  const { data, loading, error } = useDataFetcher<SLOListParams, FindSLOResponse>({
     paramsForApiCall: params,
-    initialDataState: EMPTY_LIST,
+    initialDataState: sloList,
     executeApiCall: fetchSloList,
     shouldExecuteApiCall,
   });
 
-  return { loading, sloList };
-};
+  useEffect(() => {
+    setSloList(data);
+  }, [data]);
+
+  return { sloList, loading, error };
+}
 
 const fetchSloList = async (
   params: SLOListParams,
   abortController: AbortController,
   http: HttpSetup
-): Promise<SLOList> => {
+): Promise<FindSLOResponse> => {
   try {
-    const response = await http.get<Record<string, unknown>>(`/api/observability/slos`, {
+    const response = await http.get<FindSLOResponse>(`/api/observability/slos`, {
       query: {
+        ...(params.page && { page: params.page }),
         ...(params.name && { name: params.name }),
+        ...(params.sortBy && { sortBy: params.sortBy }),
+        ...(params.indicatorTypes &&
+          params.indicatorTypes.length > 0 && { indicatorTypes: params.indicatorTypes.join(',') }),
       },
       signal: abortController.signal,
     });
-    if (response !== undefined) {
-      return toSLOList(response);
-    }
+
+    return response;
   } catch (error) {
     // ignore error for retrieving slos
   }
 
   return EMPTY_LIST;
 };
-
-function toSLOList(response: Record<string, unknown>): SLOList {
-  if (!Array.isArray(response.results)) {
-    throw new Error('Invalid response');
-  }
-
-  return {
-    results: response.results.map((result) => toSLO(result)),
-    page: Number(response.page),
-    perPage: Number(response.per_page),
-    total: Number(response.total),
-  };
-}
-
-function toSLO(result: any): SLO {
-  return {
-    id: String(result.id),
-    name: String(result.name),
-    objective: { target: Number(result.objective.target) },
-    summary: {
-      sliValue: Number(result.summary.sli_value),
-      errorBudget: {
-        remaining: Number(result.summary.error_budget.remaining),
-      },
-    },
-  };
-}
-
-export { useFetchSloList };
-export type { UseFetchSloListResponse };

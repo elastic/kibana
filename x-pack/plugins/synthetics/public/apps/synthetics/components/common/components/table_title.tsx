@@ -20,7 +20,7 @@ export const TableTitle = ({
   total: number;
   label: string;
 }) => {
-  const start = pageIndex * pageSize + 1;
+  const start = Math.min(pageIndex * pageSize + 1, total);
   const end = Math.min(start + pageSize - 1, total);
   return (
     <>

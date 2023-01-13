@@ -12,7 +12,7 @@ import buildStandalone from '@storybook/react/standalone';
 import { Flags, run } from '@kbn/dev-cli-runner';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
-import { REPO_ROOT } from '@kbn/utils';
+
 // @ts-expect-error internal dep of storybook
 import interpret from 'interpret'; // eslint-disable-line import/no-extraneous-dependencies
 import * as constants from './constants';
@@ -49,6 +49,7 @@ export function runStorybookCli({ configDir, name }: { configDir: string; name: 
         mode: flags.site ? 'static' : 'dev',
         port: 9001,
         staticDir,
+        debugWebpack: true,
       };
       if (flags.site) {
         config.outputDir = join(constants.ASSET_DIR, name);
@@ -57,9 +58,9 @@ export function runStorybookCli({ configDir, name }: { configDir: string; name: 
       logger.setLevel(getLogLevelFromFlags(flags));
 
       // force storybook to use our transpilation rather than ts-node or anything else
-      interpret.extensions['.ts'] = [join(REPO_ROOT, 'src/setup_node_env')];
-      interpret.extensions['.tsx'] = [join(REPO_ROOT, 'src/setup_node_env')];
-      interpret.extensions['.jsx'] = [join(REPO_ROOT, 'src/setup_node_env')];
+      interpret.extensions['.ts'] = [require.resolve('@kbn/babel-register/install')];
+      interpret.extensions['.tsx'] = [require.resolve('@kbn/babel-register/install')];
+      interpret.extensions['.jsx'] = [require.resolve('@kbn/babel-register/install')];
 
       await buildStandalone(config);
 

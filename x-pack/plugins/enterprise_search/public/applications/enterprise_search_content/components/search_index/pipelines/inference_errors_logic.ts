@@ -9,25 +9,11 @@ import { kea, MakeLogicType } from 'kea';
 
 import { Status } from '../../../../../../common/types/api';
 import { MlInferenceError } from '../../../../../../common/types/pipelines';
-import { Actions } from '../../../../shared/api_logic/create_api_logic';
-import { clearFlashMessages, flashAPIErrors } from '../../../../shared/flash_messages';
 import {
-  FetchMlInferenceErrorsApiLogicArgs,
   FetchMlInferenceErrorsApiLogicResponse,
   FetchMlInferenceErrorsApiLogic,
 } from '../../../api/pipelines/fetch_ml_inference_pipeline_errors';
 import { IndexNameLogic } from '../index_name_logic';
-
-interface InferenceErrorsActions {
-  fetchIndexInferenceErrorLogs: Actions<
-    FetchMlInferenceErrorsApiLogicArgs,
-    FetchMlInferenceErrorsApiLogicResponse
-  >['makeRequest'];
-  fetchIndexInferenceErrorLogsError: Actions<
-    FetchMlInferenceErrorsApiLogicArgs,
-    FetchMlInferenceErrorsApiLogicResponse
-  >['apiError'];
-}
 
 interface InferenceErrorsValues {
   fetchIndexInferenceHistoryStatus: Status;
@@ -37,17 +23,8 @@ interface InferenceErrorsValues {
   isLoading: boolean;
 }
 
-export const InferenceErrorsLogic = kea<
-  MakeLogicType<InferenceErrorsValues, InferenceErrorsActions>
->({
+export const InferenceErrorsLogic = kea<MakeLogicType<InferenceErrorsValues, {}>>({
   connect: {
-    actions: [
-      FetchMlInferenceErrorsApiLogic,
-      [
-        'makeRequest as fetchIndexInferenceErrorLogs',
-        'apiError as fetchIndexInferenceErrorLogsError',
-      ],
-    ],
     values: [
       IndexNameLogic,
       ['indexName'],
@@ -55,10 +32,6 @@ export const InferenceErrorsLogic = kea<
       ['data as inferenceErrorsData', 'status as fetchIndexInferenceHistoryStatus'],
     ],
   },
-  listeners: () => ({
-    fetchIndexInferenceErrorLogs: () => clearFlashMessages(),
-    fetchIndexInferenceErrorLogsError: (error) => flashAPIErrors(error),
-  }),
   path: ['enterprise_search', 'content', 'pipelines_inference_errors'],
   selectors: ({ selectors }) => ({
     inferenceErrors: [

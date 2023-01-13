@@ -127,8 +127,11 @@ export type SingleCaseMetricsFeature =
   | 'lifespan';
 
 export enum SortFieldCase {
-  createdAt = 'createdAt',
   closedAt = 'closedAt',
+  createdAt = 'createdAt',
+  severity = 'severity',
+  status = 'status',
+  title = 'title',
 }
 
 export type ElasticUser = SnakeToCamelCase<User>;

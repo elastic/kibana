@@ -62,7 +62,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('unpinned filter should show up only in app state when dashboard is unsaved', async () => {
-        await filterBar.addFilter('geo.src', 'is', 'AE');
+        await filterBar.addFilter({ field: 'geo.src', operation: 'is', value: 'AE' });
         await PageObjects.dashboard.waitForRenderComplete();
 
         const sharedUrl = await getSharedUrl(mode);

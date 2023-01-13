@@ -534,7 +534,7 @@ exports[`DonutChart component passes correct props without errors for valid prop
                   "strokeWidth": 2,
                 },
                 "point": Object {
-                  "fill": "rgba(255, 255, 255, 1)",
+                  "fill": "#FFF",
                   "radius": 3,
                   "strokeWidth": 2,
                   "visible": false,
@@ -542,10 +542,10 @@ exports[`DonutChart component passes correct props without errors for valid prop
               },
               "axes": Object {
                 "axisLine": Object {
-                  "stroke": "rgba(238, 240, 243, 1)",
+                  "stroke": "#eaedf3",
                 },
                 "axisTitle": Object {
-                  "fill": "rgba(52, 55, 65, 1)",
+                  "fill": "#343741",
                   "fontFamily": "'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont,
   'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
                   "fontSize": 12,
@@ -561,7 +561,7 @@ exports[`DonutChart component passes correct props without errors for valid prop
                       0,
                     ],
                     "opacity": 1,
-                    "stroke": "rgba(238, 240, 243, 1)",
+                    "stroke": "#eaedf3",
                     "strokeWidth": 1,
                     "visible": true,
                   },
@@ -571,13 +571,13 @@ exports[`DonutChart component passes correct props without errors for valid prop
                       4,
                     ],
                     "opacity": 1,
-                    "stroke": "rgba(238, 240, 243, 1)",
+                    "stroke": "#eaedf3",
                     "strokeWidth": 1,
                     "visible": true,
                   },
                 },
                 "tickLabel": Object {
-                  "fill": "rgba(105, 112, 125, 1)",
+                  "fill": "#646a77",
                   "fontFamily": "'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont,
   'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
                   "fontSize": 10,
@@ -587,13 +587,13 @@ exports[`DonutChart component passes correct props without errors for valid prop
                   },
                 },
                 "tickLine": Object {
-                  "stroke": "rgba(238, 240, 243, 1)",
+                  "stroke": "#eaedf3",
                   "strokeWidth": 1,
                   "visible": false,
                 },
               },
               "background": Object {
-                "color": "rgba(255, 255, 255, 1)",
+                "color": "#FFF",
               },
               "barSeriesStyle": Object {
                 "displayValue": Object {
@@ -632,14 +632,14 @@ exports[`DonutChart component passes correct props without errors for valid prop
               },
               "crosshair": Object {
                 "band": Object {
-                  "fill": "rgba(245, 247, 250, 1)",
+                  "fill": "#F1F4FA",
                 },
                 "crossLine": Object {
                   "dash": Array [
                     4,
                     4,
                   ],
-                  "stroke": "rgba(105, 112, 125, 1)",
+                  "stroke": "#69707D",
                   "strokeWidth": 1,
                 },
                 "line": Object {
@@ -647,44 +647,44 @@ exports[`DonutChart component passes correct props without errors for valid prop
                     4,
                     4,
                   ],
-                  "stroke": "rgba(105, 112, 125, 1)",
+                  "stroke": "#69707D",
                   "strokeWidth": 1,
                 },
               },
               "goal": Object {
                 "majorCenterLabel": Object {
-                  "fill": "rgba(52, 55, 65, 1)",
+                  "fill": "#343741",
                   "fontFamily": "'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont,
   'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
                 },
                 "majorLabel": Object {
-                  "fill": "rgba(52, 55, 65, 1)",
+                  "fill": "#343741",
                   "fontFamily": "'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont,
   'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
                 },
                 "minorCenterLabel": Object {
-                  "fill": "rgba(105, 112, 125, 1)",
+                  "fill": "#646a77",
                   "fontFamily": "'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont,
   'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
                 },
                 "minorLabel": Object {
-                  "fill": "rgba(105, 112, 125, 1)",
+                  "fill": "#646a77",
                   "fontFamily": "'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont,
   'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
                 },
                 "progressLine": Object {
-                  "stroke": "rgba(52, 55, 65, 1)",
+                  "stroke": "#343741",
                 },
                 "targetLine": Object {
-                  "stroke": "rgba(52, 55, 65, 1)",
+                  "stroke": "#343741",
                 },
                 "tickLabel": Object {
-                  "fill": "rgba(105, 112, 125, 1)",
+                  "fill": "#646a77",
                   "fontFamily": "'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont,
   'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
                 },
                 "tickLine": Object {
-                  "stroke": "rgba(152, 162, 179, 1)",
+                  "stroke": "#98A2B3",
                 },
               },
               "lineSeriesStyle": Object {
@@ -692,7 +692,7 @@ exports[`DonutChart component passes correct props without errors for valid prop
                   "strokeWidth": 2,
                 },
                 "point": Object {
-                  "fill": "rgba(255, 255, 255, 1)",
+                  "fill": "#FFF",
                   "radius": 3,
                   "strokeWidth": 2,
                 },
@@ -709,12 +709,12 @@ exports[`DonutChart component passes correct props without errors for valid prop
                 "linkLabel": Object {
                   "fontSize": 11,
                   "maxCount": 5,
-                  "textColor": "rgba(52, 55, 65, 1)",
+                  "textColor": "#343741",
                 },
                 "maxFontSize": 16,
                 "minFontSize": 8,
                 "outerSizeRatio": 1,
-                "sectorLineStroke": "rgba(255, 255, 255, 1)",
+                "sectorLineStroke": "#FFF",
                 "sectorLineWidth": 1.5,
               },
               "scales": Object {

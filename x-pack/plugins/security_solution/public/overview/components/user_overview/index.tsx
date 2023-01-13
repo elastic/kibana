@@ -33,10 +33,10 @@ import { DescriptionListStyled, OverviewWrapper } from '../../../common/componen
 import * as i18n from './translations';
 
 import { OverviewDescriptionList } from '../../../common/components/overview_description_list';
-import { useRiskScore } from '../../../risk_score/containers';
-import { RiskScore } from '../../../common/components/severity/common';
+import { useRiskScore } from '../../../explore/containers/risk_score';
+import { RiskScore } from '../../../explore/components/risk_score/severity/common';
 import type { UserItem } from '../../../../common/search_strategy/security_solution/users/common';
-import { RiskScoreHeaderTitle } from '../../../risk_score/components/risk_score_onboarding/risk_score_header_title';
+import { RiskScoreHeaderTitle } from '../../../explore/components/risk_score/risk_score_onboarding/risk_score_header_title';
 
 export interface UserSummaryProps {
   contextID?: string; // used to provide unique draggable context when viewing in the side panel

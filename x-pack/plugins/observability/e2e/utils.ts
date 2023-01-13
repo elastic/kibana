@@ -9,7 +9,7 @@ import { expect, Page } from '@elastic/synthetics';
 
 export async function waitForLoadingToFinish({ page }: { page: Page }) {
   while (true) {
-    if ((await page.$(byTestId('kbnLoadingMessage'))) === null) break;
+    if (!(await page.isVisible(byTestId('kbnLoadingMessage'), { timeout: 5000 }))) break;
     await page.waitForTimeout(5 * 1000);
   }
 }

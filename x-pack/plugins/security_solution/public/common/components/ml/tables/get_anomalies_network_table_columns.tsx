@@ -7,14 +7,14 @@
 
 import React from 'react';
 
-import type { Columns } from '../../paginated_table';
+import type { Columns } from '../../../../explore/components/paginated_table';
 import type { Anomaly, AnomaliesByNetwork } from '../types';
 import { getRowItemDraggable } from '../../tables/helpers';
 import { createCompoundAnomalyKey } from './create_compound_key';
 import { NetworkDetailsLink } from '../../links';
 
 import * as i18n from './translations';
-import { NetworkType } from '../../../../network/store/model';
+import { NetworkType } from '../../../../explore/network/store/model';
 import type { FlowTarget } from '../../../../../common/search_strategy';
 import { getAnomaliesDefaultTableColumns } from './get_anomalies_table_columns';
 

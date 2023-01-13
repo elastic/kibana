@@ -14,17 +14,17 @@ import { useKibana } from '../../utils/kibana_react';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { render } from '../../utils/test_helper';
 import { SloDetailsPage } from '.';
-import { useFetchSloDetails } from './hooks/use_fetch_slo_details';
-import { anSLO } from './mocks/slo';
+import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
 import { useParams } from 'react-router-dom';
+import { anSLO } from '../../data/slo';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useParams: jest.fn(),
 }));
 
-jest.mock('./hooks/use_fetch_slo_details');
 jest.mock('../../utils/kibana_react');
+jest.mock('../../hooks/slo/use_fetch_slo_details');
 jest.mock('../../hooks/use_breadcrumbs');
 
 const useFetchSloDetailsMock = useFetchSloDetails as jest.Mock;

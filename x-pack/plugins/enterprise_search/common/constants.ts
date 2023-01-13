@@ -44,7 +44,7 @@ export const ENTERPRISE_SEARCH_CONTENT_PLUGIN = {
 export const ANALYTICS_PLUGIN = {
   ID: 'enterpriseSearchAnalytics',
   NAME: i18n.translate('xpack.enterpriseSearch.analytics.productName', {
-    defaultMessage: 'Analytics',
+    defaultMessage: 'Behavioral Analytics',
   }),
   DESCRIPTION: i18n.translate('xpack.enterpriseSearch.analytics.productDescription', {
     defaultMessage:
@@ -115,6 +115,12 @@ export const SEARCH_EXPERIENCES_PLUGIN = {
   ELASTICSEARCH_TUTORIAL_URL: 'https://docs.elastic.co/search-ui/tutorials/elasticsearch',
   APP_SEARCH_TUTORIAL_URL: 'https://docs.elastic.co/search-ui/tutorials/app-search',
   WORKPLACE_SEARCH_TUTORIAL_URL: 'https://docs.elastic.co/search-ui/tutorials/workplace-search',
+};
+
+export const ENGINES_PLUGIN = {
+  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.engines.navTitle', {
+    defaultMessage: 'Engines',
+  }),
 };
 
 export const LICENSED_SUPPORT_URL = 'https://support.elastic.co';

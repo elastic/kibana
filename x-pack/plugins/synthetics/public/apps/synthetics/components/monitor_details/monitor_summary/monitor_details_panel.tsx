@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { css } from '@emotion/react';
 import {
   EuiDescriptionList,
   EuiDescriptionListTitle,
@@ -15,7 +14,6 @@ import {
   EuiSpacer,
   EuiLink,
   EuiLoadingContent,
-  useEuiTheme,
   EuiTitle,
   EuiPanel,
 } from '@elastic/eui';
@@ -23,6 +21,7 @@ import { capitalize } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { frequencyStr } from '../../monitors_page/overview/overview/monitor_detail_flyout';
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
 import { MonitorTags } from './monitor_tags';
@@ -33,7 +32,6 @@ import { ConfigKey } from '../../../../../../common/runtime_types';
 import { useMonitorLatestPing } from '../hooks/use_monitor_latest_ping';
 
 export const MonitorDetailsPanel = () => {
-  const { euiTheme } = useEuiTheme();
   const { latestPing } = useMonitorLatestPing();
 
   const { monitorId: configId } = useParams<{ monitorId: string }>();
@@ -49,19 +47,12 @@ export const MonitorDetailsPanel = () => {
     return <EuiLoadingContent lines={6} />;
   }
 
-  const wrapperStyle = css`
-    .euiDescriptionList.euiDescriptionList--column > *,
-    .euiDescriptionList.euiDescriptionList--responsiveColumn > * {
-      margin-top: ${euiTheme.size.s};
-    }
-  `;
-
   return (
     <EuiPanel hasShadow={false} hasBorder paddingSize="m">
       <EuiTitle size="xs">
         <h3>{MONITOR_DETAILS_LABEL}</h3>
       </EuiTitle>
-      <div css={wrapperStyle}>
+      <WrapperStyle>
         <EuiSpacer size="s" />
         <EuiDescriptionList type="column" compressed={true}>
           <EuiDescriptionListTitle>{ENABLED_LABEL}</EuiDescriptionListTitle>
@@ -100,10 +91,17 @@ export const MonitorDetailsPanel = () => {
             {monitor && <MonitorTags tags={monitor[ConfigKey.TAGS]} />}
           </EuiDescriptionListDescription>
         </EuiDescriptionList>
-      </div>
+      </WrapperStyle>
     </EuiPanel>
   );
 };
+
+export const WrapperStyle = euiStyled.div`
+  .euiDescriptionList.euiDescriptionList--column > *,
+  .euiDescriptionList.euiDescriptionList--responsiveColumn > * {
+    margin-top: ${({ theme }) => theme.eui.euiSizeS};
+  }
+`;
 
 const FREQUENCY_LABEL = i18n.translate('xpack.synthetics.management.monitorList.frequency', {
   defaultMessage: 'Frequency',

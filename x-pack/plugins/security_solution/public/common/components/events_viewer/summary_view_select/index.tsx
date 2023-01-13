@@ -11,7 +11,9 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { ALERTS_TABLE_VIEW_SELECTION_KEY } from '../../event_rendered_view/helpers';
+
+/** This local storage key stores the `Grid / Event rendered view` selection */
+export const ALERTS_TABLE_VIEW_SELECTION_KEY = 'securitySolution.alerts.table.view-selection';
 
 const storage = new Storage(localStorage);
 

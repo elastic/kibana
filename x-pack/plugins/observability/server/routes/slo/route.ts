@@ -6,6 +6,13 @@
  */
 
 import {
+  createSLOParamsSchema,
+  deleteSLOParamsSchema,
+  findSLOParamsSchema,
+  getSLOParamsSchema,
+  updateSLOParamsSchema,
+} from '@kbn/slo-schema';
+import {
   CreateSLO,
   DefaultResourceInstaller,
   DefaultSLIClient,
@@ -23,18 +30,11 @@ import {
   TransformGenerator,
 } from '../../services/slo/transform_generators';
 import { IndicatorTypes } from '../../domain/models';
-import {
-  createSLOParamsSchema,
-  deleteSLOParamsSchema,
-  findSLOParamsSchema,
-  getSLOParamsSchema,
-  updateSLOParamsSchema,
-} from '../../types/rest_specs';
 import { createObservabilityServerRoute } from '../create_observability_server_route';
 
 const transformGenerators: Record<IndicatorTypes, TransformGenerator> = {
-  'sli.apm.transaction_duration': new ApmTransactionDurationTransformGenerator(),
-  'sli.apm.transaction_error_rate': new ApmTransactionErrorRateTransformGenerator(),
+  'sli.apm.transactionDuration': new ApmTransactionDurationTransformGenerator(),
+  'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(),
   'sli.kql.custom': new KQLCustomTransformGenerator(),
 };
 

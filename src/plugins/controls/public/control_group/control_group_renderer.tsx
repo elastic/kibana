@@ -7,11 +7,14 @@
  */
 
 import uuid from 'uuid';
+import { isEqual } from 'lodash';
 import useLifecycles from 'react-use/lib/useLifecycles';
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import { IEmbeddable } from '@kbn/embeddable-plugin/public';
-import { useReduxContainerContext } from '@kbn/presentation-util-plugin/public';
+import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
+import type { Filter, TimeRange, Query } from '@kbn/es-query';
+import { compareFilters } from '@kbn/es-query';
 
 import { pluginServices } from '../services';
 import { getDefaultControlGroupInput } from '../../common';
@@ -26,16 +29,22 @@ import { controlGroupReducers } from './state/control_group_reducers';
 import { controlGroupInputBuilder } from './control_group_input_builder';
 
 export interface ControlGroupRendererProps {
-  onLoadComplete?: (controlGroup: ControlGroupContainer) => void;
+  filters?: Filter[];
   getInitialInput: (
     initialInput: Partial<ControlGroupInput>,
     builder: typeof controlGroupInputBuilder
   ) => Promise<Partial<ControlGroupInput>>;
+  onLoadComplete?: (controlGroup: ControlGroupContainer) => void;
+  timeRange?: TimeRange;
+  query?: Query;
 }
 
 export const ControlGroupRenderer = ({
   onLoadComplete,
   getInitialInput,
+  filters,
+  timeRange,
+  query,
 }: ControlGroupRendererProps) => {
   const controlGroupRef = useRef(null);
   const [controlGroup, setControlGroup] = useState<ControlGroupContainer>();
@@ -74,11 +83,29 @@ export const ControlGroupRenderer = ({
     }
   );
 
+  useEffect(() => {
+    if (!controlGroup) {
+      return;
+    }
+
+    if (
+      (timeRange && !isEqual(controlGroup.getInput().timeRange, timeRange)) ||
+      !compareFilters(controlGroup.getInput().filters ?? [], filters ?? []) ||
+      !isEqual(controlGroup.getInput().query, query)
+    ) {
+      controlGroup.updateInput({
+        timeRange,
+        query,
+        filters,
+      });
+    }
+  }, [query, filters, controlGroup, timeRange]);
+
   return <div ref={controlGroupRef} />;
 };
 
 export const useControlGroupContainerContext = () =>
-  useReduxContainerContext<ControlGroupReduxState, typeof controlGroupReducers>();
+  useReduxEmbeddableContext<ControlGroupReduxState, typeof controlGroupReducers>();
 
 // required for dynamic import using React.lazy()
 // eslint-disable-next-line import/no-default-export

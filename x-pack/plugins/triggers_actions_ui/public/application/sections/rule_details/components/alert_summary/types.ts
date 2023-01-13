@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import { AlertStatus } from '@kbn/rule-data-utils';
-import { Rule } from '../../../../../types';
+import { estypes } from '@elastic/elasticsearch';
+import { AlertStatus, ValidFeatureId } from '@kbn/rule-data-utils';
+import { AlertSummaryTimeRange } from '../../../../hooks/use_load_alert_summary';
 
-export interface RuleAlertsSummaryProps {
-  rule: Rule;
-  filteredRuleTypes: string[];
-  onClick: (status?: AlertStatus) => void;
+export interface AlertSummaryWidgetProps {
+  featureIds?: ValidFeatureId[];
+  filter?: estypes.QueryDslQueryContainer;
+  fullSize?: boolean;
+  onClick?: (status?: AlertStatus) => void;
+  timeRange: AlertSummaryTimeRange;
 }

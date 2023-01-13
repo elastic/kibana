@@ -144,7 +144,6 @@ export const AGENT_API_ROUTES = {
   STATUS_PATTERN_DEPRECATED: `${API_ROOT}/agent-status`,
   UPGRADE_PATTERN: `${API_ROOT}/agents/{agentId}/upgrade`,
   BULK_UPGRADE_PATTERN: `${API_ROOT}/agents/bulk_upgrade`,
-  CURRENT_UPGRADES_PATTERN: `${API_ROOT}/agents/current_upgrades`,
   ACTION_STATUS_PATTERN: `${API_ROOT}/agents/action_status`,
   LIST_TAGS_PATTERN: `${API_ROOT}/agents/tags`,
   LIST_UPLOADS_PATTERN: `${API_ROOT}/agents/{agentId}/uploads`,

@@ -14,8 +14,8 @@ import { TimelineId } from '../../../../common/types/timeline';
 import type { ColumnHeaderOptions } from '../../../../common/types';
 import { allowTopN } from '../../components/drag_and_drop/helpers';
 import { ShowTopNButton } from '../../components/hover_actions/actions/show_top_n';
-import { useKibana } from '../kibana';
 import { SHOW_TOP_VALUES, HIDE_TOP_VALUES } from './translations';
+import { useKibana } from '../kibana';
 
 interface Props {
   field: ColumnHeaderOptions;
@@ -23,7 +23,6 @@ interface Props {
   scopeId: string;
   value: string[] | undefined;
   onFilterAdded?: () => void;
-  closeCellPopover?: () => void;
 }
 
 const StyledFlexGroup = styled(EuiFlexGroup)`
@@ -31,7 +30,6 @@ const StyledFlexGroup = styled(EuiFlexGroup)`
   border-bottom: 1px solid #d3dae6;
   margin-top: 2px;
 `;
-
 export const StyledContent = styled.div<{ $isDetails: boolean }>`
   padding: ${({ $isDetails }) => ($isDetails ? '0 8px' : undefined)};
 `;
@@ -42,14 +40,7 @@ const ExpandedCellValueActionsComponent: React.FC<Props> = ({
   onFilterAdded,
   scopeId,
   value,
-  closeCellPopover,
 }) => {
-  const {
-    timelines,
-    data: {
-      query: { filterManager },
-    },
-  } = useKibana().services;
   const showButton = useMemo(
     () =>
       allowTopN({
@@ -60,6 +51,13 @@ const ExpandedCellValueActionsComponent: React.FC<Props> = ({
       }),
     [field]
   );
+
+  const {
+    timelines,
+    data: {
+      query: { filterManager },
+    },
+  } = useKibana().services;
 
   const [showTopN, setShowTopN] = useState(false);
   const onClick = useCallback(() => setShowTopN(!showTopN), [showTopN]);

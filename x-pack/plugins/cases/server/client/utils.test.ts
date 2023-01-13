@@ -10,36 +10,41 @@ import {
   buildNestedFilter,
   buildRangeFilter,
   constructQueryOptions,
-  sortToSnake,
+  convertSortField,
 } from './utils';
 import { toElasticsearchQuery } from '@kbn/es-query';
 import { CaseStatuses } from '../../common';
 import { CaseSeverity } from '../../common/api';
+import { ESCaseSeverity, ESCaseStatus } from '../services/cases/types';
 
 describe('utils', () => {
-  describe('sortToSnake', () => {
+  describe('convertSortField', () => {
     it('transforms status correctly', () => {
-      expect(sortToSnake('status')).toBe('status');
+      expect(convertSortField('status')).toBe('status');
     });
 
     it('transforms createdAt correctly', () => {
-      expect(sortToSnake('createdAt')).toBe('created_at');
+      expect(convertSortField('createdAt')).toBe('created_at');
     });
 
     it('transforms created_at correctly', () => {
-      expect(sortToSnake('created_at')).toBe('created_at');
+      expect(convertSortField('created_at')).toBe('created_at');
     });
 
     it('transforms closedAt correctly', () => {
-      expect(sortToSnake('closedAt')).toBe('closed_at');
+      expect(convertSortField('closedAt')).toBe('closed_at');
     });
 
     it('transforms closed_at correctly', () => {
-      expect(sortToSnake('closed_at')).toBe('closed_at');
+      expect(convertSortField('closed_at')).toBe('closed_at');
+    });
+
+    it('transforms title correctly', () => {
+      expect(convertSortField('title')).toBe('title.keyword');
     });
 
     it('transforms default correctly', () => {
-      expect(sortToSnake('not-exist')).toBe('created_at');
+      expect(convertSortField('not-exist')).toBe('created_at');
     });
   });
 
@@ -381,8 +386,12 @@ describe('utils', () => {
       `);
     });
 
-    it('creates a filter for the status', () => {
-      expect(constructQueryOptions({ status: CaseStatuses.open }).filter).toMatchInlineSnapshot(`
+    it.each([
+      [CaseStatuses.open, ESCaseStatus.OPEN],
+      [CaseStatuses['in-progress'], ESCaseStatus.IN_PROGRESS],
+      [CaseStatuses.closed, ESCaseStatus.CLOSED],
+    ])('creates a filter for status "%s"', (status, expectedStatus) => {
+      expect(constructQueryOptions({ status }).filter).toMatchInlineSnapshot(`
         Object {
           "arguments": Array [
             Object {
@@ -393,7 +402,7 @@ describe('utils', () => {
             Object {
               "isQuoted": false,
               "type": "literal",
-              "value": "open",
+              "value": "${expectedStatus}",
             },
           ],
           "function": "is",
@@ -402,9 +411,13 @@ describe('utils', () => {
       `);
     });
 
-    it('creates a filter for the severity', () => {
-      expect(constructQueryOptions({ severity: CaseSeverity.CRITICAL }).filter)
-        .toMatchInlineSnapshot(`
+    it.each([
+      [CaseSeverity.LOW, ESCaseSeverity.LOW],
+      [CaseSeverity.MEDIUM, ESCaseSeverity.MEDIUM],
+      [CaseSeverity.HIGH, ESCaseSeverity.HIGH],
+      [CaseSeverity.CRITICAL, ESCaseSeverity.CRITICAL],
+    ])('creates a filter for severity "%s"', (severity, expectedSeverity) => {
+      expect(constructQueryOptions({ severity }).filter).toMatchInlineSnapshot(`
         Object {
           "arguments": Array [
             Object {
@@ -415,13 +428,13 @@ describe('utils', () => {
             Object {
               "isQuoted": false,
               "type": "literal",
-              "value": "critical",
+              "value": "${expectedSeverity}",
             },
           ],
           "function": "is",
           "type": "function",
         }
-      `);
+        `);
     });
 
     it('creates a filter for the time range', () => {

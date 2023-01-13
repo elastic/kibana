@@ -108,6 +108,7 @@ const previouslyRegisteredTypes = [
   'space',
   'spaces-usage-stats',
   'synthetics-monitor',
+  'synthetics-param',
   'synthetics-privates-locations',
   'tag',
   'task',

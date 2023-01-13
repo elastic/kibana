@@ -79,7 +79,7 @@ function getSpanId(source: TransactionRaw | SpanRaw) {
     : (source as TransactionRaw).transaction?.id;
 }
 
-export async function getLinkedChildrenCountBySpanId({
+export async function getSpanLinksCountById({
   traceId,
   apmEventClient,
   start,

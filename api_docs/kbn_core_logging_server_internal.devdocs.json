@@ -10,10 +10,18 @@
   },
   "server": {
     "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/core-logging-server-internal",
-        "id": "def-server.getNextRollingTime",
+        "id": "def-common.getNextRollingTime",
         "type": "Function",
         "tags": [],
         "label": "getNextRollingTime",
@@ -29,7 +37,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-logging-server-internal",
-            "id": "def-server.getNextRollingTime.$1",
+            "id": "def-common.getNextRollingTime.$1",
             "type": "number",
             "tags": [],
             "label": "currentTime",
@@ -44,7 +52,7 @@
           },
           {
             "parentPluginId": "@kbn/core-logging-server-internal",
-            "id": "def-server.getNextRollingTime.$2",
+            "id": "def-common.getNextRollingTime.$2",
             "type": "Object",
             "tags": [],
             "label": "interval",
@@ -59,7 +67,7 @@
           },
           {
             "parentPluginId": "@kbn/core-logging-server-internal",
-            "id": "def-server.getNextRollingTime.$3",
+            "id": "def-common.getNextRollingTime.$3",
             "type": "boolean",
             "tags": [],
             "label": "modulate",
@@ -80,7 +88,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-logging-server-internal",
-        "id": "def-server.PrebootDeps",
+        "id": "def-common.PrebootDeps",
         "type": "Interface",
         "tags": [],
         "label": "PrebootDeps",
@@ -91,7 +99,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-logging-server-internal",
-            "id": "def-server.PrebootDeps.loggingSystem",
+            "id": "def-common.PrebootDeps.loggingSystem",
             "type": "Object",
             "tags": [],
             "label": "loggingSystem",
@@ -112,7 +120,7 @@
     "objects": [
       {
         "parentPluginId": "@kbn/core-logging-server-internal",
-        "id": "def-server.appendersSchema",
+        "id": "def-common.appendersSchema",
         "type": "Object",
         "tags": [],
         "label": "appendersSchema",
@@ -122,25 +130,25 @@
         "signature": [
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<Readonly<{} & { type: \"console\"; layout: Readonly<{} & { type: \"json\"; }> | Readonly<{ highlight?: boolean | undefined; pattern?: string | undefined; } & { type: \"pattern\"; }>; }> | Readonly<{} & { type: \"file\"; fileName: string; layout: Readonly<{} & { type: \"json\"; }> | Readonly<{ highlight?: boolean | undefined; pattern?: string | undefined; } & { type: \"pattern\"; }>; }> | Readonly<{} & { type: \"rewrite\"; policy: Readonly<{} & { type: \"meta\"; mode: \"update\" | \"remove\"; properties: Readonly<{ value?: string | number | boolean | null | undefined; } & { path: string; }>[]; }>; appenders: string[]; }> | Readonly<{} & { type: \"rolling-file\"; strategy: ",
           {
             "pluginId": "@kbn/core-logging-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreLoggingServerPluginApi",
-            "section": "def-server.NumericRollingStrategyConfig",
+            "section": "def-common.NumericRollingStrategyConfig",
             "text": "NumericRollingStrategyConfig"
           },
           "; fileName: string; layout: Readonly<{} & { type: \"json\"; }> | Readonly<{ highlight?: boolean | undefined; pattern?: string | undefined; } & { type: \"pattern\"; }>; policy: Readonly<{} & { type: \"size-limit\"; size: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.ByteSizeValue",
+            "section": "def-common.ByteSizeValue",
             "text": "ByteSizeValue"
           },
           "; }> | Readonly<{} & { type: \"time-interval\"; interval: moment.Duration; modulate: boolean; }>; }>>"
@@ -152,7 +160,7 @@
       },
       {
         "parentPluginId": "@kbn/core-logging-server-internal",
-        "id": "def-server.loggerContextConfigSchema",
+        "id": "def-common.loggerContextConfigSchema",
         "type": "Object",
         "tags": [],
         "label": "loggerContextConfigSchema",
@@ -162,33 +170,33 @@
         "signature": [
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.ObjectType",
+            "section": "def-common.ObjectType",
             "text": "ObjectType"
           },
           "<{ appenders: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<Map<string, ",
           {
             "pluginId": "@kbn/core-logging-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreLoggingServerPluginApi",
-            "section": "def-server.AppenderConfigType",
+            "section": "def-common.AppenderConfigType",
             "text": "AppenderConfigType"
           },
           ">>; loggers: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<Readonly<{} & { name: string; level: \"error\" | \"all\" | \"info\" | \"debug\" | \"off\" | \"warn\" | \"trace\" | \"fatal\"; appenders: string[]; }>[]>; }>"
@@ -200,7 +208,7 @@
       },
       {
         "parentPluginId": "@kbn/core-logging-server-internal",
-        "id": "def-server.loggerSchema",
+        "id": "def-common.loggerSchema",
         "type": "Object",
         "tags": [],
         "label": "loggerSchema",
@@ -210,33 +218,33 @@
         "signature": [
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.ObjectType",
+            "section": "def-common.ObjectType",
             "text": "ObjectType"
           },
           "<{ appenders: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<string[]>; name: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<string>; level: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<\"error\" | \"all\" | \"info\" | \"debug\" | \"off\" | \"warn\" | \"trace\" | \"fatal\">; }>"
@@ -247,13 +255,5 @@
         "initialIsOpen": false
       }
     ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }

@@ -9,13 +9,12 @@ import { EuiFilterButton, EuiFilterGroup, EuiFlexGroup, EuiFlexItem } from '@ela
 import { isEqual } from 'lodash/fp';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
+import { useRuleManagementFilters } from '../../../../rule_management/logic/use_rule_management_filters';
 import { RULES_TABLE_ACTIONS } from '../../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../../common/lib/apm/use_start_transaction';
-import { usePrePackagedRulesStatus } from '../../../../rule_management/logic/use_pre_packaged_rules_status';
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
 import { useRulesTableContext } from '../rules_table/rules_table_context';
 import { TagsFilterPopover } from './tags_filter_popover';
-import { useTags } from '../../../../rule_management/logic/use_tags';
 import { RuleSearchField } from './rule_search_field';
 
 const FilterWrapper = styled(EuiFlexGroup)`
@@ -32,10 +31,10 @@ const RulesTableFiltersComponent = () => {
     state: { filterOptions },
     actions: { setFilterOptions },
   } = useRulesTableContext();
-  const { data: allTags = [] } = useTags();
-  const { data: prePackagedRulesStatus } = usePrePackagedRulesStatus();
-  const rulesCustomInstalled = prePackagedRulesStatus?.rules_custom_installed;
-  const rulesInstalled = prePackagedRulesStatus?.rules_installed;
+  const { data: ruleManagementFields } = useRuleManagementFilters();
+  const allTags = ruleManagementFields?.aggregated_fields.tags ?? [];
+  const rulesCustomCount = ruleManagementFields?.rules_summary.custom_count;
+  const rulesPrebuiltInstalledCount = ruleManagementFields?.rules_summary.prebuilt_installed_count;
 
   const { showCustomRules, showElasticRules, tags: selectedTags } = filterOptions;
 
@@ -90,7 +89,7 @@ const RulesTableFiltersComponent = () => {
             withNext
           >
             {i18n.ELASTIC_RULES}
-            {rulesInstalled != null ? ` (${rulesInstalled})` : ''}
+            {rulesPrebuiltInstalledCount != null ? ` (${rulesPrebuiltInstalledCount ?? ''})` : ''}
           </EuiFilterButton>
           <EuiFilterButton
             hasActiveFilters={showCustomRules}
@@ -98,7 +97,7 @@ const RulesTableFiltersComponent = () => {
             data-test-subj="showCustomRulesFilterButton"
           >
             {i18n.CUSTOM_RULES}
-            {rulesCustomInstalled != null ? ` (${rulesCustomInstalled})` : ''}
+            {rulesCustomCount != null ? ` (${rulesCustomCount})` : ''}
           </EuiFilterButton>
         </EuiFilterGroup>
       </EuiFlexItem>

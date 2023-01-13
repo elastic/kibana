@@ -23,9 +23,17 @@ import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 const mockStartServicesMock = createStartServicesMock();
 export const KibanaServices = {
   get: jest.fn(() => {
-    const { http, uiSettings, notifications, data, unifiedSearch } = mockStartServicesMock;
+    const { application, http, uiSettings, notifications, data, unifiedSearch } =
+      mockStartServicesMock;
 
-    return { http, uiSettings, notifications, data, unifiedSearch };
+    return {
+      application,
+      http,
+      uiSettings,
+      notifications,
+      data,
+      unifiedSearch,
+    };
   }),
   getKibanaVersion: jest.fn(() => '8.0.0'),
 };
@@ -62,6 +70,7 @@ export const useKibana = jest.fn().mockReturnValue({
     },
     osquery: {
       OsqueryResults: jest.fn().mockReturnValue(null),
+      fetchAllLiveQueries: jest.fn().mockReturnValue({ data: { data: { items: [] } } }),
     },
     timelines: createTGridMocks(),
     savedObjectsTagging: {

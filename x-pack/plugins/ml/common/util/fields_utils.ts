@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ES_FIELD_TYPES } from '@kbn/data-plugin/common';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 import {
   Field,
   Aggregation,
@@ -127,7 +127,7 @@ function getNumericalFields(fields: Field[]): Field[] {
   );
 }
 
-function getGeoFields(fields: Field[]): Field[] {
+export function getGeoFields(fields: Field[]): Field[] {
   return fields.filter(
     (f) => f.type === ES_FIELD_TYPES.GEO_POINT || f.type === ES_FIELD_TYPES.GEO_SHAPE
   );

@@ -10,10 +10,18 @@
   },
   "server": {
     "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/rison",
-        "id": "def-server.decode",
+        "id": "def-common.decode",
         "type": "Function",
         "tags": [],
         "label": "decode",
@@ -24,9 +32,9 @@
           "(rison: string) => ",
           {
             "pluginId": "@kbn/rison",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnRisonPluginApi",
-            "section": "def-server.RisonValue",
+            "section": "def-common.RisonValue",
             "text": "RisonValue"
           }
         ],
@@ -36,7 +44,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/rison",
-            "id": "def-server.decode.$1",
+            "id": "def-common.decode.$1",
             "type": "string",
             "tags": [],
             "label": "rison",
@@ -55,7 +63,7 @@
       },
       {
         "parentPluginId": "@kbn/rison",
-        "id": "def-server.decodeArray",
+        "id": "def-common.decodeArray",
         "type": "Function",
         "tags": [],
         "label": "decodeArray",
@@ -66,9 +74,9 @@
           "(rison: string) => ",
           {
             "pluginId": "@kbn/rison",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnRisonPluginApi",
-            "section": "def-server.RisonValue",
+            "section": "def-common.RisonValue",
             "text": "RisonValue"
           },
           "[]"
@@ -79,7 +87,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/rison",
-            "id": "def-server.decodeArray.$1",
+            "id": "def-common.decodeArray.$1",
             "type": "string",
             "tags": [],
             "label": "rison",
@@ -98,7 +106,7 @@
       },
       {
         "parentPluginId": "@kbn/rison",
-        "id": "def-server.encode",
+        "id": "def-common.encode",
         "type": "Function",
         "tags": [],
         "label": "encode",
@@ -114,7 +122,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/rison",
-            "id": "def-server.encode.$1",
+            "id": "def-common.encode.$1",
             "type": "Any",
             "tags": [],
             "label": "obj",
@@ -133,7 +141,7 @@
       },
       {
         "parentPluginId": "@kbn/rison",
-        "id": "def-server.encodeArray",
+        "id": "def-common.encodeArray",
         "type": "Function",
         "tags": [],
         "label": "encodeArray",
@@ -149,7 +157,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/rison",
-            "id": "def-server.encodeArray.$1",
+            "id": "def-common.encodeArray.$1",
             "type": "Array",
             "tags": [],
             "label": "array",
@@ -168,7 +176,7 @@
       },
       {
         "parentPluginId": "@kbn/rison",
-        "id": "def-server.encodeUnknown",
+        "id": "def-common.encodeUnknown",
         "type": "Function",
         "tags": [],
         "label": "encodeUnknown",
@@ -182,13 +190,55 @@
         "children": [
           {
             "parentPluginId": "@kbn/rison",
-            "id": "def-server.encodeUnknown.$1",
+            "id": "def-common.encodeUnknown.$1",
             "type": "Any",
             "tags": [],
             "label": "obj",
             "description": [],
             "signature": [
               "any"
+            ],
+            "path": "packages/kbn-rison/kbn_rison.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rison",
+        "id": "def-common.safeDecode",
+        "type": "Function",
+        "tags": [],
+        "label": "safeDecode",
+        "description": [
+          "\nsafely parse a rison string into a javascript structure, never throws"
+        ],
+        "signature": [
+          "(rison: string) => ",
+          {
+            "pluginId": "@kbn/rison",
+            "scope": "common",
+            "docId": "kibKbnRisonPluginApi",
+            "section": "def-common.RisonValue",
+            "text": "RisonValue"
+          }
+        ],
+        "path": "packages/kbn-rison/kbn_rison.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/rison",
+            "id": "def-common.safeDecode.$1",
+            "type": "string",
+            "tags": [],
+            "label": "rison",
+            "description": [],
+            "signature": [
+              "string"
             ],
             "path": "packages/kbn-rison/kbn_rison.ts",
             "deprecated": false,
@@ -205,7 +255,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/rison",
-        "id": "def-server.RisonValue",
+        "id": "def-common.RisonValue",
         "type": "Type",
         "tags": [],
         "label": "RisonValue",
@@ -214,17 +264,17 @@
           "string | number | boolean | ",
           {
             "pluginId": "@kbn/rison",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnRisonPluginApi",
-            "section": "def-server.RisonValue",
+            "section": "def-common.RisonValue",
             "text": "RisonValue"
           },
           "[] | { [key: string]: ",
           {
             "pluginId": "@kbn/rison",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnRisonPluginApi",
-            "section": "def-server.RisonValue",
+            "section": "def-common.RisonValue",
             "text": "RisonValue"
           },
           "; } | null"
@@ -235,14 +285,6 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": []
   }
 }

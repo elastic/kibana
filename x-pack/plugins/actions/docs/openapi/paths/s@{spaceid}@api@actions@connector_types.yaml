@@ -4,7 +4,7 @@ get:
   description: >
     You do not need any Kibana feature privileges to run this API.
   tags:
-    - cases
+    - connectors
   parameters:
     - $ref: '../components/parameters/space_id.yaml'
     - in: query
@@ -35,9 +35,7 @@ get:
                   description: Indicates whether the connector is enabled in the license.
                   example: true
                 id:
-                  type: string
-                  description: The unique identifier for the connector type.
-                  example: .index
+                  $ref: '../components/schemas/connector_types.yaml'
                 minimum_license_required:
                   type: string
                   description: The license that is required to use the connector type.

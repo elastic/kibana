@@ -30,7 +30,7 @@ export const addTestMonitor = async (
 ) => {
   const testData = {
     locations: [{ id: 'us_central', isServiceManaged: true }],
-    ...(params?.type !== 'browser' ? {} : data),
+    ...(params?.type !== 'browser' ? {} : testDataMonitor),
     ...(params || {}),
     name,
   };
@@ -77,9 +77,8 @@ export const cleanPrivateLocations = async (params: Record<string, any>) => {
   const server = getService('kibanaServer');
 
   try {
-    await server.savedObjects.clean({ types: [privateLocationsSavedObjectName] });
     await server.savedObjects.clean({
-      types: ['ingest-agent-policies', 'ingest-package-policies'],
+      types: [privateLocationsSavedObjectName, 'ingest-agent-policies', 'ingest-package-policies'],
     });
   } catch (e) {
     // eslint-disable-next-line no-console
@@ -87,8 +86,21 @@ export const cleanPrivateLocations = async (params: Record<string, any>) => {
   }
 };
 
-const data = {
+export const cleanTestParams = async (params: Record<string, any>) => {
+  const getService = params.getService;
+  const server = getService('kibanaServer');
+
+  try {
+    await server.savedObjects.clean({ types: ['synthetics-param'] });
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.log(e);
+  }
+};
+
+export const testDataMonitor = {
   type: 'browser',
+  alert: { status: { enabled: true } },
   form_monitor_type: 'single',
   enabled: true,
   schedule: { unit: 'm', number: '10' },

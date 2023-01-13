@@ -38,6 +38,7 @@ export interface GuidedOnboardingApi {
   deactivateGuide: (guide: GuideState) => Promise<{ pluginState: PluginState } | undefined>;
   completeGuide: (guideId: GuideId) => Promise<{ pluginState: PluginState } | undefined>;
   isGuideStepActive$: (guideId: GuideId, stepId: GuideStepIds) => Observable<boolean>;
+  isGuideStepReadyToComplete$: (guideId: GuideId, stepId: GuideStepIds) => Observable<boolean>;
   startGuideStep: (
     guideId: GuideId,
     stepId: GuideStepIds
@@ -52,5 +53,6 @@ export interface GuidedOnboardingApi {
   ) => Promise<{ pluginState: PluginState } | undefined>;
   skipGuidedOnboarding: () => Promise<{ pluginState: PluginState } | undefined>;
   isGuidePanelOpen$: Observable<boolean>;
+  isLoading$: Observable<boolean>;
   getGuideConfig: (guideId: GuideId) => Promise<GuideConfig | undefined>;
 }

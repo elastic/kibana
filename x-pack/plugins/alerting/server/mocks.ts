@@ -10,11 +10,18 @@ import {
   savedObjectsClientMock,
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { searchSourceCommonMock } from '@kbn/data-plugin/common/search/search_source/mocks';
+import { SharePluginStart } from '@kbn/share-plugin/server';
 import { rulesClientMock } from './rules_client.mock';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { Alert, AlertFactoryDoneUtils } from './alert';
-import { AlertInstanceContext, AlertInstanceState, PublicRuleMonitoringService } from './types';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  PublicRuleResultService,
+  PublicRuleMonitoringService,
+} from './types';
 
 export { rulesClientMock };
 
@@ -25,6 +32,21 @@ const createSetupMock = () => {
     getConfig: jest.fn(),
   };
   return mock;
+};
+
+const createShareStartMock = () => {
+  const startContract = {
+    url: {
+      locators: {
+        get: (id: string) => {
+          if (id === 'DISCOVER_APP_LOCATOR') {
+            return { getRedirectUrl: (params: unknown) => JSON.stringify(params) };
+          }
+        },
+      },
+    },
+  } as SharePluginStart;
+  return startContract;
 };
 
 const createStartMock = () => {
@@ -108,6 +130,18 @@ const createRuleMonitoringServiceMock = () => {
   return mock;
 };
 
+const createRuleLastRunServiceMock = () => {
+  const mock = {
+    getLastRunErrors: jest.fn(),
+    getLastRunWarnings: jest.fn(),
+    getLastRunOutcomeMessages: jest.fn(),
+    getLastRunResults: jest.fn(),
+    getLastRunSetters: jest.fn(),
+  } as unknown as jest.Mocked<PublicRuleResultService>;
+
+  return mock;
+};
+
 const createRuleExecutorServicesMock = <
   InstanceState extends AlertInstanceState = AlertInstanceState,
   InstanceContext extends AlertInstanceContext = AlertInstanceContext
@@ -131,6 +165,8 @@ const createRuleExecutorServicesMock = <
     search: createAbortableSearchServiceMock(),
     searchSourceClient: searchSourceCommonMock,
     ruleMonitoringService: createRuleMonitoringServiceMock(),
+    share: createShareStartMock(),
+    dataViews: dataViewPluginMocks.createStartContract(),
   };
 };
 export type RuleExecutorServicesMock = ReturnType<typeof createRuleExecutorServicesMock>;
@@ -143,3 +179,5 @@ export const alertsMock = {
 };
 
 export const ruleMonitoringServiceMock = { create: createRuleMonitoringServiceMock };
+
+export const ruleLastRunServiceMock = { create: createRuleLastRunServiceMock };

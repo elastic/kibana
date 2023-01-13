@@ -57,30 +57,35 @@ export const ExperimentDatastreamSettings: React.FunctionComponent<Props> = ({
     experimentalDataFeatures ?? [],
     registryDataStream
   );
+
+  const isTimeSeriesEnabledByDefault =
+    registryDataStream.elasticsearch?.index_mode === 'time_series';
+
   const isSyntheticSourceEnabledByDefault =
-    registryDataStream.elasticsearch?.source_mode === 'synthetic';
+    registryDataStream.elasticsearch?.source_mode === 'synthetic' || isTimeSeriesEnabledByDefault;
 
   const newExperimentalIndexingFeature = {
     synthetic_source:
       typeof syntheticSourceExperimentalValue !== 'undefined'
         ? syntheticSourceExperimentalValue
         : isSyntheticSourceEnabledByDefault,
-    tsdb:
-      getExperimentalFeatureValue('tsdb', experimentalDataFeatures ?? [], registryDataStream) ??
-      false,
+    tsdb: isTimeSeriesEnabledByDefault
+      ? isTimeSeriesEnabledByDefault
+      : getExperimentalFeatureValue('tsdb', experimentalDataFeatures ?? [], registryDataStream) ??
+        false,
   };
 
   const onIndexingSettingChange = (
     features: Partial<Record<ExperimentalIndexingFeature, boolean>>
   ) => {
-    const newExperimentalDataStreamFeatures = [...(experimentalDataFeatures ?? [])];
+    const newExperimentalDataStreamFeatures =
+      experimentalDataFeatures?.map((feature) => ({ ...feature })) ?? [];
 
     const dataStream = getRegistryDataStreamAssetBaseName(registryDataStream);
 
     const existingSettingRecord = newExperimentalDataStreamFeatures.find(
       (x) => x.data_stream === dataStream
     );
-
     if (existingSettingRecord) {
       existingSettingRecord.features = {
         ...existingSettingRecord.features,

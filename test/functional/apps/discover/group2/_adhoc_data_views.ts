@@ -93,7 +93,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should support query and filtering', async () => {
-      await filterBar.addFilter('nestedField.child', 'is', 'nestedValue');
+      await filterBar.addFilter({
+        field: 'nestedField.child',
+        operation: 'is',
+        value: 'nestedValue',
+      });
       expect(await filterBar.hasFilter('nestedField.child', 'nestedValue')).to.be(true);
       await retry.try(async function () {
         expect(await PageObjects.discover.getHitCount()).to.be('1');
@@ -241,10 +245,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.createAdHocDataView('logstas', true);
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await filterBar.addFilter('nestedField.child', 'is', 'nestedValue');
+      await filterBar.addFilter({
+        field: 'nestedField.child',
+        operation: 'is',
+        value: 'nestedValue',
+      });
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await filterBar.addFilter('extension', 'is', 'jpg');
+      await filterBar.addFilter({ field: 'extension', operation: 'is', value: 'jpg' });
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       const first = await PageObjects.discover.getCurrentDataViewId();

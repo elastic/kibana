@@ -24,6 +24,9 @@ export interface EsDocument {
   _source: {
     [key: string]: unknown;
   };
+  fields: {
+    [key: string]: unknown;
+  };
   [key: string]: unknown;
 }
 
@@ -61,7 +64,7 @@ export interface Params {
   type: RuntimeType | null;
   script: Required<RuntimeField>['script'] | null;
   format: SerializedFieldFormat | null;
-  document: { [key: string]: unknown } | null;
+  document: EsDocument | null;
   // used for composite subfields
   parentName: string | null;
 }

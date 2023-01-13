@@ -14,5 +14,5 @@ export type {
   GuideStep,
   GuideStatus,
 } from './src/types';
-export { GuideCard, ObservabilityLinkCard } from './src/components/landing_page';
-export type { UseCase } from './src/components/landing_page';
+export { GuideCard, InfrastructureLinkCard } from './src/components/landing_page';
+export type { GuideCardUseCase } from './src/components/landing_page';

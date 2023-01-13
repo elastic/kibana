@@ -23,7 +23,7 @@ import {
 } from 'rxjs/operators';
 import { CliArgs } from '@kbn/config';
 import { CiStatsReporter } from '@kbn/ci-stats-reporter';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 import { Log, CliLog } from './log';
 import { Optimizer } from './optimizer';
@@ -115,6 +115,7 @@ export class CliDevMode {
     }
 
     const { watchPaths, ignorePaths } = getServerWatchPaths({
+      runExamples: cliArgs.runExamples,
       pluginPaths: config.plugins.additionalPluginPaths,
       pluginScanDirs: config.plugins.pluginSearchPaths,
     });

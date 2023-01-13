@@ -6,10 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Action, Store } from 'redux';
 import type { Subscription } from 'rxjs';
 import { Subject } from 'rxjs';
 import { combineLatestWith } from 'rxjs/operators';
+import type * as H from 'history';
 import type {
   AppMountParameters,
   AppUpdater,
@@ -58,11 +58,8 @@ import { getLazyEndpointGenericErrorsListExtension } from './management/pages/po
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_custom_assets_extension';
-import type { State } from './common/store/types';
-/**
- * The Redux store type for the Security app.
- */
-export type SecurityAppStore = Store<State, Action>;
+import type { SecurityAppStore } from './common/store/types';
+
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   readonly kibanaVersion: string;
   private config: SecuritySolutionUiConfigType;
@@ -89,6 +86,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
    * See `store` method.
    */
   private _store?: SecurityAppStore;
+  private _actionsRegistered?: boolean = false;
 
   public setup(
     core: CoreSetup<StartPluginsDependencies, PluginStart>,
@@ -162,12 +160,17 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
         const [coreStart, startPlugins] = await core.getStartServices();
         const subPlugins = await this.startSubPlugins(this.storage, coreStart, startPlugins);
+        const store = await this.store(coreStart, startPlugins, subPlugins);
+        const services = await startServices(params);
+        await this.registerActions(startPlugins, store, params.history, services);
+
         const { renderApp } = await this.lazyApplicationDependencies();
         const { getSubPluginRoutesByCapabilities } = await this.lazyHelpersForRoutes();
+
         return renderApp({
           ...params,
           services: await startServices(params),
-          store: await this.store(coreStart, startPlugins, subPlugins),
+          store,
           usageCollection: plugins.usageCollection,
           subPluginRoutes: getSubPluginRoutesByCapabilities(
             subPlugins,
@@ -336,6 +339,17 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     );
   }
 
+  private lazyActions() {
+    /**
+     * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
+     * See https://webpack.js.org/api/module-methods/#magic-comments
+     */
+    return import(
+      /* webpackChunkName: "actions" */
+      './actions'
+    );
+  }
+
   /**
    * Lazily instantiated subPlugins. This should be instantiated just once.
    */
@@ -347,9 +361,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         rules: new subPluginClasses.Rules(),
         exceptions: new subPluginClasses.Exceptions(),
         cases: new subPluginClasses.Cases(),
-        hosts: new subPluginClasses.Hosts(),
-        users: new subPluginClasses.Users(),
-        network: new subPluginClasses.Network(),
+        explore: new subPluginClasses.Explore(),
         kubernetes: new subPluginClasses.Kubernetes(),
         overview: new subPluginClasses.Overview(),
         timelines: new subPluginClasses.Timelines(),
@@ -377,9 +389,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       cases: subPlugins.cases.start(),
       rules: subPlugins.rules.start(storage),
       exceptions: subPlugins.exceptions.start(storage),
-      hosts: subPlugins.hosts.start(storage),
-      users: subPlugins.users.start(storage),
-      network: subPlugins.network.start(storage),
+      explore: subPlugins.explore.start(storage),
       timelines: subPlugins.timelines.start(),
       kubernetes: subPlugins.kubernetes.start(),
       management: subPlugins.management.start(core, plugins),
@@ -411,6 +421,19 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       startPlugins.timelines.setTimelineEmbeddedStore(this._store);
     }
     return this._store;
+  }
+
+  private async registerActions(
+    plugins: StartPlugins,
+    store: SecurityAppStore,
+    history: H.History,
+    services: StartServices
+  ) {
+    if (!this._actionsRegistered) {
+      const { registerActions } = await this.lazyActions();
+      registerActions(plugins, store, history, services);
+      this._actionsRegistered = true;
+    }
   }
 
   /**

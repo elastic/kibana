@@ -92,7 +92,9 @@ export function getTextBasedDatasource({
     indexPatterns: IndexPatternMap
   ) => {
     const context = state.initialContext;
-    if (context && 'dataViewSpec' in context && context.dataViewSpec.title) {
+    // on text based mode we offer suggestions for the query and not for a specific field
+    if (fieldName) return [];
+    if (context && 'dataViewSpec' in context && context.dataViewSpec.title && context.query) {
       const newLayerId = generateId();
       const indexPattern = indexPatterns[indexPatternId];
 

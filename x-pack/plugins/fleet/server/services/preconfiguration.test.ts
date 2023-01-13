@@ -908,6 +908,7 @@ describe('comparePreconfiguredPolicyToCurrent', () => {
     name: 'Test policy',
     description: 'This is a test policy',
     unenroll_timeout: 60,
+    inactivity_timeout: 60,
     is_preconfigured: true,
     status: 'active',
     is_managed: true,

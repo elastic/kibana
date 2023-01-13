@@ -64,6 +64,7 @@ describe('default cell actions', () => {
       initialWidth: 105,
     },
   ]);
+
   describe.each(columnHeadersToTest)('columns with a link action', (columnHeaders) => {
     test(`${columnHeaders.id ?? columnHeaders.type}`, () => {
       const columnsWithCellActions: EuiDataGridColumn[] = [columnHeaders].map((header) => {

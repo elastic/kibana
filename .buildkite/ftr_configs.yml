@@ -21,6 +21,9 @@ disabled:
   - x-pack/test/fleet_cypress/config.ts
   - x-pack/test/fleet_cypress/visual_config.ts
   - x-pack/test/functional_enterprise_search/cypress.config.ts
+  - x-pack/test/defend_workflows_cypress/cli_config.ts
+  - x-pack/test/defend_workflows_cypress/config.ts
+  - x-pack/test/defend_workflows_cypress/visual_config.ts
   - x-pack/test/osquery_cypress/cli_config.ts
   - x-pack/test/osquery_cypress/config.ts
   - x-pack/test/osquery_cypress/visual_config.ts
@@ -186,6 +189,7 @@ enabled:
   - x-pack/test/functional/apps/lens/group3/config.ts
   - x-pack/test/functional/apps/lens/open_in_lens/tsvb/config.ts
   - x-pack/test/functional/apps/lens/open_in_lens/agg_based/config.ts
+  - x-pack/test/functional/apps/lens/open_in_lens/dashboard/config.ts
   - x-pack/test/functional/apps/license_management/config.ts
   - x-pack/test/functional/apps/logstash/config.ts
   - x-pack/test/functional/apps/management/config.ts
@@ -222,6 +226,7 @@ enabled:
   - x-pack/test/licensing_plugin/config.public.ts
   - x-pack/test/licensing_plugin/config.ts
   - x-pack/test/lists_api_integration/security_and_spaces/config.ts
+  - x-pack/test/monitoring_api_integration/config.ts
   - x-pack/test/observability_api_integration/basic/config.ts
   - x-pack/test/observability_api_integration/trial/config.ts
   - x-pack/test/observability_functional/with_rac_write.config.ts
@@ -289,3 +294,4 @@ enabled:
   - x-pack/performance/journeys/data_stress_test_lens.ts
   - x-pack/performance/journeys/ecommerce_dashboard_saved_search_only.ts
   - x-pack/performance/journeys/ecommerce_dashboard_tsvb_gauge_only.ts
+  - x-pack/performance/journeys/dashboard_listing_page.ts

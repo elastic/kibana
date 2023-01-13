@@ -9,7 +9,7 @@
 import Path from 'path';
 
 import normalizePath from 'normalize-path';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 import { Plugins } from './discover_plugins';
 

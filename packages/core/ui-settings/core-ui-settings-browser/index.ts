@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export type { UiSettingsState, IUiSettingsClient } from './src/types';
+export type { UiSettingsState, IUiSettingsClient, SettingsStart, SettingsSetup } from './src/types';

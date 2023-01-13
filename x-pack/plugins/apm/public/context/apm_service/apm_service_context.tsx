@@ -15,7 +15,7 @@ import {
 } from '../../../common/transaction_types';
 import { useServiceTransactionTypesFetcher } from './use_service_transaction_types_fetcher';
 import { useServiceAgentFetcher } from './use_service_agent_fetcher';
-import { useApmParams } from '../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../hooks/use_apm_params';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { useFallbackToTransactionsFetcher } from '../../hooks/use_fallback_to_transactions_fetcher';
 import { replace } from '../../components/shared/links/url_helpers';
@@ -49,7 +49,10 @@ export function ApmServiceContextProvider({
     path: { serviceName },
     query,
     query: { kuery, rangeFrom, rangeTo },
-  } = useApmParams('/services/{serviceName}');
+  } = useAnyOfApmParams(
+    '/services/{serviceName}',
+    '/mobile-services/{serviceName}'
+  );
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 

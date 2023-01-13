@@ -1,4 +1,4 @@
-1,2c1,16
+1,2c1,20
 < describe('helpers', function() {
 <   it('helper with complex lookup$', function() {
 ---
@@ -16,13 +16,17 @@
 >   global.kbnHandlebarsEnv = Handlebars.create();
 > });
 > 
+> afterEach(() => {
+>   global.kbnHandlebarsEnv = null;
+> });
+> 
 > describe('helpers', () => {
 >   it('helper with complex lookup$', () => {
-6c20
+6c24
 <         goodbyes: [{ text: 'Goodbye', url: 'goodbye' }]
 ---
 >         goodbyes: [{ text: 'Goodbye', url: 'goodbye' }],
-8,11c22,23
+8,11c26,27
 <       .withHelper('link', function(prefix) {
 <         return (
 <           '<a href="' + prefix + '/' + this.url + '">' + this.text + '</a>'
@@ -30,90 +34,90 @@
 ---
 >       .withHelper('link', function (this: any, prefix) {
 >         return '<a href="' + prefix + '/' + this.url + '">' + this.text + '</a>';
-16c28
+16c32
 <   it('helper for raw block gets raw content', function() {
 ---
 >   it('helper for raw block gets raw content', () => {
-19c31
+19c35
 <       .withHelper('raw', function(options) {
 ---
->       .withHelper('raw', function (options) {
-22d33
+>       .withHelper('raw', function (options: Handlebars.HelperOptions) {
+22d37
 <       .withMessage('raw block helper gets raw content')
-26c37
+26c41
 <   it('helper for raw block gets parameters', function() {
 ---
 >   it('helper for raw block gets parameters', () => {
-29,30c40,42
+29,30c44,46
 <       .withHelper('raw', function(a, b, c, options) {
 <         return options.fn() + a + b + c;
 ---
->       .withHelper('raw', function (a, b, c, options) {
+>       .withHelper('raw', function (a, b, c, options: Handlebars.HelperOptions) {
 >         const ret = options.fn() + a + b + c;
 >         return ret;
-32d43
+32d47
 <       .withMessage('raw block helper gets raw content')
-36,37c47,48
+36,37c51,52
 <   describe('raw block parsing (with identity helper-function)', function() {
 <     function runWithIdentityHelper(template, expected) {
 ---
 >   describe('raw block parsing (with identity helper-function)', () => {
 >     function runWithIdentityHelper(template: string, expected: string) {
-39c50
+39c54
 <         .withHelper('identity', function(options) {
 ---
->         .withHelper('identity', function (options) {
-45c56
+>         .withHelper('identity', function (options: Handlebars.HelperOptions) {
+45c60
 <     it('helper for nested raw block gets raw content', function() {
 ---
 >     it('helper for nested raw block gets raw content', () => {
-52c63
+52c67
 <     it('helper for nested raw block works with empty content', function() {
 ---
 >     it('helper for nested raw block works with empty content', () => {
-56c67
+56c71
 <     xit('helper for nested raw block works if nested raw blocks are broken', function() {
 ---
 >     it.skip('helper for nested raw block works if nested raw blocks are broken', () => {
-67c78
+67c82
 <     it('helper for nested raw block closes after first matching close', function() {
 ---
 >     it('helper for nested raw block closes after first matching close', () => {
-74,75c85,86
+74,75c89,90
 <     it('helper for nested raw block throw exception when with missing closing braces', function() {
 <       var string = '{{{{a}}}} {{{{/a';
 ---
 >     it('helper for nested raw block throw exception when with missing closing braces', () => {
 >       const string = '{{{{a}}}} {{{{/a';
-80c91
+80c95
 <   it('helper block with identical context', function() {
 ---
 >   it('helper block with identical context', () => {
-83,86c94,97
+83,86c98,101
 <       .withHelper('goodbyes', function(options) {
 <         var out = '';
 <         var byes = ['Goodbye', 'goodbye', 'GOODBYE'];
 <         for (var i = 0, j = byes.length; i < j; i++) {
 ---
->       .withHelper('goodbyes', function (this: any, options) {
+>       .withHelper('goodbyes', function (this: any, options: Handlebars.HelperOptions) {
 >         let out = '';
 >         const byes = ['Goodbye', 'goodbye', 'GOODBYE'];
 >         for (let i = 0, j = byes.length; i < j; i++) {
-94c105
+94c109
 <   it('helper block with complex lookup expression', function() {
 ---
 >   it('helper block with complex lookup expression', () => {
-97,100c108,111
+97,100c112,115
 <       .withHelper('goodbyes', function(options) {
 <         var out = '';
 <         var byes = ['Goodbye', 'goodbye', 'GOODBYE'];
 <         for (var i = 0, j = byes.length; i < j; i++) {
 ---
->       .withHelper('goodbyes', function (options) {
+>       .withHelper('goodbyes', function (options: Handlebars.HelperOptions) {
 >         let out = '';
 >         const byes = ['Goodbye', 'goodbye', 'GOODBYE'];
 >         for (let i = 0, j = byes.length; i < j; i++) {
-108,111c119,120
+108,111c123,124
 <   it('helper with complex lookup and nested template', function() {
 <     expectTemplate(
 <       '{{#goodbyes}}{{#link ../prefix}}{{text}}{{/link}}{{/goodbyes}}'
@@ -121,11 +125,11 @@
 ---
 >   it('helper with complex lookup and nested template', () => {
 >     expectTemplate('{{#goodbyes}}{{#link ../prefix}}{{text}}{{/link}}{{/goodbyes}}')
-114c123
+114c127
 <         goodbyes: [{ text: 'Goodbye', url: 'goodbye' }]
 ---
 >         goodbyes: [{ text: 'Goodbye', url: 'goodbye' }],
-116,125c125,126
+116,125c129,130
 <       .withHelper('link', function(prefix, options) {
 <         return (
 <           '<a href="' +
@@ -137,9 +141,9 @@
 <           '</a>'
 <         );
 ---
->       .withHelper('link', function (this: any, prefix, options) {
+>       .withHelper('link', function (this: any, prefix, options: Handlebars.HelperOptions) {
 >         return '<a href="' + prefix + '/' + this.url + '">' + options.fn(this) + '</a>';
-130,133c131,132
+130,133c135,136
 <   it('helper with complex lookup and nested template in VM+Compiler', function() {
 <     expectTemplate(
 <       '{{#goodbyes}}{{#link ../prefix}}{{text}}{{/link}}{{/goodbyes}}'
@@ -147,11 +151,11 @@
 ---
 >   it('helper with complex lookup and nested template in VM+Compiler', () => {
 >     expectTemplate('{{#goodbyes}}{{#link ../prefix}}{{text}}{{/link}}{{/goodbyes}}')
-136c135
+136c139
 <         goodbyes: [{ text: 'Goodbye', url: 'goodbye' }]
 ---
 >         goodbyes: [{ text: 'Goodbye', url: 'goodbye' }],
-138,147c137,138
+138,147c141,142
 <       .withHelper('link', function(prefix, options) {
 <         return (
 <           '<a href="' +
@@ -163,83 +167,83 @@
 <           '</a>'
 <         );
 ---
->       .withHelper('link', function (this: any, prefix, options) {
+>       .withHelper('link', function (this: any, prefix, options: Handlebars.HelperOptions) {
 >         return '<a href="' + prefix + '/' + this.url + '">' + options.fn(this) + '</a>';
-152c143
+152c147
 <   it('helper returning undefined value', function() {
 ---
 >   it('helper returning undefined value', () => {
-155c146
+155c150
 <         nothere: function() {}
 ---
 >         nothere() {},
-161c152
+161c156
 <         nothere: function() {}
 ---
 >         nothere() {},
-166c157
+166c161
 <   it('block helper', function() {
 ---
 >   it('block helper', () => {
-169c160
+169c164
 <       .withHelper('goodbyes', function(options) {
 ---
->       .withHelper('goodbyes', function (options) {
-172d162
+>       .withHelper('goodbyes', function (options: Handlebars.HelperOptions) {
+172d166
 <       .withMessage('Block helper executed')
-176c166
+176c170
 <   it('block helper staying in the same context', function() {
 ---
 >   it('block helper staying in the same context', () => {
-179c169
+179c173
 <       .withHelper('form', function(options) {
 ---
->       .withHelper('form', function (this: any, options) {
-182d171
+>       .withHelper('form', function (this: any, options: Handlebars.HelperOptions) {
+182d175
 <       .withMessage('Block helper executed with current context')
-186,187c175,176
+186,187c179,180
 <   it('block helper should have context in this', function() {
 <     function link(options) {
 ---
 >   it('block helper should have context in this', () => {
 >     function link(this: any, options: Handlebars.HelperOptions) {
-191,193c180
+191,193c184
 <     expectTemplate(
 <       '<ul>{{#people}}<li>{{#link}}{{name}}{{/link}}</li>{{/people}}</ul>'
 <     )
 ---
 >     expectTemplate('<ul>{{#people}}<li>{{#link}}{{name}}{{/link}}</li>{{/people}}</ul>')
-197,198c184,185
+197,198c188,189
 <           { name: 'Yehuda', id: 2 }
 <         ]
 ---
 >           { name: 'Yehuda', id: 2 },
 >         ],
-206c193
+206c197
 <   it('block helper for undefined value', function() {
 ---
 >   it('block helper for undefined value', () => {
-210c197
+210c201
 <   it('block helper passing a new context', function() {
 ---
 >   it('block helper passing a new context', () => {
-213c200
+213c204
 <       .withHelper('form', function(context, options) {
 ---
->       .withHelper('form', function (context, options) {
-216d202
+>       .withHelper('form', function (context, options: Handlebars.HelperOptions) {
+216d206
 <       .withMessage('Context variable resolved')
-220c206
+220c210
 <   it('block helper passing a complex path context', function() {
 ---
 >   it('block helper passing a complex path context', () => {
-223c209
+223c213
 <       .withHelper('form', function(context, options) {
 ---
->       .withHelper('form', function (context, options) {
-226d211
+>       .withHelper('form', function (context, options: Handlebars.HelperOptions) {
+226d215
 <       .withMessage('Complex path variable resolved')
-230,233c215,216
+230,233c219,220
 <   it('nested block helpers', function() {
 <     expectTemplate(
 <       '{{#form yehuda}}<p>{{name}}</p>{{#link}}Hello{{/link}}{{/form}}'
@@ -247,21 +251,21 @@
 ---
 >   it('nested block helpers', () => {
 >     expectTemplate('{{#form yehuda}}<p>{{name}}</p>{{#link}}Hello{{/link}}{{/form}}')
-235c218
+235c222
 <         yehuda: { name: 'Yehuda' }
 ---
 >         yehuda: { name: 'Yehuda' },
-237c220
+237c224
 <       .withHelper('link', function(options) {
 ---
->       .withHelper('link', function (this: any, options) {
-240c223
+>       .withHelper('link', function (this: any, options: Handlebars.HelperOptions) {
+240c227
 <       .withHelper('form', function(context, options) {
 ---
->       .withHelper('form', function (context, options) {
-243d225
+>       .withHelper('form', function (context, options: Handlebars.HelperOptions) {
+243d229
 <       .withMessage('Both blocks executed')
-247,249c229,231
+247,249c233,235
 <   it('block helper inverted sections', function() {
 <     var string = "{{#list people}}{{name}}{{^}}<em>Nobody's here</em>{{/list}}";
 <     function list(context, options) {
@@ -269,32 +273,32 @@
 >   it('block helper inverted sections', () => {
 >     const string = "{{#list people}}{{name}}{{^}}<em>Nobody's here</em>{{/list}}";
 >     function list(this: any, context: any, options: Handlebars.HelperOptions) {
-251,252c233,234
+251,252c237,238
 <         var out = '<ul>';
 <         for (var i = 0, j = context.length; i < j; i++) {
 ---
 >         let out = '<ul>';
 >         for (let i = 0, j = context.length; i < j; i++) {
-268,269c250
+268,269c254
 <       .withHelpers({ list: list })
 <       .withMessage('an inverse wrapper is passed in as a new context')
 ---
 >       .withHelpers({ list })
-274,275c255
+274,275c259
 <       .withHelpers({ list: list })
 <       .withMessage('an inverse wrapper can be optionally called')
 ---
 >       .withHelpers({ list })
-281c261
+281c265
 <         message: "Nobody's here"
 ---
 >         message: "Nobody's here",
-283,284c263
+283,284c267
 <       .withHelpers({ list: list })
 <       .withMessage('the context of an inverse is the parent of the block')
 ---
 >       .withHelpers({ list })
-288,292c267,269
+288,292c271,273
 <   it('pathed lambas with parameters', function() {
 <     var hash = {
 <       helper: function() {
@@ -304,15 +308,15 @@
 >   it('pathed lambas with parameters', () => {
 >     const hash = {
 >       helper: () => 'winning',
-293a271
+293a275
 >     // @ts-expect-error
-295,299d272
+295,299d276
 <     var helpers = {
 <       './helper': function() {
 <         return 'fail';
 <       }
 <     };
-301,304c274,276
+301,304c278,280
 <     expectTemplate('{{./helper 1}}')
 <       .withInput(hash)
 <       .withHelpers(helpers)
@@ -321,7 +325,7 @@
 >     const helpers = {
 >       './helper': () => 'fail',
 >     };
-306,309c278,279
+306,309c282,283
 <     expectTemplate('{{hash/helper 1}}')
 <       .withInput(hash)
 <       .withHelpers(helpers)
@@ -329,91 +333,91 @@
 ---
 >     expectTemplate('{{./helper 1}}').withInput(hash).withHelpers(helpers).toCompileTo('winning');
 >     expectTemplate('{{hash/helper 1}}').withInput(hash).withHelpers(helpers).toCompileTo('winning');
-312,313c282,283
+312,313c286,287
 <   describe('helpers hash', function() {
 <     it('providing a helpers hash', function() {
 ---
 >   describe('helpers hash', () => {
 >     it('providing a helpers hash', () => {
-317c287
+317c291
 <           world: function() {
 ---
 >           world() {
-319c289
+319c293
 <           }
 ---
 >           },
-321d290
+321d294
 <         .withMessage('helpers hash is available')
-327c296
+327c300
 <           world: function() {
 ---
 >           world() {
-329c298
+329c302
 <           }
 ---
 >           },
-331d299
+331d303
 <         .withMessage('helpers hash is available inside other blocks')
-335c303
+335c307
 <     it('in cases of conflict, helpers win', function() {
 ---
 >     it('in cases of conflict, helpers win', () => {
-339c307
+339c311
 <           lookup: function() {
 ---
 >           lookup() {
-341c309
+341c313
 <           }
 ---
 >           },
-343d310
+343d314
 <         .withMessage('helpers hash has precedence escaped expansion')
-349c316
+349c320
 <           lookup: function() {
 ---
 >           lookup() {
-351c318
+351c322
 <           }
 ---
 >           },
-353d319
+353d323
 <         .withMessage('helpers hash has precedence simple expansion')
-357c323
+357c327
 <     it('the helpers hash is available is nested contexts', function() {
 ---
 >     it('the helpers hash is available is nested contexts', () => {
-361c327
+361c331
 <           helper: function() {
 ---
 >           helper() {
-363c329
+363c333
 <           }
 ---
 >           },
-365d330
+365d334
 <         .withMessage('helpers hash is available in nested contexts.')
-369,370c334,335
+369,370c338,339
 <     it('the helper hash should augment the global hash', function() {
 <       handlebarsEnv.registerHelper('test_helper', function() {
 ---
 >     it('the helper hash should augment the global hash', () => {
 >       kbnHandlebarsEnv!.registerHelper('test_helper', function () {
-374,376c339
+374,376c343
 <       expectTemplate(
 <         '{{test_helper}} {{#if cruel}}Goodbye {{cruel}} {{world}}!{{/if}}'
 <       )
 ---
 >       expectTemplate('{{test_helper}} {{#if cruel}}Goodbye {{cruel}} {{world}}!{{/if}}')
-379c342
+379c346
 <           world: function() {
 ---
 >           world() {
-381c344
+381c348
 <           }
 ---
 >           },
-387,389c350,352
+387,389c354,356
 <   describe('registration', function() {
 <     it('unregisters', function() {
 <       handlebarsEnv.helpers = {};
@@ -421,18 +425,18 @@
 >   describe('registration', () => {
 >     it('unregisters', () => {
 >       deleteAllKeys(kbnHandlebarsEnv!.helpers);
-391c354
+391c358
 <       handlebarsEnv.registerHelper('foo', function() {
 ---
 >       kbnHandlebarsEnv!.registerHelper('foo', function () {
-394,395c357,359
+394,395c361,363
 <       handlebarsEnv.unregisterHelper('foo');
 <       equals(handlebarsEnv.helpers.foo, undefined);
 ---
 >       expect(kbnHandlebarsEnv!.helpers.foo).toBeDefined();
 >       kbnHandlebarsEnv!.unregisterHelper('foo');
 >       expect(kbnHandlebarsEnv!.helpers.foo).toBeUndefined();
-398,400c362,364
+398,400c366,368
 <     it('allows multiple globals', function() {
 <       var helpers = handlebarsEnv.helpers;
 <       handlebarsEnv.helpers = {};
@@ -440,7 +444,7 @@
 >     it('allows multiple globals', () => {
 >       const ifHelper = kbnHandlebarsEnv!.helpers.if;
 >       deleteAllKeys(kbnHandlebarsEnv!.helpers);
-402,404c366,368
+402,404c370,372
 <       handlebarsEnv.registerHelper({
 <         if: helpers['if'],
 <         world: function() {
@@ -448,21 +452,21 @@
 >       kbnHandlebarsEnv!.registerHelper({
 >         if: ifHelper,
 >         world() {
-407c371
+407c375
 <         testHelper: function() {
 ---
 >         testHelper() {
-409c373
+409c377
 <         }
 ---
 >         },
-412,414c376
+412,414c380
 <       expectTemplate(
 <         '{{testHelper}} {{#if cruel}}Goodbye {{cruel}} {{world}}!{{/if}}'
 <       )
 ---
 >       expectTemplate('{{testHelper}} {{#if cruel}}Goodbye {{cruel}} {{world}}!{{/if}}')
-419,429c381,387
+419,429c385,391
 <     it('fails with multiple and args', function() {
 <       shouldThrow(
 <         function() {
@@ -482,7 +486,7 @@
 >           {
 >             world() {
 >               return 'world!';
-431,436c389,395
+431,436c393,399
 <             {}
 <           );
 <         },
@@ -497,69 +501,69 @@
 >           {}
 >         );
 >       }).toThrow('Arg not supported with multiple helpers');
-440c399
+440c403
 <   it('decimal number literals work', function() {
 ---
 >   it('decimal number literals work', () => {
-442c401
+442c405
 <       .withHelper('hello', function(times, times2) {
 ---
 >       .withHelper('hello', function (times, times2) {
-451d409
+451d413
 <       .withMessage('template with a negative integer literal')
-455c413
+455c417
 <   it('negative number literals work', function() {
 ---
 >   it('negative number literals work', () => {
-457c415
+457c419
 <       .withHelper('hello', function(times) {
 ---
 >       .withHelper('hello', function (times) {
-463d420
+463d424
 <       .withMessage('template with a negative integer literal')
-467,468c424,425
+467,468c428,429
 <   describe('String literal parameters', function() {
 <     it('simple literals work', function() {
 ---
 >   describe('String literal parameters', () => {
 >     it('simple literals work', () => {
-470c427
+470c431
 <         .withHelper('hello', function(param, times, bool1, bool2) {
 ---
 >         .withHelper('hello', function (param, times, bool1, bool2) {
-480,482c437
+480,482c441
 <           return (
 <             'Hello ' + param + ' ' + times + ' times: ' + bool1 + ' ' + bool2
 <           );
 ---
 >           return 'Hello ' + param + ' ' + times + ' times: ' + bool1 + ' ' + bool2;
-484d438
+484d442
 <         .withMessage('template with a simple String literal')
-488c442
+488c446
 <     it('using a quote in the middle of a parameter raises an error', function() {
 ---
 >     it('using a quote in the middle of a parameter raises an error', () => {
-492c446
+492c450
 <     it('escaping a String is possible', function() {
 ---
 >     it('escaping a String is possible', () => {
-494c448
+494c452
 <         .withHelper('hello', function(param) {
 ---
 >         .withHelper('hello', function (param) {
-497d450
+497d454
 <         .withMessage('template with an escaped String literal')
-501c454
+501c458
 <     it("it works with ' marks", function() {
 ---
 >     it("it works with ' marks", () => {
-503c456
+503c460
 <         .withHelper('hello', function(param) {
 ---
 >         .withHelper('hello', function (param) {
-506d458
+506d462
 <         .withMessage("template with a ' mark")
-511,524c463,464
+511,524c467,468
 <   it('negative number literals work', function() {
 <     expectTemplate('Message: {{hello -12}}')
 <       .withHelper('hello', function(times) {
@@ -577,13 +581,13 @@
 ---
 >   describe('multiple parameters', () => {
 >     it('simple multi-params work', () => {
-527c467
+527c471
 <         .withHelper('goodbye', function(cruel, world) {
 ---
 >         .withHelper('goodbye', function (cruel, world) {
-530d469
+530d473
 <         .withMessage('regular helpers with multiple params')
-534,537c473,474
+534,537c477,478
 <     it('block multi-params work', function() {
 <       expectTemplate(
 <         'Message: {{#goodbye cruel world}}{{greeting}} {{adj}} {{noun}}{{/goodbye}}'
@@ -591,65 +595,65 @@
 ---
 >     it('block multi-params work', () => {
 >       expectTemplate('Message: {{#goodbye cruel world}}{{greeting}} {{adj}} {{noun}}{{/goodbye}}')
-539c476
+539c480
 <         .withHelper('goodbye', function(cruel, world, options) {
 ---
->         .withHelper('goodbye', function (cruel, world, options) {
-542d478
+>         .withHelper('goodbye', function (cruel, world, options: Handlebars.HelperOptions) {
+542d482
 <         .withMessage('block helpers with multiple params')
-547,548c483,484
+547,548c487,488
 <   describe('hash', function() {
 <     it('helpers can take an optional hash', function() {
 ---
 >   describe('hash', () => {
 >     it('helpers can take an optional hash', () => {
-550c486
+550c490
 <         .withHelper('goodbye', function(options) {
 ---
->         .withHelper('goodbye', function (options) {
-561d496
+>         .withHelper('goodbye', function (options: Handlebars.HelperOptions) {
+561d500
 <         .withMessage('Helper output hash')
-565,566c500,501
+565,566c504,505
 <     it('helpers can take an optional hash with booleans', function() {
 <       function goodbye(options) {
 ---
 >     it('helpers can take an optional hash with booleans', () => {
 >       function goodbye(options: Handlebars.HelperOptions) {
-578d512
+578d516
 <         .withMessage('Helper output hash')
-583d516
+583d520
 <         .withMessage('Boolean helper parameter honored')
-587c520
+587c524
 <     it('block helpers can take an optional hash', function() {
 ---
 >     it('block helpers can take an optional hash', () => {
-589c522
+589c526
 <         .withHelper('goodbye', function(options) {
 ---
->         .withHelper('goodbye', function (this: any, options) {
-600d532
+>         .withHelper('goodbye', function (this: any, options: Handlebars.HelperOptions) {
+600d536
 <         .withMessage('Hash parameters output')
-604c536
+604c540
 <     it('block helpers can take an optional hash with single quoted stings', function() {
 ---
 >     it('block helpers can take an optional hash with single quoted stings', () => {
-606c538
+606c542
 <         .withHelper('goodbye', function(options) {
 ---
->         .withHelper('goodbye', function (this: any, options) {
-617d548
+>         .withHelper('goodbye', function (this: any, options: Handlebars.HelperOptions) {
+617d552
 <         .withMessage('Hash parameters output')
-621,622c552,553
+621,622c556,557
 <     it('block helpers can take an optional hash with booleans', function() {
 <       function goodbye(options) {
 ---
 >     it('block helpers can take an optional hash with booleans', () => {
 >       function goodbye(this: any, options: Handlebars.HelperOptions) {
-634d564
+634d568
 <         .withMessage('Boolean hash parameter honored')
-639d568
+639d572
 <         .withMessage('Boolean hash parameter honored')
-644,648c573,575
+644,648c577,579
 <   describe('helperMissing', function() {
 <     it('if a context is not found, helperMissing is used', function() {
 <       expectTemplate('{{hello}} {{link_to world}}').toThrow(
@@ -659,135 +663,135 @@
 >   describe('helperMissing', () => {
 >     it('if a context is not found, helperMissing is used', () => {
 >       expectTemplate('{{hello}} {{link_to world}}').toThrow(/Missing helper: "link_to"/);
-651c578
+651c582
 <     it('if a context is not found, custom helperMissing is used', function() {
 ---
 >     it('if a context is not found, custom helperMissing is used', () => {
-654c581
+654c585
 <         .withHelper('helperMissing', function(mesg, options) {
 ---
->         .withHelper('helperMissing', function (mesg, options) {
-662c589
+>         .withHelper('helperMissing', function (mesg, options: Handlebars.HelperOptions) {
+662c593
 <     it('if a value is not found, custom helperMissing is used', function() {
 ---
 >     it('if a value is not found, custom helperMissing is used', () => {
-665c592
+665c596
 <         .withHelper('helperMissing', function(options) {
 ---
->         .withHelper('helperMissing', function (options) {
-674,675c601,602
+>         .withHelper('helperMissing', function (options: Handlebars.HelperOptions) {
+674,675c605,606
 <   describe('knownHelpers', function() {
 <     it('Known helper should render helper', function() {
 ---
 >   describe('knownHelpers', () => {
 >     it('Known helper should render helper', () => {
-678c605
+678c609
 <           knownHelpers: { hello: true }
 ---
 >           knownHelpers: { hello: true },
-680c607
+680c611
 <         .withHelper('hello', function() {
 ---
 >         .withHelper('hello', function () {
-686c613
+686c617
 <     it('Unknown helper in knownHelpers only mode should be passed as undefined', function() {
 ---
 >     it('Unknown helper in knownHelpers only mode should be passed as undefined', () => {
-690c617
+690c621
 <           knownHelpersOnly: true
 ---
 >           knownHelpersOnly: true,
-692c619
+692c623
 <         .withHelper('typeof', function(arg) {
 ---
 >         .withHelper('typeof', function (arg) {
-695c622
+695c626
 <         .withHelper('hello', function() {
 ---
 >         .withHelper('hello', function () {
-701c628
+701c632
 <     it('Builtin helpers available in knownHelpers only mode', function() {
 ---
 >     it('Builtin helpers available in knownHelpers only mode', () => {
-704c631
+704c635
 <           knownHelpersOnly: true
 ---
 >           knownHelpersOnly: true,
-709c636
+709c640
 <     it('Field lookup works in knownHelpers only mode', function() {
 ---
 >     it('Field lookup works in knownHelpers only mode', () => {
-712c639
+712c643
 <           knownHelpersOnly: true
 ---
 >           knownHelpersOnly: true,
-718c645
+718c649
 <     it('Conditional blocks work in knownHelpers only mode', function() {
 ---
 >     it('Conditional blocks work in knownHelpers only mode', () => {
-721c648
+721c652
 <           knownHelpersOnly: true
 ---
 >           knownHelpersOnly: true,
-727c654
+727c658
 <     it('Invert blocks work in knownHelpers only mode', function() {
 ---
 >     it('Invert blocks work in knownHelpers only mode', () => {
-730c657
+730c661
 <           knownHelpersOnly: true
 ---
 >           knownHelpersOnly: true,
-736c663
+736c667
 <     it('Functions are bound to the context in knownHelpers only mode', function() {
 ---
 >     it('Functions are bound to the context in knownHelpers only mode', () => {
-739c666
+739c670
 <           knownHelpersOnly: true
 ---
 >           knownHelpersOnly: true,
-742c669
+742c673
 <           foo: function() {
 ---
 >           foo() {
-745c672
+745c676
 <           bar: 'bar'
 ---
 >           bar: 'bar',
-750c677
+750c681
 <     it('Unknown helper call in knownHelpers only mode should throw', function() {
 ---
 >     it('Unknown helper call in knownHelpers only mode should throw', () => {
-757,758c684,685
+757,758c688,689
 <   describe('blockHelperMissing', function() {
 <     it('lambdas are resolved by blockHelperMissing, not handlebars proper', function() {
 ---
 >   describe('blockHelperMissing', () => {
 >     it('lambdas are resolved by blockHelperMissing, not handlebars proper', () => {
-761c688
+761c692
 <           truthy: function() {
 ---
 >           truthy() {
-763c690
+763c694
 <           }
 ---
 >           },
-768c695
+768c699
 <     it('lambdas resolved by blockHelperMissing are bound to the context', function() {
 ---
 >     it('lambdas resolved by blockHelperMissing are bound to the context', () => {
-771c698
+771c702
 <           truthy: function() {
 ---
 >           truthy() {
-774c701
+774c705
 <           truthiness: function() {
 ---
 >           truthiness() {
-776c703
+776c707
 <           }
 ---
 >           },
-782,785c709,712
+782,785c713,716
 <   describe('name field', function() {
 <     var helpers = {
 <       blockHelperMissing: function() {
@@ -797,7 +801,7 @@
 >     const helpers = {
 >       blockHelperMissing(...args: any[]) {
 >         return 'missing: ' + args[args.length - 1].name;
-787,788c714,718
+787,788c718,722
 <       helperMissing: function() {
 <         return 'helper missing: ' + arguments[arguments.length - 1].name;
 ---
@@ -806,11 +810,11 @@
 >       },
 >       helper(...args: any[]) {
 >         return 'ran: ' + args[args.length - 1].name;
-790,792d719
+790,792d723
 <       helper: function() {
 <         return 'ran: ' + arguments[arguments.length - 1].name;
 <       }
-795,798c722,723
+795,798c726,727
 <     it('should include in ambiguous mustache calls', function() {
 <       expectTemplate('{{helper}}')
 <         .withHelpers(helpers)
@@ -818,7 +822,7 @@
 ---
 >     it('should include in ambiguous mustache calls', () => {
 >       expectTemplate('{{helper}}').withHelpers(helpers).toCompileTo('ran: helper');
-801,804c726,727
+801,804c730,731
 <     it('should include in helper mustache calls', function() {
 <       expectTemplate('{{helper 1}}')
 <         .withHelpers(helpers)
@@ -826,7 +830,7 @@
 ---
 >     it('should include in helper mustache calls', () => {
 >       expectTemplate('{{helper 1}}').withHelpers(helpers).toCompileTo('ran: helper');
-807,810c730,731
+807,810c734,735
 <     it('should include in ambiguous block calls', function() {
 <       expectTemplate('{{#helper}}{{/helper}}')
 <         .withHelpers(helpers)
@@ -834,11 +838,11 @@
 ---
 >     it('should include in ambiguous block calls', () => {
 >       expectTemplate('{{#helper}}{{/helper}}').withHelpers(helpers).toCompileTo('ran: helper');
-813c734
+813c738
 <     it('should include in simple block calls', function() {
 ---
 >     it('should include in simple block calls', () => {
-819,822c740,741
+819,822c744,745
 <     it('should include in helper block calls', function() {
 <       expectTemplate('{{#helper 1}}{{/helper}}')
 <         .withHelpers(helpers)
@@ -846,79 +850,79 @@
 ---
 >     it('should include in helper block calls', () => {
 >       expectTemplate('{{#helper 1}}{{/helper}}').withHelpers(helpers).toCompileTo('ran: helper');
-825c744
+825c748
 <     it('should include in known helper calls', function() {
 ---
 >     it('should include in known helper calls', () => {
-829c748
+829c752
 <           knownHelpersOnly: true
 ---
 >           knownHelpersOnly: true,
-835c754
+835c758
 <     it('should include full id', function() {
 ---
 >     it('should include full id', () => {
-842c761
+842c765
 <     it('should include full id if a hash is passed', function() {
 ---
 >     it('should include full id if a hash is passed', () => {
-850,851c769,770
+850,851c773,774
 <   describe('name conflicts', function() {
 <     it('helpers take precedence over same-named context properties', function() {
 ---
 >   describe('name conflicts', () => {
 >     it('helpers take precedence over same-named context properties', () => {
-853c772
+853c776
 <         .withHelper('goodbye', function() {
 ---
 >         .withHelper('goodbye', function (this: any) {
-856c775
+856c779
 <         .withHelper('cruel', function(world) {
 ---
 >         .withHelper('cruel', function (world) {
-861c780
+861c784
 <           world: 'world'
 ---
 >           world: 'world',
-863d781
+863d785
 <         .withMessage('Helper executed')
-867c785
+867c789
 <     it('helpers take precedence over same-named context properties$', function() {
 ---
 >     it('helpers take precedence over same-named context properties$', () => {
-869c787
+869c791
 <         .withHelper('goodbye', function(options) {
 ---
->         .withHelper('goodbye', function (this: any, options) {
-872c790
+>         .withHelper('goodbye', function (this: any, options: Handlebars.HelperOptions) {
+872c794
 <         .withHelper('cruel', function(world) {
 ---
 >         .withHelper('cruel', function (world) {
-877c795
+877c799
 <           world: 'world'
 ---
 >           world: 'world',
-879d796
+879d800
 <         .withMessage('Helper executed')
-883c800
+883c804
 <     it('Scoped names take precedence over helpers', function() {
 ---
 >     it('Scoped names take precedence over helpers', () => {
-885c802
+885c806
 <         .withHelper('goodbye', function() {
 ---
 >         .withHelper('goodbye', function (this: any) {
-888c805
+888c809
 <         .withHelper('cruel', function(world) {
 ---
 >         .withHelper('cruel', function (world) {
-893c810
+893c814
 <           world: 'world'
 ---
 >           world: 'world',
-895d811
+895d815
 <         .withMessage('Helper not executed')
-899,903c815,817
+899,903c819,821
 <     it('Scoped names take precedence over block helpers', function() {
 <       expectTemplate(
 <         '{{#goodbye}} {{cruel world}}{{/goodbye}} {{this.goodbye}}'
@@ -927,44 +931,44 @@
 ---
 >     it('Scoped names take precedence over block helpers', () => {
 >       expectTemplate('{{#goodbye}} {{cruel world}}{{/goodbye}} {{this.goodbye}}')
->         .withHelper('goodbye', function (this: any, options) {
-906c820
+>         .withHelper('goodbye', function (this: any, options: Handlebars.HelperOptions) {
+906c824
 <         .withHelper('cruel', function(world) {
 ---
 >         .withHelper('cruel', function (world) {
-911c825
+911c829
 <           world: 'world'
 ---
 >           world: 'world',
-913d826
+913d830
 <         .withMessage('Helper executed')
-918,919c831,832
+918,919c835,836
 <   describe('block params', function() {
 <     it('should take presedence over context values', function() {
 ---
 >   describe('block params', () => {
 >     it('should take presedence over context values', () => {
-922,923c835,836
+922,923c839,840
 <         .withHelper('goodbyes', function(options) {
 <           equals(options.fn.blockParams, 1);
 ---
->         .withHelper('goodbyes', function (options) {
+>         .withHelper('goodbyes', function (options: Handlebars.HelperOptions) {
 >           expect(options.fn.blockParams).toEqual(1);
-929c842
+929c846
 <     it('should take presedence over helper values', function() {
 ---
 >     it('should take presedence over helper values', () => {
-931c844
+931c848
 <         .withHelper('value', function() {
 ---
 >         .withHelper('value', function () {
-934,935c847,848
+934,935c851,852
 <         .withHelper('goodbyes', function(options) {
 <           equals(options.fn.blockParams, 1);
 ---
->         .withHelper('goodbyes', function (options) {
+>         .withHelper('goodbyes', function (options: Handlebars.HelperOptions) {
 >           expect(options.fn.blockParams).toEqual(1);
-941,944c854,855
+941,944c858,859
 <     it('should not take presedence over pathed values', function() {
 <       expectTemplate(
 <         '{{#goodbyes as |value|}}{{./value}}{{/goodbyes}}{{value}}'
@@ -972,23 +976,23 @@
 ---
 >     it('should not take presedence over pathed values', () => {
 >       expectTemplate('{{#goodbyes as |value|}}{{./value}}{{/goodbyes}}{{value}}')
-946c857
+946c861
 <         .withHelper('value', function() {
 ---
 >         .withHelper('value', function () {
-949,950c860,861
+949,950c864,865
 <         .withHelper('goodbyes', function(options) {
 <           equals(options.fn.blockParams, 1);
 ---
->         .withHelper('goodbyes', function (this: any, options) {
+>         .withHelper('goodbyes', function (this: any, options: Handlebars.HelperOptions) {
 >           expect(options.fn.blockParams).toEqual(1);
-956,957c867,868
+956,957c871,872
 <     it('should take presednece over parent block params', function() {
 <       var value = 1;
 ---
 >     it('should take presednece over parent block params', () => {
 >       let value: number;
-959c870,875
+959c874,879
 <         '{{#goodbyes as |value|}}{{#goodbyes}}{{value}}{{#goodbyes as |value|}}{{value}}{{/goodbyes}}{{/goodbyes}}{{/goodbyes}}{{value}}'
 ---
 >         '{{#goodbyes as |value|}}{{#goodbyes}}{{value}}{{#goodbyes as |value|}}{{value}}{{/goodbyes}}{{/goodbyes}}{{/goodbyes}}{{value}}',
@@ -997,16 +1001,16 @@
 >             value = 1;
 >           },
 >         }
-962c878
+962c882
 <         .withHelper('goodbyes', function(options) {
 ---
->         .withHelper('goodbyes', function (options) {
-966,967c882
+>         .withHelper('goodbyes', function (options: Handlebars.HelperOptions) {
+966,967c886
 <               blockParams:
 <                 options.fn.blockParams === 1 ? [value++, value++] : undefined
 ---
 >               blockParams: options.fn.blockParams === 1 ? [value++, value++] : undefined,
-974,977c889,890
+974,977c893,894
 <     it('should allow block params on chained helpers', function() {
 <       expectTemplate(
 <         '{{#if bar}}{{else goodbyes as |value|}}{{value}}{{/if}}{{value}}'
@@ -1014,13 +1018,13 @@
 ---
 >     it('should allow block params on chained helpers', () => {
 >       expectTemplate('{{#if bar}}{{else goodbyes as |value|}}{{value}}{{/if}}{{value}}')
-979,980c892,893
+979,980c896,897
 <         .withHelper('goodbyes', function(options) {
 <           equals(options.fn.blockParams, 1);
 ---
->         .withHelper('goodbyes', function (options) {
+>         .withHelper('goodbyes', function (options: Handlebars.HelperOptions) {
 >           expect(options.fn.blockParams).toEqual(1);
-987,991c900,902
+987,991c904,906
 <   describe('built-in helpers malformed arguments ', function() {
 <     it('if helper - too few arguments', function() {
 <       expectTemplate('{{#if}}{{/if}}').toThrow(
@@ -1030,7 +1034,7 @@
 >   describe('built-in helpers malformed arguments ', () => {
 >     it('if helper - too few arguments', () => {
 >       expectTemplate('{{#if}}{{/if}}').toThrow(/#if requires exactly one argument/);
-994,997c905,906
+994,997c909,910
 <     it('if helper - too many arguments, string', function() {
 <       expectTemplate('{{#if test "string"}}{{/if}}').toThrow(
 <         /#if requires exactly one argument/
@@ -1038,7 +1042,7 @@
 ---
 >     it('if helper - too many arguments, string', () => {
 >       expectTemplate('{{#if test "string"}}{{/if}}').toThrow(/#if requires exactly one argument/);
-1000,1003c909,910
+1000,1003c913,914
 <     it('if helper - too many arguments, undefined', function() {
 <       expectTemplate('{{#if test undefined}}{{/if}}').toThrow(
 <         /#if requires exactly one argument/
@@ -1046,7 +1050,7 @@
 ---
 >     it('if helper - too many arguments, undefined', () => {
 >       expectTemplate('{{#if test undefined}}{{/if}}').toThrow(/#if requires exactly one argument/);
-1006,1009c913,914
+1006,1009c917,918
 <     it('if helper - too many arguments, null', function() {
 <       expectTemplate('{{#if test null}}{{/if}}').toThrow(
 <         /#if requires exactly one argument/
@@ -1054,7 +1058,7 @@
 ---
 >     it('if helper - too many arguments, null', () => {
 >       expectTemplate('{{#if test null}}{{/if}}').toThrow(/#if requires exactly one argument/);
-1012,1015c917,918
+1012,1015c921,922
 <     it('unless helper - too few arguments', function() {
 <       expectTemplate('{{#unless}}{{/unless}}').toThrow(
 <         /#unless requires exactly one argument/
@@ -1062,11 +1066,11 @@
 ---
 >     it('unless helper - too few arguments', () => {
 >       expectTemplate('{{#unless}}{{/unless}}').toThrow(/#unless requires exactly one argument/);
-1018c921
+1018c925
 <     it('unless helper - too many arguments', function() {
 ---
 >     it('unless helper - too many arguments', () => {
-1024,1027c927,928
+1024,1027c931,932
 <     it('with helper - too few arguments', function() {
 <       expectTemplate('{{#with}}{{/with}}').toThrow(
 <         /#with requires exactly one argument/
@@ -1074,21 +1078,28 @@
 ---
 >     it('with helper - too few arguments', () => {
 >       expectTemplate('{{#with}}{{/with}}').toThrow(/#with requires exactly one argument/);
-1030c931
+1030c935
 <     it('with helper - too many arguments', function() {
 ---
 >     it('with helper - too many arguments', () => {
-1037,1038c938,939
+1037,1038c942,943
 <   describe('the lookupProperty-option', function() {
 <     it('should be passed to custom helpers', function() {
 ---
 >   describe('the lookupProperty-option', () => {
 >     it('should be passed to custom helpers', () => {
-1040c941
+1040,1042c945,950
 <         .withHelper('testHelper', function testHelper(options) {
+<           return options.lookupProperty(this, 'testProperty');
+<         })
 ---
->         .withHelper('testHelper', function testHelper(this: any, options) {
-1047a949,954
+>         .withHelper(
+>           'testHelper',
+>           function testHelper(this: any, options: Handlebars.HelperOptions) {
+>             return options.lookupProperty(this, 'testProperty');
+>           }
+>         )
+1047a956,961
 > 
 > function deleteAllKeys(obj: { [key: string]: any }) {
 >   for (const key of Object.keys(obj)) {

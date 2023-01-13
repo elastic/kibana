@@ -162,7 +162,14 @@ export const syncEditedMonitor = async ({
     const allPrivateLocations = await getSyntheticsPrivateLocations(savedObjectsClient);
 
     const editSyncPromise = syntheticsMonitorClient.editMonitors(
-      [{ monitor: monitorWithId as MonitorFields, id: previousMonitor.id, previousMonitor }],
+      [
+        {
+          monitor: monitorWithId as MonitorFields,
+          id: previousMonitor.id,
+          previousMonitor,
+          decryptedPreviousMonitor,
+        },
+      ],
       request,
       savedObjectsClient,
       allPrivateLocations,

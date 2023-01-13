@@ -11,6 +11,10 @@ exports[`Error AGENT_NAME 1`] = `"java"`;
 
 exports[`Error AGENT_VERSION 1`] = `"agent version"`;
 
+exports[`Error APP_LAUNCH_TIME 1`] = `undefined`;
+
+exports[`Error CHILD_ID 1`] = `undefined`;
+
 exports[`Error CLIENT_GEO_COUNTRY_ISO_CODE 1`] = `undefined`;
 
 exports[`Error CLOUD 1`] = `
@@ -55,6 +59,17 @@ exports[`Error ERROR_EXC_MESSAGE 1`] = `undefined`;
 
 exports[`Error ERROR_EXC_TYPE 1`] = `undefined`;
 
+exports[`Error ERROR_EXCEPTION 1`] = `
+Array [
+  Object {
+    "handled": false,
+    "message": "sonic boom",
+    "module": "errors",
+    "type": "errorString",
+  },
+]
+`;
+
 exports[`Error ERROR_GROUP_ID 1`] = `"grouping key"`;
 
 exports[`Error ERROR_ID 1`] = `"error id"`;
@@ -64,6 +79,8 @@ exports[`Error ERROR_LOG_LEVEL 1`] = `undefined`;
 exports[`Error ERROR_LOG_MESSAGE 1`] = `undefined`;
 
 exports[`Error ERROR_PAGE_URL 1`] = `undefined`;
+
+exports[`Error EVENT_NAME 1`] = `undefined`;
 
 exports[`Error EVENT_OUTCOME 1`] = `undefined`;
 
@@ -197,7 +214,15 @@ exports[`Error SERVICE_RUNTIME_VERSION 1`] = `undefined`;
 
 exports[`Error SERVICE_VERSION 1`] = `undefined`;
 
+exports[`Error SESSION_ID 1`] = `undefined`;
+
 exports[`Error SPAN_ACTION 1`] = `undefined`;
+
+exports[`Error SPAN_COMPOSITE_COMPRESSION_STRATEGY 1`] = `undefined`;
+
+exports[`Error SPAN_COMPOSITE_COUNT 1`] = `undefined`;
+
+exports[`Error SPAN_COMPOSITE_SUM 1`] = `undefined`;
 
 exports[`Error SPAN_DESTINATION_SERVICE_RESOURCE 1`] = `undefined`;
 
@@ -221,9 +246,13 @@ exports[`Error SPAN_SELF_TIME_SUM 1`] = `undefined`;
 
 exports[`Error SPAN_SUBTYPE 1`] = `undefined`;
 
+exports[`Error SPAN_SYNC 1`] = `undefined`;
+
 exports[`Error SPAN_TYPE 1`] = `undefined`;
 
 exports[`Error TIER 1`] = `undefined`;
+
+exports[`Error TIMESTAMP 1`] = `1337`;
 
 exports[`Error TRACE_ID 1`] = `"trace id"`;
 
@@ -270,6 +299,10 @@ exports[`Span AGENT_NAME 1`] = `"java"`;
 
 exports[`Span AGENT_VERSION 1`] = `"agent version"`;
 
+exports[`Span APP_LAUNCH_TIME 1`] = `undefined`;
+
+exports[`Span CHILD_ID 1`] = `undefined`;
+
 exports[`Span CLIENT_GEO_COUNTRY_ISO_CODE 1`] = `undefined`;
 
 exports[`Span CLOUD 1`] = `
@@ -314,6 +347,8 @@ exports[`Span ERROR_EXC_MESSAGE 1`] = `undefined`;
 
 exports[`Span ERROR_EXC_TYPE 1`] = `undefined`;
 
+exports[`Span ERROR_EXCEPTION 1`] = `undefined`;
+
 exports[`Span ERROR_GROUP_ID 1`] = `undefined`;
 
 exports[`Span ERROR_ID 1`] = `undefined`;
@@ -323,6 +358,8 @@ exports[`Span ERROR_LOG_LEVEL 1`] = `undefined`;
 exports[`Span ERROR_LOG_MESSAGE 1`] = `undefined`;
 
 exports[`Span ERROR_PAGE_URL 1`] = `undefined`;
+
+exports[`Span EVENT_NAME 1`] = `undefined`;
 
 exports[`Span EVENT_OUTCOME 1`] = `"unknown"`;
 
@@ -448,7 +485,15 @@ exports[`Span SERVICE_RUNTIME_VERSION 1`] = `undefined`;
 
 exports[`Span SERVICE_VERSION 1`] = `undefined`;
 
+exports[`Span SESSION_ID 1`] = `undefined`;
+
 exports[`Span SPAN_ACTION 1`] = `"my action"`;
+
+exports[`Span SPAN_COMPOSITE_COMPRESSION_STRATEGY 1`] = `undefined`;
+
+exports[`Span SPAN_COMPOSITE_COUNT 1`] = `undefined`;
+
+exports[`Span SPAN_COMPOSITE_SUM 1`] = `undefined`;
 
 exports[`Span SPAN_DESTINATION_SERVICE_RESOURCE 1`] = `undefined`;
 
@@ -472,9 +517,13 @@ exports[`Span SPAN_SELF_TIME_SUM 1`] = `undefined`;
 
 exports[`Span SPAN_SUBTYPE 1`] = `"my subtype"`;
 
+exports[`Span SPAN_SYNC 1`] = `false`;
+
 exports[`Span SPAN_TYPE 1`] = `"span type"`;
 
 exports[`Span TIER 1`] = `undefined`;
+
+exports[`Span TIMESTAMP 1`] = `1337`;
 
 exports[`Span TRACE_ID 1`] = `"trace id"`;
 
@@ -520,6 +569,10 @@ Object {
 exports[`Transaction AGENT_NAME 1`] = `"java"`;
 
 exports[`Transaction AGENT_VERSION 1`] = `"agent version"`;
+
+exports[`Transaction APP_LAUNCH_TIME 1`] = `undefined`;
+
+exports[`Transaction CHILD_ID 1`] = `undefined`;
 
 exports[`Transaction CLIENT_GEO_COUNTRY_ISO_CODE 1`] = `undefined`;
 
@@ -569,6 +622,8 @@ exports[`Transaction ERROR_EXC_MESSAGE 1`] = `undefined`;
 
 exports[`Transaction ERROR_EXC_TYPE 1`] = `undefined`;
 
+exports[`Transaction ERROR_EXCEPTION 1`] = `undefined`;
+
 exports[`Transaction ERROR_GROUP_ID 1`] = `undefined`;
 
 exports[`Transaction ERROR_ID 1`] = `undefined`;
@@ -578,6 +633,8 @@ exports[`Transaction ERROR_LOG_LEVEL 1`] = `undefined`;
 exports[`Transaction ERROR_LOG_MESSAGE 1`] = `undefined`;
 
 exports[`Transaction ERROR_PAGE_URL 1`] = `undefined`;
+
+exports[`Transaction EVENT_NAME 1`] = `undefined`;
 
 exports[`Transaction EVENT_OUTCOME 1`] = `"unknown"`;
 
@@ -717,7 +774,15 @@ exports[`Transaction SERVICE_RUNTIME_VERSION 1`] = `undefined`;
 
 exports[`Transaction SERVICE_VERSION 1`] = `undefined`;
 
+exports[`Transaction SESSION_ID 1`] = `undefined`;
+
 exports[`Transaction SPAN_ACTION 1`] = `undefined`;
+
+exports[`Transaction SPAN_COMPOSITE_COMPRESSION_STRATEGY 1`] = `undefined`;
+
+exports[`Transaction SPAN_COMPOSITE_COUNT 1`] = `undefined`;
+
+exports[`Transaction SPAN_COMPOSITE_SUM 1`] = `undefined`;
 
 exports[`Transaction SPAN_DESTINATION_SERVICE_RESOURCE 1`] = `undefined`;
 
@@ -741,9 +806,13 @@ exports[`Transaction SPAN_SELF_TIME_SUM 1`] = `undefined`;
 
 exports[`Transaction SPAN_SUBTYPE 1`] = `undefined`;
 
+exports[`Transaction SPAN_SYNC 1`] = `undefined`;
+
 exports[`Transaction SPAN_TYPE 1`] = `undefined`;
 
 exports[`Transaction TIER 1`] = `undefined`;
+
+exports[`Transaction TIMESTAMP 1`] = `1337`;
 
 exports[`Transaction TRACE_ID 1`] = `"trace id"`;
 

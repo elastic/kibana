@@ -598,6 +598,10 @@
           "trackAdoption": true,
           "references": [
             {
+              "plugin": "imageEmbeddable",
+              "path": "src/plugins/image_embeddable/public/plugin.ts"
+            },
+            {
               "plugin": "filesManagement",
               "path": "src/plugins/files_management/public/mount_management_section.tsx"
             }
@@ -1998,9 +2002,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/logging",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.Logger",
+                "section": "def-common.Logger",
                 "text": "Logger"
               }
             ],
@@ -3186,9 +3190,9 @@
               "(req: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
+                "section": "def-common.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>) => ",
@@ -3216,9 +3220,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-server.KibanaRequest",
+                    "section": "def-common.KibanaRequest",
                     "text": "KibanaRequest"
                   },
                   "<unknown, unknown, unknown, any>"
@@ -4149,12 +4153,44 @@
           },
           {
             "parentPluginId": "files",
+            "id": "def-server.FindFileArgs.mimeType",
+            "type": "Array",
+            "tags": [],
+            "label": "mimeType",
+            "description": [
+              "\nFile mime type(s)."
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/plugins/files/server/file_service/file_action_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "files",
             "id": "def-server.FindFileArgs.status",
             "type": "Array",
             "tags": [],
             "label": "status",
             "description": [
               "\nFile status(es)."
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/plugins/files/server/file_service/file_action_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-server.FindFileArgs.user",
+            "type": "Array",
+            "tags": [],
+            "label": "user",
+            "description": [
+              "\nID of user who created the file."
             ],
             "signature": [
               "string[] | undefined"

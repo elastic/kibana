@@ -219,6 +219,7 @@ export interface UpdateTimeline {
   timeline: TimelineModel;
   to: string;
   ruleNote?: string;
+  ruleAuthor?: string;
 }
 
 export type DispatchUpdateTimeline = ({
@@ -230,6 +231,7 @@ export type DispatchUpdateTimeline = ({
   timeline,
   to,
   ruleNote,
+  ruleAuthor,
 }: UpdateTimeline) => () => void;
 
 export enum TimelineTabsStyle {

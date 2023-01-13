@@ -51,8 +51,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await switchToTextBasedLanguage('SQL');
       expect(await testSubjects.exists('showQueryBarMenu')).to.be(false);
       expect(await testSubjects.exists('addFilter')).to.be(false);
+      await testSubjects.click('unifiedTextLangEditor-expand');
       const textBasedQuery = await monacoEditor.getCodeEditorValue();
       expect(textBasedQuery).to.be('SELECT * FROM "log*"');
+      await testSubjects.click('unifiedTextLangEditor-minimize');
     });
 
     it('should allow adding and using a field', async () => {
@@ -136,6 +138,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.switchDataPanelIndexPattern('logstash-*', true);
       expect(await testSubjects.exists('addFilter')).to.be(true);
       expect(await queryBar.getQueryString()).to.be('');
+    });
+
+    it('should allow using an index pattern that is not translated to a dataview', async () => {
+      await switchToTextBasedLanguage('SQL');
+      await testSubjects.click('unifiedTextLangEditor-expand');
+      await monacoEditor.setCodeEditorValue(
+        'SELECT extension, AVG("bytes") as average FROM "logstash*" GROUP BY extension'
+      );
+      await testSubjects.click('querySubmitButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.switchToVisualization('lnsMetric');
+      await PageObjects.lens.configureTextBasedLanguagesDimension({
+        dimension: 'lnsMetric_primaryMetricDimensionPanel > lns-empty-dimension',
+        field: 'average',
+      });
+
+      await PageObjects.lens.waitForVisualization('mtrVis');
+      const metricData = await PageObjects.lens.getMetricVisualizationData();
+      expect(metricData[0].title).to.eql('average');
     });
   });
 }

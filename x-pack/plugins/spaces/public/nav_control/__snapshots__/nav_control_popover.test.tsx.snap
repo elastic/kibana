@@ -15,6 +15,7 @@ exports[`NavControlPopover renders without crashing 1`] = `
       title="loading spaces navigation"
     >
       <EuiLoadingSpinner
+        className="eui-alignMiddle"
         size="m"
       />
       <p

@@ -23,7 +23,12 @@ import type {
   GetCategoriesRequest,
 } from '../../../../common/types';
 import type { Installation, PackageInfo } from '../../../types';
-import { FleetError, PackageFailedVerificationError, PackageNotFoundError } from '../../../errors';
+import {
+  FleetError,
+  PackageFailedVerificationError,
+  PackageNotFoundError,
+  RegistryResponseError,
+} from '../../../errors';
 import { appContextService } from '../..';
 import * as Registry from '../registry';
 import { getEsPackage } from '../archive/storage';
@@ -305,8 +310,16 @@ export async function getPackageFromSource(options: {
     if (res) {
       logger.debug(`retrieved package ${pkgName}-${pkgVersion} from cache`);
     } else {
-      res = await Registry.getPackage(pkgName, pkgVersion, { ignoreUnverified });
-      logger.debug(`retrieved package ${pkgName}-${pkgVersion} from registry`);
+      try {
+        res = await Registry.getPackage(pkgName, pkgVersion, { ignoreUnverified });
+        logger.debug(`retrieved package ${pkgName}-${pkgVersion} from registry`);
+      } catch (err) {
+        if (err instanceof RegistryResponseError && err.status === 404) {
+          res = await Registry.getBundledArchive(pkgName, pkgVersion);
+        } else {
+          throw err;
+        }
+      }
     }
   }
   if (!res) {

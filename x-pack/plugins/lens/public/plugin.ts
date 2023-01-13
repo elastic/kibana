@@ -24,7 +24,11 @@ import type {
   ExpressionsSetup,
   ExpressionsStart,
 } from '@kbn/expressions-plugin/public';
-import type { VisualizationsSetup, VisualizationsStart } from '@kbn/visualizations-plugin/public';
+import {
+  DASHBOARD_VISUALIZATION_PANEL_TRIGGER,
+  VisualizationsSetup,
+  VisualizationsStart,
+} from '@kbn/visualizations-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { UrlForwardingSetup } from '@kbn/url-forwarding-plugin/public';
 import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/public';
@@ -91,6 +95,7 @@ import { createOpenInDiscoverAction } from './trigger_actions/open_in_discover_a
 import { visualizeFieldAction } from './trigger_actions/visualize_field_actions';
 import { visualizeTSVBAction } from './trigger_actions/visualize_tsvb_actions';
 import { visualizeAggBasedVisAction } from './trigger_actions/visualize_agg_based_vis_actions';
+import { visualizeDashboardVisualizePanelction } from './trigger_actions/dashboard_visualize_panel_actions';
 
 import type { LensEmbeddableInput } from './embeddable';
 import { EmbeddableFactory, LensEmbeddableStartServices } from './embeddable/embeddable_factory';
@@ -505,6 +510,11 @@ export class LensPlugin {
     startDependencies.uiActions.addTriggerAction(
       VISUALIZE_EDITOR_TRIGGER,
       visualizeTSVBAction(core.application)
+    );
+
+    startDependencies.uiActions.addTriggerAction(
+      DASHBOARD_VISUALIZATION_PANEL_TRIGGER,
+      visualizeDashboardVisualizePanelction(core.application)
     );
 
     startDependencies.uiActions.addTriggerAction(

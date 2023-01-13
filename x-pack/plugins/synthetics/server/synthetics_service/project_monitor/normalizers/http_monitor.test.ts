@@ -130,9 +130,9 @@ describe('http normalizers', () => {
           errors: [
             {
               details:
-                'Multiple urls are not supported for http project monitors in 8.5.0. Please set only 1 url per monitor. You monitor was not created or updated.',
+                '`http` project monitors must have exactly one value for field `urls` in version `8.5.0`. Your monitor was not created or updated.',
               id: 'my-monitor-2',
-              reason: 'Unsupported Heartbeat option',
+              reason: 'Invalid Heartbeat configuration',
             },
             {
               details:

@@ -28,6 +28,22 @@ export interface Usage {
   fleet_server: FleetServerUsage;
 }
 
+export interface FleetUsage extends Usage {
+  fleet_server_config: { policies: Array<{ input_config: any }> };
+  agent_policies: { count: number; output_types: string[] };
+  agents_per_version: Array<{
+    version: string;
+    count: number;
+  }>;
+  agent_checkin_status: {
+    error: number;
+    degraded: number;
+  };
+  agents_per_policy: number[];
+  agent_logs_top_errors: string[];
+  fleet_server_logs_top_errors: string[];
+}
+
 export const fetchFleetUsage = async (
   core: CoreSetup,
   config: FleetConfigType,
@@ -119,6 +135,18 @@ export function registerFleetUsageCollector(
           type: 'long',
           _meta: {
             description: 'The total number of enrolled agents currently offline',
+          },
+        },
+        inactive: {
+          type: 'long',
+          _meta: {
+            description: 'The total number of of enrolled agents currently inactive',
+          },
+        },
+        unenrolled: {
+          type: 'long',
+          _meta: {
+            description: 'The total number of agents currently unenrolled',
           },
         },
         total_all_statuses: {

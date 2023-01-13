@@ -200,12 +200,11 @@ describe('blocks', () => {
   describe('decorators', () => {
     it('should apply mustache decorators', () => {
       expectTemplate('{{#helper}}{{*decorator}}{{/helper}}')
-        .withHelper('helper', function (options) {
-          return options.fn.run;
+        .withHelper('helper', function (options: Handlebars.HelperOptions) {
+          return (options.fn as any).run;
         })
         .withDecorator('decorator', function (fn) {
-          // @ts-expect-error: Property 'run' does not exist on type 'TemplateDelegate<any>'
-          fn.run = 'success';
+          (fn as any).run = 'success';
           return fn;
         })
         .toCompileTo('success');
@@ -213,24 +212,22 @@ describe('blocks', () => {
 
     it('should apply allow undefined return', () => {
       expectTemplate('{{#helper}}{{*decorator}}suc{{/helper}}')
-        .withHelper('helper', function (options) {
-          return options.fn() + options.fn.run;
+        .withHelper('helper', function (options: Handlebars.HelperOptions) {
+          return options.fn() + (options.fn as any).run;
         })
         .withDecorator('decorator', function (fn) {
-          // @ts-expect-error: Property 'run' does not exist on type 'TemplateDelegate<any>'
-          fn.run = 'cess';
+          (fn as any).run = 'cess';
         })
         .toCompileTo('success');
     });
 
     it('should apply block decorators', () => {
       expectTemplate('{{#helper}}{{#*decorator}}success{{/decorator}}{{/helper}}')
-        .withHelper('helper', function (options) {
-          return options.fn.run;
+        .withHelper('helper', function (options: Handlebars.HelperOptions) {
+          return (options.fn as any).run;
         })
         .withDecorator('decorator', function (fn, props, container, options) {
-          // @ts-expect-error: Property 'run' does not exist on type 'TemplateDelegate<any>'
-          fn.run = options.fn();
+          (fn as any).run = options.fn();
           return fn;
         })
         .toCompileTo('success');
@@ -240,13 +237,12 @@ describe('blocks', () => {
       expectTemplate(
         '{{#helper}}{{#*decorator}}{{#*nested}}suc{{/nested}}cess{{/decorator}}{{/helper}}'
       )
-        .withHelper('helper', function (options) {
-          return options.fn.run;
+        .withHelper('helper', function (options: Handlebars.HelperOptions) {
+          return (options.fn as any).run;
         })
         .withDecorators({
           decorator(fn, props, container, options) {
-            // @ts-expect-error: Property 'run' does not exist on type 'TemplateDelegate<any>'
-            fn.run = options.fn.nested + options.fn();
+            (fn as any).run = options.fn.nested + options.fn();
             return fn;
           },
           nested(fn, props, container, options) {
@@ -260,12 +256,11 @@ describe('blocks', () => {
       expectTemplate(
         '{{#helper}}{{#*decorator}}suc{{/decorator}}{{#*decorator}}cess{{/decorator}}{{/helper}}'
       )
-        .withHelper('helper', function (options) {
-          return options.fn.run;
+        .withHelper('helper', function (options: Handlebars.HelperOptions) {
+          return (options.fn as any).run;
         })
         .withDecorator('decorator', function (fn, props, container, options) {
-          // @ts-expect-error: Property 'run' does not exist on type 'TemplateDelegate<any>'
-          fn.run = (fn.run || '') + options.fn();
+          (fn as any).run = ((fn as any).run || '') + options.fn();
           return fn;
         })
         .toCompileTo('success');
@@ -273,12 +268,11 @@ describe('blocks', () => {
 
     it('should access parent variables', () => {
       expectTemplate('{{#helper}}{{*decorator foo}}{{/helper}}')
-        .withHelper('helper', function (options) {
-          return options.fn.run;
+        .withHelper('helper', function (options: Handlebars.HelperOptions) {
+          return (options.fn as any).run;
         })
         .withDecorator('decorator', function (fn, props, container, options) {
-          // @ts-expect-error: Property 'run' does not exist on type 'TemplateDelegate<any>'
-          fn.run = options.args;
+          (fn as any).run = options.args;
           return fn;
         })
         .withInput({ foo: 'success' })
@@ -314,6 +308,10 @@ describe('blocks', () => {
     describe('registration', () => {
       beforeEach(() => {
         global.kbnHandlebarsEnv = Handlebars.create();
+      });
+
+      afterEach(() => {
+        global.kbnHandlebarsEnv = null;
       });
 
       it('unregisters', () => {

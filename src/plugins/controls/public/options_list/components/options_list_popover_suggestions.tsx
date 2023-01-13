@@ -8,7 +8,17 @@
 
 import React, { useMemo } from 'react';
 
-import { EuiFilterSelectItem, EuiSpacer, EuiIcon } from '@elastic/eui';
+import {
+  EuiFilterSelectItem,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
+  EuiSpacer,
+  EuiIcon,
+  useEuiTheme,
+  EuiText,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
 import { OptionsListReduxState } from '../types';
@@ -29,6 +39,7 @@ export const OptionsListPopoverSuggestions = ({
     actions: { replaceSelection, deselectOption, selectOption, selectExists },
   } = useReduxEmbeddableContext<OptionsListReduxState, typeof optionsListReducers>();
   const dispatch = useEmbeddableDispatch();
+  const { euiTheme } = useEuiTheme();
 
   // Select current state from Redux using multiple selectors to avoid rerenders.
   const invalidSelections = select((state) => state.componentState.invalidSelections);
@@ -40,14 +51,13 @@ export const OptionsListPopoverSuggestions = ({
   const hideExists = select((state) => state.explicitInput.hideExists);
 
   const loading = select((state) => state.output.loading);
-
   // track selectedOptions and invalidSelections in sets for more efficient lookup
   const selectedOptionsSet = useMemo(() => new Set<string>(selectedOptions), [selectedOptions]);
   const invalidSelectionsSet = useMemo(
     () => new Set<string>(invalidSelections),
     [invalidSelections]
   );
-  const suggestions = showOnlySelected ? selectedOptions : availableOptions;
+  const suggestions = showOnlySelected ? selectedOptions : Object.keys(availableOptions ?? {});
 
   if (
     !loading &&
@@ -89,33 +99,78 @@ export const OptionsListPopoverSuggestions = ({
           {OptionsListStrings.controlAndPopover.getExists()}
         </EuiFilterSelectItem>
       )}
-      {suggestions?.map((suggestion, index) => (
+      {suggestions?.map((key: string) => (
         <EuiFilterSelectItem
-          data-test-subj={`optionsList-control-selection-${suggestion}`}
-          checked={selectedOptionsSet?.has(suggestion) ? 'on' : undefined}
-          key={index}
+          data-test-subj={`optionsList-control-selection-${key}`}
+          checked={selectedOptionsSet?.has(key) ? 'on' : undefined}
+          key={key}
           onClick={() => {
             if (showOnlySelected) {
-              dispatch(deselectOption(suggestion));
+              dispatch(deselectOption(key));
               return;
             }
             if (singleSelect) {
-              dispatch(replaceSelection(suggestion));
+              dispatch(replaceSelection(key));
               return;
             }
-            if (selectedOptionsSet.has(suggestion)) {
-              dispatch(deselectOption(suggestion));
+            if (selectedOptionsSet.has(key)) {
+              dispatch(deselectOption(key));
               return;
             }
-            dispatch(selectOption(suggestion));
+            dispatch(selectOption(key));
           }}
           className={
-            showOnlySelected && invalidSelectionsSet.has(suggestion)
+            showOnlySelected && invalidSelectionsSet.has(key)
               ? 'optionsList__selectionInvalid'
-              : undefined
+              : 'optionsList__validSuggestion'
+          }
+          aria-label={
+            availableOptions?.[key]
+              ? OptionsListStrings.popover.getSuggestionAriaLabel(
+                  key,
+                  availableOptions[key].doc_count ?? 0
+                )
+              : key
           }
         >
-          {`${suggestion}`}
+          <EuiFlexGroup justifyContent="spaceBetween" responsive={false} alignItems="center">
+            <EuiFlexItem
+              grow={false}
+              css={css`
+                min-width: 0;
+              `}
+            >
+              <span
+                css={css`
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                `}
+              >{`${key}`}</span>
+            </EuiFlexItem>
+            {!showOnlySelected && (
+              <EuiFlexItem grow={false} tabIndex={-1}>
+                {availableOptions && availableOptions[key] && (
+                  <EuiToolTip
+                    content={OptionsListStrings.popover.getDocumentCountTooltip(
+                      availableOptions[key].doc_count
+                    )}
+                    position={'right'}
+                  >
+                    <EuiText
+                      className="eui-textNumber"
+                      size="xs"
+                      color={euiTheme.colors.subduedText}
+                      css={css`
+                        font-weight: ${euiTheme.font.weight.medium};
+                      `}
+                    >
+                      {`${availableOptions[key].doc_count.toLocaleString()}`}
+                    </EuiText>
+                  </EuiToolTip>
+                )}
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         </EuiFilterSelectItem>
       ))}
     </>

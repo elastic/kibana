@@ -20,6 +20,7 @@ const OPEN_INSPECTOR_TEST_SUBJ = 'embeddablePanelAction-openInspector';
 const COPY_PANEL_TO_DATA_TEST_SUBJ = 'embeddablePanelAction-copyToDashboard';
 const SAVE_TO_LIBRARY_TEST_SUBJ = 'embeddablePanelAction-saveToLibrary';
 const UNLINK_FROM_LIBRARY_TEST_SUBJ = 'embeddablePanelAction-unlinkFromLibrary';
+const CONVERT_TO_LENS_TEST_SUBJ = 'embeddablePanelAction-ACTION_EDIT_IN_LENS';
 
 export class DashboardPanelActionsService extends FtrService {
   private readonly log = this.ctx.getService('log');
@@ -120,7 +121,12 @@ export class DashboardPanelActionsService extends FtrService {
   }
 
   async customizePanel(parent?: WebElementWrapper) {
+    this.log.debug('customizePanel');
     await this.openContextMenu(parent);
+    const isActionVisible = await this.testSubjects.exists(CUSTOMIZE_PANEL_DATA_TEST_SUBJ);
+    if (!isActionVisible) await this.clickContextMenuMoreItem();
+    const isPanelActionVisible = await this.testSubjects.exists(CUSTOMIZE_PANEL_DATA_TEST_SUBJ);
+    if (!isPanelActionVisible) await this.clickContextMenuMoreItem();
     await this.testSubjects.click(CUSTOMIZE_PANEL_DATA_TEST_SUBJ);
   }
 
@@ -351,5 +357,15 @@ export class DashboardPanelActionsService extends FtrService {
     }
 
     throw new Error(`No action matching text "${text}"`);
+  }
+
+  async convertToLens(parent?: WebElementWrapper) {
+    this.log.debug('convertToLens');
+    await this.openContextMenu(parent);
+    const isActionVisible = await this.testSubjects.exists(CONVERT_TO_LENS_TEST_SUBJ);
+    if (!isActionVisible) await this.clickContextMenuMoreItem();
+    const isPanelActionVisible = await this.testSubjects.exists(CONVERT_TO_LENS_TEST_SUBJ);
+    if (!isPanelActionVisible) await this.clickContextMenuMoreItem();
+    await this.testSubjects.click(CONVERT_TO_LENS_TEST_SUBJ);
   }
 }

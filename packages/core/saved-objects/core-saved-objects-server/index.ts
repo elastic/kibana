@@ -72,6 +72,7 @@ export type {
 } from './src/extensions/encryption';
 export type {
   CheckAuthorizationParams,
+  PerformAuthorizationParams,
   AuthorizationTypeEntry,
   AuthorizationTypeMap,
   CheckAuthorizationResult,
