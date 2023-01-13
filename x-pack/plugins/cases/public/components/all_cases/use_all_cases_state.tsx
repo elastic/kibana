@@ -91,7 +91,7 @@ const getFilterOptions = (
   };
 };
 
-const getSupportedFilterOptions = (filterOptions: FilterOptions): PartialFilterOptions => {
+const getSupportedFilterOptions = (filterOptions: PartialFilterOptions): PartialFilterOptions => {
   return {
     ...(filterOptions.severity && { severity: filterOptions.severity }),
     ...(filterOptions.status && { status: filterOptions.status }),
