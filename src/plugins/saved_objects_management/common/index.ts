@@ -27,4 +27,8 @@ export type {
   RelationshipsResponseHTTPV1,
   ScrollCountBodyHTTPV1,
   ScrollCountResponseHTTPV1,
+  DeleteObjectBodyHTTPV1,
+  DeleteObjectResponseHTTPV1,
+  BulkGetHTTPResponseV2,
+  SavedObjectWithMetadataV2,
 } from './types';

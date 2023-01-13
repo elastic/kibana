@@ -34,4 +34,4 @@ export type {
   DeleteObjectResponseHTTPV1,
 } from './v1';
 
-export type { SavedObjectMetadataV2 } from './v2';
+export type { SavedObjectWithMetadataV2, BulkGetHTTPResponseV2 } from './v2';
