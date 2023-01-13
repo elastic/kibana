@@ -9,6 +9,7 @@ import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { map, reduce, mapValues, has, get, keys, pickBy } from 'lodash';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { Filter, FilterMeta } from './types';
+import { FILTERS } from './types';
 import type { DataViewBase, DataViewFieldBase } from '../../es_query';
 
 const OPERANDS_IN_RANGE = 2;
@@ -91,17 +92,11 @@ export type RangeFilter = Filter & {
  *
  * @public
  */
-export const isRangeFilter = (filter?: Filter): filter is RangeFilter => has(filter, 'query.range');
+export function isRangeFilter(filter?: Filter): filter is RangeFilter {
+  if (filter?.meta?.type) return filter.meta.type === FILTERS.RANGE;
+  return has(filter, 'query.range');
+}
 
-/**
- * @param filter
- * @returns Type guard derived from the meta.type field
- *
- * @public
- */
-export const isMetaRangeFilter = (filter?: Filter): filter is RangeFilter => {
-  return get(filter, 'meta.type') === 'range';
-};
 /**
  *
  * @param filter

@@ -9,7 +9,7 @@
 import { identity, pickBy } from 'lodash';
 
 import type { Filter, FilterMeta, RangeFilter, RangeFilterParams } from '..';
-import { isMetaRangeFilter } from '../build_filters';
+import { isRangeFilter } from '../build_filters';
 
 type FilterOperator = Pick<FilterMeta, 'type' | 'negate'>;
 
@@ -26,7 +26,7 @@ export const updateFilter = (
   if (operator.type === 'exists') {
     return updateWithExistsOperator(filter, operator);
   }
-  if (operator.type === 'range' && isMetaRangeFilter(filter)) {
+  if (operator.type === 'range' && isRangeFilter(filter)) {
     return updateWithRangeOperator(filter, operator, params, field);
   }
   if (Array.isArray(params)) {

@@ -8,7 +8,7 @@
 
 import { isPhrasesFilter, PhrasesFilter } from './phrases_filter';
 import { isPhraseFilter } from './phrase_filter';
-import { isMetaRangeFilter } from './range_filter';
+import { isRangeFilter } from './range_filter';
 import { Filter } from './types';
 
 /**
@@ -19,7 +19,7 @@ export function getFilterParams(filter: Filter): Filter['meta']['params'] {
     return filter.meta.params?.query;
   } else if (isPhrasesFilter(filter)) {
     return (filter as PhrasesFilter).meta.params;
-  } else if (isMetaRangeFilter(filter) && filter.meta.params) {
+  } else if (isRangeFilter(filter) && filter.meta.params) {
     const { gte, gt, lte, lt } = filter.meta.params;
     return {
       from: gte ?? gt,
