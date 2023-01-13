@@ -7,7 +7,8 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import React from 'react';
+import React, { memo, useEffect } from 'react';
+import type { CommandArgumentValueSelectorProps } from '../../console/types';
 import type { CommandDefinition } from '../../console';
 import { ArgumentFileSelector } from '../../console_argument_selectors';
 
@@ -72,6 +73,13 @@ export const getUploadCommand = ({
         about: 'just a number',
       },
 
+      mock: {
+        required: false,
+        allowMultiples: false,
+        about: 'using a selector',
+        SelectorComponent: ArgumentSelectorComponentMock,
+      },
+
       comment: {
         required: false,
         allowMultiples: false,
@@ -84,3 +92,16 @@ export const getUploadCommand = ({
     helpCommandPosition: 0,
   };
 };
+
+const ArgumentSelectorComponentMock = memo<
+  CommandArgumentValueSelectorProps<{ selection: string }>
+>(({ value, valueText, onChange }) => {
+  useEffect(() => {
+    if (!value) {
+      onChange({ valueText: 'foo selected', value: { selection: 'foo' } });
+    }
+  }, [onChange, value]);
+
+  return <span data-test-subj="argSelectorValueText">{valueText}</span>;
+});
+ArgumentSelectorComponentMock.displayName = 'ArgumentSelectorComponentMock';

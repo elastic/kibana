@@ -67,6 +67,7 @@ export const ArgumentFileSelector = memo<CommandArgumentValueSelectorProps<File>
           button={
             <EuiButtonIcon
               iconType="folderOpen"
+              size="xs"
               onClick={handleOpenPopover}
               aria-label={OPEN_FILE_PICKER_LABEL}
             />
