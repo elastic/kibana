@@ -63,6 +63,14 @@ export const ElasticsearchTemplate: React.FC<ElasticsearchTemplateProps> = ({
     });
   }
 
+  tabs.push({
+    id: 'dashboards',
+    label: i18n.translate('xpack.monitoring.esNavigation.dashboardsLinkText', {
+      defaultMessage: 'Dashboards',
+    }),
+    route: '/elasticsearch/dashboards',
+  });
+
   return <PageTemplate {...props} tabs={tabs} product="elasticsearch" />;
 };
 

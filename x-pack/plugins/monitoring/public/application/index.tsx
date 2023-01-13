@@ -35,6 +35,7 @@ import { BeatsOverviewPage } from './pages/beats/overview';
 import { ClusterOverview } from './pages/cluster/overview_page';
 import { ElasticsearchCcrPage } from './pages/elasticsearch/ccr_page';
 import { ElasticsearchCcrShardPage } from './pages/elasticsearch/ccr_shard_page';
+import { ElasticsearchDashboardsPage } from './pages/elasticsearch/dashboards_page';
 import { ElasticsearchIndexAdvancedPage } from './pages/elasticsearch/index_advanced_page';
 import { ElasticsearchIndexPage } from './pages/elasticsearch/index_page';
 import { ElasticsearchIndicesPage } from './pages/elasticsearch/indices_page';
@@ -145,6 +146,13 @@ const MonitoringApp: React.FC<{
                         />
 
                         {/* ElasticSearch Views */}
+                        <RouteInit
+                          path="/elasticsearch/dashboards"
+                          component={ElasticsearchDashboardsPage}
+                          codePaths={[CODE_PATH_ELASTICSEARCH]}
+                          fetchAllClusters={false}
+                        />
+
                         <RouteInit
                           path="/elasticsearch/ml_jobs"
                           component={ElasticsearchMLJobsPage}
