@@ -54,7 +54,7 @@ export function MobileTransactionCharts({
               comparisonEnabled={comparisonEnabled}
             />
           </EuiFlexItem>
-          <EuiFlexItem style={{ flexShrink: 1 }}>
+          <EuiFlexItem>
             <HttpRequestsChart
               kuery={kuery}
               start={start}
@@ -62,6 +62,8 @@ export function MobileTransactionCharts({
               environment={environment}
               serviceName={serviceName}
               transactionType={transactionType}
+              offset={offset}
+              comparisonEnabled={comparisonEnabled}
             />
           </EuiFlexItem>
         </EuiFlexGrid>

@@ -13,36 +13,45 @@ import {
 } from '@kbn/observability-plugin/server';
 import {
   SERVICE_NAME,
-  TRANSACTION_TYPE,
   TRANSACTION_NAME,
   SPAN_SUBTYPE,
 } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
+import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
+import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getBucketSize } from '../../lib/helpers/get_bucket_size';
 
-export async function getHttpRequestsChart({
-  kuery,
-  apmEventClient,
-  serviceName,
-  transactionType,
-  transactionName,
-  environment,
-  start,
-  end,
-}: {
-  kuery: string;
+type Props = {
   apmEventClient: APMEventClient;
   serviceName: string;
-  transactionType?: string;
   transactionName?: string;
   environment: string;
   start: number;
   end: number;
-}) {
-  const { intervalString } = getBucketSize({
+  kuery: string;
+  offset?: string;
+};
+
+async function getHttpRequestsTimeseries({
+  kuery,
+  apmEventClient,
+  serviceName,
+  transactionName,
+  environment,
+  start,
+  end,
+  offset,
+}: Props) {
+  const { startWithOffset, endWithOffset } = getOffsetInMs({
     start,
     end,
+    offset,
+  });
+
+  const { intervalString } = getBucketSize({
+    start: startWithOffset,
+    end: endWithOffset,
     minBucketSize: 60,
   });
 
@@ -56,9 +65,8 @@ export async function getHttpRequestsChart({
           filter: [
             { exists: { field: SPAN_SUBTYPE } },
             ...termQuery(SERVICE_NAME, serviceName),
-            ...termQuery(TRANSACTION_TYPE, transactionType),
             ...termQuery(TRANSACTION_NAME, transactionName),
-            ...rangeQuery(start, end),
+            ...rangeQuery(startWithOffset, endWithOffset),
             ...environmentQuery(environment),
             ...kqlQuery(kuery),
           ],
@@ -70,6 +78,7 @@ export async function getHttpRequestsChart({
             field: '@timestamp',
             fixed_interval: intervalString,
             min_doc_count: 0,
+            extended_bounds: { min: startWithOffset, max: endWithOffset },
           },
           aggs: {
             requests: {
@@ -81,13 +90,59 @@ export async function getHttpRequestsChart({
     },
   });
 
+  return (
+    response?.aggregations?.timeseries.buckets.map((bucket) => {
+      return {
+        x: bucket.key,
+        y: bucket.doc_count ?? 0,
+      };
+    }) ?? []
+  );
+}
+
+export async function getHttpRequestsChart({
+  kuery,
+  apmEventClient,
+  serviceName,
+  transactionName,
+  environment,
+  start,
+  end,
+  offset,
+}: Props) {
+  const options = {
+    serviceName,
+    transactionName,
+    apmEventClient,
+    kuery,
+    environment,
+  };
+
+  const currentPeriodPromise = getHttpRequestsTimeseries({
+    ...options,
+    start,
+    end,
+  });
+
+  const previousPeriodPromise = offset
+    ? getHttpRequestsTimeseries({
+        ...options,
+        start,
+        end,
+        offset,
+      })
+    : [];
+
+  const [currentPeriod, previousPeriod] = await Promise.all([
+    currentPeriodPromise,
+    previousPeriodPromise,
+  ]);
+
   return {
-    timeseries:
-      response?.aggregations?.timeseries.buckets.map((bucket) => {
-        return {
-          x: bucket.key,
-          y: bucket.doc_count ?? 0,
-        };
-      }) ?? [],
+    currentPeriod,
+    previousPeriod: offsetPreviousPeriodCoordinates({
+      currentPeriodTimeseries: currentPeriod,
+      previousPeriodTimeseries: previousPeriod,
+    }),
   };
 }

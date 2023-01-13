@@ -54,7 +54,7 @@ export function SessionsChart({
 }) {
   const comparisonChartTheme = getComparisonChartTheme();
   const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
-    ChartType.HTTP_REQUESTS
+    ChartType.SESSIONS
   );
 
   const { data = INITIAL_STATE, status } = useFetcher(

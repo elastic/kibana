@@ -150,6 +150,8 @@ const httpRequestsChartRoute = createApmServerRoute({
       kueryRt,
       rangeRt,
       environmentRt,
+      offsetRt,
+
       t.partial({
         transactionType: t.string,
         transactionName: t.string,
@@ -161,21 +163,21 @@ const httpRequestsChartRoute = createApmServerRoute({
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const { serviceName } = params.path;
-    const { kuery, environment, start, end, transactionType, transactionName } =
+    const { kuery, environment, start, end, transactionName, offset } =
       params.query;
 
-    const { timeseries } = await getHttpRequestsChart({
+    const { currentPeriod, previousPeriod } = await getHttpRequestsChart({
       kuery,
       environment,
-      transactionType,
       transactionName,
       start,
       end,
       serviceName,
       apmEventClient,
+      offset,
     });
 
-    return { timeseries };
+    return { currentPeriod, previousPeriod };
   },
 });
 
