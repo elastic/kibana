@@ -13,6 +13,13 @@ import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import userEvent from '@testing-library/user-event';
 import { getPosturePolicy } from './utils';
 import { CLOUDBEAT_AWS, CLOUDBEAT_EKS } from '../../../common/constants';
+import { useParams } from 'react-router-dom';
+import { PosturePolicyTemplate } from '../../../common/types';
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useParams: jest.fn(),
+}));
 
 describe('<CspPolicyTemplateForm />', () => {
   const onChange = jest.fn();
@@ -34,6 +41,8 @@ describe('<CspPolicyTemplateForm />', () => {
   });
 
   it('renders KSPM input selector', () => {
+    (useParams as jest.Mock).mockReturnValue({ integration: 'kspm' });
+
     const { getByLabelText } = render(<WrappedComponent newPolicy={getMockPolicyK8s()} />);
 
     const option1 = getByLabelText('Self-Managed/Vanilla Kubernetes');
@@ -47,6 +56,8 @@ describe('<CspPolicyTemplateForm />', () => {
   });
 
   it('updates selected KSPM input', () => {
+    (useParams as jest.Mock).mockReturnValue({ integration: 'kspm' });
+
     const k8sPolicy = getMockPolicyK8s();
     const eksPolicy = getMockPolicyEKS();
 
@@ -54,15 +65,15 @@ describe('<CspPolicyTemplateForm />', () => {
     const option = getByLabelText('EKS (Elastic Kubernetes Service)');
     userEvent.click(option);
 
-    // Listen to the 2nd triggered by the test.
-    // The 1st is done on mount to ensure initial state is valid.
-    expect(onChange).toHaveBeenNthCalledWith(2, {
+    expect(onChange).toHaveBeenNthCalledWith(1, {
       isValid: true,
       updatedPolicy: eksPolicy,
     });
   });
 
   it('renders CSPM input selector', () => {
+    (useParams as jest.Mock).mockReturnValue({ integration: 'cspm' });
+
     const { getByLabelText } = render(<WrappedComponent newPolicy={getMockPolicyAWS()} />);
 
     const option1 = getByLabelText('Amazon Web Services');
@@ -79,6 +90,8 @@ describe('<CspPolicyTemplateForm />', () => {
   });
 
   it('renders disabled KSPM input when editing', () => {
+    (useParams as jest.Mock).mockReturnValue({ integration: 'kspm' });
+
     const { getByLabelText } = render(
       <WrappedComponent newPolicy={getMockPolicyK8s()} edit={true} />
     );
@@ -94,6 +107,8 @@ describe('<CspPolicyTemplateForm />', () => {
   });
 
   it('renders disabled CSPM input when editing', () => {
+    (useParams as jest.Mock).mockReturnValue({ integration: 'cspm' });
+
     const { getByLabelText } = render(
       <WrappedComponent newPolicy={getMockPolicyAWS()} edit={true} />
     );
@@ -111,52 +126,23 @@ describe('<CspPolicyTemplateForm />', () => {
     expect(option1).toBeChecked();
   });
 
-  it('selects default KSPM input selector', () => {
-    const policy = getMockPolicyK8s();
-    // enable all inputs of a policy template, same as fleet does
-    policy.inputs = policy.inputs.map((input) => ({
-      ...input,
-      enabled: input.policy_template === 'kspm',
-    }));
-
-    render(<WrappedComponent newPolicy={policy} />);
-
-    // 1st call happens on mount and selects the default policy template enabled input
-    expect(onChange).toHaveBeenNthCalledWith(1, {
-      isValid: true,
-      updatedPolicy: getMockPolicyK8s(),
-    });
-  });
-
-  it('selects default CSPM input selector', () => {
-    const policy = getMockPolicyAWS();
-    // enable all inputs of a policy template, same as fleet does
-    policy.inputs = policy.inputs.map((input) => ({
-      ...input,
-      enabled: input.policy_template === 'cspm',
-    }));
-
-    render(<WrappedComponent newPolicy={policy} />);
-
-    // 1st call happens on mount and selects the default policy template enabled input
-    expect(onChange).toHaveBeenNthCalledWith(1, {
-      isValid: true,
-      updatedPolicy: getMockPolicyAWS(),
-    });
-  });
-
   /**
    * AWS Credentials input fields tests for KSPM/CSPM integrations
    */
   const awsInputs = {
-    [CLOUDBEAT_EKS]: getMockPolicyEKS,
-    [CLOUDBEAT_AWS]: getMockPolicyAWS,
+    [CLOUDBEAT_EKS]: ['kspm', getMockPolicyEKS],
+    [CLOUDBEAT_AWS]: ['cspm', getMockPolicyAWS],
   };
 
-  for (const [inputKey, getPolicy] of Object.entries(awsInputs) as Array<
-    [keyof typeof awsInputs, typeof awsInputs[keyof typeof awsInputs]]
+  for (const [inputKey, [integration, getPolicy]] of Object.entries(awsInputs) as Array<
+    [
+      keyof typeof awsInputs,
+      [PosturePolicyTemplate, typeof getMockPolicyEKS | typeof getMockPolicyAWS]
+    ]
   >) {
     it(`renders ${inputKey} Assume Role fields`, () => {
+      (useParams as jest.Mock).mockReturnValue({ integration });
+
       let policy = getPolicy();
       policy = getPosturePolicy(policy, inputKey, {
         'aws.credentials.type': { value: 'assume_role' },
@@ -170,6 +156,8 @@ describe('<CspPolicyTemplateForm />', () => {
     });
 
     it(`updates ${inputKey} Assume Role fields`, () => {
+      (useParams as jest.Mock).mockReturnValue({ integration });
+
       let policy = getPolicy();
       policy = getPosturePolicy(policy, inputKey, {
         'aws.credentials.type': { value: 'assume_role' },
@@ -179,14 +167,15 @@ describe('<CspPolicyTemplateForm />', () => {
       userEvent.type(getByLabelText('Role ARN'), 'a');
       policy = getPosturePolicy(policy, inputKey, { role_arn: { value: 'a' } });
 
-      // Ignore 1st call triggered on mount to ensure initial state is valid
-      expect(onChange).toHaveBeenNthCalledWith(2, {
+      expect(onChange).toHaveBeenNthCalledWith(1, {
         isValid: true,
         updatedPolicy: policy,
       });
     });
 
     it(`renders ${inputKey} Direct Access Keys fields`, () => {
+      (useParams as jest.Mock).mockReturnValue({ integration });
+
       let policy: NewPackagePolicy = getPolicy();
       policy = getPosturePolicy(policy, inputKey, {
         'aws.credentials.type': { value: 'direct_access_keys' },
@@ -201,6 +190,8 @@ describe('<CspPolicyTemplateForm />', () => {
     });
 
     it(`updates ${inputKey} Direct Access Keys fields`, () => {
+      (useParams as jest.Mock).mockReturnValue({ integration });
+
       let policy = getPolicy();
       policy = getPosturePolicy(policy, inputKey, {
         'aws.credentials.type': { value: 'direct_access_keys' },
@@ -210,8 +201,7 @@ describe('<CspPolicyTemplateForm />', () => {
       userEvent.type(getByLabelText('Access Key ID'), 'a');
       policy = getPosturePolicy(policy, inputKey, { access_key_id: { value: 'a' } });
 
-      // Ignore 1st call triggered on mount to ensure initial state is valid
-      expect(onChange).toHaveBeenNthCalledWith(2, {
+      expect(onChange).toHaveBeenNthCalledWith(1, {
         isValid: true,
         updatedPolicy: policy,
       });
@@ -221,13 +211,15 @@ describe('<CspPolicyTemplateForm />', () => {
       userEvent.type(getByLabelText('Secret Access Key'), 'b');
       policy = getPosturePolicy(policy, inputKey, { secret_access_key: { value: 'b' } });
 
-      expect(onChange).toHaveBeenNthCalledWith(3, {
+      expect(onChange).toHaveBeenNthCalledWith(2, {
         isValid: true,
         updatedPolicy: policy,
       });
     });
 
     it(`renders ${inputKey} Temporary Keys fields`, () => {
+      (useParams as jest.Mock).mockReturnValue({ integration });
+
       let policy: NewPackagePolicy = getPolicy();
       policy = getPosturePolicy(policy, inputKey, {
         'aws.credentials.type': { value: 'temporary_keys' },
@@ -243,6 +235,8 @@ describe('<CspPolicyTemplateForm />', () => {
     });
 
     it(`updates ${inputKey} Temporary Keys fields`, () => {
+      (useParams as jest.Mock).mockReturnValue({ integration });
+
       let policy = getPolicy();
       policy = getPosturePolicy(policy, inputKey, {
         'aws.credentials.type': { value: 'temporary_keys' },
@@ -252,8 +246,7 @@ describe('<CspPolicyTemplateForm />', () => {
       userEvent.type(getByLabelText('Access Key ID'), 'a');
       policy = getPosturePolicy(policy, inputKey, { access_key_id: { value: 'a' } });
 
-      // Ignore 1st call triggered on mount to ensure initial state is valid
-      expect(onChange).toHaveBeenNthCalledWith(2, {
+      expect(onChange).toHaveBeenNthCalledWith(1, {
         isValid: true,
         updatedPolicy: policy,
       });
@@ -263,7 +256,7 @@ describe('<CspPolicyTemplateForm />', () => {
       userEvent.type(getByLabelText('Secret Access Key'), 'b');
       policy = getPosturePolicy(policy, inputKey, { secret_access_key: { value: 'b' } });
 
-      expect(onChange).toHaveBeenNthCalledWith(3, {
+      expect(onChange).toHaveBeenNthCalledWith(2, {
         isValid: true,
         updatedPolicy: policy,
       });
@@ -273,13 +266,15 @@ describe('<CspPolicyTemplateForm />', () => {
       userEvent.type(getByLabelText('Session Token'), 'a');
       policy = getPosturePolicy(policy, inputKey, { session_token: { value: 'a' } });
 
-      expect(onChange).toHaveBeenNthCalledWith(4, {
+      expect(onChange).toHaveBeenNthCalledWith(3, {
         isValid: true,
         updatedPolicy: policy,
       });
     });
 
     it(`renders ${inputKey} Shared Credentials fields`, () => {
+      (useParams as jest.Mock).mockReturnValue({ integration });
+
       let policy: NewPackagePolicy = getPolicy();
       policy = getPosturePolicy(policy, inputKey, {
         'aws.credentials.type': { value: 'shared_credentials' },
@@ -294,6 +289,8 @@ describe('<CspPolicyTemplateForm />', () => {
     });
 
     it(`updates ${inputKey} Shared Credentials fields`, () => {
+      (useParams as jest.Mock).mockReturnValue({ integration });
+
       let policy = getPolicy();
       policy = getPosturePolicy(policy, inputKey, {
         'aws.credentials.type': { value: 'shared_credentials' },
@@ -305,8 +302,7 @@ describe('<CspPolicyTemplateForm />', () => {
         shared_credential_file: { value: 'a' },
       });
 
-      // Ignore 1st call triggered on mount to ensure initial state is valid
-      expect(onChange).toHaveBeenNthCalledWith(2, {
+      expect(onChange).toHaveBeenNthCalledWith(1, {
         isValid: true,
         updatedPolicy: policy,
       });
@@ -318,7 +314,7 @@ describe('<CspPolicyTemplateForm />', () => {
         credential_profile_name: { value: 'b' },
       });
 
-      expect(onChange).toHaveBeenNthCalledWith(3, {
+      expect(onChange).toHaveBeenNthCalledWith(2, {
         isValid: true,
         updatedPolicy: policy,
       });
