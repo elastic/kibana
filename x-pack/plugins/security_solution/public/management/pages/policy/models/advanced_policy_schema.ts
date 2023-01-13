@@ -1048,4 +1048,15 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       }
     ),
   },
+  {
+    key: 'linux.advanced.host_isolation.allowed',
+    first_supported_version: '8.6',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.host_isolation.allowed',
+      {
+        defaultMessage:
+          'Message TBD. Default: true',
+      }
+    ),
+  },
 ];
