@@ -53,6 +53,7 @@
     "@kbn/logging-mocks",
     "@kbn/field-types",
     "@kbn/es-types",
+    "@kbn/core-saved-objects-common",
   ],
   "exclude": [
     "target/**/*",
