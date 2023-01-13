@@ -204,7 +204,7 @@ export class MapsPlugin implements Plugin {
 
     plugins.contentManagement.register('map', {
       storage: new MapsStorage(),
-      dbToKibanaContentSerializer: savedObjectToKibanaContent,
+      toSearchContentSerializer: savedObjectToKibanaContent,
     });
 
     return {

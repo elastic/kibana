@@ -9,4 +9,4 @@
 export { ContentCore } from './core';
 export type { ContentCoreApi } from './core';
 
-export type { ContentStorage, ContentConfig, SearchOptions } from './types';
+export type { ContentStorage, ContentConfig, SearchContentSerializer } from './types';

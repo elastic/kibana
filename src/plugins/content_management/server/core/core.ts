@@ -7,10 +7,9 @@
  */
 import { Logger, ElasticsearchClient } from '@kbn/core/server';
 
-import type { Content } from '../../common';
-import { schemas } from '../../common';
 import { ContentCrud } from './crud';
 import { EventBus } from './event_bus';
+import { init as initEventListeners } from './event_listeners';
 import { ContentRegistry } from './registry';
 import { ContentSearchIndex } from './search';
 
@@ -40,24 +39,10 @@ export class ContentCore {
       });
     };
 
-    this.eventBus.events$.subscribe((event) => {
-      if (event.type === 'createItemSuccess') {
-        // Index the data
-        // console.log('>>>>>>> Content created.');
-        // console.log(JSON.stringify(event.data));
-        const serializer = this.contentRegistry.getConfig(
-          event.contentType
-        )?.toKibanaContentSerializer;
-
-        const content = serializer ? serializer(event.data) : (event.data as Content);
-        const { error } = schemas.content.searchIndex.getSchema().validate(content);
-
-        if (error) {
-          throw new Error(`Can't index content [${event.contentType}] created, invalid Content.`);
-        }
-
-        this.searchIndex.index(content);
-      }
+    initEventListeners({
+      eventBus: this.eventBus,
+      searchIndex: this.searchIndex,
+      contentRegistry: this.contentRegistry,
     });
 
     return {

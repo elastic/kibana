@@ -11,7 +11,7 @@ import type { ContentStorage, ContentConfig } from './types';
 export class ContentRegistry {
   private contents = new Map<string, ContentConfig<ContentStorage>>();
 
-  register<S extends ContentStorage<any> = ContentStorage>(
+  register<S extends ContentStorage = ContentStorage>(
     contentType: string,
     config: ContentConfig<S>
   ) {
@@ -22,12 +22,12 @@ export class ContentRegistry {
     this.contents.set(contentType, config);
   }
 
-  getStorage<UniqueFields extends object = Record<string, unknown>>(contentType: string) {
+  getStorage(contentType: string) {
     const contentConfig = this.contents.get(contentType);
     if (!contentConfig) {
       throw new Error(`Content [${contentType}] is not registered.`);
     }
-    return contentConfig.storage as ContentStorage<UniqueFields>;
+    return contentConfig.storage;
   }
 
   getConfig(contentType: string) {

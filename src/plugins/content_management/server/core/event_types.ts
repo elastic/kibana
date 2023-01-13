@@ -6,27 +6,27 @@
  * Side Public License, v 1.
  */
 
-interface GetItemStart {
+export interface GetItemStart {
   type: 'getItemStart';
   contentId: string;
   contentType: string;
 }
 
-interface GetItemSuccess {
+export interface GetItemSuccess {
   type: 'getItemSuccess';
   contentId: string;
   contentType: string;
   data: unknown;
 }
 
-interface GetItemError {
+export interface GetItemError {
   type: 'getItemError';
   contentId: string;
   contentType: string;
   error: unknown;
 }
 
-interface CreateItemSuccess {
+export interface CreateItemSuccess {
   type: 'createItemSuccess';
   contentType: string;
   data: object;

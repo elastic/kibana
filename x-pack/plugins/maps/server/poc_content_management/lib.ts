@@ -6,8 +6,8 @@
  */
 
 import { SimpleSavedObject } from '@kbn/core-saved-objects-api-browser';
-import type { Content } from '@kbn/content-management-plugin/common';
 
+import { SearchContentSerializer } from '@kbn/content-management-plugin/server';
 import { MapSavedObjectAttributes } from '../../common/map_saved_object_type';
 
 /**
@@ -17,9 +17,9 @@ import { MapSavedObjectAttributes } from '../../common/map_saved_object_type';
  * @param map A map saved object
  * @returns a Kibana content
  */
-export const savedObjectToKibanaContent = (
-  map: SimpleSavedObject<MapSavedObjectAttributes>
-): Content => {
+export const savedObjectToKibanaContent: SearchContentSerializer<
+  SimpleSavedObject<MapSavedObjectAttributes>
+> = (map) => {
   return {
     id: map.id,
     type: map.type,
