@@ -14,7 +14,7 @@ export const loadEndpointIfNoneExist = () => {
     url: `${BASE_ENDPOINT_ROUTE}/metadata?page=0&pageSize=10&kuery=`,
     failOnStatusCode: false,
   }).then(({ body }) => {
-    if (!body.data.length) {
+    if (!body.data?.length) {
       runEndpointLoaderScript();
     }
   });
