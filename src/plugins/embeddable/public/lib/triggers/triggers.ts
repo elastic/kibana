@@ -60,7 +60,7 @@ export const contextMenuTrigger: Trigger = {
     defaultMessage: 'Context menu',
   }),
   description: i18n.translate('embeddableApi.contextMenuTrigger.description', {
-    defaultMessage: 'A panel top-right corner context menu click.',
+    defaultMessage: "A new action will be added to the panel's context menu",
   }),
 };
 

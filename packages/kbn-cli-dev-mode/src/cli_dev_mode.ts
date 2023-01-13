@@ -115,6 +115,7 @@ export class CliDevMode {
     }
 
     const { watchPaths, ignorePaths } = getServerWatchPaths({
+      runExamples: cliArgs.runExamples,
       pluginPaths: config.plugins.additionalPluginPaths,
       pluginScanDirs: config.plugins.pluginSearchPaths,
     });

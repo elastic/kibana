@@ -24,7 +24,7 @@ export const Description: FC<Props> = memo(({ children, validation }) => {
   });
   return (
     <EuiDescribedFormGroup title={<h3>{title}</h3>} description={description}>
-      <EuiFormRow label={title} error={validation.message} isInvalid={validation.valid === false}>
+      <EuiFormRow error={validation.message} isInvalid={validation.valid === false}>
         <>{children}</>
       </EuiFormRow>
     </EuiDescribedFormGroup>

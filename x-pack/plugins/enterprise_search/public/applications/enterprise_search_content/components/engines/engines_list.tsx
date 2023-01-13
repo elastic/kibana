@@ -32,7 +32,7 @@ export const EnginesList: React.FC = () => {
       meta,
       searchQuery,
     });
-  }, [meta, searchQuery]);
+  }, [meta.from, meta.size, searchQuery]);
 
   return (
     <EnterpriseSearchContentPageTemplate

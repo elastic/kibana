@@ -20,8 +20,8 @@
     "@kbn/ci-stats-reporter",
     "@kbn/jest-serializers",
     "@kbn/stdio-dev-helpers",
-    "@kbn/bazel-packages",
     "@kbn/tooling-log",
+    "@kbn/repo-packages",
   ],
   "exclude": [
     "target/**/*",

@@ -129,12 +129,7 @@ export function createAlertFactory<
             return [];
           }
 
-          const { currentRecoveredAlerts } = processAlerts<
-            State,
-            Context,
-            ActionGroupIds,
-            ActionGroupIds
-          >({
+          const { currentRecoveredAlerts } = processAlerts<State, Context>({
             alerts,
             existingAlerts: originalAlerts,
             previouslyRecoveredAlerts: {},

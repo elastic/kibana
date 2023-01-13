@@ -13,7 +13,7 @@ import { Status } from '../../../../../common/types/api';
 
 import { Actions } from '../../../shared/api_logic/create_api_logic';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
-import { flashAPIErrors, flashSuccessToast } from '../../../shared/flash_messages';
+import { flashSuccessToast } from '../../../shared/flash_messages';
 import { KibanaLogic } from '../../../shared/kibana';
 import {
   AddAnalyticsCollectionsAPILogic,
@@ -59,7 +59,6 @@ export const AddAnalyticsCollectionLogic = kea<
     values: [AddAnalyticsCollectionsAPILogic, ['status']],
   },
   listeners: ({ values, actions }) => ({
-    apiError: (error) => flashAPIErrors(error),
     apiSuccess: async ({ name, id }, breakpoint) => {
       // Wait for propagation of the new collection
       flashSuccessToast(

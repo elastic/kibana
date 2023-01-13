@@ -15,7 +15,9 @@
   ],
   "kbn_references": [
     "@kbn/repo-info",
-    "@kbn/bazel-packages",
-    "@kbn/package-map",
+    "@kbn/repo-packages",
+    "@kbn/picomatcher",
+    "@kbn/dev-cli-errors",
+    "@kbn/get-repo-files",
   ]
 }
