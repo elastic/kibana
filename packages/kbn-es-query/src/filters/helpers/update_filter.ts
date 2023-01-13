@@ -76,7 +76,7 @@ function updateWithIsOperator(
       ...filter.meta,
       negate: operator?.negate,
       type: operator?.type,
-      params: { query: params },
+      params: { ...filter.meta.params, query: params },
       value: undefined,
     },
     query: { match_phrase: { [filter.meta.key!]: params ?? '' } },
