@@ -24,7 +24,7 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
   getWebhookServer,
   getSlackServer,
-} from '../../../common/fixtures/plugins/actions_simulators/server/plugin';
+} from '../../../common/plugins/actions_simulators/server/plugin';
 
 // eslint-disable-next-line import/no-default-export
 export default function executionStatusAlertTests({ getService }: FtrProviderContext) {
@@ -80,7 +80,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       const createdAction = actionResponse.body;
       objectRemover.add(Spaces.space1.id, createdAction.id, 'connector', 'actions');
 
-      // from x-pack/test/alerting_api_integration/common/fixtures/plugins/alerts/server/alert_types.ts,
+      // from x-pack/test/alerting_api_integration/common/plugins/alerts/server/alert_types.ts,
       // const EscapableStrings
       const varsTemplate = '{{context.escapableDoubleQuote}} -- {{context.escapableLineFeed}}';
 
@@ -130,7 +130,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       const createdAction = actionResponse.body;
       objectRemover.add(Spaces.space1.id, createdAction.id, 'connector', 'actions');
 
-      // from x-pack/test/alerting_api_integration/common/fixtures/plugins/alerts/server/alert_types.ts,
+      // from x-pack/test/alerting_api_integration/common/plugins/alerts/server/alert_types.ts,
       // const EscapableStrings
       const varsTemplate =
         '{{context.escapableBacktic}} -- {{context.escapableBold}} -- {{context.escapableBackticBold}} -- {{context.escapableHtml}}';
@@ -181,7 +181,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       const createdAction = actionResponse.body;
       objectRemover.add(Spaces.space1.id, createdAction.id, 'connector', 'actions');
 
-      // from x-pack/test/alerting_api_integration/common/fixtures/plugins/alerts/server/alert_types.ts,
+      // from x-pack/test/alerting_api_integration/common/plugins/alerts/server/alert_types.ts,
       // const DeepContextVariables
       const varsTemplate = '{{context.deep}}';
 
