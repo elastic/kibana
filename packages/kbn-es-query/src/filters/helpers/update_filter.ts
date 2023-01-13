@@ -16,7 +16,8 @@ export const updateFilter = (
   filter: Filter,
   field?: string,
   operator?: FilterOperator,
-  params?: Filter['meta']['params']
+  params?: Filter['meta']['params'],
+  fieldType?: string
 ) => {
   if (!field || !operator) {
     return updateField(filter, field);
@@ -32,7 +33,7 @@ export const updateFilter = (
     return updateWithIsOneOfOperator(filter, operator, params);
   }
 
-  return updateWithIsOperator(filter, operator, params);
+  return updateWithIsOperator(filter, operator, params, fieldType);
 };
 
 function updateField(filter: Filter, field?: string) {
@@ -68,8 +69,12 @@ function updateWithExistsOperator(filter: Filter, operator?: FilterOperator) {
 function updateWithIsOperator(
   filter: Filter,
   operator?: FilterOperator,
-  params?: Filter['meta']['params']
+  params?: Filter['meta']['params'],
+  fieldType?: string
 ) {
+  if (fieldType === 'number' && !params) {
+    params = 0;
+  }
   return {
     ...filter,
     meta: {

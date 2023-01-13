@@ -109,6 +109,34 @@ describe('updateFilter', () => {
     });
   });
 
+  test('should return the correct filter for the is operator for number field and no params given', () => {
+    const filter: Filter = {
+      $state: { store: FilterStateStore.GLOBAL_STATE },
+      ...buildQueryFilter({ query_string: { query: 'apache' } }, 'index1', '', {
+        key: 'test-field',
+      }),
+    };
+    const operator = {
+      message: 'is',
+      type: 'phrase',
+      negate: true,
+    };
+    const updatedFilter = updateFilter(filter, 'test-field', operator, undefined, 'number');
+    expect(updatedFilter).toStrictEqual({
+      $state: { store: 'globalState' },
+      meta: {
+        alias: '',
+        index: 'index1',
+        params: { query: 0 },
+        key: 'test-field',
+        negate: true,
+        type: 'phrase',
+        value: undefined,
+      },
+      query: { match_phrase: { 'test-field': 0 } },
+    });
+  });
+
   test('should return the correct filter for the range operator without params', () => {
     const filter: Filter = {
       $state: { store: FilterStateStore.GLOBAL_STATE },
