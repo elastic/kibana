@@ -98,6 +98,8 @@
       "@kbn/chart-icons/*": ["packages/kbn-chart-icons/*"],
       "@kbn/charts-plugin": ["src/plugins/charts"],
       "@kbn/charts-plugin/*": ["src/plugins/charts/*"],
+      "@kbn/check-mappings-update-cli": ["packages/kbn-check-mappings-update-cli"],
+      "@kbn/check-mappings-update-cli/*": ["packages/kbn-check-mappings-update-cli/*"],
       "@kbn/ci-stats-core": ["packages/kbn-ci-stats-core"],
       "@kbn/ci-stats-core/*": ["packages/kbn-ci-stats-core/*"],
       "@kbn/ci-stats-performance-metrics": ["packages/kbn-ci-stats-performance-metrics"],

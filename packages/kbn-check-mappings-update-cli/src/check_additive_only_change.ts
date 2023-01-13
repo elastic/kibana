@@ -5,8 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import assert from 'assert';
+
 import { get } from 'lodash';
+import { SomeDevLog } from '@kbn/some-dev-log';
+import { createFailError } from '@kbn/dev-cli-errors';
 import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-base-server-internal';
 
 function isObject(v: unknown): v is object {
@@ -19,10 +21,11 @@ function isObject(v: unknown): v is object {
  *    in current, check that the same field exists in next
  * 3. If we see any missing fields in next, throw an appropriate error
  */
-export function throwIfMappedFieldRemoved(
+export async function checkAdditiveOnlyChange(
+  log: SomeDevLog,
   current: SavedObjectsTypeMappingDefinitions,
   next: SavedObjectsTypeMappingDefinitions
-): { checkedCount: number } {
+) {
   let checkedCount = 0;
   const Os: Array<[path: string[], value: unknown]> = [[[], current]];
   const missingProps: string[] = [];
@@ -41,15 +44,12 @@ export function throwIfMappedFieldRemoved(
     }
   }
 
-  assert(
-    missingProps.length === 0,
-    `Removing mapped properties is disallowed. Properties found in current mappings but not in next mappings:\n${JSON.stringify(
-      missingProps,
-      null,
-      2
-    )}`
-  );
-  return {
-    checkedCount,
-  };
+  if (missingProps.length > 0) {
+    const props = JSON.stringify(missingProps, null, 2);
+    throw createFailError(
+      `Removing mapped properties is disallowed. Properties found in current mappings but not in next mappings:\n${props}`
+    );
+  }
+
+  log.success(`Checked ${checkedCount} existing properties. All present in extracted mappings.`);
 }

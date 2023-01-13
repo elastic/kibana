@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-require('../setup_node_env');
-require('./cli_compatible_mappings_check');
+require('../src/setup_node_env');
+require('@kbn/check-mappings-update-cli');

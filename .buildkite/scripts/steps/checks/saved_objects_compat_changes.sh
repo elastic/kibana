@@ -7,7 +7,11 @@ source .buildkite/scripts/common/util.sh
 export DISABLE_BOOTSTRAP_VALIDATION=false
 .buildkite/scripts/bootstrap.sh
 
-echo --- Saved objects compatible mappings check
-cmd="node src/cli_compatible_mappings_check/dev.js check"
+echo --- Check Mappings Update
+cmd="node scripts/check_mappings_update"
+if is_pr && ! is_auto_commit_disabled; then
+  cmd="$cmd --fix"
+fi
+
 eval "$cmd"
 check_for_changed_files "$cmd" true

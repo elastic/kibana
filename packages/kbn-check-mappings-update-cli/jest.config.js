@@ -6,5 +6,8 @@
  * Side Public License, v 1.
  */
 
-require('../setup_node_env/dist');
-require('./cli_compatible_mappings_check');
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-check-mappings-update-cli'],
+};

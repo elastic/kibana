@@ -761,6 +761,7 @@
     "@kbn/babel-register": "link:packages/kbn-babel-register",
     "@kbn/babel-transform": "link:packages/kbn-babel-transform",
     "@kbn/bazel-runner": "link:packages/kbn-bazel-runner",
+    "@kbn/check-mappings-update-cli": "link:packages/kbn-check-mappings-update-cli",
     "@kbn/ci-stats-core": "link:packages/kbn-ci-stats-core",
     "@kbn/ci-stats-performance-metrics": "link:packages/kbn-ci-stats-performance-metrics",
     "@kbn/ci-stats-reporter": "link:packages/kbn-ci-stats-reporter",

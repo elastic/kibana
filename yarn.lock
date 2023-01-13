@@ -4305,6 +4305,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/check-mappings-update-cli@link:packages/kbn-check-mappings-update-cli":
+  version "0.0.0"
+  uid ""
+
 "@kbn/web-worker-stub@link:packages/kbn-web-worker-stub":
   version "0.0.0"
   uid ""

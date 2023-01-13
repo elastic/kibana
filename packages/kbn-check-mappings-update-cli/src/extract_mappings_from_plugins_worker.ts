@@ -6,22 +6,28 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-base-server-internal';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { createRootWithCorePlugins } from '@kbn/core-test-helpers-kbn-server';
 import { PluginSystemOverrides } from '@kbn/core-plugins-server-internal';
 import { mergeTypes } from '@kbn/core-saved-objects-migration-server-internal';
 
-export async function extractMappingsFromPlugins(): Promise<SavedObjectsTypeMappingDefinitions> {
+(async () => {
+  if (!process.send) {
+    throw new Error('worker must be run in a node.js fork');
+  }
+
   PluginSystemOverrides.setAllPluginsEnabled();
   const root = createRootWithCorePlugins(
-    {},
+    {
+      logging: {
+        loggers: [{ name: 'root', level: 'info', appenders: ['console'] }],
+      },
+    },
     {
       basePath: false,
       cache: false,
       dev: true,
       disableOptimizer: true,
-      silent: true,
+      silent: false,
       dist: false,
       oss: false,
       runExamples: false,
@@ -32,7 +38,8 @@ export async function extractMappingsFromPlugins(): Promise<SavedObjectsTypeMapp
   await root.preboot();
   const { savedObjects } = await root.setup();
   const mappings = mergeTypes(savedObjects.getTypeRegistry().getAllTypes());
-  // Skip root.start, best effort shut down
-  await root.shutdown().catch(() => {});
-  return mappings;
-}
+  process.send({ mappings });
+})().catch((error) => {
+  process.stderr.write(`UNHANDLED ERROR: ${error.stack}`);
+  process.exit(1);
+});
