@@ -67,7 +67,7 @@
     "@kbn/share-plugin",
     "@kbn/core-notifications-browser",
     "@kbn/slo-schema",
-    "@kbn/core-http-server-internal"
+    "@kbn/core-http-server-internal",
   ],
   "exclude": [
     "target/**/*",
