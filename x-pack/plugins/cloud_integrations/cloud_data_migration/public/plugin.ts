@@ -48,12 +48,13 @@ export class CloudDataMigrationPlugin
     if (!cloud?.isCloudEnabled) {
       core.chrome.registerGlobalHelpExtensionMenuLink({
         linkType: 'custom',
+        target: '_blank',
         href: 'https://ela.st/cloud-migration',
         content: i18n.translate('xpack.cloudDataMigration.helpMenuMoveDataTitle', {
           defaultMessage: 'Move data to Elastic Cloud',
         }),
         'data-test-subj': 'migrate_data_to_cloud__help_menu_link',
-        priority: 999, // We want this link to be at the very top.
+        priority: 200,
       });
     }
   }

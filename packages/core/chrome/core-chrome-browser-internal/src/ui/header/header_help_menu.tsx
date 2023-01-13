@@ -8,6 +8,7 @@
 
 import React, { Component, Fragment } from 'react';
 import { combineLatest, Observable, Subscription } from 'rxjs';
+import { noop } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -264,10 +265,10 @@ export class HeaderHelpMenu extends Component<Props, State> {
             });
           }
           case 'custom': {
-            const { linkType, content: text, href, ...rest } = link;
+            const { linkType, content: text, href, external, ...rest } = link;
             return createCustomLink(index, text, addSpacer, {
               href,
-              onClick: this.createOnClickHandler(href, navigateToUrl),
+              onClick: external ? noop : this.createOnClickHandler(href, navigateToUrl),
               ...rest,
             });
           }
