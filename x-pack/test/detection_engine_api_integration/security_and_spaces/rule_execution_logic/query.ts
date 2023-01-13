@@ -22,8 +22,10 @@ import {
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
 import { orderBy } from 'lodash';
+import { v4 as uuidv4 } from 'uuid';
 
 import { QueryRuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/detection_engine/rule_monitoring';
 import { Ancestor } from '@kbn/security-solution-plugin/server/lib/detection_engine/signals/types';
 import {
   ALERT_ANCESTORS,
@@ -42,6 +44,8 @@ import {
   previewRule,
 } from '../../utils';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { indexDocumentsFactory } from '../../utils/data_generator';
+import { patchRule } from '../../utils/patch_rule';
 
 /**
  * Specific _id to use for some of the tests. If the archiver changes and you see errors
@@ -78,7 +82,7 @@ export default ({ getService }: FtrProviderContext) => {
       await deleteAllAlerts(supertest, log);
     });
 
-    // First test creates a real rule - remaining tests use preview API
+    // First test creates a real rule - most remaining tests use preview API
     it('should have the specific audit record for _id or none of these tests below will pass', async () => {
       const rule: QueryRuleCreateProps = {
         ...getRuleForSignalTesting(['auditbeat-*']),
@@ -721,6 +725,105 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       describe('with a suppression time window', async () => {
+        const indexDocuments = indexDocumentsFactory({
+          es,
+          index: 'ecs_compliant',
+          log,
+        });
+
+        before(async () => {
+          await esArchiver.load(
+            'x-pack/test/functional/es_archives/security_solution/ecs_compliant'
+          );
+        });
+
+        after(async () => {
+          await esArchiver.unload(
+            'x-pack/test/functional/es_archives/security_solution/ecs_compliant'
+          );
+        });
+
+        it('should update an alert using real rule executions', async () => {
+          const id = uuidv4();
+          const firstTimestamp = new Date().toISOString();
+          const firstDocument = {
+            id,
+            '@timestamp': firstTimestamp,
+            agent: {
+              name: 'agent-1',
+            },
+          };
+          await indexDocuments([firstDocument, firstDocument]);
+
+          const rule: QueryRuleCreateProps = {
+            ...getRuleForSignalTesting(['ecs_compliant']),
+            rule_id: 'rule-2',
+            query: `id:${id}`,
+            alert_suppression: {
+              group_by: ['agent.name'],
+              duration: {
+                value: 300,
+                unit: 'm',
+              },
+            },
+          };
+          const createdRule = await createRule(supertest, log, rule);
+          const alerts = await getOpenSignals(supertest, log, es, createdRule);
+          expect(alerts.hits.hits.length).eql(1);
+          expect(alerts.hits.hits[0]._source).to.eql({
+            ...alerts.hits.hits[0]._source,
+            [ALERT_SUPPRESSION_TERMS]: [
+              {
+                field: 'agent.name',
+                value: 'agent-1',
+              },
+            ],
+            [ALERT_ORIGINAL_TIME]: firstTimestamp,
+            [ALERT_SUPPRESSION_START]: firstTimestamp,
+            [ALERT_SUPPRESSION_END]: firstTimestamp,
+            [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+          });
+
+          const secondTimestamp = new Date();
+          const secondTimestampISOString = secondTimestamp.toISOString();
+          const secondDocument = {
+            id,
+            '@timestamp': secondTimestampISOString,
+            agent: {
+              name: 'agent-1',
+            },
+          };
+          // Add a new document, then disable and re-enable to trigger another rule run. The second doc should
+          // trigger an update to the existing alert without changing the timestamp
+          await indexDocuments([secondDocument, secondDocument]);
+          await patchRule(supertest, log, { id: createdRule.id, enabled: false });
+          await patchRule(supertest, log, { id: createdRule.id, enabled: true });
+          const secondAlerts = await getOpenSignals(
+            supertest,
+            log,
+            es,
+            createdRule,
+            RuleExecutionStatus.succeeded,
+            undefined,
+            secondTimestamp
+          );
+          expect(secondAlerts.hits.hits.length).eql(1);
+          expect(secondAlerts.hits.hits[0]._source).to.eql({
+            ...secondAlerts.hits.hits[0]._source,
+            [TIMESTAMP]: alerts.hits.hits[0]._source?.[TIMESTAMP],
+            [ALERT_SUPPRESSION_TERMS]: [
+              {
+                field: 'agent.name',
+                value: 'agent-1',
+              },
+            ],
+            [ALERT_ORIGINAL_TIME]: firstTimestamp,
+            [ALERT_SUPPRESSION_START]: firstTimestamp,
+            [ALERT_SUPPRESSION_END]: secondTimestampISOString,
+            [ALERT_SUPPRESSION_DOCS_COUNT]: 3,
+          });
+        });
+
         it('should generate an alert per rule run when duration is less than rule interval', async () => {
           const rule: QueryRuleCreateProps = {
             ...getRuleForSignalTesting(['suppression-data']),
