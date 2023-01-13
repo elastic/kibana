@@ -24,7 +24,6 @@ import {
   httpServiceMock,
   overlayServiceMock,
   notificationServiceMock,
-  savedObjectsServiceMock,
   applicationServiceMock,
 } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -85,7 +84,6 @@ describe('SavedObjectsTable', () => {
   let http: ReturnType<typeof httpServiceMock.createStartContract>;
   let overlays: ReturnType<typeof overlayServiceMock.createStartContract>;
   let notifications: ReturnType<typeof notificationServiceMock.createStartContract>;
-  let savedObjects: ReturnType<typeof savedObjectsServiceMock.createStartContract>;
   let search: ReturnType<typeof dataPluginMock.createStartContract>['search'];
 
   const shallowRender = (overrides: Partial<SavedObjectsTableProps> = {}) => {
@@ -104,7 +102,6 @@ describe('SavedObjectsTable', () => {
     http = httpServiceMock.createStartContract();
     overlays = overlayServiceMock.createStartContract();
     notifications = notificationServiceMock.createStartContract();
-    savedObjects = savedObjectsServiceMock.createStartContract();
     search = dataPluginMock.createStartContract().search;
 
     const applications = applicationServiceMock.createStartContract();
