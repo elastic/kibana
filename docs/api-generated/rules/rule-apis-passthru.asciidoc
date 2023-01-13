@@ -1048,8 +1048,12 @@ Any modifications made to this file will be overwritten.
     <div class='model-description'></div>
     <div class="field-items">
       <div class="param">error (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">Unauthorized</div>
 <div class="param">message (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
 <div class="param">statusCode (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">401</div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -1057,8 +1061,12 @@ Any modifications made to this file will be overwritten.
     <div class='model-description'></div>
     <div class="field-items">
       <div class="param">error (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">Not Found</div>
 <div class="param">message (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
 <div class="param">statusCode (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">404</div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">

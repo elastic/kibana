@@ -1461,14 +1461,20 @@
         "properties": {
           "error": {
             "type": "string",
-            "example": "Unauthorized"
+            "example": "Unauthorized",
+            "enum": [
+              "Unauthorized"
+            ]
           },
           "message": {
             "type": "string"
           },
           "statusCode": {
             "type": "integer",
-            "example": 401
+            "example": 401,
+            "enum": [
+              401
+            ]
           }
         }
       },
@@ -1477,7 +1483,10 @@
         "properties": {
           "error": {
             "type": "string",
-            "example": "Not Found"
+            "example": "Not Found",
+            "enum": [
+              "Not Found"
+            ]
           },
           "message": {
             "type": "string",
@@ -1485,7 +1494,10 @@
           },
           "statusCode": {
             "type": "integer",
-            "example": 404
+            "example": 404,
+            "enum": [
+              404
+            ]
           }
         }
       },
