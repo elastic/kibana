@@ -81,6 +81,16 @@ export const createMockedIndexPattern = (someProps?: Partial<IndexPattern>): Ind
       lang: 'painless' as const,
       script: '1234',
     },
+    {
+      name: 'runtime',
+      displayName: 'RuntimeField',
+      type: 'string',
+      searchable: true,
+      aggregatable: true,
+      runtime: true,
+      lang: 'painless' as const,
+      script: '1234',
+    },
   ];
   return {
     id: '1',

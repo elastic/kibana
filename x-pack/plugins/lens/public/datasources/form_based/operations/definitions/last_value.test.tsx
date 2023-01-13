@@ -267,6 +267,26 @@ describe('last_value', () => {
       ).toBeTruthy();
     });
 
+    it('should set show array values if field is a runtime field', () => {
+      const oldColumn: LastValueIndexPatternColumn = {
+        operationType: 'last_value',
+        sourceField: 'bytes',
+        label: 'Last value of bytes',
+        isBucketed: false,
+        dataType: 'number',
+        params: {
+          sortField: 'datefield',
+          showArrayValues: false,
+        },
+      };
+      const indexPattern = createMockedIndexPattern();
+      const field = indexPattern.fields.find((i) => i.runtime)!;
+
+      expect(
+        lastValueOperation.onFieldChange(oldColumn, field).params.showArrayValues
+      ).toBeTruthy();
+    });
+
     it('should preserve show array values setting if field is not scripted', () => {
       const oldColumn: LastValueIndexPatternColumn = {
         operationType: 'last_value',
@@ -484,7 +504,10 @@ describe('last_value', () => {
       const indexPattern = createMockedIndexPattern();
 
       const scriptedField = indexPattern.fields.find((field) => field.scripted);
-      const nonScriptedField = indexPattern.fields.find((field) => !field.scripted);
+      const runtimeField = indexPattern.fields.find((field) => field.runtime);
+      const nonScriptedField = indexPattern.fields.find(
+        (field) => !field.scripted && !field.runtime
+      );
 
       const localLayer = {
         columns: {
@@ -505,6 +528,14 @@ describe('last_value', () => {
           indexPattern,
           layer: localLayer,
           field: scriptedField!,
+        }).params.showArrayValues
+      ).toBeTruthy();
+
+      expect(
+        lastValueOperation.buildColumn({
+          indexPattern,
+          layer: localLayer,
+          field: runtimeField!,
         }).params.showArrayValues
       ).toBeTruthy();
 
@@ -801,6 +832,24 @@ describe('last_value', () => {
 
         expect(new Harness(instance).showArrayValuesSwitchDisabled).toBeTruthy();
       });
+
+      it('should set showArrayValues and disable switch when runtime field', () => {
+        (layer.columns.col2 as LastValueIndexPatternColumn).sourceField = 'runtime';
+
+        const updateLayerSpy = jest.fn();
+        const instance = shallow(
+          <InlineOptions
+            {...defaultProps}
+            layer={layer}
+            paramEditorUpdater={updateLayerSpy}
+            columnId="col2"
+            currentColumn={layer.columns.col2 as LastValueIndexPatternColumn}
+          />
+        );
+
+        expect(new Harness(instance).showArrayValuesSwitchDisabled).toBeTruthy();
+      });
+
       it('should not display an array for the last value if the column is referenced', () => {
         const updateLayerSpy = jest.fn();
         const instance = shallow(
