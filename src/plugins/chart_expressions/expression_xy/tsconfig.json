@@ -30,6 +30,7 @@
     "@kbn/ui-theme",
     "@kbn/analytics",
     "@kbn/kibana-react-plugin",
+    "@kbn/chart-expressions-common",
   ],
   "exclude": [
     "target/**/*",

@@ -12,6 +12,8 @@ import {
   EuiButton,
   EuiCallOut,
   EuiEmptyPrompt,
+  EuiFlexItem,
+  EuiFlexGroup,
   EuiFormRow,
   EuiSpacer,
   EuiSwitch,
@@ -42,6 +44,13 @@ const groupResultsMessage = i18n.translate(
   'xpack.aiops.spikeAnalysisTable.groupedSwitchLabel.groupResults',
   {
     defaultMessage: 'Group results',
+  }
+);
+const groupResultsHelpMessage = i18n.translate(
+  'xpack.aiops.spikeAnalysisTable.groupedSwitchLabel.groupResultsHelpMessage',
+  {
+    defaultMessage:
+      'In expanded row, field/value pairs which do not appear in other groups are marked by an asterisk (*).',
   }
 );
 
@@ -228,16 +237,31 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
         </>
       ) : null}
       {showSpikeAnalysisTable && foundGroups && (
-        <EuiFormRow display="columnCompressedSwitch" label={groupResultsMessage}>
-          <EuiSwitch
-            data-test-subj={`aiopsExplainLogRateSpikesGroupSwitch${groupResults ? ' checked' : ''}`}
-            showLabel={false}
-            label={''}
-            checked={groupResults}
-            onChange={onSwitchToggle}
-            compressed
-          />
-        </EuiFormRow>
+        <>
+          <EuiFlexGroup direction="column" gutterSize="none">
+            <EuiFlexItem>
+              <EuiFormRow display="columnCompressedSwitch" label={groupResultsMessage}>
+                <EuiSwitch
+                  data-test-subj={`aiopsExplainLogRateSpikesGroupSwitch${
+                    groupResults ? ' checked' : ''
+                  }`}
+                  showLabel={false}
+                  label={''}
+                  checked={groupResults}
+                  onChange={onSwitchToggle}
+                  compressed
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              {groupResults && (
+                <EuiFormRow helpText={groupResultsHelpMessage}>
+                  <></>
+                </EuiFormRow>
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
       )}
       <EuiSpacer size="xs" />
       {!isRunning && !showSpikeAnalysisTable && (
