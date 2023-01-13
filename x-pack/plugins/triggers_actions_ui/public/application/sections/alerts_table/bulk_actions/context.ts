@@ -12,7 +12,7 @@ export const BulkActionsContext = createContext<
   [BulkActionsState, React.Dispatch<BulkActionsReducerAction>]
 >([
   {
-    rowSelection: new Set<number>(),
+    rowSelection: new Map<number, boolean>(),
     isAllSelected: false,
     areAllVisibleRowsSelected: false,
     rowCount: 0,

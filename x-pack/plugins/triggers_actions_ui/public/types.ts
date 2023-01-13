@@ -537,16 +537,19 @@ export enum BulkActionsVerbs {
   selectCurrentPage = 'selectCurrentPage',
   selectAll = 'selectAll',
   rowCountUpdate = 'rowCountUpdate',
+  setRowLoading = 'setRowLoading',
+  setAllRowLoading = 'setAllRowLoading',
 }
 
 export interface BulkActionsReducerAction {
   action: BulkActionsVerbs;
   rowIndex?: number;
   rowCount?: number;
+  isLoading?: boolean;
 }
 
 export interface BulkActionsState {
-  rowSelection: Set<number>;
+  rowSelection: Map<number, boolean>; // number = selected index, boolean = is loading
   isAllSelected: boolean;
   areAllVisibleRowsSelected: boolean;
   rowCount: number;

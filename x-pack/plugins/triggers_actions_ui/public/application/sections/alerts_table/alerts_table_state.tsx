@@ -187,7 +187,7 @@ const AlertsTableState = ({
   }, []);
 
   const initialBulkActionsState = useReducer(bulkActionsReducer, {
-    rowSelection: new Set<number>(),
+    rowSelection: new Map<number, boolean>(),
     isAllSelected: false,
     areAllVisibleRowsSelected: false,
     rowCount: alerts.length,

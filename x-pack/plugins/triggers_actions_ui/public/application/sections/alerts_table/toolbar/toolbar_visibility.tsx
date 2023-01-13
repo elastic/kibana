@@ -74,7 +74,7 @@ export const getToolbarVisibility = ({
 }: {
   bulkActions: BulkActionsConfig[];
   alertsCount: number;
-  rowSelection: Set<number>;
+  rowSelection: Map<number, boolean>;
   alerts: EcsFieldsResponse[];
   isLoading: boolean;
   updatedAt: number;

@@ -40,9 +40,9 @@ const containerStyles = { display: 'inline-block', position: 'relative' } as con
 
 const selectedIdsToTimelineItemMapper = (
   alerts: EcsFieldsResponse[],
-  rowSelection: Set<number>
+  rowSelection: Map<number, boolean>
 ): TimelineItem[] => {
-  return Array.from(rowSelection.values()).map((rowIndex: number) => {
+  return Array.from(rowSelection.keys()).map((rowIndex: number) => {
     const alert = alerts[rowIndex];
     return {
       _id: alert._id,
