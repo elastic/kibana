@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import execa from 'execa';
 import { FtrConfigProviderContext } from '@kbn/test';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { services } from './services';
@@ -16,6 +17,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xpackFunctionalTestsConfig = await readConfigFile(
     require.resolve('../functional/config.base.js')
   );
+
+  const hostIp = execa.commandSync(
+    "ipconfig getifaddr `scutil --dns |awk -F'[()]' '$1~/if_index/ {print $2;exit;}'`",
+    { shell: true }
+  ).stdout;
 
   return {
     ...kibanaCommonTestsConfig.getAll(),
@@ -41,6 +47,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         // define custom kibana server args here
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
         // always install Endpoint package by default when Fleet sets up
+        `--xpack.fleet.agents.fleet_server.hosts=["https://${hostIp}:8220"]`,
+        `--xpack.fleet.agents.elasticsearch.host=http://${hostIp}:${kibanaCommonTestsConfig.get(
+          'servers.elasticsearch.port'
+        )}`,
         `--xpack.fleet.packages.0.name=endpoint`,
         `--xpack.fleet.packages.0.version=latest`,
       ],
