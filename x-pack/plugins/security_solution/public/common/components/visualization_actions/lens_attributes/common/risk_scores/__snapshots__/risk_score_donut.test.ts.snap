@@ -29,7 +29,7 @@ Object {
               "f04a71a3-399f-4d32-9efc-8a005e989991": Object {
                 "dataType": "number",
                 "isBucketed": false,
-                "label": "Count of records",
+                "label": "Total",
                 "operationType": "count",
                 "params": Object {
                   "emptyAsNull": true,

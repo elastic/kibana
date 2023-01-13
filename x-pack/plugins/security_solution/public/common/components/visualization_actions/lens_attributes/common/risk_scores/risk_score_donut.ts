@@ -45,7 +45,7 @@ export const getRiskScoreDonutAttributes: GetLensAttributes = (
           '4aa7cf71-cf20-4e62-8ca6-ca6be6b0988b': {
             columns: {
               'f04a71a3-399f-4d32-9efc-8a005e989991': {
-                label: 'Count of records',
+                label: 'Total',
                 dataType: 'number',
                 operationType: 'count',
                 isBucketed: false,
