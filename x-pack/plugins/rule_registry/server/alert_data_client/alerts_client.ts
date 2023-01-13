@@ -782,7 +782,20 @@ export class AlertsClient {
     }
   }
 
+  /**
+   * This function updates the case ids of multiple alerts per index.
+   * It is supposed to be used only by Cases.
+   * Cases implements its own RBAC. By using this function directly
+   * Cases RBAC is bypassed.
+   * Plugins that want to attach alerts to a case should use the
+   * cases client that does all the necessary cases RBAC checks
+   * before updating the alert with the case ids.
+   */
   public async bulkUpdateCases({ ids, index, caseIds }: BulkUpdateCasesOptions) {
+    if (ids.length === 0) {
+      throw Boom.badRequest('You need to define at least one alert to update case ids');
+    }
+
     /**
      * We do this check to avoid any mget calls or authorization checks.
      * The check below does not ensure that an alert may exceed the limit.
