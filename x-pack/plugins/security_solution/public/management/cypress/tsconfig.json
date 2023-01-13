@@ -22,8 +22,6 @@
       "path": "../../../tsconfig.json",
       "force": true
     },
-    "@kbn/security-plugin",
-    "@kbn/securitysolution-list-constants",
-    "@kbn/fleet-plugin"
+    "@kbn/security-plugin"
   ]
 }
