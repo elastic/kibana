@@ -53,7 +53,7 @@ export const EnginesList: React.FC = () => {
             <EuiButton
               fill
               iconType="plusInCircle"
-              data-test-subj="enterpriseSearchContentEnginesCreationButton"
+              data-test-subj="enterprise-search-content-engines-creation-button"
               href={'TODO'}
             >
               {i18n.translate('xpack.enterpriseSearch.content.engines.createEngineButtonLabel', {
@@ -71,7 +71,7 @@ export const EnginesList: React.FC = () => {
             defaultMessage="Engines allow you to query indexed data with a complete set of relevance, analytics and personalization tools. To learn more about how engines work in Enterprise search {documentationUrl}"
             values={{
               documentationUrl: (
-                <EuiLink data-test-subj="documentationLink" href="TODO" target="_blank">
+                <EuiLink data-test-subj="engines-documentation-link" href="TODO" target="_blank">
                   {' '}
                   {/* TODO: navigate to documentation url */}{' '}
                   {i18n.translate('xpack.enterpriseSearch.content.engines.documentation', {

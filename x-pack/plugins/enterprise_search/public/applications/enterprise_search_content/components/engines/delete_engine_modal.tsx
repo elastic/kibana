@@ -12,6 +12,7 @@ import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { EnginesListLogic } from './engines_list_logic';
+import { CANCEL_BUTTON_LABEL } from '../../../shared/constants';
 
 export const DeleteEngineModal: React.FC = () => {
   const { closeDeleteEngineModal, deleteEngine } = useActions(EnginesListLogic);
@@ -27,18 +28,11 @@ export const DeleteEngineModal: React.FC = () => {
         title={i18n.translate('xpack.enterpriseSearch.content.engineList.deleteEngineModal.title', {
           defaultMessage: 'Permanently delete this engine?',
         })}
-        onCancel={() => {
-          closeDeleteEngineModal();
-        }}
+        onCancel={closeDeleteEngineModal}
         onConfirm={() => {
           deleteEngine({ engineName });
         }}
-        cancelButtonText={i18n.translate(
-          'xpack.enterpriseSearch.content.engineList.deleteEngineModal.closeButton.title',
-          {
-            defaultMessage: 'Cancel',
-          }
-        )}
+        cancelButtonText={CANCEL_BUTTON_LABEL}
         confirmButtonText={i18n.translate(
           'xpack.enterpriseSearch.content.engineList.deleteEngineModal.confirmButton.title',
           {

@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 import { Actions, createApiLogic } from '../../../shared/api_logic/create_api_logic';
+import { flashAPIErrors } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 
 export interface DeleteEnginesApiLogicArguments {
@@ -21,7 +22,12 @@ export const deleteEngine = async ({
   engineName,
 }: DeleteEnginesApiLogicArguments): Promise<DeleteEnginesApiLogicResponse> => {
   const route = `/internal/enterprise_search/engines/${engineName}`;
-  await HttpLogic.values.http.delete<DeleteEnginesApiLogicResponse>(route);
+  try{
+    await HttpLogic.values.http.delete<DeleteEnginesApiLogicResponse>(route);
+  }
+  catch(e){
+    flashAPIErrors(e);
+  }
   return { engineName };
 };
 export const DeleteEngineAPILogic = createApiLogic(
