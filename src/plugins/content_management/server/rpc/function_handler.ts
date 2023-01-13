@@ -23,6 +23,8 @@ interface Registry<Context> {
 export class FunctionHandler<Context> {
   private registry: Registry<Context> = {};
 
+  // constructor(private contentRegistry: ContentRegistry) {}
+
   register(fnName: Calls, config: CallConfig<Context>) {
     this.registry[fnName] = config;
   }
@@ -33,12 +35,12 @@ export class FunctionHandler<Context> {
     input: any
   ): Promise<{ token?: string; result?: any }> {
     // TODO: validate input
+    // const config = this.contentRegistry.getConfig(); // TODO: we need a way to know the content type here
 
     const handler = this.registry[fnName];
     if (!handler) throw new Error(`Handler missing for ${fnName}`);
 
     const result = await handler.fn(context, input);
-
     // TODO: validate result
 
     return { result };

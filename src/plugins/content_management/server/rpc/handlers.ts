@@ -21,7 +21,7 @@ import { schemas } from '../../common';
 import { FunctionHandler } from './function_handler';
 import { Context } from './types';
 
-export function initRpcHandlers(fnHandler: FunctionHandler<Context>) {
+export function initRpcHandlers({ fnHandler }: { fnHandler: FunctionHandler<Context> }) {
   fnHandler.register('search', {
     schemas: schemas.api.search,
     fn: async (ctx, input: SearchIn): Promise<SearchOut> => {

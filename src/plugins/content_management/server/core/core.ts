@@ -31,7 +31,7 @@ export class ContentCore {
     this.searchIndex = new ContentSearchIndex({ logger });
   }
 
-  setup(): ContentCoreApi {
+  setup(): { contentRegistry: ContentRegistry; api: ContentCoreApi } {
     const crud = (contentType: string) => {
       return new ContentCrud(contentType, {
         contentRegistry: this.contentRegistry,
@@ -46,10 +46,13 @@ export class ContentCore {
     });
 
     return {
-      register: this.contentRegistry.register.bind(this.contentRegistry),
-      crud,
-      eventBus: this.eventBus,
-      searchIndexer: this.searchIndex,
+      contentRegistry: this.contentRegistry,
+      api: {
+        register: this.contentRegistry.register.bind(this.contentRegistry),
+        crud,
+        eventBus: this.eventBus,
+        searchIndexer: this.searchIndex,
+      },
     };
   }
 

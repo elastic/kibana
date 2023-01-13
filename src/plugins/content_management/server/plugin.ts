@@ -34,10 +34,11 @@ export class ContentManagementPlugin implements Plugin {
   public setup(core: CoreSetup) {
     this.logger.info(`>>>> [${PLUGIN_ID}] setup...`);
 
-    this.coreApi = this.contentCore.setup();
+    const { api } = this.contentCore.setup();
+    this.coreApi = api;
 
     const fnHandler = new FunctionHandler<RpcContext>();
-    initRpcHandlers(fnHandler);
+    initRpcHandlers({ fnHandler });
 
     const router = core.http.createRouter();
 
