@@ -22,6 +22,7 @@ import {
   useEuiTheme,
   EuiIcon,
   EuiScreenReaderOnly,
+  EuiButton,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -65,6 +66,7 @@ export const PackageListGrid: FunctionComponent<Props> = ({
   selectedCategory,
   setSelectedCategory,
   categories,
+  subCategories,
   showMissingIntegrationMessage = false,
   callout,
   showCardLabels = true,
@@ -114,6 +116,10 @@ export const PackageListGrid: FunctionComponent<Props> = ({
     return promoteFeaturedIntegrations(filteredList, selectedCategory);
   }, [isLoading, list, localSearchRef, searchTerm, selectedCategory]);
 
+  const selectedSubCategories = useMemo(() => {
+    return subCategories?.filter((c) => c.parent_id === selectedCategory);
+  }, [selectedCategory, subCategories]);
+
   let gridContent: JSX.Element;
 
   if (isLoading || !localSearchRef.current) {
@@ -136,7 +142,11 @@ export const PackageListGrid: FunctionComponent<Props> = ({
           gutterSize="xl"
           data-test-subj="epmList.integrationCards"
         >
-          <EuiFlexItem grow={1} className={isSticky ? 'kbnStickyMenu' : ''}>
+          <EuiFlexItem
+            data-test-subj="epmList.controlsSideColumn"
+            grow={1}
+            className={isSticky ? 'kbnStickyMenu' : ''}
+          >
             <ControlsColumn controls={controls} title={title} sticky={isSticky} />
           </EuiFlexItem>
           <EuiFlexItem grow={5}>
@@ -192,6 +202,25 @@ export const PackageListGrid: FunctionComponent<Props> = ({
                 ) : undefined
               }
             />
+            {/* TODO: hide under feature flag */}
+            {selectedSubCategories?.length ? <EuiSpacer /> : null}
+            <EuiFlexGroup
+              data-test-subj="epmList.subcategoriesRow"
+              justifyContent="flexStart"
+              direction="row"
+              gutterSize="s"
+            >
+              {selectedSubCategories?.map((subCategory) => (
+                <EuiFlexItem grow={0}>
+                  <EuiButton color="text" onClick={() => undefined} key={subCategory.id}>
+                    <FormattedMessage
+                      id="xpack.fleet.epmList.subcategoriesButton"
+                      defaultMessage={`${subCategory.title} (${subCategory.count})`}
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
             {callout ? (
               <>
                 <EuiSpacer />

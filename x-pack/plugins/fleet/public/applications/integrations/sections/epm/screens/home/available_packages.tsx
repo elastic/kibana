@@ -98,8 +98,6 @@ function OnPremLink() {
   );
 }
 
-// TODO: clintandrewhall - this component is hard to test due to the hooks, particularly those that use `http`
-// or `location` to load data.  Ideally, we'll split this into "connected" and "pure" components.
 export const AvailablePackages: React.FC<{}> = ({}) => {
   const history = useHistory();
   useBreadcrumbs('integrations_all');
@@ -107,7 +105,7 @@ export const AvailablePackages: React.FC<{}> = ({}) => {
   const {
     initialSelectedCategory,
     selectedCategory,
-    categories,
+    allCategories,
     mainCategories,
     subCategories,
     preference,
@@ -124,11 +122,10 @@ export const AvailablePackages: React.FC<{}> = ({}) => {
     setUrlSearchTerm,
   } = useAvailablePackages();
 
-  if (!isLoadingCategories && !categoryExists(initialSelectedCategory, categories)) {
+  if (!isLoadingCategories && !categoryExists(initialSelectedCategory, allCategories)) {
     history.replace(pagePathGetters.integrations_all({ category: '', searchTerm: searchParam })[1]);
     return null;
   }
-
   // TODO: Move controls to their own component
   let controls = [
     <EuiFlexItem grow={false}>

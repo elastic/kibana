@@ -191,7 +191,7 @@ export const useAvailablePackages = () => {
 
   const subCategories = eprCategories?.items.filter((item) => item.parent_id !== undefined);
 
-  const categories: CategoryFacet[] = useMemo(() => {
+  const allCategories: CategoryFacet[] = useMemo(() => {
     const eprAndCustomCategories: CategoryFacet[] = isLoadingCategories
       ? []
       : mergeCategoriesAndCount(
@@ -209,12 +209,12 @@ export const useAvailablePackages = () => {
     ];
   }, [cards, eprCategories, isLoadingCategories]);
 
-  const mainCategories = xorBy(categories, subCategories, 'id');
+  const mainCategories = xorBy(allCategories, subCategories, 'id');
 
   return {
     initialSelectedCategory,
     selectedCategory,
-    categories,
+    allCategories,
     mainCategories,
     subCategories,
     preference,
