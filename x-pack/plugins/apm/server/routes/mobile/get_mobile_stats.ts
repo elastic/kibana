@@ -13,6 +13,7 @@ import {
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   SERVICE_NAME,
+  TRANSACTION_TYPE,
   SESSION_ID,
   SPAN_SUBTYPE,
   APP_LAUNCH_TIME,
@@ -74,7 +75,6 @@ export async function getMobileStats({
         ProcessorEvent.error,
         ProcessorEvent.metric,
         ProcessorEvent.transaction,
-        ProcessorEvent.span,
       ],
     },
     body: {
@@ -84,6 +84,7 @@ export async function getMobileStats({
         bool: {
           filter: [
             ...termQuery(SERVICE_NAME, serviceName),
+            ...termQuery(TRANSACTION_TYPE, transactionType),
             ...rangeQuery(start, end),
             ...environmentQuery(environment),
             ...kqlQuery(kuery),

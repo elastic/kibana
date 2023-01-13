@@ -14,7 +14,6 @@ import {
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
 import {
   SERVICE_NAME,
-  TRANSACTION_TYPE,
   SESSION_ID,
   TRANSACTION_NAME,
 } from '../../../common/es_fields/apm';
@@ -74,7 +73,6 @@ async function getSessionTimeseries({
           filter: [
             { exists: { field: SESSION_ID } },
             ...termQuery(SERVICE_NAME, serviceName),
-            ...termQuery(TRANSACTION_TYPE, transactionType),
             ...termQuery(TRANSACTION_NAME, transactionName),
             ...rangeQuery(startWithOffset, endWithOffset),
             ...environmentQuery(environment),
