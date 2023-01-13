@@ -26,10 +26,11 @@ import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/t
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { usePageUrlState } from '@kbn/ml-url-state';
+import { useTimefilter } from '@kbn/ml-date-picker';
 import { useModelActions } from './model_actions';
 import { ModelsTableToConfigMapping } from '.';
 import { ModelsBarStats, StatsBar } from '../../components/stats_bar';
-import { useMlKibana, useTimefilter } from '../../contexts/kibana';
+import { useMlKibana } from '../../contexts/kibana';
 import { useTrainedModelsApiService } from '../../services/ml_api_service/trained_models';
 import {
   ModelPipelines,

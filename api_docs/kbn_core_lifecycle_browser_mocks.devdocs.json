@@ -58,7 +58,19 @@
                 "section": "def-common.ApplicationSetup",
                 "text": "ApplicationSetup"
               },
-              ">; docLinks: jest.Mock<any, any>; executionContext: jest.Mocked<",
+              ">; customBranding: { customBranding$: ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/core-custom-branding-common",
+                "scope": "common",
+                "docId": "kibKbnCoreCustomBrandingCommonPluginApi",
+                "section": "def-common.CustomBranding",
+                "text": "CustomBranding"
+              },
+              ">; hasCustomBranding$: ",
+              "Observable",
+              "<boolean>; }; docLinks: jest.Mock<any, any>; executionContext: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-execution-context-browser",
                 "scope": "common",
@@ -100,7 +112,19 @@
               },
               "<",
               "InternalChromeStart",
-              ">; docLinks: ",
+              ">; customBranding: { customBranding$: ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/core-custom-branding-common",
+                "scope": "common",
+                "docId": "kibKbnCoreCustomBrandingCommonPluginApi",
+                "section": "def-common.CustomBranding",
+                "text": "CustomBranding"
+              },
+              ">; hasCustomBranding$: ",
+              "Observable",
+              "<boolean>; }; docLinks: ",
               {
                 "pluginId": "@kbn/core-doc-links-browser",
                 "scope": "common",
@@ -333,7 +357,19 @@
               },
               "<",
               "InternalChromeStart",
-              ">; docLinks: ",
+              ">; customBranding: { customBranding$: ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/core-custom-branding-common",
+                "scope": "common",
+                "docId": "kibKbnCoreCustomBrandingCommonPluginApi",
+                "section": "def-common.CustomBranding",
+                "text": "CustomBranding"
+              },
+              ">; hasCustomBranding$: ",
+              "Observable",
+              "<boolean>; }; docLinks: ",
               {
                 "pluginId": "@kbn/core-doc-links-browser",
                 "scope": "common",

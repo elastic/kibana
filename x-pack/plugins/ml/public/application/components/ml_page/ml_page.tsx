@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import React, { createContext, FC, useMemo, useState } from 'react';
+import React, { createContext, FC, useEffect, useMemo, useState } from 'react';
+import { Subscription } from 'rxjs';
 import { EuiPageContentBody_Deprecated as EuiPageContentBody } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import type { AppMountParameters } from '@kbn/core/public';
 import { KibanaPageTemplate, RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
 import { createHtmlPortalNode, HtmlPortalNode } from 'react-reverse-portal';
+import { DatePickerWrapper } from '@kbn/ml-date-picker';
 import { MlPageHeaderRenderer } from '../page_header/page_header';
 import { useSideNavItems } from './side_nav';
 import * as routes from '../../routing/routes';
 import { MlPageWrapper } from '../../routing/ml_page_wrapper';
 import { useMlKibana, useNavigateToPath } from '../../contexts/kibana';
 import { MlRoute, PageDependencies } from '../../routing/router';
-import { DatePickerWrapper } from '../navigation_menu/date_picker_wrapper';
 import { useActiveRoute } from '../../routing/use_active_route';
 import { useDocTitle } from '../../routing/use_doc_title';
 
@@ -43,11 +44,28 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
   const {
     services: {
       http: { basePath },
+      mlServices: { httpService },
     },
   } = useMlKibana();
 
   const headerPortalNode = useMemo(() => createHtmlPortalNode(), []);
   const [isHeaderMounted, setIsHeaderMounted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const subscriptions = new Subscription();
+
+    subscriptions.add(
+      httpService.getLoadingCount$.subscribe((v) => {
+        setIsLoading(v !== 0);
+      })
+    );
+
+    return function cleanup() {
+      subscriptions.unsubscribe();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const routeList = useMemo(
     () =>
@@ -61,8 +79,8 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
   const activeRoute = useActiveRoute(routeList);
 
   const rightSideItems = useMemo(() => {
-    return [...(activeRoute.enableDatePicker ? [<DatePickerWrapper />] : [])];
-  }, [activeRoute.enableDatePicker]);
+    return [...(activeRoute.enableDatePicker ? [<DatePickerWrapper isLoading={isLoading} />] : [])];
+  }, [activeRoute.enableDatePicker, isLoading]);
 
   useDocTitle(activeRoute);
 

@@ -15,6 +15,7 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
     after(async () => await tearDown(getService));
 
     loadTestFile(require.resolve('./aggregate'));
+    loadTestFile(require.resolve('./aggregate_post'));
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./disable'));

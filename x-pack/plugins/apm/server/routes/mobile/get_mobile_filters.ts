@@ -27,6 +27,7 @@ type MobileFiltersTypes =
   | 'appVersion'
   | 'osVersion'
   | 'netConnectionType';
+
 type MobileFilters = Array<{
   key: MobileFiltersTypes;
   options: string[];

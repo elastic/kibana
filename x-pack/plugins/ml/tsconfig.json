@@ -72,6 +72,8 @@
     "@kbn/ml-url-state",
     "@kbn/ml-nested-property",
     "@kbn/ml-local-storage",
+    "@kbn/ml-date-picker",
     "@kbn/ml-is-defined",
-  ]
+    "@kbn/ml-query-utils",
+  ],
 }

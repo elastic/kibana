@@ -736,15 +736,17 @@ function ruleTypeWithVariables<ActionGroupIds extends string>(
   id: ActionGroupIds,
   context: string,
   state: string
-): RuleType<never, never, never, never, never, ActionGroupIds> {
-  const baseAlert: RuleType<never, never, never, never, never, ActionGroupIds> = {
+): RuleType<never, never, {}, never, never, ActionGroupIds> {
+  const baseAlert: RuleType<never, never, {}, never, never, ActionGroupIds> = {
     id,
     name: `${id}-name`,
     actionGroups: [],
     defaultActionGroupId: id,
     isExportable: true,
     minimumLicenseRequired: 'basic',
-    async executor() {},
+    async executor() {
+      return { state: {} };
+    },
     producer: 'alerts',
   };
 
