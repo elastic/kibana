@@ -22,7 +22,7 @@ import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_pr
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getBucketSize } from '../../lib/helpers/get_bucket_size';
 
-type Props = {
+interface Props {
   apmEventClient: APMEventClient;
   serviceName: string;
   transactionName?: string;
@@ -31,7 +31,7 @@ type Props = {
   end: number;
   kuery: string;
   offset?: string;
-};
+}
 
 async function getHttpRequestsTimeseries({
   kuery,
