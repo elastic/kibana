@@ -16,7 +16,7 @@ import {
   EuiSplitPanel,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import type { LayerResult } from '../../../../application/jobs/new_job/job_from_lens';
+import type { LayerResult } from '../../../../../application/jobs/new_job/job_from_lens';
 import { CompatibleLayer } from './compatible_layer';
 import { IncompatibleLayer } from './incompatible_layer';
 
