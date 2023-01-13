@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { Ecs } from '@kbn/ecs';
 import { AgentEcs } from './agent';
 import type { AuditdEcs } from './auditd';
 import type { CloudEcs } from './cloud';
@@ -76,29 +75,8 @@ export type {
   ZeekEcs,
 };
 
-type OverrideTypes =
-  | 'agent'
-  | 'destination'
-  | 'dns'
-  | 'ecs'
-  | 'event'
-  | 'file'
-  | 'host'
-  | 'http'
-  | 'message'
-  | 'network'
-  | 'process'
-  | 'registry'
-  | 'rule'
-  | 'source'
-  | 'threat'
-  | '@timestamp'
-  | 'tls'
-  | 'url'
-  | 'user';
-
 // Security Solution Extension of the Elastic Common Schema
-export interface EcsSecurityExtension extends Omit<Ecs, OverrideTypes> {
+export interface EcsSecurityExtension {
   // Ecs Overrides
   // overrides Ecs to support multiple values for security entities
   agent?: AgentEcs;
@@ -118,10 +96,6 @@ export interface EcsSecurityExtension extends Omit<Ecs, OverrideTypes> {
   tls?: TlsEcs;
   url?: UrlEcs;
   user?: UserEcs;
-
-  // Overrides Not Required in Security solution
-  ['@timestamp']?: Ecs['@timestamp'];
-  ecs?: Ecs['ecs'];
 
   // Security Specific Ecs
   // exists only in security solution Ecs definition
