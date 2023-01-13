@@ -144,32 +144,6 @@ export class ServiceAPIClient {
       return;
     }
 
-    const callServiceEndpoint = (monitors: ServiceData['monitors'], url: string) => {
-      // don't need to pass locations to heartbeat
-      const monitorsStreams = monitors.map(({ locations, ...rest }) =>
-        convertToDataStreamFormat(rest)
-      );
-
-      return axios(
-        this.addVersionHeader({
-          method,
-          url: url + (runOnce ? '/run' : '/monitors'),
-          data: {
-            monitors: monitorsStreams,
-            output,
-            stack_version: this.stackVersion,
-            is_edit: isEdit,
-          },
-          headers: this.authorization
-            ? {
-                Authorization: this.authorization,
-              }
-            : undefined,
-          httpsAgent: this.getHttpsAgent(url),
-        })
-      );
-    };
-
     const pushErrors: ServiceLocationErrors = [];
 
     const promises: Array<Observable<unknown>> = [];
@@ -180,7 +154,13 @@ export class ServiceAPIClient {
       );
       if (locMonitors.length > 0) {
         promises.push(
-          rxjsFrom(callServiceEndpoint(locMonitors, url)).pipe(
+          rxjsFrom(
+            this.callServiceEndpoint(
+              { monitors: locMonitors, isEdit, runOnce, output },
+              method,
+              url
+            )
+          ).pipe(
             tap((result) => {
               this.logger.debug(result.data);
               this.logger.debug(
@@ -213,5 +193,35 @@ export class ServiceAPIClient {
     await forkJoin(promises).toPromise();
 
     return pushErrors;
+  }
+
+  async callServiceEndpoint(
+    { monitors, output, runOnce, isEdit }: ServiceData,
+    method: 'POST' | 'PUT' | 'DELETE',
+    url: string
+  ) {
+    // don't need to pass locations to heartbeat
+    const monitorsStreams = monitors.map(({ locations, ...rest }) =>
+      convertToDataStreamFormat(rest)
+    );
+
+    return axios(
+      this.addVersionHeader({
+        method,
+        url: url + (runOnce ? '/run' : '/monitors'),
+        data: {
+          monitors: monitorsStreams,
+          output,
+          stack_version: this.stackVersion,
+          is_edit: isEdit,
+        },
+        headers: this.authorization
+          ? {
+              Authorization: this.authorization,
+            }
+          : undefined,
+        httpsAgent: this.getHttpsAgent(url),
+      })
+    );
   }
 }
