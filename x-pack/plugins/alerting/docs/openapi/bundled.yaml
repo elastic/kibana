@@ -41,32 +41,13 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: Unauthorized
-                  message:
-                    type: string
-                  statusCode:
-                    type: integer
-                    example: 401
+                $ref: '#/components/schemas/401_response'
         '404':
           description: Object is not found.
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: Not Found
-                  message:
-                    type: string
-                    example: Saved object [alert/caaad6d0-920c-11ed-b36a-874bd1548a00] not found
-                  statusCode:
-                    type: integer
-                    example: 404
+                $ref: '#/components/schemas/404_response'
       servers:
         - url: https://localhost:5601
     delete:
@@ -88,32 +69,13 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: Unauthorized
-                  message:
-                    type: string
-                  statusCode:
-                    type: integer
-                    example: 401
+                $ref: '#/components/schemas/401_response'
         '404':
           description: Object is not found.
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: Not Found
-                  message:
-                    type: string
-                    example: Saved object [alert/caaad6d0-920c-11ed-b36a-874bd1548a00] not found
-                  statusCode:
-                    type: integer
-                    example: 404
+                $ref: '#/components/schemas/404_response'
       servers:
         - url: https://localhost:5601
     put:
@@ -151,32 +113,13 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: Unauthorized
-                  message:
-                    type: string
-                  statusCode:
-                    type: integer
-                    example: 401
+                $ref: '#/components/schemas/401_response'
         '404':
           description: Object is not found.
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: Not Found
-                  message:
-                    type: string
-                    example: Saved object [alert/caaad6d0-920c-11ed-b36a-874bd1548a00] not found
-                  statusCode:
-                    type: integer
-                    example: 404
+                $ref: '#/components/schemas/404_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -201,32 +144,13 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: Unauthorized
-                  message:
-                    type: string
-                  statusCode:
-                    type: integer
-                    example: 401
+                $ref: '#/components/schemas/401_response'
         '404':
           description: Object is not found.
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: Not Found
-                  message:
-                    type: string
-                    example: Saved object [alert/caaad6d0-920c-11ed-b36a-874bd1548a00] not found
-                  statusCode:
-                    type: integer
-                    example: 404
+                $ref: '#/components/schemas/404_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -251,32 +175,13 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: Unauthorized
-                  message:
-                    type: string
-                  statusCode:
-                    type: integer
-                    example: 401
+                $ref: '#/components/schemas/401_response'
         '404':
           description: Object is not found.
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: Not Found
-                  message:
-                    type: string
-                    example: Saved object [alert/caaad6d0-920c-11ed-b36a-874bd1548a00] not found
-                  statusCode:
-                    type: integer
-                    example: 404
+                $ref: '#/components/schemas/401_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -391,18 +296,134 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: Unauthorized
-                  message:
-                    type: string
-                  statusCode:
-                    type: integer
-                    example: 401
+                $ref: '#/components/schemas/401_response'
       servers:
         - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /s/{spaceId}/api/alerting/_health:
+    get:
+      summary: Retrieves the health status of the alerting framework.
+      operationId: getAlertingHealth
+      description: |
+        You must have `read` privileges for the **Management > Stack Rules** feature or for at least one of the **Analytics > Discover**, **Analytics > Machine Learning**, **Observability**, or **Security** features.
+      tags:
+        - alerting
+      parameters:
+        - $ref: '#/components/parameters/space_id'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  alerting_framework_heath:
+                    type: object
+                    description: This property has a typo. Use `alerting_framework_health` instead.
+                    deprecated: true
+                    properties:
+                      _deprecated:
+                        type: string
+                        example: This state property has a typo, use "alerting_framework_health" instead.
+                      decryption_health:
+                        type: object
+                        properties:
+                          status:
+                            type: string
+                            example: ok
+                          timestamp:
+                            type: string
+                            format: date-time
+                            example: '2023-01-13T01:28:00.280Z'
+                      execution_health:
+                        type: object
+                        properties:
+                          status:
+                            type: string
+                            example: ok
+                          timestamp:
+                            type: string
+                            format: date-time
+                            example: '2023-01-13T01:28:00.280Z'
+                      read_health:
+                        type: object
+                        properties:
+                          status:
+                            type: string
+                            example: ok
+                          timestamp:
+                            type: string
+                            format: date-time
+                            example: '2023-01-13T01:28:00.280Z'
+                  alerting_framework_health:
+                    type: object
+                    description: |
+                      Three substates identify the health of the alerting framework: `decryption_health`, `execution_health`, and `read_health`.
+                    properties:
+                      decryption_health:
+                        type: object
+                        description: The timestamp and status of the rule decryption.
+                        properties:
+                          status:
+                            type: string
+                            example: ok
+                            enum:
+                              - error
+                              - ok
+                              - warn
+                          timestamp:
+                            type: string
+                            format: date-time
+                            example: '2023-01-13T01:28:00.280Z'
+                      execution_health:
+                        type: object
+                        description: The timestamp and status of the rule run.
+                        properties:
+                          status:
+                            type: string
+                            example: ok
+                            enum:
+                              - error
+                              - ok
+                              - warn
+                          timestamp:
+                            type: string
+                            format: date-time
+                            example: '2023-01-13T01:28:00.280Z'
+                      read_health:
+                        type: object
+                        description: The timestamp and status of the rule reading events.
+                        properties:
+                          status:
+                            type: string
+                            example: ok
+                            enum:
+                              - error
+                              - ok
+                              - warn
+                          timestamp:
+                            type: string
+                            format: date-time
+                            example: '2023-01-13T01:28:00.280Z'
+                  has_permanent_encryption_key:
+                    type: boolean
+                    description: If `false`, the encrypted saved object plugin does not have a permanent encryption key.
+                    example: true
+                  is_sufficiently_secure:
+                    type: boolean
+                    description: If `false`, security is enabled but TLS is not.
+                    example: true
+              examples:
+                getAlertingHealthResponse:
+                  $ref: '#/components/examples/get_health_response'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401_response'
     servers:
       - url: https://localhost:5601
   /s/{spaceId}/api/alerting/rule_types:
@@ -589,16 +610,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: Unauthorized
-                  message:
-                    type: string
-                  statusCode:
-                    type: integer
-                    example: 401
+                $ref: '#/components/schemas/401_response'
     servers:
       - url: https://localhost:5601
   /s/{spaceId}/api/alerting/rule/{ruleId}/_mute_all:
@@ -621,16 +633,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: Unauthorized
-                  message:
-                    type: string
-                  statusCode:
-                    type: integer
-                    example: 401
+                $ref: '#/components/schemas/401_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -655,16 +658,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: Unauthorized
-                  message:
-                    type: string
-                  statusCode:
-                    type: integer
-                    example: 401
+                $ref: '#/components/schemas/401_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -690,16 +684,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: Unauthorized
-                  message:
-                    type: string
-                  statusCode:
-                    type: integer
-                    example: 401
+                $ref: '#/components/schemas/401_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -725,16 +710,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: Unauthorized
-                  message:
-                    type: string
-                  statusCode:
-                    type: integer
-                    example: 401
+                $ref: '#/components/schemas/401_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -967,6 +943,30 @@ components:
           description: The identifier for the user that updated this rule most recently.
           nullable: true
           example: elastic
+    401_response:
+      type: object
+      title: Unsuccessful rule API response
+      properties:
+        error:
+          type: string
+          example: Unauthorized
+        message:
+          type: string
+        statusCode:
+          type: integer
+          example: 401
+    404_response:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Not Found
+        message:
+          type: string
+          example: Saved object [alert/caaad6d0-920c-11ed-b36a-874bd1548a00] not found
+        statusCode:
+          type: integer
+          example: 404
     update_rule_request:
       title: Update rule request
       description: The update rule API request body varies depending on the type of rule and actions.
@@ -1198,6 +1198,32 @@ components:
               warning: null
               outcome: succeeded
             next_run: '2022-12-06T01:45:23.912Z'
+    get_health_response:
+      summary: Retrieve information about the health of the alerting framework.
+      value:
+        is_sufficiently_secure: true
+        has_permanent_encryption_key: true
+        alerting_framework_health:
+          decryption_health:
+            status: ok
+            timestamp: '2023-01-13T01:28:00.280Z'
+          execution_health:
+            status: ok
+            timestamp: '2023-01-13T01:28:00.280Z'
+          read_health:
+            status: ok
+            timestamp: '2023-01-13T01:28:00.280Z'
+        alerting_framework_heath:
+          _deprecated: This state property has a typo, use "alerting_framework_health" instead.
+          decryption_health:
+            status: ok
+            timestamp: '2023-01-13T01:28:00.280Z'
+          execution_health:
+            status: ok
+            timestamp: '2023-01-13T01:28:00.280Z'
+          read_health:
+            status: ok
+            timestamp: '2023-01-13T01:28:00.280Z'
     get_rule_types_response:
       summary: Retrieve rule types associated with Kibana machine learning features
       value:

@@ -22,6 +22,7 @@ Any modifications made to this file will be overwritten.
   <li><a href="#disableRule"><code><span class="http-method">post</span> /s/{spaceId}/api/alerting/rule/{ruleId}/_disable</code></a></li>
   <li><a href="#enableRule"><code><span class="http-method">post</span> /s/{spaceId}/api/alerting/rule/{ruleId}/_enable</code></a></li>
   <li><a href="#findRules"><code><span class="http-method">get</span> /s/{spaceId}/api/alerting/rules/_find</code></a></li>
+  <li><a href="#getAlertingHealth"><code><span class="http-method">get</span> /s/{spaceId}/api/alerting/_health</code></a></li>
   <li><a href="#getRule"><code><span class="http-method">get</span> /s/{spaceId}/api/alerting/rule/{ruleId}</code></a></li>
   <li><a href="#getRuleTypes"><code><span class="http-method">get</span> /s/{spaceId}/api/alerting/rule_types</code></a></li>
   <li><a href="#muteAlert"><code><span class="http-method">post</span> /s/{spaceId}/api/alerting/rule/{ruleId}/alert/{alertId}/_mute</code></a></li>
@@ -77,10 +78,10 @@ Any modifications made to this file will be overwritten.
         <a href="#"></a>
     <h4 class="field-label">401</h4>
     Authorization information is missing or invalid.
-        <a href="#getRule_401_response">getRule_401_response</a>
+        <a href="#401_response">401_response</a>
     <h4 class="field-label">404</h4>
     Object is not found.
-        <a href="#getRule_404_response">getRule_404_response</a>
+        <a href="#404_response">404_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="disableRule"/>
@@ -128,10 +129,10 @@ Any modifications made to this file will be overwritten.
         <a href="#"></a>
     <h4 class="field-label">401</h4>
     Authorization information is missing or invalid.
-        <a href="#getRule_401_response">getRule_401_response</a>
+        <a href="#401_response">401_response</a>
     <h4 class="field-label">404</h4>
     Object is not found.
-        <a href="#getRule_404_response">getRule_404_response</a>
+        <a href="#404_response">404_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="enableRule"/>
@@ -179,10 +180,10 @@ Any modifications made to this file will be overwritten.
         <a href="#"></a>
     <h4 class="field-label">401</h4>
     Authorization information is missing or invalid.
-        <a href="#getRule_401_response">getRule_401_response</a>
+        <a href="#401_response">401_response</a>
     <h4 class="field-label">404</h4>
     Object is not found.
-        <a href="#getRule_404_response">getRule_404_response</a>
+        <a href="#401_response">401_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="findRules"/>
@@ -364,7 +365,86 @@ Any modifications made to this file will be overwritten.
         <a href="#findRules_200_response">findRules_200_response</a>
     <h4 class="field-label">401</h4>
     Authorization information is missing or invalid.
-        <a href="#getRule_401_response">getRule_401_response</a>
+        <a href="#401_response">401_response</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getAlertingHealth"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /s/{spaceId}/api/alerting/_health</code></pre></div>
+    <div class="method-summary">Retrieves the health status of the alerting framework. (<span class="nickname">getAlertingHealth</span>)</div>
+    <div class="method-notes">You must have <code>read</code> privileges for the <strong>Management &gt; Stack Rules</strong> feature or for at least one of the <strong>Analytics &gt; Discover</strong>, <strong>Analytics &gt; Machine Learning</strong>, <strong>Observability</strong>, or <strong>Security</strong> features.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#getAlertingHealth_200_response">getAlertingHealth_200_response</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "alerting_framework_health" : {
+    "execution_health" : {
+      "status" : "ok",
+      "timestamp" : "2023-01-13T01:28:00.28Z"
+    },
+    "read_health" : {
+      "status" : "ok",
+      "timestamp" : "2023-01-13T01:28:00.28Z"
+    },
+    "decryption_health" : {
+      "status" : "ok",
+      "timestamp" : "2023-01-13T01:28:00.28Z"
+    }
+  },
+  "alerting_framework_heath" : {
+    "_deprecated" : "This state property has a typo, use \"alerting_framework_health\" instead.",
+    "execution_health" : {
+      "status" : "ok",
+      "timestamp" : "2023-01-13T01:28:00.28Z"
+    },
+    "read_health" : {
+      "status" : "ok",
+      "timestamp" : "2023-01-13T01:28:00.28Z"
+    },
+    "decryption_health" : {
+      "status" : "ok",
+      "timestamp" : "2023-01-13T01:28:00.28Z"
+    }
+  },
+  "has_permanent_encryption_key" : true,
+  "is_sufficiently_secure" : true
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Indicates a successful call.
+        <a href="#getAlertingHealth_200_response">getAlertingHealth_200_response</a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#401_response">401_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="getRule"/>
@@ -466,10 +546,10 @@ Any modifications made to this file will be overwritten.
         <a href="#rule_response_properties">rule_response_properties</a>
     <h4 class="field-label">401</h4>
     Authorization information is missing or invalid.
-        <a href="#getRule_401_response">getRule_401_response</a>
+        <a href="#401_response">401_response</a>
     <h4 class="field-label">404</h4>
     Object is not found.
-        <a href="#getRule_404_response">getRule_404_response</a>
+        <a href="#404_response">404_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="getRuleTypes"/>
@@ -604,7 +684,7 @@ Any modifications made to this file will be overwritten.
         
     <h4 class="field-label">401</h4>
     Authorization information is missing or invalid.
-        <a href="#getRule_401_response">getRule_401_response</a>
+        <a href="#401_response">401_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="muteAlert"/>
@@ -654,7 +734,7 @@ Any modifications made to this file will be overwritten.
         <a href="#"></a>
     <h4 class="field-label">401</h4>
     Authorization information is missing or invalid.
-        <a href="#getRule_401_response">getRule_401_response</a>
+        <a href="#401_response">401_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="muteAllAlerts"/>
@@ -702,7 +782,7 @@ Any modifications made to this file will be overwritten.
         <a href="#"></a>
     <h4 class="field-label">401</h4>
     Authorization information is missing or invalid.
-        <a href="#getRule_401_response">getRule_401_response</a>
+        <a href="#401_response">401_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="unmuteAlert"/>
@@ -752,7 +832,7 @@ Any modifications made to this file will be overwritten.
         <a href="#"></a>
     <h4 class="field-label">401</h4>
     Authorization information is missing or invalid.
-        <a href="#getRule_401_response">getRule_401_response</a>
+        <a href="#401_response">401_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="unmuteAllAlerts"/>
@@ -800,7 +880,7 @@ Any modifications made to this file will be overwritten.
         <a href="#"></a>
     <h4 class="field-label">401</h4>
     Authorization information is missing or invalid.
-        <a href="#getRule_401_response">getRule_401_response</a>
+        <a href="#401_response">401_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="updateRule"/>
@@ -921,10 +1001,10 @@ Any modifications made to this file will be overwritten.
         <a href="#rule_response_properties">rule_response_properties</a>
     <h4 class="field-label">401</h4>
     Authorization information is missing or invalid.
-        <a href="#getRule_401_response">getRule_401_response</a>
+        <a href="#401_response">401_response</a>
     <h4 class="field-label">404</h4>
     Object is not found.
-        <a href="#getRule_404_response">getRule_404_response</a>
+        <a href="#404_response">404_response</a>
   </div> <!-- method -->
   <hr/>
 
@@ -933,10 +1013,19 @@ Any modifications made to this file will be overwritten.
 
   <h3>Table of Contents</h3>
   <ol>
+    <li><a href="#401_response"><code>401_response</code> - Unsuccessful rule API response</a></li>
+    <li><a href="#404_response"><code>404_response</code> - </a></li>
     <li><a href="#actions_inner"><code>actions_inner</code> - </a></li>
     <li><a href="#findRules_200_response"><code>findRules_200_response</code> - </a></li>
     <li><a href="#findRules_has_reference_parameter"><code>findRules_has_reference_parameter</code> - </a></li>
     <li><a href="#findRules_search_fields_parameter"><code>findRules_search_fields_parameter</code> - </a></li>
+    <li><a href="#getAlertingHealth_200_response"><code>getAlertingHealth_200_response</code> - </a></li>
+    <li><a href="#getAlertingHealth_200_response_alerting_framework_health"><code>getAlertingHealth_200_response_alerting_framework_health</code> - </a></li>
+    <li><a href="#getAlertingHealth_200_response_alerting_framework_health_decryption_health"><code>getAlertingHealth_200_response_alerting_framework_health_decryption_health</code> - </a></li>
+    <li><a href="#getAlertingHealth_200_response_alerting_framework_health_execution_health"><code>getAlertingHealth_200_response_alerting_framework_health_execution_health</code> - </a></li>
+    <li><a href="#getAlertingHealth_200_response_alerting_framework_health_read_health"><code>getAlertingHealth_200_response_alerting_framework_health_read_health</code> - </a></li>
+    <li><a href="#getAlertingHealth_200_response_alerting_framework_heath"><code>getAlertingHealth_200_response_alerting_framework_heath</code> - </a></li>
+    <li><a href="#getAlertingHealth_200_response_alerting_framework_heath_decryption_health"><code>getAlertingHealth_200_response_alerting_framework_heath_decryption_health</code> - </a></li>
     <li><a href="#getRuleTypes_200_response_inner"><code>getRuleTypes_200_response_inner</code> - </a></li>
     <li><a href="#getRuleTypes_200_response_inner_action_groups_inner"><code>getRuleTypes_200_response_inner_action_groups_inner</code> - </a></li>
     <li><a href="#getRuleTypes_200_response_inner_action_variables"><code>getRuleTypes_200_response_inner_action_variables</code> - </a></li>
@@ -945,8 +1034,6 @@ Any modifications made to this file will be overwritten.
     <li><a href="#getRuleTypes_200_response_inner_authorized_consumers"><code>getRuleTypes_200_response_inner_authorized_consumers</code> - </a></li>
     <li><a href="#getRuleTypes_200_response_inner_authorized_consumers_alerts"><code>getRuleTypes_200_response_inner_authorized_consumers_alerts</code> - </a></li>
     <li><a href="#getRuleTypes_200_response_inner_recovery_action_group"><code>getRuleTypes_200_response_inner_recovery_action_group</code> - </a></li>
-    <li><a href="#getRule_401_response"><code>getRule_401_response</code> - </a></li>
-    <li><a href="#getRule_404_response"><code>getRule_404_response</code> - </a></li>
     <li><a href="#notify_when"><code>notify_when</code> - </a></li>
     <li><a href="#rule_response_properties"><code>rule_response_properties</code> - Rule response properties</a></li>
     <li><a href="#rule_response_properties_execution_status"><code>rule_response_properties_execution_status</code> - </a></li>
@@ -956,6 +1043,24 @@ Any modifications made to this file will be overwritten.
     <li><a href="#update_rule_request"><code>update_rule_request</code> - Update rule request</a></li>
   </ol>
 
+  <div class="model">
+    <h3><a name="401_response"><code>401_response</code> - Unsuccessful rule API response</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">error (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">message (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">statusCode (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="404_response"><code>404_response</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">error (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">message (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">statusCode (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
   <div class="model">
     <h3><a name="actions_inner"><code>actions_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
@@ -988,6 +1093,73 @@ Any modifications made to this file will be overwritten.
     <div class='model-description'></div>
     <div class="field-items">
           </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="getAlertingHealth_200_response"><code>getAlertingHealth_200_response</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">alerting_framework_heath (optional)</div><div class="param-desc"><span class="param-type"><a href="#getAlertingHealth_200_response_alerting_framework_heath">getAlertingHealth_200_response_alerting_framework_heath</a></span>  </div>
+<div class="param">alerting_framework_health (optional)</div><div class="param-desc"><span class="param-type"><a href="#getAlertingHealth_200_response_alerting_framework_health">getAlertingHealth_200_response_alerting_framework_health</a></span>  </div>
+<div class="param">has_permanent_encryption_key (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> If <code>false</code>, the encrypted saved object plugin does not have a permanent encryption key. </div>
+<div class="param">is_sufficiently_secure (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> If <code>false</code>, security is enabled but TLS is not. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="getAlertingHealth_200_response_alerting_framework_health"><code>getAlertingHealth_200_response_alerting_framework_health</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Three substates identify the health of the alerting framework: <code>decryption_health</code>, <code>execution_health</code>, and <code>read_health</code>.</div>
+    <div class="field-items">
+      <div class="param">decryption_health (optional)</div><div class="param-desc"><span class="param-type"><a href="#getAlertingHealth_200_response_alerting_framework_health_decryption_health">getAlertingHealth_200_response_alerting_framework_health_decryption_health</a></span>  </div>
+<div class="param">execution_health (optional)</div><div class="param-desc"><span class="param-type"><a href="#getAlertingHealth_200_response_alerting_framework_health_execution_health">getAlertingHealth_200_response_alerting_framework_health_execution_health</a></span>  </div>
+<div class="param">read_health (optional)</div><div class="param-desc"><span class="param-type"><a href="#getAlertingHealth_200_response_alerting_framework_health_read_health">getAlertingHealth_200_response_alerting_framework_health_read_health</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="getAlertingHealth_200_response_alerting_framework_health_decryption_health"><code>getAlertingHealth_200_response_alerting_framework_health_decryption_health</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>The timestamp and status of the rule decryption.</div>
+    <div class="field-items">
+      <div class="param">status (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">error</div><div class="param-enum">ok</div><div class="param-enum">warn</div>
+<div class="param">timestamp (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="getAlertingHealth_200_response_alerting_framework_health_execution_health"><code>getAlertingHealth_200_response_alerting_framework_health_execution_health</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>The timestamp and status of the rule run.</div>
+    <div class="field-items">
+      <div class="param">status (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">error</div><div class="param-enum">ok</div><div class="param-enum">warn</div>
+<div class="param">timestamp (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="getAlertingHealth_200_response_alerting_framework_health_read_health"><code>getAlertingHealth_200_response_alerting_framework_health_read_health</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>The timestamp and status of the rule reading events.</div>
+    <div class="field-items">
+      <div class="param">status (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">error</div><div class="param-enum">ok</div><div class="param-enum">warn</div>
+<div class="param">timestamp (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="getAlertingHealth_200_response_alerting_framework_heath"><code>getAlertingHealth_200_response_alerting_framework_heath</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>This property has a typo. Use <code>alerting_framework_health</code> instead.</div>
+    <div class="field-items">
+      <div class="param">_deprecated (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">decryption_health (optional)</div><div class="param-desc"><span class="param-type"><a href="#getAlertingHealth_200_response_alerting_framework_heath_decryption_health">getAlertingHealth_200_response_alerting_framework_heath_decryption_health</a></span>  </div>
+<div class="param">execution_health (optional)</div><div class="param-desc"><span class="param-type"><a href="#getAlertingHealth_200_response_alerting_framework_heath_decryption_health">getAlertingHealth_200_response_alerting_framework_heath_decryption_health</a></span>  </div>
+<div class="param">read_health (optional)</div><div class="param-desc"><span class="param-type"><a href="#getAlertingHealth_200_response_alerting_framework_heath_decryption_health">getAlertingHealth_200_response_alerting_framework_heath_decryption_health</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="getAlertingHealth_200_response_alerting_framework_heath_decryption_health"><code>getAlertingHealth_200_response_alerting_framework_heath_decryption_health</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">status (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">timestamp (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
+    </div>  <!-- field-items -->
   </div>
   <div class="model">
     <h3><a name="getRuleTypes_200_response_inner"><code>getRuleTypes_200_response_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
@@ -1072,24 +1244,6 @@ Any modifications made to this file will be overwritten.
     <div class="field-items">
       <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
 <div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="getRule_401_response"><code>getRule_401_response</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-      <div class="param">error (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">message (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">statusCode (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="getRule_404_response"><code>getRule_404_response</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-      <div class="param">error (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">message (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">statusCode (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
