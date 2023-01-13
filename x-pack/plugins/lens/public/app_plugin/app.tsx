@@ -512,6 +512,8 @@ export function App({
     );
 
   const addUserMessages: AddUserMessages = (messages) => {
+    // console.log('adding user message to', Object.keys(additionalUserMessages));
+
     const newMessageMap = {
       ...additionalUserMessages,
     };
@@ -528,14 +530,27 @@ export function App({
       setAdditionalUserMessages(newMessageMap);
     }
 
+    // console.log('added messages ', addedMessageIds);
+
     return () => {
       const withMessagesRemoved = {
         ...additionalUserMessages,
       };
 
-      messages.map(({ uniqueId }) => uniqueId).forEach((id) => delete withMessagesRemoved[id]);
+      // console.log(
+      //   'removing messages ' +
+      //     addedMessageIds +
+      //     ' from current user messages ' +
+      //     Object.keys(additionalUserMessages)
+      // );
+
+      addedMessageIds.forEach((id) => delete withMessagesRemoved[id]);
 
       setAdditionalUserMessages(withMessagesRemoved);
+      // console.log(
+      //   'removal completed, setting user messages to ',
+      //   Object.keys(withMessagesRemoved)
+      // );
     };
   };
 

@@ -319,13 +319,7 @@ export const getSearchWarningMessages = (
     if (warningMessages?.length) {
       const key = (requestId ?? '') + warning.type + warning.reason?.type ?? '';
       if (!warningsMap.has(key)) {
-        warningsMap.set(
-          key,
-          warningMessages.map((message) => ({
-            ...message,
-            uniqueId: `${message.uniqueId}--${key}`,
-          }))
-        );
+        warningsMap.set(key, warningMessages);
       }
       return true;
     }
