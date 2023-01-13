@@ -16,8 +16,6 @@ steps:
 
   - label: ':kibana: Performance Tests with Playwright config'
     command: .buildkite/scripts/steps/functional/performance_playwright.sh
-    env:
-      PERFORMANCE_DISABLE_TELEMETRY: true
     agents:
       queue: n2-2-spot
     depends_on: build
