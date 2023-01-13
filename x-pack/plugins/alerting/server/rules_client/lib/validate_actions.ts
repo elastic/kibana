@@ -103,7 +103,7 @@ export async function validateActions(
   );
   if (actionsWithInvalidThrottles.length) {
     throw Boom.badRequest(
-      i18n.translate('xpack.alerting.rulesClient.validateActions.notAllActionsWithFreq', {
+      i18n.translate('xpack.alerting.rulesClient.validateActions.actionsWithInvalidThrottles', {
         defaultMessage:
           'Action throttle cannot be shorter than the schedule interval of {scheduleIntervalText}: {groups}',
         values: {
