@@ -60,12 +60,7 @@ export const StepDetailPage = () => {
         <EuiFlexItem grow={1}>
           <EuiPanel hasShadow={false} hasBorder>
             {data?.details?.journey && currentStep && (
-              <StepImage
-                ping={data?.details?.journey}
-                step={currentStep}
-                isFailed={isFailed}
-                stepLabels={stepLabels}
-              />
+              <StepImage ping={data?.details?.journey} step={currentStep} isFailed={isFailed} />
             )}
           </EuiPanel>
         </EuiFlexItem>
@@ -88,7 +83,7 @@ export const StepDetailPage = () => {
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="m">
         <EuiFlexItem grow={1}>
-          <EuiPanel>
+          <EuiPanel hasShadow={false} hasBorder>
             <StepMetrics />
           </EuiPanel>
         </EuiFlexItem>

@@ -128,7 +128,7 @@ export const MonitorHistory = () => {
         />
       </EuiFlexItem>
       <EuiFlexItem>
-        <TestRunsTable from={from} to={to} />
+        <TestRunsTable from={from} to={to} showViewHistoryButton={false} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

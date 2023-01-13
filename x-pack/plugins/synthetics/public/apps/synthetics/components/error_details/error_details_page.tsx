@@ -26,13 +26,7 @@ export function ErrorDetailsPage() {
 
   const checkGroupId = failedTests?.[0]?.monitor.check_group ?? '';
 
-  const {
-    data,
-    isFailed,
-    failedStep,
-    stepLabels,
-    loading: stepsLoading,
-  } = useJourneySteps(checkGroupId);
+  const { data, isFailed, failedStep, loading: stepsLoading } = useJourneySteps(checkGroupId);
 
   const lastTestRun = failedTests?.[0];
 
@@ -67,12 +61,7 @@ export function ErrorDetailsPage() {
         <EuiFlexItem grow={1} style={{ height: 'fit-content' }}>
           <PanelWithTitle>
             {data?.details?.journey && failedStep && (
-              <StepImage
-                ping={data?.details?.journey}
-                step={failedStep}
-                isFailed={isFailed}
-                stepLabels={stepLabels}
-              />
+              <StepImage ping={data?.details?.journey} step={failedStep} isFailed={isFailed} />
             )}
           </PanelWithTitle>
 

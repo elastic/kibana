@@ -237,7 +237,7 @@ export const previewRulesRoute = async (
           while (invocationCount > 0 && !isAborted) {
             invocationStartTime = moment();
 
-            statePreview = (await executor({
+            ({ state: statePreview } = (await executor({
               executionId: uuid.v4(),
               params,
               previousStartedAt,
@@ -263,7 +263,7 @@ export const previewRulesRoute = async (
               startedAt: startedAt.toDate(),
               state: statePreview,
               logger,
-            })) as TState;
+            })) as { state: TState });
 
             const errors = loggedStatusChanges
               .filter((item) => item.newStatus === RuleExecutionStatus.failed)

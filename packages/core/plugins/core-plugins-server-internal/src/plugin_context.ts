@@ -194,6 +194,11 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       registerProvider: deps.capabilities.registerProvider,
       registerSwitcher: deps.capabilities.registerSwitcher,
     },
+    customBranding: {
+      register: (fetchFn) => {
+        deps.customBranding.register(plugin.name, fetchFn);
+      },
+    },
     docLinks: deps.docLinks,
     elasticsearch: {
       legacy: deps.elasticsearch.legacy,
@@ -286,6 +291,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
     capabilities: {
       resolveCapabilities: deps.capabilities.resolveCapabilities,
     },
+    customBranding: deps.customBranding,
     docLinks: deps.docLinks,
     elasticsearch: {
       client: deps.elasticsearch.client,

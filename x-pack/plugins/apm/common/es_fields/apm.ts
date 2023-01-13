@@ -159,5 +159,8 @@ export const INDEX = '_index';
 // Mobile
 export const NETWORK_CONNECTION_TYPE = 'network.connection.type';
 export const DEVICE_MODEL_NAME = 'device.model.name';
+export const SESSION_ID = 'session.id';
+export const APP_LAUNCH_TIME = 'application.launch.time';
+export const EVENT_NAME = 'event.name';
 
 export const CHILD_ID = 'child.id';

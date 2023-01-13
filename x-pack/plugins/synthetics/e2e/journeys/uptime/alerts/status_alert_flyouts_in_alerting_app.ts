@@ -59,12 +59,18 @@ journey('StatusFlyoutInAlertingApp', async ({ page, params }) => {
 
     await waitForLoadingToFinish({ page });
 
+    await page.click(byTestId('"xpack.synthetics.alerts.monitorStatus.filterBar"'));
+
     await assertText({ page, text: 'browser' });
     await assertText({ page, text: 'http' });
-
     await retry.tryForTime(30 * 1000, async () => {
-      const suggestionItem = await page.$(byTestId('autoCompleteSuggestionText'));
-      expect(await suggestionItem?.textContent()).toBe('"browser" ');
+      await page.click('text=browser');
+
+      const element = await page.waitForSelector(
+        byTestId('"xpack.synthetics.alerts.monitorStatus.filterBar"')
+      );
+
+      expect((await element?.textContent())?.trim()).toBe('monitor.type : "browser"');
     });
 
     await page.click(byTestId('euiFlyoutCloseButton'));
