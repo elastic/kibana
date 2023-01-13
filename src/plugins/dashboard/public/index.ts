@@ -26,3 +26,9 @@ export {
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DashboardPlugin(initializerContext);
 }
+
+export {
+  DashboardContainerRenderer,
+  type DashboardCreationOptions,
+  type DashboardContainer,
+} from './dashboard_container';
