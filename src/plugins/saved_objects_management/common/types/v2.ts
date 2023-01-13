@@ -11,3 +11,10 @@ import { SavedObjectWithMetadataV1 } from './v1';
 export interface SavedObjectMetadataV2 extends SavedObjectWithMetadataV1 {
   isManaged: boolean;
 }
+
+/**
+ * See documentation for {@link BulkGetHTTPResponseV1}
+ */
+export interface BulkGetHTTPResponseV2 {
+  objects: SavedObjectMetadataV2[];
+}
