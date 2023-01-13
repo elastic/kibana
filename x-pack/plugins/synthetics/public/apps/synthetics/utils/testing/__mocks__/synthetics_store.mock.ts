@@ -134,6 +134,7 @@ export const mockState: SyntheticsAppState = {
     loading: {},
     error: {},
   },
+  manualTestRuns: {},
 };
 
 function getBrowserJourneyMockSlice() {
@@ -159,6 +160,8 @@ function getBrowserJourneyMockSlice() {
       { hash: '4bae236101175ae7746cb922f4c511083af4fbcd', hitTime: 1658682270849 },
       { hash: 'ec95c047e2e05a27598451fdaa7f24db973eb933', hitTime: 1658682270849 },
     ],
+    journeys: {},
+    journeysLoading: {},
   };
 }
 

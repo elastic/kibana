@@ -6,9 +6,9 @@
  */
 
 import { Action } from 'redux-actions';
-import { all, call, fork, put, select, takeEvery, throttle } from 'redux-saga/effects';
+import { all, call, fork, put, select, takeEvery, takeLeading, throttle } from 'redux-saga/effects';
 import { ScreenshotBlockDoc, ScreenshotBlockCache } from '../../../../../common/runtime_types';
-import { fetchScreenshotBlockSet } from './api';
+import { fetchBrowserJourney, fetchScreenshotBlockSet } from './api';
 
 import {
   fetchBlocksAction,
@@ -17,11 +17,13 @@ import {
   putBlocksAction,
   putCacheSize,
   updateHitCountsAction,
+  fetchJourneyAction,
 } from './actions';
 
 import { isPendingBlock } from './models';
 
 import { selectBrowserJourneyState } from './selectors';
+import { fetchEffectFactory } from '../utils/fetch_effect';
 
 export function* browserJourneyEffects() {
   yield all([fork(fetchScreenshotBlocks), fork(generateBlockStatsOnPut), fork(pruneBlockCache)]);
@@ -84,4 +86,11 @@ function* pruneBlockCache() {
       yield put(pruneCacheAction(cacheSize - MAX_CACHE_SIZE));
     }
   });
+}
+
+export function* fetchJourneyStepsEffect() {
+  yield takeLeading(
+    fetchJourneyAction.get,
+    fetchEffectFactory(fetchBrowserJourney, fetchJourneyAction.success, fetchJourneyAction.fail)
+  );
 }

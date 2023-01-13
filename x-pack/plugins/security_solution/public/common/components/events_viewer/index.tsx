@@ -16,7 +16,7 @@ import type { Direction, EntityType, RowRenderer } from '@kbn/timelines-plugin/c
 import { isEmpty } from 'lodash';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
-import { getRowRenderer } from '../../../timelines/components/timeline/body/renderers/get_row_renderer';
+import type { EuiDataGridRowHeightsOptions } from '@elastic/eui';
 import type { Sort } from '../../../timelines/components/timeline/body/sort';
 import type {
   ControlColumnProps,
@@ -54,18 +54,17 @@ import {
   StyledEuiPanel,
 } from './styles';
 import { getDefaultViewSelection, getCombinedFilterQuery } from './helpers';
-import { ALERTS_TABLE_VIEW_SELECTION_KEY } from '../event_rendered_view/helpers';
 import { useTimelineEvents } from './use_timelines_events';
 import { TableContext, EmptyTable, TableLoading } from './shared';
 import { DataTableComponent } from '../data_table';
 import { FIELDS_WITHOUT_CELL_ACTIONS } from '../../lib/cell_actions/constants';
 import type { AlertWorkflowStatus } from '../../types';
-import { EventRenderedView } from '../event_rendered_view';
 import { useQueryInspector } from '../page/manage_query';
 import type { SetQuery } from '../../containers/use_global_time/types';
 import { defaultHeaders } from '../../store/data_table/defaults';
 import { checkBoxControlColumn, transformControlColumns } from '../control_columns';
 import { getEventIdToDataMapping } from '../data_table/helpers';
+import { ALERTS_TABLE_VIEW_SELECTION_KEY } from './summary_view_select';
 import type { ViewSelection } from './summary_view_select';
 import { RightTopMenu } from './right_top_menu';
 import { useAlertBulkActions } from './use_alert_bulk_actions';
@@ -232,9 +231,14 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
   const fieldBrowserOptions = useFieldBrowserOptions({
     sourcererScope,
     editorActionsRef,
-    upsertColumn: (column, index) =>
-      dispatch(dataTableActions.upsertColumn({ column, id: tableId, index })),
-    removeColumn: (columnId) => dispatch(dataTableActions.removeColumn({ columnId, id: tableId })),
+    upsertColumn: useCallback(
+      (column, index) => dispatch(dataTableActions.upsertColumn({ column, id: tableId, index })),
+      [dispatch, tableId]
+    ),
+    removeColumn: useCallback(
+      (columnId) => dispatch(dataTableActions.removeColumn({ columnId, id: tableId })),
+      [dispatch, tableId]
+    ),
   });
 
   const columnHeaders = isEmpty(columns) ? defaultHeaders : columns;
@@ -479,7 +483,6 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     tableId,
     data: nonDeletedEvents,
     totalItems: totalCountMinusDeleted,
-    refetch,
     indexNames: selectedPatterns,
     hasAlertsCrud: hasCrudPermissions,
     showCheckboxes,
@@ -500,6 +503,26 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
   const unitCountText = useMemo(
     () => `${totalCountMinusDeleted.toLocaleString()} ${unit(totalCountMinusDeleted)}`,
     [totalCountMinusDeleted, unit]
+  );
+
+  const rowHeightsOptions: EuiDataGridRowHeightsOptions | undefined = useMemo(() => {
+    if (tableView === 'eventRenderedView') {
+      return {
+        defaultHeight: 'auto' as const,
+      };
+    }
+    return undefined;
+  }, [tableView]);
+
+  const pagination = useMemo(
+    () => ({
+      pageIndex: pageInfo.activePage,
+      pageSize: itemsPerPage,
+      pageSizeOptions: itemsPerPageOptions,
+      onChangeItemsPerPage,
+      onChangePage,
+    }),
+    [itemsPerPage, itemsPerPageOptions, onChangeItemsPerPage, onChangePage, pageInfo.activePage]
   );
 
   return (
@@ -541,53 +564,27 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
                     >
                       <ScrollableFlexItem grow={1}>
                         <StatefulEventContext.Provider value={activeStatefulEventContext}>
-                          {tableView === 'gridView' && (
-                            <DataTableComponent
-                              additionalControls={alertBulkActions}
-                              unitCountText={unitCountText}
-                              browserFields={browserFields}
-                              data={nonDeletedEvents}
-                              disabledCellActions={FIELDS_WITHOUT_CELL_ACTIONS}
-                              id={tableId}
-                              loadPage={loadPage}
-                              renderCellValue={renderCellValue}
-                              rowRenderers={rowRenderers}
-                              totalItems={totalCountMinusDeleted}
-                              bulkActions={bulkActions}
-                              fieldBrowserOptions={fieldBrowserOptions}
-                              defaultCellActions={defaultCellActions}
-                              hasCrudPermissions={hasCrudPermissions}
-                              filters={filters}
-                              leadingControlColumns={transformedLeadingControlColumns}
-                              pagination={{
-                                pageIndex: pageInfo.activePage,
-                                pageSize: itemsPerPage,
-                                pageSizeOptions: itemsPerPageOptions,
-                                onChangeItemsPerPage,
-                                onChangePage,
-                              }}
-                            />
-                          )}
-                          {tableView === 'eventRenderedView' && (
-                            <EventRenderedView
-                              events={nonDeletedEvents}
-                              getRowRenderer={getRowRenderer}
-                              leadingControlColumns={transformedLeadingControlColumns}
-                              pagination={{
-                                pageIndex: pageInfo.activePage,
-                                pageSize: itemsPerPage,
-                                totalItemCount: totalCountMinusDeleted,
-                                pageSizeOptions: itemsPerPageOptions,
-                                showPerPageOptions: true,
-                              }}
-                              rowRenderers={rowRenderers}
-                              scopeId={tableId}
-                              onChangePage={onChangePage}
-                              onChangeItemsPerPage={onChangeItemsPerPage}
-                              additionalControls={alertBulkActions}
-                              unitCountText={unitCountText}
-                            />
-                          )}
+                          <DataTableComponent
+                            additionalControls={alertBulkActions}
+                            unitCountText={unitCountText}
+                            browserFields={browserFields}
+                            data={nonDeletedEvents}
+                            disabledCellActions={FIELDS_WITHOUT_CELL_ACTIONS}
+                            id={tableId}
+                            loadPage={loadPage}
+                            renderCellValue={renderCellValue}
+                            rowRenderers={rowRenderers}
+                            totalItems={totalCountMinusDeleted}
+                            bulkActions={bulkActions}
+                            fieldBrowserOptions={fieldBrowserOptions}
+                            defaultCellActions={defaultCellActions}
+                            hasCrudPermissions={hasCrudPermissions}
+                            filters={filters}
+                            leadingControlColumns={transformedLeadingControlColumns}
+                            pagination={pagination}
+                            isEventRenderedView={tableView === 'eventRenderedView'}
+                            rowHeightsOptions={rowHeightsOptions}
+                          />
                         </StatefulEventContext.Provider>
                       </ScrollableFlexItem>
                     </FullWidthFlexGroupTable>

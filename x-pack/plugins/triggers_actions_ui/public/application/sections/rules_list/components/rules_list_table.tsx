@@ -63,15 +63,11 @@ import { RuleStatusDropdown } from './rule_status_dropdown';
 import { RulesListNotifyBadge } from './rules_list_notify_badge';
 import { RulesListTableStatusCell } from './rules_list_table_status_cell';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
-import {
-  RulesListColumns,
-  RulesListVisibleColumns,
-  useRulesListColumnSelector,
-} from './rules_list_column_selector';
+import { RulesListColumns, useRulesListColumnSelector } from './rules_list_column_selector';
 
 interface RuleTypeState {
   isLoading: boolean;
-  isInitialized: boolean;
+  initialLoad: boolean;
   data: RuleTypeIndex;
 }
 
@@ -143,7 +139,7 @@ export interface RulesListTableProps {
     onLoading: (isLoading: boolean) => void
   ) => React.ReactNode;
   renderRuleError?: (rule: RuleTableItem) => React.ReactNode;
-  visibleColumns?: RulesListVisibleColumns[];
+  visibleColumns?: string[];
 }
 
 interface ConvertRulesToTableItemsOpts {
@@ -893,7 +889,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
             pageIndex: page.index,
             pageSize: page.size,
             /* Don't display rule count until we have the rule types initialized */
-            totalItemCount: ruleTypesState.isInitialized === false ? 0 : rulesState.totalItemCount,
+            totalItemCount: ruleTypesState.initialLoad ? 0 : rulesState.totalItemCount,
           }}
           onChange={({
             page: changedPage,

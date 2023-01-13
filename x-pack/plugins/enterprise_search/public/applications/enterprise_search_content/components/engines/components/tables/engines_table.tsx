@@ -7,22 +7,29 @@
 
 import React from 'react';
 
+import { useValues } from 'kea';
+
 import { CriteriaWithPagination, EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedNumber } from '@kbn/i18n-react';
+
+import { EnterpriseSearchEngine } from '../../../../../../../common/types/engines';
 
 import { DELETE_BUTTON_LABEL, MANAGE_BUTTON_LABEL } from '../../../../../shared/constants';
+import { generateEncodedPath } from '../../../../../shared/encode_path_params';
+import { KibanaLogic } from '../../../../../shared/kibana';
+import { EuiLinkTo } from '../../../../../shared/react_router_helpers';
 
-import { convertMetaToPagination, EngineListDetails, Meta } from '../../types';
+import { ENGINE_PATH } from '../../../../routes';
+import { convertMetaToPagination, Meta } from '../../types';
 
 // add health status
 interface EnginesListTableProps {
-  enginesList: EngineListDetails[];
+  enginesList: EnterpriseSearchEngine[];
+  isLoading?: boolean;
   loading: boolean;
   meta: Meta;
-  isLoading?: boolean;
-  onChange: (criteria: CriteriaWithPagination<EngineListDetails>) => void;
+  onChange: (criteria: CriteriaWithPagination<EnterpriseSearchEngine>) => void;
 }
 export const EnginesListTable: React.FC<EnginesListTableProps> = ({
   enginesList,
@@ -30,27 +37,28 @@ export const EnginesListTable: React.FC<EnginesListTableProps> = ({
   isLoading,
   onChange,
 }) => {
-  const columns: Array<EuiBasicTableColumn<EngineListDetails>> = [
+  const { navigateToUrl } = useValues(KibanaLogic);
+  const columns: Array<EuiBasicTableColumn<EnterpriseSearchEngine>> = [
     {
       field: 'name',
       name: i18n.translate('xpack.enterpriseSearch.content.enginesList.table.column.name', {
         defaultMessage: 'Engine Name',
       }),
-      width: '30%',
-      truncateText: true,
       mobileOptions: {
         header: true,
         enlarge: true,
         width: '100%',
       },
-    },
-    {
-      field: 'document_count',
-      name: i18n.translate('xpack.enterpriseSearch.content.enginesList.table.column.documents', {
-        defaultMessage: 'Documents',
-      }),
-      dataType: 'number',
-      render: (number: number) => <FormattedNumber value={number} />,
+      render: (name: string) => (
+        <EuiLinkTo
+          data-test-subj="engine-link"
+          to={generateEncodedPath(ENGINE_PATH, { engineName: name })}
+        >
+          {name}
+        </EuiLinkTo>
+      ),
+      truncateText: true,
+      width: '30%',
     },
     {
       field: 'last_updated',
@@ -82,7 +90,12 @@ export const EnginesListTable: React.FC<EnginesListTableProps> = ({
           ),
           type: 'icon',
           icon: 'eye',
-          onClick: () => {},
+          onClick: (engine) =>
+            navigateToUrl(
+              generateEncodedPath(ENGINE_PATH, {
+                engineName: engine.name,
+              })
+            ),
         },
         {
           name: DELETE_BUTTON_LABEL,
