@@ -1,3 +1,4 @@
+---
 id: kibDevTutorialAddingApiCapacityTestingJourney
 slug: /kibana-dev-docs/tutorial/performance/adding_api_capacity_testing_journey
 title: Adding Api Capacity Testing Journey
@@ -6,7 +7,7 @@ date: 2023-01-13
 tags: ['kibana', 'onboarding', 'setup', 'performance', 'development', 'telemetry']
 ---
 
-# Overview
+## Overview
 It is important to test individual API endpoint for the baseline performance, scalability, or breaking point. If an API doesn’t meet performance requirements, it is a bottleneck.
 This capacity tests track how response time changes while we slowly increase number of concurrent requests per second.
 While using similar load model, we are able to identify how many requests per second each endpoint can hold with response time staying below critical threshold.
@@ -35,7 +36,7 @@ Test results are reported using EBT in the following format:
 }
 ```
 
-## Adding a new test
+### Adding a new test
 Create a new json file in `x-pack/test/scalability/apis` with required properties:
 - **journeyName** is a test name, e.g. `GET /internal/security/session`
 - **scalabilitySetup** is used to set load model
@@ -106,8 +107,9 @@ Override default response time thresholds by adding to `scalabilitySetup`:
   },
 ```
 
-## Running api capacity journey locally
-Clone [kibana-load-testing](https://github.com/elastic/kibana-load-testing) repo 
+### Running api capacity journey locally
+Clone [kibana-load-testing](https://github.com/elastic/kibana-load-testing) repo.
+
 Use the Node script from kibana root directory:
   `node scripts/run_scalability_cli.js --journey-path x-pack/test/scalability/apis/$YOUR_JOURNEY_NAME.ts`
 
