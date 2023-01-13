@@ -63,6 +63,7 @@ import {
   selectStagedActiveData,
   selectFrameDatasourceAPI,
 } from '../../state_management';
+import { filterUserMessages } from '../../app_plugin/get_application_user_messages';
 
 const MAX_SUGGESTIONS_DISPLAYED = 5;
 const LOCAL_STORAGE_SUGGESTIONS_PANEL = 'LENS_SUGGESTIONS_PANEL_HIDDEN';
@@ -76,13 +77,17 @@ const configurationsValid = (
 ): boolean => {
   try {
     return (
-      [
-        ...(currentDataSource?.getUserMessages?.(currentDatasourceState, {
-          frame,
-          setState: () => {},
-        }) ?? []),
-        ...(currentVisualization?.getUserMessages?.(currentVisualizationState, { frame }) ?? []),
-      ].length === 0
+      filterUserMessages(
+        [
+          ...(currentDataSource?.getUserMessages?.(currentDatasourceState, {
+            frame,
+            setState: () => {},
+          }) ?? []),
+          ...(currentVisualization?.getUserMessages?.(currentVisualizationState, { frame }) ?? []),
+        ],
+        undefined,
+        { severity: 'error' }
+      ).length === 0
     );
   } catch (e) {
     return false;
