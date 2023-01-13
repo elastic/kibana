@@ -6,12 +6,18 @@
  */
 
 import React, { FC } from 'react';
+import { pick } from 'lodash';
+
+import { EuiSpacer } from '@elastic/eui';
 
 import { DataView } from '@kbn/data-views-plugin/common';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import { UrlStateProvider } from '@kbn/ml-url-state';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { DatePickerContextProvider } from '@kbn/ml-date-picker';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 
 import { DataSourceContext } from '../../hooks/use_data_source';
 import { SavedSearchSavedObject } from '../../application/utils/search_utils';
@@ -36,15 +42,25 @@ export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps>
   savedSearch,
   appDependencies,
 }) => {
+  const datePickerDeps = {
+    ...pick(appDependencies, ['data', 'http', 'notifications', 'theme', 'uiSettings']),
+    toMountPoint,
+    wrapWithTheme,
+    uiSettingsKeys: UI_SETTINGS,
+  };
+
   return (
     <AiopsAppContext.Provider value={appDependencies}>
       <UrlStateProvider>
         <DataSourceContext.Provider value={{ dataView, savedSearch }}>
           <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
-            <PageHeader />
-            <ChangePointDetectionContextProvider>
-              <ChangePointDetectionPage />
-            </ChangePointDetectionContextProvider>
+            <DatePickerContextProvider {...datePickerDeps}>
+              <PageHeader />
+              <EuiSpacer />
+              <ChangePointDetectionContextProvider>
+                <ChangePointDetectionPage />
+              </ChangePointDetectionContextProvider>
+            </DatePickerContextProvider>
           </StorageContextProvider>
         </DataSourceContext.Provider>
       </UrlStateProvider>

@@ -20,12 +20,13 @@ import { FilterInButtonIcon, FilterOutButtonIcon } from '../../../../query_bar';
 import { AddToTimelineButtonIcon, AddToTimelineContextMenu } from '../../../../timeline';
 import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../../utils';
 import { CopyToClipboardButtonIcon, CopyToClipboardContextMenu } from '../../copy_to_clipboard';
-
-export const TIMELINE_BUTTON_TEST_ID = 'TimelineButton';
-export const FILTER_IN_BUTTON_TEST_ID = 'FilterInButton';
-export const FILTER_OUT_BUTTON_TEST_ID = 'FilterOutButton';
-export const COPY_TO_CLIPBOARD_BUTTON_TEST_ID = 'CopyToClipboardButton';
-export const POPOVER_BUTTON_TEST_ID = 'PopoverButton';
+import {
+  COPY_TO_CLIPBOARD_BUTTON_TEST_ID,
+  FILTER_IN_BUTTON_TEST_ID,
+  FILTER_OUT_BUTTON_TEST_ID,
+  POPOVER_BUTTON_TEST_ID,
+  TIMELINE_BUTTON_TEST_ID,
+} from './test_ids';
 
 const MORE_ACTIONS_BUTTON_LABEL = i18n.translate('xpack.threatIntelligence.more-actions.popover', {
   defaultMessage: 'More actions',

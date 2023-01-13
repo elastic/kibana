@@ -5,13 +5,30 @@
  * 2.0.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
+import {
+  CoreSetup,
+  CoreStart,
+  IUiSettingsClient,
+  KibanaRequest,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { License } from '@kbn/license-api-guard-plugin/server';
+import { CustomBranding } from '@kbn/core-custom-branding-common';
 import { PLUGIN } from '../common/constants';
+import type { CustomBrandingRequestHandlerContext } from './types';
 import { Dependencies } from './types';
 import { registerRoutes } from './routes';
-import type { CustomBrandingRequestHandlerContext } from './types';
+
+const settingsKeys: Array<keyof CustomBranding> = [
+  'logo',
+  'customizedLogo',
+  'faviconPNG',
+  'faviconSVG',
+  'pageTitle',
+];
 
 export class CustomBrandingPlugin implements Plugin {
   private readonly license: License;
@@ -31,6 +48,14 @@ export class CustomBrandingPlugin implements Plugin {
     const router = core.http.createRouter<CustomBrandingRequestHandlerContext>();
     registerRoutes(router);
 
+    const fetchFn = async (request: KibanaRequest): Promise<CustomBranding> => {
+      const [coreStart] = await core.getStartServices();
+      const soClient = coreStart.savedObjects.getScopedClient(request);
+      const uiSettings = coreStart.uiSettings.globalAsScopedToClient(soClient);
+      return await this.getBrandingFrom(uiSettings);
+    };
+
+    core.customBranding.register(fetchFn);
     return {};
   }
 
@@ -45,4 +70,17 @@ export class CustomBrandingPlugin implements Plugin {
   }
 
   public stop() {}
+
+  private getBrandingFrom = async (uiSettingsClient: IUiSettingsClient) => {
+    const branding: CustomBranding = {};
+    for (let i = 0; i < settingsKeys!.length; i++) {
+      const key = settingsKeys[i];
+      const fullKey = `customBranding:${key}`;
+      const value = await uiSettingsClient.get(fullKey);
+      if (value) {
+        branding[key] = value;
+      }
+    }
+    return branding;
+  };
 }

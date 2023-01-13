@@ -23,7 +23,7 @@ export const ActionTypes = {
   delete_case: 'delete_case',
 } as const;
 
-export type ActionTypeKeys = keyof typeof ActionTypes;
+type ActionTypeKeys = keyof typeof ActionTypes;
 export type ActionTypeValues = typeof ActionTypes[ActionTypeKeys];
 
 export const Actions = {
@@ -34,10 +34,6 @@ export const Actions = {
   push_to_service: 'push_to_service',
 } as const;
 
-/* To the next developer, if you add/removed fields here
- * make sure to check this file (x-pack/plugins/cases/server/services/user_actions/helpers.ts) too
- */
-export const ActionTypesRt = rt.keyof(ActionTypes);
 export const ActionsRt = rt.keyof(Actions);
 
 export const UserActionCommonAttributesRt = rt.type({
