@@ -49,7 +49,9 @@ export interface Props {
   selectedCategory: ExtendedIntegrationCategory;
   setSelectedCategory: (category: string) => void;
   categories: CategoryFacet[];
-  subCategories?: CategoryFacet[];
+  availableSubCategories?: CategoryFacet[];
+  selectedSubCategory?: CategoryFacet | undefined;
+  setSelectedSubCategory?: (c: CategoryFacet) => void;
   onSearchChange: (search: string) => void;
   showMissingIntegrationMessage?: boolean;
   callout?: JSX.Element | null;
@@ -66,7 +68,9 @@ export const PackageListGrid: FunctionComponent<Props> = ({
   selectedCategory,
   setSelectedCategory,
   categories,
-  subCategories,
+  availableSubCategories,
+  selectedSubCategory,
+  setSelectedSubCategory,
   showMissingIntegrationMessage = false,
   callout,
   showCardLabels = true,
@@ -116,10 +120,6 @@ export const PackageListGrid: FunctionComponent<Props> = ({
     return promoteFeaturedIntegrations(filteredList, selectedCategory);
   }, [isLoading, list, localSearchRef, searchTerm, selectedCategory]);
 
-  const selectedSubCategories = useMemo(() => {
-    return subCategories?.filter((c) => c.parent_id === selectedCategory);
-  }, [selectedCategory, subCategories]);
-
   let gridContent: JSX.Element;
 
   if (isLoading || !localSearchRef.current) {
@@ -133,7 +133,6 @@ export const PackageListGrid: FunctionComponent<Props> = ({
       />
     );
   }
-
   return (
     <>
       <div ref={menuRef}>
@@ -203,19 +202,24 @@ export const PackageListGrid: FunctionComponent<Props> = ({
               }
             />
             {/* TODO: hide under feature flag */}
-            {selectedSubCategories?.length ? <EuiSpacer /> : null}
+            {availableSubCategories?.length ? <EuiSpacer /> : null}
             <EuiFlexGroup
               data-test-subj="epmList.subcategoriesRow"
               justifyContent="flexStart"
               direction="row"
               gutterSize="s"
             >
-              {selectedSubCategories?.map((subCategory) => (
-                <EuiFlexItem grow={0}>
-                  <EuiButton color="text" onClick={() => undefined} key={subCategory.id}>
+              {availableSubCategories?.map((subCategory) => (
+                <EuiFlexItem grow={0} key={subCategory.id}>
+                  <EuiButton
+                    color="text"
+                    onClick={() => {
+                      if (setSelectedSubCategory) setSelectedSubCategory(subCategory);
+                    }}
+                  >
                     <FormattedMessage
                       id="xpack.fleet.epmList.subcategoriesButton"
-                      defaultMessage={`${subCategory.title} (${subCategory.count})`}
+                      defaultMessage={subCategory.title}
                     />
                   </EuiButton>
                 </EuiFlexItem>

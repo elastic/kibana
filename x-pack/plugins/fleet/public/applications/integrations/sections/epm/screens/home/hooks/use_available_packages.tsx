@@ -113,6 +113,8 @@ export const useAvailablePackages = () => {
     useLocation().search
   );
   const [selectedCategory, setCategory] = useState(initialSelectedCategory);
+  const [selectedSubCategory, setSelectedSubCategory] = useState<CategoryFacet | undefined>();
+
   const { getHref, getAbsolutePath } = useLink();
 
   function setUrlCategory(categoryId: string) {
@@ -171,16 +173,19 @@ export const useAvailablePackages = () => {
       .sort((a, b) => a.title.localeCompare(b.title));
   }, [addBasePath, appendCustomIntegrations, getAbsolutePath, getHref, mergedEprPackages]);
 
+  // Packages to show
+  // Filters out based on selected category and subcategory (if any)
   const filteredCards = useMemo(
     () =>
       cards.filter((c) => {
         if (selectedCategory === '') {
           return true;
         }
+        if (!selectedSubCategory) return c.categories.includes(selectedCategory);
 
-        return c.categories.includes(selectedCategory);
+        return c.categories.includes(selectedSubCategory.id);
       }),
-    [cards, selectedCategory]
+    [cards, selectedCategory, selectedSubCategory]
   );
 
   const {
@@ -189,6 +194,7 @@ export const useAvailablePackages = () => {
     error: eprCategoryLoadingError,
   } = useCategories(prereleaseIntegrationsEnabled);
 
+  // Subcategories
   const subCategories = eprCategories?.items.filter((item) => item.parent_id !== undefined);
 
   const allCategories: CategoryFacet[] = useMemo(() => {
@@ -209,14 +215,21 @@ export const useAvailablePackages = () => {
     ];
   }, [cards, eprCategories, isLoadingCategories]);
 
+  // Filter out subcategories
   const mainCategories = xorBy(allCategories, subCategories, 'id');
+
+  const availableSubCategories = useMemo(() => {
+    return subCategories?.filter((c) => c.parent_id === selectedCategory);
+  }, [selectedCategory, subCategories]);
 
   return {
     initialSelectedCategory,
     selectedCategory,
     allCategories,
     mainCategories,
-    subCategories,
+    availableSubCategories,
+    selectedSubCategory,
+    setSelectedSubCategory,
     preference,
     setPreference,
     isLoadingCategories,

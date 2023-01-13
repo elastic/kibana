@@ -107,7 +107,6 @@ export const AvailablePackages: React.FC<{}> = ({}) => {
     selectedCategory,
     allCategories,
     mainCategories,
-    subCategories,
     preference,
     setPreference,
     isLoadingCategories,
@@ -120,6 +119,9 @@ export const AvailablePackages: React.FC<{}> = ({}) => {
     setPrereleaseIntegrationsEnabled,
     setUrlCategory,
     setUrlSearchTerm,
+    availableSubCategories,
+    selectedSubCategory,
+    setSelectedSubCategory,
   } = useAvailablePackages();
 
   if (!isLoadingCategories && !categoryExists(initialSelectedCategory, allCategories)) {
@@ -151,6 +153,7 @@ export const AvailablePackages: React.FC<{}> = ({}) => {
           selectedCategory={selectedCategory}
           onCategoryChange={({ id }) => {
             setUrlCategory(id);
+            setSelectedSubCategory(undefined);
           }}
         />
       </EuiFlexItem>,
@@ -172,12 +175,14 @@ export const AvailablePackages: React.FC<{}> = ({}) => {
       list={filteredCards}
       selectedCategory={selectedCategory}
       setSelectedCategory={setUrlCategory}
+      availableSubCategories={availableSubCategories}
       categories={mainCategories}
-      subCategories={subCategories}
       onSearchChange={setUrlSearchTerm}
       showMissingIntegrationMessage
       callout={noEprCallout}
       showCardLabels={false}
+      selectedSubCategory={selectedSubCategory}
+      setSelectedSubCategory={setSelectedSubCategory}
     />
   );
 };

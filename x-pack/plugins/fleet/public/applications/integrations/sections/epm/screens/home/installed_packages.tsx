@@ -217,6 +217,7 @@ export const InstalledPackages: React.FC<{
   }
   const callout = selectedCategory === UPDATES_AVAILABLE || isLoading ? null : CalloutComponent;
 
+  // fix props here
   return (
     <PackageListGrid
       {...{ isLoading, controls, callout, categories }}
