@@ -8,7 +8,7 @@
 import { login, loginWithRole, ROLE } from '../tasks/login';
 import { setupLicense } from '../tasks/license';
 import { licenses } from '../fixtures/licenses';
-import { runEndpointLoaderScript } from '../tasks/run_endpoint_loader';
+import { loadEndpointIfNoneExist } from '../tasks/common/load_endpoint_data';
 
 const loginWithReadAccess = (url: string) => {
   loginWithRole(ROLE.t2_analyst);
@@ -55,7 +55,7 @@ describe('Platinum license', () => {
   });
 
   it('should display response action history for an endpoint', () => {
-    runEndpointLoaderScript();
+    loadEndpointIfNoneExist();
     loginWithReadAccess('/app/security/administration/endpoints');
     cy.getBySel('hostnameCellLink').first().click();
     cy.getBySel('endpoint-details-flyout-tab-activity_log').should('exist');

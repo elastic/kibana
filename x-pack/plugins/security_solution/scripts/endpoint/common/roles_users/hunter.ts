@@ -20,6 +20,8 @@ export const getHunter: () => Omit<Role, 'name'> = () => {
           siem: [
             'minimal_all',
             'actions_log_management_all',
+            'endpoint_list_all',
+            'policy_management_all',
             'host_isolation_all',
             'process_operations_all',
             'trusted_applications_all',
