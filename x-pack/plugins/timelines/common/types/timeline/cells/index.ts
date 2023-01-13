@@ -7,9 +7,10 @@
 
 import { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
+import { BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { ColumnHeaderOptions, RowRenderer } from '../..';
 import { Ecs } from '../../../ecs';
-import { BrowserFields, TimelineNonEcsData } from '../../../search_strategy';
+import { TimelineNonEcsData } from '../../../search_strategy';
 
 /** The following props are provided to the function called by `renderCellValue` */
 export type CellValueElementProps = EuiDataGridCellValueElementProps & {

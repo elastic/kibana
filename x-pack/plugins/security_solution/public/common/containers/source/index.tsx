@@ -22,13 +22,13 @@ import type {
   BrowserField,
   BrowserFields,
   BrowserFieldCategory,
-} from '@kbn/rule-registry-plugin/common/types';
+} from '@kbn/rule-registry-plugin/common';
 import { useKibana } from '../../lib/kibana';
 import * as i18n from './translations';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { getDataViewStateFromIndexFields } from './use_data_view';
 
-export { BrowserField, BrowserFields, BrowserFieldCategory };
+export type { BrowserField, BrowserFields, BrowserFieldCategory };
 
 export function getAllBrowserFields(browserFields: BrowserFields): Array<Partial<BrowserField>> {
   const result: Array<Partial<BrowserField>> = [];

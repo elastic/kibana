@@ -11,11 +11,11 @@ import { useDispatch } from 'react-redux';
 import memoizeOne from 'memoize-one';
 import { omit, pick } from 'lodash/fp';
 import type {
-  BrowserField,
   IndexField,
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
 } from '@kbn/timelines-plugin/common';
+import type { BrowserField } from '@kbn/rule-registry-plugin/common';
 import { DELETED_SECURITY_SOLUTION_DATA_VIEW } from '@kbn/timelines-plugin/common';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';

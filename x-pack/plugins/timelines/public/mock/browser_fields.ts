@@ -6,7 +6,7 @@
  */
 
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { BrowserFields } from '../../common/search_strategy/index_fields';
+import { BrowserFields } from '@kbn/rule-registry-plugin/common';
 
 const DEFAULT_INDEX_PATTERN = [
   'apm-*-transaction*',
@@ -418,6 +418,7 @@ export const mockBrowserFields: BrowserFields = {
         type: 'string',
       },
     },
+    name: 'agent',
   },
   auditd: {
     fields: {
@@ -455,6 +456,7 @@ export const mockBrowserFields: BrowserFields = {
         type: 'string',
       },
     },
+    name: 'auditd',
   },
   base: {
     fields: {
@@ -493,6 +495,7 @@ export const mockBrowserFields: BrowserFields = {
         indexes: ['auditbeat', 'filebeat', 'packetbeat'],
       },
     },
+    name: 'base',
   },
   client: {
     fields: {
@@ -542,6 +545,7 @@ export const mockBrowserFields: BrowserFields = {
         type: 'string',
       },
     },
+    name: 'client',
   },
   cloud: {
     fields: {
@@ -569,6 +573,7 @@ export const mockBrowserFields: BrowserFields = {
         type: 'string',
       },
     },
+    name: 'cloud',
   },
   container: {
     fields: {
@@ -606,6 +611,7 @@ export const mockBrowserFields: BrowserFields = {
         type: 'string',
       },
     },
+    name: 'container',
   },
   destination: {
     fields: {
@@ -667,6 +673,7 @@ export const mockBrowserFields: BrowserFields = {
         type: 'long',
       },
     },
+    name: 'destination',
   },
   event: {
     fields: {
@@ -719,6 +726,7 @@ export const mockBrowserFields: BrowserFields = {
         indexes: DEFAULT_INDEX_PATTERN,
       },
     },
+    name: 'event',
   },
   host: {
     fields: {
@@ -734,6 +742,7 @@ export const mockBrowserFields: BrowserFields = {
         indexes: DEFAULT_INDEX_PATTERN,
       },
     },
+    name: 'host',
   },
   source: {
     fields: {
@@ -760,6 +769,7 @@ export const mockBrowserFields: BrowserFields = {
         type: 'long',
       },
     },
+    name: 'source',
   },
   user: {
     fields: {
@@ -775,6 +785,7 @@ export const mockBrowserFields: BrowserFields = {
         indexes: ['auditbeat', 'filebeat', 'packetbeat'],
       },
     },
+    name: 'user',
   },
   nestedField: {
     fields: {
@@ -827,6 +838,7 @@ export const mockBrowserFields: BrowserFields = {
         },
       },
     },
+    name: 'nestedField',
   },
 };
 
