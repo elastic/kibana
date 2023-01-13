@@ -97,9 +97,8 @@ export async function validateActions(
   const scheduleInterval = parseDuration(data.schedule.interval);
   const actionsWithInvalidThrottles = actions.filter(
     (action) =>
-      !action.frequency ||
-      (action.frequency.notifyWhen === RuleNotifyWhen.THROTTLE &&
-        parseDuration(action.frequency.throttle!) < scheduleInterval)
+      action.frequency?.notifyWhen === RuleNotifyWhen.THROTTLE &&
+      parseDuration(action.frequency.throttle!) < scheduleInterval
   );
   if (actionsWithInvalidThrottles.length) {
     throw Boom.badRequest(
