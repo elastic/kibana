@@ -40,37 +40,9 @@ export interface ContentStorage<
 export interface ContentConfig<S extends ContentStorage> {
   /** The storage layer for the content.*/
   storage: S;
+  /** Optional handler to convert the DB item to a KibanaContent */
+  dbToKibanaContentSerializer?: (item: any) => KibanaContent;
 }
-
-// --- CONTENT FIELDS
-
-/** Interface to represent a reference field (allows to populate() content) */
-export interface Ref {
-  $id: string;
-}
-
-/** Fields that all kibana content must have (fields *not* editable by the user) */
-export interface InternalFields {
-  id: string;
-  type: string;
-  meta: {
-    createdAt: string;
-    createdBy: Ref;
-    updatedAt: string;
-    updatedBy: Ref;
-  };
-}
-
-/** Fields that _all_ content must have (fields editable by the user) */
-export interface CommonFields {
-  title: string;
-  description?: string;
-}
-
-/** Base type for all Kibana content */
-export type KibanaContent<T extends object = {}> = InternalFields & CommonFields & T;
-
-// --- CRUD
 
 export interface SearchOptions {
   limit?: number;

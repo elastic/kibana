@@ -49,7 +49,9 @@ export function initRpcHandlers(fnHandler: FunctionHandler<Context>) {
     // Create a content
     register(Calls.create)(async (ctx, payload) => {
       const crudInstance = ctx.core.crud(payload.type);
-      const contentCreated = await crudInstance.create(payload.data);
+      const contentCreated = await crudInstance.create(payload.data as any, {
+        requestHandlerContext: ctx.requestHandlerContext,
+      });
 
       ctx.core.eventBus.emit({
         type: 'createItemSuccess',
