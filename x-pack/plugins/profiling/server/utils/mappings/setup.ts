@@ -57,7 +57,7 @@ export async function configureFleetPolicy(
         metrics: {
           elasticsearch: {
             hosts: ['https://1b6c02856ea642a6ac14499b01507233.us-east-2.aws.elastic-cloud.com:443'],
-            api_key: 'woq-IoMBRbbiEbPugtWW:_iBmc1PdSout7sf5FCkEpA',
+            api_key: 'NaxbCoQBy_DF28rqULgK:FxIjSR__TTy7tDrkrOkGfA',
           },
         },
         keyvalue_retention: {

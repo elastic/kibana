@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { applySetup, configureFleetPolicy } from '../utils/mappings/setup';
 import { getClient } from './compat';
 import { getRoutePaths } from '../../common';
@@ -30,12 +29,19 @@ export function registerSetupRoute({
         const esClient = await getClient(context);
         logger.info('checking if profiling ES configurations are installed');
 
-        const done = await hasProfilingSetupCompleted(esClient);
+        const done: boolean = await hasProfilingSetupCompleted(esClient)
+          .then((indices) => {
+            return indices.length === 12;
+          })
+          .catch((error) => {
+            logger.info(`error while checking Profiling setup: ${error.message}`);
+            return false;
+          });
 
         // Reply to clients if we have already created all 12 events template indices.
         // This is kind of simplistic but can be a good first step to ensure
         // Profiling resources will be created.
-        return response.ok({ body: { has_setup: done.length === 12 } });
+        return response.ok({ body: { has_setup: done } });
       } catch (error) {
         return handleRouteHandlerError({ error, logger, response });
       }
@@ -50,8 +56,6 @@ export function registerSetupRoute({
     async (context, request, response) => {
       try {
         const esClient = await getClient(context);
-        // FIXME
-        // @dgieselaar: not sure how to get the client...
         const soClient = (await context.core).savedObjects.client;
         logger.info('applying initial setup of Elasticsearch resources');
 
