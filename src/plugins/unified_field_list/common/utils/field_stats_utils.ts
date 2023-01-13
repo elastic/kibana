@@ -55,6 +55,7 @@ export function buildSearchParams({
             [timeFieldName]: {
               gte: fromDate,
               lte: toDate,
+              format: 'strict_date_optional_time',
             },
           },
         },

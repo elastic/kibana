@@ -42,7 +42,7 @@ import {
 } from '../requests/get_monitor_status';
 import { UNNAMED_LOCATION } from '../../../../common/constants';
 import { getUptimeIndexPattern, IndexPatternTitleAndFields } from '../requests/get_index_pattern';
-import { UMServerLibs, UptimeEsClient, createUptimeESClient } from '../lib';
+import { UMServerLibs, UptimeEsClient } from '../lib';
 import {
   ACTION_VARIABLES,
   ALERT_DETAILS_URL,
@@ -366,10 +366,10 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
       timerangeUnit,
     } = rawParams;
     const { basePath } = server;
-    const uptimeEsClient = createUptimeESClient({
-      esClient: scopedClusterClient.asCurrentUser,
+    const uptimeEsClient = new UptimeEsClient(
       savedObjectsClient,
-    });
+      scopedClusterClient.asCurrentUser
+    );
 
     const filterString = await formatFilterString(uptimeEsClient, filters, search, libs);
     const timespanInterval = `${String(timerangeCount)}${timerangeUnit}`;

@@ -110,6 +110,8 @@ elastic-agent-*
 fleet-server-*
 elastic-agent.yml
 fleet-server.yml
-/packages/kbn-package-map/package-map.json
+/packages/*/package-map.json
+/packages/*/config-paths.json
 /packages/kbn-synthetic-package-map/
 **/.synthetics/
+**/.journeys/

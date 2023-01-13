@@ -7,7 +7,7 @@
 import type { QueryObserverResult, UseQueryOptions } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import type { GetPackagesResponse } from '@kbn/fleet-plugin/common';
+import type { GetInfoResponse } from '@kbn/fleet-plugin/common';
 import { useHttp } from '../../../common/lib/kibana';
 import { MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../common/constants';
 import { sendGetEndpointSecurityPackage } from './ingest';
@@ -52,10 +52,10 @@ export function useGetEndpointSpecificPolicies(
 export function useGetEndpointSecurityPackage({
   customQueryOptions,
 }: {
-  customQueryOptions?: UseQueryOptions<GetPackagesResponse['items'][number], IHttpFetchError>;
-}): QueryObserverResult<GetPackagesResponse['items'][number], IHttpFetchError> {
+  customQueryOptions?: UseQueryOptions<GetInfoResponse['item'], IHttpFetchError>;
+}): QueryObserverResult<GetInfoResponse['item'], IHttpFetchError> {
   const http = useHttp();
-  return useQuery<GetPackagesResponse['items'][number], IHttpFetchError>(
+  return useQuery<GetInfoResponse['item'], IHttpFetchError>(
     ['endpointPackageVersion', customQueryOptions],
     () => {
       return sendGetEndpointSecurityPackage(http);

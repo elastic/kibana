@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
@@ -26,5 +28,11 @@ export const createCustomPipeline = async ({
 
 export const CreateCustomPipelineApiLogic = createApiLogic(
   ['content', 'create_custom_pipeline_api_logic'],
-  createCustomPipeline
+  createCustomPipeline,
+  {
+    showSuccessFlashFn: () =>
+      i18n.translate('xpack.enterpriseSearch.content.indices.pipelines.successToastCustom.title', {
+        defaultMessage: 'Custom pipeline created',
+      }),
+  }
 );

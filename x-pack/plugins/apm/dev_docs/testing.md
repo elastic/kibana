@@ -56,7 +56,7 @@ node x-pack/plugins/apm/scripts/test/api --runner --basic --grep-files=error_gro
 To update snapshots append `--updateSnapshots` to the `--runner` command:
 
 ```
-node scripts/test/api --runner --basic --updateSnapshots
+node x-pack/plugins/apm/scripts/test/api --runner --basic --updateSnapshots
 ```
 
 (The test server needs to be running)

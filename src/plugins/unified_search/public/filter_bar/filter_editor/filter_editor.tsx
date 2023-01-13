@@ -109,11 +109,19 @@ export const strings = {
       defaultMessage: 'Elasticsearch Query DSL editor',
     }),
 };
+
+interface QueryDslFilter {
+  queryDsl: string;
+  customLabel: string | null;
+}
+
 export interface FilterEditorComponentProps {
   filter: Filter;
   indexPatterns: DataView[];
   onSubmit: (filter: Filter) => void;
   onCancel: () => void;
+  onLocalFilterCreate?: (initialState: { filter: Filter; queryDslFilter: QueryDslFilter }) => void;
+  onLocalFilterUpdate?: (filter: Filter | QueryDslFilter) => void;
   timeRangeForSuggestionsOverride?: boolean;
   mode?: 'edit' | 'add';
 }
@@ -139,6 +147,15 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
       isCustomEditorOpen: this.isUnknownFilterType(),
       localFilter: dataView ? merge({}, props.filter) : buildEmptyFilter(false),
     };
+  }
+
+  componentDidMount() {
+    const { localFilter, queryDsl, customLabel } = this.state;
+    this.props.onLocalFilterCreate?.({
+      filter: localFilter,
+      queryDslFilter: { queryDsl, customLabel },
+    });
+    this.props.onLocalFilterUpdate?.(localFilter);
   }
 
   private parseFilterToQueryDsl(filter: Filter) {
@@ -372,6 +389,14 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
   private toggleCustomEditor = () => {
     const isCustomEditorOpen = !this.state.isCustomEditorOpen;
     this.setState({ isCustomEditorOpen });
+    if (this.props.onLocalFilterUpdate) {
+      const { customLabel, queryDsl, localFilter } = this.state;
+      if (isCustomEditorOpen) {
+        this.props.onLocalFilterUpdate({ queryDsl, customLabel });
+      } else {
+        this.props.onLocalFilterUpdate(localFilter);
+      }
+    }
   };
 
   private isUnknownFilterType() {
@@ -383,16 +408,20 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
     return getIndexPatternFromFilter(this.props.filter, this.props.indexPatterns);
   }
 
+  private isQueryDslValid = (queryDsl: string) => {
+    try {
+      const queryDslJson = JSON.parse(queryDsl);
+      return Object.keys(queryDslJson).length > 0;
+    } catch {
+      return false;
+    }
+  };
+
   private isFilterValid() {
     const { isCustomEditorOpen, queryDsl, selectedDataView, localFilter } = this.state;
 
     if (isCustomEditorOpen) {
-      try {
-        const queryDslJson = JSON.parse(queryDsl);
-        return Object.keys(queryDslJson).length > 0;
-      } catch (e) {
-        return false;
-      }
+      return this.isQueryDslValid(queryDsl);
     }
 
     if (!selectedDataView) {
@@ -419,10 +448,49 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
   private onCustomLabelChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const customLabel = event.target.value;
     this.setState({ customLabel });
+    if (this.props.onLocalFilterUpdate) {
+      if (this.state.isCustomEditorOpen) {
+        const { queryDsl } = this.state;
+        this.props.onLocalFilterUpdate({ queryDsl, customLabel });
+      } else {
+        const localFilter = {
+          ...this.state.localFilter,
+          meta: {
+            ...this.state.localFilter.meta,
+            alias: customLabel || null,
+          },
+        };
+        this.props.onLocalFilterUpdate(localFilter);
+      }
+    }
   };
 
   private onQueryDslChange = (queryDsl: string) => {
     this.setState({ queryDsl });
+    if (this.props.onLocalFilterUpdate) {
+      const { customLabel } = this.state;
+      this.props.onLocalFilterUpdate({ queryDsl, customLabel });
+    }
+  };
+
+  private getFilterFromQueryDsl = (queryDsl: string) => {
+    const { customLabel } = this.state;
+    const {
+      $state,
+      meta: { index, disabled = false, negate = false },
+    } = this.props.filter;
+
+    if (!$state || !$state.store) {
+      return;
+    }
+
+    const newIndex = index || this.props.indexPatterns[0].id!;
+    try {
+      const body = JSON.parse(queryDsl);
+      return buildCustomFilter(newIndex, body, disabled, negate, customLabel || null, $state.store);
+    } catch {
+      return null;
+    }
   };
 
   private onLocalFilterChange = (updatedFilters: Filter[]) => {
@@ -465,30 +533,22 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
     }
 
     this.setState({ localFilter: newFilter });
+    this.props.onLocalFilterUpdate?.(newFilter);
   };
 
   private onSubmit = () => {
     const { isCustomEditorOpen, queryDsl, customLabel } = this.state;
-    const {
-      $state,
-      meta: { index, disabled = false, negate = false },
-    } = this.props.filter;
+    const { $state } = this.props.filter;
 
     if (!$state || !$state.store) {
       return;
     }
 
     if (isCustomEditorOpen) {
-      const newIndex = index || this.props.indexPatterns[0].id!;
-      const body = JSON.parse(queryDsl);
-      const filter = buildCustomFilter(
-        newIndex,
-        body,
-        disabled,
-        negate,
-        customLabel || null,
-        $state.store
-      );
+      const filter = this.getFilterFromQueryDsl(queryDsl);
+      if (!filter) {
+        return;
+      }
 
       this.props.onSubmit(filter);
     } else {

@@ -16,6 +16,7 @@ export interface BuildOptions {
   dockerContextUseLocalArtifact: boolean | null;
   dockerCrossCompile: boolean;
   dockerPush: boolean;
+  dockerTag: string | null;
   dockerTagQualifier: string | null;
   downloadFreshNode: boolean;
   downloadCloudDependencies: boolean;

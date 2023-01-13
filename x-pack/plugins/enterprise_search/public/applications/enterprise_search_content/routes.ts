@@ -23,5 +23,6 @@ export const SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH = `${SEARCH_INDEX_PATH}/cra
 export const SEARCH_INDEX_SELECT_CONNECTOR_PATH = `${SEARCH_INDEX_PATH}/select_connector`;
 
 export const ENGINES_PATH = `${ROOT_PATH}engines`;
+export const ENGINE_CREATION_PATH = `${ENGINES_PATH}/new`;
 
 export const ML_MANAGE_TRAINED_MODELS_PATH = '/app/ml/trained_models';

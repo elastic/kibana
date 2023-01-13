@@ -34,10 +34,8 @@ export const useIndicatorById = (indicatorId: string) => {
       bool: {
         must: [
           {
-            term: {
-              _id: {
-                value: indicatorId,
-              },
+            ids: {
+              values: [indicatorId],
             },
           },
         ],
@@ -51,7 +49,6 @@ export const useIndicatorById = (indicatorId: string) => {
     ];
     const req = {
       params: {
-        index: ['filebeat-*'],
         body: {
           query,
           fields,

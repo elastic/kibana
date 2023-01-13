@@ -1,10 +1,11 @@
-# SLO 
+# SLO
 
 Add the feature flag: `xpack.observability.unsafe.slo.enabled: true` in your Kibana config to enable the various SLO APIs.
 
 ## Supported SLI
 
 We currently support the following SLI:
+
 - APM Transaction Error Rate (Availability)
 - APM Transaction Duration (Latency)
 - Custom KQL
@@ -19,13 +20,13 @@ The **custom KQL** SLI requires an index pattern, an optional filter query, a nu
 
 We support **calendar aligned** and **rolling** time windows. Any duration greater than 1 day can be used: days, weeks, months, quarters, years.
 
-**Rolling time window:** Requires a duration, e.g. `1w` for one week, and `is_rolling: true`. SLOs defined with such time window, will only considere the SLI data from the last duration period as a moving window.
+**Rolling time window:** Requires a duration, e.g. `1w` for one week, and `isRolling: true`. SLOs defined with such time window, will only considere the SLI data from the last duration period as a moving window.
 
-**Calendar aligned time window:** Requires a duration, e.g. `1M` for one month, and a `calendar.start_time` date in ISO 8601 in UTC, which marks the beginning of the first period. From start time and the duration, the system will compute the different time windows. For example, starting the calendar on the **01/01/2022** with a monthly duration, if today is the **24/10/2022**, the window associated is: `[2022-10-01T00:00:00Z, 2022-11-01T00:00:00Z]`
+**Calendar aligned time window:** Requires a duration, e.g. `1M` for one month, and a `calendar.startTime` date in ISO 8601 in UTC, which marks the beginning of the first period. From start time and the duration, the system will compute the different time windows. For example, starting the calendar on the **01/01/2022** with a monthly duration, if today is the **24/10/2022**, the window associated is: `[2022-10-01T00:00:00Z, 2022-11-01T00:00:00Z]`
 
 ### Budgeting method
 
-An SLO can be configured with an **occurrences** or **timeslices** budgeting method. 
+An SLO can be configured with an **occurrences** or **timeslices** budgeting method.
 
 An **occurrences** budgeting method uses the number of **good** and **total** events during the time window.
 
@@ -33,16 +34,17 @@ A **timeslices** budgeting method uses the number of **good slices** and **total
 
 For example, defining a **timeslices** budgeting method with a `95%` slice threshold and `5m` slice window means that a 1 week SLO is split in 2,016 slices (`7*24*60 / 5`); for a 99% SLO target there will be approximately 20 minutes of available error budget. Each bucket is either good or bad depending on the ratio of good over total events during that bucket, compared to the slice threshold of 95%.
 
-###  Objective
+### Objective
 
 The target objective is the value the SLO needs to meet during the time window.
-If a **timeslices** budgeting method is used, we also need to define the **timeslice_target** which can be different than the overall SLO target.
+If a **timeslices** budgeting method is used, we also need to define the **timesliceTarget** which can be different than the overall SLO target.
 
 ### Optional settings
 
 The default settings should be sufficient for most users, but if needed, the following properties can be overwritten:
-- timestamp_field: The date time field to use from the source index
-- sync_delay: The ingest delay in the source data
+
+- timestampField: The date time field to use from the source index
+- syncDelay: The ingest delay in the source data
 - frequency: How often do we query the source data
 
 ## Example
@@ -62,25 +64,26 @@ curl --request POST \
 	"name": "My SLO Name",
 	"description": "My SLO Description",
 	"indicator": {
-		"type": "sli.apm.transaction_error_rate",
+		"type": "sli.apm.transactionErrorRate",
 		"params": {
 			"environment": "production",
 			"service": "o11y-app",
-			"transaction_type": "request",
-			"transaction_name": "GET /api",
-			"good_status_codes": ["2xx", "3xx", "4xx"]
+			"transactionType": "request",
+			"transactionName": "GET /api",
+			"goodStatusCodes": ["2xx", "3xx", "4xx"]
 		}
 	},
-	"time_window": {
+	"timeWindow": {
 		"duration": "30d",
-		"is_rolling": true
+		"isRolling": true
 	},
-	"budgeting_method": "occurrences",
+	"budgetingMethod": "occurrences",
 	"objective": {
 		"target": 0.99
 	}
 }'
 ```
+
 </details>
 
 <details>
@@ -96,27 +99,28 @@ curl --request POST \
 	"name": "My SLO Name",
 	"description": "My SLO Description",
 	"indicator": {
-		"type": "sli.apm.transaction_error_rate",
+		"type": "sli.apm.transactionErrorRate",
 		"params": {
 			"environment": "production",
 			"service": "o11y-app",
-			"transaction_type": "request",
-			"transaction_name": "GET /api",
-			"good_status_codes": ["2xx", "3xx", "4xx"]
+			"transactionType": "request",
+			"transactionName": "GET /api",
+			"goodStatusCodes": ["2xx", "3xx", "4xx"]
 		}
 	},
-	"time_window": {
+	"timeWindow": {
 		"duration": "1q",
 		"calendar": {
-            "start_time": "2022-06-01T00:00:00.000Z"
+            "startTime": "2022-06-01T00:00:00.000Z"
         }
 	},
-	"budgeting_method": "occurrences",
+	"budgetingMethod": "occurrences",
 	"objective": {
 		"target": 0.95
 	}
 }'
 ```
+
 </details>
 
 <details>
@@ -132,27 +136,28 @@ curl --request POST \
 	"name": "My SLO Name",
 	"description": "My SLO Description",
 	"indicator": {
-		"type": "sli.apm.transaction_error_rate",
+		"type": "sli.apm.transactionErrorRate",
 		"params": {
             "environment": "production",
 			"service": "o11y-app",
-			"transaction_type": "request",
-			"transaction_name": "GET /api",
-			"good_status_codes": ["2xx", "3xx", "4xx"]
+			"transactionType": "request",
+			"transactionName": "GET /api",
+			"goodStatusCodes": ["2xx", "3xx", "4xx"]
 		}
 	},
-	"time_window": {
+	"timeWindow": {
 		"duration": "1w",
-		"is_rolling": true
+		"isRolling": true
 	},
-	"budgeting_method": "timeslices",
+	"budgetingMethod": "timeslices",
 	"objective": {
 		"target": 0.90,
-		"timeslice_target": 0.86,
-		"timeslice_window": "5m"
+		"timesliceTarget": 0.86,
+		"timesliceWindow": "5m"
 	}
 }'
 ```
+
 </details>
 
 ### Latency
@@ -170,25 +175,26 @@ curl --request POST \
 	"name": "My SLO Name",
 	"description": "My SLO Description",
 	"indicator": {
-		"type": "sli.apm.transaction_duration",
+		"type": "sli.apm.transactionDuration",
 		"params": {
 			"environment": "production",
 			"service": "o11y-app",
-			"transaction_type": "request",
-			"transaction_name": "GET /api",
+			"transactionType": "request",
+			"transactionName": "GET /api",
 			"threshold.us": 500000
 		}
 	},
-	"time_window": {
+	"timeWindow": {
 		"duration": "7d",
-		"is_rolling": true
+		"isRolling": true
 	},
-	"budgeting_method": "occurrences",
+	"budgetingMethod": "occurrences",
 	"objective": {
 		"target": 0.99
 	}
 }'
 ```
+
 </details>
 
 <details>
@@ -204,29 +210,29 @@ curl --request POST \
 	"name": "My SLO Name",
 	"description": "My SLO Description",
 	"indicator": {
-		"type": "sli.apm.transaction_duration",
+		"type": "sli.apm.transactionDuration",
 		"params": {
 			"environment": "production",
 			"service": "o11y-app",
-			"transaction_type": "request",
-			"transaction_name": "GET /api",
+			"transactionType": "request",
+			"transactionName": "GET /api",
 			"threshold.us": 500000
 		}
 	},
-	"time_window": {
+	"timeWindow": {
 		"duration": "7d",
-		"is_rolling": true
+		"isRolling": true
 	},
-	"budgeting_method": "timeslices",
+	"budgetingMethod": "timeslices",
 	"objective": {
 		"target": 0.95,
-		"timeslice_target": 0.90,
-		"timeslice_window": "1m"
+		"timesliceTarget": 0.90,
+		"timesliceWindow": "1m"
 	}
 }'
 ```
-</details>
 
+</details>
 
 <details>
 <summary>99.9% of GET /api under 500ms weekly aligned (5m timeslices)</summary>
@@ -241,34 +247,33 @@ curl --request POST \
 	"name": "My SLO Name",
 	"description": "My SLO Description",
 	"indicator": {
-		"type": "sli.apm.transaction_duration",
+		"type": "sli.apm.transactionDuration",
 		"params": {
 			"environment": "production",
 			"service": "o11y-app",
-			"transaction_type": "request",
-			"transaction_name": "GET /api",
+			"transactionType": "request",
+			"transactionName": "GET /api",
 			"threshold.us": 500000
 		}
 	},
-	"time_window": {
+	"timeWindow": {
 		"duration": "7d",
-		"calendar": { 
-			"start_time": "2022-01-01T00:00:00.000Z"
+		"calendar": {
+			"startTime": "2022-01-01T00:00:00.000Z"
 		}
 	},
-	"budgeting_method": "timeslices",
+	"budgetingMethod": "timeslices",
 	"objective": {
 		"target": 0.999,
-		"timeslice_target": 0.95,
-		"timeslice_window": "5m"
+		"timesliceTarget": 0.95,
+		"timesliceWindow": "5m"
 	}
 }'
 ```
+
 </details>
 
-
 ### Custom
-
 
 <details>
 <summary>98.5% of 'logs lantency < 300ms' for 'groupId: group-0' over the last 7 days</summary>
@@ -291,14 +296,15 @@ curl --request POST \
 			"filter": "labels.groupId: group-0"
 		}
 	},
-	"time_window": {
+	"timeWindow": {
 		"duration": "7d",
-		"is_rolling": true
+		"isRolling": true
 	},
-	"budgeting_method": "occurrences",
+	"budgetingMethod": "occurrences",
 	"objective": {
 		"target": 0.985
 	}
 }'
 ```
+
 </details>

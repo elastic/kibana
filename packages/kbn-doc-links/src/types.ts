@@ -351,7 +351,31 @@ export interface DocLinks {
     syntheticsCommandReference: string;
     syntheticsProjectMonitors: string;
   }>;
-  readonly alerting: Record<string, string>;
+  readonly alerting: Readonly<{
+    guide: string;
+    actionTypes: string;
+    apmRules: string;
+    emailAction: string;
+    emailActionConfig: string;
+    emailExchangeClientSecretConfig: string;
+    emailExchangeClientIdConfig: string;
+    generalSettings: string;
+    indexAction: string;
+    esQuery: string;
+    indexThreshold: string;
+    pagerDutyAction: string;
+    preconfiguredConnectors: string;
+    preconfiguredAlertHistoryConnector: string;
+    serviceNowAction: string;
+    serviceNowSIRAction: string;
+    setupPrerequisites: string;
+    slackAction: string;
+    teamsAction: string;
+    connectors: string;
+  }>;
+  readonly taskManager: Readonly<{
+    healthMonitoring: string;
+  }>;
   readonly maps: Readonly<{
     guide: string;
     importGeospatialPrivileges: string;

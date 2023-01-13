@@ -58,7 +58,7 @@ export function* enableMonitorAlertEffect() {
         yield put(
           enableMonitorAlertAction.fail({
             configId: action.payload.configId,
-            error: serializeHttpFetchError(error),
+            error: serializeHttpFetchError(error, action.payload),
           })
         );
       }
@@ -90,7 +90,7 @@ export function* upsertMonitorEffect() {
         yield put(
           fetchUpsertFailureAction({
             configId: action.payload.configId,
-            error: serializeHttpFetchError(error),
+            error: serializeHttpFetchError(error, action.payload),
           })
         );
       } finally {

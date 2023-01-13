@@ -43,6 +43,15 @@ export class RepoPath {
     return (this._basename ??= Path.basename(this.repoRel));
   }
 
+  private _repoRelDir: string | undefined;
+  /**
+   * repoRelDir of the path
+   * (lazy and cached getter)
+   */
+  public get repoRelDir() {
+    return (this._repoRelDir ??= Path.dirname(this.repoRel));
+  }
+
   isTypeScript() {
     return this.ext === '.ts' || this.ext === '.tsx';
   }

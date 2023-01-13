@@ -7,14 +7,14 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import { asPercentWithTwoDecimals } from '../../../../common/utils/formatters';
-import { SLO } from '../../../typings';
 import { getSloDifference } from '../helpers/get_slo_difference';
 
 export interface SloSummaryStatsProps {
-  slo: SLO;
+  slo: SLOWithSummaryResponse;
 }
 
 export function SloSummaryStats({ slo }: SloSummaryStatsProps) {

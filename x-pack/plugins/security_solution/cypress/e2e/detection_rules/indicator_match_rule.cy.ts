@@ -123,18 +123,19 @@ describe('indicator match', () => {
       esArchiverLoad('suspicious_source_event');
       login();
     });
+
     after(() => {
       esArchiverUnload('threat_indicator');
       esArchiverUnload('suspicious_source_event');
     });
 
     describe('Creating new indicator match rules', () => {
-      before(() => {
-        visitWithoutDateRange(RULE_CREATION);
-        selectIndicatorMatchType();
-      });
-
       describe('Index patterns', () => {
+        beforeEach(() => {
+          visitWithoutDateRange(RULE_CREATION);
+          selectIndicatorMatchType();
+        });
+
         it('Contains a predefined index pattern', () => {
           getIndicatorIndex().should('have.text', getIndexPatterns().join(''));
         });
@@ -153,7 +154,7 @@ describe('indicator match', () => {
       });
 
       describe('Indicator index patterns', () => {
-        before(() => {
+        beforeEach(() => {
           visitWithoutDateRange(RULE_CREATION);
           selectIndicatorMatchType();
         });
@@ -174,7 +175,7 @@ describe('indicator match', () => {
       });
 
       describe('custom query input', () => {
-        before(() => {
+        beforeEach(() => {
           visitWithoutDateRange(RULE_CREATION);
           selectIndicatorMatchType();
         });
@@ -190,10 +191,11 @@ describe('indicator match', () => {
       });
 
       describe('custom indicator query input', () => {
-        before(() => {
+        beforeEach(() => {
           visitWithoutDateRange(RULE_CREATION);
           selectIndicatorMatchType();
         });
+
         it(`Has a default set of ${DEFAULT_THREAT_MATCH_QUERY}`, () => {
           getCustomIndicatorQueryInput().should('have.text', DEFAULT_THREAT_MATCH_QUERY);
         });

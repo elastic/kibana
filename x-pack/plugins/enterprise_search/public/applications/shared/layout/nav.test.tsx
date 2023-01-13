@@ -62,7 +62,7 @@ describe('useEnterpriseSearchContentNav', () => {
             name: 'Collections',
           },
         ],
-        name: 'Behavorial Analytics',
+        name: 'Behavioral Analytics',
       },
       {
         id: 'search',
@@ -265,7 +265,7 @@ describe('useEnterpriseSearchContentNav Engines feature flag', () => {
             name: 'Collections',
           },
         ],
-        name: 'Behavorial Analytics',
+        name: 'Behavioral Analytics',
       },
       {
         id: 'standaloneExperiences',

@@ -154,7 +154,6 @@ describe('links', () => {
         expect.anything(),
         expect.anything(),
         expect.anything(),
-        expect.anything(),
         false
       );
       expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.hostIsolationExceptions));
@@ -192,7 +191,6 @@ describe('links', () => {
         }),
       });
       expect(calculateEndpointAuthz as jest.Mock).toHaveBeenLastCalledWith(
-        expect.anything(),
         expect.anything(),
         expect.anything(),
         expect.anything(),

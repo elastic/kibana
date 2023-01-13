@@ -78,7 +78,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   showOnlyThreatIndicatorAlerts,
   tableId,
   to,
-  filterGroup = 'open',
+  filterGroup,
 }) => {
   const dispatch = useDispatch();
 
@@ -158,14 +158,17 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   );
 
   const defaultFiltersMemo = useMemo(() => {
-    const alertStatusFilter = buildAlertStatusFilter(filterGroup);
-
+    let alertStatusFilter: Filter[] = [];
+    if (filterGroup) {
+      alertStatusFilter = buildAlertStatusFilter(filterGroup);
+    }
     if (isEmpty(defaultFilters)) {
       return alertStatusFilter;
     } else if (defaultFilters != null && !isEmpty(defaultFilters)) {
       return [...defaultFilters, ...alertStatusFilter];
     }
   }, [defaultFilters, filterGroup]);
+
   const { filterManager } = kibana.services.data.query;
 
   const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');

@@ -197,7 +197,7 @@ describe('KibanaSavedObjectsSLORepository', () => {
         soClientMock.find.mockResolvedValueOnce(aFindResponse(SOME_SLO));
 
         const result = await repository.find(
-          { indicatorTypes: ['sli.kql.custom', 'sli.apm.transaction_duration'] },
+          { indicatorTypes: ['sli.kql.custom', 'sli.apm.transactionDuration'] },
           DEFAULT_SORTING,
           DEFAULT_PAGINATION
         );
@@ -212,7 +212,7 @@ describe('KibanaSavedObjectsSLORepository', () => {
           type: SO_SLO_TYPE,
           page: 1,
           perPage: 25,
-          filter: `(slo.attributes.indicator.type: sli.kql.custom or slo.attributes.indicator.type: sli.apm.transaction_duration)`,
+          filter: `(slo.attributes.indicator.type: sli.kql.custom or slo.attributes.indicator.type: sli.apm.transactionDuration)`,
           sortField: 'name',
           sortOrder: 'asc',
         });
@@ -224,7 +224,7 @@ describe('KibanaSavedObjectsSLORepository', () => {
       soClientMock.find.mockResolvedValueOnce(aFindResponse(SOME_SLO));
 
       const result = await repository.find(
-        { name: 'latency', indicatorTypes: ['sli.kql.custom', 'sli.apm.transaction_duration'] },
+        { name: 'latency', indicatorTypes: ['sli.kql.custom', 'sli.apm.transactionDuration'] },
         DEFAULT_SORTING,
         DEFAULT_PAGINATION
       );
@@ -239,7 +239,7 @@ describe('KibanaSavedObjectsSLORepository', () => {
         type: SO_SLO_TYPE,
         page: 1,
         perPage: 25,
-        filter: `(slo.attributes.name: *latency*) and (slo.attributes.indicator.type: sli.kql.custom or slo.attributes.indicator.type: sli.apm.transaction_duration)`,
+        filter: `(slo.attributes.name: *latency*) and (slo.attributes.indicator.type: sli.kql.custom or slo.attributes.indicator.type: sli.apm.transactionDuration)`,
         sortField: 'name',
         sortOrder: 'asc',
       });

@@ -111,13 +111,13 @@ interface DashboardPerformanceTracker {
   doneCount: number;
 }
 
-const defaultPerformanceTracker: DashboardPerformanceTracker = {
+const getDefaultPerformanceTracker: () => DashboardPerformanceTracker = () => ({
   panelIds: {},
   loadStartTime: performance.now(),
   lastTimeToData: 0,
   status: 'done',
   doneCount: 0,
-};
+});
 
 export interface DashboardGridProps {
   onDataLoaded?: (data: DashboardLoadedInfo) => void;
@@ -143,8 +143,8 @@ export const DashboardGrid = ({ onDataLoaded }: DashboardGridProps) => {
   );
 
   // reset performance tracker on each render.
-  const performanceRefs = useRef<DashboardPerformanceTracker>(defaultPerformanceTracker);
-  performanceRefs.current = defaultPerformanceTracker;
+  const performanceRefs = useRef<DashboardPerformanceTracker>(getDefaultPerformanceTracker());
+  performanceRefs.current = getDefaultPerformanceTracker();
 
   const onPanelStatusChange = useCallback(
     (info: EmbeddablePhaseEvent) => {

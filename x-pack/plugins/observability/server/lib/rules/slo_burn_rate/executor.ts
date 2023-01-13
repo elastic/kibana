@@ -58,8 +58,8 @@ export const getRuleExecutor = (): LifecycleRuleExecutor<
     );
 
     const sliData = await sliClient.fetchSLIDataFrom(slo, [
-      { name: LONG_WINDOW, duration: longWindowDuration },
-      { name: SHORT_WINDOW, duration: shortWindowDuration },
+      { name: LONG_WINDOW, duration: longWindowDuration.add(slo.settings.syncDelay) },
+      { name: SHORT_WINDOW, duration: shortWindowDuration.add(slo.settings.syncDelay) },
     ]);
 
     const longWindowBurnRate = computeBurnRate(slo, sliData[LONG_WINDOW]);

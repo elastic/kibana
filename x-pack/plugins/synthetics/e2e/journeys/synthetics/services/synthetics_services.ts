@@ -10,7 +10,8 @@ import type { Client } from '@elastic/elasticsearch';
 import { KbnClient, uriencode } from '@kbn/test';
 import pMap from 'p-map';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
-import { firstDownHit, firstUpHit } from '../alert_rules/sample_docs/sample_docs';
+import { journeyStart, journeySummary, step1, step2 } from './data/browser_docs';
+import { firstDownHit, getUpHit } from './data/sample_docs';
 
 export class SyntheticsServices {
   kibanaUrl: string;
@@ -98,20 +99,78 @@ export class SyntheticsServices {
   }
 
   async addTestSummaryDocument({
-    isDown = false,
+    docType = 'summaryUp',
     timestamp = new Date(Date.now()).toISOString(),
     monitorId,
     name,
-  }: { monitorId?: string; isDown?: boolean; timestamp?: string; name?: string } = {}) {
+    testRunId,
+    stepIndex = 1,
+  }: {
+    monitorId?: string;
+    docType?: 'summaryUp' | 'summaryDown' | 'journeyStart' | 'journeyEnd' | 'stepEnd';
+    timestamp?: string;
+    name?: string;
+    testRunId?: string;
+    stepIndex?: number;
+  } = {}) {
     const getService = this.params.getService;
     const es: Client = getService('es');
+
+    let document = {
+      '@timestamp': timestamp,
+    };
+
+    let index = 'synthetics-http-default';
+
+    switch (docType) {
+      case 'stepEnd':
+        index = 'synthetics-browser-default';
+
+        const stepDoc =
+          stepIndex === 1
+            ? step1({ timestamp, monitorId, name, testRunId })
+            : step2({ timestamp, monitorId, name, testRunId });
+
+        document = { ...stepDoc, ...document };
+        break;
+      case 'journeyEnd':
+        index = 'synthetics-browser-default';
+        document = { ...journeySummary({ timestamp, monitorId, name, testRunId }), ...document };
+        break;
+      case 'journeyStart':
+        index = 'synthetics-browser-default';
+        document = { ...journeyStart({ timestamp, monitorId, name, testRunId }), ...document };
+        break;
+      case 'summaryDown':
+        document = { ...firstDownHit({ timestamp, monitorId, name, testRunId }), ...document };
+        break;
+      case 'summaryUp':
+        document = { ...getUpHit({ timestamp, monitorId, name, testRunId }), ...document };
+        break;
+      default:
+        document = { ...getUpHit({ timestamp, monitorId, name, testRunId }), ...document };
+    }
+
     await es.index({
-      index: 'synthetics-http-default',
-      document: {
-        ...(isDown ? firstDownHit({ timestamp, monitorId, name }) : firstUpHit),
-        '@timestamp': timestamp,
-      },
+      index,
+      document,
     });
+  }
+
+  async cleaUp(things: Array<'monitors' | 'alerts' | 'rules'> = ['monitors', 'alerts', 'rules']) {
+    const promises = [];
+    if (things.includes('monitors')) {
+      promises.push(this.cleanTestMonitors());
+    }
+    if (things.includes('alerts')) {
+      promises.push(this.cleaUpAlerts());
+    }
+
+    if (things.includes('rules')) {
+      promises.push(this.cleaUpRules());
+    }
+
+    await Promise.all(promises);
   }
 
   async cleaUpAlerts() {

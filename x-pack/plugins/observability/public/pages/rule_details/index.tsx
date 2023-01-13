@@ -42,7 +42,7 @@ import { fromQuery, toQuery } from '../../utils/url';
 import { ObservabilityAlertSearchbarWithUrlSync } from '../../components/shared/alert_search_bar';
 import { DeleteModalConfirmation } from './components/delete_modal_confirmation';
 import { CenterJustifiedSpinner } from './components/center_justified_spinner';
-import { getDefaultAlertSummaryTimeRange } from './helpers';
+import { getAlertSummaryWidgetTimeRange } from './helpers';
 
 import {
   EXECUTION_TAB,
@@ -111,7 +111,9 @@ export function RuleDetailsPage() {
   const [editFlyoutVisible, setEditFlyoutVisible] = useState<boolean>(false);
   const [isRuleEditPopoverOpen, setIsRuleEditPopoverOpen] = useState(false);
   const [esQuery, setEsQuery] = useState<{ bool: BoolQuery }>();
-  const [defaultAlertTimeRange] = useState(getDefaultAlertSummaryTimeRange);
+  const [alertSummaryWidgetTimeRange, setAlertSummaryWidgetTimeRange] = useState(
+    getAlertSummaryWidgetTimeRange
+  );
   const ruleQuery = useRef<Query[]>([
     { query: `kibana.alert.rule.uuid: ${ruleId}`, language: 'kuery' },
   ]);
@@ -123,11 +125,15 @@ export function RuleDetailsPage() {
   const tabsRef = useRef<HTMLDivElement>(null);
 
   const onAlertSummaryWidgetClick = async (status: AlertStatus = ALERT_STATUS_ALL) => {
+    const timeRange = getAlertSummaryWidgetTimeRange();
+    setAlertSummaryWidgetTimeRange(timeRange);
     await locators.get(ruleDetailsLocatorID)?.navigate(
       {
+        rangeFrom: timeRange.utcFrom,
+        rangeTo: timeRange.utcTo,
         ruleId,
-        tabId: ALERTS_TAB,
         status,
+        tabId: ALERTS_TAB,
       },
       {
         replace: true,
@@ -386,7 +392,7 @@ export function RuleDetailsPage() {
           <AlertSummaryWidget
             featureIds={featureIds}
             onClick={onAlertSummaryWidgetClick}
-            timeRange={defaultAlertTimeRange}
+            timeRange={alertSummaryWidgetTimeRange}
             filter={alertSummaryWidgetFilter.current}
           />
         </EuiFlexItem>

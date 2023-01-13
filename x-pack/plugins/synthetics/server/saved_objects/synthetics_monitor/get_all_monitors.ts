@@ -7,16 +7,29 @@
 
 import {
   SavedObjectsClientContract,
+  SavedObjectsFindOptions,
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
 import { syntheticsMonitorType } from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { EncryptedSyntheticsMonitor } from '../../../common/runtime_types';
 
-export const getAllMonitors = async (soClient: SavedObjectsClientContract, filters: string) => {
+export const getAllMonitors = async ({
+  soClient,
+  search,
+  fields,
+  sortField,
+  sortOrder,
+}: {
+  soClient: SavedObjectsClientContract;
+  search?: string;
+} & Pick<SavedObjectsFindOptions, 'sortField' | 'sortOrder' | 'fields'>) => {
   const finder = soClient.createPointInTimeFinder({
     type: syntheticsMonitorType,
     perPage: 1000,
-    search: filters,
+    search,
+    sortField,
+    sortOrder,
+    fields,
   });
 
   const hits: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitor>> = [];

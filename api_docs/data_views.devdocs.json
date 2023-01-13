@@ -852,10 +852,6 @@
                 "path": "src/plugins/data/public/query/filter_manager/lib/get_display_value.test.ts"
               },
               {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/hooks/use_adhoc_data_views.test.ts"
-              },
-              {
                 "plugin": "visTypeTimeseries",
                 "path": "src/plugins/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
               },
@@ -9076,10 +9072,6 @@
                 "path": "src/plugins/data/public/query/filter_manager/lib/get_display_value.test.ts"
               },
               {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/hooks/use_adhoc_data_views.test.ts"
-              },
-              {
                 "plugin": "visTypeTimeseries",
                 "path": "src/plugins/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
               },
@@ -16393,10 +16385,6 @@
               {
                 "plugin": "data",
                 "path": "src/plugins/data/public/query/filter_manager/lib/get_display_value.test.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/hooks/use_adhoc_data_views.test.ts"
               },
               {
                 "plugin": "visTypeTimeseries",

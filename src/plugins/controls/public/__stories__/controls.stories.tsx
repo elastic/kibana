@@ -54,7 +54,12 @@ const storybookStubOptionsListRequest = async (
     setTimeout(
       () =>
         r({
-          suggestions: getFlightSearchOptions(request.field.name, request.searchString),
+          suggestions: getFlightSearchOptions(request.field.name, request.searchString).reduce(
+            (o, current, index) => {
+              return { ...o, [current]: { doc_count: index } };
+            },
+            {}
+          ),
           totalCardinality: 100,
         }),
       120

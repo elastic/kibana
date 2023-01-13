@@ -106,7 +106,7 @@ export const searchUIEmbedSteps = (setSelectedTab: (tab: TabKey) => void) => [
               'xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.searchui.stepTwo.setupDescription',
               {
                 defaultMessage:
-                  'Finally, add the plugin to your Search UI configuration. Depending on how you have embedded Behavioural analytics, you may need to pass in the client. The example below shows how to pass in the client when using the Javascript client.',
+                  'Finally, add the plugin to your Search UI configuration. Depending on how you have embedded Behavioral analytics, you may need to pass in the client. The example below shows how to pass in the client when using the Javascript client.',
               }
             )}
           </p>
@@ -116,9 +116,11 @@ import { getTracker } from "@elastic/behavioral-analytics-tracker";
 
 const searchUIConfig = {
 ...
-plugins: [AnalyticsPlugin(
-client: getTracker();
-)],
+plugins: [
+  AnalyticsPlugin({
+    client: getTracker();
+  })
+],
 ...
 }`}
           </EuiCodeBlock>

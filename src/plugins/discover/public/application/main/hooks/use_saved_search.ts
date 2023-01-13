@@ -16,7 +16,7 @@ import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { getRawRecordType } from '../utils/get_raw_record_type';
 import { DiscoverServices } from '../../../build_services';
 import { DiscoverSearchSessionManager } from '../services/discover_search_session';
-import { GetStateReturn } from '../services/discover_state';
+import { DiscoverStateContainer } from '../services/discover_state';
 import { validateTimeRange } from '../utils/validate_time_range';
 import { useSingleton } from './use_singleton';
 import { FetchStatus } from '../../types';
@@ -106,12 +106,12 @@ export const useSavedSearch = ({
   searchSessionManager: DiscoverSearchSessionManager;
   searchSource: ISearchSource;
   services: DiscoverServices;
-  stateContainer: GetStateReturn;
+  stateContainer: DiscoverStateContainer;
   useNewFieldsApi: boolean;
 }) => {
   const { data, filterManager } = services;
   const timefilter = data.query.timefilter.timefilter;
-  const { query } = stateContainer.appStateContainer.getState();
+  const { query } = stateContainer.appState.getState();
 
   const recordRawType = useMemo(() => getRawRecordType(query), [query]);
 
@@ -185,7 +185,7 @@ export const useSavedSearch = ({
 
       await fetchAll(dataSubjects, searchSource, val === 'reset', {
         abortController,
-        appStateContainer: stateContainer.appStateContainer,
+        appStateContainer: stateContainer.appState,
         data,
         initialFetchStatus,
         inspectorAdapters,
@@ -224,7 +224,7 @@ export const useSavedSearch = ({
     searchSource,
     services,
     services.toastNotifications,
-    stateContainer.appStateContainer,
+    stateContainer.appState,
     timefilter,
     useNewFieldsApi,
   ]);

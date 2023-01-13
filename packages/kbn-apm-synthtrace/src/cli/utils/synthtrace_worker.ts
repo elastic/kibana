@@ -5,100 +5,82 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-// import pLimit from 'p-limit';
-import { workerData, parentPort } from 'worker_threads';
-import { RunOptions } from './parse_run_cli_flags';
+import { parentPort, workerData } from 'worker_threads';
+import pidusage from 'pidusage';
+import { memoryUsage } from 'process';
+import { timerange } from '@kbn/apm-synthtrace-client';
+import { getEsClient } from './get_es_client';
 import { getScenario } from './get_scenario';
-import { StreamToBulkOptions } from '../../lib/apm/client/apm_synthtrace_es_client';
-import { getCommonServices } from './get_common_services';
-import { LogLevel } from '../../lib/utils/create_logger';
-import { StreamProcessor } from '../../lib/stream_processor';
-import { Scenario } from '../scenario';
-import { EntityIterable, Fields } from '../../..';
-import { StreamAggregator } from '../../lib/stream_aggregator';
-import { ServicMetricsAggregator } from '../../lib/apm/aggregators/service_metrics_aggregator';
-
-// logging proxy to main thread, ensures we see real time logging
-const l = {
-  perf: <T extends any>(name: string, cb: () => T): T => {
-    return cb();
-  },
-  debug: (...args: any[]) => parentPort?.postMessage({ log: LogLevel.debug, args }),
-  info: (...args: any[]) => parentPort?.postMessage({ log: LogLevel.info, args }),
-  error: (...args: any[]) => parentPort?.postMessage({ log: LogLevel.error, args }),
-};
+import { loggerProxy } from './logger_proxy';
+import { RunOptions } from './parse_run_cli_flags';
 
 export interface WorkerData {
   bucketFrom: Date;
   bucketTo: Date;
   runOptions: RunOptions;
-  workerIndex: number;
+  workerId: string;
+  esUrl: string;
   version: string;
 }
 
-const { bucketFrom, bucketTo, runOptions, workerIndex, version } = workerData as WorkerData;
+const { bucketFrom, bucketTo, runOptions, esUrl, version } = workerData as WorkerData;
 
-const { logger, apmEsClient, apmIntakeClient } = getCommonServices(runOptions, l);
-const file = runOptions.file;
-let scenario: Scenario<Fields>;
-let events: EntityIterable<Fields>;
-let streamToBulkOptions: StreamToBulkOptions;
-let streamProcessor: StreamProcessor;
-
-async function setup() {
-  scenario = await logger.perf('get_scenario', () => getScenario({ file, logger }));
-  const { generate, mapToIndex } = await scenario(runOptions);
-
-  events = logger.perf('generate_scenario', () => generate({ from: bucketFrom, to: bucketTo }));
-  streamToBulkOptions = {
-    maxDocs: runOptions.maxDocs,
-    mapToIndex,
-    dryRun: !!runOptions.dryRun,
-  };
-  streamToBulkOptions.itemStartStopCallback = (item, done) => {
-    if (!item) return;
-    if (!done) {
-      parentPort?.postMessage({ workerIndex, firstTimestamp: item['@timestamp'] });
-    } else {
-      parentPort?.postMessage({ workerIndex, lastTimestamp: item['@timestamp'] });
-    }
-  };
-  const aggregators: StreamAggregator[] = [new ServicMetricsAggregator()];
-  // If we are sending data to apm-server we do not have to create any aggregates in the stream processor
-  streamProcessor = new StreamProcessor({
+async function start() {
+  const logger = loggerProxy;
+  const apmEsClient = getEsClient({
+    concurrency: runOptions.concurrency,
+    target: esUrl,
+    logger,
     version,
-    processors: apmIntakeClient ? [] : StreamProcessor.apmProcessors,
-    streamAggregators: apmIntakeClient ? [] : aggregators,
-    maxSourceEvents: runOptions.maxDocs,
-    logger: l,
-    processedCallback: (processedDocuments) => {
-      parentPort!.postMessage({ workerIndex, processedDocuments });
-    },
-    name: `Worker ${workerIndex}`,
   });
-}
 
-async function doWork() {
+  const file = runOptions.file;
+
+  const scenario = await logger.perf('get_scenario', () => getScenario({ file, logger }));
+
+  logger.info(`Running scenario from ${bucketFrom.toISOString()} to ${bucketTo.toISOString()}`);
+
+  const { generate, bootstrap } = await scenario({ ...runOptions, logger });
+
+  if (bootstrap) {
+    await bootstrap({ apmEsClient });
+  }
+
+  logger.debug('Generating scenario');
+
+  const generators = logger.perf('generate_scenario', () =>
+    generate({ range: timerange(bucketFrom, bucketTo) })
+  );
+
+  logger.debug('Indexing scenario');
+
+  function mb(value: number): string {
+    return Math.round(value / 1024 ** 2).toString() + 'mb';
+  }
+
+  setInterval(async () => {
+    const stats = await pidusage(process.pid);
+    const mem = memoryUsage();
+    logger.info(`cpu: ${stats.cpu}, memory: ${mb(mem.heapUsed)}/${mb(mem.heapTotal)}`);
+  }, 5000);
+
   await logger.perf('index_scenario', async () => {
-    if (apmIntakeClient) {
-      await apmIntakeClient.index(events, streamToBulkOptions, streamProcessor);
-    } else {
-      await apmEsClient.index(events, streamToBulkOptions, streamProcessor);
-    }
+    await apmEsClient.index(generators);
+    await apmEsClient.refresh();
   });
 }
 
-parentPort!.on('message', async (message) => {
-  if (message === 'setup') {
-    await setup();
+parentPort!.on('message', (message) => {
+  if (message !== 'start') {
+    return;
   }
-  if (message === 'start') {
-    try {
-      await doWork();
+
+  start()
+    .then(() => {
       process.exit(0);
-    } catch (error) {
-      l.info(error);
-      process.exit(2);
-    }
-  }
+    })
+    .catch((err) => {
+      loggerProxy.error(err);
+      process.exit(1);
+    });
 });

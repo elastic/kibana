@@ -51,7 +51,7 @@ describe('GetSLO', () => {
             transactionType: 'irrelevant',
             goodStatusCodes: ['2xx', '3xx', '4xx'],
           },
-          type: 'sli.apm.transaction_error_rate',
+          type: 'sli.apm.transactionErrorRate',
         },
         objective: {
           target: 0.999,

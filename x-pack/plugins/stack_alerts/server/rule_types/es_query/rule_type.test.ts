@@ -518,6 +518,9 @@ describe('ruleType', () => {
           aggregatable: false,
         },
       ],
+      toSpec: () => {
+        return { id: 'test-id', title: 'test-title', timeFieldName: 'time-field' };
+      },
     };
     const defaultParams: OnlySearchSourceRuleParams = {
       size: 100,
@@ -564,9 +567,15 @@ describe('ruleType', () => {
       const searchResult: ESSearchResponse<unknown, {}> = generateResults([]);
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
-      (searchSourceInstanceMock.getField as jest.Mock).mockImplementationOnce((name: string) => {
+      (ruleServices.dataViews.create as jest.Mock).mockResolvedValueOnce({
+        toSpec: () => dataViewMock.toSpec(),
+      });
+      (searchSourceInstanceMock.getField as jest.Mock).mockImplementation((name: string) => {
         if (name === 'index') {
           return dataViewMock;
+        }
+        if (name === 'filter') {
+          return [];
         }
       });
       (searchSourceInstanceMock.fetch as jest.Mock).mockResolvedValueOnce(searchResult);
@@ -595,9 +604,15 @@ describe('ruleType', () => {
       const params = { ...defaultParams, thresholdComparator: Comparator.GT_OR_EQ, threshold: [3] };
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
-      (searchSourceInstanceMock.getField as jest.Mock).mockImplementationOnce((name: string) => {
+      (ruleServices.dataViews.create as jest.Mock).mockResolvedValueOnce({
+        toSpec: () => dataViewMock.toSpec(),
+      });
+      (searchSourceInstanceMock.getField as jest.Mock).mockImplementation((name: string) => {
         if (name === 'index') {
           return dataViewMock;
+        }
+        if (name === 'filter') {
+          return [];
         }
       });
 

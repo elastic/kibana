@@ -14,6 +14,7 @@
     "./api_integration/apis/logstash/pipeline/fixtures/*.json",
     "./api_integration/apis/logstash/pipelines/fixtures/*.json",
     "./api_integration/apis/telemetry/fixtures/*.json",
+    "./monitoring_api_integration/fixtures/**/*.json",
     "../../typings/**/*",
     "../../packages/kbn-test/types/ftr_globals/**/*",
   ],
@@ -107,7 +108,10 @@
     "@kbn/core-saved-objects-server",
     "@kbn/core-provider-plugin",
     "@kbn/core-saved-objects-common",
-    "@kbn/alerting-fixture-plugin",
     "@kbn/user-profile-components",
+    "@kbn/apm-synthtrace-client",
+    "@kbn/utils",
+    "@kbn/journeys",
+    "@kbn/stdio-dev-helpers",
   ]
 }

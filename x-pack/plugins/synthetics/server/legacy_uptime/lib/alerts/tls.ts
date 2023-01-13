@@ -22,7 +22,7 @@ import { commonStateTranslations, tlsTranslations } from './translations';
 import { TlsTranslations } from '../../../../common/translations';
 
 import { savedObjectsAdapter } from '../saved_objects/saved_objects';
-import { createUptimeESClient } from '../lib';
+import { UptimeEsClient } from '../lib';
 import { ACTION_VARIABLES, ALERT_DETAILS_URL } from './action_variables';
 
 export type ActionGroupIds = ActionGroupIdsOf<typeof TLS>;
@@ -144,10 +144,10 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
     const { basePath } = _server;
     const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient);
 
-    const uptimeEsClient = createUptimeESClient({
-      esClient: scopedClusterClient.asCurrentUser,
+    const uptimeEsClient = new UptimeEsClient(
       savedObjectsClient,
-    });
+      scopedClusterClient.asCurrentUser
+    );
 
     const { certs, total }: CertResult = await libs.requests.getCerts({
       uptimeEsClient,

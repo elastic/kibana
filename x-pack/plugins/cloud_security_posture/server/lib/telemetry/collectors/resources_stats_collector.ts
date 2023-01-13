@@ -110,7 +110,10 @@ const getEvaluationStats = (resourceSubType: ResourceSubType) => {
   return { passed_findings_count: passed, failed_findings_count: failed };
 };
 
-const getCspmResourcesStats = (aggregatedResourcesStats: ResourcesStats): CspmResourcesStats[] => {
+const getCspmResourcesStats = (
+  aggregatedResourcesStats: ResourcesStats,
+  logger: Logger
+): CspmResourcesStats[] => {
   const accounts = aggregatedResourcesStats.accounts.buckets;
 
   const resourcesStats = accounts.map((account) => {
@@ -129,6 +132,8 @@ const getCspmResourcesStats = (aggregatedResourcesStats: ResourcesStats): CspmRe
       });
     });
   });
+  logger.info('CSPM telemetry: resources stats was sent');
+
   return resourcesStats.flat(2);
 };
 
@@ -147,7 +152,7 @@ export const getResourcesStats = async (
       );
 
       const cspmResourcesStats = resourcesStatsResponse.aggregations
-        ? getCspmResourcesStats(resourcesStatsResponse.aggregations)
+        ? getCspmResourcesStats(resourcesStatsResponse.aggregations, logger)
         : [];
 
       return cspmResourcesStats;

@@ -135,15 +135,19 @@ export class NavControlPopover extends Component<Props, State> {
     });
   }
 
+  private getAlignedLoadingSpinner() {
+    return <EuiLoadingSpinner size="m" className="eui-alignMiddle" />;
+  }
+
   private getActiveSpaceButton = () => {
     const { activeSpace } = this.state;
 
     if (!activeSpace) {
-      return this.getButton(<EuiLoadingSpinner size="m" />, 'loading spaces navigation');
+      return this.getButton(this.getAlignedLoadingSpinner(), 'loading spaces navigation');
     }
 
     return this.getButton(
-      <Suspense fallback={<EuiLoadingSpinner size="m" />}>
+      <Suspense fallback={this.getAlignedLoadingSpinner()}>
         <LazySpaceAvatar space={activeSpace} size={'s'} />
       </Suspense>,
       (activeSpace as Space).name

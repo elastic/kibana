@@ -9,11 +9,10 @@ import React from 'react';
 import { EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { euiLightVars } from '@kbn/ui-theme';
-
-import type { SLO } from '../../../typings';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 
 export interface SloStatusProps {
-  slo: SLO;
+  slo: SLOWithSummaryResponse;
 }
 
 export function SloStatusBadge({ slo }: SloStatusProps) {

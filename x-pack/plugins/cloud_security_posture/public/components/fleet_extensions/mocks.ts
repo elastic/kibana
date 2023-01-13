@@ -9,7 +9,7 @@ import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { createNewPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import { BenchmarkId } from '../../../common/types';
 import { CLOUDBEAT_EKS, CLOUDBEAT_VANILLA } from '../../../common/constants';
-import { PostureInput } from '../../../common/constants';
+import type { PostureInput } from '../../../common/types';
 
 export const getCspNewPolicyMock = (type: BenchmarkId = 'cis_k8s'): NewPackagePolicy => ({
   name: 'some-cloud_security_posture-policy',

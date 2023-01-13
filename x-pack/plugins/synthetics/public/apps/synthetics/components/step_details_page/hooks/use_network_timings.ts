@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { useParams } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
 import { useEsSearch } from '@kbn/observability-plugin/public';
 import {
   NETWORK_TIMINGS_FIELDS,
@@ -18,8 +20,6 @@ import {
   SYNTHETICS_TOTAL_TIMINGS,
   SYNTHETICS_WAIT_TIMINGS,
 } from '@kbn/observability-plugin/common';
-import { useParams } from 'react-router-dom';
-import { i18n } from '@kbn/i18n';
 
 export const useStepFilters = (prevCheckGroupId?: string) => {
   const { checkGroupId, stepIndex } = useParams<{ checkGroupId: string; stepIndex: string }>();

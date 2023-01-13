@@ -9,28 +9,40 @@ import { renderHook } from '@testing-library/react-hooks';
 
 import { getExternalAlertLensAttributes } from './lens_attributes/common/external_alert';
 import { useLensAttributes } from './use_lens_attributes';
-import { hostNameExistsFilter, getHostDetailsPageFilter, getIndexFilters } from './utils';
+import {
+  hostNameExistsFilter,
+  getDetailsPageFilter,
+  getIndexFilters,
+  sourceOrDestinationIpExistsFilter,
+  getNetworkDetailsPageFilter,
+} from './utils';
 
 import { filterFromSearchBar, queryFromSearchBar, wrapper } from './mocks';
+import { useSourcererDataView } from '../../containers/sourcerer';
+import { kpiHostMetricLensAttributes } from './lens_attributes/hosts/kpi_host_metric';
+import { useRouteSpy } from '../../utils/route/use_route_spy';
 
-jest.mock('../../containers/sourcerer', () => ({
-  useSourcererDataView: jest.fn().mockReturnValue({
-    selectedPatterns: ['auditbeat-*'],
-    dataViewId: 'security-solution-default',
-  }),
-}));
-
+jest.mock('../../containers/sourcerer');
 jest.mock('../../utils/route/use_route_spy', () => ({
-  useRouteSpy: jest.fn().mockReturnValue([
-    {
-      detailName: 'mockHost',
-      pageName: 'hosts',
-      tabName: 'events',
-    },
-  ]),
+  useRouteSpy: jest.fn(),
 }));
 
 describe('useLensAttributes', () => {
+  beforeEach(() => {
+    (useSourcererDataView as jest.Mock).mockReturnValue({
+      dataViewId: 'security-solution-default',
+      indicesExist: true,
+      selectedPatterns: ['auditbeat-*'],
+    });
+    (useRouteSpy as jest.Mock).mockReturnValue([
+      {
+        detailName: 'mockHost',
+        pageName: 'hosts',
+        tabName: 'events',
+      },
+    ]);
+  });
+
   it('should add query', () => {
     const { result } = renderHook(
       () =>
@@ -44,7 +56,7 @@ describe('useLensAttributes', () => {
     expect(result?.current?.state.query).toEqual(queryFromSearchBar);
   });
 
-  it('should add filters', () => {
+  it('should add correct filters - host details', () => {
     const { result } = renderHook(
       () =>
         useLensAttributes({
@@ -57,8 +69,59 @@ describe('useLensAttributes', () => {
     expect(result?.current?.state.filters).toEqual([
       ...getExternalAlertLensAttributes().state.filters,
       ...filterFromSearchBar,
-      ...getHostDetailsPageFilter('mockHost'),
+      ...getDetailsPageFilter('hosts', 'mockHost'),
       ...hostNameExistsFilter,
+      ...getIndexFilters(['auditbeat-*']),
+    ]);
+  });
+
+  it('should add correct filters - network details', () => {
+    (useRouteSpy as jest.Mock).mockReturnValue([
+      {
+        detailName: '192.168.1.1',
+        pageName: 'network',
+        tabName: 'events',
+      },
+    ]);
+    const { result } = renderHook(
+      () =>
+        useLensAttributes({
+          getLensAttributes: getExternalAlertLensAttributes,
+          stackByField: 'event.dataset',
+        }),
+      { wrapper }
+    );
+
+    expect(result?.current?.state.filters).toEqual([
+      ...getExternalAlertLensAttributes().state.filters,
+      ...filterFromSearchBar,
+      ...getNetworkDetailsPageFilter('192.168.1.1'),
+      ...sourceOrDestinationIpExistsFilter,
+      ...getIndexFilters(['auditbeat-*']),
+    ]);
+  });
+
+  it('should add correct filters - user details', () => {
+    (useRouteSpy as jest.Mock).mockReturnValue([
+      {
+        detailName: 'elastic',
+        pageName: 'user',
+        tabName: 'events',
+      },
+    ]);
+    const { result } = renderHook(
+      () =>
+        useLensAttributes({
+          getLensAttributes: getExternalAlertLensAttributes,
+          stackByField: 'event.dataset',
+        }),
+      { wrapper }
+    );
+
+    expect(result?.current?.state.filters).toEqual([
+      ...getExternalAlertLensAttributes().state.filters,
+      ...filterFromSearchBar,
+      ...getDetailsPageFilter('user', 'elastic'),
       ...getIndexFilters(['auditbeat-*']),
     ]);
   });
@@ -95,5 +158,46 @@ describe('useLensAttributes', () => {
         id: 'security-solution-default',
       },
     ]);
+  });
+
+  it('should return null if no indices exist', () => {
+    (useSourcererDataView as jest.Mock).mockReturnValue({
+      dataViewId: 'security-solution-default',
+      indicesExist: false,
+      selectedPatterns: ['auditbeat-*'],
+    });
+    const { result } = renderHook(
+      () =>
+        useLensAttributes({
+          getLensAttributes: getExternalAlertLensAttributes,
+          stackByField: 'event.dataset',
+        }),
+      { wrapper }
+    );
+
+    expect(result?.current).toBeNull();
+  });
+
+  it('should return Lens attributes if adHocDataViews exist', () => {
+    (useSourcererDataView as jest.Mock).mockReturnValue({
+      dataViewId: 'security-solution-default',
+      indicesExist: false,
+      selectedPatterns: ['auditbeat-*'],
+    });
+    const { result } = renderHook(
+      () =>
+        useLensAttributes({
+          lensAttributes: {
+            ...kpiHostMetricLensAttributes,
+            state: {
+              ...kpiHostMetricLensAttributes.state,
+              adHocDataViews: { mockAdHocDataViews: {} },
+            },
+          },
+        }),
+      { wrapper }
+    );
+
+    expect(result?.current).not.toBeNull();
   });
 });

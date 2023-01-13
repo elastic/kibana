@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { waitForActiveAlert } from '../wait_for_active_alert';
+import { waitForActiveAlert } from '../../../common/utils/wait_for_active_alert';
 import { generateData } from './generate_data';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -100,60 +100,64 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
   }
 
-  registry.when('Service group counts', { config: 'basic', archives: [] }, () => {
-    let synthbeansServiceGroupId: string;
-    let opbeansServiceGroupId: string;
-    before(async () => {
-      const [, { body: synthbeansServiceGroup }, { body: opbeansServiceGroup }] = await Promise.all(
-        [
-          generateData({ start, end, synthtraceEsClient }),
-          saveServiceGroup({
-            groupName: 'synthbeans',
-            kuery: 'service.name: synth*',
-          }),
-          saveServiceGroup({
-            groupName: 'opbeans',
-            kuery: 'service.name: opbeans*',
-          }),
-        ]
-      );
-      synthbeansServiceGroupId = synthbeansServiceGroup.id;
-      opbeansServiceGroupId = opbeansServiceGroup.id;
-    });
-
-    after(async () => {
-      await deleteAllServiceGroups();
-      await synthtraceEsClient.clean();
-    });
-
-    it('returns the correct number of services', async () => {
-      const response = await getServiceGroupCounts();
-      expect(response.status).to.be(200);
-      expect(Object.keys(response.body).length).to.be(2);
-      expect(response.body[synthbeansServiceGroupId]).to.have.property('services', 2);
-      expect(response.body[opbeansServiceGroupId]).to.have.property('services', 1);
-    });
-
-    describe('with alerts', () => {
-      let ruleId: string;
+  registry.when(
+    'Service group counts',
+    { config: 'basic', archives: [] },
+    () => {
+      let synthbeansServiceGroupId: string;
+      let opbeansServiceGroupId: string;
       before(async () => {
-        const { body: createdRule } = await createRule();
-        ruleId = createdRule.id;
-        await waitForActiveAlert({ ruleId, esClient, log });
+        const [, { body: synthbeansServiceGroup }, { body: opbeansServiceGroup }] =
+          await Promise.all([
+            generateData({ start, end, synthtraceEsClient }),
+            saveServiceGroup({
+              groupName: 'synthbeans',
+              kuery: 'service.name: synth*',
+            }),
+            saveServiceGroup({
+              groupName: 'opbeans',
+              kuery: 'service.name: opbeans*',
+            }),
+          ]);
+        synthbeansServiceGroupId = synthbeansServiceGroup.id;
+        opbeansServiceGroupId = opbeansServiceGroup.id;
       });
 
       after(async () => {
-        await supertest.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'true');
-        await esDeleteAllIndices('.alerts*');
+        await deleteAllServiceGroups();
+        await synthtraceEsClient.clean();
       });
 
-      it('returns the correct number of alerts', async () => {
+      it('returns the correct number of services', async () => {
         const response = await getServiceGroupCounts();
         expect(response.status).to.be(200);
         expect(Object.keys(response.body).length).to.be(2);
-        expect(response.body[synthbeansServiceGroupId]).to.have.property('alerts', 1);
-        expect(response.body[opbeansServiceGroupId]).to.have.property('alerts', 0);
+        expect(response.body[synthbeansServiceGroupId]).to.have.property('services', 2);
+        expect(response.body[opbeansServiceGroupId]).to.have.property('services', 1);
       });
-    });
-  });
+
+      describe('with alerts', () => {
+        let ruleId: string;
+        before(async () => {
+          const { body: createdRule } = await createRule();
+          ruleId = createdRule.id;
+          await waitForActiveAlert({ ruleId, esClient, log });
+        });
+
+        after(async () => {
+          await supertest.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'true');
+          await esDeleteAllIndices('.alerts*');
+        });
+
+        it('returns the correct number of alerts', async () => {
+          const response = await getServiceGroupCounts();
+          expect(response.status).to.be(200);
+          expect(Object.keys(response.body).length).to.be(2);
+          expect(response.body[synthbeansServiceGroupId]).to.have.property('alerts', 1);
+          expect(response.body[opbeansServiceGroupId]).to.have.property('alerts', 0);
+        });
+      });
+    },
+    true // skipped Failing: See https://github.com/elastic/kibana/issues/147473
+  );
 }

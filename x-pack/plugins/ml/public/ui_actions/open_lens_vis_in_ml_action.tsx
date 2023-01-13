@@ -7,13 +7,15 @@
 
 import { i18n } from '@kbn/i18n';
 import type { Embeddable } from '@kbn/lens-plugin/public';
-import { createAction } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { MlCoreSetup } from '../plugin';
 
 export const CREATE_LENS_VIS_TO_ML_AD_JOB_ACTION = 'createMLADJobAction';
 
-export function createLensVisToADJobAction(getStartServices: MlCoreSetup['getStartServices']) {
-  return createAction<{ embeddable: Embeddable }>({
+export function createLensVisToADJobAction(
+  getStartServices: MlCoreSetup['getStartServices']
+): UiActionsActionDefinition<{ embeddable: Embeddable }> {
+  return {
     id: 'create-ml-ad-job-action',
     type: CREATE_LENS_VIS_TO_ML_AD_JOB_ACTION,
     getIconType(context): string {
@@ -66,5 +68,5 @@ export function createLensVisToADJobAction(getStartServices: MlCoreSetup['getSta
         return false;
       }
     },
-  });
+  };
 }

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiFlexGroupProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
@@ -44,38 +45,46 @@ export interface DonutChartProps {
   data: DonutChartData[] | null | undefined;
   fillColor: FillColor;
   height?: number;
+  isChartEmbeddablesEnabled?: boolean;
   label: React.ReactElement | string;
   legendItems?: LegendItem[] | null | undefined;
+  onElementClick?: ElementClickListener;
   title: React.ReactElement | string | number | null;
   totalCount: number | null | undefined;
-  onElementClick?: ElementClickListener;
+}
+
+export interface DonutChartWrapperProps {
+  children?: React.ReactElement;
+  dataExists: boolean;
+  label: React.ReactElement | string;
+  title: React.ReactElement | string | number | null;
+  isChartEmbeddablesEnabled?: boolean;
 }
 
 /* Make this position absolute in order to overlap the text onto the donut */
-const DonutTextWrapper = styled(EuiFlexGroup)`
-  top: 34%;
+export const DonutTextWrapper = styled(EuiFlexGroup)<
+  EuiFlexGroupProps & { $isChartEmbeddablesEnabled?: boolean; $dataExists?: boolean }
+>`
+  top: ${({ $isChartEmbeddablesEnabled, $dataExists }) =>
+    $isChartEmbeddablesEnabled && !$dataExists ? `66%` : `34%;`};
   width: 100%;
   max-width: 77px;
   position: absolute;
   z-index: 1;
 `;
 
-const StyledEuiFlexItem = styled(EuiFlexItem)`
+export const StyledEuiFlexItem = styled(EuiFlexItem)`
   position: relative;
   align-items: center;
 `;
 
-export const DonutChart = ({
-  data,
-  fillColor,
-  height = 90,
+const DonutChartWrapperComponent: React.FC<DonutChartWrapperProps> = ({
+  children,
+  dataExists,
+  isChartEmbeddablesEnabled,
   label,
-  legendItems,
   title,
-  totalCount,
-  onElementClick,
-}: DonutChartProps) => {
-  const theme = useTheme();
+}) => {
   const { euiTheme } = useEuiTheme();
   const emptyLabelStyle = useMemo(
     () => ({
@@ -83,7 +92,7 @@ export const DonutChart = ({
     }),
     [euiTheme.colors.disabled]
   );
-
+  const className = isChartEmbeddablesEnabled ? undefined : 'eui-textTruncate';
   return (
     <EuiFlexGroup
       alignItems="center"
@@ -92,26 +101,56 @@ export const DonutChart = ({
       gutterSize="l"
       data-test-subj="donut-chart"
     >
-      <StyledEuiFlexItem grow={false}>
+      <StyledEuiFlexItem grow={isChartEmbeddablesEnabled}>
         <DonutTextWrapper
+          $dataExists={dataExists}
+          $isChartEmbeddablesEnabled={isChartEmbeddablesEnabled}
+          alignItems="center"
           direction="column"
           gutterSize="none"
-          alignItems="center"
           justifyContent="center"
         >
           <EuiFlexItem>{title}</EuiFlexItem>
-          <EuiFlexItem className="eui-textTruncate">
+          <EuiFlexItem className={className}>
             <EuiToolTip content={label}>
               <EuiText
-                className="eui-textTruncate"
+                className={className}
                 size="s"
-                style={data ? undefined : emptyLabelStyle}
+                style={dataExists ? undefined : emptyLabelStyle}
               >
                 {label}
               </EuiText>
             </EuiToolTip>
           </EuiFlexItem>
         </DonutTextWrapper>
+        {children}
+      </StyledEuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+export const DonutChartWrapper = React.memo(DonutChartWrapperComponent);
+
+export const DonutChart = ({
+  data,
+  fillColor,
+  height = 90,
+  isChartEmbeddablesEnabled,
+  label,
+  legendItems,
+  onElementClick,
+  title,
+  totalCount,
+}: DonutChartProps) => {
+  const theme = useTheme();
+
+  return (
+    <DonutChartWrapper
+      dataExists={data != null && data.length > 0}
+      label={label}
+      title={title}
+      isChartEmbeddablesEnabled={isChartEmbeddablesEnabled}
+    >
+      <>
         {data == null || totalCount == null || totalCount === 0 ? (
           <DonutChartEmpty size={height} />
         ) : (
@@ -135,12 +174,13 @@ export const DonutChart = ({
             />
           </Chart>
         )}
-      </StyledEuiFlexItem>
-      {legendItems && legendItems?.length > 0 && (
-        <EuiFlexItem>
-          <DraggableLegend legendItems={legendItems} height={height} />
-        </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
+
+        {legendItems && legendItems?.length > 0 && (
+          <EuiFlexItem>
+            <DraggableLegend legendItems={legendItems} height={height} />
+          </EuiFlexItem>
+        )}
+      </>
+    </DonutChartWrapper>
   );
 };

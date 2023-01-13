@@ -283,10 +283,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       } else {
         // otherwise this incoming embeddable is brand new and can be added via the default method after the dashboard container is created.
         this.untilInitialized().then(() =>
-          setTimeout(
-            () => this.addNewEmbeddable(incomingEmbeddable.type, incomingEmbeddable.input),
-            1 // add embeddable on next update so that the state diff can pick it up.
-          )
+          this.addNewEmbeddable(incomingEmbeddable.type, incomingEmbeddable.input)
         );
       }
     }
@@ -315,8 +312,6 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
     // start diffing dashboard state
     const diffingMiddleware = startDiffingDashboardState.bind(this)({
-      initialInput,
-      initialLastSavedInput: inputFromSavedObject,
       useSessionBackup: creationOptions?.useSessionStorageIntegration,
       setCleanupFunction: (cleanup) => {
         this.stopDiffingDashboardState = cleanup;

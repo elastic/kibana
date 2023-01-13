@@ -14,8 +14,7 @@ import { createFailError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { asyncForEachWithLimit, asyncMapWithLimit } from '@kbn/std';
 import { SomeDevLog } from '@kbn/some-dev-log';
-import { readPackageMap } from '@kbn/package-map';
-import { Project, PROJECTS } from '@kbn/ts-projects';
+import { TsProject, TS_PROJECTS } from '@kbn/ts-projects';
 
 import {
   updateRootRefsConfig,
@@ -28,8 +27,7 @@ const rel = (from: string, to: string) => {
   return path.startsWith('.') ? path : `./${path}`;
 };
 
-async function createTypeCheckConfigs(log: SomeDevLog, projects: Project[]) {
-  const pkgMap = readPackageMap();
+async function createTypeCheckConfigs(log: SomeDevLog, projects: TsProject[]) {
   const writes: Array<[path: string, content: string]> = [];
 
   // write tsconfig.type_check.json files for each project that is not the root
@@ -51,7 +49,7 @@ async function createTypeCheckConfigs(log: SomeDevLog, projects: Project[]) {
         paths: project.repoRel === 'tsconfig.base.json' ? config.compilerOptions?.paths : undefined,
       },
       kbn_references: undefined,
-      references: project.getKbnRefs(pkgMap).map((refd) => {
+      references: project.getKbnRefs(TS_PROJECTS).map((refd) => {
         queue.add(refd);
 
         return {
@@ -86,7 +84,7 @@ async function createTypeCheckConfigs(log: SomeDevLog, projects: Project[]) {
 run(
   async ({ log, flagsReader, procRunner }) => {
     if (flagsReader.boolean('clean-cache')) {
-      await asyncForEachWithLimit(PROJECTS, 10, async (proj) => {
+      await asyncForEachWithLimit(TS_PROJECTS, 10, async (proj) => {
         await Fsp.rm(Path.resolve(proj.directory, 'target/types'), {
           force: true,
           recursive: true,
@@ -101,8 +99,8 @@ run(
 
     const projectFilter = flagsReader.path('project');
 
-    const projects = PROJECTS.filter(
-      (p) => !p.disableTypeCheck && (!projectFilter || p.path === projectFilter)
+    const projects = TS_PROJECTS.filter(
+      (p) => !p.isTypeCheckDisabled() && (!projectFilter || p.path === projectFilter)
     );
 
     const created = await createTypeCheckConfigs(log, projects);

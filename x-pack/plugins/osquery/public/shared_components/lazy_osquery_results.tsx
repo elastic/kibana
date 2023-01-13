@@ -14,14 +14,13 @@ interface BigServices extends StartServices {
   storage: unknown;
 }
 
+const OsqueryResults = lazy(() => import('./osquery_results'));
+
 export const getLazyOsqueryResults =
   // eslint-disable-next-line react/display-name
-  (services: BigServices) => (props: OsqueryActionResultsProps) => {
-    const OsqueryResults = lazy(() => import('./osquery_results'));
-
-    return (
+  (services: BigServices) => (props: OsqueryActionResultsProps) =>
+    (
       <Suspense fallback={null}>
         <OsqueryResults services={services} {...props} />
       </Suspense>
     );
-  };

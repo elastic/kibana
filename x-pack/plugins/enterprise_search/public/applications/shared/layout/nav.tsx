@@ -91,7 +91,7 @@ export const useEnterpriseSearchNav = () => {
         },
       ],
       name: i18n.translate('xpack.enterpriseSearch.nav.analyticsTitle', {
-        defaultMessage: 'Behavorial Analytics',
+        defaultMessage: 'Behavioral Analytics',
       }),
     },
     {

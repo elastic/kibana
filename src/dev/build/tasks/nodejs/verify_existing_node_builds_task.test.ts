@@ -47,6 +47,7 @@ async function setup(actualShaSums?: Record<string, string>) {
     dockerContextUseLocalArtifact: false,
     dockerCrossCompile: false,
     dockerPush: false,
+    dockerTag: '',
     dockerTagQualifier: '',
   });
 
