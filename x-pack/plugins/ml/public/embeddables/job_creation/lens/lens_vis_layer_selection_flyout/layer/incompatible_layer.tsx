@@ -10,9 +10,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 
-import type { LayerResult } from '../../../../application/jobs/new_job/job_from_lens';
+import type { LayerResult } from '../../../../../application/jobs/new_job/job_from_lens';
 
-import { extractErrorMessage } from '../../../../../common/util/errors';
+import { extractErrorMessage } from '../../../../../../common/util/errors';
 
 interface Props {
   layer: LayerResult;
