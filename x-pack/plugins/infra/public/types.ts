@@ -29,6 +29,7 @@ import type {
 // import type { OsqueryPluginStart } from '../../osquery/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { LensPublicStart, TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { UnwrapPromise } from '../common/utility_types';
 import type {
   SourceProviderProps,
@@ -60,6 +61,7 @@ export interface InfraClientSetupDeps {
   ml: MlPluginSetup;
   embeddable: EmbeddableSetup;
   share: SharePluginSetup;
+  lens: LensPublicStart;
 }
 
 export interface InfraClientStartDeps {
@@ -75,6 +77,7 @@ export interface InfraClientStartDeps {
   osquery?: unknown; // OsqueryPluginStart;
   share: SharePluginStart;
   storage: IStorageWrapper;
+  lens: LensPublicStart;
 }
 
 export type InfraClientCoreSetup = CoreSetup<InfraClientStartDeps, InfraClientStartExports>;
@@ -94,3 +97,5 @@ export interface InfraHttpError extends IHttpFetchError {
     message?: string;
   };
 }
+
+export type LensAttributes = TypedLensByValueInput['attributes'];

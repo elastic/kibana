@@ -13,7 +13,8 @@ import { useMetricsDataViewContext } from '../hooks/use_data_view';
 import { UnifiedSearchBar } from './unified_search_bar';
 import { HostsTable } from './hosts_table';
 import { HostsViewProvider } from '../hooks/use_hosts_view';
-import { MetricsTrend } from './metrics_trend/metrics_trend';
+import { KPICharts } from './kpi_charts/kpi_charts';
+import { ChartContainer } from './charts/chart_container';
 
 export const HostContainer = () => {
   const { metricsDataView, isDataViewLoading, hasFailedLoadingDataView } =
@@ -36,9 +37,11 @@ export const HostContainer = () => {
       <UnifiedSearchBar dataView={metricsDataView} />
       <EuiSpacer />
       <HostsViewProvider>
-        <MetricsTrend />
+        <KPICharts />
         <EuiSpacer />
         <HostsTable />
+        <EuiSpacer />
+        <ChartContainer />
       </HostsViewProvider>
     </>
   );

@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { Tile } from './tile';
 import { HostsTile } from './hosts_tile';
 
-export const MetricsTrend = () => {
+export const KPICharts = () => {
   return (
     <EuiFlexGroup
       direction="row"
