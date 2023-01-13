@@ -29,6 +29,7 @@ import type {
 } from '@kbn/core-application-browser';
 import { CapabilitiesService } from '@kbn/core-capabilities-browser-internal';
 import { AppStatus, AppNavLinkStatus } from '@kbn/core-application-browser';
+import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import { AppRouter } from './ui';
 import type { InternalApplicationSetup, InternalApplicationStart, Mounter } from './types';
 
@@ -47,6 +48,7 @@ export interface StartDeps {
   http: HttpStart;
   theme: ThemeServiceStart;
   overlays: OverlayStart;
+  customBranding: CustomBrandingStart;
 }
 
 function filterAvailable<T>(m: Map<string, T>, capabilities: Capabilities) {
@@ -105,6 +107,7 @@ export class ApplicationService {
   private openInNewTab?: (url: string) => void;
   private redirectTo?: (url: string) => void;
   private overlayStart$ = new Subject<OverlayStart>();
+  private hasCustomBranding$: Observable<boolean> | undefined;
 
   public setup({
     http: { basePath },
@@ -204,13 +207,18 @@ export class ApplicationService {
     };
   }
 
-  public async start({ http, overlays, theme }: StartDeps): Promise<InternalApplicationStart> {
+  public async start({
+    http,
+    overlays,
+    theme,
+    customBranding,
+  }: StartDeps): Promise<InternalApplicationStart> {
     if (!this.redirectTo) {
       throw new Error('ApplicationService#setup() must be invoked before start.');
     }
 
     this.overlayStart$.next(overlays);
-
+    this.hasCustomBranding$ = customBranding.hasCustomBranding$.pipe(takeUntil(this.stop$));
     const httpLoadingCount$ = new BehaviorSubject(0);
     http.addLoadingCountSource(httpLoadingCount$);
 
@@ -345,6 +353,7 @@ export class ApplicationService {
             setAppLeaveHandler={this.setAppLeaveHandler}
             setAppActionMenu={this.setAppActionMenu}
             setIsMounting={(isMounting) => httpLoadingCount$.next(isMounting ? 1 : 0)}
+            hasCustomBranding$={this.hasCustomBranding$}
           />
         );
       },

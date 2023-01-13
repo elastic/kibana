@@ -9,7 +9,7 @@
 import { PluginInitializerContext } from '@kbn/core/public';
 import { KibanaUtilsPublicPlugin } from './plugin';
 
-export type { Get, Set, UiComponent, UiComponentInstance } from '../common';
+export type { Get, Set } from '../common';
 export {
   AbortError,
   abortSignalToPromise,

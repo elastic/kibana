@@ -87,14 +87,16 @@ export const ResetJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, r
     <EuiModal data-test-subj="mlResetJobConfirmModal" onClose={closeModal}>
       <EuiModalHeader>
         <EuiModalHeaderTitle>
-          <FormattedMessage
-            id="xpack.ml.jobsList.resetJobModal.resetJobsTitle"
-            defaultMessage="Reset {jobsCount, plural, one {{jobId}} other {# jobs}}?"
-            values={{
-              jobsCount: jobIds.length,
-              jobId: jobIds[0],
-            }}
-          />
+          <h1>
+            <FormattedMessage
+              id="xpack.ml.jobsList.resetJobModal.resetJobsTitle"
+              defaultMessage="Reset {jobsCount, plural, one {{jobId}} other {# jobs}}?"
+              values={{
+                jobsCount: jobIds.length,
+                jobId: jobIds[0],
+              }}
+            />
+          </h1>
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>

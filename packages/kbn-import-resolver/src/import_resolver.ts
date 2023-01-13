@@ -10,9 +10,9 @@ import Path from 'path';
 import Fs from 'fs';
 
 import Resolve from 'resolve';
-import { readPackageManifest, type KibanaPackageManifest } from '@kbn/bazel-packages';
+import { readPackageManifest, type KibanaPackageManifest } from '@kbn/repo-packages';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { readPackageMap, PackageMap } from '@kbn/package-map';
+import { readPackageMap, PackageMap } from '@kbn/repo-packages';
 
 import { safeStat, readFileSync } from './helpers/fs';
 import { ResolveResult } from './resolve_result';

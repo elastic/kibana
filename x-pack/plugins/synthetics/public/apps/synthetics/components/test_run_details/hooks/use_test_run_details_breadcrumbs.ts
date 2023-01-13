@@ -20,7 +20,6 @@ export const useTestRunDetailsBreadcrumbs = (
   const appPath = kibana.services.application?.getUrlForApp(PLUGIN.SYNTHETICS_PLUGIN_ID) ?? '';
 
   const { monitor } = useSelectedMonitor();
-
   const selectedLocation = useSelectedLocation();
 
   useBreadcrumbs([

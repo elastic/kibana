@@ -27,7 +27,7 @@ import {
 export const extractItems = (data: NetworkEvent[]): NetworkEvent[] => {
   // NOTE: This happens client side as the "payload" property is mapped
   // in such a way it can't be queried (or sorted on) via ES.
-  return data.sort((a: NetworkEvent, b: NetworkEvent) => {
+  return [...data].sort((a: NetworkEvent, b: NetworkEvent) => {
     return a.requestSentTime - b.requestSentTime;
   });
 };

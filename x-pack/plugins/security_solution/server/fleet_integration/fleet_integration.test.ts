@@ -43,7 +43,7 @@ import { getMockArtifacts, toArtifactRecords } from '../endpoint/lib/artifacts/m
 import { Manifest } from '../endpoint/lib/artifacts';
 import type { NewPackagePolicy, PackagePolicy } from '@kbn/fleet-plugin/common/types/models';
 import type { ManifestSchema } from '../../common/endpoint/schema/manifest';
-import type { DeletePackagePoliciesResponse } from '@kbn/fleet-plugin/common';
+import type { PostDeletePackagePoliciesResponse } from '@kbn/fleet-plugin/common';
 import { createMockPolicyData } from '../endpoint/services/feature_usage/mocks';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../common/endpoint/service/artifacts/constants';
 import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '@kbn/securitysolution-list-constants';
@@ -396,7 +396,7 @@ describe('ingest_integration tests ', () => {
       await callback(deletePackagePolicyMock());
     };
 
-    let removedPolicies: DeletePackagePoliciesResponse;
+    let removedPolicies: PostDeletePackagePoliciesResponse;
     let policyId: string;
     let fakeArtifact: ExceptionListSchema;
 
