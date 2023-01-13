@@ -33,3 +33,5 @@ export type {
   DeleteObjectBodyHTTPV1,
   DeleteObjectResponseHTTPV1,
 } from './v1';
+
+export type { SavedObjectMetadataV2 } from './v2';
