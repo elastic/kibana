@@ -16,6 +16,7 @@ import type { RequestAdapter } from '@kbn/inspector-plugin/public';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { Subject } from 'rxjs';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
 
 /**
  * The fetch status of a unified histogram request
@@ -38,6 +39,7 @@ export interface UnifiedHistogramServices {
   uiSettings: IUiSettingsClient;
   fieldFormats: FieldFormatsStart;
   lens: LensPublicStart;
+  storage: Storage;
 }
 
 /**

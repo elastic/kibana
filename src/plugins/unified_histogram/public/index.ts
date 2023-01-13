@@ -8,8 +8,8 @@
 
 import { UnifiedHistogramPublicPlugin } from './plugin';
 
-export type { UnifiedHistogramLayoutContainerApi } from './container';
-export { UnifiedHistogramLayoutContainer } from './container';
+export type { UnifiedHistogramApi } from './container';
+export { UnifiedHistogramContainer } from './container';
 export type { UnifiedHistogramLayoutProps } from './layout';
 export { UnifiedHistogramLayout } from './layout';
 export type {

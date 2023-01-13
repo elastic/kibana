@@ -9,8 +9,8 @@
 import React, { RefObject, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   UnifiedHistogramLayout,
-  UnifiedHistogramLayoutContainer,
-  UnifiedHistogramLayoutContainerApi,
+  UnifiedHistogramContainer,
+  UnifiedHistogramApi,
 } from '@kbn/unified-histogram-plugin/public';
 import { css } from '@emotion/react';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -62,9 +62,9 @@ export const DiscoverHistogramLayout = ({
     ...commonProps,
   });
 
-  const [unifiedHistogram, setUnifiedHistogram] = useState<UnifiedHistogramLayoutContainerApi>();
+  const [unifiedHistogram, setUnifiedHistogram] = useState<UnifiedHistogramApi>();
   const onUnifiedHistogramRef = useCallback(
-    (ref: UnifiedHistogramLayoutContainerApi) => setUnifiedHistogram(ref),
+    (ref: UnifiedHistogramApi) => setUnifiedHistogram(ref),
     []
   );
 
@@ -89,7 +89,7 @@ export const DiscoverHistogramLayout = ({
 
   return (
     <>
-      <UnifiedHistogramLayoutContainer ref={onUnifiedHistogramRef} />
+      <UnifiedHistogramContainer ref={onUnifiedHistogramRef} />
       <UnifiedHistogramLayout
         resizeRef={resizeRef}
         services={services}

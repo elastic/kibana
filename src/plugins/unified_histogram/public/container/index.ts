@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export type { UnifiedHistogramLayoutContainerApi } from './container';
-export { UnifiedHistogramLayoutContainer } from './container';
+export type { UnifiedHistogramApi } from './container';
+export { UnifiedHistogramContainer } from './container';
