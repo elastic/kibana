@@ -10,7 +10,8 @@
     "@kbn/i18n-react",
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/management-plugin",
-    "@kbn/es-ui-shared-plugin"
+    "@kbn/es-ui-shared-plugin",
+    "@kbn/core-http-request-handler-context-server"
   ],
   "exclude": [
     "target/**/*",
