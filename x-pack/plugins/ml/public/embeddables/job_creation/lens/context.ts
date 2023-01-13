@@ -12,7 +12,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import type { MlServicesContext } from '../../application/app';
+import type { MlServicesContext } from '../../../application/app';
 
 interface StartPlugins {
   data: DataPublicPluginStart;
