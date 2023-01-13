@@ -8,6 +8,8 @@
 
 import React from 'react';
 
+import { action } from '@storybook/addon-actions';
+
 import { CodeEditorStorybookMock, CodeEditorStorybookParams } from '@kbn/code-editor-mocks';
 import { monaco as monacoEditor } from '@kbn/monaco';
 
@@ -74,3 +76,124 @@ export const CustomLogLanguage = (params: CodeEditorStorybookParams) => {
 };
 
 CustomLogLanguage.argTypes = argTypes;
+
+export const JSONSupport = () => {
+  return (
+    <div>
+      <CodeEditor
+        languageId="json"
+        editorDidMount={(editor) => {
+          monacoEditor.languages.json.jsonDefaults.setDiagnosticsOptions({
+            validate: true,
+            schemas: [
+              {
+                uri: editor.getModel()?.uri.toString() ?? '',
+                fileMatch: ['*'],
+                schema: {
+                  type: 'object',
+                  properties: {
+                    version: {
+                      enum: ['v1', 'v2'],
+                    },
+                  },
+                },
+              },
+            ],
+          });
+        }}
+        height={250}
+        value="{}"
+        onChange={action('onChange')}
+      />
+    </div>
+  );
+};
+
+export const SuggestionProvider = () => {
+  const provideSuggestions = (
+    model: monacoEditor.editor.ITextModel,
+    position: monacoEditor.Position,
+    context: monacoEditor.languages.CompletionContext
+  ) => {
+    const wordRange = new monacoEditor.Range(
+      position.lineNumber,
+      position.column,
+      position.lineNumber,
+      position.column
+    );
+
+    return {
+      suggestions: [
+        {
+          label: 'Hello, World',
+          kind: monacoEditor.languages.CompletionItemKind.Variable,
+          documentation: {
+            value: '*Markdown* can be used in autocomplete help',
+            isTrusted: true,
+          },
+          insertText: 'Hello, World',
+          range: wordRange,
+        },
+        {
+          label: 'You know, for search',
+          kind: monacoEditor.languages.CompletionItemKind.Variable,
+          documentation: { value: 'Thanks `Monaco`', isTrusted: true },
+          insertText: 'You know, for search',
+          range: wordRange,
+        },
+      ],
+    };
+  };
+
+  return (
+    <div>
+      <CodeEditor
+        languageId="loglang"
+        height={250}
+        value={logs}
+        onChange={action('onChange')}
+        suggestionProvider={{
+          triggerCharacters: ['.'],
+          provideCompletionItems: provideSuggestions,
+        }}
+        options={{
+          quickSuggestions: true,
+        }}
+      />
+    </div>
+  );
+};
+
+export const HoverProvider = () => {
+  const provideHover = (model: monacoEditor.editor.ITextModel, position: monacoEditor.Position) => {
+    const word = model.getWordAtPosition(position);
+
+    if (!word) {
+      return {
+        contents: [],
+      };
+    }
+
+    return {
+      contents: [
+        {
+          value: `You're hovering over **${word.word}**`,
+        },
+      ],
+    };
+  };
+
+  return (
+    <div>
+      <CodeEditor
+        languageId="loglang"
+        height={250}
+        value={logs}
+        onChange={action('onChange')}
+        hoverProvider={{
+          provideHover,
+        }}
+      />
+    </div>
+  );
+};
