@@ -162,7 +162,7 @@ Any modifications made to this file will be overwritten.
         <a href="#case_response_properties">case_response_properties</a>
     <h4 class="field-label">401</h4>
     Authorization information is missing or invalid.
-        <a href="#cases4xxResponse">cases4xxResponse</a>
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="createCase"/>
@@ -282,7 +282,7 @@ Any modifications made to this file will be overwritten.
         <a href="#case_response_properties">case_response_properties</a>
     <h4 class="field-label">401</h4>
     Authorization information is missing or invalid.
-        <a href="#cases4xxResponse">cases4xxResponse</a>
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="deleteCase"/>
@@ -334,7 +334,7 @@ Any modifications made to this file will be overwritten.
         <a href="#"></a>
     <h4 class="field-label">401</h4>
     Authorization information is missing or invalid.
-        <a href="#cases4xxResponse">cases4xxResponse</a>
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="deleteCaseComment"/>
@@ -384,7 +384,7 @@ Any modifications made to this file will be overwritten.
         <a href="#"></a>
     <h4 class="field-label">401</h4>
     Authorization information is missing or invalid.
-        <a href="#cases4xxResponse">cases4xxResponse</a>
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="deleteCaseComments"/>
@@ -432,7 +432,7 @@ Any modifications made to this file will be overwritten.
         <a href="#"></a>
     <h4 class="field-label">401</h4>
     Authorization information is missing or invalid.
-        <a href="#cases4xxResponse">cases4xxResponse</a>
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="getAllCaseComments"/>
@@ -535,7 +535,7 @@ Any modifications made to this file will be overwritten.
         <a href="#case_response_properties">case_response_properties</a>
     <h4 class="field-label">401</h4>
     Authorization information is missing or invalid.
-        <a href="#cases4xxResponse">cases4xxResponse</a>
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="getCase"/>
@@ -644,7 +644,7 @@ Any modifications made to this file will be overwritten.
         <a href="#case_response_properties">case_response_properties</a>
     <h4 class="field-label">401</h4>
     Authorization information is missing or invalid.
-        <a href="#cases4xxResponse">cases4xxResponse</a>
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="getCaseActivity"/>
@@ -707,7 +707,7 @@ Any modifications made to this file will be overwritten.
         
     <h4 class="field-label">401</h4>
     Authorization information is missing or invalid.
-        <a href="#cases4xxResponse">cases4xxResponse</a>
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="getCaseAlerts"/>
@@ -760,7 +760,7 @@ Any modifications made to this file will be overwritten.
         
     <h4 class="field-label">401</h4>
     Authorization information is missing or invalid.
-        <a href="#cases4xxResponse">cases4xxResponse</a>
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="getCaseComment"/>
@@ -811,7 +811,7 @@ Any modifications made to this file will be overwritten.
         <a href="#getCaseComment_200_response">getCaseComment_200_response</a>
     <h4 class="field-label">401</h4>
     Authorization information is missing or invalid.
-        <a href="#cases4xxResponse">cases4xxResponse</a>
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="getCaseConfiguration"/>
@@ -899,7 +899,7 @@ Any modifications made to this file will be overwritten.
         
     <h4 class="field-label">401</h4>
     Authorization information is missing or invalid.
-        <a href="#cases4xxResponse">cases4xxResponse</a>
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="getCaseConnectors"/>
@@ -958,7 +958,7 @@ Any modifications made to this file will be overwritten.
         
     <h4 class="field-label">401</h4>
     Authorization information is missing or invalid.
-        <a href="#cases4xxResponse">cases4xxResponse</a>
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="getCaseReporters"/>
@@ -1016,7 +1016,7 @@ Any modifications made to this file will be overwritten.
         
     <h4 class="field-label">401</h4>
     Authorization information is missing or invalid.
-        <a href="#cases4xxResponse">cases4xxResponse</a>
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="getCaseStatus"/>
@@ -1073,7 +1073,7 @@ Any modifications made to this file will be overwritten.
         <a href="#getCaseStatus_200_response">getCaseStatus_200_response</a>
     <h4 class="field-label">401</h4>
     Authorization information is missing or invalid.
-        <a href="#cases4xxResponse">cases4xxResponse</a>
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="getCaseTags"/>
@@ -1126,7 +1126,7 @@ Any modifications made to this file will be overwritten.
         
     <h4 class="field-label">401</h4>
     Authorization information is missing or invalid.
-        <a href="#cases4xxResponse">cases4xxResponse</a>
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="getCases"/>
@@ -1325,7 +1325,7 @@ Any modifications made to this file will be overwritten.
         <a href="#getCases_200_response">getCases_200_response</a>
     <h4 class="field-label">401</h4>
     Authorization information is missing or invalid.
-        <a href="#cases4xxResponse">cases4xxResponse</a>
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="getCasesByAlert"/>
@@ -1383,7 +1383,7 @@ Any modifications made to this file will be overwritten.
         
     <h4 class="field-label">401</h4>
     Authorization information is missing or invalid.
-        <a href="#cases4xxResponse">cases4xxResponse</a>
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="pushCase"/>
@@ -1507,7 +1507,7 @@ Any modifications made to this file will be overwritten.
         <a href="#case_response_properties">case_response_properties</a>
     <h4 class="field-label">401</h4>
     Authorization information is missing or invalid.
-        <a href="#cases4xxResponse">cases4xxResponse</a>
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="setCaseConfiguration"/>
@@ -1608,7 +1608,7 @@ Any modifications made to this file will be overwritten.
         <a href="#getCaseConfiguration_200_response_inner">getCaseConfiguration_200_response_inner</a>
     <h4 class="field-label">401</h4>
     Authorization information is missing or invalid.
-        <a href="#cases4xxResponse">cases4xxResponse</a>
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="updateCase"/>
@@ -1728,7 +1728,7 @@ Any modifications made to this file will be overwritten.
         
     <h4 class="field-label">401</h4>
     Authorization information is missing or invalid.
-        <a href="#cases4xxResponse">cases4xxResponse</a>
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="updateCaseComment"/>
@@ -1850,7 +1850,7 @@ Any modifications made to this file will be overwritten.
         <a href="#case_response_properties">case_response_properties</a>
     <h4 class="field-label">401</h4>
     Authorization information is missing or invalid.
-        <a href="#cases4xxResponse">cases4xxResponse</a>
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="updateCaseConfiguration"/>
@@ -1953,7 +1953,7 @@ Any modifications made to this file will be overwritten.
         
     <h4 class="field-label">401</h4>
     Authorization information is missing or invalid.
-        <a href="#cases4xxResponse">cases4xxResponse</a>
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
 
@@ -1962,6 +1962,7 @@ Any modifications made to this file will be overwritten.
 
   <h3>Table of Contents</h3>
   <ol>
+    <li><a href="#4xx_response"><code>4xx_response</code> - Unsuccessful cases API response</a></li>
     <li><a href="#Case_response_properties_for_comments_inner"><code>Case_response_properties_for_comments_inner</code> - </a></li>
     <li><a href="#Case_response_properties_for_connectors"><code>Case_response_properties_for_connectors</code> - Case response properties for connectors</a></li>
     <li><a href="#action_types"><code>action_types</code> - </a></li>
@@ -1980,7 +1981,6 @@ Any modifications made to this file will be overwritten.
     <li><a href="#case_response_properties"><code>case_response_properties</code> - Case response properties</a></li>
     <li><a href="#case_response_pushed_by_properties"><code>case_response_pushed_by_properties</code> - Case response properties for pushed_by</a></li>
     <li><a href="#case_response_updated_by_properties"><code>case_response_updated_by_properties</code> - Case response properties for updated_by</a></li>
-    <li><a href="#cases4xxResponse"><code>cases4xxResponse</code> - Unsuccessful cases API response</a></li>
     <li><a href="#closure_types"><code>closure_types</code> - </a></li>
     <li><a href="#connector_properties_cases_webhook"><code>connector_properties_cases_webhook</code> - Create or upate case request properties for Cases Webhook connector</a></li>
     <li><a href="#connector_properties_jira"><code>connector_properties_jira</code> - Create or update case request properties for a Jira connector</a></li>
@@ -2049,6 +2049,15 @@ Any modifications made to this file will be overwritten.
     <li><a href="#user_comment_response_properties"><code>user_comment_response_properties</code> - Case response properties for user comments</a></li>
   </ol>
 
+  <div class="model">
+    <h3><a name="4xx_response"><code>4xx_response</code> - Unsuccessful cases API response</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">error (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">message (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">statusCode (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
   <div class="model">
     <h3><a name="Case_response_properties_for_comments_inner"><code>Case_response_properties_for_comments_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
@@ -2256,15 +2265,6 @@ Any modifications made to this file will be overwritten.
 <div class="param">full_name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
 <div class="param">username </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
 <div class="param">profile_uid (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="cases4xxResponse"><code>cases4xxResponse</code> - Unsuccessful cases API response</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-      <div class="param">error (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">message (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">statusCode (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">

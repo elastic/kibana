@@ -50,7 +50,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/cases4xxResponse'
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     delete:
@@ -78,7 +78,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/cases4xxResponse'
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     patch:
@@ -116,7 +116,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/cases4xxResponse'
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -280,7 +280,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/cases4xxResponse'
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -322,7 +322,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/cases4xxResponse'
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -444,7 +444,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/cases4xxResponse'
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     post:
@@ -614,7 +614,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/cases4xxResponse'
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -775,7 +775,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/cases4xxResponse'
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -830,7 +830,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/cases4xxResponse'
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -879,7 +879,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/cases4xxResponse'
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -918,7 +918,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/cases4xxResponse'
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -959,7 +959,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/cases4xxResponse'
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -997,7 +997,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/cases4xxResponse'
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -1031,7 +1031,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/cases4xxResponse'
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -1072,7 +1072,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/cases4xxResponse'
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     delete:
@@ -1094,7 +1094,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/cases4xxResponse'
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     patch:
@@ -1132,7 +1132,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/cases4xxResponse'
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     get:
@@ -1158,7 +1158,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/cases4xxResponse'
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -1184,7 +1184,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/cases4xxResponse'
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     get:
@@ -1215,7 +1215,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/cases4xxResponse'
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -1254,7 +1254,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/cases4xxResponse'
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -1288,7 +1288,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/cases4xxResponse'
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -1302,19 +1302,86 @@ components:
       type: apiKey
       in: header
       name: ApiKey
+  parameters:
+    kbn_xsrf:
+      schema:
+        type: string
+      in: header
+      name: kbn-xsrf
+      required: true
+    space_id:
+      in: path
+      name: spaceId
+      description: An identifier for the space. If `/s/` and the identifier are omitted from the path, the default space is used.
+      required: true
+      schema:
+        type: string
+        example: default
+    owner:
+      in: query
+      name: owner
+      description: |
+        A filter to limit the response to a specific set of applications. If this parameter is omitted, the response contains information about all the cases that the user has access to read.
+      schema:
+        oneOf:
+          - $ref: '#/components/schemas/owners'
+          - type: array
+            items:
+              $ref: '#/components/schemas/owners'
+      example: cases
+    severity:
+      in: query
+      name: severity
+      description: The severity of the case.
+      schema:
+        type: string
+        enum:
+          - critical
+          - high
+          - low
+          - medium
+    alert_id:
+      in: path
+      name: alertId
+      description: An identifier for the alert.
+      required: true
+      schema:
+        type: string
+        example: 09f0c261e39e36351d75995b78bb83673774d1bc2cca9df2d15f0e5c0a99a540
+    configuration_id:
+      in: path
+      name: configurationId
+      description: An identifier for the configuration.
+      required: true
+      schema:
+        type: string
+        example: 3297a0f0-b5ec-11ec-b141-0fdb20a7f9a9
+    case_id:
+      in: path
+      name: caseId
+      description: The identifier for the case. To retrieve case IDs, use the find cases API. All non-ASCII characters must be URL encoded.
+      required: true
+      schema:
+        type: string
+        example: 9c235210-6834-11ea-a78c-6ffb38a34414
+    comment_id:
+      in: path
+      name: commentId
+      description: |
+        The identifier for the comment. To retrieve comment IDs, use the get case or find cases APIs.
+      required: true
+      schema:
+        type: string
+        example: 71ec1870-725b-11ea-a0b2-c51ea50a58e2
+    connector_id:
+      in: path
+      name: connectorId
+      description: An identifier for the connector. To retrieve connector IDs, use the find connectors API.
+      required: true
+      schema:
+        type: string
+        example: abed3a70-71bd-11ea-a0b2-c51ea50a58e2
   schemas:
-    cases4xxResponse:
-      type: object
-      title: Unsuccessful cases API response
-      properties:
-        error:
-          type: string
-          example: Unauthorized
-        message:
-          type: string
-        statusCode:
-          type: integer
-          example: 401
     assignees:
       type: array
       description: An array containing users that are assigned to the case.
@@ -2069,6 +2136,18 @@ components:
         version:
           type: string
           example: WzUzMiwxXQ==
+    4xx_response:
+      type: object
+      title: Unsuccessful cases API response
+      properties:
+        error:
+          type: string
+          example: Unauthorized
+        message:
+          type: string
+        statusCode:
+          type: integer
+          example: 401
     update_case_request:
       title: Update case request
       description: The update case API request body varies depending on the type of connector.
@@ -2679,85 +2758,6 @@ components:
             - $ref: '#/components/schemas/payload_user_comment'
         type:
           $ref: '#/components/schemas/action_types'
-  parameters:
-    kbn_xsrf:
-      schema:
-        type: string
-      in: header
-      name: kbn-xsrf
-      required: true
-    space_id:
-      in: path
-      name: spaceId
-      description: An identifier for the space. If `/s/` and the identifier are omitted from the path, the default space is used.
-      required: true
-      schema:
-        type: string
-        example: default
-    owner:
-      in: query
-      name: owner
-      description: |
-        A filter to limit the response to a specific set of applications. If this parameter is omitted, the response contains information about all the cases that the user has access to read.
-      schema:
-        oneOf:
-          - $ref: '#/components/schemas/owners'
-          - type: array
-            items:
-              $ref: '#/components/schemas/owners'
-      example: cases
-    severity:
-      in: query
-      name: severity
-      description: The severity of the case.
-      schema:
-        type: string
-        enum:
-          - critical
-          - high
-          - low
-          - medium
-    alert_id:
-      in: path
-      name: alertId
-      description: An identifier for the alert.
-      required: true
-      schema:
-        type: string
-        example: 09f0c261e39e36351d75995b78bb83673774d1bc2cca9df2d15f0e5c0a99a540
-    configuration_id:
-      in: path
-      name: configurationId
-      description: An identifier for the configuration.
-      required: true
-      schema:
-        type: string
-        example: 3297a0f0-b5ec-11ec-b141-0fdb20a7f9a9
-    case_id:
-      in: path
-      name: caseId
-      description: The identifier for the case. To retrieve case IDs, use the find cases API. All non-ASCII characters must be URL encoded.
-      required: true
-      schema:
-        type: string
-        example: 9c235210-6834-11ea-a78c-6ffb38a34414
-    comment_id:
-      in: path
-      name: commentId
-      description: |
-        The identifier for the comment. To retrieve comment IDs, use the get case or find cases APIs.
-      required: true
-      schema:
-        type: string
-        example: 71ec1870-725b-11ea-a0b2-c51ea50a58e2
-    connector_id:
-      in: path
-      name: connectorId
-      description: An identifier for the connector. To retrieve connector IDs, use the find connectors API.
-      required: true
-      schema:
-        type: string
-        example: abed3a70-71bd-11ea-a0b2-c51ea50a58e2
   examples:
     create_case_request:
       summary: Create a security case that uses a Jira connector.
