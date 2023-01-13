@@ -9,6 +9,7 @@ import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { TableId } from '../../../../common/types';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import { GroupsSelector } from '../grouping_table/select_group';
 import { InspectButton } from '../inspect';
 import { UpdatedFlexGroup, UpdatedFlexItem } from './styles';
 import type { ViewSelection } from './summary_view_select';
@@ -63,6 +64,9 @@ export const RightTopMenu = ({
             <SummaryViewSelector viewSelected={tableView} onViewChange={onViewChange} />
           </UpdatedFlexItem>
         )}
+      <UpdatedFlexItem grow={false} $show={!loading}>
+        <GroupsSelector onGroupChange={() => {}} />
+      </UpdatedFlexItem>
     </UpdatedFlexGroup>
   );
 };
