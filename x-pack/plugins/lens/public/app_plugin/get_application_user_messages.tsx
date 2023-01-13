@@ -101,7 +101,7 @@ function getUnknownDatasourceTypeError(): UserMessage {
     severity: 'error',
     fixableInEditor: false,
     displayLocations: [{ id: 'visualization' }, { id: 'suggestionPanel' }],
-    shortMessage: i18n.translate('xpack.lens.unknownVisType.shortMessage', {
+    shortMessage: i18n.translate('xpack.lens.unknownDatasourceType.shortMessage', {
       defaultMessage: `Unknown datasource type`,
     }),
     longMessage: i18n.translate('xpack.lens.editorFrame.expressionMissingDatasource', {
