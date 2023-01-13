@@ -18,18 +18,14 @@ import {
   Datasource,
   DatasourceLayers,
   DatasourceMap,
-  FramePublicAPI,
   IndexPattern,
   IndexPatternMap,
   IndexPatternRef,
   InitializationOptions,
-  UserMessage,
-  Visualization,
   VisualizationMap,
   VisualizeEditorContext,
 } from '../../types';
 import { buildExpression } from './expression_helpers';
-import { showMemoizedErrorNotification } from '../../lens_ui_errors';
 import { Document } from '../../persistence/saved_object_store';
 import { getActiveDatasourceIdFromDoc, sortDataViewRefs } from '../../utils';
 import type { DatasourceStates, DataViewsState, VisualizationState } from '../../state_management';
@@ -417,41 +413,3 @@ export function getMissingIndexPattern(
   }
   return missingIds;
 }
-
-export const validateDatasourceAndVisualization = (
-  currentDataSource: Datasource | null,
-  currentDatasourceState: unknown | null,
-  currentVisualization: Visualization | null,
-  currentVisualizationState: unknown | undefined,
-  frame: Pick<FramePublicAPI, 'datasourceLayers' | 'dataViews'>
-): UserMessage[] => {
-  try {
-    // TODO - re-enable
-    return [];
-
-    // const datasourceValidationErrors = currentDatasourceState
-    //   ? currentDataSource?.getUserMessages(currentDatasourceState, { frame, setState: () => {} })
-    //   : undefined;
-
-    // const visualizationValidationErrors = currentVisualizationState
-    //   ? currentVisualization?.getErrorMessages(currentVisualizationState, frame)
-    //   : undefined;
-
-    // return [...(datasourceValidationErrors || [])];
-  } catch (e) {
-    showMemoizedErrorNotification(e);
-    if (e.message) {
-      return [
-        {
-          severity: 'error',
-          fixableInEditor: false,
-          displayLocations: [{ id: 'workspace' }],
-          shortMessage: e.message,
-          longMessage: e.message,
-        },
-      ];
-    }
-  }
-
-  return [];
-};

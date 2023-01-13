@@ -39,15 +39,12 @@ import {
   VisualizationMap,
   DatasourceLayers,
   UserMessagesGetter,
+  FrameDatasourceAPI,
 } from '../../types';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
 import { getDatasourceExpressionsByLayers } from './expression_helpers';
 import { showMemoizedErrorNotification } from '../../lens_ui_errors/memoized_error_notification';
-import {
-  getMissingIndexPattern,
-  validateDatasourceAndVisualization,
-  getDatasourceLayers,
-} from './state_helpers';
+import { getMissingIndexPattern } from './state_helpers';
 import {
   rollbackSuggestion,
   selectExecutionContextSearch,
@@ -64,10 +61,33 @@ import {
   selectChangesApplied,
   applyChanges,
   selectStagedActiveData,
+  selectFrameDatasourceAPI,
 } from '../../state_management';
 
 const MAX_SUGGESTIONS_DISPLAYED = 5;
 const LOCAL_STORAGE_SUGGESTIONS_PANEL = 'LENS_SUGGESTIONS_PANEL_HIDDEN';
+
+const configurationsValid = (
+  currentDataSource: Datasource | null,
+  currentDatasourceState: unknown,
+  currentVisualization: Visualization,
+  currentVisualizationState: unknown,
+  frame: FrameDatasourceAPI
+): boolean => {
+  try {
+    return (
+      [
+        ...(currentDataSource?.getUserMessages?.(currentDatasourceState, {
+          frame,
+          setState: () => {},
+        }) ?? []),
+        ...(currentVisualization?.getUserMessages?.(currentVisualizationState, { frame }) ?? []),
+      ].length === 0
+    );
+  } catch (e) {
+    return false;
+  }
+};
 
 export interface SuggestionPanelProps {
   datasourceMap: DatasourceMap;
@@ -200,6 +220,10 @@ export function SuggestionPanel({
   const existsStagedPreview = useLensSelector((state) => Boolean(state.lens.stagedPreview));
   const currentVisualization = useLensSelector(selectCurrentVisualization);
   const currentDatasourceStates = useLensSelector(selectCurrentDatasourceStates);
+
+  const frameDatasourceAPI = useLensSelector((state) =>
+    selectFrameDatasourceAPI(state, datasourceMap)
+  );
   const changesApplied = useLensSelector(selectChangesApplied);
   // get user's selection from localStorage, this key defines if the suggestions panel will be hidden or not
   const [hideSuggestions, setHideSuggestions] = useLocalStorage(
@@ -240,29 +264,13 @@ export function SuggestionPanel({
             }) => {
               return (
                 !hide &&
-                // it is used here just to filter out invalid configs
-                validateDatasourceAndVisualization(
+                configurationsValid(
                   suggestionDatasourceId ? datasourceMap[suggestionDatasourceId] : null,
                   suggestionDatasourceState,
                   visualizationMap[visualizationId],
                   suggestionVisualizationState,
-                  {
-                    ...frame,
-                    dataViews: frame.dataViews,
-                    datasourceLayers: getDatasourceLayers(
-                      suggestionDatasourceId
-                        ? {
-                            [suggestionDatasourceId]: {
-                              isLoading: true,
-                              state: suggestionDatasourceState,
-                            },
-                          }
-                        : {},
-                      datasourceMap,
-                      frame.dataViews.indexPatterns
-                    ),
-                  }
-                ).length === 0
+                  frameDatasourceAPI
+                )
               );
             }
           )
