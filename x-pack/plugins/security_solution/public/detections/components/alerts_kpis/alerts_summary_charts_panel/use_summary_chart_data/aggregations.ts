@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { ALERT_SEVERITY, ALERT_RULE_NAME } from '@kbn/rule-data-utils';
-import { DEFAULT_QUERY_SIZE } from '../helpers';
+
+const DEFAULT_QUERY_SIZE = 1000;
 
 export const severityAgg = {
   statusBySeverity: {
@@ -23,12 +24,20 @@ export const hostAgg = {
     },
   },
 };
+export const hostAggFive = {
+  alertsByHost: {
+    terms: {
+      field: 'host.name',
+      size: 5,
+    },
+  },
+};
 
 export const detectionsAgg = {
   alertsByRule: {
     terms: {
       field: ALERT_RULE_NAME,
-      size: 10,
+      size: DEFAULT_QUERY_SIZE,
     },
     aggs: {
       ruleByEventType: {
@@ -45,4 +54,5 @@ export const aggregations = {
   detections: detectionsAgg,
   severity: severityAgg,
   host: hostAgg,
+  hostFive: hostAggFive,
 };

@@ -32,7 +32,7 @@ import { GROUP_BY_LABEL } from '../../../components/alerts_kpis/common/translati
 const TABLE_PANEL_HEIGHT = 330; // px
 const TRENT_CHART_HEIGHT = 127; // px
 const TREND_CHART_PANEL_HEIGHT = 256; // px
-const ALERTS_CHARTS_PANEL_HEIGHT = 365; // px
+const ALERTS_CHARTS_PANEL_HEIGHT = 375; // px
 
 const FullHeightFlexItem = styled(EuiFlexItem)`
   height: 100%;

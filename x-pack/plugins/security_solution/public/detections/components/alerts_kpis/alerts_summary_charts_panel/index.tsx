@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiButton, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { Filter, Query } from '@kbn/es-query';
@@ -15,16 +15,23 @@ import { KpiPanel } from '../common/components';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { SeverityLevelChart } from './severity_donut/severity_level_chart';
-import { DetectionsTable } from './detections_table/detections_table';
-import { TopHostTable } from './host_pie_chart/top_host_table';
+import { AlertsByType } from './alerts_by_type/alerts_by_type';
+import { AlertsByHost } from './alerts_by_host/alerts_by_host';
 import { useSummaryChartData } from './use_summary_chart_data';
 import { aggregations } from './use_summary_chart_data/aggregations';
 
 const DETECTIONS_ALERTS_CHARTS_ID = 'detections-alerts-charts';
-const DETECTIONS_TABLE_ID = 'alerts-summary-detections-table';
 const SEVERITY_DONUT_CHART_ID = 'alerts-summary-severity-donut';
-const HOST_PIE_CHART_ID = 'alerts-summary-host-pie-chart';
+const ALERTS_BY_TYPE_CHART_ID = 'alerts-summary-alert_by_type';
+const ALERTS_BY_HOST_CHART_ID = 'alerts-summary-alert_by_host';
 
+const StyledFlexGroup = styled(EuiFlexGroup)`
+  @media only screen and (min-width: ${({ theme }) => theme.eui.euiBreakpoints.l})
+`;
+
+const StyledFlexItem = styled(EuiFlexItem)`
+  min-width: 355px
+`;
 interface Props {
   alignHeader?: 'center' | 'baseline' | 'stretch' | 'flexStart' | 'flexEnd';
   filters?: Filter[];
@@ -40,19 +47,13 @@ export const AlertsSummaryChartsPanel: React.FC<Props> = ({
   alignHeader,
   filters,
   addFilter,
-  panelHeight = 380,
+  panelHeight,
   query,
   runtimeMappings,
   signalIndexName,
   title = i18n.CHARTS_TITLE,
 }: Props) => {
-  const Wrapper = styled.div`
-    margin-top: -${({ theme }) => theme.eui.euiSizeS};
-    @media only screen and (min-width: ${({ theme }) => theme.eui.euiBreakpoints.l}) {
-      ${() => `height: ${panelHeight}px;`}
-    }
-  `;
-
+  
   const { toggleStatus, setToggleStatus } = useQueryToggle(DETECTIONS_ALERTS_CHARTS_ID);
   const [querySkip, setQuerySkip] = useState(!toggleStatus);
   useEffect(() => {
@@ -67,24 +68,10 @@ export const AlertsSummaryChartsPanel: React.FC<Props> = ({
     [setQuerySkip, setToggleStatus]
   );
 
-  const [option, setOption] = useState(1);
-  const [detOption, setDetOption] = useState(1);
-
   // create a unique, but stable (across re-renders) query id
-  const uniqueDetectionsQueryId = useMemo(() => `${DETECTIONS_TABLE_ID}-${uuid.v4()}`, []);
+  const uniqueDetectionsQueryId = useMemo(() => `${ALERTS_BY_TYPE_CHART_ID}-${uuid.v4()}`, []);
+  const uniqueHostsQueryId = useMemo(() => `${ALERTS_BY_HOST_CHART_ID}-${uuid.v4()}`, []);
   const uniqueSeverityQueryId = useMemo(() => `${SEVERITY_DONUT_CHART_ID}-${uuid.v4()}`, []);
-  const uniqueHostsQueryId = useMemo(() => `${HOST_PIE_CHART_ID}-${uuid.v4()}`, []);
-
-  const { items: detectionsData, isLoading: isDetectionsLoading } = useSummaryChartData({
-    aggregationType: 'Detections',
-    aggregations: aggregations.detections,
-    filters,
-    query,
-    signalIndexName,
-    runtimeMappings,
-    skip: querySkip,
-    uniqueQueryId: uniqueDetectionsQueryId,
-  });
 
   const { items: severityData, isLoading: isSeverityLoading } = useSummaryChartData({
     aggregationType: 'Severity',
@@ -108,44 +95,18 @@ export const AlertsSummaryChartsPanel: React.FC<Props> = ({
     uniqueQueryId: uniqueHostsQueryId,
   });
 
+  const { items: detectionsData, isLoading: isDetectionsLoading } = useSummaryChartData({
+    aggregationType: 'Detections',
+    aggregations: aggregations.detections,
+    filters,
+    query,
+    signalIndexName,
+    runtimeMappings,
+    skip: querySkip,
+    uniqueQueryId: uniqueDetectionsQueryId,
+  });
+
   return (
-    <>
-      <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem />
-        <EuiFlexItem>
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <EuiButton color={'primary'} onClick={() => setDetOption(1)}>
-                {'Option 1'}
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton color={'primary'} onClick={() => setDetOption(2)}>
-                {'Option 2'}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <EuiButton color={'primary'} onClick={() => setOption(1)}>
-                {'Option 1'}
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton color={'primary'} onClick={() => setOption(2)}>
-                {'Option 2'}
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton color={'primary'} onClick={() => setOption(3)}>
-                {'Option 3'}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
       <KpiPanel
         $toggleStatus={toggleStatus}
         data-test-subj="alerts-charts-panel"
@@ -163,32 +124,33 @@ export const AlertsSummaryChartsPanel: React.FC<Props> = ({
           toggleQuery={toggleQuery}
         />
         {toggleStatus && (
-          <Wrapper className="eui-yScroll">
-            <EuiFlexGroup data-test-subj="alerts-charts-container" wrap>
-              <SeverityLevelChart
-                data={severityData}
-                isLoading={isSeverityLoading}
-                uniqueQueryId={uniqueSeverityQueryId}
-                addFilter={addFilter}
-              />
-              <DetectionsTable
-                data={detectionsData}
-                isLoading={isDetectionsLoading}
-                uniqueQueryId={uniqueDetectionsQueryId}
-                option={detOption}
-              />
-              <TopHostTable
-                data={hostData}
-                isLoading={isHostsLoading}
-                uniqueQueryId={uniqueHostsQueryId}
-                addFilter={addFilter}
-                option={option}
-              />
-            </EuiFlexGroup>
-          </Wrapper>
+            <StyledFlexGroup data-test-subj="alerts-charts-container"  className="eui-yScroll" wrap gutterSize='m'>
+              <StyledFlexItem>
+                <SeverityLevelChart
+                  data={severityData}
+                  isLoading={isSeverityLoading}
+                  uniqueQueryId={uniqueSeverityQueryId}
+                  addFilter={addFilter}
+                />
+              </StyledFlexItem>
+              <StyledFlexItem>
+                <AlertsByType
+                  data={detectionsData}
+                  isLoading={isDetectionsLoading}
+                  uniqueQueryId={uniqueDetectionsQueryId}
+                />
+              </StyledFlexItem>
+              <StyledFlexItem>
+                <AlertsByHost
+                  data={hostData}
+                  isLoading={isHostsLoading}
+                  uniqueQueryId={uniqueHostsQueryId}
+                  addFilter={addFilter}
+                />
+              </StyledFlexItem>
+          </StyledFlexGroup>
         )}
       </KpiPanel>
-    </>
   );
 };
 

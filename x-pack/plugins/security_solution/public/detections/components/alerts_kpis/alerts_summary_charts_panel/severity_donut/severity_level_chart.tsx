@@ -5,13 +5,19 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiInMemoryTable } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiInMemoryTable,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
+import React, { useCallback, useMemo, useEffect, useState } from 'react';
 import { isEmpty } from 'lodash/fp';
 import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ShapeTreeNode, ElementClickListener } from '@elastic/charts';
-import * as i18n from '../translations';
+import type { ChartsPanelProps } from '../types';
 import type { SeverityBuckets as SeverityData } from '../../../../../overview/components/detection_response/alerts_by_status/types';
 import type { FillColor } from '../../../../../common/components/charts/donutchart';
 import { DonutChart } from '../../../../../common/components/charts/donutchart';
@@ -21,7 +27,8 @@ import { InspectButtonContainer } from '../../../../../common/components/inspect
 import { getSeverityTableColumns } from '../columns';
 import { getSeverityColor } from '../helpers';
 import { TOTAL_COUNT_OF_ALERTS } from '../../../alerts_table/translations';
-import type { ChartsPanelProps } from '../types';
+import { showInitialLoadingSpinner } from '../../alerts_histogram_panel/helpers';
+import * as i18n from '../translations';
 
 const DONUT_HEIGHT = 150;
 
@@ -31,6 +38,7 @@ export const SeverityLevelChart: React.FC<ChartsPanelProps> = ({
   uniqueQueryId,
   addFilter,
 }) => {
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const fillColor: FillColor = useCallback((d: ShapeTreeNode) => {
     return getSeverityColor(d.dataName);
   }, []);
@@ -69,29 +77,41 @@ export const SeverityLevelChart: React.FC<ChartsPanelProps> = ({
     [addFilter]
   );
 
+  useEffect(() => {
+    let canceled = false;
+    if (!canceled && !showInitialLoadingSpinner({ isInitialLoading, isLoadingAlerts: isLoading })) {
+      setIsInitialLoading(false);
+    }
+    return () => {
+      canceled = true; // prevent long running data fetches from updating state after unmounting
+    };
+  }, [isInitialLoading, isLoading, setIsInitialLoading]);
+
   return (
-    <EuiFlexItem style={{ minWidth: 350 }}>
-      <InspectButtonContainer>
-        <EuiPanel>
-          <HeaderSection
-            id={uniqueQueryId}
-            inspectTitle={i18n.SEVERITY_LEVELS_TITLE}
-            outerDirection="row"
-            title={i18n.SEVERITY_LEVELS_TITLE}
-            titleSize="xs"
-            hideSubtitle
-          />
-          <EuiFlexGroup data-test-subj="severty-chart" gutterSize="l">
-            <EuiFlexItem>
-              <EuiInMemoryTable
-                data-test-subj="severity-level-alerts-table"
-                columns={columns}
-                items={items}
-                loading={isLoading}
-                sorting={sorting}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
+    <InspectButtonContainer>
+      <EuiPanel hasBorder hasShadow={false}>
+        <HeaderSection
+          id={uniqueQueryId}
+          inspectTitle={i18n.SEVERITY_LEVELS_TITLE}
+          outerDirection="row"
+          title={i18n.SEVERITY_LEVELS_TITLE}
+          titleSize="xs"
+          hideSubtitle
+        />
+        <EuiFlexGroup data-test-subj="severty-chart" gutterSize="s">
+          <EuiFlexItem>
+            <EuiInMemoryTable
+              data-test-subj="severity-level-alerts-table"
+              columns={columns}
+              items={items}
+              loading={isLoading}
+              sorting={sorting}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            {isInitialLoading ? (
+              <EuiLoadingSpinner size="l" />
+            ) : (
               <DonutChart
                 data-test-subj="severity-level-donut"
                 data={items}
@@ -102,11 +122,11 @@ export const SeverityLevelChart: React.FC<ChartsPanelProps> = ({
                 totalCount={count}
                 onElementClick={onElementClick}
               />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
-      </InspectButtonContainer>
-    </EuiFlexItem>
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+    </InspectButtonContainer>
   );
 };
 

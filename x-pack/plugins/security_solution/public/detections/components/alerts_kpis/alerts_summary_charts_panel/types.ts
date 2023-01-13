@@ -21,7 +21,6 @@ export interface ChartsPanelProps {
   isLoading: boolean;
   uniqueQueryId: string;
   addFilter?: ({ field, value }: { field: string; value: string | number }) => void;
-  option?: number;
 }
 export interface UseAlertsQueryProps {
   aggregations: {};
@@ -74,7 +73,7 @@ export interface AlertsByHostAgg {
     doc_count_error_upper_bound: number;
     sum_other_doc_count: number;
     buckets: BucketItem[];
-  },
+  };
 }
 export interface HostData {
   key: string;

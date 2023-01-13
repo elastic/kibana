@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const CHARTS_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.charts.chartsTitle',
+  'xpack.securitySolution.detectionEngine.alerts.chartsTitle',
   {
     defaultMessage: 'Charts',
   }
@@ -32,43 +32,37 @@ export const SEVERITY_LEVEL_COLUMN_TITLE = i18n.translate(
   { defaultMessage: 'Levels' }
 );
 
-export const COUNT_COULMN_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.countColumn',
-  {
-    defaultMessage: 'Count',
-  }
-);
-
-export const DETECTIONS_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.detections.detectionTableTitle',
+export const ALERTS_TYPE_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.alertsByType.alertTypeChartTitle',
   {
     defaultMessage: 'Alerts by type',
   }
 );
 
-export const DETECTIONS_TYPE_COLUMN_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.detections.detectionTableTypeColumn',
+export const ALERTS_TYPE_COLUMN_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.alertsByType.typeColumn',
   {
     defaultMessage: 'Type',
   }
 );
 
-export const DETECTIONS_PREVENTIONS_COLUMN_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.detections.detectionTablePreventionsColumn',
+export const PREVENTIONS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.alertsByType.preventions',
   {
     defaultMessage: 'Preventions',
   }
 );
 
-export const ALERT_BY_HOST_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.alertsBySeverity.chartAlertHostTitle',
+export const DETECTIONS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.alertsByType.detections',
   {
-    defaultMessage: 'Top 10 hosts by alerts',
+    defaultMessage: 'Detections',
   }
 );
-export const HOST_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.detections.detectionTableTitle',
+
+export const ALERT_BY_HOST_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.alertsByHost.hostChartTitle',
   {
-    defaultMessage: 'Host name',
+    defaultMessage: 'Top alerts by host',
   }
 );
