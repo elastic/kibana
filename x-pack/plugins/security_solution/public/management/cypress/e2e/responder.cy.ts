@@ -8,7 +8,7 @@
 import { login, loginWithRole, ROLE } from '../tasks/login';
 import { setupLicense } from '../tasks/license';
 import { licenses } from '../fixtures/licenses';
-import { runEndpointLoaderScript } from '../tasks/run_endpoint_loader';
+import { loadEndpointIfNoneExist } from '../tasks/common/load_endpoint_data';
 
 const loginWithWriteAccess = (url: string) => {
   loginWithRole(ROLE.analyst_hunter);
@@ -18,7 +18,7 @@ const loginWithWriteAccess = (url: string) => {
 describe('Responder', () => {
   before(() => {
     login();
-    runEndpointLoaderScript();
+    loadEndpointIfNoneExist();
   });
 
   describe('Enterprise license', () => {
