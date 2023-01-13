@@ -29,4 +29,8 @@ export class ContentRegistry {
     }
     return contentConfig.storage as ContentStorage<UniqueFields>;
   }
+
+  getConfig(contentType: string) {
+    return this.contents.get(contentType);
+  }
 }
