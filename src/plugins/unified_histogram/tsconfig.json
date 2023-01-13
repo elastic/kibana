@@ -23,6 +23,7 @@
     "@kbn/core-ui-settings-browser-mocks",
     "@kbn/shared-ux-utility",
     "@kbn/ui-actions-plugin",
+    "@kbn/kibana-utils-plugin",
   ],
   "exclude": [
     "target/**/*",
