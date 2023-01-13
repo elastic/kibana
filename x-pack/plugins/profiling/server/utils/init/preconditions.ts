@@ -8,16 +8,19 @@
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 export async function hasProfilingData(client: ElasticsearchClient): Promise<boolean> {
-  return await client
-    .search({
-      index: 'profiling-events-all',
-      size: 0,
-      track_total_hits: true,
-    })
-    .then((response) => response.hits.total > 0)
-    .catch((error) => {
-      return false;
-    });
+  const hasProfilingDataResponse = await client.search({
+    index: 'profiling-events-all',
+    size: 0,
+    track_total_hits: 1,
+    terminate_after: 1,
+  });
+
+  const hitCount =
+    typeof hasProfilingDataResponse.hits.total === 'number'
+      ? hasProfilingDataResponse.hits.total
+      : hasProfilingDataResponse.hits.total!.value > 0;
+
+  return hitCount > 0;
 }
 
 export async function hasProfilingSetupCompleted(client: ElasticsearchClient): Promise<any[]> {

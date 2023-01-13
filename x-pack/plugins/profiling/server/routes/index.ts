@@ -5,22 +5,19 @@
  * 2.0.
  */
 
-import type { IRouter, Logger } from '@kbn/core/server';
-import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { SavedObjectsClientContract } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { IRouter, Logger } from '@kbn/core/server';
 import {
   ProfilingPluginSetupDeps,
   ProfilingPluginStartDeps,
   ProfilingRequestHandlerContext,
 } from '../types';
 import { ProfilingESClient } from '../utils/create_profiling_es_client';
-
 import { registerCacheExecutablesRoute, registerCacheStackFramesRoute } from './cache';
-
 import { registerFlameChartSearchRoute } from './flamechart';
 import { registerTopNFunctionsSearchRoute } from './functions';
-
+import { registerSetupRoute } from './setup';
 import {
   registerTraceEventsTopNContainersSearchRoute,
   registerTraceEventsTopNDeploymentsSearchRoute,
@@ -28,8 +25,6 @@ import {
   registerTraceEventsTopNStackTracesSearchRoute,
   registerTraceEventsTopNThreadsSearchRoute,
 } from './topn';
-
-import { registerSetupRoute } from './setup';
 
 export interface RouteRegisterParameters {
   router: IRouter<ProfilingRequestHandlerContext>;
@@ -43,7 +38,6 @@ export interface RouteRegisterParameters {
       request: KibanaRequest;
       esClient: ElasticsearchClient;
     }) => ProfilingESClient;
-    savedObjectsClient: SavedObjectsClientContract;
   };
 }
 

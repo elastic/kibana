@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import {
-  CoreSetup,
-  CoreStart,
-  Logger,
-  Plugin,
-  PluginInitializerContext,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
+import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { ProfilingConfig } from '.';
 import { PROFILING_FEATURE } from './feature';
 import { registerRoutes } from './routes';
@@ -73,9 +66,6 @@ export class ProfilingPlugin
 
             return createProfilingEsClient({ request, esClient });
           },
-          // FIXME
-          //  @dgieselaar how to get the client?
-          savedObjectsClient: {} as SavedObjectsClientContract,
         },
       });
     });
