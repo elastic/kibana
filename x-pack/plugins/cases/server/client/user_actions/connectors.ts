@@ -227,8 +227,21 @@ const getConnectorInfoFromSavedObject = (
   }
 };
 
+/**
+ * The algorithm to determine if a specific connector within a case needs to be pushed is as follows:
+ * 1. Check to see if the connector has been used to push, if it hasn't then we need to push
+ * 2. Check to see if the most recent connector fields are different than the connector fields used in the most recent push,
+ *  if they are different then we need to push
+ * 3. Check to see if the most recent valid user action (a valid user action is one that changes the title, description,
+ *  tags, or creation of a comment) was created after the most recent push (aka did the user do something new that needs
+ *  to be pushed)
+ */
 const hasDataToPush = (enrichedConnectorInfo: EnrichedConnector): boolean => {
   return (
+    /**
+     * This isEqual call satisfies the first two steps of the algorithm above because if a push never occurred then the
+     * push fields will be undefined which will not equal the latest connector fields anyway.
+     */
     !isEqual(
       enrichedConnectorInfo.connector,
       enrichedConnectorInfo.pushInfo?.connectorFieldsUsedInPush

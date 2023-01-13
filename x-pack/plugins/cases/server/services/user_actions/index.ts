@@ -158,6 +158,7 @@ export class CaseUserActionService {
         bool: {
           filter: [
             {
+              // Search for connector field user action prior to the push occurrence
               range: {
                 [`${CASE_USER_ACTION_SAVED_OBJECT}.created_at`]: {
                   lt: push.date.toISOString(),
@@ -171,6 +172,7 @@ export class CaseUserActionService {
                   bool: {
                     filter: [
                       {
+                        // We only want to search a time frame for a specific connector id
                         term: {
                           [`${CASE_USER_ACTION_SAVED_OBJECT}.references.id`]: {
                             value: push.connectorId,
@@ -195,6 +197,7 @@ export class CaseUserActionService {
         aggregations: {
           connectors: {
             filter: {
+              // Only search for user actions that have a connector reference aka a reference with type action
               term: {
                 [`${CASE_USER_ACTION_SAVED_OBJECT}.references.type`]: 'action',
               },
@@ -433,8 +436,10 @@ export class CaseUserActionService {
             },
             aggregations: {
               ids: {
+                // Bucket by connector id
                 terms: {
                   field: `${CASE_USER_ACTION_SAVED_OBJECT}.references.id`,
+                  // We're assuming that a case will not have more than 1000 connectors
                   size: 1000,
                 },
                 aggregations: {
@@ -444,18 +449,22 @@ export class CaseUserActionService {
                       connectorActivity: {
                         filters: {
                           filters: {
+                            // look for connector fields user actions from "change connector" occurrence
                             changeConnector: {
                               term: {
                                 [`${CASE_USER_ACTION_SAVED_OBJECT}.attributes.type`]:
                                   ActionTypes.connector,
                               },
                             },
+                            // If the case was initialized with a connector, the fields could exist in the create_case
+                            // user action
                             createCase: {
                               term: {
                                 [`${CASE_USER_ACTION_SAVED_OBJECT}.attributes.type`]:
                                   ActionTypes.create_case,
                               },
                             },
+                            // Also grab the most recent push occurrence for the connector
                             pushInfo: {
                               term: {
                                 [`${CASE_USER_ACTION_SAVED_OBJECT}.attributes.type`]:
