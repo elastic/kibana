@@ -340,6 +340,33 @@ describe('AlertsTableState', () => {
         ).toBe(AlertsField.uuid);
       });
     });
+
+    describe('when persisten controls are set', () => {
+      let props: AlertsTableStateProps;
+      beforeEach(() => {
+        const getMockWithUsePersistentControls = jest.fn().mockImplementation((plugin: string) => {
+          return {
+            columns,
+            sort: DefaultSort,
+            usePersistentControls: () => ({ right: <span>This is a persistent control</span> }),
+          };
+        });
+        const alertsTableConfigurationRegistryWithPersistentControlsMock = {
+          has: hasMock,
+          get: getMockWithUsePersistentControls,
+        } as unknown as TypeRegistry<AlertsTableConfigurationRegistry>;
+        props = {
+          ...tableProps,
+          alertsTableConfigurationRegistry:
+            alertsTableConfigurationRegistryWithPersistentControlsMock,
+        };
+      });
+
+      it('should show persistent controls if set', () => {
+        const result = render(<AlertsTableWithLocale {...props} />);
+        expect(result.getByText('This is a persistent control')).toBeInTheDocument();
+      });
+    });
   });
 
   describe('empty state', () => {
