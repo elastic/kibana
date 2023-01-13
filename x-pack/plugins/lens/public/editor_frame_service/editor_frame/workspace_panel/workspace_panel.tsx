@@ -277,7 +277,9 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     ? visualizationMap[visualization.activeId]
     : null;
 
-  const workspaceErrors = getUserMessages('visualization', { severity: 'error' });
+  const workspaceErrors = getUserMessages(['visualization', 'visualizationInEditor'], {
+    severity: 'error',
+  });
 
   // if the expression is undefined, it means we hit an error that should be displayed to the user
   const unappliedExpression = useMemo(() => {

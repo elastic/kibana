@@ -101,10 +101,6 @@ function getErrorSources(e: Error) {
   return [];
 }
 
-// NOTE - if you are adding a new error message, add it as a UserMessage in get_application_error_messages
-// or the getUserMessages method of a particular datasource or visualization class! Alternatively, use the
-// addUserMessage function passed down by the application component.
-
 export function getOriginalRequestErrorMessages(error?: ExpressionRenderError | null): string[] {
   const errorMessages = [];
   if (error && 'original' in error && error.original) {
@@ -153,15 +149,6 @@ export function getOriginalRequestErrorMessages(error?: ExpressionRenderError | 
   return errorMessages;
 }
 
-export function getMissingVisualizationTypeError() {
-  return i18n.translate('xpack.lens.editorFrame.expressionMissingVisualizationType', {
-    defaultMessage: 'Visualization type not found.',
-  });
-}
-
-export function getMissingIndexPatterns(indexPatternIds: string[]) {
-  return i18n.translate('xpack.lens.editorFrame.expressionMissingDataView', {
-    defaultMessage: 'Could not find the {count, plural, one {data view} other {data views}}: {ids}',
-    values: { count: indexPatternIds.length, ids: indexPatternIds.join(', ') },
-  });
-}
+// NOTE - if you are adding a new error message, add it as a UserMessage in get_application_error_messages
+// or the getUserMessages method of a particular datasource or visualization class! Alternatively, use the
+// addUserMessage function passed down by the application component.

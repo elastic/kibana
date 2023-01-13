@@ -275,11 +275,13 @@ interface DimensionLink {
 
 type UserMessageDisplayLocation =
   | {
-      // NOTE: 'visualization' implies that this should block rendering. We want to move toward more errors that do not block the render!
+      // NOTE: We want to move toward more errors that do not block the render!
       id:
         | 'toolbar'
         | 'embeddableBadge'
-        | 'visualization'
+        | 'visualization' // blocks render
+        | 'visualizationOnEmbeddable' // blocks render in embeddable only
+        | 'visualizationInEditor' // blocks render in editor only
         | 'suggestionPanel'
         | 'textBasedLanguagesQueryInput'
         | 'banner';
@@ -306,7 +308,7 @@ export interface UserMessageFilters {
 }
 
 export type UserMessagesGetter = (
-  locationId: UserMessagesDisplayLocationId | undefined,
+  locationId: UserMessagesDisplayLocationId | UserMessagesDisplayLocationId[] | undefined,
   filters: UserMessageFilters
 ) => UserMessage[];
 

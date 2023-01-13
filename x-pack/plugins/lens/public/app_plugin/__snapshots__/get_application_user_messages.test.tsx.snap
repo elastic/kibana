@@ -5,7 +5,7 @@ Array [
   Object {
     "displayLocations": Array [
       Object {
-        "id": "workspace",
+        "id": "visualizationInEditor",
       },
       Object {
         "id": "suggestionPanel",
@@ -90,6 +90,17 @@ Array [
         </RedirectAppLinks>
       </p>
     </React.Fragment>,
+    "severity": "error",
+    "shortMessage": "",
+  },
+  Object {
+    "displayLocations": Array [
+      Object {
+        "id": "visualizationOnEmbeddable",
+      },
+    ],
+    "fixableInEditor": true,
+    "longMessage": "Could not find the data view: missing_pattern",
     "severity": "error",
     "shortMessage": "",
   },

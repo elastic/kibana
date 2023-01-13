@@ -17,13 +17,14 @@ import { Datasource } from '../types';
 import { getApplicationUserMessages } from './get_application_user_messages';
 
 describe('application-level user messages', () => {
-  it('should generate error if vis type is unknown', () => {
+  it('should generate error if vis type is not provided', () => {
     expect(
       getApplicationUserMessages({
-        visualizationMap: {},
-        visualization: { activeId: 'id_for_type_that_doesnt_exist', state: {} },
+        visualizationType: undefined,
 
-        activeDatasource: null,
+        visualizationMap: {},
+        visualization: { activeId: '', state: {} },
+        activeDatasource: {} as Datasource,
         activeDatasourceState: null,
         dataViews: {} as DataViewsState,
         core: {} as CoreStart,
@@ -33,7 +34,36 @@ describe('application-level user messages', () => {
         Object {
           "displayLocations": Array [
             Object {
-              "id": "workspace",
+              "id": "visualization",
+            },
+          ],
+          "fixableInEditor": true,
+          "longMessage": "Visualization type not found.",
+          "severity": "warning",
+          "shortMessage": "",
+        },
+      ]
+    `);
+  });
+
+  it('should generate error if vis type is unknown', () => {
+    expect(
+      getApplicationUserMessages({
+        visualizationType: '123',
+        visualizationMap: {},
+        visualization: { activeId: 'id_for_type_that_doesnt_exist', state: {} },
+
+        activeDatasource: {} as Datasource,
+        activeDatasourceState: null,
+        dataViews: {} as DataViewsState,
+        core: {} as CoreStart,
+      })
+    ).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "displayLocations": Array [
+            Object {
+              "id": "visualization",
             },
             Object {
               "id": "suggestionPanel",
@@ -43,6 +73,38 @@ describe('application-level user messages', () => {
           "longMessage": "The visualization type id_for_type_that_doesnt_exist could not be resolved.",
           "severity": "error",
           "shortMessage": "Unknown visualization type",
+        },
+      ]
+    `);
+  });
+
+  it('should generate error if datasource type is unknown', () => {
+    expect(
+      getApplicationUserMessages({
+        activeDatasource: null,
+
+        visualizationType: '123',
+        visualizationMap: { 'some-id': {} as Visualization },
+        visualization: { activeId: 'some-id', state: {} },
+        activeDatasourceState: null,
+        dataViews: {} as DataViewsState,
+        core: {} as CoreStart,
+      })
+    ).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "displayLocations": Array [
+            Object {
+              "id": "visualization",
+            },
+            Object {
+              "id": "suggestionPanel",
+            },
+          ],
+          "fixableInEditor": false,
+          "longMessage": "Could not find datasource for the visualization",
+          "severity": "error",
+          "shortMessage": "Unknown datasource type",
         },
       ]
     `);
@@ -86,6 +148,7 @@ describe('application-level user messages', () => {
     it('generates error if missing an index pattern', () => {
       expect(
         getApplicationUserMessages({
+          visualizationType: '123',
           activeDatasource: {
             checkIntegrity: jest.fn(() => ['missing_pattern']),
           } as unknown as Datasource,
@@ -102,6 +165,7 @@ describe('application-level user messages', () => {
           <div>
             {
               getApplicationUserMessages({
+                visualizationType: '123',
                 activeDatasource: {
                   checkIntegrity: jest.fn(() => ['missing_pattern']),
                 } as unknown as Datasource,
@@ -123,6 +187,7 @@ describe('application-level user messages', () => {
           <div>
             {
               getApplicationUserMessages({
+                visualizationType: '123',
                 activeDatasource: {
                   checkIntegrity: jest.fn(() => ['missing_pattern']),
                 } as unknown as Datasource,

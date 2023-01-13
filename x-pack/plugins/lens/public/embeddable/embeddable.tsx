@@ -498,7 +498,7 @@ export class Embeddable
     );
   }
 
-  private getUserMessages: UserMessagesGetter = (locationId, filters) => {
+  public getUserMessages: UserMessagesGetter = (locationId, filters) => {
     return filterUserMessages(
       [...this._userMessages, ...Object.values(this.additionalUserMessages)],
       locationId,
@@ -522,6 +522,7 @@ export class Embeddable
     if (this.activeVisualizationState && this.activeDatasource) {
       userMessages.push(
         ...getApplicationUserMessages({
+          visualizationType: this.savedVis?.visualizationType,
           visualization: {
             state: this.activeVisualizationState,
             activeId: this.activeVisualizationId,
@@ -575,7 +576,7 @@ export class Embeddable
   private additionalUserMessages: Record<string, UserMessage> = {};
 
   // used to add warnings and errors from elsewhere in the embeddable
-  addUserMessages: AddUserMessages = (messages) => {
+  private addUserMessages: AddUserMessages = (messages) => {
     const newMessageMap = {
       ...this.additionalUserMessages,
     };
@@ -836,7 +837,7 @@ export class Embeddable
 
     this.domNode.setAttribute('data-shared-item', '');
 
-    const errors = this.getUserMessages('visualization', {
+    const errors = this.getUserMessages(['visualization', 'visualizationOnEmbeddable'], {
       severity: 'error',
     });
 

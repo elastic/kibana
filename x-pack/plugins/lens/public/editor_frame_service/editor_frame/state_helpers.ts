@@ -32,7 +32,6 @@ import { buildExpression } from './expression_helpers';
 import { showMemoizedErrorNotification } from '../../lens_ui_errors';
 import { Document } from '../../persistence/saved_object_store';
 import { getActiveDatasourceIdFromDoc, sortDataViewRefs } from '../../utils';
-import { getMissingIndexPatterns, getMissingVisualizationTypeError } from '../error_helper';
 import type { DatasourceStates, DataViewsState, VisualizationState } from '../../state_management';
 import { readFromStorage } from '../../settings_storage';
 import { loadIndexPatternRefs, loadIndexPatterns } from '../../data_views_service/loader';
@@ -334,10 +333,6 @@ export async function persistedStateToExpression(
   } = doc;
   if (!visualizationType) {
     return null;
-    return {
-      ast: null,
-      errors: [{ shortMessage: '', longMessage: getMissingVisualizationTypeError() }],
-    };
   }
   const visualization = visualizations[visualizationType!];
   const visualizationState = initializeVisualization({
@@ -379,24 +374,6 @@ export async function persistedStateToExpression(
   const datasourceId = getActiveDatasourceIdFromDoc(doc);
   if (datasourceId == null) {
     return null;
-    return {
-      ast: null,
-      errors: [{ shortMessage: '', longMessage: getMissingCurrentDatasource() }],
-    };
-  }
-
-  const indexPatternValidation = validateRequiredIndexPatterns(
-    datasourceMap[datasourceId],
-    datasourceStates[datasourceId],
-    indexPatterns
-  );
-
-  if (indexPatternValidation) {
-    return null;
-    return {
-      ast: null,
-      errors: indexPatternValidation,
-    };
   }
 
   const currentTimeRange = services.timefilter.getAbsoluteTime();
@@ -428,24 +405,6 @@ export function getMissingIndexPattern(
   }
   return missingIds;
 }
-
-const validateRequiredIndexPatterns = (
-  currentDatasource: Datasource,
-  currentDatasourceState: { state: unknown } | null,
-  indexPatterns: IndexPatternMap
-): UserMessage[] | undefined => {
-  const missingIds = getMissingIndexPattern(
-    currentDatasource,
-    currentDatasourceState,
-    indexPatterns
-  );
-
-  if (!missingIds.length) {
-    return;
-  }
-
-  return [{ shortMessage: '', longMessage: getMissingIndexPatterns(missingIds) }];
-};
 
 export const validateDatasourceAndVisualization = (
   currentDataSource: Datasource | null,

@@ -23,7 +23,7 @@ import { Document } from '../persistence';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public/embeddable';
 import { coreMock, httpServiceMock, themeServiceMock } from '@kbn/core/public/mocks';
-import { IBasePath, IUiSettingsClient } from '@kbn/core/public';
+import { CoreStart, IBasePath, IUiSettingsClient } from '@kbn/core/public';
 import { AttributeService, ViewMode } from '@kbn/embeddable-plugin/public';
 import { LensAttributeService } from '../lens_attribute_service';
 import { OnSaveProps } from '@kbn/saved-objects-plugin/public/save_modal';
@@ -141,6 +141,7 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        coreStart: {} as CoreStart,
         data: dataMock,
         expressionRenderer,
         basePath,
@@ -159,14 +160,11 @@ describe('embeddable', () => {
         injectFilterReferences: jest.fn(mockInjectFilterReferences),
         documentToExpression: () =>
           Promise.resolve({
-            ast: {
-              type: 'expression',
-              chain: [
-                { type: 'function', function: 'my', arguments: {} },
-                { type: 'function', function: 'expression', arguments: {} },
-              ],
-            },
-            errors: undefined,
+            type: 'expression',
+            chain: [
+              { type: 'function', function: 'my', arguments: {} },
+              { type: 'function', function: 'expression', arguments: {} },
+            ],
           }),
         uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
       },
@@ -192,6 +190,7 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        coreStart: {} as CoreStart,
         data: dataMock,
         expressionRenderer,
         basePath,
@@ -210,14 +209,11 @@ describe('embeddable', () => {
         injectFilterReferences: jest.fn(mockInjectFilterReferences),
         documentToExpression: () =>
           Promise.resolve({
-            ast: {
-              type: 'expression',
-              chain: [
-                { type: 'function', function: 'my', arguments: {} },
-                { type: 'function', function: 'expression', arguments: {} },
-              ],
-            },
-            errors: undefined,
+            type: 'expression',
+            chain: [
+              { type: 'function', function: 'my', arguments: {} },
+              { type: 'function', function: 'expression', arguments: {} },
+            ],
           }),
         uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
       },
@@ -250,6 +246,7 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        coreStart: {} as CoreStart,
         data: dataMock,
         uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
@@ -269,14 +266,11 @@ describe('embeddable', () => {
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
-            ast: {
-              type: 'expression',
-              chain: [
-                { type: 'function', function: 'my', arguments: {} },
-                { type: 'function', function: 'expression', arguments: {} },
-              ],
-            },
-            errors: undefined,
+            type: 'expression',
+            chain: [
+              { type: 'function', function: 'my', arguments: {} },
+              { type: 'function', function: 'expression', arguments: {} },
+            ],
           }),
       },
       {
@@ -302,6 +296,7 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        coreStart: {} as CoreStart,
         data: dataMock,
         uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
@@ -321,19 +316,28 @@ describe('embeddable', () => {
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
-            ast: {
-              type: 'expression',
-              chain: [
-                { type: 'function', function: 'my', arguments: {} },
-                { type: 'function', function: 'expression', arguments: {} },
-              ],
-            },
-            errors: [{ shortMessage: '', longMessage: 'my validation error' }],
+            type: 'expression',
+            chain: [
+              { type: 'function', function: 'my', arguments: {} },
+              { type: 'function', function: 'expression', arguments: {} },
+            ],
           }),
       },
       {} as LensEmbeddableInput
     );
-    await embeddable.initializeSavedVis({} as LensEmbeddableInput);
+
+    jest.spyOn(embeddable, 'getUserMessages').mockReturnValue([
+      {
+        severity: 'error',
+        fixableInEditor: true,
+        displayLocations: [{ id: 'visualization' }],
+        longMessage: 'lol',
+        shortMessage: 'lol',
+      },
+    ]);
+
+    await new Promise((resolve) => setTimeout(resolve, 0)); // wait for constructor
+
     embeddable.render(mountpoint);
 
     expect(expressionRenderer).toHaveBeenCalledTimes(0);
@@ -364,6 +368,7 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        coreStart: {} as CoreStart,
         data: dataMock,
         uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         inspector: inspectorPluginMock.createStartContract(),
@@ -384,19 +389,18 @@ describe('embeddable', () => {
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
-            ast: {
-              type: 'expression',
-              chain: [
-                { type: 'function', function: 'my', arguments: {} },
-                { type: 'function', function: 'expression', arguments: {} },
-              ],
-            },
-            errors: undefined,
+            type: 'expression',
+            chain: [
+              { type: 'function', function: 'my', arguments: {} },
+              { type: 'function', function: 'expression', arguments: {} },
+            ],
           }),
       },
       {} as LensEmbeddableInput
     );
-    await embeddable.initializeSavedVis({} as LensEmbeddableInput);
+
+    await new Promise((resolve) => setTimeout(resolve, 0)); // wait for constructor
+
     embeddable.render(mountpoint);
     expect(expressionRenderer).toHaveBeenCalledTimes(0);
     expect(spacesPluginStart.ui.components.getEmbeddableLegacyUrlConflict).toHaveBeenCalled();
@@ -415,6 +419,7 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        coreStart: {} as CoreStart,
         data: dataMock,
         uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
@@ -436,19 +441,18 @@ describe('embeddable', () => {
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
-            ast: {
-              type: 'expression',
-              chain: [
-                { type: 'function', function: 'my', arguments: {} },
-                { type: 'function', function: 'expression', arguments: {} },
-              ],
-            },
-            errors: undefined,
+            type: 'expression',
+            chain: [
+              { type: 'function', function: 'my', arguments: {} },
+              { type: 'function', function: 'expression', arguments: {} },
+            ],
           }),
       },
       {} as LensEmbeddableInput
     );
-    await embeddable.initializeSavedVis({} as LensEmbeddableInput);
+
+    await new Promise((resolve) => setTimeout(resolve, 0)); // wait for constructor
+
     embeddable.render(mountpoint);
     expect(expressionRenderer).toHaveBeenCalledTimes(0);
   });
@@ -466,6 +470,7 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        coreStart: {} as CoreStart,
         data: dataMock,
         uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
@@ -487,19 +492,18 @@ describe('embeddable', () => {
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
-            ast: {
-              type: 'expression',
-              chain: [
-                { type: 'function', function: 'my', arguments: {} },
-                { type: 'function', function: 'expression', arguments: {} },
-              ],
-            },
-            errors: undefined,
+            type: 'expression',
+            chain: [
+              { type: 'function', function: 'my', arguments: {} },
+              { type: 'function', function: 'expression', arguments: {} },
+            ],
           }),
       },
       {} as LensEmbeddableInput
     );
-    await embeddable.initializeSavedVis({} as LensEmbeddableInput);
+
+    await new Promise((resolve) => setTimeout(resolve, 0)); // wait for constructor
+
     const outputIndexPatterns = embeddable.getOutput().indexPatterns!;
     expect(outputIndexPatterns.length).toEqual(2);
     expect(outputIndexPatterns[0].id).toEqual('123');
@@ -515,6 +519,7 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        coreStart: {} as CoreStart,
         data: dataMock,
         uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
@@ -534,19 +539,18 @@ describe('embeddable', () => {
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
-            ast: {
-              type: 'expression',
-              chain: [
-                { type: 'function', function: 'my', arguments: {} },
-                { type: 'function', function: 'expression', arguments: {} },
-              ],
-            },
-            errors: undefined,
+            type: 'expression',
+            chain: [
+              { type: 'function', function: 'my', arguments: {} },
+              { type: 'function', function: 'expression', arguments: {} },
+            ],
           }),
       },
       { id: '123' } as LensEmbeddableInput
     );
-    await embeddable.initializeSavedVis({ id: '123' } as LensEmbeddableInput);
+
+    await new Promise((resolve) => setTimeout(resolve, 0)); // wait for constructor
+
     embeddable.render(mountpoint);
 
     expect(expressionRenderer).toHaveBeenCalledTimes(1);
@@ -563,11 +567,12 @@ describe('embeddable', () => {
     expect(expressionRenderer).toHaveBeenCalledTimes(2);
   });
 
-  it('should re-render once if session id changes and ', async () => {
+  it('should re-render once if session id changes and reload called', async () => {
     const embeddable = new Embeddable(
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        coreStart: {} as CoreStart,
         data: dataMock,
         uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
@@ -587,19 +592,18 @@ describe('embeddable', () => {
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
-            ast: {
-              type: 'expression',
-              chain: [
-                { type: 'function', function: 'my', arguments: {} },
-                { type: 'function', function: 'expression', arguments: {} },
-              ],
-            },
-            errors: undefined,
+            type: 'expression',
+            chain: [
+              { type: 'function', function: 'my', arguments: {} },
+              { type: 'function', function: 'expression', arguments: {} },
+            ],
           }),
       },
       { id: '123' } as LensEmbeddableInput
     );
-    await embeddable.initializeSavedVis({ id: '123' } as LensEmbeddableInput);
+
+    await new Promise((resolve) => setTimeout(resolve, 0)); // wait for constructor
+
     embeddable.render(mountpoint);
 
     expect(expressionRenderer).toHaveBeenCalledTimes(1);
@@ -625,6 +629,7 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        coreStart: {} as CoreStart,
         data: dataMock,
         uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
@@ -644,19 +649,18 @@ describe('embeddable', () => {
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
-            ast: {
-              type: 'expression',
-              chain: [
-                { type: 'function', function: 'my', arguments: {} },
-                { type: 'function', function: 'expression', arguments: {} },
-              ],
-            },
-            errors: undefined,
+            type: 'expression',
+            chain: [
+              { type: 'function', function: 'my', arguments: {} },
+              { type: 'function', function: 'expression', arguments: {} },
+            ],
           }),
       },
       { id: '123' } as LensEmbeddableInput
     );
-    await embeddable.initializeSavedVis({ id: '123' } as LensEmbeddableInput);
+
+    await new Promise((resolve) => setTimeout(resolve, 0)); // wait for constructor
+
     embeddable.render(mountpoint);
 
     expect(expressionRenderer).toHaveBeenCalledTimes(1);
@@ -680,6 +684,7 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        coreStart: {} as CoreStart,
         data: dataMock,
         uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
@@ -699,19 +704,18 @@ describe('embeddable', () => {
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
-            ast: {
-              type: 'expression',
-              chain: [
-                { type: 'function', function: 'my', arguments: {} },
-                { type: 'function', function: 'expression', arguments: {} },
-              ],
-            },
-            errors: undefined,
+            type: 'expression',
+            chain: [
+              { type: 'function', function: 'my', arguments: {} },
+              { type: 'function', function: 'expression', arguments: {} },
+            ],
           }),
       },
       { id: '123' } as LensEmbeddableInput
     );
-    await embeddable.initializeSavedVis({ id: '123' } as LensEmbeddableInput);
+
+    await new Promise((resolve) => setTimeout(resolve, 0)); // wait for constructor
+
     embeddable.render(mountpoint);
 
     expect(expressionRenderer).toHaveBeenCalledTimes(1);
@@ -742,6 +746,7 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        coreStart: {} as CoreStart,
         data: dataMock,
         uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
@@ -761,19 +766,18 @@ describe('embeddable', () => {
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
-            ast: {
-              type: 'expression',
-              chain: [
-                { type: 'function', function: 'my', arguments: {} },
-                { type: 'function', function: 'expression', arguments: {} },
-              ],
-            },
-            errors: undefined,
+            type: 'expression',
+            chain: [
+              { type: 'function', function: 'my', arguments: {} },
+              { type: 'function', function: 'expression', arguments: {} },
+            ],
           }),
       },
       input
     );
-    await embeddable.initializeSavedVis(input);
+
+    await new Promise((resolve) => setTimeout(resolve, 0)); // wait for constructor
+
     embeddable.render(mountpoint);
 
     expect(expressionRenderer.mock.calls[0][0].searchContext).toEqual(
@@ -805,6 +809,7 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        coreStart: {} as CoreStart,
         data: dataMock,
         uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
@@ -824,19 +829,18 @@ describe('embeddable', () => {
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
-            ast: {
-              type: 'expression',
-              chain: [
-                { type: 'function', function: 'my', arguments: {} },
-                { type: 'function', function: 'expression', arguments: {} },
-              ],
-            },
-            errors: undefined,
+            type: 'expression',
+            chain: [
+              { type: 'function', function: 'my', arguments: {} },
+              { type: 'function', function: 'expression', arguments: {} },
+            ],
           }),
       },
       input
     );
-    await embeddable.initializeSavedVis(input);
+
+    await new Promise((resolve) => setTimeout(resolve, 0)); // wait for constructor
+
     embeddable.render(mountpoint);
 
     expect(expressionRenderer.mock.calls[0][0]).toEqual(
@@ -871,6 +875,7 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        coreStart: {} as CoreStart,
         data: dataMock,
         uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
@@ -890,18 +895,16 @@ describe('embeddable', () => {
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
-            ast: {
-              type: 'expression',
-              chain: [
-                { type: 'function', function: 'my', arguments: {} },
-                { type: 'function', function: 'expression', arguments: {} },
-              ],
-            },
-            errors: undefined,
+            type: 'expression',
+            chain: [
+              { type: 'function', function: 'my', arguments: {} },
+              { type: 'function', function: 'expression', arguments: {} },
+            ],
           }),
       },
       input
     );
+    await new Promise((resolve) => setTimeout(resolve, 0)); // wait for constructor
     await embeddable.initializeSavedVis(input);
     embeddable.render(mountpoint);
 
@@ -922,6 +925,7 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        coreStart: {} as CoreStart,
         data: dataMock,
         uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
@@ -941,19 +945,18 @@ describe('embeddable', () => {
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
-            ast: {
-              type: 'expression',
-              chain: [
-                { type: 'function', function: 'my', arguments: {} },
-                { type: 'function', function: 'expression', arguments: {} },
-              ],
-            },
-            errors: undefined,
+            type: 'expression',
+            chain: [
+              { type: 'function', function: 'my', arguments: {} },
+              { type: 'function', function: 'expression', arguments: {} },
+            ],
           }),
       },
       { id: '123' } as LensEmbeddableInput
     );
-    await embeddable.initializeSavedVis({ id: '123' } as LensEmbeddableInput);
+
+    await new Promise((resolve) => setTimeout(resolve, 0)); // wait for constructor
+
     embeddable.render(mountpoint);
 
     const onEvent = expressionRenderer.mock.calls[0][0].onEvent!;
@@ -975,6 +978,7 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        coreStart: {} as CoreStart,
         data: dataMock,
         uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
@@ -994,19 +998,18 @@ describe('embeddable', () => {
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
-            ast: {
-              type: 'expression',
-              chain: [
-                { type: 'function', function: 'my', arguments: {} },
-                { type: 'function', function: 'expression', arguments: {} },
-              ],
-            },
-            errors: undefined,
+            type: 'expression',
+            chain: [
+              { type: 'function', function: 'my', arguments: {} },
+              { type: 'function', function: 'expression', arguments: {} },
+            ],
           }),
       },
       { id: '123' } as LensEmbeddableInput
     );
-    await embeddable.initializeSavedVis({ id: '123' } as LensEmbeddableInput);
+
+    await new Promise((resolve) => setTimeout(resolve, 0)); // wait for constructor
+
     embeddable.render(mountpoint);
 
     const onEvent = expressionRenderer.mock.calls[0][0].onEvent!;
@@ -1025,6 +1028,7 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        coreStart: {} as CoreStart,
         data: dataMock,
         uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
@@ -1044,18 +1048,18 @@ describe('embeddable', () => {
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
-            ast: {
-              type: 'expression',
-              chain: [
-                { type: 'function', function: 'my', arguments: {} },
-                { type: 'function', function: 'expression', arguments: {} },
-              ],
-            },
-            errors: undefined,
+            type: 'expression',
+            chain: [
+              { type: 'function', function: 'my', arguments: {} },
+              { type: 'function', function: 'expression', arguments: {} },
+            ],
           }),
       },
       { id: '123', timeRange, query, filters } as LensEmbeddableInput
     );
+
+    await new Promise((resolve) => setTimeout(resolve, 0)); // wait for constructor
+
     await embeddable.initializeSavedVis({
       id: '123',
       timeRange,
@@ -1091,6 +1095,7 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        coreStart: {} as CoreStart,
         data: dataMock,
         uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
@@ -1110,18 +1115,17 @@ describe('embeddable', () => {
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
-            ast: {
-              type: 'expression',
-              chain: [
-                { type: 'function', function: 'my', arguments: {} },
-                { type: 'function', function: 'expression', arguments: {} },
-              ],
-            },
-            errors: undefined,
+            type: 'expression',
+            chain: [
+              { type: 'function', function: 'my', arguments: {} },
+              { type: 'function', function: 'expression', arguments: {} },
+            ],
           }),
       },
       { id: '123', onLoad } as unknown as LensEmbeddableInput
     );
+
+    await new Promise((resolve) => setTimeout(resolve, 0)); // wait for constructor
 
     await embeddable.initializeSavedVis({ id: '123' } as LensEmbeddableInput);
     embeddable.render(mountpoint);
@@ -1175,6 +1179,7 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        coreStart: {} as CoreStart,
         data: dataMock,
         uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
@@ -1194,20 +1199,18 @@ describe('embeddable', () => {
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
-            ast: {
-              type: 'expression',
-              chain: [
-                { type: 'function', function: 'my', arguments: {} },
-                { type: 'function', function: 'expression', arguments: {} },
-              ],
-            },
-            errors: undefined,
+            type: 'expression',
+            chain: [
+              { type: 'function', function: 'my', arguments: {} },
+              { type: 'function', function: 'expression', arguments: {} },
+            ],
           }),
       },
       { id: '123', onFilter } as unknown as LensEmbeddableInput
     );
 
-    await embeddable.initializeSavedVis({ id: '123' } as LensEmbeddableInput);
+    await new Promise((resolve) => setTimeout(resolve, 0)); // wait for constructor
+
     embeddable.render(mountpoint);
 
     await new Promise((resolve) => setTimeout(resolve, 20));
@@ -1234,6 +1237,7 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        coreStart: {} as CoreStart,
         data: dataMock,
         uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
@@ -1253,20 +1257,18 @@ describe('embeddable', () => {
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
-            ast: {
-              type: 'expression',
-              chain: [
-                { type: 'function', function: 'my', arguments: {} },
-                { type: 'function', function: 'expression', arguments: {} },
-              ],
-            },
-            errors: undefined,
+            type: 'expression',
+            chain: [
+              { type: 'function', function: 'my', arguments: {} },
+              { type: 'function', function: 'expression', arguments: {} },
+            ],
           }),
       },
       { id: '123', onBrushEnd } as unknown as LensEmbeddableInput
     );
 
-    await embeddable.initializeSavedVis({ id: '123' } as LensEmbeddableInput);
+    await new Promise((resolve) => setTimeout(resolve, 0)); // wait for constructor
+
     embeddable.render(mountpoint);
 
     await new Promise((resolve) => setTimeout(resolve, 20));
@@ -1290,6 +1292,7 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        coreStart: {} as CoreStart,
         data: dataMock,
         uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
@@ -1309,18 +1312,17 @@ describe('embeddable', () => {
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
-            ast: {
-              type: 'expression',
-              chain: [
-                { type: 'function', function: 'my', arguments: {} },
-                { type: 'function', function: 'expression', arguments: {} },
-              ],
-            },
-            errors: undefined,
+            type: 'expression',
+            chain: [
+              { type: 'function', function: 'my', arguments: {} },
+              { type: 'function', function: 'expression', arguments: {} },
+            ],
           }),
       },
       { id: '123', onTableRowClick } as unknown as LensEmbeddableInput
     );
+
+    await new Promise((resolve) => setTimeout(resolve, 0)); // wait for constructor
 
     await embeddable.initializeSavedVis({ id: '123' } as LensEmbeddableInput);
     embeddable.render(mountpoint);
@@ -1337,17 +1339,14 @@ describe('embeddable', () => {
     const documentToExpressionMock = jest.fn().mockImplementation(async (document) => {
       const isStateEdited = document.state.visualization.value === 'edited';
       return {
-        ast: {
-          type: 'expression',
-          chain: [
-            {
-              type: 'function',
-              function: isStateEdited ? 'edited' : 'not_edited',
-              arguments: {},
-            },
-          ],
-        },
-        errors: undefined,
+        type: 'expression',
+        chain: [
+          {
+            type: 'function',
+            function: isStateEdited ? 'edited' : 'not_edited',
+            arguments: {},
+          },
+        ],
       };
     });
 
@@ -1367,6 +1366,7 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService: attributeServiceMockFromSavedVis(visDocument),
+        coreStart: {} as CoreStart,
         data: dataMock,
         uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
@@ -1436,6 +1436,7 @@ describe('embeddable', () => {
         {
           timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
           attributeService: attributeServiceMockFromSavedVis(visDocument),
+          coreStart: {} as CoreStart,
           data: dataMock,
           expressionRenderer,
           basePath,
@@ -1452,20 +1453,18 @@ describe('embeddable', () => {
           visualizationMap: {
             [visDocument.visualizationType as string]: {
               getDisplayOptions: displayOptions ? () => displayOptions : undefined,
+              initialize: () => {},
             } as unknown as Visualization,
           },
           datasourceMap: {},
           injectFilterReferences: jest.fn(mockInjectFilterReferences),
           documentToExpression: () =>
             Promise.resolve({
-              ast: {
-                type: 'expression',
-                chain: [
-                  { type: 'function', function: 'my', arguments: {} },
-                  { type: 'function', function: 'expression', arguments: {} },
-                ],
-              },
-              errors: undefined,
+              type: 'expression',
+              chain: [
+                { type: 'function', function: 'my', arguments: {} },
+                { type: 'function', function: 'expression', arguments: {} },
+              ],
             }),
           uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         },
