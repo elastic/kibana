@@ -16,13 +16,15 @@ export class FlyoutService extends FtrService {
 
   public async close(dataTestSubj: string): Promise<void> {
     this.log.debug('Closing flyout', dataTestSubj);
-    const flyoutElement = await this.testSubjects.find(dataTestSubj);
-    const closeBtn = await flyoutElement.findByCssSelector('[aria-label*="Close"]');
-    await closeBtn.click();
-    await this.retry.waitFor(
-      'flyout closed',
-      async () => !(await this.testSubjects.exists(dataTestSubj, { timeout: 1000 }))
-    );
+    await this.retry.try(async () => {
+      const flyoutExists = await this.testSubjects.exists(dataTestSubj);
+      if (flyoutExists) {
+        const flyoutElement = await this.testSubjects.find(dataTestSubj);
+        const closeBtn = await flyoutElement.findByCssSelector('[aria-label*="Close"]');
+        await closeBtn.click();
+      }
+      await this.testSubjects.missingOrFail(dataTestSubj);
+    });
   }
 
   public async ensureClosed(dataTestSubj: string): Promise<void> {
