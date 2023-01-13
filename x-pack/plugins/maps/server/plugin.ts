@@ -30,6 +30,7 @@ import { setupEmbeddable } from './embeddable';
 import { setupSavedObjects } from './saved_objects';
 import { registerIntegrations } from './register_integrations';
 import { StartDeps, SetupDeps } from './types';
+import { MapsStorage, savedObjectToKibanaContent } from './poc_content_management';
 
 export class MapsPlugin implements Plugin {
   readonly _initializerContext: PluginInitializerContext<MapsXPackConfig>;
@@ -200,6 +201,11 @@ export class MapsPlugin implements Plugin {
     registerMapsUsageCollector(usageCollection);
 
     setupEmbeddable(plugins.embeddable, getFilterMigrations, getDataViewMigrations);
+
+    plugins.contentManagement.register('map', {
+      storage: new MapsStorage(),
+      dbToKibanaContentSerializer: savedObjectToKibanaContent,
+    });
 
     return {
       config: config$,

@@ -12,7 +12,12 @@ import { checkForDuplicateTitle, OnSaveProps } from '@kbn/saved-objects-plugin/p
 import { MapSavedObjectAttributes } from '../common/map_saved_object_type';
 import { MAP_SAVED_OBJECT_TYPE } from '../common/constants';
 import { getMapEmbeddableDisplayName } from '../common/i18n_getters';
-import { getCoreOverlays, getEmbeddableService, getSavedObjectsClient } from './kibana_services';
+import {
+  getCoreOverlays,
+  getEmbeddableService,
+  getSavedObjectsClient,
+  getContentManagement,
+} from './kibana_services';
 import { extractReferences, injectReferences } from '../common/migrations/references';
 import { MapByValueInput, MapByReferenceInput } from './embeddable/types';
 
@@ -69,11 +74,13 @@ export function getMapAttributeService(): MapAttributeService {
             updatedAttributes,
             { references }
           )
-        : getSavedObjectsClient().create<MapSavedObjectAttributes>(
-            MAP_SAVED_OBJECT_TYPE,
-            updatedAttributes,
-            { references }
-          ));
+        : getContentManagement().rpc.create({
+            type: 'map',
+            data: {
+              attributes: updatedAttributes,
+              references,
+            },
+          }));
       return { id: savedObject.id };
     },
     unwrapMethod: async (
