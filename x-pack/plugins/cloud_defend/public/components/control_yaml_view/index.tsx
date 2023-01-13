@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiSpacer, EuiText, EuiFlexGroup, EuiFlexItem, EuiForm, useEuiTheme } from '@elastic/eui';
+import { EuiSpacer, EuiText, EuiFlexGroup, EuiFlexItem, EuiForm } from '@elastic/eui';
 import { CodeEditor, YamlLang } from '@kbn/kibana-react-plugin/public';
 import { monaco } from '@kbn/monaco';
 import yaml from 'js-yaml';
@@ -26,7 +26,6 @@ interface ConfigError {
 }
 
 export const ControlYamlView = ({ policy, onChange, show }: ViewDeps) => {
-  const { euiTheme } = useEuiTheme();
   const styles = useStyles();
   const [errors, setErrors] = useState<ConfigError[]>([]);
   const [actionsValid, setActionsValid] = useState(true);
