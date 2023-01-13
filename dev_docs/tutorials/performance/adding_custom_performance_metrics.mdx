@@ -12,8 +12,8 @@ Having access to performance metrics allows us to better understand user experie
 Custom metrics allows to monitor critical flows like server start, saved objects fetching or dashboard loading times.
 
 ## Instrument your code to report metric event.
-We use event-based telemetry (EBT) to report metrics as events. It is strongly suggested to use EBT only for client-side metrics.
-If you need to add one for server code, please discuss it with Core Team.
+We use event-based telemetry (EBT) to report client-side metrics as events.
+If you want to add a custom metric on server side, please notify the #kibana-core team in advance.
 
 Let's assume we intend to report the performance of a specific action called `APP_ACTION`.
 In order to do so, we need to first measure the timing of that action. The [`performance.now()`](https://developer.mozilla.org/en-US/docs/Web/API/Performance/now) API can help with that:
@@ -33,7 +33,7 @@ reportPerformanceMetricEvent(analytics, {
 });
 ```
 
-Once executed during journeys run, the metric will be delivered to the `telemetry-v2-staging` cluster, alongside with the event's context.
+After the journey run is finished, the metric will be delivered to the [Telemetry Staging](https://telemetry-v2-staging.elastic.dev/) cluster, alongside with the event's context.
 The data is updated periodically, so you might have to wait up to 30 minutes to see your data in the index.
 
 Once indexed, this metric will appear in `ebt-kibana` index. It is also mapped into an additional index, dedicated to performance metrics.
@@ -145,8 +145,7 @@ creating an event for cpuUsage does not bring any value because it doesn't bring
 events in different places of code will have so much variability during performance analysis of your code. However it can be nice attribute
 to follow if it's important for you to look inside of a specific event e.g. `page-load`. 
 
-- Understand your events
-  **Make sure that the event is clearly defined and consistent** (i.e. same code flow is executed each time).
+- **Make sure that the event is clearly defined and consistent** (i.e. same code flow is executed each time).
   Consider the start point and endpoint of the measurement and what happens between those points.
   For example: a `app-data-load` event should not include the time it takes to render the data.
 - **Choose event names wisely**.
@@ -168,7 +167,7 @@ to follow if it's important for you to look inside of a specific event e.g. `pag
 - **Keep performance in mind**. Reporting the performance of Kibana should never harm its own performance. 
   Avoid sending events too frequently (`onMouseMove`) or adding serialized JSON objects (whole `SavedObjects`) into the meta object.
 
-#### Analyzing journey results
+### Analyzing journey results
 The telemetry data will be reported to the Telemetry Staging cluster alongside with execution context.
 Use the `context.labels.ciBuildName` label to filter down events to only those originating from performance runs and visualize the duration of events (or their breakdowns):
  - Be sure to narrow your analysis down to performance events by specifying a filter `context.labels.ciBuildName: kibana-single-user-performance`.
