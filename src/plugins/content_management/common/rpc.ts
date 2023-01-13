@@ -80,7 +80,7 @@ const getDetailsInSchema = schema.object(
 export type GetDetailsIn<Options extends object | undefined = undefined> = TypeOf<
   typeof getDetailsInSchema
 > & { options?: Options };
-export type GetDetailsOut = Record<string, unknown>;
+export type GetDetailsOut = object;
 
 // -- Create content
 const createInSchema = schema.object(

@@ -7,6 +7,8 @@
  */
 import { Logger, ElasticsearchClient } from '@kbn/core/server';
 
+import type { Content } from '../../common';
+import { schemas } from '../../common';
 import { ContentCrud } from './crud';
 import { EventBus } from './event_bus';
 import { ContentRegistry } from './registry';
@@ -14,9 +16,7 @@ import { ContentSearchIndex } from './search';
 
 export interface ContentCoreApi {
   register: ContentRegistry['register'];
-  crud: <UniqueFields extends object = Record<string, unknown>>(
-    contentType: string
-  ) => ContentCrud<UniqueFields>;
+  crud: (contentType: string) => ContentCrud;
   eventBus: EventBus;
   searchIndexer: ContentSearchIndex;
 }
@@ -33,8 +33,8 @@ export class ContentCore {
   }
 
   setup(): ContentCoreApi {
-    const crud = <UniqueFields extends object = Record<string, unknown>>(contentType: string) => {
-      return new ContentCrud<UniqueFields>(contentType, {
+    const crud = (contentType: string) => {
+      return new ContentCrud(contentType, {
         contentRegistry: this.contentRegistry,
         eventBus: this.eventBus,
       });
@@ -43,12 +43,20 @@ export class ContentCore {
     this.eventBus.events$.subscribe((event) => {
       if (event.type === 'createItemSuccess') {
         // Index the data
-        console.log('>>>>>>> Content created.');
-        console.log(JSON.stringify(event.data));
+        // console.log('>>>>>>> Content created.');
+        // console.log(JSON.stringify(event.data));
         const serializer = this.contentRegistry.getConfig(
-          event.data.type
-        )?.dbToKibanaContentSerializer;
-        this.searchIndex.index(serializer ? serializer(event.data) : event.data);
+          event.contentType
+        )?.toKibanaContentSerializer;
+
+        const content = serializer ? serializer(event.data) : (event.data as Content);
+        const { error } = schemas.content.searchIndex.getSchema().validate(content);
+
+        if (error) {
+          throw new Error(`Can't index content [${event.contentType}] created, invalid Content.`);
+        }
+
+        this.searchIndex.index(content);
       }
     });
 

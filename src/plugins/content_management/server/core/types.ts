@@ -8,16 +8,16 @@
 
 import type { Content } from '../../common';
 
-export interface ContentStorage {
+export interface ContentStorage<T extends { id: string } = { id: string } & object> {
   /** Get a single item */
-  get(id: string, options: unknown): Promise<object>;
+  get(id: string, options: unknown): Promise<T>;
 
   /** Get multiple items */
   // TODO
   // mget(ids: string[], options: unknown): Promise<object[]>;
 
   /** Create an item */
-  create(fields: object, options: unknown): Promise<object>;
+  create(fields: object, options: unknown): Promise<T>;
 
   /** Update an item */
   // TODO
@@ -30,10 +30,7 @@ export interface ContentStorage {
 
 // --- CONFIG
 
-export interface ContentConfig<
-  S extends ContentStorage,
-  T extends object = Record<string, unknown>
-> {
+export interface ContentConfig<S extends ContentStorage, T extends object = object> {
   /** The storage layer for the content.*/
   storage: S;
   /** Optional handler to convert the DB item to a KibanaContent */

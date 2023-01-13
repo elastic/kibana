@@ -9,7 +9,7 @@ import type { EventBus } from './event_bus';
 import type { ContentRegistry } from './registry';
 import type { ContentStorage } from './types';
 
-export class ContentCrud implements ContentStorage {
+export class ContentCrud implements ContentStorage<{ id: string } & object> {
   private storage: ContentStorage;
   private eventBus: EventBus;
   public contentType: string;
