@@ -74,7 +74,7 @@ export function getLayerConfigs(
         getFiltersFromDefs(series.textReportDefinitions)
       );
 
-      const color = (theme.eui as unknown as Record<string, string>)[`euiColorVis${seriesIndex}`];
+      const color = (theme.eui as unknown as Record<string, string>)?.[`euiColorVis${seriesIndex}`];
       let seriesColor = series.color!;
       if (reportType !== 'single-metric') {
         seriesColor = series.color ?? color;
