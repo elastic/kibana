@@ -19,7 +19,8 @@ const findTestUtils = (
   supertest: SuperTest<Test>,
   supertestWithoutAuth: any
 ) => {
-  describe(describeType, () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/148660
+  describe.skip(describeType, () => {
     afterEach(() => objectRemover.removeAll());
 
     for (const scenario of UserAtSpaceScenarios) {

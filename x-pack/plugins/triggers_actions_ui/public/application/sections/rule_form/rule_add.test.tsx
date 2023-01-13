@@ -248,7 +248,9 @@ describe('rule_add', () => {
           interval: '1h',
         },
       },
-      onClose
+      onClose,
+      undefined,
+      'my-rule-type'
     );
 
     expect(wrapper.find('input#ruleName').props().value).toBe('Simple status rule');
@@ -259,7 +261,7 @@ describe('rule_add', () => {
 
   it('renders rule add flyout with DEFAULT_RULE_INTERVAL if no initialValues specified and no minimumScheduleInterval', async () => {
     (triggersActionsUiConfig as jest.Mock).mockResolvedValue({});
-    await setup();
+    await setup(undefined, undefined, undefined, 'my-rule-type');
 
     expect(wrapper.find('[data-test-subj="intervalInput"]').first().props().value).toEqual(1);
     expect(wrapper.find('[data-test-subj="intervalInputUnit"]').first().props().value).toBe('m');
@@ -269,7 +271,7 @@ describe('rule_add', () => {
     (triggersActionsUiConfig as jest.Mock).mockResolvedValue({
       minimumScheduleInterval: { value: '5m', enforce: false },
     });
-    await setup();
+    await setup(undefined, undefined, undefined, 'my-rule-type');
 
     expect(wrapper.find('[data-test-subj="intervalInput"]').first().props().value).toEqual(5);
     expect(wrapper.find('[data-test-subj="intervalInputUnit"]').first().props().value).toBe('m');

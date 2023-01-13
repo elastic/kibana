@@ -11,15 +11,9 @@ export interface Meta {
   total: number;
 }
 
-export interface EngineListDetails {
-  name: string;
-  indices: string[];
-  last_updated: string;
-  document_count: number;
-}
 export const DEFAULT_META = {
-  from: 1,
-  size: 3,
+  from: 0,
+  size: 10,
   total: 0,
 };
 
