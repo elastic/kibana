@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { schema } from '@kbn/config-schema';
 import type {
   CoreSetup,
   CoreStart,
@@ -52,6 +53,17 @@ export class ContentManagementPlugin implements Plugin {
     const storage = new FooStorage();
     this.coreApi.register('foo', {
       storage,
+      schemas: {
+        rpc: {
+          get: {
+            out: schema.any(),
+          },
+          create: {
+            in: schema.any(),
+            out: schema.any(),
+          },
+        },
+      },
     });
 
     const addContent = async () => {

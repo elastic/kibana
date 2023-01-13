@@ -110,6 +110,8 @@ const searchInSchema = schema.maybe(
     {
       type: schema.maybe(schema.string()),
       term: schema.maybe(schema.string()),
+      id: schema.maybe(schema.string()), // Search by Id, discards all other parameters
+      ids: schema.maybe(schema.arrayOf(schema.string())), // Search by multiple ids, discards all other parameters
       // More will come here...
     },
     { unknowns: 'forbid' }

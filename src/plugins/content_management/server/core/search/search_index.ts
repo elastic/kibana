@@ -16,6 +16,8 @@ interface Dependencies {
 
 const indexName = '.kibana-content-mgt';
 
+const buildId = (type: string, id: string) => `${type}#${id}`;
+
 export class ContentSearchIndex {
   private esClient: ElasticsearchClient | undefined;
   private readonly logger: Logger;
@@ -33,6 +35,7 @@ export class ContentSearchIndex {
     const { id, title, description, type, meta } = content;
 
     const document = {
+      id,
       title,
       description,
       type,
@@ -42,7 +45,7 @@ export class ContentSearchIndex {
     return this.getEsClient()
       .index({
         index: indexName,
-        id: `${type}#${id}`,
+        id: buildId(type, id),
         document,
       })
       .catch((e) => {
@@ -55,7 +58,7 @@ export class ContentSearchIndex {
     return this.getEsClient().search({
       query: {
         ids: {
-          values: [`${type}#${id}`],
+          values: [buildId(type, id)],
         },
       },
       index: indexName,
@@ -90,6 +93,7 @@ export class ContentSearchIndex {
               mappings: {
                 dynamic: 'strict',
                 properties: {
+                  id: { type: 'keyword', index: false },
                   title: { type: 'text' },
                   description: { type: 'text' },
                   type: { type: 'keyword' },

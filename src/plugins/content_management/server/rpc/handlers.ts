@@ -34,7 +34,7 @@ export function initRpcHandlers(fnHandler: FunctionHandler<Context>) {
       }
       return {
         total: response.hits.total! as number,
-        hits: response.hits.hits.map((hit) => ({ ...(hit._source as Content), id: hit._id })),
+        hits: response.hits.hits.map((hit) => hit._source as Content),
       };
     },
   });

@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
 import {
   CoreSetup,
@@ -17,6 +16,7 @@ import {
 import { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import type { EMSSettings } from '@kbn/maps-ems-plugin/server';
+import { schema } from '@kbn/config-schema';
 import { getEcommerceSavedObjects } from './sample_data/ecommerce_saved_objects';
 import { getFlightsSavedObjects } from './sample_data/flights_saved_objects';
 import { getWebLogsSavedObjects } from './sample_data/web_logs_saved_objects';
@@ -205,6 +205,17 @@ export class MapsPlugin implements Plugin {
     plugins.contentManagement.register('map', {
       storage: new MapsStorage(),
       toSearchContentSerializer: savedObjectToKibanaContent,
+      schemas: {
+        rpc: {
+          get: {
+            out: schema.any(), // This will have to be a proper Maps Saved object schema
+          },
+          create: {
+            in: schema.any(), // This will be a proper schema to create a map
+            out: schema.any(), // This will be a proper schema of a map created
+          },
+        },
+      },
     });
 
     return {

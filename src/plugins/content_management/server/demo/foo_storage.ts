@@ -25,7 +25,7 @@ const generateMeta = (): FooContent['meta'] => {
   };
 };
 
-export class FooStorage implements ContentStorage {
+export class FooStorage implements ContentStorage<FooContent> {
   private db: Map<string, FooContent> = new Map();
   private contentType = 'foo' as const;
 

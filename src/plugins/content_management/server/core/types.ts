@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { Type } from '@kbn/config-schema';
 import type { Content } from '../../common';
 
 export interface ContentStorage<T extends { id: string } = { id: string } & object> {
@@ -37,4 +38,15 @@ export interface ContentConfig<S extends ContentStorage> {
   storage: S;
   /** Optional handler to convert the DB item to a KibanaContent */
   toSearchContentSerializer?: SearchContentSerializer<any>;
+  schemas: {
+    rpc: {
+      get: {
+        out: Type<any>; // To validate the response from the DB layer
+      };
+      create: {
+        in: Type<any>; // To validate the data to be stored
+        out: Type<any>; // To validate the response from the DB layer
+      };
+    };
+  };
 }
