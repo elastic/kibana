@@ -29,12 +29,13 @@ export function registerSetupRoute({
       try {
         const esClient = await getClient(context);
         logger.info('checking if profiling ES configurations are installed');
-        return hasProfilingSetupCompleted(esClient).then((done) => {
-          // Reply to clients if we have already created all 12 events template indices.
-          // This is kind of simplistic but can be a good first step to ensure
-          // Profiling resources will be created.
-          return response.ok({ body: { has_setup: done.length === 12 } });
-        });
+
+        const done = await hasProfilingSetupCompleted(esClient);
+
+        // Reply to clients if we have already created all 12 events template indices.
+        // This is kind of simplistic but can be a good first step to ensure
+        // Profiling resources will be created.
+        return response.ok({ body: { has_setup: done.length === 12 } });
       } catch (error) {
         return handleRouteHandlerError({ error, logger, response });
       }
@@ -51,7 +52,7 @@ export function registerSetupRoute({
         const esClient = await getClient(context);
         // FIXME
         // @dgieselaar: not sure how to get the client...
-        const soClient = {} as SavedObjectsClientContract;
+        const soClient = (await context.core).savedObjects.client;
         logger.info('applying initial setup of Elasticsearch resources');
 
         return await applySetup(esClient)
