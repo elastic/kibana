@@ -113,25 +113,25 @@
     semver "^5.4.1"
     source-map "^0.5.0"
 
-"@babel/core@^7.1.0", "@babel/core@^7.11.6", "@babel/core@^7.12.10", "@babel/core@^7.12.3", "@babel/core@^7.20.7", "@babel/core@^7.7.2", "@babel/core@^7.7.5":
-  version "7.20.7"
-  resolved "https://registry.yarnpkg.com/@babel/core/-/core-7.20.7.tgz#37072f951bd4d28315445f66e0ec9f6ae0c8c35f"
-  integrity sha512-t1ZjCluspe5DW24bn2Rr1CDb2v9rn/hROtg9a2tmd0+QYf4bsloYfLQzjG4qHPNMhWtKdGC33R5AxGR2Af2cBw==
+"@babel/core@^7.1.0", "@babel/core@^7.11.6", "@babel/core@^7.12.10", "@babel/core@^7.12.3", "@babel/core@^7.20.12", "@babel/core@^7.7.2", "@babel/core@^7.7.5":
+  version "7.20.12"
+  resolved "https://registry.yarnpkg.com/@babel/core/-/core-7.20.12.tgz#7930db57443c6714ad216953d1356dac0eb8496d"
+  integrity sha512-XsMfHovsUYHFMdrIHkZphTN/2Hzzi78R08NuHfDBehym2VsPDL6Zn/JAD/JQdnRvbSsbQc4mVaU1m6JgtTEElg==
   dependencies:
     "@ampproject/remapping" "^2.1.0"
     "@babel/code-frame" "^7.18.6"
     "@babel/generator" "^7.20.7"
     "@babel/helper-compilation-targets" "^7.20.7"
-    "@babel/helper-module-transforms" "^7.20.7"
+    "@babel/helper-module-transforms" "^7.20.11"
     "@babel/helpers" "^7.20.7"
     "@babel/parser" "^7.20.7"
     "@babel/template" "^7.20.7"
-    "@babel/traverse" "^7.20.7"
+    "@babel/traverse" "^7.20.12"
     "@babel/types" "^7.20.7"
     convert-source-map "^1.7.0"
     debug "^4.1.0"
     gensync "^1.0.0-beta.2"
-    json5 "^2.2.1"
+    json5 "^2.2.2"
     semver "^6.3.0"
 
 "@babel/eslint-parser@^7.19.1":
@@ -273,7 +273,7 @@
   dependencies:
     "@babel/types" "^7.18.6"
 
-"@babel/helper-module-transforms@^7.12.1", "@babel/helper-module-transforms@^7.18.6", "@babel/helper-module-transforms@^7.19.6", "@babel/helper-module-transforms@^7.20.7":
+"@babel/helper-module-transforms@^7.12.1", "@babel/helper-module-transforms@^7.18.6", "@babel/helper-module-transforms@^7.19.6", "@babel/helper-module-transforms@^7.20.11":
   version "7.20.11"
   resolved "https://registry.yarnpkg.com/@babel/helper-module-transforms/-/helper-module-transforms-7.20.11.tgz#df4c7af713c557938c50ea3ad0117a7944b2f1b0"
   integrity sha512-uRy78kN4psmji1s2QtbtcCSaj/LILFDp0f/ymhpQH5QY3nljUZCaNWz9X1dEj/8MBdBEFECs7yRhKn8i7NjZgg==
@@ -1197,10 +1197,10 @@
     "@babel/parser" "^7.20.7"
     "@babel/types" "^7.20.7"
 
-"@babel/traverse@^7.10.3", "@babel/traverse@^7.12.11", "@babel/traverse@^7.12.9", "@babel/traverse@^7.13.0", "@babel/traverse@^7.19.0", "@babel/traverse@^7.19.1", "@babel/traverse@^7.20.10", "@babel/traverse@^7.20.7", "@babel/traverse@^7.4.5", "@babel/traverse@^7.7.2":
-  version "7.20.10"
-  resolved "https://registry.yarnpkg.com/@babel/traverse/-/traverse-7.20.10.tgz#2bf98239597fcec12f842756f186a9dde6d09230"
-  integrity sha512-oSf1juCgymrSez8NI4A2sr4+uB/mFd9MXplYGPEBnfAuWmmyeVcHa6xLPiaRBcXkcb/28bgxmQLTVwFKE1yfsg==
+"@babel/traverse@^7.10.3", "@babel/traverse@^7.12.11", "@babel/traverse@^7.12.9", "@babel/traverse@^7.13.0", "@babel/traverse@^7.19.0", "@babel/traverse@^7.19.1", "@babel/traverse@^7.20.10", "@babel/traverse@^7.20.12", "@babel/traverse@^7.20.7", "@babel/traverse@^7.4.5", "@babel/traverse@^7.7.2":
+  version "7.20.12"
+  resolved "https://registry.yarnpkg.com/@babel/traverse/-/traverse-7.20.12.tgz#7f0f787b3a67ca4475adef1f56cb94f6abd4a4b5"
+  integrity sha512-MsIbFN0u+raeja38qboyF8TIT7K0BFzz/Yd/77ta4MsUsmP2RAnidIlwq7d5HFQrH/OZJecGV6B71C4zAgpoSQ==
   dependencies:
     "@babel/code-frame" "^7.18.6"
     "@babel/generator" "^7.20.7"
@@ -2729,6 +2729,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/alerting-api-integration-helpers@link:x-pack/test/alerting_api_integration/packages/helpers":
+  version "0.0.0"
+  uid ""
+
 "@kbn/alerts@link:packages/kbn-alerts":
   version "0.0.0"
   uid ""
@@ -2813,15 +2817,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/bazel-packages@link:packages/kbn-bazel-packages":
-  version "0.0.0"
-  uid ""
-
 "@kbn/bazel-runner@link:packages/kbn-bazel-runner":
   version "0.0.0"
   uid ""
 
 "@kbn/cases-components@link:packages/kbn-cases-components":
+  version "0.0.0"
+  uid ""
+
+"@kbn/chart-expressions-common@link:src/plugins/chart_expressions/common":
   version "0.0.0"
   uid ""
 
@@ -2861,11 +2865,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/content-management-content-editor@link:bazel-bin/packages/content-management/content_editor":
+"@kbn/content-management-content-editor@link:packages/content-management/content_editor":
   version "0.0.0"
   uid ""
 
-"@kbn/content-management-table-list@link:bazel-bin/packages/content-management/table_list":
+"@kbn/content-management-table-list@link:packages/content-management/table_list":
   version "0.0.0"
   uid ""
 
@@ -2985,7 +2989,31 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-config-server-mocks@link:packages/core/config/core-config-server-mocks":
+"@kbn/core-custom-branding-browser-internal@link:packages/core/custom-branding/core-custom-branding-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-custom-branding-browser-mocks@link:packages/core/custom-branding/core-custom-branding-browser-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-custom-branding-browser@link:packages/core/custom-branding/core-custom-branding-browser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-custom-branding-common@link:packages/core/custom-branding/core-custom-branding-common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-custom-branding-server-internal@link:packages/core/custom-branding/core-custom-branding-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-custom-branding-server-mocks@link:packages/core/custom-branding/core-custom-branding-server-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-custom-branding-server@link:packages/core/custom-branding/core-custom-branding-server":
   version "0.0.0"
   uid ""
 
@@ -3046,10 +3074,6 @@
   uid ""
 
 "@kbn/core-elasticsearch-client-server-mocks@link:packages/core/elasticsearch/core-elasticsearch-client-server-mocks":
-  version "0.0.0"
-  uid ""
-
-"@kbn/core-elasticsearch-client-server@link:packages/core/elasticsearch/core-elasticsearch-client-server":
   version "0.0.0"
   uid ""
 
@@ -3721,6 +3745,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/import-locator@link:packages/kbn-import-locator":
+  version "0.0.0"
+  uid ""
+
 "@kbn/import-resolver@link:packages/kbn-import-resolver":
   version "0.0.0"
   uid ""
@@ -3741,11 +3769,23 @@
   version "0.0.0"
   uid ""
 
+"@kbn/json-ast@link:packages/kbn-json-ast":
+  version "0.0.0"
+  uid ""
+
 "@kbn/kibana-manifest-schema@link:packages/kbn-kibana-manifest-schema":
   version "0.0.0"
   uid ""
 
 "@kbn/language-documentation-popover@link:packages/kbn-language-documentation-popover":
+  version "0.0.0"
+  uid ""
+
+"@kbn/lint-packages-cli@link:packages/kbn-lint-packages-cli":
+  version "0.0.0"
+  uid ""
+
+"@kbn/lint-ts-projects-cli@link:packages/kbn-lint-ts-projects-cli":
   version "0.0.0"
   uid ""
 
@@ -3773,6 +3813,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-date-picker@link:x-pack/packages/ml/date_picker":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-is-defined@link:x-pack/packages/ml/is_defined":
   version "0.0.0"
   uid ""
@@ -3786,6 +3830,10 @@
   uid ""
 
 "@kbn/ml-nested-property@link:x-pack/packages/ml/nested_property":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-query-utils@link:x-pack/packages/ml/query_utils":
   version "0.0.0"
   uid ""
 
@@ -3813,10 +3861,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/package-map@link:packages/kbn-package-map":
-  version "0.0.0"
-  uid ""
-
 "@kbn/peggy-loader@link:packages/kbn-peggy-loader":
   version "0.0.0"
   uid ""
@@ -3826,6 +3870,10 @@
   uid ""
 
 "@kbn/performance-testing-dataset-extractor@link:packages/kbn-performance-testing-dataset-extractor":
+  version "0.0.0"
+  uid ""
+
+"@kbn/picomatcher@link:packages/kbn-picomatcher":
   version "0.0.0"
   uid ""
 
@@ -3845,7 +3893,19 @@
   version "0.0.0"
   uid ""
 
+"@kbn/repo-file-maps@link:packages/kbn-repo-file-maps":
+  version "0.0.0"
+  uid ""
+
 "@kbn/repo-info@link:packages/kbn-repo-info":
+  version "0.0.0"
+  uid ""
+
+"@kbn/repo-linter@link:packages/kbn-repo-linter":
+  version "0.0.0"
+  uid ""
+
+"@kbn/repo-packages@link:packages/kbn-repo-packages":
   version "0.0.0"
   uid ""
 
@@ -3938,6 +3998,10 @@
   uid ""
 
 "@kbn/server-route-repository@link:packages/kbn-server-route-repository":
+  version "0.0.0"
+  uid ""
+
+"@kbn/set-map@link:packages/kbn-set-map":
   version "0.0.0"
   uid ""
 
@@ -4121,15 +4185,19 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-services@link:packages/kbn-shared-ux-services":
+"@kbn/shared-ux-router-types@link:packages/shared-ux/router/types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-router@link:packages/shared-ux/router/impl":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-storybook-config@link:packages/shared-ux/storybook/config":
   version "0.0.0"
   uid ""
 
 "@kbn/shared-ux-storybook-mock@link:packages/shared-ux/storybook/mock":
-  version "0.0.0"
-  uid ""
-
-"@kbn/shared-ux-storybook@link:packages/kbn-shared-ux-storybook":
   version "0.0.0"
   uid ""
 
@@ -4190,14 +4258,6 @@
   uid ""
 
 "@kbn/tooling-log@link:packages/kbn-tooling-log":
-  version "0.0.0"
-  uid ""
-
-"@kbn/ts-project-linter-cli@link:packages/kbn-ts-project-linter-cli":
-  version "0.0.0"
-  uid ""
-
-"@kbn/ts-project-linter@link:packages/kbn-ts-project-linter":
   version "0.0.0"
   uid ""
 
@@ -6142,26 +6202,26 @@
   dependencies:
     remove-accents "0.4.2"
 
-"@tanstack/query-core@4.20.4":
-  version "4.20.4"
-  resolved "https://registry.yarnpkg.com/@tanstack/query-core/-/query-core-4.20.4.tgz#1f7975a2db26a8bc2f382bad8a44cd422c846b17"
-  integrity sha512-lhLtGVNJDsJ/DyZXrLzekDEywQqRVykgBqTmkv0La32a/RleILXy6JMLBb7UmS3QCatg/F/0N9/5b0i5j6IKcA==
+"@tanstack/query-core@4.22.0":
+  version "4.22.0"
+  resolved "https://registry.yarnpkg.com/@tanstack/query-core/-/query-core-4.22.0.tgz#7a786fcea64e229ed5d4308093dd644cdfaa895e"
+  integrity sha512-OeLyBKBQoT265f5G9biReijeP8mBxNFwY7ZUu1dKL+YzqpG5q5z7J/N1eT8aWyKuhyDTiUHuKm5l+oIVzbtrjw==
 
-"@tanstack/react-query-devtools@^4.20.4":
-  version "4.20.4"
-  resolved "https://registry.yarnpkg.com/@tanstack/react-query-devtools/-/react-query-devtools-4.20.4.tgz#a58c742faacc03a0735006eb30e6a1f215957310"
-  integrity sha512-4e4wOmqAYjLS1RQ7gRBLCk3koCjbOfCMvbxS3CPCAN5+FLBemLAvoYvFJ/i/7DPsIsltGwsnd7YAFFGMzdSx7A==
+"@tanstack/react-query-devtools@^4.20.9":
+  version "4.22.0"
+  resolved "https://registry.yarnpkg.com/@tanstack/react-query-devtools/-/react-query-devtools-4.22.0.tgz#e39f04e55428ff6ce2b2796f3171db170afcb2a8"
+  integrity sha512-YeYFBnfqvb+ZlA0IiJqiHNNSzepNhI1p2o9i8NlhQli9+Zrn230M47OBaBUs8qr3DD1dC2zGB1Dis50Ktz8gAA==
   dependencies:
     "@tanstack/match-sorter-utils" "^8.7.0"
     superjson "^1.10.0"
     use-sync-external-store "^1.2.0"
 
-"@tanstack/react-query@^4.20.4":
-  version "4.20.4"
-  resolved "https://registry.yarnpkg.com/@tanstack/react-query/-/react-query-4.20.4.tgz#562b34fb919adea884eccaba2b5be50e8ba7fb16"
-  integrity sha512-SJRxx13k/csb9lXAJfycgVA1N/yU/h3bvRNWP0+aHMfMjmbyX82FdoAcckDBbOdEyAupvb0byelNHNeypCFSyA==
+"@tanstack/react-query@^4.20.9":
+  version "4.22.0"
+  resolved "https://registry.yarnpkg.com/@tanstack/react-query/-/react-query-4.22.0.tgz#aaa4b41a6d306be6958018c74a8a3bb3e9f1924c"
+  integrity sha512-P9o+HjG42uB/xHR6dMsJaPhtZydSe4v0xdG5G/cEj1oHZAXelMlm67/rYJNQGKgBamKElKogj+HYGF+NY2yHYg==
   dependencies:
-    "@tanstack/query-core" "4.20.4"
+    "@tanstack/query-core" "4.22.0"
     use-sync-external-store "^1.2.0"
 
 "@testim/chrome-version@^1.1.3":
@@ -7430,6 +7490,11 @@
   version "0.10.1"
   resolved "https://registry.yarnpkg.com/@types/pegjs/-/pegjs-0.10.1.tgz#9a2f3961dc62430fdb21061eb0ddbd890f9e3b94"
   integrity sha512-ra8IchO9odGQmYKbm+94K58UyKCEKdZh9y0vxhG4pIpOJOBlC1C+ZtBVr6jLs+/oJ4pl+1p/4t3JtBA8J10Vvw==
+
+"@types/picomatch@^2.3.0":
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/@types/picomatch/-/picomatch-2.3.0.tgz#75db5e75a713c5a83d5b76780c3da84a82806003"
+  integrity sha512-O397rnSS9iQI4OirieAtsDqvCj4+3eY1J+EPdNTKuHuRWIfUoGyzX294o8C4KJYaLqgSrd2o60c5EqCU8Zv02g==
 
 "@types/pidusage@^2.0.2":
   version "2.0.2"
@@ -12270,9 +12335,9 @@ decimal.js@^10.2.1, decimal.js@^10.4.1:
   integrity sha512-F29o+vci4DodHYT9UrR5IEbfBw9pE5eSapIJdTqXK5+6hq+t8VRxwQyKlW2i+KDKFkkJQRvFyI/QXD83h8LyQw==
 
 decode-uri-component@^0.2.0:
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/decode-uri-component/-/decode-uri-component-0.2.0.tgz#eb3913333458775cb84cd1a1fae062106bb87545"
-  integrity sha1-6zkTMzRYd1y4TNGh+uBiEGu4dUU=
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/decode-uri-component/-/decode-uri-component-0.2.2.tgz#e69dbe25d37941171dd540e024c444cd5188e1e9"
+  integrity sha512-FqUYQ+8o158GyGTrMFJms9qh3CqTKvAqgqsTnkLI8sKu0028orqBhxNMFkFen0zGyg6epACD32pjVk58ngIErQ==
 
 decompress-response@^3.3.0:
   version "3.3.0"
@@ -12974,10 +13039,48 @@ elastic-apm-http-client@11.0.4, elastic-apm-http-client@^11.0.1:
     semver "^6.3.0"
     stream-chopper "^3.0.1"
 
-elastic-apm-node@^3.38.0, elastic-apm-node@^3.41.0:
+elastic-apm-node@^3.38.0:
   version "3.41.0"
   resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.41.0.tgz#ff0b5ecf6d126a2eb312ecc936bd55bc3f1e3ce6"
   integrity sha512-cX745ryAwQCFEhkYttLrdjQDO0vCHspCbKg6bCguvBURZUHkLnZcP5z5m3R20dnGfTDXGg2q6nMi65iIVMCYFA==
+  dependencies:
+    "@elastic/ecs-pino-format" "^1.2.0"
+    "@opentelemetry/api" "^1.1.0"
+    after-all-results "^2.0.0"
+    async-cache "^1.1.0"
+    async-value-promise "^1.1.1"
+    basic-auth "^2.0.1"
+    cookie "^0.5.0"
+    core-util-is "^1.0.2"
+    elastic-apm-http-client "11.0.4"
+    end-of-stream "^1.4.4"
+    error-callsites "^2.0.4"
+    error-stack-parser "^2.0.6"
+    escape-string-regexp "^4.0.0"
+    fast-safe-stringify "^2.0.7"
+    http-headers "^3.0.2"
+    is-native "^1.0.1"
+    lru-cache "^6.0.0"
+    measured-reporting "^1.51.1"
+    monitor-event-loop-delay "^1.0.0"
+    object-filter-sequence "^1.0.0"
+    object-identity-map "^1.0.2"
+    original-url "^1.2.3"
+    pino "^6.11.2"
+    relative-microtime "^2.0.0"
+    require-in-the-middle "^5.2.0"
+    semver "^6.3.0"
+    set-cookie-serde "^1.0.0"
+    shallow-clone-shim "^2.0.0"
+    source-map "^0.8.0-beta.0"
+    sql-summary "^1.0.1"
+    traverse "^0.6.6"
+    unicode-byte-truncate "^1.0.0"
+
+elastic-apm-node@^3.41.1:
+  version "3.41.1"
+  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.41.1.tgz#e0829d69d5e8a6062ef567d0a8db0ec0e3736ea8"
+  integrity sha512-bLCVIyAgQC+ZfY5fd/UaAId+8dh3vusaxZF2A0YtHBAwx1YGpIA3dqOt5zc1UuYmbjCdsEAiUjaUEAHOWdjTzA==
   dependencies:
     "@elastic/ecs-pino-format" "^1.2.0"
     "@opentelemetry/api" "^1.1.0"
@@ -18225,7 +18328,7 @@ json-stringify-safe@5.0.1, json-stringify-safe@^5.0.1, json-stringify-safe@~5.0.
   resolved "https://registry.yarnpkg.com/json-stringify-safe/-/json-stringify-safe-5.0.1.tgz#1296a2d58fd45f19a0f6ce01d65701e2c735b6eb"
   integrity sha1-Epai1Y/UXxmg9s4B1lcB4sc1tus=
 
-json5@*, json5@^2.1.2, json5@^2.1.3, json5@^2.2.1, json5@^2.2.3:
+json5@*, json5@^2.1.2, json5@^2.1.3, json5@^2.2.2, json5@^2.2.3:
   version "2.2.3"
   resolved "https://registry.yarnpkg.com/json5/-/json5-2.2.3.tgz#78cd6f1a19bdc12b73db5ad0c61efd66c1e29283"
   integrity sha512-XmOWe7eyHYH14cLdVPoyg+GOH3rYX++KpzrylJwSW98t3Nk+U8XOl8FWKOgwtzdb8lXGf6zYwDUzeHMWfxasyg==

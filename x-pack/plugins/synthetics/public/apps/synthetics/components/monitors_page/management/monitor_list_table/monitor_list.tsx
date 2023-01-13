@@ -24,6 +24,7 @@ import {
   ConfigKey,
   EncryptedSyntheticsSavedMonitor,
   OverviewStatusState,
+  SourceType,
 } from '../../../../../../../common/runtime_types';
 import { useMonitorListColumns } from './columns';
 import * as labels from './labels';
@@ -128,9 +129,13 @@ export const MonitorList = ({
       </EuiPanel>
       {monitorPendingDeletion && (
         <DeleteMonitor
-          fields={monitorPendingDeletion}
-          reloadPage={reloadPage}
+          configId={monitorPendingDeletion[ConfigKey.CONFIG_ID]}
+          name={monitorPendingDeletion[ConfigKey.NAME] ?? ''}
           setMonitorPendingDeletion={setMonitorPendingDeletion}
+          isProjectMonitor={
+            monitorPendingDeletion[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT
+          }
+          reloadPage={reloadPage}
         />
       )}
     </>

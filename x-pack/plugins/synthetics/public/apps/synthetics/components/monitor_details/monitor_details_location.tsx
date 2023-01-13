@@ -11,6 +11,7 @@ import {
   EuiHealth,
   EuiIcon,
   EuiLink,
+  EuiLoadingContent,
   EuiPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -120,7 +121,11 @@ export const MonitorDetailsLocation: React.FC = () => {
   ]);
 
   if (!selectedLocation || !monitor) {
-    return null;
+    return (
+      <EuiDescriptionList
+        listItems={[{ title: LOCATION_LABEL, description: <EuiLoadingContent lines={1} /> }]}
+      />
+    );
   }
 
   return <EuiDescriptionList listItems={[{ title: LOCATION_LABEL, description: locationList }]} />;

@@ -18,7 +18,7 @@ import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
 
-import { PROJECTS, Project } from '@kbn/ts-projects';
+import { TS_PROJECTS, TsProject } from '@kbn/ts-projects';
 
 export function runEslintWithTypes() {
   run(
@@ -35,8 +35,8 @@ export function runEslintWithTypes() {
           ? Path.resolve(flags.project)
           : undefined;
 
-      const projects = PROJECTS.filter((project) => {
-        if (project.disableTypeCheck) {
+      const projects = TS_PROJECTS.filter((project) => {
+        if (project.isTypeCheckDisabled()) {
           log.verbose(`[${project.name}] skipping project with type checking disabled`);
           return false;
         }
@@ -116,7 +116,7 @@ export function runEslintWithTypes() {
               return project;
             }
           }, concurrency),
-          reduce((acc: Project[], project) => {
+          reduce((acc: TsProject[], project) => {
             if (project) {
               return [...acc, project];
             } else {

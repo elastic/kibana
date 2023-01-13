@@ -5,19 +5,13 @@
  * 2.0.
  */
 
+import { type FrozenTierPreference } from '@kbn/ml-date-picker';
+
 import { RandomSamplerOption } from '../constants/random_sampler';
 
 export const DV_FROZEN_TIER_PREFERENCE = 'dataVisualizer.frozenDataTierPreference';
 export const DV_RANDOM_SAMPLER_PREFERENCE = 'dataVisualizer.randomSamplerPreference';
 export const DV_RANDOM_SAMPLER_P_VALUE = 'dataVisualizer.randomSamplerPValue';
-
-export const FROZEN_TIER_PREFERENCE = {
-  EXCLUDE: 'exclude-frozen',
-  INCLUDE: 'include-frozen',
-} as const;
-
-export type FrozenTierPreference =
-  typeof FROZEN_TIER_PREFERENCE[keyof typeof FROZEN_TIER_PREFERENCE];
 
 export type DV = Partial<{
   [DV_FROZEN_TIER_PREFERENCE]: FrozenTierPreference;
