@@ -90,6 +90,7 @@ export interface AvailableTotal {
 // FIXME: find a way to get this from exportTypesHandler or common/constants
 type BaseJobTypes =
   | 'csv'
+  | 'csv_saved_object'
   | 'csv_searchsource'
   | 'csv_searchsource_immediate'
   | 'PNG'

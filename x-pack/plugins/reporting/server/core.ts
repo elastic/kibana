@@ -259,7 +259,7 @@ export class ReportingCore {
     return this.pluginSetupDeps;
   }
 
-  private async getSavedObjectsClient(request: KibanaRequest) {
+  public async getSavedObjectsClient(request: KibanaRequest) {
     const { savedObjects } = await this.getPluginStartDeps();
     return savedObjects.getScopedClient(request) as SavedObjectsClientContract;
   }
