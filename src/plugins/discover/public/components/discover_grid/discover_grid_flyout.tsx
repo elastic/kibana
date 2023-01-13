@@ -107,6 +107,7 @@ export function DiscoverGridFlyout({
   return (
     <EuiPortal>
       <EuiFlyout
+        type="push"
         onClose={onClose}
         size="m"
         data-test-subj="docTableDetailsFlyout"
