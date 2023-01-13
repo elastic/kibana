@@ -39,7 +39,7 @@ import {
 // file and not bundled with the application, adding a eslint disable below and using import from
 // a restricted path.
 import { createCasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
-import { createFleetAuthzMock } from '@kbn/fleet-plugin/common';
+import { createFleetAuthzMock } from '@kbn/fleet-plugin/common/mocks';
 import type { RequestFixtureOptions } from '@kbn/core-http-router-server-mocks';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getEndpointAuthzInitialStateMock } from '../../common/endpoint/service/authz/mocks';

@@ -8,6 +8,7 @@
 import React, { FC, useState } from 'react';
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
 import { checkPermission } from '../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../ml_nodes_check';
 import { GettingStartedCallout } from './components/getting_started_callout';
@@ -17,9 +18,8 @@ import { JobsAwaitingNodeWarning } from '../components/jobs_awaiting_node_warnin
 import { SavedObjectsWarning } from '../components/saved_objects_warning';
 import { UpgradeWarning } from '../components/upgrade';
 import { HelpMenu } from '../components/help_menu';
-import { useMlKibana, useTimefilter } from '../contexts/kibana';
+import { useMlKibana } from '../contexts/kibana';
 import { NodesList } from '../trained_models/nodes_overview';
-import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';
 import { MlPageHeader } from '../components/page_header';
 
 export const OverviewPage: FC = () => {
