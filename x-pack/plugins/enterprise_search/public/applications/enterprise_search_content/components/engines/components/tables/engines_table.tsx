@@ -55,6 +55,7 @@ export const EnginesListTable: React.FC<EnginesListTableProps> = ({
       render: (name: string) => (
         <EuiLinkTo
           data-test-subj="engine-link"
+          data-telemetry-id={`entSearchContent-engines-table-viewEngine `}
           to={generateEncodedPath(ENGINE_PATH, { engineName: name })}
         >
           {name}
