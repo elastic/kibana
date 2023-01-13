@@ -37,6 +37,7 @@ describe('getRuleExecutionLogRoute', () => {
         status: 'success',
         timestamp: '2023-01-05T15:55:50.495Z',
         version: '8.7.0',
+        timed_out: false,
       },
     ],
     total: 1,

@@ -146,6 +146,19 @@ describe('getExecutionLogAggregation', () => {
                   },
                 },
               },
+              timeoutMessage: {
+                filter: {
+                  bool: {
+                    must: [
+                      {
+                        match: {
+                          'event.action': 'execute-timeout',
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
             },
             terms: {
               field: 'kibana.action.execution.uuid',
@@ -268,6 +281,19 @@ describe('getExecutionLogAggregation', () => {
                   },
                   script: {
                     source: 'params.count > 0',
+                  },
+                },
+              },
+              timeoutMessage: {
+                filter: {
+                  bool: {
+                    must: [
+                      {
+                        match: {
+                          'event.action': 'execute-timeout',
+                        },
+                      },
+                    ],
                   },
                 },
               },
@@ -412,6 +438,19 @@ describe('getExecutionLogAggregation', () => {
                   },
                 },
               },
+              timeoutMessage: {
+                filter: {
+                  bool: {
+                    must: [
+                      {
+                        match: {
+                          'event.action': 'execute-timeout',
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
             },
             terms: {
               field: 'kibana.action.execution.uuid',
@@ -511,8 +550,11 @@ describe('formatExecutionLogResult', () => {
                           _score: 3.033605,
                           _source: {
                             event: { outcome: 'success' },
-                            kibana: { space_ids: ['default'], version: '8.7.0' },
-                            action: { name: 'test connector' },
+                            kibana: {
+                              space_ids: ['default'],
+                              version: '8.7.0',
+                              action: { name: 'test connector' },
+                            },
                             message:
                               'action executed: .server-log:6709f660-8d11-11ed-bae5-bd32cbc9eaaa: test connector',
                           },
@@ -546,13 +588,14 @@ describe('formatExecutionLogResult', () => {
           status: 'success',
           timestamp: '2023-01-05T15:55:50.495Z',
           version: '8.7.0',
+          timed_out: false,
         },
       ],
       total: 1,
     });
   });
 
-  test('should format results correctly with rule execution errors', () => {
+  test('should format results correctly with action execution errors', () => {
     const results = {
       aggregations: {
         executionLogAgg: {
@@ -578,8 +621,11 @@ describe('formatExecutionLogResult', () => {
                           _score: 3.1420498,
                           _source: {
                             event: { outcome: 'failure' },
-                            kibana: { space_ids: ['default'], version: '8.7.0' },
-                            action: { name: 'test' },
+                            kibana: {
+                              space_ids: ['default'],
+                              version: '8.7.0',
+                              action: { name: 'test' },
+                            },
                             message:
                               'action execution failure: .email:e020c620-8d14-11ed-bae5-bd32cbc9eaaa: test',
                             error: {
@@ -615,8 +661,11 @@ describe('formatExecutionLogResult', () => {
                           _score: 3.1420498,
                           _source: {
                             event: { outcome: 'success' },
-                            kibana: { space_ids: ['default'], version: '8.7.0' },
-                            action: { name: 'test connector' },
+                            kibana: {
+                              space_ids: ['default'],
+                              version: '8.7.0',
+                              action: { name: 'test connector' },
+                            },
                             message:
                               'action executed: .server-log:6709f660-8d11-11ed-bae5-bd32cbc9eaaa: test connector',
                           },
@@ -650,6 +699,7 @@ describe('formatExecutionLogResult', () => {
           status: 'failure',
           timestamp: '2023-01-05T16:23:53.813Z',
           version: '8.7.0',
+          timed_out: false,
         },
         {
           connector_name: 'test connector',
@@ -662,6 +712,7 @@ describe('formatExecutionLogResult', () => {
           status: 'success',
           timestamp: '2023-01-05T15:55:50.495Z',
           version: '8.7.0',
+          timed_out: false,
         },
       ],
       total: 2,
