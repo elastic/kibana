@@ -19,7 +19,6 @@ const GhostFormField = () => <></>;
 export const EndpointResponseAction = React.memo((props: EndpointResponseActionProps) => {
   // add capability check here
 
-
   return (
     <UseField
       path={`${props.item.path}.params`}
