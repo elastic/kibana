@@ -75,7 +75,7 @@ Object {
       "@timestamp": Object {
         "date_histogram": Object {
           "field": "@timestamp",
-          "fixed_interval": "5m",
+          "fixed_interval": "2m",
         },
       },
       "slo._internal.budgeting_method": Object {
