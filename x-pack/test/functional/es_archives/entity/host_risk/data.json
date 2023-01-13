@@ -101,7 +101,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "5",
+    "id": "6",
     "index": "ml_host_risk_score_latest_default",
     "source": {
       "host": {
