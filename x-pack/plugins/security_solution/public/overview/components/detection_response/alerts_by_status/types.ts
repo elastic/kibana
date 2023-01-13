@@ -78,10 +78,6 @@ export type ParsedAlertsData = Partial<
 
 export type AlertsByStatus = 'open' | 'acknowledged' | 'closed';
 
-export interface DonutEmbeddableProps extends LensEmbeddableComponentProps {
-  label: string;
-}
-
 export interface VisualizationAlertsByStatusData {
   responses: VisualizationAlertsByStatusResponse[];
   requests: ESQuery[];

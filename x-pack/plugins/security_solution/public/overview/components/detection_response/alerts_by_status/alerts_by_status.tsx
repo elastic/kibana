@@ -58,7 +58,7 @@ import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useAlertsByStatusVisualizationData } from './use_alerts_by_status_visualization_data';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from './types';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { DonutEmbeddable } from '../../../../common/components/visualization_actions/donut_embeddable';
+import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
 import type { Status } from '../../../../../common/detection_engine/schemas/common';
 import { getAlertsByStatusAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/alerts/alerts_by_status_donut';
 
@@ -219,11 +219,12 @@ export const AlertsByStatus = ({
                   <EuiFlexGroup justifyContent="center">
                     <StyledFlexItem key="alerts-status-open" grow={isChartEmbeddablesEnabled}>
                       {isChartEmbeddablesEnabled ? (
-                        <DonutEmbeddable
+                        <VisualizationEmbeddable
                           extraOptions={openDonutOptions}
                           getLensAttributes={getAlertsByStatusAttributes}
                           height={ChartSize}
                           id={`${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-open`}
+                          isDonut={true}
                           label={STATUS_OPEN}
                           scopeId={SourcererScopeName.detections}
                           stackByField="kibana.alert.workflow_status"
@@ -247,11 +248,12 @@ export const AlertsByStatus = ({
                       grow={isChartEmbeddablesEnabled}
                     >
                       {isChartEmbeddablesEnabled ? (
-                        <DonutEmbeddable
+                        <VisualizationEmbeddable
                           extraOptions={acknowledgedDonutOptions}
                           getLensAttributes={getAlertsByStatusAttributes}
                           height={ChartSize}
                           id={`${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-acknowledged`}
+                          isDonut={true}
                           label={STATUS_ACKNOWLEDGED}
                           scopeId={SourcererScopeName.detections}
                           stackByField="kibana.alert.workflow_status"
@@ -272,11 +274,12 @@ export const AlertsByStatus = ({
                     </StyledFlexItem>
                     <StyledFlexItem key="alerts-status-closed" grow={isChartEmbeddablesEnabled}>
                       {isChartEmbeddablesEnabled ? (
-                        <DonutEmbeddable
+                        <VisualizationEmbeddable
                           extraOptions={closedDonutOptions}
                           getLensAttributes={getAlertsByStatusAttributes}
                           height={ChartSize}
                           id={`${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-closed`}
+                          isDonut={true}
                           label={STATUS_CLOSED}
                           scopeId={SourcererScopeName.detections}
                           stackByField="kibana.alert.workflow_status"

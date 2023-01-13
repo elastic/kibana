@@ -32,7 +32,7 @@ import { useNavigateToTimeline } from '../../detection_response/hooks/use_naviga
 import type { TimeRange } from '../../../../common/store/inputs/model';
 import { openAlertsFilter } from '../../detection_response/utils';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { DonutEmbeddable } from '../../../../common/components/visualization_actions/donut_embeddable';
+import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { getRiskScoreDonutAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/risk_scores/risk_score_donut';
 import { TOTAL_LABEL } from '../common/translations';
@@ -202,14 +202,15 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
           <EuiFlexGroup data-test-subj="entity_analytics_content">
             <EuiFlexItem grow={false}>
               {isChartEmbeddablesEnabled && spaceId && data && data.length ? (
-                <DonutEmbeddable
-                  id={`${entity.kpiQueryId}-donut`}
-                  timerange={timerange}
-                  label={TOTAL_LABEL}
-                  getLensAttributes={getRiskScoreDonutAttributes}
-                  stackByField={riskEntity}
+                <VisualizationEmbeddable
                   extraOptions={extraOptions}
+                  getLensAttributes={getRiskScoreDonutAttributes}
                   height="120px"
+                  id={`${entity.kpiQueryId}-donut`}
+                  isDonut={true}
+                  label={TOTAL_LABEL}
+                  stackByField={riskEntity}
+                  timerange={timerange}
                 />
               ) : (
                 <RiskScoreDonutChart severityCount={severityCount ?? EMPTY_SEVERITY_COUNT} />

@@ -42,7 +42,11 @@ const RiskScoreHeaderContentComponent = ({
     return [onClick, href];
   }, [entityLinkProps, getSecuritySolutionLinkProps]);
   return toggleStatus ? (
-    <EuiFlexGroup alignItems="center" gutterSize="m">
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="m"
+      data-test-subj={`${riskEntity}-risk-score-header-content`}
+    >
       <EuiFlexItem>
         <EuiButtonEmpty rel="noopener nofollow noreferrer" href={entityDocLink} target="_blank">
           {i18n.LEARN_MORE}
