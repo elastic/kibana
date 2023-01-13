@@ -139,6 +139,7 @@ export class ServiceAPIClient {
     method: 'POST' | 'PUT' | 'DELETE',
     { monitors: allMonitors, output, runOnce, isEdit }: ServiceData
   ) {
+    console.log(JSON.stringify(this.locations));
     if (this.username === TEST_SERVICE_USERNAME) {
       // we don't want to call service while local integration tests are running
       return;

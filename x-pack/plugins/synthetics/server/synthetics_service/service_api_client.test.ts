@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { loggerMock } from '@kbn/logging-mocks';
+
 jest.mock('axios', () => jest.fn());
 
 import { Logger } from '@kbn/core/server';
@@ -103,3 +105,243 @@ describe('checkAccountAccessStatus', () => {
     expect(result).toEqual({ allowed: true, signupUrl: 'http://localhost:666/example' });
   });
 });
+
+describe('callAPI', () => {
+  beforeEach(() => {
+    (axios as jest.MockedFunction<typeof axios>).mockReset();
+  });
+
+  afterEach(() => jest.restoreAllMocks());
+
+  const logger = loggerMock.create();
+
+  const config = {
+    username: 'dev',
+    password: '12345',
+    manifestUrl: 'http://localhost:8080/api/manifest',
+  };
+
+  it('it calls service endpoint when adding monitors', async () => {
+    const apiClient = new ServiceAPIClient(logger, config, {
+      isDev: true,
+    } as UptimeServerSetup);
+
+    await apiClient.callAPI('POST', {
+      monitors: testMonitors,
+      output: { hosts: ['https://localhost:9200'], api_key: '12345' },
+    });
+  });
+});
+
+const testLocations = [
+  {
+    id: 'us_central',
+    label: 'North America - US Central',
+    geo: { lat: 41.25, lon: -95.86 },
+    url: 'https://us-central.synthetics.elastic.dev',
+    isServiceManaged: true,
+    status: 'beta',
+    isInvalid: false,
+  },
+  {
+    id: 'us_central_qa',
+    label: 'US Central QA',
+    geo: { lat: 41.25, lon: -95.86 },
+    url: 'https://us-central1.synthetics.gcp.qa.cld.elstc.co',
+    isServiceManaged: true,
+    status: 'beta',
+    isInvalid: false,
+  },
+  {
+    id: 'us_central_staging',
+    label: 'US Central Staging',
+    geo: { lat: 41.25, lon: -95.86 },
+    url: 'https://us-central1.synthetics.gcp.foundit.no',
+    isServiceManaged: true,
+    status: 'beta',
+    isInvalid: false,
+  },
+];
+
+const testMonitors = [
+  {
+    type: 'browser',
+    enabled: true,
+    schedule: '@every 10m',
+    config_id: '9d7be1fc-6732-4913-992f-a9e406903659',
+    name: 'https://www.google.com',
+    locations: [
+      {
+        geo: { lon: -95.86, lat: 41.25 },
+        isServiceManaged: true,
+        id: 'us_central',
+        label: 'North America - US Central',
+        isInvalid: false,
+        'data-test-subj': 'syntheticsServiceLocation--us_central',
+        url: 'https://us-central.synthetics.elastic.dev',
+        status: 'beta',
+      },
+      {
+        geo: { lon: -95.86, lat: 41.25 },
+        isServiceManaged: true,
+        id: 'us_central_qa',
+        label: 'US Central QA',
+        isInvalid: false,
+        'data-test-subj': 'syntheticsServiceLocation--us_central_qa',
+        url: 'https://us-central1.synthetics.gcp.qa.cld.elstc.co',
+        status: 'beta',
+      },
+    ],
+    namespace: 'default',
+    origin: 'ui',
+    id: '9d7be1fc-6732-4913-992f-a9e406903659',
+    'source.inline.script':
+      "step('Go to https://www.google.com', async () => {\n  await page.goto('https://www.google.com');\n  await page.click('lllllll');\n});",
+    urls: 'https://www.google.com',
+    screenshots: 'on',
+    ignore_https_errors: false,
+    'ssl.verification_mode': 'full',
+    'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
+    fields: { config_id: '9d7be1fc-6732-4913-992f-a9e406903659' },
+    fields_under_root: true,
+    throttling: { download: 5, upload: 3, latency: 20 },
+  },
+  {
+    type: 'http',
+    enabled: false,
+    schedule: '@every 3m',
+    config_id: '30e7431d-ed65-4234-a89b-d4de1588e6bf',
+    timeout: '16s',
+    name: 'http',
+    locations: [
+      { isServiceManaged: true, id: 'us_central', label: 'North America - US Central' },
+      { isServiceManaged: true, id: 'us_central_qa', label: 'US Central QA' },
+    ],
+    namespace: 'default',
+    origin: 'ui',
+    id: '30e7431d-ed65-4234-a89b-d4de1588e6bf',
+    urls: 'https://www.google.com',
+    max_redirects: '0',
+    'response.include_body': 'on_error',
+    'response.include_headers': true,
+    'check.response.status': ['500'],
+    'check.request.method': 'GET',
+    'ssl.verification_mode': 'full',
+    'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
+    fields: { config_id: '30e7431d-ed65-4234-a89b-d4de1588e6bf' },
+    fields_under_root: true,
+  },
+  {
+    type: 'browser',
+    enabled: true,
+    schedule: '@every 10m',
+    config_id: 'a5e5ebb9-26d4-4088-89ce-47c6ef773c85',
+    name: 'check if title is present',
+    locations: [
+      {
+        geo: { lon: -95.86, lat: 41.25 },
+        isServiceManaged: true,
+        id: 'us_central',
+        label: 'North America - US Central',
+      },
+    ],
+    namespace: 'default',
+    origin: 'project',
+    id: 'check if title is present-test-projects-default',
+    playwright_options: { ignoreHTTPSErrors: false, headless: true },
+    params: { url: 'https://elastic.github.io/synthetics-demo/' },
+    'source.project.content':
+      'UEsDBBQACAAIAAAAIQAAAAAAAAAAAAAAAAAZAAAAam91cm5leXMvYmFzaWMuam91cm5leS50c8WQzU4DIRDH732KCSeatEt68aDx+xmM5yk7FnTLEGbWqk3fXbpbTY2NVw8QCP+P4eccPHNfEr2fuwehIk4Chg9s54szRx2KRu/kPWmgehKnJDrPhZ/Jq7iDVdwSJfrmcG1UJnGduShsv9JnIEp5BvSWqxN28FR4Debmd4W5mBw81vhA/gXiE2jUjiAK5EJCSc0M7BYyrmhW94Jrgd0ULq9gO4GhyZoO++QDYM5VjDXfg/2WAOAGow4JzYqV7ZjS9KWbXlTBbtjHJJQKRscZTmZ5TqIQCFsqcHkc3bFH5WJNWJghEQ4E7CgaPY3Sm95z0vozO502yndkjXLLYr6n2a/fYGLKfe3q0FPgbt9fIXkupXb8B6TjSV6x6/8CNs5+mtfw1iTazPcYTrIbJSvSW9USl71WZkf15gvk4AQwjwEVElEroAxLgpYTXZvh+QflT1BLBwhmqX0GUAEAABQDAABQSwECLQMUAAgACAAAACEAZql9BlABAAAUAwAAGQAAAAAAAAAAACAApIEAAAAAam91cm5leXMvYmFzaWMuam91cm5leS50c1BLBQYAAAAAAQABAEcAAACXAQAAAAA=',
+    screenshots: 'on',
+    'filter_journeys.match': 'check if title is present',
+    ignore_https_errors: false,
+    'ssl.verification_mode': 'full',
+    'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
+    original_space: 'default',
+    fields: {
+      config_id: 'a5e5ebb9-26d4-4088-89ce-47c6ef773c85',
+      'monitor.project.name': 'test-projects',
+      'monitor.project.id': 'test-projects',
+    },
+    fields_under_root: true,
+    throttling: { download: 5, upload: 3, latency: 20 },
+  },
+  {
+    type: 'http',
+    enabled: true,
+    schedule: '@every 3m',
+    config_id: '757f8635-bc6f-489d-b581-d0c409d4f6e0',
+    timeout: '16s',
+    name: 'On Staging',
+    locations: [
+      { isServiceManaged: true, id: 'us_central_staging', label: 'US Central Staging' },
+      { isServiceManaged: true, id: 'us_central_qa', label: 'US Central QA' },
+    ],
+    namespace: 'default',
+    origin: 'ui',
+    id: '757f8635-bc6f-489d-b581-d0c409d4f6e0',
+    urls: 'https://www.google.com',
+    max_redirects: '0',
+    'response.include_body': 'on_error',
+    'response.include_headers': true,
+    'check.request.method': 'GET',
+    'ssl.verification_mode': 'full',
+    'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
+    fields: { config_id: '757f8635-bc6f-489d-b581-d0c409d4f6e0' },
+    fields_under_root: true,
+  },
+  {
+    type: 'browser',
+    enabled: true,
+    schedule: '@every 10m',
+    config_id: 'b3696dd5-2779-4043-857d-2fe92da104f5',
+    name: 'Invalid monitor',
+    locations: [{ id: 'us_central_qa', label: 'US Central QA', isServiceManaged: true }],
+    namespace: 'default',
+    origin: 'ui',
+    id: 'b3696dd5-2779-4043-857d-2fe92da104f5',
+    'source.inline.script': "i don't want to run",
+    screenshots: 'on',
+    ignore_https_errors: false,
+    'ssl.verification_mode': 'full',
+    'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
+    fields: { config_id: 'b3696dd5-2779-4043-857d-2fe92da104f5' },
+    fields_under_root: true,
+    throttling: { download: 5, upload: 3, latency: 20 },
+  },
+  {
+    type: 'browser',
+    enabled: true,
+    schedule: '@every 10m',
+    config_id: '01f28b5e-ddb9-4262-83f1-8a1c369aaddd',
+    name: 'check if input placeholder is correct',
+    locations: [
+      {
+        id: 'us_central',
+        label: 'North America - US Central',
+        geo: { lat: 41.25, lon: -95.86 },
+        isServiceManaged: true,
+      },
+    ],
+    namespace: 'default',
+    origin: 'project',
+    id: 'check if input placeholder is correct-test-projects-default',
+    playwright_options: { ignoreHTTPSErrors: false, headless: true },
+    params: { url: 'https://elastic.github.io/synthetics-demo/' },
+    'source.project.content':
+      'UEsDBBQACAAIAAAAIQAAAAAAAAAAAAAAAAAZAAAAam91cm5leXMvYmFzaWMuam91cm5leS50c8WQzU4DIRDH732KCSeatEt68aDx+xmM5yk7FnTLEGbWqk3fXbpbTY2NVw8QCP+P4eccPHNfEr2fuwehIk4Chg9s54szRx2KRu/kPWmgehKnJDrPhZ/Jq7iDVdwSJfrmcG1UJnGduShsv9JnIEp5BvSWqxN28FR4Debmd4W5mBw81vhA/gXiE2jUjiAK5EJCSc0M7BYyrmhW94Jrgd0ULq9gO4GhyZoO++QDYM5VjDXfg/2WAOAGow4JzYqV7ZjS9KWbXlTBbtjHJJQKRscZTmZ5TqIQCFsqcHkc3bFH5WJNWJghEQ4E7CgaPY3Sm95z0vozO502yndkjXLLYr6n2a/fYGLKfe3q0FPgbt9fIXkupXb8B6TjSV6x6/8CNs5+mtfw1iTazPcYTrIbJSvSW9USl71WZkf15gvk4AQwjwEVElEroAxLgpYTXZvh+QflT1BLBwhmqX0GUAEAABQDAABQSwECLQMUAAgACAAAACEAZql9BlABAAAUAwAAGQAAAAAAAAAAACAApIEAAAAAam91cm5leXMvYmFzaWMuam91cm5leS50c1BLBQYAAAAAAQABAEcAAACXAQAAAAA=',
+    screenshots: 'on',
+    'filter_journeys.match': 'check if input placeholder is correct',
+    ignore_https_errors: false,
+    'ssl.verification_mode': 'full',
+    'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
+    original_space: 'default',
+    fields: {
+      config_id: '01f28b5e-ddb9-4262-83f1-8a1c369aaddd',
+      'monitor.project.name': 'test-projects',
+      'monitor.project.id': 'test-projects',
+    },
+    fields_under_root: true,
+    throttling: { download: 5, upload: 3, latency: 20 },
+  },
+] as any;
