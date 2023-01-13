@@ -55,6 +55,7 @@ export class CloudDataMigrationPlugin
         }),
         'data-test-subj': 'migrate_data_to_cloud__help_menu_link',
         priority: 200,
+        external: true,
       });
     }
   }

@@ -8,7 +8,6 @@
 
 import React, { Component, Fragment } from 'react';
 import { combineLatest, Observable, Subscription } from 'rxjs';
-import { noop } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -201,10 +200,10 @@ export class HeaderHelpMenu extends Component<Props, State> {
     return globalHelpExtensionMenuLinks
       .sort((a, b) => b.priority - a.priority)
       .map((link, index) => {
-        const { linkType, content: text, href, ...rest } = link;
+        const { linkType, content: text, href, external, ...rest } = link;
         return createCustomLink(index, text, true, {
           href,
-          onClick: this.createOnClickHandler(href, navigateToUrl),
+          onClick: external ? undefined : this.createOnClickHandler(href, navigateToUrl),
           ...rest,
         });
       });
@@ -268,7 +267,7 @@ export class HeaderHelpMenu extends Component<Props, State> {
             const { linkType, content: text, href, external, ...rest } = link;
             return createCustomLink(index, text, addSpacer, {
               href,
-              onClick: external ? noop : this.createOnClickHandler(href, navigateToUrl),
+              onClick: this.createOnClickHandler(href, navigateToUrl),
               ...rest,
             });
           }
