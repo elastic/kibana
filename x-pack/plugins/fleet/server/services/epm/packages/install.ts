@@ -20,6 +20,8 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
 import pRetry from 'p-retry';
 
+import { uniqBy } from 'lodash';
+
 import { isPackagePrerelease, getNormalizedDataStreams } from '../../../../common/services';
 
 import { FLEET_INSTALL_FORMAT_VERSION } from '../../../constants/fleet_es_assets';
@@ -783,15 +785,10 @@ export const updateEsAssetReferences = async (
     return true;
   });
 
-  const deduplicatedAssets =
-    [...withAssetsRemoved, ...assetsToAdd].reduce((acc, currentAsset) => {
-      const foundAsset = acc.find((asset: EsAssetReference) => asset.id === currentAsset.id);
-      if (!foundAsset) {
-        return acc.concat([currentAsset]);
-      } else {
-        return acc;
-      }
-    }, [] as EsAssetReference[]) || [];
+  const deduplicatedAssets = uniqBy(
+    [...withAssetsRemoved, ...assetsToAdd],
+    ({ type, id }) => `${type}-${id}`
+  );
 
   const {
     attributes: { installed_es: updatedAssets },
@@ -813,10 +810,47 @@ export const updateEsAssetReferences = async (
         ),
       // Use a lower number of retries for ES assets since they're installed in serial and can only conflict with
       // the single Kibana update call.
-      { retries: 5 }
+      { retries: 10 }
     );
 
   return updatedAssets ?? [];
+};
+/**
+ * Utility function for adding assets the installed_es field of a package
+ * uses optimistic concurrency control to prevent missed updates
+ */
+export const optimisticallyAddEsAssetReferences = async (
+  savedObjectsClient: SavedObjectsClientContract,
+  pkgName: string,
+  assetsToAdd: EsAssetReference[]
+): Promise<EsAssetReference[]> => {
+  const addEsAsstes = async () => {
+    const so = await savedObjectsClient.get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName);
+
+    const installedEs = so.attributes.installed_es ?? [];
+
+    const deduplicatedAssets = uniqBy(
+      [...installedEs, ...assetsToAdd],
+      ({ type, id }) => `${type}-${id}`
+    );
+
+    const {
+      attributes: { installed_es: updatedAssets },
+    } = await savedObjectsClient.update<Installation>(
+      PACKAGES_SAVED_OBJECT_TYPE,
+      pkgName,
+      {
+        installed_es: deduplicatedAssets,
+      },
+      {
+        version: so.version,
+      }
+    );
+
+    return updatedAssets ?? [];
+  };
+
+  return pRetry(addEsAsstes, { retries: 20 });
 };
 
 export async function ensurePackagesCompletedInstall(
@@ -896,15 +930,31 @@ export async function installIndexTemplatesAndPipelines({
   // conditions on updating the installed_es field at the same time
   // These must be saved before we actually attempt to install the templates or pipelines so that we know what to
   // cleanup in the case that a single asset fails to install.
-  const newEsReferences = await updateEsAssetReferences(
-    savedObjectsClient,
-    packageInfo.name,
-    esReferences,
-    {
-      assetsToRemove: onlyForDataStreams ? [] : preparedIndexTemplates.assetsToRemove,
-      assetsToAdd: [...preparedIngestPipelines.assetsToAdd, ...preparedIndexTemplates.assetsToAdd],
-    }
-  );
+  let newEsReferences: EsAssetReference[] = [];
+
+  if (onlyForDataStreams) {
+    // if onlyForDataStreams is present that means we are in create package policy flow
+    // not install flow, meaning we do not have a lock on the installation SO
+    // so we need to use optimistic concurrency control
+    newEsReferences = await optimisticallyAddEsAssetReferences(
+      savedObjectsClient,
+      packageInfo.name,
+      [...preparedIngestPipelines.assetsToAdd, ...preparedIndexTemplates.assetsToAdd]
+    );
+  } else {
+    newEsReferences = await updateEsAssetReferences(
+      savedObjectsClient,
+      packageInfo.name,
+      esReferences,
+      {
+        assetsToRemove: preparedIndexTemplates.assetsToRemove,
+        assetsToAdd: [
+          ...preparedIngestPipelines.assetsToAdd,
+          ...preparedIndexTemplates.assetsToAdd,
+        ],
+      }
+    );
+  }
 
   // Install index templates and ingest pipelines in parallel since they typically take the longest
   const [installedTemplates] = await Promise.all([
