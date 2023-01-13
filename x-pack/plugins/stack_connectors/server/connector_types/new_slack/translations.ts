@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const NAME = i18n.translate('xpack.stackConnectors.new_slack.title', {
+export const SLACK_CONNECTOR_NAME = i18n.translate('xpack.stackConnectors.new_slack.title', {
   defaultMessage: 'New Slack',
 });
 

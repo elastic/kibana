@@ -14,7 +14,7 @@ import {
   ExternalServiceCredentials,
   // SlackPublicConfigurationType,
   SlackSecretConfigurationType,
-  // GetChannelsResponse,
+  GetChannelsResponse,
   PostMessageResponse,
   PostMessageParams,
 } from './types';
@@ -41,8 +41,7 @@ export const createExternalService = (
     },
   });
 
-  // Get rid in the future of return types
-  // const getChannels = async (): Promise<GetChannelsResponse> => ({});
+  const getChannels = async (): Promise<GetChannelsResponse> => ({});
   const postMessage = async ({
     channel,
     text,
@@ -69,7 +68,7 @@ export const createExternalService = (
   };
 
   return {
-    // getChannels,
+    getChannels,
     postMessage,
   };
 };

@@ -19,6 +19,7 @@ import { getServiceNowITOMConnectorType } from './servicenow_itom';
 import { getServiceNowITSMConnectorType } from './servicenow_itsm';
 import { getServiceNowSIRConnectorType } from './servicenow_sir';
 import { getSlackConnectorType } from './slack';
+import { getNewSlackConnectorType } from './new_slack';
 import { getSwimlaneConnectorType } from './swimlane';
 import { getTeamsConnectorType } from './teams';
 import { getTinesConnectorType } from './tines';

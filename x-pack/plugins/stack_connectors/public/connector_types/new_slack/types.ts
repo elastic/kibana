@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ExecutorSubActionPostMessageParams } from '../../../../server/connector_types/stack/new_slack/types';
+import type { ExecutorSubActionPostMessageParams } from '../../../server/connector_types/new_slack/types';
 
 export interface SlackActionParams {
   subAction: string;

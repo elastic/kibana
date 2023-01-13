@@ -28,13 +28,12 @@ import {
   // ExecutorSubActionGetChannelsParams,
   ExecutorSubActionPostMessageParams,
 } from './types';
-import * as i18n from './translations';
+import { SLACK_CONNECTOR_ID } from './constants';
+import { SLACK_CONNECTOR_NAME } from './translations';
 
 export type ActionParamsType = TypeOf<typeof ExecutorParamsSchema>;
 
 const supportedSubActions = ['getChannels', 'postMessage'];
-
-export const ConnectorTypeId = '.new_slack';
 
 export const getConnectorType = (): ConnectorType<
   {}, // SlackPublicConfigurationType,
@@ -43,9 +42,9 @@ export const getConnectorType = (): ConnectorType<
   SlackExecutorResultData | {}
 > => {
   return {
-    id: ConnectorTypeId,
+    id: SLACK_CONNECTOR_ID,
+    name: SLACK_CONNECTOR_NAME,
     minimumLicenseRequired: 'gold', // think about which lisence it should belong
-    name: i18n.NAME,
     supportedFeatureIds: [
       AlertingConnectorFeatureId,
       UptimeConnectorFeatureId,
