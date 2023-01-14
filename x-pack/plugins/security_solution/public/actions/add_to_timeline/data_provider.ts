@@ -67,12 +67,16 @@ export const createDataProviders = ({
   const arrayValues = Array.isArray(values) ? values : [values];
   return arrayValues.reduce<DataProvider[]>((dataProviders, value, index) => {
     let id: string = '';
-    const appendedUniqueId = `${contextId}-${eventId}-${field}-${index}-${value}`;
+    const appendedUniqueId = `${contextId}${
+      eventId ? `-${eventId}` : ''
+    }-${field}-${index}-${value}`;
 
     if (fieldType === GEO_FIELD_TYPE || field === MESSAGE_FIELD_NAME) {
       return dataProviders;
     } else if (fieldType === IP_FIELD_TYPE) {
-      id = `formatted-ip-data-provider-${contextId}-${field}-${value}-${eventId}`;
+      id = `formatted-ip-data-provider-${contextId}-${field}-${value}${
+        eventId ? `-${eventId}` : ''
+      }`;
       if (isString(value) && !isEmpty(value)) {
         let addresses = value;
         try {
