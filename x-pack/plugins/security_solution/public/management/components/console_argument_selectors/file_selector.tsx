@@ -79,7 +79,7 @@ export const ArgumentFileSelector = memo<CommandArgumentValueSelectorProps<File>
           anchorClassName="popoverAnchor"
           button={
             <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
-              <EuiFlexItem grow={false} className="eui-textTruncate">
+              <EuiFlexItem grow={false} className="eui-textTruncate" onClick={handleOpenPopover}>
                 <div className="eui-textTruncate">{valueText || INITIAL_DISPLAY_LABEL}</div>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
