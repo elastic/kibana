@@ -27,12 +27,17 @@ const ArgumentFileSelectorContainer = styled.div`
 
 const INITIAL_DISPLAY_LABEL = i18n.translate(
   'xpack.securitySolution.consoleArgumentSelectors.fileSelector.initialDisplayLabel',
-  { defaultMessage: 'Click folder icon to select file' }
+  { defaultMessage: 'Click to select file' }
 );
 
 const OPEN_FILE_PICKER_LABEL = i18n.translate(
   'xpack.securitySolution.consoleArgumentSelectors.fileSelector.filePickerButtonLabel',
   { defaultMessage: 'Open file picker' }
+);
+
+const NO_FILE_SELECTED = i18n.translate(
+  'xpack.securitySolution.consoleArgumentSelectors.fileSelector.noFileSelected',
+  { defaultMessage: 'No file selected' }
 );
 
 /**
@@ -80,7 +85,9 @@ export const ArgumentFileSelector = memo<CommandArgumentValueSelectorProps<File>
           button={
             <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
               <EuiFlexItem grow={false} className="eui-textTruncate" onClick={handleOpenPopover}>
-                <div className="eui-textTruncate">{valueText || INITIAL_DISPLAY_LABEL}</div>
+                <div className="eui-textTruncate" title={valueText || NO_FILE_SELECTED}>
+                  {valueText || INITIAL_DISPLAY_LABEL}
+                </div>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButtonIcon
