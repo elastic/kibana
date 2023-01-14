@@ -19,7 +19,7 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../../../common';
 
-import { CHART_HIDDEN_KEY } from '../components/layout/use_discover_histogram';
+import { CHART_HIDDEN_KEY } from '../components/layout/use_discover_histogram_old';
 
 function getDefaultColumns(savedSearch: SavedSearch, uiSettings: IUiSettingsClient) {
   if (savedSearch.columns && savedSearch.columns.length > 0) {

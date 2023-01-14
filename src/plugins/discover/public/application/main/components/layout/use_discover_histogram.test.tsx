@@ -30,7 +30,7 @@ import {
   HISTOGRAM_HEIGHT_KEY,
   useDiscoverHistogram,
   UseDiscoverHistogramProps,
-} from './use_discover_histogram';
+} from './use_discover_histogram_old';
 import { setTimeout } from 'timers/promises';
 import { calculateBounds } from '@kbn/data-plugin/public';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';

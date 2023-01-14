@@ -8,21 +8,16 @@
 
 import { UnifiedHistogramPublicPlugin } from './plugin';
 
-export type { UnifiedHistogramApi } from './container';
+export type {
+  UnifiedHistogramApi,
+  UnifiedHistogramContainerProps,
+  UnifiedHistogramInitializeOptions,
+} from './container';
 export { UnifiedHistogramContainer } from './container';
-export type { UnifiedHistogramLayoutProps } from './layout';
-export { UnifiedHistogramLayout } from './layout';
 export type {
   UnifiedHistogramServices,
-  UnifiedHistogramRequestContext,
-  UnifiedHistogramHitsContext,
-  UnifiedHistogramChartContext,
-  UnifiedHistogramBreakdownContext,
   UnifiedHistogramChartLoadEvent,
   UnifiedHistogramAdapters,
-  UnifiedHistogramRefetchMessage,
-  UnifiedHistogramInputMessage,
-  UnifiedHistogramInput$,
 } from './types';
 export { UnifiedHistogramFetchStatus } from './types';
 

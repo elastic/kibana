@@ -21,19 +21,20 @@ export const getTopPanelHeight = (
   storage: Storage,
   localStorageKeyPrefix: string
 ): number | undefined =>
-  storage.get(getLocalStorageKey(localStorageKeyPrefix, HISTOGRAM_HEIGHT_KEY));
+  storage.get(getLocalStorageKey(localStorageKeyPrefix, HISTOGRAM_HEIGHT_KEY)) ?? undefined;
 
 export const getBreakdownField = (
   storage: Storage,
   localStorageKeyPrefix: string
 ): string | undefined =>
-  storage.get(getLocalStorageKey(localStorageKeyPrefix, HISTOGRAM_BREAKDOWN_FIELD_KEY));
+  storage.get(getLocalStorageKey(localStorageKeyPrefix, HISTOGRAM_BREAKDOWN_FIELD_KEY)) ??
+  undefined;
 
 export const setChartHidden = (
   storage: Storage,
   localStorageKeyPrefix: string,
   chartHidden: boolean | undefined
-) => storage.set(getLocalStorageKey(localStorageKeyPrefix, CHART_HIDDEN_KEY), chartHidden);
+) => storage.set(getLocalStorageKey(localStorageKeyPrefix, CHART_HIDDEN_KEY), chartHidden) ?? false;
 
 export const setTopPanelHeight = (
   storage: Storage,

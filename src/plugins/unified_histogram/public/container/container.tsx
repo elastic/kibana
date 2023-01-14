@@ -6,14 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, {
-  ForwardedRef,
-  forwardRef,
-  useEffect,
-  useImperativeHandle,
-  useMemo,
-  useState,
-} from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import { Subject } from 'rxjs';
 import { UnifiedHistogramLayout, UnifiedHistogramLayoutProps } from '../layout';
 import type { UnifiedHistogramInputMessage } from '../types';
@@ -48,84 +41,93 @@ export interface UnifiedHistogramApi {
   refetch: () => void;
 }
 
-export const UnifiedHistogramContainer = forwardRef(
-  (containerProps: UnifiedHistogramContainerProps, ref: ForwardedRef<UnifiedHistogramApi>) => {
-    const [initialized, setInitialized] = useState(false);
-    const [layoutProps, setLayoutProps] = useState<LayoutProps>();
-    const [state, setState] = useState<UnifiedHistogramState>();
-    const [stateService, setStateService] = useState<UnifiedHistogramStateService>();
-    const input$ = useMemo(() => new Subject<UnifiedHistogramInputMessage>(), []);
+export const UnifiedHistogramContainer = forwardRef<
+  UnifiedHistogramApi,
+  UnifiedHistogramContainerProps
+>((containerProps, ref) => {
+  const [initialized, setInitialized] = useState(false);
+  const [layoutProps, setLayoutProps] = useState<LayoutProps>();
+  const [state, setState] = useState<UnifiedHistogramState>();
+  const [stateService, setStateService] = useState<UnifiedHistogramStateService>();
+  const stateProps = useStateProps({ state, stateService });
+  const input$ = useMemo(() => new Subject<UnifiedHistogramInputMessage>(), []);
 
-    useEffect(() => {
-      if (!stateService) {
-        return;
-      }
+  useImperativeHandle(
+    ref,
+    () => ({
+      initialized,
+      initialize: (options: UnifiedHistogramInitializeOptions) => {
+        if (initialized) {
+          throw Error('Unified Histogram can only be initialized once.');
+        }
 
-      const subscription = stateService.getState$().subscribe(setState);
+        const { services, disableAutoFetching, disableTriggers, disabledActions } = options;
 
-      return () => {
-        subscription.unsubscribe();
-      };
-    }, [stateService]);
+        setLayoutProps({ services, disableAutoFetching, disableTriggers, disabledActions });
+        setStateService(new UnifiedHistogramStateService(options));
+        setInitialized(true);
+      },
+      getState$: () => {
+        if (!stateService) {
+          throw Error('Unified Histogram must be initialized before calling getState$.');
+        }
 
-    useImperativeHandle(
-      ref,
-      () => ({
-        initialized,
-        initialize: (options: UnifiedHistogramInitializeOptions) => {
-          if (initialized) {
-            throw Error('Unified Histogram can only be initialized once.');
-          }
+        return stateService.getState$();
+      },
+      updateState: (stateUpdate) => {
+        if (!stateService) {
+          throw Error('Unified Histogram must be initialized before calling updateState.');
+        }
 
-          const { services, disableAutoFetching, disableTriggers, disabledActions } = options;
+        stateService.updateState(stateUpdate);
+      },
+      refetch: () => {
+        if (!initialized) {
+          throw Error('Unified Histogram must be initialized before calling refetch.');
+        }
 
-          setLayoutProps({ services, disableAutoFetching, disableTriggers, disabledActions });
-          setStateService(new UnifiedHistogramStateService(options));
-          setInitialized(true);
-        },
-        getState$: () => {
-          if (!stateService) {
-            throw Error('Unified Histogram must be initialized before calling getState$.');
-          }
+        input$.next({ type: 'refetch' });
+      },
+    }),
+    [initialized, input$, stateService]
+  );
 
-          return stateService.getState$();
-        },
-        updateState: (stateUpdate) => {
-          if (!stateService) {
-            throw Error('Unified Histogram must be initialized before calling updateState.');
-          }
-
-          stateService.updateState(stateUpdate);
-        },
-        refetch: () => {
-          if (!initialized) {
-            throw Error('Unified Histogram must be initialized before calling refetch.');
-          }
-
-          input$.next({ type: 'refetch' });
-        },
-      }),
-      [initialized, input$, stateService]
-    );
-
-    const stateProps = useStateProps({ state, stateService });
-
-    if (!layoutProps || !state) {
-      return null;
+  // Subscribe to state changes
+  useEffect(() => {
+    if (!stateService) {
+      return;
     }
 
-    return (
-      <UnifiedHistogramLayout
-        {...containerProps}
-        {...layoutProps}
-        {...stateProps}
-        dataView={state.dataView}
-        query={state.query}
-        filters={state.filters}
-        timeRange={state.timeRange}
-        topPanelHeight={state.topPanelHeight}
-        input$={input$}
-      />
-    );
+    const subscription = stateService.getState$().subscribe(setState);
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [stateService]);
+
+  // Clear the Lens request adapter when the chart is hidden
+  useEffect(() => {
+    if (state?.chartHidden || !stateProps.chart) {
+      stateService?.updateState({ lensRequestAdapter: undefined });
+    }
+  }, [state?.chartHidden, stateProps.chart, stateService]);
+
+  // Don't render anything until the container is initialized
+  if (!layoutProps || !state) {
+    return null;
   }
-);
+
+  return (
+    <UnifiedHistogramLayout
+      {...containerProps}
+      {...layoutProps}
+      {...stateProps}
+      dataView={state.dataView}
+      query={state.query}
+      filters={state.filters}
+      timeRange={state.timeRange}
+      topPanelHeight={state.topPanelHeight}
+      input$={input$}
+    />
+  );
+});

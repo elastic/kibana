@@ -7,9 +7,10 @@
  */
 
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { BehaviorSubject } from 'rxjs';
+import { isEqual } from 'lodash';
+import { BehaviorSubject, distinctUntilChanged } from 'rxjs';
 import { UnifiedHistogramFetchStatus } from '../..';
 import type { UnifiedHistogramServices } from '../../types';
 import {
@@ -27,7 +28,7 @@ export interface UnifiedHistogramState {
   dataView: DataView;
   filters: Filter[];
   lensRequestAdapter: RequestAdapter | undefined;
-  query: Query;
+  query: Query | AggregateQuery;
   requestAdapter: RequestAdapter | undefined;
   searchSessionId: string | undefined;
   timeInterval: string;
@@ -85,7 +86,7 @@ export class UnifiedHistogramStateService {
   }
 
   public getState$() {
-    return this.state$.asObservable();
+    return this.state$.pipe(distinctUntilChanged((prev, curr) => isEqual(prev, curr)));
   }
 
   public updateState(newState: Partial<UnifiedHistogramState>) {

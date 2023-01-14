@@ -29,7 +29,7 @@ import { CoreTheme } from '@kbn/core/public';
 import { act } from 'react-dom/test-utils';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { LocalStorageMock } from '../../../../__mocks__/local_storage_mock';
-import { HISTOGRAM_HEIGHT_KEY } from './use_discover_histogram';
+import { HISTOGRAM_HEIGHT_KEY } from './use_discover_histogram_old';
 import { createSearchSessionMock } from '../../../../__mocks__/search_session';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';

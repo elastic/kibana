@@ -6,5 +6,17 @@
  * Side Public License, v 1.
  */
 
-export type { UnifiedHistogramApi } from './container';
+export type {
+  UnifiedHistogramApi,
+  UnifiedHistogramContainerProps,
+  UnifiedHistogramInitializeOptions,
+} from './container';
 export { UnifiedHistogramContainer } from './container';
+export {
+  getChartHidden,
+  getTopPanelHeight,
+  getBreakdownField,
+  setChartHidden,
+  setTopPanelHeight,
+  setBreakdownField,
+} from './utils/local_storage_utils';

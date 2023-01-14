@@ -6,20 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React, { RefObject, useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  UnifiedHistogramLayout,
-  UnifiedHistogramContainer,
-  UnifiedHistogramApi,
-} from '@kbn/unified-histogram-plugin/public';
+import React, { RefObject } from 'react';
+import { UnifiedHistogramContainer } from '@kbn/unified-histogram-plugin/public';
 import { css } from '@emotion/react';
-import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useDiscoverHistogram } from './use_discover_histogram';
 import type { DiscoverSearchSessionManager } from '../../services/discover_search_session';
 import type { InspectorAdapters } from '../../hooks/use_inspector';
 import { type DiscoverMainContentProps, DiscoverMainContent } from './discover_main_content';
 import { ResetSearchButton } from './reset_search_button';
-import { getUiActions } from '../../../../kibana_services';
 
 export interface DiscoverHistogramLayoutProps extends DiscoverMainContentProps {
   resetSavedSearch: () => void;
@@ -41,12 +35,6 @@ export const DiscoverHistogramLayout = ({
   searchSessionManager,
   ...mainContentProps
 }: DiscoverHistogramLayoutProps) => {
-  const discoverServices = useDiscoverServices();
-  const services = useMemo(
-    () => ({ ...discoverServices, uiActions: getUiActions() }),
-    [discoverServices]
-  );
-
   const commonProps = {
     dataView,
     isPlainRecord,
@@ -54,7 +42,7 @@ export const DiscoverHistogramLayout = ({
     savedSearchData$: stateContainer.dataState.data$,
   };
 
-  const histogramProps = useDiscoverHistogram({
+  const { hideChart, setUnifiedHistogramApi } = useDiscoverHistogram({
     isTimeBased,
     inspectorAdapters,
     searchSessionManager,
@@ -62,53 +50,27 @@ export const DiscoverHistogramLayout = ({
     ...commonProps,
   });
 
-  const [unifiedHistogram, setUnifiedHistogram] = useState<UnifiedHistogramApi>();
-  const onUnifiedHistogramRef = useCallback(
-    (ref: UnifiedHistogramApi) => setUnifiedHistogram(ref),
-    []
-  );
-
-  useEffect(() => {
-    if (!unifiedHistogram) {
-      return;
-    }
-    setTimeout(() => {
-      if (unifiedHistogram && !unifiedHistogram.initialized) {
-        unifiedHistogram.initialize();
-      }
-    }, 5000);
-  }, [unifiedHistogram]);
-
-  if (!histogramProps) {
-    return null;
-  }
-
   const histogramLayoutCss = css`
     height: 100%;
   `;
 
   return (
-    <>
-      <UnifiedHistogramContainer ref={onUnifiedHistogramRef} />
-      <UnifiedHistogramLayout
-        resizeRef={resizeRef}
-        services={services}
-        dataView={dataView}
-        appendHitsCounter={
-          savedSearch?.id ? <ResetSearchButton resetSavedSearch={resetSavedSearch} /> : undefined
-        }
-        css={histogramLayoutCss}
-        {...histogramProps}
-      >
-        <DiscoverMainContent
-          {...commonProps}
-          {...mainContentProps}
-          savedSearch={savedSearch}
-          // The documents grid doesn't rerender when the chart visibility changes
-          // which causes it to render blank space, so we need to force a rerender
-          key={`docKey${histogramProps.chart?.hidden}`}
-        />
-      </UnifiedHistogramLayout>
-    </>
+    <UnifiedHistogramContainer
+      ref={setUnifiedHistogramApi}
+      resizeRef={resizeRef}
+      appendHitsCounter={
+        savedSearch?.id ? <ResetSearchButton resetSavedSearch={resetSavedSearch} /> : undefined
+      }
+      css={histogramLayoutCss}
+    >
+      <DiscoverMainContent
+        {...commonProps}
+        {...mainContentProps}
+        savedSearch={savedSearch}
+        // The documents grid doesn't rerender when the chart visibility changes
+        // which causes it to render blank space, so we need to force a rerender
+        key={`docKey${hideChart}`}
+      />
+    </UnifiedHistogramContainer>
   );
 };
