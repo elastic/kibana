@@ -15,6 +15,7 @@ import type {
   RuntimePrimitiveTypes,
 } from '../../shared_imports';
 import type { RuntimeFieldPainlessError } from '../../types';
+import type { PreviewController } from './preview_controller';
 
 export type From = 'cluster' | 'custom';
 
@@ -41,6 +42,14 @@ interface PreviewError {
         reason?: string;
         [key: string]: unknown;
       };
+}
+
+interface PinnedFields {
+  [key: string]: boolean;
+}
+
+export interface PreviewState {
+  pinnedFields: PinnedFields;
 }
 
 export interface FetchDocError {
@@ -93,6 +102,7 @@ export interface Change {
 export type ChangeSet = Record<string, Change>;
 
 export interface Context {
+  controller: PreviewController;
   fields: FieldPreview[];
   fieldPreview$: BehaviorSubject<FieldPreview[] | undefined>;
   error: PreviewError | null;
@@ -130,10 +140,6 @@ export interface Context {
     prev: () => void;
   };
   reset: () => void;
-  pinnedFields: {
-    value: { [key: string]: boolean };
-    set: React.Dispatch<React.SetStateAction<{ [key: string]: boolean }>>;
-  };
   validation: {
     setScriptEditorValidation: React.Dispatch<
       React.SetStateAction<{ isValid: boolean; isValidating: boolean; message: string | null }>

@@ -37,6 +37,7 @@ import type {
   FetchDocError,
   FieldPreview,
 } from './types';
+import type { PreviewController } from './preview_controller';
 
 const fieldPreviewContext = createContext<Context | undefined>(undefined);
 
@@ -63,7 +64,10 @@ export const valueTypeToSelectedType = (value: unknown): RuntimePrimitiveTypes =
   return 'keyword';
 };
 
-export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
+export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewController }> = ({
+  controller,
+  children,
+}) => {
   const previewCount = useRef(0);
 
   // We keep in cache the latest params sent to the _execute API so we don't make unecessary requests
@@ -118,8 +122,6 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   const [customDocIdToLoad, setCustomDocIdToLoad] = useState<string | null>(null);
   /** Define if we provide the document to preview from the cluster or from a custom JSON */
   const [from, setFrom] = useState<From>('cluster');
-  /** Map of fields pinned to the top of the list */
-  const [pinnedFields, setPinnedFields] = useState<{ [key: string]: boolean }>({});
   /** Keep track if the script painless syntax is being validated and if it is valid  */
   const [scriptEditorValidation, setScriptEditorValidation] = useState<{
     isValidating: boolean;
@@ -510,6 +512,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
 
   const ctx = useMemo<Context>(
     () => ({
+      controller,
       fields: previewResponse.fields,
       error: previewResponse.error,
       fieldPreview$: fieldPreview$.current,
@@ -546,15 +549,12 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
         set: setFrom,
       },
       reset,
-      pinnedFields: {
-        value: pinnedFields,
-        set: setPinnedFields,
-      },
       validation: {
         setScriptEditorValidation,
       },
     }),
     [
+      controller,
       previewResponse,
       fieldPreview$,
       fetchDocError,
@@ -575,7 +575,6 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       isPanelVisible,
       from,
       reset,
-      pinnedFields,
       initialPreviewComplete,
     ]
   );

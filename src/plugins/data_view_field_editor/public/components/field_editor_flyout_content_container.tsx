@@ -30,6 +30,7 @@ import {
 } from './field_editor_flyout_content';
 import { FieldEditorProvider } from './field_editor_context';
 import { FieldPreviewProvider } from './preview';
+import { PreviewController } from './preview/preview_controller';
 
 export interface Props {
   /** Handler for the "save" footer button */
@@ -84,6 +85,7 @@ export const FieldEditorFlyoutContentContainer = ({
   fieldFormats,
   uiSettings,
 }: Props) => {
+  const controller = new PreviewController({ dataView, search });
   const [isSaving, setIsSaving] = useState(false);
 
   const { fields } = dataView;
@@ -258,7 +260,7 @@ export const FieldEditorFlyoutContentContainer = ({
       fieldName$={new BehaviorSubject(fieldToEdit?.name || '')}
       subfields$={new BehaviorSubject(fieldToEdit?.fields)}
     >
-      <FieldPreviewProvider>
+      <FieldPreviewProvider controller={controller}>
         <FieldEditorFlyoutContent
           onSave={saveField}
           onCancel={onCancel}
