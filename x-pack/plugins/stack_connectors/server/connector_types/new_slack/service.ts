@@ -12,13 +12,12 @@ import { request, getErrorMessage } from '@kbn/actions-plugin/server/lib/axios_u
 import {
   ExternalService,
   ExternalServiceCredentials,
-  // SlackPublicConfigurationType,
-  SlackSecretConfigurationType,
   GetChannelsResponse,
   PostMessageResponse,
   PostMessageParams,
 } from './types';
-import * as i18n from './translations';
+import { SLACK_CONNECTOR_NAME } from './translations';
+import type { SlackSecrets } from '../../../common/slack/types';
 
 const SLACK_URL = 'https://slack.com/api/';
 
@@ -27,11 +26,10 @@ export const createExternalService = (
   logger: Logger,
   configurationUtilities: ActionsConfigurationUtilities
 ): ExternalService => {
-  // const { url } = config as SlackPublicConfigurationType;
-  const { token } = secrets as SlackSecretConfigurationType;
+  const { token } = secrets as SlackSecrets;
 
   if (!token) {
-    throw Error(`[Action]${i18n.NAME}: Wrong configuration.`);
+    throw Error(`[Action]${SLACK_CONNECTOR_NAME}: Wrong configuration.`);
   }
 
   const axiosInstance = axios.create({
@@ -41,7 +39,27 @@ export const createExternalService = (
     },
   });
 
-  const getChannels = async (): Promise<GetChannelsResponse> => ({});
+  const getChannels = async (): Promise<GetChannelsResponse> => {
+    try {
+      const res = await request({
+        axios: axiosInstance,
+        method: 'post',
+        url: 'conversations.list',
+        logger,
+        data: { body: {} },
+        configurationUtilities,
+      });
+      return res.data as GetChannelsResponse;
+    } catch (error) {
+      throw new Error(
+        getErrorMessage(
+          SLACK_CONNECTOR_NAME,
+          `Unable to get Channels. Error: ${error.message}.` // Maybe reuse createErrorMessage?
+        )
+      );
+    }
+  };
+
   const postMessage = async ({
     channel,
     text,
@@ -60,7 +78,7 @@ export const createExternalService = (
     } catch (error) {
       throw new Error(
         getErrorMessage(
-          i18n.NAME,
+          SLACK_CONNECTOR_NAME,
           `Unable to create comment at incident with id. Error: ${error.message}.` // Maybe reuse createErrorMessage?
         )
       );

@@ -6,32 +6,22 @@
  */
 
 import { ValidatorServices } from '@kbn/actions-plugin/server/types';
-import {
-  // SlackPublicConfigurationType,
-  SlackSecretConfigurationType,
-  ExternalServiceValidation,
-} from './types';
+import type { SlackConfig, SlackSecrets } from '../../../common/slack/types';
+import type { ExternalServiceValidation } from './types';
 // import * as i18n from './translations';
 
-// export const validateCommonConfig = (
-//   configObject: SlackPublicConfigurationType,
-//   validatorServices: ValidatorServices
-// ) => {
-//   const { configurationUtilities } = validatorServices;
-//   try {
-//     // configurationUtilities.ensureUriAllowed(configObject.url);
-//   } catch (allowedListError) {
-//     throw new Error(i18n.ALLOWED_HOSTS_ERROR(allowedListError.message));
-//   }
-// };
+export const validateCommonConfig = (
+  configObject: SlackConfig,
+  validatorServices: ValidatorServices
+) => {};
 
 // Why is this type empty?
 export const validateCommonSecrets = (
-  secrets: SlackSecretConfigurationType,
+  secrets: SlackSecrets,
   validatorServices: ValidatorServices
 ) => {};
 
 export const validate: ExternalServiceValidation = {
-  // config: validateCommonConfig,
+  config: validateCommonConfig,
   secrets: validateCommonSecrets,
 };

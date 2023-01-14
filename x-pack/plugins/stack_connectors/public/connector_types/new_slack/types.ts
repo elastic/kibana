@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import type { ExecutorSubActionPostMessageParams } from '../../../server/connector_types/new_slack/types';
+// import type { SubAction } from '../../../common/slack/types';
+// import type { ExecutorSubActionPostMessageParams } from '../../../server/connector_types/new_slack/types';
 
-export interface SlackActionParams {
-  subAction: string;
-  subActionParams: ExecutorSubActionPostMessageParams;
-}
-
-// export interface SlackConfig {
-//   apiUrl: string;
-//   projectKey: string;
+// export interface SlackActionParams {
+//   subAction: string;
+//   subActionParams: ExecutorSubActionPostMessageParams;
 // }
 
-export interface SlackSecrets {
-  token: string;
-}
+// export interface SlackExecuteActionParams {
+//   subAction: SubAction;
+//   subActionParams: {};
+// }

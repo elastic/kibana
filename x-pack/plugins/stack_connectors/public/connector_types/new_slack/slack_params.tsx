@@ -5,97 +5,149 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { TextAreaWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
-import { EuiSuperSelect, EuiHealth } from '@elastic/eui';
-import { SlackActionParams } from './types';
+import {
+  EuiSpacer,
+  EuiFilterGroup,
+  EuiPopover,
+  EuiFilterButton,
+  EuiSelectable,
+  EuiSelectableOption,
+} from '@elastic/eui';
+import { useSubAction } from '@kbn/triggers-actions-ui-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { SlackExecuteActionParams } from '../../../common/slack/types';
+import type { GetChannelsResponse } from '../../../common/slack/types';
 
-const SlackParamsFields: React.FunctionComponent<
-  ActionParamsProps<SlackActionParams['subActionParams']>
-> = ({ actionParams, editAction, index, errors, messageVariables, defaultMessage }) => {
-  console.log('1', actionParams);
-  console.log('2', editAction);
-  console.log('3', index);
-  console.log('4', errors);
-  const { channel, text } = actionParams;
-  const [[isUsingDefault, defaultMessageUsed], setDefaultMessageUsage] = useState<
-    [boolean, string | undefined]
-  >([false, defaultMessage]);
-  useEffect(() => {
-    if (
-      !text ||
-      (isUsingDefault && text === defaultMessageUsed && defaultMessageUsed !== defaultMessage)
-    ) {
-      setDefaultMessageUsage([true, defaultMessage]);
-      editAction('message', defaultMessage, index); // ????
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [defaultMessage]);
+interface ChannelsStatus {
+  label: string;
+  checked?: 'on';
+}
+const SlackParamsFields: React.FunctionComponent<ActionParamsProps<SlackExecuteActionParams>> = ({
+  actionConnector,
+  actionParams,
+  editAction,
+  index,
+  errors,
+  messageVariables,
+  defaultMessage,
+}) => {
+  const { subAction, subActionParams } = actionParams;
 
-  useEffect(() => {
-    // const app = new App({
-    //   token: process.env.SLACK_BOT_TOKEN,
-    //   signingSecret: process.env.SLACK_SIGNING_SECRET
-    // });
-    // const func = async () => {
-    //   const resp = await axios.post('https://slack.com/api/admin.usergroups.listChannels', {
-    //     headers: {
-    //       'Content-Type': 'application/json',
-    //       Authorization: 'Bearer ',
-    //       // ...(clusterUuid ? { 'X-Elastic-Cluster-ID': clusterUuid } : undefined),
-    //       // 'X-Elastic-Stack-Version': clusterVersionNumber ? clusterVersionNumber : '7.16.0',
-    //     },
-    //     timeout: 5000,
-    //   });
-    //   return resp;
-    // };
-    // func();
+  if (subAction === 'postMessage') {
+    const { channel, text } = subActionParams ?? {};
+    console.log(channel, text);
+  }
+  // const [[isUsingDefault, defaultMessageUsed], setDefaultMessageUsage] = useState<
+  //   [boolean, string | undefined]
+  // >([false, defaultMessage]);
+  // useEffect(() => {
+  //   if (
+  //     !text ||
+  //     (isUsingDefault && text === defaultMessageUsed && defaultMessageUsed !== defaultMessage)
+  //   ) {
+  //     setDefaultMessageUsage([true, defaultMessage]);
+  //     editAction('message', defaultMessage, index); // ????
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [defaultMessage]);
+
+  const {
+    response: { channels } = {},
+    isLoading: isLoadingChannels,
+    error: getChannelsError,
+  } = useSubAction<void, GetChannelsResponse>({
+    connectorId: actionConnector?.id,
+    subAction: 'getChannels',
   });
 
-  const slackChannels = [
-    {
-      value: 'channel1',
-      inputDisplay: (
-        <EuiHealth color="subdued" style={{ lineHeight: 'inherit' }}>
-          Channel1
-        </EuiHealth>
-      ),
-    },
-    {
-      value: 'channel2',
-      inputDisplay: (
-        <EuiHealth color="subdued" style={{ lineHeight: 'inherit' }}>
-          Channel2
-        </EuiHealth>
-      ),
-    },
-    {
-      value: 'channel3',
-      inputDisplay: (
-        <EuiHealth color="subdued" style={{ lineHeight: 'inherit' }}>
-          Channel3
-        </EuiHealth>
-      ),
-    },
-  ];
+  const slackChannels = useMemo(
+    () =>
+      channels
+        ?.filter((channel) => channel.is_channel)
+        .map((channel) => ({ label: channel.name })) ?? [],
+    [channels]
+  );
 
-  const [selectedSlackChannel, setSelectedSlackChannel] = useState(slackChannels[1].value);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [selectedChannels, setSelectedChannels] = useState<string[]>([]);
+
+  const button = (
+    <EuiFilterButton
+      iconType="arrowDown"
+      onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+      // isSelected={isPopoverOpen}
+      numFilters={selectedChannels.length}
+      hasActiveFilters={selectedChannels.length > 0}
+      numActiveFilters={selectedChannels.length}
+    >
+      <FormattedMessage
+        id="xpack.triggersActionsUI.sections.rulesList.ruleTagFilterButton"
+        defaultMessage="Channels"
+      />
+    </EuiFilterButton>
+  );
+
+  const options: ChannelsStatus[] = useMemo(
+    () =>
+      slackChannels.map((channel) => ({
+        label: channel.label,
+        ...(selectedChannels.includes(channel.label) ? { checked: 'on' } : {}),
+      })),
+    [slackChannels, selectedChannels]
+  );
+
+  const onChange = useCallback((newOptions: EuiSelectableOption[]) => {
+    const newSelectedChannels = newOptions.reduce<string[]>((result, option) => {
+      if (option.checked === 'on') {
+        result = [...result, option.label];
+      }
+      return result;
+    }, []);
+
+    setSelectedChannels(newSelectedChannels);
+  }, []);
 
   return (
     <>
-      <EuiSuperSelect
-        options={slackChannels}
-        valueOfSelected={selectedSlackChannel}
-        onChange={(value) => value}
-      />
+      <EuiFilterGroup>
+        <EuiPopover
+          id={'id'}
+          button={button}
+          isOpen={isPopoverOpen}
+          closePopover={() => setIsPopoverOpen(false)}
+        >
+          <EuiSelectable
+            searchable
+            data-test-subj={'test-data'}
+            isLoading={isLoadingChannels}
+            options={options}
+            loadingMessage={'Loading channels'}
+            noMatchesMessage={'No channels found'}
+            emptyMessage={'No channels available'}
+            // errorMessage={}
+            onChange={onChange}
+          >
+            {(list, search) => (
+              <>
+                {search}
+                <EuiSpacer size="xs" />
+                {list}
+              </>
+            )}
+          </EuiSelectable>
+        </EuiPopover>
+      </EuiFilterGroup>
+      <EuiSpacer size="m" />
       <TextAreaWithMessageVariables
         index={index}
         editAction={editAction}
         messageVariables={messageVariables}
         paramsProperty={'text'}
-        inputTargetValue={text}
+        // inputTargetValue={text}
         label={i18n.translate('xpack.stackConnectors.components.slack.messageTextAreaFieldLabel', {
           defaultMessage: 'Message',
         })}

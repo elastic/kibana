@@ -8,17 +8,13 @@
 import { TypeOf } from '@kbn/config-schema';
 import { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import {
-  // ExternalSlackServiceConfigurationSchema,
-  ExternalSlackServiceSecretConfigurationSchema,
-  ExecutorParamsSchema,
-  // ExecutorSubActionGetChannelsParamsSchema,
   ExecutorSubActionPostMessageParamsSchema,
-} from './schema';
+  ExecutorSubActionGetChannelsParamsSchema,
+} from '../../../common/slack/schema';
+import type { SlackConfig, SlackSecrets } from '../../../common/slack/types';
 
-// export type SlackPublicConfigurationType = TypeOf<typeof ExternalSlackServiceConfigurationSchema>;
-export type SlackSecretConfigurationType = TypeOf<
-  typeof ExternalSlackServiceSecretConfigurationSchema
->;
+// export type SlackConfig = TypeOf<typeof SlackConfigSchema>;
+// export type SlackSecrets = TypeOf<typeof SlackSecretsSchema>;
 
 export type SlackExecutorResultData = PostMessageResponse; // | GetChannelsResponse;
 
@@ -42,7 +38,7 @@ export interface PostMessageResponse {
     ts: string;
   };
 }
-export type GetChannelsResponse = Array<{
+export interface GetChannelsResponse {
   ok: true;
   channels: [
     {
@@ -53,7 +49,7 @@ export type GetChannelsResponse = Array<{
       is_private: boolean;
     }
   ];
-}>;
+}
 
 export interface ExternalServiceApi {
   getChannels: ({
@@ -70,17 +66,16 @@ export interface ExternalServiceApi {
   }) => Promise<PostMessageResponse>;
 }
 
-// Can I put something more spesific here?
 export interface ExternalServiceCredentials {
-  // config: SlackPublicConfigurationType;
-  secrets: SlackSecretConfigurationType;
+  config: SlackConfig;
+  secrets: SlackSecrets;
 }
 
-export type ExecutorParams = TypeOf<typeof ExecutorParamsSchema>;
+// export type ExecutorParams = TypeOf<typeof ExecutorParamsSchema>;
 
-// export type ExecutorSubActionGetChannelsParams = TypeOf<
-//   typeof ExecutorSubActionGetChannelsParamsSchema
-// >;
+export type ExecutorSubActionGetChannelsParams = TypeOf<
+  typeof ExecutorSubActionGetChannelsParamsSchema
+>;
 export type ExecutorSubActionPostMessageParams = TypeOf<
   typeof ExecutorSubActionPostMessageParamsSchema
 >;
@@ -95,6 +90,6 @@ export interface ExternalService {
 }
 
 export interface ExternalServiceValidation {
-  // config: (configObject: any, validatorServices: ValidatorServices) => void;
+  config: (configObject: {}, validatorServices: ValidatorServices) => void;
   secrets: (secrets: { token: string }, validatorServices: ValidatorServices) => void;
 }

@@ -29,8 +29,8 @@ export const CHANNEL_REQUIRED = i18n.translate(
 );
 
 export const TOKEN_LABEL = i18n.translate(
-  'xpack.stackConnectors.components.slack.webhookUrlTextFieldLabel',
+  'xpack.stackConnectors.components.slack.tokenTextFieldLabel',
   {
-    defaultMessage: 'App token',
+    defaultMessage: 'Api token',
   }
 );

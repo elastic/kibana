@@ -17,18 +17,17 @@ import {
   SecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common/types';
 import { validate } from './validators';
-import { ExternalSlackServiceSecretConfigurationSchema, ExecutorParamsSchema } from './schema';
+import { SlackConfigSchema, SlackSecretsSchema } from './schema';
+import { ExecutorParamsSchema } from '../../../common/slack/schema';
 import { createExternalService } from './service';
 import { api } from './api';
 import {
-  ExecutorParams,
-  // SlackPublicConfigurationType,
-  SlackSecretConfigurationType,
   SlackExecutorResultData,
-  // ExecutorSubActionGetChannelsParams,
   ExecutorSubActionPostMessageParams,
+  ExecutorSubActionGetChannelsParams,
 } from './types';
-import { SLACK_CONNECTOR_ID } from './constants';
+import { SlackConfig, SlackSecrets, SlackExecuteActionParams } from '../../../common/slack/types';
+import { SLACK_CONNECTOR_ID } from '../../../common/slack/constants';
 import { SLACK_CONNECTOR_NAME } from './translations';
 
 export type ActionParamsType = TypeOf<typeof ExecutorParamsSchema>;
@@ -36,9 +35,9 @@ export type ActionParamsType = TypeOf<typeof ExecutorParamsSchema>;
 const supportedSubActions = ['getChannels', 'postMessage'];
 
 export const getConnectorType = (): ConnectorType<
-  {}, // SlackPublicConfigurationType,
-  SlackSecretConfigurationType,
-  ExecutorParams,
+  SlackConfig,
+  SlackSecrets,
+  SlackExecuteActionParams,
   SlackExecutorResultData | {}
 > => {
   return {
@@ -51,12 +50,12 @@ export const getConnectorType = (): ConnectorType<
       SecurityConnectorFeatureId,
     ],
     validate: {
-      // config: {
-      //   schema: ExternalSlackServiceConfigurationSchema,
-      //   customValidator: validate.config,
-      // },
+      config: {
+        schema: SlackConfigSchema,
+        customValidator: validate.config,
+      },
       secrets: {
-        schema: ExternalSlackServiceSecretConfigurationSchema,
+        schema: SlackSecretsSchema,
         customValidator: validate.secrets,
       },
       params: {
@@ -68,18 +67,15 @@ export const getConnectorType = (): ConnectorType<
 };
 
 const executor = async (
-  execOptions: ConnectorTypeExecutorOptions<
-    {}, // SlackPublicConfigurationType,
-    SlackSecretConfigurationType,
-    ExecutorParams
-  >
+  execOptions: ConnectorTypeExecutorOptions<SlackConfig, SlackSecrets, SlackExecuteActionParams>
 ): Promise<ConnectorTypeExecutorResult<SlackExecutorResultData | {}>> => {
   const { actionId, params, secrets, configurationUtilities, logger } = execOptions;
-  const { subAction, subActionParams } = params as ExecutorParams;
+  const { subAction, subActionParams } = params;
   let data: SlackExecutorResultData | null = null;
 
   const externalService = createExternalService(
     {
+      config: {},
       secrets,
     },
     logger,
@@ -98,16 +94,11 @@ const executor = async (
     throw new Error(errorMessage);
   }
 
-  // if (subAction === 'getChannels') {
-  //   const getChannelsParams = subActionParams as ExecutorSubActionGetChannelsParams;
-  //   const res = await api.getChannels({
-  //     externalService,
-  //     params: getChannelsParams,
-  //   });
-  //   if (res != null) {
-  //     data = res;
-  //   }
-  // }
+  if (subAction === 'getChannels') {
+    data = await api.getChannels({
+      externalService,
+    });
+  }
 
   if (subAction === 'postMessage') {
     const postMessageParams = subActionParams as ExecutorSubActionPostMessageParams;

@@ -11,7 +11,11 @@ import type {
   GenericValidationResult,
   ActionTypeModel as ConnectorTypeModel,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { SlackSecrets, SlackActionParams } from './types';
+import { SlackConfig } from '../../../common/slack/types';
+// import { SlackActionParams } from './types';
+import { SlackSecrets } from '../../../common/slack/types';
+import { SLACK_CONNECTOR_ID } from '../../../common/slack/constants';
+import { SlackExecuteActionParams } from '../../../common/slack/types';
 
 export const SLACK_DESC = i18n.translate(
   'xpack.stackConnectors.components.slack.selectMessageText',
@@ -27,22 +31,24 @@ export const SLACK_TITLE = i18n.translate(
   }
 );
 
-export function getConnectorType(): ConnectorTypeModel<
-  {},
+export const getConnectorType = (): ConnectorTypeModel<
+  SlackConfig,
   SlackSecrets,
-  SlackActionParams['subActionParams']
-> {
+  SlackExecuteActionParams
+> => {
   return {
-    id: '.new_slack',
+    id: SLACK_CONNECTOR_ID,
     iconClass: 'logoSlack',
     selectMessage: SLACK_DESC,
     actionTypeTitle: SLACK_TITLE,
     actionConnectorFields: lazy(() => import('./slack_connectors')),
     actionParamsFields: lazy(() => import('./slack_params')),
     validateParams: async (
-      actionParams: SlackActionParams['subActionParams']
+      // check how does validation work
+      actionParams: SlackExecuteActionParams
     ): Promise<GenericValidationResult<unknown>> => {
       const translations = await import('./translations');
+      const { subAction, subActionParams } = actionParams;
       const errors = {
         'subActionParams.postMessage.channel': new Array<string>(),
         'subActionParams.postMessage.text': new Array<string>(),
@@ -50,14 +56,16 @@ export function getConnectorType(): ConnectorTypeModel<
       const validationResult = {
         errors,
       };
-      if (!actionParams.channel?.length) {
-        errors['subActionParams.postMessage.text'].push(translations.CHANNEL_REQUIRED);
-      }
+      if (subAction === 'postMessage') {
+        if (!subActionParams.channel?.length) {
+          errors['subActionParams.postMessage.channel'].push(translations.CHANNEL_REQUIRED);
+        }
 
-      if (!actionParams?.text?.length) {
-        errors['subActionParams.postMessage.text'].push(translations.MESSAGE_REQUIRED);
+        if (!subActionParams?.text?.length) {
+          errors['subActionParams.postMessage.text'].push(translations.MESSAGE_REQUIRED);
+        }
       }
       return validationResult;
     },
   };
-}
+};
