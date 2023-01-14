@@ -4309,6 +4309,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/whereis-pkg-cli@link:packages/kbn-whereis-pkg-cli":
+  version "0.0.0"
+  uid ""
+
 "@kbn/yarn-lock-validator@link:packages/kbn-yarn-lock-validator":
   version "0.0.0"
   uid ""
