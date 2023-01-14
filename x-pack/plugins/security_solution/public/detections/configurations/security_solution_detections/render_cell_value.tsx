@@ -43,6 +43,9 @@ export const RenderCellValue: React.FC<EuiDataGridCellValueElementProps & CellVa
     [columnId, props.isDetails, rowIndex, scopeId]
   );
 
+  // We check both ecsData and data for the suppression count because it could be in either one,
+  // depending on where RenderCellValue is being used - when used in cases, data is populated,
+  // whereas in the regular security alerts table it's in ecsData
   const ecsSuppressionCount = props.ecsData?.kibana?.alert.suppression?.docs_count?.[0];
   const dataSuppressionCount = find({ field: 'kibana.alert.suppression.docs_count' }, props.data)
     ?.value?.[0] as number | undefined;
