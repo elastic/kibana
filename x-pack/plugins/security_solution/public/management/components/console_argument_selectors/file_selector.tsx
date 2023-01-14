@@ -6,10 +6,24 @@
  */
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { EuiButtonIcon, EuiFilePicker, EuiPopover, htmlIdGenerator } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFilePicker,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  htmlIdGenerator,
+} from '@elastic/eui';
 import type { EuiFilePickerProps } from '@elastic/eui/src/components/form/file_picker/file_picker';
 import { i18n } from '@kbn/i18n';
+import styled from 'styled-components';
 import type { CommandArgumentValueSelectorProps } from '../console/types';
+
+const ArgumentFileSelectorContainer = styled.div`
+  .popoverAnchor {
+    display: block;
+  }
+`;
 
 const INITIAL_DISPLAY_LABEL = i18n.translate(
   'xpack.securitySolution.consoleArgumentSelectors.fileSelector.initialDisplayLabel',
@@ -56,21 +70,27 @@ export const ArgumentFileSelector = memo<CommandArgumentValueSelectorProps<File>
     );
 
     return (
-      <div>
-        <span>{valueText || INITIAL_DISPLAY_LABEL}</span>
-
+      <ArgumentFileSelectorContainer>
         <EuiPopover
           isOpen={isPopoverOpen}
           closePopover={handleClosePopover}
           anchorPosition="upCenter"
           initialFocus={`#${filePickerUUID}`}
+          anchorClassName="popoverAnchor"
           button={
-            <EuiButtonIcon
-              iconType="folderOpen"
-              size="xs"
-              onClick={handleOpenPopover}
-              aria-label={OPEN_FILE_PICKER_LABEL}
-            />
+            <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
+              <EuiFlexItem grow={false} className="eui-textTruncate">
+                <div className="eui-textTruncate">{valueText || INITIAL_DISPLAY_LABEL}</div>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  iconType="folderOpen"
+                  size="xs"
+                  onClick={handleOpenPopover}
+                  aria-label={OPEN_FILE_PICKER_LABEL}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           }
         >
           {isPopoverOpen && (
@@ -82,7 +102,7 @@ export const ArgumentFileSelector = memo<CommandArgumentValueSelectorProps<File>
             />
           )}
         </EuiPopover>
-      </div>
+      </ArgumentFileSelectorContainer>
     );
   }
 );
