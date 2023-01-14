@@ -282,7 +282,6 @@ type UserMessageDisplayLocation =
         | 'visualization' // blocks render
         | 'visualizationOnEmbeddable' // blocks render in embeddable only
         | 'visualizationInEditor' // blocks render in editor only
-        | 'suggestionPanel'
         | 'textBasedLanguagesQueryInput'
         | 'banner';
     }

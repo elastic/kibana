@@ -7,9 +7,6 @@ Array [
       Object {
         "id": "visualizationInEditor",
       },
-      Object {
-        "id": "suggestionPanel",
-      },
     ],
     "fixableInEditor": true,
     "longMessage": <React.Fragment>

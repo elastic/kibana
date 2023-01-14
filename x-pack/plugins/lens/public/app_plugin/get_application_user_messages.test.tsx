@@ -65,9 +65,6 @@ describe('application-level user messages', () => {
             Object {
               "id": "visualization",
             },
-            Object {
-              "id": "suggestionPanel",
-            },
           ],
           "fixableInEditor": false,
           "longMessage": "The visualization type id_for_type_that_doesnt_exist could not be resolved.",
@@ -96,9 +93,6 @@ describe('application-level user messages', () => {
           "displayLocations": Array [
             Object {
               "id": "visualization",
-            },
-            Object {
-              "id": "suggestionPanel",
             },
           ],
           "fixableInEditor": false,

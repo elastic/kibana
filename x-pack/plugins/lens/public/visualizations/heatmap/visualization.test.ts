@@ -620,9 +620,6 @@ describe('heatmap', () => {
               Object {
                 "id": "visualization",
               },
-              Object {
-                "id": "suggestionPanel",
-              },
             ],
             "fixableInEditor": true,
             "longMessage": "Configuration for the horizontal axis is missing.",

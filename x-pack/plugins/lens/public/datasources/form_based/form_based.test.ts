@@ -3007,9 +3007,6 @@ describe('IndexPattern Data Source', () => {
                 Object {
                   "id": "visualization",
                 },
-                Object {
-                  "id": "suggestionPanel",
-                },
               ],
               "fixableInEditor": true,
               "longMessage": "error 1",
@@ -3020,9 +3017,6 @@ describe('IndexPattern Data Source', () => {
               "displayLocations": Array [
                 Object {
                   "id": "visualization",
-                },
-                Object {
-                  "id": "suggestionPanel",
                 },
               ],
               "fixableInEditor": true,
@@ -3065,9 +3059,6 @@ describe('IndexPattern Data Source', () => {
                 Object {
                   "id": "visualization",
                 },
-                Object {
-                  "id": "suggestionPanel",
-                },
               ],
               "fixableInEditor": true,
               "longMessage": <FormattedMessage
@@ -3089,9 +3080,6 @@ describe('IndexPattern Data Source', () => {
               "displayLocations": Array [
                 Object {
                   "id": "visualization",
-                },
-                Object {
-                  "id": "suggestionPanel",
                 },
               ],
               "fixableInEditor": true,

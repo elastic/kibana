@@ -734,7 +734,6 @@ export const getXyVisualization = ({
               fixableInEditor: true,
               displayLocations: [
                 { id: 'visualization' },
-                { id: 'suggestionPanel' },
                 { id: 'dimensionTrigger', dimensionId: annotation.id, layerId: layer.layerId },
               ],
               shortMessage: errorMessage,
@@ -782,7 +781,7 @@ export const getXyVisualization = ({
           errors.push({
             severity: 'error',
             fixableInEditor: true,
-            displayLocations: [{ id: 'visualization' }, { id: 'suggestionPanel' }],
+            displayLocations: [{ id: 'visualization' }],
             shortMessage: result.payload.shortMessage,
             longMessage: result.payload.longMessage,
           });
@@ -796,7 +795,7 @@ export const getXyVisualization = ({
           ({
             severity: 'error',
             fixableInEditor: true,
-            displayLocations: [{ id: 'visualization' }, { id: 'suggestionPanel' }],
+            displayLocations: [{ id: 'visualization' }],
             shortMessage,
             longMessage,
           } as UserMessage)
@@ -812,7 +811,7 @@ export const getXyVisualization = ({
             errors.push({
               severity: 'error',
               fixableInEditor: true,
-              displayLocations: [{ id: 'visualization' }, { id: 'suggestionPanel' }],
+              displayLocations: [{ id: 'visualization' }],
               shortMessage: i18n.translate('xpack.lens.xyVisualization.dataTypeFailureYShort', {
                 defaultMessage: `Wrong data type for {axis}.`,
                 values: {

@@ -177,11 +177,7 @@ export function getTextBasedDatasource({
         const message: UserMessage = {
           severity: 'error',
           fixableInEditor: true,
-          displayLocations: [
-            { id: 'visualization' },
-            { id: 'suggestionPanel' },
-            { id: 'textBasedLanguagesQueryInput' },
-          ],
+          displayLocations: [{ id: 'visualization' }, { id: 'textBasedLanguagesQueryInput' }],
           shortMessage: err.message,
           longMessage: err.message,
         };

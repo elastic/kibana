@@ -312,7 +312,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
             uniqueId: EXPRESSION_BUILD_ERROR_ID,
             severity: 'error',
             fixableInEditor: true,
-            displayLocations: [{ id: 'visualization' }, { id: 'suggestionPanel' }],
+            displayLocations: [{ id: 'visualization' }],
             shortMessage: i18n.translate('xpack.lens.editorFrame.buildExpressionError', {
               defaultMessage: 'An unexpected error occurred while preparing the chart',
             }),

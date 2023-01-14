@@ -551,7 +551,7 @@ export const getPieVisualization = ({
           {
             severity: 'error',
             fixableInEditor: true,
-            displayLocations: [{ id: 'visualization' }, { id: 'suggestionPanel' }],
+            displayLocations: [{ id: 'visualization' }],
             shortMessage: i18n.translate('xpack.lens.pie.tooManyDimensions', {
               defaultMessage: 'Your visualization has too many dimensions.',
             }),

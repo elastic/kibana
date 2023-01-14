@@ -445,7 +445,7 @@ export const getHeatmapVisualization = ({
       errors.push({
         severity: 'error',
         fixableInEditor: true,
-        displayLocations: [{ id: 'visualization' }, { id: 'suggestionPanel' }],
+        displayLocations: [{ id: 'visualization' }],
         shortMessage: i18n.translate(
           'xpack.lens.heatmapVisualization.missingXAccessorShortMessage',
           {

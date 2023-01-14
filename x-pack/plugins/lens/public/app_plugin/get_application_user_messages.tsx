@@ -83,7 +83,7 @@ function getUnknownVisualizationTypeError(visType: string): UserMessage {
   return {
     severity: 'error',
     fixableInEditor: false,
-    displayLocations: [{ id: 'visualization' }, { id: 'suggestionPanel' }],
+    displayLocations: [{ id: 'visualization' }],
     shortMessage: i18n.translate('xpack.lens.unknownVisType.shortMessage', {
       defaultMessage: `Unknown visualization type`,
     }),
@@ -100,7 +100,7 @@ function getUnknownDatasourceTypeError(): UserMessage {
   return {
     severity: 'error',
     fixableInEditor: false,
-    displayLocations: [{ id: 'visualization' }, { id: 'suggestionPanel' }],
+    displayLocations: [{ id: 'visualization' }],
     shortMessage: i18n.translate('xpack.lens.unknownDatasourceType.shortMessage', {
       defaultMessage: `Unknown datasource type`,
     }),
@@ -123,7 +123,7 @@ function getMissingIndexPatternsErrors(
     {
       severity: 'error',
       fixableInEditor: canFix,
-      displayLocations: [{ id: 'visualizationInEditor' }, { id: 'suggestionPanel' }],
+      displayLocations: [{ id: 'visualizationInEditor' }],
       shortMessage: '',
       longMessage: (
         <>

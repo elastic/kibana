@@ -552,9 +552,6 @@ describe('Textbased Data Source', () => {
                 "id": "visualization",
               },
               Object {
-                "id": "suggestionPanel",
-              },
-              Object {
                 "id": "textBasedLanguagesQueryInput",
               },
             ],
@@ -567,9 +564,6 @@ describe('Textbased Data Source', () => {
             "displayLocations": Array [
               Object {
                 "id": "visualization",
-              },
-              Object {
-                "id": "suggestionPanel",
               },
               Object {
                 "id": "textBasedLanguagesQueryInput",

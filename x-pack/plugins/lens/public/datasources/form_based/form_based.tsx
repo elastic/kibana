@@ -838,7 +838,7 @@ export function getFormBasedDatasource({
             const message: UserMessage = {
               severity: 'error',
               fixableInEditor: true,
-              displayLocations: [{ id: 'visualization' }, { id: 'suggestionPanel' }],
+              displayLocations: [{ id: 'visualization' }],
               shortMessage: '',
               longMessage:
                 typeof error === 'string' ? (
