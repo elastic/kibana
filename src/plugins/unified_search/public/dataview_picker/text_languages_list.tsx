@@ -31,6 +31,7 @@ export default function TextBasedLanguagesList({
       value?: string;
       checked?: 'on' | 'off' | undefined;
     }>
+      key="textbasedLanguages-options"
       data-test-subj="text-based-languages-switcher"
       singleSelection="always"
       options={textBasedLanguages.map((lang) => ({

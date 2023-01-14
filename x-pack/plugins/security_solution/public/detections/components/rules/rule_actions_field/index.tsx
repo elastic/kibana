@@ -13,7 +13,7 @@ import ReactMarkdown from 'react-markdown';
 import styled from 'styled-components';
 
 import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
-import type { RuleAction } from '@kbn/alerting-plugin/common';
+import type { RuleAction, RuleActionParam } from '@kbn/alerting-plugin/common';
 import { SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import type { FieldHook } from '../../../../shared_imports';
 import { useFormContext } from '../../../../shared_imports';
@@ -95,8 +95,7 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
   );
 
   const setActionParamsProperty = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (key: string, value: any, index: number) => {
+    (key: string, value: RuleActionParam, index: number) => {
       // validation is not triggered correctly when actions params updated (more details in https://github.com/elastic/kibana/issues/142217)
       // wrapping field.setValue in setTimeout fixes the issue above
       // and triggers validation after params have been updated
@@ -128,9 +127,11 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
         setActionIdByIndex,
         setActions: setAlertActionsProperty,
         setActionParamsProperty,
+        setActionFrequencyProperty: () => {},
         featureId: SecurityConnectorFeatureId,
         defaultActionMessage: DEFAULT_ACTION_MESSAGE,
         hideActionHeader: true,
+        hideNotifyWhen: true,
       }),
     [
       actions,

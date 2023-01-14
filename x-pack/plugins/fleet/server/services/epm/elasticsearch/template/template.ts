@@ -18,7 +18,6 @@ import type {
 } from '../../../../types';
 import { appContextService } from '../../..';
 import { getRegistryDataStreamAssetBaseName } from '../../../../../common/services';
-import { builRoutingPath } from '../../../package_policies';
 import {
   FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
   FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME,
@@ -66,6 +65,7 @@ export function getTemplate({
   hidden,
   registryElasticsearch,
   mappings,
+  isIndexModeTimeSeries,
 }: {
   templateIndexPattern: string;
   packageName: string;
@@ -74,6 +74,7 @@ export function getTemplate({
   mappings: IndexTemplateMappings;
   hidden?: boolean;
   registryElasticsearch?: RegistryElasticsearch | undefined;
+  isIndexModeTimeSeries?: boolean;
 }): IndexTemplate {
   const template = getBaseTemplate({
     templateIndexPattern,
@@ -83,6 +84,7 @@ export function getTemplate({
     registryElasticsearch,
     hidden,
     mappings,
+    isIndexModeTimeSeries,
   });
   if (template.template.settings.index.final_pipeline) {
     throw new Error(`Error template for ${templateIndexPattern} contains a final_pipeline`);
@@ -99,6 +101,10 @@ export function getTemplate({
   return template;
 }
 
+interface GenerateMappingsOptions {
+  isIndexModeTimeSeries?: boolean;
+}
+
 /**
  * Generate mapping takes the given nested fields array and creates the Elasticsearch
  * mapping properties out of it.
@@ -107,37 +113,44 @@ export function getTemplate({
  *
  * @param fields
  */
-export function generateMappings(fields: Field[]): IndexTemplateMappings {
+export function generateMappings(
+  fields: Field[],
+  options?: GenerateMappingsOptions
+): IndexTemplateMappings {
   const dynamicTemplates: Array<Record<string, Properties>> = [];
   const dynamicTemplateNames = new Set<string>();
 
-  const { properties } = _generateMappings(fields, {
-    addDynamicMapping: (dynamicMapping: {
-      path: string;
-      matchingType: string;
-      pathMatch: string;
-      properties: string;
-    }) => {
-      const name = dynamicMapping.path;
-      if (dynamicTemplateNames.has(name)) {
-        return;
-      }
+  const { properties } = _generateMappings(
+    fields,
+    {
+      addDynamicMapping: (dynamicMapping: {
+        path: string;
+        matchingType: string;
+        pathMatch: string;
+        properties: string;
+      }) => {
+        const name = dynamicMapping.path;
+        if (dynamicTemplateNames.has(name)) {
+          return;
+        }
 
-      const dynamicTemplate: Properties = {
-        mapping: dynamicMapping.properties,
-      };
+        const dynamicTemplate: Properties = {
+          mapping: dynamicMapping.properties,
+        };
 
-      if (dynamicMapping.matchingType) {
-        dynamicTemplate.match_mapping_type = dynamicMapping.matchingType;
-      }
+        if (dynamicMapping.matchingType) {
+          dynamicTemplate.match_mapping_type = dynamicMapping.matchingType;
+        }
 
-      if (dynamicMapping.pathMatch) {
-        dynamicTemplate.path_match = dynamicMapping.pathMatch;
-      }
-      dynamicTemplateNames.add(name);
-      dynamicTemplates.push({ [dynamicMapping.path]: dynamicTemplate });
+        if (dynamicMapping.pathMatch) {
+          dynamicTemplate.path_match = dynamicMapping.pathMatch;
+        }
+        dynamicTemplateNames.add(name);
+        dynamicTemplates.push({ [dynamicMapping.path]: dynamicTemplate });
+      },
     },
-  });
+    options
+  );
 
   return dynamicTemplates.length
     ? {
@@ -160,7 +173,8 @@ function _generateMappings(
   ctx: {
     addDynamicMapping: any;
     groupFieldName?: string;
-  }
+  },
+  options?: GenerateMappingsOptions
 ): {
   properties: IndexTemplateMappings['properties'];
   hasNonDynamicTemplateMappings: boolean;
@@ -220,12 +234,16 @@ function _generateMappings(
 
         switch (type) {
           case 'group':
-            const mappings = _generateMappings(field.fields!, {
-              ...ctx,
-              groupFieldName: ctx.groupFieldName
-                ? `${ctx.groupFieldName}.${field.name}`
-                : field.name,
-            });
+            const mappings = _generateMappings(
+              field.fields!,
+              {
+                ...ctx,
+                groupFieldName: ctx.groupFieldName
+                  ? `${ctx.groupFieldName}.${field.name}`
+                  : field.name,
+              },
+              options
+            );
             if (!mappings.hasNonDynamicTemplateMappings) {
               return;
             }
@@ -237,12 +255,16 @@ function _generateMappings(
             break;
           case 'group-nested':
             fieldProps = {
-              properties: _generateMappings(field.fields!, {
-                ...ctx,
-                groupFieldName: ctx.groupFieldName
-                  ? `${ctx.groupFieldName}.${field.name}`
-                  : field.name,
-              }).properties,
+              properties: _generateMappings(
+                field.fields!,
+                {
+                  ...ctx,
+                  groupFieldName: ctx.groupFieldName
+                    ? `${ctx.groupFieldName}.${field.name}`
+                    : field.name,
+                },
+                options
+              ).properties,
               ...generateNestedProps(field),
               type: 'nested',
             };
@@ -312,11 +334,14 @@ function _generateMappings(
               break;
             default: {
               const meta = {};
-              if ('metric_type' in field) Reflect.set(meta, 'metric_type', field.metric_type);
               if ('unit' in field) Reflect.set(meta, 'unit', field.unit);
               fieldProps.meta = meta;
             }
           }
+        }
+
+        if (options?.isIndexModeTimeSeries && 'metric_type' in field) {
+          fieldProps.time_series_metric = field.metric_type;
         }
 
         props[field.name] = fieldProps;
@@ -486,6 +511,7 @@ function getBaseTemplate({
   hidden,
   registryElasticsearch,
   mappings,
+  isIndexModeTimeSeries,
 }: {
   templateIndexPattern: string;
   packageName: string;
@@ -494,22 +520,14 @@ function getBaseTemplate({
   hidden?: boolean;
   registryElasticsearch: RegistryElasticsearch | undefined;
   mappings: IndexTemplateMappings;
+  isIndexModeTimeSeries?: boolean;
 }): IndexTemplate {
   const _meta = getESAssetMetadata({ packageName });
 
-  const isIndexModeTimeSeries = registryElasticsearch?.index_mode === 'time_series';
-
-  const mappingsProperties = mappings?.properties ?? {};
-
-  // All mapped fields of type keyword and time_series_dimension enabled will be included in the generated routing path
-  // Temporarily generating routing_path here until fixed in elasticsearch https://github.com/elastic/elasticsearch/issues/91592
-  const routingPath = builRoutingPath(mappingsProperties);
-
   let settingsIndex = {};
-  if (isIndexModeTimeSeries && routingPath.length > 0) {
+  if (isIndexModeTimeSeries) {
     settingsIndex = {
       mode: 'time_series',
-      routing_path: routingPath,
     };
   }
 

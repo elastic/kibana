@@ -12,6 +12,10 @@ import { ModuleType } from './module_type';
 import { RANDOM_TEST_FILE_NAMES, TEST_DIR, TEST_TAG } from './config';
 import { RepoPath } from './repo_path';
 
+const STATIC_EXTS = new Set(
+  'json|woff|woff2|ttf|eot|svg|ico|png|jpg|gif|jpeg|html|md|txt|tmpl'.split('|').map((e) => `.${e}`)
+);
+
 export class RepoSourceClassifier {
   constructor(private readonly resolver: ImportResolver) {}
 
@@ -124,7 +128,7 @@ export class RepoSourceClassifier {
    * Determine the "type" of a file
    */
   private getType(path: RepoPath): ModuleType {
-    if (path.getExtname() === '.json') {
+    if (STATIC_EXTS.has(path.getExtname())) {
       return 'static';
     }
 
@@ -214,6 +218,7 @@ export class RepoSourceClassifier {
       type: this.getType(path),
       repoRel: path.getRepoRel(),
       pkgInfo: path.getPkgInfo() ?? undefined,
+      dirs: path.getSegs(),
     };
     this.ids.set(path, id);
     return id;

@@ -21,12 +21,11 @@ import { withSuspense } from '@kbn/presentation-util-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { extractContainerType, extractVisualizationType } from '@kbn/chart-expressions-common';
 import { VisTypePieDependencies } from '../plugin';
 import { PARTITION_VIS_RENDERER_NAME } from '../../common/constants';
 import { CellValueAction, GetCompatibleCellValueActions } from '../types';
 import { ChartTypes, PartitionVisParams, RenderValue } from '../../common/types';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { extractContainerType, extractVisualizationType } from '../../../common';
 
 export const strings = {
   getDisplayName: () =>

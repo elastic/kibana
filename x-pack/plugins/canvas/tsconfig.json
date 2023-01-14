@@ -75,7 +75,6 @@
     "@kbn/optimizer-webpack-helpers",
     "@kbn/storybook",
     "@kbn/core-apps-server-internal",
-    "@kbn/ui-framework",
     "@kbn/flot-charts",
   ],
   "exclude": [

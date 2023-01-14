@@ -14,7 +14,8 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiThemeProvider as StyledComponentsThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { useUrlState } from '@kbn/ml-url-state';
-import { NavigateToPath, useMlKibana, useTimefilter } from '../../contexts/kibana';
+import { useTimefilter } from '@kbn/ml-date-picker';
+import { NavigateToPath, useMlKibana } from '../../contexts/kibana';
 
 import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
 

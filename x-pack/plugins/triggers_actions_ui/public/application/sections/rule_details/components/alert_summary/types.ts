@@ -12,6 +12,7 @@ import { AlertSummaryTimeRange } from '../../../../hooks/use_load_alert_summary'
 export interface AlertSummaryWidgetProps {
   featureIds?: ValidFeatureId[];
   filter?: estypes.QueryDslQueryContainer;
-  onClick: (status?: AlertStatus) => void;
+  fullSize?: boolean;
+  onClick?: (status?: AlertStatus) => void;
   timeRange: AlertSummaryTimeRange;
 }

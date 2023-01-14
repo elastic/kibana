@@ -24,7 +24,7 @@ const config = new Config(
     workspaces: {
       packages: [],
     },
-  },
+  } as any,
   '1.2.3',
   REPO_ROOT,
   {
@@ -34,6 +34,8 @@ const config = new Config(
   },
   false,
   false,
+  null,
+  '',
   '',
   false,
   true

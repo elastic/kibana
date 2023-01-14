@@ -11,6 +11,7 @@ import {
   EuiHealth,
   EuiIcon,
   EuiLink,
+  EuiLoadingContent,
   EuiPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -24,7 +25,7 @@ import { useStatusByLocation } from '../../hooks';
 import { useSelectedLocation } from './hooks/use_selected_location';
 import { useSelectedMonitor } from './hooks/use_selected_monitor';
 
-export const MonitorDetailsLocation: React.FC = () => {
+export const MonitorDetailsLocation = ({ isDisabled }: { isDisabled?: boolean }) => {
   const { monitor } = useSelectedMonitor();
   const { services } = useKibana();
   const { locations } = useLocations();
@@ -44,8 +45,8 @@ export const MonitorDetailsLocation: React.FC = () => {
 
     if (monitor?.locations && monitor.locations.length > 1) {
       const button = (
-        <EuiLink onClick={openLocationList}>
-          {selectedLocation.label} <EuiIcon type="arrowDown" />
+        <EuiLink onClick={openLocationList} disabled={isDisabled}>
+          {selectedLocation.label} {!isDisabled && <EuiIcon type="arrowDown" />}
         </EuiLink>
       );
 
@@ -108,6 +109,7 @@ export const MonitorDetailsLocation: React.FC = () => {
     }
   }, [
     closeLocationList,
+    isDisabled,
     isLocationListOpen,
     loadingLocationsStatus,
     locations,
@@ -116,11 +118,16 @@ export const MonitorDetailsLocation: React.FC = () => {
     openLocationList,
     selectedLocation,
     services.application,
-    theme,
+    theme.eui.euiColorVis0,
+    theme.eui.euiColorVis9,
   ]);
 
   if (!selectedLocation || !monitor) {
-    return null;
+    return (
+      <EuiDescriptionList
+        listItems={[{ title: LOCATION_LABEL, description: <EuiLoadingContent lines={1} /> }]}
+      />
+    );
   }
 
   return <EuiDescriptionList listItems={[{ title: LOCATION_LABEL, description: locationList }]} />;

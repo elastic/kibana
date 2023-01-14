@@ -15,8 +15,12 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { FETCH_STATUS } from '@kbn/observability-plugin/public';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
+import {
+  manualTestMonitorAction,
+  manualTestRunInProgressSelector,
+} from '../../../../state/manual_test_runs';
 import { toggleStatusAlert } from '../../../../../../../common/runtime_types/monitor_management/alert_config';
 import { useSelectedMonitor } from '../../../monitor_details/hooks/use_selected_monitor';
 import { useMonitorAlertEnable } from '../../../../hooks/use_monitor_alert_enable';
@@ -124,6 +128,8 @@ export function ActionsPopover({
     monitor.isEnabled ? disableMonitorLabel : enableMonitorLabel
   );
 
+  const testInProgress = useSelector(manualTestRunInProgressSelector(monitor.configId));
+
   useEffect(() => {
     if (status === FETCH_STATUS.LOADING) {
       setEnableLabel(loadingLabel(monitor.isEnabled));
@@ -140,7 +146,12 @@ export function ActionsPopover({
     onClick: () => {
       if (locationName) {
         dispatch(
-          setFlyoutConfig({ configId: monitor.configId, location: locationName, id: monitor.id })
+          setFlyoutConfig({
+            configId: monitor.configId,
+            location: locationName,
+            id: monitor.id,
+            locationId: monitor.location.id,
+          })
         );
         setIsPopoverOpen(false);
       }
@@ -156,12 +167,16 @@ export function ActionsPopover({
       href: detailUrl,
     },
     quickInspectPopoverItem,
-    // not rendering this for now because the manual test flyout is
-    // still in the design phase
-    // {
-    //   name: 'Run test manually',
-    //   icon: 'beaker',
-    // },
+    {
+      name: runTestManually,
+      icon: 'beaker',
+      disabled: testInProgress,
+      onClick: () => {
+        dispatch(manualTestMonitorAction.get(monitor.configId));
+        dispatch(setFlyoutConfig(null));
+        setIsPopoverOpen(false);
+      },
+    },
     {
       name: actionsMenuEditMonitorName,
       icon: 'pencil',
@@ -212,6 +227,7 @@ export function ActionsPopover({
               size={iconSize}
               display="empty"
               onClick={() => setIsPopoverOpen((b: boolean) => !b)}
+              title={openActionsMenuAria}
             />
           </IconPanel>
         }
@@ -238,6 +254,10 @@ export function ActionsPopover({
 
 const quickInspectName = i18n.translate('xpack.synthetics.overview.actions.quickInspect.title', {
   defaultMessage: 'Quick inspect',
+});
+
+const runTestManually = i18n.translate('xpack.synthetics.overview.actions.runTestManually.title', {
+  defaultMessage: 'Run test manually',
 });
 
 const openActionsMenuAria = i18n.translate(

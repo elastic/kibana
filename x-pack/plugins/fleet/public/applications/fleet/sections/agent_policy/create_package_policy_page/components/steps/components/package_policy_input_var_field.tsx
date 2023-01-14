@@ -40,6 +40,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
   frozen?: boolean;
   packageType?: string;
   datasets?: string[];
+  isEditPage?: boolean;
 }> = memo(
   ({
     varDef,
@@ -50,6 +51,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
     frozen,
     packageType,
     datasets = [],
+    isEditPage = false,
   }) => {
     const [isDirty, setIsDirty] = useState<boolean>(false);
     const { multi, required, type, title, name, description } = varDef;
@@ -68,9 +70,15 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
           />
         );
       }
-
       if (name === 'data_stream.dataset' && packageType === 'input') {
-        return <DatasetComboBox datasets={datasets} value={value} onChange={onChange} />;
+        return (
+          <DatasetComboBox
+            datasets={datasets}
+            value={value}
+            onChange={onChange}
+            isDisabled={isEditPage}
+          />
+        );
       }
       switch (type) {
         case 'textarea':
@@ -152,7 +160,19 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
             />
           );
       }
-    }, [isInvalid, multi, onChange, type, value, fieldLabel, frozen, datasets, name, packageType]);
+    }, [
+      multi,
+      name,
+      packageType,
+      type,
+      value,
+      onChange,
+      frozen,
+      datasets,
+      isEditPage,
+      isInvalid,
+      fieldLabel,
+    ]);
 
     // Boolean cannot be optional by default set to false
     const isOptional = useMemo(() => type !== 'bool' && !required, [required, type]);

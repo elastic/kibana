@@ -12,6 +12,16 @@ import expect from '@kbn/expect';
 import { first, last, times } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
+const SAMPLE_SOURCEMAP = {
+  version: 3,
+  file: 'out.js',
+  sourceRoot: '',
+  sources: ['foo.js', 'bar.js'],
+  sourcesContent: ['', null],
+  names: ['src', 'maps', 'are', 'fun'],
+  mappings: 'A,AAAB;;ABCDE;',
+};
+
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
@@ -126,11 +136,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           serviceName: 'uploading-test',
           serviceVersion: '1.0.0',
           bundleFilePath: 'bar',
-          sourcemap: {
-            version: 123,
-            sources: [''],
-            mappings: '',
-          },
+          sourcemap: SAMPLE_SOURCEMAP,
         });
 
         await waitForSourceMapCount(1);
@@ -178,11 +184,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             serviceName: 'list-test',
             serviceVersion: `1.0.${i}`,
             bundleFilePath: 'bar',
-            sourcemap: {
-              version: 123,
-              sources: [''],
-              mappings: '',
-            },
+            sourcemap: SAMPLE_SOURCEMAP,
           });
         }
         await waitForSourceMapCount(totalCount);
@@ -241,11 +243,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           serviceName: `delete-test_${getRandomString()}`,
           serviceVersion: '1.0.0',
           bundleFilePath: 'bar',
-          sourcemap: {
-            version: 123,
-            sources: [''],
-            mappings: '',
-          },
+          sourcemap: SAMPLE_SOURCEMAP,
         });
 
         // wait for the sourcemap to be indexed in .apm-source-map index
@@ -282,11 +280,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               serviceName: `migration-test`,
               serviceVersion: `1.0.${i}`,
               bundleFilePath: 'bar',
-              sourcemap: {
-                version: 123,
-                sources: [''],
-                mappings: '',
-              },
+              sourcemap: SAMPLE_SOURCEMAP,
             });
           })
         );

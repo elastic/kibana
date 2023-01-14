@@ -8,14 +8,19 @@
 import { Axis, Chart, CurveType, LineSeries, Position, ScaleType, Settings } from '@elastic/charts';
 import { Color } from '@elastic/charts/dist/common/colors';
 import { ColorVariant } from '@elastic/charts/dist/utils/common';
-import { EuiFlexGroup, EuiFlexItem, EuiListGroupItemProps, EuiText } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiListGroupItemProps,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import {
   EUI_CHARTS_THEME_DARK,
   EUI_CHARTS_THEME_LIGHT,
   EUI_SPARKLINE_THEME_PARTIAL,
 } from '@elastic/eui/dist/eui_charts_theme';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
-import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
 import React from 'react';
 import { Alert } from '../../../../../hooks/use_load_alert_summary';
 
@@ -39,7 +44,7 @@ export const AlertStateInfo = ({
   title,
 }: AlertStateInfoProps) => {
   const isDarkMode = useUiSetting<boolean>('theme:darkMode');
-  const textColor = isDarkMode ? euiDarkVars.euiTextColor : euiLightVars.euiTextColor;
+  const { euiTheme } = useEuiTheme();
   const theme = [
     EUI_SPARKLINE_THEME_PARTIAL,
     {
@@ -56,7 +61,7 @@ export const AlertStateInfo = ({
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={1} style={{ minWidth: '70px' }}>
-        <EuiText color={textColor}>
+        <EuiText color={euiTheme.colors.text}>
           <h3 data-test-subj={dataTestSubj}>{count}</h3>
         </EuiText>
         <EuiText size="s" color="subdued">
