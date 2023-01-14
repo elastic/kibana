@@ -57,8 +57,8 @@ interface VisualizationErrorProps {
 }
 
 export function VisualizationErrorPanel({ errors, canEdit }: VisualizationErrorProps) {
-  const showMore = errors && errors.length > 1;
-  const canFixInLens = canEdit && errors?.some(({ fixableInEditor }) => fixableInEditor);
+  const showMore = errors.length > 1;
+  const canFixInLens = canEdit && errors.some(({ fixableInEditor }) => fixableInEditor);
   return (
     <div className="lnsEmbeddedError">
       <EuiEmptyPrompt
