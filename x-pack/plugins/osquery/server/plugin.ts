@@ -32,7 +32,10 @@ import type { OsqueryAppContext } from './lib/osquery_app_context_services';
 import { OsqueryAppContextService } from './lib/osquery_app_context_services';
 import type { ConfigType } from '../common/config';
 import { OSQUERY_INTEGRATION_NAME } from '../common';
-import { getPackagePolicyDeleteCallback } from './lib/fleet_integration';
+import {
+  getPackagePolicyDeleteCallback,
+  getPackagePolicyUpdateCallback,
+} from './lib/fleet_integration';
 import { TelemetryEventsSender } from './lib/telemetry/sender';
 import { TelemetryReceiver } from './lib/telemetry/receiver';
 import { initializeTransformsIndices } from './create_indices/create_transforms_indices';
@@ -159,6 +162,8 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
             return newPackagePolicy;
           }
         );
+
+        registerIngestCallback('packagePolicyUpdate', getPackagePolicyUpdateCallback(esClient));
 
         registerIngestCallback('packagePolicyPostDelete', getPackagePolicyDeleteCallback(client));
       }
