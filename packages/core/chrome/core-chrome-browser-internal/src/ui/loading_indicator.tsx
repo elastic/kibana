@@ -18,6 +18,7 @@ import './loading_indicator.scss';
 export interface LoadingIndicatorProps {
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
   showAsBar?: boolean;
+  showPlainSpinner?: boolean;
 }
 
 export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { visible: boolean }> {
@@ -57,34 +58,36 @@ export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { v
   render() {
     const className = classNames(!this.state.visible && 'kbnLoadingIndicator-hidden');
 
-    const testSubj = this.state.visible
-      ? 'globalLoadingIndicator'
-      : 'globalLoadingIndicator-hidden';
+    const testSubj =
+      this.state.visible || this.props.showPlainSpinner
+        ? 'globalLoadingIndicator'
+        : 'globalLoadingIndicator-hidden';
 
-    const ariaHidden = this.state.visible ? false : true;
+    const ariaHidden = !this.state.visible;
 
     const ariaLabel = i18n.translate('core.ui.loadingIndicatorAriaLabel', {
       defaultMessage: 'Loading content',
     });
 
-    const logo = this.state.visible ? (
-      <EuiLoadingSpinner
-        size="l"
-        data-test-subj={testSubj}
-        aria-hidden={false}
-        aria-label={ariaLabel}
-      />
-    ) : (
-      <EuiIcon
-        type="logoElastic"
-        size="l"
-        data-test-subj={testSubj}
-        className="chrHeaderLogo__cluster"
-        aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.logoAriaLabel', {
-          defaultMessage: 'Elastic Logo',
-        })}
-      />
-    );
+    const logo =
+      this.state.visible || this.props.showPlainSpinner ? (
+        <EuiLoadingSpinner
+          size="l"
+          data-test-subj={testSubj}
+          aria-hidden={false}
+          aria-label={ariaLabel}
+        />
+      ) : (
+        <EuiIcon
+          type={'logoElastic'}
+          size="l"
+          data-test-subj={testSubj}
+          className="chrHeaderLogo__cluster"
+          aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.logoAriaLabel', {
+            defaultMessage: 'Elastic Logo',
+          })}
+        />
+      );
 
     return !this.props.showAsBar ? (
       logo
