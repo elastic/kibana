@@ -53,16 +53,14 @@ export const showErrorToast = (
   else toasts.addDanger(extractErrorMessage(error, SEARCH_FAILED_TEXT));
 };
 
-export const getFindingsQuery = ({ query, sort }: UseFindingsOptions) => {
-  return {
-    index: CSP_LATEST_FINDINGS_DATA_VIEW,
-    query,
-    sort: getSortField(sort),
-    size: MAX_FINDINGS_TO_LOAD,
-    aggs: getFindingsCountAggQuery(),
-    ignore_unavailable: false,
-  };
-};
+export const getFindingsQuery = ({ query, sort }: UseFindingsOptions) => ({
+  index: CSP_LATEST_FINDINGS_DATA_VIEW,
+  query,
+  sort: getSortField(sort),
+  size: MAX_FINDINGS_TO_LOAD,
+  aggs: getFindingsCountAggQuery(),
+  ignore_unavailable: false,
+});
 
 /**
  * By default, ES will sort keyword fields in case-sensitive format, the
