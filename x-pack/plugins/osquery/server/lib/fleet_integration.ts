@@ -51,9 +51,13 @@ export const getPackagePolicyUpdateCallback =
           },
         })
       ) {
-        await esClient.indices.rollover({
-          alias: `logs-${OSQUERY_INTEGRATION_NAME}.result-default`,
-        });
+        try {
+          esClient.indices.rollover({
+            alias: `logs-${OSQUERY_INTEGRATION_NAME}.result-default`,
+          });
+        } catch (e) {
+          // Ignore errors
+        }
       }
     }
 
