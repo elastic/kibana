@@ -111,7 +111,7 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     },
 
     getColumnValues: async (columnName: string) => {
-      const elementsWithNoFilterCell = ['CIS Section'];
+      const elementsWithNoFilterCell = ['CIS Section', '@timestamp'];
       const tableElement = await table.getElement();
       const columnIndex = await table.getColumnIndex(columnName);
       const selector = elementsWithNoFilterCell.includes(columnName)
