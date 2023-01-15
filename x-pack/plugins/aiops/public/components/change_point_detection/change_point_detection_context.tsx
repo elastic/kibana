@@ -18,12 +18,12 @@ import { type DataViewField } from '@kbn/data-views-plugin/public';
 import { startWith } from 'rxjs';
 import type { Query, Filter } from '@kbn/es-query';
 import { usePageUrlState } from '@kbn/ml-url-state';
+import { useTimefilter, useTimeRangeUpdates } from '@kbn/ml-date-picker';
 import {
   createMergedEsQuery,
   getEsQueryFromSavedSearch,
 } from '../../application/utils/search_utils';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
-import { useTimefilter, useTimeRangeUpdates } from '../../hooks/use_time_filter';
 import { useChangePointResults } from './use_change_point_agg_request';
 import { type TimeBuckets, TimeBucketsInterval } from '../../../common/time_buckets';
 import { useDataSource } from '../../hooks/use_data_source';
