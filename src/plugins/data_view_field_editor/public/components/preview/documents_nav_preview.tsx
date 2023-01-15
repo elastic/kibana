@@ -20,10 +20,13 @@ import { PreviewState } from './types';
 
 import { useFieldPreviewContext } from './field_preview_context';
 
-const docIdSelector = (state: PreviewState) => ({
-  documentId: state.documents[state.currentIdx].id as string,
-  isCustomId: state.currentDocument.isCustomId,
-});
+const docIdSelector = (state: PreviewState) => {
+  const doc = state.documents[state.currentIdx];
+  return {
+    documentId: doc?.id,
+    isCustomId: state.currentDocument.isCustomId,
+  };
+};
 
 export const DocumentsNavPreview = () => {
   const {
