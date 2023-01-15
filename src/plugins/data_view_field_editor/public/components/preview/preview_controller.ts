@@ -11,6 +11,7 @@ import type { ISearchStart } from '@kbn/data-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import { PreviewState } from './types';
 import { BehaviorObservable } from '../../state_utils';
+import { EsDocument } from './types';
 
 interface PreviewControllerDependencies {
   dataView: DataView;
@@ -20,6 +21,14 @@ interface PreviewControllerDependencies {
 const previewStateDefault: PreviewState = {
   /** Map of fields pinned to the top of the list */
   pinnedFields: {},
+  // this needs to be renamed
+  currentDocument: {
+    isLoading: false,
+    isCustomId: false,
+  },
+  /** sample documents fetched from cluster */
+  documents: [],
+  currentIdx: 0,
 };
 
 export class PreviewController {
@@ -46,6 +55,7 @@ export class PreviewController {
   };
 
   private publishState = () => {
+    // todo try removing object copy
     this.internalState$.next({ ...this.state });
   };
 
@@ -56,5 +66,33 @@ export class PreviewController {
     };
 
     this.updateState({ pinnedFields });
+  };
+
+  setDocuments = (documents: EsDocument[]) => {
+    this.updateState({
+      documents,
+      currentIdx: 0,
+      currentDocument: { /* value: documents[0], */ isLoading: false, isCustomId: false },
+    });
+  };
+
+  setCurrentIdx = (currentIdx: number) => {
+    this.updateState({ currentIdx });
+  };
+
+  goToNextDocument = () => {
+    if (this.state.currentIdx >= this.state.documents.length - 1) {
+      this.updateState({ currentIdx: 0 });
+    } else {
+      this.updateState({ currentIdx: this.state.currentIdx + 1 });
+    }
+  };
+
+  goToPreviousDocument = () => {
+    if (this.state.currentIdx === 0) {
+      this.updateState({ currentIdx: this.state.documents.length - 1 });
+    } else {
+      this.updateState({ currentIdx: this.state.currentIdx - 1 });
+    }
   };
 }

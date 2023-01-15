@@ -50,6 +50,13 @@ interface PinnedFields {
 
 export interface PreviewState {
   pinnedFields: PinnedFields;
+  currentDocument: {
+    id?: string | undefined;
+    isLoading: boolean;
+    isCustomId: boolean;
+  };
+  documents: EsDocument[];
+  currentIdx: number;
 }
 
 export interface FetchDocError {
@@ -114,12 +121,6 @@ export interface Context {
   };
   isPreviewAvailable: boolean;
   isLoadingPreview: boolean;
-  currentDocument: {
-    value?: EsDocument;
-    id?: string;
-    isLoading: boolean;
-    isCustomId: boolean;
-  };
   documents: {
     loadSingle: (id: string) => void;
     loadFromCluster: () => Promise<void>;

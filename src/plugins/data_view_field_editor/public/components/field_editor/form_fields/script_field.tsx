@@ -27,6 +27,8 @@ import { painlessErrorToMonacoMarker } from '../../../lib';
 import { useFieldPreviewContext, Context } from '../../preview';
 import { schema } from '../form_schema';
 import type { FieldFormInternal } from '../field_editor';
+import { useStateSelector } from '../../../state_utils';
+import { PreviewState } from '../../preview/types';
 
 interface Props {
   links: { runtimePainless: string };
@@ -53,6 +55,9 @@ const mapReturnTypeToPainlessContext = (runtimeType: RuntimeType): PainlessConte
   }
 };
 
+const currentDocumentSelector = (state: PreviewState) => state.documents[state.currentIdx];
+const currentDocumentIsLoadingSelector = (state: PreviewState) => state.currentDocument.isLoading;
+
 const ScriptFieldComponent = ({ existingConcreteFields, links, placeholder }: Props) => {
   const monacoEditor = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const editorValidationSubscription = useRef<Subscription>();
@@ -62,9 +67,11 @@ const ScriptFieldComponent = ({ existingConcreteFields, links, placeholder }: Pr
     error,
     isLoadingPreview,
     isPreviewAvailable,
-    currentDocument: { isLoading: isFetchingDoc, value: currentDocument },
     validation: { setScriptEditorValidation },
+    controller,
   } = useFieldPreviewContext();
+  const currentDocument = useStateSelector(controller.state$, currentDocumentSelector);
+  const isFetchingDoc = useStateSelector(controller.state$, currentDocumentIsLoadingSelector);
   const [validationData$, nextValidationData$] = useBehaviorSubject<
     | {
         isFetchingDoc: boolean;

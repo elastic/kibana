@@ -48,14 +48,13 @@ function fuzzyMatch(searchValue: string, text: string) {
 }
 
 const pinnedFieldsSelector = (s: PreviewState) => s.pinnedFields;
+const currentDocumentSelector = (s: PreviewState) => s.documents[s.currentIdx];
 
 export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchValue = '' }) => {
   const { dataView } = useFieldEditorContext();
-  const {
-    controller,
-    currentDocument: { value: currentDocument },
-  } = useFieldPreviewContext();
+  const { controller } = useFieldPreviewContext();
   const pinnedFields = useStateSelector(controller.state$, pinnedFieldsSelector, isEqual);
+  const currentDocument = useStateSelector(controller.state$, currentDocumentSelector);
 
   const [showAllFields, setShowAllFields] = useState(false);
 

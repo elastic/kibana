@@ -9,6 +9,8 @@
 import React from 'react';
 import { EuiTitle, EuiText, EuiTextColor, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useStateSelector } from '../../state_utils';
+import { PreviewState } from './types';
 
 import { useFieldEditorContext } from '../field_editor_context';
 import { useFieldPreviewContext } from './field_preview_context';
@@ -23,12 +25,12 @@ const i18nTexts = {
   }),
 };
 
+const currentDocumentIsLoadingSelector = (state: PreviewState) => state.currentDocument.isLoading;
+
 export const FieldPreviewHeader = () => {
   const { dataView } = useFieldEditorContext();
-  const {
-    from,
-    currentDocument: { isLoading: isFetchingDocument },
-  } = useFieldPreviewContext();
+  const { controller, from } = useFieldPreviewContext();
+  const isFetchingDocument = useStateSelector(controller.state$, currentDocumentIsLoadingSelector);
 
   return (
     <div>

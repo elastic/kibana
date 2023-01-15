@@ -15,15 +15,23 @@ import {
   EuiButtonIcon,
   EuiButtonEmpty,
 } from '@elastic/eui';
+import { useStateSelector } from '../../state_utils';
+import { PreviewState } from './types';
 
 import { useFieldPreviewContext } from './field_preview_context';
 
+const docIdSelector = (state: PreviewState) => ({
+  documentId: state.documents[state.currentIdx].id,
+  isCustomId: state.currentDocument.isCustomId,
+});
+
 export const DocumentsNavPreview = () => {
   const {
-    currentDocument: { id: documentId, isCustomId },
     documents: { loadSingle, loadFromCluster, fetchDocError },
     navigation: { prev, next },
+    controller,
   } = useFieldPreviewContext();
+  const { documentId, isCustomId } = useStateSelector(controller.state$, docIdSelector);
 
   const isInvalid = fetchDocError?.code === 'DOC_NOT_FOUND';
 

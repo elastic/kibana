@@ -23,6 +23,7 @@ import { get } from 'lodash';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { BehaviorSubject } from 'rxjs';
 import { RuntimePrimitiveTypes } from '../../shared_imports';
+import { useStateSelector } from '../../state_utils';
 
 import { parseEsError } from '../../lib/runtime_field_validation';
 import { useFieldEditorContext } from '../field_editor_context';
@@ -30,12 +31,12 @@ import type {
   PainlessExecuteContext,
   Context,
   Params,
-  ClusterData,
   From,
   EsDocument,
   ScriptErrorCodes,
   FetchDocError,
   FieldPreview,
+  PreviewState,
 } from './types';
 import type { PreviewController } from './preview_controller';
 
@@ -62,6 +63,18 @@ export const valueTypeToSelectedType = (value: unknown): RuntimePrimitiveTypes =
   if (valueType === 'number') return 'double';
   if (valueType === 'boolean') return 'boolean';
   return 'keyword';
+};
+
+// todo might break down
+const documentsSelector = (state: PreviewState) => {
+  const currentDocument = state.documents[state.currentIdx];
+  return {
+    currentDocument,
+    totalDocs: state.documents.length,
+    currentDocIndex: currentDocument?._index,
+    currentDocId: currentDocument?._id,
+    currentIdx: state.currentIdx,
+  };
 };
 
 export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewController }> = ({
@@ -107,11 +120,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
   const [fetchDocError, setFetchDocError] = useState<FetchDocError | null>(null);
   /** The parameters required for the Painless _execute API */
   const [params, setParams] = useState<Params>(defaultParams);
-  /** The sample documents fetched from the cluster */
-  const [clusterData, setClusterData] = useState<ClusterData>({
-    documents: [],
-    currentIdx: 0,
-  });
+
   /** Flag to show/hide the preview panel */
   const [isPanelVisible, setIsPanelVisible] = useState(true);
   /** Flag to indicate if we are loading document from cluster */
@@ -129,11 +138,8 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
     message: string | null;
   }>({ isValidating: false, isValid: true, message: null });
 
-  const { documents, currentIdx } = clusterData;
-  const currentDocument: EsDocument | undefined = documents[currentIdx];
-  const currentDocIndex: string | undefined = currentDocument?._index;
-  const currentDocId: string | undefined = currentDocument?._id;
-  const totalDocs = documents.length;
+  const { currentDocument, currentDocIndex, currentDocId, totalDocs, currentIdx } =
+    useStateSelector(controller.state$, documentsSelector);
   const isCustomDocId = customDocIdToLoad !== null;
   let isPreviewAvailable = true;
 
@@ -141,7 +147,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
   // a custom doc ID) then we disable preview as the script field validation expect the result
   // of the preview to before resolving. If there are no documents we can't have a preview
   // (the _execute API expects one) and thus the validation should not expect a value.
-  if (!isFetchingDocument && !isCustomDocId && documents.length === 0) {
+  if (!isFetchingDocument && !isCustomDocId && totalDocs === 0) {
     isPreviewAvailable = false;
   }
 
@@ -251,13 +257,10 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
       setFetchDocError(error);
 
       if (error === null) {
-        setClusterData({
-          documents: response ? response.rawResponse.hits.hits : [],
-          currentIdx: 0,
-        });
+        controller.setDocuments(response ? response.rawResponse.hits.hits : []);
       }
     },
-    [dataView, search]
+    [dataView, search, controller]
   );
 
   const loadDocument = useCallback(
@@ -322,17 +325,14 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
       setFetchDocError(error);
 
       if (error === null) {
-        setClusterData({
-          documents: loadedDocuments,
-          currentIdx: 0,
-        });
+        controller.setDocuments(loadedDocuments);
       } else {
         // Make sure we disable the "Updating..." indicator as we have an error
         // and we won't fetch the preview
         setIsLoadingPreview(false);
       }
     },
-    [dataView, search]
+    [dataView, search, controller]
   );
 
   const updateSingleFieldPreview = useCallback(
@@ -479,36 +479,17 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
     currentDocIndex,
   ]);
 
-  const goToNextDoc = useCallback(() => {
-    if (currentIdx >= totalDocs - 1) {
-      setClusterData((prev) => ({ ...prev, currentIdx: 0 }));
-    } else {
-      setClusterData((prev) => ({ ...prev, currentIdx: prev.currentIdx + 1 }));
-    }
-  }, [currentIdx, totalDocs]);
-
-  const goToPrevDoc = useCallback(() => {
-    if (currentIdx === 0) {
-      setClusterData((prev) => ({ ...prev, currentIdx: totalDocs - 1 }));
-    } else {
-      setClusterData((prev) => ({ ...prev, currentIdx: prev.currentIdx - 1 }));
-    }
-  }, [currentIdx, totalDocs]);
-
   const reset = useCallback(() => {
     // By resetting the previewCount we will discard previous inflight
     // API call response coming in after calling reset() was called
     previewCount.current = 0;
 
-    setClusterData({
-      documents: [],
-      currentIdx: 0,
-    });
+    controller.setDocuments([]);
     setPreviewResponse({ fields: [], error: null });
     setFrom('cluster');
     setIsLoadingPreview(false);
     setIsFetchingDocument(false);
-  }, []);
+  }, [controller]);
 
   const ctx = useMemo<Context>(
     () => ({
@@ -523,12 +504,14 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
         value: params,
         update: updateParams,
       },
+      /*
       currentDocument: {
         value: currentDocument,
         id: isCustomDocId ? customDocIdToLoad! : currentDocId,
         isLoading: isFetchingDocument,
         isCustomId: isCustomDocId,
       },
+      */
       documents: {
         loadSingle: setCustomDocIdToLoad,
         loadFromCluster: fetchSampleDocuments,
@@ -537,8 +520,8 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
       navigation: {
         isFirstDoc: currentIdx === 0,
         isLastDoc: currentIdx >= totalDocs - 1,
-        next: goToNextDoc,
-        prev: goToPrevDoc,
+        next: controller.goToNextDocument,
+        prev: controller.goToPreviousDocument,
       },
       panel: {
         isVisible: isPanelVisible,
@@ -555,6 +538,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
     }),
     [
       controller,
+      currentIdx,
       previewResponse,
       fieldPreview$,
       fetchDocError,
@@ -562,16 +546,8 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
       isPreviewAvailable,
       isLoadingPreview,
       updateParams,
-      currentDocument,
-      currentDocId,
-      isCustomDocId,
       fetchSampleDocuments,
-      isFetchingDocument,
-      customDocIdToLoad,
-      currentIdx,
       totalDocs,
-      goToNextDoc,
-      goToPrevDoc,
       isPanelVisible,
       from,
       reset,
