@@ -23,5 +23,6 @@
     "@kbn/ts-projects",
     "@kbn/repo-file-maps",
     "@kbn/json-ast",
+    "@kbn/set-map",
   ]
 }

@@ -31,8 +31,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const ruleName1 = data[0].rule.name;
   const ruleName2 = data[1].rule.name;
 
-  // Failing: See https://github.com/elastic/kibana/issues/147998
-  describe.skip('Findings Page', () => {
+  describe('Findings Page', () => {
     let findings: typeof pageObjects.findings;
     let table: typeof pageObjects.findings.table;
     let distributionBar: typeof pageObjects.findings.distributionBar;

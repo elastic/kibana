@@ -141,9 +141,9 @@ module.exports = {
     /**
      * ESLint rule to aid with breaking up packages:
      *
-     *  `fromPacakge` the package name which was broken up
-     *  `toPackage` the package where the removed exports were placed
-     *  `exportNames` the list of exports which used to be found in `fromPacakge` and are now found in `toPackage`
+     *  `from` the package/request where the exports used to be
+     *  `to` the package/request where the exports are now
+     *  `exportNames` the list of exports which used to be found in `from` and are now found in `to`
      *
      * TODO(@spalger): once packages have types we should be able to filter this rule based on the package type
      *  of the file being linted so that we could re-route imports from `plugin-client` types to a different package
@@ -151,8 +151,8 @@ module.exports = {
      */
     '@kbn/imports/exports_moved_packages': ['error', [
       {
-        fromPackage: '@kbn/dev-utils',
-        toPackage: '@kbn/tooling-log',
+        from: '@kbn/dev-utils',
+        to: '@kbn/tooling-log',
         exportNames: [
           'DEFAULT_LOG_LEVEL',
           'getLogLevelFlagsHelp',
@@ -171,8 +171,8 @@ module.exports = {
         ]
       },
       {
-        fromPackage: '@kbn/dev-utils',
-        toPackage: '@kbn/ci-stats-reporter',
+        from: '@kbn/dev-utils',
+        to: '@kbn/ci-stats-reporter',
         exportNames: [
           'CiStatsMetric',
           'CiStatsReporter',
@@ -188,15 +188,15 @@ module.exports = {
         ]
       },
       {
-        fromPackage: '@kbn/dev-utils',
-        toPackage: '@kbn/ci-stats-core',
+        from: '@kbn/dev-utils',
+        to: '@kbn/ci-stats-core',
         exportNames: [
           'Config',
         ]
       },
       {
-        fromPackage: '@kbn/dev-utils',
-        toPackage: '@kbn/jest-serializers',
+        from: '@kbn/dev-utils',
+        to: '@kbn/jest-serializers',
         exportNames: [
           'createAbsolutePathSerializer',
           'createStripAnsiSerializer',
@@ -206,23 +206,23 @@ module.exports = {
         ]
       },
       {
-        fromPackage: '@kbn/dev-utils',
-        toPackage: '@kbn/stdio-dev-helpers',
+        from: '@kbn/dev-utils',
+        to: '@kbn/stdio-dev-helpers',
         exportNames: [
           'observeReadable',
           'observeLines',
         ]
       },
       {
-        fromPackage: '@kbn/dev-utils',
-        toPackage: '@kbn/sort-package-json',
+        from: '@kbn/dev-utils',
+        to: '@kbn/sort-package-json',
         exportNames: [
           'sortPackageJson',
         ]
       },
       {
-        fromPackage: '@kbn/dev-utils',
-        toPackage: '@kbn/dev-cli-runner',
+        from: '@kbn/dev-utils',
+        to: '@kbn/dev-cli-runner',
         exportNames: [
           'run',
           'Command',
@@ -242,8 +242,8 @@ module.exports = {
         ]
       },
       {
-        fromPackage: '@kbn/dev-utils',
-        toPackage: '@kbn/dev-cli-errors',
+        from: '@kbn/dev-utils',
+        to: '@kbn/dev-cli-errors',
         exportNames: [
           'createFailError',
           'createFlagError',
@@ -251,16 +251,16 @@ module.exports = {
         ]
       },
       {
-        fromPackage: '@kbn/dev-utils',
-        toPackage: '@kbn/dev-proc-runner',
+        from: '@kbn/dev-utils',
+        to: '@kbn/dev-proc-runner',
         exportNames: [
           'withProcRunner',
           'ProcRunner',
         ]
       },
       {
-        fromPackage: '@kbn/utils',
-        toPackage: '@kbn/repo-info',
+        from: '@kbn/utils',
+        to: '@kbn/repo-info',
         exportNames: [
           'REPO_ROOT',
           'UPSTREAM_BRANCH',
@@ -269,6 +269,21 @@ module.exports = {
           'fromRoot',
         ]
       },
+      {
+        from: '@kbn/presentation-util-plugin/common',
+        to: '@kbn/presentation-util-plugin/test_helpers',
+        exportNames: [
+          'functionWrapper',
+          'fontStyle'
+        ]
+      },
+      {
+        from: '@kbn/fleet-plugin/common',
+        to: '@kbn/fleet-plugin/common/mocks',
+        exportNames: [
+          'createFleetAuthzMock'
+        ]
+      }
     ]],
 
     '@kbn/disable/no_protected_eslint_disable': 'error',
