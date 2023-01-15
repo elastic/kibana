@@ -136,7 +136,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       type SortDirection = 'asc' | 'desc';
       // Sort by lexical order will sort by the first character of the string (case-sensitive)
       const compareStringByLexicographicOrder = (a: string, b: string) => {
-        return +(a > b) || -(b > a);
+        return a > b ? 1 : b > a ? -1 : 0;
       };
       const sortByAlphabeticalOrder = (a: string, b: string) => {
         return a.localeCompare(b);
