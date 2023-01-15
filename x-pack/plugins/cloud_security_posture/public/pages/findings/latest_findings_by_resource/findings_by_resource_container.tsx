@@ -179,7 +179,7 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
               });
             }}
             sorting={{
-              sort: { field: 'failed_findings', direction: urlQuery.sortDirection },
+              sort: { field: 'findings.normalized', direction: urlQuery.sortDirection },
             }}
             onAddFilter={(field, value, negate) =>
               setUrlQuery({

@@ -8,7 +8,6 @@ import React, { useMemo } from 'react';
 import {
   EuiEmptyPrompt,
   EuiBasicTable,
-  EuiTextColor,
   type EuiTableFieldDataColumnType,
   type CriteriaWithPagination,
   type Pagination,
@@ -32,7 +31,7 @@ export const formatNumber = (value: number) =>
   value < 1000 ? value : numeral(value).format('0.0a');
 
 type Sorting = Required<
-  EuiBasicTableProps<Pick<FindingsByResourcePage, 'failed_findings'>>
+  EuiBasicTableProps<Pick<FindingsByResourcePage['findings'], 'normalized'>>
 >['sorting'];
 
 interface Props {
@@ -68,7 +67,7 @@ const FindingsByResourceTableComponent = ({
       createColumnWithFilters(findingsByResourceColumns['rule.benchmark.name'], { onAddFilter }),
       findingsByResourceColumns['rule.section'],
       createColumnWithFilters(findingsByResourceColumns.cluster_id, { onAddFilter }),
-      findingsByResourceColumns.failed_findings,
+      findingsByResourceColumns['findings.normalized'],
     ],
     [onAddFilter]
   );
@@ -139,35 +138,27 @@ const baseColumns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = 
   },
   baseFindingsColumns.cluster_id,
   {
-    field: 'failed_findings',
+    field: 'findings.normalized',
     width: '150px',
     truncateText: true,
     sortable: true,
     name: (
       <FormattedMessage
-        id="xpack.csp.findings.findingsByResourceTable.failedFindingsColumnLabel"
-        defaultMessage="Failed Findings"
+        id="xpack.csp.findings.findingsByResourceTable.complianceScoreColumnLabel"
+        defaultMessage="Compliance Score"
       />
     ),
-    render: (failedFindings: FindingsByResourcePage['failed_findings']) => (
+    render: (normalized: FindingsByResourcePage['findings']['normalized'], all) => (
       <EuiToolTip
-        content={i18n.translate(
-          'xpack.csp.findings.findingsByResourceTable.failedFindingsToolTip',
-          {
-            defaultMessage: '{failed} out of {total}',
-            values: {
-              failed: failedFindings.count,
-              total: failedFindings.total_findings,
-            },
-          }
-        )}
+        content={i18n.translate('xpack.csp.findings.findingsByResourceTable.findingsToolTip', {
+          defaultMessage: '{failed} and {passed} passed findings',
+          values: {
+            failed: all.findings.failed_findings,
+            passed: all.findings.passed_findings,
+          },
+        })}
       >
-        <>
-          <EuiTextColor color={failedFindings.count === 0 ? '' : 'danger'}>
-            {formatNumber(failedFindings.count)}
-          </EuiTextColor>
-          <span> ({numeral(failedFindings.normalized).format('0%')})</span>
-        </>
+        <span>{numeral(normalized).format('0%')}</span>
       </EuiToolTip>
     ),
     dataType: 'number',

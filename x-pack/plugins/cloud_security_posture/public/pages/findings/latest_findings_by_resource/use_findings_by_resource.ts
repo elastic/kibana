@@ -35,8 +35,9 @@ type FindingsAggResponse = IKibanaSearchResponse<
 >;
 
 export interface FindingsByResourcePage {
-  failed_findings: {
-    count: number;
+  findings: {
+    failed_findings: number;
+    passed_findings: number;
     normalized: number;
     total_findings: number;
   };
@@ -56,6 +57,7 @@ interface FindingsByResourceAggs {
 
 interface FindingsAggBucket extends estypes.AggregationsStringRareTermsBucketKeys {
   failed_findings: estypes.AggregationsMultiBucketBase;
+  passed_findings: estypes.AggregationsMultiBucketBase;
   name: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringTermsBucketKeys>;
   subtype: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringTermsBucketKeys>;
   cluster_id: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringTermsBucketKeys>;
@@ -91,6 +93,9 @@ export const getFindingsByResourceAggQuery = ({
           },
           failed_findings: {
             filter: { term: { 'result.evaluation': 'failed' } },
+          },
+          passed_findings: {
+            filter: { term: { 'result.evaluation': 'passed' } },
           },
           cluster_id: {
             terms: { field: 'cluster_id', size: 1 },
@@ -177,11 +182,12 @@ const createFindingsByResource = (resource: FindingsAggBucket): FindingsByResour
     cluster_id: resource.cluster_id.buckets[0]?.key,
     ['rule.section']: resource.cis_sections.buckets.map((v) => v.key),
     ['rule.benchmark.name']: resource.benchmarkName.buckets[0]?.key,
-    failed_findings: {
-      count: resource.failed_findings.doc_count,
+    findings: {
+      failed_findings: resource.failed_findings.doc_count,
       normalized:
         resource.doc_count > 0 ? resource.failed_findings.doc_count / resource.doc_count : 0,
       total_findings: resource.doc_count,
+      passed_findings: resource.passed_findings.doc_count,
     },
   };
 };
