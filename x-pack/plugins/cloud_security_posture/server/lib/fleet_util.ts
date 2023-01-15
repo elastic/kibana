@@ -50,11 +50,11 @@ export const getAgentStatusesByAgentPolicies = async (
   const internalAgentService = agentService.asInternalUser;
   const result: AgentStatusByAgentPolicyMap = {};
 
-  // for (const agentPolicy of agentPolicies) {
-  //   result[agentPolicy.id] = await internalAgentService.getAgentStatusForAgentPolicy(
-  //     agentPolicy.id
-  //   );
-  // }
+  for (const agentPolicy of agentPolicies) {
+    result[agentPolicy.id] = await internalAgentService.getAgentStatusForAgentPolicy(
+      agentPolicy.id
+    );
+  }
 
   return result;
 };
