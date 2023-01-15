@@ -33,7 +33,6 @@ import {
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { actionsMock, actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { alertsMock, rulesClientMock } from '../mocks';
-import { rulesSettingsClientMock } from '../rules_settings_client.mock';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 import { IEventLogger } from '@kbn/event-log-plugin/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -119,7 +118,6 @@ describe('Task Runner', () => {
   const services = alertsMock.createRuleExecutorServices();
   const actionsClient = actionsClientMock.create();
   const rulesClient = rulesClientMock.create();
-  const rulesSettingsClient = rulesSettingsClientMock.create();
   const ruleTypeRegistry = ruleTypeRegistryMock.create();
   const savedObjectsService = savedObjectsServiceMock.createInternalStartContract();
   const elasticsearchService = elasticsearchServiceMock.createInternalStart();
@@ -145,7 +143,6 @@ describe('Task Runner', () => {
     elasticsearch: elasticsearchService,
     actionsPlugin: actionsMock.createStart(),
     getRulesClientWithRequest: jest.fn().mockReturnValue(rulesClient),
-    getRulesSettingsClientWithRequest: jest.fn().mockReturnValue(rulesSettingsClient),
     encryptedSavedObjectsClient,
     logger,
     executionContext: executionContextServiceMock.createInternalStartContract(),

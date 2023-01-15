@@ -446,10 +446,6 @@ export class AlertingPlugin {
       return alertingAuthorizationClientFactory!.create(request);
     };
 
-    const getRulesSettingsClientWithRequest = (request: KibanaRequest) => {
-      return rulesSettingsClientFactory!.create(request);
-    };
-
     taskRunnerFactory.initialize({
       logger,
       data: plugins.data,
@@ -459,7 +455,6 @@ export class AlertingPlugin {
       uiSettings: core.uiSettings,
       elasticsearch: core.elasticsearch,
       getRulesClientWithRequest,
-      getRulesSettingsClientWithRequest,
       spaceIdToNamespace,
       actionsPlugin: plugins.actions,
       encryptedSavedObjectsClient,
@@ -513,7 +508,7 @@ export class AlertingPlugin {
           return rulesClientFactory!.create(request, savedObjects);
         },
         getRulesSettingsClient: () => {
-          return rulesSettingsClientFactory.create(request);
+          return rulesSettingsClientFactory.createWithAuthorization(request);
         },
         listTypes: ruleTypeRegistry!.list.bind(ruleTypeRegistry!),
         getFrameworkHealth: async () =>

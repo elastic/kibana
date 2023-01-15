@@ -17,7 +17,9 @@ export const RulesSettingsLink = () => {
     application: { capabilities },
   } = useKibana().services;
 
-  if (!capabilities.rulesSettings.show) {
+  const { show, readFlappingSettingsUI } = capabilities.rulesSettings;
+
+  if (!show || !readFlappingSettingsUI) {
     return null;
   }
 

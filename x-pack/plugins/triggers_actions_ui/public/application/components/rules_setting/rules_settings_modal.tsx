@@ -97,7 +97,6 @@ export const RulesSettingsModalFormLeft = memo((props: RulesSettingsModalFormLef
             <p>{flappingDescription}</p>
           </EuiText>
         </EuiFlexItem>
-        <EuiSpacer size="s" />
         <EuiFlexItem grow={false}>
           <EuiSwitch
             data-test-subj="rulesSettingsModalEnableSwitch"
@@ -106,15 +105,6 @@ export const RulesSettingsModalFormLeft = memo((props: RulesSettingsModalFormLef
             disabled={isSwitchDisabled}
             onChange={onChange}
           />
-          <EuiSpacer size="s" />
-          <EuiText color="subdued" size="s">
-            <p>
-              <FormattedMessage
-                id="xpack.triggersActionsUI.rulesSettings.modal.enableFlappingHelpText"
-                defaultMessage="Only affects rules whose alerts can self-recover."
-              />
-            </p>
-          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexItem>
@@ -192,6 +182,9 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
     setUpdatingRulesSettings,
   });
 
+  // In the future when we have more settings sub-features, we should
+  // disassociate the rule settings capabilities (save, show) from the
+  // sub-feature capabilities (writeXSettingsUI).
   const canWriteFlappingSettings = save && writeFlappingSettingsUI && !hasError;
   const canShowFlappingSettings = show && readFlappingSettingsUI;
 

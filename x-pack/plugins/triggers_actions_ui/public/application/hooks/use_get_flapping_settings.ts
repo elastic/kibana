@@ -42,6 +42,7 @@ export const useGetFlappingSettings = (props: UseGetFlappingSettingsProps) => {
     onSuccess,
     enabled,
     refetchOnWindowFocus: false,
+    retry: false,
   });
 
   return {

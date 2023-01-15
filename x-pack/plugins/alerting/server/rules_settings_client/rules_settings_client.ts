@@ -39,7 +39,7 @@ export class RulesSettingsClient {
     this._flapping = new RulesSettingsFlappingClient({
       logger: this.logger,
       savedObjectsClient: this.savedObjectsClient,
-      persist: this.persist.bind(this),
+      getOrCreate: this.getOrCreate.bind(this),
       getModificationMetadata: this.getModificationMetadata.bind(this),
     });
   }
@@ -91,7 +91,11 @@ export class RulesSettingsClient {
     }
   }
 
-  private async persist(): Promise<SavedObject<RulesSettings>> {
+  /**
+   * Helper function to ensure that a rules-settings saved object always exists.
+   * Enabled the creation of the saved object is done lazily during retrieval.
+   */
+  private async getOrCreate(): Promise<SavedObject<RulesSettings>> {
     try {
       return await this.get();
     } catch (e) {
@@ -99,6 +103,7 @@ export class RulesSettingsClient {
         this.logger.info('Creating new default rules settings for current space.');
         return await this.create();
       }
+      this.logger.error(`Failed to persist rules setting for current space. Error: ${e}`);
       throw e;
     }
   }

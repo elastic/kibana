@@ -20,7 +20,6 @@ import {
 } from '@kbn/core/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { rulesClientMock } from '../mocks';
-import { rulesSettingsClientMock } from '../rules_settings_client.mock';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
@@ -87,7 +86,6 @@ describe('Task Runner Factory', () => {
 
   const encryptedSavedObjectsPlugin = encryptedSavedObjectsMock.createStart();
   const rulesClient = rulesClientMock.create();
-  const rulesSettingsClient = rulesSettingsClientMock.create();
 
   const taskRunnerFactoryInitializerParams: jest.Mocked<TaskRunnerContext> = {
     data: dataPlugin,
@@ -97,7 +95,6 @@ describe('Task Runner Factory', () => {
     uiSettings: uiSettingsService,
     elasticsearch: elasticsearchService,
     getRulesClientWithRequest: jest.fn().mockReturnValue(rulesClient),
-    getRulesSettingsClientWithRequest: jest.fn().mockReturnValue(rulesSettingsClient),
     actionsPlugin: actionsMock.createStart(),
     encryptedSavedObjectsClient: encryptedSavedObjectsPlugin.getClient(),
     logger: loggingSystemMock.create().get(),

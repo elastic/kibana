@@ -17,7 +17,6 @@ import {
   RuleTypeParamsValidator,
   SanitizedRule,
   RulesClientApi,
-  RulesSettingsClientApi,
 } from '../types';
 import { MONITORING_HISTORY_LIMIT, RuleTypeParams } from '../../common';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
@@ -39,7 +38,6 @@ export async function loadRule<Params extends RuleTypeParams>(params: LoadRulePa
   let rule: SanitizedRule<Params>;
   let fakeRequest: CoreKibanaRequest;
   let rulesClient: RulesClientApi;
-  let rulesSettingsClient: RulesSettingsClientApi;
 
   try {
     const attributes = await getRuleAttributes<Params>(context, ruleId, spaceId);
@@ -48,7 +46,6 @@ export async function loadRule<Params extends RuleTypeParams>(params: LoadRulePa
     rule = attributes.rule;
     fakeRequest = attributes.fakeRequest;
     rulesClient = attributes.rulesClient;
-    rulesSettingsClient = attributes.rulesSettingsClient;
   } catch (err) {
     throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Decrypt, err);
   }
@@ -87,7 +84,6 @@ export async function loadRule<Params extends RuleTypeParams>(params: LoadRulePa
     fakeRequest,
     apiKey,
     rulesClient,
-    rulesSettingsClient,
     validatedParams,
   };
 }
@@ -103,7 +99,6 @@ export async function getRuleAttributes<Params extends RuleTypeParams>(
   rule: SanitizedRule<Params>;
   fakeRequest: CoreKibanaRequest;
   rulesClient: RulesClientApi;
-  rulesSettingsClient: RulesSettingsClientApi;
 }> {
   const namespace = context.spaceIdToNamespace(spaceId);
 
@@ -115,7 +110,6 @@ export async function getRuleAttributes<Params extends RuleTypeParams>(
 
   const fakeRequest = getFakeKibanaRequest(context, spaceId, rawRule.attributes.apiKey);
   const rulesClient = context.getRulesClientWithRequest(fakeRequest);
-  const rulesSettingsClient = context.getRulesSettingsClientWithRequest(fakeRequest);
   const rule = rulesClient.getAlertFromRaw({
     id: ruleId,
     ruleTypeId: rawRule.attributes.alertTypeId as string,
@@ -131,7 +125,6 @@ export async function getRuleAttributes<Params extends RuleTypeParams>(
     consumer: rawRule.attributes.consumer,
     fakeRequest,
     rulesClient,
-    rulesSettingsClient,
   };
 }
 

@@ -37,23 +37,31 @@ export class RulesSettingsClientFactory {
     this.securityPluginStart = options.securityPluginStart;
   }
 
-  public create(request: KibanaRequest) {
+  private createRulesSettingsClient(request: KibanaRequest, withAuth: boolean) {
     const { securityPluginStart } = this;
     const savedObjectsClient = this.savedObjectsService.getScopedClient(request, {
-      excludedExtensions: [SECURITY_EXTENSION_ID],
       includedHiddenTypes: [RULES_SETTINGS_SAVED_OBJECT_TYPE],
+      ...(withAuth ? {} : { excludedExtensions: [SECURITY_EXTENSION_ID] }),
     });
 
     return new RulesSettingsClient({
       logger: this.logger,
       savedObjectsClient,
       async getUserName() {
-        if (!securityPluginStart) {
+        if (!securityPluginStart || !request) {
           return null;
         }
-        const user = await securityPluginStart.authc.getCurrentUser(request);
+        const user = securityPluginStart.authc.getCurrentUser(request);
         return user ? user.username : null;
       },
     });
+  }
+
+  public createWithAuthorization(request: KibanaRequest) {
+    return this.createRulesSettingsClient(request, true);
+  }
+
+  public create(request: KibanaRequest) {
+    return this.createRulesSettingsClient(request, false);
   }
 }

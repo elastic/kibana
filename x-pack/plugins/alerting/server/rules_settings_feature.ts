@@ -67,7 +67,7 @@ export const rulesSettingsFeature: KibanaFeatureConfig = {
               id: ALL_FLAPPING_SETTINGS_SUB_FEATURE_ID,
               includeIn: 'all',
               savedObject: {
-                all: [],
+                all: [RULES_SETTINGS_SAVED_OBJECT_TYPE],
                 read: [],
               },
               ui: ['writeFlappingSettingsUI', 'readFlappingSettingsUI'],
@@ -79,7 +79,7 @@ export const rulesSettingsFeature: KibanaFeatureConfig = {
               includeIn: 'read',
               savedObject: {
                 all: [],
-                read: [],
+                read: [RULES_SETTINGS_SAVED_OBJECT_TYPE],
               },
               ui: ['readFlappingSettingsUI'],
             },

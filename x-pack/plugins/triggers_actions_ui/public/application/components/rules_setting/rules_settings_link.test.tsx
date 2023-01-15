@@ -127,7 +127,22 @@ describe('rules_settings_link', () => {
       },
     };
 
-    const result = render(<RulesSettingsLinkWithProviders />);
+    let result = render(<RulesSettingsLinkWithProviders />);
+    await waitFor(() => {
+      expect(result.queryByTestId('rulesSettingsLink')).toBe(null);
+    });
+
+    useKibanaMock().services.application.capabilities = {
+      ...capabilities,
+      rulesSettings: {
+        save: true,
+        show: true,
+        writeFlappingSettingsUI: true,
+        readFlappingSettingsUI: false,
+      },
+    };
+
+    result = render(<RulesSettingsLinkWithProviders />);
     await waitFor(() => {
       expect(result.queryByTestId('rulesSettingsLink')).toBe(null);
     });

@@ -48,25 +48,25 @@ const verifyFlappingSettings = (flappingSettings: RulesSettingsFlappingPropertie
 export interface RulesSettingsFlappingClientConstructorOptions {
   readonly logger: Logger;
   readonly savedObjectsClient: SavedObjectsClientContract;
-  readonly persist: () => Promise<SavedObject<RulesSettings>>;
+  readonly getOrCreate: () => Promise<SavedObject<RulesSettings>>;
   readonly getModificationMetadata: () => Promise<RulesSettingsModificationMetadata>;
 }
 
 export class RulesSettingsFlappingClient {
   private readonly logger: Logger;
   private readonly savedObjectsClient: SavedObjectsClientContract;
-  private readonly persist: () => Promise<SavedObject<RulesSettings>>;
+  private readonly getOrCreate: () => Promise<SavedObject<RulesSettings>>;
   private readonly getModificationMetadata: () => Promise<RulesSettingsModificationMetadata>;
 
   constructor(options: RulesSettingsFlappingClientConstructorOptions) {
     this.logger = options.logger;
     this.savedObjectsClient = options.savedObjectsClient;
-    this.persist = options.persist;
+    this.getOrCreate = options.getOrCreate;
     this.getModificationMetadata = options.getModificationMetadata;
   }
 
   public async get(): Promise<RulesSettingsFlapping> {
-    const rulesSettings = await this.persist();
+    const rulesSettings = await this.getOrCreate();
     return rulesSettings.attributes.flapping;
   }
 
@@ -80,24 +80,31 @@ export class RulesSettingsFlappingClient {
       throw e;
     }
 
-    const { attributes, version } = await this.persist();
+    const { attributes, version } = await this.getOrCreate();
     const modificationMetadata = await this.getModificationMetadata();
 
-    const result = await this.savedObjectsClient.update(
-      RULES_SETTINGS_SAVED_OBJECT_TYPE,
-      RULES_SETTINGS_SAVED_OBJECT_ID,
-      {
-        ...attributes,
-        flapping: {
-          ...attributes.flapping,
-          ...newFlappingProperties,
-          ...modificationMetadata,
+    try {
+      const result = await this.savedObjectsClient.update(
+        RULES_SETTINGS_SAVED_OBJECT_TYPE,
+        RULES_SETTINGS_SAVED_OBJECT_ID,
+        {
+          ...attributes,
+          flapping: {
+            ...attributes.flapping,
+            ...newFlappingProperties,
+            ...modificationMetadata,
+          },
         },
-      },
-      {
-        version,
-      }
-    );
-    return result.attributes.flapping;
+        {
+          version,
+          retryOnConflict: 3,
+        }
+      );
+      return result.attributes.flapping;
+    } catch (e) {
+      const errorMessage = 'savedObjectsClient errored trying to update flapping settings';
+      this.logger.error(`${errorMessage}: ${e}`);
+      throw Boom.boomify(e, { message: errorMessage });
+    }
   }
 }

@@ -147,10 +147,10 @@ export const RulesSettingsFlappingFormSection = memo(
     } = useKibana().services;
 
     const {
-      rulesSettings: { save, writeFlappingSettingsUI },
+      rulesSettings: { writeFlappingSettingsUI },
     } = capabilities;
 
-    const canWriteFlappingSettings = save && writeFlappingSettingsUI;
+    const canWriteFlappingSettings = writeFlappingSettingsUI;
 
     return (
       <EuiFlexGroup direction="column">

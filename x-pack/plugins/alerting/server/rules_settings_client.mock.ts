@@ -10,7 +10,7 @@ import { RulesSettingsClientApi, RulesSettingsFlappingClientApi } from './types'
 export type RulesSettingsClientMock = jest.Mocked<RulesSettingsClientApi>;
 export type RulesSettingsFlappingClientMock = jest.Mocked<RulesSettingsFlappingClientApi>;
 
-// Warning: Becareful when resetting all mocks as it would clear
+// Warning: Becareful when resetting all mocks in tests as it would clear
 // the mock return value on the flapping
 const createRulesSettingsClientMock = () => {
   const flappingMocked: RulesSettingsFlappingClientMock = {

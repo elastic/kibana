@@ -271,7 +271,7 @@ describe('RulesSettingsClient', () => {
           updatedAt: expect.any(String),
         }),
       },
-      { version: '123' }
+      { version: '123', retryOnConflict: 3 }
     );
 
     expect(result).toEqual(
@@ -280,37 +280,6 @@ describe('RulesSettingsClient', () => {
         lookBackWindow: 5,
         statusChangeThreshold: 5,
       })
-    );
-  });
-
-  test('throws if new flapping setting fails verification', async () => {
-    const client = new RulesSettingsClient(rulesSettingsClientParams);
-    await expect(
-      client.flapping().update({
-        enabled: true,
-        lookBackWindow: 200,
-        statusChangeThreshold: 500,
-      })
-    ).rejects.toThrowError('Invalid lookBackWindow value, must be between 2 and 20, but got: 200.');
-
-    await expect(
-      client.flapping().update({
-        enabled: true,
-        lookBackWindow: 20,
-        statusChangeThreshold: 500,
-      })
-    ).rejects.toThrowError(
-      'Invalid statusChangeThreshold value, must be between 2 and 20, but got: 500.'
-    );
-
-    await expect(
-      client.flapping().update({
-        enabled: true,
-        lookBackWindow: 10,
-        statusChangeThreshold: 20,
-      })
-    ).rejects.toThrowError(
-      'Invalid values,lookBackWindow (10) must be equal to or greater than statusChangeThreshold (20).'
     );
   });
 });
