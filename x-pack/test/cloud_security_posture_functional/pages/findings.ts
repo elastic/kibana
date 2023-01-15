@@ -132,7 +132,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('Table Sort', () => {
-      type SortingMethod = (string, string) => number;
+      type SortingMethod = (a: string, b: string) => number;
       type SortDirection = 'asc' | 'desc';
       // Sort by lexical order will sort by the first character of the string (case-sensitive)
       const compareStringByLexicographicOrder = (a: string, b: string) => {
