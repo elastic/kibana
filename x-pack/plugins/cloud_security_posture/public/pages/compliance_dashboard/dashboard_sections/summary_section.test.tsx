@@ -13,12 +13,16 @@ import { SummarySection } from './summary_section';
 import { mockDashboardData } from '../compliance_dashboard.test';
 import { TestProvider } from '../../../test/test_provider';
 import { screen } from '@testing-library/react';
+import { KSPM_POLICY_TEMPLATE } from '../../../../common/constants';
 
 describe('<CloudSummarySection />', () => {
   const renderCloudSummarySection = (alterMockData = {}) => {
     render(
       <TestProvider>
-        <SummarySection complianceData={{ ...mockDashboardData, ...alterMockData }} />
+        <SummarySection
+          complianceData={{ ...mockDashboardData, ...alterMockData }}
+          dashboardType={KSPM_POLICY_TEMPLATE}
+        />
       </TestProvider>
     );
   };
