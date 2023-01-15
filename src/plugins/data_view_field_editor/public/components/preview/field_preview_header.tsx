@@ -26,11 +26,13 @@ const i18nTexts = {
 };
 
 const currentDocumentIsLoadingSelector = (state: PreviewState) => state.currentDocument.isLoading;
+const documentSourceSelector = (state: PreviewState) => state.documentSource;
 
 export const FieldPreviewHeader = () => {
   const { dataView } = useFieldEditorContext();
-  const { controller, from } = useFieldPreviewContext();
+  const { controller } = useFieldPreviewContext();
   const isFetchingDocument = useStateSelector(controller.state$, currentDocumentIsLoadingSelector);
+  const documentSource = useStateSelector(controller.state$, documentSourceSelector);
 
   return (
     <div>
@@ -49,9 +51,10 @@ export const FieldPreviewHeader = () => {
       <EuiText>
         <EuiTextColor color="subdued" data-test-subj="subTitle">
           {i18n.translate('indexPatternFieldEditor.fieldPreview.subTitle', {
-            defaultMessage: 'From: {from}',
+            defaultMessage: 'From: {documentSource}',
             values: {
-              from: from.value === 'cluster' ? dataView.getIndexPattern() : i18nTexts.customData,
+              documentSource:
+                documentSource === 'cluster' ? dataView.getIndexPattern() : i18nTexts.customData,
             },
           })}
         </EuiTextColor>

@@ -31,7 +31,6 @@ import type {
   PainlessExecuteContext,
   Context,
   Params,
-  From,
   EsDocument,
   ScriptErrorCodes,
   FetchDocError,
@@ -129,8 +128,6 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
   const [isLoadingPreview, setIsLoadingPreview] = useState(false);
   /** Flag to indicate if we are loading a single document by providing its ID */
   const [customDocIdToLoad, setCustomDocIdToLoad] = useState<string | null>(null);
-  /** Define if we provide the document to preview from the cluster or from a custom JSON */
-  const [from, setFrom] = useState<From>('cluster');
   /** Keep track if the script painless syntax is being validated and if it is valid  */
   const [scriptEditorValidation, setScriptEditorValidation] = useState<{
     isValidating: boolean;
@@ -486,7 +483,6 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
 
     controller.setDocuments([]);
     setPreviewResponse({ fields: [], error: null });
-    setFrom('cluster');
     setIsLoadingPreview(false);
     setIsFetchingDocument(false);
   }, [controller]);
@@ -517,10 +513,6 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
         isVisible: isPanelVisible,
         setIsVisible: setIsPanelVisible,
       },
-      from: {
-        value: from,
-        set: setFrom,
-      },
       reset,
       validation: {
         setScriptEditorValidation,
@@ -539,7 +531,6 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
       fetchSampleDocuments,
       totalDocs,
       isPanelVisible,
-      from,
       reset,
       initialPreviewComplete,
     ]

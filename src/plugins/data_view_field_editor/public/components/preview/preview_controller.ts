@@ -29,6 +29,7 @@ const previewStateDefault: PreviewState = {
   /** sample documents fetched from cluster */
   documents: [],
   currentIdx: 0,
+  documentSource: 'cluster',
 };
 
 export class PreviewController {

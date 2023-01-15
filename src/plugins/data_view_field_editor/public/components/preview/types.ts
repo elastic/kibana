@@ -17,7 +17,7 @@ import type {
 import type { RuntimeFieldPainlessError } from '../../types';
 import type { PreviewController } from './preview_controller';
 
-export type From = 'cluster' | 'custom';
+export type DocumentSource = 'cluster' | 'custom';
 
 export interface EsDocument {
   _id: string;
@@ -57,6 +57,7 @@ export interface PreviewState {
   };
   documents: EsDocument[];
   currentIdx: number;
+  documentSource: DocumentSource;
 }
 
 export interface FetchDocError {
@@ -129,10 +130,6 @@ export interface Context {
   panel: {
     isVisible: boolean;
     setIsVisible: (isVisible: boolean) => void;
-  };
-  from: {
-    value: From;
-    set: (value: From) => void;
   };
   navigation: {
     isFirstDoc: boolean;
