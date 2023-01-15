@@ -64,14 +64,13 @@ const FindingsTableComponent = ({
   ] = useMemo(
     () => [
       getExpandColumn<CspFinding>({ onClick: setSelectedFinding }),
-      createColumnWithFilters(baseFindingsColumns['resource.id'], { onAddFilter }),
       createColumnWithFilters(baseFindingsColumns['result.evaluation'], { onAddFilter }),
-      createColumnWithFilters(baseFindingsColumns['resource.sub_type'], { onAddFilter }),
+      createColumnWithFilters(baseFindingsColumns['resource.id'], { onAddFilter }),
       createColumnWithFilters(baseFindingsColumns['resource.name'], { onAddFilter }),
+      createColumnWithFilters(baseFindingsColumns['resource.sub_type'], { onAddFilter }),
+      createColumnWithFilters(baseFindingsColumns['rule.rule_number'], { onAddFilter }),
       createColumnWithFilters(baseFindingsColumns['rule.name'], { onAddFilter }),
-      createColumnWithFilters(baseFindingsColumns['rule.benchmark.name'], { onAddFilter }),
       baseFindingsColumns['rule.section'],
-      createColumnWithFilters(baseFindingsColumns.cluster_id, { onAddFilter }),
       baseFindingsColumns['@timestamp'],
     ],
     [onAddFilter]

@@ -123,15 +123,26 @@ const baseColumns = [
   },
   {
     field: 'rule.name',
-    name: i18n.translate('xpack.csp.findings.findingsTable.findingsTableColumn.ruleColumnLabel', {
-      defaultMessage: 'Rule',
-    }),
+    name: i18n.translate(
+      'xpack.csp.findings.findingsTable.findingsTableColumn.ruleNameColumnLabel',
+      { defaultMessage: 'Rule Name' }
+    ),
     sortable: true,
     render: (name: string) => (
       <EuiToolTip content={name} position="left" anchorClassName="eui-textTruncate">
         <>{name}</>
       </EuiToolTip>
     ),
+  },
+  {
+    field: 'rule.rule_number',
+    name: i18n.translate(
+      'xpack.csp.findings.findingsTable.findingsTableColumn.ruleNumberColumnLabel',
+      {
+        defaultMessage: 'Rule Number',
+      }
+    ),
+    sortable: true,
   },
   {
     field: 'rule.benchmark.name',
