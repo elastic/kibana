@@ -137,8 +137,6 @@ export interface Context {
   navigation: {
     isFirstDoc: boolean;
     isLastDoc: boolean;
-    next: () => void;
-    prev: () => void;
   };
   reset: () => void;
   validation: {

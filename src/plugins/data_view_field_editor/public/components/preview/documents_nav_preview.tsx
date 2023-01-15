@@ -21,16 +21,16 @@ import { PreviewState } from './types';
 import { useFieldPreviewContext } from './field_preview_context';
 
 const docIdSelector = (state: PreviewState) => ({
-  documentId: state.documents[state.currentIdx].id,
+  documentId: state.documents[state.currentIdx].id as string,
   isCustomId: state.currentDocument.isCustomId,
 });
 
 export const DocumentsNavPreview = () => {
   const {
     documents: { loadSingle, loadFromCluster, fetchDocError },
-    navigation: { prev, next },
     controller,
   } = useFieldPreviewContext();
+  const { goToPreviousDocument: prev, goToNextDocument: next } = controller;
   const { documentId, isCustomId } = useStateSelector(controller.state$, docIdSelector);
 
   const isInvalid = fetchDocError?.code === 'DOC_NOT_FOUND';

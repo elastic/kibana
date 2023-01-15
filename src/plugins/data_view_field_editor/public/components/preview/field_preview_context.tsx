@@ -504,14 +504,6 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
         value: params,
         update: updateParams,
       },
-      /*
-      currentDocument: {
-        value: currentDocument,
-        id: isCustomDocId ? customDocIdToLoad! : currentDocId,
-        isLoading: isFetchingDocument,
-        isCustomId: isCustomDocId,
-      },
-      */
       documents: {
         loadSingle: setCustomDocIdToLoad,
         loadFromCluster: fetchSampleDocuments,
@@ -520,8 +512,6 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
       navigation: {
         isFirstDoc: currentIdx === 0,
         isLastDoc: currentIdx >= totalDocs - 1,
-        next: controller.goToNextDocument,
-        prev: controller.goToPreviousDocument,
       },
       panel: {
         isVisible: isPanelVisible,
