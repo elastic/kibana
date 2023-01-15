@@ -36,7 +36,7 @@ export class RepoPath {
 
   private _basename: string | undefined;
   /**
-   * basename of the path
+   * basename of the path (including extension)
    * (lazy and cached getter)
    */
   public get basename() {
@@ -62,6 +62,10 @@ export class RepoPath {
 
   isJavaScript() {
     return this.ext === '.js' || this.ext === '.jsx' || this.ext === '.mjs';
+  }
+
+  isJsTsCode() {
+    return this.isTypeScript() || this.isJavaScript();
   }
 
   isFixture() {

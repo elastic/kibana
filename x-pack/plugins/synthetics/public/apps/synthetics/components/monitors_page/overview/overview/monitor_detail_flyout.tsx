@@ -49,7 +49,7 @@ import { ClientPluginsStart } from '../../../../../../plugin';
 import { useStatusByLocation } from '../../../../hooks/use_status_by_location';
 import { MonitorEnabled } from '../../management/monitor_list_table/monitor_enabled';
 import { ActionsPopover } from './actions_popover';
-import { selectOverviewState } from '../../../../state';
+import { selectOverviewState, selectServiceLocationsState } from '../../../../state';
 import { useMonitorDetail } from '../../../../hooks/use_monitor_detail';
 import {
   ConfigKey,
@@ -65,9 +65,15 @@ interface Props {
   configId: string;
   id: string;
   location: string;
+  locationId: string;
   onClose: () => void;
   onEnabledChange: () => void;
-  onLocationChange: (params: { configId: string; id: string; location: string }) => void;
+  onLocationChange: (params: {
+    configId: string;
+    id: string;
+    location: string;
+    locationId: string;
+  }) => void;
   currentDurationChartFrom?: string;
   currentDurationChartTo?: string;
   previousDurationChartFrom?: string;
@@ -174,10 +180,12 @@ function LocationSelect({
   configId: string;
   monitor: EncryptedSyntheticsMonitor;
   onEnabledChange: () => void;
-  setCurrentLocation: (location: string) => void;
+  setCurrentLocation: (location: string, locationId: string) => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const status = locations.find((l) => l.observer?.geo?.name === currentLocation)?.monitor?.status;
+
+  const { locations: allLocations } = useSelector(selectServiceLocationsState);
 
   return (
     <EuiFlexGroup wrap={true} responsive={false}>
@@ -213,13 +221,14 @@ function LocationSelect({
                     id: 0,
                     title: GO_TO_LOCATIONS_LABEL,
                     items: locations.map((l) => {
+                      const loc = allLocations.find((ll) => ll.label === l.observer?.geo?.name);
                       return {
                         name: l.observer?.geo?.name,
                         icon: <EuiHealth color={!!l.summary?.down ? 'danger' : 'success'} />,
                         disabled: !l.observer?.geo?.name || l.observer.geo.name === currentLocation,
                         onClick: () => {
                           if (l.observer?.geo?.name && currentLocation !== l.observer.geo.name)
-                            setCurrentLocation(l.observer?.geo?.name);
+                            setCurrentLocation(l.observer?.geo?.name, loc?.id!);
                         },
                       };
                     }),
@@ -256,7 +265,7 @@ export function LoadingState() {
 }
 
 export function MonitorDetailFlyout(props: Props) {
-  const { id, configId, onLocationChange } = props;
+  const { id, configId, onLocationChange, locationId } = props;
   const {
     data: { monitors },
   } = useSelector(selectOverviewState);
@@ -267,12 +276,14 @@ export function MonitorDetailFlyout(props: Props) {
   }, [id, monitors]);
 
   const setLocation = useCallback(
-    (location: string) => onLocationChange({ id, configId, location }),
+    (location: string, locationIdT: string) =>
+      onLocationChange({ id, configId, location, locationId: locationIdT }),
     [id, configId, onLocationChange]
   );
 
   const detailLink = useMonitorDetailLocator({
     configId: id,
+    locationId,
   });
 
   const {

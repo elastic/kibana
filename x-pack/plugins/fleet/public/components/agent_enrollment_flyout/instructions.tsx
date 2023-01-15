@@ -72,14 +72,14 @@ export const Instructions = (props: InstructionProps) => {
 
   const showAgentEnrollment =
     fleetStatus.isReady &&
-    !isFleetServerUnhealthy &&
-    fleetServers.length > 0 &&
-    (fleetServerHosts?.length ?? 0) > 0;
+    (isFleetServerPolicySelected ||
+      (!isFleetServerUnhealthy && fleetServers.length > 0 && (fleetServerHosts?.length ?? 0) > 0));
 
   const showFleetServerEnrollment =
-    fleetServers.length === 0 ||
-    isFleetServerUnhealthy ||
-    (fleetStatus.missingRequirements ?? []).some((r) => r === FLEET_SERVER_PACKAGE);
+    !isFleetServerPolicySelected &&
+    (fleetServers.length === 0 ||
+      isFleetServerUnhealthy ||
+      (fleetStatus.missingRequirements ?? []).some((r) => r === FLEET_SERVER_PACKAGE));
 
   if (!isIntegrationFlow && showAgentEnrollment) {
     setSelectionType('radio');
