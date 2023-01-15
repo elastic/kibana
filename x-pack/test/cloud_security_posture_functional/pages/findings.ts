@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import Chance from 'chance';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -14,19 +15,48 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const retry = getService('retry');
   const pageObjects = getPageObjects(['common', 'findings']);
+  const chance = new Chance();
 
-  const data = Array.from({ length: 2 }, (_, id) => {
-    return {
-      resource: { id, name: `Resource ${id}` },
-      result: { evaluation: id === 0 ? 'passed' : 'failed' },
+  // We need to use a dataset for the tests to run
+  // We intentionally make some fields start with a capital letter to test that the query bar is case-insensitive/case-sensitive
+  const data = [
+    {
+      resource: { id: chance.guid(), name: `kubelet`, sub_type: 'lower case sub type' },
+      result: { evaluation: chance.integer() % 2 === 0 ? 'passed' : 'failed' },
       rule: {
-        name: `Rule ${id}`,
-        section: 'Kubelet',
-        tags: ['Kubernetes'],
-        type: 'process',
+        name: 'Upper case rule name',
+        section: 'Upper case section',
       },
-    };
-  });
+      cluster_id: 'Upper case cluster id',
+    },
+    {
+      resource: { id: chance.guid(), name: `Pod`, sub_type: 'Upper case sub type' },
+      result: { evaluation: chance.integer() % 2 === 0 ? 'passed' : 'failed' },
+      rule: {
+        name: 'lower case rule name',
+        section: 'Another upper case section',
+      },
+      cluster_id: 'Another Upper case cluster id',
+    },
+    {
+      resource: { id: chance.guid(), name: `process`, sub_type: 'another lower case type' },
+      result: { evaluation: 'passed' },
+      rule: {
+        name: 'Another upper case rule name',
+        section: 'lower case section',
+      },
+      cluster_id: 'lower case cluster id',
+    },
+    {
+      resource: { id: chance.guid(), name: `process`, sub_type: 'Upper case type again' },
+      result: { evaluation: 'failed' },
+      rule: {
+        name: 'some lower case rule name',
+        section: 'another lower case section',
+      },
+      cluster_id: 'another lower case cluster id',
+    },
+  ];
 
   const ruleName1 = data[0].rule.name;
   const ruleName2 = data[1].rule.name;
@@ -102,12 +132,38 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('Table Sort', () => {
-      it('sorts by rule name', async () => {
-        await table.toggleColumnSortOrFail('Rule', 'asc');
-      });
+      type SortingMethod = (a: string, b: string) => number;
+      type SortDirection = 'asc' | 'desc';
+      // Sort by lexical order will sort by the first character of the string (case-sensitive)
+      const compareStringByLexicographicOrder = (a: string, b: string) => {
+        return a > b ? 1 : b > a ? -1 : 0;
+      };
+      const sortByAlphabeticalOrder = (a: string, b: string) => {
+        return a.localeCompare(b);
+      };
 
-      it('sorts by resource name', async () => {
-        await table.toggleColumnSortOrFail('Resource Name', 'desc');
+      it('sorts by a column, should be case sensitive/insensitive depending on the column', async () => {
+        type TestCase = [string, SortDirection, SortingMethod];
+        const testCases: TestCase[] = [
+          ['CIS Section', 'asc', sortByAlphabeticalOrder],
+          ['CIS Section', 'desc', sortByAlphabeticalOrder],
+          ['Cluster ID', 'asc', compareStringByLexicographicOrder],
+          ['Cluster ID', 'desc', compareStringByLexicographicOrder],
+          ['Resource Name', 'asc', sortByAlphabeticalOrder],
+          ['Resource Name', 'desc', sortByAlphabeticalOrder],
+          ['Resource Type', 'asc', sortByAlphabeticalOrder],
+          ['Resource Type', 'desc', sortByAlphabeticalOrder],
+        ];
+        for (const [columnName, dir, sortingMethod] of testCases) {
+          await table.toggleColumnSort(columnName, dir);
+          const values = (await table.getColumnValues(columnName)).filter(Boolean);
+          expect(values).to.not.be.empty();
+
+          const sorted = values
+            .slice()
+            .sort((a, b) => (dir === 'asc' ? sortingMethod(a, b) : sortingMethod(b, a)));
+          values.forEach((value, i) => expect(value).to.be(sorted[i]));
+        }
       });
     });
 
