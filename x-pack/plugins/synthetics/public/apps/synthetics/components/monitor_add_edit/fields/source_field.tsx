@@ -31,14 +31,14 @@ interface SourceConfig {
   fileName?: string;
 }
 
-interface Props {
+export interface SourceFieldProps {
   onChange: (sourceConfig: SourceConfig) => void;
   onBlur: (field: ConfigKey) => void;
   value: SourceConfig;
   isEditFlow?: boolean;
 }
 
-export const SourceField = ({ onChange, onBlur, value, isEditFlow = false }: Props) => {
+export const SourceField = ({ onChange, onBlur, value, isEditFlow = false }: SourceFieldProps) => {
   const [sourceType, setSourceType] = useState<SourceType>(
     value.type === 'inline' ? SourceType.INLINE : SourceType.SCRIPT_RECORDER
   );
