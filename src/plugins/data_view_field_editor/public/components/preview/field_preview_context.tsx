@@ -76,6 +76,8 @@ const documentsSelector = (state: PreviewState) => {
   };
 };
 
+const scriptEditorValidationSelector = (state: PreviewState) => state.scriptEditorValidation;
+
 export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewController }> = ({
   controller,
   children,
@@ -128,15 +130,13 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
   const [isLoadingPreview, setIsLoadingPreview] = useState(false);
   /** Flag to indicate if we are loading a single document by providing its ID */
   const [customDocIdToLoad, setCustomDocIdToLoad] = useState<string | null>(null);
-  /** Keep track if the script painless syntax is being validated and if it is valid  */
-  const [scriptEditorValidation, setScriptEditorValidation] = useState<{
-    isValidating: boolean;
-    isValid: boolean;
-    message: string | null;
-  }>({ isValidating: false, isValid: true, message: null });
 
   const { currentDocument, currentDocIndex, currentDocId, totalDocs, currentIdx } =
     useStateSelector(controller.state$, documentsSelector);
+  const scriptEditorValidation = useStateSelector(
+    controller.state$,
+    scriptEditorValidationSelector
+  );
   const isCustomDocId = customDocIdToLoad !== null;
   let isPreviewAvailable = true;
 
@@ -514,9 +514,6 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
         setIsVisible: setIsPanelVisible,
       },
       reset,
-      validation: {
-        setScriptEditorValidation,
-      },
     }),
     [
       controller,

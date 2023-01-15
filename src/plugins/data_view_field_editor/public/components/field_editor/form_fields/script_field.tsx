@@ -63,13 +63,7 @@ const ScriptFieldComponent = ({ existingConcreteFields, links, placeholder }: Pr
   const editorValidationSubscription = useRef<Subscription>();
   const fieldCurrentValue = useRef<string>('');
 
-  const {
-    error,
-    isLoadingPreview,
-    isPreviewAvailable,
-    validation: { setScriptEditorValidation },
-    controller,
-  } = useFieldPreviewContext();
+  const { error, isLoadingPreview, isPreviewAvailable, controller } = useFieldPreviewContext();
   const currentDocument = useStateSelector(controller.state$, currentDocumentSelector);
   const isFetchingDoc = useStateSelector(controller.state$, currentDocumentIsLoadingSelector);
   const [validationData$, nextValidationData$] = useBehaviorSubject<
@@ -149,7 +143,7 @@ const ScriptFieldComponent = ({ existingConcreteFields, links, placeholder }: Pr
 
       editorValidationSubscription.current = PainlessLang.validation$().subscribe(
         ({ isValid, isValidating, errors }) => {
-          setScriptEditorValidation({
+          controller.setScriptEditorValidation({
             isValid,
             isValidating,
             message: errors[0]?.message ?? null,
@@ -157,7 +151,7 @@ const ScriptFieldComponent = ({ existingConcreteFields, links, placeholder }: Pr
         }
       );
     },
-    [setScriptEditorValidation]
+    [controller]
   );
 
   const updateMonacoMarkers = useCallback((markers: monaco.editor.IMarkerData[]) => {

@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import type {
   RuntimeType,
@@ -58,6 +57,11 @@ export interface PreviewState {
   documents: EsDocument[];
   currentIdx: number;
   documentSource: DocumentSource;
+  scriptEditorValidation: {
+    isValidating: boolean;
+    isValid: boolean;
+    message: string | null;
+  };
 }
 
 export interface FetchDocError {
@@ -136,11 +140,6 @@ export interface Context {
     isLastDoc: boolean;
   };
   reset: () => void;
-  validation: {
-    setScriptEditorValidation: React.Dispatch<
-      React.SetStateAction<{ isValid: boolean; isValidating: boolean; message: string | null }>
-    >;
-  };
 }
 
 export type PainlessExecuteContext =

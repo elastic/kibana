@@ -30,6 +30,8 @@ const previewStateDefault: PreviewState = {
   documents: [],
   currentIdx: 0,
   documentSource: 'cluster',
+  /** Keep track if the script painless syntax is being validated and if it is valid  */
+  scriptEditorValidation: { isValidating: false, isValid: true, message: null },
 };
 
 export class PreviewController {
@@ -95,5 +97,9 @@ export class PreviewController {
     } else {
       this.updateState({ currentIdx: this.state.currentIdx - 1 });
     }
+  };
+
+  setScriptEditorValidation = (scriptEditorValidation: PreviewState['scriptEditorValidation']) => {
+    this.updateState({ scriptEditorValidation });
   };
 }
