@@ -113,7 +113,7 @@ export function* fetchJourneyStepsEffect() {
           yield put(fetchJourneyAction.success(response));
         }
       } catch (e) {
-				inProgressRequests.delete(action.payload.checkGroup);
+        inProgressRequests.delete(action.payload.checkGroup);
         yield put(fetchJourneyAction.fail(serializeHttpFetchError(e, action.payload)));
       }
     }
