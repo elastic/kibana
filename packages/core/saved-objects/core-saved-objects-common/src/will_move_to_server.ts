@@ -6,10 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type {
-  SavedObjectsMigrationVersion,
-  SavedObjectError,
-} from '@kbn/core-saved-objects-common';
+import type { SavedObjectsMigrationVersion, SavedObjectError } from './saved_objects';
 
 /**
  * Don't use this type, it's simply a helper type for {@link SavedObjectAttribute}

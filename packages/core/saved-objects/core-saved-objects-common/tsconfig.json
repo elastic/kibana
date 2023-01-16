@@ -12,8 +12,5 @@
   ],
   "exclude": [
     "target/**/*",
-  ],
-  "kbn_references": [
-    "@kbn/core-saved-objects-server",
   ]
 }

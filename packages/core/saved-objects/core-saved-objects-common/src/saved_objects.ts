@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import * as serverTypes from '@kbn/core-saved-objects-server';
+import * as serverTypes from './will_move_to_server';
 
 /**
  * Information about the migrations that have been applied to this SavedObject.
