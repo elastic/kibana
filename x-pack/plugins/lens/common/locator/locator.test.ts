@@ -155,15 +155,15 @@ describe('Lens url generator', () => {
     expect(Object.keys(state.payload)).toHaveLength(0);
   });
 
-  //   test('should create data view when dataViewSpec is used', async () => {
-  //     const dataViewSpecMock = {
-  //       id: 'mock-id',
-  //       title: 'mock-title',
-  //       timeFieldName: 'mock-time-field-name',
-  //     };
-  //     const { locator } = await setup();
-  //     const { state } = await locator.getLocation({ dataViewSpec: dataViewSpecMock });
+  test('should create data view when dataViewSpec is used', async () => {
+    const dataViewSpecMock = {
+      id: 'mock-id',
+      title: 'mock-title',
+      timeFieldName: 'mock-time-field-name',
+    };
+    const { locator } = await setup();
+    const { state } = await locator.getLocation({ dataViewSpecs: [dataViewSpecMock] });
 
-  //     expect(state.dataViewSpec).toEqual(dataViewSpecMock);
-  //   });
+    expect(state.payload.dataViewSpecs).toEqual([dataViewSpecMock]);
+  });
 });

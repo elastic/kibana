@@ -144,7 +144,8 @@ export function loadInitial(
         visualizationState: emptyState.visualization,
         datasourceStates: emptyState.datasourceStates,
         initialContext,
-        adHocDataViews: lens.persistedDoc?.state.adHocDataViews,
+        adHocDataViews:
+          lens.persistedDoc?.state.adHocDataViews || initialStateFromLocator.dataViewSpecs,
         references: locatorReferences,
         ...loaderSharedArgs,
       },

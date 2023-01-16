@@ -10,7 +10,7 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
 import type { Filter, Query } from '@kbn/es-query';
-import type { SavedQuery } from '@kbn/data-plugin/common';
+import type { DataViewSpec, SavedQuery } from '@kbn/data-plugin/common';
 import { SavedObjectReference } from '@kbn/core-saved-objects-common';
 import type { DateRange } from '../types';
 
@@ -62,6 +62,11 @@ interface LensShareableState {
    * Set the references used in the Lens state
    */
   references: Array<SavedObjectReference & SerializableRecord>;
+
+  /**
+   * Pass adHoc dataViews specs used in the Lens state
+   */
+  dataViewSpecs?: DataViewSpec[];
 }
 
 export interface LensAppLocatorParams extends SerializableRecord {
@@ -115,9 +120,14 @@ export interface LensAppLocatorParams extends SerializableRecord {
   datasourceStates?: Record<string, { state: unknown }> & SerializableRecord;
 
   /**
-   * Sset the references used in the Lens state
+   * Set the references used in the Lens state
    */
   references?: Array<SavedObjectReference & SerializableRecord>;
+
+  /**
+   * Pass adHoc dataViews specs used in the Lens state
+   */
+  dataViewSpecs?: DataViewSpec[];
 }
 
 export type LensAppLocator = LocatorPublic<LensAppLocatorParams>;
@@ -158,6 +168,7 @@ function getStateFromParams(params: LensAppLocatorParams): MainHistoryLocationSt
       Object.entries(params.datasourceStates!).map(([id, { state }]) => [id, state])
     ) as Record<string, { state: unknown }> & SerializableRecord,
     references: params.references!,
+    dataViewSpecs: params.dataViewSpecs,
   };
 }
 

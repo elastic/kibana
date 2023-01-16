@@ -522,6 +522,8 @@ export const LensTopNavMenu = ({
 
   const lensStore = useStore();
 
+  const adHocDataViews = indexPatterns.filter((pattern) => !pattern.isPersisted());
+
   const topNavConfig = useMemo(() => {
     const showReplaceInDashboard =
       initialContext?.originatingApp === 'dashboards' &&
@@ -591,6 +593,7 @@ export const LensTopNavMenu = ({
                 visualizationMap,
                 visualization,
                 currentDoc,
+                adHocDataViews: adHocDataViews.map((dataView) => dataView.toSpec()),
               }
             );
 
@@ -768,6 +771,7 @@ export const LensTopNavMenu = ({
     isOnTextBasedMode,
     lensStore,
     theme$,
+    adHocDataViews,
   ]);
 
   const onQuerySubmitWrapped = useCallback(
@@ -978,7 +982,7 @@ export const LensTopNavMenu = ({
     onAddField: addField,
     onDataViewCreated: createNewDataView,
     onCreateDefaultAdHocDataView,
-    adHocDataViews: indexPatterns.filter((pattern) => !pattern.isPersisted()),
+    adHocDataViews,
     onChangeDataView: async (newIndexPatternId: string) => {
       const currentDataView = await data.dataViews.get(newIndexPatternId);
       setCurrentIndexPattern(currentDataView);

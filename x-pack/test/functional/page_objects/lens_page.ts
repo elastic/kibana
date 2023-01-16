@@ -973,8 +973,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param dimension - the selector of the dimension
      * @param index - the index of the dimension trigger in group
      */
-    async getDimensionTriggerText(dimension: string, index = 0) {
-      const dimensionTexts = await this.getDimensionTriggersTexts(dimension);
+    async getDimensionTriggerText(dimension: string, index = 0, isTextBased: boolean = false) {
+      const dimensionTexts = await this.getDimensionTriggersTexts(dimension, isTextBased);
       return dimensionTexts[index];
     },
     /**
@@ -982,9 +982,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      *
      * @param dimension - the selector of the dimension
      */
-    async getDimensionTriggersTexts(dimension: string) {
+    async getDimensionTriggersTexts(dimension: string, isTextBased: boolean = false) {
       return retry.try(async () => {
-        const dimensionElements = await testSubjects.findAll(`${dimension} > lns-dimensionTrigger`);
+        const dimensionElements = await testSubjects.findAll(
+          `${dimension} > lns-dimensionTrigger${isTextBased ? '-textBased' : ''}`
+        );
         const dimensionTexts = await Promise.all(
           await dimensionElements.map(async (el) => await el.getVisibleText())
         );

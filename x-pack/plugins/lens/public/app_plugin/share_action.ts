@@ -7,6 +7,7 @@
 
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
 import type { SerializableRecord } from '@kbn/utility-types';
+import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { LensAppLocatorParams } from '../../common/locator/locator';
 import type { LensAppState } from '../state_management';
 import type { LensAppServices } from './types';
@@ -23,6 +24,7 @@ interface ShareableConfiguration
   datasourceMap: DatasourceMap;
   visualizationMap: VisualizationMap;
   currentDoc: Document | undefined;
+  adHocDataViews?: DataViewSpec[];
 }
 
 function getShareURLForSavedObject(
@@ -54,6 +56,7 @@ function getShortShareableURL(
     datasourceMap,
     visualizationMap,
     visualization,
+    adHocDataViews,
   }: ShareableConfiguration
 ) {
   const references = extractReferencesFromState({
@@ -86,6 +89,7 @@ function getShortShareableURL(
     activeDatasourceId,
     searchSessionId: data.search.session.getSessionId(),
     references,
+    dataViewSpecs: adHocDataViews,
   });
 }
 
