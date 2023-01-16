@@ -124,12 +124,7 @@ jest.mock('../../components/alerts_table/timeline_actions/use_bulk_add_to_case_a
 }));
 
 jest.mock('../../../common/components/visualization_actions/lens_embeddable');
-jest.mock('../../../common/components/page/use_refetch_by_session', () => ({
-  useRefetchByRestartingSession: jest.fn().mockReturnValue({
-    searchSessionId: 'mockSearchSessionId',
-    refetchByRestartingSession: jest.fn(),
-  }),
-}));
+jest.mock('../../../common/components/page/use_refetch_by_session');
 
 describe('DetectionEnginePageComponent', () => {
   beforeAll(() => {

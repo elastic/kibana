@@ -24,8 +24,6 @@ import type { Props } from '.';
 import { AlertsTreemapPanel } from '.';
 import { mockAlertSearchResponse } from '../alerts_treemap/lib/mocks/mock_alert_search_response';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
-import { useInspectButton } from '../../../detections/components/alerts_kpis/common/hooks';
-import { useRefetchByRestartingSession } from '../page/use_refetch_by_session';
 
 const from = '2022-07-28T08:20:18.966Z';
 const to = '2022-07-28T08:20:18.966Z';
@@ -60,12 +58,6 @@ jest.mock('../../hooks/use_experimental_features');
 jest.mock('../page/use_refetch_by_session');
 jest.mock('../visualization_actions/lens_embeddable');
 
-jest.mock('../page/use_refetch_by_session', () => ({
-  useRefetchByRestartingSession: jest.fn().mockReturnValue({
-    searchSessionId: 'mockSearchSessionId',
-    refetchByRestartingSession: jest.fn(),
-  }),
-}));
 jest.mock('../../../detections/components/alerts_kpis/common/hooks', () => ({
   useInspectButton: jest.fn(),
   useStackByFields: jest.fn(),
@@ -330,17 +322,10 @@ describe('AlertsTreemapPanel', () => {
 });
 
 describe('when isChartEmbeddablesEnabled = true', () => {
-  const mockSearchSessionId = 'mockSearchSessionId';
-  const mockRefetchByRestartingSession = jest.fn();
   const mockRefetch = () => {};
 
   beforeEach(() => {
     jest.clearAllMocks();
-
-    (useRefetchByRestartingSession as jest.Mock).mockReturnValue({
-      searchSessionId: mockSearchSessionId,
-      refetchByRestartingSession: mockRefetchByRestartingSession,
-    });
 
     (useLocation as jest.Mock).mockReturnValue([
       { pageName: SecurityPageName.alerts, detailName: undefined },
@@ -356,23 +341,6 @@ describe('when isChartEmbeddablesEnabled = true', () => {
     });
 
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
-  });
-
-  it('refetch data by refetchByRestartingSession', async () => {
-    render(
-      <TestProviders>
-        <AlertsTreemapPanel {...defaultProps} />
-      </TestProviders>
-    );
-
-    await waitFor(() => {
-      expect((useInspectButton as jest.Mock).mock.calls[0][0].refetch).toEqual(
-        mockRefetchByRestartingSession
-      );
-      expect((useInspectButton as jest.Mock).mock.calls[0][0].searchSessionId).toEqual(
-        mockSearchSessionId
-      );
-    });
   });
 
   it('renders LensEmbeddable', async () => {

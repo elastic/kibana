@@ -21,8 +21,6 @@ import * as helpers from './helpers';
 import { mockAlertSearchResponse } from './mock_data';
 import { ChartContextMenu } from '../../../pages/detection_engine/chart_panels/chart_context_menu';
 import { AlertsHistogramPanel, LEGEND_WITH_COUNTS_WIDTH } from '.';
-import { useInspectButton } from '../common/hooks';
-import { useRefetchByRestartingSession } from '../../../../common/components/page/use_refetch_by_session';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 jest.mock('../../../../common/containers/query_toggle');
@@ -102,12 +100,7 @@ jest.mock('../../../../common/hooks/use_experimental_features');
 jest.mock('../../../../common/components/page/use_refetch_by_session');
 jest.mock('../../../../common/components/visualization_actions/lens_embeddable');
 
-jest.mock('../../../../common/components/page/use_refetch_by_session', () => ({
-  useRefetchByRestartingSession: jest.fn().mockReturnValue({
-    searchSessionId: 'mockSearchSessionId',
-    refetchByRestartingSession: jest.fn(),
-  }),
-}));
+jest.mock('../../../../common/components/page/use_refetch_by_session');
 jest.mock('../common/hooks', () => {
   const actual = jest.requireActual('../common/hooks');
   return {
@@ -722,36 +715,12 @@ describe('AlertsHistogramPanel', () => {
   });
 
   describe('when isChartEmbeddablesEnabled = true', () => {
-    const mockSearchSessionId = 'mockSearchSessionId';
-    const mockRefetchByRestartingSession = jest.fn();
-
     beforeEach(() => {
       jest.clearAllMocks();
 
       mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: mockSetToggle });
 
-      (useRefetchByRestartingSession as jest.Mock).mockReturnValue({
-        searchSessionId: mockSearchSessionId,
-        refetchByRestartingSession: mockRefetchByRestartingSession,
-      });
-
       (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
-    });
-
-    it('refetch data by refetchByRestartingSession', async () => {
-      await act(async () => {
-        mount(
-          <TestProviders>
-            <AlertsHistogramPanel {...defaultProps} />
-          </TestProviders>
-        );
-        expect((useInspectButton as jest.Mock).mock.calls[0][0].refetch).toEqual(
-          mockRefetchByRestartingSession
-        );
-        expect((useInspectButton as jest.Mock).mock.calls[0][0].searchSessionId).toEqual(
-          mockSearchSessionId
-        );
-      });
     });
 
     it('renders LensEmbeddable', async () => {
