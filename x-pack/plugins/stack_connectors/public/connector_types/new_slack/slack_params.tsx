@@ -46,6 +46,7 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<SlackExecuteA
       editAction(
         'subActionParams',
         {
+          channel,
           text,
         },
         index
@@ -53,11 +54,6 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<SlackExecuteA
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionParams]);
-
-  const editSubActionProperty = useCallback(
-    (key: string, value: any) => editAction('subActionParams', { text: value }, index),
-    [editAction, index]
-  );
 
   const {
     response: { channels } = {},
@@ -104,16 +100,20 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<SlackExecuteA
     [slackChannels, selectedChannels]
   );
 
-  const onChange = useCallback((newOptions: EuiSelectableOption[]) => {
-    const newSelectedChannels = newOptions.reduce<string[]>((result, option) => {
-      if (option.checked === 'on') {
-        result = [...result, option.label];
-      }
-      return result;
-    }, []);
+  const onChange = useCallback(
+    (newOptions: EuiSelectableOption[]) => {
+      const newSelectedChannels = newOptions.reduce<string[]>((result, option) => {
+        if (option.checked === 'on') {
+          result = [...result, option.label];
+        }
+        return result;
+      }, []);
 
-    setSelectedChannels(newSelectedChannels);
-  }, []);
+      setSelectedChannels(newSelectedChannels);
+      editAction('subActionParams', { channel: newSelectedChannels[0], text }, index);
+    },
+    [editAction, index, text]
+  );
 
   return (
     <>
@@ -148,7 +148,9 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<SlackExecuteA
       <EuiSpacer size="m" />
       <TextAreaWithMessageVariables
         index={index}
-        editAction={editSubActionProperty}
+        editAction={(key: string, value: any) =>
+          editAction('subActionParams', { channel, text: value }, index)
+        }
         messageVariables={messageVariables}
         paramsProperty={'text'}
         inputTargetValue={text}

@@ -69,9 +69,9 @@ export const createExternalService = (
       const res = await request({
         axios: axiosInstance,
         method: 'post',
-        url: SLACK_URL,
+        url: 'chat.postMessage',
         logger,
-        data: { body: { channel, text } },
+        data: { channel, text },
         configurationUtilities,
       });
 
