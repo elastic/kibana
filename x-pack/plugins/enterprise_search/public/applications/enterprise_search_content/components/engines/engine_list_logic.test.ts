@@ -29,21 +29,26 @@ const DEFAULT_VALUES = {
 
 const results: EnterpriseSearchEngine[] = [
   {
-    name: 'engine-name-1',
+    created: '1999-12-31T23:59:59Z',
     indices: ['index-18', 'index-23'],
+    name: 'engine-name-1',
+    updated: '1999-12-31T23:59:59Z',
     // last_updated: '21 March 2021',
     // document_count: 18,
   },
   {
-    name: 'engine-name-2',
+    created: '1999-12-31T23:59:59Z',
     indices: ['index-180', 'index-230', 'index-8', 'index-2'],
+    name: 'engine-name-2',
+    updated: '1999-12-31T23:59:59Z',
     // last_updated: '10 Jul 2018',
     // document_count: 10,
   },
-
   {
-    name: 'engine-name-3',
+    created: '1999-12-31T23:59:59Z',
     indices: ['index-2', 'index-3'],
+    name: 'engine-name-3',
+    updated: '1999-12-31T23:59:59Z',
     // last_updated: '21 December 2022',
     // document_count: 8,
   },

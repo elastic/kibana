@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { map, uniq } from 'lodash';
-import * as t from 'io-ts';
 import type { SavedObjectsClientContract, Logger } from '@kbn/core/server';
 import type {
   AgentPolicyServiceInterface,
@@ -18,6 +17,7 @@ import type {
   ListResult,
   PackagePolicy,
 } from '@kbn/fleet-plugin/common';
+import { errors } from '@elastic/elasticsearch';
 import { PosturePolicyTemplate } from '../../common/types';
 import { SUPPORTED_POLICY_TEMPLATES } from '../../common/constants';
 import { CSP_FLEET_PACKAGE_KUERY } from '../../common/utils/helpers';
@@ -27,7 +27,9 @@ import {
 } from '../../common/schemas/benchmark';
 
 export const PACKAGE_POLICY_SAVED_OBJECT_TYPE = 'ingest-package-policies';
-const fleetError = t.type({ statusCode: t.number });
+
+const isFleetMissingAgentHttpError = (error: unknown) =>
+  error instanceof errors.ResponseError && error.statusCode === 404;
 
 const isPolicyTemplate = (input: any): input is PosturePolicyTemplate =>
   SUPPORTED_POLICY_TEMPLATES.includes(input);
@@ -60,7 +62,7 @@ export const getAgentStatusesByAgentPolicies = async (
       );
     }
   } catch (error) {
-    if (fleetError.is(error) && error.statusCode === 404) {
+    if (isFleetMissingAgentHttpError(error)) {
       logger.debug('failed to get agent status for agent policy');
     } else {
       throw error;

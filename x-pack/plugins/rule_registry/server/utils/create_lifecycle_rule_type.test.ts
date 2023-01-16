@@ -53,6 +53,7 @@ function createRule(shouldWriteAlerts: boolean = true) {
         services.alertWithLifecycle(alert);
       });
       nextAlerts = [];
+      return { state: {} };
     },
     id: 'ruleTypeId',
     isExportable: true,
@@ -96,7 +97,7 @@ function createRule(shouldWriteAlerts: boolean = true) {
 
       scheduleActions.mockClear();
 
-      state = ((await type.executor({
+      ({ state } = ((await type.executor({
         executionId: 'b33f65d7-6e8b-4aae-8d20-c93613dec9f9',
         logger: loggerMock.create(),
         namespace: 'namespace',
@@ -137,7 +138,7 @@ function createRule(shouldWriteAlerts: boolean = true) {
         spaceId: 'spaceId',
         startedAt,
         state,
-      })) ?? {}) as Record<string, any>;
+      })) ?? {}) as Record<string, any>);
 
       previousStartedAt = startedAt;
     },

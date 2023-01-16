@@ -8,7 +8,7 @@
 import http from 'http';
 import getPort from 'get-port';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { getWebhookServer } from '../../../../common/fixtures/plugins/actions_simulators/server/plugin';
+import { getWebhookServer } from '../../../../common/plugins/actions_simulators/server/plugin';
 
 // eslint-disable-next-line import/no-default-export
 export default function webhookTest({ getService }: FtrProviderContext) {
