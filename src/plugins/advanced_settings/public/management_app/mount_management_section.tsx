@@ -59,7 +59,7 @@ export async function mountManagementSection(
   usageCollection?: UsageCollectionSetup
 ) {
   params.setBreadcrumbs(crumb);
-  const [{ uiSettings, notifications, docLinks, application, chrome }] = await getStartServices();
+  const [{ settings, notifications, docLinks, application, chrome }] = await getStartServices();
 
   const canSave = application.capabilities.advancedSettings.save as boolean;
   const trackUiMetric = usageCollection?.reportUiCounter.bind(usageCollection, 'advanced_settings');
@@ -83,7 +83,8 @@ export async function mountManagementSection(
                 enableSaving={canSave}
                 toasts={notifications.toasts}
                 docLinks={docLinks.links}
-                uiSettings={uiSettings}
+                uiSettings={settings.client}
+                globalUiSettings={settings.globalClient}
                 theme={params.theme$}
                 componentRegistry={componentRegistry}
                 trackUiMetric={trackUiMetric}

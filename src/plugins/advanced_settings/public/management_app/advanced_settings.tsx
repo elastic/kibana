@@ -24,6 +24,7 @@ import {
 import { url } from '@kbn/kibana-utils-plugin/public';
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { UiSettingsScope } from '@kbn/core-ui-settings-common';
 import { CallOuts } from './components/call_outs';
 import { Search } from './components/search';
 import { Form } from './components/form';
@@ -41,6 +42,7 @@ interface AdvancedSettingsProps {
   history: ScopedHistory;
   enableSaving: boolean;
   uiSettings: IUiSettingsClient;
+  globalUiSettings: IUiSettingsClient;
   docLinks: DocLinksStart['links'];
   toasts: ToastsStart;
   theme: ThemeServiceStart['theme$'];
@@ -51,26 +53,38 @@ interface AdvancedSettingsProps {
 interface AdvancedSettingsState {
   footerQueryMatched: boolean;
   query: Query;
-  filteredSettings: Record<string, FieldSetting[]>;
+  filteredSettings: Record<UiSettingsScope, Record<string, FieldSetting[]>>;
 }
 
 type GroupedSettings = Record<string, FieldSetting[]>;
 
 export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedSettingsState> {
   private settings: FieldSetting[];
-  private groupedSettings: GroupedSettings;
-  private categoryCounts: Record<string, number>;
-  private categories: string[] = [];
+  private globalSettings: FieldSetting[];
+  private groupedSettings: Record<UiSettingsScope, GroupedSettings>;
+  private categoryCounts: Record<UiSettingsScope, Record<string, number>>;
+  private categories: Record<UiSettingsScope, string[]>;
   private uiSettingsSubscription?: Subscription;
+  private globalUiSettingsSubscription?: Subscription;
   private unregister: UnregisterCallback;
 
   constructor(props: AdvancedSettingsProps) {
     super(props);
 
     this.settings = this.initSettings(this.props.uiSettings);
-    this.groupedSettings = this.initGroupedSettings(this.settings);
-    this.categories = this.initCategories(this.groupedSettings);
-    this.categoryCounts = this.initCategoryCounts(this.groupedSettings);
+    this.globalSettings = this.initSettings(this.props.globalUiSettings);
+    this.groupedSettings = {
+      namespace: this.initGroupedSettings(this.settings),
+      global: this.initGroupedSettings(this.globalSettings),
+    };
+    this.categories = {
+      namespace: this.initCategories(this.groupedSettings.namespace),
+      global: this.initCategories(this.groupedSettings.global),
+    };
+    this.categoryCounts = {
+      namespace: this.initCategoryCounts(this.groupedSettings.namespace),
+      global: this.initCategoryCounts(this.groupedSettings.global),
+    };
     this.state = this.getQueryState(undefined, true);
     this.unregister = this.props.history.listen(({ search }) => {
       this.setState(this.getQueryState(search));
@@ -79,9 +93,18 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
 
   init(config: IUiSettingsClient) {
     this.settings = this.initSettings(config);
-    this.groupedSettings = this.initGroupedSettings(this.settings);
-    this.categories = this.initCategories(this.groupedSettings);
-    this.categoryCounts = this.initCategoryCounts(this.groupedSettings);
+    this.groupedSettings = {
+      namespace: this.initGroupedSettings(this.settings),
+      global: this.initGroupedSettings(this.globalSettings),
+    };
+    this.categories = {
+      namespace: this.initCategories(this.groupedSettings.namespace),
+      global: this.initCategories(this.groupedSettings.global),
+    };
+    this.categoryCounts = {
+      namespace: this.initCategoryCounts(this.groupedSettings.namespace),
+      global: this.initCategoryCounts(this.groupedSettings.global),
+    };
   }
 
   initSettings = this.mapConfig;
@@ -109,7 +132,20 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
       const { query } = this.state;
       this.init(this.props.uiSettings);
       this.setState({
-        filteredSettings: this.mapSettings(Query.execute(query, this.settings)),
+        filteredSettings: {
+          ...this.state.filteredSettings,
+          namespace: this.mapSettings(Query.execute(query, this.settings)),
+        },
+      });
+    });
+    this.globalUiSettingsSubscription = this.props.globalUiSettings.getUpdate$().subscribe(() => {
+      const { query } = this.state;
+      this.init(this.props.uiSettings);
+      this.setState({
+        filteredSettings: {
+          ...this.state.filteredSettings,
+          global: this.mapSettings(Query.execute(query, this.globalSettings)),
+        },
       });
     });
 
@@ -142,6 +178,7 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
 
   componentWillUnmount() {
     this.uiSettingsSubscription?.unsubscribe?.();
+    this.globalUiSettingsSubscription?.unsubscribe?.();
     this.unregister?.();
   }
 
@@ -166,13 +203,15 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
   private getQueryState(search?: string, intialQuery = false): AdvancedSettingsState {
     const queryString = this.getQueryText(search);
     const query = this.getQuery(queryString, intialQuery);
-    const filteredSettings = this.mapSettings(Query.execute(query, this.settings));
-    const footerQueryMatched = Object.keys(filteredSettings).length > 0;
+    const filteredSettings = {
+      namespace: this.mapSettings(Query.execute(query, this.settings)),
+      global: this.mapSettings(Query.execute(query, this.globalSettings)),
+    };
 
     return {
       query,
       filteredSettings,
-      footerQueryMatched,
+      footerQueryMatched: Object.keys(filteredSettings.namespace).length > 0,
     };
   }
 
@@ -251,7 +290,11 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
             <PageTitle />
           </EuiFlexItem>
           <EuiFlexItem>
-            <Search query={query} categories={this.categories} onQueryChange={this.onQueryChange} />
+            <Search
+              query={query}
+              categories={this.categories.global.concat(this.categories.namespace)}
+              onQueryChange={this.onQueryChange}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
         <PageSubtitle />
@@ -259,14 +302,17 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
         <CallOuts />
         <EuiSpacer size="m" />
 
-        <AdvancedSettingsVoiceAnnouncement queryText={query.text} settings={filteredSettings} />
+        <AdvancedSettingsVoiceAnnouncement
+          queryText={query.text}
+          settings={filteredSettings.namespace}
+        />
 
         <KibanaContextProvider services={{ uiSettings: this.props.uiSettings }}>
           <Form
-            settings={this.groupedSettings}
-            visibleSettings={filteredSettings}
-            categories={this.categories}
-            categoryCounts={this.categoryCounts}
+            settings={this.groupedSettings.namespace}
+            visibleSettings={filteredSettings.namespace}
+            categories={this.categories.namespace}
+            categoryCounts={this.categoryCounts.namespace}
             clearQuery={this.clearQuery}
             save={this.saveConfig}
             showNoResultsMessage={!footerQueryMatched}

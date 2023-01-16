@@ -21,6 +21,7 @@ import {
 } from '@kbn/core/public/mocks';
 import { ComponentRegistry } from '../component_registry';
 import { Search } from './components/search';
+import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 
 jest.mock('./components/field', () => ({
   Field: () => {
@@ -201,7 +202,10 @@ function mockConfig() {
   };
   return {
     core: {
-      uiSettings: config,
+      settings: {
+        client: config,
+        globalClient: settingsServiceMock.createStartContract().globalClient,
+      },
     },
     plugins: {
       advancedSettings: {
@@ -249,7 +253,8 @@ describe('AdvancedSettings', () => {
         enableSaving={true}
         toasts={notificationServiceMock.createStartContract().toasts}
         docLinks={docLinksServiceMock.createStartContract().links}
-        uiSettings={mockConfig().core.uiSettings}
+        uiSettings={mockConfig().core.settings.client}
+        globalUiSettings={mockConfig().core.settings.globalClient}
         componentRegistry={new ComponentRegistry().start}
         theme={themeServiceMock.createStartContract().theme$}
       />
@@ -266,7 +271,7 @@ describe('AdvancedSettings', () => {
 
   it('should should not render a custom setting', async () => {
     // The manual mock for the uiSettings client returns false for isConfig, override that
-    const uiSettings = mockConfig().core.uiSettings;
+    const uiSettings = mockConfig().core.settings.client;
     uiSettings.isCustom = (key) => true;
 
     const customSettingQuery = 'test:customstring:setting';
@@ -277,7 +282,8 @@ describe('AdvancedSettings', () => {
         enableSaving={true}
         toasts={notificationServiceMock.createStartContract().toasts}
         docLinks={docLinksServiceMock.createStartContract().links}
-        uiSettings={uiSettings}
+        uiSettings={mockConfig().core.settings.client}
+        globalUiSettings={mockConfig().core.settings.globalClient}
         componentRegistry={new ComponentRegistry().start}
         theme={themeServiceMock.createStartContract().theme$}
       />
@@ -301,7 +307,8 @@ describe('AdvancedSettings', () => {
         enableSaving={false}
         toasts={notificationServiceMock.createStartContract().toasts}
         docLinks={docLinksServiceMock.createStartContract().links}
-        uiSettings={mockConfig().core.uiSettings}
+        uiSettings={mockConfig().core.settings.client}
+        globalUiSettings={mockConfig().core.settings.globalClient}
         componentRegistry={new ComponentRegistry().start}
         theme={themeServiceMock.createStartContract().theme$}
       />
@@ -328,7 +335,8 @@ describe('AdvancedSettings', () => {
           enableSaving={false}
           toasts={toasts}
           docLinks={docLinksServiceMock.createStartContract().links}
-          uiSettings={mockConfig().core.uiSettings}
+          uiSettings={mockConfig().core.settings.client}
+          globalUiSettings={mockConfig().core.settings.globalClient}
           componentRegistry={new ComponentRegistry().start}
           theme={themeServiceMock.createStartContract().theme$}
         />
