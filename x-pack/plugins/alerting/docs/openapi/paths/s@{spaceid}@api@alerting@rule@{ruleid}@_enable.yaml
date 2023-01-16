@@ -1,0 +1,22 @@
+post:
+  summary: Enable a rule.
+  operationId: enableRule
+  description: >
+    This API supports token-based authentication only.
+    You must have `all` privileges for the appropriate Kibana features,
+    depending on the `consumer` and `rule_type_id` of the rule. For example, the
+    **Management > Stack Rules** feature, **Analytics > Discover** and
+    **Machine Learning** features, **Observability**, and **Security** features.
+  tags:
+    - alerting
+  parameters:
+    - $ref: ../components/headers/kbn_xsrf.yaml
+    - $ref: '../components/parameters/rule_id.yaml'
+    - $ref: '../components/parameters/space_id.yaml'
+  responses:
+    '204':
+      description: Indicates a successful call.
+  servers:
+    - url: https://localhost:5601
+servers:
+  - url: https://localhost:5601

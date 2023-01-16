@@ -39,6 +39,18 @@ export interface ConstantConcurrentUsersAction {
 
 export type ScalabilityAction = RampConcurrentUsersAction | ConstantConcurrentUsersAction;
 
+export type ResponseTimeMetric =
+  | 'min'
+  | '25%'
+  | '50%'
+  | '75%'
+  | '80%'
+  | '85%'
+  | '90%'
+  | '95%'
+  | '99%'
+  | 'max';
+
 export interface ScalabilitySetup {
   /**
    * Duration strings must be formatted as string that starts with an integer and
@@ -47,6 +59,12 @@ export interface ScalabilitySetup {
    * eg: "1m" or "30s"
    */
   maxDuration: string;
+  responseTimeMetric?: ResponseTimeMetric;
+  responseTimeThreshold?: {
+    threshold1: number;
+    threshold2: number;
+    threshold3: number;
+  };
   warmup: ScalabilityAction[];
   test: ScalabilityAction[];
 }

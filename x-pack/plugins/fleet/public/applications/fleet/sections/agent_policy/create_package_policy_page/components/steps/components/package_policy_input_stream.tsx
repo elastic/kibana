@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { useRouteMatch } from 'react-router-dom';
 
-import { useGetDataStreams } from '../../../../../../../../hooks';
+import { useConfig, useGetDataStreams } from '../../../../../../../../hooks';
 
 import { mapPackageReleaseToIntegrationCardRelease } from '../../../../../../../../services/package_prerelease';
 import type { ExperimentalDataStreamFeature } from '../../../../../../../../../common/types/models/epm';
@@ -58,6 +58,7 @@ interface Props {
   updatePackagePolicyInputStream: (updatedStream: Partial<NewPackagePolicyInputStream>) => void;
   inputStreamValidationResults: PackagePolicyConfigValidationResults;
   forceShowErrors?: boolean;
+  isEditPage?: boolean;
 }
 
 export const PackagePolicyInputStreamConfig = memo<Props>(
@@ -70,7 +71,12 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     updatePackagePolicyInputStream,
     inputStreamValidationResults,
     forceShowErrors,
+    isEditPage,
   }) => {
+    const config = useConfig();
+    const isExperimentalDataStreamSettingsEnabled =
+      config.enableExperimental?.includes('experimentalDataStreamSettings') ?? false;
+
     const {
       params: { packagePolicyId },
     } = useRouteMatch<{ packagePolicyId?: string }>();
@@ -222,6 +228,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                       forceShowErrors={forceShowErrors}
                       packageType={packageInfo.type}
                       datasets={datasets}
+                      isEditPage={isEditPage}
                     />
                   </EuiFlexItem>
                 );
@@ -283,6 +290,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                             forceShowErrors={forceShowErrors}
                             packageType={packageInfo.type}
                             datasets={datasets}
+                            isEditPage={isEditPage}
                           />
                         </EuiFlexItem>
                       );
@@ -305,13 +313,15 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                       </>
                     )}
                     {/* Experimental index/datastream settings e.g. synthetic source */}
-                    <ExperimentDatastreamSettings
-                      registryDataStream={packageInputStream.data_stream}
-                      experimentalDataFeatures={
-                        packagePolicy.package?.experimental_data_stream_features
-                      }
-                      setNewExperimentalDataFeatures={setNewExperimentalDataFeatures}
-                    />
+                    {isExperimentalDataStreamSettingsEnabled && (
+                      <ExperimentDatastreamSettings
+                        registryDataStream={packageInputStream.data_stream}
+                        experimentalDataFeatures={
+                          packagePolicy.package?.experimental_data_stream_features
+                        }
+                        setNewExperimentalDataFeatures={setNewExperimentalDataFeatures}
+                      />
+                    )}
                   </>
                 ) : null}
               </Fragment>

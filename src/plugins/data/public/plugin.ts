@@ -34,8 +34,8 @@ import {
 import {
   createFiltersFromValueClickAction,
   createFiltersFromRangeSelectAction,
-  createValueClickAction,
-  createSelectRangeAction,
+  createValueClickActionDefinition,
+  createSelectRangeActionDefinition,
 } from './actions';
 import { applyFilterTrigger } from './triggers';
 import { getTableViewDescription } from './utils/table_inspector_view';
@@ -142,14 +142,14 @@ export class DataPublicPlugin
 
     uiActions.addTriggerAction(
       'SELECT_RANGE_TRIGGER',
-      createSelectRangeAction(() => ({
+      createSelectRangeActionDefinition(() => ({
         uiActions,
       }))
     );
 
     uiActions.addTriggerAction(
       'VALUE_CLICK_TRIGGER',
-      createValueClickAction(() => ({
+      createValueClickActionDefinition(() => ({
         uiActions,
       }))
     );

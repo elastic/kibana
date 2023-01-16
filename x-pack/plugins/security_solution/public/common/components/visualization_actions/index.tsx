@@ -24,6 +24,7 @@ import {
   MORE_ACTIONS,
   OPEN_IN_LENS,
 } from './translations';
+import { VISUALIZATION_ACTIONS_BUTTON_CLASS } from './utils';
 
 const Wrapper = styled.div`
   &.viz-actions {
@@ -36,8 +37,6 @@ const Wrapper = styled.div`
     padding: ${({ theme }) => theme.eui.euiSizeS};
   }
 `;
-
-export const HISTOGRAM_ACTIONS_BUTTON_CLASS = 'histogram-actions-trigger';
 
 const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
   className,
@@ -195,7 +194,7 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
     () => (
       <EuiButtonIcon
         aria-label={MORE_ACTIONS}
-        className={HISTOGRAM_ACTIONS_BUTTON_CLASS}
+        className={VISUALIZATION_ACTIONS_BUTTON_CLASS}
         data-test-subj={dataTestSubj}
         iconType="boxesHorizontal"
         onClick={onButtonClick}

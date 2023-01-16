@@ -44,6 +44,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
      */
 
     loadTestFile(require.resolve('./internal/bulk_create_attachments'));
+    loadTestFile(require.resolve('./internal/bulk_get_cases'));
 
     /**
      * Attachments framework

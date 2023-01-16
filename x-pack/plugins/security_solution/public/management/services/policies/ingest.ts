@@ -8,11 +8,13 @@
 import type { HttpFetchOptions, HttpStart } from '@kbn/core/public';
 import type {
   GetAgentStatusResponse,
-  GetPackagesResponse,
   GetAgentPoliciesRequest,
   GetAgentPoliciesResponse,
   GetPackagePoliciesResponse,
+  GetInfoResponse,
 } from '@kbn/fleet-plugin/common';
+import { epmRouteService } from '@kbn/fleet-plugin/common';
+
 import type { NewPolicyData } from '../../../../common/endpoint/types';
 import type { GetPolicyResponse, UpdatePolicyResponse } from '../../pages/policy/types';
 
@@ -135,12 +137,10 @@ export const sendGetFleetAgentStatusForPolicy = (
  */
 export const sendGetEndpointSecurityPackage = async (
   http: HttpStart
-): Promise<GetPackagesResponse['items'][0]> => {
-  const options = { query: { category: 'security' } };
-  const securityPackages = await http.get<GetPackagesResponse>(INGEST_API_EPM_PACKAGES, options);
-  const endpointPackageInfo = securityPackages.items.find(
-    (epmPackage) => epmPackage.name === 'endpoint'
-  );
+): Promise<GetInfoResponse['item']> => {
+  const path = epmRouteService.getInfoPath('endpoint');
+  const endpointPackageResponse = await http.get<GetInfoResponse>(path);
+  const endpointPackageInfo = endpointPackageResponse.item;
   if (!endpointPackageInfo) {
     throw new Error('Endpoint package was not found.');
   }
