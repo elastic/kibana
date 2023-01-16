@@ -45,14 +45,13 @@ export interface Props {
   controls?: ReactNode | ReactNode[];
   title?: string;
   list: IntegrationCardItem[];
-  initialSearch?: string;
+  searchTerm: string;
+  setUrlSearchTerm: (search: string) => void;
   selectedCategory: ExtendedIntegrationCategory;
   setSelectedCategory: (category: string) => void;
   categories: CategoryFacet[];
   availableSubCategories?: CategoryFacet[];
-  selectedSubCategory?: CategoryFacet | undefined;
   setSelectedSubCategory?: (c: CategoryFacet) => void;
-  onSearchChange: (search: string) => void;
   showMissingIntegrationMessage?: boolean;
   callout?: JSX.Element | null;
   showCardLabels?: boolean;
@@ -63,19 +62,17 @@ export const PackageListGrid: FunctionComponent<Props> = ({
   controls,
   title,
   list,
-  initialSearch,
-  onSearchChange,
+  searchTerm,
+  setUrlSearchTerm,
   selectedCategory,
   setSelectedCategory,
   categories,
   availableSubCategories,
-  selectedSubCategory,
   setSelectedSubCategory,
   showMissingIntegrationMessage = false,
   callout,
   showCardLabels = true,
 }) => {
-  const [searchTerm, setSearchTerm] = useState(initialSearch || '');
   const localSearchRef = useLocalSearch(list);
   const menuRef = useRef<HTMLDivElement>(null);
   const [isSticky, setIsSticky] = useState(false);
@@ -95,12 +92,11 @@ export const PackageListGrid: FunctionComponent<Props> = ({
 
   const onQueryChange = (e: any) => {
     const queryText = e.target.value;
-    setSearchTerm(queryText);
-    onSearchChange(queryText);
+    setUrlSearchTerm(queryText);
   };
 
   const resetQuery = () => {
-    setSearchTerm('');
+    setUrlSearchTerm('');
   };
 
   const selectedCategoryTitle = selectedCategory
@@ -120,19 +116,6 @@ export const PackageListGrid: FunctionComponent<Props> = ({
     return promoteFeaturedIntegrations(filteredList, selectedCategory);
   }, [isLoading, list, localSearchRef, searchTerm, selectedCategory]);
 
-  let gridContent: JSX.Element;
-
-  if (isLoading || !localSearchRef.current) {
-    gridContent = <Loading />;
-  } else {
-    gridContent = (
-      <GridColumn
-        list={filteredPromotedList}
-        showMissingIntegrationMessage={showMissingIntegrationMessage}
-        showCardLabels={showCardLabels}
-      />
-    );
-  }
   return (
     <>
       <div ref={menuRef}>
@@ -232,7 +215,12 @@ export const PackageListGrid: FunctionComponent<Props> = ({
               </>
             ) : null}
             <EuiSpacer />
-            {gridContent}
+            <GridColumn
+              isLoading={isLoading || !localSearchRef.current}
+              list={filteredPromotedList}
+              showMissingIntegrationMessage={showMissingIntegrationMessage}
+              showCardLabels={showCardLabels}
+            />
             {showMissingIntegrationMessage && (
               <>
                 <EuiSpacer />
@@ -255,7 +243,7 @@ interface ControlsColumnProps {
   sticky: boolean;
 }
 
-function ControlsColumn({ controls, title, sticky }: ControlsColumnProps) {
+const ControlsColumn = ({ controls, title, sticky }: ControlsColumnProps) => {
   let titleContent;
   if (title) {
     titleContent = (
@@ -273,10 +261,11 @@ function ControlsColumn({ controls, title, sticky }: ControlsColumnProps) {
       {controls}
     </EuiFlexGroup>
   );
-}
+};
 
 interface GridColumnProps {
   list: IntegrationCardItem[];
+  isLoading: boolean;
   showMissingIntegrationMessage?: boolean;
   showCardLabels?: boolean;
 }
@@ -285,7 +274,10 @@ const GridColumn = ({
   list,
   showMissingIntegrationMessage = false,
   showCardLabels = false,
+  isLoading,
 }: GridColumnProps) => {
+  if (isLoading) return <Loading />;
+
   return (
     <EuiFlexGrid gutterSize="l" columns={3}>
       {list.length ? (
@@ -334,10 +326,10 @@ interface MissingIntegrationContentProps {
   setSelectedCategory: (category: string) => void;
 }
 
-function MissingIntegrationContent({
+const MissingIntegrationContent = ({
   resetQuery,
   setSelectedCategory,
-}: MissingIntegrationContentProps) {
+}: MissingIntegrationContentProps) => {
   const handleCustomInputsLinkClick = useCallback(() => {
     resetQuery();
     setSelectedCategory('custom');
@@ -371,4 +363,4 @@ function MissingIntegrationContent({
       </p>
     </EuiText>
   );
-}
+};

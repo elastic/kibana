@@ -114,21 +114,21 @@ export const AvailablePackages: React.FC<{}> = ({}) => {
     isLoadingAppendCustomIntegrations,
     eprPackageLoadingError,
     eprCategoryLoadingError,
-    searchParam,
+    searchTerm,
+    setUrlSearchTerm,
     filteredCards,
     setPrereleaseIntegrationsEnabled,
     setUrlCategory,
-    setUrlSearchTerm,
     availableSubCategories,
-    selectedSubCategory,
     setSelectedSubCategory,
   } = useAvailablePackages();
 
+  // move this to hook
   if (!isLoadingCategories && !categoryExists(initialSelectedCategory, allCategories)) {
-    history.replace(pagePathGetters.integrations_all({ category: '', searchTerm: searchParam })[1]);
+    history.replace(pagePathGetters.integrations_all({ category: '', searchTerm })[1]);
     return null;
   }
-  // TODO: Move controls to their own component
+
   let controls = [
     <EuiFlexItem grow={false}>
       <EuiHorizontalRule margin="m" />
@@ -153,6 +153,7 @@ export const AvailablePackages: React.FC<{}> = ({}) => {
           selectedCategory={selectedCategory}
           onCategoryChange={({ id }) => {
             setUrlCategory(id);
+            setUrlSearchTerm('');
             setSelectedSubCategory(undefined);
           }}
         />
@@ -171,17 +172,16 @@ export const AvailablePackages: React.FC<{}> = ({}) => {
     <PackageListGrid
       isLoading={isLoadingAllPackages || isLoadingAppendCustomIntegrations}
       controls={controls}
-      initialSearch={searchParam}
+      searchTerm={searchTerm}
+      setUrlSearchTerm={setUrlSearchTerm}
       list={filteredCards}
       selectedCategory={selectedCategory}
       setSelectedCategory={setUrlCategory}
       availableSubCategories={availableSubCategories}
       categories={mainCategories}
-      onSearchChange={setUrlSearchTerm}
       showMissingIntegrationMessage
       callout={noEprCallout}
       showCardLabels={false}
-      selectedSubCategory={selectedSubCategory}
       setSelectedSubCategory={setSelectedSubCategory}
     />
   );

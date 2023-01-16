@@ -114,23 +114,31 @@ export const useAvailablePackages = () => {
   );
   const [selectedCategory, setCategory] = useState(initialSelectedCategory);
   const [selectedSubCategory, setSelectedSubCategory] = useState<CategoryFacet | undefined>();
+  const [searchTerm, setSearchTerm] = useState(searchParam || '');
 
   const { getHref, getAbsolutePath } = useLink();
+  const history = useHistory();
 
   function setUrlCategory(categoryId: string) {
     setCategory(categoryId as ExtendedIntegrationCategory);
 
     const url = pagePathGetters.integrations_all({
       category: categoryId,
-      searchTerm: searchParam,
+      searchTerm,
     })[1];
     history.push(url);
   }
 
-  const history = useHistory();
   function setUrlSearchTerm(search: string) {
+    setSearchTerm(search);
+
+    const url = pagePathGetters.integrations_all({
+      searchTerm: search,
+      category: selectedCategory,
+    })[1];
+
     // Use .replace so the browser's back button is not tied to single keystroke
-    history.replace(pagePathGetters.integrations_all({ searchTerm: search, selectedCategory })[1]);
+    history.replace(url);
   }
 
   const {
@@ -230,6 +238,8 @@ export const useAvailablePackages = () => {
     availableSubCategories,
     selectedSubCategory,
     setSelectedSubCategory,
+    searchTerm,
+    setUrlSearchTerm,
     preference,
     setPreference,
     isLoadingCategories,
@@ -237,10 +247,8 @@ export const useAvailablePackages = () => {
     isLoadingAppendCustomIntegrations,
     eprPackageLoadingError,
     eprCategoryLoadingError,
-    searchParam,
     filteredCards,
     setPrereleaseIntegrationsEnabled,
     setUrlCategory,
-    setUrlSearchTerm,
   };
 };

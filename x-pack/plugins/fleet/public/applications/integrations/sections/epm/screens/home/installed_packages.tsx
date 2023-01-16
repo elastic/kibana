@@ -144,6 +144,7 @@ export const InstalledPackages: React.FC<{
     history.push(url);
   }
 
+  // move to use_available_packages
   function setUrlSearchTerm(search: string) {
     // Use .replace so the browser's back button is not tied to single keystroke
     history.replace(
@@ -223,8 +224,8 @@ export const InstalledPackages: React.FC<{
       {...{ isLoading, controls, callout, categories }}
       selectedCategory={selectedCategory}
       setSelectedCategory={setUrlCategory}
-      onSearchChange={setUrlSearchTerm}
-      initialSearch={searchParam}
+      setUrlSearchTerm={setUrlSearchTerm}
+      searchTerm={searchParam}
       list={cards}
     />
   );
