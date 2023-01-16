@@ -49,11 +49,8 @@ interface PinnedFields {
 
 export interface PreviewState {
   pinnedFields: PinnedFields;
-  currentDocument: {
-    id?: string | undefined;
-    isLoading: boolean;
-    isCustomId: boolean;
-  };
+  isLoadingDocuments: boolean;
+  customId: string | undefined;
   documents: EsDocument[];
   currentIdx: number;
   documentSource: DocumentSource;

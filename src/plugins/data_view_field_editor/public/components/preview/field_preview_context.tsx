@@ -64,7 +64,6 @@ export const valueTypeToSelectedType = (value: unknown): RuntimePrimitiveTypes =
   return 'keyword';
 };
 
-// todo might break down
 const documentsSelector = (state: PreviewState) => {
   const currentDocument = state.documents[state.currentIdx];
   return {
@@ -77,6 +76,7 @@ const documentsSelector = (state: PreviewState) => {
 };
 
 const scriptEditorValidationSelector = (state: PreviewState) => state.scriptEditorValidation;
+// const customIdSelector = (state: PreviewState) => state.customId;
 
 export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewController }> = ({
   controller,
@@ -129,7 +129,6 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
   /** Flag to indicate if we are calling the _execute API */
   const [isLoadingPreview, setIsLoadingPreview] = useState(false);
 
-  // todo next
   /** Flag to indicate if we are loading a single document by providing its ID */
   const [customDocIdToLoad, setCustomDocIdToLoad] = useState<string | null>(null);
 
@@ -139,14 +138,14 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
     controller.state$,
     scriptEditorValidationSelector
   );
-  const isCustomDocId = customDocIdToLoad !== null;
+
   let isPreviewAvailable = true;
 
   // If no documents could be fetched from the cluster (and we are not trying to load
   // a custom doc ID) then we disable preview as the script field validation expect the result
   // of the preview to before resolving. If there are no documents we can't have a preview
   // (the _execute API expects one) and thus the validation should not expect a value.
-  if (!isFetchingDocument && !isCustomDocId && totalDocs === 0) {
+  if (!isFetchingDocument && !customDocIdToLoad && totalDocs === 0) {
     isPreviewAvailable = false;
   }
 
@@ -552,10 +551,11 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
    * "customDocIdToLoad" changes
    */
   useEffect(() => {
+    controller.setCustomId(customDocIdToLoad || undefined);
     if (customDocIdToLoad !== null && Boolean(customDocIdToLoad.trim())) {
       setIsFetchingDocument(true);
     }
-  }, [customDocIdToLoad]);
+  }, [customDocIdToLoad, controller]);
 
   /**
    * Whenever we show the preview panel we will update the documents from the cluster

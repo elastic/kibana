@@ -21,11 +21,10 @@ interface PreviewControllerDependencies {
 const previewStateDefault: PreviewState = {
   /** Map of fields pinned to the top of the list */
   pinnedFields: {},
-  // this needs to be renamed
-  currentDocument: {
-    isLoading: false,
-    isCustomId: false,
-  },
+  isLoadingDocuments: true,
+  /** Flag to indicate if we are loading a single document by providing its ID */
+  customId: undefined,
+  // isCustomId: false,
   /** sample documents fetched from cluster */
   documents: [],
   currentIdx: 0,
@@ -75,7 +74,7 @@ export class PreviewController {
     this.updateState({
       documents,
       currentIdx: 0,
-      currentDocument: { /* value: documents[0], */ isLoading: false, isCustomId: false },
+      isLoadingDocuments: false,
     });
   };
 
@@ -101,5 +100,9 @@ export class PreviewController {
 
   setScriptEditorValidation = (scriptEditorValidation: PreviewState['scriptEditorValidation']) => {
     this.updateState({ scriptEditorValidation });
+  };
+
+  setCustomId = (customId?: string) => {
+    this.updateState({ customId });
   };
 }

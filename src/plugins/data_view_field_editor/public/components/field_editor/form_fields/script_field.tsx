@@ -56,7 +56,7 @@ const mapReturnTypeToPainlessContext = (runtimeType: RuntimeType): PainlessConte
 };
 
 const currentDocumentSelector = (state: PreviewState) => state.documents[state.currentIdx];
-const currentDocumentIsLoadingSelector = (state: PreviewState) => state.currentDocument.isLoading;
+const currentDocumentIsLoadingSelector = (state: PreviewState) => state.isLoadingDocuments;
 
 const ScriptFieldComponent = ({ existingConcreteFields, links, placeholder }: Props) => {
   const monacoEditor = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
