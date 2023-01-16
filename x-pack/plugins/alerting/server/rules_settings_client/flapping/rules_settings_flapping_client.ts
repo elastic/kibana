@@ -97,7 +97,6 @@ export class RulesSettingsFlappingClient {
         },
         {
           version,
-          retryOnConflict: 3,
         }
       );
       return result.attributes.flapping;

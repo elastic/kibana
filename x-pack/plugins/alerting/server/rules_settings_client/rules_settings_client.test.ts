@@ -271,7 +271,7 @@ describe('RulesSettingsClient', () => {
           updatedAt: expect.any(String),
         }),
       },
-      { version: '123', retryOnConflict: 3 }
+      { version: '123' }
     );
 
     expect(result).toEqual(
