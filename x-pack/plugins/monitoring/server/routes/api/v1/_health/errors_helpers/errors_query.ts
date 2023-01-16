@@ -112,7 +112,7 @@ const errorsByDataStream = {
 
 const errorsAggregation = (errorQueryIsDataStream?: boolean) => ({
   terms: {
-    field: 'event.module',
+    field: errorQueryIsDataStream ? 'service.type' : 'event.module',
   },
   aggs: {
     errors_by_dataset: errorQueryIsDataStream ? errorsByDataStream : errorsByMetricset,
