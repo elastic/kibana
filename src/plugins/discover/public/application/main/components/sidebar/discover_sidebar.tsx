@@ -240,7 +240,6 @@ export function DiscoverSidebarComponent({
     onOverrideFieldGroupDetails,
   });
 
-  // TODO: unify field icon, label and description
   const renderFieldItem: FieldListGroupedProps<DataViewField>['renderFieldItem'] = useCallback(
     ({ field, groupName, fieldSearchHighlight }) => (
       <li key={`field${field.name}`} data-attr-field={field.name}>
