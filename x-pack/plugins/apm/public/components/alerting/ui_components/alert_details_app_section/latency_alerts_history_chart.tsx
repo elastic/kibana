@@ -109,7 +109,8 @@ export function LatencyAlertsHistoryChart({
     features: 'apm',
     ruleId,
   });
-  const getFormattedDuration = (avgTimeToRecover: number) => {
+  const getFormattedDuration = (avgTimeToRecover?: number) => {
+    if (!avgTimeToRecover || avgTimeToRecover === 0) return '-';
     const time = moment.duration(avgTimeToRecover);
     if (time.hours() > 0) {
       return `${time.hours()}h ${time.minutes()}m`;
@@ -167,7 +168,7 @@ export function LatencyAlertsHistoryChart({
               <EuiTitle size="s">
                 <h3>
                   {getFormattedDuration(
-                    triggeredAlertsData?.avgTimeToRecoverMS || -
+                    triggeredAlertsData?.avgTimeToRecoverMS
                   )}
                 </h3>
               </EuiTitle>
