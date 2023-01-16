@@ -8,26 +8,40 @@
 
 import React from 'react';
 
+import { EmbeddableStart, ViewMode } from '@kbn/embeddable-plugin/public';
+import { EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import type { DashboardPanelMap } from '@kbn/dashboard-plugin/common';
 import { DashboardContainerRenderer } from '@kbn/dashboard-plugin/public';
-import { EuiCode, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 
-export const StaticByValueExample = ({ dashboardId }: { dashboardId?: string }) => {
+import panelsJson from './static_by_value_example_panels.json';
+
+export const StaticByValueExample = ({
+  dashboardId,
+  embeddableService,
+}: {
+  dashboardId?: string;
+  embeddableService: EmbeddableStart;
+}) => {
   return dashboardId ? (
     <>
       <EuiTitle>
-        <h2>Static dashboard from library example</h2>
+        <h2>Static, by value example</h2>
       </EuiTitle>
       <EuiText>
-        <p>
-          Loads a static, non-editable version of the <EuiCode>[Logs] Web Traffic</EuiCode>{' '}
-          dashboard.
-        </p>
+        <p>Creates and displays static, non-editable by value dashboard.</p>
       </EuiText>
       <EuiSpacer size="m" />
       <EuiPanel hasBorder={true}>
         <DashboardContainerRenderer
           getCreationOptions={() => {
-            return {}; // no special creation options - just loading a saved object
+            console.log(panelsJson);
+            return {
+              initialInput: {
+                timeRange: { from: 'now-30d', to: 'now' },
+                viewMode: ViewMode.VIEW,
+                panels: panelsJson as DashboardPanelMap,
+              },
+            }; // no special creation options - just loading a saved object
           }}
           onDashboardContainerLoaded={(container) => {
             return; // this example is static, so don't need to do anything with the dashboard container

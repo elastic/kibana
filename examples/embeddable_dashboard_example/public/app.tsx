@@ -18,7 +18,7 @@ import { StaticByValueExample } from './static_by_value_example';
 import { StaticByReferenceExample } from './static_by_reference_example';
 
 export const renderApp = async (
-  { data, dashboard }: EmbeddableDashboardsExampleStartDeps,
+  { data, dashboard, embeddable }: EmbeddableDashboardsExampleStartDeps,
   { element }: AppMountParameters
 ) => {
   const dataViews = await data.dataViews.find('kibana_sample_data_logs');
@@ -30,9 +30,9 @@ export const renderApp = async (
   const examples =
     dataViews.length > 0 ? (
       <>
-        <StaticByReferenceExample dashboardId={logsSampleDashboardId} dataView={dataViews[0]} />
+        <StaticByValueExample dashboardId={logsSampleDashboardId} embeddableService={embeddable} />
         <EuiSpacer size="xl" />
-        {/* <StaticByValueExample dashboardId={logsSampleDashboardId} /> */}
+        <StaticByReferenceExample dashboardId={logsSampleDashboardId} dataView={dataViews[0]} />
       </>
     ) : (
       <div>{'Install web logs sample data to run the embeddable dashboard examples.'}</div>

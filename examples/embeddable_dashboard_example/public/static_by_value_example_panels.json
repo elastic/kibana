@@ -1,0 +1,160 @@
+{
+  "a514e5f6-1d0d-4fe9-85a9-f7ba40665033": {
+    "type": "visualization",
+    "gridData": {
+      "x": 0,
+      "y": 0,
+      "w": 28,
+      "h": 10,
+      "i": "a514e5f6-1d0d-4fe9-85a9-f7ba40665033"
+    },
+    "explicitInput": {
+      "id": "a514e5f6-1d0d-4fe9-85a9-f7ba40665033",
+      "savedVis": {
+        "id": "",
+        "title": "",
+        "description": "",
+        "type": "markdown",
+        "params": {
+          "fontSize": 12,
+          "openLinksInNewTab": false,
+          "markdown": "### By Value Dashboard\nThis dashboard is currently being loaded using some pre-configured JSON for the panels. This isn't ideal, and there are plans to improve the way that by-value embedded dashboards are handled - specifically, we want to add the ability to create a by-value dashboard input as part of the `getCreationOptions` callback.\n\nThat being said, we currently recommend by-reference dashboards until this process can be improved. "
+        },
+        "uiState": {},
+        "data": {
+          "aggs": [],
+          "searchSource": {
+            "query": {
+              "query": "",
+              "language": "kuery"
+            },
+            "filter": []
+          }
+        }
+      },
+      "enhancements": {}
+    }
+  },
+  "b06b849e-f4fd-423c-a582-5c4bfec812c9": {
+    "type": "lens",
+    "gridData": {
+      "x": 28,
+      "y": 0,
+      "w": 20,
+      "h": 21,
+      "i": "b06b849e-f4fd-423c-a582-5c4bfec812c9"
+    },
+    "explicitInput": {
+      "id": "b06b849e-f4fd-423c-a582-5c4bfec812c9",
+      "title": "Destinations",
+      "attributes": {
+        "title": "",
+        "visualizationType": "lnsPie",
+        "type": "lens",
+        "references": [
+          {
+            "type": "index-pattern",
+            "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+            "name": "indexpattern-datasource-layer-40169fc7-829a-4158-b280-b2e058a980c0"
+          }
+        ],
+        "state": {
+          "visualization": {
+            "shape": "donut",
+            "layers": [
+              {
+                "layerId": "40169fc7-829a-4158-b280-b2e058a980c0",
+                "primaryGroups": ["5cb6a35a-6ae5-4463-b3b2-639d04824cc2"],
+                "metrics": ["7f731486-71f2-40d9-8069-ef3fdb5ed2e7"],
+                "numberDisplay": "percent",
+                "categoryDisplay": "default",
+                "legendDisplay": "default",
+                "nestedLegend": false,
+                "layerType": "data"
+              }
+            ]
+          },
+          "query": {
+            "query": "",
+            "language": "kuery"
+          },
+          "filters": [],
+          "datasourceStates": {
+            "formBased": {
+              "layers": {
+                "40169fc7-829a-4158-b280-b2e058a980c0": {
+                  "columns": {
+                    "5cb6a35a-6ae5-4463-b3b2-639d04824cc2": {
+                      "label": "Top 5 values of geo.dest",
+                      "dataType": "string",
+                      "operationType": "terms",
+                      "scale": "ordinal",
+                      "sourceField": "geo.dest",
+                      "isBucketed": true,
+                      "params": {
+                        "size": 5,
+                        "orderBy": {
+                          "type": "column",
+                          "columnId": "7f731486-71f2-40d9-8069-ef3fdb5ed2e7"
+                        },
+                        "orderDirection": "desc",
+                        "otherBucket": true,
+                        "missingBucket": false,
+                        "parentFormat": {
+                          "id": "terms"
+                        },
+                        "include": [],
+                        "exclude": [],
+                        "includeIsRegex": false,
+                        "excludeIsRegex": false
+                      }
+                    },
+                    "7f731486-71f2-40d9-8069-ef3fdb5ed2e7": {
+                      "label": "Count of records",
+                      "dataType": "number",
+                      "operationType": "count",
+                      "isBucketed": false,
+                      "scale": "ratio",
+                      "sourceField": "___records___",
+                      "params": {
+                        "emptyAsNull": true
+                      }
+                    }
+                  },
+                  "columnOrder": [
+                    "5cb6a35a-6ae5-4463-b3b2-639d04824cc2",
+                    "7f731486-71f2-40d9-8069-ef3fdb5ed2e7"
+                  ],
+                  "incompleteColumns": {},
+                  "sampling": 1
+                }
+              }
+            },
+            "textBased": {
+              "layers": {}
+            }
+          },
+          "internalReferences": [],
+          "adHocDataViews": {}
+        }
+      },
+      "hidePanelTitles": false,
+      "enhancements": {}
+    }
+  },
+  "1675931b-977c-4074-a316-119c1c36e3d0": {
+    "type": "lens",
+    "gridData": {
+      "x": 0,
+      "y": 9,
+      "w": 28,
+      "h": 11,
+      "i": "1675931b-977c-4074-a316-119c1c36e3d0"
+    },
+    "explicitInput": {
+      "id": "1675931b-977c-4074-a316-119c1c36e3d0",
+      "savedObjectId": "16b1d7d0-ea71-11eb-8b4b-f7b600de0f7d",
+      "enhancements": {}
+    }
+  }
+}

@@ -10,8 +10,9 @@ import React from 'react';
 
 import { buildPhraseFilter, Filter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { DashboardContainerRenderer } from '@kbn/dashboard-plugin/public';
+import { DashboardContainerRenderer, DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
 import { EuiCode, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 export const StaticByReferenceExample = ({
   dashboardId,
@@ -23,7 +24,7 @@ export const StaticByReferenceExample = ({
   return dashboardId ? (
     <>
       <EuiTitle>
-        <h2>Static dashboard from library example</h2>
+        <h2>Static, by reference example</h2>
       </EuiTitle>
       <EuiText>
         <p>
@@ -45,12 +46,15 @@ export const StaticByReferenceExample = ({
           getCreationOptions={() => {
             const field = dataView.getFieldByName('machine.os.keyword');
             let filter: Filter;
+            let creationOptions: DashboardCreationOptions = {
+              initialInput: { viewMode: ViewMode.VIEW },
+            };
             if (field) {
               filter = buildPhraseFilter(field, 'win xp', dataView);
               filter.meta.negate = true;
-              return { overrideInput: { filters: [filter] } }; // create a static filter to apply to by reference dashboard
+              creationOptions = { ...creationOptions, overrideInput: { filters: [filter] } };
             }
-            return {}; // if can't find the field, then just return no special creation options
+            return creationOptions; // if can't find the field, then just return no special creation options
           }}
           onDashboardContainerLoaded={(container) => {
             return; // this example is static, so don't need to do anything with the dashboard container
