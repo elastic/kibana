@@ -42,7 +42,7 @@ export function MobileTransactionCharts({
     >
       <ChartPointerEventContextProvider>
         <EuiFlexGrid columns={2} gutterSize="s">
-          <EuiFlexItem data-cy={`transaction-sessipn-charts`}>
+          <EuiFlexItem data-cy={'mobile-transaction-session-chart'}>
             <SessionsChart
               kuery={kuery}
               start={start}
@@ -54,7 +54,7 @@ export function MobileTransactionCharts({
               comparisonEnabled={comparisonEnabled}
             />
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem data-cy={'mobile-transaction-http-chart'}>
             <HttpRequestsChart
               kuery={kuery}
               start={start}
@@ -71,7 +71,7 @@ export function MobileTransactionCharts({
         <EuiSpacer size="s" />
 
         <EuiFlexGrid columns={3} gutterSize="s">
-          <EuiFlexItem data-cy={`transaction-duration-charts`}>
+          <EuiFlexItem data-cy={'mobile-transaction-duration-charts'}>
             <EuiPanel hasBorder={true}>
               <LatencyChart kuery={kuery} />
             </EuiPanel>
