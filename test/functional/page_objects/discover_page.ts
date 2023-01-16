@@ -51,8 +51,8 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async clearFieldSearchInput() {
-    const fieldSearch = await this.testSubjects.find('fieldListFiltersFieldSearch');
-    await fieldSearch.clearValue();
+    const fieldSearch = await this.testSubjects.find('clearSearchButton');
+    await fieldSearch.click();
   }
 
   public async saveSearch(
