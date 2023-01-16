@@ -468,7 +468,7 @@ export class SessionIndex {
    */
   async cleanUp() {
     const { auditLogger, logger } = this.options;
-    logger.debug(`Running cleanup routine.`);
+    logger.debug('Running cleanup routine.');
 
     let error: Error | undefined;
     let indexNeedsRefresh = false;
@@ -530,11 +530,12 @@ export class SessionIndex {
     }
 
     if (error) {
+      logger.error(`Cleanup routine failed: ${getDetailedErrorMessage(error)}.`);
       // If we couldn't fetch or delete sessions, throw an error so the task will be retried.
       throw error;
     }
 
-    logger.debug(`Session cleanup routine completed.`);
+    logger.debug('Cleanup routine successfully completed.');
   }
 
   /**

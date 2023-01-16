@@ -154,6 +154,7 @@ export function initRoutes(
       logger.info(`Toggle session cleanup task (enabled: ${request.body.enabled}).`);
 
       // Refresh task manager index before trying to modify a task document.
+      // Might not be needed once https://github.com/elastic/kibana/pull/148985 is merged.
       try {
         logger.info(`Refreshing task manager index (enabled: ${request.body.enabled})...`);
         const refreshResult = await coreStart.elasticsearch.client.asInternalUser.indices.refresh({
