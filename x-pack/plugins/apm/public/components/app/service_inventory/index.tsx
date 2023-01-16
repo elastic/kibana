@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiEmptyPrompt } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiEmptyPrompt,
+  EuiCallOut,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import uuid from 'uuid';
@@ -24,6 +29,7 @@ import { useProgressiveFetcher } from '../../../hooks/use_progressive_fetcher';
 import { joinByKey } from '../../../../common/utils/join_by_key';
 import { ServiceInventoryFieldName } from '../../../../common/service_inventory';
 import { orderServiceItems } from './service_list/order_service_items';
+import { FormattedMessage } from 'react-intl';
 
 const initialData = {
   requestId: '',
@@ -202,6 +208,10 @@ export function ServiceInventory() {
     ...preloadedServices,
   ].some((item) => 'healthStatus' in item);
 
+  const displayMaxGroupReachedCallout = mainStatisticsItems.some(
+    (item) => item.serviceName === '_other'
+  );
+
   const displayAlerts = [...mainStatisticsItems, ...preloadedServices].some(
     (item) => ServiceInventoryFieldName.AlertsCount in item
   );
@@ -291,6 +301,25 @@ export function ServiceInventory() {
               anomalyDetectionSetupState={anomalyDetectionSetupState}
               onDismiss={() => setUserHasDismissedCallout(true)}
             />
+          </EuiFlexItem>
+        )}
+        {displayMaxGroupReachedCallout && (
+          <EuiFlexItem>
+            <EuiCallOut
+              title={i18n.translate('xpack.apm.serviceList.limit.warning', {
+                defaultMessage:
+                  'This view shows a subset of reported services.',
+              })}
+              color="danger"
+              iconType="alert"
+            >
+              <p>
+                <FormattedMessage
+                  id="xpack.apm.serviceList.limit.exceeded"
+                  defaultMessage="The number of unique service names limit was exceeded. Try narrowing down your results using the search bar."
+                />
+              </p>
+            </EuiCallOut>
           </EuiFlexItem>
         )}
         <EuiFlexItem>

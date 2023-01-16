@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
+import {
+  EuiCode,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiText,
+} from '@elastic/eui';
 import React from 'react';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
@@ -63,7 +69,7 @@ export function ServiceLink({
           >
             <EuiText style={{ width: `${unit * 28}px` }} size="s">
               <FormattedMessage
-                defaultMessage="The maximum number of unique services has been reached. Please see the {apmServerDocs} for 'aggregation.service.max_groups' to increase this."
+                defaultMessage="The maximum number of unique services has been reached. Please increase {codeBlock} in APM Server."
                 id="xpack.apm.serviceLink.tooltip.message"
                 values={{
                   apmServerDocs: (
@@ -81,6 +87,7 @@ export function ServiceLink({
                       )}
                     </EuiLink>
                   ),
+                  codeBlock: <EuiCode>aggregation.service.max_groups</EuiCode>,
                 }}
               />
             </EuiText>
