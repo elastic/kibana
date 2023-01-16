@@ -34,10 +34,12 @@ export function MobileStats({
   start,
   end,
   kuery,
+  direction,
 }: {
   start: string;
   end: string;
   kuery: string;
+  direction?: 'row' | 'rowReverse' | 'column' | 'columnReverse';
 }) {
   const euiTheme = useTheme();
 
@@ -115,13 +117,14 @@ export function MobileStats({
   ];
 
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup direction={direction ? direction : 'row'}>
       {metrics.map((metric, key) => (
         <EuiFlexItem>
           <MetricItem
             id={key}
             data={[metric]}
             isLoading={status === FETCH_STATUS.LOADING}
+            height={direction === 'column' ? '100%' : '124px'}
           />
         </EuiFlexItem>
       ))}

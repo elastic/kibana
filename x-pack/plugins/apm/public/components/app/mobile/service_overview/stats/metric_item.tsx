@@ -12,10 +12,12 @@ export function MetricItem({
   data,
   id,
   isLoading,
+  height,
 }: {
   data: MetricDatum[];
   id: number;
   isLoading: boolean;
+  height?: string;
 }) {
   return (
     <div
@@ -23,7 +25,7 @@ export function MetricItem({
         resize: 'none',
         padding: '0px',
         overflow: 'auto',
-        height: '100px',
+        height,
         borderRadius: '6px',
       }}
     >
