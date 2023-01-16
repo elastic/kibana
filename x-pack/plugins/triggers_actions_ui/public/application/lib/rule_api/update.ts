@@ -17,7 +17,7 @@ type RuleUpdatesBody = Pick<
 >;
 const rewriteBodyRequest: RewriteResponseCase<RuleUpdatesBody> = ({ actions, ...res }): any => ({
   ...res,
-  actions: actions.map(({ group, id, params, frequency , uuid}) => ({
+  actions: actions.map(({ group, id, params, frequency, uuid }) => ({
     group,
     id,
     params,

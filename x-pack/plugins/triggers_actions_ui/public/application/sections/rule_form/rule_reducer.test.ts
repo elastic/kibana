@@ -196,6 +196,7 @@ describe('rule reducer', () => {
       actionTypeId: 'testId',
       group: 'Rule',
       params: {},
+      uuid: '123-456',
     });
     const updatedRule = ruleReducer(
       { rule: initialRule },
