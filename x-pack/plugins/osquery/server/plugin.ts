@@ -16,6 +16,8 @@ import type {
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
+import { orderBy } from 'lodash';
+import deepequal from 'fast-deep-equal';
 
 import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import type { PackSavedObjectAttributes } from './common/types';
@@ -138,6 +140,53 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
         await this.initialize(core, dataViewsService);
       }
 
+      try {
+
+        // First get all datastreams matching the pattern.
+        const dataStreams = await esClient.indices.getDataStream({
+          name: `logs-${OSQUERY_INTEGRATION_NAME}.result-*`,
+        });
+
+        // Then for each of those datastreams, we need to see if they need to rollover.
+        await dataStreams.data_streams.forEach(async dataStream => {
+          const mapping = await esClient.indices.getMapping({
+            index: dataStream.name,
+          });
+
+          // TODO: This sort doesn't look like its working right now.
+          // Sort by index name to get the latest index
+          const dataStreamMapping = orderBy(Object.entries(mapping), [0], 'desc')?.[0][1]?.mappings
+          ?.properties?.data_stream;
+
+          if (
+            dataStreamMapping &&
+            deepequal(dataStreamMapping, {
+              properties: {
+                dataset: {
+                  type: 'constant_keyword',
+                  value: 'generic',  // We can just check for this value most likely.  It will signify that an osquery beat wrote the wrong data
+                },
+                namespace: {
+                  type: 'constant_keyword',
+                  value: 'default',  // This would need to be datastream specific to make sure it's the right namespace.  I think we can drop this comparison and just check dataset above.
+                },
+                type: {
+                  type: 'constant_keyword',
+                  value: 'osquery',
+                },
+              },
+            })
+          )
+    
+          await esClient.indices.rollover({
+            alias: dataStream.name,
+          });
+
+        });
+      } catch(e) {
+        this.logger.info(e);
+      }
+
       if (registerIngestCallback) {
         registerIngestCallback(
           'packagePolicyCreate',
@@ -163,9 +212,10 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
           }
         );
 
-        registerIngestCallback('packagePolicyUpdate', getPackagePolicyUpdateCallback(esClient));
 
-        registerIngestCallback('packagePolicyPostDelete', getPackagePolicyDeleteCallback(client));
+        //registerIngestCallback('packagePolicyUpdate', getPackagePolicyUpdateCallback(esClient, this.logger));
+
+        registerIngestCallback('packagePolicyPostDelete', getPackagePolicyDeleteCallback(client, this.logger));
       }
     });
 

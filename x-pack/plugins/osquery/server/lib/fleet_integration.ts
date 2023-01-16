@@ -9,6 +9,7 @@ import type {
   ElasticsearchClient,
   SavedObjectReference,
   SavedObjectsClient,
+  Logger,
 } from '@kbn/core/server';
 import { filter, map, orderBy } from 'lodash';
 import deepequal from 'fast-deep-equal';
@@ -20,14 +21,22 @@ import { packSavedObjectType } from '../../common/types';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
 
 export const getPackagePolicyUpdateCallback =
-  (esClient: ElasticsearchClient) => async (updatePackagePolicy: UpdatePackagePolicy) => {
+  (esClient: ElasticsearchClient) => async (updatePackagePolicy: UpdatePackagePolicy, logger: Logger) => {
+    //logger.info('trying to update.....');
     if (
       updatePackagePolicy.package?.name === OSQUERY_INTEGRATION_NAME &&
       satisfies(updatePackagePolicy.package?.version ?? '', '>=1.6.0')
     ) {
+      const dataStreams = await esClient.indices.getDataStream({
+        name: `logs-${OSQUERY_INTEGRATION_NAME}.result-*`,
+      })
+
+      logger.debug('data streams ' + dataStreams.data_streams);
+
       const mapping = await esClient.indices.getMapping({
         index: `logs-${OSQUERY_INTEGRATION_NAME}.result-*`,
       });
+      //logger.info('mapping', mapping);
       // Sort by index name to get the latest index
       const dataStreamMapping = orderBy(Object.entries(mapping), [0], 'desc')?.[0][1]?.mappings
         ?.properties?.data_stream;
@@ -65,8 +74,9 @@ export const getPackagePolicyUpdateCallback =
   };
 
 export const getPackagePolicyDeleteCallback =
-  (packsClient: SavedObjectsClient): PostPackagePolicyPostDeleteCallback =>
+  (packsClient: SavedObjectsClient, logger: Logger): PostPackagePolicyPostDeleteCallback =>
   async (deletedPackagePolicy) => {
+    logger.info('deleting package.....');
     const deletedOsqueryManagerPolicies = filter(deletedPackagePolicy, [
       'package.name',
       OSQUERY_INTEGRATION_NAME,
