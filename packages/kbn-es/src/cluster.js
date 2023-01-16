@@ -350,6 +350,8 @@ exports.Cluster = class Cluster {
       // Simulate the S3 call:
       // using 100ms because we agreed internally that's enough for our tests based on the avg delays we observe in prod
       ['indices.write_ack_delay_randomness_bound', '100ms'],
+      // Apply refresh_interval 5s to all indices
+      ['node._internal.default_refresh_interval', '5s'],
     ]);
 
     // options.esArgs overrides the default esArg values
