@@ -71,3 +71,27 @@ export const BETA_TOOLTIP_MESSAGE = i18n.translate(
       'This functionality is in beta and is subject to change. The design and code is less mature than official generally available features and is being provided as-is with no warranties. Beta features are not subject to the support service level agreement of official generally available features.',
   }
 );
+
+export const SUMMARY_LABEL = i18n.translate('xpack.synthetics.monitorManagement.summary.heading', {
+  defaultMessage: 'Summary',
+});
+
+export const CONFIGURATIONS_LABEL = i18n.translate(
+  'xpack.synthetics.monitorManagement.configurations.label',
+  {
+    defaultMessage: 'Configurations',
+  }
+);
+
+export const DISABLED_LABEL = i18n.translate('xpack.synthetics.monitorManagement.disabled.label', {
+  defaultMessage: 'Disabled',
+});
+
+export function getLastXDaysLabel(count: number) {
+  return i18n.translate('xpack.synthetics.monitorManagement.lastXDays', {
+    defaultMessage: 'Last {count, number} {count, plural, one {day} other {days}}',
+    values: {
+      count,
+    },
+  });
+}
