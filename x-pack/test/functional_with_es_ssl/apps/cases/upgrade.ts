@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import {
   getExternalServiceSimulatorPath,
   ExternalServiceSimulator,
-} from '../../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/plugin';
+} from '../../../alerting_api_integration/common/plugins/actions_simulators/server/plugin';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
