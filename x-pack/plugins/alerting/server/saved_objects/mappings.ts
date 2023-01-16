@@ -340,5 +340,8 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
         },
       },
     },
+    running: {
+      type: 'boolean',
+    },
   },
 };

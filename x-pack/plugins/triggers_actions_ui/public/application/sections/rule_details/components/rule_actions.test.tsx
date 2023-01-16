@@ -74,7 +74,9 @@ describe('Rule Actions', () => {
   it("renders rule action connector icons for user's selected rule actions", async () => {
     const wrapper = await setup();
     expect(mockedUseFetchRuleActionConnectorsHook).toHaveBeenCalledTimes(1);
-    expect(wrapper.find('[data-euiicon-type]').length).toBe(2);
+    expect(
+      wrapper.find('[data-euiicon-type]').length - wrapper.find('[data-euiicon-type="bell"]').length
+    ).toBe(2);
     expect(wrapper.find('[data-euiicon-type="logsApp"]').length).toBe(1);
     expect(wrapper.find('[data-euiicon-type="logoSlack"]').length).toBe(1);
     expect(wrapper.find('[data-euiicon-type="index"]').length).toBe(0);

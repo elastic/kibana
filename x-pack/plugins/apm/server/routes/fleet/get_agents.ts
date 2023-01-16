@@ -5,26 +5,22 @@
  * 2.0.
  */
 
-import {
-  CoreSetup,
-  CoreStart,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
+import { CoreStart, SavedObjectsClientContract } from '@kbn/core/server';
 import { APMPluginStartDependencies } from '../../types';
 import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';
 
 export async function getFleetAgents({
   policyIds,
-  core,
+  coreStart,
   fleetPluginStart,
 }: {
   policyIds: string[];
-  core: { setup: CoreSetup; start: () => Promise<CoreStart> };
+  coreStart: CoreStart;
   fleetPluginStart: NonNullable<APMPluginStartDependencies['fleet']>;
 }) {
   // @ts-ignore
   const savedObjectsClient: SavedObjectsClientContract =
-    await getInternalSavedObjectsClient(core.setup);
+    await getInternalSavedObjectsClient(coreStart);
 
   return await fleetPluginStart.agentPolicyService.getByIds(
     savedObjectsClient,

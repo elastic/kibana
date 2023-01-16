@@ -10,7 +10,6 @@ import { screen } from '@testing-library/react';
 
 import { ConfigSchema } from '../../plugin';
 import { Subset } from '../../typings';
-import { useKibana } from '../../utils/kibana_react';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { render } from '../../utils/test_helper';
 import { SlosPage } from '.';
@@ -22,25 +21,15 @@ jest.mock('react-router-dom', () => ({
   useParams: jest.fn(),
 }));
 jest.mock('../../hooks/slo/use_fetch_slo_list');
-jest.mock('../../utils/kibana_react');
 jest.mock('../../hooks/use_breadcrumbs');
 
-jest.mock('./components/slo_list_item', () => ({ SloListItem: () => 'mocked SloListItem' }));
+const mockUseKibanaReturnValue = kibanaStartMock.startContract();
+
+jest.mock('../../utils/kibana_react', () => ({
+  useKibana: jest.fn(() => mockUseKibanaReturnValue),
+}));
 
 const useFetchSloListMock = useFetchSloList as jest.Mock;
-const useKibanaMock = useKibana as jest.Mock;
-const mockKibana = () => {
-  useKibanaMock.mockReturnValue({
-    services: {
-      ...kibanaStartMock.startContract(),
-      http: {
-        basePath: {
-          prepend: jest.fn(),
-        },
-      },
-    },
-  });
-};
 
 const config: Subset<ConfigSchema> = {
   unsafe: {
@@ -51,7 +40,6 @@ const config: Subset<ConfigSchema> = {
 describe('SLOs Page', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockKibana();
   });
 
   it('renders the not found page when the feature flag is not enabled', async () => {

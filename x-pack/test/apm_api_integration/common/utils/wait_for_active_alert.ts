@@ -4,15 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import pRetry from 'p-retry';
 import { ToolingLog } from '@kbn/tooling-log';
-import expect from '@kbn/expect';
 import { Client } from '@elastic/elasticsearch';
 
-const WAIT_FOR_STATUS_INCREMENT = 1000;
-
-export async function waitForActiveAlert({
+async function getActiveAlert({
   ruleId,
-  waitMillis = 10000,
   esClient,
   log,
 }: {
@@ -21,10 +18,6 @@ export async function waitForActiveAlert({
   esClient: Client;
   log: ToolingLog;
 }): Promise<Record<string, any>> {
-  if (waitMillis < 0) {
-    expect().fail(`waiting for active alert for rule ${ruleId} timed out`);
-  }
-
   const searchParams = {
     index: '.alerts-observability.apm.alerts-*',
     size: 1,
@@ -51,25 +44,25 @@ export async function waitForActiveAlert({
     },
   };
   const response = await esClient.search(searchParams);
-
-  const hits = (response?.hits?.total as { value: number } | undefined)?.value ?? 0;
-  if (hits > 0) {
-    return response.hits.hits[0];
+  const firstHit = response.hits.hits[0];
+  if (!firstHit) {
+    throw new Error(`No active alert found for rule ${ruleId}`);
   }
-
-  const message = `waitForActiveAlert(${ruleId}): got ${hits} hits.`;
-
-  log.debug(`${message}, retrying`);
-
-  await delay(WAIT_FOR_STATUS_INCREMENT);
-  return await waitForActiveAlert({
-    ruleId,
-    waitMillis: waitMillis - WAIT_FOR_STATUS_INCREMENT,
-    esClient,
-    log,
-  });
+  return firstHit;
 }
 
-async function delay(millis: number): Promise<void> {
-  await new Promise((resolve) => setTimeout(resolve, millis));
+export function waitForActiveAlert({
+  ruleId,
+  esClient,
+  log,
+}: {
+  ruleId: string;
+  waitMillis?: number;
+  esClient: Client;
+  log: ToolingLog;
+}): Promise<Record<string, any>> {
+  return pRetry(() => getActiveAlert({ ruleId, esClient, log }), {
+    retries: 10,
+    factor: 1.5,
+  });
 }

@@ -10,7 +10,7 @@ import React from 'react';
 import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-export const getDefaultAlertSummaryTimeRange = (): AlertSummaryTimeRange => {
+export const getAlertSummaryWidgetTimeRange = (): AlertSummaryTimeRange => {
   const { to, from } = getAbsoluteTimeRange({
     from: 'now-30d',
     to: 'now',

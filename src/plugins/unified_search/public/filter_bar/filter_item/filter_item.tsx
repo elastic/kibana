@@ -25,7 +25,14 @@ import {
   toggleFilterDisabled,
 } from '@kbn/es-query';
 import classNames from 'classnames';
-import React, { MouseEvent, useState, useEffect, HTMLAttributes, useMemo } from 'react';
+import React, {
+  MouseEvent,
+  useState,
+  useEffect,
+  HTMLAttributes,
+  useMemo,
+  useCallback,
+} from 'react';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { css } from '@emotion/react';
@@ -33,8 +40,12 @@ import { getIndexPatternFromFilter, getDisplayValueFromFilter } from '@kbn/data-
 import { FilterEditor } from '../filter_editor/filter_editor';
 import { FilterView } from '../filter_view';
 import { FilterPanelOption } from '../../types';
+import {
+  withCloseFilterEditorConfirmModal,
+  WithCloseFilterEditorConfirmModalProps,
+} from '../filter_editor';
 
-export interface FilterItemProps {
+export interface FilterItemProps extends WithCloseFilterEditorConfirmModalProps {
   id: string;
   filter: Filter;
   indexPatterns: DataView[];
@@ -67,10 +78,16 @@ export type FilterLabelStatus =
 
 export const FILTER_EDITOR_WIDTH = 960;
 
-export function FilterItem(props: FilterItemProps) {
+function FilterItemComponent(props: FilterItemProps) {
+  const { onCloseFilterPopover, onLocalFilterCreate, onLocalFilterUpdate } = props;
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
+
   const [renderedComponent, setRenderedComponent] = useState('menu');
   const { id, filter, indexPatterns, hiddenPanelOptions, readOnly = false } = props;
+
+  const closePopover = useCallback(() => {
+    onCloseFilterPopover([() => setIsPopoverOpen(false)]);
+  }, [onCloseFilterPopover]);
 
   const euiTheme = useEuiTheme();
 
@@ -348,9 +365,7 @@ export function FilterItem(props: FilterItemProps) {
     className: `globalFilterItem__popover`,
     anchorClassName: `globalFilterItem__popoverAnchor`,
     isOpen: isPopoverOpen,
-    closePopover: () => {
-      setIsPopoverOpen(false);
-    },
+    closePopover,
     button: <FilterView {...filterViewProps} />,
     panelPaddingSize: 'none',
     panelProps: {
@@ -367,14 +382,14 @@ export function FilterItem(props: FilterItemProps) {
       ) : (
         <EuiContextMenuPanel
           items={[
-            <div style={{ width: FILTER_EDITOR_WIDTH, maxWidth: '100%' }}>
+            <div style={{ width: FILTER_EDITOR_WIDTH, maxWidth: '100%' }} key="filter-editor">
               <FilterEditor
                 filter={filter}
                 indexPatterns={indexPatterns}
                 onSubmit={onSubmit}
-                onCancel={() => {
-                  setIsPopoverOpen(false);
-                }}
+                onLocalFilterUpdate={onLocalFilterUpdate}
+                onLocalFilterCreate={onLocalFilterCreate}
+                onCancel={closePopover}
                 timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
               />
             </div>,
@@ -384,6 +399,9 @@ export function FilterItem(props: FilterItemProps) {
     </EuiPopover>
   );
 }
+
+export const FilterItem = withCloseFilterEditorConfirmModal(FilterItemComponent);
+
 // Needed for React.lazy
 // eslint-disable-next-line import/no-default-export
 export default FilterItem;

@@ -14,12 +14,14 @@ const transformAction: RewriteRequestCase<RuleAction> = ({
   id,
   connector_type_id: actionTypeId,
   params,
+  frequency,
 }) => ({
   uuid,
   group,
   id,
   params,
   actionTypeId,
+  frequency,
 });
 
 const transformExecutionStatus: RewriteRequestCase<RuleExecutionStatus> = ({

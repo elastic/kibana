@@ -10,12 +10,13 @@ import {
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { resolveMissingLabels } from '../../routes/status/current_status';
 import { AlertConfigKey } from '../../../common/constants/monitor_management';
 import { getAllLocations } from '../../synthetics_service/get_all_locations';
 import { getAllMonitors } from '../../saved_objects/synthetics_monitor/get_all_monitors';
 import { GetMonitorDownStatusMessageParams } from '../../legacy_uptime/lib/requests/get_monitor_status';
 import { queryMonitorStatus } from '../../queries/query_monitor_status';
-import { createUptimeESClient, UptimeEsClient } from '../../legacy_uptime/lib/lib';
+import { UptimeEsClient } from '../../legacy_uptime/lib/lib';
 import { StatusRuleParams } from '../../../common/rules/status_rule';
 import {
   ConfigKey,
@@ -58,10 +59,7 @@ export class StatusRuleExecutor {
     this.previousStartedAt = previousStartedAt;
     this.params = p;
     this.soClient = soClient;
-    this.esClient = createUptimeESClient({
-      esClient: scopedClient,
-      savedObjectsClient: this.soClient,
-    });
+    this.esClient = new UptimeEsClient(this.soClient, scopedClient);
     this.server = server;
     this.syntheticsMonitorClient = syntheticsMonitorClient;
   }
@@ -88,13 +86,14 @@ export class StatusRuleExecutor {
 
   async getMonitors() {
     await this.getAllLocationNames();
-    this.monitors = await getAllMonitors(
-      this.soClient,
-      `attributes.${AlertConfigKey.STATUS_ENABLED}: true`
-    );
+    this.monitors = await getAllMonitors({
+      soClient: this.soClient,
+      search: `attributes.${AlertConfigKey.STATUS_ENABLED}: true`,
+    });
     const allIds: string[] = [];
     const enabledIds: string[] = [];
-    let maxLocations = 1;
+    let listOfLocationsSet = new Set<string>();
+    const missingLabelLocations = new Set<string>();
 
     this.monitors.forEach((monitor) => {
       const attrs = monitor.attributes;
@@ -103,22 +102,43 @@ export class StatusRuleExecutor {
         enabledIds.push(attrs[ConfigKey.MONITOR_QUERY_ID]);
       }
 
-      maxLocations = Math.max(maxLocations, attrs[ConfigKey.LOCATIONS].length);
+      listOfLocationsSet = new Set([
+        ...listOfLocationsSet,
+        ...(attrs[ConfigKey.LOCATIONS]
+          .filter((loc) => {
+            if (!loc.label) {
+              missingLabelLocations.add(loc.id);
+            }
+            return loc.label;
+          })
+          .map((location) => location.label) as string[]),
+      ]);
     });
 
-    return { enabledIds, maxLocations, allIds };
+    const { listOfLocations } = await resolveMissingLabels(
+      this.server,
+      this.soClient,
+      this.syntheticsMonitorClient,
+      listOfLocationsSet,
+      missingLabelLocations
+    );
+
+    return { enabledIds, listOfLocations, allIds };
   }
 
   async getDownChecks(
     prevDownConfigs: OverviewStatus['downConfigs'] = {}
   ): Promise<AlertOverviewStatus> {
-    const { maxLocations, enabledIds } = await this.getMonitors();
+    const { listOfLocations, enabledIds } = await this.getMonitors();
 
     if (enabledIds.length > 0) {
       const currentStatus = await queryMonitorStatus(
         this.esClient,
-        maxLocations,
-        { to: 'now', from: this.previousStartedAt?.toISOString() ?? 'now-1m' },
+        [...listOfLocations],
+        {
+          to: 'now',
+          from: this.previousStartedAt?.toISOString() ?? 'now-1m',
+        },
         enabledIds
       );
 

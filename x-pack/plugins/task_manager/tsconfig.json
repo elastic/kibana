@@ -16,7 +16,6 @@
     "@kbn/utility-types",
     "@kbn/safer-lodash-set",
     "@kbn/es-types",
-    "@kbn/repo-info",
     "@kbn/apm-utils",
   ],
   "exclude": [

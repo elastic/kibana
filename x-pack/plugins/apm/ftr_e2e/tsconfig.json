@@ -13,13 +13,15 @@
       "cypress",
       "node",
       "cypress-real-events"
-    ]
+    ],
+    "isolatedModules": false
   },
   "kbn_references": [
     { "path": "../../../test/tsconfig.json" },
     { "path": "../../../../test/tsconfig.json" },
     "@kbn/test",
     "@kbn/apm-synthtrace",
+    "@kbn/apm-synthtrace-client",
     "@kbn/dev-utils",
     "@kbn/axe-config",
     "@kbn/cypress-config",

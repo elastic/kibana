@@ -189,4 +189,25 @@ describe('rule reducer', () => {
     );
     expect(updatedRule.rule.actions[0].group).toBe('Warning');
   });
+
+  test('if rule action frequency was updated', () => {
+    initialRule.actions.push({
+      id: '',
+      actionTypeId: 'testId',
+      group: 'Rule',
+      params: {},
+    });
+    const updatedRule = ruleReducer(
+      { rule: initialRule },
+      {
+        command: { type: 'setRuleActionFrequency' },
+        payload: {
+          key: 'notifyWhen',
+          value: 'onThrottleInterval',
+          index: 0,
+        },
+      }
+    );
+    expect(updatedRule.rule.actions[0].frequency?.notifyWhen).toBe('onThrottleInterval');
+  });
 });

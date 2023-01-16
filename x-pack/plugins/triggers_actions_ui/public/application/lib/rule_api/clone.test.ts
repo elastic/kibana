@@ -29,7 +29,6 @@ describe('cloneRule', () => {
     tags: [],
     name: 'test',
     rule_type_id: '.index-threshold',
-    notify_when: 'onActionGroupChange',
     actions: [
       {
         group: 'threshold met',
@@ -37,6 +36,11 @@ describe('cloneRule', () => {
         params: {
           level: 'info',
           message: 'alert ',
+        },
+        frequency: {
+          notifyWhen: 'onActionGroupChange',
+          throttle: null,
+          summary: false,
         },
         connector_type_id: '.server-log',
         uuid: '123456',
@@ -60,6 +64,11 @@ describe('cloneRule', () => {
         "actions": Array [
           Object {
             "actionTypeId": ".server-log",
+            "frequency": Object {
+              "notifyWhen": "onActionGroupChange",
+              "summary": false,
+              "throttle": null,
+            },
             "group": "threshold met",
             "id": "1",
             "params": Object {
@@ -85,7 +94,7 @@ describe('cloneRule', () => {
         "muteAll": undefined,
         "mutedInstanceIds": undefined,
         "name": "test",
-        "notifyWhen": "onActionGroupChange",
+        "notifyWhen": undefined,
         "params": Object {
           "aggType": "count",
           "groupBy": "all",

@@ -28,7 +28,7 @@ import { sevenDaysRolling } from './time_window';
 export const createAPMTransactionErrorRateIndicator = (
   params: Partial<APMTransactionErrorRateIndicator['params']> = {}
 ): Indicator => ({
-  type: 'sli.apm.transaction_error_rate',
+  type: 'sli.apm.transactionErrorRate',
   params: {
     environment: 'irrelevant',
     service: 'irrelevant',
@@ -42,7 +42,7 @@ export const createAPMTransactionErrorRateIndicator = (
 export const createAPMTransactionDurationIndicator = (
   params: Partial<APMTransactionDurationIndicator['params']> = {}
 ): Indicator => ({
-  type: 'sli.apm.transaction_duration',
+  type: 'sli.apm.transactionDuration',
   params: {
     environment: 'irrelevant',
     service: 'irrelevant',

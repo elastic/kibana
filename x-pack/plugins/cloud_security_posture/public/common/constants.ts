@@ -7,14 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
+import type { PosturePolicyTemplate, PostureInput } from '../../common/types';
 import {
   CLOUDBEAT_EKS,
   CLOUDBEAT_VANILLA,
   CLOUDBEAT_AWS,
   CLOUDBEAT_GCP,
   CLOUDBEAT_AZURE,
-  type PostureInput,
-  type PosturePolicyTemplate,
 } from '../../common/constants';
 
 import eksLogo from '../assets/icons/cis_eks_logo.svg';

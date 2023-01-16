@@ -9,18 +9,11 @@ import { kea, MakeLogicType } from 'kea';
 
 import { isDeepEqual } from 'react-use/lib/util';
 
-import { i18n } from '@kbn/i18n';
-
 import { DEFAULT_PIPELINE_VALUES } from '../../../../../common/constants';
 import { Status } from '../../../../../common/types/api';
 
 import { IngestPipelineParams } from '../../../../../common/types/connectors';
 import { Actions } from '../../../shared/api_logic/create_api_logic';
-import {
-  clearFlashMessages,
-  flashAPIErrors,
-  flashSuccessToast,
-} from '../../../shared/flash_messages';
 
 import {
   FetchDefaultPipelineApiLogic,
@@ -81,22 +74,12 @@ export const SettingsLogic = kea<MakeLogicType<PipelinesValues, PipelinesActions
     },
   }),
   listeners: ({ actions }) => ({
-    apiError: (error) => flashAPIErrors(error),
     apiSuccess: (pipeline) => {
-      flashSuccessToast(
-        i18n.translate(
-          'xpack.enterpriseSearch.content.indices.defaultPipelines.successToast.title',
-          {
-            defaultMessage: 'Default pipeline successfully updated',
-          }
-        )
-      );
       actions.fetchDefaultPipelineSuccess(pipeline);
     },
     fetchDefaultPipelineSuccess: (pipeline) => {
       actions.setPipeline(pipeline);
     },
-    makeRequest: () => clearFlashMessages(),
   }),
   path: ['enterprise_search', 'content', 'settings'],
   reducers: () => ({

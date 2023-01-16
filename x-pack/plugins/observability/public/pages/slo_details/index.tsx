@@ -18,7 +18,7 @@ import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useKibana } from '../../utils/kibana_react';
 import PageNotFound from '../404';
-import { isSloFeatureEnabled } from '../slos/helpers';
+import { isSloFeatureEnabled } from '../slos/helpers/is_slo_feature_enabled';
 import { SLOS_BREADCRUMB_TEXT } from '../slos/translations';
 import { SloDetailsPathParams } from './types';
 import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';

@@ -45,6 +45,10 @@ export function SloListItem({ slo, onDeleted, onDeleting }: SloListItemProps) {
     setIsActionsPopoverOpen(!isActionsPopoverOpen);
   };
 
+  const handleEdit = () => {
+    navigateToUrl(basePath.prepend(paths.observability.sloEdit(slo.id)));
+  };
+
   const handleDelete = () => {
     setDeleteConfirmationModalOpen(true);
     setIsDeleting(true);
@@ -112,7 +116,12 @@ export function SloListItem({ slo, onDeleted, onDeleting }: SloListItemProps) {
             <EuiContextMenuPanel
               size="s"
               items={[
-                <EuiContextMenuItem key="edit" icon="trash" onClick={handleDelete}>
+                <EuiContextMenuItem key="edit" icon="pencil" onClick={handleEdit}>
+                  {i18n.translate('xpack.observability.slos.slo.item.actions.edit', {
+                    defaultMessage: 'Edit',
+                  })}
+                </EuiContextMenuItem>,
+                <EuiContextMenuItem key="delete" icon="trash" onClick={handleDelete}>
                   {i18n.translate('xpack.observability.slos.slo.item.actions.delete', {
                     defaultMessage: 'Delete',
                   })}

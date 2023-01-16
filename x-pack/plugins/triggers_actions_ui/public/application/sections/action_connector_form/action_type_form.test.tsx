@@ -356,6 +356,7 @@ function getActionTypeForm(
       onConnectorSelected={onConnectorSelected ?? jest.fn()}
       defaultActionGroupId={defaultActionGroupId ?? 'default'}
       setActionParamsProperty={jest.fn()}
+      setActionFrequencyProperty={jest.fn()}
       index={index ?? 1}
       actionTypesIndex={actionTypeIndex ?? actionTypeIndexDefault}
       actionTypeRegistry={actionTypeRegistry}

@@ -16,7 +16,7 @@ jest.mock('../../../../common/lib/kibana');
 
 const onRuleChanged = jest.fn();
 const onEditRule = jest.fn();
-const setRulesToDelete = jest.fn();
+const onDeleteRule = jest.fn();
 const bulkDisableRules = jest.fn();
 const bulkEnableRules = jest.fn();
 const onUpdateAPIKey = jest.fn();
@@ -96,7 +96,7 @@ describe('CollapsedItemActions', () => {
       item: rule,
       onRuleChanged,
       onEditRule,
-      setRulesToDelete,
+      onDeleteRule,
       bulkDisableRules,
       bulkEnableRules,
       onUpdateAPIKey,
@@ -280,7 +280,7 @@ describe('CollapsedItemActions', () => {
         await nextTick();
         wrapper.update();
       });
-      expect(setRulesToDelete).toHaveBeenCalled();
+      expect(onDeleteRule).toHaveBeenCalled();
     });
 
     test('renders actions correctly when rule is disabled', async () => {

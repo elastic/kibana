@@ -54,12 +54,13 @@ const rewriteBodyRes: RewriteResponseCase<ResolvedSanitizedRule<RuleTypeParams>>
     last_execution_date: executionStatus.lastExecutionDate,
     last_duration: executionStatus.lastDuration,
   },
-  actions: actions.map(({ group, id, actionTypeId, params, uuid }) => ({
-    uuid,
+  actions: actions.map(({ group, id, actionTypeId, params, frequency, uuid }) => ({
     group,
     id,
     params,
     connector_type_id: actionTypeId,
+    frequency,
+    uuid,
   })),
   ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),
   ...(nextRun ? { next_run: nextRun } : {}),

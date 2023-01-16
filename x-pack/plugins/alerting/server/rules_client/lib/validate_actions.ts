@@ -19,24 +19,8 @@ export async function validateActions<U extends NormalizedAlertActionOptionalUui
   data: Pick<RawRule, 'notifyWhen' | 'throttle'> & { actions: U[] }
 ): Promise<void> {
   const { actions, notifyWhen, throttle } = data;
-  const hasNotifyWhen = typeof notifyWhen !== 'undefined';
-  const hasThrottle = typeof throttle !== 'undefined';
-  let usesRuleLevelFreqParams;
-  // I removed the below ` && hasThrottle` check temporarily.
-  // Currently the UI sends "throttle" as undefined but schema converts it to null, so they never become both undefined
-  // I changed the schema too, but as the UI (and tests) sends "notifyWhen" as string and "throttle" as undefined, they never become both defined.
-  // We should add it back when the UI is changed (https://github.com/elastic/kibana/issues/143369)
-  if (hasNotifyWhen) usesRuleLevelFreqParams = true;
-  else if (!hasNotifyWhen && !hasThrottle) usesRuleLevelFreqParams = false;
-  else {
-    throw Boom.badRequest(
-      i18n.translate('xpack.alerting.rulesClient.usesValidGlobalFreqParams.oneUndefined', {
-        defaultMessage:
-          'Rule-level notifyWhen and throttle must both be defined or both be undefined',
-      })
-    );
-  }
-
+  const hasRuleLevelNotifyWhen = typeof notifyWhen !== 'undefined';
+  const hasRuleLevelThrottle = Boolean(throttle);
   if (actions.length === 0) {
     return;
   }
@@ -81,13 +65,13 @@ export async function validateActions<U extends NormalizedAlertActionOptionalUui
   }
 
   // check for actions using frequency params if the rule has rule-level frequency params defined
-  if (usesRuleLevelFreqParams) {
+  if (hasRuleLevelNotifyWhen || hasRuleLevelThrottle) {
     const actionsWithFrequency = actions.filter((action) => Boolean(action.frequency));
     if (actionsWithFrequency.length) {
       throw Boom.badRequest(
         i18n.translate('xpack.alerting.rulesClient.validateActions.mixAndMatchFreqParams', {
           defaultMessage:
-            'Cannot specify per-action frequency params when notify_when and throttle are defined at the rule level: {groups}',
+            'Cannot specify per-action frequency params when notify_when or throttle are defined at the rule level: {groups}',
           values: {
             groups: actionsWithFrequency.map((a) => a.group).join(', '),
           },

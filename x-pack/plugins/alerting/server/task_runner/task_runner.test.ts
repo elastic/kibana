@@ -73,6 +73,9 @@ import {
   RuleContextOpts,
 } from '../lib/alerting_event_logger/alerting_event_logger';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
+import { SharePluginStart } from '@kbn/share-plugin/server';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -121,6 +124,9 @@ describe('Task Runner', () => {
   const dataPlugin = dataPluginMock.createStartContract();
   const uiSettingsService = uiSettingsServiceMock.createStartContract();
   const inMemoryMetrics = inMemoryMetricsMock.create();
+  const dataViewsMock = {
+    dataViewsServiceFactory: jest.fn().mockResolvedValue(dataViewPluginMocks.createStartContract()),
+  } as DataViewsServerPluginStart;
 
   type TaskRunnerFactoryInitializerParamsType = jest.Mocked<TaskRunnerContext> & {
     actionsPlugin: jest.Mocked<ActionsPluginStart>;
@@ -130,7 +136,9 @@ describe('Task Runner', () => {
 
   const taskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType = {
     data: dataPlugin,
+    dataViews: dataViewsMock,
     savedObjects: savedObjectsService,
+    share: {} as SharePluginStart,
     uiSettings: uiSettingsService,
     elasticsearch: elasticsearchService,
     actionsPlugin: actionsMock.createStart(),
@@ -207,6 +215,8 @@ describe('Task Runner', () => {
     alertingEventLogger.getStartAndDuration.mockImplementation(() => ({ start: new Date() }));
     (AlertingEventLogger as jest.Mock).mockImplementation(() => alertingEventLogger);
     logger.get.mockImplementation(() => logger);
+
+    ruleType.executor.mockResolvedValue({ state: {} });
   });
 
   test('successfully executes the task', async () => {
@@ -314,6 +324,7 @@ describe('Task Runner', () => {
           string
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
+          return { state: {} };
         }
       );
       const taskRunner = new TaskRunner(
@@ -396,6 +407,7 @@ describe('Task Runner', () => {
         string
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
+        return { state: {} };
       }
     );
     const taskRunner = new TaskRunner(
@@ -521,6 +533,7 @@ describe('Task Runner', () => {
           string
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
+          return { state: {} };
         }
       );
       const taskRunner = new TaskRunner(
@@ -574,6 +587,7 @@ describe('Task Runner', () => {
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
           executorServices.alertFactory.create('2').scheduleActions('default');
+          return { state: {} };
         }
       );
       const taskRunner = new TaskRunner(
@@ -640,6 +654,7 @@ describe('Task Runner', () => {
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
           executorServices.alertFactory.create('2').scheduleActions('default');
+          return { state: {} };
         }
       );
       const taskRunner = new TaskRunner(
@@ -702,6 +717,7 @@ describe('Task Runner', () => {
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
           executorServices.alertFactory.create('2').scheduleActions('default');
+          return { state: {} };
         }
       );
       const taskRunner = new TaskRunner(
@@ -742,6 +758,7 @@ describe('Task Runner', () => {
         string
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
+        return { state: {} };
       }
     );
     const taskRunner = new TaskRunner(
@@ -814,6 +831,7 @@ describe('Task Runner', () => {
           string
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
+          return { state: {} };
         }
       );
       const taskRunner = new TaskRunner(
@@ -889,6 +907,7 @@ describe('Task Runner', () => {
           string
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
+          return { state: {} };
         }
       );
       const taskRunner = new TaskRunner(
@@ -980,6 +999,7 @@ describe('Task Runner', () => {
           string
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
+          return { state: {} };
         }
       );
       const taskRunner = new TaskRunner(
@@ -1123,6 +1143,7 @@ describe('Task Runner', () => {
 
           // create an instance, but don't schedule any actions, so it doesn't go active
           executorServices.alertFactory.create('3');
+          return { state: {} };
         }
       );
       const taskRunner = new TaskRunner(
@@ -1228,6 +1249,7 @@ describe('Task Runner', () => {
           string
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
+          return { state: {} };
         }
       );
       const taskRunner = new TaskRunner(
@@ -1327,6 +1349,7 @@ describe('Task Runner', () => {
           string
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
+          return { state: {} };
         }
       );
 
@@ -1403,6 +1426,7 @@ describe('Task Runner', () => {
           string
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
+          return { state: {} };
         }
       );
 
@@ -1474,6 +1498,7 @@ describe('Task Runner', () => {
         string
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
+        return { state: {} };
       }
     );
     const date = new Date().toISOString();
@@ -1865,6 +1890,7 @@ describe('Task Runner', () => {
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
         executorServices.alertFactory.create('2').scheduleActions('default');
+        return { state: {} };
       }
     );
     const taskRunner = new TaskRunner(
@@ -1955,6 +1981,7 @@ describe('Task Runner', () => {
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
         executorServices.alertFactory.create('2').scheduleActions('default');
+        return { state: {} };
       }
     );
     const taskRunner = new TaskRunner(
@@ -2038,6 +2065,7 @@ describe('Task Runner', () => {
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
         executorServices.alertFactory.create('2').scheduleActions('default');
+        return { state: {} };
       }
     );
     const taskRunner = new TaskRunner(
@@ -2100,7 +2128,9 @@ describe('Task Runner', () => {
   test('end is logged for active alerts when alert state contains start time and alert recovers', async () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
-    ruleType.executor.mockImplementation(async () => {});
+    ruleType.executor.mockImplementation(async () => {
+      return { state: {} };
+    });
     const taskRunner = new TaskRunner(
       ruleType,
       {
@@ -2181,7 +2211,9 @@ describe('Task Runner', () => {
         AlertInstanceState,
         AlertInstanceContext,
         string
-      >) => {}
+      >) => {
+        return { state: {} };
+      }
     );
     const taskRunner = new TaskRunner(
       ruleType,
@@ -2509,6 +2541,7 @@ describe('Task Runner', () => {
         string
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
+        return { state: {} };
       }
     );
 
@@ -2674,6 +2707,7 @@ describe('Task Runner', () => {
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
         executorServices.alertFactory.create('2').scheduleActions('default');
+        return { state: {} };
       }
     );
 

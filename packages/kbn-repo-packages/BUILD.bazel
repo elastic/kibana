@@ -1,0 +1,30 @@
+load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
+
+SRCS = glob(
+  [
+    "**/*.js",
+    "package-map.json",
+  ],
+  exclude = [
+    "**/*.config.js",
+    "**/*.mock.*",
+    "**/*.test.*",
+    "**/*.stories.*",
+    "**/__fixtures__/**",
+    "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/mocks/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
+  ],
+)
+
+js_library(
+  name = "kbn-repo-packages",
+  package_name = "@kbn/repo-packages",
+  srcs = ["package.json"] + SRCS,
+  deps = [],
+  visibility = ["//visibility:public"],
+)

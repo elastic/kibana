@@ -7,7 +7,7 @@
 
 import pMap from 'p-map';
 import Boom from '@hapi/boom';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, omit } from 'lodash';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import {
@@ -541,7 +541,20 @@ async function getUpdatedAttributesFromOperations(
     // the `isAttributesUpdateSkipped` flag to false.
     switch (operation.field) {
       case 'actions': {
-        await validateActions(context, ruleType, { ...attributes, actions: operation.value });
+        try {
+          await validateActions(context, ruleType, {
+            ...attributes,
+            actions: operation.value,
+          });
+        } catch (e) {
+          // If validateActions fails on the first attempt, it may be because of legacy rule-level frequency params
+          attributes = await attemptToMigrateLegacyFrequency(
+            context,
+            operation,
+            attributes,
+            ruleType
+          );
+        }
 
         const { modifiedAttributes, isAttributeModified } = applyBulkEditOperation(
           operation,
@@ -551,6 +564,18 @@ async function getUpdatedAttributesFromOperations(
           ruleActions = modifiedAttributes;
           isAttributesUpdateSkipped = false;
         }
+
+        // TODO https://github.com/elastic/kibana/issues/148414
+        // If any action-level frequencies get pushed into a SIEM rule, strip their frequencies
+        const firstFrequency = operation.value[0]?.frequency;
+        if (rule.attributes.consumer === AlertConsumers.SIEM && firstFrequency) {
+          ruleActions.actions = ruleActions.actions.map((action) => omit(action, 'frequency'));
+          if (!attributes.notifyWhen) {
+            attributes.notifyWhen = firstFrequency.notifyWhen;
+            attributes.throttle = firstFrequency.throttle;
+          }
+        }
+
         break;
       }
       case 'snoozeSchedule': {
@@ -762,4 +787,22 @@ async function saveBulkUpdatedRules(
   });
 
   return { result, apiKeysToInvalidate };
+}
+
+async function attemptToMigrateLegacyFrequency(
+  context: RulesClientContext,
+  operation: BulkEditOperation,
+  attributes: SavedObjectsFindResult<RawRule>['attributes'],
+  ruleType: RuleType
+) {
+  if (operation.field !== 'actions')
+    throw new Error('Can only perform frequency migration on an action operation');
+  // Try to remove the rule-level frequency params, and then validate actions
+  if (typeof attributes.notifyWhen !== 'undefined') attributes.notifyWhen = undefined;
+  if (attributes.throttle) attributes.throttle = undefined;
+  await validateActions(context, ruleType, {
+    ...attributes,
+    actions: operation.value,
+  });
+  return attributes;
 }

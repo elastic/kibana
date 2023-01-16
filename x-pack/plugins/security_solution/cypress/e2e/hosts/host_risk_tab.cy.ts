@@ -27,6 +27,9 @@ describe('risk tab', () => {
     cleanKibana();
     esArchiverLoad('risk_hosts');
     login();
+  });
+
+  beforeEach(() => {
     visit(HOSTS_URL);
     navigateToHostRiskDetailTab();
   });

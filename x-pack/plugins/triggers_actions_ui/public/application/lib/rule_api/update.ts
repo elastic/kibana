@@ -15,18 +15,18 @@ type RuleUpdatesBody = Pick<
   RuleUpdates,
   'name' | 'tags' | 'schedule' | 'actions' | 'params' | 'throttle' | 'notifyWhen'
 >;
-const rewriteBodyRequest: RewriteResponseCase<RuleUpdatesBody> = ({
-  notifyWhen,
-  actions,
-  ...res
-}): any => ({
+const rewriteBodyRequest: RewriteResponseCase<RuleUpdatesBody> = ({ actions, ...res }): any => ({
   ...res,
-  notify_when: notifyWhen,
-  actions: actions.map(({ group, id, params, uuid }) => ({
-    uuid,
+  actions: actions.map(({ group, id, params, frequency , uuid}) => ({
     group,
     id,
     params,
+    frequency: {
+      notify_when: frequency!.notifyWhen,
+      throttle: frequency!.throttle,
+      summary: frequency!.summary,
+    },
+    uuid,
   })),
 });
 
@@ -36,19 +36,14 @@ export async function updateRule({
   id,
 }: {
   http: HttpSetup;
-  rule: Pick<
-    RuleUpdates,
-    'throttle' | 'name' | 'tags' | 'schedule' | 'params' | 'actions' | 'notifyWhen'
-  >;
+  rule: Pick<RuleUpdates, 'name' | 'tags' | 'schedule' | 'params' | 'actions'>;
   id: string;
 }): Promise<Rule> {
   const res = await http.put<AsApiContract<Rule>>(
     `${BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(id)}`,
     {
       body: JSON.stringify(
-        rewriteBodyRequest(
-          pick(rule, ['throttle', 'name', 'tags', 'schedule', 'params', 'actions', 'notifyWhen'])
-        )
+        rewriteBodyRequest(pick(rule, ['name', 'tags', 'schedule', 'params', 'actions']))
       ),
     }
   );

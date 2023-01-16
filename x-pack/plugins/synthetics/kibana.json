@@ -28,7 +28,7 @@
   "server": true,
   "ui": true,
   "version": "8.0.0",
-  "requiredBundles": ["unifiedSearch", "fleet", "kibanaReact", "kibanaUtils", "ml", "observability", "indexLifecycleManagement"],
+  "requiredBundles": ["data","unifiedSearch", "fleet", "kibanaReact", "kibanaUtils", "ml", "observability", "indexLifecycleManagement"],
   "owner": {
     "name": "Uptime",
     "githubTeam": "uptime"

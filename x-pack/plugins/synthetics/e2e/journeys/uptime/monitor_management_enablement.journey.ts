@@ -5,11 +5,14 @@
  * 2.0.
  */
 import { journey, step, expect, after, Page } from '@elastic/synthetics';
+import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
 import { monitorManagementPageProvider } from '../../page_objects/uptime/monitor_management';
 
 journey(
   'Monitor Management-enablement-superuser',
   async ({ page, params }: { page: Page; params: any }) => {
+    recordVideo(page);
+
     const uptime = monitorManagementPageProvider({ page, kibanaUrl: params.kibanaUrl });
 
     after(async () => {
@@ -34,6 +37,8 @@ journey(
 journey(
   'MonitorManagement-enablement-obs-admin',
   async ({ page, params }: { page: Page; params: any }) => {
+    recordVideo(page);
+
     const uptime = monitorManagementPageProvider({ page, kibanaUrl: params.kibanaUrl });
 
     step('Go to monitor-management', async () => {

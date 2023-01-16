@@ -143,6 +143,10 @@ const getSavedObjectTypes = (
         is_preconfigured: { type: 'boolean', index: false },
         ssl: { type: 'binary' },
         proxy_id: { type: 'keyword' },
+        shipper: {
+          dynamic: false, // we aren't querying or aggregating over this data, so we don't need to specify any fields
+          properties: {},
+        },
       },
     },
     migrations: {
@@ -266,19 +270,13 @@ const getSavedObjectTypes = (
           },
         },
         installed_kibana: {
-          type: 'nested',
-          properties: {
-            id: { type: 'keyword' },
-            type: { type: 'keyword' },
-          },
+          type: 'object',
+          enabled: false,
         },
         installed_kibana_space_id: { type: 'keyword' },
         package_assets: {
-          type: 'nested',
-          properties: {
-            id: { type: 'keyword' },
-            type: { type: 'keyword' },
-          },
+          type: 'object',
+          enabled: false,
         },
         install_started_at: { type: 'date' },
         install_version: { type: 'keyword' },
