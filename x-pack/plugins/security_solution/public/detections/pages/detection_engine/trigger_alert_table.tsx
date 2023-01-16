@@ -6,7 +6,7 @@
  */
 
 import type { EuiDataGridRowHeightsOptions, EuiDataGridStyle, EuiFlyoutSize } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiCheckbox } from '@elastic/eui';
+import { EuiCheckbox } from '@elastic/eui';
 import type { CustomFilter } from '@kbn/es-query';
 import { buildQueryFromFilters } from '@kbn/es-query';
 import type { FC } from 'react';
@@ -15,22 +15,52 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { AlertsTableStateProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/alerts_table_state';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
+import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
+import { getDataTablesInStorageByIds } from '../../../timelines/containers/local_storage';
 import { alertTableViewModeSelector } from '../../../common/store/alert_table/selectors';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { SHOW_EXTERNAL_ALERTS } from '../../../common/components/events_tab/translations';
 import { RightTopMenu } from '../../../common/components/events_viewer/right_top_menu';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
-import type { TableId } from '../../../../common/types';
+import { TableId } from '../../../../common/types';
 import { useKibana } from '../../../common/lib/kibana';
 import type { ViewSelection } from '../../../common/components/events_viewer/summary_view_select';
-import { ALERTS_TABLE_VIEW_SELECTION_KEY } from '../../../common/components/events_viewer/summary_view_select';
+import {
+  VIEW_SELECTION,
+  ALERTS_TABLE_VIEW_SELECTION_KEY,
+} from '../../../common/components/events_viewer/summary_view_select';
 import { AdditionalFiltersAction } from '../../components/alerts_table/additional_filters_action';
 import { changeAlertTableViewMode } from '../../../common/store/alert_table/actions';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
-import { RenderCellValue } from '../../configurations/security_solution_detections';
+import { getColumns } from '../../configurations/security_solution_detections';
+import { getColumnHeaders } from '../../../common/components/data_table/column_headers/helpers';
 
 const storage = new Storage(localStorage);
 
+interface GridContainerProps {
+  hideLastPage: boolean;
+}
+
+const EuiDataGridContainer = styled.div<GridContainerProps>`
+  ul.euiPagination__list {
+    li.euiPagination__item:last-child {
+      ${({ hideLastPage }) => {
+        return `${hideLastPage ? 'display:none' : ''}`;
+      }};
+    }
+  }
+  div .euiDataGridRowCell__contentByHeight {
+    height: auto;
+    align-self: center;
+  }
+  div .euiDataGridRowCell--lastColumn .euiDataGridRowCell__contentByHeight {
+    flex-grow: 0;
+    width: 100%;
+  }
+  div .siemEventsTable__trSupplement--summary {
+    display: block;
+  }
+`;
 interface DetectionEngineAlertTableProps {
   configId: string;
   flyoutSize: EuiFlyoutSize;
@@ -54,6 +84,14 @@ export const DetectionEngineAlertTable: FC<DetectionEngineAlertTableProps> = ({
   showBuildingBlockAlerts,
 }) => {
   const { triggersActionsUi } = useKibana().services;
+
+  // Store context in state rather than creating object in provider value={} to prevent re-renders caused by a new object being created
+  const [activeStatefulEventContext] = useState({
+    timelineID: tableId,
+    tabType: 'query',
+    enableHostDetailsFlyout: true,
+    enableIpDetailsFlyout: true,
+  });
 
   const dispatch = useDispatch();
 
@@ -130,43 +168,39 @@ export const DetectionEngineAlertTable: FC<DetectionEngineAlertTableProps> = ({
     [tableId, tableView, additionalFiltersComponent, handleChangeTableView]
   );
 
-  const gridStyle: (isEventRenderedView: boolean) => EuiDataGridStyle = useCallback(
-    (isEventRenderedView: boolean = false) => ({
-      border: 'none',
-      fontSize: 's',
-      header: 'underline',
-      stripes: isEventRenderedView,
-    }),
-    []
+  const gridStyle = useMemo(
+    () =>
+      ({
+        border: 'none',
+        fontSize: 's',
+        header: 'underline',
+        stripes: tableView === VIEW_SELECTION.eventRenderedView,
+      } as EuiDataGridStyle),
+    [tableView]
   );
-
-  const EuiDataGridContainer = styled.div<{ hideLastPage: boolean }>`
-    ul.euiPagination__list {
-      li.euiPagination__item:last-child {
-        ${({ hideLastPage }) => `${hideLastPage ? 'display:none' : ''}`};
-      }
-    }
-    div .euiDataGridRowCell__contentByHeight {
-      height: auto;
-      align-self: center;
-    }
-    div .euiDataGridRowCell--lastColumn .euiDataGridRowCell__contentByHeight {
-      flex-grow: 0;
-      width: 100%;
-    }
-    div .siemEventsTable__trSupplement--summary {
-      display: block;
-    }
-  `;
 
   const rowHeightsOptions: EuiDataGridRowHeightsOptions | undefined = useMemo(() => {
     if (tableView === 'eventRenderedView') {
       return {
-        defaultHeight: 'auto' as const,
+        defaultHeight: 'auto',
       };
     }
     return undefined;
   }, [tableView]);
+
+  const dataTableStorage = getDataTablesInStorageByIds(storage, [TableId.alertsOnAlertsPage]);
+  const columnsFormStorage = dataTableStorage?.[TableId.alertsOnAlertsPage]?.columns ?? [];
+  const alertColumns = columnsFormStorage.length ? columnsFormStorage : getColumns();
+
+  const evenRenderedColumns = useMemo(
+    () => getColumnHeaders(alertColumns, browserFields, true),
+    [alertColumns, browserFields]
+  );
+
+  const finalColumns = useMemo(
+    () => (tableView === VIEW_SELECTION.eventRenderedView ? evenRenderedColumns : alertColumns),
+    [evenRenderedColumns, alertColumns, tableView]
+  );
 
   const alertStateProps: AlertsTableStateProps = useMemo(
     () => ({
@@ -182,9 +216,9 @@ export const DetectionEngineAlertTable: FC<DetectionEngineAlertTableProps> = ({
       additionalControls: {
         right: additionalRightControls,
       },
-      gridStyle: gridStyle(true),
+      gridStyle,
       rowHeightsOptions,
-      renderCellValue: RenderCellValue,
+      columns: finalColumns,
     }),
     [
       additionalRightControls,
@@ -194,19 +228,19 @@ export const DetectionEngineAlertTable: FC<DetectionEngineAlertTableProps> = ({
       flyoutSize,
       gridStyle,
       rowHeightsOptions,
+      finalColumns,
     ]
   );
 
-  return false ? (
-    <EuiFlexGroup>
-      <EuiFlexItem>
-        <EuiProgress size="xs" color="primary" />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  ) : (
-    <EuiDataGridContainer hideLastPage={false}>
-      {triggersActionsUi.getAlertsStateTable(alertStateProps)}
-    </EuiDataGridContainer>
+  const AlertTable = useMemo(
+    () => triggersActionsUi.getAlertsStateTable(alertStateProps),
+    [alertStateProps, triggersActionsUi]
+  );
+
+  return (
+    <StatefulEventContext.Provider value={activeStatefulEventContext}>
+      <EuiDataGridContainer hideLastPage={false}>{AlertTable}</EuiDataGridContainer>
+    </StatefulEventContext.Provider>
   );
 };
 

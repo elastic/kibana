@@ -122,6 +122,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     },
     [dispatch, setAbsoluteRangeDatePickerTarget]
   );
+
   const barchartConfigs = useMemo(
     () =>
       getBarchartConfigs({
@@ -153,6 +154,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   );
   const { toggleStatus, setToggleStatus } = useQueryToggle(id);
   const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
+
   useEffect(() => {
     setQuerySkip(skip || !toggleStatus);
   }, [skip, toggleStatus]);

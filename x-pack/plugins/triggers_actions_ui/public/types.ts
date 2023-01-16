@@ -475,7 +475,7 @@ export interface FetchAlertData {
   ecsAlertsData: unknown[];
 }
 
-export interface AlertsTableProps {
+export type AlertsTableProps = {
   alertsTableConfiguration: AlertsTableConfigurationRegistry;
   columns: EuiDataGridColumn[];
   // defaultCellActions: TGridCellAction[];
@@ -499,8 +499,7 @@ export interface AlertsTableProps {
   onChangeVisibleColumns: (newColumns: string[]) => void;
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   additionalControls?: EuiDataGridToolBarAdditionalControlsOptions;
-  rowHeightOptions?: EuiDataGridProps['rowHeightsOptions'];
-}
+} & Partial<Pick<EuiDataGridProps, 'gridStyle' | 'rowHeightsOptions'>>;
 
 // TODO We need to create generic type between our plugin, right now we have different one because of the old alerts table
 export type GetRenderCellValue = ({

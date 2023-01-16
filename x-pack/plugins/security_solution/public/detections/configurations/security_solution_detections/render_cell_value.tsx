@@ -7,7 +7,8 @@
 
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { EuiIcon, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
+import type { GetRenderCellValue } from '@kbn/triggers-actions-ui-plugin/public';
 import { GuidedOnboardingTourStep } from '../../../common/components/guided_onboarding_tour/tour_step';
 import { isDetectionsAlertsTable } from '../../../common/components/top_n/helpers';
 import {
@@ -15,7 +16,6 @@ import {
   SecurityStepId,
 } from '../../../common/components/guided_onboarding_tour/tour_config';
 import { SIGNAL_RULE_NAME_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
-import { TimelineId } from '../../../../common/types';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 
@@ -73,61 +73,67 @@ export const RenderCellValue: React.FC<EuiDataGridCellValueElementProps & CellVa
   );
 };
 
-export const useRenderCellValue = ({
-  setFlyoutAlert,
-}: {
-  setFlyoutAlert?: (data: never) => void;
-}) => {
-  const { browserFields } = useSourcererDataView(SourcererScopeName.detections);
-  return ({
-    columnId,
-    colIndex,
-    data,
-    ecsData,
-    eventId,
-    globalFilters,
-    header,
-    isDetails = false,
-    isDraggable = false,
-    isExpandable,
-    isExpanded,
-    linkValues,
-    rowIndex,
-    rowRenderers,
-    setCellProps,
-    truncate = true,
-  }: CellValueElementProps) => {
-    const splitColumnId = columnId.split('.');
-    let myHeader = header ?? { id: columnId };
-    if (splitColumnId.length > 1 && browserFields[splitColumnId[0]]) {
-      const attr = (browserFields[splitColumnId[0]].fields ?? {})[columnId] ?? {};
-      myHeader = { ...myHeader, ...attr };
-    } else if (splitColumnId.length === 1) {
-      const attr = (browserFields.base.fields ?? {})[columnId] ?? {};
-      myHeader = { ...myHeader, ...attr };
-    }
+export const getRenderCellValueHook = ({ scopeId }: { scopeId: string }) => {
+  const useRenderCellValue: GetRenderCellValue = ({ setFlyoutAlert }) => {
+    const { browserFields } = useSourcererDataView(SourcererScopeName.detections);
 
-    return (
-      <DefaultCellRenderer
-        browserFields={browserFields}
-        columnId={columnId}
-        data={data}
-        ecsData={ecsData}
-        eventId={eventId}
-        globalFilters={globalFilters}
-        header={myHeader}
-        isDetails={isDetails}
-        isDraggable={isDraggable}
-        isExpandable={isExpandable}
-        isExpanded={isExpanded}
-        linkValues={linkValues}
-        rowIndex={rowIndex}
-        colIndex={colIndex}
-        rowRenderers={rowRenderers}
-        setCellProps={setCellProps}
-        scopeId={TimelineId.casePage}
-        truncate={truncate}
-      />
+    const result = useCallback(
+      ({
+        columnId,
+        colIndex,
+        data,
+        ecsData,
+        eventId,
+        globalFilters,
+        header,
+        isDetails = false,
+        isDraggable = false,
+        isExpandable,
+        isExpanded,
+        linkValues,
+        rowIndex,
+        rowRenderers,
+        setCellProps,
+        truncate = true,
+      }: CellValueElementProps) => {
+        const splitColumnId = columnId.split('.');
+        let myHeader = header ?? { id: columnId };
+
+        if (splitColumnId.length > 1 && browserFields[splitColumnId[0]]) {
+          const attr = (browserFields[splitColumnId[0]].fields ?? {})[columnId] ?? {};
+          myHeader = { ...myHeader, ...attr };
+        } else if (splitColumnId.length === 1) {
+          const attr = (browserFields.base.fields ?? {})[columnId] ?? {};
+          myHeader = { ...myHeader, ...attr };
+        }
+        return (
+          <DefaultCellRenderer
+            browserFields={browserFields}
+            columnId={columnId}
+            data={data}
+            ecsData={ecsData}
+            eventId={eventId}
+            globalFilters={globalFilters}
+            header={myHeader}
+            isDetails={isDetails}
+            isDraggable={isDraggable}
+            isExpandable={isExpandable}
+            isExpanded={isExpanded}
+            linkValues={linkValues}
+            rowIndex={rowIndex}
+            colIndex={colIndex}
+            rowRenderers={rowRenderers}
+            setCellProps={setCellProps}
+            scopeId={scopeId}
+            truncate={truncate}
+          />
+        );
+      },
+      [browserFields]
     );
+
+    return result;
   };
+
+  return useRenderCellValue;
 };

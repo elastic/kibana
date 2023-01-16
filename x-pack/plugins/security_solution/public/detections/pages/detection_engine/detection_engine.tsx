@@ -25,6 +25,7 @@ import type { Dispatch } from 'redux';
 import { isTab } from '@kbn/timelines-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import type { DocLinks } from '@kbn/doc-links';
+import { APP_ID } from '../../../../common/constants';
 import { TableId } from '../../../../common/types';
 import { tableDefaults } from '../../../common/store/data_table/defaults';
 import { dataTableActions, dataTableSelectors } from '../../../common/store/data_table';
@@ -344,7 +345,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
             <EuiText size="m"> {`Trigger Actions UI`}</EuiText>
             <EuiHorizontalRule />
             <DetectionEngineAlertTable
-              configId="securitySolution"
+              configId={`${APP_ID}`}
               flyoutSize="m"
               inputFilters={alertsTableDefaultFilters}
               tableId={TableId.alertsOnAlertsPage}

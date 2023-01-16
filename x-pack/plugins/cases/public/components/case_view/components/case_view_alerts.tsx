@@ -40,7 +40,7 @@ export const CaseViewAlerts = ({ caseData }: CaseViewAlertsProps) => {
 
   const alertStateProps = {
     alertsTableConfigurationRegistry: triggersActionsUi.alertsTableConfigurationRegistry,
-    configurationId: caseData.owner,
+    configurationId: `${caseData.owner}-case`,
     id: `case-details-alerts-${caseData.owner}`,
     flyoutSize: (alertFeatureIds?.includes('siem') ? 'm' : 's') as EuiFlyoutSize,
     featureIds: alertFeatureIds ?? [],

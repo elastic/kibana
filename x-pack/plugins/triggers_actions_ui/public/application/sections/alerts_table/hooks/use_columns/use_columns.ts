@@ -8,8 +8,9 @@
 import { EuiDataGridColumn } from '@elastic/eui';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { BrowserField, BrowserFields } from '@kbn/rule-registry-plugin/common';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import { isEqual } from 'lodash';
 import { AlertsTableStorage } from '../../alerts_table_state';
 import { toggleColumn } from './toggle_column';
 import { useFetchBrowserFieldCapabilities } from '../use_fetch_browser_fields_capabilities';
@@ -144,16 +145,42 @@ export const useColumns = ({
   const [isBrowserFieldDataLoading, browserFields] = useFetchBrowserFieldCapabilities({
     featureIds,
   });
+
   const [columns, setColumns] = useState<EuiDataGridColumn[]>(storageAlertsTable.current.columns);
   const [isColumnsPopulated, setColumnsPopulated] = useState<boolean>(false);
 
-  useEffect(() => {
-    if (isBrowserFieldDataLoading !== false || isColumnsPopulated) return;
+  const defaultColumnsRef = useRef<typeof defaultColumns>();
+  const [areColumnsChange, setColumnsChange] = useState(false);
 
-    const populatedColumns = populateColumns(columns, browserFields, defaultColumns);
+  useEffect(() => {
+    const defaultColumnsEqual = isEqual(defaultColumns, defaultColumnsRef.current);
+
+    if (!defaultColumnsEqual && isColumnsPopulated) {
+      setColumnsPopulated(false);
+      return;
+    }
+
+    const isApiNeverCalled = isBrowserFieldDataLoading !== false; // loading, undefined
+
+    const noOp = isApiNeverCalled && isColumnsPopulated;
+
+    if (noOp) return;
+
+    defaultColumnsRef.current = defaultColumns;
+    const columnsToPopulate = defaultColumnsEqual ? columns : defaultColumns;
+
+    const populatedColumns = populateColumns(columnsToPopulate, browserFields, defaultColumns);
     setColumnsPopulated(true);
+    setColumnsChange(false);
     setColumns(populatedColumns);
-  }, [browserFields, columns, defaultColumns, isBrowserFieldDataLoading, isColumnsPopulated]);
+  }, [
+    browserFields,
+    columns,
+    defaultColumns,
+    isBrowserFieldDataLoading,
+    isColumnsPopulated,
+    areColumnsChange,
+  ]);
 
   const setColumnsAndSave = useCallback(
     (newColumns: EuiDataGridColumn[]) => {

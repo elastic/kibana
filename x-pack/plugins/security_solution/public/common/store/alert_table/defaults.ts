@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-import { VIEW_SELECTION } from '../../components/events_viewer/summary_view_select';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import {
+  ALERTS_TABLE_VIEW_SELECTION_KEY,
+  VIEW_SELECTION,
+} from '../../components/events_viewer/summary_view_select';
 import type { AlertTableModel } from './types';
 
 export const defaultAlertTableModel: AlertTableModel = {
   totalCount: 0,
-  viewMode: VIEW_SELECTION.gridView,
+  viewMode:
+    new Storage(localStorage).get(ALERTS_TABLE_VIEW_SELECTION_KEY) ?? VIEW_SELECTION.gridView,
   isLoading: false,
 };

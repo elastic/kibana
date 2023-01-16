@@ -38,7 +38,7 @@ const GridStyles: EuiDataGridStyle = {
 };
 
 const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTableProps) => {
-  const dataGridRef = useRef<EuiDataGridRefProps>();
+  const dataGridRef = useRef<EuiDataGridRefProps | null>();
   const [rowClasses, setRowClasses] = useState<EuiDataGridStyle['rowClasses']>({});
   const alertsData = props.useFetchAlertsData();
   const {
@@ -248,7 +248,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
           })
         : basicRenderCellValue,
     [handleFlyoutAlert, props.alertsTableConfiguration]
-  )();
+  );
 
   const handleRenderCellValue = useCallback(
     (_props: EuiDataGridCellValueElementProps) => {
@@ -258,7 +258,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       const ecsAlert = ecsAlertsData[alertIndex];
       if (data) {
         try {
-          return renderCellValue({
+          return renderCellValue()({
             ..._props,
             data,
             ecsData: ecsAlert,
@@ -292,6 +292,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
         pageSize: pagination.pageSize,
       })
     : { cellActions: null, visibleCellActions: 2, disabledCellActions: [] };
+
   const columnsWithCellActions = useMemo(() => {
     if (cellActions) {
       return props.columns.map((col) => ({
@@ -333,7 +334,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
           leadingControlColumns={leadingControlColumns}
           rowCount={alertsCount}
           renderCellValue={handleRenderCellValue}
-          gridStyle={{ ...GridStyles, rowClasses }}
+          gridStyle={{ ...GridStyles, rowClasses, ...(props.gridStyle ?? {}) }}
           sorting={{ columns: sortingColumns, onSort }}
           toolbarVisibility={toolbarVisibility}
           pagination={{
@@ -342,7 +343,8 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
             onChangeItemsPerPage: onChangePageSize,
             onChangePage: onChangePageIndex,
           }}
-          rowHeightsOptions={props.rowHeightOptions}
+          rowHeightsOptions={props.rowHeightsOptions}
+          ref={dataGridRef}
         />
       )}
     </section>

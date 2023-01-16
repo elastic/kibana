@@ -7,10 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import type {
-  AlertsTableConfigurationRegistryContract,
-  GetRenderCellValue,
-} from '@kbn/triggers-actions-ui-plugin/public';
+import type { AlertsTableConfigurationRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 
 import type {
   EuiDataGridColumn,
@@ -30,14 +27,14 @@ import { useBulkAddToCaseActions } from '../../../detections/components/alerts_t
 import { useAddBulkToTimelineAction } from '../../../detections/components/alerts_table/timeline_actions/use_add_bulk_to_timeline';
 import { APP_ID, CASES_FEATURE_ID } from '../../../../common/constants';
 import { getDataTablesInStorageByIds } from '../../../timelines/containers/local_storage';
-import { TimelineId, TableId } from '../../../../common/types';
+import { TableId, TimelineId } from '../../../../common/types';
 import type {
   ColumnHeaderOptions,
   SetEventsDeleted,
   SetEventsLoading,
 } from '../../../../common/types';
 import { getColumns } from '../../../detections/configurations/security_solution_detections';
-import { useRenderCellValue } from '../../../detections/configurations/security_solution_detections/render_cell_value';
+import { getRenderCellValueHook } from '../../../detections/configurations/security_solution_detections/render_cell_value';
 import { useToGetInternalFlyout } from '../../../timelines/components/side_panel/event_details/flyout';
 import type { TimelineItem, TimelineNonEcsData } from '../../../../common/search_strategy';
 import type { Ecs } from '../../../../common/ecs';
@@ -251,69 +248,93 @@ const registerAlertsTableConfiguration = (
     };
   };
 
+  const useInternalFlyout = () => {
+    const { header, body, footer } = useToGetInternalFlyout();
+    return { header, body, footer };
+  };
+
+  const useCellActions = ({
+    columns,
+    data,
+    ecsData,
+    dataGridRef,
+    pageSize,
+  }: {
+    // Hover Actions
+    columns: EuiDataGridColumn[];
+    data: unknown[][];
+    ecsData: unknown[];
+    dataGridRef?: EuiDataGridRefProps;
+    pageSize: number;
+  }) => {
+    const { browserFields } = useSourcererDataView(SourcererScopeName.detections);
+    const viewModeSelector = alertTableViewModeSelector();
+    const viewMode = useShallowEqualSelector((state) => viewModeSelector(state));
+
+    if (viewMode === VIEW_SELECTION.eventRenderedView) {
+      return { cellActions: [] };
+    }
+
+    return {
+      cellActions: defaultCellActions.map((dca) => {
+        return dca({
+          browserFields,
+          data: data as TimelineNonEcsData[][],
+          ecsData: ecsData as Ecs[],
+          header: columns.map((col) => {
+            const splitCol = col.id.split('.');
+            const fields =
+              splitCol.length > 0
+                ? get(browserFields, [
+                    splitCol.length === 1 ? 'base' : splitCol[0],
+                    'fields',
+                    col.id,
+                  ])
+                : {};
+            return {
+              ...col,
+              ...fields,
+            };
+          }) as ColumnHeaderOptions[],
+          scopeId: SourcererScopeName.default,
+          pageSize,
+          closeCellPopover: dataGridRef?.closeCellPopover,
+        });
+      }) as EuiDataGridColumnCellAction[],
+      visibleCellActions: 5,
+      disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
+    };
+  };
+
+  const renderCellValueHookAlertPage = getRenderCellValueHook({
+    scopeId: SourcererScopeName.default,
+  });
+
+  const renderCellValueHookCasePage = getRenderCellValueHook({
+    scopeId: TimelineId.casePage,
+  });
+
+  // regitser Alert Table on Alert Page
   registry.register({
-    id: APP_ID,
+    id: `${APP_ID}`,
     casesFeatureId: CASES_FEATURE_ID,
     columns: alertColumns,
-    getRenderCellValue: useRenderCellValue as GetRenderCellValue,
+    getRenderCellValue: renderCellValueHookAlertPage,
     useActionsColumn,
-    useInternalFlyout: () => {
-      const { header, body, footer } = useToGetInternalFlyout();
-      return { header, body, footer };
-    },
+    useInternalFlyout,
     useBulkActions: useBulkActionHook,
-    useCellActions: ({
-      columns,
-      data,
-      ecsData,
-      dataGridRef,
-      pageSize,
-    }: {
-      // Hover Actions
-      columns: EuiDataGridColumn[];
-      data: unknown[][];
-      ecsData: unknown[];
-      dataGridRef?: EuiDataGridRefProps;
-      pageSize: number;
-    }) => {
-      const { browserFields } = useSourcererDataView(SourcererScopeName.detections);
-      const viewModeSelector = alertTableViewModeSelector();
-      const viewMode = useShallowEqualSelector((state) => viewModeSelector(state));
+    useCellActions,
+  });
 
-      if (viewMode === VIEW_SELECTION.eventRenderedView) {
-        return {};
-      }
-
-      return {
-        cellActions: defaultCellActions.map((dca) => {
-          return dca({
-            browserFields,
-            data: data as TimelineNonEcsData[][],
-            ecsData: ecsData as Ecs[],
-            header: columns.map((col) => {
-              const splitCol = col.id.split('.');
-              const fields =
-                splitCol.length > 0
-                  ? get(browserFields, [
-                      splitCol.length === 1 ? 'base' : splitCol[0],
-                      'fields',
-                      col.id,
-                    ])
-                  : {};
-              return {
-                ...col,
-                ...fields,
-              };
-            }) as ColumnHeaderOptions[],
-            scopeId: TimelineId.casePage,
-            pageSize,
-            closeCellPopover: dataGridRef?.closeCellPopover,
-          });
-        }) as EuiDataGridColumnCellAction[],
-        visibleCellActions: 5,
-        disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
-      };
-    },
+  registry.register({
+    id: `${APP_ID}-case`,
+    casesFeatureId: CASES_FEATURE_ID,
+    columns: alertColumns,
+    getRenderCellValue: renderCellValueHookCasePage,
+    useActionsColumn,
+    useInternalFlyout,
+    useBulkActions: useBulkActionHook,
+    useCellActions,
   });
 };
 

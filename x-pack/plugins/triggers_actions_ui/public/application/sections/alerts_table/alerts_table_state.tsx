@@ -112,6 +112,8 @@ const AlertsTableState = ({
   additionalControls,
   rowHeightsOptions,
   renderCellValue,
+  columns: propColumns,
+  gridStyle,
 }: AlertsTableStateProps) => {
   const { cases } = useKibana<{ cases: CaseUi }>().services;
 
@@ -129,6 +131,8 @@ const AlertsTableState = ({
     localAlertsTableConfig.columns &&
     !isEmpty(localAlertsTableConfig?.columns)
       ? localAlertsTableConfig?.columns ?? []
+      : propColumns && !isEmpty(propColumns)
+      ? propColumns
       : alertsTableConfiguration?.columns ?? [];
 
   const storageAlertsTable = useRef<AlertsTableStorage>({
@@ -167,7 +171,7 @@ const AlertsTableState = ({
     storageAlertsTable,
     storage,
     id,
-    defaultColumns: (alertsTableConfiguration && alertsTableConfiguration.columns) ?? [],
+    defaultColumns: columnsLocal ?? [],
   });
 
   const [
@@ -281,6 +285,7 @@ const AlertsTableState = ({
       additionalControls,
       rowHeightsOptions,
       renderCellValue,
+      gridStyle,
     }),
     [
       alertsTableConfiguration,
@@ -302,6 +307,7 @@ const AlertsTableState = ({
       additionalControls,
       rowHeightsOptions,
       renderCellValue,
+      gridStyle,
     ]
   );
 

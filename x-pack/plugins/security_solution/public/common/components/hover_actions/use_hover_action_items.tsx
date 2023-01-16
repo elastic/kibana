@@ -140,6 +140,7 @@ export const useHoverActionItems = ({
      * In the case of `DisableOverflowButton`, we show filters only when topN is NOT opened. As after topN button is clicked, the chart panel replace current hover actions in the hover actions' popover, so we have to hide all the actions.
      * in the case of `EnableOverflowButton`, we only need to hide all the items in the overflow popover as the chart's panel opens in the overflow popover, so non-overflowed actions are not affected.
      */
+
     return (
       values != null &&
       (enableOverflowButton || (!showTopN && !enableOverflowButton)) &&
