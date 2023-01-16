@@ -295,7 +295,7 @@ export class JobCreator {
     if (enable) {
       if (this._job_config.results_index_name === undefined) {
         // only set the results_index_name if it hasn't been set before.
-        // this allows it to be overwritten in the JSON editor.
+        // this allows it to be overwritten in the advanced JSON editor.
         this._job_config.results_index_name = this._job_config.job_id;
       }
     } else {
