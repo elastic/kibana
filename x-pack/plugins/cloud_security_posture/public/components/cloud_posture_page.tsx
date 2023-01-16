@@ -83,7 +83,7 @@ export const CspNoDataPage = ({
         div:nth-child(3) {
           display: block;
           margin: auto;
-          width: min-content;
+          width: 450px;
           button {
             margin: 0 auto;
             margin-top: ${euiTheme.size.base};
