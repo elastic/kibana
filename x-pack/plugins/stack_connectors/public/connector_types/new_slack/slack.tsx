@@ -12,7 +12,6 @@ import type {
   ActionTypeModel as ConnectorTypeModel,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { SlackConfig } from '../../../common/slack/types';
-// import { SlackActionParams } from './types';
 import { SlackSecrets } from '../../../common/slack/types';
 import { SLACK_CONNECTOR_ID } from '../../../common/slack/constants';
 import { SlackExecuteActionParams } from '../../../common/slack/types';
@@ -57,7 +56,7 @@ export const getConnectorType = (): ConnectorTypeModel<
         errors,
       };
       if (subAction === 'postMessage') {
-        if (!subActionParams.channel?.length) {
+        if (!subActionParams.channels?.length) {
           errors['subActionParams.postMessage.channel'].push(translations.CHANNEL_REQUIRED);
         }
 

@@ -17,15 +17,11 @@ import {
   SecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common/types';
 import { validate } from './validators';
-import { SlackConfigSchema, SlackSecretsSchema } from './schema';
+import { SlackConfigSchema, SlackSecretsSchema } from '../../../common/slack/schema';
 import { ExecutorParamsSchema } from '../../../common/slack/schema';
 import { createExternalService } from './service';
 import { api } from './api';
-import {
-  SlackExecutorResultData,
-  ExecutorSubActionPostMessageParams,
-  ExecutorSubActionGetChannelsParams,
-} from './types';
+import { SlackExecutorResultData, ExecutorSubActionPostMessageParams } from './types';
 import { SlackConfig, SlackSecrets, SlackExecuteActionParams } from '../../../common/slack/types';
 import { SLACK_CONNECTOR_ID } from '../../../common/slack/constants';
 import { SLACK_CONNECTOR_NAME } from './translations';

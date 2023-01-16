@@ -16,7 +16,7 @@ import type { SlackConfig, SlackSecrets } from '../../../common/slack/types';
 // export type SlackConfig = TypeOf<typeof SlackConfigSchema>;
 // export type SlackSecrets = TypeOf<typeof SlackSecretsSchema>;
 
-export type SlackExecutorResultData = PostMessageResponse; // | GetChannelsResponse;
+export type SlackExecutorResultData = PostMessageResponseList | GetChannelsResponse;
 
 export interface PostMessageResponse {
   ok: boolean;
@@ -26,18 +26,14 @@ export interface PostMessageResponse {
     text: string;
     username: string;
     bot_id: string;
-    // attachments: [
-    //   {
-    //     text: string;
-    //     id: number;
-    //     fallback: string;
-    //   }
-    // ];
     type: 'message';
-    subtype: string; // 'bot_message'?
+    subtype: string;
     ts: string;
   };
 }
+
+export type PostMessageResponseList = PostMessageResponse[];
+
 export interface GetChannelsResponse {
   ok: true;
   channels: [
@@ -63,7 +59,7 @@ export interface ExternalServiceApi {
   }: {
     externalService: ExternalService;
     params: PostMessageParams;
-  }) => Promise<PostMessageResponse>;
+  }) => Promise<PostMessageResponseList>;
 }
 
 export interface ExternalServiceCredentials {
@@ -81,12 +77,12 @@ export type ExecutorSubActionPostMessageParams = TypeOf<
 >;
 
 export interface PostMessageParams {
-  channel: string;
+  channels: string[];
   text: string;
 }
 export interface ExternalService {
   getChannels: ({}) => Promise<GetChannelsResponse>;
-  postMessage: ({ channel, text }: PostMessageParams) => Promise<PostMessageResponse>;
+  postMessage: ({ channels, text }: PostMessageParams) => Promise<PostMessageResponseList>;
 }
 
 export interface ExternalServiceValidation {

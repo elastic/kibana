@@ -14,12 +14,12 @@ const getChannelsHandler = async ({ externalService }: { externalService: Extern
 
 const postMessageHandler = async ({
   externalService,
-  params: { channel, text },
+  params: { channels, text },
 }: {
   externalService: ExternalService;
   params: PostMessageParams;
 }) => {
-  const res = await externalService.postMessage({ channel, text });
+  const res = await externalService.postMessage({ channels, text });
   return res;
 };
 

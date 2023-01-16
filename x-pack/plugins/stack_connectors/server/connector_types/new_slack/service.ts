@@ -14,6 +14,7 @@ import {
   ExternalServiceCredentials,
   GetChannelsResponse,
   PostMessageResponse,
+  PostMessageResponseList,
   PostMessageParams,
 } from './types';
 import { SLACK_CONNECTOR_NAME } from './translations';
@@ -61,10 +62,13 @@ export const createExternalService = (
     }
   };
 
-  const postMessage = async ({
+  const postMessageInOneChannel = async ({
     channel,
     text,
-  }: PostMessageParams): Promise<PostMessageResponse> => {
+  }: {
+    channel: string;
+    text: string;
+  }): Promise<PostMessageResponse> => {
     try {
       const res = await request({
         axios: axiosInstance,
@@ -84,6 +88,15 @@ export const createExternalService = (
         )
       );
     }
+  };
+
+  const postMessage = async ({
+    channels,
+    text,
+  }: PostMessageParams): Promise<PostMessageResponseList> => {
+    return await Promise.all(
+      channels.map(async (channel) => await postMessageInOneChannel({ channel, text }))
+    );
   };
 
   return {

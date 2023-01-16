@@ -26,6 +26,7 @@ interface ChannelsStatus {
   label: string;
   checked?: 'on';
 }
+
 const SlackParamsFields: React.FunctionComponent<ActionParamsProps<SlackExecuteActionParams>> = ({
   actionConnector,
   actionParams,
@@ -36,7 +37,7 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<SlackExecuteA
   defaultMessage,
 }) => {
   const { subAction, subActionParams } = actionParams;
-  const { channel, text } = (subActionParams as { text: string; channel: string[] }) ?? {}; // maybe should get rid of & {} in the type
+  const { channels, text } = (subActionParams as { text: string; channels: string[] }) ?? {}; // maybe should get rid of & {} in the type
 
   useEffect(() => {
     if (!subAction) {
@@ -46,7 +47,7 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<SlackExecuteA
       editAction(
         'subActionParams',
         {
-          channel,
+          channels,
           text,
         },
         index
@@ -56,7 +57,7 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<SlackExecuteA
   }, [actionParams]);
 
   const {
-    response: { channels } = {},
+    response: { channels: channelsInfo } = {},
     isLoading: isLoadingChannels,
     error: getChannelsError,
   } = useSubAction<void, GetChannelsResponse>({
@@ -66,10 +67,10 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<SlackExecuteA
 
   const slackChannels = useMemo(
     () =>
-      channels
+      channelsInfo
         ?.filter((slackChannel) => slackChannel.is_channel)
         .map((slackChannel) => ({ label: slackChannel.name })) ?? [],
-    [channels]
+    [channelsInfo]
   );
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -110,7 +111,7 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<SlackExecuteA
       }, []);
 
       setSelectedChannels(newSelectedChannels);
-      editAction('subActionParams', { channel: newSelectedChannels[0], text }, index);
+      editAction('subActionParams', { channels: newSelectedChannels, text }, index);
     },
     [editAction, index, text]
   );
@@ -126,10 +127,10 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<SlackExecuteA
         >
           <EuiSelectable
             searchable
-            data-test-subj={'test-data'}
+            data-test-subj={'test-data'} // new name
             isLoading={isLoadingChannels}
             options={options}
-            loadingMessage={'Loading channels'}
+            loadingMessage={'Loading channels'} // need translations
             noMatchesMessage={'No channels found'}
             emptyMessage={'No channels available'}
             // errorMessage={}
@@ -149,7 +150,7 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<SlackExecuteA
       <TextAreaWithMessageVariables
         index={index}
         editAction={(key: string, value: any) =>
-          editAction('subActionParams', { channel, text: value }, index)
+          editAction('subActionParams', { channels, text: value }, index)
         }
         messageVariables={messageVariables}
         paramsProperty={'text'}
