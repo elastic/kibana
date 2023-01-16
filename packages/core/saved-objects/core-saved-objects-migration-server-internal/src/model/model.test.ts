@@ -625,7 +625,7 @@ describe('migrations v2 model', () => {
             `"The .kibana alias is pointing to multiple indices: .kibana_7.12.0_001,.kibana_7.11.0_001."`
           );
         });
-        it('INIT -> WAIT_FOR_YELLOW_SOURCE when .kibana points to an index with an invalid version', () => {
+        test('INIT -> WAIT_FOR_YELLOW_SOURCE when .kibana points to an index with an invalid version', () => {
           // If users tamper with our index version naming scheme we can no
           // longer accurately detect a newer version. Older Kibana versions
           // will have indices like `.kibana_10` and users might choose an
