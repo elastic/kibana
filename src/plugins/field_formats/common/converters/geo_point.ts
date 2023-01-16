@@ -33,6 +33,18 @@ const TRANSFORM_OPTIONS = [
     }),
   },
   {
+    kind: 'dms',
+    text: i18n.translate('fieldFormats.geoPoint.transformOptions.dms', {
+      defaultMessage: 'Decimal Minute Seconds',
+    }),
+  },
+  {
+    kind: 'mgrs',
+    text: i18n.translate('fieldFormats.geoPoint.transformOptions.multi', {
+      defaultMessage: 'Military Grid Reference System (MGRS)',
+    }),
+  },
+  {
     kind: 'multi',
     text: i18n.translate('fieldFormats.geoPoint.transformOptions.multi', {
       defaultMessage: 'Multiple format display',
@@ -119,6 +131,10 @@ export class GeoPointFormat extends FieldFormat {
         return `${point.coordinates[1]},${point.coordinates[0]}`;
       case 'wkt':
         return `POINT (${point.coordinates[0]} ${point.coordinates[1]})`;
+      case 'dms':
+        return `${ddToDMS(point.coordinates[1], point.coordinates[0])}`;
+      case 'mgrs':
+        return `${ddToMGRS(point.coordinates[1], point.coordinates[0])}`
       case 'multi':
         return `LL: ${point.coordinates[1]},${point.coordinates[0]}
 WKT: POINT (${point.coordinates[0]} ${point.coordinates[1]})
