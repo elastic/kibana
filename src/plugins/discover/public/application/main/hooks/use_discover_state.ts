@@ -12,6 +12,7 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { type DataView, DataViewType } from '@kbn/data-views-plugin/public';
 import { SavedSearch, getSavedSearch } from '@kbn/saved-search-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
+import { useSearchSession } from './use_search_session';
 import { FetchStatus } from '../../types';
 import { useTextBasedQueryLanguage } from './use_text_based_query_language';
 import { useUrlTracking } from './use_url_tracking';
@@ -62,14 +63,14 @@ export function useDiscoverState({
 
   const { setUrlTracking } = useUrlTracking(savedSearch, dataView);
 
-  const { appState, replaceUrlAppState } = stateContainer;
+  const { appState, replaceUrlAppState, searchSessionManager } = stateContainer;
 
   const [state, setState] = useState(appState.getState());
 
   /**
    * Search session logic
    */
-  const searchSessionManager = stateContainer.searchSessionManager;
+  useSearchSession({ services, stateContainer, savedSearch });
 
   /**
    * Adhoc data views functionality
