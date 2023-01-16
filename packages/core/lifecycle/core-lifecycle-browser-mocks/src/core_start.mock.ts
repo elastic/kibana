@@ -20,12 +20,14 @@ import { savedObjectsServiceMock } from '@kbn/core-saved-objects-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
+import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
 
 export function createCoreStartMock({ basePath = '' } = {}) {
   const mock = {
     analytics: analyticsServiceMock.createAnalyticsServiceStart(),
     application: applicationServiceMock.createStartContract(),
     chrome: chromeServiceMock.createStartContract(),
+    customBranding: customBrandingServiceMock.createStartContract(),
     docLinks: docLinksServiceMock.createStartContract(),
     executionContext: executionContextServiceMock.createStartContract(),
     http: httpServiceMock.createStartContract({ basePath }),

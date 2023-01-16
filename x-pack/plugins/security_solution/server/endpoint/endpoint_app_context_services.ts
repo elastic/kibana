@@ -140,7 +140,7 @@ export class EndpointAppContextService {
       );
 
       registerIngestCallback(
-        'postPackagePolicyDelete',
+        'packagePolicyPostDelete',
         getPackagePolicyDeleteCallback(exceptionListsClient)
       );
     }

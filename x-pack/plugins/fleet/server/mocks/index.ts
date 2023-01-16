@@ -24,7 +24,7 @@ import type { FleetAppContext } from '../plugin';
 import { createMockTelemetryEventsSender } from '../telemetry/__mocks__';
 import type { FleetConfigType } from '../../common/types';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
-import { createFleetAuthzMock } from '../../common';
+import { createFleetAuthzMock } from '../../common/mocks';
 import { agentServiceMock } from '../services/agents/agent_service.mock';
 import type { FleetRequestHandlerContext } from '../types';
 import { packageServiceMock } from '../services/epm/package_service.mock';
@@ -122,6 +122,7 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyClien
     bulkUpdate: jest.fn(),
     runExternalCallbacks: jest.fn(),
     runDeleteExternalCallbacks: jest.fn(),
+    runPostDeleteExternalCallbacks: jest.fn(),
     upgrade: jest.fn(),
     getUpgradeDryRunDiff: jest.fn(),
     getUpgradePackagePolicyInfo: jest.fn(),

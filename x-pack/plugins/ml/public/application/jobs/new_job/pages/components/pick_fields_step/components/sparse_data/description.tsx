@@ -8,7 +8,7 @@
 import React, { memo, FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
+import { EuiDescribedFormGroup } from '@elastic/eui';
 
 export const Description: FC = memo(({ children }) => {
   const title = i18n.translate('xpack.ml.newJob.wizard.pickFieldsStep.sparseData.title', {
@@ -20,13 +20,11 @@ export const Description: FC = memo(({ children }) => {
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.pickFieldsStep.sparseData.description"
-          defaultMessage="Select if you wish to ignore empty buckets from being considered anomalous. Available for count and sum analysis."
+          defaultMessage="Ignore empty buckets from being considered anomalous. Available for count and sum analysis."
         />
       }
     >
-      <EuiFormRow label={title}>
-        <>{children}</>
-      </EuiFormRow>
+      {children}
     </EuiDescribedFormGroup>
   );
 });

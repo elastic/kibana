@@ -13,8 +13,14 @@ import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { CASES_FEATURE_ID } from '../../../../../common/constants';
 import { TestProviders } from '../../../../common/mock/test_providers';
 import { useAlertsByStatus } from './use_alerts_by_status';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 jest.mock('../../../../common/lib/kibana/kibana_react');
+jest.mock('../../../../common/hooks/use_experimental_features', () => {
+  return { useIsExperimentalFeatureEnabled: jest.fn() };
+});
+
+jest.mock('./alert_donut_embeddable');
 
 jest.mock('./chart_label', () => {
   return {
@@ -27,11 +33,17 @@ jest.mock('./use_alerts_by_status', () => ({
     isLoading: true,
   }),
 }));
+
+jest.mock('../../../../common/containers/use_global_time', () => ({
+  useGlobalTime: jest.fn().mockReturnValue({
+    from: '2022-04-08T12:00:00.000Z',
+    to: '2022-04-09T12:00:00.000Z',
+  }),
+}));
 describe('AlertsByStatus', () => {
   const mockCases = mockCasesContract();
 
   const props = {
-    showInspectButton: true,
     signalIndexName: 'mock-signal-index',
   };
 
@@ -51,6 +63,7 @@ describe('AlertsByStatus', () => {
       items: [],
       isLoading: true,
     });
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
   });
 
   test('render HoverVisibilityContainer', () => {
@@ -140,5 +153,28 @@ describe('AlertsByStatus', () => {
       </TestProviders>
     );
     expect(container.querySelector(`[data-test-subj="query-toggle-header"]`)).toBeInTheDocument();
+  });
+
+  test('should render Lens embeddable when isChartEmbeddablesEnabled = true', () => {
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+
+    const testProps = {
+      ...props,
+    };
+
+    (useAlertsByStatus as jest.Mock).mockReturnValue({
+      items: null,
+      isLoading: false,
+    });
+
+    const { container } = render(
+      <TestProviders>
+        <AlertsByStatus {...testProps} />
+      </TestProviders>
+    );
+    expect(
+      container.querySelector(`[data-test-subj="alert-donut-embeddable"]`)
+    ).toBeInTheDocument();
+    expect((useAlertsByStatus as jest.Mock).mock.calls[0][0].skip).toBeTruthy();
   });
 });

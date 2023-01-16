@@ -36,8 +36,9 @@ const hasFleetDataRoute = createApmServerRoute({
     if (!fleetPluginStart) {
       return { hasApmPolicies: false };
     }
+    const coreStart = await core.start();
     const packagePolicies = await getApmPackagePolicies({
-      core,
+      coreStart,
       fleetPluginStart,
     });
     return { hasApmPolicies: packagePolicies.total > 0 };
@@ -90,8 +91,9 @@ const fleetAgentsRoute = createApmServerRoute({
       return { cloudStandaloneSetup, fleetAgents: [], isFleetEnabled: false };
     }
     // fetches package policies that contains APM integrations
+    const coreStart = await core.start();
     const packagePolicies = await getApmPackagePolicies({
-      core,
+      coreStart,
       fleetPluginStart,
     });
 
@@ -100,7 +102,7 @@ const fleetAgentsRoute = createApmServerRoute({
     // fetches all agents with the found package policies
     const fleetAgents = await getFleetAgents({
       policyIds: Object.keys(policiesGroupedById),
-      core,
+      coreStart,
       fleetPluginStart,
     });
 
@@ -140,7 +142,8 @@ const saveApmServerSchemaRoute = createApmServerRoute({
   }),
   handler: async (resources): Promise<void> => {
     const { params, logger, core } = resources;
-    const savedObjectsClient = await getInternalSavedObjectsClient(core.setup);
+    const coreStart = await core.start();
+    const savedObjectsClient = await getInternalSavedObjectsClient(coreStart);
     const { schema } = params.body;
     await savedObjectsClient.create(
       APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE,
@@ -199,8 +202,9 @@ const getMigrationCheckRoute = createApmServerRoute({
         })
       : undefined;
     const apmPackagePolicy = getApmPackagePolicy(cloudAgentPolicy);
+    const coreStart = await core.start();
     const packagePolicies = await getApmPackagePolicies({
-      core,
+      coreStart,
       fleetPluginStart,
     });
     const latestApmPackage = await getLatestApmPackage({
