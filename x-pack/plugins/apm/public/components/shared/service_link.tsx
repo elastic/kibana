@@ -72,21 +72,6 @@ export function ServiceLink({
                 defaultMessage="The maximum number of unique services has been reached. Please increase {codeBlock} in APM Server."
                 id="xpack.apm.serviceLink.tooltip.message"
                 values={{
-                  apmServerDocs: (
-                    <EuiLink
-                      href={
-                        'https://www.elastic.co/guide/en/apm/guide/current/transaction-metrics.html#transactions-max_groups'
-                      }
-                      target="_blank"
-                    >
-                      {i18n.translate(
-                        'xpack.apm.serviceLink.tooltip.apmServerDocs',
-                        {
-                          defaultMessage: 'APM Server docs',
-                        }
-                      )}
-                    </EuiLink>
-                  ),
                   codeBlock: <EuiCode>aggregation.service.max_groups</EuiCode>,
                 }}
               />
