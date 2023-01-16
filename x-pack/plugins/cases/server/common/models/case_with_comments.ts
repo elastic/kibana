@@ -12,7 +12,6 @@ import type {
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
-import pMap from 'p-map';
 import type {
   CaseResponse,
   CommentAttributes,
@@ -31,7 +30,6 @@ import {
 import {
   CASE_SAVED_OBJECT,
   MAX_ALERTS_PER_CASE,
-  MAX_CONCURRENT_SEARCHES,
   MAX_DOCS_PER_PAGE,
 } from '../../../common/constants';
 import type { CasesClientArgs } from '../../client';
@@ -341,26 +339,10 @@ export class CaseCommentModel {
   private async updateAlertsSchemaWithCaseInfo(alertAttachments: CommentRequestAlertType[]) {
     try {
       const alerts = getAlertInfoFromComments(alertAttachments);
-      const alertsGroupedByIndex = new Map<string, Set<string>>();
-
-      for (const alert of alerts) {
-        const idsSet = alertsGroupedByIndex.get(alert.index) ?? new Set();
-        idsSet.add(alert.id);
-        alertsGroupedByIndex.set(alert.index, idsSet);
-      }
-
-      await pMap(
-        alertsGroupedByIndex.entries(),
-        async ([index, idsSet]) =>
-          this.params.alertsClient.bulkUpdateCases({
-            ids: Array.from(idsSet.values()),
-            index,
-            caseIds: [this.caseInfo.id],
-          }),
-        {
-          concurrency: MAX_CONCURRENT_SEARCHES,
-        }
-      );
+      this.params.alertsClient.bulkUpdateCases({
+        alerts,
+        caseIds: [this.caseInfo.id],
+      });
     } catch (error) {
       throw createCaseError({
         message: `Failed to add case info to alerts for caseId ${this.caseInfo.id}: ${error}`,

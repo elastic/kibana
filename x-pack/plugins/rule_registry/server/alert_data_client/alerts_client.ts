@@ -95,10 +95,14 @@ export interface BulkUpdateOptions<Params extends RuleTypeParams> {
   query: object | string | undefined | null;
 }
 
-export interface BulkUpdateCasesOptions {
-  ids: string[];
-  caseIds: string[];
+interface MgetAndAuditAlert {
+  id: string;
   index: string;
+}
+
+export interface BulkUpdateCasesOptions {
+  alerts: MgetAndAuditAlert[];
+  caseIds: string[];
 }
 
 interface GetAlertParams {
@@ -344,27 +348,23 @@ export class AlertsClient {
    * @returns
    */
   private async mgetAlertsAuditOperate({
-    ids,
-    indexName,
+    alerts,
     operation,
     fieldToUpdate,
     validate,
   }: {
-    ids: string[];
-    indexName: string;
+    alerts: MgetAndAuditAlert[];
     operation: ReadOperations.Find | ReadOperations.Get | WriteOperations.Update;
     fieldToUpdate: (source: ParsedTechnicalFields | undefined) => Record<string, unknown>;
     validate?: (source: ParsedTechnicalFields | undefined) => void;
   }) {
     try {
       const mgetRes = await this.esClient.mget<ParsedTechnicalFields>({
-        index: indexName,
-        body: {
-          ids,
-        },
+        docs: alerts.map(({ id, index }) => ({ _id: id, _index: index })),
       });
 
       await this.ensureAllAuthorized(mgetRes.docs, operation);
+      const ids = mgetRes.docs.map(({ _id }) => _id);
 
       for (const id of ids) {
         this.auditLogger?.log(
@@ -419,19 +419,16 @@ export class AlertsClient {
    * @returns
    */
   private async mgetAlertsAuditOperateStatus({
-    ids,
+    alerts,
     status,
-    indexName,
     operation,
   }: {
-    ids: string[];
+    alerts: MgetAndAuditAlert[];
     status: STATUS_VALUES;
-    indexName: string;
     operation: ReadOperations.Find | ReadOperations.Get | WriteOperations.Update;
   }) {
     return this.mgetAlertsAuditOperate({
-      ids,
-      indexName,
+      alerts,
       operation,
       fieldToUpdate: (source) => this.getAlertStatusFieldUpdate(source, status),
     });
@@ -732,10 +729,10 @@ export class AlertsClient {
   }: BulkUpdateOptions<Params>) {
     // rejects at the route level if more than 1000 id's are passed in
     if (ids != null) {
+      const alerts = ids.map((id) => ({ id, index }));
       return this.mgetAlertsAuditOperateStatus({
-        ids,
+        alerts,
         status,
-        indexName: index,
         operation: WriteOperations.Update,
       });
     } else if (query != null) {
@@ -791,8 +788,8 @@ export class AlertsClient {
    * cases client that does all the necessary cases RBAC checks
    * before updating the alert with the case ids.
    */
-  public async bulkUpdateCases({ ids, index, caseIds }: BulkUpdateCasesOptions) {
-    if (ids.length === 0) {
+  public async bulkUpdateCases({ alerts, caseIds }: BulkUpdateCasesOptions) {
+    if (alerts.length === 0) {
       throw Boom.badRequest('You need to define at least one alert to update case ids');
     }
 
@@ -807,8 +804,7 @@ export class AlertsClient {
     }
 
     return this.mgetAlertsAuditOperate({
-      ids,
-      indexName: index,
+      alerts,
       /**
        * A user with read access to an alert and write access to a case should be able to link
        * the case to the alert (update the alert's data to include the case ids).
