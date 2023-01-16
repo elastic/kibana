@@ -9,6 +9,7 @@ import { partition, sortBy } from 'lodash';
 
 import type { DataStream } from '../../../../../../../../../common/types';
 
+// sort data streams by dataset name, but promote datastreams that are from this package to the start
 export function sortDatastreamsByDataset(datasetList: DataStream[], name: string): DataStream[] {
   const [relevantDatasets, otherDatasets] = partition(sortBy(datasetList, 'dataset'), (record) =>
     record.dataset.startsWith(name)

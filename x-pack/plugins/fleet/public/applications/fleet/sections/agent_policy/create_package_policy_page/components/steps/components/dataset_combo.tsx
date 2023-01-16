@@ -15,6 +15,9 @@ interface SelectedDataset {
   dataset: string;
   package: string;
 }
+
+const GENERIC_DATASET_NAME = 'generic';
+
 export const DatasetComboBox: React.FC<{
   value?: SelectedDataset;
   onChange: (newValue: SelectedDataset) => void;
@@ -27,11 +30,11 @@ export const DatasetComboBox: React.FC<{
       label: datastream.dataset,
       value: datastream,
     })) ?? [];
-  const existingGenericStream = datasetOptions.find((ds) => ds.label === 'generic');
+  const existingGenericStream = datasetOptions.find((ds) => ds.label === GENERIC_DATASET_NAME);
   const valueAsOption = value
     ? { label: value.dataset, value: { dataset: value.dataset, package: value.package } }
     : undefined;
-  const defaultOption = valueAsOption || existingGenericStream || { label: 'generic' };
+  const defaultOption = valueAsOption || existingGenericStream || { label: GENERIC_DATASET_NAME };
 
   const [selectedOptions, setSelectedOptions] = useState<Array<{ label: string }>>([defaultOption]);
 

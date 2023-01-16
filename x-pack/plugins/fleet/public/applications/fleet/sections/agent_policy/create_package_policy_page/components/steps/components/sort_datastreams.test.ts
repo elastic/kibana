@@ -11,7 +11,7 @@ import { sortDatastreamsByDataset } from './sort_datastreams';
 
 const ds = (dataset: string) => ({ dataset } as DataStream);
 describe('orderDatasets', () => {
-  it('should move datasets up that match name', () => {
+  it('should move datasets up that match package name', () => {
     const datasets = sortDatastreamsByDataset(
       [ds('system.memory'), ds('elastic_agent'), ds('elastic_agent.filebeat'), ds('system.cpu')],
       'elastic_agent'

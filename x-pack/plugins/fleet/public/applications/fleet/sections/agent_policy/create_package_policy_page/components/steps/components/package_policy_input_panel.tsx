@@ -242,7 +242,6 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                   packageInputStream={packageInputStream}
                   packagePolicyInputStream={packagePolicyInputStream!}
                   updatePackagePolicy={updatePackagePolicy}
-                  // add data streams here
                   updatePackagePolicyInputStream={(
                     updatedStream: Partial<PackagePolicyInputStream>
                   ) => {
