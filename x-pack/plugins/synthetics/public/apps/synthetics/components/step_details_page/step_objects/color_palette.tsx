@@ -74,6 +74,12 @@ export const ColorPaletteFlexItem = ({
     }, 10);
   }, [percent, value]);
 
+  useEffect(() => {
+    if (!loading) {
+      setVal(0);
+    }
+  }, [loading]);
+
   if (loading) {
     return <LoadingLine lines={1} />;
   }
