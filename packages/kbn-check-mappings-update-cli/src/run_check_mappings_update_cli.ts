@@ -42,7 +42,12 @@ run(
     const currentMappings = await readCurrentMappings();
     const isMappingChanged = !deepEqual(currentMappings, extractedMappings);
 
-    if (verify && isMappingChanged) {
+    if (!isMappingChanged) {
+      log.success('Mappings are unchanged.');
+      return;
+    }
+
+    if (verify) {
       log.info('Checking if any mappings have been removed');
       await log.indent(4, async () => {
         return await checkAdditiveOnlyChange(log, currentMappings, extractedMappings);
@@ -67,17 +72,15 @@ run(
       });
     }
 
-    if (isMappingChanged && fix) {
+    if (fix) {
       await updateCurrentMappings(extractedMappings);
       log.warning(
         `Updated extracted mappings in current_mappings.json file, please commit the changes if desired.`
       );
-    } else if (isMappingChanged) {
+    } else {
       log.warning(
         `The extracted mappings do not match the current_mappings.json file, run with --fix to update.`
       );
-    } else {
-      log.success('Mappings are unchanged.');
     }
   },
   {
