@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { TextAreaWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
@@ -36,24 +36,28 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<SlackExecuteA
   defaultMessage,
 }) => {
   const { subAction, subActionParams } = actionParams;
+  const { channel, text } = (subActionParams as { text: string; channel: string[] }) ?? {}; // maybe should get rid of & {} in the type
 
-  if (subAction === 'postMessage') {
-    const { channel, text } = subActionParams ?? {};
-    console.log(channel, text);
-  }
-  // const [[isUsingDefault, defaultMessageUsed], setDefaultMessageUsage] = useState<
-  //   [boolean, string | undefined]
-  // >([false, defaultMessage]);
-  // useEffect(() => {
-  //   if (
-  //     !text ||
-  //     (isUsingDefault && text === defaultMessageUsed && defaultMessageUsed !== defaultMessage)
-  //   ) {
-  //     setDefaultMessageUsage([true, defaultMessage]);
-  //     editAction('message', defaultMessage, index); // ????
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [defaultMessage]);
+  useEffect(() => {
+    if (!subAction) {
+      editAction('subAction', 'postMessage', index);
+    }
+    if (!subActionParams) {
+      editAction(
+        'subActionParams',
+        {
+          text,
+        },
+        index
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [actionParams]);
+
+  const editSubActionProperty = useCallback(
+    (key: string, value: any) => editAction('subActionParams', { text: value }, index),
+    [editAction, index]
+  );
 
   const {
     response: { channels } = {},
@@ -67,8 +71,8 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<SlackExecuteA
   const slackChannels = useMemo(
     () =>
       channels
-        ?.filter((channel) => channel.is_channel)
-        .map((channel) => ({ label: channel.name })) ?? [],
+        ?.filter((slackChannel) => slackChannel.is_channel)
+        .map((slackChannel) => ({ label: slackChannel.name })) ?? [],
     [channels]
   );
 
@@ -93,9 +97,9 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<SlackExecuteA
 
   const options: ChannelsStatus[] = useMemo(
     () =>
-      slackChannels.map((channel) => ({
-        label: channel.label,
-        ...(selectedChannels.includes(channel.label) ? { checked: 'on' } : {}),
+      slackChannels.map((slackChannel) => ({
+        label: slackChannel.label,
+        ...(selectedChannels.includes(slackChannel.label) ? { checked: 'on' } : {}),
       })),
     [slackChannels, selectedChannels]
   );
@@ -144,10 +148,10 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<SlackExecuteA
       <EuiSpacer size="m" />
       <TextAreaWithMessageVariables
         index={index}
-        editAction={editAction}
+        editAction={editSubActionProperty}
         messageVariables={messageVariables}
         paramsProperty={'text'}
-        // inputTargetValue={text}
+        inputTargetValue={text}
         label={i18n.translate('xpack.stackConnectors.components.slack.messageTextAreaFieldLabel', {
           defaultMessage: 'Message',
         })}
