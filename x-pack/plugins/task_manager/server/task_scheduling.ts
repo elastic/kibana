@@ -154,50 +154,37 @@ export class TaskScheduling {
   }
 
   public async bulkDisable(taskIds: string[]) {
-    const enabledTasks = await this.bulkGetTasksHelper(taskIds, {
-      term: {
-        'task.enabled': true,
-      },
-    });
+    const enabledTasks = await this.bulkGetTasksHelper(taskIds);
 
     const updatedTasks = enabledTasks
       .flatMap(({ docs }) => docs)
-      .reduce<ConcreteTaskInstance[]>((acc, task) => {
-        // if task is not enabled, no need to update it
-        if (!task.enabled) {
-          return acc;
-        }
-
-        acc.push({ ...task, enabled: false });
-        return acc;
-      }, []);
+      .map((task) => ({
+        ...task,
+        enabled: false,
+      }));
 
     return await this.bulkUpdateTasksHelper(updatedTasks);
   }
 
   public async bulkEnable(taskIds: string[], runSoon: boolean = true) {
-    const disabledTasks = await this.bulkGetTasksHelper(taskIds, {
-      term: {
-        'task.enabled': false,
-      },
-    });
+    const disabledTasks = await this.bulkGetTasksHelper(taskIds);
 
     const updatedTasks = disabledTasks
       .flatMap(({ docs }) => docs)
-      .reduce<ConcreteTaskInstance[]>((acc, task) => {
-        // if task is enabled, no need to update it
-        if (task.enabled) {
-          return acc;
-        }
-
+      .map((task) => {
         if (runSoon) {
-          acc.push({ ...task, enabled: true, scheduledAt: new Date(), runAt: new Date() });
-        } else {
-          acc.push({ ...task, enabled: true });
+          return {
+            ...task,
+            enabled: true,
+            scheduledAt: new Date(),
+            runAt: new Date(),
+          };
         }
-
-        return acc;
-      }, []);
+        return {
+          ...task,
+          enabled: true,
+        };
+      });
 
     return await this.bulkUpdateTasksHelper(updatedTasks);
   }
@@ -250,6 +237,7 @@ export class TaskScheduling {
       chunk(taskIds, BULK_ACTION_SIZE),
       async (taskIdsChunk) =>
         this.store.fetch({
+          seq_no_primary_term: true,
           query: mustBeAllOf(
             {
               terms: {
