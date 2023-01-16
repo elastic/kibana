@@ -363,7 +363,7 @@ async function installPackageFromRegistry({
 
     const savedObjectsImporter = appContextService
       .getSavedObjects()
-      .createImporter(savedObjectsClient);
+      .createImporter(savedObjectsClient, { importSizeLimit: 15_000 });
 
     const savedObjectTagAssignmentService = appContextService
       .getSavedObjectsTagging()

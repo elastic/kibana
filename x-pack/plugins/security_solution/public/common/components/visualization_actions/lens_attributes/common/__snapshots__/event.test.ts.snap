@@ -1,0 +1,194 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getEventsHistogramLensAttributes should render 1`] = `
+Object {
+  "description": "",
+  "references": Array [
+    Object {
+      "id": "security-solution-my-test",
+      "name": "indexpattern-datasource-layer-0039eb0c-9a1a-4687-ae54-0f4e239bec75",
+      "type": "index-pattern",
+    },
+  ],
+  "state": Object {
+    "datasourceStates": Object {
+      "formBased": Object {
+        "layers": Object {
+          "0039eb0c-9a1a-4687-ae54-0f4e239bec75": Object {
+            "columnOrder": Array [
+              "34919782-4546-43a5-b668-06ac934d3acd",
+              "aac9d7d0-13a3-480a-892b-08207a787926",
+              "e09e0380-0740-4105-becc-0a4ca12e3944",
+            ],
+            "columns": Object {
+              "34919782-4546-43a5-b668-06ac934d3acd": Object {
+                "dataType": "string",
+                "isBucketed": true,
+                "label": "Top values of event.dataset",
+                "operationType": "terms",
+                "params": Object {
+                  "missingBucket": false,
+                  "orderBy": Object {
+                    "columnId": "e09e0380-0740-4105-becc-0a4ca12e3944",
+                    "type": "column",
+                  },
+                  "orderDirection": "desc",
+                  "otherBucket": true,
+                  "parentFormat": Object {
+                    "id": "terms",
+                  },
+                  "size": 10,
+                },
+                "scale": "ordinal",
+                "sourceField": "event.dataset",
+              },
+              "aac9d7d0-13a3-480a-892b-08207a787926": Object {
+                "dataType": "date",
+                "isBucketed": true,
+                "label": "@timestamp",
+                "operationType": "date_histogram",
+                "params": Object {
+                  "interval": "auto",
+                },
+                "scale": "interval",
+                "sourceField": "@timestamp",
+              },
+              "e09e0380-0740-4105-becc-0a4ca12e3944": Object {
+                "dataType": "number",
+                "isBucketed": false,
+                "label": "Count of records",
+                "operationType": "count",
+                "scale": "ratio",
+                "sourceField": "___records___",
+              },
+            },
+            "incompleteColumns": Object {},
+          },
+        },
+      },
+    },
+    "filters": Array [
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "host.id",
+          "negate": false,
+          "params": Object {
+            "query": "123",
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "match_phrase": Object {
+            "host.id": "123",
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "host.name",
+          "negate": false,
+          "params": Object {
+            "query": "mockHost",
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "match_phrase": Object {
+            "host.name": "mockHost",
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": "",
+          "disabled": false,
+          "key": "bool",
+          "negate": false,
+          "type": "custom",
+          "value": "{\\"query\\": {\\"bool\\": {\\"filter\\": [{\\"bool\\": {\\"should\\": [{\\"exists\\": {\\"field\\": \\"host.name\\"}}],\\"minimum_should_match\\": 1}}]}}}",
+        },
+        "query": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "exists": Object {
+                  "field": "host.name",
+                },
+              },
+            ],
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "_index",
+          "negate": false,
+          "params": Array [
+            "auditbeat-mytest-*",
+          ],
+          "type": "phrases",
+        },
+        "query": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "match_phrase": Object {
+                  "_index": "auditbeat-mytest-*",
+                },
+              },
+            ],
+          },
+        },
+      },
+    ],
+    "query": Object {
+      "language": "kql",
+      "query": "host.name: *",
+    },
+    "visualization": Object {
+      "axisTitlesVisibilitySettings": Object {
+        "x": false,
+        "yLeft": false,
+        "yRight": true,
+      },
+      "layers": Array [
+        Object {
+          "accessors": Array [
+            "e09e0380-0740-4105-becc-0a4ca12e3944",
+          ],
+          "layerId": "0039eb0c-9a1a-4687-ae54-0f4e239bec75",
+          "layerType": "data",
+          "position": "top",
+          "seriesType": "bar_stacked",
+          "showGridlines": false,
+          "splitAccessor": "34919782-4546-43a5-b668-06ac934d3acd",
+          "xAccessor": "aac9d7d0-13a3-480a-892b-08207a787926",
+        },
+      ],
+      "legend": Object {
+        "isVisible": true,
+        "position": "right",
+      },
+      "preferredSeriesType": "bar_stacked",
+      "title": "Empty XY chart",
+      "valueLabels": "hide",
+      "yLeftExtent": Object {
+        "mode": "full",
+      },
+      "yRightExtent": Object {
+        "mode": "full",
+      },
+    },
+  },
+  "title": "Events",
+  "visualizationType": "lnsXY",
+}
+`;

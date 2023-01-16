@@ -16,6 +16,7 @@ import {
   enrichSignalThreatMatches,
   groupAndMergeSignalMatches,
   getSignalMatchesFromThreatList,
+  MAX_NUMBER_OF_SIGNAL_MATCHES,
 } from './enrich_signal_threat_matches';
 import { getNamedQueryMock, getSignalHitMock } from './enrich_signal_threat_matches.mock';
 import type { GetMatchedThreats, ThreatListItem, ThreatMatchNamedQuery } from './types';
@@ -802,7 +803,7 @@ describe('getSignalMatchesFromThreatList', () => {
     expect(signalMatches).toEqual([]);
   });
 
-  it('return signal mathces from threat indicators', () => {
+  it('return signal matches from threat indicators', () => {
     const signalMatches = getSignalMatchesFromThreatList([
       getThreatListItemMock({
         _id: 'threatId',
@@ -848,7 +849,7 @@ describe('getSignalMatchesFromThreatList', () => {
     ]);
   });
 
-  it('merge signal mathces if different threat indicators matched the same signal', () => {
+  it('merge signal matches if different threat indicators matched the same signal', () => {
     const matchedQuery = [
       encodeThreatMatchNamedQuery(
         getNamedQueryMock({
@@ -892,5 +893,27 @@ describe('getSignalMatchesFromThreatList', () => {
         ],
       },
     ]);
+  });
+
+  it('limits number of signal matches to MAX_NUMBER_OF_SIGNAL_MATCHES', () => {
+    const threatList = Array.from(Array(2000), (index) =>
+      getThreatListItemMock({
+        _id: `threatId-${index}`,
+        matched_queries: [
+          encodeThreatMatchNamedQuery(
+            getNamedQueryMock({
+              id: 'signalId1',
+              index: 'source_index',
+              value: 'threat.indicator.domain',
+              field: 'event.domain',
+            })
+          ),
+        ],
+      })
+    );
+
+    const signalMatches = getSignalMatchesFromThreatList(threatList);
+
+    expect(signalMatches[0].queries).toHaveLength(MAX_NUMBER_OF_SIGNAL_MATCHES);
   });
 });

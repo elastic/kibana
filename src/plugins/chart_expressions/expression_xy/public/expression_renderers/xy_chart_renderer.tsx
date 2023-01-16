@@ -26,13 +26,12 @@ import { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { extractContainerType, extractVisualizationType } from '@kbn/chart-expressions-common';
 
 import type { getDataLayers } from '../helpers';
 import { LayerTypes, SeriesTypes } from '../../common/constants';
 import type { CommonXYDataLayerConfig, XYChartProps } from '../../common';
 import type { BrushEvent, FilterEvent, GetCompatibleCellValueActions } from '../types';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { extractContainerType, extractVisualizationType } from '../../../common';
 
 export type GetStartDepsFn = () => Promise<{
   data: DataPublicPluginStart;

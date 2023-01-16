@@ -76,6 +76,7 @@ interface BaseCspSetupStatus {
   installedPackagePolicies: number;
   healthyAgents: number;
   isPluginInitialized: boolean;
+  installedPolicyTemplates: PosturePolicyTemplate[];
 }
 
 interface CspSetupNotInstalledStatus extends BaseCspSetupStatus {

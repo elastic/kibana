@@ -133,7 +133,9 @@ export const javascriptClientEmbedSteps = (analyticsDNSUrl: string) => [
             )}
           </p>
           <EuiCodeBlock language="javascript" isCopyable>
-            {`// track a page view in React
+            {`import { useEffect } from 'react';
+
+// track a page view in React
 
 const SearchPage = (props) => {
   useEffect(() => {
@@ -173,11 +175,9 @@ const ProductDetailPage = (props) => {
           label: "product_id",
           value: "123"
         })
-      }} />
-      }}>Add to Basket</input>
+      }} value="Add to Basket"/>
     </div>
-    )
-  }
+  )
 }`}
           </EuiCodeBlock>
         </EuiText>

@@ -6,23 +6,23 @@
  */
 
 import React, { useState } from 'react';
-import { EuiButtonGroup, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiButtonGroup, EuiSpacer, EuiTitle, useEuiTheme, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { LastSuccessfulScreenshot } from './last_successful_screenshot';
 import { JourneyStep } from '../../../../../../common/runtime_types';
 import { JourneyStepScreenshotContainer } from '../../common/screenshot/journey_step_screenshot_container';
+import { LastSuccessfulScreenshot } from './last_successful_screenshot';
 
 export const StepImage = ({
   step,
   ping,
   isFailed,
-  stepLabels,
 }: {
   ping: JourneyStep;
   step: JourneyStep;
   isFailed?: boolean;
-  stepLabels?: string[];
 }) => {
+  const { euiTheme } = useEuiTheme();
+
   const toggleButtons = [
     {
       id: `received`,
@@ -46,33 +46,46 @@ export const StepImage = ({
         <h3>{SCREENSHOT_LABEL}</h3>
       </EuiTitle>
       <EuiSpacer size="m" />
-      <div className="eui-textCenter">
+      <EuiPanel
+        color="subdued"
+        css={{
+          outline: 0,
+          height: '192px',
+          borderRadius: 0,
+          display: 'flex',
+          justifyContent: 'center',
+        }}
+      >
         {idSelected === 'received' ? (
           <JourneyStepScreenshotContainer
             checkGroup={step?.monitor.check_group}
-            initialStepNo={step?.synthetics?.step?.index}
+            initialStepNumber={step?.synthetics?.step?.index}
             stepStatus={step?.synthetics.payload?.status}
             allStepsLoaded={true}
-            stepLabels={stepLabels}
             retryFetchOnRevisit={false}
-            asThumbnail={false}
+            size={[260, 160]}
+            borderRadius={euiTheme.border.radius.small}
           />
         ) : (
-          <LastSuccessfulScreenshot step={ping} />
-        )}
-
-        <EuiSpacer size="l" />
-        {isFailed && (
-          <EuiButtonGroup
-            legend=""
-            options={toggleButtons}
-            idSelected={idSelected}
-            onChange={(id) => onChangeDisabled(id)}
-            buttonSize="s"
-            isFullWidth
+          <LastSuccessfulScreenshot
+            step={ping}
+            stepIndex={step?.synthetics?.step?.index}
+            size={[260, 160]}
+            borderRadius={euiTheme.border.radius.small}
           />
         )}
-      </div>
+      </EuiPanel>
+      <EuiSpacer size="m" />
+      {isFailed && (
+        <EuiButtonGroup
+          legend=""
+          options={toggleButtons}
+          idSelected={idSelected}
+          onChange={(id) => onChangeDisabled(id)}
+          buttonSize="s"
+          isFullWidth
+        />
+      )}
     </>
   );
 };

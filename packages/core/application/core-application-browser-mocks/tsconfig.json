@@ -10,7 +10,7 @@
   },
   "include": [
     "**/*.ts",
-      "**/*.tsx",
+    "**/*.tsx",
   ],
   "kbn_references": [
     "@kbn/core-mount-utils-browser",
