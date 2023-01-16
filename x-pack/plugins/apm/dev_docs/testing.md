@@ -3,7 +3,7 @@
 ## Unit Tests (Jest)
 
 ```
-node scripts/test/jest [--watch] [--updateSnapshot]
+node x-pack/plugins/apm/scripts/test/jest [--watch] [--updateSnapshot]
 ```
 
 #### Coverage
