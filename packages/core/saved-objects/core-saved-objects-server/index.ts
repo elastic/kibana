@@ -89,3 +89,10 @@ export {
   SECURITY_EXTENSION_ID,
   SPACES_EXTENSION_ID,
 } from './src/extensions/extensions';
+export type {
+  SavedObject,
+  SavedObjectAttribute,
+  SavedObjectAttributeSingle,
+  SavedObjectAttributes,
+  SavedObjectReference,
+} from './src/saved_objects';
