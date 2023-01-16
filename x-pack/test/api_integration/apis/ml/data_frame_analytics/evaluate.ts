@@ -126,7 +126,7 @@ export default ({ getService }: FtrProviderContext) => {
     return body;
   }
 
-  describe.only('POST data_frame/_evaluate', () => {
+  describe('POST data_frame/_evaluate', () => {
     before(async () => {
       const modelsAll = await runRequest();
       log.info(JSON.stringify(modelsAll, null, 2));
