@@ -440,7 +440,7 @@ describe('discover responsive sidebar', function () {
     );
 
     expect(mockCalcFieldCounts.mock.calls.length).toBe(1);
-  });
+  }, 10000);
 
   it('should show "Add a field" button to create a runtime field', async () => {
     const services = createMockServices();

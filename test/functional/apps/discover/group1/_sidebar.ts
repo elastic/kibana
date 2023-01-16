@@ -149,7 +149,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           );
         });
 
-        const fieldSearch = await this.testSubjects.find('clearSearchButton');
+        const fieldSearch = await testSubjects.find('clearSearchButton');
         await fieldSearch.click();
 
         await retry.waitFor('reset', async () => {
