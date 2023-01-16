@@ -34,7 +34,7 @@ export const SchemaTable: React.FC = () => {
   const {
     myRole: { canManageEngines },
   } = useValues(AppLogic);
-  const { schema, unconfirmedFields } = useValues(SchemaLogic);
+  const { schema, unconfirmedFields, incompleteFields } = useValues(SchemaLogic);
   const { updateSchemaFieldType } = useActions(SchemaLogic);
   const { isElasticsearchEngine } = useValues(EngineLogic);
 
@@ -58,14 +58,15 @@ export const SchemaTable: React.FC = () => {
           <EuiTableRowCell align="right" />
         </EuiTableRow>
         {Object.entries(schema).map(([fieldName, fieldType]) => {
-          const isRecentlyAdded = unconfirmedFields.length && unconfirmedFields.includes(fieldName);
+          const isRecentlyAdded = unconfirmedFields.includes(fieldName);
+          const isMissingSubfields = fieldType === 'text' && incompleteFields.includes(fieldName);
 
           return (
             <EuiTableRow key={fieldName}>
               <EuiTableRowCell>
                 <code>{fieldName}</code>
               </EuiTableRowCell>
-              {isRecentlyAdded ? (
+              {isRecentlyAdded && (
                 <EuiTableRowCell align="right">
                   <EuiHealth color="success">
                     <EuiText color="subdued" size="s">
@@ -76,9 +77,20 @@ export const SchemaTable: React.FC = () => {
                     </EuiText>
                   </EuiHealth>
                 </EuiTableRowCell>
-              ) : (
-                <EuiTableRowCell aria-hidden />
               )}
+              {isMissingSubfields && (
+                <EuiTableRowCell align="right">
+                  <EuiHealth color="warning">
+                    <EuiText color="subdued" size="s">
+                      {i18n.translate(
+                        'xpack.enterpriseSearch.appSearch.engine.schema.missingSubfieldsLabel',
+                        { defaultMessage: 'Missing subfields' }
+                      )}
+                    </EuiText>
+                  </EuiHealth>
+                </EuiTableRowCell>
+              )}
+              {!(isRecentlyAdded || isMissingSubfields) && <EuiTableRowCell aria-hidden />}
               <EuiTableRowCell align="right" width={150}>
                 <SchemaFieldTypeSelect
                   fieldName={fieldName}

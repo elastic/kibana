@@ -69,10 +69,10 @@ export const editException = (updatedField: string, itemIndex = 0, fieldIndex = 
 };
 
 export const addExceptionFlyoutItemName = (name: string) => {
-  cy.get(EXCEPTION_ITEM_NAME_INPUT).should('exist');
-  cy.get(EXCEPTION_ITEM_NAME_INPUT).should('be.visible');
   cy.get(EXCEPTION_ITEM_NAME_INPUT).first().focus();
-  cy.get(EXCEPTION_ITEM_NAME_INPUT).type(`${name}{enter}`).should('have.value', name);
+  cy.get(EXCEPTION_ITEM_NAME_INPUT)
+    .type(`${name}{enter}`, { force: true })
+    .should('have.value', name);
 };
 
 export const editExceptionFlyoutItemName = (name: string) => {

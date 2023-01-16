@@ -581,18 +581,6 @@
             "path": "src/plugins/home/public/application/components/tutorial/tutorial.js"
           },
           {
-            "plugin": "spaces",
-            "path": "x-pack/plugins/spaces/public/space_selector/space_selector.tsx"
-          },
-          {
-            "plugin": "spaces",
-            "path": "x-pack/plugins/spaces/public/space_selector/space_selector.tsx"
-          },
-          {
-            "plugin": "spaces",
-            "path": "x-pack/plugins/spaces/public/space_selector/space_selector.tsx"
-          },
-          {
             "plugin": "ml",
             "path": "x-pack/plugins/ml/public/application/components/ml_page/ml_page.tsx"
           },
@@ -3127,6 +3115,14 @@
             "docId": "kibKbnCoreChromeBrowserPluginApi",
             "section": "def-common.ChromeStart",
             "text": "ChromeStart"
+          },
+          " | undefined; customBranding?: ",
+          {
+            "pluginId": "@kbn/core-custom-branding-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreCustomBrandingBrowserPluginApi",
+            "section": "def-common.CustomBrandingStart",
+            "text": "CustomBrandingStart"
           },
           " | undefined; docLinks?: ",
           {
