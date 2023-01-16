@@ -10,6 +10,7 @@ import { EuiTitle, EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer } fro
 import { i18n } from '@kbn/i18n';
 import { LoadWhenInView } from '@kbn/observability-plugin/public';
 
+import { MonitorAlerts } from './monitor_alerts';
 import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 import { useEarliestStartDate } from '../hooks/use_earliest_start_date';
 import { MonitorErrorSparklines } from './monitor_error_sparklines';
@@ -19,7 +20,7 @@ import { MonitorDurationTrend } from './duration_trend';
 import { StepDurationPanel } from './step_duration_panel';
 import { AvailabilityPanel } from './availability_panel';
 import { DurationPanel } from './duration_panel';
-import { MonitorDetailsPanel } from './monitor_details_panel';
+import { MonitorDetailsPanelContainer } from './monitor_details_panel';
 import { AvailabilitySparklines } from './availability_sparklines';
 import { LastTestRun } from './last_test_run';
 import { LAST_10_TEST_RUNS, TestRunsTable } from './test_runs_table';
@@ -40,7 +41,7 @@ export const MonitorSummary = () => {
     <>
       <EuiFlexGroup gutterSize="m">
         <EuiFlexItem grow={1}>
-          <MonitorDetailsPanel />
+          <MonitorDetailsPanelContainer />
         </EuiFlexItem>
         <EuiFlexItem grow={2}>
           <EuiPanel hasShadow={false} hasBorder paddingSize="m" css={{ height: 120 }}>
@@ -114,6 +115,8 @@ export const MonitorSummary = () => {
           <LastTestRun />
         </EuiFlexItem>
         <EuiFlexItem>
+          <MonitorAlerts dateLabel={dateLabel} from={from} to={to} />
+          <EuiSpacer size="m" />
           <StepDurationPanel />
         </EuiFlexItem>
       </EuiFlexGroup>

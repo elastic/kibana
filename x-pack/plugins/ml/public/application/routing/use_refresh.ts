@@ -6,13 +6,12 @@
  */
 
 import useObservable from 'react-use/lib/useObservable';
-import { merge } from 'rxjs';
+import { merge, type Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { useMemo } from 'react';
+import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
 import { annotationsRefresh$ } from '../services/annotations_service';
-import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';
-import { useTimefilter } from '../contexts/kibana';
 
 export interface Refresh {
   lastRefresh: number;
@@ -40,7 +39,7 @@ export const useRefresh = () => {
         })
       ),
       annotationsRefresh$.pipe(map((d) => ({ lastRefresh: d })))
-    );
+    ) as Observable<Refresh>;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

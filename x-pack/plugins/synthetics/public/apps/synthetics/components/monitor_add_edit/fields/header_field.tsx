@@ -11,7 +11,7 @@ import { ContentType, Mode } from '../types';
 
 import { KeyValuePairsField, Pair } from './key_value_field';
 
-interface Props {
+export interface HeaderFieldProps {
   contentMode?: Mode;
   defaultValue: Record<string, string>;
   onChange: (value: Record<string, string>) => void;
@@ -25,7 +25,7 @@ export const HeaderField = ({
   onChange,
   onBlur,
   'data-test-subj': dataTestSubj,
-}: Props) => {
+}: HeaderFieldProps) => {
   const defaultValueKeys = Object.keys(defaultValue).filter((key) => key !== 'Content-Type'); // Content-Type is a secret header we hide from the user
   const formattedDefaultValues: Pair[] = [
     ...defaultValueKeys.map<Pair>((key) => {
