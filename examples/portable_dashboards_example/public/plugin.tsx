@@ -27,24 +27,23 @@ interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;
 }
 
-export interface EmbeddableDashboardsExampleStartDeps {
+export interface PortableDashboardsExampleStartDeps {
   dashboard: DashboardStart;
-  embeddable: EmbeddableStart;
   data: DataPublicPluginStart;
   navigation: NavigationPublicPluginStart;
   savedObjectsClient: SavedObjectsClientContract;
 }
 
-export class EmbeddableDashboardsExamplePlugin
-  implements Plugin<void, void, SetupDeps, EmbeddableDashboardsExampleStartDeps>
+export class PortableDashboardsExamplePlugin
+  implements Plugin<void, void, SetupDeps, PortableDashboardsExampleStartDeps>
 {
   public setup(
-    core: CoreSetup<EmbeddableDashboardsExampleStartDeps>,
+    core: CoreSetup<PortableDashboardsExampleStartDeps>,
     { developerExamples }: SetupDeps
   ) {
     core.application.register({
       id: PLUGIN_ID,
-      title: 'Embeddable dashboard examples',
+      title: 'Portable dashboard examples',
       navLinkStatus: AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {
         const [, depsStart] = await core.getStartServices();
@@ -55,13 +54,13 @@ export class EmbeddableDashboardsExamplePlugin
 
     developerExamples.register({
       appId: PLUGIN_ID,
-      title: 'Embeddable Dashboards',
+      title: 'Portable Dashboards',
       description: `Showcases different ways to embed a dashboard into your app`,
       image: img,
     });
   }
 
-  public async start(core: CoreStart, { dashboard }: EmbeddableDashboardsExampleStartDeps) {}
+  public async start(core: CoreStart, { dashboard }: PortableDashboardsExampleStartDeps) {}
 
   public stop() {}
 }

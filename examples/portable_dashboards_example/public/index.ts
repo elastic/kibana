@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export const PLUGIN_ID = 'embeddableDashboardExamples';
+import { PortableDashboardsExamplePlugin } from './plugin';
+
+export function plugin() {
+  return new PortableDashboardsExamplePlugin();
+}
