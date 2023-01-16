@@ -172,7 +172,7 @@ describe('AlertsByStatus', () => {
       </TestProviders>
     );
     expect(
-      container.querySelector(`[data-test-subj="visualization-embeddable-managed"]`)
+      container.querySelector(`[data-test-subj="visualization-embeddable"]`)
     ).toBeInTheDocument();
     expect((useAlertsByStatus as jest.Mock).mock.calls[0][0].skip).toBeTruthy();
   });

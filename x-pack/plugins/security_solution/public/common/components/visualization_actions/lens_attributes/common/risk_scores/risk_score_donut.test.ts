@@ -30,6 +30,13 @@ jest.mock('../../../../../utils/route/use_route_spy', () => ({
   ]),
 }));
 
+jest.mock('uuid', () => ({
+  v4: jest
+    .fn()
+    .mockReturnValueOnce('d594baeb-5eca-480c-8885-ba79eaf41372')
+    .mockReturnValue('1dd5663b-f062-43f8-8688-fc8166c2ca8e'),
+}));
+
 describe('getRiskScoreDonutAttributes', () => {
   it('should render', () => {
     const { result } = renderHook(
