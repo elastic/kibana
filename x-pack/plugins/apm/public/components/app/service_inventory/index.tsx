@@ -16,6 +16,7 @@ import React from 'react';
 import uuid from 'uuid';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { apmServiceInventoryOptimizedSorting } from '@kbn/observability-plugin/common';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
 import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
 import { useLocalStorage } from '../../../hooks/use_local_storage';
@@ -29,7 +30,6 @@ import { useProgressiveFetcher } from '../../../hooks/use_progressive_fetcher';
 import { joinByKey } from '../../../../common/utils/join_by_key';
 import { ServiceInventoryFieldName } from '../../../../common/service_inventory';
 import { orderServiceItems } from './service_list/order_service_items';
-import { FormattedMessage } from 'react-intl';
 
 const initialData = {
   requestId: '',
