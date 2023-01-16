@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { mergeWith, uniqBy, isEqual } from 'lodash';
+import { mergeWith, uniqWith, isEqual } from 'lodash';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -45,6 +45,16 @@ export interface CreateState {
   datafeedCreated: CreationState;
   jobOpened: CreationState;
   datafeedStarted: CreationState;
+}
+
+function mergeQueriesCheck(
+  objValue: estypes.QueryDslQueryContainer,
+  srcValue: estypes.QueryDslQueryContainer
+) {
+  if (Array.isArray(objValue)) {
+    const combinedQuery = objValue.concat(srcValue);
+    return uniqWith(combinedQuery, isEqual);
+  }
 }
 
 export class QuickJobCreatorBase {
@@ -173,49 +183,6 @@ export class QuickJobCreatorBase {
     return result;
   }
 
-  protected combineQueries(
-    intialQuery: estypes.QueryDslQueryContainer,
-    queryToCombine: estypes.QueryDslQueryContainer
-  ): estypes.QueryDslQueryContainer {
-    if (queryToCombine.bool === undefined) {
-      queryToCombine.bool = {};
-    }
-
-    const incomingMust = Array.isArray(queryToCombine.bool.must) ? queryToCombine.bool.must : [];
-    const incomingShould = Array.isArray(queryToCombine.bool.should)
-      ? queryToCombine.bool.should
-      : [];
-    const incomingMustNot = Array.isArray(queryToCombine.bool.must_not)
-      ? queryToCombine.bool.must_not
-      : [];
-
-    if (intialQuery.bool === undefined) {
-      intialQuery.bool = {
-        minimum_should_match: 1,
-      };
-    }
-
-    if (!Array.isArray(intialQuery.bool.must_not)) {
-      intialQuery.bool.must_not =
-        intialQuery.bool.must_not === undefined ? [] : [intialQuery.bool.must_not];
-    }
-
-    if (!Array.isArray(intialQuery.bool.must)) {
-      intialQuery.bool.must = intialQuery.bool.must === undefined ? [] : [intialQuery.bool.must];
-    }
-
-    if (!Array.isArray(intialQuery.bool.should)) {
-      intialQuery.bool.should =
-        intialQuery.bool.should === undefined ? [] : [intialQuery.bool.should];
-    }
-
-    intialQuery.bool.must = [...intialQuery.bool.must, ...incomingMust];
-    intialQuery.bool.should = [...intialQuery.bool.should, ...incomingShould];
-    intialQuery.bool.must_not = [...intialQuery.bool.must_not, ...incomingMustNot];
-
-    return intialQuery;
-  }
-
   protected combineQueriesAndFilters(
     dashboard: { query: Query; filters: Filter[] },
     vis: { query: Query; filters: Filter[] },
@@ -252,20 +219,15 @@ export class QuickJobCreatorBase {
         this.kibanaConfig
       );
       // combine vis and layer queries if layer-level query exists
-      mergedVisAndLayerQueries = this.combineQueries(visQueries, layerQueries);
+      mergedVisAndLayerQueries = mergeWith(visQueries, layerQueries, mergeQueriesCheck);
     }
 
     const mergedQueries = mergeWith(
       dashboardQueries,
       mergedVisAndLayerQueries ? mergedVisAndLayerQueries : visQueries,
-      (objValue: estypes.QueryDslQueryContainer, srcValue: estypes.QueryDslQueryContainer) => {
-        if (Array.isArray(objValue)) {
-          const combinedQuery = objValue.concat(srcValue);
-          return uniqBy(combinedQuery, isEqual);
-        }
-      }
+      mergeQueriesCheck
     );
-
+    
     return mergedQueries;
   }
 
