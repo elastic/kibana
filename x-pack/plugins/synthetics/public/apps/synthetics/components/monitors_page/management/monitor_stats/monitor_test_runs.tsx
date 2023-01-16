@@ -10,9 +10,9 @@ import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useTheme } from '@kbn/observability-plugin/public';
 import { ReportTypes } from '@kbn/observability-plugin/public';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
 import { ClientPluginsStart } from '../../../../../../plugin';
+import * as labels from '../labels';
 
 interface MonitorCompleteCountProps {
   from?: string;
@@ -29,33 +29,22 @@ export const MonitorTestRunsCount = ({
   const { ExploratoryViewEmbeddable } = observability;
 
   return (
-    <StyledWrapper metricColor={theme.eui.euiColorVis1}>
-      <ExploratoryViewEmbeddable
-        align="left"
-        reportType={ReportTypes.SINGLE_METRIC}
-        attributes={[
-          {
-            time: { from, to },
-            reportDefinitions: {
-              'monitor.id': [],
-              'observer.geo.name': [],
-            },
-            dataType: 'synthetics',
-            selectedMetricField: 'monitor_total_runs',
-            name: 'synthetics-series-1',
+    <ExploratoryViewEmbeddable
+      align="left"
+      reportType={ReportTypes.SINGLE_METRIC}
+      attributes={[
+        {
+          time: { from, to },
+          reportDefinitions: {
+            'monitor.id': [],
+            'observer.geo.name': [],
           },
-        ]}
-      />
-    </StyledWrapper>
+          dataType: 'synthetics',
+          selectedMetricField: 'monitor_total_runs',
+          name: labels.TEST_RUNS_LABEL,
+          color: theme.eui.euiColorVis1,
+        },
+      ]}
+    />
   );
 };
-
-const StyledWrapper = euiStyled.div<{ metricColor: string }>`
-&&& {
-  .legacyMtrVis__container {
-    .legacyMtrVis__value {
-     color: ${({ metricColor }) => metricColor};
-    }
-  }
-}
-`;

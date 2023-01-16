@@ -11,6 +11,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useTheme } from '@kbn/observability-plugin/public';
 
 import { ClientPluginsStart } from '../../../../../../plugin';
+import * as labels from '../labels';
 
 interface Props {
   from?: string;
@@ -39,7 +40,7 @@ export const MonitorTestRunsSparkline = ({ from = 'now-30d', to = 'now' }: Props
           },
           dataType: 'synthetics',
           selectedMetricField: 'state.id',
-          name: 'Monitor complete',
+          name: labels.TEST_RUNS_LABEL,
           color: theme.eui.euiColorVis1,
           operationType: 'unique_count',
         },

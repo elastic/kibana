@@ -87,6 +87,10 @@ export const DISABLED_LABEL = i18n.translate('xpack.synthetics.monitorManagement
   defaultMessage: 'Disabled',
 });
 
+export const TEST_RUNS_LABEL = i18n.translate('xpack.synthetics.monitorManagement.testRuns.label', {
+  defaultMessage: 'Test runs',
+});
+
 export function getLastXDaysLabel(count: number) {
   return i18n.translate('xpack.synthetics.monitorManagement.lastXDays', {
     defaultMessage: 'Last {count, number} {count, plural, one {day} other {days}}',
