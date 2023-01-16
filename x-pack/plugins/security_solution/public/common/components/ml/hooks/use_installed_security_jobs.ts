@@ -73,7 +73,7 @@ export const useInstalledSecurityJobsIds = () => {
   return { jobIds, loading };
 };
 
-export const useInstalledSecurityJobsNamesById = () => {
+export const useInstalledSecurityJobNameById = () => {
   const { jobs, loading } = useInstalledSecurityJobs();
 
   const jobNameById = useMemo(

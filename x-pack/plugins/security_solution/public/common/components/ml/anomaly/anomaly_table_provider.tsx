@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { useInstalledSecurityJobsNamesById } from '../hooks/use_installed_security_jobs';
+import { useInstalledSecurityJobNameById } from '../hooks/use_installed_security_jobs';
 import type { InfluencerInput, Anomalies, CriteriaFields } from '../types';
 import { useAnomaliesTableData } from './use_anomalies_table_data';
 
@@ -27,7 +27,7 @@ interface Props {
 
 export const AnomalyTableProvider = React.memo<Props>(
   ({ influencers, startDate, endDate, children, criteriaFields, skip }) => {
-    const { jobNameById } = useInstalledSecurityJobsNamesById();
+    const { jobNameById } = useInstalledSecurityJobNameById();
     const jobIds = useMemo(() => Object.keys(jobNameById), [jobNameById]);
 
     const [isLoadingAnomaliesData, anomaliesData] = useAnomaliesTableData({

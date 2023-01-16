@@ -12,7 +12,7 @@ import { useAnomaliesTableData } from '../anomaly/use_anomalies_table_data';
 import { UsersType } from '../../../../explore/users/store/model';
 import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
 import { fireEvent, render } from '@testing-library/react';
-import { useInstalledSecurityJobsNamesById } from '../hooks/use_installed_security_jobs';
+import { useInstalledSecurityJobNameById } from '../hooks/use_installed_security_jobs';
 import { mockAnomalies } from '../mock';
 import { useMlHref } from '@kbn/ml-plugin/public';
 
@@ -24,7 +24,7 @@ jest.mock('@kbn/ml-plugin/public');
 
 const mockUseQueryToggle = useQueryToggle as jest.Mock;
 const mockUseAnomaliesTableData = useAnomaliesTableData as jest.Mock;
-const mockUseInstalledSecurityJobsNamesById = useInstalledSecurityJobsNamesById as jest.Mock;
+const mockUseInstalledSecurityJobNameById = useInstalledSecurityJobNameById as jest.Mock;
 const mockUseMlHref = useMlHref as jest.Mock;
 
 const mockSetToggle = jest.fn();
@@ -32,7 +32,7 @@ const mockSetToggle = jest.fn();
 (hasMlUserPermissions as jest.Mock).mockReturnValue(true);
 mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: mockSetToggle });
 mockUseMlHref.mockReturnValue('http://test');
-mockUseInstalledSecurityJobsNamesById.mockReturnValue({
+mockUseInstalledSecurityJobNameById.mockReturnValue({
   loading: false,
   jobNameById: {},
 });
@@ -71,7 +71,7 @@ describe('Anomalies user table', () => {
         interval: '10',
       },
     ]);
-    mockUseInstalledSecurityJobsNamesById.mockReturnValue({
+    mockUseInstalledSecurityJobNameById.mockReturnValue({
       loading: false,
       jobNameById: { [anomaly.jobId]: jobName },
     });

@@ -51,7 +51,7 @@ import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { navTabsNetworkDetails } from './nav_tabs';
 import { NetworkDetailsTabs } from './details_tabs';
-import { useInstalledSecurityJobsNamesById } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
+import { useInstalledSecurityJobNameById } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
 
 export { getTrailingBreadcrumbs } from './utils';
 
@@ -137,7 +137,7 @@ const NetworkDetailsComponent: React.FC = () => {
     ip,
   });
 
-  const { jobNameById } = useInstalledSecurityJobsNamesById();
+  const { jobNameById } = useInstalledSecurityJobNameById();
   const jobIds = useMemo(() => Object.keys(jobNameById), [jobNameById]);
   const [isLoadingAnomaliesData, anomaliesData] = useAnomaliesTableData({
     criteriaFields: networkToCriteria(detailName, flowTarget),

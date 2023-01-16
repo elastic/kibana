@@ -22,7 +22,7 @@ import { BasicTable } from './basic_table';
 import { getCriteriaFromHostType } from '../criteria/get_criteria_from_host_type';
 import { Panel } from '../../panel';
 import { useQueryToggle } from '../../../containers/query_toggle';
-import { useInstalledSecurityJobsNamesById } from '../hooks/use_installed_security_jobs';
+import { useInstalledSecurityJobNameById } from '../hooks/use_installed_security_jobs';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import type { State } from '../../../store';
 import { JobIdFilter } from './job_id_filter';
@@ -59,7 +59,7 @@ const AnomaliesHostTableComponent: React.FC<AnomaliesHostTableProps> = ({
     [setQuerySkip, setToggleStatus]
   );
 
-  const { jobNameById, loading: loadingJobs } = useInstalledSecurityJobsNamesById();
+  const { jobNameById, loading: loadingJobs } = useInstalledSecurityJobNameById();
   const jobIds = useMemo(() => Object.keys(jobNameById), [jobNameById]);
 
   const getAnomaliesHostsTableFilterQuerySelector = useMemo(

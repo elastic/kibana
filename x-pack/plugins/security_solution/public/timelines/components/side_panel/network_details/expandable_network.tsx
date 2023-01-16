@@ -29,7 +29,7 @@ import { useNetworkDetails } from '../../../../explore/network/containers/detail
 import { networkModel } from '../../../../explore/network/store';
 import { useAnomaliesTableData } from '../../../../common/components/ml/anomaly/use_anomalies_table_data';
 import { LandingCards } from '../../../../common/components/landing_cards';
-import { useInstalledSecurityJobsNamesById } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
+import { useInstalledSecurityJobNameById } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
 
 interface ExpandableNetworkProps {
   expandedNetwork: { ip: string; flowTarget: FlowTargetSourceDest };
@@ -116,7 +116,7 @@ export const ExpandableNetworkDetails = ({
   });
 
   useInvalidFilterQuery({ id, filterQuery, kqlError, query, startDate: from, endDate: to });
-  const { jobNameById } = useInstalledSecurityJobsNamesById();
+  const { jobNameById } = useInstalledSecurityJobNameById();
   const jobIds = useMemo(() => Object.keys(jobNameById), [jobNameById]);
   const [isLoadingAnomaliesData, anomaliesData] = useAnomaliesTableData({
     criteriaFields: networkToCriteria(ip, flowTarget),

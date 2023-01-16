@@ -30,7 +30,7 @@ import { SelectInterval } from './select_interval';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { usersActions, usersSelectors } from '../../../../explore/users/store';
 import type { State } from '../../../store/types';
-import { useInstalledSecurityJobsNamesById } from '../hooks/use_installed_security_jobs';
+import { useInstalledSecurityJobNameById } from '../hooks/use_installed_security_jobs';
 
 const sorting = {
   sort: {
@@ -63,7 +63,7 @@ const AnomaliesUserTableComponent: React.FC<AnomaliesUserTableProps> = ({
     [setQuerySkip, setToggleStatus]
   );
 
-  const { jobNameById, loading: loadingJobs } = useInstalledSecurityJobsNamesById();
+  const { jobNameById, loading: loadingJobs } = useInstalledSecurityJobNameById();
   const jobIds = useMemo(() => Object.keys(jobNameById), [jobNameById]);
 
   const getAnomaliesUserTableFilterQuerySelector = useMemo(
