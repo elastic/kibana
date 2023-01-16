@@ -7,7 +7,7 @@
 
 import { pick } from 'lodash';
 import { Alert } from '../alert';
-import { AlertInstanceState, AlertInstanceContext, DefaultActionGroupId } from '../../common';
+import { AlertInstanceState, AlertInstanceContext } from '../../common';
 import { setFlapping, isAlertFlapping } from './set_flapping';
 
 describe('setFlapping', () => {
@@ -85,34 +85,25 @@ describe('setFlapping', () => {
     describe('not currently flapping', () => {
       test('returns true if the flap count exceeds the threshold', () => {
         const flappingHistory = [true, true, true, true].concat(new Array(16).fill(false));
-        const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>(
-          '1',
-          {
-            meta: { flappingHistory },
-          }
-        );
+        const alert = new Alert<AlertInstanceState, AlertInstanceContext>('1', {
+          meta: { flappingHistory },
+        });
         expect(isAlertFlapping(alert)).toEqual(true);
       });
 
       test("returns false the flap count doesn't exceed the threshold", () => {
         const flappingHistory = [true, true].concat(new Array(20).fill(false));
-        const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>(
-          '1',
-          {
-            meta: { flappingHistory },
-          }
-        );
+        const alert = new Alert<AlertInstanceState, AlertInstanceContext>('1', {
+          meta: { flappingHistory },
+        });
         expect(isAlertFlapping(alert)).toEqual(false);
       });
 
       test('returns true if not at capacity and the flap count exceeds the threshold', () => {
         const flappingHistory = new Array(5).fill(true);
-        const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>(
-          '1',
-          {
-            meta: { flappingHistory },
-          }
-        );
+        const alert = new Alert<AlertInstanceState, AlertInstanceContext>('1', {
+          meta: { flappingHistory },
+        });
         expect(isAlertFlapping(alert)).toEqual(true);
       });
     });
@@ -120,45 +111,33 @@ describe('setFlapping', () => {
     describe('currently flapping', () => {
       test('returns true if at capacity and the flap count exceeds the threshold', () => {
         const flappingHistory = new Array(16).fill(false).concat([true, true, true, true]);
-        const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>(
-          '1',
-          {
-            meta: { flappingHistory, flapping: true },
-          }
-        );
+        const alert = new Alert<AlertInstanceState, AlertInstanceContext>('1', {
+          meta: { flappingHistory, flapping: true },
+        });
         expect(isAlertFlapping(alert)).toEqual(true);
       });
 
       test("returns true if not at capacity and the flap count doesn't exceed the threshold", () => {
         const flappingHistory = new Array(16).fill(false);
-        const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>(
-          '1',
-          {
-            meta: { flappingHistory, flapping: true },
-          }
-        );
+        const alert = new Alert<AlertInstanceState, AlertInstanceContext>('1', {
+          meta: { flappingHistory, flapping: true },
+        });
         expect(isAlertFlapping(alert)).toEqual(true);
       });
 
       test('returns true if not at capacity and the flap count exceeds the threshold', () => {
         const flappingHistory = new Array(10).fill(false).concat([true, true, true, true]);
-        const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>(
-          '1',
-          {
-            meta: { flappingHistory, flapping: true },
-          }
-        );
+        const alert = new Alert<AlertInstanceState, AlertInstanceContext>('1', {
+          meta: { flappingHistory, flapping: true },
+        });
         expect(isAlertFlapping(alert)).toEqual(true);
       });
 
       test("returns false if at capacity and the flap count doesn't exceed the threshold", () => {
         const flappingHistory = new Array(20).fill(false);
-        const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>(
-          '1',
-          {
-            meta: { flappingHistory, flapping: true },
-          }
-        );
+        const alert = new Alert<AlertInstanceState, AlertInstanceContext>('1', {
+          meta: { flappingHistory, flapping: true },
+        });
         expect(isAlertFlapping(alert)).toEqual(false);
       });
     });
