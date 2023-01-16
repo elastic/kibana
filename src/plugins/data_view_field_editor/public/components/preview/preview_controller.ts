@@ -44,7 +44,9 @@ export class PreviewController {
     this.state$ = this.internalState$ as BehaviorObservable<PreviewState>;
   }
 
+  // @ts-ignore
   private dataView: DataView;
+  // @ts-ignore
   private search: ISearchStart;
   private state: PreviewState = previewStateDefault;
   private internalState$: BehaviorSubject<PreviewState>;
