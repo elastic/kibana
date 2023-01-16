@@ -24,8 +24,8 @@ const nonPackageMatcher = makeMatcher([
   'src/**',
   '!src/{dev,fixtures}/**',
   'x-pack/plugins/**',
-  '!x-pack/plugins/screenshotting/chromium',
-  '!x-pack/plugins/canvas/canvas_plugin_src',
+  '!x-pack/plugins/screenshotting/chromium/**',
+  '!x-pack/plugins/canvas/canvas_plugin_src/**',
 ]);
 
 export interface Options {
