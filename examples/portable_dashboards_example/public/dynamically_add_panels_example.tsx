@@ -52,8 +52,7 @@ export const DynamicByReferenceExample = ({ dataView }: { dataView: DataView }) 
     }
   };
 
-  const resetPersistableInput = async () => {
-    setIsSaving(true);
+  const resetPersistableInput = () => {
     localStorage.removeItem(INPUT_KEY);
     if (dashboardContainer) {
       const children = dashboardContainer.getChildIds();
@@ -61,8 +60,6 @@ export const DynamicByReferenceExample = ({ dataView }: { dataView: DataView }) 
         dashboardContainer.removeEmbeddable(childId);
       });
     }
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setIsSaving(false);
   };
 
   const addByReference = () => {
@@ -106,15 +103,15 @@ export const DynamicByReferenceExample = ({ dataView }: { dataView: DataView }) 
       </EuiText>
       <EuiSpacer size="m" />
       <EuiPanel hasBorder={true}>
-        <EuiFlexGroup alignItems="center">
-          <EuiFlexItem>
-            <EuiFlexGroup gutterSize="s" alignItems="center">
-              <EuiFlexItem grow={false}>
+        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="s">
+              <EuiFlexItem>
                 <EuiButton onClick={addByValue} isDisabled={disableButtons}>
                   Add visualization by value
                 </EuiButton>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem>
                 <EuiButton onClick={addByReference} isDisabled={disableButtons}>
                   Add visualization from library
                 </EuiButton>
@@ -122,13 +119,13 @@ export const DynamicByReferenceExample = ({ dataView }: { dataView: DataView }) 
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s" alignItems="center">
-              <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="s">
+              <EuiFlexItem>
                 <EuiButton fill onClick={onSave} isLoading={isSaving} isDisabled={disableButtons}>
                   Save to local storage
                 </EuiButton>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem>
                 <EuiButton
                   onClick={resetPersistableInput}
                   isLoading={isSaving}
@@ -148,7 +145,7 @@ export const DynamicByReferenceExample = ({ dataView }: { dataView: DataView }) 
             return {
               initialInput: {
                 ...persistedInput,
-                timeRange: { from: 'now-30d', to: 'now' }, // need to set the time range
+                timeRange: { from: 'now-30d', to: 'now' }, // need to set the time range for the by value vis
               },
             };
           }}
