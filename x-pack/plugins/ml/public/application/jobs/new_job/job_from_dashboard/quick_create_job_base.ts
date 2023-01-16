@@ -227,7 +227,7 @@ export class QuickJobCreatorBase {
       mergedVisAndLayerQueries ? mergedVisAndLayerQueries : visQueries,
       mergeQueriesCheck
     );
-    
+
     return mergedQueries;
   }
 
