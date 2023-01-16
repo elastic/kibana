@@ -6,8 +6,7 @@
  */
 import React, { useReducer } from 'react';
 
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { render, screen, within, fireEvent } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 
@@ -172,7 +171,7 @@ describe('AlertsTable.BulkActions', () => {
         expect(bulkActionsCells[0].checked).toBeFalsy();
         expect(bulkActionsCells[1].checked).toBeFalsy();
 
-        userEvent.click(screen.getByTestId('bulk-actions-header'));
+        fireEvent.click(screen.getByTestId('bulk-actions-header'));
 
         bulkActionsCells = screen.getAllByTestId('bulk-actions-row-cell') as HTMLInputElement[];
         expect(bulkActionsCells[0].checked).toBeTruthy();
@@ -218,7 +217,7 @@ describe('AlertsTable.BulkActions', () => {
             (screen.getByTestId('bulk-actions-header') as HTMLInputElement).checked
           ).toBeTruthy();
 
-          userEvent.click(bulkActionsCells[1]);
+          fireEvent.click(bulkActionsCells[1]);
           expect(
             (screen.getByTestId('bulk-actions-header') as HTMLInputElement).checked
           ).toBeFalsy();
@@ -281,7 +280,7 @@ describe('AlertsTable.BulkActions', () => {
           ((await screen.findAllByTestId('bulk-actions-row-cell')) as HTMLInputElement[])[1].checked
         ).toBeTruthy();
 
-        userEvent.click(await screen.findByTestId('bulk-actions-header'));
+        fireEvent.click(await screen.findByTestId('bulk-actions-header'));
 
         expect(
           ((await screen.findAllByTestId('bulk-actions-row-cell')) as HTMLInputElement[])[0].checked
@@ -302,7 +301,7 @@ describe('AlertsTable.BulkActions', () => {
         const bulkActionsCells = screen.getAllByTestId(
           'bulk-actions-row-cell'
         ) as HTMLInputElement[];
-        userEvent.click(bulkActionsCells[0]);
+        fireEvent.click(bulkActionsCells[0]);
 
         expect(await screen.findByTestId('selectedShowBulkActionsButton')).toBeDefined();
         expect(await screen.findByTestId('selectAllAlertsButton')).toBeDefined();
@@ -326,7 +325,7 @@ describe('AlertsTable.BulkActions', () => {
           expect(getByTestId('selectAllAlertsButton')).toBeDefined();
 
           const bulkActionsCells = getAllByTestId('bulk-actions-row-cell') as HTMLInputElement[];
-          userEvent.click(bulkActionsCells[0]);
+          fireEvent.click(bulkActionsCells[0]);
 
           expect(queryByTestId('selectAllAlertsButton')).toBeNull();
           expect(queryByTestId('selectedShowBulkActionsButton')).toBeNull();
@@ -360,10 +359,10 @@ describe('AlertsTable.BulkActions', () => {
 
           render(<AlertsTableWithBulkActionsContext {...props} />);
 
-          userEvent.click(await screen.findByTestId('selectedShowBulkActionsButton'));
+          fireEvent.click(await screen.findByTestId('selectedShowBulkActionsButton'));
           await waitForEuiPopoverOpen();
 
-          userEvent.click(await screen.findByText('Fake Bulk Action'));
+          fireEvent.click(await screen.findByText('Fake Bulk Action'));
           expect(mockedFn.mock.calls[0][0]).toEqual([
             {
               _id: 'alert1',
@@ -386,6 +385,82 @@ describe('AlertsTable.BulkActions', () => {
           ]);
           expect(mockedFn.mock.calls[0][1]).toEqual(false);
           expect(mockedFn.mock.calls[0][2]).toBeDefined(); // it's a callback
+        });
+
+        describe('and the callback to represent the loading state is executed', () => {
+          let mockedFn: jest.Mock;
+          let props: AlertsTableProps;
+
+          beforeEach(() => {
+            mockedFn = jest.fn();
+            props = {
+              ...tablePropsWithBulkActions,
+              alertsTableConfiguration: {
+                ...alertsTableConfiguration,
+                useBulkActions: () => [
+                  {
+                    label: 'Fake Bulk Action',
+                    key: 'fakeBulkAction',
+                    'data-test-subj': 'fake-bulk-action',
+                    disableOnQuery: false,
+                    onClick: mockedFn,
+                  },
+                ],
+              },
+            };
+          });
+
+          it('should show the loading state on each selected row', async () => {
+            const initialBulkActionsState = {
+              ...defaultBulkActionsState,
+              rowSelection: new Map([[1, false]]),
+            };
+            render(
+              <AlertsTableWithBulkActionsContext
+                {...props}
+                initialBulkActionsState={initialBulkActionsState}
+              />
+            );
+            fireEvent.click(await screen.findByTestId('selectedShowBulkActionsButton'));
+            await waitForEuiPopoverOpen();
+
+            fireEvent.click(await screen.findByText('Fake Bulk Action'));
+
+            // the callback given to our clients to run when they want to update the loading state
+            mockedFn.mock.calls[0][2](true);
+
+            expect(await screen.findAllByTestId('row-loader')).toHaveLength(1);
+            const selectedOptions = await screen.findAllByTestId('dataGridRowCell');
+            // first row, first column
+            expect(within(selectedOptions[0]).queryByLabelText('Loading')).not.toBeInTheDocument();
+            expect(within(selectedOptions[0]).getByRole('checkbox')).toBeDefined();
+
+            // second row, first column
+            expect(within(selectedOptions[4]).getByLabelText('Loading')).toBeDefined();
+            expect(within(selectedOptions[4]).queryByRole('checkbox')).not.toBeInTheDocument();
+          });
+
+          it('should hide the loading state on each selected row', async () => {
+            const initialBulkActionsState = {
+              ...defaultBulkActionsState,
+              rowSelection: new Map([[1, true]]),
+            };
+            render(
+              <AlertsTableWithBulkActionsContext
+                {...props}
+                initialBulkActionsState={initialBulkActionsState}
+              />
+            );
+            fireEvent.click(await screen.findByTestId('selectedShowBulkActionsButton'));
+            await waitForEuiPopoverOpen();
+
+            fireEvent.click(await screen.findByText('Fake Bulk Action'));
+
+            // the callback given to our clients to run when they want to update the loading state
+            mockedFn.mock.calls[0][2](false);
+
+            expect(screen.queryByTestId('row-loader')).not.toBeInTheDocument();
+          });
         });
       });
 
@@ -410,7 +485,7 @@ describe('AlertsTable.BulkActions', () => {
               .checked
           ).toBeFalsy();
 
-          userEvent.click(screen.getByTestId('selectAllAlertsButton'));
+          fireEvent.click(screen.getByTestId('selectAllAlertsButton'));
 
           expect(
             ((await screen.findAllByTestId('bulk-actions-row-cell')) as HTMLInputElement[])[0]
@@ -448,7 +523,7 @@ describe('AlertsTable.BulkActions', () => {
                 .checked
             ).toBeTruthy();
 
-            userEvent.click(screen.getByTestId('selectAllAlertsButton'));
+            fireEvent.click(screen.getByTestId('selectAllAlertsButton'));
 
             expect(
               ((await screen.findAllByTestId('bulk-actions-row-cell')) as HTMLInputElement[])[0]
@@ -493,10 +568,10 @@ describe('AlertsTable.BulkActions', () => {
               <AlertsTableWithBulkActionsContext {...props} />
             );
 
-            userEvent.click(getByTestId('selectedShowBulkActionsButton'));
+            fireEvent.click(getByTestId('selectedShowBulkActionsButton'));
             await waitForEuiPopoverOpen();
 
-            userEvent.click(getByText('Fake Bulk Action'));
+            fireEvent.click(getByText('Fake Bulk Action'));
             expect(mockedFn.mock.calls[0][0]).toEqual([
               {
                 _id: 'alert0',
