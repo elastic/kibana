@@ -8,18 +8,10 @@
 
 import React from 'react';
 
-import { buildPhraseFilter, Filter } from '@kbn/es-query';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import { DashboardContainerRenderer } from '@kbn/dashboard-plugin/public';
 import { EuiCode, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 
-export const StaticByReferenceExample = ({
-  dashboardId,
-  dataView,
-}: {
-  dashboardId?: string;
-  dataView: DataView;
-}) => {
+export const StaticByValueExample = ({ dashboardId }: { dashboardId?: string }) => {
   return dashboardId ? (
     <>
       <EuiTitle>
@@ -28,29 +20,14 @@ export const StaticByReferenceExample = ({
       <EuiText>
         <p>
           Loads a static, non-editable version of the <EuiCode>[Logs] Web Traffic</EuiCode>{' '}
-          dashboard, excluding any logs with an operating system of <EuiCode>win xip</EuiCode>.
+          dashboard.
         </p>
       </EuiText>
       <EuiSpacer size="m" />
-      <EuiPanel
-        hasBorder={true}
-        // Once https://github.com/elastic/kibana/pull/145628 is merged, we should (hopefully) be able to make the dashboard
-        // conform to the height of the panel by uncommenting this:
-        // css={css`
-        //   height: 300px;
-        // `}
-      >
+      <EuiPanel hasBorder={true}>
         <DashboardContainerRenderer
-          savedObjectId={dashboardId}
           getCreationOptions={() => {
-            const field = dataView.getFieldByName('machine.os.keyword');
-            let filter: Filter;
-            if (field) {
-              filter = buildPhraseFilter(field, 'win xp', dataView);
-              filter.meta.negate = true;
-              return { overrideInput: { filters: [filter] } }; // create a static filter to apply to by reference dashboard
-            }
-            return {}; // if can't find the field, then just return no special creation options
+            return {}; // no special creation options - just loading a saved object
           }}
           onDashboardContainerLoaded={(container) => {
             return; // this example is static, so don't need to do anything with the dashboard container

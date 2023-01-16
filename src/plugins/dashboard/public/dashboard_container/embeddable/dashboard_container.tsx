@@ -242,6 +242,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       ...creationOptions?.overrideInput,
     });
 
+    console.log('initialInput', initialInput);
     // set up execution context
     initialInput.executionContext = {
       type: 'dashboard',

@@ -9,9 +9,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
+import { EuiSpacer } from '@elastic/eui';
 import { AppMountParameters } from '@kbn/core/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+
 import { EmbeddableDashboardsExampleStartDeps } from './plugin';
+import { StaticByValueExample } from './static_by_value_example';
 import { StaticByReferenceExample } from './static_by_reference_example';
 
 export const renderApp = async (
@@ -27,7 +30,9 @@ export const renderApp = async (
   const examples =
     dataViews.length > 0 ? (
       <>
-        <StaticByReferenceExample dashboardId={logsSampleDashboardId} />
+        <StaticByReferenceExample dashboardId={logsSampleDashboardId} dataView={dataViews[0]} />
+        <EuiSpacer size="xl" />
+        {/* <StaticByValueExample dashboardId={logsSampleDashboardId} /> */}
       </>
     ) : (
       <div>{'Install web logs sample data to run the embeddable dashboard examples.'}</div>
