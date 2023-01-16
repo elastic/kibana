@@ -1214,7 +1214,6 @@ describe('XYChart component', () => {
 
     const tooltip = wrapper.find(Tooltip);
     const actions = tooltip.prop('actions');
-    // [{"disabled": [Function disabled], "label": [Function label], "onSelect": [Function filterSelectedTooltipValues]}]
     expect(actions?.length).toBe(1);
     expect(actions).toEqual(
       expect.arrayContaining([
