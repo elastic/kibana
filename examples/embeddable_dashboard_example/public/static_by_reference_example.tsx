@@ -9,10 +9,9 @@
 import React from 'react';
 
 import { DashboardContainerRenderer } from '@kbn/dashboard-plugin/public';
-import { EuiCode, EuiPanel, EuiPortal, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiCode, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 
-export const BasicReduxExample = ({ dashboardId }: { dashboardId?: string }) => {
+export const StaticByReferenceExample = ({ dashboardId }: { dashboardId?: string }) => {
   return dashboardId ? (
     <>
       <EuiTitle>
@@ -27,7 +26,8 @@ export const BasicReduxExample = ({ dashboardId }: { dashboardId?: string }) => 
       <EuiSpacer size="m" />
       <EuiPanel
         hasBorder={true}
-        // Waiting on Catherine's PR so that the dashboard is contained by its parent before we can set the height of the panel
+        // Once https://github.com/elastic/kibana/pull/145628 is merged, we should (hopefully) be able to make the dashboard
+        // conform to the height of the panel by uncommenting this:
         // css={css`
         //   height: 300px;
         // `}

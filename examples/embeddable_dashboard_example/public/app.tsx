@@ -12,7 +12,7 @@ import ReactDOM from 'react-dom';
 import { AppMountParameters } from '@kbn/core/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { EmbeddableDashboardsExampleStartDeps } from './plugin';
-import { BasicReduxExample } from './basic_redux_example';
+import { StaticByReferenceExample } from './static_by_reference_example';
 
 export const renderApp = async (
   { data, dashboard }: EmbeddableDashboardsExampleStartDeps,
@@ -27,7 +27,7 @@ export const renderApp = async (
   const examples =
     dataViews.length > 0 ? (
       <>
-        <BasicReduxExample dashboardId={logsSampleDashboardId} />
+        <StaticByReferenceExample dashboardId={logsSampleDashboardId} />
       </>
     ) : (
       <div>{'Install web logs sample data to run the embeddable dashboard examples.'}</div>
