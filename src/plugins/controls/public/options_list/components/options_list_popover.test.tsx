@@ -66,7 +66,7 @@ describe('Options list popover', () => {
   });
 
   test('no available options', async () => {
-    const popover = await mountComponent({ componentState: { availableOptions: [] } });
+    const popover = await mountComponent({ componentState: { availableOptions: {} } });
     const availableOptionsDiv = findTestSubject(popover, 'optionsList-control-available-options');
     const noOptionsDiv = findTestSubject(
       availableOptionsDiv,
@@ -116,6 +116,43 @@ describe('Options list popover', () => {
     sortButton = findTestSubject(popover, 'optionsListControl__sortingOptionsButton');
     expect(searchBox.prop('disabled')).toBe(true);
     expect(sortButton.prop('disabled')).toBe(true);
+  });
+
+  test('test single invalid selection', async () => {
+    const popover = await mountComponent({
+      explicitInput: {
+        selectedOptions: ['bark', 'woof'],
+      },
+      componentState: {
+        availableOptions: {
+          bark: { doc_count: 75 },
+        },
+        validSelections: ['bark'],
+        invalidSelections: ['woof'],
+      },
+    });
+    const validSelection = findTestSubject(popover, 'optionsList-control-selection-bark');
+    expect(validSelection.text()).toEqual('bark75');
+    const title = findTestSubject(popover, 'optionList__ignoredSelectionLabel').text();
+    expect(title).toEqual('Ignored selection');
+    const invalidSelection = findTestSubject(popover, 'optionsList-control-ignored-selection-woof');
+    expect(invalidSelection.text()).toEqual('woof');
+    expect(invalidSelection.hasClass('optionsList__selectionInvalid')).toBe(true);
+  });
+
+  test('test title when multiple invalid selections', async () => {
+    const popover = await mountComponent({
+      explicitInput: { selectedOptions: ['bark', 'woof', 'meow'] },
+      componentState: {
+        availableOptions: {
+          bark: { doc_count: 75 },
+        },
+        validSelections: ['bark'],
+        invalidSelections: ['woof', 'meow'],
+      },
+    });
+    const title = findTestSubject(popover, 'optionList__ignoredSelectionLabel').text();
+    expect(title).toEqual('Ignored selections');
   });
 
   test('should default to exclude = false', async () => {
@@ -172,7 +209,7 @@ describe('Options list popover', () => {
 
   test('if existsSelected = false and no suggestions, then "Exists" does not show up', async () => {
     const popover = await mountComponent({
-      componentState: { availableOptions: [] },
+      componentState: { availableOptions: {} },
       explicitInput: { existsSelected: false },
     });
     const existsOption = findTestSubject(popover, 'optionsList-control-selection-exists');

@@ -7,7 +7,7 @@
 
 import type { ChangePoint } from '@kbn/ml-agg-utils';
 
-import type { GroupTableItem } from '../../components/spike_analysis_table/spike_analysis_table_groups';
+import type { GroupTableItem } from '../../components/spike_analysis_table/types';
 
 import { buildBaseFilterCriteria } from './query_utils';
 

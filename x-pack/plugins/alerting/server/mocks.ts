@@ -10,7 +10,9 @@ import {
   savedObjectsClientMock,
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { searchSourceCommonMock } from '@kbn/data-plugin/common/search/search_source/mocks';
+import { SharePluginStart } from '@kbn/share-plugin/server';
 import { rulesClientMock } from './rules_client.mock';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { Alert, AlertFactoryDoneUtils } from './alert';
@@ -32,6 +34,21 @@ const createSetupMock = () => {
   return mock;
 };
 
+const createShareStartMock = () => {
+  const startContract = {
+    url: {
+      locators: {
+        get: (id: string) => {
+          if (id === 'DISCOVER_APP_LOCATOR') {
+            return { getRedirectUrl: (params: unknown) => JSON.stringify(params) };
+          }
+        },
+      },
+    },
+  } as SharePluginStart;
+  return startContract;
+};
+
 const createStartMock = () => {
   const mock: jest.Mocked<PluginStartContract> = {
     listTypes: jest.fn(),
@@ -48,7 +65,7 @@ export type AlertInstanceMock<
   Context extends AlertInstanceContext = AlertInstanceContext
 > = jest.Mocked<Alert<State, Context>>;
 
-const createAlertFactoryMock = {
+export const createAlertFactoryMock = {
   create: <
     InstanceState extends AlertInstanceState = AlertInstanceState,
     InstanceContext extends AlertInstanceContext = AlertInstanceContext
@@ -148,6 +165,8 @@ const createRuleExecutorServicesMock = <
     search: createAbortableSearchServiceMock(),
     searchSourceClient: searchSourceCommonMock,
     ruleMonitoringService: createRuleMonitoringServiceMock(),
+    share: createShareStartMock(),
+    dataViews: dataViewPluginMocks.createStartContract(),
   };
 };
 export type RuleExecutorServicesMock = ReturnType<typeof createRuleExecutorServicesMock>;

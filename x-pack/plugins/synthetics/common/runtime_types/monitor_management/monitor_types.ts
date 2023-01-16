@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import { AlertConfigsCodec } from './alert_config';
 import { secretKeys } from '../../constants/monitor_management';
 import { ConfigKey } from './config_key';
 import { MonitorServiceLocationCodec, ServiceLocationErrors } from './locations';
@@ -88,6 +89,7 @@ export const CommonFieldsCodec = t.intersection([
     [ConfigKey.PROJECT_ID]: t.string,
     [ConfigKey.ORIGINAL_SPACE]: t.string,
     [ConfigKey.CUSTOM_HEARTBEAT_ID]: t.string,
+    [ConfigKey.ALERT_CONFIG]: AlertConfigsCodec,
   }),
 ]);
 
@@ -373,12 +375,16 @@ export type MonitorDefaults = t.TypeOf<typeof MonitorDefaultsCodec>;
 
 export const MonitorManagementListResultCodec = t.type({
   monitors: t.array(
-    t.interface({
-      id: t.string,
-      attributes: EncryptedSyntheticsMonitorCodec,
-      updated_at: t.string,
-      created_at: t.string,
-    })
+    t.intersection([
+      t.interface({
+        id: t.string,
+        attributes: EncryptedSyntheticsMonitorCodec,
+      }),
+      t.partial({
+        updated_at: t.string,
+        created_at: t.string,
+      }),
+    ])
   ),
   page: t.number,
   perPage: t.number,
@@ -395,6 +401,7 @@ export const MonitorOverviewItemCodec = t.interface({
   configId: t.string,
   location: MonitorServiceLocationCodec,
   isEnabled: t.boolean,
+  isStatusAlertEnabled: t.boolean,
 });
 
 export type MonitorOverviewItem = t.TypeOf<typeof MonitorOverviewItemCodec>;

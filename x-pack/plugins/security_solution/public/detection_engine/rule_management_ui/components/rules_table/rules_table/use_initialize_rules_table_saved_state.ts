@@ -62,7 +62,7 @@ export function useInitializeRulesTableSavedState(): void {
   } = useKibana();
 
   useEffect(() => {
-    const { decodedParam: urlState } = getUrlParam();
+    const urlState = getUrlParam();
     const storageState = readStorageState(sessionStorage);
 
     if (!urlState && !storageState) {

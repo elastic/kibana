@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiPanel,
+  EuiSpacer,
+} from '@elastic/eui';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
@@ -15,17 +21,30 @@ import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transact
 import { MobileTransactionCharts } from '../../../shared/charts/transaction_charts/mobile_transaction_charts';
 import { TransactionsTable } from '../../../shared/transactions_table';
 import { replace } from '../../../shared/links/url_helpers';
+import { getKueryWithMobileFilters } from '../../../../../common/utils/get_kuery_with_mobile_filters';
 
 export function MobileTransactionOverview() {
   const {
     query: {
       environment,
-      kuery,
       rangeFrom,
       rangeTo,
       transactionType: transactionTypeFromUrl,
+      device,
+      osVersion,
+      appVersion,
+      netConnectionType,
+      kuery,
     },
   } = useApmParams('/mobile-services/{serviceName}/transactions');
+
+  const kueryWithFilters = getKueryWithMobileFilters({
+    device,
+    osVersion,
+    appVersion,
+    netConnectionType,
+    kuery,
+  });
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -40,6 +59,9 @@ export function MobileTransactionOverview() {
 
   return (
     <>
+      <EuiFlexItem>
+        <EuiHorizontalRule />
+      </EuiFlexItem>
       {fallbackToTransactions && (
         <>
           <EuiFlexGroup>
@@ -51,7 +73,7 @@ export function MobileTransactionOverview() {
         </>
       )}
       <MobileTransactionCharts
-        kuery={kuery}
+        kuery={kueryWithFilters}
         environment={environment}
         start={start}
         end={end}
@@ -63,7 +85,7 @@ export function MobileTransactionOverview() {
           numberOfTransactionsPerPage={25}
           showAggregationAccurateCallout
           environment={environment}
-          kuery={kuery}
+          kuery={kueryWithFilters}
           start={start}
           end={end}
           saveTableOptionsToUrl

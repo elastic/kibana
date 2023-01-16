@@ -10,10 +10,18 @@
   },
   "server": {
     "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-        "id": "def-server.createRoot",
+        "id": "def-common.createRoot",
         "type": "Function",
         "tags": [],
         "label": "createRoot",
@@ -26,9 +34,9 @@
           ">) => ",
           {
             "pluginId": "@kbn/core-root-server-internal",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreRootServerInternalPluginApi",
-            "section": "def-server.Root",
+            "section": "def-common.Root",
             "text": "Root"
           }
         ],
@@ -38,7 +46,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-            "id": "def-server.createRoot.$1",
+            "id": "def-common.createRoot.$1",
             "type": "Object",
             "tags": [],
             "label": "settings",
@@ -55,7 +63,7 @@
           },
           {
             "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-            "id": "def-server.createRoot.$2",
+            "id": "def-common.createRoot.$2",
             "type": "Object",
             "tags": [],
             "label": "cliArgs",
@@ -76,7 +84,7 @@
       },
       {
         "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-        "id": "def-server.createRootWithCorePlugins",
+        "id": "def-common.createRootWithCorePlugins",
         "type": "Function",
         "tags": [],
         "label": "createRootWithCorePlugins",
@@ -89,9 +97,9 @@
           ">, customKibanaVersion: string | undefined) => ",
           {
             "pluginId": "@kbn/core-root-server-internal",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreRootServerInternalPluginApi",
-            "section": "def-server.Root",
+            "section": "def-common.Root",
             "text": "Root"
           }
         ],
@@ -101,7 +109,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-            "id": "def-server.createRootWithCorePlugins.$1",
+            "id": "def-common.createRootWithCorePlugins.$1",
             "type": "Object",
             "tags": [],
             "label": "settings",
@@ -118,7 +126,7 @@
           },
           {
             "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-            "id": "def-server.createRootWithCorePlugins.$2",
+            "id": "def-common.createRootWithCorePlugins.$2",
             "type": "Object",
             "tags": [],
             "label": "cliArgs",
@@ -135,7 +143,7 @@
           },
           {
             "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-            "id": "def-server.createRootWithCorePlugins.$3",
+            "id": "def-common.createRootWithCorePlugins.$3",
             "type": "string",
             "tags": [],
             "label": "customKibanaVersion",
@@ -154,7 +162,7 @@
       },
       {
         "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-        "id": "def-server.createRootWithSettings",
+        "id": "def-common.createRootWithSettings",
         "type": "Function",
         "tags": [],
         "label": "createRootWithSettings",
@@ -165,9 +173,9 @@
           ">, customKibanaVersion: string | undefined) => ",
           {
             "pluginId": "@kbn/core-root-server-internal",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreRootServerInternalPluginApi",
-            "section": "def-server.Root",
+            "section": "def-common.Root",
             "text": "Root"
           }
         ],
@@ -177,7 +185,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-            "id": "def-server.createRootWithSettings.$1",
+            "id": "def-common.createRootWithSettings.$1",
             "type": "Object",
             "tags": [],
             "label": "settings",
@@ -192,7 +200,7 @@
           },
           {
             "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-            "id": "def-server.createRootWithSettings.$2",
+            "id": "def-common.createRootWithSettings.$2",
             "type": "Object",
             "tags": [],
             "label": "cliArgs",
@@ -209,7 +217,7 @@
           },
           {
             "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-            "id": "def-server.createRootWithSettings.$3",
+            "id": "def-common.createRootWithSettings.$3",
             "type": "string",
             "tags": [],
             "label": "customKibanaVersion",
@@ -228,7 +236,7 @@
       },
       {
         "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-        "id": "def-server.createTestServers",
+        "id": "def-common.createTestServers",
         "type": "Function",
         "tags": [
           "prop",
@@ -242,17 +250,17 @@
           "({\n  adjustTimeout,\n  settings = {},\n}: { adjustTimeout: (timeout: number) => void; settings?: { es?: Partial<",
           {
             "pluginId": "@kbn/test",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnTestPluginApi",
-            "section": "def-server.CreateTestEsClusterOptions",
+            "section": "def-common.CreateTestEsClusterOptions",
             "text": "CreateTestEsClusterOptions"
           },
           "> | undefined; kbn?: { [key: string]: any; plugins?: { [key: string]: any; paths: string[]; } | undefined; } | undefined; users?: { username: string; password: string; roles: string[]; }[] | undefined; } | undefined; }) => ",
           {
             "pluginId": "@kbn/core-test-helpers-kbn-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreTestHelpersKbnServerPluginApi",
-            "section": "def-server.TestUtils",
+            "section": "def-common.TestUtils",
             "text": "TestUtils"
           }
         ],
@@ -262,7 +270,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-            "id": "def-server.createTestServers.$1",
+            "id": "def-common.createTestServers.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  adjustTimeout,\n  settings = {},\n}",
@@ -273,7 +281,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-                "id": "def-server.createTestServers.$1.adjustTimeout",
+                "id": "def-common.createTestServers.$1.adjustTimeout",
                 "type": "Function",
                 "tags": [],
                 "label": "adjustTimeout",
@@ -287,7 +295,7 @@
                 "children": [
                   {
                     "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-                    "id": "def-server.createTestServers.$1.adjustTimeout.$1",
+                    "id": "def-common.createTestServers.$1.adjustTimeout.$1",
                     "type": "number",
                     "tags": [],
                     "label": "timeout",
@@ -305,7 +313,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-                "id": "def-server.createTestServers.$1.settings",
+                "id": "def-common.createTestServers.$1.settings",
                 "type": "Object",
                 "tags": [],
                 "label": "settings",
@@ -314,9 +322,9 @@
                   "{ es?: Partial<",
                   {
                     "pluginId": "@kbn/test",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnTestPluginApi",
-                    "section": "def-server.CreateTestEsClusterOptions",
+                    "section": "def-common.CreateTestEsClusterOptions",
                     "text": "CreateTestEsClusterOptions"
                   },
                   "> | undefined; kbn?: { [key: string]: any; plugins?: { [key: string]: any; paths: string[]; } | undefined; } | undefined; users?: { username: string; password: string; roles: string[]; }[] | undefined; } | undefined"
@@ -333,7 +341,7 @@
       },
       {
         "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-        "id": "def-server.getSupertest",
+        "id": "def-common.getSupertest",
         "type": "Function",
         "tags": [],
         "label": "getSupertest",
@@ -344,17 +352,17 @@
           "(root: ",
           {
             "pluginId": "@kbn/core-root-server-internal",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreRootServerInternalPluginApi",
-            "section": "def-server.Root",
+            "section": "def-common.Root",
             "text": "Root"
           },
           ", method: ",
           {
             "pluginId": "@kbn/core-test-helpers-kbn-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreTestHelpersKbnServerPluginApi",
-            "section": "def-server.HttpMethod",
+            "section": "def-common.HttpMethod",
             "text": "HttpMethod"
           },
           ", path: string) => ",
@@ -366,7 +374,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-            "id": "def-server.getSupertest.$1",
+            "id": "def-common.getSupertest.$1",
             "type": "Object",
             "tags": [],
             "label": "root",
@@ -374,9 +382,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-root-server-internal",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreRootServerInternalPluginApi",
-                "section": "def-server.Root",
+                "section": "def-common.Root",
                 "text": "Root"
               }
             ],
@@ -387,7 +395,7 @@
           },
           {
             "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-            "id": "def-server.getSupertest.$2",
+            "id": "def-common.getSupertest.$2",
             "type": "CompoundType",
             "tags": [],
             "label": "method",
@@ -395,9 +403,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-test-helpers-kbn-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreTestHelpersKbnServerPluginApi",
-                "section": "def-server.HttpMethod",
+                "section": "def-common.HttpMethod",
                 "text": "HttpMethod"
               }
             ],
@@ -408,7 +416,7 @@
           },
           {
             "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-            "id": "def-server.getSupertest.$3",
+            "id": "def-common.getSupertest.$3",
             "type": "string",
             "tags": [],
             "label": "path",
@@ -429,7 +437,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-        "id": "def-server.TestElasticsearchUtils",
+        "id": "def-common.TestElasticsearchUtils",
         "type": "Interface",
         "tags": [],
         "label": "TestElasticsearchUtils",
@@ -440,7 +448,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-            "id": "def-server.TestElasticsearchUtils.stop",
+            "id": "def-common.TestElasticsearchUtils.stop",
             "type": "Function",
             "tags": [],
             "label": "stop",
@@ -456,7 +464,7 @@
           },
           {
             "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-            "id": "def-server.TestElasticsearchUtils.es",
+            "id": "def-common.TestElasticsearchUtils.es",
             "type": "Any",
             "tags": [],
             "label": "es",
@@ -470,7 +478,7 @@
           },
           {
             "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-            "id": "def-server.TestElasticsearchUtils.hosts",
+            "id": "def-common.TestElasticsearchUtils.hosts",
             "type": "Array",
             "tags": [],
             "label": "hosts",
@@ -484,7 +492,7 @@
           },
           {
             "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-            "id": "def-server.TestElasticsearchUtils.username",
+            "id": "def-common.TestElasticsearchUtils.username",
             "type": "string",
             "tags": [],
             "label": "username",
@@ -495,7 +503,7 @@
           },
           {
             "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-            "id": "def-server.TestElasticsearchUtils.password",
+            "id": "def-common.TestElasticsearchUtils.password",
             "type": "string",
             "tags": [],
             "label": "password",
@@ -509,7 +517,7 @@
       },
       {
         "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-        "id": "def-server.TestKibanaUtils",
+        "id": "def-common.TestKibanaUtils",
         "type": "Interface",
         "tags": [],
         "label": "TestKibanaUtils",
@@ -520,7 +528,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-            "id": "def-server.TestKibanaUtils.root",
+            "id": "def-common.TestKibanaUtils.root",
             "type": "Object",
             "tags": [],
             "label": "root",
@@ -528,9 +536,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-root-server-internal",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreRootServerInternalPluginApi",
-                "section": "def-server.Root",
+                "section": "def-common.Root",
                 "text": "Root"
               }
             ],
@@ -540,7 +548,7 @@
           },
           {
             "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-            "id": "def-server.TestKibanaUtils.coreSetup",
+            "id": "def-common.TestKibanaUtils.coreSetup",
             "type": "Object",
             "tags": [],
             "label": "coreSetup",
@@ -554,7 +562,7 @@
           },
           {
             "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-            "id": "def-server.TestKibanaUtils.coreStart",
+            "id": "def-common.TestKibanaUtils.coreStart",
             "type": "Object",
             "tags": [],
             "label": "coreStart",
@@ -568,7 +576,7 @@
           },
           {
             "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-            "id": "def-server.TestKibanaUtils.stop",
+            "id": "def-common.TestKibanaUtils.stop",
             "type": "Function",
             "tags": [],
             "label": "stop",
@@ -587,7 +595,7 @@
       },
       {
         "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-        "id": "def-server.TestUtils",
+        "id": "def-common.TestUtils",
         "type": "Interface",
         "tags": [],
         "label": "TestUtils",
@@ -598,7 +606,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-            "id": "def-server.TestUtils.startES",
+            "id": "def-common.TestUtils.startES",
             "type": "Function",
             "tags": [],
             "label": "startES",
@@ -607,9 +615,9 @@
               "() => Promise<",
               {
                 "pluginId": "@kbn/core-test-helpers-kbn-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreTestHelpersKbnServerPluginApi",
-                "section": "def-server.TestElasticsearchUtils",
+                "section": "def-common.TestElasticsearchUtils",
                 "text": "TestElasticsearchUtils"
               },
               ">"
@@ -622,7 +630,7 @@
           },
           {
             "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-            "id": "def-server.TestUtils.startKibana",
+            "id": "def-common.TestUtils.startKibana",
             "type": "Function",
             "tags": [],
             "label": "startKibana",
@@ -631,9 +639,9 @@
               "() => Promise<",
               {
                 "pluginId": "@kbn/core-test-helpers-kbn-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreTestHelpersKbnServerPluginApi",
-                "section": "def-server.TestKibanaUtils",
+                "section": "def-common.TestKibanaUtils",
                 "text": "TestKibanaUtils"
               },
               ">"
@@ -652,7 +660,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-        "id": "def-server.HttpMethod",
+        "id": "def-common.HttpMethod",
         "type": "Type",
         "tags": [],
         "label": "HttpMethod",
@@ -669,7 +677,7 @@
     "objects": [
       {
         "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-        "id": "def-server.request",
+        "id": "def-common.request",
         "type": "Object",
         "tags": [],
         "label": "request",
@@ -680,7 +688,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-            "id": "def-server.request.delete",
+            "id": "def-common.request.delete",
             "type": "Function",
             "tags": [],
             "label": "delete",
@@ -689,9 +697,9 @@
               "(root: ",
               {
                 "pluginId": "@kbn/core-root-server-internal",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreRootServerInternalPluginApi",
-                "section": "def-server.Root",
+                "section": "def-common.Root",
                 "text": "Root"
               },
               ", path: string) => ",
@@ -703,7 +711,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-                "id": "def-server.request.delete.$1",
+                "id": "def-common.request.delete.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "root",
@@ -711,9 +719,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-root-server-internal",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreRootServerInternalPluginApi",
-                    "section": "def-server.Root",
+                    "section": "def-common.Root",
                     "text": "Root"
                   }
                 ],
@@ -724,7 +732,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-                "id": "def-server.request.delete.$2",
+                "id": "def-common.request.delete.$2",
                 "type": "string",
                 "tags": [],
                 "label": "path",
@@ -742,7 +750,7 @@
           },
           {
             "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-            "id": "def-server.request.get",
+            "id": "def-common.request.get",
             "type": "Function",
             "tags": [],
             "label": "get",
@@ -751,9 +759,9 @@
               "(root: ",
               {
                 "pluginId": "@kbn/core-root-server-internal",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreRootServerInternalPluginApi",
-                "section": "def-server.Root",
+                "section": "def-common.Root",
                 "text": "Root"
               },
               ", path: string) => ",
@@ -765,7 +773,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-                "id": "def-server.request.get.$1",
+                "id": "def-common.request.get.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "root",
@@ -773,9 +781,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-root-server-internal",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreRootServerInternalPluginApi",
-                    "section": "def-server.Root",
+                    "section": "def-common.Root",
                     "text": "Root"
                   }
                 ],
@@ -786,7 +794,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-                "id": "def-server.request.get.$2",
+                "id": "def-common.request.get.$2",
                 "type": "string",
                 "tags": [],
                 "label": "path",
@@ -804,7 +812,7 @@
           },
           {
             "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-            "id": "def-server.request.head",
+            "id": "def-common.request.head",
             "type": "Function",
             "tags": [],
             "label": "head",
@@ -813,9 +821,9 @@
               "(root: ",
               {
                 "pluginId": "@kbn/core-root-server-internal",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreRootServerInternalPluginApi",
-                "section": "def-server.Root",
+                "section": "def-common.Root",
                 "text": "Root"
               },
               ", path: string) => ",
@@ -827,7 +835,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-                "id": "def-server.request.head.$1",
+                "id": "def-common.request.head.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "root",
@@ -835,9 +843,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-root-server-internal",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreRootServerInternalPluginApi",
-                    "section": "def-server.Root",
+                    "section": "def-common.Root",
                     "text": "Root"
                   }
                 ],
@@ -848,7 +856,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-                "id": "def-server.request.head.$2",
+                "id": "def-common.request.head.$2",
                 "type": "string",
                 "tags": [],
                 "label": "path",
@@ -866,7 +874,7 @@
           },
           {
             "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-            "id": "def-server.request.post",
+            "id": "def-common.request.post",
             "type": "Function",
             "tags": [],
             "label": "post",
@@ -875,9 +883,9 @@
               "(root: ",
               {
                 "pluginId": "@kbn/core-root-server-internal",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreRootServerInternalPluginApi",
-                "section": "def-server.Root",
+                "section": "def-common.Root",
                 "text": "Root"
               },
               ", path: string) => ",
@@ -889,7 +897,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-                "id": "def-server.request.post.$1",
+                "id": "def-common.request.post.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "root",
@@ -897,9 +905,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-root-server-internal",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreRootServerInternalPluginApi",
-                    "section": "def-server.Root",
+                    "section": "def-common.Root",
                     "text": "Root"
                   }
                 ],
@@ -910,7 +918,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-                "id": "def-server.request.post.$2",
+                "id": "def-common.request.post.$2",
                 "type": "string",
                 "tags": [],
                 "label": "path",
@@ -928,7 +936,7 @@
           },
           {
             "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-            "id": "def-server.request.put",
+            "id": "def-common.request.put",
             "type": "Function",
             "tags": [],
             "label": "put",
@@ -937,9 +945,9 @@
               "(root: ",
               {
                 "pluginId": "@kbn/core-root-server-internal",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreRootServerInternalPluginApi",
-                "section": "def-server.Root",
+                "section": "def-common.Root",
                 "text": "Root"
               },
               ", path: string) => ",
@@ -951,7 +959,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-                "id": "def-server.request.put.$1",
+                "id": "def-common.request.put.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "root",
@@ -959,9 +967,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-root-server-internal",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreRootServerInternalPluginApi",
-                    "section": "def-server.Root",
+                    "section": "def-common.Root",
                     "text": "Root"
                   }
                 ],
@@ -972,7 +980,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-                "id": "def-server.request.put.$2",
+                "id": "def-common.request.put.$2",
                 "type": "string",
                 "tags": [],
                 "label": "path",
@@ -990,7 +998,7 @@
           },
           {
             "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-            "id": "def-server.request.patch",
+            "id": "def-common.request.patch",
             "type": "Function",
             "tags": [],
             "label": "patch",
@@ -999,9 +1007,9 @@
               "(root: ",
               {
                 "pluginId": "@kbn/core-root-server-internal",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreRootServerInternalPluginApi",
-                "section": "def-server.Root",
+                "section": "def-common.Root",
                 "text": "Root"
               },
               ", path: string) => ",
@@ -1013,7 +1021,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-                "id": "def-server.request.patch.$1",
+                "id": "def-common.request.patch.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "root",
@@ -1021,9 +1029,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-root-server-internal",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreRootServerInternalPluginApi",
-                    "section": "def-server.Root",
+                    "section": "def-common.Root",
                     "text": "Root"
                   }
                 ],
@@ -1034,7 +1042,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-test-helpers-kbn-server",
-                "id": "def-server.request.patch.$2",
+                "id": "def-common.request.patch.$2",
                 "type": "string",
                 "tags": [],
                 "label": "path",
@@ -1054,13 +1062,5 @@
         "initialIsOpen": false
       }
     ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }

@@ -1323,6 +1323,9 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiQuickSelect.valueLabel': i18n.translate('core.euiQuickSelect.valueLabel', {
       defaultMessage: 'Time value',
     }),
+    'euiQuickSelectPopover.buttonLabel': i18n.translate('core.euiQuickSelectPopover.buttonLabel', {
+      defaultMessage: 'Date quick select',
+    }),
     'euiRecentlyUsed.legend': i18n.translate('core.euiRecentlyUsed.legend', {
       defaultMessage: 'Recently used date ranges',
     }),

@@ -44,7 +44,7 @@ export const AnalyticsOverview: React.FC = () => {
           }
         ),
         pageTitle: i18n.translate('xpack.enterpriseSearch.analytics.collections.pageTitle', {
-          defaultMessage: 'Behaviorial Analytics',
+          defaultMessage: 'Behavioral Analytics',
         }),
       }}
     >

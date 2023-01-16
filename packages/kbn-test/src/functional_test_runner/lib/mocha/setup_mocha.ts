@@ -8,7 +8,7 @@
 
 import { relative } from 'path';
 
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
 // @ts-expect-error we don't use @types/mocha so it doesn't conflict with @types/jest
 import Mocha from 'mocha';

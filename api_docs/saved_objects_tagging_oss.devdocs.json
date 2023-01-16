@@ -212,9 +212,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsFindOptionsReference",
+                "section": "def-common.SavedObjectsFindOptionsReference",
                 "text": "SavedObjectsFindOptionsReference"
               },
               "[]"
@@ -233,9 +233,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsFindOptionsReference",
+                "section": "def-common.SavedObjectsFindOptionsReference",
                 "text": "SavedObjectsFindOptionsReference"
               },
               "[]"
@@ -661,9 +661,9 @@
               "(tagName: string) => ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsFindOptionsReference",
+                "section": "def-common.SavedObjectsFindOptionsReference",
                 "text": "SavedObjectsFindOptionsReference"
               },
               " | undefined"
@@ -787,9 +787,9 @@
               " | ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsFindOptionsReference",
+                "section": "def-common.SavedObjectsFindOptionsReference",
                 "text": "SavedObjectsFindOptionsReference"
               },
               ")[]) => string[]"
@@ -817,9 +817,9 @@
                   " | ",
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsFindOptionsReference",
+                    "section": "def-common.SavedObjectsFindOptionsReference",
                     "text": "SavedObjectsFindOptionsReference"
                   },
                   ")[]"

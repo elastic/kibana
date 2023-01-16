@@ -6,11 +6,11 @@
  */
 
 import moment from 'moment';
-import { getDefaultAlertSummaryTimeRange } from '.';
+import { getAlertSummaryWidgetTimeRange } from '.';
 
 describe('getDefaultAlertSummaryTimeRange', () => {
   it('should return default time in UTC format', () => {
-    const defaultTimeRange = getDefaultAlertSummaryTimeRange();
+    const defaultTimeRange = getAlertSummaryWidgetTimeRange();
     const utcFormat = 'YYYY-MM-DDTHH:mm:ss.SSSZ';
 
     expect(moment(defaultTimeRange.utcFrom, utcFormat, true).isValid()).toBeTruthy();

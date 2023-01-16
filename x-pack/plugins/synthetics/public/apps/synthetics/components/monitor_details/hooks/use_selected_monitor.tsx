@@ -18,8 +18,12 @@ import {
   selectorError,
 } from '../../../state';
 
-export const useSelectedMonitor = () => {
-  const { monitorId } = useParams<{ monitorId: string }>();
+export const useSelectedMonitor = (monId?: string) => {
+  let monitorId = monId;
+  const { monitorId: urlMonitorId } = useParams<{ monitorId: string }>();
+  if (!monitorId) {
+    monitorId = urlMonitorId;
+  }
   const monitorsList = useSelector(selectEncryptedSyntheticsSavedMonitors);
   const { loading: monitorListLoading } = useSelector(selectMonitorListState);
 

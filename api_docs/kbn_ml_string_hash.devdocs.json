@@ -10,10 +10,18 @@
   },
   "server": {
     "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/ml-string-hash",
-        "id": "def-server.stringHash",
+        "id": "def-common.stringHash",
         "type": "Function",
         "tags": [],
         "label": "stringHash",
@@ -29,7 +37,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/ml-string-hash",
-            "id": "def-server.stringHash.$1",
+            "id": "def-common.stringHash.$1",
             "type": "string",
             "tags": [],
             "label": "str",
@@ -47,14 +55,6 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [],
     "enums": [],
     "misc": [],

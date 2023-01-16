@@ -9,10 +9,18 @@
     "objects": []
   },
   "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/core-saved-objects-utils-server",
-        "id": "def-server.SavedObjectsErrorHelpers",
+        "id": "def-common.SavedObjectsErrorHelpers",
         "type": "Class",
         "tags": [],
         "label": "SavedObjectsErrorHelpers",
@@ -23,7 +31,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-utils-server",
-            "id": "def-server.SavedObjectsErrorHelpers.isSavedObjectsClientError",
+            "id": "def-common.SavedObjectsErrorHelpers.isSavedObjectsClientError",
             "type": "Function",
             "tags": [],
             "label": "isSavedObjectsClientError",
@@ -32,9 +40,9 @@
               "(error: any) => error is ",
               {
                 "pluginId": "@kbn/core-saved-objects-utils-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
-                "section": "def-server.DecoratedError",
+                "section": "def-common.DecoratedError",
                 "text": "DecoratedError"
               }
             ],
@@ -44,7 +52,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-utils-server",
-                "id": "def-server.SavedObjectsErrorHelpers.isSavedObjectsClientError.$1",
+                "id": "def-common.SavedObjectsErrorHelpers.isSavedObjectsClientError.$1",
                 "type": "Any",
                 "tags": [],
                 "label": "error",
@@ -62,7 +70,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-utils-server",
-            "id": "def-server.SavedObjectsErrorHelpers.decorateBadRequestError",
+            "id": "def-common.SavedObjectsErrorHelpers.decorateBadRequestError",
             "type": "Function",
             "tags": [],
             "label": "decorateBadRequestError",
@@ -71,9 +79,9 @@
               "(error: Error, reason?: string | undefined) => ",
               {
                 "pluginId": "@kbn/core-saved-objects-utils-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
-                "section": "def-server.DecoratedError",
+                "section": "def-common.DecoratedError",
                 "text": "DecoratedError"
               }
             ],
@@ -83,7 +91,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-utils-server",
-                "id": "def-server.SavedObjectsErrorHelpers.decorateBadRequestError.$1",
+                "id": "def-common.SavedObjectsErrorHelpers.decorateBadRequestError.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "error",
@@ -98,7 +106,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-utils-server",
-                "id": "def-server.SavedObjectsErrorHelpers.decorateBadRequestError.$2",
+                "id": "def-common.SavedObjectsErrorHelpers.decorateBadRequestError.$2",
                 "type": "string",
                 "tags": [],
                 "label": "reason",
@@ -116,7 +124,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-utils-server",
-            "id": "def-server.SavedObjectsErrorHelpers.createBadRequestError",
+            "id": "def-common.SavedObjectsErrorHelpers.createBadRequestError",
             "type": "Function",
             "tags": [],
             "label": "createBadRequestError",
@@ -125,9 +133,9 @@
               "(reason?: string | undefined) => ",
               {
                 "pluginId": "@kbn/core-saved-objects-utils-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
-                "section": "def-server.DecoratedError",
+                "section": "def-common.DecoratedError",
                 "text": "DecoratedError"
               }
             ],
@@ -137,7 +145,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-utils-server",
-                "id": "def-server.SavedObjectsErrorHelpers.createBadRequestError.$1",
+                "id": "def-common.SavedObjectsErrorHelpers.createBadRequestError.$1",
                 "type": "string",
                 "tags": [],
                 "label": "reason",
@@ -155,7 +163,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-utils-server",
-            "id": "def-server.SavedObjectsErrorHelpers.createUnsupportedTypeError",
+            "id": "def-common.SavedObjectsErrorHelpers.createUnsupportedTypeError",
             "type": "Function",
             "tags": [],
             "label": "createUnsupportedTypeError",
@@ -164,9 +172,9 @@
               "(type: string) => ",
               {
                 "pluginId": "@kbn/core-saved-objects-utils-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
-                "section": "def-server.DecoratedError",
+                "section": "def-common.DecoratedError",
                 "text": "DecoratedError"
               }
             ],
@@ -176,7 +184,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-utils-server",
-                "id": "def-server.SavedObjectsErrorHelpers.createUnsupportedTypeError.$1",
+                "id": "def-common.SavedObjectsErrorHelpers.createUnsupportedTypeError.$1",
                 "type": "string",
                 "tags": [],
                 "label": "type",
@@ -194,7 +202,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-utils-server",
-            "id": "def-server.SavedObjectsErrorHelpers.isBadRequestError",
+            "id": "def-common.SavedObjectsErrorHelpers.isBadRequestError",
             "type": "Function",
             "tags": [],
             "label": "isBadRequestError",
@@ -203,9 +211,9 @@
               "(error: Error | ",
               {
                 "pluginId": "@kbn/core-saved-objects-utils-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
-                "section": "def-server.DecoratedError",
+                "section": "def-common.DecoratedError",
                 "text": "DecoratedError"
               },
               ") => boolean"
@@ -216,7 +224,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-utils-server",
-                "id": "def-server.SavedObjectsErrorHelpers.isBadRequestError.$1",
+                "id": "def-common.SavedObjectsErrorHelpers.isBadRequestError.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "error",
@@ -225,9 +233,9 @@
                   "Error | ",
                   {
                     "pluginId": "@kbn/core-saved-objects-utils-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
-                    "section": "def-server.DecoratedError",
+                    "section": "def-common.DecoratedError",
                     "text": "DecoratedError"
                   }
                 ],
@@ -241,7 +249,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-utils-server",
-            "id": "def-server.SavedObjectsErrorHelpers.createInvalidVersionError",
+            "id": "def-common.SavedObjectsErrorHelpers.createInvalidVersionError",
             "type": "Function",
             "tags": [],
             "label": "createInvalidVersionError",
@@ -250,9 +258,9 @@
               "(versionInput?: string | undefined) => ",
               {
                 "pluginId": "@kbn/core-saved-objects-utils-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
-                "section": "def-server.DecoratedError",
+                "section": "def-common.DecoratedError",
                 "text": "DecoratedError"
               }
             ],
@@ -262,7 +270,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-utils-server",
-                "id": "def-server.SavedObjectsErrorHelpers.createInvalidVersionError.$1",
+                "id": "def-common.SavedObjectsErrorHelpers.createInvalidVersionError.$1",
                 "type": "string",
                 "tags": [],
                 "label": "versionInput",
@@ -280,7 +288,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-utils-server",
-            "id": "def-server.SavedObjectsErrorHelpers.isInvalidVersionError",
+            "id": "def-common.SavedObjectsErrorHelpers.isInvalidVersionError",
             "type": "Function",
             "tags": [],
             "label": "isInvalidVersionError",
@@ -289,9 +297,9 @@
               "(error: Error | ",
               {
                 "pluginId": "@kbn/core-saved-objects-utils-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
-                "section": "def-server.DecoratedError",
+                "section": "def-common.DecoratedError",
                 "text": "DecoratedError"
               },
               ") => boolean"
@@ -302,7 +310,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-utils-server",
-                "id": "def-server.SavedObjectsErrorHelpers.isInvalidVersionError.$1",
+                "id": "def-common.SavedObjectsErrorHelpers.isInvalidVersionError.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "error",
@@ -311,9 +319,9 @@
                   "Error | ",
                   {
                     "pluginId": "@kbn/core-saved-objects-utils-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
-                    "section": "def-server.DecoratedError",
+                    "section": "def-common.DecoratedError",
                     "text": "DecoratedError"
                   }
                 ],
@@ -327,7 +335,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-utils-server",
-            "id": "def-server.SavedObjectsErrorHelpers.decorateNotAuthorizedError",
+            "id": "def-common.SavedObjectsErrorHelpers.decorateNotAuthorizedError",
             "type": "Function",
             "tags": [],
             "label": "decorateNotAuthorizedError",
@@ -336,9 +344,9 @@
               "(error: Error, reason?: string | undefined) => ",
               {
                 "pluginId": "@kbn/core-saved-objects-utils-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
-                "section": "def-server.DecoratedError",
+                "section": "def-common.DecoratedError",
                 "text": "DecoratedError"
               }
             ],
@@ -348,7 +356,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-utils-server",
-                "id": "def-server.SavedObjectsErrorHelpers.decorateNotAuthorizedError.$1",
+                "id": "def-common.SavedObjectsErrorHelpers.decorateNotAuthorizedError.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "error",
@@ -363,7 +371,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-utils-server",
-                "id": "def-server.SavedObjectsErrorHelpers.decorateNotAuthorizedError.$2",
+                "id": "def-common.SavedObjectsErrorHelpers.decorateNotAuthorizedError.$2",
                 "type": "string",
                 "tags": [],
                 "label": "reason",
@@ -381,7 +389,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-utils-server",
-            "id": "def-server.SavedObjectsErrorHelpers.isNotAuthorizedError",
+            "id": "def-common.SavedObjectsErrorHelpers.isNotAuthorizedError",
             "type": "Function",
             "tags": [],
             "label": "isNotAuthorizedError",
@@ -390,9 +398,9 @@
               "(error: Error | ",
               {
                 "pluginId": "@kbn/core-saved-objects-utils-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
-                "section": "def-server.DecoratedError",
+                "section": "def-common.DecoratedError",
                 "text": "DecoratedError"
               },
               ") => boolean"
@@ -403,7 +411,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-utils-server",
-                "id": "def-server.SavedObjectsErrorHelpers.isNotAuthorizedError.$1",
+                "id": "def-common.SavedObjectsErrorHelpers.isNotAuthorizedError.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "error",
@@ -412,9 +420,9 @@
                   "Error | ",
                   {
                     "pluginId": "@kbn/core-saved-objects-utils-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
-                    "section": "def-server.DecoratedError",
+                    "section": "def-common.DecoratedError",
                     "text": "DecoratedError"
                   }
                 ],
@@ -428,7 +436,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-utils-server",
-            "id": "def-server.SavedObjectsErrorHelpers.decorateForbiddenError",
+            "id": "def-common.SavedObjectsErrorHelpers.decorateForbiddenError",
             "type": "Function",
             "tags": [],
             "label": "decorateForbiddenError",
@@ -437,9 +445,9 @@
               "(error: Error, reason?: string | undefined) => ",
               {
                 "pluginId": "@kbn/core-saved-objects-utils-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
-                "section": "def-server.DecoratedError",
+                "section": "def-common.DecoratedError",
                 "text": "DecoratedError"
               }
             ],
@@ -449,7 +457,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-utils-server",
-                "id": "def-server.SavedObjectsErrorHelpers.decorateForbiddenError.$1",
+                "id": "def-common.SavedObjectsErrorHelpers.decorateForbiddenError.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "error",
@@ -464,7 +472,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-utils-server",
-                "id": "def-server.SavedObjectsErrorHelpers.decorateForbiddenError.$2",
+                "id": "def-common.SavedObjectsErrorHelpers.decorateForbiddenError.$2",
                 "type": "string",
                 "tags": [],
                 "label": "reason",
@@ -482,7 +490,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-utils-server",
-            "id": "def-server.SavedObjectsErrorHelpers.isForbiddenError",
+            "id": "def-common.SavedObjectsErrorHelpers.isForbiddenError",
             "type": "Function",
             "tags": [],
             "label": "isForbiddenError",
@@ -491,9 +499,9 @@
               "(error: Error | ",
               {
                 "pluginId": "@kbn/core-saved-objects-utils-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
-                "section": "def-server.DecoratedError",
+                "section": "def-common.DecoratedError",
                 "text": "DecoratedError"
               },
               ") => boolean"
@@ -504,7 +512,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-utils-server",
-                "id": "def-server.SavedObjectsErrorHelpers.isForbiddenError.$1",
+                "id": "def-common.SavedObjectsErrorHelpers.isForbiddenError.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "error",
@@ -513,9 +521,9 @@
                   "Error | ",
                   {
                     "pluginId": "@kbn/core-saved-objects-utils-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
-                    "section": "def-server.DecoratedError",
+                    "section": "def-common.DecoratedError",
                     "text": "DecoratedError"
                   }
                 ],
@@ -529,7 +537,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-utils-server",
-            "id": "def-server.SavedObjectsErrorHelpers.decorateRequestEntityTooLargeError",
+            "id": "def-common.SavedObjectsErrorHelpers.decorateRequestEntityTooLargeError",
             "type": "Function",
             "tags": [],
             "label": "decorateRequestEntityTooLargeError",
@@ -538,9 +546,9 @@
               "(error: Error, reason?: string | undefined) => ",
               {
                 "pluginId": "@kbn/core-saved-objects-utils-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
-                "section": "def-server.DecoratedError",
+                "section": "def-common.DecoratedError",
                 "text": "DecoratedError"
               }
             ],
@@ -550,7 +558,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-utils-server",
-                "id": "def-server.SavedObjectsErrorHelpers.decorateRequestEntityTooLargeError.$1",
+                "id": "def-common.SavedObjectsErrorHelpers.decorateRequestEntityTooLargeError.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "error",
@@ -565,7 +573,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-utils-server",
-                "id": "def-server.SavedObjectsErrorHelpers.decorateRequestEntityTooLargeError.$2",
+                "id": "def-common.SavedObjectsErrorHelpers.decorateRequestEntityTooLargeError.$2",
                 "type": "string",
                 "tags": [],
                 "label": "reason",
@@ -583,7 +591,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-utils-server",
-            "id": "def-server.SavedObjectsErrorHelpers.isRequestEntityTooLargeError",
+            "id": "def-common.SavedObjectsErrorHelpers.isRequestEntityTooLargeError",
             "type": "Function",
             "tags": [],
             "label": "isRequestEntityTooLargeError",
@@ -592,9 +600,9 @@
               "(error: Error | ",
               {
                 "pluginId": "@kbn/core-saved-objects-utils-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
-                "section": "def-server.DecoratedError",
+                "section": "def-common.DecoratedError",
                 "text": "DecoratedError"
               },
               ") => boolean"
@@ -605,7 +613,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-utils-server",
-                "id": "def-server.SavedObjectsErrorHelpers.isRequestEntityTooLargeError.$1",
+                "id": "def-common.SavedObjectsErrorHelpers.isRequestEntityTooLargeError.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "error",
@@ -614,9 +622,9 @@
                   "Error | ",
                   {
                     "pluginId": "@kbn/core-saved-objects-utils-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
-                    "section": "def-server.DecoratedError",
+                    "section": "def-common.DecoratedError",
                     "text": "DecoratedError"
                   }
                 ],
@@ -630,7 +638,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-utils-server",
-            "id": "def-server.SavedObjectsErrorHelpers.createGenericNotFoundError",
+            "id": "def-common.SavedObjectsErrorHelpers.createGenericNotFoundError",
             "type": "Function",
             "tags": [],
             "label": "createGenericNotFoundError",
@@ -639,9 +647,9 @@
               "(type?: string | null, id?: string | null) => ",
               {
                 "pluginId": "@kbn/core-saved-objects-utils-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
-                "section": "def-server.DecoratedError",
+                "section": "def-common.DecoratedError",
                 "text": "DecoratedError"
               }
             ],
@@ -651,7 +659,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-utils-server",
-                "id": "def-server.SavedObjectsErrorHelpers.createGenericNotFoundError.$1",
+                "id": "def-common.SavedObjectsErrorHelpers.createGenericNotFoundError.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "type",
@@ -666,7 +674,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-utils-server",
-                "id": "def-server.SavedObjectsErrorHelpers.createGenericNotFoundError.$2",
+                "id": "def-common.SavedObjectsErrorHelpers.createGenericNotFoundError.$2",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "id",
@@ -684,7 +692,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-utils-server",
-            "id": "def-server.SavedObjectsErrorHelpers.createIndexAliasNotFoundError",
+            "id": "def-common.SavedObjectsErrorHelpers.createIndexAliasNotFoundError",
             "type": "Function",
             "tags": [],
             "label": "createIndexAliasNotFoundError",
@@ -693,9 +701,9 @@
               "(alias: string) => ",
               {
                 "pluginId": "@kbn/core-saved-objects-utils-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
-                "section": "def-server.DecoratedError",
+                "section": "def-common.DecoratedError",
                 "text": "DecoratedError"
               }
             ],
@@ -705,7 +713,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-utils-server",
-                "id": "def-server.SavedObjectsErrorHelpers.createIndexAliasNotFoundError.$1",
+                "id": "def-common.SavedObjectsErrorHelpers.createIndexAliasNotFoundError.$1",
                 "type": "string",
                 "tags": [],
                 "label": "alias",
@@ -723,7 +731,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-utils-server",
-            "id": "def-server.SavedObjectsErrorHelpers.decorateIndexAliasNotFoundError",
+            "id": "def-common.SavedObjectsErrorHelpers.decorateIndexAliasNotFoundError",
             "type": "Function",
             "tags": [],
             "label": "decorateIndexAliasNotFoundError",
@@ -732,9 +740,9 @@
               "(error: Error, alias: string) => ",
               {
                 "pluginId": "@kbn/core-saved-objects-utils-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
-                "section": "def-server.DecoratedError",
+                "section": "def-common.DecoratedError",
                 "text": "DecoratedError"
               }
             ],
@@ -744,7 +752,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-utils-server",
-                "id": "def-server.SavedObjectsErrorHelpers.decorateIndexAliasNotFoundError.$1",
+                "id": "def-common.SavedObjectsErrorHelpers.decorateIndexAliasNotFoundError.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "error",
@@ -759,7 +767,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-utils-server",
-                "id": "def-server.SavedObjectsErrorHelpers.decorateIndexAliasNotFoundError.$2",
+                "id": "def-common.SavedObjectsErrorHelpers.decorateIndexAliasNotFoundError.$2",
                 "type": "string",
                 "tags": [],
                 "label": "alias",
@@ -777,7 +785,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-utils-server",
-            "id": "def-server.SavedObjectsErrorHelpers.isNotFoundError",
+            "id": "def-common.SavedObjectsErrorHelpers.isNotFoundError",
             "type": "Function",
             "tags": [],
             "label": "isNotFoundError",
@@ -786,9 +794,9 @@
               "(error: Error | ",
               {
                 "pluginId": "@kbn/core-saved-objects-utils-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
-                "section": "def-server.DecoratedError",
+                "section": "def-common.DecoratedError",
                 "text": "DecoratedError"
               },
               ") => boolean"
@@ -799,7 +807,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-utils-server",
-                "id": "def-server.SavedObjectsErrorHelpers.isNotFoundError.$1",
+                "id": "def-common.SavedObjectsErrorHelpers.isNotFoundError.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "error",
@@ -808,9 +816,9 @@
                   "Error | ",
                   {
                     "pluginId": "@kbn/core-saved-objects-utils-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
-                    "section": "def-server.DecoratedError",
+                    "section": "def-common.DecoratedError",
                     "text": "DecoratedError"
                   }
                 ],
@@ -824,7 +832,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-utils-server",
-            "id": "def-server.SavedObjectsErrorHelpers.decorateConflictError",
+            "id": "def-common.SavedObjectsErrorHelpers.decorateConflictError",
             "type": "Function",
             "tags": [],
             "label": "decorateConflictError",
@@ -833,9 +841,9 @@
               "(error: Error, reason?: string | undefined) => ",
               {
                 "pluginId": "@kbn/core-saved-objects-utils-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
-                "section": "def-server.DecoratedError",
+                "section": "def-common.DecoratedError",
                 "text": "DecoratedError"
               }
             ],
@@ -845,7 +853,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-utils-server",
-                "id": "def-server.SavedObjectsErrorHelpers.decorateConflictError.$1",
+                "id": "def-common.SavedObjectsErrorHelpers.decorateConflictError.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "error",
@@ -860,7 +868,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-utils-server",
-                "id": "def-server.SavedObjectsErrorHelpers.decorateConflictError.$2",
+                "id": "def-common.SavedObjectsErrorHelpers.decorateConflictError.$2",
                 "type": "string",
                 "tags": [],
                 "label": "reason",
@@ -878,7 +886,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-utils-server",
-            "id": "def-server.SavedObjectsErrorHelpers.createConflictError",
+            "id": "def-common.SavedObjectsErrorHelpers.createConflictError",
             "type": "Function",
             "tags": [],
             "label": "createConflictError",
@@ -887,9 +895,9 @@
               "(type: string, id: string, reason?: string | undefined) => ",
               {
                 "pluginId": "@kbn/core-saved-objects-utils-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
-                "section": "def-server.DecoratedError",
+                "section": "def-common.DecoratedError",
                 "text": "DecoratedError"
               }
             ],
@@ -899,7 +907,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-utils-server",
-                "id": "def-server.SavedObjectsErrorHelpers.createConflictError.$1",
+                "id": "def-common.SavedObjectsErrorHelpers.createConflictError.$1",
                 "type": "string",
                 "tags": [],
                 "label": "type",
@@ -914,7 +922,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-utils-server",
-                "id": "def-server.SavedObjectsErrorHelpers.createConflictError.$2",
+                "id": "def-common.SavedObjectsErrorHelpers.createConflictError.$2",
                 "type": "string",
                 "tags": [],
                 "label": "id",
@@ -929,7 +937,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-utils-server",
-                "id": "def-server.SavedObjectsErrorHelpers.createConflictError.$3",
+                "id": "def-common.SavedObjectsErrorHelpers.createConflictError.$3",
                 "type": "string",
                 "tags": [],
                 "label": "reason",
@@ -947,7 +955,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-utils-server",
-            "id": "def-server.SavedObjectsErrorHelpers.isConflictError",
+            "id": "def-common.SavedObjectsErrorHelpers.isConflictError",
             "type": "Function",
             "tags": [],
             "label": "isConflictError",
@@ -956,9 +964,9 @@
               "(error: Error | ",
               {
                 "pluginId": "@kbn/core-saved-objects-utils-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
-                "section": "def-server.DecoratedError",
+                "section": "def-common.DecoratedError",
                 "text": "DecoratedError"
               },
               ") => boolean"
@@ -969,7 +977,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-utils-server",
-                "id": "def-server.SavedObjectsErrorHelpers.isConflictError.$1",
+                "id": "def-common.SavedObjectsErrorHelpers.isConflictError.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "error",
@@ -978,9 +986,9 @@
                   "Error | ",
                   {
                     "pluginId": "@kbn/core-saved-objects-utils-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
-                    "section": "def-server.DecoratedError",
+                    "section": "def-common.DecoratedError",
                     "text": "DecoratedError"
                   }
                 ],
@@ -994,7 +1002,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-utils-server",
-            "id": "def-server.SavedObjectsErrorHelpers.decorateTooManyRequestsError",
+            "id": "def-common.SavedObjectsErrorHelpers.decorateTooManyRequestsError",
             "type": "Function",
             "tags": [],
             "label": "decorateTooManyRequestsError",
@@ -1003,9 +1011,9 @@
               "(error: Error, reason?: string | undefined) => ",
               {
                 "pluginId": "@kbn/core-saved-objects-utils-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
-                "section": "def-server.DecoratedError",
+                "section": "def-common.DecoratedError",
                 "text": "DecoratedError"
               }
             ],
@@ -1015,7 +1023,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-utils-server",
-                "id": "def-server.SavedObjectsErrorHelpers.decorateTooManyRequestsError.$1",
+                "id": "def-common.SavedObjectsErrorHelpers.decorateTooManyRequestsError.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "error",
@@ -1030,7 +1038,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-utils-server",
-                "id": "def-server.SavedObjectsErrorHelpers.decorateTooManyRequestsError.$2",
+                "id": "def-common.SavedObjectsErrorHelpers.decorateTooManyRequestsError.$2",
                 "type": "string",
                 "tags": [],
                 "label": "reason",
@@ -1048,7 +1056,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-utils-server",
-            "id": "def-server.SavedObjectsErrorHelpers.createTooManyRequestsError",
+            "id": "def-common.SavedObjectsErrorHelpers.createTooManyRequestsError",
             "type": "Function",
             "tags": [],
             "label": "createTooManyRequestsError",
@@ -1057,9 +1065,9 @@
               "(type: string, id: string) => ",
               {
                 "pluginId": "@kbn/core-saved-objects-utils-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
-                "section": "def-server.DecoratedError",
+                "section": "def-common.DecoratedError",
                 "text": "DecoratedError"
               }
             ],
@@ -1069,7 +1077,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-utils-server",
-                "id": "def-server.SavedObjectsErrorHelpers.createTooManyRequestsError.$1",
+                "id": "def-common.SavedObjectsErrorHelpers.createTooManyRequestsError.$1",
                 "type": "string",
                 "tags": [],
                 "label": "type",
@@ -1084,7 +1092,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-utils-server",
-                "id": "def-server.SavedObjectsErrorHelpers.createTooManyRequestsError.$2",
+                "id": "def-common.SavedObjectsErrorHelpers.createTooManyRequestsError.$2",
                 "type": "string",
                 "tags": [],
                 "label": "id",
@@ -1102,7 +1110,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-utils-server",
-            "id": "def-server.SavedObjectsErrorHelpers.isTooManyRequestsError",
+            "id": "def-common.SavedObjectsErrorHelpers.isTooManyRequestsError",
             "type": "Function",
             "tags": [],
             "label": "isTooManyRequestsError",
@@ -1111,9 +1119,9 @@
               "(error: Error | ",
               {
                 "pluginId": "@kbn/core-saved-objects-utils-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
-                "section": "def-server.DecoratedError",
+                "section": "def-common.DecoratedError",
                 "text": "DecoratedError"
               },
               ") => boolean"
@@ -1124,7 +1132,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-utils-server",
-                "id": "def-server.SavedObjectsErrorHelpers.isTooManyRequestsError.$1",
+                "id": "def-common.SavedObjectsErrorHelpers.isTooManyRequestsError.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "error",
@@ -1133,9 +1141,9 @@
                   "Error | ",
                   {
                     "pluginId": "@kbn/core-saved-objects-utils-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
-                    "section": "def-server.DecoratedError",
+                    "section": "def-common.DecoratedError",
                     "text": "DecoratedError"
                   }
                 ],
@@ -1149,7 +1157,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-utils-server",
-            "id": "def-server.SavedObjectsErrorHelpers.decorateEsCannotExecuteScriptError",
+            "id": "def-common.SavedObjectsErrorHelpers.decorateEsCannotExecuteScriptError",
             "type": "Function",
             "tags": [],
             "label": "decorateEsCannotExecuteScriptError",
@@ -1158,9 +1166,9 @@
               "(error: Error, reason?: string | undefined) => ",
               {
                 "pluginId": "@kbn/core-saved-objects-utils-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
-                "section": "def-server.DecoratedError",
+                "section": "def-common.DecoratedError",
                 "text": "DecoratedError"
               }
             ],
@@ -1170,7 +1178,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-utils-server",
-                "id": "def-server.SavedObjectsErrorHelpers.decorateEsCannotExecuteScriptError.$1",
+                "id": "def-common.SavedObjectsErrorHelpers.decorateEsCannotExecuteScriptError.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "error",
@@ -1185,7 +1193,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-utils-server",
-                "id": "def-server.SavedObjectsErrorHelpers.decorateEsCannotExecuteScriptError.$2",
+                "id": "def-common.SavedObjectsErrorHelpers.decorateEsCannotExecuteScriptError.$2",
                 "type": "string",
                 "tags": [],
                 "label": "reason",
@@ -1203,7 +1211,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-utils-server",
-            "id": "def-server.SavedObjectsErrorHelpers.isEsCannotExecuteScriptError",
+            "id": "def-common.SavedObjectsErrorHelpers.isEsCannotExecuteScriptError",
             "type": "Function",
             "tags": [],
             "label": "isEsCannotExecuteScriptError",
@@ -1212,9 +1220,9 @@
               "(error: Error | ",
               {
                 "pluginId": "@kbn/core-saved-objects-utils-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
-                "section": "def-server.DecoratedError",
+                "section": "def-common.DecoratedError",
                 "text": "DecoratedError"
               },
               ") => boolean"
@@ -1225,7 +1233,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-utils-server",
-                "id": "def-server.SavedObjectsErrorHelpers.isEsCannotExecuteScriptError.$1",
+                "id": "def-common.SavedObjectsErrorHelpers.isEsCannotExecuteScriptError.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "error",
@@ -1234,9 +1242,9 @@
                   "Error | ",
                   {
                     "pluginId": "@kbn/core-saved-objects-utils-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
-                    "section": "def-server.DecoratedError",
+                    "section": "def-common.DecoratedError",
                     "text": "DecoratedError"
                   }
                 ],
@@ -1250,7 +1258,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-utils-server",
-            "id": "def-server.SavedObjectsErrorHelpers.decorateEsUnavailableError",
+            "id": "def-common.SavedObjectsErrorHelpers.decorateEsUnavailableError",
             "type": "Function",
             "tags": [],
             "label": "decorateEsUnavailableError",
@@ -1259,9 +1267,9 @@
               "(error: Error, reason?: string | undefined) => ",
               {
                 "pluginId": "@kbn/core-saved-objects-utils-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
-                "section": "def-server.DecoratedError",
+                "section": "def-common.DecoratedError",
                 "text": "DecoratedError"
               }
             ],
@@ -1271,7 +1279,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-utils-server",
-                "id": "def-server.SavedObjectsErrorHelpers.decorateEsUnavailableError.$1",
+                "id": "def-common.SavedObjectsErrorHelpers.decorateEsUnavailableError.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "error",
@@ -1286,7 +1294,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-utils-server",
-                "id": "def-server.SavedObjectsErrorHelpers.decorateEsUnavailableError.$2",
+                "id": "def-common.SavedObjectsErrorHelpers.decorateEsUnavailableError.$2",
                 "type": "string",
                 "tags": [],
                 "label": "reason",
@@ -1304,7 +1312,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-utils-server",
-            "id": "def-server.SavedObjectsErrorHelpers.isEsUnavailableError",
+            "id": "def-common.SavedObjectsErrorHelpers.isEsUnavailableError",
             "type": "Function",
             "tags": [],
             "label": "isEsUnavailableError",
@@ -1313,9 +1321,9 @@
               "(error: Error | ",
               {
                 "pluginId": "@kbn/core-saved-objects-utils-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
-                "section": "def-server.DecoratedError",
+                "section": "def-common.DecoratedError",
                 "text": "DecoratedError"
               },
               ") => boolean"
@@ -1326,7 +1334,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-utils-server",
-                "id": "def-server.SavedObjectsErrorHelpers.isEsUnavailableError.$1",
+                "id": "def-common.SavedObjectsErrorHelpers.isEsUnavailableError.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "error",
@@ -1335,9 +1343,9 @@
                   "Error | ",
                   {
                     "pluginId": "@kbn/core-saved-objects-utils-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
-                    "section": "def-server.DecoratedError",
+                    "section": "def-common.DecoratedError",
                     "text": "DecoratedError"
                   }
                 ],
@@ -1351,7 +1359,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-utils-server",
-            "id": "def-server.SavedObjectsErrorHelpers.decorateGeneralError",
+            "id": "def-common.SavedObjectsErrorHelpers.decorateGeneralError",
             "type": "Function",
             "tags": [],
             "label": "decorateGeneralError",
@@ -1360,9 +1368,9 @@
               "(error: Error, reason?: string | undefined) => ",
               {
                 "pluginId": "@kbn/core-saved-objects-utils-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
-                "section": "def-server.DecoratedError",
+                "section": "def-common.DecoratedError",
                 "text": "DecoratedError"
               }
             ],
@@ -1372,7 +1380,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-utils-server",
-                "id": "def-server.SavedObjectsErrorHelpers.decorateGeneralError.$1",
+                "id": "def-common.SavedObjectsErrorHelpers.decorateGeneralError.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "error",
@@ -1387,7 +1395,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-utils-server",
-                "id": "def-server.SavedObjectsErrorHelpers.decorateGeneralError.$2",
+                "id": "def-common.SavedObjectsErrorHelpers.decorateGeneralError.$2",
                 "type": "string",
                 "tags": [],
                 "label": "reason",
@@ -1405,7 +1413,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-utils-server",
-            "id": "def-server.SavedObjectsErrorHelpers.isGeneralError",
+            "id": "def-common.SavedObjectsErrorHelpers.isGeneralError",
             "type": "Function",
             "tags": [],
             "label": "isGeneralError",
@@ -1414,9 +1422,9 @@
               "(error: Error | ",
               {
                 "pluginId": "@kbn/core-saved-objects-utils-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
-                "section": "def-server.DecoratedError",
+                "section": "def-common.DecoratedError",
                 "text": "DecoratedError"
               },
               ") => boolean"
@@ -1427,7 +1435,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-utils-server",
-                "id": "def-server.SavedObjectsErrorHelpers.isGeneralError.$1",
+                "id": "def-common.SavedObjectsErrorHelpers.isGeneralError.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "error",
@@ -1436,9 +1444,9 @@
                   "Error | ",
                   {
                     "pluginId": "@kbn/core-saved-objects-utils-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
-                    "section": "def-server.DecoratedError",
+                    "section": "def-common.DecoratedError",
                     "text": "DecoratedError"
                   }
                 ],
@@ -1452,7 +1460,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-utils-server",
-            "id": "def-server.SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError",
+            "id": "def-common.SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError",
             "type": "Function",
             "tags": [],
             "label": "createGenericNotFoundEsUnavailableError",
@@ -1461,9 +1469,9 @@
               "(type?: string | null, id?: string | null) => ",
               {
                 "pluginId": "@kbn/core-saved-objects-utils-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
-                "section": "def-server.DecoratedError",
+                "section": "def-common.DecoratedError",
                 "text": "DecoratedError"
               }
             ],
@@ -1473,7 +1481,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-utils-server",
-                "id": "def-server.SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError.$1",
+                "id": "def-common.SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "type",
@@ -1488,7 +1496,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-utils-server",
-                "id": "def-server.SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError.$2",
+                "id": "def-common.SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError.$2",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "id",
@@ -1509,7 +1517,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-utils-server",
-        "id": "def-server.SavedObjectsUtils",
+        "id": "def-common.SavedObjectsUtils",
         "type": "Class",
         "tags": [],
         "label": "SavedObjectsUtils",
@@ -1520,7 +1528,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-utils-server",
-            "id": "def-server.SavedObjectsUtils.namespaceIdToString",
+            "id": "def-common.SavedObjectsUtils.namespaceIdToString",
             "type": "Function",
             "tags": [],
             "label": "namespaceIdToString",
@@ -1536,7 +1544,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-utils-server",
-                "id": "def-server.SavedObjectsUtils.namespaceIdToString.$1",
+                "id": "def-common.SavedObjectsUtils.namespaceIdToString.$1",
                 "type": "string",
                 "tags": [],
                 "label": "namespace",
@@ -1556,7 +1564,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-utils-server",
-            "id": "def-server.SavedObjectsUtils.namespaceStringToId",
+            "id": "def-common.SavedObjectsUtils.namespaceStringToId",
             "type": "Function",
             "tags": [],
             "label": "namespaceStringToId",
@@ -1572,7 +1580,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-utils-server",
-                "id": "def-server.SavedObjectsUtils.namespaceStringToId.$1",
+                "id": "def-common.SavedObjectsUtils.namespaceStringToId.$1",
                 "type": "string",
                 "tags": [],
                 "label": "namespace",
@@ -1592,7 +1600,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-utils-server",
-            "id": "def-server.SavedObjectsUtils.createEmptyFindResponse",
+            "id": "def-common.SavedObjectsUtils.createEmptyFindResponse",
             "type": "Function",
             "tags": [],
             "label": "createEmptyFindResponse",
@@ -1603,17 +1611,17 @@
               "<T, A>({ page, perPage, }: ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsFindOptions",
+                "section": "def-common.SavedObjectsFindOptions",
                 "text": "SavedObjectsFindOptions"
               },
               ") => ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsFindResponse",
+                "section": "def-common.SavedObjectsFindResponse",
                 "text": "SavedObjectsFindResponse"
               },
               "<T, A>"
@@ -1624,7 +1632,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-utils-server",
-                "id": "def-server.SavedObjectsUtils.createEmptyFindResponse.$1",
+                "id": "def-common.SavedObjectsUtils.createEmptyFindResponse.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "{\n    page = FIND_DEFAULT_PAGE,\n    perPage = FIND_DEFAULT_PER_PAGE,\n  }",
@@ -1632,9 +1640,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsFindOptions",
+                    "section": "def-common.SavedObjectsFindOptions",
                     "text": "SavedObjectsFindOptions"
                   }
                 ],
@@ -1648,7 +1656,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-utils-server",
-            "id": "def-server.SavedObjectsUtils.generateId",
+            "id": "def-common.SavedObjectsUtils.generateId",
             "type": "Function",
             "tags": [],
             "label": "generateId",
@@ -1666,7 +1674,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-utils-server",
-            "id": "def-server.SavedObjectsUtils.isRandomId",
+            "id": "def-common.SavedObjectsUtils.isRandomId",
             "type": "Function",
             "tags": [
               "todo"
@@ -1684,7 +1692,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-utils-server",
-                "id": "def-server.SavedObjectsUtils.isRandomId.$1",
+                "id": "def-common.SavedObjectsUtils.isRandomId.$1",
                 "type": "string",
                 "tags": [],
                 "label": "id",
@@ -1704,7 +1712,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-utils-server",
-            "id": "def-server.SavedObjectsUtils.getConvertedObjectId",
+            "id": "def-common.SavedObjectsUtils.getConvertedObjectId",
             "type": "Function",
             "tags": [],
             "label": "getConvertedObjectId",
@@ -1720,7 +1728,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-utils-server",
-                "id": "def-server.SavedObjectsUtils.getConvertedObjectId.$1",
+                "id": "def-common.SavedObjectsUtils.getConvertedObjectId.$1",
                 "type": "string",
                 "tags": [],
                 "label": "namespace",
@@ -1737,7 +1745,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-utils-server",
-                "id": "def-server.SavedObjectsUtils.getConvertedObjectId.$2",
+                "id": "def-common.SavedObjectsUtils.getConvertedObjectId.$2",
                 "type": "string",
                 "tags": [],
                 "label": "type",
@@ -1754,7 +1762,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-utils-server",
-                "id": "def-server.SavedObjectsUtils.getConvertedObjectId.$3",
+                "id": "def-common.SavedObjectsUtils.getConvertedObjectId.$3",
                 "type": "string",
                 "tags": [],
                 "label": "id",
@@ -1781,7 +1789,7 @@
     "functions": [
       {
         "parentPluginId": "@kbn/core-saved-objects-utils-server",
-        "id": "def-server.arrayMapsAreEqual",
+        "id": "def-common.arrayMapsAreEqual",
         "type": "Function",
         "tags": [],
         "label": "arrayMapsAreEqual",
@@ -1797,7 +1805,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-utils-server",
-            "id": "def-server.arrayMapsAreEqual.$1",
+            "id": "def-common.arrayMapsAreEqual.$1",
             "type": "Object",
             "tags": [],
             "label": "mapA",
@@ -1814,7 +1822,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-utils-server",
-            "id": "def-server.arrayMapsAreEqual.$2",
+            "id": "def-common.arrayMapsAreEqual.$2",
             "type": "Object",
             "tags": [],
             "label": "mapB",
@@ -1837,7 +1845,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-utils-server",
-        "id": "def-server.mergeSavedObjectMigrationMaps",
+        "id": "def-common.mergeSavedObjectMigrationMaps",
         "type": "Function",
         "tags": [],
         "label": "mergeSavedObjectMigrationMaps",
@@ -1848,25 +1856,25 @@
           "(map1: ",
           {
             "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-server.SavedObjectMigrationMap",
+            "section": "def-common.SavedObjectMigrationMap",
             "text": "SavedObjectMigrationMap"
           },
           ", map2: ",
           {
             "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-server.SavedObjectMigrationMap",
+            "section": "def-common.SavedObjectMigrationMap",
             "text": "SavedObjectMigrationMap"
           },
           ") => ",
           {
             "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-server.SavedObjectMigrationMap",
+            "section": "def-common.SavedObjectMigrationMap",
             "text": "SavedObjectMigrationMap"
           }
         ],
@@ -1876,7 +1884,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-utils-server",
-            "id": "def-server.mergeSavedObjectMigrationMaps.$1",
+            "id": "def-common.mergeSavedObjectMigrationMaps.$1",
             "type": "Object",
             "tags": [],
             "label": "map1",
@@ -1886,9 +1894,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectMigrationMap",
+                "section": "def-common.SavedObjectMigrationMap",
                 "text": "SavedObjectMigrationMap"
               }
             ],
@@ -1899,7 +1907,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-utils-server",
-            "id": "def-server.mergeSavedObjectMigrationMaps.$2",
+            "id": "def-common.mergeSavedObjectMigrationMaps.$2",
             "type": "Object",
             "tags": [],
             "label": "map2",
@@ -1909,9 +1917,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectMigrationMap",
+                "section": "def-common.SavedObjectMigrationMap",
                 "text": "SavedObjectMigrationMap"
               }
             ],
@@ -1928,7 +1936,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-utils-server",
-        "id": "def-server.setMapsAreEqual",
+        "id": "def-common.setMapsAreEqual",
         "type": "Function",
         "tags": [],
         "label": "setMapsAreEqual",
@@ -1944,7 +1952,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-utils-server",
-            "id": "def-server.setMapsAreEqual.$1",
+            "id": "def-common.setMapsAreEqual.$1",
             "type": "Object",
             "tags": [],
             "label": "mapA",
@@ -1961,7 +1969,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-utils-server",
-            "id": "def-server.setMapsAreEqual.$2",
+            "id": "def-common.setMapsAreEqual.$2",
             "type": "Object",
             "tags": [],
             "label": "mapB",
@@ -1984,7 +1992,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-utils-server",
-        "id": "def-server.setsAreEqual",
+        "id": "def-common.setsAreEqual",
         "type": "Function",
         "tags": [],
         "label": "setsAreEqual",
@@ -2000,7 +2008,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-utils-server",
-            "id": "def-server.setsAreEqual.$1",
+            "id": "def-common.setsAreEqual.$1",
             "type": "Object",
             "tags": [],
             "label": "setA",
@@ -2017,7 +2025,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-utils-server",
-            "id": "def-server.setsAreEqual.$2",
+            "id": "def-common.setsAreEqual.$2",
             "type": "Object",
             "tags": [],
             "label": "setB",
@@ -2042,7 +2050,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-saved-objects-utils-server",
-        "id": "def-server.DecoratedError",
+        "id": "def-common.DecoratedError",
         "type": "Interface",
         "tags": [],
         "label": "DecoratedError",
@@ -2050,9 +2058,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-utils-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
-            "section": "def-server.DecoratedError",
+            "section": "def-common.DecoratedError",
             "text": "DecoratedError"
           },
           " extends ",
@@ -2065,7 +2073,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-utils-server",
-            "id": "def-server.DecoratedError.code",
+            "id": "def-common.DecoratedError.code",
             "type": "string",
             "tags": [],
             "label": "[code]",
@@ -2085,7 +2093,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-saved-objects-utils-server",
-        "id": "def-server.ALL_NAMESPACES_STRING",
+        "id": "def-common.ALL_NAMESPACES_STRING",
         "type": "string",
         "tags": [],
         "label": "ALL_NAMESPACES_STRING",
@@ -2100,7 +2108,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-utils-server",
-        "id": "def-server.DEFAULT_NAMESPACE_STRING",
+        "id": "def-common.DEFAULT_NAMESPACE_STRING",
         "type": "string",
         "tags": [],
         "label": "DEFAULT_NAMESPACE_STRING",
@@ -2115,7 +2123,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-utils-server",
-        "id": "def-server.FIND_DEFAULT_PAGE",
+        "id": "def-common.FIND_DEFAULT_PAGE",
         "type": "number",
         "tags": [],
         "label": "FIND_DEFAULT_PAGE",
@@ -2130,7 +2138,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-utils-server",
-        "id": "def-server.FIND_DEFAULT_PER_PAGE",
+        "id": "def-common.FIND_DEFAULT_PER_PAGE",
         "type": "number",
         "tags": [],
         "label": "FIND_DEFAULT_PER_PAGE",
@@ -2144,14 +2152,6 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": []
   }
 }

@@ -29,7 +29,7 @@ export function encode(obj: any) {
   const rison = encodeUnknown(obj);
   if (rison === undefined) {
     throw new Error(
-      'unable to encode value into rison, expected a primative value array or object'
+      'unable to encode value into rison, expected a primitive value array or object'
     );
   }
   return rison;
@@ -40,6 +40,17 @@ export function encode(obj: any) {
  */
 export function decode(rison: string): RisonValue {
   return Rison.decode(rison);
+}
+
+/**
+ * safely parse a rison string into a javascript structure, never throws
+ */
+export function safeDecode(rison: string): RisonValue {
+  try {
+    return decode(rison);
+  } catch {
+    return null;
+  }
 }
 
 /**

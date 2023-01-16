@@ -11,7 +11,7 @@ import { Filter, TimeRange } from '@kbn/es-query';
 import type { RefreshInterval } from '@kbn/data-plugin/common';
 import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
 import { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
-import { Dictionary, isRisonSerializationRequired } from '../../common/util/url_state';
+import { type Dictionary, isRisonSerializationRequired } from '@kbn/ml-url-state';
 import { SearchQueryLanguage } from '../types/combined_query';
 
 export const DATA_VISUALIZER_APP_LOCATOR = 'DATA_VISUALIZER_APP_LOCATOR';

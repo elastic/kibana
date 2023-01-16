@@ -7,14 +7,19 @@
 
 import { journey, step, expect, before } from '@elastic/synthetics';
 import { assertText, byTestId, waitForLoadingToFinish } from '@kbn/observability-plugin/e2e/utils';
+import { RetryService } from '@kbn/ftr-common-functional-services';
+import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
 import { loginPageProvider } from '../../../page_objects/login';
 
 journey('StatusFlyoutInAlertingApp', async ({ page, params }) => {
+  recordVideo(page);
+
   const login = loginPageProvider({ page });
   before(async () => {
     await waitForLoadingToFinish({ page });
   });
-
+  const getService = params.getService;
+  const retry: RetryService = getService('retry');
   const baseUrl = `${params.kibanaUrl}/app/management/insightsAndAlerting/triggersActions/rules`;
 
   step('Go to Alerting app', async () => {
@@ -25,11 +30,17 @@ journey('StatusFlyoutInAlertingApp', async ({ page, params }) => {
   });
 
   step('Open monitor status flyout', async () => {
-    await page.click(byTestId('createFirstRuleButton'));
+    await page.click('text=Create rule');
     await waitForLoadingToFinish({ page });
     await page.click(byTestId('"xpack.uptime.alerts.monitorStatus-SelectOption"'));
     await waitForLoadingToFinish({ page });
-    await assertText({ page, text: 'This alert will apply to approximately 0 monitors.' });
+
+    await retry.tryForTime(60 * 1000, async () => {
+      const text = await page.textContent(byTestId('alertSnapShotCount'));
+      expect(text).toContain('This alert will apply to approximately');
+      const getNUmber = text?.split('This alert will apply to approximately ')[1][0];
+      expect(Number(getNUmber)).toBeGreaterThan(0);
+    });
   });
 
   step('can add filters', async () => {
@@ -48,18 +59,26 @@ journey('StatusFlyoutInAlertingApp', async ({ page, params }) => {
 
     await waitForLoadingToFinish({ page });
 
+    await page.click(byTestId('"xpack.synthetics.alerts.monitorStatus.filterBar"'));
+
     await assertText({ page, text: 'browser' });
     await assertText({ page, text: 'http' });
+    await retry.tryForTime(30 * 1000, async () => {
+      await page.click('text=browser');
 
-    const suggestionItem = await page.$(byTestId('autoCompleteSuggestionText'));
-    expect(await suggestionItem?.textContent()).toBe('"browser" ');
+      const element = await page.waitForSelector(
+        byTestId('"xpack.synthetics.alerts.monitorStatus.filterBar"')
+      );
+
+      expect((await element?.textContent())?.trim()).toBe('monitor.type : "browser"');
+    });
 
     await page.click(byTestId('euiFlyoutCloseButton'));
     await page.click(byTestId('confirmModalConfirmButton'));
   });
 
   step('Open tls alert flyout', async () => {
-    await page.click(byTestId('createFirstRuleButton'));
+    await page.click('text=Create rule');
     await waitForLoadingToFinish({ page });
     await page.click(byTestId('"xpack.uptime.alerts.tlsCertificate-SelectOption"'));
     await waitForLoadingToFinish({ page });

@@ -428,6 +428,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
           {...fieldListGroupedProps}
           renderFieldItem={renderFieldItem}
           data-test-subj="lnsIndexPattern"
+          localStorageKeyPrefix="lens"
         />
       </FieldList>
     </ChildDragDropProvider>

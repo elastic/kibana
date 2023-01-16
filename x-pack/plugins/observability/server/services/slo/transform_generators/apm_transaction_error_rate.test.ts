@@ -30,7 +30,7 @@ describe('APM Transaction Error Rate Transform Generator', () => {
 
   it("uses default values when 'good_status_codes' is not specified", async () => {
     const anSLO = createSLO({
-      indicator: createAPMTransactionErrorRateIndicator({ good_status_codes: [] }),
+      indicator: createAPMTransactionErrorRateIndicator({ goodStatusCodes: [] }),
     });
     const transform = generator.getTransformParams(anSLO);
 
@@ -42,8 +42,8 @@ describe('APM Transaction Error Rate Transform Generator', () => {
       indicator: createAPMTransactionErrorRateIndicator({
         environment: '*',
         service: '*',
-        transaction_name: '*',
-        transaction_type: '*',
+        transactionName: '*',
+        transactionType: '*',
       }),
     });
     const transform = generator.getTransformParams(anSLO);

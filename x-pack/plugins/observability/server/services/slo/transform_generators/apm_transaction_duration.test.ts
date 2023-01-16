@@ -33,8 +33,8 @@ describe('APM Transaction Duration Transform Generator', () => {
       indicator: createAPMTransactionDurationIndicator({
         environment: '*',
         service: '*',
-        transaction_name: '*',
-        transaction_type: '*',
+        transactionName: '*',
+        transactionType: '*',
       }),
     });
     const transform = generator.getTransformParams(anSLO);

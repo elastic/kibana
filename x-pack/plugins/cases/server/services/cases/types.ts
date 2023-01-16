@@ -27,6 +27,12 @@ export enum ESCaseSeverity {
   CRITICAL = 30,
 }
 
+export enum ESCaseStatus {
+  OPEN = 0,
+  IN_PROGRESS = 10,
+  CLOSED = 20,
+}
+
 /**
  * This type should only be used within the cases service and its helper functions (e.g. the transforms).
  *
@@ -36,9 +42,12 @@ export enum ESCaseSeverity {
  */
 export type ESCaseAttributes = Omit<
   CaseAttributes,
-  'connector' | 'external_service' | 'severity'
+  'connector' | 'external_service' | 'severity' | 'status'
 > & {
   severity: ESCaseSeverity;
+  status: ESCaseStatus;
   connector: ESCaseConnector;
   external_service: ExternalServicesWithoutConnectorId | null;
+  total_alerts: number;
+  total_comments: number;
 };

@@ -28,6 +28,7 @@ jest.mock('../app_context', () => {
 jest.mock('../agent_policy', () => {
   return {
     agentPolicyService: {
+      getInactivityTimeouts: jest.fn().mockResolvedValue([]),
       getByIDs: jest.fn().mockResolvedValue([{ id: 'hosted-agent-policy', is_managed: true }]),
       list: jest.fn().mockResolvedValue({ items: [] }),
     },
@@ -49,16 +50,21 @@ describe('update_agent_tags', () => {
   beforeEach(() => {
     esClient = elasticsearchServiceMock.createInternalClient();
     soClient = savedObjectsClientMock.create();
-    esClient.mget.mockResolvedValue({
-      docs: [
-        {
-          _id: 'agent1',
-          _source: {
-            tags: ['one', 'two', 'three'],
+    esClient.search.mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            _id: 'agent1',
+            _source: {
+              tags: ['one', 'two', 'three'],
+            },
+            fields: {
+              status: 'online',
+            },
           },
-        } as any,
-      ],
-    });
+        ],
+      },
+    } as any);
     esClient.bulk.mockReset();
     esClient.bulk.mockResolvedValue({
       items: [],
@@ -206,12 +212,12 @@ describe('update_agent_tags', () => {
           tagsToRemove: [],
           kuery: '',
           total: 100,
-          retryCount: 3,
+          retryCount: 5,
         }
       )
     ).rejects.toThrowError('version conflict of 100 agents');
     const errorResults = esClient.bulk.mock.calls[0][0] as any;
-    expect(errorResults.body[1].error).toEqual('version conflict on 3rd retry');
+    expect(errorResults.body[1].error).toEqual('version conflict on last retry');
   });
 
   it('should run add tags async when actioning more agents than batch size', async () => {
@@ -257,18 +263,65 @@ describe('update_agent_tags', () => {
     );
 
     const updateByQuery = esClient.updateByQuery.mock.calls[0][0] as any;
-    expect(updateByQuery.query).toEqual({
-      bool: {
-        filter: [
-          { bool: { minimum_should_match: 1, should: [{ match: { active: true } }] } },
-          {
-            bool: {
-              must_not: { bool: { minimum_should_match: 1, should: [{ match: { tags: 'new' } }] } },
+    expect(updateByQuery.query).toMatchInlineSnapshot(`
+      Object {
+        "bool": Object {
+          "filter": Array [
+            Object {
+              "bool": Object {
+                "must_not": Object {
+                  "bool": Object {
+                    "minimum_should_match": 1,
+                    "should": Array [
+                      Object {
+                        "bool": Object {
+                          "minimum_should_match": 1,
+                          "should": Array [
+                            Object {
+                              "match": Object {
+                                "status": "inactive",
+                              },
+                            },
+                          ],
+                        },
+                      },
+                      Object {
+                        "bool": Object {
+                          "minimum_should_match": 1,
+                          "should": Array [
+                            Object {
+                              "match": Object {
+                                "status": "unenrolled",
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
             },
-          },
-        ],
-      },
-    });
+            Object {
+              "bool": Object {
+                "must_not": Object {
+                  "bool": Object {
+                    "minimum_should_match": 1,
+                    "should": Array [
+                      Object {
+                        "match": Object {
+                          "tags": "new",
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+          ],
+        },
+      }
+    `);
   });
 
   it('should add tags filter if only one tag to remove', async () => {

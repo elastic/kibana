@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
-import { SLO } from '../../../typings';
 
 export interface Props {
-  slo: SLO;
+  slo: SLOWithSummaryResponse;
 }
 
 export function SloDetails(props: Props) {

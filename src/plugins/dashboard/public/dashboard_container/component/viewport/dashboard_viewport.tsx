@@ -8,26 +8,17 @@
 
 import React, { useEffect, useRef } from 'react';
 
-import { withSuspense } from '@kbn/shared-ux-utility';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
-import { CalloutProps, LazyControlsCallout } from '@kbn/controls-plugin/public';
 
 import { DashboardGrid } from '../grid';
 import { pluginServices } from '../../../services/plugin_services';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
 import { useDashboardContainerContext } from '../../dashboard_container_renderer';
-import { DashboardLoadedInfo } from '../../embeddable/dashboard_container';
 
-const ControlsCallout = withSuspense<CalloutProps>(LazyControlsCallout);
-
-export const DashboardViewport = ({
-  onDataLoaded,
-}: {
-  onDataLoaded?: (data: DashboardLoadedInfo) => void;
-}) => {
+export const DashboardViewport = () => {
   const {
-    settings: { isProjectEnabledInLabs, uiSettings },
+    settings: { isProjectEnabledInLabs },
   } = pluginServices.getServices();
   const controlsRoot = useRef(null);
 
@@ -60,30 +51,14 @@ export const DashboardViewport = ({
   const isEmbeddedExternally = select((state) => state.componentState.isEmbeddedExternally);
 
   const controlsEnabled = isProjectEnabledInLabs('labs:dashboard:dashboardControls');
-  const hideAnnouncements = Boolean(uiSettings.get('hideAnnouncements'));
 
   return (
     <>
-      {controlsEnabled && controlGroup ? (
-        <>
-          {!hideAnnouncements &&
-          viewMode === ViewMode.EDIT &&
-          panelCount !== 0 &&
-          controlCount === 0 ? (
-            <ControlsCallout
-              getCreateControlButton={() => {
-                return controlGroup && controlGroup.getCreateControlButton('callout');
-              }}
-            />
-          ) : null}
-
-          {viewMode !== ViewMode.PRINT && (
-            <div
-              className={controlCount > 0 ? 'dshDashboardViewport-controls' : ''}
-              ref={controlsRoot}
-            />
-          )}
-        </>
+      {controlsEnabled && controlGroup && viewMode !== ViewMode.PRINT ? (
+        <div
+          className={controlCount > 0 ? 'dshDashboardViewport-controls' : ''}
+          ref={controlsRoot}
+        />
       ) : null}
       <div
         data-shared-items-count={panelCount}
@@ -103,7 +78,7 @@ export const DashboardViewport = ({
             <DashboardEmptyScreen isEditMode={viewMode === ViewMode.EDIT} />
           </div>
         )}
-        <DashboardGrid onDataLoaded={onDataLoaded} />
+        <DashboardGrid />
       </div>
     </>
   );

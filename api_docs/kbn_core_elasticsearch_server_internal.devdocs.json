@@ -10,10 +10,18 @@
   },
   "server": {
     "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/core-elasticsearch-server-internal",
-        "id": "def-server.isInlineScriptingEnabled",
+        "id": "def-common.isInlineScriptingEnabled",
         "type": "Function",
         "tags": [],
         "label": "isInlineScriptingEnabled",
@@ -22,9 +30,9 @@
           "({ client, }: { client: ",
           {
             "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.ElasticsearchClient",
+            "section": "def-common.ElasticsearchClient",
             "text": "ElasticsearchClient"
           },
           "; }) => Promise<boolean>"
@@ -35,7 +43,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-internal",
-            "id": "def-server.isInlineScriptingEnabled.$1",
+            "id": "def-common.isInlineScriptingEnabled.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  client,\n}",
@@ -46,7 +54,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-elasticsearch-server-internal",
-                "id": "def-server.isInlineScriptingEnabled.$1.client",
+                "id": "def-common.isInlineScriptingEnabled.$1.client",
                 "type": "Object",
                 "tags": [],
                 "label": "client",
@@ -1252,7 +1260,7 @@
       },
       {
         "parentPluginId": "@kbn/core-elasticsearch-server-internal",
-        "id": "def-server.isNotFoundFromUnsupportedServer",
+        "id": "def-common.isNotFoundFromUnsupportedServer",
         "type": "Function",
         "tags": [],
         "label": "isNotFoundFromUnsupportedServer",
@@ -1268,7 +1276,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-internal",
-            "id": "def-server.isNotFoundFromUnsupportedServer.$1",
+            "id": "def-common.isNotFoundFromUnsupportedServer.$1",
             "type": "Object",
             "tags": [],
             "label": "args",
@@ -1279,7 +1287,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-elasticsearch-server-internal",
-                "id": "def-server.isNotFoundFromUnsupportedServer.$1.statusCode",
+                "id": "def-common.isNotFoundFromUnsupportedServer.$1.statusCode",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "statusCode",
@@ -1293,7 +1301,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-elasticsearch-server-internal",
-                "id": "def-server.isNotFoundFromUnsupportedServer.$1.headers",
+                "id": "def-common.isNotFoundFromUnsupportedServer.$1.headers",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "headers",
@@ -1315,7 +1323,7 @@
       },
       {
         "parentPluginId": "@kbn/core-elasticsearch-server-internal",
-        "id": "def-server.isSupportedEsServer",
+        "id": "def-common.isSupportedEsServer",
         "type": "Function",
         "tags": [],
         "label": "isSupportedEsServer",
@@ -1331,7 +1339,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-internal",
-            "id": "def-server.isSupportedEsServer.$1",
+            "id": "def-common.isSupportedEsServer.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "headers",
@@ -1354,7 +1362,7 @@
       },
       {
         "parentPluginId": "@kbn/core-elasticsearch-server-internal",
-        "id": "def-server.pollEsNodesVersion",
+        "id": "def-common.pollEsNodesVersion",
         "type": "Function",
         "tags": [],
         "label": "pollEsNodesVersion",
@@ -1363,9 +1371,9 @@
           "({ internalClient, log, kibanaVersion, ignoreVersionMismatch, esVersionCheckInterval: healthCheckInterval, }: ",
           {
             "pluginId": "@kbn/core-elasticsearch-server-internal",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchServerInternalPluginApi",
-            "section": "def-server.PollEsNodesVersionOptions",
+            "section": "def-common.PollEsNodesVersionOptions",
             "text": "PollEsNodesVersionOptions"
           },
           ") => ",
@@ -1373,9 +1381,9 @@
           "<",
           {
             "pluginId": "@kbn/core-elasticsearch-server-internal",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchServerInternalPluginApi",
-            "section": "def-server.NodesVersionCompatibility",
+            "section": "def-common.NodesVersionCompatibility",
             "text": "NodesVersionCompatibility"
           },
           ">"
@@ -1386,7 +1394,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-internal",
-            "id": "def-server.pollEsNodesVersion.$1",
+            "id": "def-common.pollEsNodesVersion.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  internalClient,\n  log,\n  kibanaVersion,\n  ignoreVersionMismatch,\n  esVersionCheckInterval: healthCheckInterval,\n}",
@@ -1394,9 +1402,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-elasticsearch-server-internal",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchServerInternalPluginApi",
-                "section": "def-server.PollEsNodesVersionOptions",
+                "section": "def-common.PollEsNodesVersionOptions",
                 "text": "PollEsNodesVersionOptions"
               }
             ],
@@ -1413,7 +1421,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-elasticsearch-server-internal",
-        "id": "def-server.ClusterInfo",
+        "id": "def-common.ClusterInfo",
         "type": "Interface",
         "tags": [
           "private"
@@ -1426,7 +1434,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-internal",
-            "id": "def-server.ClusterInfo.cluster_name",
+            "id": "def-common.ClusterInfo.cluster_name",
             "type": "string",
             "tags": [],
             "label": "cluster_name",
@@ -1437,7 +1445,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-internal",
-            "id": "def-server.ClusterInfo.cluster_uuid",
+            "id": "def-common.ClusterInfo.cluster_uuid",
             "type": "string",
             "tags": [],
             "label": "cluster_uuid",
@@ -1448,7 +1456,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-internal",
-            "id": "def-server.ClusterInfo.cluster_version",
+            "id": "def-common.ClusterInfo.cluster_version",
             "type": "string",
             "tags": [],
             "label": "cluster_version",
@@ -1462,7 +1470,7 @@
       },
       {
         "parentPluginId": "@kbn/core-elasticsearch-server-internal",
-        "id": "def-server.NodeInfo",
+        "id": "def-common.NodeInfo",
         "type": "Interface",
         "tags": [],
         "label": "NodeInfo",
@@ -1473,7 +1481,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-internal",
-            "id": "def-server.NodeInfo.version",
+            "id": "def-common.NodeInfo.version",
             "type": "string",
             "tags": [],
             "label": "version",
@@ -1484,7 +1492,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-internal",
-            "id": "def-server.NodeInfo.ip",
+            "id": "def-common.NodeInfo.ip",
             "type": "string",
             "tags": [],
             "label": "ip",
@@ -1495,7 +1503,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-internal",
-            "id": "def-server.NodeInfo.http",
+            "id": "def-common.NodeInfo.http",
             "type": "Object",
             "tags": [],
             "label": "http",
@@ -1509,7 +1517,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-internal",
-            "id": "def-server.NodeInfo.name",
+            "id": "def-common.NodeInfo.name",
             "type": "string",
             "tags": [],
             "label": "name",
@@ -1523,7 +1531,7 @@
       },
       {
         "parentPluginId": "@kbn/core-elasticsearch-server-internal",
-        "id": "def-server.NodesInfo",
+        "id": "def-common.NodesInfo",
         "type": "Interface",
         "tags": [],
         "label": "NodesInfo",
@@ -1534,7 +1542,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-internal",
-            "id": "def-server.NodesInfo.nodes",
+            "id": "def-common.NodesInfo.nodes",
             "type": "Object",
             "tags": [],
             "label": "nodes",
@@ -1543,9 +1551,9 @@
               "{ [key: string]: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-server-internal",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchServerInternalPluginApi",
-                "section": "def-server.NodeInfo",
+                "section": "def-common.NodeInfo",
                 "text": "NodeInfo"
               },
               "; }"
@@ -1559,7 +1567,7 @@
       },
       {
         "parentPluginId": "@kbn/core-elasticsearch-server-internal",
-        "id": "def-server.NodesVersionCompatibility",
+        "id": "def-common.NodesVersionCompatibility",
         "type": "Interface",
         "tags": [],
         "label": "NodesVersionCompatibility",
@@ -1570,7 +1578,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-internal",
-            "id": "def-server.NodesVersionCompatibility.isCompatible",
+            "id": "def-common.NodesVersionCompatibility.isCompatible",
             "type": "boolean",
             "tags": [],
             "label": "isCompatible",
@@ -1581,7 +1589,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-internal",
-            "id": "def-server.NodesVersionCompatibility.message",
+            "id": "def-common.NodesVersionCompatibility.message",
             "type": "string",
             "tags": [],
             "label": "message",
@@ -1595,7 +1603,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-internal",
-            "id": "def-server.NodesVersionCompatibility.incompatibleNodes",
+            "id": "def-common.NodesVersionCompatibility.incompatibleNodes",
             "type": "Array",
             "tags": [],
             "label": "incompatibleNodes",
@@ -1603,9 +1611,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-elasticsearch-server-internal",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchServerInternalPluginApi",
-                "section": "def-server.NodeInfo",
+                "section": "def-common.NodeInfo",
                 "text": "NodeInfo"
               },
               "[]"
@@ -1616,7 +1624,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-internal",
-            "id": "def-server.NodesVersionCompatibility.warningNodes",
+            "id": "def-common.NodesVersionCompatibility.warningNodes",
             "type": "Array",
             "tags": [],
             "label": "warningNodes",
@@ -1624,9 +1632,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-elasticsearch-server-internal",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchServerInternalPluginApi",
-                "section": "def-server.NodeInfo",
+                "section": "def-common.NodeInfo",
                 "text": "NodeInfo"
               },
               "[]"
@@ -1637,7 +1645,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-internal",
-            "id": "def-server.NodesVersionCompatibility.kibanaVersion",
+            "id": "def-common.NodesVersionCompatibility.kibanaVersion",
             "type": "string",
             "tags": [],
             "label": "kibanaVersion",
@@ -1648,7 +1656,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-internal",
-            "id": "def-server.NodesVersionCompatibility.nodesInfoRequestError",
+            "id": "def-common.NodesVersionCompatibility.nodesInfoRequestError",
             "type": "Object",
             "tags": [],
             "label": "nodesInfoRequestError",
@@ -1665,7 +1673,7 @@
       },
       {
         "parentPluginId": "@kbn/core-elasticsearch-server-internal",
-        "id": "def-server.PollEsNodesVersionOptions",
+        "id": "def-common.PollEsNodesVersionOptions",
         "type": "Interface",
         "tags": [],
         "label": "PollEsNodesVersionOptions",
@@ -1676,7 +1684,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-internal",
-            "id": "def-server.PollEsNodesVersionOptions.internalClient",
+            "id": "def-common.PollEsNodesVersionOptions.internalClient",
             "type": "Object",
             "tags": [],
             "label": "internalClient",
@@ -2876,7 +2884,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-internal",
-            "id": "def-server.PollEsNodesVersionOptions.log",
+            "id": "def-common.PollEsNodesVersionOptions.log",
             "type": "Object",
             "tags": [],
             "label": "log",
@@ -2884,9 +2892,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/logging",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.Logger",
+                "section": "def-common.Logger",
                 "text": "Logger"
               }
             ],
@@ -2896,7 +2904,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-internal",
-            "id": "def-server.PollEsNodesVersionOptions.kibanaVersion",
+            "id": "def-common.PollEsNodesVersionOptions.kibanaVersion",
             "type": "string",
             "tags": [],
             "label": "kibanaVersion",
@@ -2907,7 +2915,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-internal",
-            "id": "def-server.PollEsNodesVersionOptions.ignoreVersionMismatch",
+            "id": "def-common.PollEsNodesVersionOptions.ignoreVersionMismatch",
             "type": "boolean",
             "tags": [],
             "label": "ignoreVersionMismatch",
@@ -2918,7 +2926,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-internal",
-            "id": "def-server.PollEsNodesVersionOptions.esVersionCheckInterval",
+            "id": "def-common.PollEsNodesVersionOptions.esVersionCheckInterval",
             "type": "number",
             "tags": [],
             "label": "esVersionCheckInterval",
@@ -2935,7 +2943,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-elasticsearch-server-internal",
-        "id": "def-server.ElasticsearchConfigType",
+        "id": "def-common.ElasticsearchConfigType",
         "type": "Type",
         "tags": [],
         "label": "ElasticsearchConfigType",
@@ -2952,7 +2960,7 @@
     "objects": [
       {
         "parentPluginId": "@kbn/core-elasticsearch-server-internal",
-        "id": "def-server.configSchema",
+        "id": "def-common.configSchema",
         "type": "Object",
         "tags": [],
         "label": "configSchema",
@@ -2962,289 +2970,289 @@
         "signature": [
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.ObjectType",
+            "section": "def-common.ObjectType",
             "text": "ObjectType"
           },
           "<{ sniffOnStart: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<boolean>; sniffInterval: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<false | moment.Duration>; sniffOnConnectionFault: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<boolean>; hosts: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<string | string[]>; maxSockets: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<number>; maxIdleSockets: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<number>; idleSocketTimeout: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<moment.Duration>; compression: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<boolean>; username: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<string | undefined>; password: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<string | undefined>; serviceAccountToken: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<string | undefined>; requestHeadersWhitelist: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<string | string[]>; customHeaders: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<Record<string, string>>; shardTimeout: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<moment.Duration>; requestTimeout: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<moment.Duration>; pingTimeout: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<moment.Duration>; logQueries: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<boolean>; ssl: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.ObjectType",
+            "section": "def-common.ObjectType",
             "text": "ObjectType"
           },
           "<{ verificationMode: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<\"none\" | \"full\" | \"certificate\">; certificateAuthorities: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<string | string[] | undefined>; certificate: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<string | undefined>; key: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<string | undefined>; keyPassphrase: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<string | undefined>; keystore: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.ObjectType",
+            "section": "def-common.ObjectType",
             "text": "ObjectType"
           },
           "<{ path: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<string | undefined>; password: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<string | undefined>; }>; truststore: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.ObjectType",
+            "section": "def-common.ObjectType",
             "text": "ObjectType"
           },
           "<{ path: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<string | undefined>; password: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<string | undefined>; }>; alwaysPresentCertificate: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<boolean>; }>; apiVersion: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<string>; healthCheck: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.ObjectType",
+            "section": "def-common.ObjectType",
             "text": "ObjectType"
           },
           "<{ delay: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<moment.Duration>; }>; ignoreVersionMismatch: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.ConditionalType",
+            "section": "def-common.ConditionalType",
             "text": "ConditionalType"
           },
           "<false, boolean, boolean>; skipStartupConnectionCheck: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.ConditionalType",
+            "section": "def-common.ConditionalType",
             "text": "ConditionalType"
           },
           "<true, boolean, boolean>; }>"
@@ -3255,13 +3263,5 @@
         "initialIsOpen": false
       }
     ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }

@@ -1061,25 +1061,25 @@
                   "Readonly<{ id: string; management?: Readonly<{ [x: string]: ",
                   {
                     "pluginId": "@kbn/utility-types",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnUtilityTypesPluginApi",
-                    "section": "def-server.RecursiveReadonlyArray",
+                    "section": "def-common.RecursiveReadonlyArray",
                     "text": "RecursiveReadonlyArray"
                   },
                   "<string>; }> | undefined; catalogue?: ",
                   {
                     "pluginId": "@kbn/utility-types",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnUtilityTypesPluginApi",
-                    "section": "def-server.RecursiveReadonlyArray",
+                    "section": "def-common.RecursiveReadonlyArray",
                     "text": "RecursiveReadonlyArray"
                   },
                   "<string> | undefined; privileges: ",
                   {
                     "pluginId": "@kbn/utility-types",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnUtilityTypesPluginApi",
-                    "section": "def-server.RecursiveReadonlyArray",
+                    "section": "def-common.RecursiveReadonlyArray",
                     "text": "RecursiveReadonlyArray"
                   },
                   "<",
@@ -1121,9 +1121,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/utility-types",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.RecursiveReadonlyArray",
+                "section": "def-common.RecursiveReadonlyArray",
                 "text": "RecursiveReadonlyArray"
               },
               "<string> | undefined"
@@ -1143,9 +1143,9 @@
               "Readonly<{ [x: string]: ",
               {
                 "pluginId": "@kbn/utility-types",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.RecursiveReadonlyArray",
+                "section": "def-common.RecursiveReadonlyArray",
                 "text": "RecursiveReadonlyArray"
               },
               "<string>; }> | undefined"
@@ -1164,9 +1164,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/utility-types",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.RecursiveReadonlyArray",
+                "section": "def-common.RecursiveReadonlyArray",
                 "text": "RecursiveReadonlyArray"
               },
               "<",
@@ -2796,25 +2796,25 @@
                   "Readonly<{ id: string; management?: Readonly<{ [x: string]: ",
                   {
                     "pluginId": "@kbn/utility-types",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnUtilityTypesPluginApi",
-                    "section": "def-server.RecursiveReadonlyArray",
+                    "section": "def-common.RecursiveReadonlyArray",
                     "text": "RecursiveReadonlyArray"
                   },
                   "<string>; }> | undefined; catalogue?: ",
                   {
                     "pluginId": "@kbn/utility-types",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnUtilityTypesPluginApi",
-                    "section": "def-server.RecursiveReadonlyArray",
+                    "section": "def-common.RecursiveReadonlyArray",
                     "text": "RecursiveReadonlyArray"
                   },
                   "<string> | undefined; privileges: ",
                   {
                     "pluginId": "@kbn/utility-types",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnUtilityTypesPluginApi",
-                    "section": "def-server.RecursiveReadonlyArray",
+                    "section": "def-common.RecursiveReadonlyArray",
                     "text": "RecursiveReadonlyArray"
                   },
                   "<",
@@ -2856,9 +2856,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/utility-types",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.RecursiveReadonlyArray",
+                "section": "def-common.RecursiveReadonlyArray",
                 "text": "RecursiveReadonlyArray"
               },
               "<string> | undefined"
@@ -2878,9 +2878,9 @@
               "Readonly<{ [x: string]: ",
               {
                 "pluginId": "@kbn/utility-types",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.RecursiveReadonlyArray",
+                "section": "def-common.RecursiveReadonlyArray",
                 "text": "RecursiveReadonlyArray"
               },
               "<string>; }> | undefined"
@@ -2899,9 +2899,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/utility-types",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.RecursiveReadonlyArray",
+                "section": "def-common.RecursiveReadonlyArray",
                 "text": "RecursiveReadonlyArray"
               },
               "<",

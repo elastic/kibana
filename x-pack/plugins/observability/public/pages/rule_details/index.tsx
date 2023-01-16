@@ -42,7 +42,7 @@ import { fromQuery, toQuery } from '../../utils/url';
 import { ObservabilityAlertSearchbarWithUrlSync } from '../../components/shared/alert_search_bar';
 import { DeleteModalConfirmation } from './components/delete_modal_confirmation';
 import { CenterJustifiedSpinner } from './components/center_justified_spinner';
-import { getDefaultAlertSummaryTimeRange } from './helpers';
+import { getAlertSummaryWidgetTimeRange } from './helpers';
 
 import {
   EXECUTION_TAB,
@@ -111,7 +111,9 @@ export function RuleDetailsPage() {
   const [editFlyoutVisible, setEditFlyoutVisible] = useState<boolean>(false);
   const [isRuleEditPopoverOpen, setIsRuleEditPopoverOpen] = useState(false);
   const [esQuery, setEsQuery] = useState<{ bool: BoolQuery }>();
-  const [defaultAlertTimeRange] = useState(getDefaultAlertSummaryTimeRange);
+  const [alertSummaryWidgetTimeRange, setAlertSummaryWidgetTimeRange] = useState(
+    getAlertSummaryWidgetTimeRange
+  );
   const ruleQuery = useRef<Query[]>([
     { query: `kibana.alert.rule.uuid: ${ruleId}`, language: 'kuery' },
   ]);
@@ -123,11 +125,15 @@ export function RuleDetailsPage() {
   const tabsRef = useRef<HTMLDivElement>(null);
 
   const onAlertSummaryWidgetClick = async (status: AlertStatus = ALERT_STATUS_ALL) => {
+    const timeRange = getAlertSummaryWidgetTimeRange();
+    setAlertSummaryWidgetTimeRange(timeRange);
     await locators.get(ruleDetailsLocatorID)?.navigate(
       {
+        rangeFrom: timeRange.utcFrom,
+        rangeTo: timeRange.utcTo,
         ruleId,
-        tabId: ALERTS_TAB,
         status,
+        tabId: ALERTS_TAB,
       },
       {
         replace: true,
@@ -372,7 +378,7 @@ export function RuleDetailsPage() {
           : [],
       }}
     >
-      <EuiFlexGroup wrap={true} gutterSize="m">
+      <EuiFlexGroup wrap gutterSize="m">
         <EuiFlexItem style={{ minWidth: 350 }}>
           {getRuleStatusPanel({
             rule,
@@ -382,17 +388,15 @@ export function RuleDetailsPage() {
             statusMessage,
           })}
         </EuiFlexItem>
-        <EuiSpacer size="m" />
         <EuiFlexItem style={{ minWidth: 350 }}>
           <AlertSummaryWidget
             featureIds={featureIds}
-            onClick={(status) => onAlertSummaryWidgetClick(status)}
-            timeRange={defaultAlertTimeRange}
+            onClick={onAlertSummaryWidgetClick}
+            timeRange={alertSummaryWidgetTimeRange}
             filter={alertSummaryWidgetFilter.current}
           />
         </EuiFlexItem>
-        <EuiSpacer size="m" />
-        {getRuleDefinition({ rule, onEditRule: () => reloadRule() } as RuleDefinitionProps)}
+        {getRuleDefinition({ rule, onEditRule: reloadRule } as RuleDefinitionProps)}
       </EuiFlexGroup>
 
       <EuiSpacer size="l" />

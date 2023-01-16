@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { ComponentStory } from '@storybook/react';
+import { SLOResponse } from '@kbn/slo-schema';
 
-import { SLO } from '../../../typings';
 import { SloSelector as Component } from './slo_selector';
 
 export default {
@@ -17,7 +17,7 @@ export default {
 };
 
 const Template: ComponentStory<typeof Component> = () => (
-  <Component onSelected={(slo: SLO | undefined) => console.log(slo)} />
+  <Component onSelected={(slo: SLOResponse | undefined) => console.log(slo)} />
 );
 const defaultProps = {};
 

@@ -9,7 +9,7 @@
 import { resolve } from 'path';
 import { services } from '../plugin_functional/services';
 import fs from 'fs';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 export default async function ({ readConfigFile }) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config.base.js'));

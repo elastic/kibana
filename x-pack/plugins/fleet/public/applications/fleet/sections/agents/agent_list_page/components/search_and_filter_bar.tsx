@@ -63,6 +63,12 @@ const statusFilters = [
       defaultMessage: 'Inactive',
     }),
   },
+  {
+    status: 'unenrolled',
+    label: i18n.translate('xpack.fleet.agentList.statusUnenrolledFilterText', {
+      defaultMessage: 'Unenrolled',
+    }),
+  },
 ];
 
 const ClearAllTagsFilterItem = styled(EuiFilterSelectItem)`

@@ -11,11 +11,11 @@ import { pipe } from 'fp-ts/lib/pipeable';
 
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
+import { sloSchema } from '@kbn/slo-schema';
 
 import { StoredSLO, SLO } from '../../domain/models';
 import { SO_SLO_TYPE } from '../../saved_objects';
 import { SLONotFound } from '../../errors';
-import { sloSchema } from '../../types/schema';
 
 type ObjectValues<T> = T[keyof T];
 

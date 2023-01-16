@@ -26,11 +26,14 @@ export const OptionsListPopoverInvalidSelections = () => {
 
   // Select current state from Redux using multiple selectors to avoid rerenders.
   const invalidSelections = select((state) => state.componentState.invalidSelections);
-
   return (
     <>
       <EuiSpacer size="s" />
-      <EuiTitle size="xxs" className="optionsList-control-ignored-selection-title">
+      <EuiTitle
+        size="xxs"
+        className="optionsList-control-ignored-selection-title"
+        data-test-subj="optionList__ignoredSelectionLabel"
+      >
         <label>
           {OptionsListStrings.popover.getInvalidSelectionsSectionTitle(
             invalidSelections?.length ?? 0
@@ -44,6 +47,7 @@ export const OptionsListPopoverInvalidSelections = () => {
           className="optionsList__selectionInvalid"
           key={index}
           onClick={() => dispatch(deselectOption(ignoredSelection))}
+          aria-label={OptionsListStrings.popover.getInvalidSelectionAriaLabel(ignoredSelection)}
         >
           {`${ignoredSelection}`}
         </EuiFilterSelectItem>

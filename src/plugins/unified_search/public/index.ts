@@ -21,10 +21,8 @@ export { SearchBar } from './search_bar';
 export type { FilterItemsProps } from './filter_bar';
 export { FilterItem, FilterItems } from './filter_bar';
 export { FilterBadgeGroup } from './filter_badge';
-export { DataViewsList } from './dataview_picker/dataview_list';
-export { DataViewSelector } from './dataview_picker/data_view_selector';
-export { DataViewPicker } from './dataview_picker';
 
+export { DataViewPicker, DataViewSelector, DataViewsList } from './dataview_picker';
 export type { DataViewPickerProps } from './dataview_picker';
 
 export type { ApplyGlobalFilterActionContext } from './actions';

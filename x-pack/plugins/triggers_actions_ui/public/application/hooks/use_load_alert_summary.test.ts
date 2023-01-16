@@ -28,7 +28,7 @@ describe('useLoadAlertSummary', () => {
 
   it('should return the mocked data from API', async () => {
     mockedPostAPI.mockResolvedValue({
-      ...mockAlertSummaryResponse(),
+      ...mockAlertSummaryResponse,
     });
 
     const { result, waitForNextUpdate } = renderHook(() =>
@@ -39,15 +39,19 @@ describe('useLoadAlertSummary', () => {
     );
     expect(result.current).toEqual({
       isLoading: true,
-      alertSummary: { active: 0, recovered: 0 },
+      alertSummary: {
+        activeAlertCount: 0,
+        activeAlerts: [],
+        recoveredAlertCount: 0,
+        recoveredAlerts: [],
+      },
     });
 
     await waitForNextUpdate();
 
     const { alertSummary, error } = result.current;
     expect(alertSummary).toEqual({
-      active: 1,
-      recovered: 1,
+      ...mockAlertSummaryResponse,
     });
     expect(error).toBeFalsy();
   });
@@ -61,7 +65,7 @@ describe('useLoadAlertSummary', () => {
       },
     };
     mockedPostAPI.mockResolvedValue({
-      ...mockAlertSummaryResponse(),
+      ...mockAlertSummaryResponse,
     });
 
     const { waitForNextUpdate } = renderHook(() =>

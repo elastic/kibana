@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 export const AlertSummaryWidgetError = () => {
   return (
     <EuiEmptyPrompt
-      data-test-subj="alertsRuleSummaryErrorPrompt"
+      data-test-subj="alertSummaryWidgetError"
       iconType="alert"
       color="danger"
       title={

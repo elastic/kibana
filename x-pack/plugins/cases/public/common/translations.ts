@@ -314,7 +314,7 @@ export const ADD_TAG_CUSTOM_OPTION_LABEL = (searchValue: string) =>
 export const VERSION_CONFLICT_WARNING = (markdownId: string) =>
   i18n.translate('xpack.cases.configure.commentVersionConflictWarning', {
     defaultMessage:
-      'This {markdownId} was updated. Saving your changes will overwrite the updated value.',
+      'This {markdownId} has been updated by another user. Saving your {markdownId} will overwrite their update.',
     values: { markdownId },
   });
 

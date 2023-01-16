@@ -9,6 +9,7 @@
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
+import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import type {
   FatalState,
   State,
@@ -45,6 +46,7 @@ import type {
   CheckVersionIndexReadyActions,
   UpdateTargetMappingsMeta,
   CheckTargetMappingsState,
+  PrepareCompatibleMigration,
 } from '../state';
 import { type TransformErrorObjects, TransformSavedObjectDocumentError } from '../core';
 import type { AliasAction, RetryableEsClientError } from '../actions';
@@ -53,6 +55,20 @@ import { createInitialProgress } from './progress';
 import { model } from './model';
 
 describe('migrations v2 model', () => {
+  const indexMapping: IndexMapping = {
+    properties: {
+      new_saved_object_type: {
+        properties: {
+          value: { type: 'text' },
+        },
+      },
+    },
+    _meta: {
+      migrationMappingPropertyHashes: {
+        new_saved_object_type: '4a11183eee21e6fbad864f7a30b39ad0',
+      },
+    },
+  };
   const baseState: BaseState = {
     controlState: '',
     legacyIndex: '.kibana',
@@ -67,20 +83,7 @@ describe('migrations v2 model', () => {
     discardCorruptObjects: false,
     indexPrefix: '.kibana',
     outdatedDocumentsQuery: {},
-    targetIndexMappings: {
-      properties: {
-        new_saved_object_type: {
-          properties: {
-            value: { type: 'text' },
-          },
-        },
-      },
-      _meta: {
-        migrationMappingPropertyHashes: {
-          new_saved_object_type: '4a11183eee21e6fbad864f7a30b39ad0',
-        },
-      },
-    },
+    targetIndexMappings: indexMapping,
     tempIndexMappings: { properties: {} },
     preMigrationScript: Option.none,
     currentAlias: '.kibana',
@@ -265,7 +268,7 @@ describe('migrations v2 model', () => {
               settings: {},
             },
           });
-          const newState = model(initState, res);
+          const newState = model(initState, res) as OutdatedDocumentsSearchOpenPit;
 
           expect(newState.controlState).toEqual('OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT');
           // This snapshot asserts that we merge the
@@ -292,6 +295,22 @@ describe('migrations v2 model', () => {
               },
             }
           `);
+          expect(newState.targetIndexRawMappings).toEqual({
+            _meta: {
+              migrationMappingPropertyHashes: {
+                disabled_saved_object_type: '7997cf5a56cc02bdc9c93361bde732b0',
+              },
+            },
+            properties: {
+              disabled_saved_object_type: {
+                properties: {
+                  value: {
+                    type: 'keyword',
+                  },
+                },
+              },
+            },
+          });
           expect(newState.retryCount).toEqual(0);
           expect(newState.retryDelay).toEqual(0);
         });
@@ -498,6 +517,7 @@ describe('migrations v2 model', () => {
           expect(newState.retryDelay).toEqual(2000);
         });
       });
+
       describe('if waitForMigrationCompletion=false', () => {
         const initState = Object.assign({}, initBaseState, {
           waitForMigrationCompletion: false,
@@ -786,6 +806,67 @@ describe('migrations v2 model', () => {
           });
           expect(newState.retryCount).toEqual(0);
           expect(newState.retryDelay).toEqual(0);
+        });
+
+        describe('when upgrading to a new stack version', () => {
+          const unchangedMappingsState: State = {
+            ...baseState,
+            controlState: 'INIT',
+            kibanaVersion: '7.12.0', // new version!
+            currentAlias: '.kibana',
+            versionAlias: '.kibana_7.12.0',
+            versionIndex: '.kibana_7.11.0_001',
+          };
+          it('INIT -> PREPARE_COMPATIBLE_MIGRATION when the mappings have not changed', () => {
+            const res: ResponseType<'INIT'> = Either.right({
+              '.kibana_7.11.0_001': {
+                aliases: {
+                  '.kibana': {},
+                  '.kibana_7.11.0': {},
+                },
+                mappings: indexMapping,
+                settings: {},
+              },
+            });
+            const newState = model(unchangedMappingsState, res) as PrepareCompatibleMigration;
+
+            expect(newState.controlState).toEqual('PREPARE_COMPATIBLE_MIGRATION');
+            expect(newState.targetIndexRawMappings).toEqual({
+              _meta: {
+                migrationMappingPropertyHashes: {
+                  new_saved_object_type: '4a11183eee21e6fbad864f7a30b39ad0',
+                },
+              },
+              properties: {
+                new_saved_object_type: {
+                  properties: {
+                    value: {
+                      type: 'text',
+                    },
+                  },
+                },
+              },
+            });
+            expect(newState.versionAlias).toEqual('.kibana_7.12.0');
+            expect(newState.currentAlias).toEqual('.kibana');
+            // will point to
+            expect(newState.targetIndex).toEqual('.kibana_7.11.0_001');
+            expect(newState.preTransformDocsActions).toEqual([
+              {
+                add: {
+                  alias: '.kibana_7.12.0',
+                  index: '.kibana_7.11.0_001',
+                },
+              },
+              {
+                remove: {
+                  alias: '.kibana_7.11.0',
+                  index: '.kibana_7.11.0_001',
+                  must_exist: true,
+                },
+              },
+            ]);
+          });
         });
       });
     });
@@ -1889,6 +1970,47 @@ describe('migrations v2 model', () => {
         expect(newState.controlState).toEqual('FATAL');
         expect((newState as FatalState).reason).toMatchInlineSnapshot(
           `"[cluster_shard_limit_exceeded] Upgrading Kibana requires adding a small number of new shards. Ensure that Kibana is able to add 10 more shards by increasing the cluster.max_shards_per_node setting, or removing indices to clear up resources. See clusterShardLimitExceeded"`
+        );
+      });
+    });
+
+    describe('PREPARE_COMPATIBLE_MIGRATIONS', () => {
+      const someAliasAction: AliasAction = { add: { index: '.kibana', alias: '.kibana_8.7.0' } };
+      const state: PrepareCompatibleMigration = {
+        ...baseState,
+        controlState: 'PREPARE_COMPATIBLE_MIGRATION',
+        versionIndexReadyActions: Option.none,
+        sourceIndex: Option.some('.kibana') as Option.Some<string>,
+        targetIndex: '.kibana_7.11.0_001',
+        preTransformDocsActions: [someAliasAction],
+      };
+
+      it('PREPARE_COMPATIBLE_MIGRATIONS -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT if action succeeds', () => {
+        const res: ResponseType<'PREPARE_COMPATIBLE_MIGRATION'> = Either.right(
+          'update_aliases_succeeded'
+        );
+        const newState = model(state, res) as OutdatedDocumentsSearchOpenPit;
+        expect(newState.controlState).toEqual('OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT');
+        expect(newState.versionIndexReadyActions).toEqual(Option.none);
+      });
+
+      it('PREPARE_COMPATIBLE_MIGRATIONS -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT if action fails because the alias is not found', () => {
+        const res: ResponseType<'PREPARE_COMPATIBLE_MIGRATION'> = Either.left({
+          type: 'alias_not_found_exception',
+        });
+
+        const newState = model(state, res) as OutdatedDocumentsSearchOpenPit;
+        expect(newState.controlState).toEqual('OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT');
+        expect(newState.versionIndexReadyActions).toEqual(Option.none);
+      });
+
+      it('throws an exception if action fails with an error other than a missing alias', () => {
+        const res: ResponseType<'PREPARE_COMPATIBLE_MIGRATION'> = Either.left({
+          type: 'remove_index_not_a_concrete_index',
+        });
+
+        expect(() => model(state, res)).toThrowErrorMatchingInlineSnapshot(
+          `"PREPARE_COMPATIBLE_MIGRATION received unexpected action response: {\\"type\\":\\"remove_index_not_a_concrete_index\\"}"`
         );
       });
     });

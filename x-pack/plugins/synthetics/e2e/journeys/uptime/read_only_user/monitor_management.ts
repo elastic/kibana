@@ -7,11 +7,14 @@
 
 import { expect, journey, Page, step } from '@elastic/synthetics';
 import { byTestId } from '@kbn/observability-plugin/e2e/utils';
+import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
 import { monitorManagementPageProvider } from '../../../page_objects/uptime/monitor_management';
 
 journey(
   'Monitor Management read only user',
   async ({ page, params }: { page: Page; params: any }) => {
+    recordVideo(page);
+
     const uptime = monitorManagementPageProvider({ page, kibanaUrl: params.kibanaUrl });
 
     step('Go to monitor-management', async () => {

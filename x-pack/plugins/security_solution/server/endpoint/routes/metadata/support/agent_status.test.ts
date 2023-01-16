@@ -92,45 +92,46 @@ describe('test filtering endpoint hosts by agent status', () => {
     it('correctly builds kuery for healthy status', () => {
       const status = ['healthy'];
       const kuery = buildStatusesKuery(status);
-      expect(kuery).toMatchInlineSnapshot(
-        `"(united.agent.last_checkin:*  AND not ((united.agent.last_checkin < now-300s) or ((((united.agent.upgrade_started_at:*) and not (united.agent.upgraded_at:*)) or (not (united.agent.last_checkin:*)) or (united.agent.unenrollment_started_at:*) or (not united.agent.policy_revision_idx:*))  AND not ((united.agent.last_checkin < now-300s) or ((united.agent.last_checkin_status:error or united.agent.last_checkin_status:degraded or united.agent.last_checkin_status:DEGRADED or united.agent.last_checkin_status:ERROR)  AND not ((united.agent.last_checkin < now-300s) or (united.agent.unenrollment_started_at:*))))) or ((united.agent.last_checkin_status:error or united.agent.last_checkin_status:degraded or united.agent.last_checkin_status:DEGRADED or united.agent.last_checkin_status:ERROR)  AND not ((united.agent.last_checkin < now-300s) or (united.agent.unenrollment_started_at:*)))))"`
-      );
+      expect(kuery).toMatchInlineSnapshot(`"(status:online)"`);
     });
 
     it('correctly builds kuery for offline status', () => {
       const status = ['offline'];
       const kuery = buildStatusesKuery(status);
-      expect(kuery).toMatchInlineSnapshot(`"(united.agent.last_checkin < now-300s)"`);
+      expect(kuery).toMatchInlineSnapshot(`"(status:offline)"`);
     });
 
     it('correctly builds kuery for unhealthy status', () => {
       const status = ['unhealthy'];
       const kuery = buildStatusesKuery(status);
-      expect(kuery).toMatchInlineSnapshot(
-        `"((united.agent.last_checkin_status:error or united.agent.last_checkin_status:degraded or united.agent.last_checkin_status:DEGRADED or united.agent.last_checkin_status:ERROR)  AND not ((united.agent.last_checkin < now-300s) or (united.agent.unenrollment_started_at:*)))"`
-      );
+      expect(kuery).toMatchInlineSnapshot(`"((status:error or status:degraded))"`);
     });
 
     it('correctly builds kuery for updating status', () => {
       const status = ['updating'];
       const kuery = buildStatusesKuery(status);
       expect(kuery).toMatchInlineSnapshot(
-        `"((((united.agent.upgrade_started_at:*) and not (united.agent.upgraded_at:*)) or (not (united.agent.last_checkin:*)) or (united.agent.unenrollment_started_at:*) or (not united.agent.policy_revision_idx:*))  AND not ((united.agent.last_checkin < now-300s) or ((united.agent.last_checkin_status:error or united.agent.last_checkin_status:degraded or united.agent.last_checkin_status:DEGRADED or united.agent.last_checkin_status:ERROR)  AND not ((united.agent.last_checkin < now-300s) or (united.agent.unenrollment_started_at:*)))))"`
+        `"((status:updating or status:unenrolling or status:enrolling))"`
       );
     });
 
     it('correctly builds kuery for inactive status', () => {
       const status = ['inactive'];
       const kuery = buildStatusesKuery(status);
-      const expected = '(united.agent.active:false)';
-      expect(kuery).toEqual(expected);
+      expect(kuery).toMatchInlineSnapshot(`"(status:inactive)"`);
+    });
+
+    it('correctly builds kuery for unenrolled status', () => {
+      const status = ['unenrolled'];
+      const kuery = buildStatusesKuery(status);
+      expect(kuery).toMatchInlineSnapshot(`"(status:unenrolled)"`);
     });
 
     it('correctly builds kuery for multiple statuses', () => {
       const statuses = ['offline', 'unhealthy'];
       const kuery = buildStatusesKuery(statuses);
       expect(kuery).toMatchInlineSnapshot(
-        `"(united.agent.last_checkin < now-300s OR (united.agent.last_checkin_status:error or united.agent.last_checkin_status:degraded or united.agent.last_checkin_status:DEGRADED or united.agent.last_checkin_status:ERROR)  AND not ((united.agent.last_checkin < now-300s) or (united.agent.unenrollment_started_at:*)))"`
+        `"(status:offline OR (status:error or status:degraded))"`
       );
     });
   });

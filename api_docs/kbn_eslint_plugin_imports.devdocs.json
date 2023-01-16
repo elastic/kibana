@@ -10,15 +10,23 @@
   },
   "server": {
     "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/eslint-plugin-imports",
-        "id": "def-server.getImportResolver",
+        "id": "def-common.getImportResolver",
         "type": "Function",
         "tags": [],
         "label": "getImportResolver",
         "description": [
-          "\nCreate a request resolver for ESLint, requires a PluginPackageResolver from @kbn/bazel-packages which will\nbe created and cached on contextServices automatically.\n\nAll import requests in the repository should return a result, if they don't it's a bug\nwhich should be caught by the `@kbn/import/no_unresolved` rule, which should never be disabled. If you need help\nadding support for an import style please reach out to operations."
+          "\nCreate a request resolver for ESLint, requires a PluginPackageResolver from @kbn/repo-packages which will\nbe created and cached on contextServices automatically.\n\nAll import requests in the repository should return a result, if they don't it's a bug\nwhich should be caught by the `@kbn/import/no_unresolved` rule, which should never be disabled. If you need help\nadding support for an import style please reach out to operations."
         ],
         "signature": [
           "(context: ",
@@ -26,9 +34,9 @@
           ".RuleContext) => ",
           {
             "pluginId": "@kbn/import-resolver",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnImportResolverPluginApi",
-            "section": "def-server.ImportResolver",
+            "section": "def-common.ImportResolver",
             "text": "ImportResolver"
           }
         ],
@@ -38,7 +46,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/eslint-plugin-imports",
-            "id": "def-server.getImportResolver.$1",
+            "id": "def-common.getImportResolver.$1",
             "type": "Object",
             "tags": [],
             "label": "context",
@@ -57,14 +65,6 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [],
     "enums": [],
     "misc": [],

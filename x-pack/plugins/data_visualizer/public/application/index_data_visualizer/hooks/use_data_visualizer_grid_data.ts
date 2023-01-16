@@ -14,13 +14,13 @@ import { type DataViewField, UI_SETTINGS } from '@kbn/data-plugin/common';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import seedrandom from 'seedrandom';
 import type { SamplingOption } from '@kbn/discover-plugin/public/application/main/components/field_stats_table/field_stats_table';
+import type { Dictionary } from '@kbn/ml-url-state';
+import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
 import type { RandomSamplerOption } from '../constants/random_sampler';
 import type { DataVisualizerIndexBasedAppState } from '../types/index_data_visualizer_state';
 import { useDataVisualizerKibana } from '../../kibana_context';
 import { getEsQueryFromSavedSearch } from '../utils/saved_search_utils';
 import type { MetricFieldsStats } from '../../common/components/stats_table/components/field_count_stats';
-import { useTimefilter } from './use_time_filter';
-import { dataVisualizerRefresh$ } from '../services/timefilter_refresh_service';
 import { TimeBuckets } from '../../../../common/services/time_buckets';
 import type { FieldVisConfig } from '../../common/components/stats_table/types';
 import {
@@ -36,7 +36,6 @@ import { getDefaultPageState } from '../components/index_data_visualizer_view/in
 import { useFieldStatsSearchStrategy } from './use_field_stats';
 import { useOverallStats } from './use_overall_stats';
 import type { OverallStatsSearchStrategyParams } from '../../../../common/types/field_stats';
-import type { Dictionary } from '../../common/util/url_state';
 import type { AggregatableField, NonAggregatableField } from '../types/overall_stats';
 
 const defaults = getDefaultPageState();
@@ -313,7 +312,7 @@ export const useDataVisualizerGridData = (
     const timeUpdateSubscription = merge(
       timefilter.getTimeUpdate$(),
       timefilter.getAutoRefreshFetch$(),
-      dataVisualizerRefresh$
+      mlTimefilterRefresh$
     ).subscribe(() => {
       if (onUpdate) {
         onUpdate({

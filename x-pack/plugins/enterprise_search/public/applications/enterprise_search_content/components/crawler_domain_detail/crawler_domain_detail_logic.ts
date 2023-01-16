@@ -135,9 +135,6 @@ export const CrawlerDomainDetailLogic = kea<
         })
       );
     },
-    deleteApiError: (error) => {
-      flashAPIErrors(error);
-    },
     fetchDomainData: async ({ domainId }) => {
       const { http } = HttpLogic.values;
       const { indexName } = IndexNameLogic.values;

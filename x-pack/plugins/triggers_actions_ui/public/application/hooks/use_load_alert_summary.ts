@@ -21,6 +21,11 @@ export interface AlertSummaryTimeRange {
   title: JSX.Element | string;
 }
 
+export interface Alert {
+  key: number;
+  doc_count: number;
+}
+
 interface UseLoadAlertSummaryProps {
   featureIds?: ValidFeatureId[];
   timeRange: AlertSummaryTimeRange;
@@ -29,18 +34,14 @@ interface UseLoadAlertSummaryProps {
 
 interface AlertSummary {
   activeAlertCount: number;
-  activeAlerts?: object[];
+  activeAlerts: Alert[];
   recoveredAlertCount: number;
-  recoveredAlerts?: object[];
-  error?: string;
+  recoveredAlerts: Alert[];
 }
 
 interface LoadAlertSummaryResponse {
   isLoading: boolean;
-  alertSummary: {
-    active: number;
-    recovered: number;
-  };
+  alertSummary: AlertSummary;
   error?: string;
 }
 
@@ -48,7 +49,12 @@ export function useLoadAlertSummary({ featureIds, timeRange, filter }: UseLoadAl
   const { http } = useKibana().services;
   const [alertSummary, setAlertSummary] = useState<LoadAlertSummaryResponse>({
     isLoading: true,
-    alertSummary: { active: 0, recovered: 0 },
+    alertSummary: {
+      activeAlertCount: 0,
+      activeAlerts: [],
+      recoveredAlertCount: 0,
+      recoveredAlerts: [],
+    },
   });
   const isCancelledRef = useRef(false);
   const abortCtrlRef = useRef(new AbortController());
@@ -59,20 +65,23 @@ export function useLoadAlertSummary({ featureIds, timeRange, filter }: UseLoadAl
     abortCtrlRef.current = new AbortController();
 
     try {
-      const { activeAlertCount, recoveredAlertCount, error } = await fetchAlertSummary({
-        featureIds,
-        filter,
-        http,
-        signal: abortCtrlRef.current.signal,
-        timeRange,
-      });
-      if (error) throw error;
+      const { activeAlertCount, activeAlerts, recoveredAlertCount, recoveredAlerts } =
+        await fetchAlertSummary({
+          featureIds,
+          filter,
+          http,
+          signal: abortCtrlRef.current.signal,
+          timeRange,
+        });
+
       if (!isCancelledRef.current) {
         setAlertSummary((oldState) => ({
           ...oldState,
           alertSummary: {
-            active: activeAlertCount,
-            recovered: recoveredAlertCount,
+            activeAlertCount,
+            activeAlerts,
+            recoveredAlertCount,
+            recoveredAlerts,
           },
           isLoading: false,
         }));
@@ -110,30 +119,26 @@ async function fetchAlertSummary({
   timeRange: AlertSummaryTimeRange;
   filter?: estypes.QueryDslQueryContainer;
 }): Promise<AlertSummary> {
-  try {
-    const res = await http.post<AsApiContract<any>>(`${BASE_RAC_ALERTS_API_PATH}/_alert_summary`, {
-      signal,
-      body: JSON.stringify({
-        fixed_interval: fixedInterval,
-        gte: utcFrom,
-        lte: utcTo,
-        featureIds,
-        filter: [filter],
-      }),
-    });
+  const res = await http.post<AsApiContract<any>>(`${BASE_RAC_ALERTS_API_PATH}/_alert_summary`, {
+    signal,
+    body: JSON.stringify({
+      fixed_interval: fixedInterval,
+      gte: utcFrom,
+      lte: utcTo,
+      featureIds,
+      filter: [filter],
+    }),
+  });
 
-    const activeAlertCount = res?.activeAlertCount ?? 0;
-    const recoveredAlertCount = res?.recoveredAlertCount ?? 0;
+  const activeAlertCount = res?.activeAlertCount ?? 0;
+  const activeAlerts = res?.activeAlerts ?? [];
+  const recoveredAlertCount = res?.recoveredAlertCount ?? 0;
+  const recoveredAlerts = res?.recoveredAlerts ?? [];
 
-    return {
-      activeAlertCount,
-      recoveredAlertCount,
-    };
-  } catch (error) {
-    return {
-      error,
-      activeAlertCount: 0,
-      recoveredAlertCount: 0,
-    };
-  }
+  return {
+    activeAlertCount,
+    activeAlerts,
+    recoveredAlertCount,
+    recoveredAlerts,
+  };
 }

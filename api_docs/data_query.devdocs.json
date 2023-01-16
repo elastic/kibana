@@ -2173,14 +2173,6 @@
             "path": "src/plugins/discover/public/application/main/services/discover_state.ts"
           },
           {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/routes/map_page/url_state/global_sync.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/routes/map_page/url_state/global_sync.ts"
-          },
-          {
             "plugin": "monitoring",
             "path": "x-pack/plugins/monitoring/public/url_state.ts"
           },
@@ -4558,7 +4550,7 @@
           "\nConverts QueryState to expression AST"
         ],
         "signature": [
-          "({\n  filters,\n  query,\n  inputQuery,\n  time,\n  dataViewsService,\n}: Args) => Promise<",
+          "({\n  filters,\n  query,\n  inputQuery,\n  time,\n  dataView,\n}: Args) => Promise<",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -4577,7 +4569,7 @@
             "id": "def-common.textBasedQueryStateToAstWithValidation.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  filters,\n  query,\n  inputQuery,\n  time,\n  dataViewsService,\n}",
+            "label": "{\n  filters,\n  query,\n  inputQuery,\n  time,\n  dataView,\n}",
             "description": [],
             "signature": [
               "Args"

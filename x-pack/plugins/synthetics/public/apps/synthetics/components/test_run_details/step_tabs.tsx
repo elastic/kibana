@@ -83,6 +83,12 @@ export const StepTabs = ({
         );
       case 'console':
         return (
+          <EuiCodeBlock isCopyable={true} overflowHeight="200px" language="javascript">
+            {getBrowserConsoles(1)?.join('\n')}
+          </EuiCodeBlock>
+        );
+      case 'stackTrace':
+        return (
           <EuiCodeBlock isCopyable={true} overflowHeight="200px" language="html">
             {step?.synthetics?.error?.stack}
           </EuiCodeBlock>
@@ -91,7 +97,7 @@ export const StepTabs = ({
       default:
         return (
           <EuiCodeBlock isCopyable={true} overflowHeight="200px" language="javascript">
-            {getBrowserConsoles(1)?.join('\n')}
+            {step?.synthetics?.payload?.source}
           </EuiCodeBlock>
         );
     }

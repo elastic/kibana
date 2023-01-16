@@ -20,7 +20,7 @@ import {
 } from '../../common/utils/attachments';
 import { CASE_SAVED_OBJECT, NO_ASSIGNEES_FILTERING_KEYWORD } from '../../common/constants';
 
-import { SEVERITY_EXTERNAL_TO_ESMODEL } from '../common/constants';
+import { SEVERITY_EXTERNAL_TO_ESMODEL, STATUS_EXTERNAL_TO_ESMODEL } from '../common/constants';
 import type {
   CaseStatuses,
   CommentRequest,
@@ -147,7 +147,9 @@ export const addStatusFilter = ({
   type?: string;
 }): KueryNode => {
   const filters: KueryNode[] = [];
-  filters.push(nodeBuilder.is(`${type}.attributes.status`, status));
+  filters.push(
+    nodeBuilder.is(`${type}.attributes.status`, `${STATUS_EXTERNAL_TO_ESMODEL[status]}`)
+  );
 
   if (appendFilter) {
     filters.push(appendFilter);

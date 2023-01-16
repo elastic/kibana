@@ -135,7 +135,7 @@ describe('PipelinesLogic', () => {
     describe('apiSuccess', () => {
       it('should call flashSuccessToast', () => {
         PipelinesLogic.actions.apiSuccess({ connectorId: 'a', pipeline: newPipeline });
-        expect(flashSuccessToast).toHaveBeenCalledWith('Pipelines successfully updated');
+        expect(flashSuccessToast).toHaveBeenCalledWith('Pipelines updated');
       });
     });
     describe('createCustomPipelineError', () => {
@@ -151,7 +151,7 @@ describe('PipelinesLogic', () => {
         PipelinesLogic.actions.fetchCustomPipeline = jest.fn();
         PipelinesLogic.actions.fetchIndexApiSuccess(connectorIndex);
         PipelinesLogic.actions.createCustomPipelineSuccess({ created: ['a', 'b'] });
-        expect(flashSuccessToast).toHaveBeenCalledWith('Custom pipeline successfully created');
+        expect(flashSuccessToast).toHaveBeenCalledWith('Custom pipeline created');
         expect(PipelinesLogic.actions.setPipelineState).toHaveBeenCalledWith({
           ...PipelinesLogic.values.pipelineState,
           name: 'a',

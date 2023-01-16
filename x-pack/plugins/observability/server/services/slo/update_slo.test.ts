@@ -39,10 +39,11 @@ describe('UpdateSLO', () => {
       expectTransformManagerNeverCalled();
       expect(mockEsClient.deleteByQuery).not.toBeCalled();
       expect(mockRepository.save).toBeCalledWith(
-        expect.objectContaining({ ...slo, name: newName, updated_at: expect.anything() })
+        expect.objectContaining({ ...slo, name: newName, updatedAt: expect.anything() })
       );
       expect(response.name).toBe(newName);
-      expect(response.updated_at).not.toBe(slo.updated_at);
+      expect(response.updatedAt).not.toBe(slo.updatedAt);
+      expect(response.revision).toBe(slo.revision);
     });
   });
 
@@ -60,7 +61,7 @@ describe('UpdateSLO', () => {
           ...slo,
           settings: newSettings,
           revision: 2,
-          updated_at: expect.anything(),
+          updatedAt: expect.anything(),
         })
       );
       expectInstallationOfNewSLOTransform();
@@ -81,7 +82,7 @@ describe('UpdateSLO', () => {
           ...slo,
           indicator: newIndicator,
           revision: 2,
-          updated_at: expect.anything(),
+          updatedAt: expect.anything(),
         })
       );
       expectInstallationOfNewSLOTransform();

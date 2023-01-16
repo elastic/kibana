@@ -137,6 +137,18 @@ export function registerFleetUsageCollector(
             description: 'The total number of enrolled agents currently offline',
           },
         },
+        inactive: {
+          type: 'long',
+          _meta: {
+            description: 'The total number of of enrolled agents currently inactive',
+          },
+        },
+        unenrolled: {
+          type: 'long',
+          _meta: {
+            description: 'The total number of agents currently unenrolled',
+          },
+        },
         total_all_statuses: {
           type: 'long',
           _meta: {

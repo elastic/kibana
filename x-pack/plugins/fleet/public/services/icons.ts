@@ -9,10 +9,14 @@ import { ICON_TYPES } from '@elastic/eui';
 import type { IBasePath } from '@kbn/core/public';
 
 import { epmRouteService } from '../applications/fleet/services';
-import type { PackageListItem } from '../types';
+import type { PackageListItem, RegistryPolicyTemplate } from '../types';
 
-export const getEuiIconType = (pkg: PackageListItem, basePath: IBasePath): string | undefined => {
-  const pkgIcon = pkg.icons?.find((icon) => icon.type === 'image/svg+xml');
+export const getEuiIconType = (
+  pkg: PackageListItem,
+  basePath: IBasePath,
+  policyTemplate?: RegistryPolicyTemplate
+): string | undefined => {
+  const pkgIcon = (policyTemplate || pkg).icons?.find((icon) => icon.type === 'image/svg+xml');
   if (!pkgIcon) {
     // If no valid SVG is available, attempt to fallback to built-in EUI icons
     return ICON_TYPES.find((key) => key.toLowerCase() === `logo${pkg.name}`);

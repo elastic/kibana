@@ -7,9 +7,8 @@
 
 import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-// @ts-ignore
+import { usePageUrlState } from '@kbn/ml-url-state';
 import { JobsListView } from './components/jobs_list_view';
-import { usePageUrlState } from '../../util/url_state';
 import { ML_PAGES } from '../../../../common/constants/locator';
 import { ListingPageUrlState } from '../../../../common/types/common';
 import { HelpMenu } from '../../components/help_menu';
@@ -17,6 +16,11 @@ import { useMlKibana } from '../../contexts/kibana';
 import { MlPageHeader } from '../../components/page_header';
 import { HeaderMenuPortal } from '../../components/header_menu_portal';
 import { JobsActionMenu } from '../components/jobs_action_menu';
+
+interface PageUrlState {
+  pageKey: typeof ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE;
+  pageUrlState: ListingPageUrlState;
+}
 
 interface JobsPageProps {
   isMlEnabledInSpace?: boolean;
@@ -31,7 +35,7 @@ export const getDefaultAnomalyDetectionJobsListState = (): ListingPageUrlState =
 });
 
 export const JobsPage: FC<JobsPageProps> = ({ isMlEnabledInSpace, lastRefresh }) => {
-  const [pageState, setPageState] = usePageUrlState(
+  const [pageState, setPageState] = usePageUrlState<PageUrlState>(
     ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
     getDefaultAnomalyDetectionJobsListState()
   );

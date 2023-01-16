@@ -188,6 +188,7 @@ export default function ({ getService }: FtrProviderContext) {
               isServiceManaged: true,
             },
             isEnabled: true,
+            isStatusAlertEnabled: true,
           },
           {
             id: savedMonitors[0].attributes[ConfigKey.MONITOR_QUERY_ID],
@@ -204,6 +205,7 @@ export default function ({ getService }: FtrProviderContext) {
               isServiceManaged: true,
             },
             isEnabled: true,
+            isStatusAlertEnabled: true,
           },
           {
             id: savedMonitors[1].attributes[ConfigKey.MONITOR_QUERY_ID],
@@ -220,6 +222,7 @@ export default function ({ getService }: FtrProviderContext) {
               isServiceManaged: true,
             },
             isEnabled: true,
+            isStatusAlertEnabled: true,
           },
           {
             id: savedMonitors[1].attributes[ConfigKey.MONITOR_QUERY_ID],
@@ -236,6 +239,7 @@ export default function ({ getService }: FtrProviderContext) {
               isServiceManaged: true,
             },
             isEnabled: true,
+            isStatusAlertEnabled: true,
           },
         ]);
         expect(savedMonitors[1].attributes[ConfigKey.MONITOR_QUERY_ID]).eql(customHeartbeatId);

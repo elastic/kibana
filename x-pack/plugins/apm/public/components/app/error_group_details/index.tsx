@@ -11,48 +11,31 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiSpacer,
-  EuiText,
   EuiTitle,
-  EuiHorizontalRule,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import React, { useEffect } from 'react';
+import { omit } from 'lodash';
+import { useHistory } from 'react-router-dom';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
-import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useErrorGroupDistributionFetcher } from '../../../hooks/use_error_group_distribution_fetcher';
-import { useFetcher } from '../../../hooks/use_fetcher';
+import {
+  FETCH_STATUS,
+  isPending,
+  useFetcher,
+} from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
-import { DetailView } from './detail_view';
+import { ErrorSampler } from './error_sampler';
 import { ErrorDistribution } from './distribution';
 import { TopErroneousTransactions } from './top_erroneous_transactions';
-
-const Titles = euiStyled.div`
-  margin-bottom: ${({ theme }) => theme.eui.euiSizeL};
-`;
-
-const Label = euiStyled.div`
-  margin-bottom: ${({ theme }) => theme.eui.euiSizeXS};
-  font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
-  color: ${({ theme }) => theme.eui.euiColorDarkShade};
-`;
-
-const Message = euiStyled.div`
-  font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
-  font-weight: bold;
-  font-size: ${({ theme }) => theme.eui.euiFontSizeM};
-  margin-bottom: ${({ theme }) => theme.eui.euiSizeS};
-`;
-
-const Culprit = euiStyled.div`
-  font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
-  margin-bottom: ${({ theme }) => theme.eui.euiSizeS};
-`;
+import { maybe } from '../../../../common/utils/maybe';
+import { fromQuery, toQuery } from '../../shared/links/url_helpers';
 
 type ErrorDistributionAPIResponse =
   APIReturnType<'GET /internal/apm/services/{serviceName}/errors/distribution'>;
@@ -73,10 +56,10 @@ function getShortGroupId(errorGroupId?: string) {
 
 function ErrorGroupHeader({
   groupId,
-  isUnhandled,
+  occurrencesCount,
 }: {
   groupId: string;
-  isUnhandled?: boolean;
+  occurrencesCount?: number;
 }) {
   return (
     <EuiFlexGroup alignItems="center">
@@ -92,26 +75,23 @@ function ErrorGroupHeader({
           </h2>
         </EuiTitle>
       </EuiFlexItem>
-
-      {isUnhandled && (
-        <EuiFlexItem grow={false}>
-          <EuiBadge color="warning">
-            {i18n.translate('xpack.apm.errorGroupDetails.unhandledLabel', {
-              defaultMessage: 'Unhandled',
-            })}
-          </EuiBadge>
-        </EuiFlexItem>
-      )}
+      <EuiFlexItem grow={false}>
+        <EuiBadge color="hollow">
+          {i18n.translate('xpack.apm.errorGroupDetails.occurrencesLabel', {
+            defaultMessage: '{occurrencesCount} occ',
+            values: { occurrencesCount },
+          })}
+        </EuiBadge>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 }
 
 export function ErrorGroupDetails() {
-  const { urlParams } = useLegacyUrlParams();
-
   const { serviceName } = useApmServiceContext();
 
   const apmRouter = useApmRouter();
+  const history = useHistory();
 
   const {
     path: { groupId },
@@ -122,6 +102,7 @@ export function ErrorGroupDetails() {
       kuery,
       serviceGroup,
       comparisonEnabled,
+      errorId,
     },
   } = useApmParams('/services/{serviceName}/errors/{groupId}');
 
@@ -158,110 +139,97 @@ export function ErrorGroupDetails() {
     ]
   );
 
-  const { data: errorGroupData } = useFetcher(
-    (callApmApi) => {
-      if (start && end) {
-        return callApmApi(
-          'GET /internal/apm/services/{serviceName}/errors/{groupId}',
-          {
-            params: {
-              path: {
-                serviceName,
-                groupId,
+  const { data: errorSamplesData, status: errorSamplesFetchStatus } =
+    useFetcher(
+      (callApmApi) => {
+        if (start && end) {
+          return callApmApi(
+            'GET /internal/apm/services/{serviceName}/errors/{groupId}/samples',
+            {
+              params: {
+                path: {
+                  serviceName,
+                  groupId,
+                },
+                query: {
+                  environment,
+                  kuery,
+                  start,
+                  end,
+                },
               },
-              query: {
-                environment,
-                kuery,
-                start,
-                end,
-              },
-            },
-          }
-        );
-      }
-    },
-    [environment, kuery, serviceName, start, end, groupId]
-  );
+            }
+          );
+        }
+      },
+      [environment, kuery, serviceName, start, end, groupId]
+    );
 
-  const { errorDistributionData, status } = useErrorGroupDistributionFetcher({
-    serviceName,
-    groupId,
-    environment,
-    kuery,
-  });
+  const { errorDistributionData, status: errorDistributionStatus } =
+    useErrorGroupDistributionFetcher({
+      serviceName,
+      groupId,
+      environment,
+      kuery,
+    });
 
-  if (!errorGroupData || !errorDistributionData) {
+  useEffect(() => {
+    const selectedSample = errorSamplesData?.errorSampleIds.find(
+      (sample) => sample === errorId
+    );
+
+    if (errorSamplesFetchStatus === FETCH_STATUS.SUCCESS && !selectedSample) {
+      // selected sample was not found. select a new one:
+      const selectedErrorId = maybe(errorSamplesData?.errorSampleIds[0]);
+
+      history.replace({
+        ...history.location,
+        search: fromQuery({
+          ...omit(toQuery(history.location.search), ['errorId']),
+          errorId: selectedErrorId,
+        }),
+      });
+    }
+  }, [history, errorId, errorSamplesData, errorSamplesFetchStatus]);
+
+  const loadingDistributionData = isPending(errorDistributionStatus);
+  const loadingErrorSamplesData = isPending(errorSamplesFetchStatus);
+
+  if (loadingDistributionData && loadingErrorSamplesData) {
+    return (
+      <div style={{ textAlign: 'center' }}>
+        <EuiLoadingSpinner size="xl" />
+      </div>
+    );
+  }
+
+  if (!errorDistributionData || !errorSamplesData) {
     return <ErrorGroupHeader groupId={groupId} />;
   }
 
-  // If there are 0 occurrences, show only distribution chart w. empty message
-  const showDetails = errorGroupData.occurrencesCount !== 0;
-  const logMessage = errorGroupData.error?.error.log?.message;
-  const excMessage = errorGroupData.error?.error.exception?.[0].message;
-  const culprit = errorGroupData.error?.error.culprit;
-  const isUnhandled =
-    errorGroupData.error?.error.exception?.[0].handled === false;
+  // If there are 0 occurrences, show only charts w. empty message
+  const showDetails = errorSamplesData.occurrencesCount !== 0;
 
   return (
     <>
       <EuiSpacer size={'s'} />
 
-      <ErrorGroupHeader groupId={groupId} isUnhandled={isUnhandled} />
+      <ErrorGroupHeader
+        groupId={groupId}
+        occurrencesCount={errorSamplesData.occurrencesCount}
+      />
 
       <EuiSpacer size={'m'} />
-
-      {showDetails && (
-        <Titles>
-          <EuiText>
-            {logMessage && (
-              <>
-                <Label>
-                  {i18n.translate(
-                    'xpack.apm.errorGroupDetails.logMessageLabel',
-                    {
-                      defaultMessage: 'Log message',
-                    }
-                  )}
-                </Label>
-                <Message>{logMessage}</Message>
-              </>
-            )}
-            <Label>
-              {i18n.translate(
-                'xpack.apm.errorGroupDetails.exceptionMessageLabel',
-                {
-                  defaultMessage: 'Exception message',
-                }
-              )}
-            </Label>
-            <Message>{excMessage || NOT_AVAILABLE_LABEL}</Message>
-            <Label>
-              {i18n.translate('xpack.apm.errorGroupDetails.culpritLabel', {
-                defaultMessage: 'Culprit',
-              })}
-            </Label>
-            <Culprit>{culprit || NOT_AVAILABLE_LABEL}</Culprit>
-
-            <Label>
-              {i18n.translate('xpack.apm.errorGroupDetails.occurrencesLabel', {
-                defaultMessage: 'Occurrences',
-              })}
-            </Label>
-            {errorGroupData.occurrencesCount}
-          </EuiText>
-          <EuiHorizontalRule />
-        </Titles>
-      )}
       <EuiFlexGroup>
         <EuiFlexItem grow={3}>
           <EuiPanel hasBorder={true}>
             <ErrorDistribution
-              fetchStatus={status}
+              fetchStatus={errorDistributionStatus}
               distribution={showDetails ? errorDistributionData : emptyState}
               title={i18n.translate(
                 'xpack.apm.errorGroupDetails.occurrencesChartLabel',
                 {
-                  defaultMessage: 'Occurrences',
+                  defaultMessage: 'Error occurrences',
                 }
               )}
             />
@@ -275,10 +243,10 @@ export function ErrorGroupDetails() {
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       {showDetails && (
-        <DetailView
-          errorGroup={errorGroupData}
-          urlParams={urlParams}
-          kuery={kuery}
+        <ErrorSampler
+          errorSampleIds={errorSamplesData.errorSampleIds}
+          errorSamplesFetchStatus={errorSamplesFetchStatus}
+          occurrencesCount={errorSamplesData.occurrencesCount}
         />
       )}
     </>

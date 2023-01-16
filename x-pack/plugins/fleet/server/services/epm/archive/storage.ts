@@ -102,10 +102,9 @@ export async function removeArchiveEntries(opts: {
 }) {
   const { savedObjectsClient, refs } = opts;
   if (!refs) return;
-  const results = await Promise.all(
-    refs.map((ref) => savedObjectsClient.delete(ASSETS_SAVED_OBJECT_TYPE, ref.id))
+  return savedObjectsClient.bulkDelete(
+    refs.map((ref) => ({ id: ref.id, type: ASSETS_SAVED_OBJECT_TYPE }))
   );
-  return results;
 }
 
 export async function saveArchiveEntries(opts: {

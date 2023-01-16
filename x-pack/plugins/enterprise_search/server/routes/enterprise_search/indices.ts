@@ -596,8 +596,12 @@ export function registerIndexRoutes({
           headers: { 'content-type': 'application/json' },
         });
       } catch (e) {
-        log.error(`Error simulating inference pipeline: ${JSON.stringify(e)}`);
-        throw e;
+        return createError({
+          errorCode: ErrorCode.UNCAUGHT_EXCEPTION,
+          message: e.message,
+          response,
+          statusCode: 400,
+        });
       }
     })
   );
@@ -673,8 +677,12 @@ export function registerIndexRoutes({
           headers: { 'content-type': 'application/json' },
         });
       } catch (e) {
-        log.error(`Error simulating inference pipeline: ${JSON.stringify(e)}`);
-        throw e;
+        return createError({
+          errorCode: ErrorCode.UNCAUGHT_EXCEPTION,
+          message: e.message,
+          response,
+          statusCode: 400,
+        });
       }
     })
   );

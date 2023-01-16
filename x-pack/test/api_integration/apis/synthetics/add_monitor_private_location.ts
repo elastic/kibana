@@ -267,6 +267,7 @@ export default function ({ getService }: FtrProviderContext) {
                 uptime: ['all'],
                 fleet: ['all'],
                 fleetv2: ['all'],
+                actions: ['all'],
               },
               spaces: ['*'],
             },

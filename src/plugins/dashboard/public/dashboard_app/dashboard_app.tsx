@@ -10,6 +10,7 @@ import { History } from 'history';
 import useMount from 'react-use/lib/useMount';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 
@@ -64,12 +65,14 @@ export function DashboardApp({
    * Unpack & set up dashboard services
    */
   const {
+    screenshotMode: { isScreenshotMode, getScreenshotContext },
     coreContext: { executionContext },
     embeddable: { getStateTransfer },
     notifications: { toasts },
     settings: { uiSettings },
     data: { search },
   } = pluginServices.getServices();
+
   const incomingEmbeddable = getStateTransfer().getIncomingEmbeddablePackage(
     DASHBOARD_APP_ID,
     true
@@ -115,6 +118,7 @@ export function DashboardApp({
   const getCreationOptions = useCallback((): DashboardCreationOptions => {
     const initialUrlState = loadAndRemoveDashboardState(kbnUrlStateStorage);
     const searchSessionIdFromURL = getSearchSessionIdFromURL(history);
+
     return {
       incomingEmbeddable,
 
@@ -139,11 +143,24 @@ export function DashboardApp({
         // State loaded from the dashboard app URL and from the locator overrides all other dashboard state.
         ...initialUrlState,
         ...stateFromLocator,
+
+        // if print mode is active, force viewMode.PRINT
+        ...(isScreenshotMode() && getScreenshotContext('layout') === 'print'
+          ? { viewMode: ViewMode.PRINT }
+          : {}),
       },
 
       validateLoadedSavedObject: validateOutcome,
     };
-  }, [kbnUrlStateStorage, history, stateFromLocator, incomingEmbeddable, validateOutcome]);
+  }, [
+    history,
+    validateOutcome,
+    stateFromLocator,
+    isScreenshotMode,
+    kbnUrlStateStorage,
+    incomingEmbeddable,
+    getScreenshotContext,
+  ]);
 
   /**
    * Get the redux wrapper from the dashboard container. This is used to wrap the top nav so it can interact with the
