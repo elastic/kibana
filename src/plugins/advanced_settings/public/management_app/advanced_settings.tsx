@@ -7,12 +7,8 @@
  */
 
 import React, { Component } from 'react';
-import { Subscription } from 'rxjs';
-import { UnregisterCallback } from 'history';
-import { parse } from 'query-string';
 
 import { UiCounterMetricType } from '@kbn/analytics';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, Query } from '@elastic/eui';
 
 import {
   IUiSettingsClient,
@@ -21,20 +17,11 @@ import {
   ScopedHistory,
   ThemeServiceStart,
 } from '@kbn/core/public';
-import { url } from '@kbn/kibana-utils-plugin/public';
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { UiSettingsScope } from '@kbn/core-ui-settings-common';
-import { CallOuts } from './components/call_outs';
-import { Search } from './components/search';
 import { Form } from './components/form';
-import { AdvancedSettingsVoiceAnnouncement } from './components/advanced_settings_voice_announcement';
-import { ComponentRegistry } from '..';
-
-import { getAriaName, toEditableConfig, fieldSorter, DEFAULT_CATEGORY } from './lib';
 
 import { FieldSetting, SettingsChanges } from './types';
-import { parseErrorMsg } from './components/search/search';
 
 export const QUERY = 'query';
 
@@ -42,229 +29,26 @@ interface AdvancedSettingsProps {
   history: ScopedHistory;
   enableSaving: boolean;
   uiSettings: IUiSettingsClient;
-  globalUiSettings: IUiSettingsClient;
   docLinks: DocLinksStart['links'];
   toasts: ToastsStart;
   theme: ThemeServiceStart['theme$'];
-  componentRegistry: ComponentRegistry['start'];
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
-}
-
-interface AdvancedSettingsState {
-  footerQueryMatched: boolean;
-  query: Query;
-  filteredSettings: Record<UiSettingsScope, Record<string, FieldSetting[]>>;
+  settings: FieldSetting[];
+  groupedSettings: GroupedSettings;
+  categoryCounts: Record<string, number>;
+  categories: string[];
+  visibleSettings: Record<string, FieldSetting[]>;
+  noResults: boolean;
+  clearQuery: () => void;
+  queryText: string;
 }
 
 type GroupedSettings = Record<string, FieldSetting[]>;
 
-export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedSettingsState> {
-  private settings: FieldSetting[];
-  private globalSettings: FieldSetting[];
-  private groupedSettings: Record<UiSettingsScope, GroupedSettings>;
-  private categoryCounts: Record<UiSettingsScope, Record<string, number>>;
-  private categories: Record<UiSettingsScope, string[]>;
-  private uiSettingsSubscription?: Subscription;
-  private globalUiSettingsSubscription?: Subscription;
-  private unregister: UnregisterCallback;
-
+export class AdvancedSettings extends Component<AdvancedSettingsProps> {
   constructor(props: AdvancedSettingsProps) {
     super(props);
-
-    this.settings = this.initSettings(this.props.uiSettings);
-    this.globalSettings = this.initSettings(this.props.globalUiSettings);
-    this.groupedSettings = {
-      namespace: this.initGroupedSettings(this.settings),
-      global: this.initGroupedSettings(this.globalSettings),
-    };
-    this.categories = {
-      namespace: this.initCategories(this.groupedSettings.namespace),
-      global: this.initCategories(this.groupedSettings.global),
-    };
-    this.categoryCounts = {
-      namespace: this.initCategoryCounts(this.groupedSettings.namespace),
-      global: this.initCategoryCounts(this.groupedSettings.global),
-    };
-    this.state = this.getQueryState(undefined, true);
-    this.unregister = this.props.history.listen(({ search }) => {
-      this.setState(this.getQueryState(search));
-    });
   }
-
-  init(config: IUiSettingsClient) {
-    this.settings = this.initSettings(config);
-    this.groupedSettings = {
-      namespace: this.initGroupedSettings(this.settings),
-      global: this.initGroupedSettings(this.globalSettings),
-    };
-    this.categories = {
-      namespace: this.initCategories(this.groupedSettings.namespace),
-      global: this.initCategories(this.groupedSettings.global),
-    };
-    this.categoryCounts = {
-      namespace: this.initCategoryCounts(this.groupedSettings.namespace),
-      global: this.initCategoryCounts(this.groupedSettings.global),
-    };
-  }
-
-  initSettings = this.mapConfig;
-  initGroupedSettings = this.mapSettings;
-  initCategories(groupedSettings: GroupedSettings) {
-    return Object.keys(groupedSettings).sort((a, b) => {
-      if (a === DEFAULT_CATEGORY) return -1;
-      if (b === DEFAULT_CATEGORY) return 1;
-      if (a > b) return 1;
-      return a === b ? 0 : -1;
-    });
-  }
-  initCategoryCounts(groupedSettings: GroupedSettings) {
-    return Object.keys(groupedSettings).reduce(
-      (counts: Record<string, number>, category: string) => {
-        counts[category] = groupedSettings[category].length;
-        return counts;
-      },
-      {}
-    );
-  }
-
-  componentDidMount() {
-    this.uiSettingsSubscription = this.props.uiSettings.getUpdate$().subscribe(() => {
-      const { query } = this.state;
-      this.init(this.props.uiSettings);
-      this.setState({
-        filteredSettings: {
-          ...this.state.filteredSettings,
-          namespace: this.mapSettings(Query.execute(query, this.settings)),
-        },
-      });
-    });
-    this.globalUiSettingsSubscription = this.props.globalUiSettings.getUpdate$().subscribe(() => {
-      const { query } = this.state;
-      this.init(this.props.uiSettings);
-      this.setState({
-        filteredSettings: {
-          ...this.state.filteredSettings,
-          global: this.mapSettings(Query.execute(query, this.globalSettings)),
-        },
-      });
-    });
-
-    // scrolls to setting provided in the URL hash
-    const { hash } = window.location;
-    if (hash !== '') {
-      setTimeout(() => {
-        const id = hash.replace('#', '');
-        const element = document.getElementById(id);
-
-        let globalNavOffset = 0;
-
-        const globalNavBars = document
-          .getElementById('globalHeaderBars')
-          ?.getElementsByClassName('euiHeader');
-
-        if (globalNavBars) {
-          Array.from(globalNavBars).forEach((navBar) => {
-            globalNavOffset += (navBar as HTMLDivElement).offsetHeight;
-          });
-        }
-
-        if (element) {
-          element.scrollIntoView();
-          window.scrollBy(0, -globalNavOffset); // offsets scroll by height of the global nav
-        }
-      }, 0);
-    }
-  }
-
-  componentWillUnmount() {
-    this.uiSettingsSubscription?.unsubscribe?.();
-    this.globalUiSettingsSubscription?.unsubscribe?.();
-    this.unregister?.();
-  }
-
-  private getQuery(queryString: string, intialQuery = false): Query {
-    try {
-      const query = intialQuery ? getAriaName(queryString) : queryString ?? '';
-      return Query.parse(query);
-    } catch ({ message }) {
-      this.props.toasts.addWarning({
-        title: parseErrorMsg,
-        text: message,
-      });
-      return Query.parse('');
-    }
-  }
-
-  private getQueryText(search?: string): string {
-    const queryParams = parse(search ?? window.location.search) ?? {};
-    return (queryParams[QUERY] as string) ?? '';
-  }
-
-  private getQueryState(search?: string, intialQuery = false): AdvancedSettingsState {
-    const queryString = this.getQueryText(search);
-    const query = this.getQuery(queryString, intialQuery);
-    const filteredSettings = {
-      namespace: this.mapSettings(Query.execute(query, this.settings)),
-      global: this.mapSettings(Query.execute(query, this.globalSettings)),
-    };
-
-    return {
-      query,
-      filteredSettings,
-      footerQueryMatched: Object.keys(filteredSettings.namespace).length > 0,
-    };
-  }
-
-  setUrlQuery(q: string = '') {
-    const search = url.addQueryParam(window.location.search, QUERY, q);
-
-    this.props.history.push({
-      pathname: '', // remove any route query param
-      search,
-    });
-  }
-
-  mapConfig(config: IUiSettingsClient) {
-    const all = config.getAll();
-    return Object.entries(all)
-      .map(([settingId, settingDef]) => {
-        return toEditableConfig({
-          def: settingDef,
-          name: settingId,
-          value: settingDef.userValue,
-          isCustom: config.isCustom(settingId),
-          isOverridden: config.isOverridden(settingId),
-        });
-      })
-      .filter((c) => !c.readOnly)
-      .filter((c) => !c.isCustom) // hide any settings that aren't explicitly registered by enabled plugins.
-      .sort(fieldSorter);
-  }
-
-  mapSettings(settings: FieldSetting[]) {
-    // Group settings by category
-    return settings.reduce((groupedSettings: GroupedSettings, setting) => {
-      // We will want to change this logic when we put each category on its
-      // own page aka allowing a setting to be included in multiple categories.
-      const category = setting.category[0];
-      (groupedSettings[category] = groupedSettings[category] || []).push(setting);
-      return groupedSettings;
-    }, {});
-  }
-
-  onQueryChange = ({ query }: { query: Query }) => {
-    this.setUrlQuery(query.text);
-  };
-
-  clearQuery = () => {
-    this.setUrlQuery('');
-  };
-
-  onFooterQueryMatchChange = (matched: boolean) => {
-    this.setState({
-      footerQueryMatched: matched,
-    });
-  };
 
   saveConfig = async (changes: SettingsChanges) => {
     const arr = Object.entries(changes).map(([key, value]) =>
@@ -274,63 +58,24 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
   };
 
   render() {
-    const { filteredSettings, query, footerQueryMatched } = this.state;
-    const componentRegistry = this.props.componentRegistry;
-
-    const PageTitle = componentRegistry.get(componentRegistry.componentType.PAGE_TITLE_COMPONENT);
-    const PageSubtitle = componentRegistry.get(
-      componentRegistry.componentType.PAGE_SUBTITLE_COMPONENT
-    );
-    const PageFooter = componentRegistry.get(componentRegistry.componentType.PAGE_FOOTER_COMPONENT);
-
     return (
-      <div>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <PageTitle />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <Search
-              query={query}
-              categories={this.categories.global.concat(this.categories.namespace)}
-              onQueryChange={this.onQueryChange}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <PageSubtitle />
-        <EuiSpacer size="m" />
-        <CallOuts />
-        <EuiSpacer size="m" />
-
-        <AdvancedSettingsVoiceAnnouncement
-          queryText={query.text}
-          settings={filteredSettings.namespace}
-        />
-
-        <KibanaContextProvider services={{ uiSettings: this.props.uiSettings }}>
-          <Form
-            settings={this.groupedSettings.namespace}
-            visibleSettings={filteredSettings.namespace}
-            categories={this.categories.namespace}
-            categoryCounts={this.categoryCounts.namespace}
-            clearQuery={this.clearQuery}
-            save={this.saveConfig}
-            showNoResultsMessage={!footerQueryMatched}
-            enableSaving={this.props.enableSaving}
-            docLinks={this.props.docLinks}
-            toasts={this.props.toasts}
-            trackUiMetric={this.props.trackUiMetric}
-            queryText={query.text}
-            theme={this.props.theme}
-          />
-        </KibanaContextProvider>
-        <PageFooter
-          toasts={this.props.toasts}
-          query={query}
-          onQueryMatchChange={this.onFooterQueryMatchChange}
+      <KibanaContextProvider services={{ uiSettings: this.props.uiSettings }}>
+        <Form
+          settings={this.props.groupedSettings}
+          visibleSettings={this.props.visibleSettings}
+          categories={this.props.categories}
+          categoryCounts={this.props.categoryCounts}
+          clearQuery={this.props.clearQuery}
+          save={this.saveConfig}
+          showNoResultsMessage={this.props.noResults}
           enableSaving={this.props.enableSaving}
+          docLinks={this.props.docLinks}
+          toasts={this.props.toasts}
+          trackUiMetric={this.props.trackUiMetric}
+          queryText={this.props.queryText}
+          theme={this.props.theme}
         />
-      </div>
+      </KibanaContextProvider>
     );
   }
 }

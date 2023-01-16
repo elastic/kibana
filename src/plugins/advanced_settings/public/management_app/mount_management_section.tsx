@@ -20,7 +20,8 @@ import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { StartServicesAccessor } from '@kbn/core/public';
 
-import { AdvancedSettings, QUERY } from './advanced_settings';
+import { QUERY } from './advanced_settings';
+import { Settings } from './settings';
 import { ComponentRegistry } from '../types';
 
 import './index.scss';
@@ -78,7 +79,7 @@ export async function mountManagementSection(
             {/* TODO: remove route param (`query`) in 7.13 */}
             <Route path={`/:${QUERY}`}>{(props) => <Redirect to={redirectUrl(props)} />}</Route>
             <Route path="/">
-              <AdvancedSettings
+              <Settings
                 history={params.history}
                 enableSaving={canSave}
                 toasts={notifications.toasts}

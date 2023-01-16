@@ -14,7 +14,7 @@ export const PageTitle = () => {
   return (
     <EuiText>
       <h1 data-test-subj="managementSettingsTitle">
-        <FormattedMessage id="advancedSettings.pageTitle" defaultMessage="Settings" />
+        <FormattedMessage id="advancedSettings.pageTitle" defaultMessage="Advanced Settings" />
       </h1>
     </EuiText>
   );

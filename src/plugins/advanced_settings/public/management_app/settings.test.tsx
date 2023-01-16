@@ -9,11 +9,13 @@
 import React from 'react';
 import { Observable } from 'rxjs';
 import { ReactWrapper } from 'enzyme';
-import { mountWithI18nProvider, shallowWithI18nProvider } from '@kbn/test-jest-helpers';
+import { mountWithI18nProvider } from '@kbn/test-jest-helpers';
 import dedent from 'dedent';
 import { PublicUiSettingsParams, UserProvidedValues, UiSettingsType } from '@kbn/core/public';
+import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
+
 import { FieldSetting } from './types';
-import { AdvancedSettings } from './advanced_settings';
+import { Settings } from './settings';
 import {
   notificationServiceMock,
   docLinksServiceMock,
@@ -21,7 +23,6 @@ import {
 } from '@kbn/core/public/mocks';
 import { ComponentRegistry } from '../component_registry';
 import { Search } from './components/search';
-import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 
 jest.mock('./components/field', () => ({
   Field: () => {
@@ -225,7 +226,7 @@ function mockConfig() {
   };
 }
 
-describe('AdvancedSettings', () => {
+describe('Settings', () => {
   const defaultQuery = 'test:string:setting';
   const mockHistory = {
     listen: jest.fn(),
@@ -248,7 +249,7 @@ describe('AdvancedSettings', () => {
   it('should render specific setting if given setting key', async () => {
     mockQuery();
     const component = mountWithI18nProvider(
-      <AdvancedSettings
+      <Settings
         history={mockHistory}
         enableSaving={true}
         toasts={notificationServiceMock.createStartContract().toasts}
@@ -277,7 +278,7 @@ describe('AdvancedSettings', () => {
     const customSettingQuery = 'test:customstring:setting';
     mockQuery(customSettingQuery);
     const component = mountWithI18nProvider(
-      <AdvancedSettings
+      <Settings
         history={mockHistory}
         enableSaving={true}
         toasts={notificationServiceMock.createStartContract().toasts}
@@ -289,6 +290,7 @@ describe('AdvancedSettings', () => {
       />
     );
 
+    expect(component.find('Field')).not.toBeNull();
     expect(
       component
         .find('Field')
@@ -302,7 +304,7 @@ describe('AdvancedSettings', () => {
   it('should render read-only when saving is disabled', async () => {
     mockQuery();
     const component = mountWithI18nProvider(
-      <AdvancedSettings
+      <Settings
         history={mockHistory}
         enableSaving={false}
         toasts={notificationServiceMock.createStartContract().toasts}
@@ -314,6 +316,7 @@ describe('AdvancedSettings', () => {
       />
     );
 
+    expect(component.find('Field')).not.toBeNull();
     expect(
       component
         .find('Field')
@@ -328,23 +331,21 @@ describe('AdvancedSettings', () => {
     const badQuery = 'category:(accessibility))';
     mockQuery(badQuery);
     const { toasts } = notificationServiceMock.createStartContract();
-    const getComponent = () =>
-      shallowWithI18nProvider(
-        <AdvancedSettings
-          history={mockHistory}
-          enableSaving={false}
-          toasts={toasts}
-          docLinks={docLinksServiceMock.createStartContract().links}
-          uiSettings={mockConfig().core.settings.client}
-          globalUiSettings={mockConfig().core.settings.globalClient}
-          componentRegistry={new ComponentRegistry().start}
-          theme={themeServiceMock.createStartContract().theme$}
-        />
-      );
 
-    expect(getComponent).not.toThrow();
+    const component = mountWithI18nProvider(
+      <Settings
+        history={mockHistory}
+        enableSaving={false}
+        toasts={toasts}
+        docLinks={docLinksServiceMock.createStartContract().links}
+        uiSettings={mockConfig().core.settings.client}
+        globalUiSettings={mockConfig().core.settings.globalClient}
+        componentRegistry={new ComponentRegistry().start}
+        theme={themeServiceMock.createStartContract().theme$}
+      />
+    );
+
     expect(toasts.addWarning).toHaveBeenCalledTimes(1);
-    const component = getComponent();
     expect(component.find(Search).prop('query').text).toEqual('');
   });
 });
