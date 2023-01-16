@@ -36,6 +36,7 @@ export const createExternalService = (
     baseURL: SLACK_URL,
     headers: {
       Authorization: `Bearer ${secrets.token}`,
+      'Content-type': 'application/json; charset=UTF-8',
     },
   });
 
@@ -43,12 +44,12 @@ export const createExternalService = (
     try {
       const res = await request({
         axios: axiosInstance,
-        method: 'post',
-        url: 'conversations.list',
-        logger,
-        data: { body: {} },
         configurationUtilities,
+        logger,
+        method: 'get',
+        url: 'conversations.list?types=public_channel,private_channel',
       });
+
       return res.data as GetChannelsResponse;
     } catch (error) {
       throw new Error(
