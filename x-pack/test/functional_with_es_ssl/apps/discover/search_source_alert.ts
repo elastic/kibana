@@ -410,6 +410,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('openEditRuleFlyoutButton');
       await queryBar.setQuery('message:msg-1');
       await filterBar.addFilter({ field: 'message.keyword', operation: 'is', value: 'msg-1' });
+      await testSubjects.click('saveFilter');
 
       await testSubjects.click('thresholdPopover');
       await testSubjects.setValue('alertThresholdInput', '1');
