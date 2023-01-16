@@ -17,6 +17,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
   const ml = getService('ml');
   const log = getService('log');
+  const spacesService = getService('spaces');
 
   const currentTime = `${Date.now()}`;
   const generateDestinationIndex = (analyticsId: string) => `user-${analyticsId}`;
@@ -112,8 +113,24 @@ export default ({ getService }: FtrProviderContext) => {
     }
   }
 
+  async function runRequest(space?: string) {
+    const { body, status } = await supertest
+      .get(`${space ? `/s/${space}` : ''}/api/ml/management/list/trained-model`)
+      .auth(
+        USER.ML_POWERUSER_ALL_SPACES,
+        ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER_ALL_SPACES)
+      )
+      .set(COMMON_REQUEST_HEADERS);
+    ml.api.assertResponseStatusCode(200, status, body);
+
+    return body;
+  }
+
   describe('POST data_frame/_evaluate', () => {
     before(async () => {
+      const modelsAll = await runRequest();
+      log.info(JSON.stringify(modelsAll, null, 2));
+
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/bm_classification');
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/egs_regression');
       await ml.testResources.setKibanaTimeZoneToUTC();
@@ -126,6 +143,22 @@ export default ({ getService }: FtrProviderContext) => {
       }
       await ml.api.cleanMlIndices();
       await ml.api.syncSavedObjects();
+
+      const modelsAll = await runRequest();
+      log.info(JSON.stringify(modelsAll, null, 2));
+
+      const idSpace1 = `space1-${Date.now()}`;
+      const idSpace2 = `space2-${Date.now()}`;
+      await spacesService.create({ id: idSpace1, name: 'space_one', disabledFeatures: [] });
+      await spacesService.create({ id: idSpace2, name: 'space_two', disabledFeatures: [] });
+      await ml.api.initSavedObjects();
+
+      const modelsS1 = await runRequest(idSpace1);
+      log.info(JSON.stringify(modelsS1, null, 2));
+      const modelsS2 = await runRequest(idSpace2);
+      log.info(JSON.stringify(modelsS2, null, 2));
+
+      throw new Error('debug');
     });
 
     testJobConfigs.forEach((testConfig) => {
@@ -133,13 +166,13 @@ export default ({ getService }: FtrProviderContext) => {
         it(`should evaluate ${testConfig.jobType} analytics job`, async () => {
           const tm5 = await ml.api.getTrainedModelsES();
           log.info(JSON.stringify(tm5, null, 2));
+          // ------------
           // const { body, status } = await supertest
           //   .post(`/api/ml/data_frame/_evaluate`)
           //   .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
           //   .set(COMMON_REQUEST_HEADERS)
           //   .send(testConfig.eval);
           // ml.api.assertResponseStatusCode(200, status, body);
-
           // if (testConfig.jobType === 'classification') {
           //   const { classification } = body;
           //   expect(body).to.have.property('classification');
