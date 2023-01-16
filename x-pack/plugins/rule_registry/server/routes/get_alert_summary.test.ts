@@ -88,7 +88,7 @@ describe('getAlertSummaryRoute', () => {
           "attributes": Object {
             "success": false,
           },
-          "message": "fixed_interval is not following the expected format 1m, 1h, 1d",
+          "message": "fixed_interval (value: xx) is not following the expected format 1s, 1m, 1h, 1d with at most 6 digits",
         }
       `);
     });
