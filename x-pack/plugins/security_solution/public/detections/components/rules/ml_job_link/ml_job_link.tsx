@@ -18,9 +18,10 @@ const StyledJobEuiLInk = styled(EuiLink)`
 
 interface MlJobLinkProps {
   jobId: string;
+  jobName: string | undefined;
 }
 
-const MlJobLinkComponent: React.FC<MlJobLinkProps> = ({ jobId }) => {
+const MlJobLinkComponent: React.FC<MlJobLinkProps> = ({ jobId, jobName }) => {
   const {
     services: { http, ml },
   } = useKibana();
@@ -33,7 +34,7 @@ const MlJobLinkComponent: React.FC<MlJobLinkProps> = ({ jobId }) => {
 
   return (
     <StyledJobEuiLInk data-test-subj="machineLearningJobLink" href={jobUrl} target="_blank">
-      <span data-test-subj="machineLearningJobId">{jobId}</span>
+      <span data-test-subj="machineLearningJobId">{jobName ?? jobId}</span>
     </StyledJobEuiLInk>
   );
 };

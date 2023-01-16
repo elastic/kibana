@@ -50,9 +50,9 @@ const MlJobEuiButton = styled(EuiButton)`
   margin-top: 20px;
 `;
 
-const JobDisplay: React.FC<MlJobValue> = ({ id, description }) => (
+const JobDisplay: React.FC<{ description: string; label: string }> = ({ description, label }) => (
   <JobDisplayContainer>
-    <strong>{id}</strong>
+    <strong>{label}</strong>
     <EuiToolTip content={description}>
       <EuiText size="xs" color="subdued">
         <p>{description}</p>
@@ -68,7 +68,7 @@ interface MlJobSelectProps {
 
 const renderJobOption = (option: MlJobOption) => (
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  <JobDisplay id={option.value!.id} description={option.value!.description} />
+  <JobDisplay description={option.value!.description} label={option.label} />
 );
 
 export const MlJobSelect: React.FC<MlJobSelectProps> = ({ describedByIds = [], field }) => {
@@ -91,7 +91,7 @@ export const MlJobSelect: React.FC<MlJobSelectProps> = ({ describedByIds = [], f
       id: job.id,
       description: job.description,
     },
-    label: job.id,
+    label: job.customSettings?.security_app_display_name ?? job.id,
   }));
 
   const selectedJobOptions = jobOptions.filter((option) => jobIds.includes(option.value.id));
