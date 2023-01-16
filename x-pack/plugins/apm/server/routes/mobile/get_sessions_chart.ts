@@ -21,11 +21,16 @@ import { environmentQuery } from '../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getBucketSize } from '../../lib/helpers/get_bucket_size';
+import { Coordinate } from '../../../typings/timeseries';
+
+export interface SessionsTimeseries {
+  currentPeriod: Coordinate[];
+  previousPeriod: Coordinate[];
+}
 
 interface Props {
   apmEventClient: APMEventClient;
   serviceName: string;
-  transactionType?: string;
   transactionName?: string;
   environment: string;
   start: number;
@@ -37,7 +42,6 @@ interface Props {
 async function getSessionTimeseries({
   apmEventClient,
   serviceName,
-  transactionType,
   transactionName,
   environment,
   start,
@@ -112,16 +116,14 @@ export async function getSessionsChart({
   kuery,
   apmEventClient,
   serviceName,
-  transactionType,
   transactionName,
   environment,
   start,
   end,
   offset,
-}: Props) {
+}: Props): Promise<SessionsTimeseries> {
   const options = {
     serviceName,
-    transactionType,
     transactionName,
     apmEventClient,
     kuery,

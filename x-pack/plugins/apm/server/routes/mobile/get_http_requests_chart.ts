@@ -21,7 +21,12 @@ import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getBucketSize } from '../../lib/helpers/get_bucket_size';
+import { Coordinate } from '../../../typings/timeseries';
 
+export interface HttpRequestsTimeseries {
+  currentPeriod: Coordinate[];
+  previousPeriod: Coordinate[];
+}
 interface Props {
   apmEventClient: APMEventClient;
   serviceName: string;
@@ -109,7 +114,7 @@ export async function getHttpRequestsChart({
   start,
   end,
   offset,
-}: Props) {
+}: Props): Promise<HttpRequestsTimeseries> {
   const options = {
     serviceName,
     transactionName,

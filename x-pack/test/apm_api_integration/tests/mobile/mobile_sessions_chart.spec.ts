@@ -72,7 +72,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.status).to.be(200);
         expect(
           response.body.currentPeriod.some(
-            (item: { x: number; y: number | null }) => item.x && item.y
+            (item: { x: number; y?: number | null }) => item.x && item.y
           )
         ).to.equal(true);
         expect(response.body.currentPeriod[0].y).to.equal(3);

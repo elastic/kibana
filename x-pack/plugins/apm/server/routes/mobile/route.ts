@@ -10,9 +10,12 @@ import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 import { offsetRt } from '../../../common/comparison_rt';
-import { getHttpRequestsChart } from './get_http_requests_chart';
+import {
+  getHttpRequestsChart,
+  HttpRequestsTimeseries,
+} from './get_http_requests_chart';
 import { getMobileFilters } from './get_mobile_filters';
-import { getSessionsChart } from './get_sessions_chart';
+import { getSessionsChart, SessionsTimeseries } from './get_sessions_chart';
 import { getMobileStats, MobileStats } from './get_mobile_stats';
 
 const mobileFiltersRoute = createApmServerRoute({
@@ -74,12 +77,11 @@ const mobileStatsRoute = createApmServerRoute({
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const { serviceName } = params.path;
-    const { kuery, environment, start, end, transactionType } = params.query;
+    const { kuery, environment, start, end } = params.query;
 
     const stats = await getMobileStats({
       kuery,
       environment,
-      transactionType,
       start,
       end,
       serviceName,
@@ -109,24 +111,16 @@ const sessionsChartRoute = createApmServerRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (resources): Promise<SessionsTimeseries> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const { serviceName } = params.path;
-    const {
-      kuery,
-      environment,
-      start,
-      end,
-      transactionType,
-      transactionName,
-      offset,
-    } = params.query;
+    const { kuery, environment, start, end, transactionName, offset } =
+      params.query;
 
     const { currentPeriod, previousPeriod } = await getSessionsChart({
       kuery,
       environment,
-      transactionType,
       transactionName,
       start,
       end,
@@ -151,7 +145,6 @@ const httpRequestsChartRoute = createApmServerRoute({
       rangeRt,
       environmentRt,
       offsetRt,
-
       t.partial({
         transactionType: t.string,
         transactionName: t.string,
@@ -159,7 +152,7 @@ const httpRequestsChartRoute = createApmServerRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (resources): Promise<HttpRequestsTimeseries> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const { serviceName } = params.path;
