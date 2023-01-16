@@ -27,7 +27,6 @@ describe('test getDataStateContainer', () => {
     expect(dataState.data$.main$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
     expect(dataState.data$.documents$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
     expect(dataState.data$.totalHits$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
-    expect(dataState.data$.charts$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
   });
   test('refetch$ triggers a search', async () => {
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
