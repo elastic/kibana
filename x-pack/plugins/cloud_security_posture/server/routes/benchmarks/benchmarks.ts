@@ -69,7 +69,7 @@ const createBenchmarks = (
         const agentPolicyStatus = {
           id: agentPolicy.id,
           name: agentPolicy.name,
-          agents: agentStatusByAgentPolicyId[agentPolicy.id].total,
+          agents: agentStatusByAgentPolicyId[agentPolicy.id]?.total,
         };
         return {
           package_policy: cspPackage,
@@ -115,7 +115,8 @@ export const defineGetBenchmarksRoute = (router: CspRouter): void =>
 
         const agentStatusesByAgentPolicyId = await getAgentStatusesByAgentPolicies(
           cspContext.agentService,
-          agentPolicies
+          agentPolicies,
+          cspContext.logger
         );
 
         const benchmarks = await createBenchmarks(

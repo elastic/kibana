@@ -19,7 +19,7 @@ import {
   SUPPORTED_POLICY_TEMPLATES,
   SUPPORTED_CLOUDBEAT_INPUTS,
 } from '../../../common/constants';
-import { type PostureInput, type PosturePolicyTemplate } from '../../../common/types';
+import type { PostureInput, PosturePolicyTemplate } from '../../../common/types';
 import { assert } from '../../../common/utils/helpers';
 import { cloudPostureIntegrations } from '../../common/constants';
 

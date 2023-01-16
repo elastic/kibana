@@ -5,43 +5,58 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { useFetcher } from '@kbn/observability-plugin/public';
 import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { fetchLastSuccessfulCheck } from '../../../state';
 import { JourneyStep } from '../../../../../../common/runtime_types';
-import { EmptyImage } from '../../common/screenshot/empty_image';
 import { JourneyStepScreenshotContainer } from '../../common/screenshot/journey_step_screenshot_container';
+import { ScreenshotImageSize } from '../../common/screenshot/screenshot_size';
 
-export const LastSuccessfulScreenshot = ({ step }: { step: JourneyStep }) => {
+export const LastSuccessfulScreenshot = ({
+  step,
+  stepIndex: stepInd,
+  size,
+  borderRadius,
+}: {
+  step: JourneyStep;
+  stepIndex?: number;
+  size: ScreenshotImageSize;
+  borderRadius?: string | number;
+}) => {
   const { stepIndex } = useParams<{ checkGroupId: string; stepIndex: string }>();
 
   const { data, loading } = useFetcher(() => {
     return fetchLastSuccessfulCheck({
       timestamp: step['@timestamp'],
       monitorId: step.monitor.id,
-      stepIndex: Number(stepIndex),
+      stepIndex: Number(stepIndex ?? stepInd),
       location: step.observer?.geo?.name,
     });
   }, [step._id, step['@timestamp']]);
-
-  if (loading || !data) {
-    return <EmptyImage isLoading={Boolean(loading)} />;
-  }
 
   return (
     <>
       <JourneyStepScreenshotContainer
         checkGroup={data?.monitor.check_group}
-        initialStepNo={data?.synthetics?.step?.index}
+        initialStepNumber={data?.synthetics?.step?.index}
         stepStatus={data?.synthetics?.payload?.status}
-        allStepsLoaded={true}
-        stepLabels={[]}
+        allStepsLoaded={!loading}
         retryFetchOnRevisit={false}
-        asThumbnail={false}
+        size={size}
+        unavailableMessage={IMAGE_UN_AVAILABLE}
+        borderRadius={borderRadius}
       />
       <EuiSpacer size="xs" />
     </>
   );
 };
+
+export const IMAGE_UN_AVAILABLE = i18n.translate(
+  'xpack.synthetics.monitor.step.screenshot.unAvailable',
+  {
+    defaultMessage: 'Image unavailable',
+  }
+);

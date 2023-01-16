@@ -10,7 +10,7 @@ import React from 'react';
 
 import { EditPanelAction, isFilterableEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
 import { type IEmbeddable, isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
-import { KibanaThemeProvider, reactToUiComponent } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import type { ApplicationStart } from '@kbn/core/public';
@@ -46,7 +46,7 @@ export class FiltersNotificationAction implements Action<FiltersNotificationActi
     } = pluginServices.getServices());
   }
 
-  private FilterIconButton = ({ context }: { context: FiltersNotificationActionContext }) => {
+  public readonly MenuItem = ({ context }: { context: FiltersNotificationActionContext }) => {
     const { embeddable } = context;
 
     const editPanelAction = new EditPanelAction(
@@ -75,8 +75,6 @@ export class FiltersNotificationAction implements Action<FiltersNotificationActi
       </I18nProvider>
     );
   };
-
-  public readonly MenuItem = reactToUiComponent(this.FilterIconButton);
 
   public getDisplayName({ embeddable }: FiltersNotificationActionContext) {
     if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {

@@ -9,7 +9,7 @@
   },
   "include": [
     "**/*.ts",
-      "**/*.tsx",
+    "**/*.tsx",
   ],
   "kbn_references": [
     "@kbn/core-theme-browser",
@@ -25,7 +25,8 @@
     "@kbn/core-deprecations-browser",
     "@kbn/core-overlays-browser",
     "@kbn/core-saved-objects-browser",
-    "@kbn/core-chrome-browser"
+    "@kbn/core-chrome-browser",
+    "@kbn/core-custom-branding-browser"
   ],
   "exclude": [
     "target/**/*",
