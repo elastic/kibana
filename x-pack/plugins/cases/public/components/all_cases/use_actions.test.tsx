@@ -145,9 +145,11 @@ describe('useActions', () => {
   });
 
   it('copies the case id to the clipboard', async () => {
+    const originalClipboard = global.window.navigator.clipboard;
+
     Object.defineProperty(navigator, 'clipboard', {
       value: {
-        writeText: jest.fn(),
+        writeText: jest.fn().mockImplementation(() => Promise.resolve()),
       },
       writable: true,
     });
@@ -170,6 +172,10 @@ describe('useActions', () => {
     });
 
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(basicCase.id);
+
+    Object.defineProperty(navigator, 'clipboard', {
+      value: originalClipboard,
+    });
   });
 
   describe('Modals', () => {

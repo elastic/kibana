@@ -13,9 +13,7 @@ export interface UseActionProps {
   isDisabled: boolean;
 }
 
-export interface UseCopyIDActionProps {
-  onActionSuccess: () => void;
-}
+export type UseCopyIDActionProps = Pick<UseActionProps, 'onActionSuccess'>;
 
 export interface ItemsSelectionState {
   selectedItems: string[];

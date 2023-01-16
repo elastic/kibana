@@ -56,9 +56,11 @@ describe('CaseView actions', () => {
   });
 
   it('clicking copyClipboard icon copies case id', () => {
+    const originalClipboard = global.window.navigator.clipboard;
+
     Object.defineProperty(navigator, 'clipboard', {
       value: {
-        writeText: jest.fn(),
+        writeText: jest.fn().mockImplementation(() => Promise.resolve()),
       },
       writable: true,
     });
@@ -73,6 +75,10 @@ describe('CaseView actions', () => {
     wrapper.find('button[data-test-subj="property-actions-copyClipboard"]').simulate('click');
 
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(basicCase.id);
+
+    Object.defineProperty(navigator, 'clipboard', {
+      value: originalClipboard,
+    });
   });
 
   it('does not show trash icon when user does not have deletion privileges', () => {

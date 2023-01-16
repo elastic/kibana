@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiIcon, EuiTextColor } from '@elastic/eui';
-import * as i18n from './translations';
+import * as i18n from '../../../common/translations';
 import { useCasesToast } from '../../../common/use_cases_toast';
 
 import type { Case } from '../../../../common';
@@ -20,9 +20,10 @@ export const useCopyIDAction = ({ onActionSuccess }: UseCopyIDActionProps) => {
     return {
       name: <EuiTextColor>{i18n.COPY_ID_ACTION_LABEL}</EuiTextColor>,
       onClick: () => {
-        navigator.clipboard.writeText(selectedCase.id);
-        onActionSuccess();
-        showSuccessToast(i18n.COPY_ID_ACTION_SUCCESS);
+        navigator.clipboard.writeText(selectedCase.id).then(() => {
+          onActionSuccess();
+          showSuccessToast(i18n.COPY_ID_ACTION_SUCCESS);
+        });
       },
       'data-test-subj': 'cases-action-copy-id',
       icon: <EuiIcon type="copyClipboard" size="m" />,
