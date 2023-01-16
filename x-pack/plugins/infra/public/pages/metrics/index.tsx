@@ -30,6 +30,7 @@ import { SnapshotPage } from './inventory_view';
 import { MetricDetail } from './metric_detail';
 import { MetricsSettingsPage } from './settings';
 import { HostsPage } from './hosts';
+import { HostsLandingPage } from './hosts_landing';
 import { SourceLoadingPage } from '../../components/source_loading_page';
 import { WaffleOptionsProvider } from './inventory_view/hooks/use_waffle_options';
 import { WaffleTimeProvider } from './inventory_view/hooks/use_waffle_time';
@@ -56,6 +57,9 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
   });
 
   const kibana = useKibana();
+  const isHostViewEnabled = kibana.services.uiSettings?.get(
+    'observability:enableInfrastructureHostsView'
+  );
 
   useReadOnlyBadge(!uiCapabilities?.infrastructure?.save);
 
@@ -120,7 +124,10 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                       )}
                     />
                     <Route path="/detail/:type/:node" component={MetricDetail} />
-                    <Route path={'/hosts'} component={HostsPage} />
+                    <Route
+                      path={'/hosts'}
+                      render={(props) => (isHostViewEnabled ? <HostsPage /> : <HostsLandingPage />)}
+                    />
                     <Route path={'/settings'} component={MetricsSettingsPage} />
                   </Switch>
                 </InfraMLCapabilitiesProvider>
