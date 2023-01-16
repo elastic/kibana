@@ -12,6 +12,8 @@ import Fs from 'fs';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { makeMatcher } from '@kbn/picomatcher';
 import { findPackageInfoForPath } from '@kbn/repo-packages';
+import { createFailError } from '@kbn/dev-cli-errors';
+import { getRepoFilesSync } from '@kbn/get-repo-files';
 
 import { readTsConfig, parseTsConfig, TsConfig } from './ts_configfile';
 
@@ -56,7 +58,11 @@ function expand(name: string, patterns: string[], knownPaths: string[]) {
 }
 
 export class TsProject {
-  static loadAll(options: { ignore: string[]; disableTypeCheck: string[] }) {
+  static loadAll(options: {
+    ignore: string[];
+    disableTypeCheck: string[];
+    noTsconfigPathsRefresh?: boolean;
+  }): TsProject[] {
     const mapPath = Path.resolve(__dirname, 'config-paths.json');
     if (!Fs.existsSync(mapPath)) {
       throw new Error('missing config-paths.json file, make sure you run `yarn kbn bootstrap`');
@@ -68,23 +74,37 @@ export class TsProject {
     const disableTypeCheck = expand('disableTypeCheck', options.disableTypeCheck, tsConfigRepoRels);
 
     const cache = new Map();
-    const projects = tsConfigRepoRels.flatMap((repoRel) => {
+    const projects: TsProject[] = [];
+    for (const repoRel of tsConfigRepoRels) {
       if (ignores.has(repoRel)) {
-        return [];
+        continue;
       }
 
       const proj = TsProject.createFromCache(cache, Path.resolve(REPO_ROOT, repoRel), {
         disableTypeCheck: disableTypeCheck.has(repoRel),
       });
 
-      if (!proj) {
-        throw new Error(
-          `The tsconfig at ${repoRel} has been removed, please run "yarn kbn bootstrap" to update map of tsconfig files in the repository`
+      if (proj) {
+        projects.push(proj);
+        continue;
+      }
+
+      if (options.noTsconfigPathsRefresh) {
+        throw createFailError(
+          `Run "yarn kbn bootstrap" to update the tsconfig.json path cache. ${repoRel} no longer exists.`
         );
       }
 
-      return proj;
-    });
+      // rebuild the tsconfig.json path cache
+      const tsConfigPaths = Array.from(getRepoFilesSync()).flatMap((r) =>
+        r.basename === 'tsconfig.json' ? r.repoRel : []
+      );
+      Fs.writeFileSync(mapPath, JSON.stringify(tsConfigPaths, null, 2));
+      return TsProject.loadAll({
+        ...options,
+        noTsconfigPathsRefresh: true,
+      });
+    }
 
     return projects;
   }

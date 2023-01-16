@@ -5,14 +5,10 @@
  * 2.0.
  */
 
+import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { Spaces } from '../../../../scenarios';
-import {
-  ESTestIndexTool,
-  ES_TEST_INDEX_NAME,
-  getUrlPrefix,
-  ObjectRemover,
-} from '../../../../../common/lib';
+import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 import { createEsDocuments, createEsDocumentsWithGroups } from '../lib/create_test_data';
 
 export const RULE_TYPE_ID = '.es-query';

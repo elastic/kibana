@@ -12,13 +12,17 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCheckbox, EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
 import { ResponseBodyIndexPolicy } from '../types';
 
-interface Props {
+export interface ResponseBodyIndexFieldProps {
   defaultValue: ResponseBodyIndexPolicy;
   onChange: (responseBodyIndexPolicy: ResponseBodyIndexPolicy) => void;
   onBlur?: () => void;
 }
 
-export const ResponseBodyIndexField = ({ defaultValue, onChange, onBlur }: Props) => {
+export const ResponseBodyIndexField = ({
+  defaultValue,
+  onChange,
+  onBlur,
+}: ResponseBodyIndexFieldProps) => {
   const [policy, setPolicy] = useState<ResponseBodyIndexPolicy>(
     defaultValue !== ResponseBodyIndexPolicy.NEVER ? defaultValue : ResponseBodyIndexPolicy.ON_ERROR
   );

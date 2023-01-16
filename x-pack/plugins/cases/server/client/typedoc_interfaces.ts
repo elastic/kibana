@@ -27,6 +27,7 @@ import type {
   CasesResponse,
   CaseUserActionsResponse,
   CommentsResponse,
+  CasesBulkGetResponse,
 } from '../../common/api';
 
 /**
@@ -41,6 +42,7 @@ export interface ICaseResponse extends CaseResponse {}
 export interface ICaseResolveResponse extends CaseResolveResponse {}
 export interface ICasesResponse extends CasesResponse {}
 export interface ICasesFindResponse extends CasesFindResponse {}
+export interface ICasesBulkGetResponse extends CasesBulkGetResponse {}
 
 export interface ICasesConfigureResponse extends CasesConfigureResponse {}
 export interface ICasesConfigureRequest extends CasesConfigureRequest {}

@@ -24,5 +24,15 @@ export const SEARCH_INDEX_SELECT_CONNECTOR_PATH = `${SEARCH_INDEX_PATH}/select_c
 
 export const ENGINES_PATH = `${ROOT_PATH}engines`;
 export const ENGINE_CREATION_PATH = `${ENGINES_PATH}/new`;
+export const ENGINE_PATH = `${ENGINES_PATH}/:engineName`;
+export const ENGINE_TAB_PATH = `${ENGINE_PATH}/:tabId`;
+export enum EngineViewTabs {
+  OVERVIEW = 'overview',
+  INDICES = 'indices',
+  DOCUMENTS = 'documents',
+  SCHEMA = 'schema',
+  PREVIEW = 'preview',
+  API = 'api',
+}
 
 export const ML_MANAGE_TRAINED_MODELS_PATH = '/app/ml/trained_models';

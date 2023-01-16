@@ -10,19 +10,26 @@ import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import moment from 'moment';
+import { FullTimeRangeSelector, FROZEN_TIER_PREFERENCE } from '@kbn/ml-date-picker';
+import { useTimefilter, type GetTimeFieldRangeResponse } from '@kbn/ml-date-picker';
+import { useStorage } from '@kbn/ml-local-storage';
 import { WizardNav } from '../wizard_nav';
 import { StepProps, WIZARD_STEPS } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
 import { useMlContext } from '../../../../../contexts/ml';
-import { FullTimeRangeSelector } from '../../../../../components/full_time_range_selector';
 import { EventRateChart } from '../charts/event_rate_chart';
 import { LineChartPoint } from '../../../common/chart_loader';
 import { JOB_TYPE } from '../../../../../../../common/constants/new_job';
-import { GetTimeFieldRangeResponse } from '../../../../../services/ml_api_service';
 import { TimeRangePicker, TimeRange } from '../../../common/components';
 import { useMlKibana } from '../../../../../contexts/kibana';
+import {
+  ML_FROZEN_TIER_PREFERENCE,
+  type MlStorageKey,
+  type TMlStorageMapped,
+} from '../../../../../../../common/types/storage';
 
 export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
+  const timefilter = useTimefilter();
   const { services } = useMlKibana();
   const mlContext = useMlContext();
 
@@ -35,6 +42,15 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
   });
   const [eventRateChartData, setEventRateChartData] = useState<LineChartPoint[]>([]);
   const [loadingData, setLoadingData] = useState(false);
+
+  const [frozenDataPreference, setFrozenDataPreference] = useStorage<
+    MlStorageKey,
+    TMlStorageMapped<typeof ML_FROZEN_TIER_PREFERENCE>
+  >(
+    ML_FROZEN_TIER_PREFERENCE,
+    // By default we will exclude frozen data tier
+    FROZEN_TIER_PREFERENCE.EXCLUDE
+  );
 
   async function loadChart() {
     setLoadingData(true);
@@ -61,8 +77,8 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
       max: moment(end),
     });
     // update the timefilter, to keep the URL in sync
-    const { timefilter } = services.data.query.timefilter;
-    timefilter.setTime({
+    const { timefilter: timefilterService } = services.data.query.timefilter;
+    timefilterService.setTime({
       from: moment(start).toISOString(),
       to: moment(end).toISOString(),
     });
@@ -89,8 +105,8 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
   function fullTimeRangeCallback(range: GetTimeFieldRangeResponse) {
     if (range.start !== null && range.end !== null) {
       setTimeRange({
-        start: range.start,
-        end: range.end,
+        start: range.start.epoch,
+        end: range.end.epoch,
       });
     } else {
       const { toasts } = services.notifications;
@@ -112,10 +128,13 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <FullTimeRangeSelector
+                frozenDataPreference={frozenDataPreference}
+                setFrozenDataPreference={setFrozenDataPreference}
                 dataView={mlContext.currentDataView}
                 query={mlContext.combinedQuery}
                 disabled={false}
                 callback={fullTimeRangeCallback}
+                timefilter={timefilter}
               />
             </EuiFlexItem>
             <EuiFlexItem />
