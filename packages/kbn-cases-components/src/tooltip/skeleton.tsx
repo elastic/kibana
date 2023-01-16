@@ -7,20 +7,15 @@
  */
 
 import React from 'react';
-import { EuiFlexItem, EuiLoadingContent } from '@elastic/eui';
+import { EuiFlexItem, EuiLoadingContent, EuiHorizontalRule } from '@elastic/eui';
 
 const SkeletonComponent: React.FC = () => {
   return (
-    <EuiFlexItem style={{ width: 240 }} data-test-subj="tooltip-loading-content">
-      <div style={{ width: 70, marginBottom: '12px' }}>
-        <EuiLoadingContent lines={1} />
-      </div>
-
+    <EuiFlexItem css={{ width: 240 }} data-test-subj="tooltip-loading-content">
+      <EuiLoadingContent lines={1} css={{ width: 70, marginBottom: '12px' }} />
       <EuiLoadingContent lines={3} />
-
-      <div style={{ marginTop: '12px' }}>
-        <EuiLoadingContent lines={1} />
-      </div>
+      <EuiHorizontalRule margin="xs" />
+      <EuiLoadingContent lines={1} />
     </EuiFlexItem>
   );
 };

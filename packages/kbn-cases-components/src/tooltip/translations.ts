@@ -13,9 +13,9 @@ export const OPENED = i18n.translate('cases.components.tooltip.opened', {
 });
 
 export const CLOSED = i18n.translate('cases.components.tooltip.closed', {
-  defaultMessage: 'Closed ',
+  defaultMessage: 'Closed',
 });
 
 export const BY = i18n.translate('cases.components.tooltip.by', {
-  defaultMessage: 'by ',
+  defaultMessage: 'by',
 });

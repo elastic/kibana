@@ -13,21 +13,14 @@ import { TooltipContent } from './tooltip_content';
 import type { CaseTooltipProps } from './types';
 import { Skeleton } from './skeleton';
 
-interface Props extends CaseTooltipProps {
-  children: React.ReactNode;
-  dataTestSubj?: string;
-  className?: string;
-  loading?: boolean;
-}
-
-const CaseTooltipComponent = React.memo<Props>((props) => {
-  const { dataTestSubj, children, loading = false, className = '', ...rest } = props;
+const CaseTooltipComponent = React.memo<CaseTooltipProps>((props) => {
+  const { dataTestSubj, children, loading = false, className = '', content } = props;
 
   return (
     <EuiToolTip
       data-test-subj={dataTestSubj ? dataTestSubj : 'cases-components-tooltip'}
       anchorClassName={className}
-      content={loading ? <Skeleton /> : <TooltipContent {...rest} />}
+      content={loading ? <Skeleton /> : <TooltipContent {...content} />}
     >
       <>{children}</>
     </EuiToolTip>

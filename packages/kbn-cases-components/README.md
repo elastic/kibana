@@ -20,9 +20,9 @@ The component renders the tooltip with case details on hover of an Element. Usag
 
 ```
 import { Tooltip, CaseStatuses } from '@kbn/cases-components';
-import type { CaseTooltipProps } from '@kbn/cases-components';
+import type { CaseTooltipContentProps, CaseTooltipProps } from '@kbn/cases-components';
 
-const tooltipProps = {
+const tooltipContent: CaseTooltipContentProps = {
   title: 'Case title',
   description: 'Case description',
   createdAt: '2020-02-19T23:06:33.798Z',
@@ -33,6 +33,12 @@ const tooltipProps = {
   totalComments: 1,
   status: CaseStatuses.open,
 }
+
+const tooltipProps: CaseTooltipProps = {
+  loading: false,
+  content: tooltipContent,
+  className: 'customClass',
+};
 
 <Tooltip {...tooltipProps}>
   <span>This is a demo span</span>

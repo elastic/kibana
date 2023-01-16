@@ -7,14 +7,14 @@
  */
 
 import React from 'react';
-import { storiesOf } from '@storybook/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import { ComponentStory, ComponentMeta } from '@storybook/react';
 
 import { CaseStatuses } from '../status/types';
 import { Tooltip } from '../tooltip/tooltip';
-import type { CaseTooltipProps } from '../tooltip/types';
+import type { CaseTooltipProps, CaseTooltipContentProps } from '../tooltip/types';
 
-const tooltipProps: CaseTooltipProps = {
+const tooltipContent: CaseTooltipContentProps = {
   title: 'Unusual process identified',
   description: 'There was an unusual process while adding alerts to existing case.',
   createdAt: '2020-02-19T23:06:33.798Z',
@@ -24,6 +24,11 @@ const tooltipProps: CaseTooltipProps = {
   },
   totalComments: 10,
   status: CaseStatuses.open,
+};
+
+const tooltipProps: CaseTooltipProps = {
+  loading: false,
+  content: tooltipContent,
 };
 
 const sampleText = 'This is a test span element!!';
@@ -41,60 +46,44 @@ const longDescription = `Lorem Ipsum is simply dummy text of the printing and ty
   took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, 
   but also the leap into electronic typesetting, remaining essentially unchanged.`;
 
-storiesOf('Tooltip', module)
-  .add('default', () => (
-    <I18nProvider>
-      <Tooltip {...tooltipProps}>
-        <TestSpan />
-      </Tooltip>
-    </I18nProvider>
-  ))
-  .add('loading state', () => (
-    <I18nProvider>
-      <Tooltip {...tooltipProps} loading={true}>
-        <TestSpan />
-      </Tooltip>
-    </I18nProvider>
-  ))
-  .add('long title', () => (
-    <I18nProvider>
-      <Tooltip {...tooltipProps} title={longTitle}>
-        <TestSpan />
-      </Tooltip>
-    </I18nProvider>
-  ))
-  .add('long description', () => (
-    <I18nProvider>
-      <Tooltip {...tooltipProps} description={longDescription}>
-        <TestSpan />
-      </Tooltip>
-    </I18nProvider>
-  ))
-  .add('in-progress status', () => (
-    <I18nProvider>
-      <Tooltip {...tooltipProps} status={CaseStatuses['in-progress']}>
-        <TestSpan />
-      </Tooltip>
-    </I18nProvider>
-  ))
-  .add('closed status', () => (
-    <I18nProvider>
-      <Tooltip {...tooltipProps} status={CaseStatuses.closed}>
-        <TestSpan />
-      </Tooltip>
-    </I18nProvider>
-  ))
-  .add('no user info', () => (
-    <I18nProvider>
-      <Tooltip {...tooltipProps} createdBy={{}}>
-        <TestSpan />
-      </Tooltip>
-    </I18nProvider>
-  ))
-  .add('full name as user', () => (
-    <I18nProvider>
-      <Tooltip {...tooltipProps} createdBy={{ fullName: 'Elastic User' }}>
-        <TestSpan />
-      </Tooltip>
-    </I18nProvider>
-  ));
+const Template = (args: CaseTooltipProps) => (
+  <I18nProvider>
+    <Tooltip {...args}>
+      <TestSpan />
+    </Tooltip>
+  </I18nProvider>
+);
+
+export default {
+  title: 'CaseTooltip',
+  component: Template,
+} as ComponentMeta<typeof Template>;
+
+export const Default: ComponentStory<typeof Template> = Template.bind({});
+Default.args = { ...tooltipProps };
+
+export const LoadingState: ComponentStory<typeof Template> = Template.bind({});
+LoadingState.args = {...tooltipProps, loading: true}
+
+
+export const LongTitle: ComponentStory<typeof Template> = Template.bind({});
+LongTitle.args = {...tooltipProps, content:{ ...tooltipContent, title:longTitle }}
+
+export const LongDescription: ComponentStory<typeof Template> = Template.bind({});
+LongDescription.args = {...tooltipProps, content:{ ...tooltipContent, description:longDescription }}
+
+export const InProgressStatus: ComponentStory<typeof Template> = Template.bind({});
+InProgressStatus.args = {...tooltipProps, content:{ ...tooltipContent, status:CaseStatuses['in-progress'] }}
+
+export const ClosedStatus: ComponentStory<typeof Template> = Template.bind({});
+ClosedStatus.args = {...tooltipProps, content:{ ...tooltipContent, status:CaseStatuses.closed }}
+
+export const NoUserInfo: ComponentStory<typeof Template> = Template.bind({});
+NoUserInfo.args = {...tooltipProps, content:{ ...tooltipContent, createdBy:{} }}
+
+export const FullName: ComponentStory<typeof Template> = Template.bind({});
+FullName.args = {...tooltipProps, content:{ ...tooltipContent, createdBy:{ fullName: 'Elastic User' } }}
+
+export const LongUserName: ComponentStory<typeof Template> = Template.bind({});
+LongUserName.args = {...tooltipProps, content:{ ...tooltipContent, createdBy:{ fullName: 'LoremIpsumElasticUser WithALongSurname' } }}
+

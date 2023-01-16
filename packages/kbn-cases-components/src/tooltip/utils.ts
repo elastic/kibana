@@ -7,7 +7,7 @@
  */
 
 export const getTruncatedText = (text: string, truncateLength: number): string => {
-  if (truncateLength < 0 || text.length <= truncateLength) {
+  if (truncateLength <= 0 || text.length <= truncateLength) {
     return text;
   }
 

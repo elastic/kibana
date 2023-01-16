@@ -13,21 +13,19 @@ export const IconWithCount = React.memo<{
   count: number;
   icon: string;
 }>(({ count, icon }) => (
-  <span style={{ width: 'fit-content' }}>
-    <EuiFlexGroup alignItems="center" gutterSize="none">
-      <EuiFlexItem grow={false}>
-        <EuiIcon
-          style={{ marginRight: '4px' }}
-          size="s"
-          type={icon}
-          data-test-subj="comment-count-icon"
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiText size="xs">{count}</EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </span>
+  <EuiFlexGroup alignItems="center" gutterSize="none" css={{ marginLeft: 'auto', flexGrow: 0 }}>
+    <EuiFlexItem grow={false}>
+      <EuiIcon
+        css={{ marginRight: '4px' }}
+        size="s"
+        type={icon}
+        data-test-subj="comment-count-icon"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiText size="xs">{count}</EuiText>
+    </EuiFlexItem>
+  </EuiFlexGroup>
 ));
 
 IconWithCount.displayName = 'IconWithCount';
