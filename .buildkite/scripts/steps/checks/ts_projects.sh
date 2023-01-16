@@ -4,8 +4,8 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
-echo --- Run TS Project Linter
-cmd="node scripts/ts_project_linter"
+echo --- Lint TS projects
+cmd="node scripts/lint_ts_projects"
 if is_pr && ! is_auto_commit_disabled; then
   cmd="$cmd --fix"
 fi

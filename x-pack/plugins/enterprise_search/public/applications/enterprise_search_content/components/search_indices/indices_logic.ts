@@ -7,22 +7,16 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { i18n } from '@kbn/i18n';
-
 import { Meta } from '../../../../../common/types';
 import { HttpError, Status } from '../../../../../common/types/api';
 import { ElasticsearchIndexWithIngestion } from '../../../../../common/types/indices';
 import { Actions } from '../../../shared/api_logic/create_api_logic';
 import { DEFAULT_META } from '../../../shared/constants';
-import {
-  flashAPIErrors,
-  clearFlashMessages,
-  flashSuccessToast,
-} from '../../../shared/flash_messages';
 import { updateMetaPageIndex } from '../../../shared/table_pagination';
 import {
   DeleteIndexApiLogic,
   DeleteIndexApiLogicArgs,
+  DeleteIndexApiLogicValues,
 } from '../../api/index/delete_index_api_logic';
 import { FetchIndicesAPILogic } from '../../api/index/fetch_indices_api_logic';
 import { ElasticsearchViewIndex, IngestionMethod } from '../../types';
@@ -50,9 +44,9 @@ export interface IndicesActions {
     searchQuery?: string;
   };
   closeDeleteModal(): void;
-  deleteError: Actions<DeleteIndexApiLogicArgs, void>['apiError'];
-  deleteIndex: Actions<DeleteIndexApiLogicArgs, void>['makeRequest'];
-  deleteSuccess: Actions<DeleteIndexApiLogicArgs, void>['apiSuccess'];
+  deleteError: Actions<DeleteIndexApiLogicArgs, DeleteIndexApiLogicValues>['apiError'];
+  deleteIndex: Actions<DeleteIndexApiLogicArgs, DeleteIndexApiLogicValues>['makeRequest'];
+  deleteSuccess: Actions<DeleteIndexApiLogicArgs, DeleteIndexApiLogicValues>['apiSuccess'];
   fetchIndices({
     meta,
     returnHiddenIndices,
@@ -111,18 +105,7 @@ export const IndicesLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
     ],
   },
   listeners: ({ actions, values }) => ({
-    apiError: (e) => flashAPIErrors(e),
-    deleteError: (e) => flashAPIErrors(e),
     deleteSuccess: () => {
-      flashSuccessToast(
-        i18n.translate('xpack.enterpriseSearch.content.indices.deleteIndex.successToast.title', {
-          defaultMessage:
-            'Your index {indexName} and any associated ingestion configurations were successfully deleted',
-          values: {
-            indexName: values.deleteModalIndexName,
-          },
-        })
-      );
       actions.closeDeleteModal();
       actions.fetchIndices(values.searchParams);
     },
@@ -130,7 +113,6 @@ export const IndicesLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
       await breakpoint(150);
       actions.makeRequest(input);
     },
-    makeRequest: () => clearFlashMessages(),
   }),
   path: ['enterprise_search', 'content', 'indices_logic'],
   reducers: () => ({

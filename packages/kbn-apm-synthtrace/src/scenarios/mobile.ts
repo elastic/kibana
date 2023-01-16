@@ -368,7 +368,7 @@ const scenario: Scenario<ApmFields> = async ({ scenarioOpts, logger }) => {
                     httpUrl: 'https://backend:1234/api/start',
                   })
                   .duration(800)
-                  .success()
+                  .failure()
                   .timestamp(timestamp + 400)
               ),
             device

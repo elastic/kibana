@@ -10,6 +10,7 @@ Object {
   "csp": Object {
     "warnLegacyBrowsers": true,
   },
+  "customBranding": Object {},
   "env": Object {
     "mode": Object {
       "dev": Any<Boolean>,
@@ -70,6 +71,7 @@ Object {
   "csp": Object {
     "warnLegacyBrowsers": true,
   },
+  "customBranding": Object {},
   "env": Object {
     "mode": Object {
       "dev": Any<Boolean>,
@@ -134,6 +136,7 @@ Object {
   "csp": Object {
     "warnLegacyBrowsers": true,
   },
+  "customBranding": Object {},
   "env": Object {
     "mode": Object {
       "dev": Any<Boolean>,
@@ -194,6 +197,7 @@ Object {
   "csp": Object {
     "warnLegacyBrowsers": true,
   },
+  "customBranding": Object {},
   "env": Object {
     "mode": Object {
       "dev": Any<Boolean>,
@@ -254,6 +258,7 @@ Object {
   "csp": Object {
     "warnLegacyBrowsers": true,
   },
+  "customBranding": Object {},
   "env": Object {
     "mode": Object {
       "dev": Any<Boolean>,
@@ -318,6 +323,7 @@ Object {
   "csp": Object {
     "warnLegacyBrowsers": true,
   },
+  "customBranding": Object {},
   "env": Object {
     "mode": Object {
       "dev": Any<Boolean>,
@@ -378,6 +384,7 @@ Object {
   "csp": Object {
     "warnLegacyBrowsers": true,
   },
+  "customBranding": Object {},
   "env": Object {
     "mode": Object {
       "dev": Any<Boolean>,
@@ -438,6 +445,7 @@ Object {
   "csp": Object {
     "warnLegacyBrowsers": true,
   },
+  "customBranding": Object {},
   "env": Object {
     "mode": Object {
       "dev": Any<Boolean>,
@@ -502,6 +510,7 @@ Object {
   "csp": Object {
     "warnLegacyBrowsers": true,
   },
+  "customBranding": Object {},
   "env": Object {
     "mode": Object {
       "dev": Any<Boolean>,
@@ -570,6 +579,7 @@ Object {
   "csp": Object {
     "warnLegacyBrowsers": true,
   },
+  "customBranding": Object {},
   "env": Object {
     "mode": Object {
       "dev": Any<Boolean>,
@@ -630,6 +640,7 @@ Object {
   "csp": Object {
     "warnLegacyBrowsers": true,
   },
+  "customBranding": Object {},
   "env": Object {
     "mode": Object {
       "dev": Any<Boolean>,
@@ -694,6 +705,7 @@ Object {
   "csp": Object {
     "warnLegacyBrowsers": true,
   },
+  "customBranding": Object {},
   "env": Object {
     "mode": Object {
       "dev": Any<Boolean>,
@@ -762,6 +774,7 @@ Object {
   "csp": Object {
     "warnLegacyBrowsers": true,
   },
+  "customBranding": Object {},
   "env": Object {
     "mode": Object {
       "dev": Any<Boolean>,
@@ -826,6 +839,7 @@ Object {
   "csp": Object {
     "warnLegacyBrowsers": true,
   },
+  "customBranding": Object {},
   "env": Object {
     "mode": Object {
       "dev": Any<Boolean>,

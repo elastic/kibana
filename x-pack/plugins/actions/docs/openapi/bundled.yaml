@@ -15,6 +15,135 @@ servers:
   - url: http://localhost:5601
     description: local
 paths:
+  /s/{spaceId}/api/actions/connector/{connectorId}:
+    get:
+      summary: Retrieves a connector by ID.
+      operationId: getConnector
+      description: |
+        You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.
+      tags:
+        - connectors
+      parameters:
+        - $ref: '#/components/parameters/connector_id'
+        - $ref: '#/components/parameters/space_id'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - connector_type_id
+                  - id
+                  - is_deprecated
+                  - is_preconfigured
+                  - name
+                properties:
+                  config:
+                    type: object
+                    description: The configuration for the connector. Configuration properties vary depending on the connector type.
+                    additionalProperties: true
+                    nullable: true
+                  connector_type_id:
+                    $ref: '#/components/schemas/connector_types'
+                  id:
+                    type: string
+                    description: The identifier for the connector.
+                    example: b0766e10-d190-11ec-b04c-776c77d14fca
+                  is_deprecated:
+                    $ref: '#/components/schemas/is_deprecated'
+                  is_missing_secrets:
+                    $ref: '#/components/schemas/is_missing_secrets'
+                  is_preconfigured:
+                    $ref: '#/components/schemas/is_preconfigured'
+                  name:
+                    type: string
+                    description: The display name for the connector.
+                    example: my-connector
+              examples:
+                getConnectorResponse:
+                  $ref: '#/components/examples/get_connector_response'
+      servers:
+        - url: https://localhost:5601
+    delete:
+      summary: Deletes a connector.
+      operationId: deleteConnector
+      description: |
+        You must have `all` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges. WARNING: When you delete a connector, it cannot be recovered.
+      tags:
+        - connectors
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/connector_id'
+        - $ref: '#/components/parameters/space_id'
+      responses:
+        '204':
+          description: Indicates a successful call.
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /s/{spaceId}/api/actions/connectors:
+    get:
+      summary: Retrieves all connectors.
+      operationId: getConnectors
+      description: |
+        You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.
+      tags:
+        - connectors
+      parameters:
+        - $ref: '#/components/parameters/space_id'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required:
+                    - connector_type_id
+                    - id
+                    - is_deprecated
+                    - is_preconfigured
+                    - name
+                    - referenced_by_count
+                  properties:
+                    connector_type_id:
+                      $ref: '#/components/schemas/connector_types'
+                    config:
+                      type: object
+                      description: The configuration for the connector. Configuration properties vary depending on the connector type.
+                      additionalProperties: true
+                      nullable: true
+                    id:
+                      type: string
+                      description: The identifier for the connector.
+                      example: b0766e10-d190-11ec-b04c-776c77d14fca
+                    is_deprecated:
+                      $ref: '#/components/schemas/is_deprecated'
+                    is_missing_secrets:
+                      $ref: '#/components/schemas/is_missing_secrets'
+                    is_preconfigured:
+                      $ref: '#/components/schemas/is_preconfigured'
+                    name:
+                      type: string
+                      description: The display name for the connector.
+                      example: my-connector
+                    referenced_by_count:
+                      type: integer
+                      description: Indicates the number of saved objects that reference the connector. If `is_preconfigured` is true, this value is not calculated.
+                      example: 2
+                      default: 0
+              examples:
+                getConnectorsResponse:
+                  $ref: '#/components/examples/get_connectors_response'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
   /s/{spaceId}/api/actions/connector_types:
     get:
       summary: Retrieves a list of all connector types.
@@ -22,7 +151,7 @@ paths:
       description: |
         You do not need any Kibana feature privileges to run this API.
       tags:
-        - cases
+        - connectors
       parameters:
         - $ref: '#/components/parameters/space_id'
         - in: query
@@ -53,9 +182,7 @@ paths:
                       description: Indicates whether the connector is enabled in the license.
                       example: true
                     id:
-                      type: string
-                      description: The unique identifier for the connector type.
-                      example: .index
+                      $ref: '#/components/schemas/connector_types'
                     minimum_license_required:
                       type: string
                       description: The license that is required to use the connector type.
@@ -90,6 +217,14 @@ components:
       in: header
       name: ApiKey
   parameters:
+    connector_id:
+      in: path
+      name: connectorId
+      description: An identifier for the connector.
+      required: true
+      schema:
+        type: string
+        example: df770e30-8b8b-11ed-a780-3b746c987a81
     space_id:
       in: path
       name: spaceId
@@ -98,7 +233,47 @@ components:
       schema:
         type: string
         example: default
+    kbn_xsrf:
+      schema:
+        type: string
+      in: header
+      name: kbn-xsrf
+      required: true
   schemas:
+    connector_types:
+      type: string
+      description: The type of connector. For example, `.email`, `.index`, `.jira`, `.opsgenie`, or `.server-log`.
+      enum:
+        - .cases-webhook
+        - .email
+        - .index
+        - .jira
+        - .opsgenie
+        - .pagerduty
+        - .resilient
+        - .servicenow
+        - .servicenow-itom
+        - .servicenow-sir
+        - .server-log
+        - .slack
+        - .swimlane
+        - .teams
+        - .tines
+        - .webhook
+        - .xmatters
+      example: .server-log
+    is_deprecated:
+      type: boolean
+      description: Indicates whether the connector type is deprecated.
+      example: false
+    is_missing_secrets:
+      type: boolean
+      description: Indicates whether secrets are missing for the connector. Secrets configuration properties vary depending on the connector type.
+      example: false
+    is_preconfigured:
+      type: boolean
+      description: Indicates whether it is a preconfigured connector. If true, the `config` and `is_missing_secrets` properties are omitted from the response.
+      example: false
     features:
       type: string
       description: |
@@ -109,6 +284,36 @@ components:
         - uptime
         - siem
   examples:
+    get_connector_response:
+      summary: A list of connector types
+      value:
+        id: df770e30-8b8b-11ed-a780-3b746c987a81
+        name: my_server_log_connector
+        config: {}
+        connector_type_id: .server-log
+        is_preconfigured: false
+        is_deprecated: false
+        is_missing_secrets: false
+    get_connectors_response:
+      summary: A list of connectors
+      value:
+        - id: preconfigured-email-connector
+          name: my-preconfigured-email-notification
+          connector_type_id: .email
+          is_preconfigured: true
+          is_deprecated: false
+          referenced_by_count: 0
+        - id: e07d0c80-8b8b-11ed-a780-3b746c987a81
+          name: my-index-connector
+          config:
+            index: test-index
+            refresh: false
+            executionTimeField: null
+          connector_type_id: .index
+          is_preconfigured: false
+          is_deprecated: false
+          referenced_by_count: 2
+          is_missing_secrets: false
     get_connector_types_response:
       summary: A list of connector types
       value:

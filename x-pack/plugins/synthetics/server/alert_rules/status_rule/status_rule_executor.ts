@@ -135,7 +135,10 @@ export class StatusRuleExecutor {
       const currentStatus = await queryMonitorStatus(
         this.esClient,
         [...listOfLocations],
-        { to: 'now', from: this.previousStartedAt?.toISOString() ?? 'now-1m' },
+        {
+          to: 'now',
+          from: this.previousStartedAt?.toISOString() ?? 'now-1m',
+        },
         enabledIds
       );
 
