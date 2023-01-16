@@ -21,7 +21,7 @@ import { useAppStateSelector } from '../../services/discover_app_state_container
 import { getUiActions } from '../../../../kibana_services';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useDataState } from '../../hooks/use_data_state';
-import type { SavedSearchData } from '../../hooks/use_saved_search';
+import type { SavedSearchData } from '../../services/discover_data_state_container';
 import type { DiscoverStateContainer } from '../../services/discover_state';
 import { FetchStatus } from '../../../types';
 import type { DiscoverSearchSessionManager } from '../../services/discover_search_session';

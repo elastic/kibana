@@ -18,7 +18,7 @@ import {
   DataMain$,
   DataTotalHits$,
   RecordRawType,
-} from '../../hooks/use_saved_search';
+} from '../../services/discover_data_state_container';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';

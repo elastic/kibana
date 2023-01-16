@@ -6,23 +6,23 @@
  * Side Public License, v 1.
  */
 import { BehaviorSubject, Subject } from 'rxjs';
-import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { AggregateQuery, Query } from '@kbn/es-query';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
-import { DataTableRecord } from '../../../types';
+import { getRawRecordType } from '../utils/get_raw_record_type';
 import { AppState } from './discover_app_state_container';
 import { DiscoverServices } from '../../../build_services';
 import { DiscoverSearchSessionManager } from './discover_search_session';
-import { getRawRecordType } from '../utils/get_raw_record_type';
 import { SEARCH_FIELDS_FROM_SOURCE, SEARCH_ON_PAGE_LOAD_SETTING } from '../../../../common';
 import { FetchStatus } from '../../types';
-import { getFetch$ } from '../utils/get_fetch_observable';
 import { validateTimeRange } from '../utils/validate_time_range';
 import { fetchAll } from '../utils/fetch_all';
 import { sendResetMsg } from '../hooks/use_saved_search_messages';
+import { getFetch$ } from '../utils/get_fetch_observable';
+import { DataTableRecord } from '../../../types';
 
 export interface SavedSearchData {
   main$: DataMain$;

@@ -29,7 +29,7 @@ import {
   HIDE_ANNOUNCEMENTS,
 } from '../../../../../common';
 import { useColumns } from '../../../../hooks/use_data_grid_columns';
-import { DataDocuments$, RecordRawType } from '../../hooks/use_saved_search';
+import { DataDocuments$, RecordRawType } from '../../services/discover_data_state_container';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { useDataState } from '../../hooks/use_data_state';
 import { DocTableInfinite } from '../../../../components/doc_table/doc_table_infinite';

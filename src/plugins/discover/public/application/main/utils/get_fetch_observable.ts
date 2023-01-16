@@ -14,7 +14,7 @@ import type {
   ISearchSource,
 } from '@kbn/data-plugin/public';
 import { FetchStatus } from '../../types';
-import { DataMain$, DataRefetch$ } from '../hooks/use_saved_search';
+import { DataMain$, DataRefetch$ } from '../services/discover_data_state_container';
 import { DiscoverSearchSessionManager } from '../services/discover_search_session';
 
 /**

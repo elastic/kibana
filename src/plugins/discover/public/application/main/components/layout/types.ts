@@ -12,7 +12,7 @@ import type { ISearchSource } from '@kbn/data-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { DataTableRecord } from '../../../../types';
 import { DiscoverStateContainer } from '../../services/discover_state';
-import { DataRefetch$, SavedSearchData } from '../../hooks/use_saved_search';
+import { DataRefetch$, SavedSearchData } from '../../services/discover_data_state_container';
 import type { DiscoverSearchSessionManager } from '../../services/discover_search_session';
 import type { InspectorAdapters } from '../../hooks/use_inspector';
 

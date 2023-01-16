@@ -37,7 +37,7 @@ import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { VIEW_MODE } from '../../common/constants';
 import { getSortForEmbeddable, SortPair } from '../utils/sorting';
-import { RecordRawType } from '../application/main/hooks/use_saved_search';
+import { RecordRawType } from '../application/main/services/discover_data_state_container';
 import { buildDataTableRecord } from '../utils/build_data_record';
 import { DataTableRecord, EsHitRecord } from '../types';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';

@@ -13,7 +13,7 @@ import { setHeaderActionMenuMounter } from '../../../../kibana_services';
 import { esHits } from '../../../../__mocks__/es_hits';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { DiscoverStateContainer } from '../../services/discover_state';
-import { DataDocuments$ } from '../../hooks/use_saved_search';
+import { DataDocuments$ } from '../../services/discover_data_state_container';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { DiscoverDocuments, onResize } from './discover_documents';
