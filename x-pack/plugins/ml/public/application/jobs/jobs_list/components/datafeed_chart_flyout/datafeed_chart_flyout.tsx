@@ -443,7 +443,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                             defaultMessage: 'Count',
                           })}
                           position={Position.Left}
-                          tickFormat={(d) => (d === null ? notAvailableMessage : d)}
+                          tickFormat={(d) => (d === null ? notAvailableMessage : String(d))}
                         />
                         {showAnnotations ? (
                           <>
