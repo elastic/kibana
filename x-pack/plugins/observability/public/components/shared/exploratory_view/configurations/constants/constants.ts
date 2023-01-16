@@ -138,6 +138,16 @@ export const FieldLabels: Record<string, string> = {
     defaultMessage: 'Total',
   }),
 
+  'kibana.alert.rule.category': i18n.translate('xpack.observability.expView.alerts.category', {
+    defaultMessage: 'Rule category',
+  }),
+  'kibana.alert.rule.name': i18n.translate('xpack.observability.expView.alerts.name', {
+    defaultMessage: 'Alert name',
+  }),
+  'kibana.alert.status': i18n.translate('xpack.observability.expView.alerts.status', {
+    defaultMessage: 'Alert status',
+  }),
+
   'monitor.id': MONITOR_ID_LABEL,
   'monitor.status': MONITOR_STATUS_LABEL,
   [MONITOR_DURATION_US]: MONITORS_DURATION_LABEL,
@@ -187,6 +197,7 @@ export const OPERATION_COLUMN = 'operation';
 export const PERCENTILE = 'percentile';
 
 export const REPORT_METRIC_FIELD = 'REPORT_METRIC_FIELD';
+export const REPORT_METRIC_TIMESTAMP = 'REPORT_METRIC_FIELD_TIMESTAMP';
 
 export const PERCENTILE_RANKS = [
   '99th' as OperationType,
