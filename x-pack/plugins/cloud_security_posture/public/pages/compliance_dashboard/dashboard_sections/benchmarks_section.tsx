@@ -6,27 +6,37 @@
  */
 
 import React from 'react';
-import { EuiFlexItem, EuiFlexGroup, useEuiTheme, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { CloudPostureScoreChart } from '../compliance_charts/cloud_posture_score_chart';
-import type { ComplianceDashboardData, Evaluation } from '../../../../common/types';
+import type {
+  ComplianceDashboardData,
+  Evaluation,
+  PosturePolicyTemplate,
+} from '../../../../common/types';
 import { RisksTable } from '../compliance_charts/risks_table';
-import { RULE_FAILED } from '../../../../common/constants';
+import { KSPM_POLICY_TEMPLATE, RULE_FAILED } from '../../../../common/constants';
 import { useNavigateFindings } from '../../../common/hooks/use_navigate_findings';
 import { ClusterDetailsBox } from './cluster_details_box';
-import { dashboardColumnsGrow } from './cloud_summary_section';
+import { dashboardColumnsGrow, getPolicyTemplateQuery } from './summary_section';
 
-export const CloudBenchmarksSection = ({
+export const BenchmarksSection = ({
   complianceData,
+  dashboardType,
 }: {
   complianceData: ComplianceDashboardData;
+  dashboardType: PosturePolicyTemplate;
 }) => {
   const { euiTheme } = useEuiTheme();
   const navToFindings = useNavigateFindings();
 
   const handleEvalCounterClick = (clusterId: string, evaluation: Evaluation) => {
-    navToFindings({ cluster_id: clusterId, 'result.evaluation': evaluation });
+    navToFindings({
+      cluster_id: clusterId,
+      'result.evaluation': evaluation,
+      ...getPolicyTemplateQuery(dashboardType),
+    });
   };
 
   const handleCellClick = (clusterId: string, ruleSection: string) => {
@@ -34,11 +44,16 @@ export const CloudBenchmarksSection = ({
       cluster_id: clusterId,
       'rule.section': ruleSection,
       'result.evaluation': RULE_FAILED,
+      ...getPolicyTemplateQuery(dashboardType),
     });
   };
 
   const handleViewAllClick = (clusterId: string) => {
-    navToFindings({ cluster_id: clusterId, 'result.evaluation': RULE_FAILED });
+    navToFindings({
+      cluster_id: clusterId,
+      'result.evaluation': RULE_FAILED,
+      ...getPolicyTemplateQuery(dashboardType),
+    });
   };
 
   return (
@@ -55,10 +70,17 @@ export const CloudBenchmarksSection = ({
         <EuiFlexItem grow={dashboardColumnsGrow.first}>
           <EuiTitle size="xxs" css={{ fontWeight: euiTheme.font.weight.semiBold }}>
             <h5>
-              <FormattedMessage
-                id="xpack.csp.dashboard.cloudBenchmarkSection.columnsHeader.clusterNameTitle"
-                defaultMessage="Cluster Name"
-              />
+              {dashboardType === KSPM_POLICY_TEMPLATE ? (
+                <FormattedMessage
+                  id="xpack.csp.dashboard.benchmarkSection.columnsHeader.clusterNameTitle"
+                  defaultMessage="Cluster Name"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.csp.dashboard.benchmarkSection.columnsHeader.accountNameTitle"
+                  defaultMessage="Account Name"
+                />
+              )}
             </h5>
           </EuiTitle>
         </EuiFlexItem>
@@ -69,7 +91,7 @@ export const CloudBenchmarksSection = ({
           >
             <h5>
               <FormattedMessage
-                id="xpack.csp.dashboard.cloudBenchmarkSection.columnsHeader.complianceScoreTitle"
+                id="xpack.csp.dashboard.benchmarkSection.columnsHeader.complianceScoreTitle"
                 defaultMessage="Compliance Score"
               />
             </h5>
@@ -82,7 +104,7 @@ export const CloudBenchmarksSection = ({
           >
             <h5>
               <FormattedMessage
-                id="xpack.csp.dashboard.cloudBenchmarkSection.columnsHeader.complianceByCisSectionTitle"
+                id="xpack.csp.dashboard.benchmarkSection.columnsHeader.complianceByCisSectionTitle"
                 defaultMessage="Compliance by CIS Section"
               />
             </h5>
