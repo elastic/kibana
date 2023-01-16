@@ -167,11 +167,9 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(apiResponse.body.statusCode).to.be(401);
         expect(apiResponse.body.error).to.be('Unauthorized');
-        // TODO: Fix type failure introduced by elasticsearch-js 8.6.0-canary.3
         expect(apiResponse.body.message).to.include.string(
-          '[security_exception] Reason: unable to authenticate user [dummy_hacker] for REST request [/_security/_authenticate]'
+          'unable to authenticate user [dummy_hacker] for REST request [/_security/_authenticate]'
         );
-
         expect(apiResponse.headers['set-cookie']).to.be(undefined);
       });
     });
