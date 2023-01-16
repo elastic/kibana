@@ -207,8 +207,10 @@ export class AlertService {
 
   public async bulkUpdateCases({ alerts, caseIds }: UpdateAlertCasesRequest): Promise<void> {
     try {
+      const nonEmptyAlerts = alerts.filter((alert) => !AlertService.isEmptyAlert(alert));
+
       await this.alertsClient.bulkUpdateCases({
-        alerts,
+        alerts: nonEmptyAlerts,
         caseIds,
       });
     } catch (error) {

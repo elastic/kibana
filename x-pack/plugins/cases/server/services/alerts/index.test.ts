@@ -338,4 +338,32 @@ describe('updateAlertsStatus', () => {
       expect(res).toBe(undefined);
     });
   });
+
+  describe('bulkUpdateCases', () => {
+    const alerts = [
+      {
+        id: 'c3869d546717e8c581add9cbf7d24578f34cd3e72cbc8d8b8e9a9330a899f70f',
+        index: '.internal.alerts-security.alerts-default-000001',
+      },
+    ];
+    const caseIds = ['test-case'];
+
+    it('update case info', async () => {
+      await alertService.bulkUpdateCases({ alerts, caseIds });
+
+      expect(alertsClient.bulkUpdateCases).toBeCalledWith({ alerts, caseIds });
+    });
+
+    it('filters out alerts with empty id', async () => {
+      await alertService.bulkUpdateCases({ alerts: [{ id: '', index: 'test-index' }], caseIds });
+
+      expect(alertsClient.bulkUpdateCases).toBeCalledWith({ alerts: [], caseIds });
+    });
+
+    it('filters out alerts with empty index', async () => {
+      await alertService.bulkUpdateCases({ alerts: [{ id: 'test-id', index: '' }], caseIds });
+
+      expect(alertsClient.bulkUpdateCases).toBeCalledWith({ alerts: [], caseIds });
+    });
+  });
 });
