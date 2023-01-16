@@ -102,18 +102,25 @@ export const AlertActions = ({
   );
 };
 
-const useAlertsUrl = ({
+export const useAlertsUrl = ({
   rangeFrom,
   rangeTo,
   monitorId,
 }: {
-  monitorId: string;
+  monitorId?: string;
   rangeFrom: string;
   rangeTo: string;
 }) => {
   const { basePath } = useSyntheticsSettingsContext();
+
+  let kuery = 'kibana.alert.rule.category : "Synthetics monitor status" ';
+
+  if (monitorId) {
+    kuery += `AND monitor.id : "${monitorId}"`;
+  }
+
   return `${basePath}/app/observability/alerts?_a=${rison.encode({
-    kuery: `monitor.id : "${monitorId}" `,
+    kuery,
     rangeFrom,
     rangeTo,
   })}`;
