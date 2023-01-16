@@ -109,6 +109,7 @@ const baseColumns = [
   },
   {
     field: 'resource.name',
+    width: '200px',
     name: i18n.translate(
       'xpack.csp.findings.findingsTable.findingsTableColumn.resourceNameColumnLabel',
       { defaultMessage: 'Resource Name' }
@@ -142,6 +143,7 @@ const baseColumns = [
         defaultMessage: 'Rule Number',
       }
     ),
+    width: '120px',
     sortable: true,
   },
   {
@@ -160,7 +162,6 @@ const baseColumns = [
       'xpack.csp.findings.findingsTable.findingsTableColumn.ruleSectionColumnLabel',
       { defaultMessage: 'CIS Section' }
     ),
-    width: '7%',
     sortable: true,
     truncateText: true,
     render: (section: string) => (
@@ -183,7 +184,6 @@ const baseColumns = [
         )}
       />
     ),
-    width: '150px',
     sortable: true,
     truncateText: true,
     render: (section: string) => (
@@ -194,6 +194,7 @@ const baseColumns = [
   },
   {
     field: '@timestamp',
+    align: 'right',
     width: '10%',
     name: i18n.translate(
       'xpack.csp.findings.findingsTable.findingsTableColumn.lastCheckedColumnLabel',

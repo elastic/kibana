@@ -13,12 +13,13 @@ import {
   PackagePolicy,
   PackagePolicyInput,
 } from '@kbn/fleet-plugin/common';
+import { roundScore } from '../../server/routes/compliance_dashboard/get_stats';
 import {
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
   CLOUDBEAT_VANILLA,
   CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
 } from '../constants';
-import { BenchmarkId } from '../types';
+import { BenchmarkId, Score } from '../types';
 
 /**
  * @example
@@ -72,3 +73,6 @@ export function assert(condition: any, msg?: string): asserts condition {
     throw new Error(msg);
   }
 }
+
+export const calculatePostureScore = (passed: number, failed: number): Score =>
+  roundScore(passed / (passed + failed));

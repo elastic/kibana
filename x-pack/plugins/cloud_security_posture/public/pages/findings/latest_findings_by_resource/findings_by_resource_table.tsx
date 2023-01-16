@@ -14,10 +14,10 @@ import {
   EuiToolTip,
   EuiBasicTableProps,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import numeral from '@elastic/numeral';
 import { Link, generatePath } from 'react-router-dom';
+import { ComplianceScoreBar } from '../../../components/compliance_score_bar';
 import * as TEST_SUBJECTS from '../test_subjects';
 import type { FindingsByResourcePage } from './use_findings_by_resource';
 import { findingsNavigation } from '../../../common/navigation/constants';
@@ -30,9 +30,7 @@ import {
 export const formatNumber = (value: number) =>
   value < 1000 ? value : numeral(value).format('0.0a');
 
-type Sorting = Required<
-  EuiBasicTableProps<Pick<FindingsByResourcePage['findings'], 'normalized'>>
->['sorting'];
+type Sorting = Required<EuiBasicTableProps<FindingsByResourcePage>>['sorting'];
 
 interface Props {
   items: FindingsByResourcePage[];
@@ -67,7 +65,7 @@ const FindingsByResourceTableComponent = ({
       createColumnWithFilters(findingsByResourceColumns['rule.benchmark.name'], { onAddFilter }),
       findingsByResourceColumns['rule.section'],
       createColumnWithFilters(findingsByResourceColumns.cluster_id, { onAddFilter }),
-      findingsByResourceColumns['findings.normalized'],
+      findingsByResourceColumns.compliance_score,
     ],
     [onAddFilter]
   );
@@ -105,6 +103,7 @@ const baseColumns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = 
   {
     ...baseFindingsColumns['resource.id'],
     field: 'resource_id',
+    width: '15%',
     render: (resourceId: FindingsByResourcePage['resource_id']) => (
       <Link
         to={generatePath(findingsNavigation.resource_findings.path, { resourceId })}
@@ -121,6 +120,7 @@ const baseColumns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = 
   {
     field: 'rule.section',
     truncateText: true,
+    // width: '200px',
     name: (
       <FormattedMessage
         id="xpack.csp.findings.findingsByResourceTable.cisSectionsColumnLabel"
@@ -138,7 +138,7 @@ const baseColumns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = 
   },
   baseFindingsColumns.cluster_id,
   {
-    field: 'findings.normalized',
+    field: 'compliance_score',
     width: '150px',
     truncateText: true,
     sortable: true,
@@ -148,18 +148,11 @@ const baseColumns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = 
         defaultMessage="Compliance Score"
       />
     ),
-    render: (normalized: FindingsByResourcePage['findings']['normalized'], all) => (
-      <EuiToolTip
-        content={i18n.translate('xpack.csp.findings.findingsByResourceTable.findingsToolTip', {
-          defaultMessage: '{failed} and {passed} passed findings',
-          values: {
-            failed: all.findings.failed_findings,
-            passed: all.findings.passed_findings,
-          },
-        })}
-      >
-        <span>{numeral(normalized).format('0%')}</span>
-      </EuiToolTip>
+    render: (complianceScore: FindingsByResourcePage['compliance_score'], data) => (
+      <ComplianceScoreBar
+        totalPassed={data.findings.passed_findings}
+        totalFailed={data.findings.failed_findings}
+      />
     ),
     dataType: 'number',
   },

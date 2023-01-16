@@ -6,11 +6,11 @@
  */
 
 import {
-  calculatePostureScore,
   FindingsEvaluationsQueryResult,
   getStatsFromFindingsEvaluationsAggs,
   roundScore,
 } from './get_stats';
+import { calculatePostureScore } from '../../../common/utils/helpers';
 
 const standardQueryResult: FindingsEvaluationsQueryResult = {
   resources_evaluated: {
