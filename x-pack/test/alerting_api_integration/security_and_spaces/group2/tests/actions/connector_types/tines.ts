@@ -14,7 +14,7 @@ import {
   tinesStory2,
   tinesAgentWebhook,
   tinesWebhookSuccessResponse,
-} from '../../../../../common/fixtures/plugins/actions_simulators/server/tines_simulation';
+} from '../../../../../common/plugins/actions_simulators/server/tines_simulation';
 
 const connectorTypeId = '.tines';
 const name = 'A tines action';

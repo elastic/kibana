@@ -381,7 +381,7 @@
 /x-pack/test/plugin_api_integration/test_suites/task_manager/ @elastic/response-ops
 /x-pack/plugins/triggers_actions_ui/ @elastic/response-ops
 /x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/ @elastic/response-ops
-/x-pack/test/functional_with_es_ssl/fixtures/plugins/alerts/ @elastic/response-ops
+/x-pack/test/functional_with_es_ssl/plugins/alerts/ @elastic/response-ops
 /docs/user/alerting/ @elastic/response-ops
 /docs/management/connectors/ @elastic/response-ops
 /x-pack/plugins/stack_alerts/ @elastic/response-ops
@@ -1025,6 +1025,7 @@ packages/kbn-utility-types @elastic/kibana-core
 packages/kbn-utility-types-jest @elastic/kibana-operations
 packages/kbn-utils @elastic/kibana-operations
 packages/kbn-web-worker-stub @elastic/kibana-operations
+packages/kbn-whereis-pkg-cli @elastic/kibana-operations
 packages/kbn-yarn-lock-validator @elastic/kibana-operations
 packages/shared-ux/avatar/solution @elastic/kibana-global-experience
 packages/shared-ux/avatar/user_profile/impl @elastic/kibana-global-experience
@@ -1086,3 +1087,4 @@ x-pack/packages/ml/nested_property @elastic/ml-ui
 x-pack/packages/ml/query_utils @elastic/ml-ui
 x-pack/packages/ml/string_hash @elastic/ml-ui
 x-pack/packages/ml/url_state @elastic/ml-ui
+x-pack/test/alerting_api_integration/packages/helpers @elastic/response-ops
