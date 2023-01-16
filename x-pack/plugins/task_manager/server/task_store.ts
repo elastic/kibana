@@ -341,6 +341,25 @@ export class TaskStore {
   }
 
   /**
+   * Gets tasks by ids
+   *
+   * @param {Array<string>} ids
+   * @returns {Promise<ConcreteTaskInstance[]>}
+   */
+  public async bulkGet(ids: string[]): Promise<ConcreteTaskInstance[]> {
+    let result;
+    try {
+      result = await this.savedObjectsRepository.bulkGet<SerializedConcreteTaskInstance>(
+        ids.map((id) => ({ type: 'task', id }))
+      );
+    } catch (e) {
+      this.errors$.next(e);
+      throw e;
+    }
+    return result && result.saved_objects.map((task) => savedObjectToConcreteTaskInstance(task));
+  }
+
+  /**
    * Gets task lifecycle step by id
    *
    * @param {string} id

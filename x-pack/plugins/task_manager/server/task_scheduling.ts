@@ -9,12 +9,10 @@ import { filter, take } from 'rxjs/operators';
 import pMap from 'p-map';
 
 import uuid from 'uuid';
-import { chunk, pick } from 'lodash';
+import { chunk, flatten, pick } from 'lodash';
 import { Subject } from 'rxjs';
 import agent from 'elastic-apm-node';
 import { Logger } from '@kbn/core/server';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { mustBeAllOf } from './queries/query_clauses';
 import { either, isErr, mapErr } from './lib/result_type';
 import {
   ErroredTask,
@@ -40,6 +38,7 @@ import { ensureDeprecatedFieldsAreCorrected } from './lib/correct_deprecated_fie
 import { TaskLifecycleEvent } from './polling_lifecycle';
 import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
 import { EphemeralTaskRejectedDueToCapacityError } from './task_running';
+import { retryableBulkUpdate } from './lib/retryable_bulk_update';
 
 const VERSION_CONFLICT_STATUS = 409;
 const BULK_ACTION_SIZE = 100;
@@ -153,39 +152,28 @@ export class TaskScheduling {
   }
 
   public async bulkDisable(taskIds: string[]) {
-    const enabledTasks = await this.bulkGetTasksHelper(taskIds);
-
-    const updatedTasks = enabledTasks
-      .flatMap(({ docs }) => docs)
-      .map((task) => ({
-        ...task,
-        enabled: false,
-      }));
-
-    return await this.bulkUpdateTasksHelper(updatedTasks);
+    return await retryableBulkUpdate({
+      taskIds,
+      store: this.store,
+      getTasks: async (ids) => await this.bulkGetTasksHelper(ids),
+      filter: (task) => !!task.enabled,
+      map: (task) => ({ ...task, enabled: false }),
+    });
   }
 
   public async bulkEnable(taskIds: string[], runSoon: boolean = true) {
-    const disabledTasks = await this.bulkGetTasksHelper(taskIds);
-
-    const updatedTasks = disabledTasks
-      .flatMap(({ docs }) => docs)
-      .map((task) => {
+    return await retryableBulkUpdate({
+      taskIds,
+      store: this.store,
+      getTasks: async (ids) => await this.bulkGetTasksHelper(ids),
+      filter: (task) => !task.enabled,
+      map: (task) => {
         if (runSoon) {
-          return {
-            ...task,
-            enabled: true,
-            scheduledAt: new Date(),
-            runAt: new Date(),
-          };
+          return { ...task, enabled: true, scheduledAt: new Date(), runAt: new Date() };
         }
-        return {
-          ...task,
-          enabled: true,
-        };
-      });
-
-    return await this.bulkUpdateTasksHelper(updatedTasks);
+        return { ...task, enabled: true };
+      },
+    });
   }
 
   /**
@@ -201,20 +189,13 @@ export class TaskScheduling {
     taskIds: string[],
     schedule: IntervalSchedule
   ): Promise<BulkUpdateTaskResult> {
-    const tasks = await this.bulkGetTasksHelper(taskIds, {
-      term: {
-        'task.status': 'idle',
-      },
-    });
-
-    const updatedTasks = tasks
-      .flatMap(({ docs }) => docs)
-      .reduce<ConcreteTaskInstance[]>((acc, task) => {
-        // if task schedule interval is the same, no need to update it
-        if (task.schedule?.interval === schedule.interval) {
-          return acc;
-        }
-
+    return retryableBulkUpdate({
+      taskIds,
+      store: this.store,
+      getTasks: async (ids) => await this.bulkGetTasksHelper(ids),
+      filter: (task) =>
+        task.status === TaskStatus.Idle && task.schedule?.interval !== schedule.interval,
+      map: (task) => {
         const oldIntervalInMs = parseIntervalAsMillisecond(task.schedule?.interval ?? '0s');
 
         // computing new runAt using formula:
@@ -224,46 +205,18 @@ export class TaskScheduling {
           task.runAt.getTime() - oldIntervalInMs + parseIntervalAsMillisecond(schedule.interval)
         );
 
-        acc.push({ ...task, schedule, runAt: new Date(newRunAtInMs) });
-        return acc;
-      }, []);
-
-    return await this.bulkUpdateTasksHelper(updatedTasks);
+        return { ...task, schedule, runAt: new Date(newRunAtInMs) };
+      },
+    });
   }
 
-  private async bulkGetTasksHelper(taskIds: string[], ...must: QueryDslQueryContainer[]) {
-    return await pMap(
+  private async bulkGetTasksHelper(taskIds: string[]) {
+    const batches = await pMap(
       chunk(taskIds, BULK_ACTION_SIZE),
-      async (taskIdsChunk) =>
-        this.store.fetch({
-          seq_no_primary_term: true,
-          query: mustBeAllOf(
-            {
-              terms: {
-                _id: taskIdsChunk.map((taskId) => `task:${taskId}`),
-              },
-            },
-            ...must
-          ),
-          size: BULK_ACTION_SIZE,
-        }),
+      async (taskIdsChunk) => this.store.bulkGet(taskIdsChunk),
       { concurrency: 10 }
     );
-  }
-
-  private async bulkUpdateTasksHelper(updatedTasks: ConcreteTaskInstance[]) {
-    return (await this.store.bulkUpdate(updatedTasks)).reduce<BulkUpdateTaskResult>(
-      (acc, task) => {
-        if (task.tag === 'ok') {
-          acc.tasks.push(task.value);
-        } else {
-          acc.errors.push({ error: task.error.error, task: task.error.entity });
-        }
-
-        return acc;
-      },
-      { tasks: [], errors: [] }
-    );
+    return flatten(batches);
   }
 
   /**
