@@ -16,6 +16,8 @@ import { SomeDevLog } from '@kbn/some-dev-log';
 import { observeLines } from '@kbn/stdio-dev-helpers';
 import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-base-server-internal';
 
+import type { Result } from './extract_mappings_from_plugins_worker';
+
 function routeToLog(readable: Readable, log: SomeDevLog, level: 'debug' | 'error') {
   return observeLines(readable).pipe(
     Rx.tap((line) => {
@@ -30,7 +32,9 @@ function routeToLog(readable: Readable, log: SomeDevLog, level: 'debug' | 'error
  * saved object mappings for all plugins. We run this in a child process so that we can
  * harvest logs and feed them into the logger when debugging.
  */
-export async function extractMappingsFromPlugins(log: SomeDevLog) {
+export async function extractMappingsFromPlugins(
+  log: SomeDevLog
+): Promise<SavedObjectsTypeMappingDefinitions> {
   log.info('Loading core with all plugins enabled so that we can get all savedObject mappings...');
 
   const fork = ChildProcess.fork(require.resolve('./extract_mappings_from_plugins_worker.ts'), {
@@ -42,24 +46,25 @@ export async function extractMappingsFromPlugins(log: SomeDevLog) {
   const mappings = await Rx.firstValueFrom(
     Rx.merge(
       // the actual value we are interested in
-      Rx.fromEvent<[any]>(fork, 'message'),
+      Rx.fromEvent(fork, 'message'),
 
       // worker logs are written to the logger, but dropped from the stream
       routeToLog(fork.stdout!, log, 'debug'),
       routeToLog(fork.stderr!, log, 'error'),
 
       // if an error occurs running the worker throw it into the stream
-      Rx.fromEvent<[any]>(fork, 'error').pipe(
+      Rx.fromEvent(fork, 'error').pipe(
         Rx.map((err) => {
           throw err;
         })
       )
     ).pipe(
       Rx.takeUntil(Rx.fromEvent(fork, 'exit')),
-      Rx.map(([msg]) => {
-        log.debug('message received from worker', msg);
-        fork.kill('SIGKILL');
-        return msg.mappings as SavedObjectsTypeMappingDefinitions;
+      Rx.map((results) => {
+        const [result] = results as [Result];
+        log.debug('message received from worker', result);
+        fork.kill('SIGILL');
+        return result.mappings;
       }),
       Rx.defaultIfEmpty(undefined)
     )

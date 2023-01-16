@@ -9,6 +9,11 @@
 import { createRootWithCorePlugins } from '@kbn/core-test-helpers-kbn-server';
 import { PluginSystemOverrides } from '@kbn/core-plugins-server-internal';
 import { mergeTypes } from '@kbn/core-saved-objects-migration-server-internal';
+import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-base-server-internal';
+
+export interface Result {
+  mappings: SavedObjectsTypeMappingDefinitions;
+}
 
 (async () => {
   if (!process.send) {
@@ -37,8 +42,10 @@ import { mergeTypes } from '@kbn/core-saved-objects-migration-server-internal';
 
   await root.preboot();
   const { savedObjects } = await root.setup();
-  const mappings = mergeTypes(savedObjects.getTypeRegistry().getAllTypes());
-  process.send({ mappings });
+  const result: Result = {
+    mappings: mergeTypes(savedObjects.getTypeRegistry().getAllTypes()),
+  };
+  process.send(result);
 })().catch((error) => {
   process.stderr.write(`UNHANDLED ERROR: ${error.stack}`);
   process.exit(1);
