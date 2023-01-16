@@ -8,12 +8,11 @@
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { NavigateToPath } from '../../../contexts/kibana';
+import { useTimefilter } from '@kbn/ml-date-picker';
 
-import { MlRoute, PageLoader, PageProps } from '../../router';
-import { useResolver } from '../../use_resolver';
+import { ML_PAGES } from '../../../../../common/constants/locator';
 
-import { useTimefilter } from '../../../contexts/kibana';
+import { useCreateAndNavigateToMlLink } from '../../../contexts/kibana/use_create_url';
 import { checkFullLicense } from '../../../license';
 import {
   checkGetJobsCapabilitiesResolver,
@@ -21,10 +20,11 @@ import {
 } from '../../../capabilities/check_capabilities';
 import { checkMlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';
 import { EditFilterList } from '../../../settings/filter_lists';
+import { NavigateToPath } from '../../../contexts/kibana';
 
+import { MlRoute, PageLoader, PageProps } from '../../router';
+import { useResolver } from '../../use_resolver';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
-import { useCreateAndNavigateToMlLink } from '../../../contexts/kibana/use_create_url';
-import { ML_PAGES } from '../../../../../common/constants/locator';
 
 enum MODE {
   NEW,

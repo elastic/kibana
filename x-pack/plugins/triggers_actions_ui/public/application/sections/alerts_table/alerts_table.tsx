@@ -112,6 +112,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       onToggleColumn,
       onResetColumns,
       browserFields,
+      controls: props.controls,
       setIsBulkActionsLoading,
     });
   }, [
@@ -120,11 +121,12 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     alertsCount,
     alertsData.alerts,
     updatedAt,
-    browserFields,
     isLoading,
     visibleColumns,
     onToggleColumn,
     onResetColumns,
+    browserFields,
+    props.controls,
     setIsBulkActionsLoading,
   ])();
 

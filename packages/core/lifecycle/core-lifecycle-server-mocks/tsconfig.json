@@ -33,6 +33,7 @@
     "@kbn/core-usage-data-server-mocks",
     "@kbn/core-http-request-handler-context-server",
     "@kbn/core-logging-server-mocks",
+    "@kbn/core-custom-branding-server-mocks",
   ],
   "exclude": [
     "target/**/*",
