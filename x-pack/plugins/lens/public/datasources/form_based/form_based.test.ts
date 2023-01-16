@@ -321,6 +321,37 @@ describe('IndexPattern Data Source', () => {
       };
       expect(FormBasedDatasource?.getSelectedFields?.(state)).toEqual([]);
     });
+
+    it('should support columns with multiple fields', async () => {
+      const state = {
+        currentIndexPatternId: '1',
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['col1'],
+            columns: {
+              col1: {
+                label: 'My Op',
+                dataType: 'string',
+                isBucketed: true,
+
+                // Private
+                operationType: 'terms',
+                sourceField: 'op',
+                params: {
+                  size: 5,
+                  orderBy: { type: 'alphabetical' },
+                  orderDirection: 'asc',
+                  secondaryFields: ['source', 'geo.src'],
+                },
+              } as TermsIndexPatternColumn,
+            },
+          },
+        },
+      };
+
+      expect(FormBasedDatasource?.getSelectedFields?.(state)).toEqual(['op', 'source', 'geo.src']);
+    });
   });
 
   describe('#toExpression', () => {

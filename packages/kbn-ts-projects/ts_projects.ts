@@ -12,7 +12,7 @@ export const TS_PROJECTS = TsProject.loadAll({
   /** Array of repo-relative paths to projects which should be ignored and not treated as a TS project in the repo */
   ignore: [
     'x-pack/plugins/apm/scripts/optimize_tsconfig/tsconfig.json',
-    'packages/kbn-docs-utils/src/api_docs/integration_tests/__fixtures__/src/**/*',
+    'packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/**/*',
   ],
 
   /** Array of repo-relative paths to projects which should have their type-check disabled */
