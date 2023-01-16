@@ -29,11 +29,9 @@ import { useInspectButton } from '../common/hooks';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { FieldSelection } from '../../../../common/components/field_selection';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { InputsModelId } from '../../../../common/store/inputs/constants';
-import { LensEmbeddable } from '../../../../common/components/visualization_actions/lens_embeddable';
 import { getAlertsTableLensAttributes as getLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/alerts/alerts_table';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { useRefetchByRestartingSession } from '../../../../common/components/page/use_refetch_by_session';
+import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
 
 export const DETECTIONS_ALERTS_COUNT_ID = 'detections-alerts-count';
 
@@ -120,10 +118,7 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
 
     const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
     const timerange = useMemo(() => ({ from, to }), [from, to]);
-    const { searchSessionId, refetchByRestartingSession } = useRefetchByRestartingSession({
-      inputId: InputsModelId.global,
-      queryId: uniqueQueryId,
-    });
+
     const extraVisualizationOptions = useMemo(
       () => ({
         breakdownField: stackByField1,
@@ -176,10 +171,9 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
     useInspectButton({
       deleteQuery,
       loading: isLoadingAlerts,
-      refetch: isChartEmbeddablesEnabled ? refetchByRestartingSession : refetch,
+      refetch,
       request,
       response,
-      searchSessionId,
       setQuery,
       uniqueQueryId,
     });
@@ -222,13 +216,13 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
           </HeaderSection>
           {toggleStatus ? (
             isChartEmbeddablesEnabled && getLensAttributes && timerange ? (
-              <LensEmbeddable
+              <VisualizationEmbeddable
                 data-test-subj="embeddable-matrix-histogram"
                 extraActions={extraActions}
                 extraOptions={extraVisualizationOptions}
                 getLensAttributes={getLensAttributes}
                 height={ChartHeight}
-                id={uniqueQueryId}
+                id={`${uniqueQueryId}-embeddable`}
                 inspectTitle={inspectTitle}
                 scopeId={SourcererScopeName.detections}
                 stackByField={stackByField0}

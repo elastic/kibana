@@ -34,10 +34,9 @@ import { HoverVisibilityContainer } from '../hover_visibility_container';
 import { VisualizationActions } from '../visualization_actions';
 import type { GetLensAttributes, LensAttributes } from '../visualization_actions/types';
 import { useQueryToggle } from '../../containers/query_toggle';
-import { LensEmbeddable } from '../visualization_actions/lens_embeddable';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
-import { useRefetchByRestartingSession } from '../page/use_refetch_by_session';
 import { VISUALIZATION_ACTIONS_BUTTON_CLASS } from '../visualization_actions/utils';
+import { VisualizationEmbeddable } from '../visualization_actions/visualization_embeddable';
 
 export type MatrixHistogramComponentProps = MatrixHistogramProps &
   Omit<MatrixHistogramQueryProps, 'stackByField'> & {
@@ -169,11 +168,6 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   );
 
   const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
-  const { searchSessionId, refetchByRestartingSession } = useRefetchByRestartingSession({
-    inputId: InputsModelId.global,
-    queryId: id,
-    skip: !isChartEmbeddablesEnabled,
-  });
 
   const matrixHistogramRequest = {
     endDate,
@@ -218,8 +212,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
         id,
         inspect,
         loading,
-        refetch: isChartEmbeddablesEnabled ? refetchByRestartingSession : refetch,
-        searchSessionId,
+        refetch,
       });
     }
 
@@ -235,8 +228,6 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     isInitialLoading,
     loading,
     refetch,
-    refetchByRestartingSession,
-    searchSessionId,
     setIsInitialLoading,
     setQuery,
   ]);
@@ -308,11 +299,11 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
           </HeaderSection>
           {toggleStatus ? (
             isChartEmbeddablesEnabled && (getLensAttributes || lensAttributes) && timerange ? (
-              <LensEmbeddable
+              <VisualizationEmbeddable
                 data-test-subj="embeddable-matrix-histogram"
                 getLensAttributes={getLensAttributes}
                 height={ChartHeight}
-                id={id}
+                id={`${id}-embeddable`}
                 inspectTitle={title as string}
                 stackByField={selectedStackByOption.value}
                 timerange={timerange}

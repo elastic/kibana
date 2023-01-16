@@ -6,7 +6,6 @@
  */
 
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
-import type { Filter } from '@kbn/es-query';
 import type { ESQuery } from '../../../../../common/typed_json';
 
 interface StatusBySeverity {

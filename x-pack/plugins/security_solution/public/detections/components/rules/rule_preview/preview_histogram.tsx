@@ -38,11 +38,9 @@ import { useGlobalFullScreen } from '../../../../common/containers/use_full_scre
 import type { TimeframePreviewOptions } from '../../../pages/detection_engine/rules/types';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useRefetchByRestartingSession } from '../../../../common/components/page/use_refetch_by_session';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { InputsModelId } from '../../../../common/store/inputs/constants';
-import { LensEmbeddable } from '../../../../common/components/visualization_actions/lens_embeddable';
 import { getRulePreviewLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/alerts/rule_preview';
+import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
 
 const LoadingChart = styled(EuiLoadingChart)`
   display: block;
@@ -98,10 +96,7 @@ export const PreviewHistogram = ({
 
   const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
   const timerange = useMemo(() => ({ from: startDate, to: endDate }), [startDate, endDate]);
-  const { searchSessionId, refetchByRestartingSession } = useRefetchByRestartingSession({
-    inputId: InputsModelId.global,
-    queryId: `${ID}-${previewId}`,
-  });
+
   const extraVisualizationOptions = useMemo(
     () => ({
       ruleId: previewId,
@@ -139,21 +134,10 @@ export const PreviewHistogram = ({
         id: `${ID}-${previewId}`,
         inspect,
         loading: isLoading,
-        refetch: isChartEmbeddablesEnabled ? refetchByRestartingSession : refetch,
-        searchSessionId,
+        refetch,
       });
     }
-  }, [
-    setQuery,
-    inspect,
-    isLoading,
-    isInitializing,
-    refetch,
-    previewId,
-    isChartEmbeddablesEnabled,
-    refetchByRestartingSession,
-    searchSessionId,
-  ]);
+  }, [setQuery, inspect, isLoading, isInitializing, refetch, previewId, isChartEmbeddablesEnabled]);
 
   const barConfig = useMemo(
     (): ChartSeriesConfigs => getHistogramConfig(endDate, startDate, !isEqlRule),
@@ -206,11 +190,12 @@ export const PreviewHistogram = ({
             {isLoading ? (
               <LoadingChart size="l" data-test-subj="preview-histogram-loading" />
             ) : isChartEmbeddablesEnabled ? (
-              <LensEmbeddable
+              <VisualizationEmbeddable
+                applyGlobalQueriesAndFilters={false}
                 extraOptions={extraVisualizationOptions}
                 getLensAttributes={getRulePreviewLensAttributes}
                 height={`${CHART_HEIGHT}px`}
-                id={`${ID}-${previewId}`}
+                id={`${ID}-${previewId}-embeddable`}
                 inspectTitle={i18n.QUERY_GRAPH_HITS_TITLE}
                 scopeId={SourcererScopeName.detections}
                 stackByField={ruleType === 'machine_learning' ? 'host.name' : 'event.category'}

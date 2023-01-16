@@ -51,13 +51,10 @@ import { KpiPanel, StackByComboBox } from '../common/components';
 import { useInspectButton } from '../common/hooks';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { GROUP_BY_TOP_LABEL } from '../common/translations';
-import { LensEmbeddable } from '../../../../common/components/visualization_actions/lens_embeddable';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { getAlertsHistogramLensAttributes as getLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/alerts/alerts_histogram';
-import { InputsModelId } from '../../../../common/store/inputs/constants';
-import { useRefetchByRestartingSession } from '../../../../common/components/page/use_refetch_by_session';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import type { EmbeddableData } from '../../../../common/components/visualization_actions/types';
+import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
 
 const defaultTotalAlertsObj: AlertsTotal = {
   value: 0,
@@ -190,10 +187,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
 
     const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
     const timerange = useMemo(() => ({ from, to }), [from, to]);
-    const { searchSessionId, refetchByRestartingSession } = useRefetchByRestartingSession({
-      inputId: InputsModelId.global,
-      queryId: uniqueQueryId,
-    });
+
     const extraVisualizationOptions = useMemo(
       () => ({
         filters,
@@ -286,26 +280,12 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     useInspectButton({
       deleteQuery,
       loading: isLoadingAlerts,
-      refetch: isChartEmbeddablesEnabled ? refetchByRestartingSession : refetch,
+      refetch,
       request,
       response,
-      searchSessionId,
       setQuery,
       uniqueQueryId,
     });
-
-    const onEmbeddableLoad = useCallback(
-      ({ requests, responses, isLoading }: EmbeddableData) => {
-        setQuery({
-          id: uniqueQueryId,
-          searchSessionId,
-          refetch: refetchByRestartingSession,
-          loading: isLoading,
-          inspect: { dsl: requests, response: responses },
-        });
-      },
-      [refetchByRestartingSession, searchSessionId, setQuery, uniqueQueryId]
-    );
 
     useEffect(() => {
       setTotalAlertsObj(
@@ -442,18 +422,17 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
 
           {toggleStatus ? (
             isChartEmbeddablesEnabled && getLensAttributes && timerange ? (
-              <LensEmbeddable
+              <VisualizationEmbeddable
                 data-test-subj="embeddable-matrix-histogram"
                 extraActions={extraActions}
                 extraOptions={extraVisualizationOptions}
                 getLensAttributes={getLensAttributes}
                 height={ChartHeight}
-                id={uniqueQueryId}
+                id={`alerts-histogram-embeddable-${uniqueQueryId}`}
                 inspectTitle={inspectTitle}
                 scopeId={SourcererScopeName.detections}
                 stackByField={selectedStackByOption}
                 timerange={timerange}
-                onLoad={onEmbeddableLoad}
               />
             ) : isInitialLoading ? (
               <MatrixLoader />

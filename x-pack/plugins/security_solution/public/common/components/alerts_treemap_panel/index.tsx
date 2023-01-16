@@ -25,12 +25,10 @@ import { HeaderSection } from '../header_section';
 import { InspectButtonContainer } from '../inspect';
 import { DEFAULT_STACK_BY_FIELD0_SIZE, getAlertsRiskQuery } from '../alerts_treemap/query';
 import type { AlertsTreeMapAggregation } from '../alerts_treemap/types';
-import { InputsModelId } from '../../store/inputs/constants';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
-import { useRefetchByRestartingSession } from '../page/use_refetch_by_session';
-import { LensEmbeddable } from '../visualization_actions/lens_embeddable';
 import { getAlertsTreemapLensAttributes as getLensAttributes } from '../visualization_actions/lens_attributes/common/alerts/alerts_treemap';
 import { SourcererScopeName } from '../../store/sourcerer/model';
+import { VisualizationEmbeddable } from '../visualization_actions/visualization_embeddable';
 
 const DEFAULT_HEIGHT = DEFAULT_MIN_CHART_HEIGHT + 134; // px
 
@@ -95,10 +93,7 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
   const uniqueQueryId = useMemo(() => `${ALERTS_TREEMAP_ID}-${uuid.v4()}`, []);
   const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
   const timerange = useMemo(() => ({ from, to }), [from, to]);
-  const { searchSessionId, refetchByRestartingSession } = useRefetchByRestartingSession({
-    inputId: InputsModelId.global,
-    queryId: uniqueQueryId,
-  });
+
   const extraVisualizationOptions = useMemo(
     () => ({
       breakdownField: stackByField1,
@@ -169,10 +164,9 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
   useInspectButton({
     deleteQuery,
     loading: isLoadingAlerts,
-    refetch: isChartEmbeddablesEnabled ? refetchByRestartingSession : refetch,
+    refetch,
     request,
     response,
-    searchSessionId,
     setQuery,
     uniqueQueryId,
   });
@@ -220,12 +214,12 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
 
         {isPanelExpanded ? (
           isChartEmbeddablesEnabled && getLensAttributes && timerange ? (
-            <LensEmbeddable
+            <VisualizationEmbeddable
               extraActions={extraActions}
               extraOptions={extraVisualizationOptions}
               getLensAttributes={getLensAttributes}
               height={`${DEFAULT_MIN_CHART_HEIGHT}px`}
-              id={uniqueQueryId}
+              id={`charts-embeddable-${uniqueQueryId}`}
               inspectTitle={inspectTitle}
               scopeId={SourcererScopeName.detections}
               stackByField={stackByField0}
