@@ -341,7 +341,7 @@ describe('AlertsTableState', () => {
       });
     });
 
-    describe('when persisten controls are set', () => {
+    describe('when persistent controls are set', () => {
       let props: AlertsTableStateProps;
       beforeEach(() => {
         const getMockWithUsePersistentControls = jest.fn().mockImplementation((plugin: string) => {
