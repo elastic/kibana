@@ -100,7 +100,7 @@ export const sloList: FindSLOResponse = {
     },
     {
       ...baseSlo,
-      id: 'c0f8d669-9177-4706-9098-f397a88173a7',
+      id: 'c0f8d669-9177-4706-9098-f397a88173a8',
       budgetingMethod: 'timeslices',
       objective: { target: 0.98, timesliceTarget: 0.9, timesliceWindow: '5m' },
       summary: {
