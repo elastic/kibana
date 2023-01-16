@@ -64,27 +64,40 @@ export const Default: ComponentStory<typeof Template> = Template.bind({});
 Default.args = { ...tooltipProps };
 
 export const LoadingState: ComponentStory<typeof Template> = Template.bind({});
-LoadingState.args = {...tooltipProps, loading: true}
-
+LoadingState.args = { ...tooltipProps, loading: true };
 
 export const LongTitle: ComponentStory<typeof Template> = Template.bind({});
-LongTitle.args = {...tooltipProps, content:{ ...tooltipContent, title:longTitle }}
+LongTitle.args = { ...tooltipProps, content: { ...tooltipContent, title: longTitle } };
 
 export const LongDescription: ComponentStory<typeof Template> = Template.bind({});
-LongDescription.args = {...tooltipProps, content:{ ...tooltipContent, description:longDescription }}
+LongDescription.args = {
+  ...tooltipProps,
+  content: { ...tooltipContent, description: longDescription },
+};
 
 export const InProgressStatus: ComponentStory<typeof Template> = Template.bind({});
-InProgressStatus.args = {...tooltipProps, content:{ ...tooltipContent, status:CaseStatuses['in-progress'] }}
+InProgressStatus.args = {
+  ...tooltipProps,
+  content: { ...tooltipContent, status: CaseStatuses['in-progress'] },
+};
 
 export const ClosedStatus: ComponentStory<typeof Template> = Template.bind({});
-ClosedStatus.args = {...tooltipProps, content:{ ...tooltipContent, status:CaseStatuses.closed }}
+ClosedStatus.args = {
+  ...tooltipProps,
+  content: { ...tooltipContent, status: CaseStatuses.closed },
+};
 
 export const NoUserInfo: ComponentStory<typeof Template> = Template.bind({});
-NoUserInfo.args = {...tooltipProps, content:{ ...tooltipContent, createdBy:{} }}
+NoUserInfo.args = { ...tooltipProps, content: { ...tooltipContent, createdBy: {} } };
 
 export const FullName: ComponentStory<typeof Template> = Template.bind({});
-FullName.args = {...tooltipProps, content:{ ...tooltipContent, createdBy:{ fullName: 'Elastic User' } }}
+FullName.args = {
+  ...tooltipProps,
+  content: { ...tooltipContent, createdBy: { fullName: 'Elastic User' } },
+};
 
 export const LongUserName: ComponentStory<typeof Template> = Template.bind({});
-LongUserName.args = {...tooltipProps, content:{ ...tooltipContent, createdBy:{ fullName: 'LoremIpsumElasticUser WithALongSurname' } }}
-
+LongUserName.args = {
+  ...tooltipProps,
+  content: { ...tooltipContent, createdBy: { fullName: 'LoremIpsumElasticUser WithALongSurname' } },
+};
