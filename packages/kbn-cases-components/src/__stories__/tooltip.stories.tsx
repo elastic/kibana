@@ -14,6 +14,13 @@ import { CaseStatuses } from '../status/types';
 import { Tooltip } from '../tooltip/tooltip';
 import type { CaseTooltipProps, CaseTooltipContentProps } from '../tooltip/types';
 
+const sampleText = 'This is a test span element!!';
+const TestSpan = () => (
+  <a href="https://www.elastic.co/">
+    <span data-test-subj="sample-span">{sampleText}</span>
+  </a>
+);
+
 const tooltipContent: CaseTooltipContentProps = {
   title: 'Unusual process identified',
   description: 'There was an unusual process while adding alerts to existing case.',
@@ -27,16 +34,10 @@ const tooltipContent: CaseTooltipContentProps = {
 };
 
 const tooltipProps: CaseTooltipProps = {
+  children: TestSpan,
   loading: false,
   content: tooltipContent,
 };
-
-const sampleText = 'This is a test span element!!';
-const TestSpan = () => (
-  <a href="https://www.elastic.co/">
-    <span data-test-subj="sample-span">{sampleText}</span>
-  </a>
-);
 
 const longTitle = `Lorem Ipsum is simply dummy text of the printing and typesetting industry. 
   Lorem Ipsum has been the industry standard dummy text ever since the 1500s!! Lorem!!!`;
