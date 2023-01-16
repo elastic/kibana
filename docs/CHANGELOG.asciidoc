@@ -110,10 +110,9 @@ Enterprise Search::
 For the Elastic Enterprise Search 8.6.0 release information, refer to {enterprise-search-ref}/changelog.html[_Elastic Enterprise Search Documentation Release notes_].
 
 Fleet::
-* Differentiate kubernetes integration multi page experience {kibana-pull}145224[#145224]
-* Prerelease toggle {kibana-pull}143853[#143853]
-* Adds link to skip multi step add integration workflow {kibana-pull}143279[#143279]
-* Request diagnostics {kibana-pull}142369[#142369]
+* Differentiate kubernetes integration multipage experience {kibana-pull}145224[#145224]
+* Adds prerelease toggle to Integrations list {kibana-pull}143853[#143853]
+* Adds link to allow users to skip multistep add integration workflow {kibana-pull}143279[#143279]
 
 Infrastructure::
 Adds support for the the Unified Search Bar for Query input {kibana-pull}143222[#143222]
