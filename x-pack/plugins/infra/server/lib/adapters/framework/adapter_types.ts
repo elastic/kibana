@@ -50,7 +50,7 @@ export interface CallWithRequestParams extends estypes.RequestBase {
   allow_no_indices?: boolean;
   size?: number;
   terminate_after?: number;
-  fields?: string | string[];
+  fields?: estypes.Fields;
   path?: string;
   query?: string | object;
   track_total_hits?: boolean | number;

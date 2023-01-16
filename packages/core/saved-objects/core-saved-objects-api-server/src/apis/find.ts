@@ -9,7 +9,6 @@
 import type {
   SortOrder,
   AggregationsAggregationContainer,
-  Id as EsId,
   SortResults,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SavedObject } from '@kbn/core-saved-objects-common';
@@ -69,7 +68,7 @@ export interface SavedObjectsFindOptions {
   /**
    * Use the sort values from the previous page to retrieve the next page of results.
    */
-  searchAfter?: EsId[];
+  searchAfter?: SortResults;
   /**
    * The fields to perform the parsed query against. Unlike the `searchFields` argument, these are expected to be root fields and will not
    * be modified. If used in conjunction with `searchFields`, both are concatenated together.

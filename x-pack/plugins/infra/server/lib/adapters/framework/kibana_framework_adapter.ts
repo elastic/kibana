@@ -164,7 +164,7 @@ export class KibanaFramework {
         break;
       case 'fieldCaps':
         apiResult = elasticsearch.client.asCurrentUser.fieldCaps({
-          ...params,
+          ...(params as any), // TODO: Fix type failure introduced by elasticsearch-js 8.6.0-canary.3
         });
         break;
       case 'indices.existsAlias':
@@ -185,12 +185,12 @@ export class KibanaFramework {
       case 'transport.request':
         apiResult = elasticsearch.client.asCurrentUser.transport.request({
           ...params,
-        } as TransportRequestParams);
+        } as unknown as TransportRequestParams); // TODO: Fix type failure introduced by elasticsearch-js 8.6.0-canary.3
         break;
       case 'ml.getBuckets':
         apiResult = elasticsearch.client.asCurrentUser.ml.getBuckets({
           ...params,
-        } as estypes.MlGetBucketsRequest);
+        } as unknown as estypes.MlGetBucketsRequest); // TODO: Fix type failure introduced by elasticsearch-js 8.6.0-canary.3
         break;
     }
     return apiResult ? await apiResult : undefined;
