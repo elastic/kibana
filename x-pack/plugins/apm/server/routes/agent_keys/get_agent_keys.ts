@@ -17,11 +17,11 @@ export async function getAgentKeys({
     query: {
       bool: {
         filter: [
-          {
-            term: {
-              'metadata.application': 'apm',
-            },
-          },
+          // only retrieve APM keys
+          { term: { 'metadata.application': 'apm' } },
+
+          // exclude system keys
+          { bool: { must_not: { term: { 'metadata.system': true } } } },
         ],
       },
     },

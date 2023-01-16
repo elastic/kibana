@@ -38,6 +38,7 @@ export const AlertAttributesExcludedFromAAD = [
   'isSnoozedUntil',
   'lastRun',
   'nextRun',
+  'running',
 ];
 
 // useful for Pick<RawAlert, AlertAttributesExcludedFromAADType> which is a
@@ -56,7 +57,8 @@ export type AlertAttributesExcludedFromAADType =
   | 'snoozeSchedule'
   | 'isSnoozedUntil'
   | 'lastRun'
-  | 'nextRun';
+  | 'nextRun'
+  | 'running';
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,

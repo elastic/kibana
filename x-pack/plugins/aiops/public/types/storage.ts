@@ -5,15 +5,9 @@
  * 2.0.
  */
 
+import { type FrozenTierPreference } from '@kbn/ml-date-picker';
+
 export const AIOPS_FROZEN_TIER_PREFERENCE = 'aiops.frozenDataTierPreference';
-
-export const FROZEN_TIER_PREFERENCE = {
-  EXCLUDE: 'exclude-frozen',
-  INCLUDE: 'include-frozen',
-} as const;
-
-export type FrozenTierPreference =
-  typeof FROZEN_TIER_PREFERENCE[keyof typeof FROZEN_TIER_PREFERENCE];
 
 export type AiOps = Partial<{
   [AIOPS_FROZEN_TIER_PREFERENCE]: FrozenTierPreference;

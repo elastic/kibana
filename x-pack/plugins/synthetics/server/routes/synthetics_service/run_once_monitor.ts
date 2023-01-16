@@ -44,6 +44,7 @@ export const runOnceSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
         monitorId,
         heartbeatId: monitorId,
         runOnce: true,
+        testRunId: monitorId,
         params: paramsBySpace[spaceId],
       }),
     ]);

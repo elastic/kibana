@@ -206,6 +206,8 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
     } catch (e) {
       throw new Error(e);
     }
+
+    return { state: {} };
   });
 
 export async function executeAlert(

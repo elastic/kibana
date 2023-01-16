@@ -71,9 +71,15 @@ export function syntheticsAppPageProvider({ page, kibanaUrl }: { page: Page; kib
     },
 
     async navigateToAddMonitor() {
-      await page.goto(addMonitor, {
-        waitUntil: 'networkidle',
-      });
+      if (await page.isVisible('text=select a different monitor type', { timeout: 0 })) {
+        await page.click('text=select a different monitor type');
+      } else if (await page.isVisible('text=Create monitor', { timeout: 0 })) {
+        await page.click('text=Create monitor');
+      } else {
+        await page.goto(addMonitor, {
+          waitUntil: 'networkidle',
+        });
+      }
     },
 
     async ensureIsOnMonitorConfigPage() {
@@ -89,7 +95,9 @@ export function syntheticsAppPageProvider({ page, kibanaUrl }: { page: Page; kib
     async deleteMonitors() {
       let isSuccessful: boolean = false;
       while (true) {
-        if ((await page.$(this.byTestId('euiCollapsedItemActionsButton'))) === null) {
+        if (
+          !(await page.isVisible(this.byTestId('euiCollapsedItemActionsButton'), { timeout: 0 }))
+        ) {
           isSuccessful = true;
           break;
         }
