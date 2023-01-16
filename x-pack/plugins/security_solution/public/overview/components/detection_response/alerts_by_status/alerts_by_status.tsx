@@ -220,6 +220,7 @@ export const AlertsByStatus = ({
                     <StyledFlexItem key="alerts-status-open" grow={isChartEmbeddablesEnabled}>
                       {isChartEmbeddablesEnabled ? (
                         <VisualizationEmbeddable
+                          applyGlobalQueriesAndFilters={false}
                           extraOptions={openDonutOptions}
                           getLensAttributes={getAlertsByStatusAttributes}
                           height={ChartSize}
@@ -249,6 +250,7 @@ export const AlertsByStatus = ({
                     >
                       {isChartEmbeddablesEnabled ? (
                         <VisualizationEmbeddable
+                          applyGlobalQueriesAndFilters={false}
                           extraOptions={acknowledgedDonutOptions}
                           getLensAttributes={getAlertsByStatusAttributes}
                           height={ChartSize}
@@ -275,6 +277,7 @@ export const AlertsByStatus = ({
                     <StyledFlexItem key="alerts-status-closed" grow={isChartEmbeddablesEnabled}>
                       {isChartEmbeddablesEnabled ? (
                         <VisualizationEmbeddable
+                          applyGlobalQueriesAndFilters={false}
                           extraOptions={closedDonutOptions}
                           getLensAttributes={getAlertsByStatusAttributes}
                           height={ChartSize}

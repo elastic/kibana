@@ -7,6 +7,4 @@
 
 import React from 'react';
 
-export const VisualizationEmbeddable = () => (
-  <div data-test-subj="visualization-embeddable-managed" />
-);
+export const VisualizationEmbeddable = () => <div data-test-subj="visualization-embeddable" />;

@@ -14,13 +14,12 @@ import { HeaderSection } from '../../../../common/components/header_section';
 import { useRiskScore, useRiskScoreKpi } from '../../../../explore/containers/risk_score';
 
 import type { RiskSeverity } from '../../../../../common/search_strategy';
-import { EMPTY_SEVERITY_COUNT, RiskScoreEntity } from '../../../../../common/search_strategy';
+import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { generateSeverityFilter } from '../../../../explore/hosts/store/helpers';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { InspectButtonContainer } from '../../../../common/components/inspect';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
-import { RiskScoreDonutChart } from '../common/risk_score_donut_chart';
 import { StyledBasicTable } from '../common/styled_basic_table';
 import { RiskScoreHeaderTitle } from '../../../../explore/components/risk_score/risk_score_onboarding/risk_score_header_title';
 import { RiskScoresNoDataDetected } from '../../../../explore/components/risk_score/risk_score_onboarding/risk_score_no_data_detected';
@@ -31,19 +30,14 @@ import * as commonI18n from '../common/translations';
 import { useNavigateToTimeline } from '../../detection_response/hooks/use_navigate_to_timeline';
 import type { TimeRange } from '../../../../common/store/inputs/model';
 import { openAlertsFilter } from '../../detection_response/utils';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
-import { useSpaceId } from '../../../../common/hooks/use_space_id';
-import { getRiskScoreDonutAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/risk_scores/risk_score_donut';
-import { TOTAL_LABEL } from '../common/translations';
+
 import { useEntityInfo } from './use_entity';
 import { RiskScoreHeaderContent } from './header_content';
+import { ChartContent } from './chart_content';
 
 const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskScoreEntity }) => {
   const { deleteQuery, setQuery, from, to } = useGlobalTime();
   const [updatedAt, setUpdatedAt] = useState<number>(Date.now());
-  const spaceId = useSpaceId();
-  const extraOptions = useMemo(() => ({ spaceId }), [spaceId]);
   const entity = useEntityInfo(riskEntity);
 
   const { openTimelineWithFilters } = useNavigateToTimeline();
@@ -93,7 +87,6 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
     }),
     [from, to]
   );
-  const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
 
   const {
     severityCount,
@@ -201,20 +194,13 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
         {toggleStatus && (
           <EuiFlexGroup data-test-subj="entity_analytics_content">
             <EuiFlexItem grow={false}>
-              {isChartEmbeddablesEnabled && spaceId && data && data.length ? (
-                <VisualizationEmbeddable
-                  extraOptions={extraOptions}
-                  getLensAttributes={getRiskScoreDonutAttributes}
-                  height="120px"
-                  id={`${entity.kpiQueryId}-donut`}
-                  isDonut={true}
-                  label={TOTAL_LABEL}
-                  stackByField={riskEntity}
-                  timerange={timerange}
-                />
-              ) : (
-                <RiskScoreDonutChart severityCount={severityCount ?? EMPTY_SEVERITY_COUNT} />
-              )}
+              <ChartContent
+                dataExists={data && data.length > 0}
+                kpiQueryId={entity.kpiQueryId}
+                riskEntity={riskEntity}
+                severityCount={severityCount}
+                timerange={timerange}
+              />
             </EuiFlexItem>
             <EuiFlexItem>
               <StyledBasicTable

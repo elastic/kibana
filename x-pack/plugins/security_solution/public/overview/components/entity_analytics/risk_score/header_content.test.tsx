@@ -8,9 +8,10 @@ import type { RenderResult } from '@testing-library/react';
 import { render } from '@testing-library/react';
 import React from 'react';
 import { SecurityPageName } from '../../../../../common/constants';
-import { RiskScoreEntity, RiskSeverity } from '../../../../../common/search_strategy';
+import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
 import { RiskScoreHeaderContent } from './header_content';
+import { mockSeverityCount } from './__mocks__';
 
 jest.mock('../../../../common/components/links', () => {
   const actual = jest.requireActual('../../../../common/components/links');
@@ -40,13 +41,7 @@ describe('RiskScoreHeaderContent', () => {
         onSelectSeverityFilterGroup={jest.fn()}
         riskEntity={RiskScoreEntity.user}
         selectedSeverity={[]}
-        severityCount={{
-          [RiskSeverity.unknown]: 1,
-          [RiskSeverity.low]: 2,
-          [RiskSeverity.moderate]: 3,
-          [RiskSeverity.high]: 4,
-          [RiskSeverity.critical]: 5,
-        }}
+        severityCount={mockSeverityCount}
         toggleStatus={true}
       />
     );
@@ -79,13 +74,7 @@ describe('RiskScoreHeaderContent', () => {
         onSelectSeverityFilterGroup={jest.fn()}
         riskEntity={RiskScoreEntity.user}
         selectedSeverity={[]}
-        severityCount={{
-          [RiskSeverity.unknown]: 1,
-          [RiskSeverity.low]: 2,
-          [RiskSeverity.moderate]: 3,
-          [RiskSeverity.high]: 4,
-          [RiskSeverity.critical]: 5,
-        }}
+        severityCount={mockSeverityCount}
         toggleStatus={false}
       />
     );
