@@ -57358,7 +57358,9 @@
                 "section": "def-common.SavedObjectsClientContract",
                 "text": "SavedObjectsClientContract"
               },
-              ") => ",
+              ", options?: ",
+              "SavedObjectsImporterOptions",
+              " | undefined) => ",
               {
                 "pluginId": "@kbn/core-saved-objects-server",
                 "scope": "common",
@@ -57391,6 +57393,22 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsServiceStart.createImporter.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "SavedObjectsImporterOptions",
+                  " | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []

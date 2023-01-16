@@ -335,11 +335,11 @@ export class SavedObjectsService
           exportSizeLimit: this.config!.maxImportExportSize,
           logger: this.logger.get('exporter'),
         }),
-      createImporter: (savedObjectsClient) =>
+      createImporter: (savedObjectsClient, options) =>
         new SavedObjectsImporter({
           savedObjectsClient,
           typeRegistry: this.typeRegistry,
-          importSizeLimit: this.config!.maxImportExportSize,
+          importSizeLimit: options?.importSizeLimit ?? this.config!.maxImportExportSize,
         }),
       getTypeRegistry: () => this.typeRegistry,
     };
