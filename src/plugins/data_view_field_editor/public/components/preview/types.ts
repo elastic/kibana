@@ -43,12 +43,8 @@ interface PreviewError {
       };
 }
 
-interface PinnedFields {
-  [key: string]: boolean;
-}
-
 export interface PreviewState {
-  pinnedFields: PinnedFields;
+  pinnedFields: Record<string, boolean>;
   isLoadingDocuments: boolean;
   customId: string | undefined;
   documents: EsDocument[];
