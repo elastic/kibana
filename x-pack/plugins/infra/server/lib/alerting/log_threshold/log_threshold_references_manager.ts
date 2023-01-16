@@ -11,7 +11,7 @@ import { RuleParams, ruleParamsRT } from '../../../../common/alerting/logs/log_t
 import { logViewReferenceRT } from '../../../../common/log_views';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 
-const LOG_VIEW_REFERENCE_NAME = 'log-view-reference-0';
+export const LOG_VIEW_REFERENCE_NAME = 'log-view-reference-0';
 
 export const extractReferences = (params: RuleParams) => {
   if (!logViewReferenceRT.is(params.logView)) {
