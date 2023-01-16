@@ -138,7 +138,7 @@ function getAllCategoriesFromIntegrations(pkg: PackageListItem) {
 // Packages can export multiple integrations, aka `policy_templates`
 // In the case where packages ship >1 `policy_templates`, we flatten out the
 // list of packages by bringing all integrations to top-level so that
-// each integration is displayed as its own tile
+// each integration is displayed as its own tile, except the top package
 const packageListToIntegrationsList = (packages: PackageList): PackageList => {
   return packages.reduce((acc: PackageList, pkg) => {
     const {
@@ -154,7 +154,7 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
 
     return [
       ...acc,
-      topPackage,
+      ...(pkg.name === 'cloud_security_posture' ? [] : [topPackage]),
       ...(doesPackageHaveIntegrations(pkg)
         ? policyTemplates.map((policyTemplate) => {
             const { name, title, description, icons } = policyTemplate;
