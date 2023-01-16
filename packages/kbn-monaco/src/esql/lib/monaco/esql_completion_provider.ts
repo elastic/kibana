@@ -68,7 +68,7 @@ export class ESQLCompletionAdapter implements monaco.languages.CompletionItemPro
     const lines = model.getLineCount();
 
     const currentLineChars = model.getValueInRange({
-      startLineNumber: position.lineNumber,
+      startLineNumber: 0,
       startColumn: 0,
       endLineNumber: position.lineNumber,
       endColumn: position.column,

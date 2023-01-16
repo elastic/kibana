@@ -244,7 +244,8 @@ export function ChangeDataView({
                         'unifiedSearch.query.queryBar.indexPattern.textBasedLangSwitchWarning',
                         {
                           defaultMessage:
-                            "Switching data views removes the current SQL query. Save this search to ensure you don't lose work.",
+                            "Switching data views removes the current {textBasedLanguage} query. Save this search to ensure you don't lose work.",
+                          values: { textBasedLanguage },
                         }
                       )}
                     >
@@ -432,6 +433,7 @@ export function ChangeDataView({
       <TextBasedLanguagesTransitionModal
         closeModal={onModalClose}
         setIsTextLangTransitionModalVisible={setIsTextLangTransitionModalVisible}
+        textBasedLanguage={textBasedLanguage}
       />
     );
   }

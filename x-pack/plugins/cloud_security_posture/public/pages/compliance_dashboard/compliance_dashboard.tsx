@@ -29,8 +29,8 @@ import {
 import { useCspmStatsApi, useKspmStatsApi } from '../../common/api';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { NoFindingsStates } from '../../components/no_findings_states';
-import { CloudSummarySection } from './dashboard_sections/cloud_summary_section';
-import { CloudBenchmarksSection } from './dashboard_sections/cloud_benchmarks_section';
+import { SummarySection } from './dashboard_sections/summary_section';
+import { BenchmarksSection } from './dashboard_sections/benchmarks_section';
 import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '../../../common/constants';
 
 const noDataOptions: Record<
@@ -113,10 +113,12 @@ const IntegrationPostureDashboard = ({
   complianceData,
   notInstalledConfig,
   isIntegrationInstalled,
+  dashboardType,
 }: {
   complianceData: ComplianceDashboardData | undefined;
   notInstalledConfig: CspNoDataPageProps;
   isIntegrationInstalled?: boolean;
+  dashboardType: PosturePolicyTemplate;
 }) => {
   const noFindings = !complianceData || complianceData.stats.totalFindings === 0;
 
@@ -164,9 +166,9 @@ const IntegrationPostureDashboard = ({
   // there are findings, displays dashboard even if integration is not installed
   return (
     <>
-      <CloudSummarySection complianceData={complianceData} />
+      <SummarySection complianceData={complianceData} dashboardType={dashboardType} />
       <EuiSpacer />
-      <CloudBenchmarksSection complianceData={complianceData} />
+      <BenchmarksSection complianceData={complianceData} dashboardType={dashboardType} />
       <EuiSpacer />
     </>
   );
@@ -232,6 +234,7 @@ export const ComplianceDashboard = () => {
           <CloudPosturePage query={getCspmDashboardData}>
             <div data-test-subj={CLOUD_DASHBOARD_CONTAINER}>
               <IntegrationPostureDashboard
+                dashboardType={CSPM_POLICY_TEMPLATE}
                 complianceData={getCspmDashboardData.data}
                 notInstalledConfig={getNotInstalledConfig(
                   CSPM_POLICY_TEMPLATE,
@@ -255,6 +258,7 @@ export const ComplianceDashboard = () => {
           <CloudPosturePage query={getKspmDashboardData}>
             <div data-test-subj={KUBERNETES_DASHBOARD_CONTAINER}>
               <IntegrationPostureDashboard
+                dashboardType={KSPM_POLICY_TEMPLATE}
                 complianceData={getKspmDashboardData.data}
                 notInstalledConfig={getNotInstalledConfig(
                   KSPM_POLICY_TEMPLATE,

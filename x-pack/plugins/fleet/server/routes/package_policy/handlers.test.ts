@@ -98,7 +98,7 @@ jest.mock(
         update: jest.fn(),
         // @ts-ignore
         runExternalCallbacks: jest.fn((callbackType, packagePolicy, context, request) =>
-          callbackType === 'postPackagePolicyDelete'
+          callbackType === 'packagePolicyPostDelete'
             ? Promise.resolve(undefined)
             : Promise.resolve(packagePolicy)
         ),
