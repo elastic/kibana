@@ -138,6 +138,7 @@ export interface URLState {
     field: SortColumnField;
     direction: Direction;
   };
+
   [key: string]: unknown;
 }
 
@@ -146,6 +147,7 @@ interface URLQueryParams {
   title?: string;
   sort?: string;
   sortdir?: string;
+
   [key: string]: unknown;
 }
 
@@ -855,6 +857,12 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     );
   }
 
+  const testSubjectState = isDeletingItems
+    ? 'table-is-deleting'
+    : hasInitialFetchReturned && !isFetchingItems
+    ? 'table-is-ready'
+    : 'table-is-loading';
+
   return (
     <PageTemplate panelled data-test-subj={pageDataTestSubject}>
       <KibanaPageTemplate.Header
@@ -885,11 +893,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
         {showFetchError && renderFetchError()}
 
         {/* Table of items */}
-        <div
-          data-test-subj={
-            hasInitialFetchReturned && !isFetchingItems ? 'table-is-ready' : 'table-is-loading'
-          }
-        >
+        <div data-test-subj={testSubjectState}>
           <Table<T>
             dispatch={dispatch}
             items={items}
