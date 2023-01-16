@@ -1,0 +1,72 @@
+{
+  "id": "@kbn/ml-query-utils",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/ml-query-utils",
+        "id": "def-common.addExcludeFrozenToQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "addExcludeFrozenToQuery",
+        "description": [
+          "\nExtends an existing query with a clause to exclude the frozen tier.\n"
+        ],
+        "signature": [
+          "(originalQuery: ",
+          "QueryDslQueryContainer",
+          " | undefined) => ",
+          "QueryDslQueryContainer",
+          " | { bool: { must_not: { term: { _tier: { value: string; }; }; }[]; }; }"
+        ],
+        "path": "x-pack/packages/ml/query_utils/src/add_exclude_frozen_to_query.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-query-utils",
+            "id": "def-common.addExcludeFrozenToQuery.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "originalQuery",
+            "description": [
+              "- the original query"
+            ],
+            "signature": [
+              "QueryDslQueryContainer",
+              " | undefined"
+            ],
+            "path": "x-pack/packages/ml/query_utils/src/add_exclude_frozen_to_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "the original query exluding the frozen tier"
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/core-custom-branding-server",
+  "owner": "@elastic/kibana-global-experience",
+}
