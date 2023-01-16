@@ -95,4 +95,4 @@ function findPackageInfoForPath(repoRoot, path) {
   }
 }
 
-module.exports = { getPackages, findPackageInfoForPath };
+module.exports = { getPackages, findPackageInfoForPath, getPkgMap };
