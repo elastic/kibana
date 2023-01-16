@@ -24,7 +24,6 @@ const previewStateDefault: PreviewState = {
   isLoadingDocuments: true,
   /** Flag to indicate if we are loading a single document by providing its ID */
   customId: undefined,
-  // isCustomId: false,
   /** sample documents fetched from cluster */
   documents: [],
   currentIdx: 0,
@@ -35,8 +34,8 @@ const previewStateDefault: PreviewState = {
 
 export class PreviewController {
   constructor({ dataView, search }: PreviewControllerDependencies) {
-    // this.dataView = dataView;
-    // this.search = search;
+    this.dataView = dataView;
+    this.search = search;
 
     this.internalState$ = new BehaviorSubject<PreviewState>({
       ...previewStateDefault,
@@ -45,8 +44,8 @@ export class PreviewController {
     this.state$ = this.internalState$ as BehaviorObservable<PreviewState>;
   }
 
-  // private dataView: DataView;
-  // private search: ISearchStart;
+  private dataView: DataView;
+  private search: ISearchStart;
   private state: PreviewState = previewStateDefault;
   private internalState$: BehaviorSubject<PreviewState>;
   state$: BehaviorObservable<PreviewState>;

@@ -76,7 +76,6 @@ const documentsSelector = (state: PreviewState) => {
 };
 
 const scriptEditorValidationSelector = (state: PreviewState) => state.scriptEditorValidation;
-// const customIdSelector = (state: PreviewState) => state.customId;
 
 export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewController }> = ({
   controller,
