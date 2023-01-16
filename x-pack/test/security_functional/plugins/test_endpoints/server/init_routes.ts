@@ -150,8 +150,28 @@ export function initRoutes(
       validate: { body: schema.object({ enabled: schema.boolean() }) },
     },
     async (context, request, response) => {
-      const [, { taskManager }] = await core.getStartServices();
+      const [coreStart, { taskManager }] = await core.getStartServices();
       logger.info(`Toggle session cleanup task (enabled: ${request.body.enabled}).`);
+
+      // Refresh task manager index before trying to modify a task document.
+      try {
+        logger.info(`Refreshing task manager index (enabled: ${request.body.enabled})...`);
+        const refreshResult = await coreStart.elasticsearch.client.asInternalUser.indices.refresh({
+          index: '.kibana_task_manager',
+          expand_wildcards: 'all',
+        });
+        logger.info(
+          `Successfully refreshed task manager index (enabled: ${
+            request.body.enabled
+          }): ${JSON.stringify(refreshResult)}.`
+        );
+      } catch (err) {
+        logger.error(
+          `Failed to refresh task manager index (enabled: ${request.body.enabled}): ${
+            err?.message || err
+          }.`
+        );
+      }
 
       let bulkEnableDisableResult: BulkUpdateTaskResult;
       try {
