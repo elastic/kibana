@@ -26,8 +26,8 @@ import { DEFAULT_VALUES } from '../constants';
 import { DataViewSelectPopover } from '../../components/data_view_select_popover';
 import { RuleCommonExpressions } from '../rule_common_expressions';
 import { totalHitsToNumber } from '../test_query_row';
-import { hasExpressionValidationErrors } from '../validation';
 import { useTriggerUiActionServices } from '../util';
+import { hasExpressionValidationErrors } from '../validation';
 
 const HIDDEN_FILTER_PANEL_OPTIONS: SearchBarProps['hiddenFilterPanelOptions'] = [
   'pinFilter',
@@ -94,6 +94,10 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
       if (isSearchSourceParam(action)) {
         searchSource.setParent(undefined).setField(action.type, action.payload);
         setParam('searchConfiguration', searchSource.getSerializedFields());
+
+        if (action.type === 'index') {
+          setParam('timeField', searchSource.getField('index')?.timeFieldName);
+        }
       } else {
         setParam(action.type, action.payload);
       }
@@ -112,6 +116,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
         ruleParams.excludeHitsFromPreviousRun ?? DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
     }
   );
+
   const { index: dataView, query, filter: filters } = ruleConfiguration;
   const dataViews = useMemo(() => (dataView ? [dataView] : []), [dataView]);
 
@@ -290,7 +295,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
         onChangeWindowUnit={onChangeWindowUnit}
         onChangeSizeValue={onChangeSizeValue}
         errors={errors}
-        hasValidationErrors={hasExpressionValidationErrors(ruleParams) || !dataView}
+        hasValidationErrors={hasExpressionValidationErrors(props.ruleParams)}
         onTestFetch={onTestFetch}
         onCopyQuery={onCopyQuery}
         excludeHitsFromPreviousRun={ruleConfiguration.excludeHitsFromPreviousRun}

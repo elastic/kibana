@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
-import type { Datum, NodeColorAccessor, PartialTheme } from '@elastic/charts';
+import type { Datum, NodeColorAccessor, PartialTheme, ElementClickListener } from '@elastic/charts';
 import {
   Chart,
   Partition,
@@ -48,6 +48,7 @@ export interface DonutChartProps {
   legendItems?: LegendItem[] | null | undefined;
   title: React.ReactElement | string | number | null;
   totalCount: number | null | undefined;
+  onElementClick?: ElementClickListener;
 }
 
 /* Make this position absolute in order to overlap the text onto the donut */
@@ -72,6 +73,7 @@ export const DonutChart = ({
   legendItems,
   title,
   totalCount,
+  onElementClick,
 }: DonutChartProps) => {
   const theme = useTheme();
   const { euiTheme } = useEuiTheme();
@@ -114,7 +116,7 @@ export const DonutChart = ({
           <DonutChartEmpty size={height} />
         ) : (
           <Chart size={height}>
-            <Settings theme={donutTheme} baseTheme={theme} />
+            <Settings theme={donutTheme} baseTheme={theme} onElementClick={onElementClick} />
             <Partition
               id="donut-chart"
               data={data}

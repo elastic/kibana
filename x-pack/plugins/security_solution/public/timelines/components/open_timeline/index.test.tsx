@@ -55,9 +55,17 @@ jest.mock('../../containers/all', () => {
     useGetAllTimeline: jest.fn(),
   };
 });
-
-jest.mock('../../../common/lib/kibana');
-jest.mock('../../../common/components/link_to');
+const mockNavigateTo = jest.fn();
+jest.mock('../../../common/lib/kibana', () => {
+  const actual = jest.requireActual('../../../common/lib/kibana');
+  return {
+    ...actual,
+    useNavigation: () => ({
+      getAppUrl: jest.fn(),
+      navigateTo: mockNavigateTo,
+    }),
+  };
+});
 
 jest.mock('../../../common/components/link_to', () => {
   const originalModule = jest.requireActual('../../../common/components/link_to');
@@ -655,5 +663,21 @@ describe('StatefulOpenTimeline', () => {
       );
       expect((queryTimelineById as jest.Mock).mock.calls[0][0].duplicate).toEqual(true);
     });
+  });
+
+  test('navigates to create rule page with timeline id in URL when Create rule from timeline click', async () => {
+    const wrapper = mount(
+      <TestProviders>
+        <StatefulOpenTimeline
+          data-test-subj="stateful-timeline"
+          isModal={false}
+          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+          title={title}
+        />
+      </TestProviders>
+    );
+
+    wrapper.find('[data-test-subj="euiCollapsedItemActionsButton"]').first().simulate('click');
+    wrapper.find('[data-test-subj="create-rule-from-timeline"]').first().simulate('click');
   });
 });

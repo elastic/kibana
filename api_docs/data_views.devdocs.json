@@ -81,6 +81,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/detections/containers/detection_engine/rules/use_rule_from_timeline.tsx"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/detections/containers/detection_engine/exceptions/get_es_query_filter.ts"
               },
               {
@@ -482,10 +486,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/results_loader/categorization_examples_loader.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/chart_loader/chart_loader.ts"
               },
               {
                 "plugin": "ml",
@@ -8382,6 +8382,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/detections/containers/detection_engine/rules/use_rule_from_timeline.tsx"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/detections/containers/detection_engine/exceptions/get_es_query_filter.ts"
               },
               {
@@ -8783,10 +8787,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/results_loader/categorization_examples_loader.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/chart_loader/chart_loader.ts"
               },
               {
                 "plugin": "ml",
@@ -15764,6 +15764,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/detections/containers/detection_engine/rules/use_rule_from_timeline.tsx"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/detections/containers/detection_engine/exceptions/get_es_query_filter.ts"
               },
               {
@@ -16165,10 +16169,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/results_loader/categorization_examples_loader.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/chart_loader/chart_loader.ts"
               },
               {
                 "plugin": "ml",

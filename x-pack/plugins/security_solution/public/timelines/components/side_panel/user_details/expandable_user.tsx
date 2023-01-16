@@ -13,14 +13,14 @@ import { useDispatch } from 'react-redux';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { UserDetailsLink } from '../../../../common/components/links';
 import { UserOverview } from '../../../../overview/components/user_overview';
-import { useUserDetails } from '../../../../users/containers/users/details';
+import { useUserDetails } from '../../../../explore/users/containers/users/details';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
 import { getCriteriaFromUsersType } from '../../../../common/components/ml/criteria/get_criteria_from_users_type';
 import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
 import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
-import { UsersType } from '../../../../users/store/model';
+import { UsersType } from '../../../../explore/users/store/model';
 
 export const QUERY_ID = 'usersDetailsQuery';
 export interface ExpandableUserProps {

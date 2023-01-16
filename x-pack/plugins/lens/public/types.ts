@@ -248,6 +248,11 @@ export type VisualizeEditorContext<T extends Configuration = Configuration> = {
   vizEditorOriginatingAppUrl?: string;
   originatingApp?: string;
   isVisualizeAction: boolean;
+  searchQuery?: Query;
+  searchFilters?: Filter[];
+  title?: string;
+  visTypeTitle?: string;
+  isEmbeddable?: boolean;
 } & NavigateToLensContext<T>;
 
 export interface GetDropPropsArgs<T = unknown> {

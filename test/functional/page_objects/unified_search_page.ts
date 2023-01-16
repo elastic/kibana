@@ -75,6 +75,13 @@ export class UnifiedSearchPageObject extends FtrService {
     await this.testSubjects.click(adHoc ? 'exploreIndexPatternButton' : 'saveIndexPatternButton');
   }
 
+  public async isAdHocDataView() {
+    const dataViewSwitcher = await this.testSubjects.find('discover-dataView-switch-link');
+    const dataViewName = await dataViewSwitcher.getVisibleText();
+    await dataViewSwitcher.click();
+    return await this.testSubjects.exists(`dataViewItemTempBadge-${dataViewName}`);
+  }
+
   public async selectTextBasedLanguage(language: string) {
     await this.find.clickByCssSelector(
       `[data-test-subj="text-based-languages-switcher"] [title="${language}"]`

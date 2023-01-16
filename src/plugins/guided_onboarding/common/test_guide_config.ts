@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
+import type { GuideId } from '@kbn/guided-onboarding';
 import type { GuideConfig } from './types';
 
+export const testGuideId: GuideId = 'testGuide';
 export const testGuideConfig: GuideConfig = {
   title: 'Test guide for development',
   description: `This guide is used to test the guided onboarding UI while in development and to run automated tests for the API and UI components.`,

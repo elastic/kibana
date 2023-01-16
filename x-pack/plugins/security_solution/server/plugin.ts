@@ -31,6 +31,10 @@ import type { ListPluginSetup } from '@kbn/lists-plugin/server';
 import type { ILicense } from '@kbn/licensing-plugin/server';
 
 import {
+  securityGuideId,
+  securityGuideConfig,
+} from '../common/guided_onboarding/security_guide_config';
+import {
   createEqlAlertType,
   createIndicatorMatchAlertType,
   createMlAlertType,
@@ -397,6 +401,11 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
 
     featureUsageService.setup(plugins.licensing);
+
+    /**
+     * Register a config for the security guide
+     */
+    plugins.guidedOnboarding.registerGuideConfig(securityGuideId, securityGuideConfig);
 
     return {};
   }

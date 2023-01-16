@@ -86,7 +86,6 @@ export const UseCaseCard = ({
 
   return (
     <EuiCard
-      display="subdued"
       image={<EuiImage src={getImageUrl(useCase)} alt={constants[useCase].logAltText} />}
       title={titleElement}
       description={description}

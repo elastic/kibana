@@ -50,7 +50,7 @@ export function DataViewsList({
         value: id,
         checked: id === currentDataViewId && !Boolean(isTextBasedLangSelected) ? 'on' : undefined,
         append: isAdhoc ? (
-          <EuiBadge color="hollow">
+          <EuiBadge color="hollow" data-test-subj={`dataViewItemTempBadge-${name}`}>
             {i18n.translate('unifiedSearch.query.queryBar.indexPattern.temporaryDataviewLabel', {
               defaultMessage: 'Temporary',
             })}

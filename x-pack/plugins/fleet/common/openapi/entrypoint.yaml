@@ -19,6 +19,8 @@ paths:
   /settings:
     $ref: paths/settings.yaml
   # App endpoints
+  /health_check:
+    $ref: paths/health_check.yaml
   /service-tokens:
     $ref: paths/service_tokens_deprecated.yaml
   /service_tokens:
@@ -61,12 +63,18 @@ paths:
     $ref: 'paths/agents@{agent_id}.yaml'
   '/agents/{agentId}/actions':
     $ref: 'paths/agents@{agent_id}@actions.yaml'
+  '/agents/{agentId}/actions/{actionId}/cancel':
+    $ref: 'paths/agents@{agent_id}@actions@{action_id}@cancel.yaml'
+  '/agents/files@{fileId}@{fileName}':
+    $ref: 'paths/agents@files@{file_id}@{file_name}.yaml'
   '/agents/{agentId}/reassign':
     $ref: 'paths/agents@{agent_id}@reassign.yaml'
   '/agents/{agentId}/unenroll':
     $ref: 'paths/agents@{agent_id}@unenroll.yaml'
   '/agents/{agentId}/upgrade':
     $ref: 'paths/agents@{agent_id}@upgrade.yaml'
+  '/agents/{agentId}/upload':
+    $ref: 'paths/agents@{agent_id}@uploads.yaml'
   '/agents/bulk_reassign':
     $ref: 'paths/agents@bulk_reassign.yaml'
   '/agents/bulk_unenroll':
@@ -86,6 +94,10 @@ paths:
     $ref: 'paths/agent_policies@{agent_policy_id}.yaml'
   '/agent_policies/{agentPolicyId}/copy':
     $ref: 'paths/agent_policies@{agent_policy_id}@copy.yaml'
+  '/agent_policies/{agentPolicyId}/full':
+    $ref: 'paths/agent_policies@{agent_policy_id}@full.yaml'
+  '/agent_policies/{agentPolicyId}/download':
+    $ref: 'paths/agent_policies@{agent_policy_id}@download.yaml'
   /agent_policies/_bulk_get:
     $ref: paths/agent_policies@_bulk_get.yaml
   /agent_policies/delete:
@@ -136,6 +148,9 @@ paths:
     $ref: paths/proxies.yaml
   /proxies/{itemId}:
     $ref: paths/proxies@{item_id}.yaml
+  # K8s
+  /kubernetes:
+    $ref: paths/kubernetes.yaml
 components:
   securitySchemes:
     basicAuth:

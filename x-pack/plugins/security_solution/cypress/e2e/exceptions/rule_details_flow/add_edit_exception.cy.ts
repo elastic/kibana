@@ -253,9 +253,13 @@ describe('Add/edit exception from rule details', () => {
           ...getNewRule(),
           customQuery: 'agent.name:*',
           dataSource: { index: ['exceptions*'], type: 'indexPatterns' },
+          runsEvery: {
+            interval: '1',
+            timeType: 'Seconds',
+            type: 's',
+          },
         },
-        'rule_testing',
-        '1s'
+        'rule_testing'
       );
       visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
       goToRuleDetails();

@@ -8,7 +8,7 @@
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { renderHook } from '@testing-library/react-hooks';
 import { useKibana } from '../../common/lib/kibana';
-import { mockAggsResponse } from '../mock/rule_details/alert_summary';
+import { mockAggsResponse, mockAlertSummaryTimeRange } from '../mock/alert_summary_widget';
 import { useLoadRuleAlertsAggs } from './use_load_rule_alerts_aggregations';
 
 jest.mock('../../common/lib/kibana');
@@ -26,6 +26,7 @@ describe('useLoadRuleAlertsAggs', () => {
       useLoadRuleAlertsAggs({
         features: ALERTS_FEATURE_ID,
         ruleId: 'c95bc120-1d56-11ed-9cc7-e7214ada1128',
+        timeRange: mockAlertSummaryTimeRange,
       })
     );
     expect(result.current).toEqual({
@@ -44,15 +45,17 @@ describe('useLoadRuleAlertsAggs', () => {
 
   it('should have the correct query body sent to Elasticsearch', async () => {
     const ruleId = 'c95bc120-1d56-11ed-9cc7-e7214ada1128';
+    const { utcFrom, utcTo } = mockAlertSummaryTimeRange;
     const { waitForNextUpdate } = renderHook(() =>
       useLoadRuleAlertsAggs({
         features: ALERTS_FEATURE_ID,
         ruleId,
+        timeRange: mockAlertSummaryTimeRange,
       })
     );
 
     await waitForNextUpdate();
-    const body = `{"index":"mock_index","size":0,"query":{"bool":{"must":[{"term":{"kibana.alert.rule.uuid":"${ruleId}"}},{"range":{"@timestamp":{"gte":"now-30d","lt":"now"}}},{"bool":{"should":[{"term":{"kibana.alert.status":"active"}},{"term":{"kibana.alert.status":"recovered"}}]}}]}},"aggs":{"total":{"filters":{"filters":{"totalActiveAlerts":{"term":{"kibana.alert.status":"active"}},"totalRecoveredAlerts":{"term":{"kibana.alert.status":"recovered"}}}}}}}`;
+    const body = `{"index":"mock_index","size":0,"query":{"bool":{"must":[{"term":{"kibana.alert.rule.uuid":"${ruleId}"}},{"range":{"@timestamp":{"gte":"${utcFrom}","lt":"${utcTo}"}}},{"bool":{"should":[{"term":{"kibana.alert.status":"active"}},{"term":{"kibana.alert.status":"recovered"}}]}}]}},"aggs":{"total":{"filters":{"filters":{"totalActiveAlerts":{"term":{"kibana.alert.status":"active"}},"totalRecoveredAlerts":{"term":{"kibana.alert.status":"recovered"}}}}}}}`;
 
     expect(useKibanaMock().services.http.post).toHaveBeenCalledWith(
       '/internal/rac/alerts/find',

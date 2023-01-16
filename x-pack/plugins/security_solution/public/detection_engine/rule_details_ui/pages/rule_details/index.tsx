@@ -87,7 +87,7 @@ import {
   DEFAULT_THREAT_INDEX_KEY,
 } from '../../../../../common/constants';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
-import { Display } from '../../../../hosts/pages/display';
+import { Display } from '../../../../explore/hosts/pages/display';
 
 import {
   focusUtilityBarAction,

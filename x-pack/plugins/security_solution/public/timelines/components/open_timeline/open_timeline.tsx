@@ -44,6 +44,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
     isLoading,
     itemIdToExpandedNotesRowMap,
     importDataModalToggle,
+    onCreateRule,
     onDeleteSelected,
     onlyFavorites,
     onOpenTimeline,
@@ -148,7 +149,12 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
     }, [setImportDataModalToggle, refetch]);
 
     const actionTimelineToShow = useMemo<ActionTimelineToShow[]>(() => {
-      const timelineActions: ActionTimelineToShow[] = ['createFrom', 'duplicate'];
+      const createRule: ActionTimelineToShow[] = ['createRule'];
+      const timelineActions: ActionTimelineToShow[] = [
+        'createFrom',
+        'duplicate',
+        ...(onCreateRule != null ? createRule : []),
+      ];
 
       if (timelineStatus !== TimelineStatus.immutable) {
         timelineActions.push('export');
@@ -164,7 +170,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
       }
 
       return timelineActions;
-    }, [onDeleteSelected, deleteTimelines, timelineStatus]);
+    }, [onCreateRule, timelineStatus, onDeleteSelected, deleteTimelines]);
 
     const SearchRowContent = useMemo(() => <>{templateTimelineFilter}</>, [templateTimelineFilter]);
 
@@ -257,6 +263,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
             loading={isLoading}
             itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
             enableExportTimelineDownloader={enableExportTimelineDownloader}
+            onCreateRule={onCreateRule}
             onOpenDeleteTimelineModal={onOpenDeleteTimelineModal}
             onOpenTimeline={onOpenTimeline}
             onSelectionChange={onSelectionChange}

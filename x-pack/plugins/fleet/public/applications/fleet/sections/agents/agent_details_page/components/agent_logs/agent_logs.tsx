@@ -348,7 +348,7 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiPanel paddingSize="none" panelRef={logsPanelRef}>
+          <EuiPanel paddingSize="none" panelRef={logsPanelRef} grow={false}>
             <LogStream
               logView={{ type: 'log-view-reference', logViewId: 'default' }}
               height={logPanelHeight}

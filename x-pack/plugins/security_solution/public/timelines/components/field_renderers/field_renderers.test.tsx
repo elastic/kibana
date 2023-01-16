@@ -25,7 +25,7 @@ import {
   DefaultFieldRendererOverflow,
   MoreContainer,
 } from './field_renderers';
-import { mockData } from '../../../network/components/details/mock';
+import { mockData } from '../../../explore/network/components/details/mock';
 import type { AutonomousSystem } from '../../../../common/search_strategy';
 import { FlowTarget } from '../../../../common/search_strategy';
 import type { HostEcs } from '../../../../common/ecs/host';

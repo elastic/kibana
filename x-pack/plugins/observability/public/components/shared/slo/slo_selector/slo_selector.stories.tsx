@@ -13,11 +13,11 @@ import { SloSelector as Component } from './slo_selector';
 
 export default {
   component: Component,
-  title: 'app/SLOs/Shared/SloSelector',
+  title: 'app/SLO/Shared/SloSelector',
 };
 
 const Template: ComponentStory<typeof Component> = () => (
-  <Component onSelected={(slo: SLO) => console.log(slo)} />
+  <Component onSelected={(slo: SLO | undefined) => console.log(slo)} />
 );
 const defaultProps = {};
 

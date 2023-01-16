@@ -11,6 +11,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiHorizontalRule,
+  EuiLoadingContent,
   EuiPortal,
   EuiSpacer,
   EuiTabbedContent,
@@ -20,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import React from 'react';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
+import { useFetcher, isPending } from '../../../../../../../hooks/use_fetcher';
 import { TransactionMetadata } from '../../../../../../shared/metadata_table/transaction_metadata';
 import { getSpanLinksTabContent } from '../../../../../../shared/span_links/span_links_tab_content';
 import { TransactionSummary } from '../../../../../../shared/summary/transaction_summary';
@@ -30,30 +32,33 @@ import { SpanLinksCount } from '../waterfall_helpers/waterfall_helpers';
 import { DroppedSpansWarning } from './dropped_spans_warning';
 
 interface Props {
+  transactionId: string;
+  traceId: string;
   onClose: () => void;
-  transaction?: Transaction;
   errorCount?: number;
   rootTransactionDuration?: number;
   spanLinksCount: SpanLinksCount;
 }
 
 export function TransactionFlyout({
-  transaction: transactionDoc,
+  transactionId,
+  traceId,
   onClose,
   errorCount = 0,
   rootTransactionDuration,
   spanLinksCount,
 }: Props) {
-  if (!transactionDoc) {
-    return null;
-  }
+  const { data: transaction, status } = useFetcher(
+    (callApmApi) => {
+      return callApmApi(
+        'GET /internal/apm/traces/{traceId}/transactions/{transactionId}',
+        { params: { path: { traceId, transactionId } } }
+      );
+    },
+    [traceId, transactionId]
+  );
 
-  const spanLinksTabContent = getSpanLinksTabContent({
-    spanLinksCount,
-    traceId: transactionDoc.trace.id,
-    spanId: transactionDoc.transaction.id,
-    processorEvent: ProcessorEvent.transaction,
-  });
+  const isLoading = isPending(status);
 
   return (
     <EuiPortal>
@@ -73,47 +78,84 @@ export function TransactionFlyout({
               </EuiTitle>
             </EuiFlexItem>
 
-            <EuiFlexItem grow={false}>
-              <TransactionActionMenu
-                isLoading={false}
-                transaction={transactionDoc}
-              />
-            </EuiFlexItem>
+            {transaction && (
+              <EuiFlexItem grow={false}>
+                <TransactionActionMenu
+                  isLoading={false}
+                  transaction={transaction}
+                />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <FlyoutTopLevelProperties transaction={transactionDoc} />
-          <EuiSpacer size="m" />
-          <TransactionSummary
-            transaction={transactionDoc}
-            totalDuration={rootTransactionDuration}
-            errorCount={errorCount}
-            coldStartBadge={transactionDoc.faas?.coldstart}
-          />
-          <EuiHorizontalRule margin="m" />
-          <DroppedSpansWarning transactionDoc={transactionDoc} />
-          <EuiTabbedContent
-            tabs={[
-              {
-                id: 'metadata',
-                name: i18n.translate(
-                  'xpack.apm.propertiesTable.tabs.metadataLabel',
-                  {
-                    defaultMessage: 'Metadata',
-                  }
-                ),
-                content: (
-                  <>
-                    <EuiSpacer size="m" />
-                    <TransactionMetadata transaction={transactionDoc} />
-                  </>
-                ),
-              },
-              ...(spanLinksTabContent ? [spanLinksTabContent] : []),
-            ]}
-          />
+          {isLoading && <EuiLoadingContent />}
+          {transaction && (
+            <TransactionFlyoutBody
+              transaction={transaction!}
+              errorCount={errorCount}
+              rootTransactionDuration={rootTransactionDuration}
+              spanLinksCount={spanLinksCount}
+            />
+          )}
         </EuiFlyoutBody>
       </ResponsiveFlyout>
     </EuiPortal>
+  );
+}
+
+function TransactionFlyoutBody({
+  transaction,
+  errorCount,
+  rootTransactionDuration,
+  spanLinksCount,
+}: {
+  transaction: Transaction;
+  errorCount: number;
+  rootTransactionDuration?: number;
+  spanLinksCount: SpanLinksCount;
+}) {
+  const spanLinksTabContent = getSpanLinksTabContent({
+    spanLinksCount,
+    traceId: transaction.trace.id,
+    spanId: transaction.transaction.id,
+    processorEvent: ProcessorEvent.transaction,
+  });
+
+  return (
+    <>
+      <FlyoutTopLevelProperties transaction={transaction} />
+      <EuiSpacer size="m" />
+      <TransactionSummary
+        transaction={transaction}
+        totalDuration={rootTransactionDuration}
+        errorCount={errorCount}
+        coldStartBadge={transaction.faas?.coldstart}
+      />
+      <EuiHorizontalRule margin="m" />
+      <DroppedSpansWarning transactionDoc={transaction} />
+      <EuiTabbedContent
+        tabs={[
+          {
+            id: 'metadata',
+            name: i18n.translate(
+              'xpack.apm.propertiesTable.tabs.metadataLabel',
+              {
+                defaultMessage: 'Metadata',
+              }
+            ),
+            content: (
+              <>
+                <EuiSpacer size="m" />
+                <TransactionMetadata
+                  transactionId={transaction.transaction.id}
+                />
+              </>
+            ),
+          },
+          ...(spanLinksTabContent ? [spanLinksTabContent] : []),
+        ]}
+      />
+    </>
   );
 }

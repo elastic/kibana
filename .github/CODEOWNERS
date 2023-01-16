@@ -497,20 +497,15 @@
 /x-pack/plugins/security_solution/public/common/components/navigation @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/news_feed @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/overview_description_list @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/public/common/components/paginated_table @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/sidebar_header @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/public/common/components/stat_items @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/tables @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/top_n @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/with_hover_actions @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/public/common/containers/hosts_risk @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/containers/matrix_histogram @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/lib/cell_actions @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/cases @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/public/hosts @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/public/network @elastic/security-threat-hunting-explore
+/x-pack/plugins/security_solution/public/explore @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/overview @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/public/users @elastic/security-threat-hunting-explore
 
 /x-pack/plugins/security_solution/server/search_strategy/security_solution/factory/hosts @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/server/search_strategy/security_solution/factory/matrix_histogram @elastic/security-threat-hunting-explore

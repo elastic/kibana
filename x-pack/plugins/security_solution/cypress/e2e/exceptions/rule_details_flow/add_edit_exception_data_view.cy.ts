@@ -65,9 +65,13 @@ describe('Add exception using data views from rule details', () => {
         ...getNewRule(),
         customQuery: 'agent.name:*',
         dataSource: { dataView: 'exceptions-*', type: 'dataView' },
+        runsEvery: {
+          interval: '1',
+          timeType: 'Seconds',
+          type: 's',
+        },
       },
-      'rule_testing',
-      '1s'
+      'rule_testing'
     );
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     goToRuleDetails();

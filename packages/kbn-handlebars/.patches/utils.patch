@@ -1,4 +1,4 @@
-1,86c1,21
+1,55c1,6
 < describe('utils', function() {
 <   describe('#SafeString', function() {
 <     it('constructing a safestring from a string and checking its type', function() {
@@ -54,7 +54,14 @@
 <       equals(Handlebars.Utils.escapeExpression([]), [].toString());
 <     });
 <   });
-< 
+---
+> /*
+>  * This file is forked from the handlebars project (https://github.com/handlebars-lang/handlebars.js),
+>  * and may include modifications made by Elasticsearch B.V.
+>  * Elasticsearch B.V. licenses this file to you under the MIT License.
+>  * See `packages/kbn-handlebars/LICENSE` for more information.
+>  */
+57,64c8,9
 <   describe('#isEmpty', function() {
 <     it('should not be empty', function() {
 <       equals(Handlebars.Utils.isEmpty(undefined), true);
@@ -63,13 +70,23 @@
 <       equals(Handlebars.Utils.isEmpty(''), true);
 <       equals(Handlebars.Utils.isEmpty([]), true);
 <     });
-< 
+---
+> import Handlebars from '../..';
+> import { expectTemplate } from '../__jest__/test_bench';
+66,70c11,16
 <     it('should be empty', function() {
 <       equals(Handlebars.Utils.isEmpty(0), false);
 <       equals(Handlebars.Utils.isEmpty([1]), false);
 <       equals(Handlebars.Utils.isEmpty('foo'), false);
 <       equals(Handlebars.Utils.isEmpty({ bar: 1 }), false);
-<     });
+---
+> describe('utils', function () {
+>   describe('#SafeString', function () {
+>     it('constructing a safestring from a string and checking its type', function () {
+>       const safe = new Handlebars.SafeString('testing 1, 2, 3');
+>       expect(safe).toBeInstanceOf(Handlebars.SafeString);
+>       expect(safe.toString()).toEqual('testing 1, 2, 3');
+72,83d17
 <   });
 < 
 <   describe('#extend', function() {
@@ -82,28 +99,10 @@
 <       var b = { b: 2 };
 < 
 <       Handlebars.Utils.extend(b, new A());
-< 
+85,86c19,21
 <       equals(b.a, 1);
 <       equals(b.b, 2);
 ---
-> /*
->  * This file is forked from the handlebars project (https://github.com/handlebars-lang/handlebars.js),
->  * and may include modifications made by Elasticsearch B.V.
->  * Elasticsearch B.V. licenses this file to you under the MIT License.
->  * See `packages/kbn-handlebars/LICENSE` for more information.
->  */
-> 
-> import Handlebars from '../..';
-> import { expectTemplate } from '../__jest__/test_bench';
-> 
-> describe('utils', function () {
->   describe('#SafeString', function () {
->     it('constructing a safestring from a string and checking its type', function () {
->       const safe = new Handlebars.SafeString('testing 1, 2, 3');
->       expect(safe).toBeInstanceOf(Handlebars.SafeString);
->       expect(safe.toString()).toEqual('testing 1, 2, 3');
->     });
-> 
 >     it('it should not escape SafeString properties', function () {
 >       const name = new Handlebars.SafeString('<em>Sean O&#x27;Malley</em>');
 >       expectTemplate('{{name}}').withInput({ name }).toCompileTo('<em>Sean O&#x27;Malley</em>');

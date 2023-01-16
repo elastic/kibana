@@ -28476,6 +28476,41 @@
       },
       {
         "parentPluginId": "core",
+        "id": "def-server.DeprecationsGetResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "DeprecationsGetResponse",
+        "description": [],
+        "path": "packages/core/deprecations/core-deprecations-common/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.DeprecationsGetResponse.deprecations",
+            "type": "Array",
+            "tags": [],
+            "label": "deprecations",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-deprecations-common",
+                "scope": "common",
+                "docId": "kibKbnCoreDeprecationsCommonPluginApi",
+                "section": "def-common.DomainDeprecationDetails",
+                "text": "DomainDeprecationDetails"
+              },
+              "[]"
+            ],
+            "path": "packages/core/deprecations/core-deprecations-common/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
         "id": "def-server.DeprecationsRequestHandlerContext",
         "type": "Interface",
         "tags": [],
@@ -59480,6 +59515,26 @@
             "path": "packages/core/ui-settings/core-ui-settings-server/src/request_handler_context.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.UiSettingsRequestHandlerContext.globalClient",
+            "type": "Object",
+            "tags": [],
+            "label": "globalClient",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-ui-settings-server",
+                "scope": "server",
+                "docId": "kibKbnCoreUiSettingsServerPluginApi",
+                "section": "def-server.IUiSettingsClient",
+                "text": "IUiSettingsClient"
+              }
+            ],
+            "path": "packages/core/ui-settings/core-ui-settings-server/src/request_handler_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -59502,7 +59557,7 @@
             "tags": [],
             "label": "register",
             "description": [
-              "\nSets settings with default values for the uiSettings."
+              "\nSets settings with default values for the uiSettings"
             ],
             "signature": [
               "(settings: Record<string, ",
@@ -59522,6 +59577,56 @@
               {
                 "parentPluginId": "core",
                 "id": "def-server.UiSettingsServiceSetup.register.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "settings",
+                "description": [],
+                "signature": [
+                  "Record<string, ",
+                  {
+                    "pluginId": "@kbn/core-ui-settings-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                    "section": "def-common.UiSettingsParams",
+                    "text": "UiSettingsParams"
+                  },
+                  "<unknown>>"
+                ],
+                "path": "packages/core/ui-settings/core-ui-settings-server/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.UiSettingsServiceSetup.registerGlobal",
+            "type": "Function",
+            "tags": [],
+            "label": "registerGlobal",
+            "description": [
+              "\nSets settings with default values for the global uiSettings"
+            ],
+            "signature": [
+              "(settings: Record<string, ",
+              {
+                "pluginId": "@kbn/core-ui-settings-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                "section": "def-common.UiSettingsParams",
+                "text": "UiSettingsParams"
+              },
+              "<unknown>>) => void"
+            ],
+            "path": "packages/core/ui-settings/core-ui-settings-server/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.UiSettingsServiceSetup.registerGlobal.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "settings",
@@ -59593,6 +59698,61 @@
               {
                 "parentPluginId": "core",
                 "id": "def-server.UiSettingsServiceStart.asScopedToClient.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "savedObjectsClient",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                    "section": "def-server.SavedObjectsClientContract",
+                    "text": "SavedObjectsClientContract"
+                  }
+                ],
+                "path": "packages/core/ui-settings/core-ui-settings-server/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.UiSettingsServiceStart.globalAsScopedToClient",
+            "type": "Function",
+            "tags": [],
+            "label": "globalAsScopedToClient",
+            "description": [
+              "\nCreates a global {@link IUiSettingsClient} with provided *scoped* saved objects client.\n\nThis should only be used in the specific case where the client needs to be accessed\nfrom outside of the scope of a {@link RequestHandler}.\n"
+            ],
+            "signature": [
+              "(savedObjectsClient: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              },
+              ") => ",
+              {
+                "pluginId": "@kbn/core-ui-settings-server",
+                "scope": "server",
+                "docId": "kibKbnCoreUiSettingsServerPluginApi",
+                "section": "def-server.IUiSettingsClient",
+                "text": "IUiSettingsClient"
+              }
+            ],
+            "path": "packages/core/ui-settings/core-ui-settings-server/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.UiSettingsServiceStart.globalAsScopedToClient.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "savedObjectsClient",
@@ -60964,6 +61124,28 @@
           }
         ],
         "path": "packages/core/doc-links/core-doc-links-server/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.DomainDeprecationDetails",
+        "type": "Type",
+        "tags": [],
+        "label": "DomainDeprecationDetails",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-deprecations-common",
+            "scope": "common",
+            "docId": "kibKbnCoreDeprecationsCommonPluginApi",
+            "section": "def-common.DeprecationsDetails",
+            "text": "DeprecationsDetails"
+          },
+          " & { domainId: string; }"
+        ],
+        "path": "packages/core/deprecations/core-deprecations-common/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

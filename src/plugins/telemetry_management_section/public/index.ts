@@ -8,7 +8,7 @@
 
 import { TelemetryManagementSectionPlugin } from './plugin';
 
-export { OptInExampleFlyout } from './components';
+export { LazyOptInExampleFlyout } from './components';
 
 export function plugin() {
   return new TelemetryManagementSectionPlugin();

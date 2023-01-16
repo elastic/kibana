@@ -7,6 +7,7 @@
 
 import { HttpSetup } from '@kbn/core-http-browser';
 import { useCallback, useMemo } from 'react';
+import { toSLO } from '../../../utils/slo/slo';
 import { useDataFetcher } from '../../../hooks/use_data_fetcher';
 import { SLO } from '../../../typings';
 
@@ -54,20 +55,6 @@ const fetchSlo = async (
 
   return undefined;
 };
-
-function toSLO(result: any): SLO {
-  return {
-    id: String(result.id),
-    name: String(result.name),
-    objective: { target: Number(result.objective.target) },
-    summary: {
-      sliValue: Number(result.summary.sli_value),
-      errorBudget: {
-        remaining: Number(result.summary.error_budget.remaining),
-      },
-    },
-  };
-}
 
 export type { UseFetchSloDetailsResponse };
 export { useFetchSloDetails };

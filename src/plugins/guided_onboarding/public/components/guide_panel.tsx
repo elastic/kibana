@@ -208,6 +208,7 @@ export const GuidePanel = ({ api, application, notifications }: GuidePanelProps)
           css={styles.flyoutOverrides.flyoutContainer}
           maskProps={{ headerZindexLocation: 'above' }}
           data-test-subj="guidePanel"
+          maxWidth={480}
         >
           <EuiFlyoutHeader>
             <EuiButtonEmpty

@@ -11,6 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { DocLinks } from '@kbn/doc-links';
 import { EuiLink } from '@elastic/eui';
 
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useHttp } from '../../../../common/lib/kibana';
 import type { ArtifactListPageProps } from '../../../components/artifact_list_page';
 import { ArtifactListPage } from '../../../components/artifact_list_page';
@@ -100,6 +101,7 @@ const BLOCKLIST_PAGE_LABELS: ArtifactListPageProps['labels'] = {
 };
 
 export const Blocklist = memo(() => {
+  const { canWriteBlocklist } = useUserPrivileges().endpointPrivileges;
   const http = useHttp();
   const blocklistsApiClient = BlocklistsApiClient.getInstance(http);
 
@@ -110,6 +112,9 @@ export const Blocklist = memo(() => {
       labels={BLOCKLIST_PAGE_LABELS}
       data-test-subj="blocklistPage"
       flyoutSize="l"
+      allowCardCreateAction={canWriteBlocklist}
+      allowCardEditAction={canWriteBlocklist}
+      allowCardDeleteAction={canWriteBlocklist}
     />
   );
 });

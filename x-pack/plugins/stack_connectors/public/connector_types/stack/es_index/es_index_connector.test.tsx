@@ -338,8 +338,7 @@ describe('IndexActionConnectorFields', () => {
     expect(screen.getByText('indexPattern2')).toBeInTheDocument();
   });
 
-  // Broken during Jest 29 upgrade
-  describe.skip('Validation', () => {
+  describe('Validation', () => {
     let appMockRenderer: AppMockRenderer;
     const onSubmit = jest.fn();
 

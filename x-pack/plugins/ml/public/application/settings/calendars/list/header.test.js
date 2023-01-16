@@ -14,6 +14,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
   withKibana: (comp) => {
     return comp;
   },
+  reactToUiComponent: jest.fn(),
 }));
 
 describe('CalendarListsHeader', () => {

@@ -104,6 +104,12 @@ export interface Action<Context extends object = object>
    *
    */
   disabled?: boolean;
+
+  /**
+   * Determines if notification should be shown in menu for that action
+   *
+   */
+  showNotification?: boolean;
 }
 
 /**
@@ -151,6 +157,12 @@ export interface ActionDefinition<Context extends object = object>
    *
    */
   disabled?: boolean;
+
+  /**
+   * Determines if notification should be shown in menu for that action
+   *
+   */
+  showNotification?: boolean;
 }
 
 export type ActionContext<A> = A extends ActionDefinition<infer Context> ? Context : never;

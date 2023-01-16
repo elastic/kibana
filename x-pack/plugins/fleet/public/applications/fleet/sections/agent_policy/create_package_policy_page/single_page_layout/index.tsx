@@ -73,6 +73,7 @@ const CustomEuiBottomBar = styled(EuiBottomBar)`
 export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   from,
   queryParamsPolicyId,
+  prerelease,
 }) => {
   const {
     agents: { enabled: isFleetEnabled },
@@ -99,7 +100,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     data: packageInfoData,
     error: packageInfoError,
     isLoading: isPackageInfoLoading,
-  } = useGetPackageInfoByKey(pkgName, pkgVersion, { full: true, prerelease: true });
+  } = useGetPackageInfoByKey(pkgName, pkgVersion, { full: true, prerelease });
   const packageInfo = useMemo(() => {
     if (packageInfoData && packageInfoData.item) {
       return packageInfoData.item;

@@ -821,6 +821,65 @@ instanceStateValue: true
             overwrites: {
               schedule: { interval: '1s' },
             },
+            notifyWhen: 'onThrottleInterval',
+          });
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'global_read at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getConsumerUnauthorizedErrorMessage(
+                  'create',
+                  'test.always-firing',
+                  'alertsFixture'
+                ),
+                statusCode: 403,
+              });
+              break;
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: `Unauthorized to get actions`,
+                statusCode: 403,
+              });
+              break;
+            case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+            case 'superuser at space1':
+              expect(response.statusCode).to.eql(200);
+              // Wait until alerts scheduled actions 3 times before disabling the alert and waiting for tasks to finish
+              await esTestIndexTool.waitForDocs('alert:test.always-firing', reference, 3);
+              await alertUtils.disable(response.body.id);
+              await taskManagerUtils.waitForDisabled(response.body.id, testStart);
+
+              // Ensure actions only executed once
+              const searchResult = await esTestIndexTool.search(
+                'action:test.index-record',
+                reference
+              );
+              // @ts-expect-error doesnt handle total: number
+              expect(searchResult.body.hits.total.value).to.eql(1);
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should throttle alerts with throttled action when appropriate', async () => {
+          const testStart = new Date();
+          const reference = alertUtils.generateReference();
+          const response = await alertUtils.createAlwaysFiringAction({
+            reference,
+            overwrites: {
+              schedule: { interval: '1s' },
+            },
+            notifyWhen: 'onThrottleInterval',
+            throttle: '1m',
+            summary: false,
           });
 
           switch (scenario.id) {

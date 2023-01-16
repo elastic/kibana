@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { SavedObjectsImportSuccess } from '@kbn/core-saved-objects-common';
 import { taggableTypes } from '@kbn/saved-objects-tagging-plugin/common/constants';
 import type { IAssignmentService, ITagsClient } from '@kbn/saved-objects-tagging-plugin/server';
 
@@ -29,11 +30,17 @@ interface TagAssetsParams {
   pkgTitle: string;
   pkgName: string;
   spaceId: string;
+  importedAssets: SavedObjectsImportSuccess[];
 }
 
 export async function tagKibanaAssets(opts: TagAssetsParams) {
-  const { savedObjectTagAssignmentService, kibanaAssets } = opts;
-  const taggableAssets = getTaggableAssets(kibanaAssets);
+  const { savedObjectTagAssignmentService, kibanaAssets, importedAssets } = opts;
+  const getNewId = (assetId: string) =>
+    importedAssets.find((imported) => imported.id === assetId)?.destinationId ?? assetId;
+  const taggableAssets = getTaggableAssets(kibanaAssets).map((asset) => ({
+    ...asset,
+    id: getNewId(asset.id),
+  }));
 
   // no assets to tag
   if (taggableAssets.length === 0) {

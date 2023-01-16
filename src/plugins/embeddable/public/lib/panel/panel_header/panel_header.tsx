@@ -30,7 +30,10 @@ export interface PanelHeaderProps {
   index?: number;
   isViewMode: boolean;
   hidePanelTitle: boolean;
-  getActionContextMenuPanel: () => Promise<EuiContextMenuPanelDescriptor[]>;
+  getActionContextMenuPanel: () => Promise<{
+    panels: EuiContextMenuPanelDescriptor[];
+    actions: Action[];
+  }>;
   closeContextMenu: boolean;
   badges: Array<Action<EmbeddableContext>>;
   notifications: Array<Action<EmbeddableContext>>;

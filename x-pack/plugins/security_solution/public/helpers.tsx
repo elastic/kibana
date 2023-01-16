@@ -12,6 +12,7 @@ import type { RouteProps } from 'react-router-dom';
 import { matchPath, Redirect } from 'react-router-dom';
 
 import type { Capabilities, CoreStart } from '@kbn/core/public';
+import type { DocLinks } from '@kbn/doc-links';
 import {
   ALERTS_PATH,
   APP_UI_ID,
@@ -29,7 +30,7 @@ import type {
   StrategyResponseType,
 } from '../common/search_strategy/security_solution';
 import type { TimelineEqlResponse } from '../common/search_strategy/timeline';
-import { NoPrivilegesPage } from './app/no_privileges';
+import { NoPrivilegesPage } from './common/components/no_privileges';
 import { SecurityPageName } from './app/types';
 import type { InspectResponse, StartedSubPlugins } from './types';
 import { CASES_SUB_PLUGIN_KEY } from './types';
@@ -200,11 +201,13 @@ export const getSubPluginRoutesByCapabilities = (
       if (isSubPluginAvailable(key, capabilities)) {
         return [...acc, ...value.routes];
       }
+      const docLinkSelector = (docLinks: DocLinks) => docLinks.siem.privileges;
+
       return [
         ...acc,
         ...value.routes.map((route: RouteProps) => ({
           path: route.path,
-          component: () => <NoPrivilegesPage subPluginKey={key} />,
+          component: () => <NoPrivilegesPage pageName={key} docLinkSelector={docLinkSelector} />,
         })),
       ];
     }, []),

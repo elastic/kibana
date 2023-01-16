@@ -228,3 +228,8 @@ export const savedQueryByName = (savedQueryName: string) =>
 
 export const APPLY_SELECTED_SAVED_QUERY_BUTTON =
   '[data-test-subj="saved-query-management-apply-changes-button"]';
+
+export const RULE_INDICES =
+  '[data-test-subj="detectionEngineStepDefineRuleIndices"] [data-test-subj="comboBoxInput"]';
+
+export const ALERTS_INDEX_BUTTON = 'span[title=".alerts-security.alerts-default"] button';

@@ -1,0 +1,35 @@
+
+get:
+  summary: Agent policy - Download
+  operationId: agent-policy-download
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              item:
+                type: string
+parameters:
+  - schema:
+      type: string
+    name: agentPolicyId
+    in: path
+    required: true
+  - schema:
+      type: string
+    name: download
+    in: query
+    required: false
+  - schema:
+      type: string
+    name: standalone
+    in: query
+    required: false
+  - schema:
+      type: string
+    name: kubernetes
+    in: query
+    required: false

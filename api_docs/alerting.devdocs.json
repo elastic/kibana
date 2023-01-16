@@ -3018,7 +3018,7 @@
           },
           "<Params>>; muteAll: (options: { id: string; }) => Promise<void>; getAlertState: (params: ",
           "GetAlertStateParams",
-          ") => Promise<void | { alertTypeState?: { [x: string]: unknown; } | undefined; alertInstances?: { [x: string]: { state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; }) | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; } | undefined; }; } | undefined; alertRecoveredInstances?: { [x: string]: { state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; }) | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; } | undefined; }; } | undefined; previousStartedAt?: Date | null | undefined; }>; getAlertSummary: (params: ",
+          ") => Promise<void | { alertTypeState?: { [x: string]: unknown; } | undefined; alertInstances?: { [x: string]: { state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; } & { actions?: { [x: string]: { date?: Date | undefined; }; } | undefined; }) | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; } | undefined; }; } | undefined; alertRecoveredInstances?: { [x: string]: { state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; } & { actions?: { [x: string]: { date?: Date | undefined; }; } | undefined; }) | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; } | undefined; }; } | undefined; previousStartedAt?: Date | null | undefined; }>; getAlertSummary: (params: ",
           "GetAlertSummaryParams",
           ") => Promise<",
           {
@@ -3174,7 +3174,19 @@
           "MuteOptions",
           ") => Promise<void>; runSoon: (options: { id: string; }) => Promise<any>; listAlertTypes: () => Promise<Set<",
           "RegistryAlertTypeWithAuth",
-          ">>; getSpaceId: () => string | undefined; }"
+          ">>; getSpaceId: () => string | undefined; getAlertFromRaw: (params: ",
+          "GetAlertFromRawParams",
+          ") => ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.Rule",
+            "text": "Rule"
+          },
+          "<never> | ",
+          "RuleWithLegacyId",
+          "<never>; }"
         ],
         "path": "x-pack/plugins/alerting/server/index.ts",
         "deprecated": false,
@@ -6507,6 +6519,21 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-common.AlertActions",
+        "type": "Type",
+        "tags": [],
+        "label": "AlertActions",
+        "description": [],
+        "signature": [
+          "{ [x: string]: { date?: Date | undefined; }; }"
+        ],
+        "path": "x-pack/plugins/alerting/common/alert_instance.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-common.AlertInstanceContext",
         "type": "Type",
         "tags": [],
@@ -6528,7 +6555,7 @@
         "label": "AlertInstanceMeta",
         "description": [],
         "signature": [
-          "{ lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; }) | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; }"
+          "{ lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; } & { actions?: { [x: string]: { date?: Date | undefined; }; } | undefined; }) | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; }"
         ],
         "path": "x-pack/plugins/alerting/common/alert_instance.ts",
         "deprecated": false,
@@ -6657,6 +6684,21 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-common.LastScheduledActions",
+        "type": "Type",
+        "tags": [],
+        "label": "LastScheduledActions",
+        "description": [],
+        "signature": [
+          "{ subgroup?: string | undefined; } & { group: string; date: Date; } & { actions?: { [x: string]: { date?: Date | undefined; }; } | undefined; }"
+        ],
+        "path": "x-pack/plugins/alerting/common/alert_instance.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-common.LEGACY_BASE_ALERT_API_PATH",
         "type": "string",
         "tags": [],
@@ -6722,7 +6764,7 @@
         "label": "RawAlertInstance",
         "description": [],
         "signature": [
-          "{ state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; }) | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; } | undefined; }"
+          "{ state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; } & { actions?: { [x: string]: { date?: Date | undefined; }; } | undefined; }) | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; } | undefined; }"
         ],
         "path": "x-pack/plugins/alerting/common/alert_instance.ts",
         "deprecated": false,
@@ -6982,7 +7024,7 @@
         "label": "RuleTaskState",
         "description": [],
         "signature": [
-          "{ alertTypeState?: { [x: string]: unknown; } | undefined; alertInstances?: { [x: string]: { state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; }) | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; } | undefined; }; } | undefined; alertRecoveredInstances?: { [x: string]: { state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; }) | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; } | undefined; }; } | undefined; previousStartedAt?: Date | null | undefined; }"
+          "{ alertTypeState?: { [x: string]: unknown; } | undefined; alertInstances?: { [x: string]: { state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; } & { actions?: { [x: string]: { date?: Date | undefined; }; } | undefined; }) | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; } | undefined; }; } | undefined; alertRecoveredInstances?: { [x: string]: { state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; } & { actions?: { [x: string]: { date?: Date | undefined; }; } | undefined; }) | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; } | undefined; }; } | undefined; previousStartedAt?: Date | null | undefined; }"
         ],
         "path": "x-pack/plugins/alerting/common/rule_task_instance.ts",
         "deprecated": false,
@@ -7138,6 +7180,28 @@
       }
     ],
     "objects": [
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.actionsSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "actionsSchema",
+        "description": [],
+        "signature": [
+          "RecordC",
+          "<",
+          "StringC",
+          ", ",
+          "PartialC",
+          "<{ date: ",
+          "Type",
+          "<Date, string, unknown>; }>>"
+        ],
+        "path": "x-pack/plugins/alerting/common/alert_instance.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "alerting",
         "id": "def-common.DisabledActionTypeIdsForActionGroup",
@@ -7310,7 +7374,17 @@
           "StringC",
           "; date: ",
           "Type",
-          "<Date, string, unknown>; }>]>; flappingHistory: ",
+          "<Date, string, unknown>; }>, ",
+          "PartialC",
+          "<{ actions: ",
+          "RecordC",
+          "<",
+          "StringC",
+          ", ",
+          "PartialC",
+          "<{ date: ",
+          "Type",
+          "<Date, string, unknown>; }>>; }>]>; flappingHistory: ",
           "ArrayC",
           "<",
           "BooleanC",
@@ -7448,7 +7522,17 @@
           "StringC",
           "; date: ",
           "Type",
-          "<Date, string, unknown>; }>]>; flappingHistory: ",
+          "<Date, string, unknown>; }>, ",
+          "PartialC",
+          "<{ actions: ",
+          "RecordC",
+          "<",
+          "StringC",
+          ", ",
+          "PartialC",
+          "<{ date: ",
+          "Type",
+          "<Date, string, unknown>; }>>; }>]>; flappingHistory: ",
           "ArrayC",
           "<",
           "BooleanC",
@@ -7480,7 +7564,17 @@
           "StringC",
           "; date: ",
           "Type",
-          "<Date, string, unknown>; }>]>; flappingHistory: ",
+          "<Date, string, unknown>; }>, ",
+          "PartialC",
+          "<{ actions: ",
+          "RecordC",
+          "<",
+          "StringC",
+          ", ",
+          "PartialC",
+          "<{ date: ",
+          "Type",
+          "<Date, string, unknown>; }>>; }>]>; flappingHistory: ",
           "ArrayC",
           "<",
           "BooleanC",

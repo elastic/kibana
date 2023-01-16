@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { GuideState, GuideId, GuideStepIds } from '@kbn/guided-onboarding';
+import type { GuideState, GuideStepIds } from '@kbn/guided-onboarding';
 
 import { PluginState } from '../../common';
 
-export const testGuide: GuideId = 'testGuide';
 export const testGuideFirstStep: GuideStepIds = 'step1';
 export const testGuideManualCompletionStep = 'step2';
 export const testGuideLastStep: GuideStepIds = 'step3';

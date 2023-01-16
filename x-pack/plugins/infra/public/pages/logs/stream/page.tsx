@@ -8,9 +8,10 @@
 import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
+import { useLogViewContext } from '../../../hooks/use_log_view';
 import { useLogsBreadcrumbs } from '../../../hooks/use_logs_breadcrumbs';
-import { StreamPageContent } from './page_content';
-import { LogsPageProviders } from './page_providers';
+import { ConnectedStreamPageContent } from './page_content';
+import { LogStreamPageProviders } from './page_providers';
 import { streamTitle } from '../../../translations';
 
 export const StreamPage = () => {
@@ -22,11 +23,14 @@ export const StreamPage = () => {
       text: streamTitle,
     },
   ]);
+
+  const { logViewStateNotifications } = useLogViewContext();
+
   return (
     <EuiErrorBoundary>
-      <LogsPageProviders>
-        <StreamPageContent />
-      </LogsPageProviders>
+      <LogStreamPageProviders logViewStateNotifications={logViewStateNotifications}>
+        <ConnectedStreamPageContent />
+      </LogStreamPageProviders>
     </EuiErrorBoundary>
   );
 };

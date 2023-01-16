@@ -20,9 +20,9 @@ export function syntheticsAppPageProvider({ page, kibanaUrl }: { page: Page; kib
   const isRemote = Boolean(process.env.SYNTHETICS_REMOTE_ENABLED);
   const basePath = isRemote ? remoteKibanaUrl : kibanaUrl;
   const monitorManagement = `${basePath}/app/synthetics/monitors`;
+  const settingsPage = `${basePath}/app/synthetics/settings`;
   const addMonitor = `${basePath}/app/synthetics/add-monitor`;
   const overview = `${basePath}/app/synthetics`;
-  const settingsPage = `${basePath}/app/synthetics/settings`;
 
   return {
     ...loginPageProvider({

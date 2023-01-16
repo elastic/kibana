@@ -712,6 +712,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click('lnsApp_saveAndReturnButton');
     },
 
+    async replaceInDashboard() {
+      await testSubjects.click('lnsApp_replaceInDashboardButton');
+    },
+
     async expectSaveAndReturnButtonDisabled() {
       const button = await testSubjects.find('lnsApp_saveAndReturnButton', 10000);
       const disabledAttr = await button.getAttribute('disabled');

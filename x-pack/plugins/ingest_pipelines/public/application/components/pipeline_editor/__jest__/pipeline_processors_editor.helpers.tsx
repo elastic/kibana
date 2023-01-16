@@ -85,16 +85,19 @@ const createActions = (testBed: TestBed<TestSubject>) => {
       find(`${processorsSelector}.addProcessorButton`).simulate('click');
       await act(async () => {
         find('processorTypeSelector.input').simulate('change', [{ value: type, label: type }]);
+        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
       });
       component.update();
       await act(async () => {
         find('processorOptionsEditor').simulate('change', {
           jsonContent: JSON.stringify(options),
         });
+        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
       });
       component.update();
       await act(async () => {
         find('addProcessorForm.submitButton').simulate('click');
+        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
       });
       component.update();
     },
@@ -134,15 +137,18 @@ const createActions = (testBed: TestBed<TestSubject>) => {
       find(`${processorSelector}.moreMenu.addOnFailureButton`).simulate('click');
       await act(async () => {
         find('processorTypeSelector.input').simulate('change', [{ value: type, label: type }]);
+        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
       });
       component.update();
       await act(async () => {
         find('processorOptionsEditor').simulate('change', {
           jsonContent: JSON.stringify(options),
         });
+        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
       });
       await act(async () => {
         find('addProcessorForm.submitButton').simulate('click');
+        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
       });
     },
 
@@ -172,6 +178,7 @@ const createActions = (testBed: TestBed<TestSubject>) => {
     submitProcessorForm: async () => {
       await act(async () => {
         find('editProcessorForm.submitButton').simulate('click');
+        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
       });
     },
   };

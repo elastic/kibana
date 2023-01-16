@@ -96,6 +96,7 @@ enabled:
   - test/functional/apps/visualize/replaced_vislib_chart_types/config.ts
   - test/functional/config.ccs.ts
   - test/functional/config.firefox.js
+  - test/health_gateway/config.ts
   - test/interactive_setup_api_integration/enrollment_flow.config.ts
   - test/interactive_setup_api_integration/manual_configuration_flow_without_tls.config.ts
   - test/interactive_setup_api_integration/manual_configuration_flow.config.ts
@@ -185,6 +186,7 @@ enabled:
   - x-pack/test/functional/apps/lens/group3/config.ts
   - x-pack/test/functional/apps/lens/open_in_lens/tsvb/config.ts
   - x-pack/test/functional/apps/lens/open_in_lens/agg_based/config.ts
+  - x-pack/test/functional/apps/lens/open_in_lens/dashboard/config.ts
   - x-pack/test/functional/apps/license_management/config.ts
   - x-pack/test/functional/apps/logstash/config.ts
   - x-pack/test/functional/apps/management/config.ts

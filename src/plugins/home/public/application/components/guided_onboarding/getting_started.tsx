@@ -15,7 +15,6 @@ import {
   EuiLink,
   EuiLoadingSpinner,
   EuiPageTemplate,
-  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -182,58 +181,55 @@ export const GettingStarted = () => {
 
   return (
     <KibanaPageTemplate panelled={false} grow>
-      <EuiPageTemplate.Section alignment="center">
-        <EuiPanel
-          color="plain"
-          hasShadow
-          css={paddingCss}
-          data-test-subj="onboarding--landing-page"
-        >
-          <EuiTitle size="l" className="eui-textCenter">
-            <h1>{title}</h1>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiText size="m" textAlign="center">
-            <p>{subtitle}</p>
-          </EuiText>
-          <EuiSpacer size="s" />
-          <EuiSpacer size="xxl" />
-          <EuiFlexGrid columns={4} gutterSize="l">
-            {['search', 'observability', 'observabilityLink', 'security'].map((useCase) => {
-              if (useCase === 'observabilityLink') {
-                return (
-                  <EuiFlexItem key={`linkCard-${useCase}`}>
-                    <ObservabilityLinkCard
-                      navigateToApp={application.navigateToApp}
-                      isDarkTheme={isDarkTheme}
-                      addBasePath={http.basePath.prepend}
-                    />
-                  </EuiFlexItem>
-                );
-              }
+      <EuiPageTemplate.Section
+        alignment="center"
+        css={paddingCss}
+        data-test-subj="onboarding--landing-page"
+      >
+        <EuiTitle size="l" className="eui-textCenter">
+          <h1>{title}</h1>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiText size="m" textAlign="center">
+          <p>{subtitle}</p>
+        </EuiText>
+        <EuiSpacer size="s" />
+        <EuiSpacer size="xxl" />
+        <EuiFlexGrid columns={4} gutterSize="l">
+          {['search', 'observability', 'observabilityLink', 'security'].map((useCase) => {
+            if (useCase === 'observabilityLink') {
               return (
-                <EuiFlexItem key={`guideCard-${useCase}`}>
-                  <GuideCard
-                    useCase={useCase as UseCase}
-                    guides={guidesState}
-                    activateGuide={activateGuide}
+                <EuiFlexItem key={`linkCard-${useCase}`}>
+                  <ObservabilityLinkCard
+                    navigateToApp={application.navigateToApp}
                     isDarkTheme={isDarkTheme}
                     addBasePath={http.basePath.prepend}
                   />
                 </EuiFlexItem>
               );
-            })}
-          </EuiFlexGrid>
-          <EuiSpacer />
-          <EuiHorizontalRule />
-          <EuiSpacer />
-          <div className="eui-textCenter">
-            {/* data-test-subj used for FS tracking */}
-            <EuiLink onClick={onSkip} data-test-subj="onboarding--skipGuideLink">
-              {skipText}
-            </EuiLink>
-          </div>
-        </EuiPanel>
+            }
+            return (
+              <EuiFlexItem key={`guideCard-${useCase}`}>
+                <GuideCard
+                  useCase={useCase as UseCase}
+                  guides={guidesState}
+                  activateGuide={activateGuide}
+                  isDarkTheme={isDarkTheme}
+                  addBasePath={http.basePath.prepend}
+                />
+              </EuiFlexItem>
+            );
+          })}
+        </EuiFlexGrid>
+        <EuiSpacer />
+        <EuiHorizontalRule />
+        <EuiSpacer />
+        <div className="eui-textCenter">
+          {/* data-test-subj used for FS tracking */}
+          <EuiLink onClick={onSkip} data-test-subj="onboarding--skipGuideLink">
+            {skipText}
+          </EuiLink>
+        </div>
       </EuiPageTemplate.Section>
     </KibanaPageTemplate>
   );

@@ -41,6 +41,8 @@ import { fromQuery, toQuery } from '../../utils/url';
 import { ObservabilityAlertSearchbarWithUrlSync } from '../../components/shared/alert_search_bar';
 import { DeleteModalConfirmation } from './components/delete_modal_confirmation';
 import { CenterJustifiedSpinner } from './components/center_justified_spinner';
+import { getDefaultAlertSummaryTimeRange } from './helpers';
+
 import {
   EXECUTION_TAB,
   ALERTS_TAB,
@@ -108,6 +110,7 @@ export function RuleDetailsPage() {
   const [editFlyoutVisible, setEditFlyoutVisible] = useState<boolean>(false);
   const [isRuleEditPopoverOpen, setIsRuleEditPopoverOpen] = useState(false);
   const [esQuery, setEsQuery] = useState<{ bool: BoolQuery }>();
+  const [defaultAlertTimeRange] = useState(getDefaultAlertSummaryTimeRange);
   const ruleQuery = useRef([
     { query: `kibana.alert.rule.uuid: ${ruleId}`, language: 'kuery' },
   ] as Query[]);
@@ -379,6 +382,7 @@ export function RuleDetailsPage() {
             rule={rule}
             filteredRuleTypes={filteredRuleTypes}
             onClick={(status) => onAlertSummaryWidgetClick(status)}
+            timeRange={defaultAlertTimeRange}
           />
         </EuiFlexItem>
         <EuiSpacer size="m" />

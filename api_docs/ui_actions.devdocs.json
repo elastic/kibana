@@ -1322,6 +1322,22 @@
             "path": "src/plugins/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.Action.showNotification",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showNotification",
+            "description": [
+              "\nDetermines if notification should be shown in menu for that action\n"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/ui_actions/public/actions/action.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1544,6 +1560,22 @@
             "label": "disabled",
             "description": [
               "\naction is disabled or not\n"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/ui_actions/public/actions/action.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.ActionDefinition.showNotification",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showNotification",
+            "description": [
+              "\nDetermines if notification should be shown in menu for that action\n"
             ],
             "signature": [
               "boolean | undefined"

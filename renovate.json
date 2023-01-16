@@ -144,6 +144,16 @@
       "enabled": true
     },
     {
+      "groupName": "scss",
+      "packageNames": [
+        "node-sass"
+      ],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Operations", "release_note:skip", "backport:all-open"],
+      "enabled": true
+    },
+    {
       "groupName": "@testing-library",
       "packageNames": [
         "@testing-library/dom",
@@ -246,6 +256,16 @@
       "reviewers": ["team:awp-viz"],
       "matchBaseBranches": ["main"],
       "labels": ["Team: AWP: Visualization", "release_note:skip", "backport:skip"],
+      "enabled": true,
+      "prCreation": "immediate"
+    },
+    {
+      "groupName": "XState",
+      "matchPackageNames": ["xstate"],
+      "matchPackagePrefixes": ["@xstate/"],
+      "reviewers": ["team:infra-monitoring-ui"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Infra Monitoring UI", "release_note:skip"],
       "enabled": true,
       "prCreation": "immediate"
     }

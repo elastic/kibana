@@ -112,7 +112,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('dashboard panel - edit panel title', async () => {
       await dashboardPanelActions.toggleContextMenu(header);
-      await testSubjects.click('embeddablePanelAction-ACTION_CUSTOMIZE_PANEL');
+      await dashboardPanelActions.customizePanel();
       await a11y.testAppSnapshot();
       await testSubjects.click('customizePanelHideTitle');
       await a11y.testAppSnapshot();

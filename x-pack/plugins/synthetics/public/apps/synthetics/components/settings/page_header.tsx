@@ -10,7 +10,12 @@ import { EuiPageHeaderProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SYNTHETICS_SETTINGS_ROUTE } from '../../../../../common/constants';
 
-export type SettingsTabId = 'data-retention' | 'params' | 'alerting' | 'private-locations';
+export type SettingsTabId =
+  | 'data-retention'
+  | 'params'
+  | 'alerting'
+  | 'private-locations'
+  | 'api-keys';
 
 export const getSettingsPageHeader = (
   history: ReturnType<typeof useHistory>,
@@ -55,6 +60,13 @@ export const getSettingsPageHeader = (
         }),
         isSelected: tabId === 'data-retention',
         href: replaceTab('data-retention'),
+      },
+      {
+        label: i18n.translate('xpack.synthetics.settingsTabs.apiKeys', {
+          defaultMessage: 'Project API Keys',
+        }),
+        isSelected: tabId === 'api-keys',
+        href: replaceTab('api-keys'),
       },
     ],
   };

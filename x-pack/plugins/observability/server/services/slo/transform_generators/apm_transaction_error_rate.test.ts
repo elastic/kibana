@@ -50,4 +50,16 @@ describe('APM Transaction Error Rate Transform Generator', () => {
 
     expect(transform.source.query).toMatchSnapshot();
   });
+
+  it('uses the provided index params as source index', async () => {
+    const index = 'my-custom-apm-index*';
+    const anSLO = createSLO({
+      indicator: createAPMTransactionErrorRateIndicator({
+        index,
+      }),
+    });
+    const transform = generator.getTransformParams(anSLO);
+
+    expect(transform.source.index).toEqual(index);
+  });
 });

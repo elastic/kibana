@@ -45,6 +45,7 @@ const createRulesClientMock = () => {
     clearExpiredSnoozes: jest.fn(),
     runSoon: jest.fn(),
     clone: jest.fn(),
+    getAlertFromRaw: jest.fn(),
   };
   return mocked;
 };

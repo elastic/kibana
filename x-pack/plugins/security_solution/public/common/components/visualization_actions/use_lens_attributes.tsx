@@ -7,8 +7,8 @@
 
 import { useMemo } from 'react';
 import { SecurityPageName } from '../../../../common/constants';
-import { HostsTableType } from '../../../hosts/store/model';
-import { NetworkRouteType } from '../../../network/pages/navigation/types';
+import { HostsTableType } from '../../../explore/hosts/store/model';
+import { NetworkRouteType } from '../../../explore/network/pages/navigation/types';
 import { useSourcererDataView } from '../../containers/sourcerer';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { inputsSelectors } from '../../store';

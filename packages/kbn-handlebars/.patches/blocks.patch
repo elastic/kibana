@@ -420,7 +420,7 @@
 <       equals(run, true);
 ---
 >       expect(run).toEqual(true);
-406,408c314,321
+406,408c314,317
 <     describe('registration', function() {
 <       it('unregisters', function() {
 <         handlebarsEnv.decorators = {};
@@ -429,13 +429,13 @@
 >       beforeEach(() => {
 >         global.kbnHandlebarsEnv = Handlebars.create();
 >       });
-> 
+410c319,323
+<         handlebarsEnv.registerDecorator('foo', function() {
+---
 >       it('unregisters', () => {
 >         // @ts-expect-error: Cannot assign to 'decorators' because it is a read-only property.
 >         kbnHandlebarsEnv!.decorators = {};
-410c323
-<         handlebarsEnv.registerDecorator('foo', function() {
----
+> 
 >         kbnHandlebarsEnv!.registerDecorator('foo', function () {
 414,416c327,329
 <         equals(!!handlebarsEnv.decorators.foo, true);
@@ -445,18 +445,18 @@
 >         expect(!!kbnHandlebarsEnv!.decorators.foo).toEqual(true);
 >         kbnHandlebarsEnv!.unregisterDecorator('foo');
 >         expect(kbnHandlebarsEnv!.decorators.foo).toBeUndefined();
-419,424c332,339
+419,420c332,334
 <       it('allows multiple globals', function() {
 <         handlebarsEnv.decorators = {};
-< 
-<         handlebarsEnv.registerDecorator({
-<           foo: function() {},
-<           bar: function() {}
 ---
 >       it('allows multiple globals', () => {
 >         // @ts-expect-error: Cannot assign to 'decorators' because it is a read-only property.
 >         kbnHandlebarsEnv!.decorators = {};
-> 
+422,424c336,339
+<         handlebarsEnv.registerDecorator({
+<           foo: function() {},
+<           bar: function() {}
+---
 >         // @ts-expect-error: Expected 2 arguments, but got 1.
 >         kbnHandlebarsEnv!.registerDecorator({
 >           foo() {},

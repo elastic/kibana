@@ -855,10 +855,6 @@
             "path": "x-pack/plugins/ml/common/types/modules.ts"
           },
           {
-            "plugin": "core",
-            "path": "src/core/server/types.ts"
-          },
-          {
             "plugin": "alerting",
             "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.11/index.ts"
           },

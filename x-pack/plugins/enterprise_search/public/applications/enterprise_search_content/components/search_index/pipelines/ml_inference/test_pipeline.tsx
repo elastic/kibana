@@ -29,7 +29,7 @@ import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 
 import { MLInferenceLogic } from './ml_inference_logic';
 
-import './add_ml_inference_pipeline_modal.scss';
+import './add_inference_pipeline_flyout.scss';
 
 export const TestPipeline: React.FC = () => {
   const {

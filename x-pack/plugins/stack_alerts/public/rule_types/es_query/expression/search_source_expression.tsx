@@ -46,7 +46,9 @@ export const SearchSourceExpression = ({
   const [paramsError, setParamsError] = useState<Error>();
 
   const setParam = useCallback(
-    (paramField: string, paramValue: unknown) => setRuleParams(paramField, paramValue),
+    (paramField: string, paramValue: unknown) => {
+      setRuleParams(paramField, paramValue);
+    },
     [setRuleParams]
   );
 
@@ -65,22 +67,26 @@ export const SearchSourceExpression = ({
         initialSearchConfiguration = newSearchSource.getSerializedFields();
       }
 
-      setRuleProperty('params', {
-        searchConfiguration: initialSearchConfiguration,
-        searchType: SearchType.searchSource,
-        timeWindowSize: timeWindowSize ?? DEFAULT_VALUES.TIME_WINDOW_SIZE,
-        timeWindowUnit: timeWindowUnit ?? DEFAULT_VALUES.TIME_WINDOW_UNIT,
-        threshold: threshold ?? DEFAULT_VALUES.THRESHOLD,
-        thresholdComparator: thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR,
-        size: size ?? DEFAULT_VALUES.SIZE,
-        excludeHitsFromPreviousRun:
-          excludeHitsFromPreviousRun ?? DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
-      });
-
-      data.search.searchSource
-        .create(initialSearchConfiguration)
-        .then(setSearchSource)
-        .catch(setParamsError);
+      try {
+        const createdSearchSource = await data.search.searchSource.create(
+          initialSearchConfiguration
+        );
+        setRuleProperty('params', {
+          searchConfiguration: initialSearchConfiguration,
+          timeField: createdSearchSource.getField('index')?.timeFieldName,
+          searchType: SearchType.searchSource,
+          timeWindowSize: timeWindowSize ?? DEFAULT_VALUES.TIME_WINDOW_SIZE,
+          timeWindowUnit: timeWindowUnit ?? DEFAULT_VALUES.TIME_WINDOW_UNIT,
+          threshold: threshold ?? DEFAULT_VALUES.THRESHOLD,
+          thresholdComparator: thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR,
+          size: size ?? DEFAULT_VALUES.SIZE,
+          excludeHitsFromPreviousRun:
+            excludeHitsFromPreviousRun ?? DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
+        });
+        setSearchSource(createdSearchSource);
+      } catch (error) {
+        setParamsError(error);
+      }
     };
 
     initSearchSource();

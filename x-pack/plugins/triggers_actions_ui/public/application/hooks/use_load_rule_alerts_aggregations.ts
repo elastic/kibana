@@ -11,9 +11,16 @@ import { HttpSetup } from '@kbn/core/public';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
 import { useKibana } from '../../common/lib/kibana';
 
+export interface AlertSummaryTimeRange {
+  utcFrom: string;
+  utcTo: string;
+  title: JSX.Element | string;
+}
+
 interface UseLoadRuleAlertsAggs {
   features: string;
   ruleId: string;
+  timeRange: AlertSummaryTimeRange;
 }
 interface RuleAlertsAggs {
   active: number;
@@ -29,11 +36,12 @@ interface LoadRuleAlertsAggs {
   };
   errorRuleAlertsAggs?: string;
 }
+
 interface IndexName {
   index: string;
 }
 
-export function useLoadRuleAlertsAggs({ features, ruleId }: UseLoadRuleAlertsAggs) {
+export function useLoadRuleAlertsAggs({ features, ruleId, timeRange }: UseLoadRuleAlertsAggs) {
   const { http } = useKibana().services;
   const [ruleAlertsAggs, setRuleAlertsAggs] = useState<LoadRuleAlertsAggs>({
     isLoadingRuleAlertsAggs: true,
@@ -56,6 +64,7 @@ export function useLoadRuleAlertsAggs({ features, ruleId }: UseLoadRuleAlertsAgg
         index,
         ruleId,
         signal: abortCtrlRef.current.signal,
+        timeRange,
       });
       if (error) throw error;
       if (!isCancelledRef.current) {
@@ -79,7 +88,7 @@ export function useLoadRuleAlertsAggs({ features, ruleId }: UseLoadRuleAlertsAgg
         }
       }
     }
-  }, [http, features, ruleId]);
+  }, [features, http, ruleId, timeRange]);
   useEffect(() => {
     loadRuleAlertsAgg();
   }, [loadRuleAlertsAgg]);
@@ -107,11 +116,13 @@ async function fetchRuleAlertsAggByTimeRange({
   index,
   ruleId,
   signal,
+  timeRange: { utcFrom, utcTo },
 }: {
   http: HttpSetup;
   index: string;
   ruleId: string;
   signal: AbortSignal;
+  timeRange: AlertSummaryTimeRange;
 }): Promise<RuleAlertsAggs> {
   try {
     const res = await http.post<AsApiContract<any>>(`${BASE_RAC_ALERTS_API_PATH}/find`, {
@@ -130,8 +141,8 @@ async function fetchRuleAlertsAggByTimeRange({
               {
                 range: {
                   '@timestamp': {
-                    gte: 'now-30d',
-                    lt: 'now',
+                    gte: utcFrom,
+                    lt: utcTo,
                   },
                 },
               },

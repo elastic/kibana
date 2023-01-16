@@ -76,7 +76,7 @@ checkout_and_compile_load_runner
 
 echo "--- Run Scalability Tests"
 cd "$KIBANA_DIR"
-node scripts/run_scalability --kibana-install-dir "$KIBANA_BUILD_LOCATION" --journey-config-path "scalability_traces/server"
+node scripts/run_scalability --kibana-install-dir "$KIBANA_BUILD_LOCATION" --journey-path "scalability_traces/server"
 
 echo "--- Upload test results"
 upload_test_results

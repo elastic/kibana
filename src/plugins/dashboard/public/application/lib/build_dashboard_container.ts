@@ -109,9 +109,14 @@ export const buildDashboardContainer = async ({
         gridData: originalPanelState.gridData,
         type: incomingEmbeddable.type,
         explicitInput: {
-          ...(incomingEmbeddable.type === originalPanelState.type && {
-            ...originalPanelState.explicitInput,
-          }),
+          // even when we change embeddable type we should keep hidePanelTitles state
+          // this is temporary, and only required because the key is stored in explicitInput
+          // when it should be stored outside of it instead.
+          ...(incomingEmbeddable.type === originalPanelState.type
+            ? {
+                ...originalPanelState.explicitInput,
+              }
+            : { hidePanelTitles: originalPanelState.explicitInput.hidePanelTitles }),
           ...incomingEmbeddable.input,
           id: incomingEmbeddable.embeddableId,
         },

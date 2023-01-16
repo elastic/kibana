@@ -135,8 +135,6 @@ export { loadActionErrorLog } from './application/lib/rule_api/load_action_error
 export { loadRuleTypes } from './application/lib/rule_api/rule_types';
 export { loadRuleSummary } from './application/lib/rule_api/rule_summary';
 export { deleteRules } from './application/lib/rule_api/delete';
-export { enableRule } from './application/lib/rule_api/enable';
-export { disableRule } from './application/lib/rule_api/disable';
 export { muteRule } from './application/lib/rule_api/mute';
 export { unmuteRule } from './application/lib/rule_api/unmute';
 export { snoozeRule } from './application/lib/rule_api/snooze';

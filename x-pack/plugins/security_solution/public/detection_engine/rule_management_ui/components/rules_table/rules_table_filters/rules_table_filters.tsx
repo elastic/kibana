@@ -5,15 +5,9 @@
  * 2.0.
  */
 
-import {
-  EuiFieldSearch,
-  EuiFilterButton,
-  EuiFilterGroup,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiFilterButton, EuiFilterGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEqual } from 'lodash/fp';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 import { RULES_TABLE_ACTIONS } from '../../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../../common/lib/apm/use_start_transaction';
@@ -22,19 +16,10 @@ import * as i18n from '../../../../../detections/pages/detection_engine/rules/tr
 import { useRulesTableContext } from '../rules_table/rules_table_context';
 import { TagsFilterPopover } from './tags_filter_popover';
 import { useTags } from '../../../../rule_management/logic/use_tags';
-import { SEARCH_FIRST_RULE_ANCHOR } from '../rules_table/guided_onboarding/rules_management_tour';
+import { RuleSearchField } from './rule_search_field';
 
 const FilterWrapper = styled(EuiFlexGroup)`
   margin-bottom: ${({ theme }) => theme.eui.euiSizeXS};
-`;
-
-const SearchBarWrapper = styled(EuiFlexItem)`
-  & .euiPopover,
-  & .euiPopover__anchor {
-    // This is needed to "cancel" styles passed down from EuiTourStep that
-    // interfere with EuiFieldSearch and don't allow it to take the full width
-    display: block;
-  }
 `;
 
 /**
@@ -53,17 +38,6 @@ const RulesTableFiltersComponent = () => {
   const rulesInstalled = prePackagedRulesStatus?.rules_installed;
 
   const { showCustomRules, showElasticRules, tags: selectedTags } = filterOptions;
-
-  const [searchText, setSearchText] = useState(filterOptions.filter);
-
-  useEffect(() => {
-    setSearchText(filterOptions.filter);
-  }, [filterOptions.filter]);
-
-  const handleSearchInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => setSearchText(e.target.value),
-    []
-  );
 
   const handleOnSearch = useCallback(
     (filterString) => {
@@ -95,18 +69,7 @@ const RulesTableFiltersComponent = () => {
 
   return (
     <FilterWrapper gutterSize="m" justifyContent="flexEnd">
-      <SearchBarWrapper grow>
-        <EuiFieldSearch
-          id={SEARCH_FIRST_RULE_ANCHOR}
-          value={searchText}
-          aria-label={i18n.SEARCH_RULES}
-          fullWidth
-          incremental={false}
-          placeholder={i18n.SEARCH_PLACEHOLDER}
-          onSearch={handleOnSearch}
-          onChange={handleSearchInputChange}
-        />
-      </SearchBarWrapper>
+      <RuleSearchField initialValue={filterOptions.filter} onSearch={handleOnSearch} />
       <EuiFlexItem grow={false}>
         <EuiFilterGroup>
           <TagsFilterPopover

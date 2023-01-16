@@ -323,6 +323,10 @@ export function getJobCreatorTitle(jobCreator: JobCreatorType) {
       return i18n.translate('xpack.ml.newJob.wizard.jobCreatorTitle.rare', {
         defaultMessage: 'Rare',
       });
+    case JOB_TYPE.GEO:
+      return i18n.translate('xpack.ml.newJob.wizard.jobCreatorTitle.geo', {
+        defaultMessage: 'Geo',
+      });
     default:
       return '';
   }

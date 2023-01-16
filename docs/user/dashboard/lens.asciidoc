@@ -43,7 +43,7 @@ Edit and delete.
 
 . To delete a field, close the configuration options, then click *X* next to the field.
 
-. To clone a layer, click image:dashboard/images/lens_layerActions_8.5.0.png[Actions menu to duplicate Lens visualization layers] in the layer pane, then select *Duplicate layer*.
+. To duplicate a layer, click image:dashboard/images/lens_layerActions_8.5.0.png[Actions menu to duplicate Lens visualization layers] in the layer pane, then select *Duplicate layer*.
 
 . To clear the layer configuration, click image:dashboard/images/lens_layerActions_8.5.0.png[Actions menu to clear Lens visualization layers] in the layer pane, then select *Clear layer*.
 
@@ -56,6 +56,8 @@ TIP: You can manually apply the changes you make, which is helpful when creating
 Change the fields list to display a different {data-source}, different time range, or add your own fields.
 
 * To create a visualization with fields in a different {data-source}, open the {data-source} dropdown, then select the {data-source}. 
++
+For more information about {data-sources}, refer to <<data-views>>.
 
 * If the fields list is empty, change the <<set-time-filter,time filter>>.
 
@@ -192,24 +194,52 @@ Note: this option is not available for mosaic charts.
 
 preview::[]
 
-Annotations allow you to call out specific points in your visualizations that are important, such as a major change in the data. You can add annotations for any {data-source}, add text and icons, specify the line format and color, and more.
+Annotations allow you to call out specific points in your visualizations that are important, such as significant changes in the data. You can add annotations for any {data-source}, add text and icons, specify the line format and color, and more.
 
 [role="screenshot"]
 image::images/lens_annotations_8.2.0.png[Lens annotations]
 
+Annotations support two placement types:
+
+* *Static date* &mdash; Displays annotations for specific times or time ranges.
+
+* *Custom query* &mdash; Displays annotations based on custom {es} queries. For detailed information about queries, check <<semi-structured-search>>. 
+
+Create the annotation layer. 
+
 . In the layer pane, click *Add layer > Annotations*.
 
-. Select the {data-source}.
+. Select the {data-source} for the annotation.
 
-. To open the annotation options, click *Event*.
+. From the fields list, drag a field to the *Add an annotation* field.
 
-. Specify the *Annotation date*.
+. To use global filters in the annotation, click image:dashboard/images/lens_layerActions_8.5.0.png[Actions menu for the annotations layer], then select *Keep global filters* from the dropdown.
 
-. To display the annotation as a time range, select *Apply as range*, then specify the *From* and *To* time range.
+Create static annotations.
+
+. Select *Static date*.
+
+. In the *Annotation date* field, click image:images/lens_annotationDateIcon_8.6.0.png[Annodation date icon in Lens], then select the date.
+
+. To display the annotation as a time range, select *Apply as range*, then specify the *From* and *To* dates.
+
+Create custom query annotations.
+
+. Select *Custom query*.
+
+. Enter the *Annotation query* for the data you want to display. 
++
+For detailed information about queries and examples, check <<semi-structured-search>>.
+
+. Select the *Target date field*.
+
+Specify the annotation appearance.
 
 . Enter the annotation *Name*.
 
-. Change the *Appearance* options for how you want the annotation to display.
+. Change the *Appearance* options for how you want the annotation to display on the visualization.
+
+. If you created a custom query annotation, click *Add field* to add a field to the annotation tooltip.
 
 . To close, click *X*.
 
@@ -240,7 +270,7 @@ image::images/lens_referenceLine_7.16.png[Lens drag and drop focus state]
 [[filter-the-data]]
 ==== Apply filters
 
-You can use the <<semi-structured-search, KQL query bar>> to focus on a known set of data for the entire visualization, or use the filter options from the layer pane or legend.
+You can use the <<semi-structured-search, query bar>> to create queries that filter all the data in a visualization, or use the layer pane and legend filters to apply filters based on field values.
 
 [float]
 [[filter-with-the-function]]

@@ -15,8 +15,8 @@ import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { render } from '../../utils/test_helper';
 import { SloDetailsPage } from '.';
 import { useFetchSloDetails } from './hooks/use_fetch_slo_details';
-import { anSLO } from './mocks/slo';
 import { useParams } from 'react-router-dom';
+import { anSLO } from '../../../common/data/slo';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),

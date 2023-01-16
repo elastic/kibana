@@ -411,6 +411,22 @@ describe('OpenTimeline', () => {
     ).toEqual(['createFrom', 'duplicate', 'export', 'selectable', 'delete']);
   });
 
+  test('it should include createRule in timeline actions if onCreateRule is passed', () => {
+    const defaultProps = {
+      ...getDefaultTestProps(mockResults),
+      timelineStatus: TimelineStatus.active,
+    };
+    const wrapper = mountWithIntl(
+      <ThemeProvider theme={mockTheme}>
+        <OpenTimeline {...defaultProps} onCreateRule={jest.fn()} />
+      </ThemeProvider>
+    );
+
+    expect(
+      wrapper.find('[data-test-subj="timelines-table"]').first().prop('actionTimelineToShow')
+    ).toEqual(['createFrom', 'duplicate', 'createRule', 'export', 'selectable', 'delete']);
+  });
+
   test("it should render selected count if timelineStatus is active (selecting custom templates' tab)", () => {
     const defaultProps = {
       ...getDefaultTestProps(mockResults),

@@ -9,18 +9,56 @@ import {
   QueryDslQueryContainer,
   Sort,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { rangeQuery } from '@kbn/observability-plugin/server';
+import { APMConfig } from '../..';
 import {
+  AGENT_NAME,
+  CHILD_ID,
+  ERROR_EXCEPTION,
+  ERROR_GROUP_ID,
+  ERROR_ID,
   ERROR_LOG_LEVEL,
+  ERROR_LOG_MESSAGE,
+  EVENT_OUTCOME,
+  FAAS_COLDSTART,
   PARENT_ID,
+  PROCESSOR_EVENT,
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+  SPAN_ACTION,
+  SPAN_COMPOSITE_COMPRESSION_STRATEGY,
+  SPAN_COMPOSITE_COUNT,
+  SPAN_COMPOSITE_SUM,
   SPAN_DURATION,
+  SPAN_ID,
+  SPAN_LINKS,
+  SPAN_NAME,
+  SPAN_SUBTYPE,
+  SPAN_SYNC,
+  SPAN_TYPE,
+  TIMESTAMP,
   TRACE_ID,
   TRANSACTION_DURATION,
+  TRANSACTION_ID,
+  TRANSACTION_NAME,
+  TRANSACTION_RESULT,
+  TRANSACTION_TYPE,
 } from '../../../common/es_fields/apm';
-import { getLinkedChildrenCountBySpanId } from '../span_links/get_linked_children';
+import {
+  WaterfallError,
+  WaterfallSpan,
+  WaterfallTransaction,
+} from '../../../common/waterfall/typings';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import { APMConfig } from '../..';
+import { getSpanLinksCountById } from '../span_links/get_linked_children';
+
+export interface TraceItems {
+  exceedsMax: boolean;
+  traceDocs: Array<WaterfallTransaction | WaterfallSpan>;
+  errorDocs: WaterfallError[];
+  spanLinksCountById: Record<string, number>;
+}
 
 export async function getTraceItems(
   traceId: string,
@@ -28,7 +66,7 @@ export async function getTraceItems(
   apmEventClient: APMEventClient,
   start: number,
   end: number
-) {
+): Promise<TraceItems> {
   const maxTraceItems = config.ui.maxTraceItems;
   const excludedLogLevels = ['debug', 'info', 'warning'];
 
@@ -39,6 +77,17 @@ export async function getTraceItems(
     body: {
       track_total_hits: false,
       size: maxTraceItems,
+      _source: [
+        TIMESTAMP,
+        TRACE_ID,
+        TRANSACTION_ID,
+        PARENT_ID,
+        SERVICE_NAME,
+        ERROR_ID,
+        ERROR_LOG_MESSAGE,
+        ERROR_EXCEPTION,
+        ERROR_GROUP_ID,
+      ],
       query: {
         bool: {
           filter: [
@@ -58,6 +107,34 @@ export async function getTraceItems(
     body: {
       track_total_hits: maxTraceItems + 1,
       size: maxTraceItems,
+      _source: [
+        TIMESTAMP,
+        TRACE_ID,
+        PARENT_ID,
+        SERVICE_NAME,
+        SERVICE_ENVIRONMENT,
+        AGENT_NAME,
+        EVENT_OUTCOME,
+        PROCESSOR_EVENT,
+        TRANSACTION_DURATION,
+        TRANSACTION_ID,
+        TRANSACTION_NAME,
+        TRANSACTION_TYPE,
+        TRANSACTION_RESULT,
+        FAAS_COLDSTART,
+        SPAN_ID,
+        SPAN_TYPE,
+        SPAN_SUBTYPE,
+        SPAN_ACTION,
+        SPAN_NAME,
+        SPAN_DURATION,
+        SPAN_LINKS,
+        SPAN_COMPOSITE_COUNT,
+        SPAN_COMPOSITE_COMPRESSION_STRATEGY,
+        SPAN_COMPOSITE_SUM,
+        SPAN_SYNC,
+        CHILD_ID,
+      ],
       query: {
         bool: {
           filter: [
@@ -77,12 +154,11 @@ export async function getTraceItems(
     },
   });
 
-  const [errorResponse, traceResponse, linkedChildrenOfSpanCountBySpanId] =
-    await Promise.all([
-      errorResponsePromise,
-      traceResponsePromise,
-      getLinkedChildrenCountBySpanId({ traceId, apmEventClient, start, end }),
-    ]);
+  const [errorResponse, traceResponse, spanLinksCountById] = await Promise.all([
+    errorResponsePromise,
+    traceResponsePromise,
+    getSpanLinksCountById({ traceId, apmEventClient, start, end }),
+  ]);
 
   const exceedsMax = traceResponse.hits.total.value > maxTraceItems;
   const traceDocs = traceResponse.hits.hits.map((hit) => hit._source);
@@ -92,6 +168,6 @@ export async function getTraceItems(
     exceedsMax,
     traceDocs,
     errorDocs,
-    linkedChildrenOfSpanCountBySpanId,
+    spanLinksCountById,
   };
 }

@@ -24,7 +24,7 @@ import { useCtiDashboardLinks } from '../containers/overview_cti_links';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { initialUserPrivilegesState } from '../../common/components/user_privileges/user_privileges_context';
 import type { EndpointPrivileges } from '../../../common/endpoint/types';
-import { useRiskScore } from '../../risk_score/containers';
+import { useRiskScore } from '../../explore/containers/risk_score';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { LandingPageComponent } from '../../common/components/landing_page';
 
@@ -98,7 +98,7 @@ jest.mock('../containers/overview_cti_links/use_all_ti_data_sources');
 const useAllTiDataSourcesMock = useAllTiDataSources as jest.Mock;
 useAllTiDataSourcesMock.mockReturnValue(mockTiDataSources);
 
-jest.mock('../../risk_score/containers');
+jest.mock('../../explore/containers/risk_score');
 const useRiskScoreMock = useRiskScore as jest.Mock;
 useRiskScoreMock.mockReturnValue({ loading: false, data: [], isModuleEnabled: false });
 

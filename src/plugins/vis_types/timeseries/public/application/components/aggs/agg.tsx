@@ -13,11 +13,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { aggToComponent } from '../lib/agg_to_component';
 import { isMetricEnabled } from '../../../../common/check_ui_restrictions';
 import { getInvalidAggComponent } from './invalid_agg';
-// @ts-expect-error not typed yet
 import { seriesChangeHandler } from '../lib/series_change_handler';
 import { checkIfNumericMetric } from '../lib/check_if_numeric_metric';
 import { getFormatterType } from '../lib/get_formatter_type';
-import { DATA_FORMATTERS } from '../../../../common/enums';
+import { DATA_FORMATTERS, TSVB_METRIC_TYPES } from '../../../../common/enums';
 import type { Metric, Panel, Series, SanitizedFieldType } from '../../../../common/types';
 import type { DragHandleProps } from '../../../types';
 import type { TimeseriesUIRestrictions } from '../../../../common/ui_restrictions';
@@ -39,8 +38,9 @@ interface AggProps extends HTMLAttributes<HTMLElement> {
 
 export function Agg(props: AggProps) {
   const { model, uiRestrictions, series, name, onModelChange, fields, siblings } = props;
+  const type = model.type as TSVB_METRIC_TYPES;
 
-  let Component = aggToComponent[model.type];
+  let Component = aggToComponent[type];
 
   if (!Component) {
     Component = getInvalidAggComponent(

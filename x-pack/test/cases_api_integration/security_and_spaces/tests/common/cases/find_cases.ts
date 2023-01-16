@@ -278,6 +278,24 @@ export default ({ getService }: FtrProviderContext): void => {
         }
       });
 
+      it('sorts by title', async () => {
+        const case3 = await createCase(supertest, { ...postCaseReq, title: 'c' });
+        const case2 = await createCase(supertest, { ...postCaseReq, title: 'b' });
+        const case1 = await createCase(supertest, { ...postCaseReq, title: 'a' });
+
+        const cases = await findCases({
+          supertest,
+          query: { sortField: 'title', sortOrder: 'asc' },
+        });
+
+        expect(cases).to.eql({
+          ...findCasesResp,
+          total: 3,
+          cases: [case1, case2, case3],
+          count_open_cases: 3,
+        });
+      });
+
       it('unhappy path - 400s when bad query supplied', async () => {
         await findCases({ supertest, query: { perPage: true }, expectedHttpCode: 400 });
       });

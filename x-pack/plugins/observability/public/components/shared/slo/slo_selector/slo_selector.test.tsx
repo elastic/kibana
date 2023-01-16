@@ -12,8 +12,8 @@ import userEvent from '@testing-library/user-event';
 import { render } from '../../../../utils/test_helper';
 import { SloSelector } from './slo_selector';
 import { useFetchSloList } from '../../../../hooks/slo/use_fetch_slo_list';
-import { emptySloList } from '../../../../pages/slos/mocks/slo_list';
 import { wait } from '@testing-library/user-event/dist/utils';
+import { emptySloList } from '../../../../../common/data/slo';
 
 jest.mock('../../../../hooks/slo/use_fetch_slo_list');
 const useFetchSloListMock = useFetchSloList as jest.Mock;

@@ -1,0 +1,11 @@
+steps:
+  - command: .buildkite/scripts/steps/test/kbn_handlebars.sh
+    label: 'Check @kbn/handlebars for upstream differences'
+    agents:
+      queue: n2-2-spot
+    depends_on: build
+    timeout_in_minutes: 5
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1

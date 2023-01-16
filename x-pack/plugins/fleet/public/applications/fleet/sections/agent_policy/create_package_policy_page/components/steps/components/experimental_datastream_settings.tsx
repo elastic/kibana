@@ -73,14 +73,14 @@ export const ExperimentDatastreamSettings: React.FunctionComponent<Props> = ({
   const onIndexingSettingChange = (
     features: Partial<Record<ExperimentalIndexingFeature, boolean>>
   ) => {
-    const newExperimentalDataStreamFeatures = [...(experimentalDataFeatures ?? [])];
+    const newExperimentalDataStreamFeatures =
+      experimentalDataFeatures?.map((feature) => ({ ...feature })) ?? [];
 
     const dataStream = getRegistryDataStreamAssetBaseName(registryDataStream);
 
     const existingSettingRecord = newExperimentalDataStreamFeatures.find(
       (x) => x.data_stream === dataStream
     );
-
     if (existingSettingRecord) {
       existingSettingRecord.features = {
         ...existingSettingRecord.features,

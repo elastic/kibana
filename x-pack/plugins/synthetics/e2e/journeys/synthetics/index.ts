@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export * from './project_api_keys.journey';
 export * from './getting_started.journey';
 export * from './add_monitor.journey';
 export * from './monitor_selector.journey';
