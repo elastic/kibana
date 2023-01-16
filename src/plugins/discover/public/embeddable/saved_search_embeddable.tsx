@@ -253,7 +253,6 @@ export class SavedSearchEmbeddable
         return;
       }
 
-
       // Request document data
       const { rawResponse: resp } = await lastValueFrom(
         searchSource.fetch$({
