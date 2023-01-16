@@ -14,8 +14,10 @@ import { useSyntheticsSettingsContext } from '../../../contexts';
 export const StepDetailsLinkIcon = ({
   stepIndex,
   checkGroup,
+  configId,
 }: {
   checkGroup: string;
+  configId: string;
   stepIndex?: number;
 }) => {
   const { basePath } = useSyntheticsSettingsContext();
@@ -26,7 +28,7 @@ export const StepDetailsLinkIcon = ({
       aria-label={VIEW_DETAILS}
       title={VIEW_DETAILS}
       size="s"
-      href={`${basePath}/app/synthetics/journey/${checkGroup}/step/${stepIndex}?locationId=${selectedLocation?.id}`}
+      href={`${basePath}/app/synthetics/monitor/${configId}/test-run/${checkGroup}/step/${stepIndex}?locationId=${selectedLocation?.id}`}
       target="_self"
       iconType="apmTrace"
     />
