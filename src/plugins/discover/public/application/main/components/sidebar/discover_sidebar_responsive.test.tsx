@@ -392,7 +392,8 @@ describe('discover responsive sidebar', function () {
     findTestSubject(comp, 'discoverFieldListPanelAddExistFilter-extension').simulate('click');
     expect(props.onAddFilter).toHaveBeenCalledWith('_exists_', 'extension', '+');
   });
-  it('should allow filtering by string, and calcFieldCount should just be executed once', async function () {
+
+  it('should allow searching by string, and calcFieldCount should just be executed once', async function () {
     const comp = await mountComponent(props);
 
     expect(findTestSubject(comp, 'fieldListGroupedAvailableFields-count').text()).toBe('3');
@@ -410,6 +411,34 @@ describe('discover responsive sidebar', function () {
     expect(findTestSubject(comp, 'fieldListGrouped__ariaDescription').text()).toBe(
       '1 popular field. 1 available field. 0 empty fields. 0 meta fields.'
     );
+    expect(mockCalcFieldCounts.mock.calls.length).toBe(1);
+  });
+
+  it('should allow filtering by field type', async function () {
+    const comp = await mountComponent(props);
+
+    expect(findTestSubject(comp, 'fieldListGroupedAvailableFields-count').text()).toBe('3');
+    expect(findTestSubject(comp, 'fieldListGrouped__ariaDescription').text()).toBe(
+      '1 selected field. 4 popular fields. 3 available fields. 20 empty fields. 2 meta fields.'
+    );
+
+    await act(async () => {
+      await findTestSubject(comp, 'fieldListFiltersFieldTypeFilterToggle').simulate('click');
+    });
+
+    await comp.update();
+
+    await act(async () => {
+      await findTestSubject(comp, 'typeFilter-number').simulate('click');
+    });
+
+    await comp.update();
+
+    expect(findTestSubject(comp, 'fieldListGroupedAvailableFields-count').text()).toBe('2');
+    expect(findTestSubject(comp, 'fieldListGrouped__ariaDescription').text()).toBe(
+      '1 popular field. 2 available fields. 1 empty field. 0 meta fields.'
+    );
+
     expect(mockCalcFieldCounts.mock.calls.length).toBe(1);
   });
 
