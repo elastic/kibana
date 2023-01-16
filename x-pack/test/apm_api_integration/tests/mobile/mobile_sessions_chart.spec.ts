@@ -23,11 +23,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     kuery = '',
     serviceName,
     transactionType = 'mobile',
+    offset,
   }: {
     environment?: string;
     kuery?: string;
     serviceName: string;
     transactionType?: string;
+    offset?: string;
   }) {
     return await apmApiClient.readUser({
       endpoint: 'GET /internal/apm/mobile-services/{serviceName}/transactions/charts/sessions',
@@ -37,6 +39,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           environment,
           start: new Date(start).toISOString(),
           end: new Date(end).toISOString(),
+          offset,
           kuery,
           transactionType,
         },
@@ -49,6 +52,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('handles empty state', async () => {
         const response = await getSessionsChart({ serviceName: 'foo' });
         expect(response.body.currentPeriod).to.eql([]);
+        expect(response.body.previousPeriod).to.eql([]);
         expect(response.status).to.be(200);
       });
     });
@@ -67,6 +71,20 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     describe('when data is loaded', () => {
       it('returns timeseries for sessions chart', async () => {
+        const response = await getSessionsChart({ serviceName: 'synth-android', offset: '1d' });
+
+        expect(response.status).to.be(200);
+        expect(
+          response.body.currentPeriod.some(
+            (item: { x: number; y?: number | null }) => item.x && item.y
+          )
+        ).to.eql(true);
+
+        expect(response.body.currentPeriod[0].y).to.eql(8);
+        expect(response.body.previousPeriod[0].y).to.eql(0);
+      });
+
+      it('returns only current period timeseries when offset is not available', async () => {
         const response = await getSessionsChart({ serviceName: 'synth-android' });
 
         expect(response.status).to.be(200);
@@ -74,8 +92,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           response.body.currentPeriod.some(
             (item: { x: number; y?: number | null }) => item.x && item.y
           )
-        ).to.equal(true);
-        expect(response.body.currentPeriod[0].y).to.equal(3);
+        ).to.eql(true);
+
+        expect(response.body.currentPeriod[0].y).to.eql(8);
+        expect(response.body.previousPeriod).to.eql([]);
       });
     });
 
@@ -87,7 +107,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           kuery: `app.version:"none"`,
         });
 
-        expect(response.body.currentPeriod).to.eql([]);
+        expect(
+          response.body.currentPeriod.every(
+            (item: { x: number; y?: number | null }) => item.y === 0
+          )
+        ).to.eql(true);
+        expect(
+          response.body.previousPeriod.every(
+            (item: { x: number; y?: number | null }) => item.y === 0
+          )
+        ).to.eql(true);
       });
 
       it('returns the correct values filter is applied', async () => {
@@ -98,7 +127,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         expect(response.status).to.be(200);
-        expect(response.body.currentPeriod[0].y).to.equal(2);
+        expect(
+          response.body.currentPeriod.some(
+            (item: { x: number; y?: number | null }) => item.x && item.y
+          )
+        ).to.eql(true);
+
+        expect(response.body.currentPeriod[0].y).to.eql(2);
+        expect(response.body.previousPeriod).to.eql([]);
       });
     });
   });
