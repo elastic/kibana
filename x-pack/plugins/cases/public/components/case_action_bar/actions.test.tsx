@@ -55,6 +55,26 @@ describe('CaseView actions', () => {
     expect(wrapper.find('[data-test-subj="confirm-delete-case-modal"]').exists()).toBeTruthy();
   });
 
+  it('clicking copyClipboard icon copies case id', () => {
+    Object.defineProperty(navigator, 'clipboard', {
+      value: {
+        writeText: jest.fn(),
+      },
+      writable: true,
+    });
+
+    const wrapper = mount(
+      <TestProviders>
+        <Actions {...defaultProps} />
+      </TestProviders>
+    );
+
+    wrapper.find('button[data-test-subj="property-actions-ellipses"]').first().simulate('click');
+    wrapper.find('button[data-test-subj="property-actions-copyClipboard"]').simulate('click');
+
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(basicCase.id);
+  });
+
   it('does not show trash icon when user does not have deletion privileges', () => {
     const wrapper = mount(
       <TestProviders permissions={noDeleteCasesPermissions()}>
@@ -63,7 +83,9 @@ describe('CaseView actions', () => {
     );
 
     expect(wrapper.find('[data-test-subj="confirm-delete-case-modal"]').exists()).toBeFalsy();
-    expect(wrapper.find('button[data-test-subj="property-actions-ellipses"]').exists()).toBeFalsy();
+    wrapper.find('button[data-test-subj="property-actions-ellipses"]').first().simulate('click');
+    expect(wrapper.find('[data-test-subj="property-actions-trash"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="property-actions-copyClipboard"]').exists()).toBeTruthy();
   });
 
   it('toggle delete modal and confirm', async () => {
