@@ -16,13 +16,10 @@ export class FlyoutService extends FtrService {
 
   public async close(dataTestSubj: string): Promise<void> {
     this.log.debug('Closing flyout', dataTestSubj);
+    const flyoutElement = await this.testSubjects.find(dataTestSubj);
     await this.retry.try(async () => {
-      const flyoutExists = await this.testSubjects.exists(dataTestSubj);
-      if (flyoutExists) {
-        const flyoutElement = await this.testSubjects.find(dataTestSubj);
-        const closeBtn = await flyoutElement.findByCssSelector('[aria-label*="Close"]');
-        await closeBtn.click();
-      }
+      const closeBtn = await flyoutElement.findByCssSelector('[aria-label*="Close"]');
+      await closeBtn.click();
       await this.testSubjects.missingOrFail(dataTestSubj);
     });
   }
