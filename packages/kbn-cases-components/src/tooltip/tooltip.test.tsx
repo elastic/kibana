@@ -32,6 +32,7 @@ const tooltipContent: CaseTooltipContentProps = {
 };
 
 const tooltipProps: CaseTooltipProps = {
+  children: TestSpan,
   loading: false,
   content: tooltipContent,
 };
