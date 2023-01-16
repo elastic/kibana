@@ -36,6 +36,7 @@ import { RenderingService } from '@kbn/core-rendering-browser-internal';
 import { CoreAppsService } from '@kbn/core-apps-browser-internal';
 import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-browser-internal';
 import { PluginsService } from '@kbn/core-plugins-browser-internal';
+import { CustomBrandingService } from '@kbn/core-custom-branding-browser-internal';
 import { KBN_LOAD_MARKS } from './events';
 import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';
 
@@ -103,6 +104,7 @@ export class CoreSystem {
   private readonly rootDomElement: HTMLElement;
   private readonly coreContext: CoreContext;
   private readonly executionContext: ExecutionContextService;
+  private readonly customBranding: CustomBrandingService;
   private fatalErrorsSetup: FatalErrorsSetup | null = null;
 
   constructor(params: CoreSystemParams) {
@@ -147,6 +149,7 @@ export class CoreSystem {
     this.executionContext = new ExecutionContextService();
     this.plugins = new PluginsService(this.coreContext, injectedMetadata.uiPlugins);
     this.coreApp = new CoreAppsService(this.coreContext);
+    this.customBranding = new CustomBrandingService();
 
     performance.mark(KBN_LOAD_MARKS, {
       detail: LOAD_CORE_CREATED,
@@ -236,6 +239,7 @@ export class CoreSystem {
       const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
       const settings = this.settings.setup({ http, injectedMetadata });
       const notifications = this.notifications.setup({ uiSettings });
+      const customBranding = this.customBranding.setup({ injectedMetadata });
 
       const application = this.application.setup({ http });
       this.coreApp.setup({ application, http, injectedMetadata, notifications });
@@ -251,6 +255,7 @@ export class CoreSystem {
         uiSettings,
         settings,
         executionContext,
+        customBranding,
       };
 
       // Services that do not expose contracts at setup
@@ -304,7 +309,8 @@ export class CoreSystem {
         theme,
         targetDomElement: notificationsTargetDomElement,
       });
-      const application = await this.application.start({ http, theme, overlays });
+      const customBranding = this.customBranding.start();
+      const application = await this.application.start({ http, theme, overlays, customBranding });
 
       const executionContext = this.executionContext.start({
         curApp$: application.currentAppId$,
@@ -316,6 +322,7 @@ export class CoreSystem {
         http,
         injectedMetadata,
         notifications,
+        customBranding,
       });
       const deprecations = this.deprecations.start({ http });
 
@@ -338,6 +345,7 @@ export class CoreSystem {
         settings,
         fatalErrors,
         deprecations,
+        customBranding,
       };
 
       await this.plugins.start(core);

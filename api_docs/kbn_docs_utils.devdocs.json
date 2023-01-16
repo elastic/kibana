@@ -29,7 +29,7 @@
         "signature": [
           "() => void"
         ],
-        "path": "packages/kbn-docs-utils/src/api_docs/build_api_docs_cli.ts",
+        "path": "packages/kbn-docs-utils/src/build_api_docs_cli.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
