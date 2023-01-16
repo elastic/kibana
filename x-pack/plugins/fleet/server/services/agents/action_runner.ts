@@ -6,7 +6,6 @@
  */
 
 import uuid from 'uuid';
-import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 
@@ -21,9 +20,8 @@ import { SO_SEARCH_LIMIT } from '../../../common/constants';
 import { getAgentActions } from './actions';
 import { closePointInTime, getAgentsByKuery } from './crud';
 import type { BulkActionsResolver } from './bulk_actions_resolver';
-import { getRetryParams } from './bulk_actions_resolver';
-
-export const MAX_RETRY_COUNT = 10;
+import type { RetryParams } from './retry_helper';
+import { getRetryParams, MAX_RETRY_COUNT } from './retry_helper';
 
 export interface ActionParams {
   kuery: string;
@@ -33,13 +31,6 @@ export interface ActionParams {
   actionId?: string;
   // additional parameters specific to an action e.g. reassign to new policy id
   [key: string]: any;
-}
-
-export interface RetryParams {
-  pitId?: string;
-  searchAfter?: SortResults;
-  retryCount?: number;
-  taskId?: string;
 }
 
 export abstract class ActionRunner {

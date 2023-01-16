@@ -29,7 +29,7 @@ import {
   getUnenrollAgentActions,
 } from './actions';
 import { getHostedPolicies, isHostedAgent } from './hosted_agent';
-import { BulkActionTaskType } from './bulk_actions_resolver';
+import { BulkActionTaskType } from './bulk_action_types';
 
 export class UnenrollActionRunner extends ActionRunner {
   protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {

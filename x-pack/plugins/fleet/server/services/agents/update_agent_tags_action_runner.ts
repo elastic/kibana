@@ -15,11 +15,12 @@ import { AGENTS_INDEX } from '../../constants';
 
 import { appContextService } from '../app_context';
 
-import { ActionRunner, MAX_RETRY_COUNT } from './action_runner';
+import { ActionRunner } from './action_runner';
 
-import { BulkActionTaskType } from './bulk_actions_resolver';
+import { BulkActionTaskType } from './bulk_action_types';
 import { filterHostedPolicies } from './filter_hosted_agents';
 import { bulkCreateAgentActionResults, createAgentAction } from './actions';
+import { MAX_RETRY_COUNT } from './retry_helper';
 
 export class UpdateAgentTagsActionRunner extends ActionRunner {
   protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {

@@ -11,6 +11,7 @@ import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/serv
 import type { Agent } from '../../types';
 
 import { createClientMock } from './action.mock';
+import { MAX_RETRY_COUNT } from './retry_helper';
 import { updateAgentTags } from './update_agent_tags';
 import { UpdateAgentTagsActionRunner, updateTagsBatch } from './update_agent_tags_action_runner';
 
@@ -196,7 +197,7 @@ describe('update_agent_tags', () => {
           tagsToRemove: [],
           kuery: '',
           total: 100,
-          retryCount: 5,
+          retryCount: MAX_RETRY_COUNT,
         }
       )
     ).rejects.toThrowError('version conflict of 100 agents');
