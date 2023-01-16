@@ -156,7 +156,9 @@ describe('bulkEdit()', () => {
       minimumLicenseRequired: 'basic',
       isExportable: true,
       recoveryActionGroup: RecoveredActionGroup,
-      async executor() {},
+      async executor() {
+        return { state: {} };
+      },
       producer: 'alerts',
     });
   });
@@ -1682,7 +1684,9 @@ describe('bulkEdit()', () => {
             param1: schema.string(),
           }),
         },
-        async executor() {},
+        async executor() {
+          return { state: {} };
+        },
         producer: 'alerts',
       });
 
@@ -1724,7 +1728,9 @@ describe('bulkEdit()', () => {
             },
           },
         },
-        async executor() {},
+        async executor() {
+          return { state: {} };
+        },
         producer: 'alerts',
       });
 
