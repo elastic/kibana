@@ -19,7 +19,6 @@ import type { PackageUsage } from './package_collectors';
 import { getFleetServerUsage, getFleetServerConfig } from './fleet_server_collector';
 import type { FleetServerUsage } from './fleet_server_collector';
 import { getAgentPoliciesUsage } from './agent_policies';
-import { getAgentLogsTopErrors } from './agent_logs';
 
 export interface Usage {
   agents_enabled: boolean;
@@ -61,7 +60,8 @@ export const fetchFleetUsage = async (
     ...(await getAgentData(esClient, abortController)),
     fleet_server_config: await getFleetServerConfig(soClient),
     agent_policies: await getAgentPoliciesUsage(esClient, abortController),
-    ...(await getAgentLogsTopErrors(esClient)),
+    // TODO removed top errors telemetry as it causes this issue: https://github.com/elastic/kibana/issues/148976
+    // ...(await getAgentLogsTopErrors(esClient)),
   };
   return usage;
 };
