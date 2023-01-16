@@ -257,6 +257,8 @@ export function getDiscoverStateContainer({
     searchSessionManager,
     getAppState: appStateContainer.getState,
     getSavedSearch: () => {
+      // Simulating the behavior of the removed hook to always create a clean searchSource child that
+      // we then use to add query, filters, etc., will be removed soon.
       return { ...savedSearch, searchSource: savedSearch.searchSource.createChild() };
     },
     appStateContainer,

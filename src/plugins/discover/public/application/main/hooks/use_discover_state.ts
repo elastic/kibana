@@ -185,6 +185,7 @@ export function useDiscoverState({
         dataViewChanged &&
         stateContainer.dataState.initialFetchStatus === FetchStatus.UNINITIALIZED
       ) {
+        // stop execution if given data view has changed, and it's not configured to initially start a search in Discover
         return;
       }
 
