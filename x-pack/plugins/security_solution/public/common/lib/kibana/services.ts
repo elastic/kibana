@@ -24,7 +24,14 @@ export class KibanaServices {
     uiSettings,
     notifications,
   }: GlobalServices & { kibanaVersion: string }) {
-    this.services = { application, data, http, uiSettings, unifiedSearch, notifications };
+    this.services = {
+      application,
+      data,
+      http,
+      uiSettings,
+      unifiedSearch,
+      notifications,
+    };
     this.kibanaVersion = kibanaVersion;
   }
 
