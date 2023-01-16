@@ -5,17 +5,19 @@
  * 2.0.
  */
 
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { alertsClientMock } from '@kbn/rule-registry-plugin/server/alert_data_client/alerts_client.mock';
 import { CaseStatuses } from '../../../common/api';
 import { AlertService } from '.';
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 
 describe('updateAlertsStatus', () => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   const logger = loggingSystemMock.create().get('case');
+  const alertsClient = alertsClientMock.create();
   let alertService: AlertService;
 
   beforeEach(async () => {
-    alertService = new AlertService(esClient, logger);
+    alertService = new AlertService(esClient, logger, alertsClient);
     jest.clearAllMocks();
   });
 

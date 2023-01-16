@@ -37,3 +37,8 @@ export interface AlertUpdateStatus {
 export interface AlertGet {
   alertsInfo: AlertInfo[];
 }
+
+export interface UpdateAlertCasesRequest {
+  alerts: Array<{ id: string; index: string }>;
+  caseIds: string[];
+}

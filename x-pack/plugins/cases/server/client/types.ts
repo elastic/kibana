@@ -12,7 +12,6 @@ import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { IBasePath } from '@kbn/core-http-browser';
 import type { KueryNode } from '@kbn/es-query';
-import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import type { CasesFindRequest, User } from '../../common/api';
 import type { Authorization } from '../authorization/authorization';
 import type {
@@ -54,7 +53,7 @@ export interface CasesClientArgs {
   readonly externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   readonly securityStartPlugin: SecurityPluginStart;
   readonly spaceId: string;
-  readonly alertsClient: PublicMethodsOf<AlertsClient>;
+
   readonly publicBaseUrl?: IBasePath['publicBaseUrl'];
 }
 

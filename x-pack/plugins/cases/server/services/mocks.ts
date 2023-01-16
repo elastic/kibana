@@ -95,6 +95,7 @@ export const createAlertServiceMock = (): AlertServiceMock => {
     updateAlertsStatus: jest.fn(),
     getAlerts: jest.fn(),
     executeAggregations: jest.fn(),
+    bulkUpdateCases: jest.fn(),
   };
 
   // the cast here is required because jest.Mocked tries to include private members and would throw an error

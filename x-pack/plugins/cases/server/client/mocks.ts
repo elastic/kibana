@@ -10,7 +10,6 @@ import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mock
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client.mock';
-import { alertsClientMock } from '@kbn/rule-registry-plugin/server/alert_data_client/alerts_client.mock';
 import { makeLensEmbeddableFactory } from '@kbn/lens-plugin/server/embeddable/make_lens_embeddable_factory';
 import type { CasesClient } from '.';
 import { createAuthorizationMock } from '../authorization/mock';
@@ -142,7 +141,6 @@ export const createCasesClientMockArgs = () => {
     logger: loggingSystemMock.createLogger(),
     unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
     actionsClient: actionsClientMock.create(),
-    alertsClient: alertsClientMock.create(),
     user: {
       username: 'damaged_raccoon',
       email: 'damaged_raccoon@elastic.co',

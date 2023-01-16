@@ -337,19 +337,12 @@ export class CaseCommentModel {
   }
 
   private async updateAlertsSchemaWithCaseInfo(alertAttachments: CommentRequestAlertType[]) {
-    try {
-      const alerts = getAlertInfoFromComments(alertAttachments);
-      this.params.alertsClient.bulkUpdateCases({
-        alerts,
-        caseIds: [this.caseInfo.id],
-      });
-    } catch (error) {
-      throw createCaseError({
-        message: `Failed to add case info to alerts for caseId ${this.caseInfo.id}: ${error}`,
-        error,
-        logger: this.params.logger,
-      });
-    }
+    const alerts = getAlertInfoFromComments(alertAttachments);
+
+    await this.params.services.alertsService.bulkUpdateCases({
+      alerts,
+      caseIds: [this.caseInfo.id],
+    });
   }
 
   private async createCommentUserAction(

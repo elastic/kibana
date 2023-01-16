@@ -12,17 +12,20 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { STATUS_VALUES } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import type { MgetResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { CaseStatuses } from '../../../common/api';
 import { MAX_ALERTS_PER_CASE, MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import { createCaseError } from '../../common/error';
 import type { AlertInfo } from '../../common/types';
-import type { UpdateAlertStatusRequest } from '../../client/alerts/types';
+import type { UpdateAlertCasesRequest, UpdateAlertStatusRequest } from '../../client/alerts/types';
 import type { AggregationBuilder, AggregationResponse } from '../../client/metrics/types';
 
 export class AlertService {
   constructor(
     private readonly scopedClusterClient: ElasticsearchClient,
-    private readonly logger: Logger
+    private readonly logger: Logger,
+    private readonly alertsClient: PublicMethodsOf<AlertsClient>
   ) {}
 
   public async executeAggregations({
@@ -196,6 +199,21 @@ export class AlertService {
     } catch (error) {
       throw createCaseError({
         message: `Failed to retrieve alerts ids: ${JSON.stringify(alertsInfo)}: ${error}`,
+        error,
+        logger: this.logger,
+      });
+    }
+  }
+
+  public async bulkUpdateCases({ alerts, caseIds }: UpdateAlertCasesRequest): Promise<void> {
+    try {
+      await this.alertsClient.bulkUpdateCases({
+        alerts,
+        caseIds,
+      });
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to add case info to alerts for caseIds ${caseIds}: ${error}`,
         error,
         logger: this.logger,
       });
