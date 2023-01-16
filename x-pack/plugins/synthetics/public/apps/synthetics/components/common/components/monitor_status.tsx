@@ -25,7 +25,7 @@ export const MonitorStatus = ({
   const badge =
     loading && !monitor ? (
       <EuiLoadingContent lines={1} />
-    ) : !status ? (
+    ) : !status || status === 'unknown' ? (
       <EuiBadge color="default" data-test-subj="monitorLatestStatusPending">
         {PENDING_LABEL}
       </EuiBadge>
