@@ -14,6 +14,7 @@ import { CriteriaWithPagination, EuiBasicTable, EuiBasicTableColumn } from '@ela
 import { i18n } from '@kbn/i18n';
 
 import { EnterpriseSearchEngine } from '../../../../../../../common/types/engines';
+import { MANAGE_BUTTON_LABEL } from '../../../../../shared/constants';
 
 import { generateEncodedPath } from '../../../../../shared/encode_path_params';
 import { FormattedDateTime } from '../../../../../shared/formatted_date_time';
@@ -55,7 +56,7 @@ export const EnginesListTable: React.FC<EnginesListTableProps> = ({
       render: (name: string) => (
         <EuiLinkTo
           data-test-subj="engine-link"
-          data-telemetry-id={`entSearchContent-engines-table-viewEngine `}
+          data-telemetry-id="entSearchContent-engines-table-viewEngine"
           to={generateEncodedPath(ENGINE_PATH, { engineName: name })}
         >
           {name}
@@ -86,6 +87,7 @@ export const EnginesListTable: React.FC<EnginesListTableProps> = ({
       }),
       actions: [
         {
+          name: MANAGE_BUTTON_LABEL,
           description: i18n.translate(
             'xpack.enterpriseSearch.content.enginesList.table.column.actions.view.buttonDescription',
             {

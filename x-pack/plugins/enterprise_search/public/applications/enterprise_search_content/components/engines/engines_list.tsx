@@ -54,7 +54,7 @@ export const EnginesList: React.FC = () => {
               fill
               iconType="plusInCircle"
               data-test-subj="enterprise-search-content-engines-creation-button"
-              data-telemetry-id={`entSearchContent-engines-list-createEngine `}
+              data-telemetry-id="entSearchContent-engines-list-createEngine"
               href={'TODO'}
             >
               {i18n.translate('xpack.enterpriseSearch.content.engines.createEngineButtonLabel', {
@@ -76,7 +76,7 @@ export const EnginesList: React.FC = () => {
                   data-test-subj="engines-documentation-link"
                   href="TODO"
                   target="_blank"
-                  data-telemetry-id={`entSearchContent-engines-documentation-viewDocumentaion `}
+                  data-telemetry-id="entSearchContent-engines-documentation-viewDocumentaion"
                 >
                   {' '}
                   {/* TODO: navigate to documentation url */}{' '}
