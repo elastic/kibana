@@ -63,6 +63,9 @@ const createSimpleSavedObjectMock = (
   return mock;
 };
 
+/**
+ * @deprecated TODO: Replace with issue link
+ */
 export const simpleSavedObjectMock = {
   create: (client: SavedObjectsClientContract, savedObject: SavedObject) =>
     createSimpleSavedObjectMock(savedObject),

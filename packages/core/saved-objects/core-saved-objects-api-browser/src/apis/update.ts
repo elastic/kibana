@@ -12,6 +12,7 @@ import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
  * Options for updating a saved object
  *
  * @public
+ * @deprecated TODO: Replace with issue link
  */
 export interface SavedObjectsUpdateOptions<Attributes = unknown> {
   /** version of the saved object */

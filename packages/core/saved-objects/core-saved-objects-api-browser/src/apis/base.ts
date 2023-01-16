@@ -12,6 +12,7 @@ import { SimpleSavedObject } from '../simple_saved_object';
  * Batch response for simple saved objects
  *
  * @public
+ * @deprecated TODO: Replace with issue link
  */
 export interface SavedObjectsBatchResponse<T = unknown> {
   /** Array of simple saved objects */

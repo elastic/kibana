@@ -41,6 +41,9 @@ const createMock = () => {
   return mocked;
 };
 
+/**
+ * @deprecated TODO: Replace with issue link
+ */
 export const savedObjectsServiceMock = {
   create: createMock,
   createStartContract: createStartContractMock,

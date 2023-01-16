@@ -12,6 +12,7 @@ import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
  * Per-object parameters for bulk update operation
  *
  * @public
+ * @deprecated TODO: Replace with issue link
  */
 export interface SavedObjectsBulkUpdateObject<T = unknown> {
   /** Type of the saved object to update */
@@ -30,6 +31,7 @@ export interface SavedObjectsBulkUpdateObject<T = unknown> {
  * Options for bulk update operation
  *
  * @public
+ * @deprecated TODO: Replace with issue link
  * */
 export interface SavedObjectsBulkUpdateOptions {
   /**

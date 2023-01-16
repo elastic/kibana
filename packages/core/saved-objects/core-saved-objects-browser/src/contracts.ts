@@ -9,6 +9,7 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-bro
 
 /**
  * @public
+ * @deprecated TODO: Replace with issue link
  */
 export interface SavedObjectsStart {
   /** {@link SavedObjectsClientContract} */

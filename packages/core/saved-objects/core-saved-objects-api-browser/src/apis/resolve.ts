@@ -14,6 +14,7 @@ import type { SimpleSavedObject } from '../simple_saved_object';
  * with the {@link SavedObjectsClientContract}.
  *
  * @public
+ * @deprecated TODO: Replace with issue link
  */
 export interface ResolvedSimpleSavedObject<T = unknown> {
   /**

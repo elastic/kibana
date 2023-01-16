@@ -15,6 +15,7 @@ import type {
  * Options for creating a saved object.
  *
  * @public
+ * @deprecated TODO: Replace with issue link
  */
 export interface SavedObjectsCreateOptions {
   /**

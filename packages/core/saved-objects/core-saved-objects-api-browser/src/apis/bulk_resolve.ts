@@ -12,6 +12,7 @@ import type { ResolvedSimpleSavedObject } from './resolve';
  * Return type of the Saved Objects `bulkResolve()` method.
  *
  * @public
+ * @deprecated TODO: Replace with issue link
  */
 export interface SavedObjectsBulkResolveResponse<T = unknown> {
   /** Array of {@link ResolvedSimpleSavedObject} that were resolved */

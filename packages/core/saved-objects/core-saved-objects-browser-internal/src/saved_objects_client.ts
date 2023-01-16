@@ -104,6 +104,7 @@ const getObjectsToResolve = (queue: BatchResolveQueueEntry[]) => {
  * HTTP API for interacting with Saved Objects.
  *
  * @internal
+ * @deprecated TODO: Replace with issue link
  */
 export class SavedObjectsClient implements SavedObjectsClientContract {
   private http: HttpSetup;

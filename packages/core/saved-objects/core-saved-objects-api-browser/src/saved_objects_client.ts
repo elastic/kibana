@@ -30,6 +30,7 @@ import type { SimpleSavedObject } from './simple_saved_object';
  * HTTP API for interacting with Saved Objects.
  *
  * @public
+ * @deprecated TODO: Replace with issue link
  */
 export interface SavedObjectsClientContract {
   /**
