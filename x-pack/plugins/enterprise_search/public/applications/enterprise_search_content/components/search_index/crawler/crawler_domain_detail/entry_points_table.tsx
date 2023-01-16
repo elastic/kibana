@@ -14,12 +14,12 @@ import { EuiFieldText, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eu
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { docLinks } from '../../../shared/doc_links';
-import { GenericEndpointInlineEditableTable } from '../../../shared/tables/generic_endpoint_inline_editable_table';
+import { docLinks } from '../../../../../shared/doc_links';
+import { GenericEndpointInlineEditableTable } from '../../../../../shared/tables/generic_endpoint_inline_editable_table';
 
-import { InlineEditableTableColumn } from '../../../shared/tables/inline_editable_table/types';
-import { ItemWithAnID } from '../../../shared/tables/types';
-import { CrawlerDomain, EntryPoint } from '../../api/crawler/types';
+import { InlineEditableTableColumn } from '../../../../../shared/tables/inline_editable_table/types';
+import { ItemWithAnID } from '../../../../../shared/tables/types';
+import { CrawlerDomain, EntryPoint } from '../../../../api/crawler/types';
 
 import { EntryPointsTableLogic } from './entry_points_table_logic';
 

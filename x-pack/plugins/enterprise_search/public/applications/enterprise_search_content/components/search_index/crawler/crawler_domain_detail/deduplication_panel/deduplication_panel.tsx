@@ -21,6 +21,8 @@ import {
   EuiSelectable,
   EuiSpacer,
   EuiSwitch,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 
 import { EuiSelectableLIOption } from '@elastic/eui/src/components/selectable/selectable_option';
@@ -28,8 +30,7 @@ import { EuiSelectableLIOption } from '@elastic/eui/src/components/selectable/se
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { DataPanel } from '../../../../shared/data_panel/data_panel';
-import { docLinks } from '../../../../shared/doc_links';
+import { docLinks } from '../../../../../../shared/doc_links';
 import { CrawlerDomainDetailLogic } from '../crawler_domain_detail_logic';
 
 import { getCheckedOptionLabels, getSelectableOptions } from './utils';
@@ -52,53 +53,60 @@ export const DeduplicationPanel: React.FC = () => {
   const selectableOptions = getSelectableOptions(domain, showAllFields);
 
   return (
-    <DataPanel
-      hasBorder
-      title={
-        <h2>
-          {i18n.translate('xpack.enterpriseSearch.crawler.deduplicationPanel.title', {
-            defaultMessage: 'Duplicate document handling',
-          })}
-        </h2>
-      }
-      action={
-        <EuiButton
-          data-telemetry-id="entSearchContent-crawler-domainDetail-deduplication-reset"
-          color="warning"
-          iconType="refresh"
-          size="s"
-          onClick={() => submitDeduplicationUpdate({ fields: [] })}
-          disabled={deduplicationFields.length === 0}
-        >
-          {i18n.translate(
-            'xpack.enterpriseSearch.crawler.deduplicationPanel.resetToDefaultsButtonLabel',
-            {
-              defaultMessage: 'Reset to defaults',
-            }
-          )}
-        </EuiButton>
-      }
-      subtitle={
-        <FormattedMessage
-          id="xpack.enterpriseSearch.crawler.deduplicationPanel.description"
-          defaultMessage="The web crawler only indexes unique pages. Choose which fields the crawler should use when
+    <div className="deduplicationPanel">
+      <EuiSpacer />
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <h2>
+              {i18n.translate('xpack.enterpriseSearch.crawler.deduplicationPanel.title', {
+                defaultMessage: 'Duplicate document handling',
+              })}
+            </h2>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            data-telemetry-id="entSearchContent-crawler-domainDetail-deduplication-reset"
+            color="warning"
+            iconType="refresh"
+            size="s"
+            onClick={() => submitDeduplicationUpdate({ fields: [] })}
+            disabled={deduplicationFields.length === 0}
+          >
+            {i18n.translate(
+              'xpack.enterpriseSearch.crawler.deduplicationPanel.resetToDefaultsButtonLabel',
+              {
+                defaultMessage: 'Reset to defaults',
+              }
+            )}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer />
+      <EuiText size="s" color="subdued">
+        <p>
+          <FormattedMessage
+            id="xpack.enterpriseSearch.crawler.deduplicationPanel.description"
+            defaultMessage="The web crawler only indexes unique pages. Choose which fields the crawler should use when
           considering which pages are duplicates. Deselect all schema fields to allow duplicate
           documents on this domain. {documentationLink}."
-          values={{
-            documentationLink: (
-              <EuiLink href={docLinks.crawlerManaging} target="_blank" external>
-                {i18n.translate(
-                  'xpack.enterpriseSearch.crawler.deduplicationPanel.learnMoreMessage',
-                  {
-                    defaultMessage: 'Learn more about content hashing',
-                  }
-                )}
-              </EuiLink>
-            ),
-          }}
-        />
-      }
-    >
+            values={{
+              documentationLink: (
+                <EuiLink href={docLinks.crawlerManaging} target="_blank" external>
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.crawler.deduplicationPanel.learnMoreMessage',
+                    {
+                      defaultMessage: 'Learn more about content hashing',
+                    }
+                  )}
+                </EuiLink>
+              ),
+            }}
+          />
+        </p>
+      </EuiText>
+      <EuiSpacer />
       <EuiSwitch
         data-telemetry-id="entSearchContent-crawler-domainDetail-deduplication-preventDuplicates"
         label={i18n.translate(
@@ -210,6 +218,6 @@ export const DeduplicationPanel: React.FC = () => {
           </div>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </DataPanel>
+    </div>
   );
 };

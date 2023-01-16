@@ -7,19 +7,19 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { HttpError, Status } from '../../../../../common/types/api';
+import { HttpError, Status } from '../../../../../../../common/types/api';
 
-import { generateEncodedPath } from '../../../shared/encode_path_params';
+import { generateEncodedPath } from '../../../../../shared/encode_path_params';
 
-import { flashAPIErrors } from '../../../shared/flash_messages';
+import { flashAPIErrors } from '../../../../../shared/flash_messages';
 
-import { HttpLogic } from '../../../shared/http';
-import { KibanaLogic } from '../../../shared/kibana';
+import { HttpLogic } from '../../../../../shared/http';
+import { KibanaLogic } from '../../../../../shared/kibana';
 import {
   DeleteCrawlerDomainApiLogic,
   DeleteCrawlerDomainArgs,
   DeleteCrawlerDomainResponse,
-} from '../../api/crawler/delete_crawler_domain_api_logic';
+} from '../../../../api/crawler/delete_crawler_domain_api_logic';
 import {
   CrawlerAuth,
   CrawlerDomain,
@@ -27,11 +27,11 @@ import {
   CrawlRule,
   EntryPoint,
   Sitemap,
-} from '../../api/crawler/types';
-import { crawlerDomainServerToClient } from '../../api/crawler/utils';
-import { SEARCH_INDEX_TAB_PATH } from '../../routes';
-import { IndexNameLogic } from '../search_index/index_name_logic';
-import { SearchIndexTabId } from '../search_index/search_index';
+} from '../../../../api/crawler/types';
+import { crawlerDomainServerToClient } from '../../../../api/crawler/utils';
+import { SEARCH_INDEX_TAB_PATH } from '../../../../routes';
+import { IndexNameLogic } from '../../index_name_logic';
+import { SearchIndexTabId } from '../../search_index';
 
 export interface CrawlerDomainDetailProps {
   domainId: string;

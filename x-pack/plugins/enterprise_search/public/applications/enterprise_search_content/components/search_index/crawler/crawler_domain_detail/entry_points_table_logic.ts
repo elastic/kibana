@@ -7,9 +7,9 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { clearFlashMessages, flashSuccessToast } from '../../../shared/flash_messages';
+import { clearFlashMessages, flashSuccessToast } from '../../../../../shared/flash_messages';
 
-import { EntryPoint } from '../../api/crawler/types';
+import { EntryPoint } from '../../../../api/crawler/types';
 
 import { CrawlerDomainDetailLogic } from './crawler_domain_detail_logic';
 

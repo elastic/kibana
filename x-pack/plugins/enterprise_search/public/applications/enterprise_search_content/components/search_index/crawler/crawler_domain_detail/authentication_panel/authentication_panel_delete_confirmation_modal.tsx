@@ -12,7 +12,7 @@ import { useActions } from 'kea';
 import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { CANCEL_BUTTON_LABEL } from '../../../../shared/constants';
+import { CANCEL_BUTTON_LABEL } from '../../../../../../shared/constants';
 
 import { AuthenticationPanelLogic } from './authentication_panel_logic';
 

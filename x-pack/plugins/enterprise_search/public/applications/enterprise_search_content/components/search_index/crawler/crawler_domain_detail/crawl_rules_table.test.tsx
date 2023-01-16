@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mockFlashMessageHelpers, setMockActions } from '../../../__mocks__/kea_logic';
+import { mockFlashMessageHelpers, setMockActions } from '../../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -13,8 +13,8 @@ import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiFieldText, EuiSelect } from '@elastic/eui';
 
-import { GenericEndpointInlineEditableTable } from '../../../shared/tables/generic_endpoint_inline_editable_table';
-import { CrawlerPolicies, CrawlerRules } from '../../api/crawler/types';
+import { GenericEndpointInlineEditableTable } from '../../../../../shared/tables/generic_endpoint_inline_editable_table';
+import { CrawlerPolicies, CrawlerRules } from '../../../../api/crawler/types';
 
 import { CrawlRulesTable, CrawlRulesTableProps } from './crawl_rules_table';
 
