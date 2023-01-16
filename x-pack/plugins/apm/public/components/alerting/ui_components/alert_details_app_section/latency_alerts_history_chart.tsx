@@ -110,7 +110,6 @@ export function LatencyAlertsHistoryChart({
     ruleId,
   });
   const getFormattedDuration = (avgTimeToRecover: number) => {
-    if (!avgTimeToRecover) return;
     const time = moment.duration(avgTimeToRecover);
     if (time.hours() > 0) {
       return `${time.hours()}h ${time.minutes()}m`;
@@ -168,7 +167,7 @@ export function LatencyAlertsHistoryChart({
               <EuiTitle size="s">
                 <h3>
                   {getFormattedDuration(
-                    triggeredAlertsData?.avgTimeToRecoverMS || 0
+                    triggeredAlertsData?.avgTimeToRecoverMS || -
                   )}
                 </h3>
               </EuiTitle>
