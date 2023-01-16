@@ -147,8 +147,10 @@ export class SavedSearchEmbeddable
     };
     this.panelTitle = savedSearch.title ?? '';
     this.initializeSearchEmbeddableProps();
+    console.log('savedSearch constructed');
 
     this.subscription = this.getUpdated$().subscribe(() => {
+      console.log('savedSearch subscribe triggered');
       const titleChanged = this.output.title && this.panelTitle !== this.output.title;
       if (titleChanged) {
         this.panelTitle = this.output.title || '';
@@ -169,6 +171,7 @@ export class SavedSearchEmbeddable
   }
 
   private fetch = async () => {
+    console.log('fetch');
     const searchSessionId = this.input.searchSessionId;
     const useNewFieldsApi = !this.services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE, false);
     if (!this.searchProps) return;
@@ -222,6 +225,7 @@ export class SavedSearchEmbeddable
     const dataView = this.savedSearch.searchSource.getField('index')!;
     const recordRawType = getRawRecordType(query);
     const useSql = recordRawType === RecordRawType.PLAIN;
+    console.log('fetch start');
 
     try {
       // Request SQL data
@@ -249,6 +253,7 @@ export class SavedSearchEmbeddable
         return;
       }
 
+
       // Request document data
       const { rawResponse: resp } = await lastValueFrom(
         searchSource.fetch$({
@@ -267,6 +272,7 @@ export class SavedSearchEmbeddable
           executionContext,
         })
       );
+      console.log('fetch end', resp);
 
       this.updateOutput({
         ...this.getOutput(),
@@ -297,6 +303,7 @@ export class SavedSearchEmbeddable
   }
 
   private initializeSearchEmbeddableProps() {
+    console.log('initializeSearchEmbeddableProps');
     const { searchSource } = this.savedSearch;
 
     const dataView = searchSource.getField('index');
@@ -420,17 +427,19 @@ export class SavedSearchEmbeddable
   }
 
   private isFetchRequired(searchProps?: SearchProps) {
+    console.log('isFetchRequired', { searchProps });
     if (!searchProps || !searchProps.dataView) {
       return false;
     }
-
-    return (
+    const result =
       !onlyDisabledFiltersChanged(this.input.filters, this.prevFilters) ||
       !isEqual(this.prevQuery, this.input.query) ||
       !isEqual(this.prevTimeRange, this.getTimeRange()) ||
       !isEqual(this.prevSort, this.input.sort) ||
-      this.prevSearchSessionId !== this.input.searchSessionId
-    );
+      this.prevSearchSessionId !== this.input.searchSessionId;
+    console.log('isFetchRequired result', result);
+
+    return result;
   }
 
   private isRerenderRequired(searchProps?: SearchProps) {
@@ -491,6 +500,7 @@ export class SavedSearchEmbeddable
    * @param {Element} domNode
    */
   public async render(domNode: HTMLElement) {
+    console.log('render', { searchProps: this.searchProps });
     if (!this.searchProps) {
       throw new Error('Search props not defined');
     }
@@ -502,6 +512,7 @@ export class SavedSearchEmbeddable
   }
 
   private renderReactComponent(domNode: HTMLElement, searchProps: SearchProps) {
+    console.log('renderReactComponent', { searchProps });
     if (!searchProps) {
       return;
     }
@@ -574,6 +585,8 @@ export class SavedSearchEmbeddable
   }
 
   private async load(searchProps: SearchProps, forceFetch = false) {
+    console.log('load', { searchProps, forceFetch });
+
     await this.pushContainerStateParamsToProps(searchProps, { forceFetch });
 
     if (this.node) {
@@ -582,6 +595,7 @@ export class SavedSearchEmbeddable
   }
 
   public reload(forceFetch = true) {
+    console.log('reload', { forceFetch });
     if (this.searchProps) {
       this.load(this.searchProps, forceFetch);
     }
