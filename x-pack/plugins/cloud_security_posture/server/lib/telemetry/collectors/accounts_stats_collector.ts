@@ -6,7 +6,7 @@
  */
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/core/server';
-import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingRuntimeFields, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { calculatePostureScore } from '../../../routes/compliance_dashboard/get_stats';
 import type { CspmAccountsStats } from './types';
 import { LATEST_FINDINGS_INDEX_DEFAULT_NS } from '../../../../common/constants';
@@ -52,15 +52,47 @@ interface AccountEntity {
   };
 }
 
+export const getIdentifierRuntimeMapping = (): MappingRuntimeFields => ({
+  asset_identifier: {
+    type: 'keyword',
+    script: {
+      // 'myField' should be replace by the new field in: https://github.com/elastic/security-team/issues/5732
+      source: `
+        if (!doc.containsKey('myField') || doc['myField'].empty) 
+        {
+        def identifier = doc["cluster_id"].value;
+        emit(identifier);
+        return
+            
+        }
+        def benchmark = doc["rule.benchmark.id"].value; 
+        if (benchmark == "cis_k8s" || benchmark == "cis_eks")
+          {
+            def identifier = doc["cluster_id"].value;
+            emit(identifier);
+            return
+          }
+        if (benchmark == "cspm")
+          {
+            def identifier = doc["account_id"].value;
+            emit(identifier);
+            return
+          }
+      `,
+    },
+  },
+});
+
 const getAccountsStatsQuery = (index: string): SearchRequest => ({
   index,
+  runtime_mappings: getIdentifierRuntimeMapping(),
   query: {
     match_all: {},
   },
   aggs: {
     accounts: {
       terms: {
-        field: 'cluster_id',
+        field: 'asset_identifier',
         order: {
           _count: 'desc',
         },
