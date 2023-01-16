@@ -36,6 +36,8 @@ import type { IntegrationCardItem } from '../../../../../../common/types/models'
 
 import type { ExtendedIntegrationCategory, CategoryFacet } from '../screens/home/category_facets';
 
+import type { IntegrationsURLParameters } from '../screens/home/hooks/use_available_packages';
+
 import { promoteFeaturedIntegrations } from './utils';
 
 import { PackageCard } from './package_card';
@@ -46,12 +48,15 @@ export interface Props {
   title?: string;
   list: IntegrationCardItem[];
   searchTerm: string;
-  setUrlSearchTerm: (search: string) => void;
+  setSearchTerm: (search: string) => void;
   selectedCategory: ExtendedIntegrationCategory;
-  setSelectedCategory: (category: string) => void;
+  setCategory: (category: ExtendedIntegrationCategory) => void;
   categories: CategoryFacet[];
   availableSubCategories?: CategoryFacet[];
-  setSelectedSubCategory?: (c: CategoryFacet) => void;
+  selectedSubCategory?: CategoryFacet;
+  setSelectedSubCategory?: (c: CategoryFacet | undefined) => void;
+  setUrlandReplaceHistory: (params: IntegrationsURLParameters) => void;
+  setUrlandPushHistory: (params: IntegrationsURLParameters) => void;
   showMissingIntegrationMessage?: boolean;
   callout?: JSX.Element | null;
   showCardLabels?: boolean;
@@ -63,12 +68,15 @@ export const PackageListGrid: FunctionComponent<Props> = ({
   title,
   list,
   searchTerm,
-  setUrlSearchTerm,
+  setSearchTerm,
   selectedCategory,
-  setSelectedCategory,
+  setCategory,
   categories,
   availableSubCategories,
   setSelectedSubCategory,
+  selectedSubCategory,
+  setUrlandReplaceHistory,
+  setUrlandPushHistory,
   showMissingIntegrationMessage = false,
   callout,
   showCardLabels = true,
@@ -92,11 +100,17 @@ export const PackageListGrid: FunctionComponent<Props> = ({
 
   const onQueryChange = (e: any) => {
     const queryText = e.target.value;
-    setUrlSearchTerm(queryText);
+    setSearchTerm(queryText);
+    setUrlandReplaceHistory({
+      searchString: queryText,
+      categoryId: selectedCategory,
+      subCategoryId: selectedSubCategory?.id,
+    });
   };
 
   const resetQuery = () => {
-    setUrlSearchTerm('');
+    setSearchTerm('');
+    setUrlandReplaceHistory({ searchString: '', categoryId: '', subCategoryId: '' });
   };
 
   const selectedCategoryTitle = selectedCategory
@@ -161,7 +175,13 @@ export const PackageListGrid: FunctionComponent<Props> = ({
                     <button
                       data-test-subj="epmList.categoryBadge.closeBtn"
                       onClick={() => {
-                        setSelectedCategory('');
+                        setCategory('');
+                        if (setSelectedSubCategory) setSelectedSubCategory(undefined);
+                        setUrlandReplaceHistory({
+                          searchString: '',
+                          categoryId: '',
+                          subCategoryId: '',
+                        });
                       }}
                       aria-label="Remove filter"
                       style={{
@@ -198,6 +218,10 @@ export const PackageListGrid: FunctionComponent<Props> = ({
                     color="text"
                     onClick={() => {
                       if (setSelectedSubCategory) setSelectedSubCategory(subCategory);
+                      setUrlandPushHistory({
+                        categoryId: selectedCategory,
+                        subCategoryId: subCategory.id,
+                      });
                     }}
                   >
                     <FormattedMessage
@@ -225,9 +249,11 @@ export const PackageListGrid: FunctionComponent<Props> = ({
               <>
                 <EuiSpacer />
                 <MissingIntegrationContent
+                  setUrlandPushHistory={setUrlandPushHistory}
                   resetQuery={resetQuery}
-                  setSelectedCategory={setSelectedCategory}
+                  setSelectedCategory={setCategory}
                 />
+                <EuiSpacer />
               </>
             )}
           </EuiFlexItem>
@@ -323,17 +349,23 @@ const GridColumn = ({
 
 interface MissingIntegrationContentProps {
   resetQuery: () => void;
-  setSelectedCategory: (category: string) => void;
+  setSelectedCategory: (category: ExtendedIntegrationCategory) => void;
+  setUrlandPushHistory: (params: IntegrationsURLParameters) => void;
 }
 
 const MissingIntegrationContent = ({
   resetQuery,
   setSelectedCategory,
+  setUrlandPushHistory,
 }: MissingIntegrationContentProps) => {
   const handleCustomInputsLinkClick = useCallback(() => {
     resetQuery();
     setSelectedCategory('custom');
-  }, [resetQuery, setSelectedCategory]);
+    setUrlandPushHistory({
+      categoryId: 'custom',
+      subCategoryId: '',
+    });
+  }, [resetQuery, setSelectedCategory, setUrlandPushHistory]);
 
   return (
     <EuiText size="s" color="subdued">

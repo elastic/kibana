@@ -113,8 +113,6 @@ const VerificationWarningCallout: React.FC = () => {
   );
 };
 
-// TODO: clintandrewhall - this component is hard to test due to the hooks, particularly those that use `http`
-// or `location` to load data.  Ideally, we'll split this into "connected" and "pure" components.
 export const InstalledPackages: React.FC<{
   installedPackages: PackageListItem[];
   isLoading: boolean;

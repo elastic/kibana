@@ -36,9 +36,15 @@ import { pagePathGetters } from '../../../../../constants';
 import type { IntegrationCardItem } from '../../../../../../../../common/types/models';
 
 import { ALL_CATEGORY } from '../category_facets';
-import type { CategoryFacet, ExtendedIntegrationCategory } from '../category_facets';
+import type { CategoryFacet } from '../category_facets';
 
 import { mergeCategoriesAndCount } from '../util';
+
+export interface IntegrationsURLParameters {
+  searchString?: string;
+  categoryId?: string;
+  subCategoryId?: string;
+}
 
 function getAllCategoriesFromIntegrations(pkg: PackageListItem) {
   if (!doesPackageHaveIntegrations(pkg)) {
@@ -119,27 +125,41 @@ export const useAvailablePackages = () => {
   const { getHref, getAbsolutePath } = useLink();
   const history = useHistory();
 
-  function setUrlCategory(categoryId: string) {
-    setCategory(categoryId as ExtendedIntegrationCategory);
-
+  const buildUrl = ({ searchString, categoryId, subCategoryId }: IntegrationsURLParameters) => {
     const url = pagePathGetters.integrations_all({
-      category: categoryId,
-      searchTerm,
+      category: categoryId ? categoryId : '',
+      subCategory: subCategoryId ? subCategoryId : '',
+      searchTerm: searchString ? searchString : '',
     })[1];
+    return url;
+  };
+
+  const setUrlandPushHistory = ({
+    searchString,
+    categoryId,
+    subCategoryId,
+  }: IntegrationsURLParameters) => {
+    const url = buildUrl({
+      categoryId,
+      searchString,
+      subCategoryId,
+    });
     history.push(url);
-  }
+  };
 
-  function setUrlSearchTerm(search: string) {
-    setSearchTerm(search);
-
-    const url = pagePathGetters.integrations_all({
-      searchTerm: search,
-      category: selectedCategory,
-    })[1];
-
+  const setUrlandReplaceHistory = ({
+    searchString,
+    categoryId,
+    subCategoryId,
+  }: IntegrationsURLParameters) => {
+    const url = buildUrl({
+      categoryId,
+      searchString,
+      subCategoryId,
+    });
     // Use .replace so the browser's back button is not tied to single keystroke
     history.replace(url);
-  }
+  };
 
   const {
     data: eprPackages,
@@ -233,13 +253,16 @@ export const useAvailablePackages = () => {
   return {
     initialSelectedCategory,
     selectedCategory,
+    setCategory,
     allCategories,
     mainCategories,
     availableSubCategories,
     selectedSubCategory,
     setSelectedSubCategory,
     searchTerm,
-    setUrlSearchTerm,
+    setSearchTerm,
+    setUrlandPushHistory,
+    setUrlandReplaceHistory,
     preference,
     setPreference,
     isLoadingCategories,
@@ -249,6 +272,5 @@ export const useAvailablePackages = () => {
     eprCategoryLoadingError,
     filteredCards,
     setPrereleaseIntegrationsEnabled,
-    setUrlCategory,
   };
 };

@@ -114,8 +114,21 @@ export const pagePathGetters: {
   base: () => [FLEET_BASE_PATH, '/'],
   overview: () => [FLEET_BASE_PATH, '/'],
   integrations: () => [INTEGRATIONS_BASE_PATH, '/'],
-  integrations_all: ({ searchTerm, category }: { searchTerm?: string; category?: string }) => {
-    const categoryPath = category ? `/${category}` : ``;
+  integrations_all: ({
+    searchTerm,
+    category,
+    subCategory,
+  }: {
+    searchTerm?: string;
+    category?: string;
+    subCategory?: string;
+  }) => {
+    const categoryPath =
+      category && subCategory
+        ? `/${category}/${subCategory} `
+        : category && !subCategory
+        ? `/${category}`
+        : ``;
     const queryParams = searchTerm ? `?${INTEGRATIONS_SEARCH_QUERYPARAM}=${searchTerm}` : ``;
     return [INTEGRATIONS_BASE_PATH, `/browse${categoryPath}${queryParams}`];
   },

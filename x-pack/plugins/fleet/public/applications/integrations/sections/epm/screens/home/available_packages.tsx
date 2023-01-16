@@ -7,14 +7,12 @@
 
 import type { FunctionComponent } from 'react';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiHorizontalRule, EuiFlexItem, EuiCallOut, EuiLink } from '@elastic/eui';
 
 import { useStartServices } from '../../../../hooks';
 
-import { pagePathGetters } from '../../../../constants';
 import { useBreadcrumbs } from '../../../../hooks';
 
 import { PackageListGrid } from '../../components/package_list_grid';
@@ -27,7 +25,8 @@ import { categoryExists } from '.';
 
 import { useAvailablePackages } from './hooks/use_available_packages';
 
-// TODO: move callout to its own component
+import type { ExtendedIntegrationCategory } from './category_facets';
+
 const NoEprCallout: FunctionComponent<{ statusCode?: number }> = ({
   statusCode,
 }: {
@@ -99,12 +98,12 @@ function OnPremLink() {
 }
 
 export const AvailablePackages: React.FC<{}> = ({}) => {
-  const history = useHistory();
   useBreadcrumbs('integrations_all');
 
   const {
     initialSelectedCategory,
     selectedCategory,
+    setCategory,
     allCategories,
     mainCategories,
     preference,
@@ -115,17 +114,18 @@ export const AvailablePackages: React.FC<{}> = ({}) => {
     eprPackageLoadingError,
     eprCategoryLoadingError,
     searchTerm,
-    setUrlSearchTerm,
+    setSearchTerm,
+    setUrlandPushHistory,
+    setUrlandReplaceHistory,
     filteredCards,
     setPrereleaseIntegrationsEnabled,
-    setUrlCategory,
     availableSubCategories,
+    selectedSubCategory,
     setSelectedSubCategory,
   } = useAvailablePackages();
 
-  // move this to hook
   if (!isLoadingCategories && !categoryExists(initialSelectedCategory, allCategories)) {
-    history.replace(pagePathGetters.integrations_all({ category: '', searchTerm })[1]);
+    setUrlandReplaceHistory({ searchString: searchTerm, categoryId: '', subCategoryId: '' });
     return null;
   }
 
@@ -152,9 +152,10 @@ export const AvailablePackages: React.FC<{}> = ({}) => {
           categories={mainCategories}
           selectedCategory={selectedCategory}
           onCategoryChange={({ id }) => {
-            setUrlCategory(id);
-            setUrlSearchTerm('');
+            setCategory(id as ExtendedIntegrationCategory);
+            setSearchTerm('');
             setSelectedSubCategory(undefined);
+            setUrlandPushHistory({ searchString: '', categoryId: id, subCategoryId: '' });
           }}
         />
       </EuiFlexItem>,
@@ -173,16 +174,19 @@ export const AvailablePackages: React.FC<{}> = ({}) => {
       isLoading={isLoadingAllPackages || isLoadingAppendCustomIntegrations}
       controls={controls}
       searchTerm={searchTerm}
-      setUrlSearchTerm={setUrlSearchTerm}
+      setSearchTerm={setSearchTerm}
       list={filteredCards}
       selectedCategory={selectedCategory}
-      setSelectedCategory={setUrlCategory}
+      setCategory={setCategory}
       availableSubCategories={availableSubCategories}
       categories={mainCategories}
       showMissingIntegrationMessage
       callout={noEprCallout}
       showCardLabels={false}
       setSelectedSubCategory={setSelectedSubCategory}
+      selectedSubCategory={selectedSubCategory}
+      setUrlandReplaceHistory={setUrlandReplaceHistory}
+      setUrlandPushHistory={setUrlandPushHistory}
     />
   );
 };
