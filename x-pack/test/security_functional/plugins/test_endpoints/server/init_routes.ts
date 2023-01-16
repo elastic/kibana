@@ -156,6 +156,11 @@ export function initRoutes(
       let bulkEnableDisableResult: BulkUpdateTaskResult;
       try {
         if (request.body.enabled) {
+          logger.info(
+            `Going to enable the following task: ${JSON.stringify(
+              await taskManager.get(SESSION_INDEX_CLEANUP_TASK_NAME)
+            )}.`
+          );
           bulkEnableDisableResult = await taskManager.bulkEnable(
             [SESSION_INDEX_CLEANUP_TASK_NAME],
             true /** runSoon **/
