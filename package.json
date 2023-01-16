@@ -683,7 +683,7 @@
     "styled-components": "^5.1.0",
     "suricata-sid-db": "^1.0.2",
     "symbol-observable": "^1.2.0",
-    "tar": "^6.1.11",
+    "tar": "^6.1.13",
     "tinycolor2": "1.4.1",
     "tinygradient": "0.4.3",
     "ts-easing": "^0.2.0",
