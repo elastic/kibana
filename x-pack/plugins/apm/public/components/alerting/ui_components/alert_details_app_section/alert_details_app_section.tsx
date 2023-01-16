@@ -20,9 +20,6 @@ import {
   ALERT_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
 import moment from 'moment';
-import { getTransactionType } from '../../../../context/apm_service/apm_service_context';
-import { useServiceAgentFetcher } from '../../../../context/apm_service/use_service_agent_fetcher';
-import { useServiceTransactionTypesFetcher } from '../../../../context/apm_service/use_service_transaction_types_fetcher';
 import { asPercent } from '../../../../../common/utils/formatters';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { getDurationFormatter } from '../../../../../common/utils/formatters/duration';
