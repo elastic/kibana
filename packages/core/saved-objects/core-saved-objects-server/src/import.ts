@@ -40,6 +40,16 @@ export interface ISavedObjectsImporter {
 }
 
 /**
+ * Options to control the importer
+ *
+ * @public
+ */
+export interface SavedObjectsImporterOptions {
+  /** Overwrites the maximum number of saved objects that could be imported */
+  importSizeLimit?: number;
+}
+
+/**
  * Options to control the import operation.
  * @public
  */

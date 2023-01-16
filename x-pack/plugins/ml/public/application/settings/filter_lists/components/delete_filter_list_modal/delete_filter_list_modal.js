@@ -8,6 +8,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 import { EuiButton, EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON } from '@elastic/eui';
 
@@ -56,34 +57,27 @@ export class DeleteFilterListModal extends Component {
     let modal;
 
     if (this.state.isModalVisible) {
-      const title = (
-        <FormattedMessage
-          id="xpack.ml.settings.filterLists.deleteFilterListModal.modalTitle"
-          defaultMessage="Delete {selectedFilterListsLength, plural, one {{selectedFilterId}} other {# filter lists}}?"
-          values={{
-            selectedFilterListsLength: selectedFilterLists.length,
-            selectedFilterId: !!selectedFilterLists.length && selectedFilterLists[0].filter_id,
-          }}
-        />
-      );
       modal = (
         <EuiConfirmModal
-          title={title}
+          title={i18n.translate('xpack.ml.settings.filterLists.deleteFilterListModal.modalTitle', {
+            defaultMessage:
+              'Delete {selectedFilterListsLength, plural, one {{selectedFilterId}} other {# filter lists}}?',
+            values: {
+              selectedFilterListsLength: selectedFilterLists.length,
+              selectedFilterId: !!selectedFilterLists.length && selectedFilterLists[0].filter_id,
+            },
+          })}
           className="eui-textBreakWord"
           onCancel={this.closeModal}
           onConfirm={this.onConfirmDelete}
-          cancelButtonText={
-            <FormattedMessage
-              id="xpack.ml.settings.filterLists.deleteFilterListModal.cancelButtonLabel"
-              defaultMessage="Cancel"
-            />
-          }
-          confirmButtonText={
-            <FormattedMessage
-              id="xpack.ml.settings.filterLists.deleteFilterListModal.confirmButtonLabel"
-              defaultMessage="Delete"
-            />
-          }
+          cancelButtonText={i18n.translate(
+            'xpack.ml.settings.filterLists.deleteFilterListModal.cancelButtonLabel',
+            { defaultMessage: 'Cancel' }
+          )}
+          confirmButtonText={i18n.translate(
+            'xpack.ml.settings.filterLists.deleteFilterListModal.confirmButtonLabel',
+            { defaultMessage: 'Delete' }
+          )}
           buttonColor="danger"
           defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
           data-test-subj={'mlFilterListDeleteConfirmation'}

@@ -171,7 +171,7 @@ There are three great ways to debug issues with the API infrastructure.
 
 1. Write a test
 
-[api_doc_suite.test.ts](https://github.com/elastic/kibana/blob/main/packages/kbn-docs-utils/src/api_docs/tests/api_doc_suite.test.ts) is a pretty comprehensive test suite that builds the test docs inside the [**fixtures** folder](https://github.com/elastic/kibana/tree/main/packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src).
+[api_doc_suite.test.ts](https://github.com/elastic/kibana/blob/main/packages/kbn-docs-utils/src/tests/api_doc_suite.test.ts) is a pretty comprehensive test suite that builds the test docs inside the [**fixtures** folder](https://github.com/elastic/kibana/tree/main/packages/kbn-docs-utils/src/tests/__fixtures__/src).
 
 Edit the code inside `__fixtures__` to replicate the bug, write a test to track what should happen, then run `yarn jest api_doc_suite`.
 

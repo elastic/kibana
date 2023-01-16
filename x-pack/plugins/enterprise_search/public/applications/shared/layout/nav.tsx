@@ -24,6 +24,7 @@ import {
   ENGINES_PATH,
   SEARCH_INDICES_PATH,
   SETTINGS_PATH,
+  EngineViewTabs,
 } from '../../enterprise_search_content/routes';
 import { KibanaLogic } from '../kibana';
 
@@ -176,7 +177,6 @@ export const useEnterpriseSearchNav = () => {
             }),
             ...generateNavLink({
               shouldNotCreateHref: true,
-              shouldShowActiveForSubroutes: true,
               to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + ENGINES_PATH,
             }),
           },
@@ -228,6 +228,105 @@ export const useEnterpriseSearchNav = () => {
         : []),
     ];
   }
+
+  return navItems;
+};
+
+export const useEnterpriseSearchEngineNav = (engineName?: string, isEmptyState?: boolean) => {
+  const navItems = useEnterpriseSearchNav();
+  if (!engineName) return navItems;
+  const searchItem = navItems.find((item) => item.id === 'enginesSearch');
+  if (!searchItem || !searchItem.items) return navItems;
+  const enginesItem = searchItem.items[1];
+  if (!enginesItem || enginesItem.id !== 'enterpriseSearchEngines') return navItems;
+
+  const enginePath = `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}${ENGINES_PATH}/${engineName}`;
+
+  enginesItem.items = !isEmptyState
+    ? [
+        {
+          id: 'engineId',
+          name: engineName,
+          ...generateNavLink({
+            shouldNotCreateHref: true,
+            to: enginePath,
+          }),
+          items: [
+            {
+              id: 'enterpriseSearchEngineOverview',
+              name: i18n.translate('xpack.enterpriseSearch.nav.engine.overviewTitle', {
+                defaultMessage: 'Overview',
+              }),
+              ...generateNavLink({
+                shouldNotCreateHref: true,
+                to: `${enginePath}/${EngineViewTabs.OVERVIEW}`,
+              }),
+            },
+            {
+              id: 'enterpriseSearchEngineIndices',
+              name: i18n.translate('xpack.enterpriseSearch.nav.engine.indicesTitle', {
+                defaultMessage: 'Indices',
+              }),
+              ...generateNavLink({
+                shouldNotCreateHref: true,
+                to: `${enginePath}/${EngineViewTabs.INDICES}`,
+              }),
+            },
+
+            {
+              id: 'enterpriseSearchEngineDocuments',
+              name: i18n.translate('xpack.enterpriseSearch.nav.engine.documentsTitle', {
+                defaultMessage: 'Documents',
+              }),
+              ...generateNavLink({
+                shouldNotCreateHref: true,
+                to: `${enginePath}/${EngineViewTabs.DOCUMENTS}`,
+              }),
+            },
+            {
+              id: 'enterpriseSearchEngineSchema',
+              name: i18n.translate('xpack.enterpriseSearch.nav.engine.schemaTitle', {
+                defaultMessage: 'Schema',
+              }),
+              ...generateNavLink({
+                shouldNotCreateHref: true,
+                to: `${enginePath}/${EngineViewTabs.SCHEMA}`,
+              }),
+            },
+            {
+              id: 'enterpriseSearchEnginePreview',
+              name: i18n.translate('xpack.enterpriseSearch.nav.engine.previewTitle', {
+                defaultMessage: 'Preview',
+              }),
+              ...generateNavLink({
+                shouldNotCreateHref: true,
+                to: `${enginePath}/${EngineViewTabs.PREVIEW}`,
+              }),
+            },
+            {
+              id: 'enterpriseSearchEngineAPI',
+              name: i18n.translate('xpack.enterpriseSearch.nav.engine.apiTitle', {
+                defaultMessage: 'API',
+              }),
+              ...generateNavLink({
+                shouldNotCreateHref: true,
+                to: `${enginePath}/${EngineViewTabs.API}`,
+              }),
+            },
+          ],
+        },
+      ]
+    : [
+        {
+          id: 'engineId',
+          name: engineName,
+          ...generateNavLink({
+            shouldNotCreateHref: true,
+            shouldShowActiveForSubroutes: true,
+            to: enginePath,
+          }),
+        },
+      ];
 
   return navItems;
 };

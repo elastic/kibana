@@ -381,7 +381,7 @@
 /x-pack/test/plugin_api_integration/test_suites/task_manager/ @elastic/response-ops
 /x-pack/plugins/triggers_actions_ui/ @elastic/response-ops
 /x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/ @elastic/response-ops
-/x-pack/test/functional_with_es_ssl/fixtures/plugins/alerts/ @elastic/response-ops
+/x-pack/test/functional_with_es_ssl/plugins/alerts/ @elastic/response-ops
 /docs/user/alerting/ @elastic/response-ops
 /docs/management/connectors/ @elastic/response-ops
 /x-pack/plugins/stack_alerts/ @elastic/response-ops
@@ -496,6 +496,7 @@
 /x-pack/plugins/security_solution/public/common/components/navigation @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/news_feed @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/overview_description_list @elastic/security-threat-hunting-explore
+/x-pack/plugins/security_solution/public/common/components/page @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/sidebar_header @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/tables @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/top_n @elastic/security-threat-hunting-explore
@@ -724,6 +725,13 @@ packages/core/chrome/core-chrome-browser @elastic/kibana-core
 packages/core/chrome/core-chrome-browser-internal @elastic/kibana-core
 packages/core/chrome/core-chrome-browser-mocks @elastic/kibana-core
 packages/core/config/core-config-server-internal @elastic/kibana-core
+packages/core/custom-branding/core-custom-branding-browser @elastic/kibana-global-experience
+packages/core/custom-branding/core-custom-branding-browser-internal @elastic/kibana-global-experience
+packages/core/custom-branding/core-custom-branding-browser-mocks @elastic/kibana-global-experience
+packages/core/custom-branding/core-custom-branding-common @elastic/kibana-global-experience
+packages/core/custom-branding/core-custom-branding-server @elastic/kibana-global-experience
+packages/core/custom-branding/core-custom-branding-server-internal @elastic/kibana-global-experience
+packages/core/custom-branding/core-custom-branding-server-mocks @elastic/kibana-global-experience
 packages/core/deprecations/core-deprecations-browser @elastic/kibana-core
 packages/core/deprecations/core-deprecations-browser-internal @elastic/kibana-core
 packages/core/deprecations/core-deprecations-browser-mocks @elastic/kibana-core
@@ -1017,6 +1025,7 @@ packages/kbn-utility-types @elastic/kibana-core
 packages/kbn-utility-types-jest @elastic/kibana-operations
 packages/kbn-utils @elastic/kibana-operations
 packages/kbn-web-worker-stub @elastic/kibana-operations
+packages/kbn-whereis-pkg-cli @elastic/kibana-operations
 packages/kbn-yarn-lock-validator @elastic/kibana-operations
 packages/shared-ux/avatar/solution @elastic/kibana-global-experience
 packages/shared-ux/avatar/user_profile/impl @elastic/kibana-global-experience
@@ -1066,12 +1075,16 @@ packages/shared-ux/router/mocks @elastic/kibana-global-experience
 packages/shared-ux/router/types @elastic/kibana-global-experience
 packages/shared-ux/storybook/config @elastic/kibana-global-experience
 packages/shared-ux/storybook/mock @elastic/kibana-global-experience
+src/plugins/chart_expressions/common @elastic/kibana-visualizations
 x-pack/packages/ml/agg_utils @elastic/ml-ui
 x-pack/packages/ml/aiops_components @elastic/ml-ui
 x-pack/packages/ml/aiops_utils @elastic/ml-ui
+x-pack/packages/ml/date_picker @elastic/ml-ui
 x-pack/packages/ml/is_defined @elastic/ml-ui
 x-pack/packages/ml/is_populated_object @elastic/ml-ui
 x-pack/packages/ml/local_storage @elastic/ml-ui
 x-pack/packages/ml/nested_property @elastic/ml-ui
+x-pack/packages/ml/query_utils @elastic/ml-ui
 x-pack/packages/ml/string_hash @elastic/ml-ui
 x-pack/packages/ml/url_state @elastic/ml-ui
+x-pack/test/alerting_api_integration/packages/helpers @elastic/response-ops
