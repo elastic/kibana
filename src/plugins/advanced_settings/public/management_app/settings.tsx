@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { EuiSpacer, Query, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { ScopedHistory } from '@kbn/core-application-browser';
@@ -32,7 +32,7 @@ interface AdvancedSettingsState {
   filteredSettings: Record<UiSettingsScope, Record<string, FieldSetting[]>>;
 }
 
-type GroupedSettings = Record<string, FieldSetting[]>;
+export type GroupedSettings = Record<string, FieldSetting[]>;
 
 interface Props {
   history: ScopedHistory;
@@ -77,48 +77,41 @@ export const Settings = (props: Props) => {
     }, {});
   };
 
-  const settings = useMemo<FieldSetting[]>(() => {
-    return mapConfig(uiSettings);
-  }, [uiSettings]);
+  const initCategoryCounts = (grouped: GroupedSettings) => {
+    return Object.keys(grouped).reduce((counts: Record<string, number>, category: string) => {
+      counts[category] = grouped[category].length;
+      return counts;
+    }, {});
+  };
 
-  const globalSettings = useMemo<FieldSetting[]>(() => {
-    return mapConfig(globalUiSettings);
-  }, [globalUiSettings]);
+  const initCategories = (grouped: GroupedSettings) => {
+    return Object.keys(grouped).sort((a, b) => {
+      if (a === DEFAULT_CATEGORY) return -1;
+      if (b === DEFAULT_CATEGORY) return 1;
+      if (a > b) return 1;
+      return a === b ? 0 : -1;
+    });
+  };
 
-  const groupedSettings = useMemo<Record<UiSettingsScope, GroupedSettings>>(() => {
-    return {
-      namespace: mapSettings(settings),
-      global: mapSettings(globalSettings),
-    };
-  }, [settings, globalSettings]);
+  const [settings, setSettings] = useState<FieldSetting[]>(mapConfig(uiSettings));
+  const [globalSettings, setGlobalSettings] = useState<FieldSetting[]>(mapConfig(globalUiSettings));
 
-  const categoryCounts = useMemo<Record<UiSettingsScope, Record<string, number>>>(() => {
-    const initCategoryCounts = (grouped: GroupedSettings) => {
-      return Object.keys(grouped).reduce((counts: Record<string, number>, category: string) => {
-        counts[category] = grouped[category].length;
-        return counts;
-      }, {});
-    };
-    return {
-      namespace: initCategoryCounts(groupedSettings.namespace),
-      global: initCategoryCounts(groupedSettings.global),
-    };
-  }, [groupedSettings]);
+  const [groupedSettings, setGroupedSettings] = useState<Record<UiSettingsScope, GroupedSettings>>({
+    namespace: mapSettings(settings),
+    global: mapSettings(globalSettings),
+  });
 
-  const categories = useMemo<Record<UiSettingsScope, string[]>>(() => {
-    const initCategories = (grouped: GroupedSettings) => {
-      return Object.keys(grouped).sort((a, b) => {
-        if (a === DEFAULT_CATEGORY) return -1;
-        if (b === DEFAULT_CATEGORY) return 1;
-        if (a > b) return 1;
-        return a === b ? 0 : -1;
-      });
-    };
-    return {
-      namespace: initCategories(groupedSettings.namespace),
-      global: initCategories(groupedSettings.global),
-    };
-  }, [groupedSettings]);
+  const [categoryCounts, setCategoryCounts] = useState<
+    Record<UiSettingsScope, Record<string, number>>
+  >({
+    namespace: initCategoryCounts(groupedSettings.namespace),
+    global: initCategoryCounts(groupedSettings.global),
+  });
+
+  const [categories, setCategories] = useState<Record<UiSettingsScope, string[]>>({
+    namespace: initCategories(groupedSettings.namespace),
+    global: initCategories(groupedSettings.global),
+  });
 
   const [queryState, setQueryState] = useState<AdvancedSettingsState>({
     filteredSettings: {
@@ -129,56 +122,69 @@ export const Settings = (props: Props) => {
     query: Query.parse(''),
   });
 
+  const setTimeoutCallback = () => {
+    const { hash } = window.location;
+    const id = hash.replace('#', '');
+    const element = document.getElementById(id);
+
+    let globalNavOffset = 0;
+
+    const globalNavBars = document
+      .getElementById('globalHeaderBars')
+      ?.getElementsByClassName('euiHeader');
+
+    if (globalNavBars) {
+      Array.from(globalNavBars).forEach((navBar) => {
+        globalNavOffset += (navBar as HTMLDivElement).offsetHeight;
+      });
+    }
+
+    if (element) {
+      element.scrollIntoView();
+      window.scrollBy(0, -globalNavOffset); // offsets scroll by height of the global nav
+    }
+  };
+
   useEffectOnce(() => {
     setQueryState(getQueryState(undefined, true));
+
+    const subscription = (mappedSettings: FieldSetting[], scope: UiSettingsScope) => {
+      const grouped = { ...groupedSettings };
+      grouped[scope] = mapSettings(mappedSettings);
+      setGroupedSettings(grouped);
+
+      const updatedCategories = { ...categories };
+      updatedCategories[scope] = initCategories(groupedSettings[scope]);
+      setCategories(updatedCategories);
+
+      const updatedCategoryCounts = { ...categoryCounts };
+      updatedCategoryCounts[scope] = initCategoryCounts(groupedSettings[scope]);
+      setCategoryCounts(updatedCategoryCounts);
+      const updatedQueryState = { ...getQueryState(undefined, true) };
+      updatedQueryState.filteredSettings[scope] = mapSettings(
+        Query.execute(updatedQueryState.query, mappedSettings)
+      );
+      setQueryState(updatedQueryState);
+    };
+
     const uiSettingsSubscription = uiSettings.getUpdate$().subscribe(() => {
-      const { query } = queryState;
-      setQueryState({
-        ...queryState,
-        filteredSettings: {
-          ...queryState.filteredSettings,
-          namespace: mapSettings(Query.execute(query, settings)),
-        },
-      });
+      const updatedSettings = mapConfig(uiSettings);
+      setSettings(updatedSettings);
+      subscription(updatedSettings, 'namespace');
     });
     const globalUiSettingsSubscription = globalUiSettings.getUpdate$().subscribe(() => {
-      const { query } = queryState;
-      setQueryState({
-        ...queryState,
-        filteredSettings: {
-          ...queryState.filteredSettings,
-          global: mapSettings(Query.execute(query, globalSettings)),
-        },
-      });
+      const mappedSettings = mapConfig(globalUiSettings);
+      setGlobalSettings(mappedSettings);
+      subscription(mappedSettings, 'global');
     });
-    const { hash } = window.location;
-    if (hash !== '') {
-      setTimeout(() => {
-        const id = hash.replace('#', '');
-        const element = document.getElementById(id);
-
-        let globalNavOffset = 0;
-
-        const globalNavBars = document
-          .getElementById('globalHeaderBars')
-          ?.getElementsByClassName('euiHeader');
-
-        if (globalNavBars) {
-          Array.from(globalNavBars).forEach((navBar) => {
-            globalNavOffset += (navBar as HTMLDivElement).offsetHeight;
-          });
-        }
-
-        if (element) {
-          element.scrollIntoView();
-          window.scrollBy(0, -globalNavOffset); // offsets scroll by height of the global nav
-        }
-      }, 0);
+    if (window.location.hash !== '') {
+      setTimeout(() => setTimeoutCallback(), 0);
     }
+    const unregister = history.listen(({ search }) => {
+      setQueryState(getQueryState(search));
+    });
     return () => {
-      history.listen(({ search }) => {
-        setQueryState(getQueryState(search));
-      });
+      unregister();
       uiSettingsSubscription.unsubscribe();
       globalUiSettingsSubscription.unsubscribe();
     };
@@ -199,8 +205,7 @@ export const Settings = (props: Props) => {
   const getQuery = (queryString: string, initialQuery = false): Query => {
     try {
       const query = initialQuery ? getAriaName(queryString) : queryString ?? '';
-      const res = Query.parse(query);
-      return res;
+      return Query.parse(query);
     } catch ({ message }) {
       toasts.addWarning({
         title: parseErrorMsg,
