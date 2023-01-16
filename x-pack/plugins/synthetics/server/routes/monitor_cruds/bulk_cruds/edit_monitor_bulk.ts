@@ -60,7 +60,12 @@ export const syncEditedMonitorBulk = async ({
           monitorsToUpdate.map(({ previousMonitor, monitorWithRevision }) => ({
             type: syntheticsMonitorType,
             id: previousMonitor.id,
-            attributes: monitorWithRevision,
+            attributes: {
+              ...monitorWithRevision,
+              [ConfigKey.CONFIG_ID]: previousMonitor.id,
+              [ConfigKey.MONITOR_QUERY_ID]:
+                monitorWithRevision[ConfigKey.CUSTOM_HEARTBEAT_ID] || previousMonitor.id,
+            },
           }))
         );
         savedObjectsSuccessful = true;
@@ -73,11 +78,19 @@ export const syncEditedMonitorBulk = async ({
     async function syncUpdatedMonitors() {
       try {
         const editSyncPromise = await syntheticsMonitorClient.editMonitors(
-          monitorsToUpdate.map(({ normalizedMonitor, previousMonitor }) => ({
-            monitor: normalizedMonitor as MonitorFields,
-            id: previousMonitor.id,
-            previousMonitor,
-          })),
+          monitorsToUpdate.map(
+            ({ normalizedMonitor, previousMonitor, decryptedPreviousMonitor }) => ({
+              monitor: {
+                ...(normalizedMonitor as MonitorFields),
+                [ConfigKey.CONFIG_ID]: previousMonitor.id,
+                [ConfigKey.MONITOR_QUERY_ID]:
+                  normalizedMonitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || previousMonitor.id,
+              },
+              id: previousMonitor.id,
+              previousMonitor,
+              decryptedPreviousMonitor,
+            })
+          ),
           request,
           savedObjectsClient,
           privateLocations,

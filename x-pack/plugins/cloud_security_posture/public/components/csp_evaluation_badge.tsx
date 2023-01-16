@@ -24,7 +24,11 @@ const getColor = (type: Props['type']): EuiBadgeProps['color'] => {
 };
 
 export const CspEvaluationBadge = ({ type }: Props) => (
-  <EuiBadge color={getColor(type)} style={{ width: BADGE_WIDTH, textAlign: 'center' }}>
+  <EuiBadge
+    color={getColor(type)}
+    style={{ width: BADGE_WIDTH, textAlign: 'center' }}
+    data-test-subj={`${type}_finding`}
+  >
     {type === 'failed' ? (
       <FormattedMessage id="xpack.csp.cspEvaluationBadge.failLabel" defaultMessage="Fail" />
     ) : (

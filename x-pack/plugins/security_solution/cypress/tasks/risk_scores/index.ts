@@ -23,19 +23,24 @@ import {
 import { intercepInstallRiskScoreModule } from '../api_calls/risk_scores';
 
 import { RiskScoreEntity } from './common';
-import { getLegacyIngestPipelineName } from './ingest_pipelines';
+import { getIngestPipelineName, getLegacyIngestPipelineName } from './ingest_pipelines';
 
-export const interceptUpgradeRiskScoreModule = (riskScoreEntity: RiskScoreEntity) => {
+export const interceptUpgradeRiskScoreModule = (
+  riskScoreEntity: RiskScoreEntity,
+  version?: '8.3' | '8.4'
+) => {
+  const ingestPipelinesNames = `${getLegacyIngestPipelineName(
+    riskScoreEntity
+  )},${getIngestPipelineName(riskScoreEntity)}`;
   cy.intercept(
     `POST`,
     `${RISK_SCORE_SAVED_OBJECTS_URL}/_bulk_delete/${riskScoreEntity}RiskScoreDashboards`
   ).as('deleteDashboards');
   cy.intercept(`POST`, `${TRANSFORMS_URL}/stop_transforms`).as('stopTransforms');
   cy.intercept(`POST`, `${TRANSFORMS_URL}/delete_transforms`).as('deleteTransforms');
-  cy.intercept(
-    `DELETE`,
-    `${INGEST_PIPELINES_URL}/${getLegacyIngestPipelineName(riskScoreEntity)}`
-  ).as('deleteIngestPipelines');
+  cy.intercept(`DELETE`, `${INGEST_PIPELINES_URL}/${ingestPipelinesNames}`).as(
+    'deleteIngestPipelines'
+  );
   cy.intercept(`DELETE`, `${STORED_SCRIPTS_URL}/delete`).as('deleteScripts');
   intercepInstallRiskScoreModule();
 };

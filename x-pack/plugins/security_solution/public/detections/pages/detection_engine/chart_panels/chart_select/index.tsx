@@ -13,7 +13,7 @@ import styled from 'styled-components';
 import type { AlertViewSelection } from './helpers';
 import { getButtonProperties, getContextMenuPanels } from './helpers';
 import * as i18n from './translations';
-
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 interface Props {
   alertViewSelection: AlertViewSelection;
   setAlertViewSelection: (alertViewSelection: AlertViewSelection) => void;
@@ -49,10 +49,16 @@ const ChartSelectComponent: React.FC<Props> = ({
       </EuiButton>
     );
   }, [alertViewSelection, onButtonClick]);
-
+  const isAlertsPageChartsEnabled = useIsExperimentalFeatureEnabled('alertsPageChartsEnabled');
   const panels: EuiContextMenuPanelDescriptor[] = useMemo(
-    () => getContextMenuPanels({ alertViewSelection, closePopover, setAlertViewSelection }),
-    [alertViewSelection, closePopover, setAlertViewSelection]
+    () =>
+      getContextMenuPanels({
+        alertViewSelection,
+        closePopover,
+        setAlertViewSelection,
+        isAlertsPageChartsEnabled,
+      }),
+    [alertViewSelection, closePopover, setAlertViewSelection, isAlertsPageChartsEnabled]
   );
 
   return (

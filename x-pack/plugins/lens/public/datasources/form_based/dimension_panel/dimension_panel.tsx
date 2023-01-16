@@ -52,14 +52,13 @@ function wrapOnDot(str?: string) {
 export const FormBasedDimensionTriggerComponent = function FormBasedDimensionTrigger(
   props: FormBasedDimensionTriggerProps
 ) {
-  const layerId = props.layerId;
+  const { columnId, uniqueLabel, invalid, invalidMessage, hideTooltip, layerId, dateRange } = props;
   const layer = props.state.layers[layerId];
   const currentIndexPattern = props.indexPatterns[layer.indexPatternId];
-  const { columnId, uniqueLabel, invalid, invalidMessage, hideTooltip } = props;
 
   const currentColumnHasErrors = useMemo(
-    () => invalid || isColumnInvalid(layer, columnId, currentIndexPattern),
-    [layer, columnId, currentIndexPattern, invalid]
+    () => invalid || isColumnInvalid(layer, columnId, currentIndexPattern, dateRange),
+    [layer, columnId, currentIndexPattern, invalid, dateRange]
   );
 
   const selectedColumn: GenericIndexPatternColumn | null = layer.columns[props.columnId] ?? null;

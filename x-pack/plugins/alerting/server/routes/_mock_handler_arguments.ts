@@ -26,8 +26,8 @@ export function mockHandlerArguments(
       (() => Promise<AlertsHealth>);
     areApiKeysEnabled?: () => Promise<boolean>;
   },
-  req: unknown,
-  res?: Array<MethodKeysOf<KibanaResponseFactory>>
+  request: unknown,
+  response?: Array<MethodKeysOf<KibanaResponseFactory>>
 ): [
   AlertingRequestHandlerContext,
   KibanaRequest<unknown, unknown, unknown>,
@@ -45,8 +45,8 @@ export function mockHandlerArguments(
         areApiKeysEnabled: areApiKeysEnabled ? areApiKeysEnabled : () => Promise.resolve(true),
       },
     } as unknown as AlertingRequestHandlerContext,
-    req as KibanaRequest<unknown, unknown, unknown>,
-    mockResponseFactory(res),
+    request as KibanaRequest<unknown, unknown, unknown>,
+    mockResponseFactory(response),
   ];
 }
 

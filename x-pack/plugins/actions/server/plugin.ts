@@ -19,7 +19,7 @@ import {
   SavedObjectsClientContract,
   SavedObjectsBulkGetObject,
 } from '@kbn/core/server';
-
+import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import {
   EncryptedSavedObjectsClient,
   EncryptedSavedObjectsPluginSetup,
@@ -43,7 +43,7 @@ import {
 import { ActionsConfig, getValidatedConfig } from './config';
 import { resolveCustomHosts } from './lib/custom_host_settings';
 import { ActionsClient } from './actions_client';
-import { ActionTypeRegistry, MAX_ATTEMPTS } from './action_type_registry';
+import { ActionTypeRegistry } from './action_type_registry';
 import {
   createExecutionEnqueuerFunction,
   createEphemeralExecutionEnqueuerFunction,
@@ -360,7 +360,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         actionType: ActionType<Config, Secrets, Params, ExecutorResultData>
       ) => {
         ensureSufficientLicense(actionType);
-        actionType.maxAttempts = actionType.maxAttempts ?? MAX_ATTEMPTS;
         actionTypeRegistry.register(actionType);
       },
       registerSubActionConnectorType: <
@@ -570,7 +569,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     request: KibanaRequest
   ) =>
     savedObjects.getScopedClient(request, {
-      excludedWrappers: ['security'],
+      excludedExtensions: [SECURITY_EXTENSION_ID],
       includedHiddenTypes,
     });
 
@@ -633,7 +632,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
             );
           }
           const unsecuredSavedObjectsClient = savedObjects.getScopedClient(request, {
-            excludedWrappers: ['security'],
+            excludedExtensions: [SECURITY_EXTENSION_ID],
             includedHiddenTypes,
           });
           return new ActionsClient({

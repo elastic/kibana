@@ -14,7 +14,7 @@ import type {
 import * as Either from 'fp-ts/lib/Either';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import type { State } from '../state';
-import type { FetchIndexResponse } from '../actions';
+import type { AliasAction, FetchIndexResponse } from '../actions';
 
 /**
  * A helper function/type for ensuring that all control state's are handled.
@@ -188,4 +188,20 @@ export function getAliases(
   }
 
   return Either.right(aliases);
+}
+
+/**
+ * Build a list of alias actions to remove the provided aliases from the given index.
+ */
+export function buildRemoveAliasActions(
+  index: string,
+  aliases: string[],
+  exclude: string[]
+): AliasAction[] {
+  return aliases.flatMap((alias) => {
+    if (exclude.includes(alias)) {
+      return [];
+    }
+    return [{ remove: { index, alias, must_exist: true } }];
+  });
 }

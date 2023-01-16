@@ -7,6 +7,7 @@
 
 import { useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { useWithInputTextEntered } from '../../../hooks/state_selectors/use_with_input_text_entered';
 import { getArgumentsForCommand } from '../../../service/parsed_command_input';
 import type { CommandDefinition } from '../../..';
 import { useConsoleStateDispatch } from '../../../hooks/state_selectors/use_console_state_dispatch';
@@ -24,6 +25,11 @@ const NO_ARGUMENTS_HINT = i18n.translate('xpack.securitySolution.useInputHints.n
   defaultMessage: 'Hit enter to execute',
 });
 
+export const UP_ARROW_ACCESS_HISTORY_HINT = i18n.translate(
+  'xpack.securitySolution.useInputHints.viewInputHistory',
+  { defaultMessage: 'Press the up arrow key to access previously entered commands' }
+);
+
 /**
  * Auto-generates console footer "hints" while user is interacting with the input area
  */
@@ -32,6 +38,7 @@ export const useInputHints = () => {
   const isInputPopoverOpen = Boolean(useWithInputShowPopover());
   const commandEntered = useWithInputCommandEntered();
   const commandList = useWithCommandList();
+  const { textEntered } = useWithInputTextEntered();
 
   const commandEnteredDefinition = useMemo<CommandDefinition | undefined>(() => {
     if (commandEntered) {
@@ -95,8 +102,13 @@ export const useInputHints = () => {
         dispatch({ type: 'setInputState', payload: { value: 'error' } });
       }
     } else {
-      dispatch({ type: 'updateFooterContent', payload: { value: '' } });
+      dispatch({
+        type: 'updateFooterContent',
+        payload: {
+          value: textEntered || isInputPopoverOpen ? '' : UP_ARROW_ACCESS_HISTORY_HINT,
+        },
+      });
       dispatch({ type: 'setInputState', payload: { value: undefined } });
     }
-  }, [commandEntered, commandEnteredDefinition, dispatch, isInputPopoverOpen]);
+  }, [commandEntered, commandEnteredDefinition, dispatch, isInputPopoverOpen, textEntered]);
 };

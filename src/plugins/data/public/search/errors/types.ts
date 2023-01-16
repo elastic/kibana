@@ -17,7 +17,7 @@ export interface FailedShard {
 
 export interface Reason {
   type: string;
-  reason: string;
+  reason?: string;
   script_stack?: string[];
   position?: {
     offset: number;

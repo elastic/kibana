@@ -7,6 +7,7 @@
 import moment from 'moment';
 import uuid from 'uuid';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { QUERY_RULE_TYPE_ID, SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import type { Logger, StartServicesAccessor } from '@kbn/core/server';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type {
@@ -51,7 +52,6 @@ import {
   createIndicatorMatchAlertType,
   createMlAlertType,
   createQueryAlertType,
-  createSavedQueryAlertType,
   createThresholdAlertType,
   createNewTermsAlertType,
 } from '../../../rule_types';
@@ -91,7 +91,7 @@ export const previewRulesRoute = async (
         return siemResponse.error({ statusCode: 400, body: validationErrors });
       }
       try {
-        const [, { data, security: securityService }] = await getStartServices();
+        const [, { data, security: securityService, share, dataViews }] = await getStartServices();
         const searchSourceClient = await data.search.searchSource.asScoped(request);
         const savedObjectsClient = coreContext.savedObjects.client;
         const siemClient = (await context.securitySolution).getAppClient();
@@ -229,10 +229,15 @@ export const previewRulesRoute = async (
 
           let invocationStartTime;
 
+          const dataViewsService = await dataViews.dataViewsServiceFactory(
+            savedObjectsClient,
+            coreContext.elasticsearch.client.asInternalUser
+          );
+
           while (invocationCount > 0 && !isAborted) {
             invocationStartTime = moment();
 
-            statePreview = (await executor({
+            ({ state: statePreview } = (await executor({
               executionId: uuid.v4(),
               params,
               previousStartedAt,
@@ -251,12 +256,14 @@ export const previewRulesRoute = async (
                   searchSourceClient,
                 }),
                 uiSettingsClient: coreContext.uiSettings.client,
+                dataViews: dataViewsService,
+                share,
               },
               spaceId,
               startedAt: startedAt.toDate(),
               state: statePreview,
               logger,
-            })) as TState;
+            })) as { state: TState });
 
             const errors = loggedStatusChanges
               .filter((item) => item.newStatus === RuleExecutionStatus.failed)
@@ -288,7 +295,12 @@ export const previewRulesRoute = async (
         switch (previewRuleParams.type) {
           case 'query':
             const queryAlertType = previewRuleTypeWrapper(
-              createQueryAlertType({ ...ruleOptions, ...queryRuleAdditionalOptions })
+              createQueryAlertType({
+                ...ruleOptions,
+                ...queryRuleAdditionalOptions,
+                id: QUERY_RULE_TYPE_ID,
+                name: 'Custom Query Rule',
+              })
             );
             await runExecutors(
               queryAlertType.executor,
@@ -308,7 +320,12 @@ export const previewRulesRoute = async (
             break;
           case 'saved_query':
             const savedQueryAlertType = previewRuleTypeWrapper(
-              createSavedQueryAlertType({ ...ruleOptions, ...queryRuleAdditionalOptions })
+              createQueryAlertType({
+                ...ruleOptions,
+                ...queryRuleAdditionalOptions,
+                id: SAVED_QUERY_RULE_TYPE_ID,
+                name: 'Saved Query Rule',
+              })
             );
             await runExecutors(
               savedQueryAlertType.executor,
@@ -403,9 +420,7 @@ export const previewRulesRoute = async (
             );
             break;
           case 'new_terms':
-            const newTermsAlertType = previewRuleTypeWrapper(
-              createNewTermsAlertType(ruleOptions, true)
-            );
+            const newTermsAlertType = previewRuleTypeWrapper(createNewTermsAlertType(ruleOptions));
             await runExecutors(
               newTermsAlertType.executor,
               newTermsAlertType.id,

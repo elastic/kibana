@@ -112,7 +112,7 @@ export const FindingsRuleFlyout = ({ onClose, findings }: FindingFlyoutProps) =>
   const [tab, setTab] = useState<FindingsTab>(tabs[0]);
 
   return (
-    <EuiFlyout ownFocus={false} onClose={onClose}>
+    <EuiFlyout onClose={onClose}>
       <EuiFlyoutHeader>
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
@@ -129,7 +129,12 @@ export const FindingsRuleFlyout = ({ onClose, findings }: FindingFlyoutProps) =>
         <EuiSpacer />
         <EuiTabs>
           {tabs.map((v) => (
-            <EuiTab key={v.id} isSelected={tab.id === v.id} onClick={() => setTab(v)}>
+            <EuiTab
+              key={v.id}
+              isSelected={tab.id === v.id}
+              onClick={() => setTab(v)}
+              data-test-subj={`findings_flyout_tab_${v.id}`}
+            >
               {v.title}
             </EuiTab>
           ))}

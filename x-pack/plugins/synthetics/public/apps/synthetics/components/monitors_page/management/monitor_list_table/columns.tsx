@@ -5,54 +5,52 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiBasicTableColumn, EuiIcon, EuiThemeComputed } from '@elastic/eui';
+import { EuiBadge, EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import moment from 'moment';
 import React from 'react';
+import { useHistory } from 'react-router-dom';
+import { FETCH_STATUS } from '@kbn/observability-plugin/public';
+import {
+  isStatusEnabled,
+  toggleStatusAlert,
+} from '../../../../../../../common/runtime_types/monitor_management/alert_config';
+import { TagsBadges } from '../../../common/components/tag_badges';
+import { useMonitorAlertEnable } from '../../../../hooks/use_monitor_alert_enable';
+import * as labels from './labels';
 import { MonitorDetailsLink } from './monitor_details_link';
 
 import {
   ConfigKey,
   DataStream,
   EncryptedSyntheticsSavedMonitor,
-  Ping,
+  OverviewStatusState,
   ServiceLocations,
   SyntheticsMonitorSchedule,
 } from '../../../../../../../common/runtime_types';
 
 import { getFrequencyLabel } from './labels';
-import { Actions } from './actions';
 import { MonitorEnabled } from './monitor_enabled';
 import { MonitorLocations } from './monitor_locations';
 
-export function getMonitorListColumns({
-  basePath,
-  euiTheme,
-  errorSummaries,
-  errorSummariesById,
+export function useMonitorListColumns({
   canEditSynthetics,
   reloadPage,
   loading,
-  syntheticsMonitors,
+  status,
+  setMonitorPendingDeletion,
 }: {
-  basePath: string;
-  euiTheme: EuiThemeComputed;
-  errorSummaries?: Ping[];
-  errorSummariesById: Map<string, Ping>;
   canEditSynthetics: boolean;
-  syntheticsMonitors: EncryptedSyntheticsSavedMonitor[];
   loading: boolean;
+  status: OverviewStatusState | null;
   reloadPage: () => void;
-}) {
-  const getIsMonitorUnHealthy = (monitor: EncryptedSyntheticsSavedMonitor) => {
-    const errorSummary = errorSummariesById.get(monitor.id);
+  setMonitorPendingDeletion: (config: EncryptedSyntheticsSavedMonitor) => void;
+}): Array<EuiBasicTableColumn<EncryptedSyntheticsSavedMonitor>> {
+  const history = useHistory();
 
-    if (errorSummary) {
-      return moment(monitor.updated_at).isBefore(moment(errorSummary.timestamp));
-    }
+  const { alertStatus, updateAlertEnabledState } = useMonitorAlertEnable();
 
-    return false;
+  const isActionLoading = (fields: EncryptedSyntheticsSavedMonitor) => {
+    return alertStatus(fields[ConfigKey.CONFIG_ID]) === FETCH_STATUS.LOADING;
   };
 
   return [
@@ -60,43 +58,12 @@ export function getMonitorListColumns({
       align: 'left' as const,
       field: ConfigKey.NAME as string,
       name: i18n.translate('xpack.synthetics.management.monitorList.monitorName', {
-        defaultMessage: 'Monitor name',
+        defaultMessage: 'Monitor',
       }),
       sortable: true,
       render: (_: string, monitor: EncryptedSyntheticsSavedMonitor) => (
-        <MonitorDetailsLink basePath={basePath} monitor={monitor} />
+        <MonitorDetailsLink monitor={monitor} />
       ),
-    },
-    {
-      align: 'left' as const,
-      field: 'id',
-      name: i18n.translate('xpack.synthetics.management.monitorList.monitorStatus', {
-        defaultMessage: 'Status',
-      }),
-      sortable: false,
-      render: (_: string, monitor: EncryptedSyntheticsSavedMonitor) => {
-        const isMonitorHealthy = !getIsMonitorUnHealthy(monitor);
-
-        return (
-          <>
-            <EuiIcon
-              type="dot"
-              color={isMonitorHealthy ? euiTheme.colors.success : euiTheme.colors.danger}
-            />
-            {isMonitorHealthy ? (
-              <FormattedMessage
-                id="xpack.synthetics.management.monitorList.monitorHealthy"
-                defaultMessage="Healthy"
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.synthetics.management.monitorList.monitorUnhealthy"
-                defaultMessage="Unhealthy"
-              />
-            )}
-          </>
-        );
-      },
     },
     {
       align: 'left' as const,
@@ -111,15 +78,6 @@ export function getMonitorListColumns({
     },
     {
       align: 'left' as const,
-      field: ConfigKey.LOCATIONS,
-      name: i18n.translate('xpack.synthetics.management.monitorList.locations', {
-        defaultMessage: 'Locations',
-      }),
-      render: (locations: ServiceLocations) =>
-        locations ? <MonitorLocations locations={locations} /> : null,
-    },
-    {
-      align: 'left' as const,
       field: ConfigKey.SCHEDULE,
       sortable: true,
       name: i18n.translate('xpack.synthetics.management.monitorList.frequency', {
@@ -129,13 +87,44 @@ export function getMonitorListColumns({
     },
     {
       align: 'left' as const,
+      field: ConfigKey.LOCATIONS,
+      name: i18n.translate('xpack.synthetics.management.monitorList.locations', {
+        defaultMessage: 'Locations',
+      }),
+      render: (locations: ServiceLocations, monitor: EncryptedSyntheticsSavedMonitor) =>
+        locations ? (
+          <MonitorLocations
+            monitorId={monitor[ConfigKey.CONFIG_ID] ?? monitor.id}
+            locations={locations}
+            status={status}
+          />
+        ) : null,
+    },
+    {
+      align: 'left' as const,
+      field: ConfigKey.TAGS,
+      name: i18n.translate('xpack.synthetics.management.monitorList.tags', {
+        defaultMessage: 'Tags',
+      }),
+      render: (tags: string[]) => (
+        <TagsBadges
+          tags={tags}
+          onClick={(tag) => {
+            history.push({ search: `tags=${JSON.stringify([tag])}` });
+          }}
+        />
+      ),
+    },
+    {
+      align: 'left' as const,
       field: ConfigKey.ENABLED as string,
+      sortable: true,
       name: i18n.translate('xpack.synthetics.management.monitorList.enabled', {
         defaultMessage: 'Enabled',
       }),
       render: (_enabled: boolean, monitor: EncryptedSyntheticsSavedMonitor) => (
         <MonitorEnabled
-          id={monitor.id}
+          configId={monitor[ConfigKey.CONFIG_ID]}
           monitor={monitor}
           reloadPage={reloadPage}
           isSwitchable={!loading}
@@ -147,15 +136,64 @@ export function getMonitorListColumns({
       name: i18n.translate('xpack.synthetics.management.monitorList.actions', {
         defaultMessage: 'Actions',
       }),
-      render: (fields: EncryptedSyntheticsSavedMonitor) => (
-        <Actions
-          euiTheme={euiTheme}
-          id={fields.id}
-          name={fields[ConfigKey.NAME]}
-          canEditSynthetics={canEditSynthetics}
-          reloadPage={reloadPage}
-        />
-      ),
+      actions: [
+        {
+          'data-test-subj': 'syntheticsMonitorEditAction',
+          isPrimary: true,
+          name: labels.EDIT_LABEL,
+          description: labels.EDIT_LABEL,
+          icon: 'pencil',
+          type: 'icon',
+          enabled: (fields) => canEditSynthetics && !isActionLoading(fields),
+          onClick: (fields) => {
+            history.push({
+              pathname: `/edit-monitor/${fields[ConfigKey.CONFIG_ID]}`,
+            });
+          },
+        },
+        {
+          'data-test-subj': 'syntheticsMonitorDeleteAction',
+          isPrimary: true,
+          name: labels.DELETE_LABEL,
+          description: labels.DELETE_LABEL,
+          icon: 'trash',
+          type: 'icon',
+          color: 'danger',
+          enabled: (fields) => canEditSynthetics && !isActionLoading(fields),
+          onClick: (fields) => {
+            setMonitorPendingDeletion(fields);
+          },
+        },
+        {
+          description: labels.DISABLE_STATUS_ALERT,
+          name: (fields) =>
+            isStatusEnabled(fields[ConfigKey.ALERT_CONFIG])
+              ? labels.DISABLE_STATUS_ALERT
+              : labels.ENABLE_STATUS_ALERT,
+          icon: (fields) =>
+            isStatusEnabled(fields[ConfigKey.ALERT_CONFIG]) ? 'bellSlash' : 'bell',
+          type: 'icon',
+          color: 'danger',
+          enabled: (fields) => canEditSynthetics && !isActionLoading(fields),
+          onClick: (fields) => {
+            updateAlertEnabledState({
+              monitor: {
+                [ConfigKey.ALERT_CONFIG]: toggleStatusAlert(fields[ConfigKey.ALERT_CONFIG]),
+              },
+              name: fields[ConfigKey.NAME],
+              configId: fields[ConfigKey.CONFIG_ID],
+            });
+          },
+        },
+        /*
+      TODO: Implement duplication functionality
+      const duplicateMenuItem = (
+        <EuiContextMenuItem key="xpack.synthetics.duplicateMonitor" icon="copy" onClick={closePopover}>
+          {labels.DUPLICATE_LABEL}
+        </EuiContextMenuItem>
+      );
+      */
+      ],
     },
-  ] as Array<EuiBasicTableColumn<EncryptedSyntheticsSavedMonitor>>;
+  ];
 }

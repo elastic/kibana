@@ -19,7 +19,7 @@ export const memoryTotal: MetricsUIAggregation = {
         memoryTotal: 'memory_total',
       },
       script: {
-        source: 'params.memoryTotal / 1000000', // Convert to MB
+        source: 'params.memoryTotal',
         lang: 'painless',
       },
       gap_policy: 'skip',

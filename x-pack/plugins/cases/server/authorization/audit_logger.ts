@@ -21,9 +21,9 @@ interface CreateAuditMsgParams {
  * Audit logger for authorization operations
  */
 export class AuthorizationAuditLogger {
-  private readonly auditLogger?: AuditLogger;
+  private readonly auditLogger: AuditLogger;
 
-  constructor(logger?: AuditLogger) {
+  constructor(logger: AuditLogger) {
     this.auditLogger = logger;
   }
 
@@ -97,6 +97,6 @@ export class AuthorizationAuditLogger {
    * Logs an audit event based on the status of an operation.
    */
   public log(auditMsgParams: CreateAuditMsgParams) {
-    this.auditLogger?.log(AuthorizationAuditLogger.createAuditMsg(auditMsgParams));
+    this.auditLogger.log(AuthorizationAuditLogger.createAuditMsg(auditMsgParams));
   }
 }

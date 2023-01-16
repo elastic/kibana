@@ -36,6 +36,9 @@ export interface ConsoleDataState {
 
   dataTestSubj?: string;
 
+  /** The local storage prefix for saving/persisting data associated with the console */
+  storagePrefix?: string;
+
   /** The key for the console when it is under ConsoleManager control */
   managedKey?: symbol;
 
@@ -145,6 +148,10 @@ export type ConsoleDataAction =
       payload: {
         command: string;
       };
+    }
+  | {
+      type: 'clearInputHistoryState';
+      payload?: never;
     };
 
 type PayloadValueOrFunction<T extends object = object> = T | ((options: Required<T>) => T);

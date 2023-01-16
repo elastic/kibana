@@ -9,70 +9,50 @@
 import React, { ReactElement } from 'react';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import type { UnifiedHistogramChartData, UnifiedHistogramFetchStatus } from '../types';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { UnifiedHistogramFetchStatus } from '../types';
 import { Chart } from './chart';
 import type { ReactWrapper } from 'enzyme';
 import { unifiedHistogramServicesMock } from '../__mocks__/services';
+import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
+import { of } from 'rxjs';
 import { HitsCounter } from '../hits_counter';
+import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
+import { dataViewMock } from '../__mocks__/data_view';
+import { BreakdownFieldSelector } from './breakdown_field_selector';
+import { Histogram } from './histogram';
 
 async function mountComponent({
   noChart,
   noHits,
+  noBreakdown,
   chartHidden = false,
   appendHistogram,
   onEditVisualization = jest.fn(),
+  dataView = dataViewWithTimefieldMock,
 }: {
   noChart?: boolean;
   noHits?: boolean;
+  noBreakdown?: boolean;
   chartHidden?: boolean;
   appendHistogram?: ReactElement;
+  dataView?: DataView;
   onEditVisualization?: null | (() => void);
 } = {}) {
   const services = unifiedHistogramServicesMock;
   services.data.query.timefilter.timefilter.getAbsoluteTime = () => {
     return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
   };
-
-  const chartData = {
-    xAxisOrderedValues: [
-      1623880800000, 1623967200000, 1624053600000, 1624140000000, 1624226400000, 1624312800000,
-      1624399200000, 1624485600000, 1624572000000, 1624658400000, 1624744800000, 1624831200000,
-      1624917600000, 1625004000000, 1625090400000,
-    ],
-    xAxisFormat: { id: 'date', params: { pattern: 'YYYY-MM-DD' } },
-    xAxisLabel: 'order_date per day',
-    yAxisFormat: { id: 'number' },
-    ordered: {
-      date: true,
-      interval: {
-        asMilliseconds: jest.fn(),
-      },
-      intervalESUnit: 'd',
-      intervalESValue: 1,
-      min: '2021-03-18T08:28:56.411Z',
-      max: '2021-07-01T07:28:56.411Z',
-    },
-    yAxisLabel: 'Count',
-    values: [
-      { x: 1623880800000, y: 134 },
-      { x: 1623967200000, y: 152 },
-      { x: 1624053600000, y: 141 },
-      { x: 1624140000000, y: 138 },
-      { x: 1624226400000, y: 142 },
-      { x: 1624312800000, y: 157 },
-      { x: 1624399200000, y: 149 },
-      { x: 1624485600000, y: 146 },
-      { x: 1624572000000, y: 170 },
-      { x: 1624658400000, y: 137 },
-      { x: 1624744800000, y: 150 },
-      { x: 1624831200000, y: 144 },
-      { x: 1624917600000, y: 147 },
-      { x: 1625004000000, y: 137 },
-      { x: 1625090400000, y: 66 },
-    ],
-  } as unknown as UnifiedHistogramChartData;
+  (services.data.query.queryString.getDefaultQuery as jest.Mock).mockReturnValue({
+    language: 'kuery',
+    query: '',
+  });
+  (searchSourceInstanceMock.fetch$ as jest.Mock).mockImplementation(
+    jest.fn().mockReturnValue(of({ rawResponse: { hits: { total: noHits ? 0 : 2 } } }))
+  );
 
   const props = {
+    dataView,
     services: unifiedHistogramServicesMock,
     hits: noHits
       ? undefined
@@ -91,8 +71,8 @@ async function mountComponent({
             description: 'test',
             scale: 2,
           },
-          data: chartData,
         },
+    breakdown: noBreakdown ? undefined : { field: undefined },
     appendHistogram,
     onEditVisualization: onEditVisualization || undefined,
     onResetChartHeight: jest.fn(),
@@ -105,7 +85,7 @@ async function mountComponent({
     instance = mountWithIntl(<Chart {...props} />);
     // wait for initial async loading to complete
     await new Promise((r) => setTimeout(r, 0));
-    await instance.update();
+    instance.update();
   });
   return instance;
 }
@@ -158,13 +138,13 @@ describe('Chart', () => {
     const fn = jest.fn();
     const component = await mountComponent({ onEditVisualization: fn });
     await act(async () => {
-      await component
+      component
         .find('[data-test-subj="unifiedHistogramEditVisualization"]')
         .first()
         .simulate('click');
     });
-
-    expect(fn).toHaveBeenCalled();
+    const lensAttributes = component.find(Histogram).prop('lensAttributes');
+    expect(fn).toHaveBeenCalledWith(lensAttributes);
   });
 
   it('should render HitsCounter when hits is defined', async () => {
@@ -181,5 +161,30 @@ describe('Chart', () => {
     const appendHistogram = <div data-test-subj="appendHistogram" />;
     const component = await mountComponent({ appendHistogram });
     expect(component.find('[data-test-subj="appendHistogram"]').exists()).toBeTruthy();
+  });
+
+  it('should not render chart if data view is not time based', async () => {
+    const component = await mountComponent({ dataView: dataViewMock });
+    expect(component.find('[data-test-subj="unifiedHistogramChart"]').exists()).toBeFalsy();
+  });
+
+  it('should render chart if data view is time based', async () => {
+    const component = await mountComponent();
+    expect(component.find('[data-test-subj="unifiedHistogramChart"]').exists()).toBeTruthy();
+  });
+
+  it('should render BreakdownFieldSelector when chart is visible and breakdown is defined', async () => {
+    const component = await mountComponent();
+    expect(component.find(BreakdownFieldSelector).exists()).toBeTruthy();
+  });
+
+  it('should not render BreakdownFieldSelector when chart is hidden', async () => {
+    const component = await mountComponent({ chartHidden: true });
+    expect(component.find(BreakdownFieldSelector).exists()).toBeFalsy();
+  });
+
+  it('should not render BreakdownFieldSelector when chart is visible and breakdown is undefined', async () => {
+    const component = await mountComponent({ noBreakdown: true });
+    expect(component.find(BreakdownFieldSelector).exists()).toBeFalsy();
   });
 });

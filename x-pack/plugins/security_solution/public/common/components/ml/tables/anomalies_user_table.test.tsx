@@ -11,7 +11,7 @@ import { TestProviders } from '../../../mock';
 import React from 'react';
 import { useQueryToggle } from '../../../containers/query_toggle';
 import { useAnomaliesTableData } from '../anomaly/use_anomalies_table_data';
-import { UsersType } from '../../../../users/store/model';
+import { UsersType } from '../../../../explore/users/store/model';
 import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
 
 jest.mock('../../../containers/query_toggle');

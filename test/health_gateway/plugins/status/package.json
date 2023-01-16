@@ -1,0 +1,10 @@
+{
+  "name": "kbn_health_gateway_status",
+  "version": "0.1.0",
+  "main": "target/test/health_gateway/plugins/status",
+  "kibana": {
+    "version": "kibana",
+    "templateVersion": "0.1.0"
+  },
+  "license": "SSPL-1.0 OR Elastic License 2.0"
+}

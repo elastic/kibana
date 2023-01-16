@@ -310,7 +310,14 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         framePublicAPI
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [activeVisualization, visualization.state, activeDatasourceId, datasourceMap, datasourceStates]
+    [
+      activeVisualization,
+      visualization.state,
+      activeDatasourceId,
+      datasourceMap,
+      datasourceStates,
+      framePublicAPI.dateRange,
+    ]
   );
 
   // if the expression is undefined, it means we hit an error that should be displayed to the user
@@ -324,6 +331,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           datasourceStates,
           datasourceLayers,
           indexPatterns: dataViews.indexPatterns,
+          dateRange: framePublicAPI.dateRange,
           searchSessionId,
         });
 
@@ -368,6 +376,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     datasourceLayers,
     dataViews.indexPatterns,
     searchSessionId,
+    framePublicAPI.dateRange,
   ]);
 
   useEffect(() => {
@@ -815,6 +824,7 @@ export const VisualizationWrapper = ({
                     href={core.application.getUrlForApp('management', {
                       path: '/kibana/indexPatterns/create',
                     })}
+                    style={{ width: '100%' }}
                     data-test-subj="configuration-failure-reconfigure-indexpatterns"
                   >
                     {i18n.translate('xpack.lens.editorFrame.dataViewReconfigure', {

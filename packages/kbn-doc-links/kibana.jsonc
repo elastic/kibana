@@ -1,7 +1,5 @@
 {
   "type": "shared-common",
   "id": "@kbn/doc-links",
-  "owner": "@elastic/kibana-docs",
-  "runtimeDeps": [],
-  "typeDeps": []
+  "owner": "@elastic/kibana-docs"
 }

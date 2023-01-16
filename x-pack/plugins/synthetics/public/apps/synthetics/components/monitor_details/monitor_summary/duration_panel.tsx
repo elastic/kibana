@@ -8,6 +8,7 @@
 import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ReportTypes } from '@kbn/observability-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { ClientPluginsStart } from '../../../../../plugin';
 import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 import { useSelectedLocation } from '../hooks/use_selected_location';
@@ -27,7 +28,7 @@ export const DurationPanel = (props: DurationPanelProps) => {
 
   const monitorId = useMonitorQueryId();
 
-  if (!selectedLocation) {
+  if (!selectedLocation || !monitorId) {
     return null;
   }
 
@@ -39,7 +40,7 @@ export const DurationPanel = (props: DurationPanelProps) => {
       attributes={[
         {
           time: props,
-          name: 'Monitor duration',
+          name: AVG_DURATION_LABEL,
           dataType: 'synthetics',
           selectedMetricField: 'monitor_duration',
           reportDefinitions: {
@@ -51,3 +52,10 @@ export const DurationPanel = (props: DurationPanelProps) => {
     />
   );
 };
+
+export const AVG_DURATION_LABEL = i18n.translate(
+  'xpack.synthetics.monitorDetails.summary.avgDuration',
+  {
+    defaultMessage: 'Avg. duration',
+  }
+);

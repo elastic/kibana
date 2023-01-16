@@ -66,10 +66,14 @@ export const mockState: SyntheticsAppState = {
   },
   monitorList: {
     pageState: {
+      query: undefined,
       pageIndex: 0,
       pageSize: 10,
-      sortOrder: 'asc',
       sortField: `${ConfigKey.NAME}.keyword`,
+      sortOrder: 'asc',
+      tags: undefined,
+      monitorType: undefined,
+      locations: undefined,
     },
     monitorUpsertStatuses: {},
     data: {
@@ -107,6 +111,30 @@ export const mockState: SyntheticsAppState = {
   browserJourney: getBrowserJourneyMockSlice(),
   networkEvents: {},
   pingStatus: getPingStatusesMockSlice(),
+  agentPolicies: {
+    loading: false,
+    error: null,
+    data: null,
+  },
+  settings: {
+    loading: false,
+    error: null,
+    success: null,
+  },
+  dynamicSettings: {
+    loading: false,
+  },
+  defaultAlerting: {
+    loading: false,
+    error: null,
+    success: null,
+  },
+  elasticsearch: {
+    results: {},
+    loading: {},
+    error: {},
+  },
+  manualTestRuns: {},
 };
 
 function getBrowserJourneyMockSlice() {
@@ -132,6 +160,8 @@ function getBrowserJourneyMockSlice() {
       { hash: '4bae236101175ae7746cb922f4c511083af4fbcd', hitTime: 1658682270849 },
       { hash: 'ec95c047e2e05a27598451fdaa7f24db973eb933', hitTime: 1658682270849 },
     ],
+    journeys: {},
+    journeysLoading: {},
   };
 }
 
@@ -412,8 +442,10 @@ function getMonitorDetailsMockSlice() {
       'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'] as TLSVersion[],
       revision: 1,
       updated_at: '2022-07-24T17:15:46.342Z',
+      created_at: '2022-05-24T13:20:49.322Z',
     },
     syntheticsMonitorLoading: false,
+    syntheticsMonitorDispatchedAt: 0,
     error: null,
     selectedLocationId: 'us_central',
   };

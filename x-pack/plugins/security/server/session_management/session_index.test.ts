@@ -20,7 +20,11 @@ import type { AuditLogger } from '../audit';
 import { auditLoggerMock } from '../audit/mocks';
 import { ConfigSchema, createConfig } from '../config';
 import { securityMock } from '../mocks';
-import { getSessionIndexSettings, SessionIndex } from './session_index';
+import {
+  getSessionIndexSettings,
+  SESSION_INDEX_MAPPINGS_VERSION_META_FIELD_NAME,
+  SessionIndex,
+} from './session_index';
 import { sessionIndexMock } from './session_index.mock';
 
 describe('Session index', () => {
@@ -166,6 +170,98 @@ describe('Session index', () => {
       });
     });
 
+    it('updates mappings for existing index without version in the meta', async () => {
+      mockElasticsearchClient.indices.existsTemplate.mockResponse(false);
+      mockElasticsearchClient.indices.existsIndexTemplate.mockResponse(false);
+      mockElasticsearchClient.indices.exists.mockResponse(true);
+      mockElasticsearchClient.indices.getMapping.mockResolvedValue({
+        [indexName]: {
+          mappings: { _meta: {} },
+        },
+      });
+
+      await sessionIndex.initialize();
+
+      assertExistenceChecksPerformed();
+
+      expect(mockElasticsearchClient.indices.deleteTemplate).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.deleteIndexTemplate).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.create).not.toHaveBeenCalled();
+
+      expect(mockElasticsearchClient.indices.putAlias).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.indices.putAlias).toHaveBeenCalledWith({
+        index: indexName,
+        name: aliasName,
+      });
+      expect(mockElasticsearchClient.indices.getMapping).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.indices.getMapping).toHaveBeenCalledWith({ index: indexName });
+      expect(mockElasticsearchClient.indices.putMapping).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.indices.putMapping).toHaveBeenCalledWith({
+        index: indexName,
+        ...getSessionIndexSettings({ indexName, aliasName }).mappings,
+      });
+    });
+
+    it('updates mappings for existing index if version in meta is lower than the current version', async () => {
+      mockElasticsearchClient.indices.existsTemplate.mockResponse(false);
+      mockElasticsearchClient.indices.existsIndexTemplate.mockResponse(false);
+      mockElasticsearchClient.indices.exists.mockResponse(true);
+      mockElasticsearchClient.indices.getMapping.mockResolvedValue({
+        [indexName]: {
+          mappings: { _meta: { [SESSION_INDEX_MAPPINGS_VERSION_META_FIELD_NAME]: '8.6.9' } },
+        },
+      });
+
+      await sessionIndex.initialize();
+
+      assertExistenceChecksPerformed();
+
+      expect(mockElasticsearchClient.indices.deleteTemplate).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.deleteIndexTemplate).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.create).not.toHaveBeenCalled();
+
+      expect(mockElasticsearchClient.indices.putAlias).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.indices.putAlias).toHaveBeenCalledWith({
+        index: indexName,
+        name: aliasName,
+      });
+      expect(mockElasticsearchClient.indices.getMapping).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.indices.getMapping).toHaveBeenCalledWith({ index: indexName });
+      expect(mockElasticsearchClient.indices.putMapping).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.indices.putMapping).toHaveBeenCalledWith({
+        index: indexName,
+        ...getSessionIndexSettings({ indexName, aliasName }).mappings,
+      });
+    });
+
+    it('does not update mappings for existing index if version in meta is greater or equal to the current version', async () => {
+      mockElasticsearchClient.indices.existsTemplate.mockResponse(false);
+      mockElasticsearchClient.indices.existsIndexTemplate.mockResponse(false);
+      mockElasticsearchClient.indices.exists.mockResponse(true);
+      mockElasticsearchClient.indices.getMapping.mockResolvedValue({
+        [indexName]: {
+          mappings: { _meta: { [SESSION_INDEX_MAPPINGS_VERSION_META_FIELD_NAME]: '8.7.0' } },
+        },
+      });
+
+      await sessionIndex.initialize();
+
+      assertExistenceChecksPerformed();
+
+      expect(mockElasticsearchClient.indices.deleteTemplate).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.deleteIndexTemplate).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.create).not.toHaveBeenCalled();
+
+      expect(mockElasticsearchClient.indices.putAlias).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.indices.putAlias).toHaveBeenCalledWith({
+        index: indexName,
+        name: aliasName,
+      });
+      expect(mockElasticsearchClient.indices.getMapping).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.indices.getMapping).toHaveBeenCalledWith({ index: indexName });
+      expect(mockElasticsearchClient.indices.putMapping).not.toHaveBeenCalled();
+    });
+
     it('creates index if it does not exist', async () => {
       mockElasticsearchClient.indices.existsTemplate.mockResponse(false);
       mockElasticsearchClient.indices.existsIndexTemplate.mockResponse(false);
@@ -177,6 +273,8 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.indices.deleteTemplate).not.toHaveBeenCalled();
       expect(mockElasticsearchClient.indices.deleteIndexTemplate).not.toHaveBeenCalled();
       expect(mockElasticsearchClient.indices.putAlias).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.getMapping).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.putMapping).not.toHaveBeenCalled();
       expect(mockElasticsearchClient.indices.create).toHaveBeenCalledWith(
         getSessionIndexSettings({ indexName, aliasName })
       );

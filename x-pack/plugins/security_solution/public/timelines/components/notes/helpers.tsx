@@ -71,13 +71,13 @@ export const NotesCount = React.memo<{
 NotesCount.displayName = 'NotesCount';
 
 /** Creates a new instance of a `note` */
-export const createNote = ({ newNote }: { newNote: string }): Note => ({
+export const createNote = ({ newNote, user }: { newNote: string; user: string }): Note => ({
   created: moment.utc().toDate(),
   id: uuid.v4(),
   lastEdit: null,
   note: newNote,
   saveObjectId: null,
-  user: 'elastic', // TODO: get the logged-in Kibana user
+  user,
   version: null,
 });
 
@@ -86,6 +86,7 @@ interface UpdateAndAssociateNodeParams {
   newNote: string;
   updateNewNote: UpdateInternalNewNote;
   updateNote: UpdateNote;
+  user: string;
 }
 
 export const updateAndAssociateNode = ({
@@ -93,8 +94,9 @@ export const updateAndAssociateNode = ({
   newNote,
   updateNewNote,
   updateNote,
+  user,
 }: UpdateAndAssociateNodeParams) => {
-  const note = createNote({ newNote });
+  const note = createNote({ newNote, user });
   updateNote(note); // perform IO to store the newly-created note
   associateNote(note.id); // associate the note with the (opaque) thing
   updateNewNote(''); // clear the input

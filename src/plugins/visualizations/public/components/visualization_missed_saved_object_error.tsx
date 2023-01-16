@@ -48,6 +48,7 @@ export const VisualizationMissedSavedObjectError = ({
                 path: '/kibana/indexPatterns/create',
               })}
               data-test-subj="configuration-failure-reconfigure-indexpatterns"
+              style={{ width: '100%' }}
             >
               {i18n.translate('visualizations.missedDataView.dataViewReconfigure', {
                 defaultMessage: `Recreate it in the data view management page`,

@@ -7,6 +7,7 @@
 import type { ComponentType } from 'react';
 import React, { memo } from 'react';
 import { Route } from '@kbn/kibana-react-plugin/public';
+import type { DocLinks } from '@kbn/doc-links';
 import { NoPrivilegesPage } from '../../../common/components/no_privileges';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { NoPermissions } from '../no_permissons';
@@ -22,6 +23,8 @@ export const PrivilegedRoute = memo(({ component, hasPrivilege, path }: Privileg
   const isEndpointRbacEnabled = useIsExperimentalFeatureEnabled('endpointRbacEnabled');
   const isEndpointRbacV1Enabled = useIsExperimentalFeatureEnabled('endpointRbacV1Enabled');
 
+  const docLinkSelector = (docLinks: DocLinks) => docLinks.securitySolution.privileges;
+
   let componentToRender = component;
 
   if (!hasPrivilege) {
@@ -30,7 +33,7 @@ export const PrivilegedRoute = memo(({ component, hasPrivilege, path }: Privileg
       (isEndpointRbacV1Enabled && path === MANAGEMENT_ROUTING_RESPONSE_ACTIONS_HISTORY_PATH);
 
     componentToRender = shouldUseMissingPrivilegesScreen
-      ? () => <NoPrivilegesPage />
+      ? () => <NoPrivilegesPage docLinkSelector={docLinkSelector} />
       : NoPermissions;
   }
 

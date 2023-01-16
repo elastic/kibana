@@ -42,13 +42,12 @@ export async function handleExperimentalDatastreamFeatureOptIn({
       (optIn) => optIn.data_stream === featureMapEntry.data_stream
     );
 
-    const isOptInChanged =
+    const isSyntheticSourceOptInChanged =
       existingOptIn?.features.synthetic_source !== featureMapEntry.features.synthetic_source;
 
-    // If the feature opt-in status in unchanged, we don't need to update any component templates
-    if (!isOptInChanged) {
-      continue;
-    }
+    const isTSDBOptInChanged = existingOptIn?.features.tsdb !== featureMapEntry.features.tsdb;
+
+    if (!isSyntheticSourceOptInChanged && !isTSDBOptInChanged) continue;
 
     const componentTemplateName = `${featureMapEntry.data_stream}@package`;
     const componentTemplateRes = await esClient.cluster.getComponentTemplate({
@@ -57,23 +56,50 @@ export async function handleExperimentalDatastreamFeatureOptIn({
 
     const componentTemplate = componentTemplateRes.component_templates[0].component_template;
 
-    const body = {
-      template: {
-        ...componentTemplate.template,
-        mappings: {
-          ...componentTemplate.template.mappings,
-          _source: {
-            mode: featureMapEntry.features.synthetic_source ? 'synthetic' : 'stored',
+    if (isSyntheticSourceOptInChanged) {
+      const body = {
+        template: {
+          ...componentTemplate.template,
+          mappings: {
+            ...componentTemplate.template.mappings,
+            _source: {
+              mode: featureMapEntry.features.synthetic_source ? 'synthetic' : 'stored',
+            },
           },
         },
-      },
-    };
+      };
 
-    await esClient.cluster.putComponentTemplate({
-      name: componentTemplateName,
-      // @ts-expect-error - TODO: Remove when ES client typings include support for synthetic source
-      body,
-    });
+      await esClient.cluster.putComponentTemplate({
+        name: componentTemplateName,
+        // @ts-expect-error - TODO: Remove when ES client typings include support for synthetic source
+        body,
+      });
+    }
+
+    if (isTSDBOptInChanged && featureMapEntry.features.tsdb) {
+      const indexTemplateRes = await esClient.indices.getIndexTemplate({
+        name: featureMapEntry.data_stream,
+      });
+      const indexTemplate = indexTemplateRes.index_templates[0].index_template;
+
+      const indexTemplateBody = {
+        ...indexTemplate,
+        template: {
+          ...(indexTemplate.template ?? {}),
+          settings: {
+            ...(indexTemplate.template?.settings ?? {}),
+            index: {
+              mode: 'time_series',
+            },
+          },
+        },
+      };
+
+      await esClient.indices.putIndexTemplate({
+        name: featureMapEntry.data_stream,
+        body: indexTemplateBody,
+      });
+    }
   }
 
   // Update the installation object to persist the experimental feature map

@@ -67,6 +67,7 @@ export interface CreateTimelineProps {
   to: string;
   notes: NoteResult[] | null;
   ruleNote?: string;
+  ruleAuthor?: string | string[];
 }
 
 export type CreateTimeline = ({ from, timeline, to }: CreateTimelineProps) => void;

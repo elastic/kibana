@@ -41,6 +41,7 @@ function getAddFilter({ entityName, entityValue, filter }: EntityCellProps) {
       >
         <EuiButtonIcon
           size="s"
+          data-test-subj={`mlAnomaliesTableEntityCellAddFilterButton-${entityValue}`}
           className="filter-button"
           onClick={blurButtonOnClick(() => {
             filter(entityName, entityValue, ENTITY_FIELD_OPERATIONS.ADD);
@@ -68,6 +69,7 @@ function getRemoveFilter({ entityName, entityValue, filter }: EntityCellProps) {
       >
         <EuiButtonIcon
           size="s"
+          data-test-subj={`mlAnomaliesTableEntityCellRemoveFilterButton-${entityValue}`}
           className="filter-button"
           onClick={blurButtonOnClick(() => {
             filter(entityName, entityValue, ENTITY_FIELD_OPERATIONS.REMOVE);

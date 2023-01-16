@@ -13,8 +13,7 @@ import { EuiComboBoxOptionOption } from '@elastic/eui/src/components/combo_box/t
 import { SecuritySolutionDataViewBase } from '../../../../../types';
 import { RawIndicatorFieldId } from '../../../../../../common/types/indicator';
 import { useStyles } from './styles';
-
-export const DROPDOWN_TEST_ID = 'tiIndicatorFieldSelectorDropdown';
+import { DROPDOWN_TEST_ID } from './test_ids';
 
 export interface IndicatorsFieldSelectorProps {
   indexPattern: SecuritySolutionDataViewBase;
@@ -53,11 +52,9 @@ export const IndicatorsFieldSelector = memo<IndicatorsFieldSelectorProps>(
 
     const selectedFieldChange = useCallback(
       (values: Array<EuiComboBoxOptionOption<string>>) => {
-        if (!values || values.length === 0) {
-          return;
+        if (values && values.length > 0) {
+          valueChange(values[0].label);
         }
-
-        valueChange(values[0].label);
         setSelectedField(values);
       },
       [valueChange]

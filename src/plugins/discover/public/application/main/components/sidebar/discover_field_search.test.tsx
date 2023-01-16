@@ -44,13 +44,14 @@ describe('DiscoverFieldSearch', () => {
     const input = findTestSubject(component, 'fieldFilterSearchInput');
     input.simulate('change', { target: { value: 'new filter' } });
     expect(defaultProps.onChange).toBeCalledTimes(1);
+    expect(defaultProps.onChange).toHaveBeenCalledWith('name', 'new filter');
   });
 
   test('change in active filters should change facet selection and call onChange', () => {
     const onChange = jest.fn();
     const component = mountComponent({ ...defaultProps, ...{ onChange } });
     const btn = findTestSubject(component, 'toggleFieldFilterButton');
-    const badge = btn.find('.euiNotificationBadge');
+    const badge = btn.find('.euiNotificationBadge').last();
     expect(badge.text()).toEqual('0');
     btn.simulate('click');
     const aggregatableButtonGroup = findButtonGroup(component, 'aggregatable');
@@ -69,7 +70,7 @@ describe('DiscoverFieldSearch', () => {
     let btn = findTestSubject(component, 'toggleFieldFilterButton');
     btn.simulate('click');
     btn = findTestSubject(component, 'toggleFieldFilterButton');
-    const badge = btn.find('.euiNotificationBadge');
+    const badge = btn.find('.euiNotificationBadge').last();
     // no active filters
     expect(badge.text()).toEqual('0');
     // change value of aggregatable select
@@ -97,30 +98,17 @@ describe('DiscoverFieldSearch', () => {
     expect(badge.text()).toEqual('1');
   });
 
-  test('change in missing fields switch should not change filter count', () => {
-    const component = mountComponent();
-    const btn = findTestSubject(component, 'toggleFieldFilterButton');
-    btn.simulate('click');
-    const badge = btn.find('.euiNotificationBadge');
-    expect(badge.text()).toEqual('0');
-    const missingSwitch = findTestSubject(component, 'missingSwitch');
-    missingSwitch.simulate('change', { target: { value: false } });
-    expect(badge.text()).toEqual('0');
-  });
-
   test('change in filters triggers onChange', () => {
     const onChange = jest.fn();
     const component = mountComponent({ ...defaultProps, ...{ onChange } });
     const btn = findTestSubject(component, 'toggleFieldFilterButton');
     btn.simulate('click');
     const aggregtableButtonGroup = findButtonGroup(component, 'aggregatable');
-    const missingSwitch = findTestSubject(component, 'missingSwitch');
     act(() => {
       // @ts-expect-error
       (aggregtableButtonGroup.props() as EuiButtonGroupProps).onChange('aggregatable-true', null);
     });
-    missingSwitch.simulate('click');
-    expect(onChange).toBeCalledTimes(2);
+    expect(onChange).toBeCalledTimes(1);
   });
 
   test('change in type filters triggers onChange with appropriate value', () => {

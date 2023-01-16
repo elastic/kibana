@@ -15,6 +15,7 @@ import { GuideState } from '../../types';
 const defaultProps: GuideCardFooterProps = {
   guides: [],
   useCase: 'search',
+  telemetryId: 'search',
   activateGuide: jest.fn(),
 };
 
@@ -23,7 +24,7 @@ const searchGuideState: GuideState = {
   status: 'not_started',
   steps: [
     { id: 'add_data', status: 'complete' },
-    { id: 'browse_docs', status: 'in_progress' },
+    { id: 'search_experience', status: 'in_progress' },
   ],
   isActive: true,
 };

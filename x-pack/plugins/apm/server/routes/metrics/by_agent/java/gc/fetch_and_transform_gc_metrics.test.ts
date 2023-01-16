@@ -9,7 +9,7 @@ import { APMConfig } from '../../../../..';
 import {
   METRIC_JAVA_GC_COUNT,
   METRIC_JAVA_GC_TIME,
-} from '../../../../../../common/elasticsearch_fieldnames';
+} from '../../../../../../common/es_fields/apm';
 import { APMEventClient } from '../../../../../lib/helpers/create_es_client/create_apm_event_client';
 import { ChartBase } from '../../../types';
 

@@ -691,7 +691,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             taggingApi={taggingApi}
             initialQuery={this.props.initialQuery}
             allowedTypes={allowedTypes}
-            itemId={'id'}
+            itemId={(item: SavedObjectWithMetadata) => `${item.type}:${item.id}`}
             actionRegistry={this.props.actionRegistry}
             columnRegistry={this.props.columnRegistry}
             selectionConfig={selectionConfig}

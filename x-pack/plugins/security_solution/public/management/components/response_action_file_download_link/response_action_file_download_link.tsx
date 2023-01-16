@@ -6,15 +6,10 @@
  */
 
 import React, { memo, useMemo, type CSSProperties } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonEmpty,
-  EuiLoadingContent,
-  EuiText,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiLoadingContent, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import styled from 'styled-components';
 import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
 import { FormattedError } from '../formatted_error';
 import { useGetFileInfo } from '../../hooks/response_actions/use_get_file_info';
@@ -37,6 +32,12 @@ export const FILE_NO_LONGER_AVAILABLE_MESSAGE = i18n.translate(
   'xpack.securitySolution.responseActionFileDownloadLink.fileNoLongerAvailable',
   { defaultMessage: 'File has expired and is no longer available for download.' }
 );
+
+const FileDownloadLinkContainer = styled.div`
+  & > * {
+    vertical-align: middle;
+  }
+`;
 
 export interface ResponseActionFileDownloadLinkProps {
   action: MaybeImmutable<ActionDetails>;
@@ -103,32 +104,38 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
     }
 
     return (
-      <EuiFlexGroup alignItems="center" gutterSize="none" data-test-subj={dataTestSubj}>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            href={downloadUrl}
-            iconType="download"
-            data-test-subj={getTestId('downloadButton')}
-            flush="left"
-            style={STYLE_INHERIT_FONT_FAMILY}
-            download
-            size={textSize}
-          >
-            <EuiText size={textSize}>{buttonTitle}</EuiText>
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size={textSize} data-test-subj={getTestId('passcodeMessage')}>
-            <FormattedMessage
-              id="xpack.securitySolution.responseActionFileDownloadLink.passcodeInfo"
-              defaultMessage="(ZIP file passcode: {passcode})"
-              values={{
-                passcode: 'elastic',
-              }}
-            />
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <FileDownloadLinkContainer data-test-subj={dataTestSubj}>
+        <EuiButtonEmpty
+          href={downloadUrl}
+          iconType="download"
+          data-test-subj={getTestId('downloadButton')}
+          flush="left"
+          style={STYLE_INHERIT_FONT_FAMILY}
+          iconSize="s"
+          download
+        >
+          <EuiText size={textSize}>{buttonTitle}</EuiText>
+        </EuiButtonEmpty>
+        <EuiText
+          size={textSize}
+          data-test-subj={getTestId('passcodeMessage')}
+          className="eui-displayInline"
+        >
+          <FormattedMessage
+            id="xpack.securitySolution.responseActionFileDownloadLink.passcodeInfo"
+            defaultMessage="(ZIP file passcode: {passcode})."
+            values={{
+              passcode: 'elastic',
+            }}
+          />
+        </EuiText>
+        <EuiText size={textSize} data-test-subj={getTestId('fileDeleteMessage')}>
+          <FormattedMessage
+            id="xpack.securitySolution.responseActionFileDownloadLink.deleteNotice"
+            defaultMessage="Files are periodically deleted to clear storage space. Download and save file locally if needed."
+          />
+        </EuiText>
+      </FileDownloadLinkContainer>
     );
   }
 );

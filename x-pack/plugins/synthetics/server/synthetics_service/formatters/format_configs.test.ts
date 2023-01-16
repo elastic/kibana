@@ -205,17 +205,18 @@ describe('formatMonitorConfig', () => {
 });
 
 describe('formatHeartbeatRequest', () => {
-  it('uses custom heartbeat id when defined', () => {
+  it('uses heartbeat id', () => {
     const monitorId = 'test-monitor-id';
-    const customHeartbeatId = 'test-custom-heartbeat-id';
+    const heartbeatId = 'test-custom-heartbeat-id';
     const actual = formatHeartbeatRequest({
       monitor: testBrowserConfig as SyntheticsMonitor,
       monitorId,
-      customHeartbeatId,
+      heartbeatId,
+      params: {},
     });
     expect(actual).toEqual({
       ...testBrowserConfig,
-      id: customHeartbeatId,
+      id: heartbeatId,
       fields: {
         config_id: monitorId,
         'monitor.project.name': testBrowserConfig.project_id,
@@ -232,6 +233,8 @@ describe('formatHeartbeatRequest', () => {
     const actual = formatHeartbeatRequest({
       monitor: testBrowserConfig as SyntheticsMonitor,
       monitorId,
+      heartbeatId: monitorId,
+      params: {},
     });
     expect(actual).toEqual({
       ...testBrowserConfig,
@@ -253,6 +256,8 @@ describe('formatHeartbeatRequest', () => {
     const actual = formatHeartbeatRequest({
       monitor,
       monitorId,
+      heartbeatId: monitorId,
+      params: {},
     });
 
     expect(actual).toEqual({
@@ -275,6 +280,8 @@ describe('formatHeartbeatRequest', () => {
     const actual = formatHeartbeatRequest({
       monitor,
       monitorId,
+      heartbeatId: monitorId,
+      params: {},
     });
 
     expect(actual).toEqual({
@@ -297,6 +304,8 @@ describe('formatHeartbeatRequest', () => {
       monitor: testBrowserConfig as SyntheticsMonitor,
       monitorId,
       runOnce: true,
+      heartbeatId: monitorId,
+      params: {},
     });
 
     expect(actual).toEqual({
@@ -320,10 +329,38 @@ describe('formatHeartbeatRequest', () => {
       monitor: testBrowserConfig as SyntheticsMonitor,
       monitorId,
       testRunId,
+      heartbeatId: monitorId,
+      params: {},
     });
 
     expect(actual).toEqual({
       ...testBrowserConfig,
+      id: monitorId,
+      fields: {
+        config_id: monitorId,
+        'monitor.project.name': testBrowserConfig.project_id,
+        'monitor.project.id': testBrowserConfig.project_id,
+        run_once: undefined,
+        test_run_id: testRunId,
+      },
+      fields_under_root: true,
+    });
+  });
+
+  it('supports empty params', () => {
+    const monitorId = 'test-monitor-id';
+    const testRunId = 'beep';
+    const actual = formatHeartbeatRequest({
+      monitor: { ...testBrowserConfig, params: '' } as SyntheticsMonitor,
+      monitorId,
+      testRunId,
+      heartbeatId: monitorId,
+      params: {},
+    });
+
+    expect(actual).toEqual({
+      ...testBrowserConfig,
+      params: '',
       id: monitorId,
       fields: {
         config_id: monitorId,

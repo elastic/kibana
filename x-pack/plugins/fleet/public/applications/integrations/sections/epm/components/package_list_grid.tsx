@@ -8,6 +8,7 @@
 import type { ReactNode, FunctionComponent } from 'react';
 import { useMemo } from 'react';
 import React, { useCallback, useState, useRef, useEffect } from 'react';
+import { css } from '@emotion/react';
 
 import {
   EuiFlexGrid,
@@ -257,7 +258,17 @@ function GridColumn({
       {list.length ? (
         list.map((item) => {
           return (
-            <EuiFlexItem key={item.id}>
+            <EuiFlexItem
+              key={item.id}
+              // Ensure that cards wrapped in EuiTours/EuiPopovers correctly inherit the full grid row height
+              css={css`
+                & > .euiPopover,
+                & > .euiPopover > .euiPopover__anchor,
+                & > .euiPopover > .euiPopover__anchor > .euiCard {
+                  height: 100%;
+                }
+              `}
+            >
               <PackageCard {...item} showLabels={showCardLabels} />
             </EuiFlexItem>
           );

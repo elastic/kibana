@@ -7,13 +7,15 @@
  */
 
 import React, { FC, useContext, useMemo, useCallback } from 'react';
-import type { SearchFilterConfig } from '@elastic/eui';
 import type { Observable } from 'rxjs';
 import type { FormattedRelative } from '@kbn/i18n-react';
 import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
 import type { OverlayFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import { RedirectAppLinksKibanaProvider } from '@kbn/shared-ux-link-redirect-app';
-import { InspectorKibanaProvider } from '@kbn/content-management-inspector';
+import { ContentEditorKibanaProvider } from '@kbn/content-management-content-editor';
+
+import { TAG_MANAGEMENT_APP_URL } from './constants';
+import type { Tag } from './types';
 
 type NotifyFn = (title: JSX.Element, text?: string) => void;
 
@@ -30,6 +32,12 @@ export type DateFormatter = (props: {
   children: (formattedDate: string) => JSX.Element;
 }) => JSX.Element;
 
+export interface TagListProps {
+  references: SavedObjectsReference[];
+  onClick?: (tag: Tag) => void;
+  tagRender?: (tag: Tag) => JSX.Element;
+}
+
 /**
  * Abstract external services for this component.
  */
@@ -39,15 +47,19 @@ export interface Services {
   notifyError: NotifyFn;
   currentAppId$: Observable<string | undefined>;
   navigateToUrl: (url: string) => Promise<void> | void;
-  searchQueryParser?: (searchQuery: string) => {
+  searchQueryParser?: (searchQuery: string) => Promise<{
     searchQuery: string;
     references?: SavedObjectsFindOptionsReference[];
-  };
-  getSearchBarFilters?: () => SearchFilterConfig[];
+    referencesToExclude?: SavedObjectsFindOptionsReference[];
+  }>;
   DateFormatterComp?: DateFormatter;
-  TagList: FC<{ references: SavedObjectsReference[]; onClick?: (tag: { name: string }) => void }>;
-  /** Predicate function to indicate if the saved object references include tags */
+  /** Handler to retrieve the list of available tags */
+  getTagList: () => Tag[];
+  TagList: FC<TagListProps>;
+  /** Predicate function to indicate if some of the saved object references are tags */
   itemHasTags: (references: SavedObjectsReference[]) => boolean;
+  /** Handler to return the url to navigate to the kibana tags management */
+  getTagManagementUrl: () => string;
   getTagIdsFromReferences: (references: SavedObjectsReference[]) => string[];
 }
 
@@ -81,6 +93,11 @@ export interface TableListViewKibanaDependencies {
         addDanger: (notifyArgs: { title: MountPoint; text?: string }) => void;
       };
     };
+    http: {
+      basePath: {
+        prepend: (path: string) => string;
+      };
+    };
     overlays: {
       openFlyout(mount: MountPoint, options?: OverlayFlyoutOpenOptions): OverlayRef;
     };
@@ -111,7 +128,8 @@ export interface TableListViewKibanaDependencies {
           object: {
             references: SavedObjectsReference[];
           };
-          onClick?: (tag: { name: string; description: string; color: string }) => void;
+          onClick?: (tag: Tag) => void;
+          tagRender?: (tag: Tag) => JSX.Element;
         }>;
         SavedObjectSaveModalTagSelector: React.FC<{
           initialSelection: string[];
@@ -124,15 +142,13 @@ export interface TableListViewKibanaDependencies {
           useName?: boolean;
           tagField?: string;
         }
-      ) => {
+      ) => Promise<{
         searchTerm: string;
         tagReferences: SavedObjectsFindOptionsReference[];
+        tagReferencesToExclude: SavedObjectsFindOptionsReference[];
         valid: boolean;
-      };
-      getSearchBarFilter: (options?: {
-        useName?: boolean;
-        tagField?: string;
-      }) => SearchFilterConfig;
+      }>;
+      getTagList: () => Tag[];
       getTagIdsFromReferences: (references: SavedObjectsReference[]) => string[];
     };
   };
@@ -149,31 +165,26 @@ export const TableListViewKibanaProvider: FC<TableListViewKibanaDependencies> = 
 }) => {
   const { core, toMountPoint, savedObjectsTagging, FormattedRelative } = services;
 
-  const getSearchBarFilters = useMemo(() => {
-    if (savedObjectsTagging) {
-      return () => [savedObjectsTagging.ui.getSearchBarFilter({ useName: true })];
-    }
-  }, [savedObjectsTagging]);
-
   const searchQueryParser = useMemo(() => {
     if (savedObjectsTagging) {
-      return (searchQuery: string) => {
-        const res = savedObjectsTagging.ui.parseSearchQuery(searchQuery, { useName: true });
+      return async (searchQuery: string) => {
+        const res = await savedObjectsTagging.ui.parseSearchQuery(searchQuery, { useName: true });
         return {
           searchQuery: res.searchTerm,
           references: res.tagReferences,
+          referencesToExclude: res.tagReferencesToExclude,
         };
       };
     }
   }, [savedObjectsTagging]);
 
   const TagList = useMemo(() => {
-    const Comp: Services['TagList'] = ({ references, onClick }) => {
+    const Comp: Services['TagList'] = ({ references, onClick, tagRender }) => {
       if (!savedObjectsTagging?.ui.components.TagList) {
         return null;
       }
       const PluginTagList = savedObjectsTagging.ui.components.TagList;
-      return <PluginTagList object={{ references }} onClick={onClick} />;
+      return <PluginTagList object={{ references }} onClick={onClick} tagRender={tagRender} />;
     };
 
     return Comp;
@@ -190,6 +201,14 @@ export const TableListViewKibanaProvider: FC<TableListViewKibanaDependencies> = 
     [savedObjectsTagging?.ui]
   );
 
+  const getTagList = useCallback(() => {
+    if (!savedObjectsTagging?.ui.getTagList) {
+      return [];
+    }
+
+    return savedObjectsTagging.ui.getTagList();
+  }, [savedObjectsTagging?.ui]);
+
   const itemHasTags = useCallback(
     (references: SavedObjectsReference[]) => {
       return getTagIdsFromReferences(references).length > 0;
@@ -199,7 +218,7 @@ export const TableListViewKibanaProvider: FC<TableListViewKibanaDependencies> = 
 
   return (
     <RedirectAppLinksKibanaProvider coreStart={core}>
-      <InspectorKibanaProvider
+      <ContentEditorKibanaProvider
         core={core}
         toMountPoint={toMountPoint}
         savedObjectsTagging={savedObjectsTagging}
@@ -214,18 +233,19 @@ export const TableListViewKibanaProvider: FC<TableListViewKibanaDependencies> = 
           notifyError={(title, text) => {
             core.notifications.toasts.addDanger({ title: toMountPoint(title), text });
           }}
-          getSearchBarFilters={getSearchBarFilters}
           searchQueryParser={searchQueryParser}
           DateFormatterComp={(props) => <FormattedRelative {...props} />}
           currentAppId$={core.application.currentAppId$}
           navigateToUrl={core.application.navigateToUrl}
+          getTagList={getTagList}
           TagList={TagList}
           itemHasTags={itemHasTags}
           getTagIdsFromReferences={getTagIdsFromReferences}
+          getTagManagementUrl={() => core.http.basePath.prepend(TAG_MANAGEMENT_APP_URL)}
         >
           {children}
         </TableListViewProvider>
-      </InspectorKibanaProvider>
+      </ContentEditorKibanaProvider>
     </RedirectAppLinksKibanaProvider>
   );
 };

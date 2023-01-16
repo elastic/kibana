@@ -34,6 +34,7 @@ import {
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { buildEsQuery, Query, Filter, AggregateQuery } from '@kbn/es-query';
+import { OverrideFieldTopValueBarCallback } from './field_top_values_bucket';
 import type { BucketedAggregation } from '../../../common/types';
 import { canProvideStatsForField } from '../../../common/utils/field_stats_utils';
 import { loadFieldStats } from '../../services/field_stats';
@@ -46,7 +47,7 @@ import {
 } from './field_top_values';
 import { FieldSummaryMessage } from './field_summary_message';
 
-interface State {
+export interface FieldStatsState {
   isLoading: boolean;
   totalDocuments?: number;
   sampledDocuments?: number;
@@ -63,11 +64,11 @@ export interface FieldStatsServices {
   charts: ChartsPluginSetup;
 }
 
-export interface FieldStatsProps {
+interface FieldStatsPropsBase {
   services: FieldStatsServices;
-  query: Query | AggregateQuery;
-  filters: Filter[];
+  /** ISO formatted date string **/
   fromDate: string;
+  /** ISO formatted date string **/
   toDate: string;
   dataViewOrDataViewId: DataView | string;
   field: DataViewField;
@@ -83,11 +84,30 @@ export interface FieldStatsProps {
     sampledDocuments?: number;
   }) => JSX.Element;
   onAddFilter?: AddFieldFilterHandler;
+  overrideFieldTopValueBar?: OverrideFieldTopValueBarCallback;
+  onStateChange?: (s: FieldStatsState) => void;
 }
+
+export interface FieldStatsWithKbnQuery extends FieldStatsPropsBase {
+  /** If Kibana-supported query is provided, it will be converted to dsl query **/
+  query: Query | AggregateQuery;
+  filters: Filter[];
+  dslQuery?: never;
+}
+
+export interface FieldStatsWithDslQuery extends FieldStatsPropsBase {
+  query?: never;
+  filters?: never;
+  /** If dsl query is provided, use it directly in searches **/
+  dslQuery: object;
+}
+
+export type FieldStatsProps = FieldStatsWithKbnQuery | FieldStatsWithDslQuery;
 
 const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   services,
   query,
+  dslQuery,
   filters,
   fromDate,
   toDate,
@@ -98,9 +118,11 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   overrideMissingContent,
   overrideFooter,
   onAddFilter,
+  overrideFieldTopValueBar,
+  onStateChange,
 }) => {
   const { fieldFormats, uiSettings, charts, dataViews, data } = services;
-  const [state, changeState] = useState<State>({
+  const [state, changeState] = useState<FieldStatsState>({
     isLoading: false,
   });
   const [dataView, changeDataView] = useState<DataView | null>(null);
@@ -114,6 +136,15 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
       }
     },
     [changeState, isCanceledRef]
+  );
+
+  useEffect(
+    function broadcastOnStateChange() {
+      if (onStateChange) {
+        onStateChange(state);
+      }
+    },
+    [onStateChange, state]
   );
 
   const setDataView: typeof changeDataView = useCallback(
@@ -153,7 +184,9 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
         field,
         fromDate,
         toDate,
-        dslQuery: buildEsQuery(loadedDataView, query, filters, getEsQueryConfig(uiSettings)),
+        dslQuery:
+          dslQuery ??
+          buildEsQuery(loadedDataView, query ?? [], filters ?? [], getEsQueryConfig(uiSettings)),
         abortController: abortControllerRef.current,
       });
 
@@ -169,7 +202,6 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
         topValues: results.topValues,
       }));
     } catch (e) {
-      // console.error(e);
       setState((s) => ({ ...s, isLoading: false }));
     }
   }
@@ -346,33 +378,36 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
 
   if (histogram && histogram.buckets.length && topValues && topValues.buckets.length) {
     title = (
-      <EuiButtonGroup
-        buttonSize="compressed"
-        isFullWidth
-        legend={i18n.translate('unifiedFieldList.fieldStats.displayToggleLegend', {
-          defaultMessage: 'Toggle either the',
-        })}
-        options={[
-          {
-            label: i18n.translate('unifiedFieldList.fieldStats.topValuesLabel', {
-              defaultMessage: 'Top values',
-            }),
-            id: 'topValues',
-            'data-test-subj': `${dataTestSubject}-buttonGroup-topValuesButton`,
-          },
-          {
-            label: i18n.translate('unifiedFieldList.fieldStats.fieldDistributionLabel', {
-              defaultMessage: 'Distribution',
-            }),
-            id: 'histogram',
-            'data-test-subj': `${dataTestSubject}-buttonGroup-distributionButton`,
-          },
-        ]}
-        onChange={(optionId: string) => {
-          setShowingHistogram(optionId === 'histogram');
-        }}
-        idSelected={showingHistogram ? 'histogram' : 'topValues'}
-      />
+      <>
+        <EuiButtonGroup
+          buttonSize="compressed"
+          isFullWidth
+          legend={i18n.translate('unifiedFieldList.fieldStats.displayToggleLegend', {
+            defaultMessage: 'Toggle either the',
+          })}
+          options={[
+            {
+              label: i18n.translate('unifiedFieldList.fieldStats.topValuesLabel', {
+                defaultMessage: 'Top values',
+              }),
+              id: 'topValues',
+              'data-test-subj': `${dataTestSubject}-buttonGroup-topValuesButton`,
+            },
+            {
+              label: i18n.translate('unifiedFieldList.fieldStats.fieldDistributionLabel', {
+                defaultMessage: 'Distribution',
+              }),
+              id: 'histogram',
+              'data-test-subj': `${dataTestSubject}-buttonGroup-distributionButton`,
+            },
+          ]}
+          onChange={(optionId: string) => {
+            setShowingHistogram(optionId === 'histogram');
+          }}
+          idSelected={showingHistogram ? 'histogram' : 'topValues'}
+        />
+        <EuiSpacer size="xs" />
+      </>
     );
   } else if (field.type === 'date') {
     title = (
@@ -494,6 +529,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
         color={color}
         data-test-subj={dataTestSubject}
         onAddFilter={onAddFilter}
+        overrideFieldTopValueBar={overrideFieldTopValueBar}
       />
     );
   }
@@ -510,10 +546,6 @@ class ErrorBoundary extends React.Component<{}, { hasError: boolean }> {
   static getDerivedStateFromError() {
     return { hasError: true };
   }
-
-  // componentDidCatch(error, errorInfo) {
-  //   console.log(error, errorInfo);
-  // }
 
   render() {
     if (this.state.hasError) {

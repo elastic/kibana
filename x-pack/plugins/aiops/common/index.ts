@@ -20,3 +20,5 @@ export const PLUGIN_NAME = 'AIOps';
  * "Explain log rate spikes UI" during development until the first release.
  */
 export const AIOPS_ENABLED = true;
+
+export const CHANGE_POINT_DETECTION_ENABLED = true;

@@ -263,7 +263,7 @@ describe('createCommentUserActionBuilder', () => {
       userEvent.click(result.getByTestId('property-actions-quote'));
 
       await waitFor(() => {
-        expect(builderArgs.handleManageQuote).toHaveBeenCalledWith('basic-comment-id');
+        expect(builderArgs.handleManageQuote).toHaveBeenCalledWith('Solve this fast!');
       });
     });
   });

@@ -61,6 +61,7 @@ jest.mock('../../../../common/lib/kibana', () => ({
     addError: jest.fn(),
     addSuccess: jest.fn(),
     addWarning: jest.fn(),
+    remove: jest.fn(),
   }),
   useKibana: () => ({
     services: {
@@ -160,11 +161,11 @@ describe('Alert table context menu', () => {
         ecsRowData: { ...ecsRowData, agent: { type: ['endpoint'] }, event: { kind: ['event'] } },
       };
 
-      describe('when users can access endpoint management', () => {
+      describe('when users has write event filters privilege', () => {
         beforeEach(() => {
           (useUserPrivileges as jest.Mock).mockReturnValue({
             ...mockInitialUserPrivilegesState(),
-            endpointPrivileges: { loading: false, canAccessEndpointManagement: true },
+            endpointPrivileges: { loading: false, canWriteEventFilters: true },
           });
         });
 
@@ -246,15 +247,15 @@ describe('Alert table context menu', () => {
         });
       });
 
-      describe('when users can NOT access endpoint management', () => {
+      describe("when users don't have write event filters privilege", () => {
         beforeEach(() => {
           (useUserPrivileges as jest.Mock).mockReturnValue({
             ...mockInitialUserPrivilegesState(),
-            endpointPrivileges: { loading: false, canAccessEndpointManagement: false },
+            endpointPrivileges: { loading: false, canWriteEventFilters: false },
           });
         });
 
-        test('it disables AddEndpointEventFilter when timeline id is host events page but cannot acces endpoint management', () => {
+        test('it removes AddEndpointEventFilter option when timeline id is host events page but does not has write event filters privilege', () => {
           const wrapper = mount(
             <AlertContextMenu {...endpointEventProps} scopeId={TableId.hostsPageEvents} />,
             {
@@ -262,12 +263,11 @@ describe('Alert table context menu', () => {
             }
           );
 
-          wrapper.find(actionMenuButton).simulate('click');
-          expect(wrapper.find(addEndpointEventFilterButton).first().exists()).toEqual(true);
-          expect(wrapper.find(addEndpointEventFilterButton).first().props().disabled).toEqual(true);
+          // Entire actionMenuButton is removed as there is no option available
+          expect(wrapper.find(actionMenuButton).first().exists()).toEqual(false);
         });
 
-        test('it disables AddEndpointEventFilter when timeline id is user events page but cannot acces endpoint management', () => {
+        test('it removes AddEndpointEventFilter option when timeline id is user events page but does not has write event filters privilege', () => {
           const wrapper = mount(
             <AlertContextMenu {...endpointEventProps} scopeId={TableId.usersPageEvents} />,
             {
@@ -275,9 +275,8 @@ describe('Alert table context menu', () => {
             }
           );
 
-          wrapper.find(actionMenuButton).simulate('click');
-          expect(wrapper.find(addEndpointEventFilterButton).first().exists()).toEqual(true);
-          expect(wrapper.find(addEndpointEventFilterButton).first().props().disabled).toEqual(true);
+          // Entire actionMenuButton is removed as there is no option available
+          expect(wrapper.find(actionMenuButton).first().exists()).toEqual(false);
         });
       });
     });

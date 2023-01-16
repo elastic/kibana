@@ -31,8 +31,11 @@ import {
   stateToAlertMessage,
 } from '../common/messages';
 import {
+  AdditionalContext,
   createScopedLogger,
+  flattenAdditionalContext,
   getAlertDetailsUrl,
+  getContextForRecoveredAlerts,
   getViewInInventoryAppUrl,
   UNGROUPED_FACTORY_KEY,
 } from '../common/utils';
@@ -54,7 +57,7 @@ type InventoryMetricThresholdAlert = Alert<
 type InventoryMetricThresholdAlertFactory = (
   id: string,
   reason: string,
-  additionalContext?: [x: string] | null,
+  additionalContext?: AdditionalContext | null,
   threshold?: number | undefined,
   value?: number | undefined
 ) => InventoryMetricThresholdAlert;
@@ -80,14 +83,20 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
 
     const esClient = services.scopedClusterClient.asCurrentUser;
 
-    const { alertWithLifecycle, savedObjectsClient, getAlertStartedDate, getAlertUuid } = services;
+    const {
+      alertWithLifecycle,
+      savedObjectsClient,
+      getAlertStartedDate,
+      getAlertUuid,
+      getAlertByAlertUuid,
+    } = services;
     const alertFactory: InventoryMetricThresholdAlertFactory = (id, reason, additionalContext) =>
       alertWithLifecycle({
         id,
         fields: {
           [ALERT_REASON]: reason,
           [ALERT_RULE_PARAMETERS]: params as any, // the type assumes the object is already flattened when writing the same way as when reading https://github.com/elastic/kibana/blob/main/x-pack/plugins/rule_registry/common/field_map/runtime_type_from_fieldmap.ts#L60
-          ...additionalContext,
+          ...flattenAdditionalContext(additionalContext),
         },
       });
 
@@ -121,7 +130,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
           }),
         });
 
-        return {};
+        return { state: {} };
       }
     }
     const source = await libs.sources.getSourceConfiguration(savedObjectsClient, sourceId);
@@ -245,6 +254,8 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
       const recoveredAlertId = alert.getId();
       const indexedStartedDate = getAlertStartedDate(recoveredAlertId) ?? startedAt.toISOString();
       const alertUuid = getAlertUuid(recoveredAlertId);
+      const alertHits = alertUuid ? await getAlertByAlertUuid(alertUuid) : undefined;
+      const additionalContext = getContextForRecoveredAlerts(alertHits);
 
       alert.setContext({
         alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),
@@ -260,11 +271,14 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
           timestamp: indexedStartedDate,
           spaceId,
         }),
+        ...additionalContext,
       });
     }
 
     const stopTime = Date.now();
     logger.debug(`Scheduled ${scheduledActionsCount} actions in ${stopTime - startTime}ms`);
+
+    return { state: {} };
   });
 
 const formatThreshold = (metric: SnapshotMetricType, value: number | number[]) => {

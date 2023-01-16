@@ -120,7 +120,7 @@ describe('metric visualization', () => {
             Object {
               "columnId": "metric-col-id",
               "palette": Array [],
-              "triggerIcon": "colorBy",
+              "triggerIconType": "colorBy",
             },
           ]
         `);
@@ -136,7 +136,7 @@ describe('metric visualization', () => {
             Object {
               "color": "#f5f7fa",
               "columnId": "metric-col-id",
-              "triggerIcon": "color",
+              "triggerIconType": "color",
             },
           ]
         `);
@@ -154,7 +154,7 @@ describe('metric visualization', () => {
             Object {
               "color": "static-color",
               "columnId": "metric-col-id",
-              "triggerIcon": "color",
+              "triggerIconType": "color",
             },
           ]
         `);
@@ -170,7 +170,7 @@ describe('metric visualization', () => {
             Object {
               "columnId": "metric-col-id",
               "palette": Array [],
-              "triggerIcon": "colorBy",
+              "triggerIconType": "colorBy",
             },
           ]
         `);
@@ -187,7 +187,7 @@ describe('metric visualization', () => {
           Array [
             Object {
               "columnId": "breakdown-col-id",
-              "triggerIcon": "aggregate",
+              "triggerIconType": "aggregate",
             },
           ]
         `);
@@ -202,7 +202,7 @@ describe('metric visualization', () => {
           Array [
             Object {
               "columnId": "breakdown-col-id",
-              "triggerIcon": undefined,
+              "triggerIconType": undefined,
             },
           ]
         `);

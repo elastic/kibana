@@ -8,8 +8,8 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { getSampleProbability } from '@kbn/ml-agg-utils';
 
 import type { AiopsExplainLogRateSpikesSchema } from '../../../common/api/explain_log_rate_spikes';
 
@@ -20,7 +20,6 @@ import { getRequestBase } from './get_request_base';
 // `x-pack/plugins/apm/server/routes/correlations/queries/fetch_duration_field_candidates.ts`
 
 const POPULATED_DOC_COUNT_SAMPLE_SIZE = 1000;
-const SAMPLE_PROBABILITY_MIN_DOC_COUNT = 50000;
 
 const SUPPORTED_ES_FIELD_TYPES = [
   ES_FIELD_TYPES.KEYWORD,
@@ -69,9 +68,10 @@ export const fetchIndexInfo = async (
   Object.entries(respMapping.fields).forEach(([key, value]) => {
     const fieldTypes = Object.keys(value) as ES_FIELD_TYPES[];
     const isSupportedType = fieldTypes.some((type) => SUPPORTED_ES_FIELD_TYPES.includes(type));
+    const isAggregatable = fieldTypes.some((type) => value[type].aggregatable);
 
     // Check if fieldName is something we can aggregate on
-    if (isSupportedType) {
+    if (isSupportedType && isAggregatable) {
       acceptableFields.add(key);
     }
   });
@@ -96,12 +96,7 @@ export const fetchIndexInfo = async (
   });
 
   const totalDocCount = (resp.hits.total as estypes.SearchTotalHits).value;
-
-  let sampleProbability = 1;
-
-  if (totalDocCount > SAMPLE_PROBABILITY_MIN_DOC_COUNT) {
-    sampleProbability = Math.min(0.5, SAMPLE_PROBABILITY_MIN_DOC_COUNT / totalDocCount);
-  }
+  const sampleProbability = getSampleProbability(totalDocCount);
 
   return { fieldCandidates: [...finalFieldCandidates], sampleProbability, totalDocCount };
 };

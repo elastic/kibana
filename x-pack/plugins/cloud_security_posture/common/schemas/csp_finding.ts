@@ -6,7 +6,7 @@
  */
 
 // TODO: this needs to be defined in a versioned schema
-import type { EcsEvent } from '@kbn/logging';
+import type { EcsEvent } from '@kbn/ecs';
 import type { CspRuleMetadata } from './csp_rule_metadata';
 
 export interface CspFinding {

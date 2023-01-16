@@ -166,6 +166,7 @@ describe('ALL - Packs', () => {
       findAndClickButton('Save and deploy changes');
       cy.contains(PACK_NAME);
       cy.contains(`Successfully created "${PACK_NAME}" pack`);
+      cy.getBySel('toastCloseButton').click();
     });
 
     it('to click the edit button and edit pack', () => {
@@ -186,6 +187,7 @@ describe('ALL - Packs', () => {
       cy.contains('Save and deploy changes');
       findAndClickButton('Save and deploy changes');
       cy.contains(`Successfully updated "${PACK_NAME}" pack`);
+      cy.getBySel('toastCloseButton').click();
     });
 
     it('should trigger validation when saved query is being chosen', () => {
@@ -407,6 +409,93 @@ describe('ALL - Packs', () => {
       cy.contains('Load Elastic prebuilt packs').should('not.exist');
       cy.wait(1000);
       cy.react('EuiTableRow').should('have.length.above', 5);
+    });
+  });
+
+  describe('Global packs', () => {
+    beforeEach(() => {
+      login();
+      navigateTo('/app/osquery/packs');
+    });
+
+    it('add global packs to polciies', () => {
+      const globalPack = 'globalPack';
+      cy.contains('Packs').click();
+      findAndClickButton('Add pack');
+      findFormFieldByRowsLabelAndType('Name', globalPack);
+      cy.getBySel('osqueryPackTypeGlobal').click();
+      findAndClickButton('Save pack');
+
+      cy.contains(globalPack);
+      cy.contains(`Successfully created "${globalPack}" pack`);
+      cy.getBySel('toastCloseButton').click();
+
+      cy.visit(FLEET_AGENT_POLICIES);
+      cy.contains('Create agent policy').click();
+      cy.getBySel('createAgentPolicyNameField').type('testGlobal');
+      cy.getBySel('createAgentPolicyFlyoutBtn').click();
+      cy.contains(/^Agent policy 'testGlobal' created$/).click();
+      cy.contains('testGlobal').click();
+      cy.contains('Add integration').click();
+      cy.contains(integration).click();
+      addIntegration('testGlobal');
+      cy.contains('Add Elastic Agent later').click();
+      cy.contains('osquery_manager-');
+      cy.request('/internal/osquery/fleet_wrapper/package_policies').then((response) => {
+        const item = response.body.items[0];
+
+        expect(item.inputs[0].config.osquery.value.packs.globalPack).to.deep.equal({
+          shard: 100,
+          queries: {},
+        });
+      });
+      cy.visit('/app/fleet/policies');
+      cy.contains('td', 'testGlobal')
+        .parent()
+        .within(() => {
+          cy.contains('rev. 2').click();
+        });
+    });
+    it('add proper shard to policies packs config', () => {
+      const shardPack = 'shardPack';
+      cy.contains('Packs').click();
+      findAndClickButton('Add pack');
+      findFormFieldByRowsLabelAndType('Name', shardPack);
+
+      cy.contains('Partial deployment (shards)').click();
+      cy.getBySel('packShardsForm-0').within(() => {
+        cy.getBySel('shards-field-policy').type('Default{downArrow}{enter}');
+        cy.get('#shardsPercentage0').type('{backspace}{backspace}5');
+      });
+      cy.getBySel('packShardsForm-1').within(() => {
+        cy.getBySel('shards-field-policy').type('{downArrow}{enter}');
+        cy.get('#shardsPercentage1').type('{backspace}{backspace}{backspace}');
+      });
+      findAndClickButton('Save pack');
+
+      cy.contains(`Successfully created "${shardPack}" pack`);
+      cy.getBySel('toastCloseButton').click();
+
+      cy.request('/internal/osquery/fleet_wrapper/package_policies').then((response) => {
+        const shardPolicy = response.body.items.find(
+          (policy: { policy_id: string }) => policy.policy_id === 'fleet-server-policy'
+        );
+
+        expect(shardPolicy.inputs[0].config.osquery.value.packs[shardPack]).to.deep.equal({
+          shard: 15,
+          queries: {},
+        });
+      });
+      cy.contains(shardPack).click();
+      cy.contains('Edit').click();
+      cy.get('#shardsPercentage0').should('have.value', '15');
+      cy.getBySel('packShardsForm-1').within(() => {
+        cy.getBySel('shards-field-policy').contains('testGlobal');
+        cy.get('#shardsPercentage1').should('have.value', '0');
+      });
+      cy.getBySel('policyIdsComboBox').within(() => {
+        cy.contains('testGlobal').should('not.exist');
+      });
     });
   });
 });

@@ -6,55 +6,37 @@
  * Side Public License, v 1.
  */
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import type { UnifiedHistogramChartData, UnifiedHistogramFetchStatus } from '../types';
-import { Histogram } from './histogram';
+import { getLensProps, Histogram } from './histogram';
 import React from 'react';
 import { unifiedHistogramServicesMock } from '../__mocks__/services';
+import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
+import { createDefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
+import { UnifiedHistogramFetchStatus } from '../types';
+import { getLensAttributes } from './get_lens_attributes';
+import { REQUEST_DEBOUNCE_MS } from './consts';
+import { act } from 'react-dom/test-utils';
+import * as buildBucketInterval from './build_bucket_interval';
+import * as useTimeRange from './use_time_range';
+import { RequestStatus } from '@kbn/inspector-plugin/public';
 
-const chartData = {
-  xAxisOrderedValues: [
-    1623880800000, 1623967200000, 1624053600000, 1624140000000, 1624226400000, 1624312800000,
-    1624399200000, 1624485600000, 1624572000000, 1624658400000, 1624744800000, 1624831200000,
-    1624917600000, 1625004000000, 1625090400000,
-  ],
-  xAxisFormat: { id: 'date', params: { pattern: 'YYYY-MM-DD' } },
-  xAxisLabel: 'order_date per day',
-  yAxisFormat: { id: 'number' },
-  ordered: {
-    date: true,
-    interval: {
-      asMilliseconds: jest.fn(),
+const mockBucketInterval = { description: '1 minute', scale: undefined, scaled: false };
+jest.spyOn(buildBucketInterval, 'buildBucketInterval').mockReturnValue(mockBucketInterval);
+jest.spyOn(useTimeRange, 'useTimeRange');
+
+const getMockLensAttributes = () =>
+  getLensAttributes({
+    title: 'test',
+    filters: [],
+    query: {
+      language: 'kuery',
+      query: '',
     },
-    intervalESUnit: 'd',
-    intervalESValue: 1,
-    min: '2021-03-18T08:28:56.411Z',
-    max: '2021-07-01T07:28:56.411Z',
-  },
-  yAxisLabel: 'Count',
-  values: [
-    { x: 1623880800000, y: 134 },
-    { x: 1623967200000, y: 152 },
-    { x: 1624053600000, y: 141 },
-    { x: 1624140000000, y: 138 },
-    { x: 1624226400000, y: 142 },
-    { x: 1624312800000, y: 157 },
-    { x: 1624399200000, y: 149 },
-    { x: 1624485600000, y: 146 },
-    { x: 1624572000000, y: 170 },
-    { x: 1624658400000, y: 137 },
-    { x: 1624744800000, y: 150 },
-    { x: 1624831200000, y: 144 },
-    { x: 1624917600000, y: 147 },
-    { x: 1625004000000, y: 137 },
-    { x: 1625090400000, y: 66 },
-  ],
-} as unknown as UnifiedHistogramChartData;
+    dataView: dataViewWithTimefieldMock,
+    timeInterval: 'auto',
+    breakdownField: dataViewWithTimefieldMock.getFieldByName('extension'),
+  });
 
-function mountComponent(
-  status: UnifiedHistogramFetchStatus,
-  data: UnifiedHistogramChartData | null = chartData,
-  error?: Error
-) {
+function mountComponent() {
   const services = unifiedHistogramServicesMock;
   services.data.query.timefilter.timefilter.getAbsoluteTime = () => {
     return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
@@ -64,44 +46,212 @@ function mountComponent(
 
   const props = {
     services: unifiedHistogramServicesMock,
+    request: {
+      searchSessionId: '123',
+    },
+    hits: {
+      status: UnifiedHistogramFetchStatus.loading,
+      total: undefined,
+    },
     chart: {
-      status,
       hidden: false,
       timeInterval: 'auto',
-      bucketInterval: {
-        scaled: true,
-        description: 'test',
-        scale: 2,
-      },
-      data: data ?? undefined,
-      error,
     },
     timefilterUpdateHandler,
+    dataView: dataViewWithTimefieldMock,
+    timeRange: {
+      from: '2020-05-14T11:05:13.590',
+      to: '2020-05-14T11:20:13.590',
+    },
+    lastReloadRequestTime: 42,
+    lensAttributes: getMockLensAttributes(),
+    onTotalHitsChange: jest.fn(),
+    onChartLoad: jest.fn(),
   };
 
-  return mountWithIntl(<Histogram {...props} />);
+  return {
+    props,
+    component: mountWithIntl(<Histogram {...props} />),
+  };
 }
 
 describe('Histogram', () => {
   it('renders correctly', () => {
-    const component = mountComponent('complete');
+    const { component } = mountComponent();
     expect(component.find('[data-test-subj="unifiedHistogramChart"]').exists()).toBe(true);
   });
 
-  it('renders error correctly', () => {
-    const component = mountComponent('error', null, new Error('Loading error'));
-    expect(component.find('[data-test-subj="unifiedHistogramChart"]').exists()).toBe(false);
-    expect(component.find('[data-test-subj="unifiedHistogramErrorChartContainer"]').exists()).toBe(
-      true
+  it('should render lens.EmbeddableComponent with debounced props', async () => {
+    const { component, props } = mountComponent();
+    const embeddable = unifiedHistogramServicesMock.lens.EmbeddableComponent;
+    expect(component.find(embeddable).exists()).toBe(true);
+    let lensProps = component.find(embeddable).props();
+    const originalProps = getLensProps({
+      timeRange: props.timeRange,
+      attributes: getMockLensAttributes(),
+      request: props.request,
+      lastReloadRequestTime: props.lastReloadRequestTime,
+      onLoad: lensProps.onLoad,
+    });
+    expect(lensProps).toEqual(originalProps);
+    component.setProps({ lastReloadRequestTime: 43 }).update();
+    lensProps = component.find(embeddable).props();
+    expect(lensProps).toEqual(originalProps);
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, REQUEST_DEBOUNCE_MS));
+    });
+    component.update();
+    lensProps = component.find(embeddable).props();
+    expect(lensProps).toEqual({ ...originalProps, lastReloadRequestTime: 43 });
+  });
+
+  it('should execute onLoad correctly', async () => {
+    const { component, props } = mountComponent();
+    const embeddable = unifiedHistogramServicesMock.lens.EmbeddableComponent;
+    const onLoad = component.find(embeddable).props().onLoad;
+    const adapters = createDefaultInspectorAdapters();
+    adapters.tables.tables.unifiedHistogram = { meta: { statistics: { totalCount: 100 } } } as any;
+    const rawResponse = {
+      took: 0,
+      timed_out: false,
+      _shards: {
+        total: 1,
+        successful: 1,
+        skipped: 0,
+        failed: 0,
+      },
+      hits: {
+        total: 100,
+        max_score: null,
+        hits: [],
+      },
+      aggregations: {
+        '2': {
+          buckets: [
+            {
+              key_as_string: '2022-10-05T16:00:00.000-03:00',
+              key: 1664996400000,
+              doc_count: 20,
+            },
+            {
+              key_as_string: '2022-10-05T16:30:00.000-03:00',
+              key: 1664998200000,
+              doc_count: 20,
+            },
+            {
+              key_as_string: '2022-10-05T17:00:00.000-03:00',
+              key: 1665000000000,
+              doc_count: 20,
+            },
+            {
+              key_as_string: '2022-10-05T17:30:00.000-03:00',
+              key: 1665001800000,
+              doc_count: 20,
+            },
+            {
+              key_as_string: '2022-10-05T18:00:00.000-03:00',
+              key: 1665003600000,
+              doc_count: 20,
+            },
+          ],
+        },
+      },
+    };
+    jest
+      .spyOn(adapters.requests, 'getRequests')
+      .mockReturnValue([{ response: { json: { rawResponse } } } as any]);
+    onLoad(true, undefined);
+    expect(props.onTotalHitsChange).toHaveBeenLastCalledWith(
+      UnifiedHistogramFetchStatus.loading,
+      undefined
     );
-    expect(
-      component.find('[data-test-subj="unifiedHistogramErrorChartText"]').get(1).props.children
-    ).toBe('Loading error');
+    expect(props.onChartLoad).toHaveBeenLastCalledWith({ complete: false, adapters: {} });
+    expect(buildBucketInterval.buildBucketInterval).not.toHaveBeenCalled();
+    expect(useTimeRange.useTimeRange).toHaveBeenLastCalledWith(
+      expect.objectContaining({ bucketInterval: undefined })
+    );
+    act(() => {
+      onLoad(false, adapters);
+    });
+    expect(props.onTotalHitsChange).toHaveBeenLastCalledWith(
+      UnifiedHistogramFetchStatus.complete,
+      100
+    );
+    expect(props.onChartLoad).toHaveBeenLastCalledWith({ complete: true, adapters });
+    expect(buildBucketInterval.buildBucketInterval).toHaveBeenCalled();
+    expect(useTimeRange.useTimeRange).toHaveBeenLastCalledWith(
+      expect.objectContaining({ bucketInterval: mockBucketInterval })
+    );
   });
 
-  it('renders loading state correctly', () => {
-    const component = mountComponent('loading', null);
-    expect(component.find('[data-test-subj="unifiedHistogramChart"]').exists()).toBe(true);
-    expect(component.find('[data-test-subj="unifiedHistogramChartLoading"]').exists()).toBe(true);
+  it('should execute onLoad correctly when the request has a failure status', async () => {
+    const { component, props } = mountComponent();
+    const embeddable = unifiedHistogramServicesMock.lens.EmbeddableComponent;
+    const onLoad = component.find(embeddable).props().onLoad;
+    const adapters = createDefaultInspectorAdapters();
+    jest
+      .spyOn(adapters.requests, 'getRequests')
+      .mockReturnValue([{ status: RequestStatus.ERROR } as any]);
+    onLoad(false, adapters);
+    expect(props.onTotalHitsChange).toHaveBeenLastCalledWith(
+      UnifiedHistogramFetchStatus.error,
+      undefined
+    );
+    expect(props.onChartLoad).toHaveBeenLastCalledWith({ complete: false, adapters });
+  });
+
+  it('should execute onLoad correctly when the response has shard failures', async () => {
+    const { component, props } = mountComponent();
+    const embeddable = unifiedHistogramServicesMock.lens.EmbeddableComponent;
+    const onLoad = component.find(embeddable).props().onLoad;
+    const adapters = createDefaultInspectorAdapters();
+    const rawResponse = {
+      _shards: {
+        total: 1,
+        successful: 0,
+        skipped: 0,
+        failed: 1,
+        failures: [],
+      },
+    };
+    jest
+      .spyOn(adapters.requests, 'getRequests')
+      .mockReturnValue([{ response: { json: { rawResponse } } } as any]);
+    onLoad(false, adapters);
+    expect(props.onTotalHitsChange).toHaveBeenLastCalledWith(
+      UnifiedHistogramFetchStatus.error,
+      undefined
+    );
+    expect(props.onChartLoad).toHaveBeenLastCalledWith({ complete: false, adapters });
+  });
+
+  it('should not recreate onLoad in debounced lens props when hits.total changes', async () => {
+    const { component, props } = mountComponent();
+    const embeddable = unifiedHistogramServicesMock.lens.EmbeddableComponent;
+    const onLoad = component.find(embeddable).props().onLoad;
+    onLoad(true, undefined);
+    expect(props.onTotalHitsChange).toHaveBeenLastCalledWith(
+      UnifiedHistogramFetchStatus.loading,
+      undefined
+    );
+    component
+      .setProps({
+        hits: {
+          status: UnifiedHistogramFetchStatus.complete,
+          total: 100,
+        },
+      })
+      .update();
+    expect(component.find(embeddable).props().onLoad).toBe(onLoad);
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, REQUEST_DEBOUNCE_MS));
+    });
+    component.update();
+    expect(component.find(embeddable).props().onLoad).toBe(onLoad);
+    onLoad(true, undefined);
+    expect(props.onTotalHitsChange).toHaveBeenLastCalledWith(
+      UnifiedHistogramFetchStatus.loading,
+      100
+    );
   });
 });

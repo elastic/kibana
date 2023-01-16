@@ -8,8 +8,10 @@
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import { ReportTypes } from '@kbn/observability-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { ClientPluginsStart } from '../../../../../plugin';
 import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
+import { useSelectedLocation } from '../hooks/use_selected_location';
 
 interface MonitorTotalRunsCountProps {
   from: string;
@@ -22,6 +24,11 @@ export const MonitorTotalRunsCount = (props: MonitorTotalRunsCountProps) => {
   const { ExploratoryViewEmbeddable } = observability;
 
   const monitorId = useMonitorQueryId();
+  const selectedLocation = useSelectedLocation();
+
+  if (!monitorId || !selectedLocation) {
+    return null;
+  }
 
   return (
     <ExploratoryViewEmbeddable
@@ -30,12 +37,19 @@ export const MonitorTotalRunsCount = (props: MonitorTotalRunsCountProps) => {
       attributes={[
         {
           time: props,
-          reportDefinitions: { config_id: [monitorId] },
+          reportDefinitions: {
+            'monitor.id': [monitorId],
+            'observer.geo.name': [selectedLocation.label],
+          },
           dataType: 'synthetics',
           selectedMetricField: 'monitor_total_runs',
-          name: 'synthetics-series-1',
+          name: TOTAL_RUNS_LABEL,
         },
       ]}
     />
   );
 };
+
+const TOTAL_RUNS_LABEL = i18n.translate('xpack.synthetics.monitorDetails.summary.totalRuns', {
+  defaultMessage: 'Total runs',
+});

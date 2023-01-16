@@ -52,6 +52,17 @@ export const EDIT_LABEL = i18n.translate('xpack.synthetics.management.editLabel'
   defaultMessage: 'Edit',
 });
 
+export const ENABLE_STATUS_ALERT = i18n.translate('xpack.synthetics.management.enableStatusAlert', {
+  defaultMessage: 'Enable status alerts',
+});
+
+export const DISABLE_STATUS_ALERT = i18n.translate(
+  'xpack.synthetics.management.disableStatusAlert',
+  {
+    defaultMessage: 'Disable status alerts',
+  }
+);
+
 export const DUPLICATE_LABEL = i18n.translate('xpack.synthetics.management.duplicateLabel', {
   defaultMessage: 'Duplicate',
 });
@@ -137,8 +148,8 @@ export const getRecordRangeLabel = ({
         total: <EuiI18nNumber value={total} />,
         monitorsLabel: (
           <strong>
-            {i18n.translate('xpack.synthetics.management.monitorList.recordRangeLabel', {
-              defaultMessage: '{monitorCount, plural, one {Monitor} other {Monitors}}',
+            {i18n.translate('xpack.synthetics.management.monitorList.configurationRangeLabel', {
+              defaultMessage: '{monitorCount, plural, one {Configuration} other {Configurations}}',
               values: {
                 monitorCount: total,
               },
@@ -189,6 +200,10 @@ export const DISABLE_MONITOR_LABEL = i18n.translate(
     defaultMessage: 'Disable monitor',
   }
 );
+
+export const PROJECT = i18n.translate('xpack.synthetics.management.project', {
+  defaultMessage: 'Project',
+});
 
 export const getMonitorEnabledSuccessLabel = (name: string) =>
   i18n.translate('xpack.synthetics.management.monitorEnabledSuccessMessage', {

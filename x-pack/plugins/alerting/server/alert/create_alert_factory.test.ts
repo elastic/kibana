@@ -33,11 +33,13 @@ describe('createAlertFactory()', () => {
     });
     const result = alertFactory.create('1');
     expect(result).toMatchInlineSnapshot(`
-              Object {
-                "meta": Object {},
-                "state": Object {},
-              }
-        `);
+      Object {
+        "meta": Object {
+          "flappingHistory": Array [],
+        },
+        "state": Object {},
+      }
+    `);
     // @ts-expect-error
     expect(result.getId()).toEqual('1');
   });
@@ -58,6 +60,7 @@ describe('createAlertFactory()', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "meta": Object {
+          "flappingHistory": Array [],
           "lastScheduledActions": Object {
             "date": "1970-01-01T00:00:00.000Z",
             "group": "default",
@@ -79,13 +82,15 @@ describe('createAlertFactory()', () => {
     });
     alertFactory.create('1');
     expect(alerts).toMatchInlineSnapshot(`
-              Object {
-                "1": Object {
-                  "meta": Object {},
-                  "state": Object {},
-                },
-              }
-        `);
+      Object {
+        "1": Object {
+          "meta": Object {
+            "flappingHistory": Array [],
+          },
+          "state": Object {},
+        },
+      }
+    `);
   });
 
   test('throws error and sets flag when more alerts are created than allowed', () => {
@@ -115,7 +120,9 @@ describe('createAlertFactory()', () => {
     });
     const result = alertFactory.create('1');
     expect(result).toEqual({
-      meta: {},
+      meta: {
+        flappingHistory: [],
+      },
       state: {},
       context: {},
       scheduledExecutionOptions: undefined,
@@ -133,7 +140,7 @@ describe('createAlertFactory()', () => {
 
   test('returns recovered alerts when setsRecoveryContext is true', () => {
     (processAlerts as jest.Mock).mockReturnValueOnce({
-      recoveredAlerts: {
+      currentRecoveredAlerts: {
         z: {
           id: 'z',
           state: { foo: true },
@@ -154,7 +161,9 @@ describe('createAlertFactory()', () => {
     });
     const result = alertFactory.create('1');
     expect(result).toEqual({
-      meta: {},
+      meta: {
+        flappingHistory: [],
+      },
       state: {},
       context: {},
       scheduledExecutionOptions: undefined,
@@ -178,7 +187,9 @@ describe('createAlertFactory()', () => {
     });
     const result = alertFactory.create('1');
     expect(result).toEqual({
-      meta: {},
+      meta: {
+        flappingHistory: [],
+      },
       state: {},
       context: {},
       scheduledExecutionOptions: undefined,
@@ -201,7 +212,9 @@ describe('createAlertFactory()', () => {
     });
     const result = alertFactory.create('1');
     expect(result).toEqual({
-      meta: {},
+      meta: {
+        flappingHistory: [],
+      },
       state: {},
       context: {},
       scheduledExecutionOptions: undefined,
@@ -223,7 +236,9 @@ describe('createAlertFactory()', () => {
     });
     const result = alertFactory.create('1');
     expect(result).toEqual({
-      meta: {},
+      meta: {
+        flappingHistory: [],
+      },
       state: {},
       context: {},
       scheduledExecutionOptions: undefined,

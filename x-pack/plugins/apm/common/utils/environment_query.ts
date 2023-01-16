@@ -6,10 +6,7 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
-  SERVICE_ENVIRONMENT,
-  SERVICE_NODE_NAME,
-} from '../elasticsearch_fieldnames';
+import { SERVICE_ENVIRONMENT, SERVICE_NODE_NAME } from '../es_fields/apm';
 import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,

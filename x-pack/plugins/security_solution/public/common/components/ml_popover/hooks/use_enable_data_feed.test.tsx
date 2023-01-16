@@ -18,17 +18,10 @@ import { createStore } from '../../../store';
 import type { State } from '../../../store';
 
 import type { SecurityJob } from '../types';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
 
 const state: State = mockGlobalState;
 const { storage } = createSecuritySolutionStorageMock();
-const store = createStore(
-  state,
-  SUB_PLUGINS_REDUCER,
-  { dataTable: tGridReducer },
-  kibanaObservable,
-  storage
-);
+const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <TestProviders store={store}>{children}</TestProviders>
@@ -130,7 +123,7 @@ describe('useSecurityJobsHelpers', () => {
   });
 
   it('calls startDatafeeds with 2 weeks old start date', async () => {
-    jest.useFakeTimers('modern').setSystemTime(new Date('1989-03-07'));
+    jest.useFakeTimers().setSystemTime(new Date('1989-03-07'));
 
     const { result } = renderHook(() => useEnableDataFeed(), {
       wrapper,

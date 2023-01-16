@@ -8,6 +8,7 @@
 import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ReportTypes, useTheme } from '@kbn/observability-plugin/public';
+import { AVAILABILITY_LABEL } from './availability_panel';
 import { ClientPluginsStart } from '../../../../../plugin';
 import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 import { useSelectedLocation } from '../hooks/use_selected_location';
@@ -29,7 +30,7 @@ export const AvailabilitySparklines = (props: AvailabilitySparklinesProps) => {
 
   const selectedLocation = useSelectedLocation();
 
-  if (!selectedLocation) {
+  if (!selectedLocation || !monitorId) {
     return null;
   }
 
@@ -44,7 +45,7 @@ export const AvailabilitySparklines = (props: AvailabilitySparklinesProps) => {
         {
           seriesType: 'area',
           time: props,
-          name: 'Monitor availability',
+          name: AVAILABILITY_LABEL,
           dataType: 'synthetics',
           selectedMetricField: 'monitor_availability',
           reportDefinitions: {

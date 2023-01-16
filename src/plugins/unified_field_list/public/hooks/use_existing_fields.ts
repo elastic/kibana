@@ -15,7 +15,6 @@ import {
   DataPublicPluginStart,
   DataViewsContract,
   getEsQueryConfig,
-  UI_SETTINGS,
 } from '@kbn/data-plugin/public';
 import { type DataView } from '@kbn/data-plugin/common';
 import { loadFieldExisting } from '../services/field_existing';
@@ -32,11 +31,12 @@ export interface ExistingFieldsInfo {
 }
 
 export interface ExistingFieldsFetcherParams {
+  disableAutoFetching?: boolean;
   dataViews: DataView[];
-  fromDate: string;
-  toDate: string;
-  query: Query | AggregateQuery;
-  filters: Filter[];
+  fromDate: string | undefined; // fetching will be skipped if `undefined`
+  toDate: string | undefined;
+  query: Query | AggregateQuery | undefined;
+  filters: Filter[] | undefined;
   services: {
     core: Pick<CoreStart, 'uiSettings'>;
     data: DataPublicPluginStart;
@@ -68,6 +68,12 @@ const unknownInfo: ExistingFieldsInfo = {
 const globalMap$ = new BehaviorSubject<ExistingFieldsByDataViewMap>(initialData); // for syncing between hooks
 let lastFetchId: string = ''; // persist last fetch id to skip older requests/responses if any
 
+/**
+ * Fetches info whether a field contains data or it's empty.
+ * Can be used in combination with `useQuerySubscriber` hook for gathering the required params.
+ * @param params
+ * @public
+ */
 export const useExistingFieldsFetcher = (
   params: ExistingFieldsFetcherParams
 ): ExistingFieldsFetcher => {
@@ -89,7 +95,7 @@ export const useExistingFieldsFetcher = (
       dataViewId: string | undefined;
       fetchId: string;
     }): Promise<void> => {
-      if (!dataViewId) {
+      if (!dataViewId || !query || !fromDate || !toDate) {
         return;
       }
 
@@ -123,7 +129,7 @@ export const useExistingFieldsFetcher = (
             dslQuery: await buildSafeEsQuery(
               dataView,
               query,
-              filters,
+              filters || [],
               getEsQueryConfig(core.uiSettings)
             ),
             fromDate,
@@ -137,11 +143,11 @@ export const useExistingFieldsFetcher = (
 
           const existingFieldNames = result?.existingFieldNames || [];
 
-          const metaFields = core.uiSettings.get(UI_SETTINGS.META_FIELDS) || [];
           if (
-            !existingFieldNames.filter((fieldName) => !metaFields.includes?.(fieldName)).length &&
+            onNoData &&
             numberOfFetches === 1 &&
-            onNoData
+            !existingFieldNames.filter((fieldName) => !dataView?.metaFields?.includes(fieldName))
+              .length
           ) {
             onNoData(dataViewId);
           }
@@ -173,12 +179,17 @@ export const useExistingFieldsFetcher = (
     async (dataViewId?: string) => {
       const fetchId = generateId();
       lastFetchId = fetchId;
+
+      const options = {
+        fetchId,
+        dataViewId,
+        ...params,
+      };
       // refetch only for the specified data view
       if (dataViewId) {
         await fetchFieldsExistenceInfo({
-          fetchId,
+          ...options,
           dataViewId,
-          ...params,
         });
         return;
       }
@@ -186,9 +197,8 @@ export const useExistingFieldsFetcher = (
       await Promise.all(
         params.dataViews.map((dataView) =>
           fetchFieldsExistenceInfo({
-            fetchId,
+            ...options,
             dataViewId: dataView.id,
-            ...params,
           })
         )
       );
@@ -205,8 +215,10 @@ export const useExistingFieldsFetcher = (
   );
 
   useEffect(() => {
-    refetchFieldsExistenceInfo();
-  }, [refetchFieldsExistenceInfo]);
+    if (!params.disableAutoFetching) {
+      refetchFieldsExistenceInfo();
+    }
+  }, [refetchFieldsExistenceInfo, params.disableAutoFetching]);
 
   useEffect(() => {
     return () => {

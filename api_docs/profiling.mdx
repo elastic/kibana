@@ -8,7 +8,7 @@ slug: /kibana-dev-docs/api/profiling
 title: "profiling"
 image: https://source.unsplash.com/400x175/?github
 description: API docs for the profiling plugin
-date: 2022-11-10
+date: 2023-01-16
 tags: ['contributor', 'dev', 'apidocs', 'kibana', 'profiling']
 ---
 import profilingObj from './profiling.devdocs.json';
@@ -21,7 +21,7 @@ Contact [profiling](https://github.com/orgs/elastic/teams/profiling-ui) for ques
 
 | Public API count  | Any count | Items lacking comments | Missing exports |
 |-------------------|-----------|------------------------|-----------------|
-| 14 | 2 | 14 | 0 |
+| 15 | 2 | 15 | 0 |
 
 ## Server
 
@@ -30,6 +30,9 @@ Contact [profiling](https://github.com/orgs/elastic/teams/profiling-ui) for ques
 
 ### Start
 <DocDefinitionList data={[profilingObj.server.start]}/>
+
+### Consts, variables and types
+<DocDefinitionList data={profilingObj.server.misc}/>
 
 ## Common
 

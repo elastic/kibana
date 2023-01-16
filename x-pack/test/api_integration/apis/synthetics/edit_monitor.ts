@@ -43,6 +43,7 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       _httpMonitorJson = getFixtureJson('http_monitor');
       await supertest.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
+      await supertest.post(API_URLS.SYNTHETICS_ENABLEMENT).set('kbn-xsrf', 'true').expect(200);
 
       const testPolicyName = 'Fleet test server policy' + Date.now();
       const apiResponse = await testPrivateLocations.addFleetPolicy(testPolicyName);
@@ -99,7 +100,7 @@ export default function ({ getService }: FtrProviderContext) {
       };
 
       const modifiedMonitor = {
-        ...newMonitor,
+        ...savedMonitor,
         ...updates,
         [ConfigKey.METADATA]: {
           ...newMonitor[ConfigKey.METADATA],
@@ -236,6 +237,61 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(apiResponse.status).eql(400);
       expect(apiResponse.body.message).eql('Monitor type is invalid');
+    });
+
+    it('sets config hash to empty string on edits', async () => {
+      const newMonitor = httpMonitorJson;
+      const configHash = 'djrhefje';
+
+      const { id: monitorId, attributes: savedMonitor } = await saveMonitor({
+        ...(newMonitor as MonitorFields),
+        [ConfigKey.CONFIG_HASH]: configHash,
+      });
+
+      expect(savedMonitor).eql(
+        omit(
+          {
+            ...newMonitor,
+            [ConfigKey.CONFIG_ID]: monitorId,
+            [ConfigKey.MONITOR_QUERY_ID]: monitorId,
+            [ConfigKey.CONFIG_HASH]: configHash,
+          },
+          secretKeys
+        )
+      );
+
+      const updates: Partial<HTTPFields> = {
+        [ConfigKey.URLS]: 'https://modified-host.com',
+      } as Partial<HTTPFields>;
+
+      const modifiedMonitor = {
+        ...newMonitor,
+        ...updates,
+        [ConfigKey.METADATA]: {
+          ...newMonitor[ConfigKey.METADATA],
+          ...updates[ConfigKey.METADATA],
+        },
+      };
+
+      const editResponse = await supertest
+        .put(API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)
+        .set('kbn-xsrf', 'true')
+        .send(modifiedMonitor)
+        .expect(200);
+
+      expect(editResponse.body.attributes).eql(
+        omit(
+          {
+            ...modifiedMonitor,
+            [ConfigKey.CONFIG_ID]: monitorId,
+            [ConfigKey.MONITOR_QUERY_ID]: monitorId,
+            [ConfigKey.CONFIG_HASH]: '',
+            revision: 2,
+          },
+          secretKeys
+        )
+      );
+      expect(editResponse.body.attributes).not.to.have.keys('unknownkey');
     });
 
     it('handles private location errors and does not update the monitor if integration policy is unable to be updated', async () => {

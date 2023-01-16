@@ -9,10 +9,12 @@
 export type {
   SavedObjectsClientFactory,
   SavedObjectsClientFactoryProvider,
-  SavedObjectsClientWrapperFactory,
   SavedObjectsRepositoryFactory,
   SavedObjectsClientProviderOptions,
-  SavedObjectsClientWrapperOptions,
+  SavedObjectsEncryptionExtensionFactory,
+  SavedObjectsSecurityExtensionFactory,
+  SavedObjectsSpacesExtensionFactory,
+  SavedObjectsExtensionFactory,
 } from './src/client_factory';
 export type { SavedObjectsServiceSetup, SavedObjectsServiceStart } from './src/contracts';
 export type {
@@ -64,3 +66,26 @@ export type {
 } from './src/serialization';
 export type { ISavedObjectTypeRegistry } from './src/type_registry';
 export type { SavedObjectsValidationMap, SavedObjectsValidationSpec } from './src/validation';
+export type {
+  ISavedObjectsEncryptionExtension,
+  EncryptedObjectDescriptor,
+} from './src/extensions/encryption';
+export type {
+  CheckAuthorizationParams,
+  PerformAuthorizationParams,
+  AuthorizationTypeEntry,
+  AuthorizationTypeMap,
+  CheckAuthorizationResult,
+  EnforceAuthorizationParams,
+  AddAuditEventParams,
+  RedactNamespacesParams,
+  ISavedObjectsSecurityExtension,
+} from './src/extensions/security';
+export { AuditAction } from './src/extensions/security';
+export type { ISavedObjectsSpacesExtension } from './src/extensions/spaces';
+export type { SavedObjectsExtensions } from './src/extensions/extensions';
+export {
+  ENCRYPTION_EXTENSION_ID,
+  SECURITY_EXTENSION_ID,
+  SPACES_EXTENSION_ID,
+} from './src/extensions/extensions';

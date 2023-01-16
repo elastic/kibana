@@ -10,6 +10,7 @@ import type {
   DurationRange,
   OnRefreshChangeProps,
 } from '@elastic/eui/src/components/date_picker/types';
+import { ExperimentalFeaturesService } from '../../../../common/experimental_features_service';
 import type {
   ConsoleResponseActionCommands,
   ResponseActionsApiCommandNames,
@@ -232,7 +233,17 @@ export const useActionsLogFilter = ({
         }))
       : isHostsFilter
       ? []
-      : RESPONSE_ACTION_API_COMMANDS_NAMES.map((commandName) => ({
+      : RESPONSE_ACTION_API_COMMANDS_NAMES.filter((commandName) => {
+          // `get-file` is currently behind FF
+          if (
+            commandName === 'get-file' &&
+            !ExperimentalFeaturesService.get().responseActionGetFileEnabled
+          ) {
+            return false;
+          }
+
+          return true;
+        }).map((commandName) => ({
           key: commandName,
           label: getUiCommand(commandName),
           checked:

@@ -40,6 +40,8 @@
       "author": "@randomuserid/Elastic",
       "version": "3",
       "updated_date": "5/16/2022"
-  },
-    "created_by": "ml-module-security-linux"  }
+    },
+    "created_by": "ml-module-security-linux-v3",
+    "security_app_display_name": "Unusual Linux Process Calling the Metadata Service"
+  }
 }

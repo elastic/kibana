@@ -41,6 +41,7 @@ import {
 } from '../utils';
 import { combineQueryAndFilters, getLayerMetaInfo } from './show_underlying_data';
 import { changeIndexPattern } from '../state_management/lens_slice';
+import { LensByReferenceInput } from '../embeddable';
 
 function getLensTopNavConfig(options: {
   showSaveAndReturn: boolean;
@@ -55,6 +56,9 @@ function getLensTopNavConfig(options: {
   savingToDashboardPermitted: boolean;
   contextOriginatingApp?: string;
   isSaveable: boolean;
+  showReplaceInDashboard: boolean;
+  showReplaceInCanvas: boolean;
+  contextFromEmbeddable?: boolean;
 }): TopNavMenuData[] {
   const {
     actions,
@@ -68,6 +72,9 @@ function getLensTopNavConfig(options: {
     tooltips,
     contextOriginatingApp,
     isSaveable,
+    showReplaceInDashboard,
+    showReplaceInCanvas,
+    contextFromEmbeddable,
   } = options;
   const topNavMenu: TopNavMenuData[] = [];
 
@@ -90,14 +97,14 @@ function getLensTopNavConfig(options: {
         defaultMessage: 'Save',
       });
 
-  if (contextOriginatingApp) {
+  if (contextOriginatingApp && !showCancel) {
     topNavMenu.push({
       label: i18n.translate('xpack.lens.app.goBackLabel', {
         defaultMessage: `Go back to {contextOriginatingApp}`,
         values: { contextOriginatingApp },
       }),
       run: actions.goBack,
-      className: 'lnsNavItem__goBack',
+      className: 'lnsNavItem__withDivider',
       testId: 'lnsApp_goBackToAppButton',
       description: i18n.translate('xpack.lens.app.goBackLabel', {
         defaultMessage: `Go back to {contextOriginatingApp}`,
@@ -116,6 +123,7 @@ function getLensTopNavConfig(options: {
       label: exploreDataInDiscoverLabel,
       run: () => {},
       testId: 'lnsApp_openInDiscover',
+      className: 'lnsNavItem__withDivider',
       description: exploreDataInDiscoverLabel,
       disableButton: Boolean(tooltips.showUnderlyingDataWarning()),
       tooltip: tooltips.showUnderlyingDataWarning,
@@ -154,6 +162,7 @@ function getLensTopNavConfig(options: {
       defaultMessage: 'Settings',
     }),
     run: actions.openSettings,
+    className: 'lnsNavItem__withDivider',
     testId: 'lnsApp_settingsButton',
     description: i18n.translate('xpack.lens.app.settingsAriaLabel', {
       defaultMessage: 'Open the Lens settings menu',
@@ -175,8 +184,10 @@ function getLensTopNavConfig(options: {
 
   topNavMenu.push({
     label: saveButtonLabel,
-    iconType: !showSaveAndReturn ? 'save' : undefined,
-    emphasize: !showSaveAndReturn,
+    iconType: (showReplaceInDashboard || showReplaceInCanvas ? false : !showSaveAndReturn)
+      ? 'save'
+      : undefined,
+    emphasize: showReplaceInDashboard || showReplaceInCanvas ? false : !showSaveAndReturn,
     run: actions.showSaveModal,
     testId: 'lnsApp_saveButton',
     description: i18n.translate('xpack.lens.app.saveButtonAriaLabel', {
@@ -187,16 +198,54 @@ function getLensTopNavConfig(options: {
 
   if (showSaveAndReturn) {
     topNavMenu.push({
-      label: i18n.translate('xpack.lens.app.saveAndReturn', {
-        defaultMessage: 'Save and return',
-      }),
+      label: contextFromEmbeddable
+        ? i18n.translate('xpack.lens.app.saveAndReplace', {
+            defaultMessage: 'Save and replace',
+          })
+        : i18n.translate('xpack.lens.app.saveAndReturn', {
+            defaultMessage: 'Save and return',
+          }),
       emphasize: true,
-      iconType: 'checkInCircleFilled',
+      iconType: contextFromEmbeddable ? 'save' : 'checkInCircleFilled',
       run: actions.saveAndReturn,
       testId: 'lnsApp_saveAndReturnButton',
       disableButton: !isSaveable,
       description: i18n.translate('xpack.lens.app.saveAndReturnButtonAriaLabel', {
         defaultMessage: 'Save the current lens visualization and return to the last app',
+      }),
+    });
+  }
+
+  if (showReplaceInDashboard) {
+    topNavMenu.push({
+      label: i18n.translate('xpack.lens.app.replaceInDashboard', {
+        defaultMessage: 'Replace in dashboard',
+      }),
+      emphasize: true,
+      iconType: 'merge',
+      run: actions.saveAndReturn,
+      testId: 'lnsApp_replaceInDashboardButton',
+      disableButton: !isSaveable,
+      description: i18n.translate('xpack.lens.app.replaceInDashboardButtonAriaLabel', {
+        defaultMessage:
+          'Replace legacy visualization with lens visualization and return to the dashboard',
+      }),
+    });
+  }
+
+  if (showReplaceInCanvas) {
+    topNavMenu.push({
+      label: i18n.translate('xpack.lens.app.replaceInCanvas', {
+        defaultMessage: 'Replace in canvas',
+      }),
+      emphasize: true,
+      iconType: 'merge',
+      run: actions.saveAndReturn,
+      testId: 'lnsApp_replaceInCanvasButton',
+      disableButton: !isSaveable,
+      description: i18n.translate('xpack.lens.app.replaceInCanvasButtonAriaLabel', {
+        defaultMessage:
+          'Replace legacy visualization with lens visualization and return to the canvas',
       }),
     });
   }
@@ -233,7 +282,7 @@ export const LensTopNavMenu = ({
     uiSettings,
     application,
     attributeService,
-    discover,
+    share,
     dashboardFeatureFlag,
     dataViewFieldEditor,
     dataViewEditor,
@@ -362,13 +411,20 @@ export const LensTopNavMenu = ({
         const dataViewId = datasourceMap[activeDatasourceId].getUsedDataView(
           datasourceStates[activeDatasourceId].state
         );
-        const dataView = await data.dataViews.get(dataViewId);
+        const dataView = dataViewId ? await data.dataViews.get(dataViewId) : undefined;
         setCurrentIndexPattern(dataView ?? indexPatterns[0]);
       }
     };
 
     setCurrentPattern();
-  }, [activeDatasourceId, datasourceMap, datasourceStates, indexPatterns, data.dataViews]);
+  }, [
+    activeDatasourceId,
+    datasourceMap,
+    datasourceStates,
+    indexPatterns,
+    data.dataViews,
+    isOnTextBasedMode,
+  ]);
 
   useEffect(() => {
     if (typeof query === 'object' && query !== null && isOfAggregateQueryType(query)) {
@@ -424,13 +480,20 @@ export const LensTopNavMenu = ({
     currentDoc,
   ]);
 
+  const discoverLocator = share?.url.locators.get('DISCOVER_APP_LOCATOR');
+
   const layerMetaInfo = useMemo(() => {
-    if (!activeDatasourceId || !discover) {
+    if (!activeDatasourceId || !discoverLocator) {
+      return;
+    }
+    if (visualization.activeId == null) {
       return;
     }
     return getLayerMetaInfo(
       datasourceMap[activeDatasourceId],
       datasourceStates[activeDatasourceId].state,
+      visualizationMap[visualization.activeId],
+      visualization.state,
       activeData,
       dataViews.indexPatterns,
       data.query.timefilter.timefilter.getTime(),
@@ -438,9 +501,11 @@ export const LensTopNavMenu = ({
     );
   }, [
     activeDatasourceId,
-    discover,
+    discoverLocator,
+    visualization,
     datasourceMap,
     datasourceStates,
+    visualizationMap,
     activeData,
     dataViews.indexPatterns,
     data.query.timefilter.timefilter,
@@ -450,13 +515,23 @@ export const LensTopNavMenu = ({
   const lensStore = useStore();
 
   const topNavConfig = useMemo(() => {
+    const showReplaceInDashboard =
+      initialContext?.originatingApp === 'dashboards' &&
+      !(initialInput as LensByReferenceInput)?.savedObjectId;
+    const showReplaceInCanvas =
+      initialContext?.originatingApp === 'canvas' &&
+      !(initialInput as LensByReferenceInput)?.savedObjectId;
+    const contextFromEmbeddable =
+      initialContext && 'isEmbeddable' in initialContext && initialContext.isEmbeddable;
     const baseMenuEntries = getLensTopNavConfig({
       showSaveAndReturn:
-        Boolean(
+        !(showReplaceInDashboard || showReplaceInCanvas) &&
+        (Boolean(
           isLinkedToOriginatingApp &&
             // Temporarily required until the 'by value' paradigm is default.
             (dashboardFeatureFlag.allowByValueEmbeddables || Boolean(initialInput))
-        ) || Boolean(initialContextIsEmbedded),
+        ) ||
+          Boolean(initialContextIsEmbedded)),
       enableExportToCSV: Boolean(isSaveable && activeData && Object.keys(activeData).length),
       showOpenInDiscover: Boolean(layerMetaInfo?.isVisible),
       isByValueMode: getIsByValueMode(),
@@ -466,6 +541,9 @@ export const LensTopNavMenu = ({
       savingToDashboardPermitted,
       isSaveable,
       contextOriginatingApp,
+      showReplaceInDashboard,
+      showReplaceInCanvas,
+      contextFromEmbeddable,
       tooltips: {
         showExportWarning: () => {
           if (activeData) {
@@ -525,7 +603,17 @@ export const LensTopNavMenu = ({
             });
             runSave(
               {
-                newTitle: title || '',
+                newTitle:
+                  title ||
+                  (initialContext && 'isEmbeddable' in initialContext && initialContext.isEmbeddable
+                    ? i18n.translate('xpack.lens.app.convertedLabel', {
+                        defaultMessage: '{title} (converted)',
+                        values: {
+                          title:
+                            initialContext.title || `${initialContext.visTypeTitle} visualization`,
+                        },
+                      })
+                    : ''),
                 newCopyOnSave: false,
                 isTitleDuplicateConfirmed: false,
                 returnToOrigin: true,
@@ -559,7 +647,7 @@ export const LensTopNavMenu = ({
           const { error, meta } = layerMetaInfo;
           // If Discover is not available, return
           // If there's no data, return
-          if (error || !discover || !meta) {
+          if (error || !discoverLocator || !meta) {
             return;
           }
           const { filters: newFilters, query: newQuery } = combineQueryAndFilters(
@@ -570,7 +658,7 @@ export const LensTopNavMenu = ({
             getEsQueryConfig(uiSettings)
           );
 
-          return discover.locator!.getRedirectUrl({
+          return discoverLocator.getRedirectUrl({
             dataViewSpec: dataViews.indexPatterns[meta.id]?.spec,
             timeRange: data.query.timefilter.timefilter.getTime(),
             filters: newFilters,
@@ -611,7 +699,7 @@ export const LensTopNavMenu = ({
     setIsSaveModalVisible,
     goBackToOriginatingApp,
     redirectToOrigin,
-    discover,
+    discoverLocator,
     query,
     filters,
     indexPatterns,
@@ -620,6 +708,7 @@ export const LensTopNavMenu = ({
     isOnTextBasedMode,
     lensStore,
     theme$,
+    initialContext,
   ]);
 
   const onQuerySubmitWrapped = useCallback(
@@ -897,6 +986,7 @@ export const LensTopNavMenu = ({
       }
     }
   }
+
   return (
     <AggregateQueryTopNavMenu
       setMenuMountPoint={setHeaderActionMenu}

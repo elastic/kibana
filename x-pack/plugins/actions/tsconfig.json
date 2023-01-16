@@ -1,9 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
+    "outDir": "target/types",
   },
   "include": [
     "server/**/*",
@@ -13,16 +11,29 @@
     "common/**/*"
   ],
   "kbn_references": [
-    { "path": "../../../src/core/tsconfig.json" },
-    { "path": "../../../src/plugins/data/tsconfig.json" },
-    { "path": "../spaces/tsconfig.json" },
-    { "path": "../security/tsconfig.json" },
-    { "path": "../licensing/tsconfig.json" },
-    { "path": "../task_manager/tsconfig.json" },
-    { "path": "../event_log/tsconfig.json" },
-    { "path": "../encrypted_saved_objects/tsconfig.json" },
-    { "path": "../features/tsconfig.json" },
-    { "path": "../monitoring_collection/tsconfig.json" },
-    { "path": "../../../src/plugins/usage_collection/tsconfig.json" }
+    "@kbn/core",
+    "@kbn/spaces-plugin",
+    "@kbn/security-plugin",
+    "@kbn/licensing-plugin",
+    "@kbn/task-manager-plugin",
+    "@kbn/event-log-plugin",
+    "@kbn/encrypted-saved-objects-plugin",
+    "@kbn/features-plugin",
+    "@kbn/monitoring-collection-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/i18n",
+    "@kbn/utility-types",
+    "@kbn/config-schema",
+    "@kbn/config",
+    "@kbn/core-saved-objects-server",
+    "@kbn/es-query",
+    "@kbn/apm-utils",
+    "@kbn/std",
+    "@kbn/logging",
+    "@kbn/logging-mocks",
+    "@kbn/core-elasticsearch-client-server-mocks",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

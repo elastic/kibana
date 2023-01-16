@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { createMockDatasource } from '../mocks';
+import { createMockDatasource, createMockVisualization } from '../mocks';
 import { combineQueryAndFilters, getLayerMetaInfo } from './show_underlying_data';
 import { Filter } from '@kbn/es-query';
-import { DatasourcePublicAPI } from '../types';
+import { createMockedIndexPattern } from '../datasources/form_based/mocks';
+import { LayerType } from '..';
 
 describe('getLayerMetaInfo', () => {
   const capabilities = {
@@ -20,6 +21,8 @@ describe('getLayerMetaInfo', () => {
       getLayerMetaInfo(
         createMockDatasource('testDatasource'),
         {},
+        createMockVisualization('testVisualization'),
+        {},
         undefined,
         {},
         undefined,
@@ -28,14 +31,17 @@ describe('getLayerMetaInfo', () => {
     ).toBe('Visualization has no data available to show');
   });
 
-  it('should return error in case of multiple layers', () => {
+  it('should return error in case of multiple data layers', () => {
+    const mockDatasource = createMockDatasource('testDatasource');
+    mockDatasource.getLayers.mockReturnValue(['layer1', 'layer2']);
     expect(
       getLayerMetaInfo(
-        createMockDatasource('testDatasource'),
+        mockDatasource,
+        {},
+        createMockVisualization('testVisualization'),
         {},
         {
           datatable1: { type: 'datatable', columns: [], rows: [] },
-          datatable2: { type: 'datatable', columns: [], rows: [] },
         },
         {},
         undefined,
@@ -45,15 +51,56 @@ describe('getLayerMetaInfo', () => {
   });
 
   it('should return error in case of missing activeDatasource', () => {
-    expect(getLayerMetaInfo(undefined, {}, undefined, {}, undefined, capabilities).error).toBe(
-      'Visualization has no data available to show'
-    );
+    expect(
+      getLayerMetaInfo(
+        undefined,
+        {},
+        createMockVisualization('testVisualization'),
+        {},
+        undefined,
+        {},
+        undefined,
+        capabilities
+      ).error
+    ).toBe('Visualization has no data available to show');
   });
 
-  it('should return error in case of missing configuration/state', () => {
+  it('should return error in case of missing datasource configuration/state', () => {
     expect(
       getLayerMetaInfo(
         createMockDatasource('testDatasource'),
+        undefined,
+        createMockVisualization('testVisualization'),
+        {},
+        {},
+        {},
+        undefined,
+        capabilities
+      ).error
+    ).toBe('Visualization has no data available to show');
+  });
+
+  it('should return error in case of missing activeVisualization', () => {
+    expect(
+      getLayerMetaInfo(
+        createMockDatasource('testDatasource'),
+        {},
+        undefined,
+        {},
+        undefined,
+        {},
+        undefined,
+        capabilities
+      ).error
+    ).toBe('Visualization has no data available to show');
+  });
+
+  it('should return error in case of missing visualization configuration/state', () => {
+    expect(
+      getLayerMetaInfo(
+        createMockDatasource('testDatasource'),
+        {},
+        createMockVisualization('testVisualization'),
         undefined,
         {},
         {},
@@ -63,10 +110,59 @@ describe('getLayerMetaInfo', () => {
     ).toBe('Visualization has no data available to show');
   });
 
+  it('should ignore the number of datatables passed, rather check the datasource and visualization configuration', () => {
+    expect(
+      getLayerMetaInfo(
+        createMockDatasource('testDatasource', {
+          getFilters: jest.fn(() => ({
+            enabled: { kuery: [], lucene: [] },
+            disabled: { kuery: [], lucene: [] },
+          })),
+        }),
+        {},
+        createMockVisualization('testVisualization'),
+        {},
+        {
+          datatable1: { type: 'datatable', columns: [], rows: [] },
+          datatable2: { type: 'datatable', columns: [], rows: [] },
+        },
+        {},
+        undefined,
+        capabilities
+      ).error
+    ).toBeUndefined();
+  });
+
+  it('should return no multiple layers error when non-data layers are used together with a single data layer', () => {
+    const mockDatasource = createMockDatasource('testDatasource', {
+      getFilters: jest.fn(() => ({
+        enabled: { kuery: [], lucene: [] },
+        disabled: { kuery: [], lucene: [] },
+      })),
+    });
+    mockDatasource.getLayers.mockReturnValue(['layer1', 'layer2', 'layer3']);
+    const mockVisualization = createMockVisualization('testVisualization');
+    let counter = 0;
+    const layerTypes: LayerType[] = ['data', 'annotations', 'referenceLine'];
+    mockVisualization.getLayerType.mockImplementation(() => layerTypes[counter++]);
+    expect(
+      getLayerMetaInfo(
+        mockDatasource,
+        {},
+        mockVisualization,
+        {},
+        {
+          datatable1: { type: 'datatable', columns: [], rows: [] },
+        },
+        {},
+        undefined,
+        capabilities
+      ).error
+    ).toBeUndefined();
+  });
+
   it('should return error in case of a timeshift declared in a column', () => {
-    const mockDatasource = createMockDatasource('testDatasource');
-    const updatedPublicAPI: DatasourcePublicAPI = {
-      datasourceId: 'testDatasource',
+    const mockDatasource = createMockDatasource('testDatasource', {
       getOperationForColumnId: jest.fn(() => ({
         dataType: 'number',
         isBucketed: false,
@@ -77,39 +173,33 @@ describe('getLayerMetaInfo', () => {
         hasTimeShift: true,
         hasReducedTimeRange: true,
       })),
-      getTableSpec: jest.fn(),
-      getVisualDefaults: jest.fn(),
-      getSourceId: jest.fn(),
-      getMaxPossibleNumValues: jest.fn(),
-      getFilters: jest.fn(),
-      isTextBasedLanguage: jest.fn(() => false),
-      hasDefaultTimeField: jest.fn(() => true),
-    };
-    mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
+    });
     expect(
-      getLayerMetaInfo(createMockDatasource('testDatasource'), {}, {}, {}, undefined, capabilities)
-        .error
+      getLayerMetaInfo(
+        mockDatasource,
+        {},
+        createMockVisualization('testVisualization'),
+        {},
+        {},
+        {},
+        undefined,
+        capabilities
+      ).error
     ).toBe('Visualization has no data available to show');
   });
 
   it('should return error in case of getFilters returning errors', () => {
-    const mockDatasource = createMockDatasource('testDatasource');
-    const updatedPublicAPI: DatasourcePublicAPI = {
+    const mockDatasource = createMockDatasource('testDatasource', {
       datasourceId: 'formBased',
-      getOperationForColumnId: jest.fn(),
       getTableSpec: jest.fn(() => [{ columnId: 'col1', fields: ['bytes'] }]),
-      getVisualDefaults: jest.fn(),
-      getSourceId: jest.fn(),
-      getMaxPossibleNumValues: jest.fn(),
       getFilters: jest.fn(() => ({ error: 'filters error' })),
-      isTextBasedLanguage: jest.fn(() => false),
-      hasDefaultTimeField: jest.fn(() => true),
-    };
-    mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
+    });
     expect(
       getLayerMetaInfo(
         mockDatasource,
         {}, // the publicAPI has been mocked, so no need for a state here
+        createMockVisualization('testVisualization'),
+        {},
         {
           datatable1: { type: 'datatable', columns: [], rows: [] },
         },
@@ -121,23 +211,17 @@ describe('getLayerMetaInfo', () => {
   });
 
   it('should not be visible if discover is not available', () => {
-    const mockDatasource = createMockDatasource('testDatasource');
-    const updatedPublicAPI: DatasourcePublicAPI = {
+    const mockDatasource = createMockDatasource('testDatasource', {
       datasourceId: 'indexpattern',
-      getOperationForColumnId: jest.fn(),
       getTableSpec: jest.fn(() => [{ columnId: 'col1', fields: ['bytes'] }]),
-      getVisualDefaults: jest.fn(),
-      getSourceId: jest.fn(),
-      getMaxPossibleNumValues: jest.fn(),
       getFilters: jest.fn(() => ({ error: 'filters error' })),
-      isTextBasedLanguage: jest.fn(() => false),
-      hasDefaultTimeField: jest.fn(() => true),
-    };
-    mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
+    });
     // both capabilities should be enabled to enable discover
     expect(
       getLayerMetaInfo(
         mockDatasource,
+        {},
+        createMockVisualization('testVisualization'),
         {},
         {
           datatable1: { type: 'datatable', columns: [], rows: [] },
@@ -154,6 +238,8 @@ describe('getLayerMetaInfo', () => {
       getLayerMetaInfo(
         mockDatasource,
         {},
+        createMockVisualization('testVisualization'),
+        {},
         {
           datatable1: { type: 'datatable', columns: [], rows: [] },
         },
@@ -168,15 +254,10 @@ describe('getLayerMetaInfo', () => {
   });
 
   it('should basically work collecting fields and filters in the visualization', () => {
-    const mockDatasource = createMockDatasource('testDatasource');
-    const updatedPublicAPI: DatasourcePublicAPI = {
+    const mockDatasource = createMockDatasource('testDatasource', {
       datasourceId: 'formBased',
-      getOperationForColumnId: jest.fn(),
       getTableSpec: jest.fn(() => [{ columnId: 'col1', fields: ['bytes'] }]),
-      getVisualDefaults: jest.fn(),
-      getSourceId: jest.fn(),
-      getMaxPossibleNumValues: jest.fn(),
-      isTextBasedLanguage: jest.fn(() => false),
+      getSourceId: jest.fn(() => '1'),
       getFilters: jest.fn(() => ({
         enabled: {
           kuery: [[{ language: 'kuery', query: 'memory > 40000' }]],
@@ -184,16 +265,19 @@ describe('getLayerMetaInfo', () => {
         },
         disabled: { kuery: [], lucene: [] },
       })),
-      hasDefaultTimeField: jest.fn(() => true),
+    });
+    const sampleIndexPatternsFromService = {
+      '1': createMockedIndexPattern(),
     };
-    mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
     const { error, meta } = getLayerMetaInfo(
       mockDatasource,
       {}, // the publicAPI has been mocked, so no need for a state here
+      createMockVisualization('testVisualization'),
+      {},
       {
         datatable1: { type: 'datatable', columns: [], rows: [] },
       },
-      {},
+      sampleIndexPatternsFromService,
       undefined,
       capabilities
     );
@@ -213,6 +297,37 @@ describe('getLayerMetaInfo', () => {
       },
       disabled: { kuery: [], lucene: [] },
     });
+  });
+
+  it('should order date fields first', () => {
+    const mockDatasource = createMockDatasource('testDatasource', {
+      datasourceId: 'formBased',
+      getTableSpec: jest.fn(() => [{ columnId: 'col1', fields: ['bytes', 'timestamp'] }]),
+      getSourceId: jest.fn(() => '1'),
+      getFilters: jest.fn(() => ({
+        enabled: {
+          kuery: [[{ language: 'kuery', query: 'memory > 40000' }]],
+          lucene: [],
+        },
+        disabled: { kuery: [], lucene: [] },
+      })),
+    });
+    const sampleIndexPatternsFromService = {
+      '1': createMockedIndexPattern(),
+    };
+    const { meta } = getLayerMetaInfo(
+      mockDatasource,
+      {}, // the publicAPI has been mocked, so no need for a state here
+      createMockVisualization('testVisualization'),
+      {},
+      {
+        datatable1: { type: 'datatable', columns: [], rows: [] },
+      },
+      sampleIndexPatternsFromService,
+      undefined,
+      capabilities
+    );
+    expect(meta?.columns).toEqual(['timestamp', 'bytes']);
   });
 });
 describe('combineQueryAndFilters', () => {

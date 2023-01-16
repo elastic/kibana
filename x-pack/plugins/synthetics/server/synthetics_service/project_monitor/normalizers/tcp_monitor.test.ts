@@ -128,8 +128,6 @@ describe('tcp normalizers', () => {
                 id: 'us_central',
                 isServiceManaged: true,
                 label: 'Test Location',
-                status: 'ga',
-                url: 'test-url',
               },
             ],
             name: 'GMail SMTP',
@@ -184,8 +182,6 @@ describe('tcp normalizers', () => {
                 id: 'us_central',
                 isServiceManaged: true,
                 label: 'Test Location',
-                status: 'ga',
-                url: 'test-url',
               },
             ],
             name: 'Always Down',
@@ -219,9 +215,9 @@ describe('tcp normalizers', () => {
           errors: [
             {
               details:
-                'Multiple hosts are not supported for tcp project monitors in 8.5.0. Please set only 1 host per monitor. You monitor was not created or updated.',
+                '`tcp` project monitors must have exactly one value for field `hosts` in version `8.5.0`. Your monitor was not created or updated.',
               id: 'always-down',
-              reason: 'Unsupported Heartbeat option',
+              reason: 'Invalid Heartbeat configuration',
             },
             {
               details:
@@ -253,8 +249,6 @@ describe('tcp normalizers', () => {
                 id: 'us_central',
                 isServiceManaged: true,
                 label: 'Test Location',
-                status: 'ga',
-                url: 'test-url',
               },
             ],
             name: 'Always Down',

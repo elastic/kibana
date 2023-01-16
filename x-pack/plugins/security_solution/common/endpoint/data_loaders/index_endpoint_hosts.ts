@@ -11,11 +11,7 @@ import type { AxiosResponse } from 'axios';
 import uuid from 'uuid';
 import type { KbnClient } from '@kbn/test';
 import type { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type {
-  Agent,
-  CreatePackagePolicyResponse,
-  GetPackagesResponse,
-} from '@kbn/fleet-plugin/common';
+import type { Agent, CreatePackagePolicyResponse, GetInfoResponse } from '@kbn/fleet-plugin/common';
 import { EndpointDocGenerator } from '../generate_data';
 import type { HostMetadata, HostPolicyResponse } from '../types';
 import type {
@@ -95,7 +91,7 @@ export async function indexEndpointHostDocs({
   client: Client;
   kbnClient: KbnClient;
   realPolicies: Record<string, CreatePackagePolicyResponse['item']>;
-  epmEndpointPackage: GetPackagesResponse['items'][0];
+  epmEndpointPackage: GetInfoResponse['item'];
   metadataIndex: string;
   policyResponseIndex: string;
   enrollFleet: boolean;
@@ -195,7 +191,12 @@ export async function indexEndpointHostDocs({
       };
 
       // Create some fleet endpoint actions and .logs-endpoint actions for this Host
-      await indexEndpointAndFleetActionsForHost(client, hostMetadata, undefined);
+      const actionsResponse = await indexEndpointAndFleetActionsForHost(
+        client,
+        hostMetadata,
+        undefined
+      );
+      mergeAndAppendArrays(response, actionsResponse);
     }
 
     await client

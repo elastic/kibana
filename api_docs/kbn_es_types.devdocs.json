@@ -11,10 +11,18 @@
   "server": {
     "classes": [],
     "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/es-types",
-        "id": "def-server.ESSearchOptions",
+        "id": "def-common.ESSearchOptions",
         "type": "Interface",
         "tags": [],
         "label": "ESSearchOptions",
@@ -25,7 +33,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/es-types",
-            "id": "def-server.ESSearchOptions.restTotalHitsAsInt",
+            "id": "def-common.ESSearchOptions.restTotalHitsAsInt",
             "type": "boolean",
             "tags": [],
             "label": "restTotalHitsAsInt",
@@ -42,7 +50,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/es-types",
-        "id": "def-server.AggregateOf",
+        "id": "def-common.AggregateOf",
         "type": "Type",
         "tags": [],
         "label": "AggregateOf",
@@ -81,7 +89,7 @@
       },
       {
         "parentPluginId": "@kbn/es-types",
-        "id": "def-server.AggregationOptionsByType",
+        "id": "def-common.AggregationOptionsByType",
         "type": "Type",
         "tags": [],
         "label": "AggregationOptionsByType",
@@ -161,6 +169,8 @@
           "AggregationsHistogramAggregation",
           "; ip_range: ",
           "AggregationsIpRangeAggregation",
+          "; ip_prefix: ",
+          "AggregationsIpPrefixAggregation",
           "; inference: ",
           "AggregationsInferenceAggregation",
           "; line: ",
@@ -250,7 +260,7 @@
       },
       {
         "parentPluginId": "@kbn/es-types",
-        "id": "def-server.ESFilter",
+        "id": "def-common.ESFilter",
         "type": "Type",
         "tags": [],
         "label": "ESFilter",
@@ -265,7 +275,7 @@
       },
       {
         "parentPluginId": "@kbn/es-types",
-        "id": "def-server.ESSearchRequest",
+        "id": "def-common.ESSearchRequest",
         "type": "Type",
         "tags": [],
         "label": "ESSearchRequest",
@@ -280,7 +290,7 @@
       },
       {
         "parentPluginId": "@kbn/es-types",
-        "id": "def-server.ESSearchResponse",
+        "id": "def-common.ESSearchResponse",
         "type": "Type",
         "tags": [],
         "label": "ESSearchResponse",
@@ -303,7 +313,7 @@
       },
       {
         "parentPluginId": "@kbn/es-types",
-        "id": "def-server.ESSourceOptions",
+        "id": "def-common.ESSourceOptions",
         "type": "Type",
         "tags": [],
         "label": "ESSourceOptions",
@@ -318,7 +328,7 @@
       },
       {
         "parentPluginId": "@kbn/es-types",
-        "id": "def-server.InferSearchResponseOf",
+        "id": "def-common.InferSearchResponseOf",
         "type": "Type",
         "tags": [],
         "label": "InferSearchResponseOf",
@@ -341,7 +351,7 @@
       },
       {
         "parentPluginId": "@kbn/es-types",
-        "id": "def-server.MaybeReadonlyArray",
+        "id": "def-common.MaybeReadonlyArray",
         "type": "Type",
         "tags": [],
         "label": "MaybeReadonlyArray",
@@ -356,7 +366,7 @@
       },
       {
         "parentPluginId": "@kbn/es-types",
-        "id": "def-server.SearchHit",
+        "id": "def-common.SearchHit",
         "type": "Type",
         "tags": [],
         "label": "SearchHit",
@@ -374,14 +384,6 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": []
   }
 }

@@ -54,6 +54,15 @@ const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');
 mockUseResizeObserver.mockImplementation(() => ({}));
 
+const useAddToTimeline = () => ({
+  beginDrag: jest.fn(),
+  cancelDrag: jest.fn(),
+  dragToLocation: jest.fn(),
+  endDrag: jest.fn(),
+  hasDraggableLock: jest.fn(),
+  startDragToTimeline: jest.fn(),
+});
+
 jest.mock('../../../../common/lib/kibana', () => {
   const originalModule = jest.requireActual('../../../../common/lib/kibana');
   return {
@@ -84,11 +93,7 @@ jest.mock('../../../../common/lib/kibana', () => {
         timelines: {
           getLastUpdated: jest.fn(),
           getLoadingPanel: jest.fn(),
-          getUseDraggableKeyboardWrapper: () =>
-            jest.fn().mockReturnValue({
-              onBlur: jest.fn(),
-              onKeyDown: jest.fn(),
-            }),
+          getUseAddToTimeline: () => useAddToTimeline,
         },
       },
     }),

@@ -1,16 +1,30 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
+    "outDir": "target/types",
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*"],
+  "include": [ "../../../typings/**/*", "common/**/*", "public/**/*", "server/**/*"],
   "kbn_references": [
-    { "path": "../../core/tsconfig.json" },
-    { "path": "../charts/tsconfig.json" },
-    { "path": "../data/tsconfig.json" },
-    { "path": "../data_views/tsconfig.json" },
-    { "path": "../saved_search/tsconfig.json" }
+    "@kbn/core",
+    "@kbn/charts-plugin",
+    "@kbn/data-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/lens-plugin",
+    "@kbn/field-formats-plugin",
+    "@kbn/inspector-plugin",
+    "@kbn/expressions-plugin",
+    "@kbn/test-jest-helpers",
+    "@kbn/i18n-react",
+    "@kbn/i18n",
+    "@kbn/es-query",
+    "@kbn/embeddable-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/core-ui-settings-browser",
+    "@kbn/datemath",
+    "@kbn/core-ui-settings-browser-mocks",
+    "@kbn/shared-ux-utility",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

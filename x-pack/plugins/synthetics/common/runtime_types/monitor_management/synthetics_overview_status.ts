@@ -6,20 +6,33 @@
  */
 
 import * as t from 'io-ts';
+import { PingType } from '..';
 
 export const OverviewStatusMetaDataCodec = t.interface({
-  heartbeatId: t.string,
+  monitorQueryId: t.string,
   configId: t.string,
   location: t.string,
+  timestamp: t.string,
+  status: t.string,
+  ping: PingType,
 });
 
-export const OverviewStatusType = t.type({
+export const OverviewStatusCodec = t.interface({
   up: t.number,
   down: t.number,
   disabledCount: t.number,
-  upConfigs: t.array(OverviewStatusMetaDataCodec),
-  downConfigs: t.array(OverviewStatusMetaDataCodec),
+  upConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
+  downConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
+  enabledIds: t.array(t.string),
 });
 
-export type OverviewStatus = t.TypeOf<typeof OverviewStatusType>;
+export const OverviewStatusStateCodec = t.intersection([
+  OverviewStatusCodec,
+  t.interface({
+    allConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
+  }),
+]);
+
+export type OverviewStatus = t.TypeOf<typeof OverviewStatusCodec>;
+export type OverviewStatusState = t.TypeOf<typeof OverviewStatusStateCodec>;
 export type OverviewStatusMetaData = t.TypeOf<typeof OverviewStatusMetaDataCodec>;

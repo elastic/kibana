@@ -33,6 +33,7 @@ export const SIEM_CTA = i18n.translate(
     defaultMessage: 'Add security integrations',
   }
 );
+
 export const ENDPOINT_TITLE = i18n.translate(
   'xpack.securitySolution.overview.landingCards.box.endpoint.title',
   {

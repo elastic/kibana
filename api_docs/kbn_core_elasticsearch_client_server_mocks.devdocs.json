@@ -10,10 +10,18 @@
   },
   "server": {
     "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
-        "id": "def-server.createAgentStoreMock",
+        "id": "def-common.createAgentStoreMock",
         "type": "Function",
         "tags": [],
         "label": "createAgentStoreMock",
@@ -22,17 +30,17 @@
           "(agents?: Set<",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-internal",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerInternalPluginApi",
-            "section": "def-server.NetworkAgent",
+            "section": "def-common.NetworkAgent",
             "text": "NetworkAgent"
           },
           ">) => ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-internal",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerInternalPluginApi",
-            "section": "def-server.AgentStore",
+            "section": "def-common.AgentStore",
             "text": "AgentStore"
           }
         ],
@@ -42,7 +50,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "id": "def-server.createAgentStoreMock.$1",
+            "id": "def-common.createAgentStoreMock.$1",
             "type": "Object",
             "tags": [],
             "label": "agents",
@@ -51,9 +59,9 @@
               "Set<",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-internal",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerInternalPluginApi",
-                "section": "def-server.NetworkAgent",
+                "section": "def-common.NetworkAgent",
                 "text": "NetworkAgent"
               },
               ">"
@@ -71,7 +79,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
-        "id": "def-server.ClientApiMockInstance",
+        "id": "def-common.ClientApiMockInstance",
         "type": "Interface",
         "tags": [],
         "label": "ClientApiMockInstance",
@@ -79,9 +87,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.ClientApiMockInstance",
+            "section": "def-common.ClientApiMockInstance",
             "text": "ClientApiMockInstance"
           },
           "<T, Y> extends jest.MockInstance<T, Y>"
@@ -92,7 +100,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "id": "def-server.ClientApiMockInstance.mockResponse",
+            "id": "def-common.ClientApiMockInstance.mockResponse",
             "type": "Function",
             "tags": [],
             "label": "mockResponse",
@@ -110,7 +118,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "id": "def-server.ClientApiMockInstance.mockResponse.$1",
+                "id": "def-common.ClientApiMockInstance.mockResponse.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "value",
@@ -125,7 +133,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "id": "def-server.ClientApiMockInstance.mockResponse.$2",
+                "id": "def-common.ClientApiMockInstance.mockResponse.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "opts",
@@ -145,7 +153,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "id": "def-server.ClientApiMockInstance.mockResponseOnce",
+            "id": "def-common.ClientApiMockInstance.mockResponseOnce",
             "type": "Function",
             "tags": [],
             "label": "mockResponseOnce",
@@ -163,7 +171,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "id": "def-server.ClientApiMockInstance.mockResponseOnce.$1",
+                "id": "def-common.ClientApiMockInstance.mockResponseOnce.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "value",
@@ -178,7 +186,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "id": "def-server.ClientApiMockInstance.mockResponseOnce.$2",
+                "id": "def-common.ClientApiMockInstance.mockResponseOnce.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "opts",
@@ -198,7 +206,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "id": "def-server.ClientApiMockInstance.mockResponseImplementation",
+            "id": "def-common.ClientApiMockInstance.mockResponseImplementation",
             "type": "Function",
             "tags": [],
             "label": "mockResponseImplementation",
@@ -216,7 +224,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "id": "def-server.ClientApiMockInstance.mockResponseImplementation.$1",
+                "id": "def-common.ClientApiMockInstance.mockResponseImplementation.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "handler",
@@ -236,7 +244,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "id": "def-server.ClientApiMockInstance.mockResponseImplementationOnce",
+            "id": "def-common.ClientApiMockInstance.mockResponseImplementationOnce",
             "type": "Function",
             "tags": [],
             "label": "mockResponseImplementationOnce",
@@ -254,7 +262,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "id": "def-server.ClientApiMockInstance.mockResponseImplementationOnce.$1",
+                "id": "def-common.ClientApiMockInstance.mockResponseImplementationOnce.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "handler",
@@ -277,7 +285,7 @@
       },
       {
         "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
-        "id": "def-server.ClusterClientMock",
+        "id": "def-common.ClusterClientMock",
         "type": "Interface",
         "tags": [],
         "label": "ClusterClientMock",
@@ -288,7 +296,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "id": "def-server.ClusterClientMock.asInternalUser",
+            "id": "def-common.ClusterClientMock.asInternalUser",
             "type": "CompoundType",
             "tags": [],
             "label": "asInternalUser",
@@ -297,9 +305,9 @@
               "{ name: string | symbol; get: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -313,9 +321,9 @@
               " | undefined]>; delete: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -329,9 +337,9 @@
               " | undefined]>; cluster: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -339,9 +347,9 @@
               ">; eql: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -349,9 +357,9 @@
               ">; search: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -365,9 +373,9 @@
               " | undefined]>; create: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -381,9 +389,9 @@
               " | undefined]>; monitoring: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -391,9 +399,9 @@
               ">; security: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -401,9 +409,9 @@
               ">; index: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -417,9 +425,9 @@
               " | undefined]>; update: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -433,9 +441,9 @@
               " | undefined]>; asyncSearch: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -443,9 +451,9 @@
               ">; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -453,9 +461,9 @@
               ">; helpers: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -463,9 +471,9 @@
               ">; child: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<",
@@ -475,9 +483,9 @@
               "]>; autoscaling: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -485,9 +493,9 @@
               ">; bulk: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -501,9 +509,9 @@
               " | undefined]>; cat: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -511,9 +519,9 @@
               ">; ccr: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -521,9 +529,9 @@
               ">; clearScroll: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -537,9 +545,9 @@
               " | undefined]>; closePointInTime: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -553,9 +561,9 @@
               " | undefined]>; count: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -569,9 +577,9 @@
               " | undefined]>; danglingIndices: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -579,9 +587,9 @@
               ">; deleteByQuery: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -595,9 +603,9 @@
               " | undefined]>; deleteByQueryRethrottle: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -611,9 +619,9 @@
               " | undefined]>; deleteScript: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -627,9 +635,9 @@
               " | undefined]>; enrich: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -637,9 +645,9 @@
               ">; exists: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<boolean>, [params: ",
@@ -651,9 +659,9 @@
               " | undefined]>; existsSource: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<boolean>, [params: ",
@@ -665,9 +673,9 @@
               " | undefined]>; explain: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -681,9 +689,9 @@
               " | undefined]>; features: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -691,25 +699,25 @@
               ">; fieldCaps: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
               "FieldCapsResponse",
-              ">, [params: ",
+              ">, [params?: ",
               "FieldCapsRequest",
               " | ",
               "FieldCapsRequest",
-              ", options?: ",
+              " | undefined, options?: ",
               "TransportRequestOptions",
               " | undefined]>; fleet: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -717,9 +725,9 @@
               ">; getScript: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -733,9 +741,9 @@
               " | undefined]>; getScriptContext: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -749,9 +757,9 @@
               " | undefined]>; getScriptLanguages: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -765,9 +773,9 @@
               " | undefined]>; getSource: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<unknown>, [params: ",
@@ -779,9 +787,9 @@
               " | undefined]>; graph: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -789,9 +797,9 @@
               ">; ilm: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -799,9 +807,9 @@
               ">; indices: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -809,9 +817,9 @@
               ">; info: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -825,9 +833,9 @@
               " | undefined]>; ingest: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -835,9 +843,9 @@
               ">; knnSearch: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -851,9 +859,9 @@
               " | undefined]>; license: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -861,9 +869,9 @@
               ">; logstash: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -871,9 +879,9 @@
               ">; mget: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -887,9 +895,9 @@
               " | undefined]>; migration: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -897,9 +905,9 @@
               ">; ml: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -907,9 +915,9 @@
               ">; msearch: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -923,9 +931,9 @@
               " | undefined]>; msearchTemplate: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -939,9 +947,9 @@
               " | undefined]>; mtermvectors: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -955,9 +963,9 @@
               " | undefined]>; nodes: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -965,9 +973,9 @@
               ">; openPointInTime: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -981,9 +989,9 @@
               " | undefined]>; ping: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<boolean>, [params?: ",
@@ -995,9 +1003,9 @@
               " | undefined]>; putScript: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -1011,9 +1019,9 @@
               " | undefined]>; rankEval: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -1027,9 +1035,9 @@
               " | undefined]>; reindex: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -1043,9 +1051,9 @@
               " | undefined]>; reindexRethrottle: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -1059,9 +1067,9 @@
               " | undefined]>; renderSearchTemplate: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -1075,9 +1083,9 @@
               " | undefined]>; rollup: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -1085,9 +1093,9 @@
               ">; scriptsPainlessExecute: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -1101,9 +1109,9 @@
               " | undefined]>; scroll: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -1117,9 +1125,9 @@
               " | undefined]>; searchMvt: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<ArrayBuffer>, [params: ",
@@ -1131,9 +1139,9 @@
               " | undefined]>; searchShards: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -1147,9 +1155,9 @@
               " | undefined]>; searchTemplate: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -1163,9 +1171,9 @@
               " | undefined]>; searchableSnapshots: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -1173,9 +1181,9 @@
               ">; shutdown: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -1183,9 +1191,9 @@
               ">; slm: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -1193,9 +1201,9 @@
               ">; snapshot: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -1203,9 +1211,9 @@
               ">; sql: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -1213,9 +1221,9 @@
               ">; ssl: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -1223,9 +1231,9 @@
               ">; tasks: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -1233,9 +1241,9 @@
               ">; termsEnum: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -1249,9 +1257,9 @@
               " | undefined]>; termvectors: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -1265,9 +1273,9 @@
               " | undefined]>; textStructure: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -1275,9 +1283,9 @@
               ">; transform: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -1285,9 +1293,9 @@
               ">; updateByQuery: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -1301,9 +1309,9 @@
               " | undefined]>; updateByQueryRethrottle: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -1317,9 +1325,9 @@
               " | undefined]>; watcher: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -1327,9 +1335,9 @@
               ">; xpack: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -1337,9 +1345,9 @@
               ">; } & ",
               {
                 "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.ElasticsearchClient",
+                "section": "def-common.ElasticsearchClient",
                 "text": "ElasticsearchClient"
               }
             ],
@@ -1349,7 +1357,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "id": "def-server.ClusterClientMock.asScoped",
+            "id": "def-common.ClusterClientMock.asScoped",
             "type": "Function",
             "tags": [],
             "label": "asScoped",
@@ -1358,17 +1366,17 @@
               "jest.MockInstance<",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ScopedClusterClientMock",
+                "section": "def-common.ScopedClusterClientMock",
                 "text": "ScopedClusterClientMock"
               },
               ", []> & (() => ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ScopedClusterClientMock",
+                "section": "def-common.ScopedClusterClientMock",
                 "text": "ScopedClusterClientMock"
               },
               ")"
@@ -1384,7 +1392,7 @@
       },
       {
         "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
-        "id": "def-server.ScopedClusterClientMock",
+        "id": "def-common.ScopedClusterClientMock",
         "type": "Interface",
         "tags": [],
         "label": "ScopedClusterClientMock",
@@ -1395,7 +1403,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "id": "def-server.ScopedClusterClientMock.asInternalUser",
+            "id": "def-common.ScopedClusterClientMock.asInternalUser",
             "type": "CompoundType",
             "tags": [],
             "label": "asInternalUser",
@@ -1404,9 +1412,9 @@
               "{ name: string | symbol; get: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -1420,9 +1428,9 @@
               " | undefined]>; delete: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -1436,9 +1444,9 @@
               " | undefined]>; cluster: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -1446,9 +1454,9 @@
               ">; eql: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -1456,9 +1464,9 @@
               ">; search: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -1472,9 +1480,9 @@
               " | undefined]>; create: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -1488,9 +1496,9 @@
               " | undefined]>; monitoring: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -1498,9 +1506,9 @@
               ">; security: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -1508,9 +1516,9 @@
               ">; index: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -1524,9 +1532,9 @@
               " | undefined]>; update: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -1540,9 +1548,9 @@
               " | undefined]>; asyncSearch: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -1550,9 +1558,9 @@
               ">; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -1560,9 +1568,9 @@
               ">; helpers: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -1570,9 +1578,9 @@
               ">; child: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<",
@@ -1582,9 +1590,9 @@
               "]>; autoscaling: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -1592,9 +1600,9 @@
               ">; bulk: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -1608,9 +1616,9 @@
               " | undefined]>; cat: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -1618,9 +1626,9 @@
               ">; ccr: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -1628,9 +1636,9 @@
               ">; clearScroll: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -1644,9 +1652,9 @@
               " | undefined]>; closePointInTime: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -1660,9 +1668,9 @@
               " | undefined]>; count: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -1676,9 +1684,9 @@
               " | undefined]>; danglingIndices: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -1686,9 +1694,9 @@
               ">; deleteByQuery: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -1702,9 +1710,9 @@
               " | undefined]>; deleteByQueryRethrottle: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -1718,9 +1726,9 @@
               " | undefined]>; deleteScript: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -1734,9 +1742,9 @@
               " | undefined]>; enrich: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -1744,9 +1752,9 @@
               ">; exists: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<boolean>, [params: ",
@@ -1758,9 +1766,9 @@
               " | undefined]>; existsSource: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<boolean>, [params: ",
@@ -1772,9 +1780,9 @@
               " | undefined]>; explain: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -1788,9 +1796,9 @@
               " | undefined]>; features: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -1798,25 +1806,25 @@
               ">; fieldCaps: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
               "FieldCapsResponse",
-              ">, [params: ",
+              ">, [params?: ",
               "FieldCapsRequest",
               " | ",
               "FieldCapsRequest",
-              ", options?: ",
+              " | undefined, options?: ",
               "TransportRequestOptions",
               " | undefined]>; fleet: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -1824,9 +1832,9 @@
               ">; getScript: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -1840,9 +1848,9 @@
               " | undefined]>; getScriptContext: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -1856,9 +1864,9 @@
               " | undefined]>; getScriptLanguages: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -1872,9 +1880,9 @@
               " | undefined]>; getSource: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<unknown>, [params: ",
@@ -1886,9 +1894,9 @@
               " | undefined]>; graph: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -1896,9 +1904,9 @@
               ">; ilm: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -1906,9 +1914,9 @@
               ">; indices: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -1916,9 +1924,9 @@
               ">; info: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -1932,9 +1940,9 @@
               " | undefined]>; ingest: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -1942,9 +1950,9 @@
               ">; knnSearch: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -1958,9 +1966,9 @@
               " | undefined]>; license: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -1968,9 +1976,9 @@
               ">; logstash: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -1978,9 +1986,9 @@
               ">; mget: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -1994,9 +2002,9 @@
               " | undefined]>; migration: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -2004,9 +2012,9 @@
               ">; ml: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -2014,9 +2022,9 @@
               ">; msearch: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -2030,9 +2038,9 @@
               " | undefined]>; msearchTemplate: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -2046,9 +2054,9 @@
               " | undefined]>; mtermvectors: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -2062,9 +2070,9 @@
               " | undefined]>; nodes: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -2072,9 +2080,9 @@
               ">; openPointInTime: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -2088,9 +2096,9 @@
               " | undefined]>; ping: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<boolean>, [params?: ",
@@ -2102,9 +2110,9 @@
               " | undefined]>; putScript: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -2118,9 +2126,9 @@
               " | undefined]>; rankEval: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -2134,9 +2142,9 @@
               " | undefined]>; reindex: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -2150,9 +2158,9 @@
               " | undefined]>; reindexRethrottle: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -2166,9 +2174,9 @@
               " | undefined]>; renderSearchTemplate: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -2182,9 +2190,9 @@
               " | undefined]>; rollup: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -2192,9 +2200,9 @@
               ">; scriptsPainlessExecute: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -2208,9 +2216,9 @@
               " | undefined]>; scroll: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -2224,9 +2232,9 @@
               " | undefined]>; searchMvt: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<ArrayBuffer>, [params: ",
@@ -2238,9 +2246,9 @@
               " | undefined]>; searchShards: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -2254,9 +2262,9 @@
               " | undefined]>; searchTemplate: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -2270,9 +2278,9 @@
               " | undefined]>; searchableSnapshots: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -2280,9 +2288,9 @@
               ">; shutdown: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -2290,9 +2298,9 @@
               ">; slm: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -2300,9 +2308,9 @@
               ">; snapshot: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -2310,9 +2318,9 @@
               ">; sql: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -2320,9 +2328,9 @@
               ">; ssl: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -2330,9 +2338,9 @@
               ">; tasks: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -2340,9 +2348,9 @@
               ">; termsEnum: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -2356,9 +2364,9 @@
               " | undefined]>; termvectors: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -2372,9 +2380,9 @@
               " | undefined]>; textStructure: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -2382,9 +2390,9 @@
               ">; transform: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -2392,9 +2400,9 @@
               ">; updateByQuery: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -2408,9 +2416,9 @@
               " | undefined]>; updateByQueryRethrottle: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -2424,9 +2432,9 @@
               " | undefined]>; watcher: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -2434,9 +2442,9 @@
               ">; xpack: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -2444,9 +2452,9 @@
               ">; } & ",
               {
                 "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.ElasticsearchClient",
+                "section": "def-common.ElasticsearchClient",
                 "text": "ElasticsearchClient"
               }
             ],
@@ -2456,7 +2464,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "id": "def-server.ScopedClusterClientMock.asCurrentUser",
+            "id": "def-common.ScopedClusterClientMock.asCurrentUser",
             "type": "CompoundType",
             "tags": [],
             "label": "asCurrentUser",
@@ -2465,9 +2473,9 @@
               "{ name: string | symbol; get: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -2481,9 +2489,9 @@
               " | undefined]>; delete: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -2497,9 +2505,9 @@
               " | undefined]>; cluster: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -2507,9 +2515,9 @@
               ">; eql: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -2517,9 +2525,9 @@
               ">; search: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -2533,9 +2541,9 @@
               " | undefined]>; create: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -2549,9 +2557,9 @@
               " | undefined]>; monitoring: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -2559,9 +2567,9 @@
               ">; security: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -2569,9 +2577,9 @@
               ">; index: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -2585,9 +2593,9 @@
               " | undefined]>; update: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -2601,9 +2609,9 @@
               " | undefined]>; asyncSearch: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -2611,9 +2619,9 @@
               ">; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -2621,9 +2629,9 @@
               ">; helpers: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -2631,9 +2639,9 @@
               ">; child: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<",
@@ -2643,9 +2651,9 @@
               "]>; autoscaling: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -2653,9 +2661,9 @@
               ">; bulk: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -2669,9 +2677,9 @@
               " | undefined]>; cat: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -2679,9 +2687,9 @@
               ">; ccr: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -2689,9 +2697,9 @@
               ">; clearScroll: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -2705,9 +2713,9 @@
               " | undefined]>; closePointInTime: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -2721,9 +2729,9 @@
               " | undefined]>; count: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -2737,9 +2745,9 @@
               " | undefined]>; danglingIndices: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -2747,9 +2755,9 @@
               ">; deleteByQuery: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -2763,9 +2771,9 @@
               " | undefined]>; deleteByQueryRethrottle: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -2779,9 +2787,9 @@
               " | undefined]>; deleteScript: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -2795,9 +2803,9 @@
               " | undefined]>; enrich: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -2805,9 +2813,9 @@
               ">; exists: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<boolean>, [params: ",
@@ -2819,9 +2827,9 @@
               " | undefined]>; existsSource: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<boolean>, [params: ",
@@ -2833,9 +2841,9 @@
               " | undefined]>; explain: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -2849,9 +2857,9 @@
               " | undefined]>; features: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -2859,25 +2867,25 @@
               ">; fieldCaps: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
               "FieldCapsResponse",
-              ">, [params: ",
+              ">, [params?: ",
               "FieldCapsRequest",
               " | ",
               "FieldCapsRequest",
-              ", options?: ",
+              " | undefined, options?: ",
               "TransportRequestOptions",
               " | undefined]>; fleet: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -2885,9 +2893,9 @@
               ">; getScript: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -2901,9 +2909,9 @@
               " | undefined]>; getScriptContext: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -2917,9 +2925,9 @@
               " | undefined]>; getScriptLanguages: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -2933,9 +2941,9 @@
               " | undefined]>; getSource: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<unknown>, [params: ",
@@ -2947,9 +2955,9 @@
               " | undefined]>; graph: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -2957,9 +2965,9 @@
               ">; ilm: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -2967,9 +2975,9 @@
               ">; indices: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -2977,9 +2985,9 @@
               ">; info: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -2993,9 +3001,9 @@
               " | undefined]>; ingest: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -3003,9 +3011,9 @@
               ">; knnSearch: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -3019,9 +3027,9 @@
               " | undefined]>; license: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -3029,9 +3037,9 @@
               ">; logstash: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -3039,9 +3047,9 @@
               ">; mget: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -3055,9 +3063,9 @@
               " | undefined]>; migration: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -3065,9 +3073,9 @@
               ">; ml: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -3075,9 +3083,9 @@
               ">; msearch: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -3091,9 +3099,9 @@
               " | undefined]>; msearchTemplate: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -3107,9 +3115,9 @@
               " | undefined]>; mtermvectors: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -3123,9 +3131,9 @@
               " | undefined]>; nodes: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -3133,9 +3141,9 @@
               ">; openPointInTime: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -3149,9 +3157,9 @@
               " | undefined]>; ping: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<boolean>, [params?: ",
@@ -3163,9 +3171,9 @@
               " | undefined]>; putScript: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -3179,9 +3187,9 @@
               " | undefined]>; rankEval: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -3195,9 +3203,9 @@
               " | undefined]>; reindex: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -3211,9 +3219,9 @@
               " | undefined]>; reindexRethrottle: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -3227,9 +3235,9 @@
               " | undefined]>; renderSearchTemplate: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -3243,9 +3251,9 @@
               " | undefined]>; rollup: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -3253,9 +3261,9 @@
               ">; scriptsPainlessExecute: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -3269,9 +3277,9 @@
               " | undefined]>; scroll: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -3285,9 +3293,9 @@
               " | undefined]>; searchMvt: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<ArrayBuffer>, [params: ",
@@ -3299,9 +3307,9 @@
               " | undefined]>; searchShards: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -3315,9 +3323,9 @@
               " | undefined]>; searchTemplate: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -3331,9 +3339,9 @@
               " | undefined]>; searchableSnapshots: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -3341,9 +3349,9 @@
               ">; shutdown: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -3351,9 +3359,9 @@
               ">; slm: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -3361,9 +3369,9 @@
               ">; snapshot: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -3371,9 +3379,9 @@
               ">; sql: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -3381,9 +3389,9 @@
               ">; ssl: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -3391,9 +3399,9 @@
               ">; tasks: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -3401,9 +3409,9 @@
               ">; termsEnum: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -3417,9 +3425,9 @@
               " | undefined]>; termvectors: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -3433,9 +3441,9 @@
               " | undefined]>; textStructure: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -3443,9 +3451,9 @@
               ">; transform: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -3453,9 +3461,9 @@
               ">; updateByQuery: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -3469,9 +3477,9 @@
               " | undefined]>; updateByQueryRethrottle: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClientApiMockInstance",
+                "section": "def-common.ClientApiMockInstance",
                 "text": "ClientApiMockInstance"
               },
               "<Promise<",
@@ -3485,9 +3493,9 @@
               " | undefined]>; watcher: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -3495,9 +3503,9 @@
               ">; xpack: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -3505,9 +3513,9 @@
               ">; } & ",
               {
                 "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.ElasticsearchClient",
+                "section": "def-common.ElasticsearchClient",
                 "text": "ElasticsearchClient"
               }
             ],
@@ -3523,7 +3531,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
-        "id": "def-server.CustomClusterClientMock",
+        "id": "def-common.CustomClusterClientMock",
         "type": "Type",
         "tags": [],
         "label": "CustomClusterClientMock",
@@ -3532,41 +3540,41 @@
           "{ close: jest.MockInstance<Promise<void>, []>; readonly asInternalUser: ",
           {
             "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.ElasticsearchClient",
+            "section": "def-common.ElasticsearchClient",
             "text": "ElasticsearchClient"
           },
           "; asScoped: jest.MockInstance<",
           {
             "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.IScopedClusterClient",
+            "section": "def-common.IScopedClusterClient",
             "text": "IScopedClusterClient"
           },
           ", [request: ",
           {
             "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.ScopeableRequest",
+            "section": "def-common.ScopeableRequest",
             "text": "ScopeableRequest"
           },
           "]>; } & ",
           {
             "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.ICustomClusterClient",
+            "section": "def-common.ICustomClusterClient",
             "text": "ICustomClusterClient"
           },
           " & ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.ClusterClientMock",
+            "section": "def-common.ClusterClientMock",
             "text": "ClusterClientMock"
           }
         ],
@@ -3577,7 +3585,7 @@
       },
       {
         "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
-        "id": "def-server.DeeplyMockedApi",
+        "id": "def-common.DeeplyMockedApi",
         "type": "Type",
         "tags": [],
         "label": "DeeplyMockedApi",
@@ -3586,17 +3594,17 @@
           "{ [P in keyof T]: T[P] extends (...args: any[]) => any ? ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.ClientApiMockInstance",
+            "section": "def-common.ClientApiMockInstance",
             "text": "ClientApiMockInstance"
           },
           "<ReturnType<T[P]>, Parameters<T[P]>> : ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.DeeplyMockedApi",
+            "section": "def-common.DeeplyMockedApi",
             "text": "DeeplyMockedApi"
           },
           "<T[P]>; } & T"
@@ -3608,7 +3616,7 @@
       },
       {
         "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
-        "id": "def-server.ElasticsearchClientMock",
+        "id": "def-common.ElasticsearchClientMock",
         "type": "Type",
         "tags": [],
         "label": "ElasticsearchClientMock",
@@ -3617,9 +3625,9 @@
           "{ name: string | symbol; get: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.ClientApiMockInstance",
+            "section": "def-common.ClientApiMockInstance",
             "text": "ClientApiMockInstance"
           },
           "<Promise<",
@@ -3633,9 +3641,9 @@
           " | undefined]>; delete: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.ClientApiMockInstance",
+            "section": "def-common.ClientApiMockInstance",
             "text": "ClientApiMockInstance"
           },
           "<Promise<",
@@ -3649,9 +3657,9 @@
           " | undefined]>; cluster: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.DeeplyMockedApi",
+            "section": "def-common.DeeplyMockedApi",
             "text": "DeeplyMockedApi"
           },
           "<",
@@ -3659,9 +3667,9 @@
           ">; eql: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.DeeplyMockedApi",
+            "section": "def-common.DeeplyMockedApi",
             "text": "DeeplyMockedApi"
           },
           "<",
@@ -3669,9 +3677,9 @@
           ">; search: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.ClientApiMockInstance",
+            "section": "def-common.ClientApiMockInstance",
             "text": "ClientApiMockInstance"
           },
           "<Promise<",
@@ -3685,9 +3693,9 @@
           " | undefined]>; create: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.ClientApiMockInstance",
+            "section": "def-common.ClientApiMockInstance",
             "text": "ClientApiMockInstance"
           },
           "<Promise<",
@@ -3701,9 +3709,9 @@
           " | undefined]>; monitoring: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.DeeplyMockedApi",
+            "section": "def-common.DeeplyMockedApi",
             "text": "DeeplyMockedApi"
           },
           "<",
@@ -3711,9 +3719,9 @@
           ">; security: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.DeeplyMockedApi",
+            "section": "def-common.DeeplyMockedApi",
             "text": "DeeplyMockedApi"
           },
           "<",
@@ -3721,9 +3729,9 @@
           ">; index: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.ClientApiMockInstance",
+            "section": "def-common.ClientApiMockInstance",
             "text": "ClientApiMockInstance"
           },
           "<Promise<",
@@ -3737,9 +3745,9 @@
           " | undefined]>; update: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.ClientApiMockInstance",
+            "section": "def-common.ClientApiMockInstance",
             "text": "ClientApiMockInstance"
           },
           "<Promise<",
@@ -3753,9 +3761,9 @@
           " | undefined]>; asyncSearch: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.DeeplyMockedApi",
+            "section": "def-common.DeeplyMockedApi",
             "text": "DeeplyMockedApi"
           },
           "<",
@@ -3763,9 +3771,9 @@
           ">; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.DeeplyMockedApi",
+            "section": "def-common.DeeplyMockedApi",
             "text": "DeeplyMockedApi"
           },
           "<",
@@ -3773,9 +3781,9 @@
           ">; helpers: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.DeeplyMockedApi",
+            "section": "def-common.DeeplyMockedApi",
             "text": "DeeplyMockedApi"
           },
           "<",
@@ -3783,9 +3791,9 @@
           ">; child: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.ClientApiMockInstance",
+            "section": "def-common.ClientApiMockInstance",
             "text": "ClientApiMockInstance"
           },
           "<",
@@ -3795,9 +3803,9 @@
           "]>; autoscaling: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.DeeplyMockedApi",
+            "section": "def-common.DeeplyMockedApi",
             "text": "DeeplyMockedApi"
           },
           "<",
@@ -3805,9 +3813,9 @@
           ">; bulk: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.ClientApiMockInstance",
+            "section": "def-common.ClientApiMockInstance",
             "text": "ClientApiMockInstance"
           },
           "<Promise<",
@@ -3821,9 +3829,9 @@
           " | undefined]>; cat: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.DeeplyMockedApi",
+            "section": "def-common.DeeplyMockedApi",
             "text": "DeeplyMockedApi"
           },
           "<",
@@ -3831,9 +3839,9 @@
           ">; ccr: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.DeeplyMockedApi",
+            "section": "def-common.DeeplyMockedApi",
             "text": "DeeplyMockedApi"
           },
           "<",
@@ -3841,9 +3849,9 @@
           ">; clearScroll: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.ClientApiMockInstance",
+            "section": "def-common.ClientApiMockInstance",
             "text": "ClientApiMockInstance"
           },
           "<Promise<",
@@ -3857,9 +3865,9 @@
           " | undefined]>; closePointInTime: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.ClientApiMockInstance",
+            "section": "def-common.ClientApiMockInstance",
             "text": "ClientApiMockInstance"
           },
           "<Promise<",
@@ -3873,9 +3881,9 @@
           " | undefined]>; count: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.ClientApiMockInstance",
+            "section": "def-common.ClientApiMockInstance",
             "text": "ClientApiMockInstance"
           },
           "<Promise<",
@@ -3889,9 +3897,9 @@
           " | undefined]>; danglingIndices: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.DeeplyMockedApi",
+            "section": "def-common.DeeplyMockedApi",
             "text": "DeeplyMockedApi"
           },
           "<",
@@ -3899,9 +3907,9 @@
           ">; deleteByQuery: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.ClientApiMockInstance",
+            "section": "def-common.ClientApiMockInstance",
             "text": "ClientApiMockInstance"
           },
           "<Promise<",
@@ -3915,9 +3923,9 @@
           " | undefined]>; deleteByQueryRethrottle: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.ClientApiMockInstance",
+            "section": "def-common.ClientApiMockInstance",
             "text": "ClientApiMockInstance"
           },
           "<Promise<",
@@ -3931,9 +3939,9 @@
           " | undefined]>; deleteScript: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.ClientApiMockInstance",
+            "section": "def-common.ClientApiMockInstance",
             "text": "ClientApiMockInstance"
           },
           "<Promise<",
@@ -3947,9 +3955,9 @@
           " | undefined]>; enrich: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.DeeplyMockedApi",
+            "section": "def-common.DeeplyMockedApi",
             "text": "DeeplyMockedApi"
           },
           "<",
@@ -3957,9 +3965,9 @@
           ">; exists: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.ClientApiMockInstance",
+            "section": "def-common.ClientApiMockInstance",
             "text": "ClientApiMockInstance"
           },
           "<Promise<boolean>, [params: ",
@@ -3971,9 +3979,9 @@
           " | undefined]>; existsSource: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.ClientApiMockInstance",
+            "section": "def-common.ClientApiMockInstance",
             "text": "ClientApiMockInstance"
           },
           "<Promise<boolean>, [params: ",
@@ -3985,9 +3993,9 @@
           " | undefined]>; explain: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.ClientApiMockInstance",
+            "section": "def-common.ClientApiMockInstance",
             "text": "ClientApiMockInstance"
           },
           "<Promise<",
@@ -4001,9 +4009,9 @@
           " | undefined]>; features: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.DeeplyMockedApi",
+            "section": "def-common.DeeplyMockedApi",
             "text": "DeeplyMockedApi"
           },
           "<",
@@ -4011,25 +4019,25 @@
           ">; fieldCaps: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.ClientApiMockInstance",
+            "section": "def-common.ClientApiMockInstance",
             "text": "ClientApiMockInstance"
           },
           "<Promise<",
           "FieldCapsResponse",
-          ">, [params: ",
+          ">, [params?: ",
           "FieldCapsRequest",
           " | ",
           "FieldCapsRequest",
-          ", options?: ",
+          " | undefined, options?: ",
           "TransportRequestOptions",
           " | undefined]>; fleet: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.DeeplyMockedApi",
+            "section": "def-common.DeeplyMockedApi",
             "text": "DeeplyMockedApi"
           },
           "<",
@@ -4037,9 +4045,9 @@
           ">; getScript: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.ClientApiMockInstance",
+            "section": "def-common.ClientApiMockInstance",
             "text": "ClientApiMockInstance"
           },
           "<Promise<",
@@ -4053,9 +4061,9 @@
           " | undefined]>; getScriptContext: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.ClientApiMockInstance",
+            "section": "def-common.ClientApiMockInstance",
             "text": "ClientApiMockInstance"
           },
           "<Promise<",
@@ -4069,9 +4077,9 @@
           " | undefined]>; getScriptLanguages: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.ClientApiMockInstance",
+            "section": "def-common.ClientApiMockInstance",
             "text": "ClientApiMockInstance"
           },
           "<Promise<",
@@ -4085,9 +4093,9 @@
           " | undefined]>; getSource: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.ClientApiMockInstance",
+            "section": "def-common.ClientApiMockInstance",
             "text": "ClientApiMockInstance"
           },
           "<Promise<unknown>, [params: ",
@@ -4099,9 +4107,9 @@
           " | undefined]>; graph: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.DeeplyMockedApi",
+            "section": "def-common.DeeplyMockedApi",
             "text": "DeeplyMockedApi"
           },
           "<",
@@ -4109,9 +4117,9 @@
           ">; ilm: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.DeeplyMockedApi",
+            "section": "def-common.DeeplyMockedApi",
             "text": "DeeplyMockedApi"
           },
           "<",
@@ -4119,9 +4127,9 @@
           ">; indices: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.DeeplyMockedApi",
+            "section": "def-common.DeeplyMockedApi",
             "text": "DeeplyMockedApi"
           },
           "<",
@@ -4129,9 +4137,9 @@
           ">; info: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.ClientApiMockInstance",
+            "section": "def-common.ClientApiMockInstance",
             "text": "ClientApiMockInstance"
           },
           "<Promise<",
@@ -4145,9 +4153,9 @@
           " | undefined]>; ingest: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.DeeplyMockedApi",
+            "section": "def-common.DeeplyMockedApi",
             "text": "DeeplyMockedApi"
           },
           "<",
@@ -4155,9 +4163,9 @@
           ">; knnSearch: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.ClientApiMockInstance",
+            "section": "def-common.ClientApiMockInstance",
             "text": "ClientApiMockInstance"
           },
           "<Promise<",
@@ -4171,9 +4179,9 @@
           " | undefined]>; license: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.DeeplyMockedApi",
+            "section": "def-common.DeeplyMockedApi",
             "text": "DeeplyMockedApi"
           },
           "<",
@@ -4181,9 +4189,9 @@
           ">; logstash: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.DeeplyMockedApi",
+            "section": "def-common.DeeplyMockedApi",
             "text": "DeeplyMockedApi"
           },
           "<",
@@ -4191,9 +4199,9 @@
           ">; mget: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.ClientApiMockInstance",
+            "section": "def-common.ClientApiMockInstance",
             "text": "ClientApiMockInstance"
           },
           "<Promise<",
@@ -4207,9 +4215,9 @@
           " | undefined]>; migration: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.DeeplyMockedApi",
+            "section": "def-common.DeeplyMockedApi",
             "text": "DeeplyMockedApi"
           },
           "<",
@@ -4217,9 +4225,9 @@
           ">; ml: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.DeeplyMockedApi",
+            "section": "def-common.DeeplyMockedApi",
             "text": "DeeplyMockedApi"
           },
           "<",
@@ -4227,9 +4235,9 @@
           ">; msearch: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.ClientApiMockInstance",
+            "section": "def-common.ClientApiMockInstance",
             "text": "ClientApiMockInstance"
           },
           "<Promise<",
@@ -4243,9 +4251,9 @@
           " | undefined]>; msearchTemplate: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.ClientApiMockInstance",
+            "section": "def-common.ClientApiMockInstance",
             "text": "ClientApiMockInstance"
           },
           "<Promise<",
@@ -4259,9 +4267,9 @@
           " | undefined]>; mtermvectors: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.ClientApiMockInstance",
+            "section": "def-common.ClientApiMockInstance",
             "text": "ClientApiMockInstance"
           },
           "<Promise<",
@@ -4275,9 +4283,9 @@
           " | undefined]>; nodes: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.DeeplyMockedApi",
+            "section": "def-common.DeeplyMockedApi",
             "text": "DeeplyMockedApi"
           },
           "<",
@@ -4285,9 +4293,9 @@
           ">; openPointInTime: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.ClientApiMockInstance",
+            "section": "def-common.ClientApiMockInstance",
             "text": "ClientApiMockInstance"
           },
           "<Promise<",
@@ -4301,9 +4309,9 @@
           " | undefined]>; ping: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.ClientApiMockInstance",
+            "section": "def-common.ClientApiMockInstance",
             "text": "ClientApiMockInstance"
           },
           "<Promise<boolean>, [params?: ",
@@ -4315,9 +4323,9 @@
           " | undefined]>; putScript: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.ClientApiMockInstance",
+            "section": "def-common.ClientApiMockInstance",
             "text": "ClientApiMockInstance"
           },
           "<Promise<",
@@ -4331,9 +4339,9 @@
           " | undefined]>; rankEval: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.ClientApiMockInstance",
+            "section": "def-common.ClientApiMockInstance",
             "text": "ClientApiMockInstance"
           },
           "<Promise<",
@@ -4347,9 +4355,9 @@
           " | undefined]>; reindex: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.ClientApiMockInstance",
+            "section": "def-common.ClientApiMockInstance",
             "text": "ClientApiMockInstance"
           },
           "<Promise<",
@@ -4363,9 +4371,9 @@
           " | undefined]>; reindexRethrottle: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.ClientApiMockInstance",
+            "section": "def-common.ClientApiMockInstance",
             "text": "ClientApiMockInstance"
           },
           "<Promise<",
@@ -4379,9 +4387,9 @@
           " | undefined]>; renderSearchTemplate: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.ClientApiMockInstance",
+            "section": "def-common.ClientApiMockInstance",
             "text": "ClientApiMockInstance"
           },
           "<Promise<",
@@ -4395,9 +4403,9 @@
           " | undefined]>; rollup: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.DeeplyMockedApi",
+            "section": "def-common.DeeplyMockedApi",
             "text": "DeeplyMockedApi"
           },
           "<",
@@ -4405,9 +4413,9 @@
           ">; scriptsPainlessExecute: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.ClientApiMockInstance",
+            "section": "def-common.ClientApiMockInstance",
             "text": "ClientApiMockInstance"
           },
           "<Promise<",
@@ -4421,9 +4429,9 @@
           " | undefined]>; scroll: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.ClientApiMockInstance",
+            "section": "def-common.ClientApiMockInstance",
             "text": "ClientApiMockInstance"
           },
           "<Promise<",
@@ -4437,9 +4445,9 @@
           " | undefined]>; searchMvt: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.ClientApiMockInstance",
+            "section": "def-common.ClientApiMockInstance",
             "text": "ClientApiMockInstance"
           },
           "<Promise<ArrayBuffer>, [params: ",
@@ -4451,9 +4459,9 @@
           " | undefined]>; searchShards: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.ClientApiMockInstance",
+            "section": "def-common.ClientApiMockInstance",
             "text": "ClientApiMockInstance"
           },
           "<Promise<",
@@ -4467,9 +4475,9 @@
           " | undefined]>; searchTemplate: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.ClientApiMockInstance",
+            "section": "def-common.ClientApiMockInstance",
             "text": "ClientApiMockInstance"
           },
           "<Promise<",
@@ -4483,9 +4491,9 @@
           " | undefined]>; searchableSnapshots: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.DeeplyMockedApi",
+            "section": "def-common.DeeplyMockedApi",
             "text": "DeeplyMockedApi"
           },
           "<",
@@ -4493,9 +4501,9 @@
           ">; shutdown: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.DeeplyMockedApi",
+            "section": "def-common.DeeplyMockedApi",
             "text": "DeeplyMockedApi"
           },
           "<",
@@ -4503,9 +4511,9 @@
           ">; slm: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.DeeplyMockedApi",
+            "section": "def-common.DeeplyMockedApi",
             "text": "DeeplyMockedApi"
           },
           "<",
@@ -4513,9 +4521,9 @@
           ">; snapshot: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.DeeplyMockedApi",
+            "section": "def-common.DeeplyMockedApi",
             "text": "DeeplyMockedApi"
           },
           "<",
@@ -4523,9 +4531,9 @@
           ">; sql: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.DeeplyMockedApi",
+            "section": "def-common.DeeplyMockedApi",
             "text": "DeeplyMockedApi"
           },
           "<",
@@ -4533,9 +4541,9 @@
           ">; ssl: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.DeeplyMockedApi",
+            "section": "def-common.DeeplyMockedApi",
             "text": "DeeplyMockedApi"
           },
           "<",
@@ -4543,9 +4551,9 @@
           ">; tasks: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.DeeplyMockedApi",
+            "section": "def-common.DeeplyMockedApi",
             "text": "DeeplyMockedApi"
           },
           "<",
@@ -4553,9 +4561,9 @@
           ">; termsEnum: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.ClientApiMockInstance",
+            "section": "def-common.ClientApiMockInstance",
             "text": "ClientApiMockInstance"
           },
           "<Promise<",
@@ -4569,9 +4577,9 @@
           " | undefined]>; termvectors: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.ClientApiMockInstance",
+            "section": "def-common.ClientApiMockInstance",
             "text": "ClientApiMockInstance"
           },
           "<Promise<",
@@ -4585,9 +4593,9 @@
           " | undefined]>; textStructure: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.DeeplyMockedApi",
+            "section": "def-common.DeeplyMockedApi",
             "text": "DeeplyMockedApi"
           },
           "<",
@@ -4595,9 +4603,9 @@
           ">; transform: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.DeeplyMockedApi",
+            "section": "def-common.DeeplyMockedApi",
             "text": "DeeplyMockedApi"
           },
           "<",
@@ -4605,9 +4613,9 @@
           ">; updateByQuery: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.ClientApiMockInstance",
+            "section": "def-common.ClientApiMockInstance",
             "text": "ClientApiMockInstance"
           },
           "<Promise<",
@@ -4621,9 +4629,9 @@
           " | undefined]>; updateByQueryRethrottle: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.ClientApiMockInstance",
+            "section": "def-common.ClientApiMockInstance",
             "text": "ClientApiMockInstance"
           },
           "<Promise<",
@@ -4637,9 +4645,9 @@
           " | undefined]>; watcher: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.DeeplyMockedApi",
+            "section": "def-common.DeeplyMockedApi",
             "text": "DeeplyMockedApi"
           },
           "<",
@@ -4647,9 +4655,9 @@
           ">; xpack: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.DeeplyMockedApi",
+            "section": "def-common.DeeplyMockedApi",
             "text": "DeeplyMockedApi"
           },
           "<",
@@ -4657,9 +4665,9 @@
           ">; } & ",
           {
             "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.ElasticsearchClient",
+            "section": "def-common.ElasticsearchClient",
             "text": "ElasticsearchClient"
           }
         ],
@@ -4672,7 +4680,7 @@
     "objects": [
       {
         "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
-        "id": "def-server.elasticsearchClientMock",
+        "id": "def-common.elasticsearchClientMock",
         "type": "Object",
         "tags": [],
         "label": "elasticsearchClientMock",
@@ -4683,7 +4691,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "id": "def-server.elasticsearchClientMock.createClusterClient",
+            "id": "def-common.elasticsearchClientMock.createClusterClient",
             "type": "Function",
             "tags": [],
             "label": "createClusterClient",
@@ -4692,9 +4700,9 @@
               "() => ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClusterClientMock",
+                "section": "def-common.ClusterClientMock",
                 "text": "ClusterClientMock"
               }
             ],
@@ -4706,7 +4714,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "id": "def-server.elasticsearchClientMock.createCustomClusterClient",
+            "id": "def-common.elasticsearchClientMock.createCustomClusterClient",
             "type": "Function",
             "tags": [],
             "label": "createCustomClusterClient",
@@ -4715,9 +4723,9 @@
               "() => ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.CustomClusterClientMock",
+                "section": "def-common.CustomClusterClientMock",
                 "text": "CustomClusterClientMock"
               }
             ],
@@ -4729,7 +4737,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "id": "def-server.elasticsearchClientMock.createScopedClusterClient",
+            "id": "def-common.elasticsearchClientMock.createScopedClusterClient",
             "type": "Function",
             "tags": [],
             "label": "createScopedClusterClient",
@@ -4738,9 +4746,9 @@
               "() => ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ScopedClusterClientMock",
+                "section": "def-common.ScopedClusterClientMock",
                 "text": "ScopedClusterClientMock"
               }
             ],
@@ -4752,7 +4760,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "id": "def-server.elasticsearchClientMock.createElasticsearchClient",
+            "id": "def-common.elasticsearchClientMock.createElasticsearchClient",
             "type": "Function",
             "tags": [],
             "label": "createElasticsearchClient",
@@ -4761,9 +4769,9 @@
               "(res?: Promise<unknown> | undefined) => ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ElasticsearchClientMock",
+                "section": "def-common.ElasticsearchClientMock",
                 "text": "ElasticsearchClientMock"
               }
             ],
@@ -4774,7 +4782,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "id": "def-server.elasticsearchClientMock.createElasticsearchClient.$1",
+                "id": "def-common.elasticsearchClientMock.createElasticsearchClient.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "res",
@@ -4790,7 +4798,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "id": "def-server.elasticsearchClientMock.createInternalClient",
+            "id": "def-common.elasticsearchClientMock.createInternalClient",
             "type": "Function",
             "tags": [],
             "label": "createInternalClient",
@@ -4799,9 +4807,9 @@
               "(res?: Promise<unknown> | undefined) => ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
+                "section": "def-common.DeeplyMockedApi",
                 "text": "DeeplyMockedApi"
               },
               "<",
@@ -4815,7 +4823,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "id": "def-server.elasticsearchClientMock.createInternalClient.$1",
+                "id": "def-common.elasticsearchClientMock.createInternalClient.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "res",
@@ -4831,7 +4839,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "id": "def-server.elasticsearchClientMock.createSuccessTransportRequestPromise",
+            "id": "def-common.elasticsearchClientMock.createSuccessTransportRequestPromise",
             "type": "Function",
             "tags": [],
             "label": "createSuccessTransportRequestPromise",
@@ -4848,7 +4856,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "id": "def-server.elasticsearchClientMock.createSuccessTransportRequestPromise.$1",
+                "id": "def-common.elasticsearchClientMock.createSuccessTransportRequestPromise.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "body",
@@ -4862,7 +4870,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "id": "def-server.elasticsearchClientMock.createSuccessTransportRequestPromise.$2",
+                "id": "def-common.elasticsearchClientMock.createSuccessTransportRequestPromise.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "__1",
@@ -4876,7 +4884,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "id": "def-server.elasticsearchClientMock.createSuccessTransportRequestPromise.$3",
+                "id": "def-common.elasticsearchClientMock.createSuccessTransportRequestPromise.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "headers",
@@ -4892,7 +4900,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "id": "def-server.elasticsearchClientMock.createErrorTransportRequestPromise",
+            "id": "def-common.elasticsearchClientMock.createErrorTransportRequestPromise",
             "type": "Function",
             "tags": [],
             "label": "createErrorTransportRequestPromise",
@@ -4907,7 +4915,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "id": "def-server.elasticsearchClientMock.createErrorTransportRequestPromise.$1",
+                "id": "def-common.elasticsearchClientMock.createErrorTransportRequestPromise.$1",
                 "type": "Any",
                 "tags": [],
                 "label": "err",
@@ -4923,7 +4931,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "id": "def-server.elasticsearchClientMock.createApiResponse",
+            "id": "def-common.elasticsearchClientMock.createApiResponse",
             "type": "Function",
             "tags": [],
             "label": "createApiResponse",
@@ -4942,7 +4950,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "id": "def-server.elasticsearchClientMock.createApiResponse.$1",
+                "id": "def-common.elasticsearchClientMock.createApiResponse.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "opts",
@@ -4968,13 +4976,5 @@
         "initialIsOpen": false
       }
     ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }

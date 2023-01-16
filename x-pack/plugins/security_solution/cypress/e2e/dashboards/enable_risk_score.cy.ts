@@ -40,14 +40,14 @@ describe('Enable risk scores', () => {
   });
 
   beforeEach(() => {
-    deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId, deleteAll: true });
-    deleteRiskScore({ riskScoreEntity: RiskScoreEntity.user, spaceId, deleteAll: true });
+    deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId });
+    deleteRiskScore({ riskScoreEntity: RiskScoreEntity.user, spaceId });
     visit(ENTITY_ANALYTICS_URL);
   });
 
   afterEach(() => {
-    deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId, deleteAll: true });
-    deleteRiskScore({ riskScoreEntity: RiskScoreEntity.user, spaceId, deleteAll: true });
+    deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId });
+    deleteRiskScore({ riskScoreEntity: RiskScoreEntity.user, spaceId });
   });
 
   it('shows enable host risk button', () => {

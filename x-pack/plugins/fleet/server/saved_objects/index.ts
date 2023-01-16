@@ -19,6 +19,7 @@ import {
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
   DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
   FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+  FLEET_PROXY_SAVED_OBJECT_TYPE,
 } from '../constants';
 
 import {
@@ -47,7 +48,11 @@ import {
   migratePackagePolicyToV840,
 } from './migrations/to_v8_4_0';
 import { migratePackagePolicyToV850, migrateAgentPolicyToV850 } from './migrations/to_v8_5_0';
-import { migrateSettingsToV860, migrateInstallationToV860 } from './migrations/to_v8_6_0';
+import {
+  migrateSettingsToV860,
+  migrateInstallationToV860,
+  migratePackagePolicyToV860,
+} from './migrations/to_v8_6_0';
 
 /*
  * Saved object types and mappings
@@ -97,6 +102,7 @@ const getSavedObjectTypes = (
         is_default_fleet_server: { type: 'boolean' },
         status: { type: 'keyword' },
         unenroll_timeout: { type: 'integer' },
+        inactivity_timeout: { type: 'integer' },
         updated_at: { type: 'date' },
         updated_by: { type: 'keyword' },
         revision: { type: 'integer' },
@@ -136,6 +142,11 @@ const getSavedObjectTypes = (
         config_yaml: { type: 'text' },
         is_preconfigured: { type: 'boolean', index: false },
         ssl: { type: 'binary' },
+        proxy_id: { type: 'keyword' },
+        shipper: {
+          dynamic: false, // we aren't querying or aggregating over this data, so we don't need to specify any fields
+          properties: {},
+        },
       },
     },
     migrations: {
@@ -228,6 +239,7 @@ const getSavedObjectTypes = (
       '8.3.0': migratePackagePolicyToV830,
       '8.4.0': migratePackagePolicyToV840,
       '8.5.0': migratePackagePolicyToV850,
+      '8.6.0': migratePackagePolicyToV860,
     },
   },
   [PACKAGES_SAVED_OBJECT_TYPE]: {
@@ -254,22 +266,17 @@ const getSavedObjectTypes = (
           properties: {
             id: { type: 'keyword' },
             type: { type: 'keyword' },
+            version: { type: 'keyword' },
           },
         },
         installed_kibana: {
-          type: 'nested',
-          properties: {
-            id: { type: 'keyword' },
-            type: { type: 'keyword' },
-          },
+          type: 'object',
+          enabled: false,
         },
         installed_kibana_space_id: { type: 'keyword' },
         package_assets: {
-          type: 'nested',
-          properties: {
-            id: { type: 'keyword' },
-            type: { type: 'keyword' },
-          },
+          type: 'object',
+          enabled: false,
         },
         install_started_at: { type: 'date' },
         install_version: { type: 'keyword' },
@@ -284,6 +291,7 @@ const getSavedObjectTypes = (
               type: 'nested',
               properties: {
                 synthetic_source: { type: 'boolean' },
+                tsdb: { type: 'boolean' },
               },
             },
           },
@@ -361,6 +369,26 @@ const getSavedObjectTypes = (
         is_default: { type: 'boolean' },
         host_urls: { type: 'keyword', index: false },
         is_preconfigured: { type: 'boolean' },
+        proxy_id: { type: 'keyword' },
+      },
+    },
+  },
+  [FLEET_PROXY_SAVED_OBJECT_TYPE]: {
+    name: FLEET_PROXY_SAVED_OBJECT_TYPE,
+    hidden: false,
+    namespaceType: 'agnostic',
+    management: {
+      importableAndExportable: false,
+    },
+    mappings: {
+      properties: {
+        name: { type: 'keyword' },
+        url: { type: 'keyword', index: false },
+        proxy_headers: { type: 'text', index: false },
+        certificate_authorities: { type: 'keyword', index: false },
+        certificate: { type: 'keyword', index: false },
+        certificate_key: { type: 'keyword', index: false },
+        is_preconfigured: { type: 'boolean' },
       },
     },
   },
@@ -394,6 +422,7 @@ export function registerEncryptedSavedObjects(
       'config',
       'config_yaml',
       'is_preconfigured',
+      'proxy_id',
     ]),
   });
   // Encrypted saved objects

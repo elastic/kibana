@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import React, { FC, MouseEvent } from 'react';
 import {
   EuiButton,
@@ -13,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiImage,
+  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -81,7 +83,7 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
                   >
                     <FormattedMessage
                       id="home.addData.guidedOnboardingLinkLabel"
-                      defaultMessage="Launch setup guide"
+                      defaultMessage="Setup guides"
                     />
                   </EuiButton>
                 </EuiFlexItem>
@@ -138,18 +140,76 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
             </EuiFlexGroup>
           </EuiFlexItem>
 
-          <EuiFlexItem>
-            <EuiImage
-              alt="Illustration of Elastic data integrations"
-              className="homDataAdd__illustration"
-              src={
-                addBasePath('/plugins/kibanaReact/assets/') +
-                (isDarkMode
-                  ? 'illustration_integrations_darkmode.svg'
-                  : 'illustration_integrations_lightmode.svg')
-              }
-            />
-          </EuiFlexItem>
+          {!isCloudEnabled ? (
+            <EuiFlexItem>
+              <EuiPanel paddingSize="l">
+                <EuiFlexGroup alignItems="center" gutterSize="xl">
+                  <EuiFlexItem>
+                    <EuiImage
+                      alt={i18n.translate('home.moveData.illustration.alt.text', {
+                        defaultMessage: 'Illustration for cloud data migration',
+                      })}
+                      src={
+                        addBasePath('/plugins/kibanaReact/assets/') +
+                        'illustration_cloud_migration.png'
+                      }
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiTitle size="xs">
+                      <h4>
+                        <FormattedMessage
+                          id="home.addData.moveYourDataTitle"
+                          defaultMessage="Considering Elastic Cloud?"
+                        />
+                      </h4>
+                    </EuiTitle>
+
+                    <EuiSpacer size="s" />
+
+                    <EuiText size="s">
+                      <FormattedMessage
+                        id="home.addData.moveYourDataToElasticCloud"
+                        defaultMessage="Moving your data to Elastic Cloud is easy and can save you time and money."
+                      />
+                    </EuiText>
+
+                    <EuiSpacer size="m" />
+
+                    {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+                    <EuiButton
+                      color="primary"
+                      href={addBasePath('/app/management/data/migrate_data')}
+                      onClick={(event: MouseEvent) => {
+                        trackUiMetric(METRIC_TYPE.CLICK, 'migrate_data_to_cloud');
+                        createAppNavigationHandler('/app/management/data/migrate_data')(event);
+                      }}
+                    >
+                      <FormattedMessage
+                        id="home.addData.moveYourDataButtonLabel"
+                        defaultMessage="Explore the benefits"
+                      />
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPanel>
+            </EuiFlexItem>
+          ) : (
+            <EuiFlexItem>
+              <EuiImage
+                alt={i18n.translate('home.addData.illustration.alt.text', {
+                  defaultMessage: 'Illustration of Elastic data integrations',
+                })}
+                className="homDataAdd__illustration"
+                src={
+                  addBasePath('/plugins/kibanaReact/assets/') +
+                  (isDarkMode
+                    ? 'illustration_integrations_darkmode.svg'
+                    : 'illustration_integrations_lightmode.svg')
+                }
+              />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </KibanaPageTemplate.Section>
     );

@@ -29,6 +29,7 @@ import { ALL_OSQUERY_VERSIONS_OPTIONS } from '../../packs/queries/constants';
 import { ECSMappingEditorField } from '../../packs/queries/lazy_ecs_mapping_editor_field';
 import { PlaygroundFlyout } from './playground_flyout';
 import { CodeEditorField } from './code_editor_field';
+import { overflowCss } from '../../packs/utils';
 
 interface SavedQueryFormProps {
   viewMode?: boolean;
@@ -90,7 +91,7 @@ const SavedQueryFormComponent: React.FC<SavedQueryFormProps> = ({
       <CodeEditorField euiFieldProps={euiFieldProps} />
       <EuiSpacer size="xl" />
       <EuiFlexGroup>
-        <EuiFlexItem>
+        <EuiFlexItem css={overflowCss}>
           <ECSMappingEditorField euiFieldProps={euiFieldProps} />
         </EuiFlexItem>
       </EuiFlexGroup>

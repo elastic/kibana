@@ -1,16 +1,13 @@
-load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
-load("@npm//webpack-cli:index.bzl", webpack = "webpack_cli")
-load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
+load("@npm//webpack-cli:index.bzl", "webpack_cli")
 
-PKG_DIRNAME = "kbn-ui-shared-deps-npm"
-PKG_REQUIRE_NAME = "@kbn/ui-shared-deps-npm"
-
-SOURCE_FILES = glob(
+SRCS = glob(
   [
-    "**/*.js",
+    "index.js",
+    "src/**/*",
   ],
   exclude = [
+    "**/test_helpers.ts",
     "**/*.config.js",
     "**/*.mock.*",
     "**/*.test.*",
@@ -25,18 +22,18 @@ SOURCE_FILES = glob(
   ],
 )
 
-SRCS = SOURCE_FILES
-
-filegroup(
-  name = "srcs",
-  srcs = SRCS,
-)
-
-NPM_MODULE_EXTRA_FILES = [
-  "package.json",
-]
-
+# deps needed when importing this module from another location
 RUNTIME_DEPS = [
+  "@npm//loader-utils",
+  "@npm//val-loader",
+  "//packages/kbn-repo-info",
+  # deps in the dll need to be included in the sandbox for consumers
+  # of this DLL (ui-shared-deps-src) because webpack won't actually
+  # use the DLL version of a package until it has resolved to the same
+  # relative path as the module which is already included in the DLL manifest
+  "@npm//core-js",
+  "@npm//whatwg-fetch",
+  "@npm//symbol-observable",
   "@npm//@babel/runtime",
   "@npm//@elastic/charts",
   "@npm//@elastic/eui",
@@ -45,103 +42,34 @@ RUNTIME_DEPS = [
   "@npm//@emotion/react",
   "@npm//@tanstack/react-query",
   "@npm//@tanstack/react-query-devtools",
-  "@npm//babel-loader",
-  "@npm//core-js",
-  "@npm//css-loader",
+  "@npm//classnames",
   "@npm//fflate",
+  "@npm//history",
   "@npm//jquery",
-  "@npm//loader-utils",
-  "@npm//mini-css-extract-plugin",
+  "@npm//lodash",
   "@npm//moment-timezone",
-  "@npm//moment",
-  "@npm//raw-loader",
   "@npm//react-ace",
+  "@npm//react-beautiful-dnd",
   "@npm//react-dom",
-  "@npm//react-intl",
-  "@npm//react-is",
   "@npm//react-router-dom",
   "@npm//react-router",
   "@npm//react",
-  "@npm//rison-node",
   "@npm//rxjs",
   "@npm//styled-components",
-  "@npm//symbol-observable",
   "@npm//tslib",
-  "@npm//url-loader",
-  "@npm//val-loader",
-  "@npm//whatwg-fetch",
 ]
 
-WEBPACK_DEPS = [
-  "@npm//clean-webpack-plugin",
-]
-
-TYPES_DEPS = [
-  "@npm//@elastic/charts",
-  "@npm//@elastic/eui",
-  "@npm//@elastic/numeral",
-  "@npm//@emotion/cache",
-  "@npm//@emotion/react",
-  "@npm//babel-loader",
-  "@npm//core-js",
-  "@npm//css-loader",
-  "@npm//fflate",
-  "@npm//jquery",
-  "@npm//loader-utils",
-  "@npm//mini-css-extract-plugin",
-  "@npm//moment",
-  "@npm//moment-timezone",
-  "@npm//raw-loader",
-  "@npm//react",
-  "@npm//react-dom",
-  "@npm//react-intl",
-  "@npm//react-is",
-  "@npm//react-router",
-  "@npm//react-router-dom",
-  "@npm//rison-node",
-  "@npm//rxjs",
-  "@npm//styled-components",
-  "@npm//symbol-observable",
-  "@npm//url-loader",
-  "@npm//val-loader",
-  "@npm//whatwg-fetch",
-  "@npm//@types/node",
-]
-
-jsts_transpiler(
-  name = "target_node",
-  srcs = SRCS,
-  build_pkg_name = package_name(),
-)
-
-ts_config(
-  name = "tsconfig",
-  src = "tsconfig.json",
-  deps = [
-    "//:tsconfig.base.json",
-    "//:tsconfig.bazel.json",
-  ],
-)
-
-ts_project(
-  name = "tsc_types",
-  args = ['--pretty'],
-  srcs = SRCS,
-  deps = TYPES_DEPS,
-  allow_js = True,
-  declaration = True,
-  emit_declaration_only = True,
-  out_dir = "target_types",
-  tsconfig = ":tsconfig",
-)
-
-webpack(
+webpack_cli(
   name = "shared_built_assets",
-  data = RUNTIME_DEPS + WEBPACK_DEPS + [
-    "//:package.json",
-    ":srcs",
-    ":tsconfig",
+  data = RUNTIME_DEPS + SRCS + [
+    "//:.browserslistrc",
     ":webpack.config.js",
+
+    "@npm//webpack",
+    "@npm//clean-webpack-plugin",
+    "@npm//mini-css-extract-plugin",
+    "@npm//moment",
+    "@npm//css-loader",
   ],
   output_dir = True,
   args = [
@@ -149,41 +77,23 @@ webpack(
     "$(location webpack.config.js)",
     "--output-path",
     "$(@D)",
-    "--no-stats"
-  ],
-)
-
-js_library(
-  name = PKG_DIRNAME,
-  srcs = NPM_MODULE_EXTRA_FILES,
-  deps = RUNTIME_DEPS + [":target_node", ":shared_built_assets"],
-  package_name = PKG_REQUIRE_NAME,
-  visibility = ["//visibility:public"],
-)
-
-js_library(
-  name = "npm_module_types",
-  srcs = NPM_MODULE_EXTRA_FILES,
-  deps = RUNTIME_DEPS + [":target_node", ":shared_built_assets", ":tsc_types"],
-  package_name = PKG_REQUIRE_NAME,
-  visibility = ["//visibility:public"],
-)
-
-pkg_npm(
-  name = "npm_module",
-  deps = [":" + PKG_DIRNAME],
-)
-
-filegroup(
-  name = "build",
-  srcs = [
-    ":npm_module",
+    "--stats=errors-only"
   ],
   visibility = ["//visibility:public"],
+  env = select({
+    "//:dist": {
+      "NODE_ENV": "production",
+    },
+    "//conditions:default": {
+      "NODE_ENV": "development",
+    },
+  })
 )
-
-pkg_npm(
-  name = "build_types",
-  deps = [":npm_module_types"],
+#
+js_library(
+  name = "kbn-ui-shared-deps-npm",
+  package_name = "@kbn/ui-shared-deps-npm",
+  srcs = SRCS + ["package.json"],
+  deps = RUNTIME_DEPS + [":shared_built_assets"],
   visibility = ["//visibility:public"],
 )

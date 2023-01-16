@@ -30,4 +30,6 @@ export enum URL_PARAM_KEY {
   sourcerer = 'sourcerer',
   timeline = 'timeline',
   timerange = 'timerange',
+  pageFilter = 'pageFilters',
+  rulesTable = 'rulesTable',
 }

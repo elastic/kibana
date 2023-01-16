@@ -77,7 +77,7 @@ const loginFormMessages: Record<LogoutReason, NonNullable<LoginFormProps['messag
     type: LoginFormMessageType.Danger,
     content: i18n.translate('xpack.security.unauthenticated.errorDescription', {
       defaultMessage:
-        "We hit an authentication error. Please check your credentials and try again. If you still can't log in, contact your system administrator.",
+        'Try logging in again, and if the problem persists, contact your system administrator.',
     }),
   },
 };
@@ -130,7 +130,7 @@ export class LoginPage extends Component<Props, State> {
             <span className="loginWelcome__logo">
               <EuiIcon type="logoElastic" size="xxl" />
             </span>
-            <EuiTitle size="m" className="loginWelcome__title">
+            <EuiTitle size="m" className="loginWelcome__title" data-test-subj="loginWelcomeTitle">
               <h1>
                 <FormattedMessage
                   id="xpack.security.loginPage.welcomeTitle"

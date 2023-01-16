@@ -37,6 +37,7 @@ const createSLORepositoryMock = (): jest.Mocked<SLORepository> => {
 const createSLIClientMock = (): jest.Mocked<SLIClient> => {
   return {
     fetchCurrentSLIData: jest.fn(),
+    fetchSLIDataFrom: jest.fn(),
   };
 };
 

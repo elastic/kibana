@@ -43,6 +43,7 @@ export {
   downloadSourceRoutesService,
 } from '../../common/services';
 export { isPackageUnverified, isVerificationError } from './package_verification';
+export { isPackageUpdatable } from './is_package_updatable';
 export { pkgKeyFromPackageInfo } from './pkg_key_from_package_info';
 export { createExtensionRegistrationCallback } from './ui_extensions';
 export { incrementPolicyName } from './increment_policy_name';

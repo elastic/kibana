@@ -76,6 +76,10 @@ const expectedIndexPatterns = {
 };
 
 const indexPatterns = expectedIndexPatterns;
+const dateRange = {
+  fromDate: '2022-03-17T08:25:00.000Z',
+  toDate: '2022-04-17T08:25:00.000Z',
+};
 
 describe('Textbased Data Source', () => {
   let baseState: TextBasedPrivateState;
@@ -469,6 +473,27 @@ describe('Textbased Data Source', () => {
         layerId: 'newid',
       });
     });
+
+    it('should not return suggestions if no query is given', () => {
+      const state = {
+        layers: {},
+        initialContext: {
+          contextualFields: ['bytes', 'dest'],
+          dataViewSpec: {
+            title: 'foo',
+            id: '1',
+            name: 'Foo',
+          },
+        },
+      } as unknown as TextBasedPrivateState;
+      const suggestions = TextBasedDatasource.getDatasourceSuggestionsForVisualizeField(
+        state,
+        '1',
+        '',
+        indexPatterns
+      );
+      expect(suggestions).toEqual([]);
+    });
   });
 
   describe('#getErrorMessages', () => {
@@ -622,7 +647,9 @@ describe('Textbased Data Source', () => {
   describe('#toExpression', () => {
     it('should generate an empty expression when no columns are selected', async () => {
       const state = TextBasedDatasource.initialize();
-      expect(TextBasedDatasource.toExpression(state, 'first', indexPatterns)).toEqual(null);
+      expect(TextBasedDatasource.toExpression(state, 'first', indexPatterns, dateRange)).toEqual(
+        null
+      );
     });
 
     it('should generate an expression for an SQL query', async () => {
@@ -672,7 +699,7 @@ describe('Textbased Data Source', () => {
         ],
       } as unknown as TextBasedPrivateState;
 
-      expect(TextBasedDatasource.toExpression(queryBaseState, 'a', indexPatterns))
+      expect(TextBasedDatasource.toExpression(queryBaseState, 'a', indexPatterns, dateRange))
         .toMatchInlineSnapshot(`
         Object {
           "chain": Array [

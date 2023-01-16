@@ -8,6 +8,7 @@
 
 import type { HttpStart } from '@kbn/core/public';
 import type { ScopedFilesClient, FilesClient } from '../types';
+import { getFileKindsRegistry } from '../../common/file_kinds_registry';
 import {
   API_BASE_PATH,
   FILES_API_BASE_PATH,
@@ -48,6 +49,7 @@ export const apiRoutes = {
    */
   getFindRoute: () => `${API_BASE_PATH}/find`,
   getMetricsRoute: () => `${API_BASE_PATH}/metrics`,
+  getBulkDeleteRoute: () => `${API_BASE_PATH}/blobs`,
 };
 
 /**
@@ -86,6 +88,12 @@ export function createFilesClient({
   fileKind?: string;
 }): FilesClient | ScopedFilesClient {
   const api: FilesClient = {
+    bulkDelete: (args) => {
+      return http.delete(apiRoutes.getBulkDeleteRoute(), {
+        headers: commonBodyHeaders,
+        body: JSON.stringify(args),
+      });
+    },
     create: ({ kind, ...args }) => {
       return http.post(apiRoutes.getCreateFileRoute(scopedFileKind ?? kind), {
         headers: commonBodyHeaders,
@@ -162,6 +170,9 @@ export function createFilesClient({
     },
     publicDownload: ({ token, fileName }) => {
       return http.get(apiRoutes.getPublicDownloadRoute(fileName), { query: { token } });
+    },
+    getFileKind(id: string) {
+      return getFileKindsRegistry().get(id);
     },
   };
   return api;

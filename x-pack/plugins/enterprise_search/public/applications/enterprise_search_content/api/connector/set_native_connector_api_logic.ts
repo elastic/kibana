@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { ConnectorStatus } from '../../../../../common/types/connectors';
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 import { NativeConnector } from '../../components/search_index/connector/types';
 
 export interface SetNativeConnectorArgs {
   connectorId: string;
-  nativeConnector: NativeConnector;
+  serviceType: string;
 }
 
 export interface SetNativeConnectorResponse {
@@ -20,29 +19,13 @@ export interface SetNativeConnectorResponse {
   nativeConnector: NativeConnector;
 }
 
-export const setNativeConnector = async ({
-  connectorId,
-  nativeConnector,
-}: SetNativeConnectorArgs) => {
-  const { configuration, serviceType } = nativeConnector;
-
+export const setNativeConnector = async ({ connectorId, serviceType }: SetNativeConnectorArgs) => {
   await HttpLogic.values.http.put(
-    `/internal/enterprise_search/connectors/${connectorId}/service_type`,
+    `/internal/enterprise_search/connectors/${connectorId}/configure_native`,
     {
-      body: JSON.stringify({ serviceType }),
+      body: JSON.stringify({ service_type: serviceType }),
     }
   );
-
-  await HttpLogic.values.http.post(
-    `/internal/enterprise_search/connectors/${connectorId}/configuration`,
-    {
-      body: JSON.stringify(configuration),
-    }
-  );
-
-  await HttpLogic.values.http.put(`/internal/enterprise_search/connectors/${connectorId}/status`, {
-    body: JSON.stringify({ status: ConnectorStatus.NEEDS_CONFIGURATION }),
-  });
 
   return { connectorId };
 };

@@ -728,6 +728,44 @@
           },
           {
             "parentPluginId": "lists",
+            "id": "def-server.ExceptionListClient.duplicateExceptionListAndItems",
+            "type": "Function",
+            "tags": [],
+            "label": "duplicateExceptionListAndItems",
+            "description": [
+              "\nCreate the Trusted Apps Agnostic list if it does not yet exist (`null` is returned if it does exist)"
+            ],
+            "signature": [
+              "({ listId, namespaceType, }: ",
+              "DuplicateExceptionListOptions",
+              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; updated_at: string; updated_by: string; version: number; } | null>"
+            ],
+            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "lists",
+                "id": "def-server.ExceptionListClient.duplicateExceptionListAndItems.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{\n    listId,\n    namespaceType,\n  }",
+                "description": [],
+                "signature": [
+                  "DuplicateExceptionListOptions"
+                ],
+                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "The exception list schema or null if it does not exist"
+            ]
+          },
+          {
+            "parentPluginId": "lists",
             "id": "def-server.ExceptionListClient.updateEndpointListItem",
             "type": "Function",
             "tags": [],
@@ -1453,9 +1491,9 @@
               ") => Promise<",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsOpenPointInTimeResponse",
+                "section": "def-common.SavedObjectsOpenPointInTimeResponse",
                 "text": "SavedObjectsOpenPointInTimeResponse"
               },
               ">"
@@ -1499,9 +1537,9 @@
               ") => Promise<",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsClosePointInTimeResponse",
+                "section": "def-common.SavedObjectsClosePointInTimeResponse",
                 "text": "SavedObjectsClosePointInTimeResponse"
               },
               ">"
@@ -3861,9 +3899,9 @@
             "(savedObjectsClient: ",
             {
               "pluginId": "@kbn/core-saved-objects-api-server",
-              "scope": "server",
+              "scope": "common",
               "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-              "section": "def-server.SavedObjectsClientContract",
+              "section": "def-common.SavedObjectsClientContract",
               "text": "SavedObjectsClientContract"
             },
             ", user: string, enableServerExtensionPoints?: boolean | undefined) => ",
@@ -3890,9 +3928,9 @@
               "signature": [
                 {
                   "pluginId": "@kbn/core-saved-objects-api-server",
-                  "scope": "server",
+                  "scope": "common",
                   "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                  "section": "def-server.SavedObjectsClientContract",
+                  "section": "def-common.SavedObjectsClientContract",
                   "text": "SavedObjectsClientContract"
                 }
               ],
@@ -3938,9 +3976,9 @@
             "(esClient: ",
             {
               "pluginId": "@kbn/core-elasticsearch-server",
-              "scope": "server",
+              "scope": "common",
               "docId": "kibKbnCoreElasticsearchServerPluginApi",
-              "section": "def-server.ElasticsearchClient",
+              "section": "def-common.ElasticsearchClient",
               "text": "ElasticsearchClient"
             },
             ", spaceId: string, user: string) => ",
@@ -4405,29 +4443,29 @@
                 "ExplainResponse",
                 "<TDocument>>; }; features: ",
                 "default",
-                "; fieldCaps: { (this: That, params: ",
+                "; fieldCaps: { (this: That, params?: ",
                 "FieldCapsRequest",
                 " | ",
                 "FieldCapsRequest",
-                ", options?: ",
+                " | undefined, options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
                 "FieldCapsResponse",
-                ">; (this: That, params: ",
+                ">; (this: That, params?: ",
                 "FieldCapsRequest",
                 " | ",
                 "FieldCapsRequest",
-                ", options?: ",
+                " | undefined, options?: ",
                 "TransportRequestOptionsWithMeta",
                 " | undefined): Promise<",
                 "TransportResult",
                 "<",
                 "FieldCapsResponse",
-                ", unknown>>; (this: That, params: ",
+                ", unknown>>; (this: That, params?: ",
                 "FieldCapsRequest",
                 " | ",
                 "FieldCapsRequest",
-                ", options?: ",
+                " | undefined, options?: ",
                 "TransportRequestOptions",
                 " | undefined): Promise<",
                 "FieldCapsResponse",

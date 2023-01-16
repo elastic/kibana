@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import rison from 'rison-node';
+import rison from '@kbn/rison';
 import type { TimeRange } from '@kbn/data-plugin/common/query';
 
 export const PLUGIN_ID = 'lens';

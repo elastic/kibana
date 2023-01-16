@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { GetPackagesResponse } from '@kbn/fleet-plugin/common';
+import type { GetPackagesResponse, GetInfoResponse } from '@kbn/fleet-plugin/common';
+import { epmRouteService } from '@kbn/fleet-plugin/common';
 import {
   INGEST_API_EPM_PACKAGES,
   INGEST_API_PACKAGE_POLICIES,
@@ -61,6 +62,11 @@ export const policyListApiPathHandlers = (totalPolicies: number = 1) => {
     [INGEST_API_EPM_PACKAGES]: (): GetPackagesResponse => {
       return {
         items: [generator.generateEpmPackage()],
+      };
+    },
+    [epmRouteService.getInfoPath('endpoint')]: (): GetInfoResponse => {
+      return {
+        item: generator.generateEpmPackageInfo(),
       };
     },
   };

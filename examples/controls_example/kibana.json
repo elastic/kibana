@@ -1,0 +1,18 @@
+{
+  "id": "controlsExample",
+  "owner": {
+    "name": "Kibana Presentation",
+    "githubTeam": "kibana-presentation"
+  },
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "ui": true,
+  "requiredPlugins": [
+    "controls",
+    "data",
+    "developerExamples",
+    "embeddable",
+    "navigation",
+    "presentationUtil"
+  ]
+}

@@ -15,9 +15,8 @@ Creates a connector.
 
 === {api-prereq-title}
 
-You must have `all` privileges for the *Actions and Connectors* feature in the
-*Management* section of the
-<<kibana-feature-privileges,{kib} feature privileges>>.
+You must have `all` privileges for the *{connectors-feature}* feature in the
+*Management* section of the <<kibana-feature-privileges,{kib} feature privileges>>.
 
 [[create-connector-api-path-params]]
 === {api-path-parms-title}
@@ -81,6 +80,18 @@ For more information, refer to <<index-action-type>>.
 (Required, string) The {jira} project key.
 
 For more information, refer to <<jira-action-type>>.
+=====
+
+.Opsgenie connectors
+[%collapsible%open]
+=====
+
+`apiUrl`::
+(Required, string) The Opsgenie URL. For example, `https://api.opsgenie.com` or
+`https://api.eu.opsgenie.com`. If you are using the `xpack.actions.allowedHosts`
+setting, make sure the hostname is added to the allowed hosts.
+
+For more information, refer to <<opsgenie-action-type>>.
 =====
 
 .{sn-itom}, {sn-itsm}, and {sn-sir} connectors
@@ -408,7 +419,7 @@ For more configuration properties, refer to <<action-types>>.
 
 `connector_type_id`::
 (Required, string) The connector type ID for the connector. For example,
-`.cases-webhook`, `.index`, `.jira`, `.server-log`, or `.servicenow-itom`.
+`.cases-webhook`, `.index`, `.jira`, `.opsgenie`, `.server-log`, or `.servicenow-itom`.
 
 `name`::
 (Required, string) The display name for the connector.
@@ -445,6 +456,14 @@ authentication.
 
 `email`::
 (Required, string) The account email for HTTP Basic authentication.
+=====
+
+.Opsgenie connectors
+[%collapsible%open]
+=====
+`apiKey`::
+(Required, string) The Opsgenie API authentication key for HTTP Basic
+authentication.
 =====
 
 .{sn-itom}, {sn-itsm}, and {sn-sir} connectors

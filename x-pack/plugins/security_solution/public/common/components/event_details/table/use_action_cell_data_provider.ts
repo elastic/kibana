@@ -25,10 +25,11 @@ import {
 } from '../../../../timelines/components/timeline/body/renderers/constants';
 import { BYTES_FORMAT } from '../../../../timelines/components/timeline/body/renderers/bytes';
 import { EVENT_DURATION_FIELD_NAME } from '../../../../timelines/components/duration';
-import { PORT_NAMES } from '../../../../network/components/port/helpers';
+import { getDisplayValue } from '../../../../timelines/components/timeline/data_providers/helpers';
+import { PORT_NAMES } from '../../../../explore/network/components/port/helpers';
 import { INDICATOR_REFERENCE } from '../../../../../common/cti/constants';
 import type { BrowserField } from '../../../containers/source';
-import type { DataProvider } from '../../../../../common/types';
+import type { DataProvider, QueryOperator } from '../../../../../common/types';
 import { IS_OPERATOR } from '../../../../../common/types';
 
 export interface UseActionCellDataProvider {
@@ -48,7 +49,12 @@ export interface ActionCellValuesAndDataProvider {
   dataProviders: DataProvider[];
 }
 
-export const getDataProvider = (field: string, id: string, value: string): DataProvider => ({
+export const getDataProvider = (
+  field: string,
+  id: string,
+  value: string | string[],
+  operator: QueryOperator = IS_OPERATOR
+): DataProvider => ({
   and: [],
   enabled: true,
   id: escapeDataProviderId(id),
@@ -58,7 +64,8 @@ export const getDataProvider = (field: string, id: string, value: string): DataP
   queryMatch: {
     field,
     value,
-    operator: IS_OPERATOR,
+    operator,
+    displayValue: getDisplayValue(value),
   },
 });
 

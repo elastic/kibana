@@ -41,9 +41,6 @@ export default function ({ loadTestFile, getService }) {
     // Settings
     loadTestFile(require.resolve('./settings'));
 
-    // Preconfiguration
-    loadTestFile(require.resolve('./preconfiguration'));
-
     // Service tokens
     loadTestFile(require.resolve('./service_tokens'));
 
@@ -61,5 +58,8 @@ export default function ({ loadTestFile, getService }) {
 
     // Fleet server hosts
     loadTestFile(require.resolve('./fleet_server_hosts/crud'));
+
+    // Fleet proxies
+    loadTestFile(require.resolve('./fleet_proxies/crud'));
   });
 }

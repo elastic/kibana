@@ -14,7 +14,6 @@ import {
   AlertMessageLinkToken,
   AlertMessageDocLinkToken,
 } from '../../../common/types/alerts';
-// @ts-ignore
 import { formatTimestampToDuration } from '../../../common';
 import { CALCULATE_DURATION_UNTIL } from '../../../common/constants';
 import { AlertMessageTokenType } from '../../../common/enums';

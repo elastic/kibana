@@ -52,3 +52,4 @@ export interface Meta {
 }
 
 export type { ElasticsearchIndexWithPrivileges } from './indices';
+export type { KibanaDeps } from './kibana_deps';

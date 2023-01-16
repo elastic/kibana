@@ -6,7 +6,6 @@
  */
 
 import { COMPARATORS } from '@kbn/triggers-actions-ui-plugin/public';
-import { ErrorKey } from './types';
 
 export const DEFAULT_VALUES = {
   THRESHOLD_COMPARATOR: COMPARATORS.GREATER_THAN,
@@ -19,20 +18,42 @@ export const DEFAULT_VALUES = {
   TIME_WINDOW_SIZE: 5,
   TIME_WINDOW_UNIT: 'm',
   THRESHOLD: [1000],
+  AGGREGATION_TYPE: 'count',
+  TERM_SIZE: 5,
+  GROUP_BY: 'all',
   EXCLUDE_PREVIOUS_HITS: true,
 };
 
-export const EXPRESSION_ERRORS = {
-  index: new Array<string>(),
-  size: new Array<string>(),
-  timeField: new Array<string>(),
+export const COMMON_EXPRESSION_ERRORS = {
+  searchType: new Array<string>(),
   threshold0: new Array<string>(),
   threshold1: new Array<string>(),
-  esQuery: new Array<string>(),
-  thresholdComparator: new Array<string>(),
   timeWindowSize: new Array<string>(),
-  searchConfiguration: new Array<string>(),
-  searchType: new Array<string>(),
+  size: new Array<string>(),
+  aggField: new Array<string>(),
+  aggType: new Array<string>(),
+  groupBy: new Array<string>(),
+  termSize: new Array<string>(),
+  termField: new Array<string>(),
 };
 
-export const EXPRESSION_ERROR_KEYS = Object.keys(EXPRESSION_ERRORS) as ErrorKey[];
+export const SEARCH_SOURCE_ONLY_EXPRESSION_ERRORS = {
+  searchConfiguration: new Array<string>(),
+  timeField: new Array<string>(),
+};
+
+export const ONLY_ES_QUERY_EXPRESSION_ERRORS = {
+  index: new Array<string>(),
+  esQuery: new Array<string>(),
+  timeField: new Array<string>(),
+};
+
+const ALL_EXPRESSION_ERROR_ENTRIES = {
+  ...COMMON_EXPRESSION_ERRORS,
+  ...SEARCH_SOURCE_ONLY_EXPRESSION_ERRORS,
+  ...ONLY_ES_QUERY_EXPRESSION_ERRORS,
+};
+
+export const ALL_EXPRESSION_ERROR_KEYS = Object.keys(ALL_EXPRESSION_ERROR_ENTRIES) as Array<
+  keyof typeof ALL_EXPRESSION_ERROR_ENTRIES
+>;

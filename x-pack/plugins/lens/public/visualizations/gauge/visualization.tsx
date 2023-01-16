@@ -250,12 +250,12 @@ export const getGaugeVisualization = ({
                 palette
                   ? {
                       columnId: metricAccessor,
-                      triggerIcon: 'colorBy',
+                      triggerIconType: 'colorBy',
                       palette,
                     }
                   : {
                       columnId: metricAccessor,
-                      triggerIcon: 'none',
+                      triggerIconType: 'none',
                     },
               ]
             : [],
@@ -565,6 +565,7 @@ export const getGaugeVisualization = ({
         name: i18n.translate('xpack.lens.gauge.metricLabel', {
           defaultMessage: 'Metric',
         }),
+        dimensionType: 'metric',
       });
     }
 
@@ -574,6 +575,7 @@ export const getGaugeVisualization = ({
         name: i18n.translate('xpack.lens.gauge.maxValueLabel', {
           defaultMessage: 'Maximum value',
         }),
+        dimensionType: 'max',
       });
     }
 
@@ -583,6 +585,7 @@ export const getGaugeVisualization = ({
         name: i18n.translate('xpack.lens.gauge.minValueLabel', {
           defaultMessage: 'Minimum value',
         }),
+        dimensionType: 'min',
       });
     }
 
@@ -592,6 +595,7 @@ export const getGaugeVisualization = ({
         name: i18n.translate('xpack.lens.gauge.goalValueLabel', {
           defaultMessage: 'Goal value',
         }),
+        dimensionType: 'goal',
       });
     }
     return {

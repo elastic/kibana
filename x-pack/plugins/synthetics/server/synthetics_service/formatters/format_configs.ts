@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isNil, omitBy } from 'lodash';
+import { isEmpty, isNil, omitBy } from 'lodash';
 import {
   BrowserFields,
   ConfigKey,
@@ -28,6 +28,7 @@ const UI_KEYS_TO_SKIP = [
   ConfigKey.FORM_MONITOR_TYPE,
   ConfigKey.TEXT_ASSERTION,
   ConfigKey.CONFIG_HASH,
+  ConfigKey.ALERT_CONFIG,
   'secrets',
 ];
 
@@ -65,20 +66,40 @@ export const formatMonitorConfig = (configKeys: ConfigKey[], config: Partial<Mon
 export const formatHeartbeatRequest = ({
   monitor,
   monitorId,
-  customHeartbeatId,
+  heartbeatId,
   runOnce,
   testRunId,
+  params: globalParams,
 }: {
   monitor: SyntheticsMonitor;
   monitorId: string;
-  customHeartbeatId?: string;
+  heartbeatId: string;
   runOnce?: boolean;
   testRunId?: string;
+  params: Record<string, string>;
 }): HeartbeatConfig => {
   const projectId = (monitor as BrowserFields)[ConfigKey.PROJECT_ID];
+
+  let params = { ...(globalParams ?? {}) };
+
+  let paramsString = '';
+
+  try {
+    const monParamsStr = (monitor as BrowserFields)[ConfigKey.PARAMS];
+
+    if (monParamsStr) {
+      const monitorParams = JSON.parse(monParamsStr);
+      params = { ...params, ...monitorParams };
+    }
+
+    paramsString = isEmpty(params) ? '' : JSON.stringify(params);
+  } catch (e) {
+    // ignore
+  }
+
   return {
     ...monitor,
-    id: customHeartbeatId || monitorId,
+    id: heartbeatId,
     fields: {
       config_id: monitorId,
       'monitor.project.name': projectId || undefined,
@@ -87,5 +108,6 @@ export const formatHeartbeatRequest = ({
       test_run_id: testRunId,
     },
     fields_under_root: true,
+    params: paramsString,
   };
 };

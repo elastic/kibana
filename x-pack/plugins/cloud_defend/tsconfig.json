@@ -1,0 +1,25 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+  },
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "../../../typings/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/fleet-plugin",
+    "@kbn/fleet-plugin",
+    "@kbn/core",
+    "@kbn/i18n-react",
+    "@kbn/data-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/monaco",
+    "@kbn/i18n"
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

@@ -17,7 +17,13 @@ import { getBuiltinCommands } from '../../service/builtin_commands';
 
 export type InitialStateInterface = Pick<
   ConsoleDataState,
-  'commands' | 'scrollToBottom' | 'dataTestSubj' | 'HelpComponent' | 'managedKey' | 'keyCapture'
+  | 'commands'
+  | 'scrollToBottom'
+  | 'dataTestSubj'
+  | 'HelpComponent'
+  | 'managedKey'
+  | 'keyCapture'
+  | 'storagePrefix'
 >;
 
 export const initiateState = (
@@ -92,6 +98,7 @@ export const stateDataReducer: ConsoleStoreReducer = (state, action) => {
 
     case 'updateInputPopoverState':
     case 'updateInputHistoryState':
+    case 'clearInputHistoryState':
     case 'updateInputTextEnteredState':
     case 'updateInputPlaceholderState':
     case 'setInputState':

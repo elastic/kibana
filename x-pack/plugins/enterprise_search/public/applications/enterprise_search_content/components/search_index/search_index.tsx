@@ -24,6 +24,7 @@ import {
   SEARCH_INDEX_SELECT_CONNECTOR_PATH,
   SEARCH_INDEX_TAB_PATH,
 } from '../../routes';
+
 import { isConnectorIndex, isCrawlerIndex } from '../../utils/indices';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
@@ -32,6 +33,7 @@ import { baseBreadcrumbs } from '../search_indices';
 import { getHeaderActions } from './components/header_actions/header_actions';
 import { ConnectorConfiguration } from './connector/connector_configuration';
 import { ConnectorSchedulingComponent } from './connector/connector_scheduling';
+import { ConnectorSyncRules } from './connector/sync_rules/connector_rules';
 import { AutomaticCrawlScheduler } from './crawler/automatic_crawl_scheduler/automatic_crawl_scheduler';
 import { CrawlCustomSettingsFlyout } from './crawler/crawl_custom_settings_flyout/crawl_custom_settings_flyout';
 import { SearchIndexDomainManagement } from './crawler/domain_management/domain_management';
@@ -50,13 +52,14 @@ export enum SearchIndexTabId {
   PIPELINES = 'pipelines',
   // connector indices
   CONFIGURATION = 'configuration',
+  SYNC_RULES = 'sync_rules',
   SCHEDULING = 'scheduling',
   // crawler indices
   DOMAIN_MANAGEMENT = 'domain_management',
 }
 
 export const SearchIndex: React.FC = () => {
-  const { index, isInitialLoading } = useValues(IndexViewLogic);
+  const { hasFilteringFeature, index, isInitialLoading } = useValues(IndexViewLogic);
 
   const { tabId = SearchIndexTabId.OVERVIEW } = useParams<{
     tabId?: string;
@@ -109,7 +112,7 @@ export const SearchIndex: React.FC = () => {
       content: <SearchIndexIndexMappings />,
       id: SearchIndexTabId.INDEX_MAPPINGS,
       name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.indexMappingsTabLabel', {
-        defaultMessage: 'Index Mappings',
+        defaultMessage: 'Index mappings',
       }),
     },
   ];
@@ -122,6 +125,17 @@ export const SearchIndex: React.FC = () => {
         defaultMessage: 'Configuration',
       }),
     },
+    ...(hasFilteringFeature
+      ? [
+          {
+            content: <ConnectorSyncRules />,
+            id: SearchIndexTabId.SYNC_RULES,
+            name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.syncRulesTabLabel', {
+              defaultMessage: 'Sync rules',
+            }),
+          },
+        ]
+      : []),
     {
       content: <ConnectorSchedulingComponent />,
       id: SearchIndexTabId.SCHEDULING,

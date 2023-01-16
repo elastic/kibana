@@ -5,24 +5,18 @@
  * 2.0.
  */
 
-import {
-  EuiCode,
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiNotificationBadge,
-} from '@elastic/eui';
+import { EuiCode, EuiEmptyPrompt, EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Ecs } from '../../../../common/ecs';
 import { PERMISSION_DENIED } from '../../../detection_engine/rule_response_actions/osquery/translations';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
-import { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/rule_response_actions/schemas';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { useKibana } from '../../lib/kibana';
 import { EventsViewType } from './event_details';
 import * as i18n from './translations';
+import type { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/rule_response_actions/schemas/response_actions';
 
 const TabContentWrapper = styled.div`
   height: 100%;
@@ -30,7 +24,7 @@ const TabContentWrapper = styled.div`
 `;
 type RuleParameters = Array<{
   response_actions: Array<{
-    action_type_id: string;
+    action_type_id: RESPONSE_ACTION_TYPES.OSQUERY;
     params: Record<string, unknown>;
   }>;
 }>;
@@ -80,7 +74,7 @@ export const useOsqueryTab = ({
         titleSize="xs"
         body={
           <FormattedMessage
-            id="xpack.securitySolution.osquery.results.missingPrivilleges"
+            id="xpack.securitySolution.osquery.results.missingPrivileges"
             defaultMessage="To access these results, ask your administrator for {osquery} Kibana
               privileges."
             values={{
@@ -98,45 +92,41 @@ export const useOsqueryTab = ({
     return;
   }
 
-  const { OsqueryResults } = osquery;
   const expandedEventFieldsObject = expandDottedObject(
     rawEventData.fields
   ) as ExpandedEventFieldsObject;
 
-  const parameters = expandedEventFieldsObject.kibana?.alert?.rule?.parameters;
-  const responseActions = parameters?.[0].response_actions;
+  const responseActions =
+    expandedEventFieldsObject?.kibana?.alert?.rule?.parameters?.[0].response_actions;
 
-  const osqueryActionsLength = responseActions?.filter(
-    (action: { action_type_id: string }) => action.action_type_id === RESPONSE_ACTION_TYPES.OSQUERY
-  )?.length;
-
-  if (!osqueryActionsLength) {
+  if (!responseActions?.length) {
     return;
   }
-  const ruleName = expandedEventFieldsObject.kibana?.alert?.rule?.name;
-  const agentIds = expandedEventFieldsObject.agent?.id;
+
+  const { OsqueryResults, fetchAllLiveQueries } = osquery;
 
   const alertId = rawEventData._id;
+
+  const { data: actionsData } = fetchAllLiveQueries({
+    filterQuery: { term: { alert_ids: alertId } },
+    activePage: 0,
+    limit: 100,
+    sortField: '@timestamp',
+    alertId,
+  });
+  const actionItems = actionsData?.data.items || [];
+
+  const ruleName = expandedEventFieldsObject.kibana?.alert?.rule?.name;
+  const agentIds = expandedEventFieldsObject.agent?.id;
 
   return {
     id: EventsViewType.osqueryView,
     'data-test-subj': 'osqueryViewTab',
-    name: (
-      <EuiFlexGroup
-        direction="row"
-        alignItems={'center'}
-        justifyContent={'spaceAround'}
-        gutterSize="xs"
-      >
-        <EuiFlexItem>
-          <span>{i18n.OSQUERY_VIEW}</span>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiNotificationBadge data-test-subj="osquery-actions-notification">
-            {osqueryActionsLength}
-          </EuiNotificationBadge>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+    name: i18n.OSQUERY_VIEW,
+    append: (
+      <EuiNotificationBadge data-test-subj="osquery-actions-notification">
+        {actionItems.length}
+      </EuiNotificationBadge>
     ),
     content: (
       <>
@@ -144,12 +134,15 @@ export const useOsqueryTab = ({
           {!application?.capabilities?.osquery?.read ? (
             emptyPrompt
           ) : (
-            <OsqueryResults
-              agentIds={agentIds}
-              ruleName={ruleName}
-              alertId={alertId}
-              ecsData={ecsData}
-            />
+            <>
+              <OsqueryResults
+                agentIds={agentIds}
+                ruleName={ruleName}
+                actionItems={actionItems}
+                ecsData={ecsData}
+              />
+              <EuiSpacer size="s" />
+            </>
           )}
         </TabContentWrapper>
       </>

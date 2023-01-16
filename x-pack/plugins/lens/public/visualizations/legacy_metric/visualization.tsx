@@ -232,7 +232,7 @@ export const getLegacyMetricVisualization = ({
             ? [
                 {
                   columnId: props.state.accessor,
-                  triggerIcon: hasColoring ? 'colorBy' : undefined,
+                  triggerIconType: hasColoring ? 'colorBy' : undefined,
                   palette: hasColoring ? stops.map(({ color }) => color) : undefined,
                 },
               ]
@@ -325,6 +325,7 @@ export const getLegacyMetricVisualization = ({
         name: i18n.translate('xpack.lens.metric.label', {
           defaultMessage: 'Metric',
         }),
+        dimensionType: 'metric',
       });
     }
 

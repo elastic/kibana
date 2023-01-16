@@ -39,9 +39,10 @@ import {
 // file and not bundled with the application, adding a eslint disable below and using import from
 // a restricted path.
 import { createCasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
-import { createFleetAuthzMock } from '@kbn/fleet-plugin/common';
+import { createFleetAuthzMock } from '@kbn/fleet-plugin/common/mocks';
 import type { RequestFixtureOptions } from '@kbn/core-http-router-server-mocks';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { getEndpointAuthzInitialStateMock } from '../../common/endpoint/service/authz/mocks';
 import { xpackMocks } from '../fixtures';
 import { createMockConfig, requestContextMock } from '../lib/detection_engine/routes/__mocks__';
 import type {
@@ -94,6 +95,7 @@ export const createMockEndpointAppContextService = (
     getManifestManager: jest.fn().mockReturnValue(mockManifestManager ?? jest.fn()),
     getEndpointMetadataService: jest.fn(() => mockEndpointMetadataContext.endpointMetadataService),
     getInternalFleetServices: jest.fn(() => mockEndpointMetadataContext.fleetServices),
+    getEndpointAuthz: jest.fn(getEndpointAuthzInitialStateMock),
   } as unknown as jest.Mocked<EndpointAppContextService>;
 };
 

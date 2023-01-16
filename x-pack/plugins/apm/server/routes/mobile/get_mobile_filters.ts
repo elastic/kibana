@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import {
   termQuery,
   kqlQuery,
@@ -19,7 +18,7 @@ import {
   SERVICE_NAME,
   SERVICE_VERSION,
   TRANSACTION_TYPE,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
@@ -28,10 +27,10 @@ type MobileFiltersTypes =
   | 'appVersion'
   | 'osVersion'
   | 'netConnectionType';
+
 type MobileFilters = Array<{
   key: MobileFiltersTypes;
   options: string[];
-  label: string;
 }>;
 
 export async function getMobileFilters({
@@ -57,6 +56,7 @@ export async function getMobileFilters({
         ProcessorEvent.error,
         ProcessorEvent.metric,
         ProcessorEvent.transaction,
+        ProcessorEvent.span,
       ],
     },
     body: {
@@ -105,9 +105,6 @@ export async function getMobileFilters({
   return [
     {
       key: 'device',
-      label: i18n.translate('xpack.apm.mobile.filters.device', {
-        defaultMessage: 'Device',
-      }),
       options:
         response.aggregations?.devices?.buckets?.map(
           ({ key }) => key as string
@@ -115,9 +112,6 @@ export async function getMobileFilters({
     },
     {
       key: 'osVersion',
-      label: i18n.translate('xpack.apm.mobile.filters.osVersion', {
-        defaultMessage: 'OS version',
-      }),
       options:
         response.aggregations?.osVersions?.buckets?.map(
           ({ key }) => key as string
@@ -125,9 +119,6 @@ export async function getMobileFilters({
     },
     {
       key: 'appVersion',
-      label: i18n.translate('xpack.apm.mobile.filters.appVersion', {
-        defaultMessage: 'App version',
-      }),
       options:
         response.aggregations?.appVersions?.buckets?.map(
           ({ key }) => key as string
@@ -135,9 +126,6 @@ export async function getMobileFilters({
     },
     {
       key: 'netConnectionType',
-      label: i18n.translate('xpack.apm.mobile.filters.nct', {
-        defaultMessage: 'NCT',
-      }),
       options:
         response.aggregations?.netConnectionTypes?.buckets?.map(
           ({ key }) => key as string

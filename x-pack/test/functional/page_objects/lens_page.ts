@@ -38,7 +38,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * Clicks the index pattern filters toggle.
      */
     async toggleIndexPatternFiltersPopover() {
-      await testSubjects.click('lnsIndexPatternFiltersToggle');
+      await testSubjects.click('lnsIndexPatternFieldTypeFilterToggle');
     },
 
     async findAllFields() {
@@ -712,6 +712,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click('lnsApp_saveAndReturnButton');
     },
 
+    async replaceInDashboard() {
+      await testSubjects.click('lnsApp_replaceInDashboardButton');
+    },
+
     async expectSaveAndReturnButtonDisabled() {
       const button = await testSubjects.find('lnsApp_saveAndReturnButton', 10000);
       const disabledAttr = await button.getAttribute('disabled');
@@ -1061,7 +1065,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         );
       } else {
         buttonEl = await find.byCssSelector(
-          `[data-test-subj^="dataGridHeaderCellActionGroup"] li[class$="selected"] [title^="Sort"]`
+          `[data-test-subj^="dataGridHeaderCellActionGroup"] li[class*="selected"] [title^="Sort"]`
         );
       }
       return buttonEl.click();

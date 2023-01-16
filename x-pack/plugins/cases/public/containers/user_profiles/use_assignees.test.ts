@@ -13,7 +13,7 @@ import { useAssignees } from './use_assignees';
 describe('useAssignees', () => {
   it('returns an empty array when the caseAssignees is empty', () => {
     const { result } = renderHook(() =>
-      useAssignees({ caseAssignees: [], userProfiles: new Map(), currentUserProfile: undefined })
+      useAssignees({ caseAssignees: [], userProfiles: new Map() })
     );
 
     expect(result.current.allAssignees).toHaveLength(0);
@@ -26,7 +26,6 @@ describe('useAssignees', () => {
       useAssignees({
         caseAssignees: userProfiles.map((profile) => ({ uid: profile.uid })),
         userProfiles: userProfilesMap,
-        currentUserProfile: undefined,
       })
     );
 
@@ -41,7 +40,6 @@ describe('useAssignees', () => {
       useAssignees({
         caseAssignees: unsorted.map((profile) => ({ uid: profile.uid })),
         userProfiles: userProfilesMap,
-        currentUserProfile: undefined,
       })
     );
 
@@ -56,7 +54,6 @@ describe('useAssignees', () => {
       useAssignees({
         caseAssignees: unknownProfiles,
         userProfiles: userProfilesMap,
-        currentUserProfile: undefined,
       })
     );
 
@@ -71,7 +68,6 @@ describe('useAssignees', () => {
       useAssignees({
         caseAssignees: assignees,
         userProfiles: userProfilesMap,
-        currentUserProfile: undefined,
       })
     );
 
@@ -85,28 +81,6 @@ describe('useAssignees', () => {
       asAssigneeWithProfile(userProfiles[0]),
       { uid: '1' },
     ]);
-  });
-
-  it('returns assignees with profiles with the current user at the front', () => {
-    const { result } = renderHook(() =>
-      useAssignees({
-        caseAssignees: userProfiles,
-        userProfiles: userProfilesMap,
-        currentUserProfile: userProfiles[2],
-      })
-    );
-
-    expect(result.current.assigneesWithProfiles).toHaveLength(3);
-    expect(result.current.allAssignees).toHaveLength(3);
-
-    const asAssignees = userProfiles.map(asAssigneeWithProfile);
-
-    expect(result.current.assigneesWithProfiles).toEqual([
-      asAssignees[2],
-      asAssignees[0],
-      asAssignees[1],
-    ]);
-    expect(result.current.allAssignees).toEqual([asAssignees[2], asAssignees[0], asAssignees[1]]);
   });
 });
 

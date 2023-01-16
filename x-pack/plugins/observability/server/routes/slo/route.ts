@@ -6,36 +6,36 @@
  */
 
 import {
+  createSLOParamsSchema,
+  deleteSLOParamsSchema,
+  findSLOParamsSchema,
+  getSLOParamsSchema,
+  updateSLOParamsSchema,
+} from '@kbn/slo-schema';
+import {
   CreateSLO,
-  DeleteSLO,
   DefaultResourceInstaller,
-  DefaultTransformManager,
-  KibanaSavedObjectsSLORepository,
-  GetSLO,
-  UpdateSLO,
   DefaultSLIClient,
+  DefaultTransformManager,
+  DeleteSLO,
+  FindSLO,
+  GetSLO,
+  KibanaSavedObjectsSLORepository,
+  UpdateSLO,
 } from '../../services/slo';
-import { FindSLO } from '../../services/slo/find_slo';
 import {
   ApmTransactionDurationTransformGenerator,
   ApmTransactionErrorRateTransformGenerator,
   KQLCustomTransformGenerator,
   TransformGenerator,
 } from '../../services/slo/transform_generators';
-import { IndicatorTypes } from '../../types/models';
-import {
-  createSLOParamsSchema,
-  deleteSLOParamsSchema,
-  findSLOParamsSchema,
-  getSLOParamsSchema,
-  updateSLOParamsSchema,
-} from '../../types/rest_specs';
+import { IndicatorTypes } from '../../domain/models';
 import { createObservabilityServerRoute } from '../create_observability_server_route';
 
 const transformGenerators: Record<IndicatorTypes, TransformGenerator> = {
-  'slo.apm.transaction_duration': new ApmTransactionDurationTransformGenerator(),
-  'slo.apm.transaction_error_rate': new ApmTransactionErrorRateTransformGenerator(),
-  'slo.kql.custom': new KQLCustomTransformGenerator(),
+  'sli.apm.transactionDuration': new ApmTransactionDurationTransformGenerator(),
+  'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(),
+  'sli.kql.custom': new KQLCustomTransformGenerator(),
 };
 
 const createSLORoute = createObservabilityServerRoute({
@@ -125,8 +125,10 @@ const findSLORoute = createObservabilityServerRoute({
   params: findSLOParamsSchema,
   handler: async ({ context, params }) => {
     const soClient = (await context.core).savedObjects.client;
+    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const repository = new KibanaSavedObjectsSLORepository(soClient);
-    const findSLO = new FindSLO(repository);
+    const sliClient = new DefaultSLIClient(esClient);
+    const findSLO = new FindSLO(repository, sliClient);
 
     const response = await findSLO.execute(params?.query ?? {});
 

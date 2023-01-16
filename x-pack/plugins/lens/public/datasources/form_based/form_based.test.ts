@@ -176,6 +176,10 @@ const expectedIndexPatterns = {
 };
 
 const indexPatterns = expectedIndexPatterns;
+const dateRange = {
+  fromDate: '2022-03-17T08:25:00.000Z',
+  toDate: '2022-04-17T08:25:00.000Z',
+};
 
 describe('IndexPattern Data Source', () => {
   let baseState: FormBasedPrivateState;
@@ -310,13 +314,44 @@ describe('IndexPattern Data Source', () => {
       };
       expect(FormBasedDatasource?.getSelectedFields?.(state)).toEqual([]);
     });
+
+    it('should support columns with multiple fields', async () => {
+      const state = {
+        currentIndexPatternId: '1',
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['col1'],
+            columns: {
+              col1: {
+                label: 'My Op',
+                dataType: 'string',
+                isBucketed: true,
+
+                // Private
+                operationType: 'terms',
+                sourceField: 'op',
+                params: {
+                  size: 5,
+                  orderBy: { type: 'alphabetical' },
+                  orderDirection: 'asc',
+                  secondaryFields: ['source', 'geo.src'],
+                },
+              } as TermsIndexPatternColumn,
+            },
+          },
+        },
+      };
+
+      expect(FormBasedDatasource?.getSelectedFields?.(state)).toEqual(['op', 'source', 'geo.src']);
+    });
   });
 
   describe('#toExpression', () => {
     it('should generate an empty expression when no columns are selected', async () => {
       const state = FormBasedDatasource.initialize();
       expect(
-        FormBasedDatasource.toExpression(state, 'first', indexPatterns, 'testing-seed')
+        FormBasedDatasource.toExpression(state, 'first', indexPatterns, dateRange, 'testing-seed')
       ).toEqual(null);
     });
 
@@ -341,7 +376,13 @@ describe('IndexPattern Data Source', () => {
         },
       };
       expect(
-        FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns, 'testing-seed')
+        FormBasedDatasource.toExpression(
+          queryBaseState,
+          'first',
+          indexPatterns,
+          dateRange,
+          'testing-seed'
+        )
       ).toEqual({
         chain: [
           {
@@ -390,7 +431,13 @@ describe('IndexPattern Data Source', () => {
       };
 
       expect(
-        FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns, 'testing-seed')
+        FormBasedDatasource.toExpression(
+          queryBaseState,
+          'first',
+          indexPatterns,
+          dateRange,
+          'testing-seed'
+        )
       ).toMatchInlineSnapshot(`
         Object {
           "chain": Array [
@@ -575,6 +622,7 @@ describe('IndexPattern Data Source', () => {
         queryBaseState,
         'first',
         indexPatterns,
+        dateRange,
         'testing-seed'
       ) as Ast;
       expect(ast.chain[1].arguments.timeFields).toEqual(['timestamp', 'another_datefield']);
@@ -615,6 +663,7 @@ describe('IndexPattern Data Source', () => {
         queryBaseState,
         'first',
         indexPatterns,
+        dateRange,
         'testing-seed'
       ) as Ast;
       expect((ast.chain[1].arguments.aggs[1] as Ast).chain[0].arguments.timeShift).toEqual(['1d']);
@@ -827,6 +876,7 @@ describe('IndexPattern Data Source', () => {
         queryBaseState,
         'first',
         indexPatterns,
+        dateRange,
         'testing-seed'
       ) as Ast;
       const count = (ast.chain[1].arguments.aggs[1] as Ast).chain[0];
@@ -896,6 +946,7 @@ describe('IndexPattern Data Source', () => {
         queryBaseState,
         'first',
         indexPatterns,
+        dateRange,
         'testing-seed'
       ) as Ast;
       expect(ast.chain[1].arguments.aggs[0]).toMatchInlineSnapshot(`
@@ -1025,6 +1076,7 @@ describe('IndexPattern Data Source', () => {
         queryBaseState,
         'first',
         indexPatterns,
+        dateRange,
         'testing-seed'
       ) as Ast;
       const timeScaleCalls = ast.chain.filter((fn) => fn.function === 'lens_time_scale');
@@ -1095,6 +1147,7 @@ describe('IndexPattern Data Source', () => {
         queryBaseState,
         'first',
         indexPatterns,
+        dateRange,
         'testing-seed'
       ) as Ast;
       const filteredMetricAgg = (ast.chain[1].arguments.aggs[0] as Ast).chain[0].arguments;
@@ -1151,6 +1204,7 @@ describe('IndexPattern Data Source', () => {
         queryBaseState,
         'first',
         indexPatterns,
+        dateRange,
         'testing-seed'
       ) as Ast;
       const formatIndex = ast.chain.findIndex((fn) => fn.function === 'lens_format_column');
@@ -1204,6 +1258,7 @@ describe('IndexPattern Data Source', () => {
         queryBaseState,
         'first',
         indexPatterns,
+        dateRange,
         'testing-seed'
       ) as Ast;
       expect(ast.chain[1].arguments.metricsAtAllLevels).toEqual([false]);
@@ -1248,6 +1303,7 @@ describe('IndexPattern Data Source', () => {
         queryBaseState,
         'first',
         indexPatterns,
+        dateRange,
         'testing-seed'
       ) as Ast;
       expect(ast.chain[1].arguments.timeFields).toEqual(['timestamp']);
@@ -1306,7 +1362,13 @@ describe('IndexPattern Data Source', () => {
 
         const optimizeMock = jest.spyOn(operationDefinitionMap.percentile, 'optimizeEsAggs');
 
-        FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns, 'testing-seed');
+        FormBasedDatasource.toExpression(
+          queryBaseState,
+          'first',
+          indexPatterns,
+          dateRange,
+          'testing-seed'
+        );
 
         expect(operationDefinitionMap.percentile.optimizeEsAggs).toHaveBeenCalledTimes(1);
 
@@ -1378,6 +1440,7 @@ describe('IndexPattern Data Source', () => {
           queryBaseState,
           'first',
           indexPatterns,
+          dateRange,
           'testing-seed'
         ) as Ast;
 
@@ -1447,6 +1510,7 @@ describe('IndexPattern Data Source', () => {
           queryBaseState,
           'first',
           indexPatterns,
+          dateRange,
           'testing-seed'
         ) as Ast;
 
@@ -1557,6 +1621,7 @@ describe('IndexPattern Data Source', () => {
           queryBaseState,
           'first',
           indexPatterns,
+          dateRange,
           'testing-seed'
         ) as Ast;
         // @ts-expect-error we can't isolate just the reference type
@@ -1595,6 +1660,7 @@ describe('IndexPattern Data Source', () => {
           queryBaseState,
           'first',
           indexPatterns,
+          dateRange,
           'testing-seed'
         ) as Ast;
 
@@ -1687,6 +1753,7 @@ describe('IndexPattern Data Source', () => {
           queryBaseState,
           'first',
           indexPatterns,
+          dateRange,
           'testing-seed'
         ) as Ast;
         const chainLength = ast.chain.length;

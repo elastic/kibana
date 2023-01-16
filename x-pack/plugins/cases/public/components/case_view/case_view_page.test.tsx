@@ -171,9 +171,9 @@ describe('CaseViewPage', () => {
     userEvent.click(dropdown.querySelector('button')!);
     await waitForEuiPopoverOpen();
     userEvent.click(result.getByTestId('case-view-status-dropdown-closed'));
+    const updateObject = updateCaseProperty.mock.calls[0][0];
 
     await waitFor(() => {
-      const updateObject = updateCaseProperty.mock.calls[0][0];
       expect(updateCaseProperty).toHaveBeenCalledTimes(1);
       expect(updateObject.updateKey).toEqual('status');
       expect(updateObject.updateValue).toEqual('closed');
@@ -187,8 +187,11 @@ describe('CaseViewPage', () => {
       updateKey: 'title',
     }));
     const result = appMockRenderer.render(<CaseViewPage {...caseProps} />);
-    expect(result.getByTestId('editable-title-loading')).toBeInTheDocument();
-    expect(result.queryByTestId('editable-title-edit-icon')).not.toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(result.getByTestId('editable-title-loading')).toBeInTheDocument();
+      expect(result.queryByTestId('editable-title-edit-icon')).not.toBeInTheDocument();
+    });
   });
 
   it('should display description isLoading', async () => {
@@ -197,13 +200,17 @@ describe('CaseViewPage', () => {
       isLoading: true,
       updateKey: 'description',
     }));
+
     const result = appMockRenderer.render(<CaseViewPage {...caseProps} />);
-    expect(
-      within(result.getByTestId('description-action')).getByTestId('user-action-title-loading')
-    ).toBeInTheDocument();
-    expect(
-      within(result.getByTestId('description-action')).queryByTestId('property-actions')
-    ).not.toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(
+        within(result.getByTestId('description-action')).getByTestId('user-action-title-loading')
+      ).toBeInTheDocument();
+      expect(
+        within(result.getByTestId('description-action')).queryByTestId('property-actions')
+      ).not.toBeInTheDocument();
+    });
   });
 
   it('should display tags isLoading', async () => {
@@ -212,11 +219,18 @@ describe('CaseViewPage', () => {
       isLoading: true,
       updateKey: 'tags',
     }));
+
     const result = appMockRenderer.render(<CaseViewPage {...caseProps} />);
-    expect(
-      within(result.getByTestId('case-view-tag-list')).getByTestId('tag-list-loading')
-    ).toBeInTheDocument();
-    expect(result.queryByTestId('tag-list-edit')).not.toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(
+        within(result.getByTestId('case-view-tag-list')).getByTestId('tag-list-loading')
+      ).toBeInTheDocument();
+    });
+
+    await waitFor(() => {
+      expect(result.queryByTestId('tag-list-edit')).not.toBeInTheDocument();
+    });
   });
 
   it('should update title', async () => {
@@ -228,8 +242,10 @@ describe('CaseViewPage', () => {
     userEvent.click(result.getByTestId('editable-title-submit-btn'));
 
     const updateObject = updateCaseProperty.mock.calls[0][0];
-    expect(updateObject.updateKey).toEqual('title');
-    expect(updateObject.updateValue).toEqual(newTitle);
+    await waitFor(() => {
+      expect(updateObject.updateKey).toEqual('title');
+      expect(updateObject.updateValue).toEqual(newTitle);
+    });
   });
 
   it('should push updates on button click', async () => {
@@ -244,6 +260,7 @@ describe('CaseViewPage', () => {
     const result = appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
     expect(result.getByTestId('has-data-to-push-button')).toBeInTheDocument();
+
     userEvent.click(result.getByTestId('push-to-external-service'));
 
     await waitFor(() => {
@@ -260,7 +277,9 @@ describe('CaseViewPage', () => {
         }}
       />
     );
-    expect(result.getByTestId('push-to-external-service')).toBeDisabled();
+    await waitFor(() => {
+      expect(result.getByTestId('push-to-external-service')).toBeDisabled();
+    });
   });
 
   it('should update connector', async () => {
@@ -328,8 +347,10 @@ describe('CaseViewPage', () => {
     const result = appMockRenderer.render(
       <CaseViewPage {...caseProps} useFetchAlertData={useFetchAlertData} />
     );
-    expect(result.getByTestId('case-view-loading-content')).toBeInTheDocument();
-    expect(result.queryByTestId('user-actions')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(result.getByTestId('case-view-loading-content')).toBeInTheDocument();
+      expect(result.queryByTestId('user-actions')).not.toBeInTheDocument();
+    });
   });
 
   it('should call show alert details with expected arguments', async () => {
@@ -348,19 +369,21 @@ describe('CaseViewPage', () => {
   it('should show the rule name', async () => {
     const result = appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
-    expect(
-      result
-        .getByTestId('user-action-alert-comment-create-action-alert-action-id')
-        .querySelector('.euiCommentEvent__headerEvent')
-    ).toHaveTextContent('added an alert from Awesome rule');
+    await waitFor(() => {
+      expect(
+        result
+          .getByTestId('user-action-alert-comment-create-action-alert-action-id')
+          .querySelector('.euiCommentEvent__headerEvent')
+      ).toHaveTextContent('added an alert from Awesome rule');
+    });
   });
 
   it('should update settings', async () => {
     const result = appMockRenderer.render(<CaseViewPage {...caseProps} />);
     userEvent.click(result.getByTestId('sync-alerts-switch'));
+    const updateObject = updateCaseProperty.mock.calls[0][0];
 
     await waitFor(() => {
-      const updateObject = updateCaseProperty.mock.calls[0][0];
       expect(updateObject.updateKey).toEqual('settings');
       expect(updateObject.updateValue).toEqual({ syncAlerts: false });
     });
@@ -379,6 +402,7 @@ describe('CaseViewPage', () => {
     const result = appMockRenderer.render(
       <CaseViewPage {...{ ...caseProps, connector: { ...caseProps, name: 'old-name' } }} />
     );
+
     await waitFor(() => {
       expect(result.getByTestId('has-data-to-push-button')).toHaveTextContent('My Connector 2');
     });

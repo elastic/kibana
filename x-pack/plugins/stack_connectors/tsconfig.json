@@ -1,9 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
+    "outDir": "target/types",
   },
   "include": [
     "server/**/*",
@@ -13,8 +11,23 @@
     "public/**/*"
   ],
   "kbn_references": [
-    { "path": "../../../src/core/tsconfig.json" },
-    { "path": "../actions/tsconfig.json" },
-    { "path": "../triggers_actions_ui/tsconfig.json" }
+    "@kbn/core",
+    "@kbn/actions-plugin",
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/config-schema",
+    "@kbn/i18n",
+    "@kbn/logging-mocks",
+    "@kbn/logging",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-elasticsearch-client-server-mocks",
+    "@kbn/alerting-plugin",
+    "@kbn/i18n-react",
+    "@kbn/es-ui-shared-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/test-jest-helpers",
+    "@kbn/securitysolution-io-ts-utils",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

@@ -51,6 +51,8 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { InfraClientStartExports } from '@kbn/infra-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { registerApmRuleTypes } from './components/alerting/rule_types/register_apm_rule_types';
 import {
   getApmEnrollmentFlyoutData,
@@ -82,6 +84,7 @@ export interface ApmPluginSetupDeps {
 
 export interface ApmPluginStartDeps {
   alerting?: AlertingPluginPublicStart;
+  charts?: ChartsPluginStart;
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
   home: void;
@@ -92,6 +95,7 @@ export interface ApmPluginStartDeps {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   observability: ObservabilityPublicStart;
   fleet?: FleetStart;
+  fieldFormats?: FieldFormatsStart;
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
   infra?: InfraClientStartExports;

@@ -18,6 +18,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     { jobId: 'fq_002', spaceId: 'space1' },
   ];
 
+  const failConfig = { jobId: 'fq_fail', spaceId: undefined };
+
   describe('Notifications list', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
@@ -25,19 +27,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       // Prepare jobs to generate notifications
-      await Promise.all(
-        configs.map(async (v) => {
-          const datafeedConfig = ml.commonConfig.getADFqDatafeedConfig(v.jobId);
-
-          await ml.api.createAnomalyDetectionJob(
-            ml.commonConfig.getADFqSingleMetricJobConfig(v.jobId),
-            v.spaceId
-          );
-          await ml.api.openAnomalyDetectionJob(v.jobId);
-          await ml.api.createDatafeed(datafeedConfig, v.spaceId);
-          await ml.api.startDatafeed(datafeedConfig.datafeed_id);
-        })
-      );
+      for (const config of configs) {
+        await ml.api.createAnomalyDetectionJob(
+          ml.commonConfig.getADFqSingleMetricJobConfig(config.jobId),
+          config.spaceId
+        );
+      }
 
       await ml.securityUI.loginAsMlPowerUser();
       await PageObjects.common.navigateToApp('ml', {
@@ -46,10 +41,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      for (const { jobId } of configs) {
+      for (const { jobId } of [...configs, failConfig]) {
         await ml.api.deleteAnomalyDetectionJobES(jobId);
       }
       await ml.testResources.cleanMLSavedObjects();
+      await ml.api.cleanMlIndices();
       await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
     });
 
@@ -71,7 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('display a number of errors in the notification indicator', async () => {
       await ml.navigation.navigateToOverview();
 
-      const jobConfig = ml.commonConfig.getADFqSingleMetricJobConfig('fq_fail');
+      const jobConfig = ml.commonConfig.getADFqSingleMetricJobConfig(failConfig.jobId);
       jobConfig.analysis_config = {
         bucket_span: '15m',
         influencers: ['airline'],

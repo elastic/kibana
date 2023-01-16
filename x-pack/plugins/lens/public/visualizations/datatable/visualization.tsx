@@ -226,7 +226,7 @@ export const getDatatableVisualization = ({
             )
             .map((accessor) => ({
               columnId: accessor,
-              triggerIcon: columnMap[accessor].hidden
+              triggerIconType: columnMap[accessor].hidden
                 ? 'invisible'
                 : columnMap[accessor].collapseFn
                 ? 'aggregate'
@@ -289,7 +289,7 @@ export const getDatatableVisualization = ({
 
               return {
                 columnId: accessor,
-                triggerIcon: columnConfig?.hidden
+                triggerIconType: columnConfig?.hidden
                   ? 'invisible'
                   : hasColoring
                   ? 'colorBy'
@@ -626,18 +626,22 @@ export const getDatatableVisualization = ({
             let name = i18n.translate('xpack.lens.datatable.metric', {
               defaultMessage: 'Metric',
             });
+            let dimensionType = 'Metric';
             if (!column.transposable) {
               if (column.isTransposed) {
                 name = i18n.translate('xpack.lens.datatable.breakdownColumns', {
                   defaultMessage: 'Split metrics by',
                 });
+                dimensionType = 'split_metrics';
               } else {
                 name = i18n.translate('xpack.lens.datatable.breakdownRow', {
                   defaultMessage: 'Row',
                 });
+                dimensionType = 'split_rows';
               }
             }
             return {
+              dimensionType,
               id: column.columnId,
               name,
             };

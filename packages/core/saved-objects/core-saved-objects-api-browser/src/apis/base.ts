@@ -8,7 +8,12 @@
 
 import { SimpleSavedObject } from '../simple_saved_object';
 
-/** @public */
+/**
+ * Batch response for simple saved objects
+ *
+ * @public
+ */
 export interface SavedObjectsBatchResponse<T = unknown> {
+  /** Array of simple saved objects */
   savedObjects: Array<SimpleSavedObject<T>>;
 }

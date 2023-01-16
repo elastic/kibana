@@ -42,7 +42,7 @@ export const WithHeaderLayout: React.FC<WithHeaderLayoutProps> = ({
     >
       <EuiPageBody>
         <ContentWrapper>
-          <EuiSpacer size="m" />
+          <EuiSpacer size="l" />
           {children}
         </ContentWrapper>
       </EuiPageBody>

@@ -32,7 +32,10 @@ import type {
   PackageAssetReference,
   PackageVerificationResult,
 } from '../../../types';
-import { prepareToInstallTemplates } from '../elasticsearch/template/install';
+import {
+  ensureFileUploadWriteIndices,
+  prepareToInstallTemplates,
+} from '../elasticsearch/template/install';
 import { removeLegacyTemplates } from '../elasticsearch/template/remove_legacy';
 import {
   prepareToInstallPipelines,
@@ -47,7 +50,7 @@ import { installMlModel } from '../elasticsearch/ml_model';
 import { installIlmForDataStream } from '../elasticsearch/datastream_ilm/install';
 import { saveArchiveEntries } from '../archive/storage';
 import { ConcurrentInstallOperationError } from '../../../errors';
-import { packagePolicyService } from '../..';
+import { appContextService, packagePolicyService } from '../..';
 
 import { createInstallation, updateEsAssetReferences, restartInstallation } from './install';
 import { withPackageSpan } from './utils';
@@ -177,8 +180,16 @@ export async function _installPackage({
      * This split of prepare/install could be extended to all asset types. Besides performance, it also allows us to
      * more easily write unit tests against the asset generation code without needing to mock ES responses.
      */
+    const experimentalDataStreamFeatures =
+      installedPkg?.attributes?.experimental_data_stream_features ?? [];
+
     const preparedIngestPipelines = prepareToInstallPipelines(packageInfo, paths);
-    const preparedIndexTemplates = prepareToInstallTemplates(packageInfo, paths, esReferences);
+    const preparedIndexTemplates = prepareToInstallTemplates(
+      packageInfo,
+      paths,
+      esReferences,
+      experimentalDataStreamFeatures
+    );
 
     // Update the references for the templates and ingest pipelines together. Need to be done togther to avoid race
     // conditions on updating the installed_es field at the same time
@@ -212,6 +223,15 @@ export async function _installPackage({
       await removeLegacyTemplates({ packageInfo, esClient, logger });
     } catch (e) {
       logger.warn(`Error removing legacy templates: ${e.message}`);
+    }
+
+    const { diagnosticFileUploadEnabled } = appContextService.getExperimentalFeatures();
+    if (diagnosticFileUploadEnabled) {
+      await ensureFileUploadWriteIndices({
+        integrationNames: [packageInfo.name],
+        esClient,
+        logger,
+      });
     }
 
     // update current backing indices of each data stream

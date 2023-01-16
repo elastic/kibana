@@ -8,7 +8,6 @@
 import type { EuiTabbedContentTab } from '@elastic/eui';
 import {
   EuiFlexGroup,
-  EuiFlexItem,
   EuiHorizontalRule,
   EuiLoadingContent,
   EuiLoadingSpinner,
@@ -337,26 +336,17 @@ const EventDetailsComponent: React.FC<Props> = ({
         ? {
             id: EventsViewType.threatIntelView,
             'data-test-subj': 'threatIntelTab',
-            name: (
-              <EuiFlexGroup
-                direction="row"
-                alignItems={'center'}
-                justifyContent={'spaceAround'}
-                gutterSize="xs"
-              >
-                <EuiFlexItem>
-                  <span>{i18n.THREAT_INTEL}</span>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  {isEnrichmentsLoading ? (
-                    <EuiLoadingSpinner />
-                  ) : (
-                    <EuiNotificationBadge data-test-subj="enrichment-count-notification">
-                      {enrichmentCount}
-                    </EuiNotificationBadge>
-                  )}
-                </EuiFlexItem>
-              </EuiFlexGroup>
+            name: i18n.THREAT_INTEL,
+            append: (
+              <>
+                {isEnrichmentsLoading ? (
+                  <EuiLoadingSpinner />
+                ) : (
+                  <EuiNotificationBadge data-test-subj="enrichment-count-notification">
+                    {enrichmentCount}
+                  </EuiNotificationBadge>
+                )}
+              </>
             ),
             content: (
               <ThreatDetailsView
@@ -455,14 +445,17 @@ const EventDetailsComponent: React.FC<Props> = ({
       step={AlertsCasesTourSteps.reviewAlertDetailsFlyout}
       tourId={SecurityStepId.alertsCases}
     >
-      <StyledEuiTabbedContent
-        {...tourAnchor}
-        data-test-subj="eventDetails"
-        tabs={tabs}
-        selectedTab={selectedTab}
-        onTabClick={handleTabClick}
-        key="event-summary-tabs"
-      />
+      <>
+        <EuiSpacer size="s" />
+        <StyledEuiTabbedContent
+          {...tourAnchor}
+          data-test-subj="eventDetails"
+          tabs={tabs}
+          selectedTab={selectedTab}
+          onTabClick={handleTabClick}
+          key="event-summary-tabs"
+        />
+      </>
     </GuidedOnboardingTourStep>
   );
 };

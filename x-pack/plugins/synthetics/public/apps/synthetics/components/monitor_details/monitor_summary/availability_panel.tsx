@@ -8,6 +8,7 @@
 import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ReportTypes } from '@kbn/observability-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { ClientPluginsStart } from '../../../../../plugin';
 import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 import { useSelectedLocation } from '../hooks/use_selected_location';
@@ -27,7 +28,7 @@ export const AvailabilityPanel = (props: AvailabilityPanelprops) => {
 
   const monitorId = useMonitorQueryId();
 
-  if (!selectedLocation) {
+  if (!selectedLocation || !monitorId) {
     return null;
   }
 
@@ -39,7 +40,7 @@ export const AvailabilityPanel = (props: AvailabilityPanelprops) => {
       attributes={[
         {
           time: props,
-          name: 'Monitor availability',
+          name: AVAILABILITY_LABEL,
           dataType: 'synthetics',
           selectedMetricField: 'monitor_availability',
           reportDefinitions: {
@@ -51,3 +52,10 @@ export const AvailabilityPanel = (props: AvailabilityPanelprops) => {
     />
   );
 };
+
+export const AVAILABILITY_LABEL = i18n.translate(
+  'xpack.synthetics.monitorDetails.summary.availability',
+  {
+    defaultMessage: 'Availability',
+  }
+);

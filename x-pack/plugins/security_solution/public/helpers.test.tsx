@@ -88,7 +88,8 @@ describe('#getSubPluginRoutesByCapabilities', () => {
     const CasesView = (casesRoute?.component ?? mockRender) as React.ComponentType<any>;
     expect(shallow(<CasesView />)).toMatchInlineSnapshot(`
       <NoPrivilegePage
-        subPluginKey="cases"
+        docLinkSelector={[Function]}
+        pageName="cases"
       />
     `);
   });
@@ -103,7 +104,8 @@ describe('#getSubPluginRoutesByCapabilities', () => {
     const AlertsView = (alertsRoute?.component ?? mockRender) as React.ComponentType<any>;
     expect(shallow(<AlertsView />)).toMatchInlineSnapshot(`
       <NoPrivilegePage
-        subPluginKey="alerts"
+        docLinkSelector={[Function]}
+        pageName="alerts"
       />
     `);
   });
@@ -123,12 +125,14 @@ describe('#getSubPluginRoutesByCapabilities', () => {
 
     expect(shallow(<AlertsView />)).toMatchInlineSnapshot(`
       <NoPrivilegePage
-        subPluginKey="alerts"
+        docLinkSelector={[Function]}
+        pageName="alerts"
       />
     `);
     expect(shallow(<CasesView />)).toMatchInlineSnapshot(`
       <NoPrivilegePage
-        subPluginKey="cases"
+        docLinkSelector={[Function]}
+        pageName="cases"
       />
     `);
   });

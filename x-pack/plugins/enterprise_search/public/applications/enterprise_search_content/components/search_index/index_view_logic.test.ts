@@ -14,7 +14,7 @@ import { apiIndex, connectorIndex, crawlerIndex } from '../../__mocks__/view_ind
 
 import { nextTick } from '@kbn/test-jest-helpers';
 
-import { HttpError, Status } from '../../../../../common/types/api';
+import { Status } from '../../../../../common/types/api';
 
 import { SyncStatus } from '../../../../../common/types/connectors';
 import { StartSyncApiLogic } from '../../api/connector/start_sync_api_logic';
@@ -32,8 +32,12 @@ import { IndexViewLogic } from './index_view_logic';
 const DEFAULT_VALUES = {
   connector: undefined,
   connectorId: null,
+  error: null,
   fetchIndexApiData: undefined,
-  fetchIndexApiStatus: Status.LOADING,
+  fetchIndexApiStatus: Status.IDLE,
+  hasAdvancedFilteringFeature: false,
+  hasBasicFilteringFeature: false,
+  hasFilteringFeature: false,
   index: undefined,
   indexData: null,
   indexName: 'index-name',
@@ -225,22 +229,31 @@ describe('IndexViewLogic', () => {
   });
 
   describe('listeners', () => {
-    it('calls clearFlashMessages on makeStartSyncRequest', () => {
-      IndexViewLogic.actions.makeStartSyncRequest({ connectorId: 'connectorId' });
-      expect(mockFlashMessageHelpers.clearFlashMessages).toHaveBeenCalledTimes(1);
-    });
-
-    it('calls flashAPIErrors on apiError', () => {
-      IndexViewLogic.actions.startSyncApiError({} as HttpError);
-      expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledTimes(1);
-      expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledWith({});
-    });
     it('calls makeFetchIndexRequest on fetchIndex', () => {
       IndexViewLogic.actions.makeFetchIndexRequest = jest.fn();
       IndexNameLogic.actions.setIndexName('indexName');
       IndexViewLogic.actions.fetchIndex();
       expect(IndexViewLogic.actions.makeFetchIndexRequest).toHaveBeenCalledWith({
         indexName: 'indexName',
+      });
+    });
+  });
+
+  describe('selectors', () => {
+    describe('error', () => {
+      it('should return connector error if available', () => {
+        IndexViewLogic.actions.fetchIndexApiSuccess({
+          ...CONNECTOR_VALUES.index,
+          connector: { ...connectorIndex.connector, error: 'error' },
+        });
+        expect(IndexViewLogic.values.error).toEqual('error');
+      });
+      it('should return connector last sync error if available and error is undefined', () => {
+        IndexViewLogic.actions.fetchIndexApiSuccess({
+          ...CONNECTOR_VALUES.index,
+          connector: { ...connectorIndex.connector, last_sync_error: 'last sync error' },
+        });
+        expect(IndexViewLogic.values.error).toEqual('last sync error');
       });
     });
   });

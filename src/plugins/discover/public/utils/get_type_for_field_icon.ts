@@ -13,5 +13,10 @@ import { DataViewField } from '@kbn/data-views-plugin/common';
  *
  * We define custom logic for Discover in order to distinguish between various "string" types.
  */
-export const getTypeForFieldIcon = (field: DataViewField) =>
-  field.type === 'string' && field.esTypes ? field.esTypes[0] : field.type;
+export const getTypeForFieldIcon = (field: DataViewField) => {
+  const esType = field.esTypes?.[0] || null;
+  if (esType && ['_id', '_index'].includes(esType)) {
+    return field.type;
+  }
+  return field.type === 'string' && esType ? esType : field.type;
+};

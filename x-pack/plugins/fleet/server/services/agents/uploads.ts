@@ -17,14 +17,15 @@ import type { AgentDiagnostics } from '../../../common/types/models';
 import { appContextService } from '../app_context';
 import {
   AGENT_ACTIONS_INDEX,
-  agentRouteService,
   AGENT_ACTIONS_RESULTS_INDEX,
+  agentRouteService,
 } from '../../../common';
 
-import { SO_SEARCH_LIMIT } from '../../constants';
-
-const FILE_STORAGE_METADATA_AGENT_INDEX = '.fleet-agent-files';
-const FILE_STORAGE_DATA_AGENT_INDEX = '.fleet-agent-file-data';
+import {
+  FILE_STORAGE_DATA_AGENT_INDEX,
+  FILE_STORAGE_METADATA_AGENT_INDEX,
+  SO_SEARCH_LIMIT,
+} from '../../constants';
 
 export async function getAgentUploads(
   esClient: ElasticsearchClient,

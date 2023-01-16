@@ -56,10 +56,10 @@
       },
       {
         "parentPluginId": "@kbn/guided-onboarding",
-        "id": "def-common.ObservabilityLinkCard",
+        "id": "def-common.InfrastructureLinkCard",
         "type": "Function",
         "tags": [],
-        "label": "ObservabilityLinkCard",
+        "label": "InfrastructureLinkCard",
         "description": [],
         "signature": [
           "({ navigateToApp, isDarkTheme, addBasePath, }: { navigateToApp: (appId: string, options?: ",
@@ -72,24 +72,24 @@
           },
           " | undefined) => Promise<void>; isDarkTheme: boolean; addBasePath: (url: string) => string; }) => JSX.Element"
         ],
-        "path": "packages/kbn-guided-onboarding/src/components/landing_page/observability_link_card.tsx",
+        "path": "packages/kbn-guided-onboarding/src/components/landing_page/infrastructure_link_card.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/guided-onboarding",
-            "id": "def-common.ObservabilityLinkCard.$1",
+            "id": "def-common.InfrastructureLinkCard.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  navigateToApp,\n  isDarkTheme,\n  addBasePath,\n}",
             "description": [],
-            "path": "packages/kbn-guided-onboarding/src/components/landing_page/observability_link_card.tsx",
+            "path": "packages/kbn-guided-onboarding/src/components/landing_page/infrastructure_link_card.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/guided-onboarding",
-                "id": "def-common.ObservabilityLinkCard.$1.navigateToApp",
+                "id": "def-common.InfrastructureLinkCard.$1.navigateToApp",
                 "type": "Function",
                 "tags": [],
                 "label": "navigateToApp",
@@ -105,13 +105,13 @@
                   },
                   " | undefined) => Promise<void>"
                 ],
-                "path": "packages/kbn-guided-onboarding/src/components/landing_page/observability_link_card.tsx",
+                "path": "packages/kbn-guided-onboarding/src/components/landing_page/infrastructure_link_card.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/guided-onboarding",
-                    "id": "def-common.ObservabilityLinkCard.$1.navigateToApp.$1",
+                    "id": "def-common.InfrastructureLinkCard.$1.navigateToApp.$1",
                     "type": "string",
                     "tags": [],
                     "label": "appId",
@@ -119,14 +119,14 @@
                     "signature": [
                       "string"
                     ],
-                    "path": "packages/kbn-guided-onboarding/src/components/landing_page/observability_link_card.tsx",
+                    "path": "packages/kbn-guided-onboarding/src/components/landing_page/infrastructure_link_card.tsx",
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": true
                   },
                   {
                     "parentPluginId": "@kbn/guided-onboarding",
-                    "id": "def-common.ObservabilityLinkCard.$1.navigateToApp.$2",
+                    "id": "def-common.InfrastructureLinkCard.$1.navigateToApp.$2",
                     "type": "Object",
                     "tags": [],
                     "label": "options",
@@ -141,7 +141,7 @@
                       },
                       " | undefined"
                     ],
-                    "path": "packages/kbn-guided-onboarding/src/components/landing_page/observability_link_card.tsx",
+                    "path": "packages/kbn-guided-onboarding/src/components/landing_page/infrastructure_link_card.tsx",
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": false
@@ -151,18 +151,18 @@
               },
               {
                 "parentPluginId": "@kbn/guided-onboarding",
-                "id": "def-common.ObservabilityLinkCard.$1.isDarkTheme",
+                "id": "def-common.InfrastructureLinkCard.$1.isDarkTheme",
                 "type": "boolean",
                 "tags": [],
                 "label": "isDarkTheme",
                 "description": [],
-                "path": "packages/kbn-guided-onboarding/src/components/landing_page/observability_link_card.tsx",
+                "path": "packages/kbn-guided-onboarding/src/components/landing_page/infrastructure_link_card.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/guided-onboarding",
-                "id": "def-common.ObservabilityLinkCard.$1.addBasePath",
+                "id": "def-common.InfrastructureLinkCard.$1.addBasePath",
                 "type": "Function",
                 "tags": [],
                 "label": "addBasePath",
@@ -170,13 +170,13 @@
                 "signature": [
                   "(url: string) => string"
                 ],
-                "path": "packages/kbn-guided-onboarding/src/components/landing_page/observability_link_card.tsx",
+                "path": "packages/kbn-guided-onboarding/src/components/landing_page/infrastructure_link_card.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/guided-onboarding",
-                    "id": "def-common.ObservabilityLinkCard.$1.addBasePath.$1",
+                    "id": "def-common.InfrastructureLinkCard.$1.addBasePath.$1",
                     "type": "string",
                     "tags": [],
                     "label": "url",
@@ -184,7 +184,7 @@
                     "signature": [
                       "string"
                     ],
-                    "path": "packages/kbn-guided-onboarding/src/components/landing_page/observability_link_card.tsx",
+                    "path": "packages/kbn-guided-onboarding/src/components/landing_page/infrastructure_link_card.tsx",
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": true
@@ -219,7 +219,7 @@
             "label": "guideId",
             "description": [],
             "signature": [
-              "\"search\" | \"security\" | \"observability\" | \"testGuide\""
+              "\"search\" | \"kubernetes\" | \"siem\" | \"testGuide\""
             ],
             "path": "packages/kbn-guided-onboarding/src/types.ts",
             "deprecated": false,
@@ -310,7 +310,7 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"complete\" | \"active\" | \"inactive\" | \"in_progress\" | \"ready_to_complete\""
+              "\"complete\" | \"in_progress\" | \"inactive\" | \"active\" | \"ready_to_complete\""
             ],
             "path": "packages/kbn-guided-onboarding/src/types.ts",
             "deprecated": false,
@@ -324,13 +324,28 @@
     "misc": [
       {
         "parentPluginId": "@kbn/guided-onboarding",
+        "id": "def-common.GuideCardUseCase",
+        "type": "Type",
+        "tags": [],
+        "label": "GuideCardUseCase",
+        "description": [],
+        "signature": [
+          "\"search\" | \"kubernetes\" | \"siem\""
+        ],
+        "path": "packages/kbn-guided-onboarding/src/components/landing_page/guide_card.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/guided-onboarding",
         "id": "def-common.GuideId",
         "type": "Type",
         "tags": [],
         "label": "GuideId",
         "description": [],
         "signature": [
-          "\"search\" | \"security\" | \"observability\" | \"testGuide\""
+          "\"search\" | \"kubernetes\" | \"siem\" | \"testGuide\""
         ],
         "path": "packages/kbn-guided-onboarding/src/types.ts",
         "deprecated": false,
@@ -379,24 +394,9 @@
           "\nAllowed states for each step in a guide:\n inactive: Step has not started\n active: Step is ready to start (i.e., the guide has been started)\n in_progress: Step has been started and is in progress\n ready_to_complete: Step can be manually completed\n complete: Step has been completed"
         ],
         "signature": [
-          "\"complete\" | \"active\" | \"inactive\" | \"in_progress\" | \"ready_to_complete\""
+          "\"complete\" | \"in_progress\" | \"inactive\" | \"active\" | \"ready_to_complete\""
         ],
         "path": "packages/kbn-guided-onboarding/src/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/guided-onboarding",
-        "id": "def-common.UseCase",
-        "type": "Type",
-        "tags": [],
-        "label": "UseCase",
-        "description": [],
-        "signature": [
-          "\"search\" | \"security\" | \"observability\""
-        ],
-        "path": "packages/kbn-guided-onboarding/src/components/landing_page/use_case_card.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -163,6 +163,14 @@ export const getMockMlJobSummaryResponse = () => [
   },
 ];
 
+export const getMockMlForceStartDatafeedsResponse = () => ({
+  linux_anomalous_network_activity_ecs: { started: true },
+});
+
+export const getMockMlStopDatafeedsResponse = () => ({
+  linux_anomalous_network_activity_ecs: { stopped: true },
+});
+
 export const getMockMlJobDetailsResponse = () => ({
   count: 20,
   jobs: [

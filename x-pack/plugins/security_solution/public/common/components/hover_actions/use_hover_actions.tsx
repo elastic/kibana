@@ -7,13 +7,13 @@
 
 import React, { useCallback, useMemo, useState, useRef, useContext } from 'react';
 import type { DraggableProvided, DraggableStateSnapshot } from 'react-beautiful-dnd';
-import { TableContext } from '@kbn/timelines-plugin/public';
 import { TimelineContext } from '../../../timelines/components/timeline';
 import { HoverActions } from '.';
 
 import type { DataProvider } from '../../../../common/types';
 import { ProviderContentWrapper } from '../drag_and_drop/draggable_wrapper';
 import { getDraggableId } from '../drag_and_drop/helpers';
+import { TableContext } from '../events_viewer/shared';
 import { useTopNPopOver } from './utils';
 
 const draggableContainsLinks = (draggableElement: HTMLDivElement | null) => {
@@ -80,6 +80,20 @@ export const useHoverActions = ({
 
   const { closeTopN, toggleTopN, isShowingTopN } = useTopNPopOver(handleClosePopOverTrigger);
 
+  const values = useMemo(() => {
+    const val = dataProvider.queryMatch.value;
+
+    if (typeof val === 'number') {
+      return val.toString();
+    }
+
+    if (Array.isArray(val)) {
+      return val.map((item) => String(item));
+    }
+
+    return val;
+  }, [dataProvider.queryMatch.value]);
+
   const hoverContent = useMemo(() => {
     // display links as additional content in the hover menu to enable keyboard
     // navigation of links (when the draggable contains them):
@@ -110,11 +124,7 @@ export const useHoverActions = ({
         showTopN={isShowingTopN}
         scopeId={id}
         toggleTopN={toggleTopN}
-        values={
-          typeof dataProvider.queryMatch.value !== 'number'
-            ? dataProvider.queryMatch.value
-            : `${dataProvider.queryMatch.value}`
-        }
+        values={values}
       />
     );
   }, [
@@ -131,6 +141,7 @@ export const useHoverActions = ({
     onFilterAdded,
     id,
     toggleTopN,
+    values,
   ]);
 
   const setContainerRef = useCallback((e: HTMLDivElement) => {

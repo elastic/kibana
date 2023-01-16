@@ -137,6 +137,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
         exclude: newInput.exclude,
         filters: newInput.filters,
         query: newInput.query,
+        sort: newInput.sort,
       })),
       distinctUntilChanged(diffDataFetchProps)
     );
@@ -284,7 +285,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
     const {
       componentState: { searchString },
-      explicitInput: { selectedOptions, runPastTimeout, existsSelected },
+      explicitInput: { selectedOptions, runPastTimeout, existsSelected, sort },
     } = getState();
     dispatch(setLoading(true));
     if (searchString.valid) {
@@ -296,7 +297,6 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
         timeRange: globalTimeRange,
         timeslice,
       } = this.getInput();
-
       if (this.abortController) this.abortController.abort();
       this.abortController = new AbortController();
       const timeRange =
@@ -310,6 +310,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       const { suggestions, invalidSelections, totalCardinality } =
         await this.optionsListService.runOptionsListRequest(
           {
+            sort,
             field,
             query,
             filters,
@@ -361,7 +362,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       batch(() => {
         dispatch(
           updateQueryResults({
-            availableOptions: [],
+            availableOptions: {},
           })
         );
         dispatch(setLoading(false));

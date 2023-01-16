@@ -75,12 +75,12 @@ export const TakeActionDropdown = React.memo(
     scopeId,
   }: TakeActionDropdownProps) => {
     const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
-    const { loading: canAccessEndpointManagementLoading, canAccessEndpointManagement } =
+    const { loading: endpointPrivilegesLoading, canWriteEventFilters } =
       useUserPrivileges().endpointPrivileges;
 
     const canCreateEndpointEventFilters = useMemo(
-      () => !canAccessEndpointManagementLoading && canAccessEndpointManagement,
-      [canAccessEndpointManagement, canAccessEndpointManagementLoading]
+      () => !endpointPrivilegesLoading && canWriteEventFilters,
+      [canWriteEventFilters, endpointPrivilegesLoading]
     );
     const { osquery } = useKibana().services;
 
@@ -168,7 +168,6 @@ export const TakeActionDropdown = React.memo(
 
     const { eventFilterActionItems } = useEventFilterAction({
       onAddEventFilterClick: handleOnAddEventFilterClick,
-      disabled: !isEndpointEvent || !canCreateEndpointEventFilters,
     });
 
     const onMenuItemClick = useCallback(() => {
@@ -210,12 +209,13 @@ export const TakeActionDropdown = React.memo(
       () =>
         !isEvent && actionsData.ruleId
           ? [...statusActionItems, ...exceptionActionItems]
-          : isEndpointEvent
+          : isEndpointEvent && canCreateEndpointEventFilters
           ? eventFilterActionItems
           : [],
       [
         eventFilterActionItems,
         isEndpointEvent,
+        canCreateEndpointEventFilters,
         exceptionActionItems,
         statusActionItems,
         isEvent,

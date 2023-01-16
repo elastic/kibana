@@ -7,9 +7,8 @@
  */
 import React from 'react';
 import { from } from 'rxjs';
-import { EuiBadgeGroup, EuiBadge } from '@elastic/eui';
 
-import { Services } from './services';
+import type { Services, TagListProps } from './services';
 
 /**
  * Parameters drawn from the Storybook arguments collection that customize a component story.
@@ -17,56 +16,42 @@ import { Services } from './services';
 export type Params = Record<keyof ReturnType<typeof getStoryArgTypes>, any>;
 type ActionFn = (name: string) => any;
 
-const tags = [
-  {
-    name: 'elastic',
-    color: '#8dc4de',
-    description: 'elastic tag',
-  },
-  {
-    name: 'cloud',
-    color: '#f5ed14',
-    description: 'cloud tag',
-  },
-];
-
-interface Props {
-  onClick?: (tag: { name: string }) => void;
-  tags?: typeof tags | null;
-}
-
-export const TagList = ({ onClick, tags: _tags = tags }: Props) => {
-  if (_tags === null) {
+export const TagList = ({ onClick, references, tagRender }: TagListProps) => {
+  if (references.length === 0) {
     return null;
   }
 
   return (
-    <EuiBadgeGroup>
-      {_tags.map((tag) => (
-        <EuiBadge
-          key={tag.name}
-          onClick={() => {
-            if (onClick) {
-              onClick(tag);
-            }
-          }}
-          onClickAriaLabel="tag button"
-          iconOnClick={() => undefined}
-          iconOnClickAriaLabel=""
-          color={tag.color}
-          title={tag.description}
-        >
-          {tag.name}
-        </EuiBadge>
-      ))}
-    </EuiBadgeGroup>
+    <div>
+      {references.map((ref) => {
+        const tag = { ...ref, color: 'blue', description: '' };
+
+        if (tagRender) {
+          return tagRender(tag);
+        }
+
+        return (
+          <button
+            key={tag.name}
+            onClick={() => {
+              if (onClick) {
+                onClick(tag);
+              }
+            }}
+            data-test-subj={`tag-${tag.id}`}
+          >
+            {tag.name}
+          </button>
+        );
+      })}
+    </div>
   );
 };
 
 export const getTagList =
-  ({ tags: _tags }: Props = {}) =>
-  ({ onClick }: Props) => {
-    return <TagList onClick={onClick} tags={_tags} />;
+  ({ references: _tags }: TagListProps = { references: [] }) =>
+  ({ onClick }: TagListProps) => {
+    return <TagList onClick={onClick} references={_tags} />;
   };
 
 /**
@@ -82,7 +67,9 @@ export const getStoryServices = (params: Params, action: ActionFn = () => {}) =>
     currentAppId$: from('mockedApp'),
     navigateToUrl: () => undefined,
     TagList,
+    getTagList: () => [],
     itemHasTags: () => true,
+    getTagManagementUrl: () => '',
     getTagIdsFromReferences: () => [],
     ...params,
   };
@@ -152,5 +139,9 @@ export const getStoryArgTypes = () => ({
       type: 'number',
     },
     defaultValue: 20,
+  },
+  asManagementSection: {
+    control: 'boolean',
+    defaultValue: false,
   },
 });

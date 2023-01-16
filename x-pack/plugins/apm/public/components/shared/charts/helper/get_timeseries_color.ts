@@ -7,7 +7,7 @@
 
 import { euiPaletteColorBlind } from '@elastic/eui';
 
-export const enum ChartType {
+export enum ChartType {
   LATENCY_AVG,
   LATENCY_P95,
   LATENCY_P99,
@@ -15,6 +15,7 @@ export const enum ChartType {
   FAILED_TRANSACTION_RATE,
   CPU_USAGE,
   MEMORY_USAGE,
+  ERROR_OCCURRENCES,
 }
 
 const palette = euiPaletteColorBlind({ rotations: 2 });
@@ -50,6 +51,10 @@ const timeSeriesColorMap: Record<
   [ChartType.MEMORY_USAGE]: {
     currentPeriodColor: palette[8],
     previousPeriodColor: palette[18],
+  },
+  [ChartType.ERROR_OCCURRENCES]: {
+    currentPeriodColor: palette[3],
+    previousPeriodColor: palette[13],
   },
 };
 

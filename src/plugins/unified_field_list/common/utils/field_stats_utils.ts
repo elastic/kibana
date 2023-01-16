@@ -55,6 +55,7 @@ export function buildSearchParams({
             [timeFieldName]: {
               gte: fromDate,
               lte: toDate,
+              format: 'strict_date_optional_time',
             },
           },
         },
@@ -193,9 +194,10 @@ export async function getNumberHistogram(
       ? minMaxResult.aggregations!.sample.top_values
       : {
           buckets: [] as Array<{ doc_count: number; key: string | number }>,
+          sum_other_doc_count: 0,
         };
 
-  const topValuesBuckets = {
+  const topValues = {
     buckets: terms.buckets.map((bucket) => ({
       count: bucket.doc_count,
       key: bucket.key,
@@ -211,9 +213,11 @@ export async function getNumberHistogram(
   if (histogramInterval === 0) {
     return {
       totalDocuments: getHitsTotal(minMaxResult),
-      sampledValues: minMaxResult.aggregations!.sample.sample_count.value!,
+      sampledValues:
+        sumSampledValues(topValues, terms.sum_other_doc_count) ||
+        minMaxResult.aggregations!.sample.sample_count.value!,
       sampledDocuments: minMaxResult.aggregations!.sample.doc_count,
-      topValues: topValuesBuckets,
+      topValues,
       histogram: useTopHits
         ? { buckets: [] }
         : {
@@ -244,14 +248,16 @@ export async function getNumberHistogram(
   return {
     totalDocuments: getHitsTotal(minMaxResult),
     sampledDocuments: minMaxResult.aggregations!.sample.doc_count,
-    sampledValues: minMaxResult.aggregations!.sample.sample_count.value!,
+    sampledValues:
+      sumSampledValues(topValues, terms.sum_other_doc_count) ||
+      minMaxResult.aggregations!.sample.sample_count.value!,
     histogram: {
       buckets: histogramResult.aggregations!.sample.histo.buckets.map((bucket) => ({
         count: bucket.doc_count,
         key: bucket.key,
       })),
     },
-    topValues: topValuesBuckets,
+    topValues,
   };
 }
 
@@ -284,16 +290,22 @@ export async function getStringSamples(
     { body: { aggs: typeof topValuesBody } }
   >;
 
+  const topValues = {
+    buckets: topValuesResult.aggregations!.sample.top_values.buckets.map((bucket) => ({
+      count: bucket.doc_count,
+      key: bucket.key,
+    })),
+  };
+
   return {
     totalDocuments: getHitsTotal(topValuesResult),
     sampledDocuments: topValuesResult.aggregations!.sample.doc_count,
-    sampledValues: topValuesResult.aggregations!.sample.sample_count.value!,
-    topValues: {
-      buckets: topValuesResult.aggregations!.sample.top_values.buckets.map((bucket) => ({
-        count: bucket.doc_count,
-        key: bucket.key,
-      })),
-    },
+    sampledValues:
+      sumSampledValues(
+        topValues,
+        topValuesResult.aggregations!.sample.top_values.sum_other_doc_count
+      ) || topValuesResult.aggregations!.sample.sample_count.value!,
+    topValues,
   };
 }
 
@@ -392,3 +404,14 @@ function getFieldRef(field: DataViewField) {
 const getHitsTotal = (body: estypes.SearchResponse): number => {
   return (body.hits.total as estypes.SearchTotalHits).value ?? body.hits.total ?? 0;
 };
+
+// We could use `aggregations.sample.sample_count.value` instead, but it does not always give a correct sum
+// See Github issue #144625
+export function sumSampledValues(
+  topValues: FieldStatsResponse<string | number>['topValues'],
+  sumOtherDocCount: number
+): number {
+  const valuesInTopBuckets =
+    topValues?.buckets?.reduce((prev, bucket) => bucket.count + prev, 0) || 0;
+  return valuesInTopBuckets + (sumOtherDocCount || 0);
+}

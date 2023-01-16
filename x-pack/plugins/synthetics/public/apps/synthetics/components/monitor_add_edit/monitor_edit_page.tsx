@@ -6,11 +6,13 @@
  */
 
 import React, { useEffect } from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { useTrackPageview, useFetcher } from '@kbn/observability-plugin/public';
+import { LoadingState } from '../monitors_page/overview/overview/monitor_detail_flyout';
+import { ConfigKey } from '../../../../../common/runtime_types';
 import { getServiceLocations } from '../../state';
+import { ServiceAllowedWrapper } from '../common/wrappers/service_allowed_wrapper';
 import { MonitorSteps } from './steps';
 import { MonitorForm } from './form';
 import { MonitorDetailsLinkPortal } from './monitor_details_portal';
@@ -18,7 +20,7 @@ import { useMonitorAddEditBreadcrumbs } from './use_breadcrumbs';
 import { getMonitorAPI } from '../../state/monitor_management/api';
 import { EDIT_MONITOR_STEPS } from './steps/step_config';
 
-export const MonitorEditPage: React.FC = () => {
+const MonitorEditPage: React.FC = () => {
   useTrackPageview({ app: 'synthetics', path: 'edit-monitor' });
   useTrackPageview({ app: 'synthetics', path: 'edit-monitor', delay: 15000 });
   const { monitorId } = useParams<{ monitorId: string }>();
@@ -36,9 +38,18 @@ export const MonitorEditPage: React.FC = () => {
   return data && !loading && !error ? (
     <MonitorForm defaultValues={data?.attributes}>
       <MonitorSteps stepMap={EDIT_MONITOR_STEPS} isEditFlow={true} />
-      <MonitorDetailsLinkPortal id={data?.id} name={data?.attributes.name} />
+      <MonitorDetailsLinkPortal
+        configId={data?.attributes[ConfigKey.CONFIG_ID]}
+        name={data?.attributes.name}
+      />
     </MonitorForm>
   ) : (
-    <EuiLoadingSpinner />
+    <LoadingState />
   );
 };
+
+export const MonitorEditPageWithServiceAllowed = React.memo(() => (
+  <ServiceAllowedWrapper>
+    <MonitorEditPage />
+  </ServiceAllowedWrapper>
+));

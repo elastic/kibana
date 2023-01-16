@@ -52,6 +52,7 @@ const standaloneSteps = [addIntegrationStep, installAgentStep, confirmDataStep];
 export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
   from,
   queryParamsPolicyId,
+  prerelease,
 }) => {
   const { params } = useRouteMatch<AddToPolicyParams>();
   const { pkgkey, policyId, integration } = params;
@@ -70,7 +71,7 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
     data: packageInfoData,
     error: packageInfoError,
     isLoading: isPackageInfoLoading,
-  } = useGetPackageInfoByKey(pkgName, pkgVersion, { prerelease: true, full: true });
+  } = useGetPackageInfoByKey(pkgName, pkgVersion, { prerelease, full: true });
 
   const {
     agentPolicy,
@@ -92,7 +93,8 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
     setOnSplash(false);
   };
 
-  const { fleetServerHosts, isLoadingInitialRequest } = useFleetServerHostsForPolicy(agentPolicy);
+  const { fleetServerHosts, fleetProxy, isLoadingInitialRequest } =
+    useFleetServerHostsForPolicy(agentPolicy);
 
   const cancelUrl = getHref('add_integration_to_policy', {
     pkgkey,
@@ -134,6 +136,7 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
   return (
     <MultiPageStepsLayout
       fleetServerHosts={fleetServerHosts}
+      fleetProxy={fleetProxy}
       agentPolicy={agentPolicy}
       enrollmentAPIKey={enrollmentAPIKey}
       currentStep={currentStep}

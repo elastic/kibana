@@ -6,91 +6,99 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-
 import React, { useCallback, useEffect } from 'react';
+
+import { i18n } from '@kbn/i18n';
 import { Query } from '@kbn/es-query';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { observabilityAlertFeatureIds } from '../../../config';
-import { ObservabilityAppServices } from '../../../application/types';
 import { AlertsStatusFilter } from './components';
-import { ALERT_STATUS_QUERY, DEFAULT_QUERIES } from './constants';
-import { AlertSearchBarProps } from './types';
+import { observabilityAlertFeatureIds } from '../../../config';
+import { ALERT_STATUS_QUERY, DEFAULT_QUERIES, DEFAULT_QUERY_STRING } from './constants';
+import { ObservabilityAlertSearchBarProps } from './types';
 import { buildEsQuery } from '../../../utils/build_es_query';
 import { AlertStatus } from '../../../../common/typings';
 
 const getAlertStatusQuery = (status: string): Query[] => {
-  return status ? [{ query: ALERT_STATUS_QUERY[status], language: 'kuery' }] : [];
+  return ALERT_STATUS_QUERY[status]
+    ? [{ query: ALERT_STATUS_QUERY[status], language: 'kuery' }]
+    : [];
 };
 
-export function AlertSearchBar({
+export function ObservabilityAlertSearchBar({
   appName,
-  rangeFrom,
-  setRangeFrom,
-  rangeTo,
-  setRangeTo,
+  defaultSearchQueries = DEFAULT_QUERIES,
+  onEsQueryChange,
+  onKueryChange,
+  onRangeFromChange,
+  onRangeToChange,
+  onStatusChange,
   kuery,
-  setKuery,
+  rangeFrom,
+  rangeTo,
+  services: { AlertsSearchBar, timeFilterService, useToasts },
   status,
-  setStatus,
-  setEsQuery,
-  queries = DEFAULT_QUERIES,
-}: AlertSearchBarProps) {
-  const {
-    data: {
-      query: {
-        timefilter: { timefilter: timeFilterService },
-      },
-    },
-    triggersActionsUi: { getAlertsSearchBar: AlertsSearchBar },
-  } = useKibana<ObservabilityAppServices>().services;
+}: ObservabilityAlertSearchBarProps) {
+  const toasts = useToasts();
 
-  const onStatusChange = useCallback(
+  const onAlertStatusChange = useCallback(
     (alertStatus: AlertStatus) => {
-      setEsQuery(
+      onEsQueryChange(
         buildEsQuery(
           {
             to: rangeTo,
             from: rangeFrom,
           },
           kuery,
-          [...getAlertStatusQuery(alertStatus), ...queries]
+          [...getAlertStatusQuery(alertStatus), ...defaultSearchQueries]
         )
       );
     },
-    [kuery, queries, rangeFrom, rangeTo, setEsQuery]
+    [kuery, defaultSearchQueries, rangeFrom, rangeTo, onEsQueryChange]
   );
 
   useEffect(() => {
-    onStatusChange(status);
-  }, [onStatusChange, status]);
+    onAlertStatusChange(status);
+  }, [onAlertStatusChange, status]);
 
-  const onSearchBarParamsChange = useCallback(
+  const onSearchBarParamsChange = useCallback<
+    (query: {
+      dateRange: { from: string; to: string; mode?: 'absolute' | 'relative' };
+      query: string;
+    }) => void
+  >(
     ({ dateRange, query }) => {
-      timeFilterService.setTime(dateRange);
-      setRangeFrom(dateRange.from);
-      setRangeTo(dateRange.to);
-      setKuery(query);
-      setEsQuery(
-        buildEsQuery(
+      try {
+        // First try to create es query to make sure query is valid, then save it in state
+        const esQuery = buildEsQuery(
           {
-            to: rangeTo,
-            from: rangeFrom,
+            to: dateRange.to,
+            from: dateRange.from,
           },
           query,
-          [...getAlertStatusQuery(status), ...queries]
-        )
-      );
+          [...getAlertStatusQuery(status), ...defaultSearchQueries]
+        );
+        onKueryChange(query);
+        timeFilterService.setTime(dateRange);
+        onRangeFromChange(dateRange.from);
+        onRangeToChange(dateRange.to);
+        onEsQueryChange(esQuery);
+      } catch (error) {
+        toasts.addError(error, {
+          title: i18n.translate('xpack.observability.alerts.searchBar.invalidQueryTitle', {
+            defaultMessage: 'Invalid query string',
+          }),
+        });
+        onKueryChange(DEFAULT_QUERY_STRING);
+      }
     },
     [
+      defaultSearchQueries,
       timeFilterService,
-      setRangeFrom,
-      setRangeTo,
-      setKuery,
-      setEsQuery,
-      rangeTo,
-      rangeFrom,
+      onRangeFromChange,
+      onRangeToChange,
+      onKueryChange,
+      onEsQueryChange,
       status,
-      queries,
+      toasts,
     ]
   );
 
@@ -110,15 +118,13 @@ export function AlertSearchBar({
       <EuiFlexItem>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
-            <AlertsStatusFilter
-              status={status}
-              onChange={(id) => {
-                setStatus(id as AlertStatus);
-              }}
-            />
+            <AlertsStatusFilter status={status} onChange={onStatusChange} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 }
+
+// eslint-disable-next-line import/no-default-export
+export default ObservabilityAlertSearchBar;

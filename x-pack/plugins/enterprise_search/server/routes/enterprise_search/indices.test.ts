@@ -289,6 +289,7 @@ describe('Enterprise Search Managed Indices', () => {
         mockRequestBody.model_id,
         mockRequestBody.source_field,
         mockRequestBody.destination_field,
+        undefined,
         mockClient.asCurrentUser
       );
 

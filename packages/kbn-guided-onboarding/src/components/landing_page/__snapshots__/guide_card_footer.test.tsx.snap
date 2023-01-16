@@ -4,6 +4,19 @@ exports[`guide card footer snapshots should render the footer when the guide has
 <Fragment>
   <EuiProgress
     label="Completed"
+    labelProps={
+      Object {
+        "css": Object {
+          "map": undefined,
+          "name": "x46p4t",
+          "next": undefined,
+          "styles": "
+  text-align: 'left';
+",
+          "toString": [Function],
+        },
+      }
+    }
     max={2}
     size="s"
     value={1}
@@ -12,36 +25,46 @@ exports[`guide card footer snapshots should render the footer when the guide has
   <EuiSpacer
     size="l"
   />
-  <div
-    className="eui-textCenter"
+  <EuiFlexGroup
+    justifyContent="center"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiButton
+        color="primary"
+        data-test-subj="onboarding--guideCard--view--search"
+        fill={true}
+        isLoading={false}
+        onClick={[Function]}
+        size="m"
+      >
+        View guide
+      </EuiButton>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</Fragment>
+`;
+
+exports[`guide card footer snapshots should render the footer when the guide has not started yet 1`] = `
+<EuiFlexGroup
+  justifyContent="center"
+>
+  <EuiFlexItem
+    grow={false}
   >
     <EuiButton
       color="primary"
       data-test-subj="onboarding--guideCard--view--search"
       fill={true}
+      isLoading={false}
       onClick={[Function]}
       size="m"
     >
       View guide
     </EuiButton>
-  </div>
-</Fragment>
-`;
-
-exports[`guide card footer snapshots should render the footer when the guide has not started yet 1`] = `
-<div
-  className="eui-textCenter"
->
-  <EuiButton
-    color="primary"
-    data-test-subj="onboarding--guideCard--view--search"
-    fill={true}
-    onClick={[Function]}
-    size="m"
-  >
-    View guide
-  </EuiButton>
-</div>
+  </EuiFlexItem>
+</EuiFlexGroup>
 `;
 
 exports[`guide card footer snapshots should render the footer when the guide is in progress 1`] = `
@@ -69,19 +92,24 @@ exports[`guide card footer snapshots should render the footer when the guide is 
   <EuiSpacer
     size="l"
   />
-  <div
-    className="eui-textCenter"
+  <EuiFlexGroup
+    justifyContent="center"
   >
-    <EuiButton
-      color="primary"
-      data-test-subj="onboarding--guideCard--continue--search"
-      fill={true}
-      onClick={[Function]}
-      size="m"
+    <EuiFlexItem
+      grow={false}
     >
-      Continue
-    </EuiButton>
-  </div>
+      <EuiButton
+        color="primary"
+        data-test-subj="onboarding--guideCard--continue--search"
+        fill={true}
+        isLoading={false}
+        onClick={[Function]}
+        size="m"
+      >
+        Continue
+      </EuiButton>
+    </EuiFlexItem>
+  </EuiFlexGroup>
 </Fragment>
 `;
 
@@ -110,34 +138,44 @@ exports[`guide card footer snapshots should render the footer when the guide is 
   <EuiSpacer
     size="l"
   />
-  <div
-    className="eui-textCenter"
+  <EuiFlexGroup
+    justifyContent="center"
   >
-    <EuiButton
-      color="primary"
-      data-test-subj="onboarding--guideCard--continue--search"
-      fill={true}
-      onClick={[Function]}
-      size="m"
+    <EuiFlexItem
+      grow={false}
     >
-      Continue
-    </EuiButton>
-  </div>
+      <EuiButton
+        color="primary"
+        data-test-subj="onboarding--guideCard--continue--search"
+        fill={true}
+        isLoading={false}
+        onClick={[Function]}
+        size="m"
+      >
+        Continue
+      </EuiButton>
+    </EuiFlexItem>
+  </EuiFlexGroup>
 </Fragment>
 `;
 
 exports[`guide card footer snapshots should render the footer when the guided onboarding has not started yet 1`] = `
-<div
-  className="eui-textCenter"
+<EuiFlexGroup
+  justifyContent="center"
 >
-  <EuiButton
-    color="primary"
-    data-test-subj="onboarding--guideCard--view--search"
-    fill={true}
-    onClick={[Function]}
-    size="m"
+  <EuiFlexItem
+    grow={false}
   >
-    View guide
-  </EuiButton>
-</div>
+    <EuiButton
+      color="primary"
+      data-test-subj="onboarding--guideCard--view--search"
+      fill={true}
+      isLoading={false}
+      onClick={[Function]}
+      size="m"
+    >
+      View guide
+    </EuiButton>
+  </EuiFlexItem>
+</EuiFlexGroup>
 `;

@@ -64,7 +64,7 @@
             "label": "experimentalFeatures",
             "description": [],
             "signature": [
-              "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly disableIsolationUIPendingStatuses: boolean; readonly pendingActionResponsesWithAck: boolean; readonly policyListEnabled: boolean; readonly policyResponseInFleetEnabled: boolean; readonly chartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly responseActionsConsoleEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointRbacEnabled: boolean; readonly endpointRbacV1Enabled: boolean; readonly guidedOnboarding: boolean; readonly alertDetailsPageEnabled: boolean; }"
+              "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly disableIsolationUIPendingStatuses: boolean; readonly pendingActionResponsesWithAck: boolean; readonly policyListEnabled: boolean; readonly policyResponseInFleetEnabled: boolean; readonly chartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly responseActionsConsoleEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointRbacEnabled: boolean; readonly endpointRbacV1Enabled: boolean; readonly alertDetailsPageEnabled: boolean; readonly responseActionGetFileEnabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly riskyHostsEnabled: boolean; readonly riskyUsersEnabled: boolean; }"
             ],
             "path": "x-pack/plugins/security_solution/public/plugin.tsx",
             "deprecated": false,
@@ -859,13 +859,7 @@
               "The columns displayed in the data table"
             ],
             "signature": [
-              {
-                "pluginId": "timelines",
-                "scope": "common",
-                "docId": "kibTimelinesPluginApi",
-                "section": "def-common.ColumnHeaderOptions",
-                "text": "ColumnHeaderOptions"
-              },
+              "ColumnHeaderOptions",
               "[]"
             ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
@@ -880,13 +874,7 @@
             "label": "defaultColumns",
             "description": [],
             "signature": [
-              {
-                "pluginId": "timelines",
-                "scope": "common",
-                "docId": "kibTimelinesPluginApi",
-                "section": "def-common.ColumnHeaderOptions",
-                "text": "ColumnHeaderOptions"
-              },
+              "ColumnHeaderOptions",
               "[]"
             ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
@@ -1048,17 +1036,17 @@
             ],
             "signature": [
               "{ query?: ",
-              "TimelineExpandedDetailType",
+              "ExpandedDetailType",
               " | undefined; graph?: ",
-              "TimelineExpandedDetailType",
+              "ExpandedDetailType",
               " | undefined; notes?: ",
-              "TimelineExpandedDetailType",
+              "ExpandedDetailType",
               " | undefined; pinned?: ",
-              "TimelineExpandedDetailType",
+              "ExpandedDetailType",
               " | undefined; eql?: ",
-              "TimelineExpandedDetailType",
+              "ExpandedDetailType",
               " | undefined; session?: ",
-              "TimelineExpandedDetailType",
+              "ExpandedDetailType",
               " | undefined; }"
             ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
@@ -1249,6 +1237,17 @@
             "type": "boolean",
             "tags": [],
             "label": "isLoading",
+            "description": [],
+            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.TimelineModel.selectAll",
+            "type": "boolean",
+            "tags": [],
+            "label": "selectAll",
             "description": [],
             "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
             "deprecated": false,
@@ -1446,9 +1445,9 @@
           " implements ",
           {
             "pluginId": "@kbn/core-plugins-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCorePluginsServerPluginApi",
-            "section": "def-server.Plugin",
+            "section": "def-common.Plugin",
             "text": "Plugin"
           },
           "<",
@@ -1501,9 +1500,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-plugins-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCorePluginsServerPluginApi",
-                    "section": "def-server.PluginInitializerContext",
+                    "section": "def-common.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
                   "<unknown>"
@@ -1585,9 +1584,9 @@
               "(core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreLifecycleServerPluginApi",
-                "section": "def-server.CoreStart",
+                "section": "def-common.CoreStart",
                 "text": "CoreStart"
               },
               ", plugins: ",
@@ -1615,9 +1614,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreLifecycleServerPluginApi",
-                    "section": "def-server.CoreStart",
+                    "section": "def-common.CoreStart",
                     "text": "CoreStart"
                   }
                 ],
@@ -1687,9 +1686,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-server.CoreRequestHandlerContext",
+                "section": "def-common.CoreRequestHandlerContext",
                 "text": "CoreRequestHandlerContext"
               }
             ],
@@ -1699,17 +1698,23 @@
           },
           {
             "parentPluginId": "securitySolution",
-            "id": "def-server.SecuritySolutionApiRequestHandlerContext.endpointAuthz",
-            "type": "Object",
+            "id": "def-server.SecuritySolutionApiRequestHandlerContext.getEndpointAuthz",
+            "type": "Function",
             "tags": [],
-            "label": "endpointAuthz",
+            "label": "getEndpointAuthz",
             "description": [],
             "signature": [
-              "EndpointAuthz"
+              "() => Promise<",
+              "ImmutableObject",
+              "<",
+              "EndpointAuthz",
+              ">>"
             ],
             "path": "x-pack/plugins/security_solution/server/types.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "securitySolution",
@@ -1841,9 +1846,9 @@
               "(req: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
+                "section": "def-common.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>) => Promise<",
@@ -1870,9 +1875,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-server.KibanaRequest",
+                    "section": "def-common.KibanaRequest",
                     "text": "KibanaRequest"
                   },
                   "<unknown, unknown, unknown, any>"
@@ -1937,9 +1942,9 @@
               "(req: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
+                "section": "def-common.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>) => ",
@@ -1959,9 +1964,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-server.KibanaRequest",
+                    "section": "def-common.KibanaRequest",
                     "text": "KibanaRequest"
                   },
                   "<unknown, unknown, unknown, any>"
@@ -2002,7 +2007,9 @@
         "label": "ConfigType",
         "description": [],
         "signature": [
-          "Readonly<{} & { signalsIndex: string; maxRuleImportExportSize: number; maxRuleImportPayloadBytes: number; maxTimelineImportExportSize: number; maxTimelineImportPayloadBytes: number; alertMergeStrategy: \"allFields\" | \"missingFields\" | \"noFields\"; alertIgnoreFields: string[]; enableExperimental: string[]; packagerTaskInterval: string; prebuiltRulesFromFileSystem: boolean; prebuiltRulesFromSavedObjects: boolean; }> & { experimentalFeatures: Readonly<{ tGridEnabled: boolean; tGridEventRenderedViewEnabled: boolean; excludePoliciesInFilterEnabled: boolean; kubernetesEnabled: boolean; disableIsolationUIPendingStatuses: boolean; pendingActionResponsesWithAck: boolean; policyListEnabled: boolean; policyResponseInFleetEnabled: boolean; chartEmbeddablesEnabled: boolean; previewTelemetryUrlEnabled: boolean; responseActionsConsoleEnabled: boolean; insightsRelatedAlertsByProcessAncestry: boolean; extendedRuleExecutionLoggingEnabled: boolean; socTrendsEnabled: boolean; responseActionsEnabled: boolean; endpointRbacEnabled: boolean; endpointRbacV1Enabled: boolean; guidedOnboarding: boolean; alertDetailsPageEnabled: boolean; }>; }"
+          "Readonly<{} & { signalsIndex: string; maxRuleImportExportSize: number; maxRuleImportPayloadBytes: number; maxTimelineImportExportSize: number; maxTimelineImportPayloadBytes: number; alertMergeStrategy: \"allFields\" | \"missingFields\" | \"noFields\"; alertIgnoreFields: string[]; enableExperimental: string[]; packagerTaskInterval: string; }> & { experimentalFeatures: ",
+          "ExperimentalFeatures",
+          "; }"
         ],
         "path": "x-pack/plugins/security_solution/server/config.ts",
         "deprecated": false,

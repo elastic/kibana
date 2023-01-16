@@ -35,7 +35,7 @@
             "section": "def-common.UserContentCommonSchema",
             "text": "UserContentCommonSchema"
           },
-          ">({ tableListTitle, entityName, entityNamePlural, initialFilter: initialQuery, headingId, initialPageSize, listingLimit, customTableColumn, emptyPrompt, findItems, createItem, editItem, deleteItems, getDetailViewLink, onClickTitle, id, inspector, children, }: ",
+          ">({ tableListTitle, tableListDescription, entityName, entityNamePlural, initialFilter: initialQuery, headingId, initialPageSize, listingLimit, urlStateEnabled, customTableColumn, emptyPrompt, findItems, createItem, editItem, deleteItems, getDetailViewLink, onClickTitle, id: listingId, contentEditor, children, titleColumnName, additionalRightSideActions, withoutPageTemplateWrapper, }: ",
           "Props",
           "<T>) => JSX.Element | null"
         ],
@@ -187,7 +187,7 @@
                 "section": "def-common.MountPoint",
                 "text": "MountPoint"
               },
-              "<HTMLElement>; text?: string | undefined; }) => void; }; }; overlays: { openFlyout(mount: ",
+              "<HTMLElement>; text?: string | undefined; }) => void; }; }; http: { basePath: { prepend: (path: string) => string; }; }; overlays: { openFlyout(mount: ",
               {
                 "pluginId": "@kbn/core-mount-utils-browser",
                 "scope": "common",
@@ -301,11 +301,17 @@
             "signature": [
               "{ ui: { components: { TagList: React.FC<{ object: { references: ",
               "SavedObjectsReference",
-              "[]; }; onClick?: ((tag: { name: string; description: string; color: string; }) => void) | undefined; }>; SavedObjectSaveModalTagSelector: React.FC<{ initialSelection: string[]; onTagsSelected: (ids: string[]) => void; }>; }; parseSearchQuery: (query: string, options?: { useName?: boolean | undefined; tagField?: string | undefined; } | undefined) => { searchTerm: string; tagReferences: ",
+              "[]; }; onClick?: ((tag: ",
+              "Tag",
+              ") => void) | undefined; tagRender?: ((tag: ",
+              "Tag",
+              ") => JSX.Element) | undefined; }>; SavedObjectSaveModalTagSelector: React.FC<{ initialSelection: string[]; onTagsSelected: (ids: string[]) => void; }>; }; parseSearchQuery: (query: string, options?: { useName?: boolean | undefined; tagField?: string | undefined; } | undefined) => Promise<{ searchTerm: string; tagReferences: ",
               "SavedObjectsFindOptionsReference",
-              "[]; valid: boolean; }; getSearchBarFilter: (options?: { useName?: boolean | undefined; tagField?: string | undefined; } | undefined) => ",
-              "SearchFilterConfig",
-              "; getTagIdsFromReferences: (references: ",
+              "[]; tagReferencesToExclude: ",
+              "SavedObjectsFindOptionsReference",
+              "[]; valid: boolean; }>; getTagList: () => ",
+              "Tag",
+              "[]; getTagIdsFromReferences: (references: ",
               "SavedObjectsReference",
               "[]) => string[]; }; } | undefined"
             ],

@@ -75,7 +75,7 @@ export class DashboardPageObject extends FtrService {
   public async clickFullScreenMode() {
     this.log.debug(`clickFullScreenMode`);
     await this.testSubjects.click('dashboardFullScreenMode');
-    await this.testSubjects.exists('exitFullScreenModeLogo');
+    await this.testSubjects.exists('exitFullScreenModeButton');
     await this.waitForRenderComplete();
   }
 
@@ -99,17 +99,15 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async exitFullScreenLogoButtonExists() {
-    // TODO: Replace every instance of `exitFullScreenModeLogo` with `exitFullScreenModeButton` once the new Shared UX
-    // full screen button can be used (i.e. after https://github.com/elastic/kibana/issues/140311 is resolved)
-    return await this.testSubjects.exists('exitFullScreenModeLogo');
+    return await this.testSubjects.exists('exitFullScreenModeButton');
   }
 
   public async getExitFullScreenLogoButton() {
-    return await this.testSubjects.find('exitFullScreenModeLogo');
+    return await this.testSubjects.find('exitFullScreenModeButton');
   }
 
   public async clickExitFullScreenLogoButton() {
-    await this.testSubjects.click('exitFullScreenModeLogo');
+    await this.testSubjects.click('exitFullScreenModeButton');
     await this.waitForRenderComplete();
   }
 
@@ -324,6 +322,12 @@ export class DashboardPageObject extends FtrService {
     if (switchMode) {
       await this.clickCancelOutOfEditMode();
     }
+  }
+
+  public async expectUnsavedChangesBadge() {
+    await this.retry.try(async () => {
+      await this.testSubjects.existOrFail('dashboardUnsavedChangesBadge');
+    });
   }
 
   public async clickNewDashboard(continueEditing = false) {
@@ -790,5 +794,16 @@ export class DashboardPageObject extends FtrService {
 
   public async getPanelChartDebugState(panelIndex: number) {
     return await this.elasticChart.getChartDebugData(undefined, panelIndex);
+  }
+
+  public async isNotificationExists(panelIndex = 0) {
+    const panel = (await this.getDashboardPanels())[panelIndex];
+    try {
+      const notification = await panel.findByClassName('embPanel__optionsMenuPopover-notification');
+      return Boolean(notification);
+    } catch (e) {
+      // if not found then this is false
+      return false;
+    }
   }
 }

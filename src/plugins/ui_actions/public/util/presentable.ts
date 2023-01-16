@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { UiComponent } from '@kbn/kibana-utils-plugin/public';
+import type { FC } from 'react';
 
 /**
  * Represents something that can be displayed to user in UI.
@@ -24,10 +24,10 @@ export interface Presentable<Context = unknown> {
   readonly order: number;
 
   /**
-   * `UiComponent` to render when displaying this entity as a context menu item.
+   * Component to render when displaying this entity as a context menu item.
    * If not provided, `getDisplayName` will be used instead.
    */
-  readonly MenuItem?: UiComponent<{ context: Context }>;
+  readonly MenuItem?: FC<{ context: Context }>;
 
   /**
    * Optional EUI icon type that can be displayed along with the title.

@@ -14,7 +14,7 @@ import {
   farequoteKQLSearchTestData,
   farequoteLuceneSearchTestData,
   sampleLogTestData,
-} from './index_test_data';
+} from './index_test_data_random_sampler';
 
 export default function ({ getPageObject, getService }: FtrProviderContext) {
   const headerPage = getPageObject('header');
@@ -62,7 +62,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       }
 
       await ml.dataVisualizerTable.assertSearchPanelExist();
-      await ml.dataVisualizerTable.assertSampleSizeInputExists();
       await ml.dataVisualizerTable.assertFieldTypeInputExists();
       await ml.dataVisualizerTable.assertFieldNameInputExists();
 
@@ -110,18 +109,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
           fieldRow.viewableInLens,
           false,
           fieldRow.exampleContent
-        );
-      }
-
-      await ml.testExecution.logTestStep(
-        `${testData.suiteTitle} sample size control changes non-metric fields`
-      );
-      for (const sampleSizeCase of testData.sampleSizeValidations) {
-        const { size, expected } = sampleSizeCase;
-        await ml.dataVisualizerTable.setSampleSizeInputValue(
-          size,
-          expected.field,
-          expected.docCountFormatted
         );
       }
 

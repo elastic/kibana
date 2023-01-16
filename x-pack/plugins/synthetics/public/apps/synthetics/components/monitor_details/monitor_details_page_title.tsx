@@ -14,7 +14,7 @@ export const MonitorDetailsPageTitle = () => {
   const { monitor } = useSelectedMonitor();
 
   return (
-    <EuiFlexGroup gutterSize="m">
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}> {monitor?.name}</EuiFlexItem>
       <EuiFlexItem>
         <MonitorSelector />

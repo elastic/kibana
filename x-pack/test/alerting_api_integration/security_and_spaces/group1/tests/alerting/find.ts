@@ -19,7 +19,8 @@ const findTestUtils = (
   supertest: SuperTest<Test>,
   supertestWithoutAuth: any
 ) => {
-  describe(describeType, () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/148660
+  describe.skip(describeType, () => {
     afterEach(() => objectRemover.removeAll());
 
     for (const scenario of UserAtSpaceScenarios) {
@@ -68,6 +69,7 @@ const findTestUtils = (
                 name: 'abc',
                 tags: ['foo'],
                 rule_type_id: 'test.noop',
+                running: false,
                 consumer: 'alertsFixture',
                 schedule: { interval: '1m' },
                 enabled: true,
@@ -84,6 +86,8 @@ const findTestUtils = (
                 mute_all: false,
                 muted_alert_ids: [],
                 execution_status: match.execution_status,
+                ...(match.next_run ? { next_run: match.next_run } : {}),
+                ...(match.last_run ? { last_run: match.last_run } : {}),
                 ...(describeType === 'internal'
                   ? {
                       monitoring: match.monitoring,
@@ -269,6 +273,7 @@ const findTestUtils = (
                 name: 'abc',
                 tags: ['foo'],
                 rule_type_id: 'test.noop',
+                running: false,
                 consumer: 'alertsFixture',
                 schedule: { interval: '1m' },
                 enabled: false,
@@ -291,6 +296,8 @@ const findTestUtils = (
                 created_at: match.created_at,
                 updated_at: match.updated_at,
                 execution_status: match.execution_status,
+                ...(match.next_run ? { next_run: match.next_run } : {}),
+                ...(match.last_run ? { last_run: match.last_run } : {}),
                 ...(describeType === 'internal'
                   ? {
                       monitoring: match.monitoring,

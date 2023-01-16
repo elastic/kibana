@@ -138,6 +138,9 @@ describe('Error count alert', () => {
     expect(scheduleActions).toHaveBeenCalledTimes(3);
 
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
+      alertDetailsUrl: expect.stringContaining(
+        'http://localhost:5601/eyr/app/observability/alerts/'
+      ),
       serviceName: 'foo',
       environment: 'env-foo',
       threshold: 2,
@@ -148,6 +151,9 @@ describe('Error count alert', () => {
         'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo',
     });
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
+      alertDetailsUrl: expect.stringContaining(
+        'http://localhost:5601/eyr/app/observability/alerts/'
+      ),
       serviceName: 'foo',
       environment: 'env-foo-2',
       threshold: 2,
@@ -158,6 +164,9 @@ describe('Error count alert', () => {
         'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo-2',
     });
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
+      alertDetailsUrl: expect.stringContaining(
+        'http://localhost:5601/eyr/app/observability/alerts/'
+      ),
       serviceName: 'bar',
       environment: 'env-bar',
       reason: 'Error count is 3 in the last 5 mins for bar. Alert when > 2.',

@@ -30,6 +30,14 @@ export const POLICY_ARTIFACT_EMPTY_UNASSIGNED_LABELS = Object.freeze({
       defaultMessage: 'Manage artifacts',
     }
   ),
+  emptyUnassignedNoPrivilegesMessage: (policyName: string): string =>
+    i18n.translate(
+      'xpack.securitySolution.endpoint.policy.artifacts.empty.unassigned.noPrivileges.content',
+      {
+        defaultMessage: 'There are currently no artifacts assigned to {policyName}.',
+        values: { policyName },
+      }
+    ),
 });
 
 export const POLICY_ARTIFACT_EMPTY_UNEXISTING_LABELS = Object.freeze({

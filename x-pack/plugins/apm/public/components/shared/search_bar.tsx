@@ -13,6 +13,8 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import React from 'react';
+import { isMobileAgentName } from '../../../common/agent_name';
+import { useApmServiceContext } from '../../context/apm_service/use_apm_service_context';
 import { useBreakpoints } from '../../hooks/use_breakpoints';
 import { ApmDatePicker } from './date_picker/apm_date_picker';
 import { KueryBar } from './kuery_bar';
@@ -36,6 +38,9 @@ export function SearchBar({
   kueryBarBoolFilter,
   kueryBarPlaceholder,
 }: Props) {
+  const { agentName } = useApmServiceContext();
+  const isMobileAgent = isMobileAgentName(agentName);
+
   const { isSmall, isMedium, isLarge, isXl, isXXL, isXXXL } = useBreakpoints();
 
   if (hidden) {
@@ -92,7 +97,7 @@ export function SearchBar({
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="m" />
+      <EuiSpacer size={isMobileAgent ? 's' : 'm'} />
     </>
   );
 }

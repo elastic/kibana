@@ -6,18 +6,20 @@
  */
 import { RuleExecutionStatus } from '@kbn/alerting-plugin/common';
 import { AsApiContract, RewriteRequestCase } from '@kbn/actions-plugin/common';
-import { Rule, RuleAction, ResolvedRule } from '../../../types';
+import { Rule, RuleAction, ResolvedRule, RuleLastRun } from '../../../types';
 
 const transformAction: RewriteRequestCase<RuleAction> = ({
   group,
   id,
   connector_type_id: actionTypeId,
   params,
+  frequency,
 }) => ({
   group,
   id,
   params,
   actionTypeId,
+  frequency,
 });
 
 const transformExecutionStatus: RewriteRequestCase<RuleExecutionStatus> = ({
@@ -27,6 +29,16 @@ const transformExecutionStatus: RewriteRequestCase<RuleExecutionStatus> = ({
 }) => ({
   lastExecutionDate,
   lastDuration,
+  ...rest,
+});
+
+const transformLastRun: RewriteRequestCase<RuleLastRun> = ({
+  outcome_msg: outcomeMsg,
+  alerts_count: alertsCount,
+  ...rest
+}) => ({
+  outcomeMsg,
+  alertsCount,
   ...rest,
 });
 
@@ -46,6 +58,8 @@ export const transformRule: RewriteRequestCase<Rule> = ({
   snooze_schedule: snoozeSchedule,
   is_snoozed_until: isSnoozedUntil,
   active_snoozes: activeSnoozes,
+  last_run: lastRun,
+  next_run: nextRun,
   ...rest
 }: any) => ({
   ruleTypeId,
@@ -65,6 +79,8 @@ export const transformRule: RewriteRequestCase<Rule> = ({
   scheduledTaskId,
   isSnoozedUntil,
   activeSnoozes,
+  ...(lastRun ? { lastRun: transformLastRun(lastRun) } : {}),
+  ...(nextRun ? { nextRun } : {}),
   ...rest,
 });
 

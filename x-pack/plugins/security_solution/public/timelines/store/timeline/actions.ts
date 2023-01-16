@@ -8,6 +8,7 @@
 import actionCreatorFactory from 'typescript-fsa';
 import type { Filter } from '@kbn/es-query';
 
+import type { SessionViewConfig } from '../../../../common/types';
 import type {
   DataProvider,
   DataProviderType,
@@ -30,7 +31,6 @@ import type {
   SortColumnTimeline,
 } from '../../../../common/types/timeline';
 import type { ResolveTimelineConfig } from '../../components/open_timeline/types';
-import type { SessionViewConfig } from '../../components/timeline/session_tab_content/use_session_view';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/timeline');
 
@@ -114,7 +114,7 @@ export const dataProviderEdited = actionCreator<{
   id: string;
   operator: QueryOperator;
   providerId: string;
-  value: string | number;
+  value: string | number | Array<string | number>;
 }>('DATA_PROVIDER_EDITED');
 
 export const updateDataProviderType = actionCreator<{

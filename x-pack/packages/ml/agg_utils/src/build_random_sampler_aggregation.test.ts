@@ -19,6 +19,7 @@ describe('buildRandomSamplerAggregation', () => {
       sample: {
         random_sampler: {
           probability: 0.01,
+          seed: 3867412,
         },
         aggs: testAggs,
       },

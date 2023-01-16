@@ -105,7 +105,10 @@ export const useEsSearch = <DocumentSource extends unknown, TParams extends esty
 
   const { rawResponse } = response as any;
 
-  return { data: rawResponse as ESSearchResponse<DocumentSource, TParams>, loading };
+  return {
+    data: rawResponse as ESSearchResponse<DocumentSource, TParams>,
+    loading: Boolean(loading),
+  };
 };
 
 export function createEsParams<T extends estypes.SearchRequest>(params: T): T {

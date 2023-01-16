@@ -18,6 +18,7 @@ import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/se
 import type { ListsApiRequestHandlerContext, ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { IRuleDataService, AlertsClient } from '@kbn/rule-registry-plugin/server';
 
+import type { Immutable } from '../common/endpoint/types';
 import type { CreateQueryRuleAdditionalOptions } from './lib/detection_engine/rule_types/types';
 import { AppClient } from './client';
 import type { ConfigType } from './config';
@@ -33,7 +34,7 @@ export { AppClient };
 
 export interface SecuritySolutionApiRequestHandlerContext {
   core: CoreRequestHandlerContext;
-  endpointAuthz: EndpointAuthz;
+  getEndpointAuthz: () => Promise<Immutable<EndpointAuthz>>;
   getConfig: () => ConfigType;
   getFrameworkRequest: () => FrameworkRequest;
   getAppClient: () => AppClient;

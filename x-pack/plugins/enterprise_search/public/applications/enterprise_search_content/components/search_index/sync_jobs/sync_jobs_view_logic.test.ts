@@ -63,18 +63,23 @@ describe('SyncJobsViewLogic', () => {
         cancelation_requested_at: null,
         canceled_at: null,
         completed_at: '2022-09-05T15:59:39.816+00:00',
-        connector_id: 'we2284IBjobuR2-lAuXh',
+        connector: {
+          configuration: {},
+          filtering: null,
+          id: 'we2284IBjobuR2-lAuXh',
+          index_name: 'indexName',
+          language: 'something',
+          pipeline: null,
+          service_type: '',
+        },
         created_at: '2022-09-05T14:59:39.816+00:00',
         deleted_document_count: 20,
         error: null,
-        filtering: null,
         id: 'id',
-        index_name: 'indexName',
         indexed_document_count: 50,
         indexed_document_volume: 40,
         last_seen: '2022-09-05T15:59:39.816+00:00',
         metadata: {},
-        pipeline: null,
         started_at: '2022-09-05T14:59:39.816+00:00',
         status: SyncStatus.COMPLETED,
         trigger_method: TriggerMethod.ON_DEMAND,
@@ -183,11 +188,9 @@ describe('SyncJobsViewLogic', () => {
       expect(mockFlashMessageHelpers.clearFlashMessages).toHaveBeenCalledTimes(1);
     });
 
-    it('calls flashAPIErrors on apiError', async () => {
+    it('updates state on apiError', async () => {
       SyncJobsViewLogic.actions.fetchSyncJobsError({} as HttpError);
       await nextTick();
-      expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledTimes(1);
-      expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledWith({});
       expect(SyncJobsViewLogic.values).toEqual({
         ...DEFAULT_VALUES,
         syncJobsLoading: false,

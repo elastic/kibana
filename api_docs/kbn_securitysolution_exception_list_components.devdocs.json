@@ -311,6 +311,39 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-exception-list-components",
+        "id": "def-common.generateLinkedRulesMenuItems",
+        "type": "Function",
+        "tags": [],
+        "label": "generateLinkedRulesMenuItems",
+        "description": [],
+        "signature": [
+          "({ dataTestSubj, linkedRules, securityLinkAnchorComponent, leftIcon, }: MenuItemLinkedRulesProps) => React.ReactElement<any, string | React.JSXElementConstructor<any>>[] | null"
+        ],
+        "path": "packages/kbn-securitysolution-exception-list-components/src/generate_linked_rules_menu_item/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.generateLinkedRulesMenuItems.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  dataTestSubj,\n  linkedRules,\n  securityLinkAnchorComponent,\n  leftIcon = '',\n}",
+            "description": [],
+            "signature": [
+              "MenuItemLinkedRulesProps"
+            ],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/generate_linked_rules_menu_item/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-exception-list-components",
         "id": "def-common.HeaderMenu",
         "type": "Function",
         "tags": [],
@@ -546,6 +579,88 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-exception-list-components",
+        "id": "def-common.BackOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "BackOptions",
+        "description": [],
+        "path": "packages/kbn-securitysolution-exception-list-components/src/list_header/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.BackOptions.pageId",
+            "type": "string",
+            "tags": [],
+            "label": "pageId",
+            "description": [],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/list_header/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.BackOptions.path",
+            "type": "string",
+            "tags": [],
+            "label": "path",
+            "description": [],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/list_header/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.BackOptions.dataTestSubj",
+            "type": "string",
+            "tags": [],
+            "label": "dataTestSubj",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/list_header/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.BackOptions.onNavigate",
+            "type": "Function",
+            "tags": [],
+            "label": "onNavigate",
+            "description": [],
+            "signature": [
+              "(path: string) => void"
+            ],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/list_header/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/securitysolution-exception-list-components",
+                "id": "def-common.BackOptions.onNavigate.$1",
+                "type": "string",
+                "tags": [],
+                "label": "path",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-securitysolution-exception-list-components/src/list_header/index.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-exception-list-components",
         "id": "def-common.ExceptionItemCardCommentsProps",
         "type": "Interface",
         "tags": [],
@@ -719,7 +834,7 @@
             "label": "formattedDateComponent",
             "description": [],
             "signature": [
-              "\"symbol\" | \"object\" | React.ComponentType<any> | \"body\" | \"path\" | \"circle\" | \"filter\" | \"data\" | \"line\" | \"area\" | \"time\" | \"label\" | \"legend\" | \"image\" | \"link\" | \"menu\" | \"stop\" | \"base\" | \"text\" | \"title\" | \"s\" | \"small\" | \"source\" | \"input\" | \"svg\" | \"meta\" | \"script\" | \"summary\" | \"desc\" | \"q\" | \"pattern\" | \"mask\" | \"slot\" | \"style\" | \"head\" | \"section\" | \"big\" | \"sub\" | \"sup\" | \"animate\" | \"progress\" | \"view\" | \"output\" | \"var\" | \"map\" | \"html\" | \"a\" | \"img\" | \"audio\" | \"br\" | \"form\" | \"main\" | \"abbr\" | \"address\" | \"article\" | \"aside\" | \"b\" | \"bdi\" | \"bdo\" | \"blockquote\" | \"button\" | \"canvas\" | \"caption\" | \"cite\" | \"code\" | \"col\" | \"colgroup\" | \"datalist\" | \"dd\" | \"del\" | \"details\" | \"dfn\" | \"dialog\" | \"div\" | \"dl\" | \"dt\" | \"em\" | \"embed\" | \"fieldset\" | \"figcaption\" | \"figure\" | \"footer\" | \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"header\" | \"hgroup\" | \"hr\" | \"i\" | \"iframe\" | \"ins\" | \"kbd\" | \"keygen\" | \"li\" | \"mark\" | \"menuitem\" | \"meter\" | \"nav\" | \"noindex\" | \"noscript\" | \"ol\" | \"optgroup\" | \"option\" | \"p\" | \"param\" | \"picture\" | \"pre\" | \"rp\" | \"rt\" | \"ruby\" | \"samp\" | \"select\" | \"span\" | \"strong\" | \"table\" | \"template\" | \"tbody\" | \"td\" | \"textarea\" | \"tfoot\" | \"th\" | \"thead\" | \"tr\" | \"track\" | \"u\" | \"ul\" | \"video\" | \"wbr\" | \"webview\" | \"animateMotion\" | \"animateTransform\" | \"clipPath\" | \"defs\" | \"ellipse\" | \"feBlend\" | \"feColorMatrix\" | \"feComponentTransfer\" | \"feComposite\" | \"feConvolveMatrix\" | \"feDiffuseLighting\" | \"feDisplacementMap\" | \"feDistantLight\" | \"feDropShadow\" | \"feFlood\" | \"feFuncA\" | \"feFuncB\" | \"feFuncG\" | \"feFuncR\" | \"feGaussianBlur\" | \"feImage\" | \"feMerge\" | \"feMergeNode\" | \"feMorphology\" | \"feOffset\" | \"fePointLight\" | \"feSpecularLighting\" | \"feSpotLight\" | \"feTile\" | \"feTurbulence\" | \"foreignObject\" | \"g\" | \"linearGradient\" | \"marker\" | \"metadata\" | \"mpath\" | \"polygon\" | \"polyline\" | \"radialGradient\" | \"rect\" | \"switch\" | \"textPath\" | \"tspan\" | \"use\""
+              "\"symbol\" | \"object\" | React.ComponentType<any> | \"body\" | \"path\" | \"circle\" | \"filter\" | \"data\" | \"line\" | \"area\" | \"time\" | \"label\" | \"legend\" | \"article\" | \"image\" | \"link\" | \"menu\" | \"stop\" | \"base\" | \"text\" | \"title\" | \"s\" | \"small\" | \"source\" | \"output\" | \"svg\" | \"meta\" | \"script\" | \"summary\" | \"desc\" | \"q\" | \"pattern\" | \"mask\" | \"input\" | \"slot\" | \"style\" | \"head\" | \"section\" | \"animate\" | \"progress\" | \"view\" | \"big\" | \"sub\" | \"sup\" | \"var\" | \"map\" | \"html\" | \"a\" | \"img\" | \"audio\" | \"br\" | \"form\" | \"main\" | \"abbr\" | \"address\" | \"aside\" | \"b\" | \"bdi\" | \"bdo\" | \"blockquote\" | \"button\" | \"canvas\" | \"caption\" | \"cite\" | \"code\" | \"col\" | \"colgroup\" | \"datalist\" | \"dd\" | \"del\" | \"details\" | \"dfn\" | \"dialog\" | \"div\" | \"dl\" | \"dt\" | \"em\" | \"embed\" | \"fieldset\" | \"figcaption\" | \"figure\" | \"footer\" | \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"header\" | \"hgroup\" | \"hr\" | \"i\" | \"iframe\" | \"ins\" | \"kbd\" | \"keygen\" | \"li\" | \"mark\" | \"menuitem\" | \"meter\" | \"nav\" | \"noindex\" | \"noscript\" | \"ol\" | \"optgroup\" | \"option\" | \"p\" | \"param\" | \"picture\" | \"pre\" | \"rp\" | \"rt\" | \"ruby\" | \"samp\" | \"select\" | \"span\" | \"strong\" | \"table\" | \"template\" | \"tbody\" | \"td\" | \"textarea\" | \"tfoot\" | \"th\" | \"thead\" | \"tr\" | \"track\" | \"u\" | \"ul\" | \"video\" | \"wbr\" | \"webview\" | \"animateMotion\" | \"animateTransform\" | \"clipPath\" | \"defs\" | \"ellipse\" | \"feBlend\" | \"feColorMatrix\" | \"feComponentTransfer\" | \"feComposite\" | \"feConvolveMatrix\" | \"feDiffuseLighting\" | \"feDisplacementMap\" | \"feDistantLight\" | \"feDropShadow\" | \"feFlood\" | \"feFuncA\" | \"feFuncB\" | \"feFuncG\" | \"feFuncR\" | \"feGaussianBlur\" | \"feImage\" | \"feMerge\" | \"feMergeNode\" | \"feMorphology\" | \"feOffset\" | \"fePointLight\" | \"feSpecularLighting\" | \"feSpotLight\" | \"feTile\" | \"feTurbulence\" | \"foreignObject\" | \"g\" | \"linearGradient\" | \"marker\" | \"metadata\" | \"mpath\" | \"polygon\" | \"polyline\" | \"radialGradient\" | \"rect\" | \"switch\" | \"textPath\" | \"tspan\" | \"use\""
             ],
             "path": "packages/kbn-securitysolution-exception-list-components/src/exception_item_card/meta/index.tsx",
             "deprecated": false,
@@ -733,7 +848,7 @@
             "label": "securityLinkAnchorComponent",
             "description": [],
             "signature": [
-              "\"symbol\" | \"object\" | React.ComponentType<any> | \"body\" | \"path\" | \"circle\" | \"filter\" | \"data\" | \"line\" | \"area\" | \"time\" | \"label\" | \"legend\" | \"image\" | \"link\" | \"menu\" | \"stop\" | \"base\" | \"text\" | \"title\" | \"s\" | \"small\" | \"source\" | \"input\" | \"svg\" | \"meta\" | \"script\" | \"summary\" | \"desc\" | \"q\" | \"pattern\" | \"mask\" | \"slot\" | \"style\" | \"head\" | \"section\" | \"big\" | \"sub\" | \"sup\" | \"animate\" | \"progress\" | \"view\" | \"output\" | \"var\" | \"map\" | \"html\" | \"a\" | \"img\" | \"audio\" | \"br\" | \"form\" | \"main\" | \"abbr\" | \"address\" | \"article\" | \"aside\" | \"b\" | \"bdi\" | \"bdo\" | \"blockquote\" | \"button\" | \"canvas\" | \"caption\" | \"cite\" | \"code\" | \"col\" | \"colgroup\" | \"datalist\" | \"dd\" | \"del\" | \"details\" | \"dfn\" | \"dialog\" | \"div\" | \"dl\" | \"dt\" | \"em\" | \"embed\" | \"fieldset\" | \"figcaption\" | \"figure\" | \"footer\" | \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"header\" | \"hgroup\" | \"hr\" | \"i\" | \"iframe\" | \"ins\" | \"kbd\" | \"keygen\" | \"li\" | \"mark\" | \"menuitem\" | \"meter\" | \"nav\" | \"noindex\" | \"noscript\" | \"ol\" | \"optgroup\" | \"option\" | \"p\" | \"param\" | \"picture\" | \"pre\" | \"rp\" | \"rt\" | \"ruby\" | \"samp\" | \"select\" | \"span\" | \"strong\" | \"table\" | \"template\" | \"tbody\" | \"td\" | \"textarea\" | \"tfoot\" | \"th\" | \"thead\" | \"tr\" | \"track\" | \"u\" | \"ul\" | \"video\" | \"wbr\" | \"webview\" | \"animateMotion\" | \"animateTransform\" | \"clipPath\" | \"defs\" | \"ellipse\" | \"feBlend\" | \"feColorMatrix\" | \"feComponentTransfer\" | \"feComposite\" | \"feConvolveMatrix\" | \"feDiffuseLighting\" | \"feDisplacementMap\" | \"feDistantLight\" | \"feDropShadow\" | \"feFlood\" | \"feFuncA\" | \"feFuncB\" | \"feFuncG\" | \"feFuncR\" | \"feGaussianBlur\" | \"feImage\" | \"feMerge\" | \"feMergeNode\" | \"feMorphology\" | \"feOffset\" | \"fePointLight\" | \"feSpecularLighting\" | \"feSpotLight\" | \"feTile\" | \"feTurbulence\" | \"foreignObject\" | \"g\" | \"linearGradient\" | \"marker\" | \"metadata\" | \"mpath\" | \"polygon\" | \"polyline\" | \"radialGradient\" | \"rect\" | \"switch\" | \"textPath\" | \"tspan\" | \"use\""
+              "\"symbol\" | \"object\" | React.ComponentType<any> | \"body\" | \"path\" | \"circle\" | \"filter\" | \"data\" | \"line\" | \"area\" | \"time\" | \"label\" | \"legend\" | \"article\" | \"image\" | \"link\" | \"menu\" | \"stop\" | \"base\" | \"text\" | \"title\" | \"s\" | \"small\" | \"source\" | \"output\" | \"svg\" | \"meta\" | \"script\" | \"summary\" | \"desc\" | \"q\" | \"pattern\" | \"mask\" | \"input\" | \"slot\" | \"style\" | \"head\" | \"section\" | \"animate\" | \"progress\" | \"view\" | \"big\" | \"sub\" | \"sup\" | \"var\" | \"map\" | \"html\" | \"a\" | \"img\" | \"audio\" | \"br\" | \"form\" | \"main\" | \"abbr\" | \"address\" | \"aside\" | \"b\" | \"bdi\" | \"bdo\" | \"blockquote\" | \"button\" | \"canvas\" | \"caption\" | \"cite\" | \"code\" | \"col\" | \"colgroup\" | \"datalist\" | \"dd\" | \"del\" | \"details\" | \"dfn\" | \"dialog\" | \"div\" | \"dl\" | \"dt\" | \"em\" | \"embed\" | \"fieldset\" | \"figcaption\" | \"figure\" | \"footer\" | \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"header\" | \"hgroup\" | \"hr\" | \"i\" | \"iframe\" | \"ins\" | \"kbd\" | \"keygen\" | \"li\" | \"mark\" | \"menuitem\" | \"meter\" | \"nav\" | \"noindex\" | \"noscript\" | \"ol\" | \"optgroup\" | \"option\" | \"p\" | \"param\" | \"picture\" | \"pre\" | \"rp\" | \"rt\" | \"ruby\" | \"samp\" | \"select\" | \"span\" | \"strong\" | \"table\" | \"template\" | \"tbody\" | \"td\" | \"textarea\" | \"tfoot\" | \"th\" | \"thead\" | \"tr\" | \"track\" | \"u\" | \"ul\" | \"video\" | \"wbr\" | \"webview\" | \"animateMotion\" | \"animateTransform\" | \"clipPath\" | \"defs\" | \"ellipse\" | \"feBlend\" | \"feColorMatrix\" | \"feComponentTransfer\" | \"feComposite\" | \"feConvolveMatrix\" | \"feDiffuseLighting\" | \"feDisplacementMap\" | \"feDistantLight\" | \"feDropShadow\" | \"feFlood\" | \"feFuncA\" | \"feFuncB\" | \"feFuncG\" | \"feFuncR\" | \"feGaussianBlur\" | \"feImage\" | \"feMerge\" | \"feMergeNode\" | \"feMorphology\" | \"feOffset\" | \"fePointLight\" | \"feSpecularLighting\" | \"feSpotLight\" | \"feTile\" | \"feTurbulence\" | \"foreignObject\" | \"g\" | \"linearGradient\" | \"marker\" | \"metadata\" | \"mpath\" | \"polygon\" | \"polyline\" | \"radialGradient\" | \"rect\" | \"switch\" | \"textPath\" | \"tspan\" | \"use\""
             ],
             "path": "packages/kbn-securitysolution-exception-list-components/src/exception_item_card/meta/index.tsx",
             "deprecated": false,
@@ -872,7 +987,7 @@
             "label": "securityLinkAnchorComponent",
             "description": [],
             "signature": [
-              "\"symbol\" | \"object\" | React.ComponentType<any> | \"body\" | \"path\" | \"circle\" | \"filter\" | \"data\" | \"line\" | \"area\" | \"time\" | \"label\" | \"legend\" | \"image\" | \"link\" | \"menu\" | \"stop\" | \"base\" | \"text\" | \"title\" | \"s\" | \"small\" | \"source\" | \"input\" | \"svg\" | \"meta\" | \"script\" | \"summary\" | \"desc\" | \"q\" | \"pattern\" | \"mask\" | \"slot\" | \"style\" | \"head\" | \"section\" | \"big\" | \"sub\" | \"sup\" | \"animate\" | \"progress\" | \"view\" | \"output\" | \"var\" | \"map\" | \"html\" | \"a\" | \"img\" | \"audio\" | \"br\" | \"form\" | \"main\" | \"abbr\" | \"address\" | \"article\" | \"aside\" | \"b\" | \"bdi\" | \"bdo\" | \"blockquote\" | \"button\" | \"canvas\" | \"caption\" | \"cite\" | \"code\" | \"col\" | \"colgroup\" | \"datalist\" | \"dd\" | \"del\" | \"details\" | \"dfn\" | \"dialog\" | \"div\" | \"dl\" | \"dt\" | \"em\" | \"embed\" | \"fieldset\" | \"figcaption\" | \"figure\" | \"footer\" | \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"header\" | \"hgroup\" | \"hr\" | \"i\" | \"iframe\" | \"ins\" | \"kbd\" | \"keygen\" | \"li\" | \"mark\" | \"menuitem\" | \"meter\" | \"nav\" | \"noindex\" | \"noscript\" | \"ol\" | \"optgroup\" | \"option\" | \"p\" | \"param\" | \"picture\" | \"pre\" | \"rp\" | \"rt\" | \"ruby\" | \"samp\" | \"select\" | \"span\" | \"strong\" | \"table\" | \"template\" | \"tbody\" | \"td\" | \"textarea\" | \"tfoot\" | \"th\" | \"thead\" | \"tr\" | \"track\" | \"u\" | \"ul\" | \"video\" | \"wbr\" | \"webview\" | \"animateMotion\" | \"animateTransform\" | \"clipPath\" | \"defs\" | \"ellipse\" | \"feBlend\" | \"feColorMatrix\" | \"feComponentTransfer\" | \"feComposite\" | \"feConvolveMatrix\" | \"feDiffuseLighting\" | \"feDisplacementMap\" | \"feDistantLight\" | \"feDropShadow\" | \"feFlood\" | \"feFuncA\" | \"feFuncB\" | \"feFuncG\" | \"feFuncR\" | \"feGaussianBlur\" | \"feImage\" | \"feMerge\" | \"feMergeNode\" | \"feMorphology\" | \"feOffset\" | \"fePointLight\" | \"feSpecularLighting\" | \"feSpotLight\" | \"feTile\" | \"feTurbulence\" | \"foreignObject\" | \"g\" | \"linearGradient\" | \"marker\" | \"metadata\" | \"mpath\" | \"polygon\" | \"polyline\" | \"radialGradient\" | \"rect\" | \"switch\" | \"textPath\" | \"tspan\" | \"use\""
+              "\"symbol\" | \"object\" | React.ComponentType<any> | \"body\" | \"path\" | \"circle\" | \"filter\" | \"data\" | \"line\" | \"area\" | \"time\" | \"label\" | \"legend\" | \"article\" | \"image\" | \"link\" | \"menu\" | \"stop\" | \"base\" | \"text\" | \"title\" | \"s\" | \"small\" | \"source\" | \"output\" | \"svg\" | \"meta\" | \"script\" | \"summary\" | \"desc\" | \"q\" | \"pattern\" | \"mask\" | \"input\" | \"slot\" | \"style\" | \"head\" | \"section\" | \"animate\" | \"progress\" | \"view\" | \"big\" | \"sub\" | \"sup\" | \"var\" | \"map\" | \"html\" | \"a\" | \"img\" | \"audio\" | \"br\" | \"form\" | \"main\" | \"abbr\" | \"address\" | \"aside\" | \"b\" | \"bdi\" | \"bdo\" | \"blockquote\" | \"button\" | \"canvas\" | \"caption\" | \"cite\" | \"code\" | \"col\" | \"colgroup\" | \"datalist\" | \"dd\" | \"del\" | \"details\" | \"dfn\" | \"dialog\" | \"div\" | \"dl\" | \"dt\" | \"em\" | \"embed\" | \"fieldset\" | \"figcaption\" | \"figure\" | \"footer\" | \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"header\" | \"hgroup\" | \"hr\" | \"i\" | \"iframe\" | \"ins\" | \"kbd\" | \"keygen\" | \"li\" | \"mark\" | \"menuitem\" | \"meter\" | \"nav\" | \"noindex\" | \"noscript\" | \"ol\" | \"optgroup\" | \"option\" | \"p\" | \"param\" | \"picture\" | \"pre\" | \"rp\" | \"rt\" | \"ruby\" | \"samp\" | \"select\" | \"span\" | \"strong\" | \"table\" | \"template\" | \"tbody\" | \"td\" | \"textarea\" | \"tfoot\" | \"th\" | \"thead\" | \"tr\" | \"track\" | \"u\" | \"ul\" | \"video\" | \"wbr\" | \"webview\" | \"animateMotion\" | \"animateTransform\" | \"clipPath\" | \"defs\" | \"ellipse\" | \"feBlend\" | \"feColorMatrix\" | \"feComponentTransfer\" | \"feComposite\" | \"feConvolveMatrix\" | \"feDiffuseLighting\" | \"feDisplacementMap\" | \"feDistantLight\" | \"feDropShadow\" | \"feFlood\" | \"feFuncA\" | \"feFuncB\" | \"feFuncG\" | \"feFuncR\" | \"feGaussianBlur\" | \"feImage\" | \"feMerge\" | \"feMergeNode\" | \"feMorphology\" | \"feOffset\" | \"fePointLight\" | \"feSpecularLighting\" | \"feSpotLight\" | \"feTile\" | \"feTurbulence\" | \"foreignObject\" | \"g\" | \"linearGradient\" | \"marker\" | \"metadata\" | \"mpath\" | \"polygon\" | \"polyline\" | \"radialGradient\" | \"rect\" | \"switch\" | \"textPath\" | \"tspan\" | \"use\""
             ],
             "path": "packages/kbn-securitysolution-exception-list-components/src/exception_item_card/exception_item_card.tsx",
             "deprecated": false,
@@ -886,7 +1001,7 @@
             "label": "formattedDateComponent",
             "description": [],
             "signature": [
-              "\"symbol\" | \"object\" | React.ComponentType<any> | \"body\" | \"path\" | \"circle\" | \"filter\" | \"data\" | \"line\" | \"area\" | \"time\" | \"label\" | \"legend\" | \"image\" | \"link\" | \"menu\" | \"stop\" | \"base\" | \"text\" | \"title\" | \"s\" | \"small\" | \"source\" | \"input\" | \"svg\" | \"meta\" | \"script\" | \"summary\" | \"desc\" | \"q\" | \"pattern\" | \"mask\" | \"slot\" | \"style\" | \"head\" | \"section\" | \"big\" | \"sub\" | \"sup\" | \"animate\" | \"progress\" | \"view\" | \"output\" | \"var\" | \"map\" | \"html\" | \"a\" | \"img\" | \"audio\" | \"br\" | \"form\" | \"main\" | \"abbr\" | \"address\" | \"article\" | \"aside\" | \"b\" | \"bdi\" | \"bdo\" | \"blockquote\" | \"button\" | \"canvas\" | \"caption\" | \"cite\" | \"code\" | \"col\" | \"colgroup\" | \"datalist\" | \"dd\" | \"del\" | \"details\" | \"dfn\" | \"dialog\" | \"div\" | \"dl\" | \"dt\" | \"em\" | \"embed\" | \"fieldset\" | \"figcaption\" | \"figure\" | \"footer\" | \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"header\" | \"hgroup\" | \"hr\" | \"i\" | \"iframe\" | \"ins\" | \"kbd\" | \"keygen\" | \"li\" | \"mark\" | \"menuitem\" | \"meter\" | \"nav\" | \"noindex\" | \"noscript\" | \"ol\" | \"optgroup\" | \"option\" | \"p\" | \"param\" | \"picture\" | \"pre\" | \"rp\" | \"rt\" | \"ruby\" | \"samp\" | \"select\" | \"span\" | \"strong\" | \"table\" | \"template\" | \"tbody\" | \"td\" | \"textarea\" | \"tfoot\" | \"th\" | \"thead\" | \"tr\" | \"track\" | \"u\" | \"ul\" | \"video\" | \"wbr\" | \"webview\" | \"animateMotion\" | \"animateTransform\" | \"clipPath\" | \"defs\" | \"ellipse\" | \"feBlend\" | \"feColorMatrix\" | \"feComponentTransfer\" | \"feComposite\" | \"feConvolveMatrix\" | \"feDiffuseLighting\" | \"feDisplacementMap\" | \"feDistantLight\" | \"feDropShadow\" | \"feFlood\" | \"feFuncA\" | \"feFuncB\" | \"feFuncG\" | \"feFuncR\" | \"feGaussianBlur\" | \"feImage\" | \"feMerge\" | \"feMergeNode\" | \"feMorphology\" | \"feOffset\" | \"fePointLight\" | \"feSpecularLighting\" | \"feSpotLight\" | \"feTile\" | \"feTurbulence\" | \"foreignObject\" | \"g\" | \"linearGradient\" | \"marker\" | \"metadata\" | \"mpath\" | \"polygon\" | \"polyline\" | \"radialGradient\" | \"rect\" | \"switch\" | \"textPath\" | \"tspan\" | \"use\""
+              "\"symbol\" | \"object\" | React.ComponentType<any> | \"body\" | \"path\" | \"circle\" | \"filter\" | \"data\" | \"line\" | \"area\" | \"time\" | \"label\" | \"legend\" | \"article\" | \"image\" | \"link\" | \"menu\" | \"stop\" | \"base\" | \"text\" | \"title\" | \"s\" | \"small\" | \"source\" | \"output\" | \"svg\" | \"meta\" | \"script\" | \"summary\" | \"desc\" | \"q\" | \"pattern\" | \"mask\" | \"input\" | \"slot\" | \"style\" | \"head\" | \"section\" | \"animate\" | \"progress\" | \"view\" | \"big\" | \"sub\" | \"sup\" | \"var\" | \"map\" | \"html\" | \"a\" | \"img\" | \"audio\" | \"br\" | \"form\" | \"main\" | \"abbr\" | \"address\" | \"aside\" | \"b\" | \"bdi\" | \"bdo\" | \"blockquote\" | \"button\" | \"canvas\" | \"caption\" | \"cite\" | \"code\" | \"col\" | \"colgroup\" | \"datalist\" | \"dd\" | \"del\" | \"details\" | \"dfn\" | \"dialog\" | \"div\" | \"dl\" | \"dt\" | \"em\" | \"embed\" | \"fieldset\" | \"figcaption\" | \"figure\" | \"footer\" | \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"header\" | \"hgroup\" | \"hr\" | \"i\" | \"iframe\" | \"ins\" | \"kbd\" | \"keygen\" | \"li\" | \"mark\" | \"menuitem\" | \"meter\" | \"nav\" | \"noindex\" | \"noscript\" | \"ol\" | \"optgroup\" | \"option\" | \"p\" | \"param\" | \"picture\" | \"pre\" | \"rp\" | \"rt\" | \"ruby\" | \"samp\" | \"select\" | \"span\" | \"strong\" | \"table\" | \"template\" | \"tbody\" | \"td\" | \"textarea\" | \"tfoot\" | \"th\" | \"thead\" | \"tr\" | \"track\" | \"u\" | \"ul\" | \"video\" | \"wbr\" | \"webview\" | \"animateMotion\" | \"animateTransform\" | \"clipPath\" | \"defs\" | \"ellipse\" | \"feBlend\" | \"feColorMatrix\" | \"feComponentTransfer\" | \"feComposite\" | \"feConvolveMatrix\" | \"feDiffuseLighting\" | \"feDisplacementMap\" | \"feDistantLight\" | \"feDropShadow\" | \"feFlood\" | \"feFuncA\" | \"feFuncB\" | \"feFuncG\" | \"feFuncR\" | \"feGaussianBlur\" | \"feImage\" | \"feMerge\" | \"feMergeNode\" | \"feMorphology\" | \"feOffset\" | \"fePointLight\" | \"feSpecularLighting\" | \"feSpotLight\" | \"feTile\" | \"feTurbulence\" | \"foreignObject\" | \"g\" | \"linearGradient\" | \"marker\" | \"metadata\" | \"mpath\" | \"polygon\" | \"polyline\" | \"radialGradient\" | \"rect\" | \"switch\" | \"textPath\" | \"tspan\" | \"use\""
             ],
             "path": "packages/kbn-securitysolution-exception-list-components/src/exception_item_card/exception_item_card.tsx",
             "deprecated": false,
@@ -1343,10 +1458,10 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.Rule.exception_list",
+            "id": "def-common.Rule.exceptions_list",
             "type": "Array",
             "tags": [],
-            "label": "exception_list",
+            "label": "exceptions_list",
             "description": [],
             "signature": [
               "{ id: string; list_id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; namespace_type: \"single\" | \"agnostic\"; }[] | undefined"

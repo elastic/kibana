@@ -12,7 +12,12 @@ import { EuiText } from '@elastic/eui';
 
 export const TotalDocuments = ({ totalHitCount }: { totalHitCount: number }) => {
   return (
-    <EuiText grow={false} size="s" style={{ paddingRight: 2 }}>
+    <EuiText
+      grow={false}
+      size="s"
+      style={{ paddingRight: 2 }}
+      data-test-subj="savedSearchTotalDocuments"
+    >
       <FormattedMessage
         id="discover.docTable.totalDocuments"
         defaultMessage="{totalDocuments} documents"

@@ -7,7 +7,7 @@
 
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { EuiSelectableOption, EuiSelectableProps } from '@elastic/eui';
-import { EuiSelectable } from '@elastic/eui';
+import { EuiSelectable, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { InputHistoryItem } from '../../console_state/types';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
@@ -16,10 +16,21 @@ import { UserCommandInput } from '../../user_command_input';
 import { useConsoleStateDispatch } from '../../../hooks/state_selectors/use_console_state_dispatch';
 import { useWithInputHistory } from '../../../hooks/state_selectors/use_with_input_history';
 import { useDataTestSubj } from '../../../hooks/state_selectors/use_data_test_subj';
+import { CommandInputClearHistory } from './command_input_clear_history';
 
-const NO_HISTORY_EMPTY_MESSAGE = i18n.translate(
+export const NO_HISTORY_EMPTY_MESSAGE = i18n.translate(
   'xpack.securitySolution.commandInputHistory.noHistoryEmptyMessage',
   { defaultMessage: 'No commands have been entered' }
+);
+const FILTER_HISTORY_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.commandInputHistory.filterPlaceholder',
+  {
+    defaultMessage: 'Filter previously entered actions',
+  }
+);
+const NO_FILTERED_MATCHES = i18n.translate(
+  'xpack.securitySolution.commandInputHistory.noFilteredMatchesFoundMessage',
+  { defaultMessage: 'No entries found matching the filter entered' }
 );
 
 export const CommandInputHistory = memo(() => {
@@ -42,21 +53,36 @@ export const CommandInputHistory = memo(() => {
   const selectableListProps: EuiSelectableProps['listProps'] = useMemo(() => {
     return {
       showIcons: false,
-      onKeyDownCapture: (ev) => {
-        // Works around an issue where the `enter` key event from the EuiSelectable gets capture
-        // by the outer `KeyCapture` input somehow. Likely due to the sequence of events between
-        // keyup, focus and the Focus trap component having the `returnFocus` on by default
-        if (ev.key === 'Enter') {
-          // @ts-expect-error
-          ev._CONSOLE_IGNORE_KEY = true;
-        }
-      },
+      bordered: true,
     };
   }, []);
 
-  const renderSelectionContent: EuiSelectableProps['children'] = useCallback((list, search) => {
-    return list;
+  const selectableSearchProps = useMemo(() => {
+    return {
+      placeholder: FILTER_HISTORY_PLACEHOLDER,
+      compressed: true,
+      fullWidth: true,
+    };
   }, []);
+
+  const renderSelectionContent: EuiSelectableProps['children'] = useCallback(
+    (list, search) => {
+      return (
+        <>
+          {list}
+          <EuiSpacer size="s" />
+          {/*
+            The empty DIV below helps with a strange behaviour around losing the focus from inside the
+            popover's Portal. Normally, the `search` input will force the focus to behave as expected, but
+            if no input history exists, we don't want to show the search bar. In that case, we insert this
+            div with `tabindex` which seems to get around the issue.
+          */}
+          {inputHistory.length > 0 ? search : <div tabIndex={-1} />}
+        </>
+      );
+    },
+    [inputHistory.length]
+  );
 
   const handleSelectableOnChange: EuiSelectableProps['onChange'] = useCallback(
     (items: EuiSelectableOption[]) => {
@@ -115,18 +141,26 @@ export const CommandInputHistory = memo(() => {
   }, [dispatch, optionWasSelected, priorInputState]);
 
   return (
-    <EuiSelectable
-      options={selectableHistoryOptions}
-      onChange={handleSelectableOnChange}
-      onActiveOptionChange={handleOnActiveOptionChange}
-      renderOption={handleRenderOption}
-      listProps={selectableListProps}
-      singleSelection={true}
-      emptyMessage={NO_HISTORY_EMPTY_MESSAGE}
-      data-test-subj={getTestId('inputHistorySelector')}
-    >
-      {renderSelectionContent}
-    </EuiSelectable>
+    <div>
+      {inputHistory.length > 0 && <CommandInputClearHistory />}
+
+      <EuiSelectable
+        options={selectableHistoryOptions}
+        onChange={handleSelectableOnChange}
+        onActiveOptionChange={handleOnActiveOptionChange}
+        renderOption={handleRenderOption}
+        listProps={selectableListProps}
+        singleSelection={true}
+        searchable={true}
+        searchProps={selectableSearchProps}
+        emptyMessage={NO_HISTORY_EMPTY_MESSAGE}
+        noMatchesMessage={NO_FILTERED_MATCHES}
+        data-test-subj={getTestId('inputHistorySelector')}
+        data-console-input-history={true}
+      >
+        {renderSelectionContent}
+      </EuiSelectable>
+    </div>
   );
 });
 CommandInputHistory.displayName = 'CommandInputHistory';

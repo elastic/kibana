@@ -9,39 +9,32 @@ import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
+import { useController } from 'react-hook-form';
 
 const StyledEuiCard = styled(EuiCard)`
-  /*
-  TODO: this css shouldn't be necessary after https://github.com/elastic/eui/issues/6345
-  tested this placeholder fix on mac in Chrome, Firefox, Safari, and Edge
-  with multiple zoom levels and with keyboard <tab> navigation
-  and in a responsive design / mobile view
-  */
-  padding-bottom: 60px;
-  position: relative;
-
-  button {
-    position: absolute;
-    bottom: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: row;
+  border: ${(props) => {
+    if (props.selectable?.isSelected) {
+      return `1px solid ${props.theme.eui.euiColorSuccess}`;
+    }
+  }};
+  .euiCard__content {
+    padding: 16px 92px 16px 16px !important;
   }
-  /* end todo css */
-
-  padding: 16px 92px 16px 16px !important;
-
   .euiTitle {
     font-size: 1rem;
   }
-
   .euiText {
     margin-top: 0;
     color: ${(props) => props.theme.eui.euiTextSubduedColor};
   }
 
   > button[role='switch'] {
-    left: auto;
+    min-inline-size: 80px;
     height: 100% !important;
     width: 80px;
-    right: 0;
     border-radius: 0 5px 5px 0;
 
     > span {
@@ -57,41 +50,38 @@ const StyledEuiCard = styled(EuiCard)`
       }
     }
   }
-
-  button[aria-checked='false'] > span > svg {
-    display: none;
-  }
 `;
-
 interface QueryPackSelectableProps {
-  queryType: string;
-  setQueryType: (type: string) => void;
   canRunSingleQuery: boolean;
   canRunPacks: boolean;
-  resetFormFields?: () => void;
 }
 
 export const QueryPackSelectable = ({
-  queryType,
-  setQueryType,
   canRunSingleQuery,
   canRunPacks,
-  resetFormFields,
 }: QueryPackSelectableProps) => {
+  const {
+    field: { value: queryType, onChange: setQueryType },
+  } = useController({
+    name: 'queryType',
+    defaultValue: 'query',
+    rules: {
+      deps: ['packId', 'query'],
+    },
+  });
+
   const handleChange = useCallback(
     (type) => {
       setQueryType(type);
-      if (resetFormFields) {
-        resetFormFields();
-      }
     },
-    [resetFormFields, setQueryType]
+    [setQueryType]
   );
   const queryCardSelectable = useMemo(
     () => ({
       onClick: () => handleChange('query'),
       isSelected: queryType === 'query',
       iconType: 'check',
+      textProps: {}, // this is needed for the text to get wrapped in span
     }),
     [queryType, handleChange]
   );
@@ -101,6 +91,7 @@ export const QueryPackSelectable = ({
       onClick: () => handleChange('pack'),
       isSelected: queryType === 'pack',
       iconType: 'check',
+      textProps: {}, // this is needed for the text to get wrapped in span
     }),
     [queryType, handleChange]
   );

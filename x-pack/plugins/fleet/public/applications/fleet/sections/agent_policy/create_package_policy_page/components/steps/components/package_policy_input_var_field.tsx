@@ -25,6 +25,7 @@ import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import type { RegistryVarsEntry } from '../../../../../../types';
 
 import { MultiTextInput } from './multi_text_input';
+import { DatasetComboBox } from './dataset_combo';
 
 const FixedHeightDiv = styled.div`
   height: 300px;
@@ -37,127 +38,164 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
   errors?: string[] | null;
   forceShowErrors?: boolean;
   frozen?: boolean;
-}> = memo(({ varDef, value, onChange, errors: varErrors, forceShowErrors, frozen }) => {
-  const [isDirty, setIsDirty] = useState<boolean>(false);
-  const { multi, required, type, title, name, description } = varDef;
-  const isInvalid = (isDirty || forceShowErrors) && !!varErrors;
-  const errors = isInvalid ? varErrors : null;
-  const fieldLabel = title || name;
+  packageType?: string;
+  datasets?: string[];
+  isEditPage?: boolean;
+}> = memo(
+  ({
+    varDef,
+    value,
+    onChange,
+    errors: varErrors,
+    forceShowErrors,
+    frozen,
+    packageType,
+    datasets = [],
+    isEditPage = false,
+  }) => {
+    const [isDirty, setIsDirty] = useState<boolean>(false);
+    const { multi, required, type, title, name, description } = varDef;
+    const isInvalid = (isDirty || forceShowErrors) && !!varErrors;
+    const errors = isInvalid ? varErrors : null;
+    const fieldLabel = title || name;
 
-  const field = useMemo(() => {
-    if (multi) {
-      return (
-        <MultiTextInput
-          value={value ?? []}
-          onChange={onChange}
-          onBlur={() => setIsDirty(true)}
-          isDisabled={frozen}
-        />
-      );
-    }
-    switch (type) {
-      case 'textarea':
+    const field = useMemo(() => {
+      if (multi) {
         return (
-          <EuiTextArea
-            isInvalid={isInvalid}
-            value={value === undefined ? '' : value}
-            onChange={(e) => onChange(e.target.value)}
+          <MultiTextInput
+            value={value ?? []}
+            onChange={onChange}
             onBlur={() => setIsDirty(true)}
-            disabled={frozen}
-            resize="vertical"
+            isDisabled={frozen}
           />
         );
-      case 'yaml':
-        return frozen ? (
-          <EuiCodeBlock language="yaml" isCopyable={false} paddingSize="s">
-            <pre>{value}</pre>
-          </EuiCodeBlock>
-        ) : (
-          <FixedHeightDiv>
-            <CodeEditor
-              languageId="yaml"
-              width="100%"
-              height="300px"
-              value={value}
-              onChange={onChange}
-              options={{
-                minimap: {
-                  enabled: false,
-                },
-                ariaLabel: i18n.translate('xpack.fleet.packagePolicyField.yamlCodeEditor', {
-                  defaultMessage: 'YAML Code Editor',
-                }),
-                scrollBeyondLastLine: false,
-                wordWrap: 'off',
-                wrappingIndent: 'indent',
-                tabSize: 2,
-                // To avoid left margin
-                lineNumbers: 'off',
-                lineNumbersMinChars: 0,
-                glyphMargin: false,
-                folding: false,
-                lineDecorationsWidth: 0,
-                overviewRulerBorder: false,
-              }}
-            />
-          </FixedHeightDiv>
-        );
-      case 'bool':
-        return (
-          <EuiSwitch
-            label={fieldLabel}
-            checked={value}
-            showLabel={false}
-            onChange={(e) => onChange(e.target.checked)}
-            onBlur={() => setIsDirty(true)}
-            disabled={frozen}
-          />
-        );
-      case 'password':
-        return (
-          <EuiFieldPassword
-            type="dual"
-            isInvalid={isInvalid}
-            value={value === undefined ? '' : value}
-            onChange={(e) => onChange(e.target.value)}
-            onBlur={() => setIsDirty(true)}
-            disabled={frozen}
-          />
-        );
-      default:
-        return (
-          <EuiFieldText
-            isInvalid={isInvalid}
-            value={value === undefined ? '' : value}
-            onChange={(e) => onChange(e.target.value)}
-            onBlur={() => setIsDirty(true)}
-            disabled={frozen}
-          />
-        );
-    }
-  }, [isInvalid, multi, onChange, type, value, fieldLabel, frozen]);
-
-  // Boolean cannot be optional by default set to false
-  const isOptional = useMemo(() => type !== 'bool' && !required, [required, type]);
-
-  return (
-    <EuiFormRow
-      isInvalid={isInvalid}
-      error={errors}
-      label={fieldLabel}
-      labelAppend={
-        isOptional ? (
-          <EuiText size="xs" color="subdued">
-            <FormattedMessage
-              id="xpack.fleet.createPackagePolicy.stepConfigure.inputVarFieldOptionalLabel"
-              defaultMessage="Optional"
-            />
-          </EuiText>
-        ) : null
       }
-      helpText={description && <ReactMarkdown children={description} />}
-    >
-      {field}
-    </EuiFormRow>
-  );
-});
+      if (name === 'data_stream.dataset' && packageType === 'input') {
+        return (
+          <DatasetComboBox
+            datasets={datasets}
+            value={value}
+            onChange={onChange}
+            isDisabled={isEditPage}
+          />
+        );
+      }
+      switch (type) {
+        case 'textarea':
+          return (
+            <EuiTextArea
+              isInvalid={isInvalid}
+              value={value === undefined ? '' : value}
+              onChange={(e) => onChange(e.target.value)}
+              onBlur={() => setIsDirty(true)}
+              disabled={frozen}
+              resize="vertical"
+            />
+          );
+        case 'yaml':
+          return frozen ? (
+            <EuiCodeBlock language="yaml" isCopyable={false} paddingSize="s">
+              <pre>{value}</pre>
+            </EuiCodeBlock>
+          ) : (
+            <FixedHeightDiv>
+              <CodeEditor
+                languageId="yaml"
+                width="100%"
+                height="300px"
+                value={value}
+                onChange={onChange}
+                options={{
+                  minimap: {
+                    enabled: false,
+                  },
+                  ariaLabel: i18n.translate('xpack.fleet.packagePolicyField.yamlCodeEditor', {
+                    defaultMessage: 'YAML Code Editor',
+                  }),
+                  scrollBeyondLastLine: false,
+                  wordWrap: 'off',
+                  wrappingIndent: 'indent',
+                  tabSize: 2,
+                  // To avoid left margin
+                  lineNumbers: 'off',
+                  lineNumbersMinChars: 0,
+                  glyphMargin: false,
+                  folding: false,
+                  lineDecorationsWidth: 0,
+                  overviewRulerBorder: false,
+                }}
+              />
+            </FixedHeightDiv>
+          );
+        case 'bool':
+          return (
+            <EuiSwitch
+              label={fieldLabel}
+              checked={value}
+              showLabel={false}
+              onChange={(e) => onChange(e.target.checked)}
+              onBlur={() => setIsDirty(true)}
+              disabled={frozen}
+            />
+          );
+        case 'password':
+          return (
+            <EuiFieldPassword
+              type="dual"
+              isInvalid={isInvalid}
+              value={value === undefined ? '' : value}
+              onChange={(e) => onChange(e.target.value)}
+              onBlur={() => setIsDirty(true)}
+              disabled={frozen}
+            />
+          );
+        default:
+          return (
+            <EuiFieldText
+              isInvalid={isInvalid}
+              value={value === undefined ? '' : value}
+              onChange={(e) => onChange(e.target.value)}
+              onBlur={() => setIsDirty(true)}
+              disabled={frozen}
+            />
+          );
+      }
+    }, [
+      multi,
+      name,
+      packageType,
+      type,
+      value,
+      onChange,
+      frozen,
+      datasets,
+      isEditPage,
+      isInvalid,
+      fieldLabel,
+    ]);
+
+    // Boolean cannot be optional by default set to false
+    const isOptional = useMemo(() => type !== 'bool' && !required, [required, type]);
+
+    return (
+      <EuiFormRow
+        isInvalid={isInvalid}
+        error={errors}
+        label={fieldLabel}
+        labelAppend={
+          isOptional ? (
+            <EuiText size="xs" color="subdued">
+              <FormattedMessage
+                id="xpack.fleet.createPackagePolicy.stepConfigure.inputVarFieldOptionalLabel"
+                defaultMessage="Optional"
+              />
+            </EuiText>
+          ) : null
+        }
+        helpText={description && <ReactMarkdown children={description} />}
+      >
+        {field}
+      </EuiFormRow>
+    );
+  }
+);

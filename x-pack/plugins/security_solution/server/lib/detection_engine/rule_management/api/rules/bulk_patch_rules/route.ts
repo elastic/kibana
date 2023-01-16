@@ -27,6 +27,8 @@ import { readRules } from '../../../logic/crud/read_rules';
 // eslint-disable-next-line no-restricted-imports
 import { legacyMigrate } from '../../../logic/rule_actions/legacy_action_migration';
 import { getDeprecatedBulkEndpointHeader, logDeprecatedBulkEndpoint } from '../../deprecation';
+import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
+import { validateRulesWithDuplicatedDefaultExceptionsList } from '../../../logic/exceptions/validate_rules_with_duplicated_default_exceptions_list';
 
 /**
  * @deprecated since version 8.2.0. Use the detection_engine/rules/_bulk_action API instead
@@ -63,6 +65,7 @@ export const bulkPatchRulesRoute = (
         request,
         savedObjectsClient,
       });
+
       const rules = await Promise.all(
         request.body.map(async (payloadRule) => {
           const idOrRuleIdOrUnknown = payloadRule.id ?? payloadRule.rule_id ?? '(unknown id)';
@@ -82,6 +85,19 @@ export const bulkPatchRulesRoute = (
               // reject an unauthorized modification of an ML rule
               throwAuthzError(await mlAuthz.validateRuleType(existingRule?.params.type));
             }
+
+            validateRulesWithDuplicatedDefaultExceptionsList({
+              allRules: request.body,
+              exceptionsList: payloadRule.exceptions_list,
+              ruleId: idOrRuleIdOrUnknown,
+            });
+
+            await validateRuleDefaultExceptionList({
+              exceptionsList: payloadRule.exceptions_list,
+              rulesClient,
+              ruleRuleId: payloadRule.rule_id,
+              ruleId: payloadRule.id,
+            });
 
             const migratedRule = await legacyMigrate({
               rulesClient,

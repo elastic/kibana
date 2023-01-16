@@ -161,6 +161,12 @@ export interface DomainConfigFromServer {
   sitemap_urls: string[];
 }
 
+export interface CrawlScheduleFromServer {
+  frequency: number;
+  unit: CrawlUnits;
+  use_connector_schedule: boolean;
+}
+
 // Client
 
 export interface CrawlerDomain {
@@ -252,6 +258,7 @@ export type CrawlEvent = CrawlRequest & {
 export interface CrawlSchedule {
   frequency: number;
   unit: CrawlUnits;
+  useConnectorSchedule: boolean;
 }
 
 export interface DomainConfig {

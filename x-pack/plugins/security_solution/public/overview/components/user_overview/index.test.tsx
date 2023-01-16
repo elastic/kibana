@@ -12,7 +12,7 @@ import '../../../common/mock/match_media';
 import { TestProviders } from '../../../common/mock';
 
 import { mockAnomalies } from '../../../common/components/ml/mock';
-import { useRiskScore } from '../../../risk_score/containers/all';
+import { useRiskScore } from '../../../explore/containers/risk_score/all';
 import type { UserSummaryProps } from '.';
 import { UserOverview } from '.';
 
@@ -25,7 +25,7 @@ const defaultProps = {
   loading: false,
 };
 
-jest.mock('../../../risk_score/containers/all');
+jest.mock('../../../explore/containers/risk_score/all');
 
 const mockRiskScore = useRiskScore as jest.Mock;
 

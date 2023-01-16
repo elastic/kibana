@@ -7,6 +7,7 @@
 
 export default function loadTests({ loadTestFile }) {
   describe('Settings Endpoints', () => {
+    loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./update'));
   });
 }

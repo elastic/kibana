@@ -95,56 +95,7 @@ export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) 
           });
         }
 
-        let createdItems;
-
-        const ruleDefaultLists = rule.params.exceptionsList.filter(
-          (list) => list.type === ExceptionListTypeEnum.RULE_DEFAULT
-        );
-
-        // This should hopefully never happen, but could if we forget to add such a check to one
-        // of our routes allowing the user to update the rule to have more than one default list added
-        checkDefaultRuleExceptionListReferences({ exceptionLists: rule.params.exceptionsList });
-
-        const [ruleDefaultList] = ruleDefaultLists;
-
-        if (ruleDefaultList != null) {
-          // check that list does indeed exist
-          const exceptionListAssociatedToRule = await listsClient?.getExceptionList({
-            id: ruleDefaultList.id,
-            listId: ruleDefaultList.list_id,
-            namespaceType: ruleDefaultList.namespace_type,
-          });
-
-          // if list does exist, just need to create the items
-          if (exceptionListAssociatedToRule != null) {
-            createdItems = await createExceptionListItems({
-              items,
-              defaultList: exceptionListAssociatedToRule,
-              listsClient,
-            });
-          } else {
-            // This means that there was missed cleanup when this rule exception list was
-            // deleted and it remained referenced on the rule. Let's remove it from the rule,
-            // and update the rule's exceptions lists to include newly created default list.
-            const defaultList = await createAndAssociateDefaultExceptionList({
-              rule,
-              rulesClient,
-              listsClient,
-              removeOldAssociation: true,
-            });
-
-            createdItems = await createExceptionListItems({ items, defaultList, listsClient });
-          }
-        } else {
-          const defaultList = await createAndAssociateDefaultExceptionList({
-            rule,
-            rulesClient,
-            listsClient,
-            removeOldAssociation: false,
-          });
-
-          createdItems = await createExceptionListItems({ items, defaultList, listsClient });
-        }
+        const createdItems = await createRuleExceptions({ items, rule, listsClient, rulesClient });
 
         const [validated, errors] = validate(createdItems, t.array(exceptionListItemSchema));
         if (errors != null) {
@@ -161,6 +112,67 @@ export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) 
       }
     }
   );
+};
+
+export const createRuleExceptions = async ({
+  items,
+  rule,
+  listsClient,
+  rulesClient,
+}: {
+  items: CreateRuleExceptionListItemSchemaDecoded[];
+  listsClient: ExceptionListClient | null;
+  rulesClient: RulesClient;
+  rule: SanitizedRule<RuleParams>;
+}) => {
+  const ruleDefaultLists = rule.params.exceptionsList.filter(
+    (list) => list.type === ExceptionListTypeEnum.RULE_DEFAULT
+  );
+
+  // This should hopefully never happen, but could if we forget to add such a check to one
+  // of our routes allowing the user to update the rule to have more than one default list added
+  checkDefaultRuleExceptionListReferences({ exceptionLists: rule.params.exceptionsList });
+
+  const [ruleDefaultList] = ruleDefaultLists;
+
+  if (ruleDefaultList != null) {
+    // check that list does indeed exist
+    const exceptionListAssociatedToRule = await listsClient?.getExceptionList({
+      id: ruleDefaultList.id,
+      listId: ruleDefaultList.list_id,
+      namespaceType: ruleDefaultList.namespace_type,
+    });
+
+    // if list does exist, just need to create the items
+    if (exceptionListAssociatedToRule != null) {
+      return createExceptionListItems({
+        items,
+        defaultList: exceptionListAssociatedToRule,
+        listsClient,
+      });
+    } else {
+      // This means that there was missed cleanup when this rule exception list was
+      // deleted and it remained referenced on the rule. Let's remove it from the rule,
+      // and update the rule's exceptions lists to include newly created default list.
+      const defaultList = await createAndAssociateDefaultExceptionList({
+        rule,
+        rulesClient,
+        listsClient,
+        removeOldAssociation: true,
+      });
+
+      return createExceptionListItems({ items, defaultList, listsClient });
+    }
+  } else {
+    const defaultList = await createAndAssociateDefaultExceptionList({
+      rule,
+      rulesClient,
+      listsClient,
+      removeOldAssociation: false,
+    });
+
+    return createExceptionListItems({ items, defaultList, listsClient });
+  }
 };
 
 export const createExceptionListItems = async ({
@@ -191,17 +203,15 @@ export const createExceptionListItems = async ({
   );
 };
 
-export const createAndAssociateDefaultExceptionList = async ({
+export const createExceptionList = async ({
   rule,
   listsClient,
-  rulesClient,
-  removeOldAssociation,
 }: {
   rule: SanitizedRule<RuleParams>;
   listsClient: ExceptionListClient | null;
-  rulesClient: RulesClient;
-  removeOldAssociation: boolean;
-}): Promise<ExceptionListSchema> => {
+}): Promise<ExceptionListSchema | null> => {
+  if (!listsClient) return null;
+
   const exceptionList: CreateExceptionListSchema = {
     description: `Exception list containing exceptions for rule with id: ${rule.id}`,
     meta: undefined,
@@ -233,7 +243,7 @@ export const createAndAssociateDefaultExceptionList = async ({
   } = validated;
 
   // create the default rule list
-  const exceptionListAssociatedToRule = await listsClient?.createExceptionList({
+  return listsClient.createExceptionList({
     description,
     immutable: false,
     listId,
@@ -244,8 +254,22 @@ export const createAndAssociateDefaultExceptionList = async ({
     type,
     version,
   });
+};
 
-  if (exceptionListAssociatedToRule == null) {
+export const createAndAssociateDefaultExceptionList = async ({
+  rule,
+  listsClient,
+  rulesClient,
+  removeOldAssociation,
+}: {
+  rule: SanitizedRule<RuleParams>;
+  listsClient: ExceptionListClient | null;
+  rulesClient: RulesClient;
+  removeOldAssociation: boolean;
+}): Promise<ExceptionListSchema> => {
+  const exceptionListToAssociate = await createExceptionList({ rule, listsClient });
+
+  if (exceptionListToAssociate == null) {
     throw Error(`An error occurred creating rule default exception list`);
   }
 
@@ -265,14 +289,14 @@ export const createAndAssociateDefaultExceptionList = async ({
       exceptions_list: [
         ...ruleExceptionLists,
         {
-          id: exceptionListAssociatedToRule.id,
-          list_id: exceptionListAssociatedToRule.list_id,
-          type: exceptionListAssociatedToRule.type,
-          namespace_type: exceptionListAssociatedToRule.namespace_type,
+          id: exceptionListToAssociate.id,
+          list_id: exceptionListToAssociate.list_id,
+          type: exceptionListToAssociate.type,
+          namespace_type: exceptionListToAssociate.namespace_type,
         },
       ],
     },
   });
 
-  return exceptionListAssociatedToRule;
+  return exceptionListToAssociate;
 };

@@ -13,9 +13,9 @@ import type { MutableRefObject } from 'react';
 import type { Filter, TimeRange } from '@kbn/es-query';
 import type {
   ExpressionAstExpression,
-  ExpressionRendererEvent,
   IInterpreterRenderHandlers,
   Datatable,
+  ExpressionRendererEvent,
 } from '@kbn/expressions-plugin/public';
 import type { Configuration, NavigateToLensContext } from '@kbn/visualizations-plugin/common';
 import { Adapters } from '@kbn/inspector-plugin/public';
@@ -28,12 +28,14 @@ import type {
 import type { ClickTriggerEvent, BrushTriggerEvent } from '@kbn/charts-plugin/public';
 import type { IndexPatternAggRestrictions } from '@kbn/data-plugin/public';
 import type { FieldSpec, DataViewSpec, DataView } from '@kbn/data-views-plugin/common';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import { SearchResponseWarning } from '@kbn/data-plugin/public/search/types';
 import type { EuiButtonIconProps } from '@elastic/eui';
 import { SearchRequest } from '@kbn/data-plugin/public';
 import { estypes } from '@elastic/elasticsearch';
 import React from 'react';
+import { CellValueContext } from '@kbn/embeddable-plugin/public';
 import type { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
 import type { DateRange, LayerType, SortingHint } from '../common';
 import type {
@@ -87,7 +89,7 @@ export type IndexPatternField = FieldSpec & {
    * Map of fields which can be used, but may fail partially (ranked lower than others)
    */
   partiallyApplicableFunctions?: Partial<Record<string, boolean>>;
-  timeSeriesMetricType?: 'histogram' | 'summary' | 'gauge' | 'counter';
+  timeSeriesMetric?: 'histogram' | 'summary' | 'gauge' | 'counter';
   timeSeriesRollup?: boolean;
   meta?: boolean;
   runtime?: boolean;
@@ -137,7 +139,11 @@ export interface TableSuggestionColumn {
 export interface DataSourceInfo {
   layerId: string;
   dataView?: DataView;
-  columns: Array<{ id: string; role: 'split' | 'metric'; operation: OperationDescriptor }>;
+  columns: Array<{
+    id: string;
+    role: 'split' | 'metric';
+    operation: OperationDescriptor & { type: string; fields?: string[]; filter?: Query };
+  }>;
 }
 
 export interface VisualizationInfo {
@@ -147,7 +153,7 @@ export interface VisualizationInfo {
     chartType?: string;
     icon?: IconType;
     label?: string;
-    dimensions: Array<{ name: string; id: string }>;
+    dimensions: Array<{ name: string; id: string; dimensionType: string }>;
   }>;
 }
 
@@ -243,6 +249,11 @@ export type VisualizeEditorContext<T extends Configuration = Configuration> = {
   vizEditorOriginatingAppUrl?: string;
   originatingApp?: string;
   isVisualizeAction: boolean;
+  searchQuery?: Query;
+  searchFilters?: Filter[];
+  title?: string;
+  visTypeTitle?: string;
+  isEmbeddable?: boolean;
 } & NavigateToLensContext<T>;
 
 export interface GetDropPropsArgs<T = unknown> {
@@ -384,6 +395,7 @@ export interface Datasource<T = unknown, P = unknown> {
     state: T,
     layerId: string,
     indexPatterns: IndexPatternMap,
+    dateRange: DateRange,
     searchSessionId?: string
   ) => ExpressionAstExpression | string | null;
 
@@ -465,7 +477,8 @@ export interface Datasource<T = unknown, P = unknown> {
     state: T,
     indexPatterns: IndexPatternMap,
     layerId: string,
-    columnId: string
+    columnId: string,
+    dateRange?: DateRange
   ) => boolean;
   /**
    * Are these datasources equivalent?
@@ -489,18 +502,11 @@ export interface Datasource<T = unknown, P = unknown> {
    */
   getUsedDataViews: (state: T) => string[];
 
-  getSupportedActionsForLayer?: (
-    layerId: string,
-    state: T,
-    setState: StateSetter<T>,
-    openLayerSettings?: () => void
-  ) => LayerAction[];
-
   getDatasourceInfo: (
     state: T,
     references?: SavedObjectReference[],
-    dataViews?: DataView[]
-  ) => DataSourceInfo[];
+    dataViewsService?: DataViewsPublicPluginStart
+  ) => Promise<DataSourceInfo[]>;
 }
 
 export interface DatasourceFixAction<T> {
@@ -565,7 +571,7 @@ export interface DatasourceDataPanelProps<T = unknown> {
   showNoDataPopover: () => void;
   core: Pick<
     CoreStart,
-    'http' | 'notifications' | 'uiSettings' | 'overlays' | 'theme' | 'application'
+    'http' | 'notifications' | 'uiSettings' | 'overlays' | 'theme' | 'application' | 'docLinks'
   >;
   query: Query;
   dateRange: DateRange;
@@ -581,6 +587,7 @@ export interface DatasourceDataPanelProps<T = unknown> {
 
 /** @internal **/
 export interface LayerAction {
+  id: string;
   displayName: string;
   description?: string;
   execute: () => void | Promise<void>;
@@ -589,6 +596,8 @@ export interface LayerAction {
   isCompatible: boolean;
   'data-test-subj'?: string;
 }
+
+export type LayerActionFromVisualization = Omit<LayerAction, 'execute'>;
 
 interface SharedDimensionProps {
   /** Visualizations can restrict operations based on their own rules.
@@ -610,6 +619,7 @@ export type DatasourceDimensionProps<T> = SharedDimensionProps & {
   onRemove?: (accessor: string) => void;
   state: T;
   activeData?: Record<string, Datatable>;
+  dateRange: DateRange;
   indexPatterns: IndexPatternMap;
   hideTooltip?: boolean;
   invalid?: boolean;
@@ -783,7 +793,15 @@ export type VisualizationDimensionEditorProps<T = unknown> = VisualizationConfig
 
 export interface AccessorConfig {
   columnId: string;
-  triggerIcon?: 'color' | 'disabled' | 'colorBy' | 'none' | 'invisible' | 'aggregate';
+  triggerIconType?:
+    | 'color'
+    | 'disabled'
+    | 'colorBy'
+    | 'none'
+    | 'invisible'
+    | 'aggregate'
+    | 'custom';
+  customIcon?: IconType;
   color?: string;
   palette?: string[] | Array<{ color: string; stop: number }>;
 }
@@ -796,6 +814,10 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   /** ID is passed back to visualization. For example, `x` */
   groupId: string;
   accessors: AccessorConfig[];
+  // currently used only on partition charts to display non-editable UI dimension trigger in the buckets group when multiple metrics exist
+  fakeFinalAccessor?: {
+    label: string;
+  };
   supportsMoreColumns: boolean;
   dimensionsTooMany?: number;
   /** If required, a warning will appear if accessors are empty */
@@ -1065,12 +1087,13 @@ export interface Visualization<T = unknown, P = unknown> {
    * returns a list of custom actions supported by the visualization layer.
    * Default actions like delete/clear are not included in this list and are managed by the editor frame
    * */
-  getSupportedActionsForLayer?: (
-    layerId: string,
-    state: T,
-    setState: StateSetter<T>,
-    openLayerSettings?: () => void
-  ) => LayerAction[];
+  getSupportedActionsForLayer?: (layerId: string, state: T) => LayerActionFromVisualization[];
+
+  /**
+   * Perform state mutations in response to a layer action
+   */
+  onLayerAction?: (layerId: string, actionId: string, state: T) => T;
+
   /** returns the type string of the given layer */
   getLayerType: (layerId: string, state?: T) => LayerType | undefined;
 
@@ -1148,6 +1171,11 @@ export interface Visualization<T = unknown, P = unknown> {
   getDropProps?: (
     dropProps: GetDropPropsArgs
   ) => { dropTypes: DropType[]; nextLabel?: string } | undefined;
+
+  /**
+   * Allows the visualization to announce whether or not it has any settings to show
+   */
+  hasLayerSettings?: (props: VisualizationConfigProps<T>) => boolean;
 
   renderLayerSettings?: (
     domElement: Element,
@@ -1316,7 +1344,7 @@ export function isLensEditEvent<T extends LensEditSupportedActions>(
 
 export function isLensTableRowContextMenuClickEvent(
   event: ExpressionRendererEvent
-): event is BrushTriggerEvent {
+): event is LensTableRowContextMenuEvent {
   return event.name === 'tableRowContextMenuClick';
 }
 
@@ -1357,3 +1385,14 @@ export type LensTopNavMenuEntryGenerator = (props: {
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
   currentDoc: Document | undefined;
 }) => undefined | TopNavMenuData;
+
+export interface LensCellValueAction {
+  id: string;
+  iconType: string;
+  displayName: string;
+  execute: (data: CellValueContext['data']) => void;
+}
+
+export type GetCompatibleCellValueActions = (
+  data: CellValueContext['data']
+) => Promise<LensCellValueAction[]>;

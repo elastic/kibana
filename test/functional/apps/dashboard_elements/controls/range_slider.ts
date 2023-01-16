@@ -183,6 +183,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const firstId = (await dashboardControls.getAllControlIds())[0];
         await dashboardControls.rangeSliderClearSelection(firstId);
         await dashboardControls.validateRange('value', firstId, '', '');
+        await dashboard.clearUnsavedChanges();
+      });
+
+      it('making changes to range causes unsaved changes', async () => {
+        const firstId = (await dashboardControls.getAllControlIds())[0];
+        await dashboardControls.rangeSliderSetLowerBound(firstId, '0');
+        await dashboardControls.rangeSliderSetUpperBound(firstId, '3');
+        await dashboardControls.rangeSliderWaitForLoading();
+        await testSubjects.existOrFail('dashboardUnsavedChangesBadge');
+      });
+
+      it('changes to range can be discarded', async () => {
+        const firstId = (await dashboardControls.getAllControlIds())[0];
+        await dashboardControls.validateRange('value', firstId, '0', '3');
+        await dashboard.clickCancelOutOfEditMode();
+        await dashboardControls.validateRange('value', firstId, '', '');
+      });
+
+      it('dashboard does not load with unsaved changes when changes are discarded', async () => {
+        await dashboard.switchToEditMode();
+        await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
       });
 
       it('deletes an existing control', async () => {

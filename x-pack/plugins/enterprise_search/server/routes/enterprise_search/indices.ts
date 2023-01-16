@@ -366,6 +366,15 @@ export function registerIndexRoutes({
         }),
         body: schema.object({
           destination_field: schema.maybe(schema.nullable(schema.string())),
+          inference_config: schema.maybe(
+            schema.object({
+              zero_shot_classification: schema.maybe(
+                schema.object({
+                  labels: schema.arrayOf(schema.string()),
+                })
+              ),
+            })
+          ),
           model_id: schema.string(),
           pipeline_name: schema.string(),
           source_field: schema.string(),
@@ -381,6 +390,7 @@ export function registerIndexRoutes({
         pipeline_name: pipelineName,
         source_field: sourceField,
         destination_field: destinationField,
+        inference_config: inferenceConfig,
       } = request.body;
 
       let createPipelineResult: CreateMlInferencePipelineResponse | undefined;
@@ -392,6 +402,7 @@ export function registerIndexRoutes({
           modelId,
           sourceField,
           destinationField,
+          inferenceConfig,
           client.asCurrentUser
         );
       } catch (error) {
@@ -577,12 +588,21 @@ export function registerIndexRoutes({
         pipeline: { description: defaultDescription, ...pipeline },
       };
 
-      const simulateResult = await client.asCurrentUser.ingest.simulate(simulateRequest);
+      try {
+        const simulateResult = await client.asCurrentUser.ingest.simulate(simulateRequest);
 
-      return response.ok({
-        body: simulateResult,
-        headers: { 'content-type': 'application/json' },
-      });
+        return response.ok({
+          body: simulateResult,
+          headers: { 'content-type': 'application/json' },
+        });
+      } catch (e) {
+        return createError({
+          errorCode: ErrorCode.UNCAUGHT_EXCEPTION,
+          message: e.message,
+          response,
+          statusCode: 400,
+        });
+      }
     })
   );
 
@@ -649,12 +669,21 @@ export function registerIndexRoutes({
         pipeline: pipelinesResponse[pipelineName],
       };
 
-      const simulateResult = await client.asCurrentUser.ingest.simulate(simulateRequest);
+      try {
+        const simulateResult = await client.asCurrentUser.ingest.simulate(simulateRequest);
 
-      return response.ok({
-        body: simulateResult,
-        headers: { 'content-type': 'application/json' },
-      });
+        return response.ok({
+          body: simulateResult,
+          headers: { 'content-type': 'application/json' },
+        });
+      } catch (e) {
+        return createError({
+          errorCode: ErrorCode.UNCAUGHT_EXCEPTION,
+          message: e.message,
+          response,
+          statusCode: 400,
+        });
+      }
     })
   );
 

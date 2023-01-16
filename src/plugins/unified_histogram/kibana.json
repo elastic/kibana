@@ -11,5 +11,5 @@
   "ui": true,
   "requiredPlugins": [],
   "optionalPlugins": [],
-  "requiredBundles": ["charts", "data"]
+  "requiredBundles": ["data", "dataViews", "embeddable", "kibanaUtils", "inspector"]
 }

@@ -11,7 +11,7 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 import useObservable from 'react-use/lib/useObservable';
 import { catchError, of, timeout } from 'rxjs';
 import { useLocation } from 'react-router-dom';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import { siemGuideId } from '../../../../common/guided_onboarding/siem_guide_config';
 import { isTourPath } from '../../../helpers';
 import { useKibana } from '../../lib/kibana';
 import type { AlertsCasesTourSteps } from './tour_config';
@@ -39,7 +39,7 @@ export const RealTourContextProvider = ({ children }: { children: ReactChild }) 
   const { guidedOnboardingApi } = useKibana().services.guidedOnboarding;
 
   const isRulesTourActive = useObservable(
-    guidedOnboardingApi?.isGuideStepActive$('security', SecurityStepId.rules).pipe(
+    guidedOnboardingApi?.isGuideStepActive$(siemGuideId, SecurityStepId.rules).pipe(
       // if no result after 30s the observable will error, but the error handler will just emit false
       timeout(30000),
       catchError((error) => of(false))
@@ -47,7 +47,7 @@ export const RealTourContextProvider = ({ children }: { children: ReactChild }) 
     false
   );
   const isAlertsCasesTourActive = useObservable(
-    guidedOnboardingApi?.isGuideStepActive$('security', SecurityStepId.alertsCases).pipe(
+    guidedOnboardingApi?.isGuideStepActive$(siemGuideId, SecurityStepId.alertsCases).pipe(
       // if no result after 30s the observable will error, but the error handler will just emit false
       timeout(30000),
       catchError((error) => of(false))
@@ -84,7 +84,7 @@ export const RealTourContextProvider = ({ children }: { children: ReactChild }) 
     }
     let ignore = false;
     const complete = async () => {
-      await guidedOnboardingApi.completeGuideStep('security', completeStep);
+      await guidedOnboardingApi.completeGuideStep(siemGuideId, completeStep);
       if (!ignore) {
         setCompleteStep(null);
         _setActiveStep(1);
@@ -113,11 +113,10 @@ export const RealTourContextProvider = ({ children }: { children: ReactChild }) 
 
 export const TourContextProvider = ({ children }: { children: ReactChild }) => {
   const { pathname } = useLocation();
-  const isTourEnabled = useIsExperimentalFeatureEnabled('guidedOnboarding');
 
   const ContextProvider = useMemo(
-    () => (isTourPath(pathname) && isTourEnabled ? RealTourContextProvider : TourContext.Provider),
-    [isTourEnabled, pathname]
+    () => (isTourPath(pathname) ? RealTourContextProvider : TourContext.Provider),
+    [pathname]
   );
 
   return <ContextProvider value={initialState}>{children}</ContextProvider>;

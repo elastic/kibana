@@ -19,6 +19,7 @@ export type StaticPage =
   | 'settings_create_outputs'
   | 'settings_create_download_sources'
   | 'settings_create_fleet_server_hosts'
+  | 'settings_create_fleet_proxy'
   | 'debug';
 
 export type DynamicPage =
@@ -44,7 +45,8 @@ export type DynamicPage =
   | 'agent_details_diagnostics'
   | 'settings_edit_outputs'
   | 'settings_edit_download_sources'
-  | 'settings_edit_fleet_server_hosts';
+  | 'settings_edit_fleet_server_hosts'
+  | 'settings_edit_fleet_proxy';
 
 export type Page = StaticPage | DynamicPage;
 
@@ -77,6 +79,8 @@ export const FLEET_ROUTING_PATHS = {
   settings_create_outputs: '/settings/create-outputs',
   settings_edit_outputs: '/settings/outputs/:outputId',
   settings_create_download_sources: '/settings/create-download-sources',
+  settings_create_fleet_proxy: '/settings/create-fleet-proxy',
+  settings_edit_fleet_proxy: '/settings/fleet-proxies/:itemId',
   settings_edit_download_sources: '/settings/downloadSources/:downloadSourceId',
   debug: '/_debug',
 
@@ -212,6 +216,14 @@ export const pagePathGetters: {
   settings_create_fleet_server_hosts: () => [
     FLEET_BASE_PATH,
     FLEET_ROUTING_PATHS.settings_create_fleet_server_hosts,
+  ],
+  settings_create_fleet_proxy: () => [
+    FLEET_BASE_PATH,
+    FLEET_ROUTING_PATHS.settings_create_fleet_proxy,
+  ],
+  settings_edit_fleet_proxy: ({ itemId }) => [
+    FLEET_BASE_PATH,
+    FLEET_ROUTING_PATHS.settings_edit_fleet_proxy.replace(':itemId', itemId.toString()),
   ],
   settings_edit_outputs: ({ outputId }) => [
     FLEET_BASE_PATH,

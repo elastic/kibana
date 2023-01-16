@@ -9,6 +9,13 @@ Object {
           "transaction.root": true,
         },
       },
+      Object {
+        "range": Object {
+          "@timestamp": Object {
+            "gte": "now-7d",
+          },
+        },
+      },
     ],
   },
 }
@@ -113,6 +120,13 @@ Object {
             },
           },
           Object {
+            "range": Object {
+              "@timestamp": Object {
+                "gte": "now-7d",
+              },
+            },
+          },
+          Object {
             "match": Object {
               "service.name": "irrelevant",
             },
@@ -182,7 +196,7 @@ Object {
   },
   "sync": Object {
     "time": Object {
-      "delay": "60s",
+      "delay": "1m",
       "field": "@timestamp",
     },
   },

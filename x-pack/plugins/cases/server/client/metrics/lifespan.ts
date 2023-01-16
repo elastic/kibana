@@ -26,7 +26,6 @@ export class Lifespan extends SingleCaseBaseHandler {
 
   public async compute(): Promise<SingleCaseMetricsResponse> {
     const {
-      unsecuredSavedObjectsClient,
       authorization,
       services: { userActionService },
       logger,
@@ -49,7 +48,6 @@ export class Lifespan extends SingleCaseBaseHandler {
       );
 
       const statusUserActions = await userActionService.findStatusChanges({
-        unsecuredSavedObjectsClient,
         caseId: this.caseId,
         filter: authorizationFilter,
       });

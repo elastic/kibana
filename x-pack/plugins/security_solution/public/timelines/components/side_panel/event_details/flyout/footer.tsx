@@ -44,6 +44,7 @@ interface AddExceptionModalWrapperData {
   alertStatus: Status;
   eventId: string;
   ruleId: string;
+  ruleRuleId: string;
   ruleName: string;
 }
 
@@ -93,6 +94,7 @@ export const FlyoutFooterComponent = React.memo(
       () =>
         [
           { category: 'signal', field: 'signal.rule.id', name: 'ruleId' },
+          { category: 'signal', field: 'signal.rule.rule_id', name: 'ruleRuleId' },
           { category: 'signal', field: 'signal.rule.name', name: 'ruleName' },
           { category: 'signal', field: 'kibana.alert.workflow_status', name: 'alertStatus' },
           { category: '_id', field: '_id', name: 'eventId' },
@@ -173,6 +175,7 @@ export const FlyoutFooterComponent = React.memo(
       */}
         {openAddExceptionFlyout &&
           addExceptionModalWrapperData.ruleId != null &&
+          addExceptionModalWrapperData.ruleRuleId != null &&
           addExceptionModalWrapperData.eventId != null && (
             <AddExceptionFlyoutWrapper
               {...addExceptionModalWrapperData}

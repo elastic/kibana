@@ -7,11 +7,16 @@
 
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
-import { validateTimeWindowUnits } from '@kbn/triggers-actions-ui-plugin/server';
+import {
+  validateTimeWindowUnits,
+  validateAggType,
+  validateGroupBy,
+  MAX_GROUPS,
+} from '@kbn/triggers-actions-ui-plugin/server';
 import { RuleTypeState } from '@kbn/alerting-plugin/server';
 import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { ComparatorFnNames } from '../../../common';
 import { Comparator } from '../../../common/comparator_types';
-import { ComparatorFnNames } from '../lib';
 import { getComparatorSchemaType } from '../lib/comparator';
 
 export const ES_QUERY_MAX_HITS_PER_EXECUTION = 10000;
@@ -35,9 +40,25 @@ const EsQueryRuleParamsSchemaProperties = {
   timeWindowUnit: schema.string({ validate: validateTimeWindowUnits }),
   threshold: schema.arrayOf(schema.number(), { minSize: 1, maxSize: 2 }),
   thresholdComparator: getComparatorSchemaType(validateComparator),
+  // aggregation type
+  aggType: schema.string({ validate: validateAggType }),
+  // aggregation field
+  aggField: schema.maybe(schema.string({ minLength: 1 })),
+  // how to group
+  groupBy: schema.string({ validate: validateGroupBy }),
+  // field to group on (for groupBy: top)
+  termField: schema.maybe(schema.string({ minLength: 1 })),
+  // limit on number of groups returned
+  termSize: schema.maybe(schema.number({ min: 1 })),
   searchType: schema.oneOf([schema.literal('searchSource'), schema.literal('esQuery')], {
     defaultValue: 'esQuery',
   }),
+  timeField: schema.conditional(
+    schema.siblingRef('searchType'),
+    schema.literal('esQuery'),
+    schema.string({ minLength: 1 }),
+    schema.maybe(schema.string({ minLength: 1 }))
+  ),
   // searchSource rule param only
   searchConfiguration: schema.conditional(
     schema.siblingRef('searchType'),
@@ -58,12 +79,6 @@ const EsQueryRuleParamsSchemaProperties = {
     schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
     schema.never()
   ),
-  timeField: schema.conditional(
-    schema.siblingRef('searchType'),
-    schema.literal('esQuery'),
-    schema.string({ minLength: 1 }),
-    schema.never()
-  ),
 };
 
 export const EsQueryRuleParamsSchema = schema.object(EsQueryRuleParamsSchemaProperties, {
@@ -74,7 +89,17 @@ const betweenComparators = new Set(['between', 'notBetween']);
 
 // using direct type not allowed, circular reference, so body is typed to any
 function validateParams(anyParams: unknown): string | undefined {
-  const { esQuery, thresholdComparator, threshold, searchType } = anyParams as EsQueryRuleParams;
+  const {
+    esQuery,
+    thresholdComparator,
+    threshold,
+    searchType,
+    aggType,
+    aggField,
+    groupBy,
+    termField,
+    termSize,
+  } = anyParams as EsQueryRuleParams;
 
   if (betweenComparators.has(thresholdComparator) && threshold.length === 1) {
     return i18n.translate('xpack.stackAlerts.esQuery.invalidThreshold2ErrorMessage', {
@@ -84,6 +109,37 @@ function validateParams(anyParams: unknown): string | undefined {
         thresholdComparator,
       },
     });
+  }
+
+  if (aggType !== 'count' && !aggField) {
+    return i18n.translate('xpack.stackAlerts.esQuery.aggTypeRequiredErrorMessage', {
+      defaultMessage: '[aggField]: must have a value when [aggType] is "{aggType}"',
+      values: {
+        aggType,
+      },
+    });
+  }
+
+  // check grouping
+  if (groupBy === 'top') {
+    if (termField == null) {
+      return i18n.translate('xpack.stackAlerts.esQuery.termFieldRequiredErrorMessage', {
+        defaultMessage: '[termField]: termField required when [groupBy] is top',
+      });
+    }
+    if (termSize == null) {
+      return i18n.translate('xpack.stackAlerts.esQuery.termSizeRequiredErrorMessage', {
+        defaultMessage: '[termSize]: termSize required when [groupBy] is top',
+      });
+    }
+    if (termSize > MAX_GROUPS) {
+      return i18n.translate('xpack.stackAlerts.esQuery.invalidTermSizeMaximumErrorMessage', {
+        defaultMessage: '[termSize]: must be less than or equal to {maxGroups}',
+        values: {
+          maxGroups: MAX_GROUPS,
+        },
+      });
+    }
   }
 
   if (searchType === 'searchSource') {

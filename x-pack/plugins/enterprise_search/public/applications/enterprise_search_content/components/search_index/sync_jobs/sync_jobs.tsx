@@ -61,9 +61,17 @@ export const SyncJobs: React.FC = () => {
       truncateText: true,
     },
     {
-      field: 'docsCount',
-      name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.docsCount.columnTitle', {
-        defaultMessage: 'Docs count',
+      field: 'indexed_document_count',
+      name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.addedDocs.columnTitle', {
+        defaultMessage: 'Docs added',
+      }),
+      sortable: true,
+      truncateText: true,
+    },
+    {
+      field: 'deleted_document_count',
+      name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.deletedDocs.columnTitle', {
+        defaultMessage: 'Docs deleted',
       }),
       sortable: true,
       truncateText: true,

@@ -6,24 +6,24 @@
  */
 
 import React, { useState } from 'react';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
+  EuiButton,
   EuiFieldSearch,
   EuiFieldSearchProps,
-  EuiButton,
-  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTextColor,
-  EuiText,
   EuiPageHeader,
+  EuiSpacer,
+  EuiText,
+  EuiTextColor,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
+import { KSPM_POLICY_TEMPLATE } from '../../../common/constants';
+import { useCspIntegrationLink } from '../../common/navigation/use_csp_integration_link';
 import { CloudPosturePageTitle } from '../../components/cloud_posture_page_title';
 import { CloudPosturePage } from '../../components/cloud_posture_page';
-import { useCISIntegrationLink } from '../../common/navigation/use_navigate_to_cis_integration';
 import { BenchmarksTable } from './benchmarks_table';
 import {
   useCspBenchmarkIntegrations,
@@ -31,12 +31,14 @@ import {
 } from './use_csp_benchmark_integrations';
 import { extractErrorMessage } from '../../../common/utils/helpers';
 import * as TEST_SUBJ from './test_subjects';
-import { LOCAL_STORAGE_PAGE_SIZE_BENCHMARK_KEY } from '../../../common/constants';
+import { LOCAL_STORAGE_PAGE_SIZE_BENCHMARK_KEY } from '../../common/constants';
+import { usePageSize } from '../../common/hooks/use_page_size';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
+// TODO: CIS AWS - add cspm integration button as well
 const AddCisIntegrationButton = () => {
-  const cisIntegrationLink = useCISIntegrationLink();
+  const cisIntegrationLink = useCspIntegrationLink(KSPM_POLICY_TEMPLATE);
 
   return (
     <EuiButton
@@ -128,14 +130,11 @@ const BenchmarkSearchField = ({
 };
 
 export const Benchmarks = () => {
-  const [pageSize, setPageSize] = useLocalStorage<number>(
-    LOCAL_STORAGE_PAGE_SIZE_BENCHMARK_KEY,
-    10
-  );
+  const { pageSize, setPageSize } = usePageSize(LOCAL_STORAGE_PAGE_SIZE_BENCHMARK_KEY);
   const [query, setQuery] = useState<UseCspBenchmarkIntegrationsProps>({
     name: '',
     page: 1,
-    perPage: pageSize || 10,
+    perPage: pageSize,
     sortField: 'package_policy.name',
     sortOrder: 'asc',
   });

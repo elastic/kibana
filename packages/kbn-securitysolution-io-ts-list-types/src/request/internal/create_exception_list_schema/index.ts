@@ -6,12 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  ENDPOINT_BLOCKLISTS_LIST_ID,
-  ENDPOINT_EVENT_FILTERS_LIST_ID,
-  ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
-  ENDPOINT_TRUSTED_APPS_LIST_ID,
-} from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LIST_IDS } from '@kbn/securitysolution-list-constants';
 import * as t from 'io-ts';
 
 import {
@@ -32,13 +27,13 @@ export const internalCreateExceptionListSchema = t.intersection([
   ),
   t.exact(
     t.partial({
-      // TODO: Move the ALL_ENDPOINT_ARTIFACT_LIST_IDS inside the package and use it here instead
-      list_id: t.keyof({
-        [ENDPOINT_TRUSTED_APPS_LIST_ID]: null,
-        [ENDPOINT_EVENT_FILTERS_LIST_ID]: null,
-        [ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID]: null,
-        [ENDPOINT_BLOCKLISTS_LIST_ID]: null,
-      }),
+      list_id: t.keyof(
+        ENDPOINT_ARTIFACT_LIST_IDS.reduce<Record<string, null>>((mapOfListIds, listId) => {
+          mapOfListIds[listId] = null;
+
+          return mapOfListIds;
+        }, {})
+      ),
     })
   ),
   createExceptionListSchema,

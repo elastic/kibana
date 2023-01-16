@@ -26,11 +26,11 @@ export const ANOMALY_THRESHOLD_INPUT = '[data-test-subj="anomalyThresholdSlider"
 
 export const ADVANCED_SETTINGS_BTN = '[data-test-subj="advancedSettings"] .euiAccordion__button';
 
-export const BACK_TO_ALL_RULES_LINK = '[data-test-subj="ruleDetailsBackToAllRules"]';
-
 export const COMBO_BOX_CLEAR_BTN = '[data-test-subj="comboBoxClearButton"]';
 
 export const CREATE_AND_ENABLE_BTN = '[data-test-subj="create-enable"]';
+
+export const CREATE_WITHOUT_ENABLING_BTN = '[data-test-subj="create-enabled-false"]';
 
 export const CUSTOM_QUERY_INPUT = '[data-test-subj="queryInput"]';
 
@@ -71,6 +71,8 @@ export const DATA_VIEW_COMBO_BOX =
   '[data-test-subj="pick-rule-data-source"] [data-test-subj="comboBoxInput"]';
 
 export const DATA_VIEW_OPTION = '[data-test-subj="rule-index-toggle-dataView"]';
+
+export const CONTINUE_BUTTON = '[data-test-subj$=-continue]';
 
 export const DEFINE_CONTINUE_BUTTON = '[data-test-subj="define-continue"]';
 
@@ -224,3 +226,8 @@ export const savedQueryByName = (savedQueryName: string) =>
 
 export const APPLY_SELECTED_SAVED_QUERY_BUTTON =
   '[data-test-subj="saved-query-management-apply-changes-button"]';
+
+export const RULE_INDICES =
+  '[data-test-subj="detectionEngineStepDefineRuleIndices"] [data-test-subj="comboBoxInput"]';
+
+export const ALERTS_INDEX_BUTTON = 'span[title=".alerts-security.alerts-default"] button';

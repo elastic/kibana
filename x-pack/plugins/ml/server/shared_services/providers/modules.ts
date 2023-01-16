@@ -33,9 +33,10 @@ export function getModulesProvider(
 ): ModulesProvider {
   return {
     modulesProvider(request: KibanaRequest, savedObjectsClient: SavedObjectsClientContract) {
+      const guards = getGuards(request, savedObjectsClient);
       return {
         async recognize(...args) {
-          return await getGuards(request, savedObjectsClient)
+          return await guards
             .isFullLicense()
             .hasMlCapabilities(['canGetJobs'])
             .ok(async ({ scopedClient, mlClient, mlSavedObjectService, getDataViewsService }) => {
@@ -52,7 +53,7 @@ export function getModulesProvider(
             });
         },
         async getModule(moduleId: string) {
-          return await getGuards(request, savedObjectsClient)
+          return await guards
             .isFullLicense()
             .hasMlCapabilities(['canGetJobs'])
             .ok(async ({ scopedClient, mlClient, mlSavedObjectService, getDataViewsService }) => {
@@ -69,7 +70,7 @@ export function getModulesProvider(
             });
         },
         async listModules() {
-          return await getGuards(request, savedObjectsClient)
+          return await guards
             .isFullLicense()
             .hasMlCapabilities(['canGetJobs'])
             .ok(async ({ scopedClient, mlClient, mlSavedObjectService, getDataViewsService }) => {
@@ -86,7 +87,7 @@ export function getModulesProvider(
             });
         },
         async setup(payload: ModuleSetupPayload) {
-          return await getGuards(request, savedObjectsClient)
+          return await guards
             .isFullLicense()
             .hasMlCapabilities(['canCreateJob'])
             .ok(async ({ scopedClient, mlClient, mlSavedObjectService, getDataViewsService }) => {

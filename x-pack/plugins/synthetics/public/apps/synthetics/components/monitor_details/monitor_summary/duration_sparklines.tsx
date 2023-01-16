@@ -8,7 +8,8 @@
 import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ReportTypes, useTheme } from '@kbn/observability-plugin/public';
-import { useParams } from 'react-router-dom';
+import { AVG_DURATION_LABEL } from './duration_panel';
+import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 import { ClientPluginsStart } from '../../../../../plugin';
 import { useSelectedLocation } from '../hooks/use_selected_location';
 
@@ -23,13 +24,12 @@ export const DurationSparklines = (props: DurationSparklinesProps) => {
       observability: { ExploratoryViewEmbeddable },
     },
   } = useKibana<ClientPluginsStart>();
-  const { monitorId } = useParams<{ monitorId: string }>();
-
+  const monitorId = useMonitorQueryId();
   const theme = useTheme();
 
   const selectedLocation = useSelectedLocation();
 
-  if (!selectedLocation) {
+  if (!selectedLocation || !monitorId) {
     return null;
   }
 
@@ -44,11 +44,11 @@ export const DurationSparklines = (props: DurationSparklinesProps) => {
           {
             seriesType: 'area',
             time: props,
-            name: 'Monitor duration',
+            name: AVG_DURATION_LABEL,
             dataType: 'synthetics',
             selectedMetricField: 'monitor.duration.us',
             reportDefinitions: {
-              config_id: [monitorId],
+              'monitor.id': [monitorId],
               'observer.geo.name': [selectedLocation?.label],
             },
             color: theme.eui.euiColorVis1,

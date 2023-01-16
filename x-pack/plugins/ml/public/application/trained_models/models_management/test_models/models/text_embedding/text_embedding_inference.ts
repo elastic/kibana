@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-
 import { i18n } from '@kbn/i18n';
-import { InferenceBase, InferResponse } from '../inference_base';
+import { estypes } from '@elastic/elasticsearch';
+import { InferenceBase, INPUT_TYPE } from '../inference_base';
+import type { InferResponse } from '../inference_base';
 import { getGeneralInputComponent } from '../text_input';
 import { getTextEmbeddingOutputComponent } from './text_embedding_output';
 import { SUPPORTED_PYTORCH_TASKS } from '../../../../../../../common/constants/trained_models';
+import { trainedModelsApiProvider } from '../../../../../services/ml_api_service/trained_models';
 
 export interface RawTextEmbeddingResponse {
-  inference_results: [{ predicted_value: number[] }];
+  inference_results: Array<{ predicted_value: number[] }>;
 }
 
 export interface FormattedTextEmbeddingResponse {
@@ -38,38 +39,48 @@ export class TextEmbeddingInference extends InferenceBase<TextEmbeddingResponse>
     }),
   ];
 
-  public async infer() {
-    try {
-      this.setRunning();
-      const inputText = this.inputText$.getValue();
-      const payload = {
-        docs: [{ [this.inputField]: inputText }],
-      };
-      const resp = (await this.trainedModelsApi.inferTrainedModel(
-        this.model.model_id,
-        payload,
-        '30s'
-      )) as unknown as RawTextEmbeddingResponse;
+  constructor(
+    trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
+    model: estypes.MlTrainedModelConfig,
+    inputType: INPUT_TYPE
+  ) {
+    super(trainedModelsApi, model, inputType);
 
-      const processedResponse: TextEmbeddingResponse = processResponse(resp, this.model, inputText);
-      this.inferenceResult$.next(processedResponse);
-      this.setFinished();
-
-      return processedResponse;
-    } catch (error) {
-      this.setFinishedWithErrors(error);
-      throw error;
-    }
+    this.initialize();
   }
 
-  public getInputComponent(): JSX.Element {
-    const placeholder = i18n.translate(
-      'xpack.ml.trainedModels.testModelsFlyout.textEmbedding.inputText',
-      {
-        defaultMessage: 'Enter a phrase to test',
+  public async inferText() {
+    return this.runInfer<RawTextEmbeddingResponse>(
+      () => {},
+      (resp, inputText) => {
+        return processTextResponse(resp, inputText);
       }
     );
-    return getGeneralInputComponent(this, placeholder);
+  }
+
+  protected async inferIndex() {
+    return this.runPipelineSimulate((doc) => {
+      const inputText = doc._source[this.getInputField()];
+      return processIndexResponse(doc._source[this.inferenceType], inputText);
+    });
+  }
+
+  protected getProcessors() {
+    return this.getBasicProcessors();
+  }
+
+  public getInputComponent(): JSX.Element | null {
+    if (this.inputType === INPUT_TYPE.TEXT) {
+      const placeholder = i18n.translate(
+        'xpack.ml.trainedModels.testModelsFlyout.textEmbedding.inputText',
+        {
+          defaultMessage: 'Enter a phrase to test',
+        }
+      );
+      return getGeneralInputComponent(this, placeholder);
+    } else {
+      return null;
+    }
   }
 
   public getOutputComponent(): JSX.Element {
@@ -77,11 +88,20 @@ export class TextEmbeddingInference extends InferenceBase<TextEmbeddingResponse>
   }
 }
 
-function processResponse(
+function processTextResponse(
   resp: RawTextEmbeddingResponse,
-  model: estypes.MlTrainedModelConfig,
+
   inputText: string
 ) {
   const predictedValue = resp.inference_results[0].predicted_value;
   return { response: { predictedValue }, rawResponse: resp, inputText };
+}
+
+function processIndexResponse(resp: { predicted_value: number[] }, inputText: string) {
+  const predictedValue = resp.predicted_value;
+  return {
+    response: { predictedValue },
+    rawResponse: { inference_results: [{ predicted_value: predictedValue }] },
+    inputText,
+  };
 }

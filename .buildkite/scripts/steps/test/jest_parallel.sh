@@ -26,6 +26,13 @@ echo "--- downloading jest test run order"
 download_artifact jest_run_order.json .
 configs=$(jq -r 'getpath([env.TEST_TYPE]) | .groups[env.JOB | tonumber].names | .[]' jest_run_order.json)
 
+echo "+++ ⚠️ WARNING ⚠️"
+echo "
+  console.log(), console.warn(), and console.error() output in jest tests causes a massive amount
+  of noise on CI without any percevable benefit, so they have been disabled. If you want to log
+  output in your test temporarily, you can modify 'packages/kbn-test/src/jest/setup/disable_console_logs.js'
+"
+
 while read -r config; do
   echo "--- $ node scripts/jest --config $config"
 

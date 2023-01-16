@@ -123,7 +123,9 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsBatchResponse",
-        "description": [],
+        "description": [
+          "\nBatch response for simple saved objects\n"
+        ],
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-api-browser",
@@ -144,7 +146,9 @@
             "type": "Array",
             "tags": [],
             "label": "savedObjects",
-            "description": [],
+            "description": [
+              "Array of simple saved objects"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-api-browser",
@@ -168,7 +172,9 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsBulkCreateObject",
-        "description": [],
+        "description": [
+          "\nPer-object parameters for bulk create operation\n"
+        ],
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-api-browser",
@@ -196,7 +202,9 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": [],
+            "description": [
+              "Create a SavedObject of this type."
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/bulk_create.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -207,7 +215,9 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "attributes",
-            "description": [],
+            "description": [
+              "Attributes for the saved object to be created."
+            ],
             "signature": [
               "T"
             ],
@@ -224,7 +234,9 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsBulkCreateOptions",
-        "description": [],
+        "description": [
+          "\nOptions for bulk create operation\n"
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/bulk_create.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -236,7 +248,7 @@
             "tags": [],
             "label": "overwrite",
             "description": [
-              "If a document with the given `id` already exists, overwrite it's contents (default=false)."
+              "If a document with the given `id` already exists, overwrite its contents (default=false)."
             ],
             "signature": [
               "boolean | undefined"
@@ -254,7 +266,9 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsBulkDeleteOptions",
-        "description": [],
+        "description": [
+          "\nOptions for bulk delete operation\n"
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/bulk_delete.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -265,7 +279,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "force",
-            "description": [],
+            "description": [
+              "Force deletion of any objects that exist in multiple namespaces (default=false)"
+            ],
             "signature": [
               "boolean | undefined"
             ],
@@ -282,7 +298,9 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsBulkDeleteResponse",
-        "description": [],
+        "description": [
+          "\nReturn type of the Saved Objects `bulkDelete()` method.\n"
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/bulk_delete.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -293,7 +311,9 @@
             "type": "Array",
             "tags": [],
             "label": "statuses",
-            "description": [],
+            "description": [
+              "array of statuses per object"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-api-browser",
@@ -317,7 +337,9 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsBulkDeleteResponseItem",
-        "description": [],
+        "description": [
+          "\nSingle item within the statuses array of the bulk delete response\n"
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/bulk_delete.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -328,7 +350,9 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [],
+            "description": [
+              "saved object id"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/bulk_delete.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -339,7 +363,9 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": [],
+            "description": [
+              "saved object type"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/bulk_delete.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -350,7 +376,9 @@
             "type": "boolean",
             "tags": [],
             "label": "success",
-            "description": [],
+            "description": [
+              "true if the delete operation succeeded"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/bulk_delete.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -361,7 +389,9 @@
             "type": "Object",
             "tags": [],
             "label": "error",
-            "description": [],
+            "description": [
+              "error from delete operation (undefined if no error)"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-common",
@@ -385,7 +415,9 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsBulkResolveResponse",
-        "description": [],
+        "description": [
+          "\nReturn type of the Saved Objects `bulkResolve()` method.\n"
+        ],
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-api-browser",
@@ -406,7 +438,9 @@
             "type": "Array",
             "tags": [],
             "label": "resolved_objects",
-            "description": [],
+            "description": [
+              "Array of {@link ResolvedSimpleSavedObject} that were resolved"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-api-browser",
@@ -430,7 +464,9 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsBulkUpdateObject",
-        "description": [],
+        "description": [
+          "\nPer-object parameters for bulk update operation\n"
+        ],
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-api-browser",
@@ -451,7 +487,9 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": [],
+            "description": [
+              "Type of the saved object to update"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/bulk_update.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -462,7 +500,9 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [],
+            "description": [
+              "ID of the saved object to update"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/bulk_update.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -473,7 +513,9 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "attributes",
-            "description": [],
+            "description": [
+              "The attributes to update"
+            ],
             "signature": [
               "T"
             ],
@@ -487,7 +529,9 @@
             "type": "string",
             "tags": [],
             "label": "version",
-            "description": [],
+            "description": [
+              "The version string for the saved object"
+            ],
             "signature": [
               "string | undefined"
             ],
@@ -501,7 +545,9 @@
             "type": "Array",
             "tags": [],
             "label": "references",
-            "description": [],
+            "description": [
+              "Array of references to other saved objects"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-common",
@@ -525,7 +571,9 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsBulkUpdateOptions",
-        "description": [],
+        "description": [
+          "\nOptions for bulk update operation\n"
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/bulk_update.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -536,7 +584,9 @@
             "type": "string",
             "tags": [],
             "label": "namespace",
-            "description": [],
+            "description": [
+              "\nThe namespace from which to apply the bulk update operation\nNot permitted if spaces extension is enabled"
+            ],
             "signature": [
               "string | undefined"
             ],
@@ -567,7 +617,7 @@
             "tags": [],
             "label": "create",
             "description": [
-              "\nPersists an object"
+              "\nCreates an object\n"
             ],
             "signature": [
               "<T = unknown>(type: string, attributes: T, options?: ",
@@ -598,7 +648,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "type",
-                "description": [],
+                "description": [
+                  "- the type of object to create"
+                ],
                 "signature": [
                   "string"
                 ],
@@ -613,7 +665,9 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "attributes",
-                "description": [],
+                "description": [
+                  "- the attributes of the object"
+                ],
                 "signature": [
                   "T"
                 ],
@@ -628,7 +682,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [],
+                "description": [
+                  "{@link SavedObjectsCreateOptions }"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-browser",
@@ -645,7 +701,9 @@
                 "isRequired": false
               }
             ],
-            "returnComment": []
+            "returnComment": [
+              "The result of the create operation - the created saved object"
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-browser",
@@ -654,7 +712,7 @@
             "tags": [],
             "label": "bulkCreate",
             "description": [
-              "\nCreates multiple documents at once"
+              "\nCreates multiple objects at once\n"
             ],
             "signature": [
               "(objects: ",
@@ -693,7 +751,9 @@
                 "type": "Array",
                 "tags": [],
                 "label": "objects",
-                "description": [],
+                "description": [
+                  "- an array of objects containing type, attributes"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-browser",
@@ -715,7 +775,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [],
+                "description": [
+                  "{@link SavedObjectsBulkCreateOptions }"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-browser",
@@ -743,7 +805,7 @@
             "tags": [],
             "label": "delete",
             "description": [
-              "\nDeletes an object"
+              "\nDeletes an object\n"
             ],
             "signature": [
               "(type: string, id: string, options?: ",
@@ -766,7 +828,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "type",
-                "description": [],
+                "description": [
+                  "- the type the of object to delete"
+                ],
                 "signature": [
                   "string"
                 ],
@@ -781,7 +845,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "id",
-                "description": [],
+                "description": [
+                  "- the id of the object to delete"
+                ],
                 "signature": [
                   "string"
                 ],
@@ -796,7 +862,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [],
+                "description": [
+                  "{@link SavedObjectsDeleteOptions }"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-browser",
@@ -954,7 +1022,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [],
+                "description": [
+                  "{@link SavedObjectsFindOptions }"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-browser",
@@ -1004,7 +1074,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "type",
-                "description": [],
+                "description": [
+                  "- the type of the object to get"
+                ],
                 "signature": [
                   "string"
                 ],
@@ -1019,7 +1091,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "id",
-                "description": [],
+                "description": [
+                  "- the ID of the object to get"
+                ],
                 "signature": [
                   "string"
                 ],
@@ -1126,7 +1200,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "type",
-                "description": [],
+                "description": [
+                  "- the type of the object to resolve"
+                ],
                 "signature": [
                   "string"
                 ],
@@ -1141,7 +1217,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "id",
-                "description": [],
+                "description": [
+                  "- the ID of the object to resolve"
+                ],
                 "signature": [
                   "string"
                 ],
@@ -1259,7 +1337,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "type",
-                "description": [],
+                "description": [
+                  "- the type of the object to update"
+                ],
                 "signature": [
                   "string"
                 ],
@@ -1274,7 +1354,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "id",
-                "description": [],
+                "description": [
+                  "- the ID of the object to update"
+                ],
                 "signature": [
                   "string"
                 ],
@@ -1289,7 +1371,9 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "attributes",
-                "description": [],
+                "description": [
+                  "- the attributes to update"
+                ],
                 "signature": [
                   "T"
                 ],
@@ -1304,7 +1388,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [],
+                "description": [
+                  "{@link SavedObjectsUpdateOptions }"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-browser",
@@ -1321,7 +1407,9 @@
                 "isRequired": false
               }
             ],
-            "returnComment": []
+            "returnComment": [
+              "the udpated simple saved object"
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-browser",
@@ -1362,7 +1450,7 @@
                 "tags": [],
                 "label": "objects",
                 "description": [
-                  "- [{ type, id, attributes, options: { version, references } }]"
+                  "- an array of objects containing type, id, attributes, and references"
                 ],
                 "signature": [
                   {
@@ -1381,7 +1469,7 @@
               }
             ],
             "returnComment": [
-              "The result of the update operation containing both failed and updated saved objects."
+              "the result of the bulk update operation containing both failed and updated saved objects."
             ]
           }
         ],
@@ -1393,7 +1481,9 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsCreateOptions",
-        "description": [],
+        "description": [
+          "\nOptions for creating a saved object.\n"
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/create.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1475,7 +1565,9 @@
             "type": "Array",
             "tags": [],
             "label": "references",
-            "description": [],
+            "description": [
+              "Array of referenced saved objects."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-common",
@@ -1499,7 +1591,9 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsDeleteOptions",
-        "description": [],
+        "description": [
+          "\nOptions for deleting a saved object.\n"
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/delete.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1511,7 +1605,7 @@
             "tags": [],
             "label": "force",
             "description": [
-              "Force deletion of an object that exists in multiple namespaces"
+              "Force deletion of an object that exists in multiple namespaces (default=false)"
             ],
             "signature": [
               "boolean | undefined"
@@ -1529,8 +1623,10 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsFindOptionsReference",
-        "description": [],
-        "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/find.ts",
+        "description": [
+          "\nAn object reference for use in find operation options\n"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1540,8 +1636,10 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/find.ts",
+            "description": [
+              "The type of the saved object"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1551,8 +1649,10 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/find.ts",
+            "description": [
+              "The ID of the saved object"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1596,7 +1696,9 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "aggregations",
-            "description": [],
+            "description": [
+              "aggregations from the search query"
+            ],
             "signature": [
               "A | undefined"
             ],
@@ -1610,7 +1712,9 @@
             "type": "number",
             "tags": [],
             "label": "total",
-            "description": [],
+            "description": [
+              "total number of results"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/find.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1621,7 +1725,9 @@
             "type": "number",
             "tags": [],
             "label": "perPage",
-            "description": [],
+            "description": [
+              "number of results per page"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/find.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1632,7 +1738,9 @@
             "type": "number",
             "tags": [],
             "label": "page",
-            "description": [],
+            "description": [
+              "current page in results"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/find.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1646,7 +1754,9 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsUpdateOptions",
-        "description": [],
+        "description": [
+          "\nOptions for updating a saved object\n"
+        ],
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-api-browser",
@@ -1667,7 +1777,9 @@
             "type": "string",
             "tags": [],
             "label": "version",
-            "description": [],
+            "description": [
+              "version of the saved object"
+            ],
             "signature": [
               "string | undefined"
             ],
@@ -1681,7 +1793,9 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "upsert",
-            "description": [],
+            "description": [
+              "Alternative attributes for the saved object if upserting"
+            ],
             "signature": [
               "Attributes | undefined"
             ],
@@ -1695,7 +1809,9 @@
             "type": "Array",
             "tags": [],
             "label": "references",
-            "description": [],
+            "description": [
+              "Array of references to other saved objects"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-common",
@@ -1742,7 +1858,9 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "attributes",
-            "description": [],
+            "description": [
+              "attributes of the object, templated"
+            ],
             "signature": [
               "T"
             ],
@@ -1756,7 +1874,9 @@
             "type": "string",
             "tags": [],
             "label": "_version",
-            "description": [],
+            "description": [
+              " version of the saved object"
+            ],
             "signature": [
               "string | undefined"
             ],
@@ -1770,7 +1890,9 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [],
+            "description": [
+              "ID of the saved object"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/simple_saved_object.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1781,7 +1903,9 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": [],
+            "description": [
+              "Type of the saved object"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/simple_saved_object.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1792,7 +1916,9 @@
             "type": "Object",
             "tags": [],
             "label": "migrationVersion",
-            "description": [],
+            "description": [
+              "Migration version of the saved object"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-common",
@@ -1813,7 +1939,9 @@
             "type": "string",
             "tags": [],
             "label": "coreMigrationVersion",
-            "description": [],
+            "description": [
+              "Core migration version of the saved object"
+            ],
             "signature": [
               "string | undefined"
             ],
@@ -1827,7 +1955,9 @@
             "type": "Object",
             "tags": [],
             "label": "error",
-            "description": [],
+            "description": [
+              "Error associated with this object, undefined if no error"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-common",
@@ -1848,7 +1978,9 @@
             "type": "Array",
             "tags": [],
             "label": "references",
-            "description": [],
+            "description": [
+              "References to other saved objects"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-common",
@@ -1869,7 +2001,9 @@
             "type": "string",
             "tags": [],
             "label": "updatedAt",
-            "description": [],
+            "description": [
+              "The date this object was last updated"
+            ],
             "signature": [
               "string | undefined"
             ],
@@ -1883,7 +2017,9 @@
             "type": "string",
             "tags": [],
             "label": "createdAt",
-            "description": [],
+            "description": [
+              "The date this object was created"
+            ],
             "signature": [
               "string | undefined"
             ],
@@ -1913,7 +2049,9 @@
             "type": "Function",
             "tags": [],
             "label": "get",
-            "description": [],
+            "description": [
+              "\nGets an attribute of this object\n"
+            ],
             "signature": [
               "(key: string) => any"
             ],
@@ -1927,7 +2065,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "key",
-                "description": [],
+                "description": [
+                  "- the name of the attribute"
+                ],
                 "signature": [
                   "string"
                 ],
@@ -1937,7 +2077,9 @@
                 "isRequired": true
               }
             ],
-            "returnComment": []
+            "returnComment": [
+              "The value of the attribute."
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-browser",
@@ -1945,7 +2087,9 @@
             "type": "Function",
             "tags": [],
             "label": "set",
-            "description": [],
+            "description": [
+              "\nSets an attribute of this object\n"
+            ],
             "signature": [
               "(key: string, value: any) => T"
             ],
@@ -1959,7 +2103,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "key",
-                "description": [],
+                "description": [
+                  "- the name of the attribute"
+                ],
                 "signature": [
                   "string"
                 ],
@@ -1974,7 +2120,9 @@
                 "type": "Any",
                 "tags": [],
                 "label": "value",
-                "description": [],
+                "description": [
+                  "- the value for the attribute"
+                ],
                 "signature": [
                   "any"
                 ],
@@ -1984,7 +2132,9 @@
                 "isRequired": true
               }
             ],
-            "returnComment": []
+            "returnComment": [
+              "The updated attributes of this object."
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-browser",
@@ -1992,7 +2142,9 @@
             "type": "Function",
             "tags": [],
             "label": "has",
-            "description": [],
+            "description": [
+              "\nChecks if this object has an attribute\n"
+            ],
             "signature": [
               "(key: string) => boolean"
             ],
@@ -2006,7 +2158,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "key",
-                "description": [],
+                "description": [
+                  "- the name of the attribute"
+                ],
                 "signature": [
                   "string"
                 ],
@@ -2016,7 +2170,9 @@
                 "isRequired": true
               }
             ],
-            "returnComment": []
+            "returnComment": [
+              "true if the attribute exists."
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-browser",
@@ -2024,7 +2180,9 @@
             "type": "Function",
             "tags": [],
             "label": "save",
-            "description": [],
+            "description": [
+              "\nSaves this object"
+            ],
             "signature": [
               "() => Promise<",
               {
@@ -2048,7 +2206,9 @@
             "type": "Function",
             "tags": [],
             "label": "delete",
-            "description": [],
+            "description": [
+              "\nDeletes this object"
+            ],
             "signature": [
               "() => Promise<{}>"
             ],
@@ -2070,40 +2230,42 @@
         "type": "Type",
         "tags": [],
         "label": "SavedObjectsFindOptions",
-        "description": [],
+        "description": [
+          "\nBrowser options for finding saved objects\n"
+        ],
         "signature": [
           "{ type: string | string[]; filter?: any; search?: string | undefined; fields?: string[] | undefined; aggs?: Record<string, ",
           "AggregationsAggregationContainer",
           "> | undefined; page?: number | undefined; perPage?: number | undefined; sortField?: string | undefined; searchFields?: string[] | undefined; hasReference?: ",
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-server.SavedObjectsFindOptionsReference",
+            "section": "def-common.SavedObjectsFindOptionsReference",
             "text": "SavedObjectsFindOptionsReference"
           },
           " | ",
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-server.SavedObjectsFindOptionsReference",
+            "section": "def-common.SavedObjectsFindOptionsReference",
             "text": "SavedObjectsFindOptionsReference"
           },
           "[] | undefined; hasReferenceOperator?: \"AND\" | \"OR\" | undefined; hasNoReference?: ",
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-server.SavedObjectsFindOptionsReference",
+            "section": "def-common.SavedObjectsFindOptionsReference",
             "text": "SavedObjectsFindOptionsReference"
           },
           " | ",
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-server.SavedObjectsFindOptionsReference",
+            "section": "def-common.SavedObjectsFindOptionsReference",
             "text": "SavedObjectsFindOptionsReference"
           },
           "[] | undefined; hasNoReferenceOperator?: \"AND\" | \"OR\" | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; namespaces?: string[] | undefined; preference?: string | undefined; }"

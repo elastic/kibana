@@ -6,6 +6,7 @@
  */
 
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import { EuiIcon, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { GuidedOnboardingTourStep } from '../../../common/components/guided_onboarding_tour/tour_step';
 import { isDetectionsAlertsTable } from '../../../common/components/top_n/helpers';
@@ -20,6 +21,8 @@ import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 
 import type { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
+
+import { SUPPRESSED_ALERT_TOOLTIP } from './translations';
 
 /**
  * This implementation of `EuiDataGrid`'s `renderCellValue`
@@ -39,7 +42,9 @@ export const RenderCellValue: React.FC<EuiDataGridCellValueElementProps & CellVa
     [columnId, props.isDetails, rowIndex, scopeId]
   );
 
-  return (
+  const suppressionCount = props.ecsData?.kibana?.alert.suppression?.docs_count;
+
+  const component = (
     <GuidedOnboardingTourStep
       isTourAnchor={isTourAnchor}
       step={AlertsCasesTourSteps.pointToAlertName}
@@ -47,6 +52,24 @@ export const RenderCellValue: React.FC<EuiDataGridCellValueElementProps & CellVa
     >
       <DefaultCellRenderer {...props} />
     </GuidedOnboardingTourStep>
+  );
+
+  return columnId === SIGNAL_RULE_NAME_FIELD_NAME &&
+    suppressionCount &&
+    parseInt(suppressionCount[0], 10) > 0 ? (
+    <EuiFlexGroup gutterSize="xs">
+      <EuiFlexItem grow={false}>
+        <EuiToolTip
+          position="top"
+          content={SUPPRESSED_ALERT_TOOLTIP(parseInt(suppressionCount[0], 10))}
+        >
+          <EuiIcon type="layers" />
+        </EuiToolTip>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>{component}</EuiFlexItem>
+    </EuiFlexGroup>
+  ) : (
+    component
   );
 };
 

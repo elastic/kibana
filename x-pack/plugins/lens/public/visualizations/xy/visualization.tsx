@@ -43,6 +43,7 @@ import {
   type XYDataLayerConfig,
   type SeriesType,
   type PersistedState,
+  type XYAnnotationLayerConfig,
   visualizationTypes,
 } from './types';
 import {
@@ -94,7 +95,11 @@ import { AnnotationsPanel } from './xy_config_panel/annotations_config_panel';
 import { DimensionTrigger } from '../../shared_components/dimension_trigger';
 import { defaultAnnotationLabel } from './annotations/helpers';
 import { onDropForVisualization } from '../../editor_frame_service/editor_frame/config_panel/buttons/drop_targets_utils';
-import { createAnnotationActions } from './annotations/actions';
+import {
+  createAnnotationActions,
+  IGNORE_GLOBAL_FILTERS_ACTION_ID,
+  KEEP_GLOBAL_FILTERS_ACTION_ID,
+} from './annotations/actions';
 
 const XY_ID = 'lnsXY';
 export const getXyVisualization = ({
@@ -249,14 +254,32 @@ export const getXyVisualization = ({
     ];
   },
 
-  getSupportedActionsForLayer(layerId, state, setState) {
+  getSupportedActionsForLayer(layerId, state) {
     const layerIndex = state.layers.findIndex((l) => l.layerId === layerId);
     const layer = state.layers[layerIndex];
     const actions = [];
     if (isAnnotationsLayer(layer)) {
-      actions.push(...createAnnotationActions({ state, layerIndex, layer, setState }));
+      actions.push(...createAnnotationActions({ state, layerIndex, layer }));
     }
     return actions;
+  },
+
+  onLayerAction(layerId, actionId, state) {
+    if ([IGNORE_GLOBAL_FILTERS_ACTION_ID, KEEP_GLOBAL_FILTERS_ACTION_ID].includes(actionId)) {
+      return {
+        ...state,
+        layers: state.layers.map((layer) =>
+          layer.layerId === layerId
+            ? {
+                ...layer,
+                ignoreGlobalFilters: !(layer as XYAnnotationLayerConfig).ignoreGlobalFilters,
+              }
+            : layer
+        ),
+      };
+    }
+
+    return state;
   },
 
   onIndexPatternChange(state, indexPatternId, layerId) {
@@ -366,7 +389,7 @@ export const getXyVisualization = ({
             ? [
                 {
                   columnId: dataLayer.splitAccessor,
-                  triggerIcon: dataLayer.collapseFn ? ('aggregate' as const) : ('colorBy' as const),
+                  triggerIconType: dataLayer.collapseFn ? 'aggregate' : 'colorBy',
                   palette: dataLayer.collapseFn
                     ? undefined
                     : paletteService
@@ -891,11 +914,19 @@ export const getXyVisualization = ({
         icon = layerVisType?.icon;
         label = layerVisType?.fullLabel || layerVisType?.label;
         if (layer.xAccessor) {
-          dimensions.push({ name: getAxisName('x', { isHorizontal }), id: layer.xAccessor });
+          dimensions.push({
+            name: getAxisName('x', { isHorizontal }),
+            id: layer.xAccessor,
+            dimensionType: 'x',
+          });
         }
         if (layer.accessors && layer.accessors.length) {
           layer.accessors.forEach((accessor) => {
-            dimensions.push({ name: getAxisName('y', { isHorizontal }), id: accessor });
+            dimensions.push({
+              name: getAxisName('y', { isHorizontal }),
+              id: accessor,
+              dimensionType: 'y',
+            });
           });
         }
         if (layer.splitAccessor) {
@@ -903,6 +934,7 @@ export const getXyVisualization = ({
             name: i18n.translate('xpack.lens.xyChart.splitSeries', {
               defaultMessage: 'Breakdown',
             }),
+            dimensionType: 'breakdown',
             id: layer.splitAccessor,
           });
         }
@@ -913,6 +945,7 @@ export const getXyVisualization = ({
             name: i18n.translate('xpack.lens.xyChart.layerReferenceLine', {
               defaultMessage: 'Reference line',
             }),
+            dimensionType: 'reference_line',
             id: accessor,
           });
         });
@@ -927,6 +960,7 @@ export const getXyVisualization = ({
             name: i18n.translate('xpack.lens.xyChart.layerAnnotation', {
               defaultMessage: 'Annotation',
             }),
+            dimensionType: 'annotation',
             id: annotation.id,
           });
         });

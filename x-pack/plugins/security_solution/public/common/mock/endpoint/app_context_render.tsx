@@ -24,7 +24,6 @@ import type {
 } from '@testing-library/react-hooks/src/types/react';
 import type { UseBaseQueryResult } from '@tanstack/react-query';
 import ReactDOM from 'react-dom';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
 import { ConsoleManager } from '../../../management/components/console';
 import type { StartPlugins, StartServices } from '../../../types';
 import { depsStartMock } from './dependencies_start_mock';
@@ -41,7 +40,7 @@ import type { ExperimentalFeatures } from '../../../../common/experimental_featu
 import { APP_UI_ID, APP_PATH } from '../../../../common/constants';
 import { KibanaContextProvider, KibanaServices } from '../../lib/kibana';
 import { getDeepLinks } from '../../../app/deep_links';
-import { fleetGetPackageListHttpMock } from '../../../management/mocks';
+import { fleetGetPackageHttpMock } from '../../../management/mocks';
 
 const REAL_REACT_DOM_CREATE_PORTAL = ReactDOM.createPortal;
 
@@ -155,6 +154,11 @@ export interface AppContextTestRender {
    * @param flags
    */
   setExperimentalFlag: (flags: Partial<ExperimentalFeatures>) => void;
+
+  /**
+   * The React Query client (setup to support jest testing)
+   */
+  queryClient: QueryClient;
 }
 
 // Defined a private custom reducer that reacts to an action that enables us to update the
@@ -205,14 +209,10 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     app: experimentalFeaturesReducer,
   };
 
-  const store = createStore(
-    mockGlobalState,
-    storeReducer,
-    { dataTable: tGridReducer },
-    kibanaObservable,
-    storage,
-    [...managementMiddlewareFactory(coreStart, depsStart), middlewareSpy.actionSpyMiddleware]
-  );
+  const store = createStore(mockGlobalState, storeReducer, kibanaObservable, storage, [
+    ...managementMiddlewareFactory(coreStart, depsStart),
+    middlewareSpy.actionSpyMiddleware,
+  ]);
 
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -315,6 +315,7 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     renderHook,
     renderReactQueryHook,
     setExperimentalFlag,
+    queryClient,
   };
 };
 
@@ -372,5 +373,5 @@ const applyDefaultCoreHttpMocks = (http: AppContextTestRender['coreStart']['http
   // Need to mock getting the endpoint package from the fleet API because it is used as soon
   // as the store middleware for Endpoint list is initialized, thus mocking it here would avoid
   // unnecessary errors being output to the console
-  fleetGetPackageListHttpMock(http, { ignoreUnMockedApiRouteErrors: true });
+  fleetGetPackageHttpMock(http, { ignoreUnMockedApiRouteErrors: true });
 };

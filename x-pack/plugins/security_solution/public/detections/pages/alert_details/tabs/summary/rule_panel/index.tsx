@@ -11,7 +11,7 @@ import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import React, { useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { find } from 'lodash/fp';
-import type { FlexItemGrowSize } from '@elastic/eui/src/components/flex/flex_item';
+import type { EuiFlexItemProps } from '@elastic/eui/src/components/flex/flex_item';
 import {
   ALERT_RISK_SCORE,
   ALERT_RULE_DESCRIPTION,
@@ -55,7 +55,7 @@ const threatTacticContainerStyles = css`
 interface RuleSectionProps {
   ['data-test-subj']?: string;
   title: string;
-  grow?: FlexItemGrowSize;
+  grow?: EuiFlexItemProps['grow'];
 }
 const RuleSection: React.FC<RuleSectionProps> = ({
   grow,

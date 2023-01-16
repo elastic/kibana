@@ -8,12 +8,13 @@
 import type { SingleCaseMetricsFeature } from './types';
 
 export const DEFAULT_TABLE_ACTIVE_PAGE = 1;
-export const DEFAULT_TABLE_LIMIT = 5;
+export const DEFAULT_TABLE_LIMIT = 10;
 
 export const casesQueriesKeys = {
   all: ['cases'] as const,
   users: ['users'] as const,
   connectors: ['connectors'] as const,
+  alerts: ['alerts'] as const,
   connectorsList: () => [...casesQueriesKeys.connectors, 'list'] as const,
   casesList: () => [...casesQueriesKeys.all, 'list'] as const,
   casesMetrics: () => [...casesQueriesKeys.casesList(), 'metrics'] as const,
@@ -32,9 +33,12 @@ export const casesQueriesKeys = {
   connectorTypes: () => [...casesQueriesKeys.connectors, 'types'] as const,
   license: () => [...casesQueriesKeys.connectors, 'license'] as const,
   tags: () => [...casesQueriesKeys.all, 'tags'] as const,
+  alertFeatureIds: (alertRegistrationContexts: string[]) =>
+    [...casesQueriesKeys.alerts, 'features', alertRegistrationContexts] as const,
 };
 
 export const casesMutationsKeys = {
   deleteCases: ['delete-cases'] as const,
   updateCases: ['update-cases'] as const,
+  deleteComment: ['delete-comment'] as const,
 };

@@ -7,11 +7,12 @@
 
 import uuid from 'uuid';
 
-import { SLO } from '../../types/models';
+import { CreateSLOParams, CreateSLOResponse } from '@kbn/slo-schema';
+
+import { Duration, DurationUnit, SLO } from '../../domain/models';
 import { ResourceInstaller } from './resource_installer';
 import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
-import { CreateSLOParams, CreateSLOResponse } from '../../types/rest_specs';
 import { validateSLO } from '../../domain/services';
 
 export class CreateSLO {
@@ -55,9 +56,14 @@ export class CreateSLO {
     return {
       ...params,
       id: uuid.v1(),
+      settings: {
+        timestampField: params.settings?.timestampField ?? '@timestamp',
+        syncDelay: params.settings?.syncDelay ?? new Duration(1, DurationUnit.Minute),
+        frequency: params.settings?.frequency ?? new Duration(1, DurationUnit.Minute),
+      },
       revision: 1,
-      created_at: now,
-      updated_at: now,
+      createdAt: now,
+      updatedAt: now,
     };
   }
 

@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ExperimentalFeaturesService } from '../../../../common/experimental_features_service';
 import type {
   EndpointCapabilities,
   ConsoleResponseActionCommands,
@@ -134,6 +135,8 @@ export const getEndpointConsoleCommands = ({
   endpointCapabilities: ImmutableArray<string>;
   endpointPrivileges: EndpointPrivileges;
 }): CommandDefinition[] => {
+  const isGetFileEnabled = ExperimentalFeaturesService.get().responseActionGetFileEnabled;
+
   const doesEndpointSupportCommand = (commandName: ConsoleResponseActionCommands) => {
     const responderCapability = commandToCapabilitiesMap.get(commandName);
     if (responderCapability) {
@@ -142,7 +145,7 @@ export const getEndpointConsoleCommands = ({
     return false;
   };
 
-  return [
+  const consoleCommands: CommandDefinition[] = [
     {
       name: 'isolate',
       about: getCommandAboutInfo({
@@ -365,7 +368,11 @@ export const getEndpointConsoleCommands = ({
       helpDisabled: doesEndpointSupportCommand('processes') === false,
       helpHidden: !getRbacControl({ commandName: 'processes', privileges: endpointPrivileges }),
     },
-    {
+  ];
+
+  // `get-file` is currently behind feature flag
+  if (isGetFileEnabled) {
+    consoleCommands.push({
       name: 'get-file',
       about: getCommandAboutInfo({
         aboutInfo: i18n.translate('xpack.securitySolution.endpointConsoleCommands.getFile.about', {
@@ -411,6 +418,8 @@ export const getEndpointConsoleCommands = ({
         commandName: 'get-file',
         privileges: endpointPrivileges,
       }),
-    },
-  ];
+    });
+  }
+
+  return consoleCommands;
 };

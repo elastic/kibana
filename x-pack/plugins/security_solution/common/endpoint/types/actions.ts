@@ -53,9 +53,15 @@ export interface KillProcessActionOutputContent {
 
 export interface ResponseActionGetFileOutputContent {
   code: string;
-  path: string;
-  size: number;
   zip_size: number;
+  /** The contents of the zip file. One entry per file */
+  contents: Array<{
+    path: string;
+    sha256: string;
+    size: number;
+    file_name: string;
+    type: string;
+  }>;
 }
 
 export const ActivityLogItemTypes = {

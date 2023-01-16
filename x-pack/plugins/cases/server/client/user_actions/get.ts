@@ -18,17 +18,13 @@ export const get = async (
   clientArgs: CasesClientArgs
 ): Promise<CaseUserActionsResponse> => {
   const {
-    unsecuredSavedObjectsClient,
     services: { userActionService },
     logger,
     authorization,
   } = clientArgs;
 
   try {
-    const userActions = await userActionService.getAll({
-      unsecuredSavedObjectsClient,
-      caseId,
-    });
+    const userActions = await userActionService.getAll(caseId);
 
     await authorization.ensureAuthorized({
       entities: userActions.saved_objects.map((userAction) => ({

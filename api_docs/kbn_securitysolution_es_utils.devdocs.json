@@ -9,10 +9,18 @@
     "objects": []
   },
   "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/securitysolution-es-utils",
-        "id": "def-server.BadRequestError",
+        "id": "def-common.BadRequestError",
         "type": "Class",
         "tags": [],
         "label": "BadRequestError",
@@ -20,9 +28,9 @@
         "signature": [
           {
             "pluginId": "@kbn/securitysolution-es-utils",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnSecuritysolutionEsUtilsPluginApi",
-            "section": "def-server.BadRequestError",
+            "section": "def-common.BadRequestError",
             "text": "BadRequestError"
           },
           " extends Error"
@@ -37,7 +45,7 @@
     "functions": [
       {
         "parentPluginId": "@kbn/securitysolution-es-utils",
-        "id": "def-server.createBootstrapIndex",
+        "id": "def-common.createBootstrapIndex",
         "type": "Function",
         "tags": [],
         "label": "createBootstrapIndex",
@@ -53,7 +61,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
-            "id": "def-server.createBootstrapIndex.$1",
+            "id": "def-common.createBootstrapIndex.$1",
             "type": "Object",
             "tags": [],
             "label": "esClient",
@@ -68,7 +76,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
-            "id": "def-server.createBootstrapIndex.$2",
+            "id": "def-common.createBootstrapIndex.$2",
             "type": "string",
             "tags": [],
             "label": "index",
@@ -87,7 +95,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-es-utils",
-        "id": "def-server.decodeVersion",
+        "id": "def-common.decodeVersion",
         "type": "Function",
         "tags": [],
         "label": "decodeVersion",
@@ -101,7 +109,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
-            "id": "def-server.decodeVersion.$1",
+            "id": "def-common.decodeVersion.$1",
             "type": "string",
             "tags": [],
             "label": "version",
@@ -120,7 +128,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-es-utils",
-        "id": "def-server.deleteAllIndex",
+        "id": "def-common.deleteAllIndex",
         "type": "Function",
         "tags": [],
         "label": "deleteAllIndex",
@@ -136,7 +144,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
-            "id": "def-server.deleteAllIndex.$1",
+            "id": "def-common.deleteAllIndex.$1",
             "type": "Object",
             "tags": [],
             "label": "esClient",
@@ -151,7 +159,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
-            "id": "def-server.deleteAllIndex.$2",
+            "id": "def-common.deleteAllIndex.$2",
             "type": "string",
             "tags": [],
             "label": "pattern",
@@ -166,7 +174,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
-            "id": "def-server.deleteAllIndex.$3",
+            "id": "def-common.deleteAllIndex.$3",
             "type": "number",
             "tags": [],
             "label": "maxAttempts",
@@ -185,7 +193,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-es-utils",
-        "id": "def-server.deleteIndexTemplate",
+        "id": "def-common.deleteIndexTemplate",
         "type": "Function",
         "tags": [],
         "label": "deleteIndexTemplate",
@@ -201,7 +209,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
-            "id": "def-server.deleteIndexTemplate.$1",
+            "id": "def-common.deleteIndexTemplate.$1",
             "type": "Object",
             "tags": [],
             "label": "esClient",
@@ -216,7 +224,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
-            "id": "def-server.deleteIndexTemplate.$2",
+            "id": "def-common.deleteIndexTemplate.$2",
             "type": "string",
             "tags": [],
             "label": "name",
@@ -235,7 +243,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-es-utils",
-        "id": "def-server.deletePolicy",
+        "id": "def-common.deletePolicy",
         "type": "Function",
         "tags": [],
         "label": "deletePolicy",
@@ -251,7 +259,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
-            "id": "def-server.deletePolicy.$1",
+            "id": "def-common.deletePolicy.$1",
             "type": "Object",
             "tags": [],
             "label": "esClient",
@@ -266,7 +274,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
-            "id": "def-server.deletePolicy.$2",
+            "id": "def-common.deletePolicy.$2",
             "type": "string",
             "tags": [],
             "label": "name",
@@ -285,7 +293,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-es-utils",
-        "id": "def-server.deleteTemplate",
+        "id": "def-common.deleteTemplate",
         "type": "Function",
         "tags": [],
         "label": "deleteTemplate",
@@ -301,7 +309,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
-            "id": "def-server.deleteTemplate.$1",
+            "id": "def-common.deleteTemplate.$1",
             "type": "Object",
             "tags": [],
             "label": "esClient",
@@ -316,7 +324,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
-            "id": "def-server.deleteTemplate.$2",
+            "id": "def-common.deleteTemplate.$2",
             "type": "string",
             "tags": [],
             "label": "name",
@@ -335,7 +343,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-es-utils",
-        "id": "def-server.encodeHitVersion",
+        "id": "def-common.encodeHitVersion",
         "type": "Function",
         "tags": [],
         "label": "encodeHitVersion",
@@ -351,7 +359,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
-            "id": "def-server.encodeHitVersion.$1",
+            "id": "def-common.encodeHitVersion.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "hit",
@@ -370,7 +378,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-es-utils",
-        "id": "def-server.getBootstrapIndexExists",
+        "id": "def-common.getBootstrapIndexExists",
         "type": "Function",
         "tags": [],
         "label": "getBootstrapIndexExists",
@@ -388,7 +396,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
-            "id": "def-server.getBootstrapIndexExists.$1",
+            "id": "def-common.getBootstrapIndexExists.$1",
             "type": "Object",
             "tags": [],
             "label": "esClient",
@@ -405,7 +413,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
-            "id": "def-server.getBootstrapIndexExists.$2",
+            "id": "def-common.getBootstrapIndexExists.$2",
             "type": "string",
             "tags": [],
             "label": "index",
@@ -426,7 +434,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-es-utils",
-        "id": "def-server.getIndexAliases",
+        "id": "def-common.getIndexAliases",
         "type": "Function",
         "tags": [],
         "label": "getIndexAliases",
@@ -444,7 +452,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
-            "id": "def-server.getIndexAliases.$1",
+            "id": "def-common.getIndexAliases.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  esClient,\n  alias,\n}",
@@ -455,7 +463,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/securitysolution-es-utils",
-                "id": "def-server.getIndexAliases.$1.esClient",
+                "id": "def-common.getIndexAliases.$1.esClient",
                 "type": "Object",
                 "tags": [],
                 "label": "esClient",
@@ -897,29 +905,29 @@
                   "ExplainResponse",
                   "<TDocument>>; }; features: ",
                   "default",
-                  "; fieldCaps: { (this: That, params: ",
+                  "; fieldCaps: { (this: That, params?: ",
                   "FieldCapsRequest",
                   " | ",
                   "FieldCapsRequest",
-                  ", options?: ",
+                  " | undefined, options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
                   "FieldCapsResponse",
-                  ">; (this: That, params: ",
+                  ">; (this: That, params?: ",
                   "FieldCapsRequest",
                   " | ",
                   "FieldCapsRequest",
-                  ", options?: ",
+                  " | undefined, options?: ",
                   "TransportRequestOptionsWithMeta",
                   " | undefined): Promise<",
                   "TransportResult",
                   "<",
                   "FieldCapsResponse",
-                  ", unknown>>; (this: That, params: ",
+                  ", unknown>>; (this: That, params?: ",
                   "FieldCapsRequest",
                   " | ",
                   "FieldCapsRequest",
-                  ", options?: ",
+                  " | undefined, options?: ",
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "FieldCapsResponse",
@@ -1651,7 +1659,7 @@
               },
               {
                 "parentPluginId": "@kbn/securitysolution-es-utils",
-                "id": "def-server.getIndexAliases.$1.alias",
+                "id": "def-common.getIndexAliases.$1.alias",
                 "type": "string",
                 "tags": [],
                 "label": "alias",
@@ -1670,7 +1678,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-es-utils",
-        "id": "def-server.getIndexCount",
+        "id": "def-common.getIndexCount",
         "type": "Function",
         "tags": [],
         "label": "getIndexCount",
@@ -1688,7 +1696,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
-            "id": "def-server.getIndexCount.$1",
+            "id": "def-common.getIndexCount.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  esClient,\n  index,\n}",
@@ -1699,7 +1707,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/securitysolution-es-utils",
-                "id": "def-server.getIndexCount.$1.esClient",
+                "id": "def-common.getIndexCount.$1.esClient",
                 "type": "Object",
                 "tags": [],
                 "label": "esClient",
@@ -2141,29 +2149,29 @@
                   "ExplainResponse",
                   "<TDocument>>; }; features: ",
                   "default",
-                  "; fieldCaps: { (this: That, params: ",
+                  "; fieldCaps: { (this: That, params?: ",
                   "FieldCapsRequest",
                   " | ",
                   "FieldCapsRequest",
-                  ", options?: ",
+                  " | undefined, options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
                   "FieldCapsResponse",
-                  ">; (this: That, params: ",
+                  ">; (this: That, params?: ",
                   "FieldCapsRequest",
                   " | ",
                   "FieldCapsRequest",
-                  ", options?: ",
+                  " | undefined, options?: ",
                   "TransportRequestOptionsWithMeta",
                   " | undefined): Promise<",
                   "TransportResult",
                   "<",
                   "FieldCapsResponse",
-                  ", unknown>>; (this: That, params: ",
+                  ", unknown>>; (this: That, params?: ",
                   "FieldCapsRequest",
                   " | ",
                   "FieldCapsRequest",
-                  ", options?: ",
+                  " | undefined, options?: ",
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "FieldCapsResponse",
@@ -2895,7 +2903,7 @@
               },
               {
                 "parentPluginId": "@kbn/securitysolution-es-utils",
-                "id": "def-server.getIndexCount.$1.index",
+                "id": "def-common.getIndexCount.$1.index",
                 "type": "string",
                 "tags": [],
                 "label": "index",
@@ -2914,7 +2922,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-es-utils",
-        "id": "def-server.getIndexExists",
+        "id": "def-common.getIndexExists",
         "type": "Function",
         "tags": [],
         "label": "getIndexExists",
@@ -2930,7 +2938,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
-            "id": "def-server.getIndexExists.$1",
+            "id": "def-common.getIndexExists.$1",
             "type": "Object",
             "tags": [],
             "label": "esClient",
@@ -2945,7 +2953,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
-            "id": "def-server.getIndexExists.$2",
+            "id": "def-common.getIndexExists.$2",
             "type": "string",
             "tags": [],
             "label": "index",
@@ -2964,7 +2972,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-es-utils",
-        "id": "def-server.getIndexTemplateExists",
+        "id": "def-common.getIndexTemplateExists",
         "type": "Function",
         "tags": [],
         "label": "getIndexTemplateExists",
@@ -2980,7 +2988,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
-            "id": "def-server.getIndexTemplateExists.$1",
+            "id": "def-common.getIndexTemplateExists.$1",
             "type": "Object",
             "tags": [],
             "label": "esClient",
@@ -2995,7 +3003,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
-            "id": "def-server.getIndexTemplateExists.$2",
+            "id": "def-common.getIndexTemplateExists.$2",
             "type": "string",
             "tags": [],
             "label": "template",
@@ -3014,7 +3022,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-es-utils",
-        "id": "def-server.getPolicyExists",
+        "id": "def-common.getPolicyExists",
         "type": "Function",
         "tags": [],
         "label": "getPolicyExists",
@@ -3030,7 +3038,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
-            "id": "def-server.getPolicyExists.$1",
+            "id": "def-common.getPolicyExists.$1",
             "type": "Object",
             "tags": [],
             "label": "esClient",
@@ -3045,7 +3053,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
-            "id": "def-server.getPolicyExists.$2",
+            "id": "def-common.getPolicyExists.$2",
             "type": "string",
             "tags": [],
             "label": "name",
@@ -3064,7 +3072,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-es-utils",
-        "id": "def-server.getTemplateExists",
+        "id": "def-common.getTemplateExists",
         "type": "Function",
         "tags": [],
         "label": "getTemplateExists",
@@ -3080,7 +3088,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
-            "id": "def-server.getTemplateExists.$1",
+            "id": "def-common.getTemplateExists.$1",
             "type": "Object",
             "tags": [],
             "label": "esClient",
@@ -3095,7 +3103,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
-            "id": "def-server.getTemplateExists.$2",
+            "id": "def-common.getTemplateExists.$2",
             "type": "string",
             "tags": [],
             "label": "template",
@@ -3114,7 +3122,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-es-utils",
-        "id": "def-server.readIndex",
+        "id": "def-common.readIndex",
         "type": "Function",
         "tags": [],
         "label": "readIndex",
@@ -3130,7 +3138,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
-            "id": "def-server.readIndex.$1",
+            "id": "def-common.readIndex.$1",
             "type": "Object",
             "tags": [],
             "label": "esClient",
@@ -3145,7 +3153,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
-            "id": "def-server.readIndex.$2",
+            "id": "def-common.readIndex.$2",
             "type": "string",
             "tags": [],
             "label": "index",
@@ -3164,7 +3172,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-es-utils",
-        "id": "def-server.readPrivileges",
+        "id": "def-common.readPrivileges",
         "type": "Function",
         "tags": [],
         "label": "readPrivileges",
@@ -3180,7 +3188,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
-            "id": "def-server.readPrivileges.$1",
+            "id": "def-common.readPrivileges.$1",
             "type": "Object",
             "tags": [],
             "label": "esClient",
@@ -3195,7 +3203,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
-            "id": "def-server.readPrivileges.$2",
+            "id": "def-common.readPrivileges.$2",
             "type": "string",
             "tags": [],
             "label": "index",
@@ -3214,7 +3222,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-es-utils",
-        "id": "def-server.setIndexTemplate",
+        "id": "def-common.setIndexTemplate",
         "type": "Function",
         "tags": [],
         "label": "setIndexTemplate",
@@ -3230,7 +3238,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
-            "id": "def-server.setIndexTemplate.$1",
+            "id": "def-common.setIndexTemplate.$1",
             "type": "Object",
             "tags": [],
             "label": "esClient",
@@ -3245,7 +3253,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
-            "id": "def-server.setIndexTemplate.$2",
+            "id": "def-common.setIndexTemplate.$2",
             "type": "string",
             "tags": [],
             "label": "name",
@@ -3260,7 +3268,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
-            "id": "def-server.setIndexTemplate.$3",
+            "id": "def-common.setIndexTemplate.$3",
             "type": "Object",
             "tags": [],
             "label": "body",
@@ -3279,7 +3287,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-es-utils",
-        "id": "def-server.setPolicy",
+        "id": "def-common.setPolicy",
         "type": "Function",
         "tags": [],
         "label": "setPolicy",
@@ -3295,7 +3303,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
-            "id": "def-server.setPolicy.$1",
+            "id": "def-common.setPolicy.$1",
             "type": "Object",
             "tags": [],
             "label": "esClient",
@@ -3310,7 +3318,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
-            "id": "def-server.setPolicy.$2",
+            "id": "def-common.setPolicy.$2",
             "type": "string",
             "tags": [],
             "label": "name",
@@ -3325,7 +3333,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
-            "id": "def-server.setPolicy.$3",
+            "id": "def-common.setPolicy.$3",
             "type": "Object",
             "tags": [],
             "label": "body",
@@ -3344,7 +3352,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-es-utils",
-        "id": "def-server.setTemplate",
+        "id": "def-common.setTemplate",
         "type": "Function",
         "tags": [],
         "label": "setTemplate",
@@ -3360,7 +3368,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
-            "id": "def-server.setTemplate.$1",
+            "id": "def-common.setTemplate.$1",
             "type": "Object",
             "tags": [],
             "label": "esClient",
@@ -3375,7 +3383,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
-            "id": "def-server.setTemplate.$2",
+            "id": "def-common.setTemplate.$2",
             "type": "string",
             "tags": [],
             "label": "name",
@@ -3390,7 +3398,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
-            "id": "def-server.setTemplate.$3",
+            "id": "def-common.setTemplate.$3",
             "type": "Object",
             "tags": [],
             "label": "body",
@@ -3409,7 +3417,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-es-utils",
-        "id": "def-server.transformError",
+        "id": "def-common.transformError",
         "type": "Function",
         "tags": [],
         "label": "transformError",
@@ -3420,9 +3428,9 @@
           ">) => ",
           {
             "pluginId": "@kbn/securitysolution-es-utils",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnSecuritysolutionEsUtilsPluginApi",
-            "section": "def-server.OutputError",
+            "section": "def-common.OutputError",
             "text": "OutputError"
           }
         ],
@@ -3432,7 +3440,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
-            "id": "def-server.transformError.$1",
+            "id": "def-common.transformError.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "err",
@@ -3455,7 +3463,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/securitysolution-es-utils",
-        "id": "def-server.OutputError",
+        "id": "def-common.OutputError",
         "type": "Interface",
         "tags": [],
         "label": "OutputError",
@@ -3466,7 +3474,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
-            "id": "def-server.OutputError.message",
+            "id": "def-common.OutputError.message",
             "type": "string",
             "tags": [],
             "label": "message",
@@ -3477,7 +3485,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
-            "id": "def-server.OutputError.statusCode",
+            "id": "def-common.OutputError.statusCode",
             "type": "number",
             "tags": [],
             "label": "statusCode",
@@ -3490,14 +3498,6 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
     "enums": [],
     "misc": [],
     "objects": []

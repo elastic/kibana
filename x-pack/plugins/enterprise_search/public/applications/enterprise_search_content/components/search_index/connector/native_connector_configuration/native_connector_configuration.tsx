@@ -102,7 +102,10 @@ export const NativeConnectorConfiguration: React.FC = () => {
                 },
                 {
                   children: (
-                    <NativeConnectorConfigurationConfig nativeConnector={nativeConnector} />
+                    <NativeConnectorConfigurationConfig
+                      nativeConnector={nativeConnector}
+                      status={index.connector.status}
+                    />
                   ),
                   status: hasConfigured ? 'complete' : 'incomplete',
                   title: i18n.translate(

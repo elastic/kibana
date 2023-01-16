@@ -106,7 +106,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
 
           it('should redirect to the Overview page from the unrecognized routes', async () => {
-            await PageObjects.common.navigateToUrl('ml', 'magic-ai');
+            await PageObjects.common.navigateToUrl('ml', 'magic-ai', {
+              shouldUseHashForSubUrl: false,
+              insertTimestamp: false,
+            });
 
             await ml.testExecution.logTestStep('should display a warning banner');
             await ml.overviewPage.assertPageNotFoundBannerText('magic-ai');

@@ -81,6 +81,7 @@ export * from './get_web_hook_action';
 export * from './index_event_log_execution_events';
 export * from './install_prepackaged_rules';
 export * from './machine_learning_setup';
+export * from './perform_search_query';
 export * from './preview_rule_with_exception_entries';
 export * from './preview_rule';
 export * from './refresh_index';

@@ -14,6 +14,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import type { NotificationsStart, ApplicationStart } from '@kbn/core/public';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { KibanaContextProvider } from '../public/common/lib/kibana';
 import { ExperimentalFeaturesService } from '../public/common/experimental_features_service';
 import { getHttp } from './context/http';
@@ -23,6 +24,8 @@ import { getActionTypeRegistry } from './context/action_type_registry';
 interface StorybookContextDecoratorProps {
   context: Parameters<DecoratorFn>[1];
 }
+
+const queryClient = new QueryClient();
 
 const handler = (type: string, ...rest: any[]) => {
   action(`${type} Toast`)(rest);
@@ -88,6 +91,7 @@ export const StorybookContextDecorator: React.FC<StorybookContextDecoratorProps>
       ruleTagFilter: true,
       ruleStatusFilter: true,
       rulesDetailLogs: true,
+      ruleUseExecutionStatus: false,
     },
   });
   return (
@@ -115,7 +119,7 @@ export const StorybookContextDecorator: React.FC<StorybookContextDecoratorProps>
               ruleTypeRegistry: getRuleTypeRegistry(),
             }}
           >
-            {children}
+            <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
           </KibanaContextProvider>
         </KibanaThemeProvider>
       </EuiThemeProvider>

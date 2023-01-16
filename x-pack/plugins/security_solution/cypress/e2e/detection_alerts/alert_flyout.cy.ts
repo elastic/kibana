@@ -34,6 +34,9 @@ describe('Alert Flyout', () => {
     cleanKibana();
     login();
     createCustomRuleEnabled(getNewRule(), 'rule1');
+  });
+
+  beforeEach(() => {
     visitWithoutDateRange(ALERTS_URL);
     const dateContainingAllEvents = 'Jul 27, 2015 @ 00:00:00.000';
     setStartDate(dateContainingAllEvents);

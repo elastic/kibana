@@ -5,13 +5,21 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, SavedObjectsClientContract, KibanaRequest } from '@kbn/core/server';
+import {
+  ElasticsearchClient,
+  SavedObjectsClientContract,
+  KibanaRequest,
+  CoreRequestHandlerContext,
+} from '@kbn/core/server';
 import chalk from 'chalk';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ESSearchResponse } from '@kbn/es-types';
 import { RequestStatus } from '@kbn/inspector-plugin/common';
 import { getInspectResponse } from '@kbn/observability-plugin/server';
 import { InspectResponse } from '@kbn/observability-plugin/typings/common';
+import { enableInspectEsQueries } from '@kbn/observability-plugin/common';
+import { API_URLS } from '../../../common/constants';
+import { UptimeServerSetup } from './adapters';
 import { UMLicenseCheck } from './domains';
 import { UptimeRequests } from './requests';
 import { savedObjectsAdapter } from './saved_objects/saved_objects';
@@ -38,106 +46,152 @@ export interface CountResponse {
   indices: string;
 }
 
-export type UptimeEsClient = ReturnType<typeof createUptimeESClient>;
-
-export const inspectableEsQueriesMap = new WeakMap<KibanaRequest, InspectResponse>();
-
-export function createUptimeESClient({
-  esClient,
-  request,
-  savedObjectsClient,
-  isInspectorEnabled,
-}: {
-  isInspectorEnabled?: boolean;
-  esClient: ElasticsearchClient;
+export class UptimeEsClient {
+  isDev: boolean;
   request?: KibanaRequest;
+  baseESClient: ElasticsearchClient;
+  heartbeatIndices: string;
+  isInspectorEnabled: boolean | undefined;
+  inspectableEsQueries: InspectResponse = [];
+  uiSettings?: CoreRequestHandlerContext['uiSettings'];
   savedObjectsClient: SavedObjectsClientContract;
-}) {
-  return {
-    baseESClient: esClient,
-    async search<DocumentSource extends unknown, TParams extends estypes.SearchRequest>(
-      params: TParams,
-      operationName?: string,
-      index?: string
-    ): Promise<{ body: ESSearchResponse<DocumentSource, TParams> }> {
-      let res: any;
-      let esError: any;
-      const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(
-        savedObjectsClient!
+
+  constructor(
+    savedObjectsClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    isDev: boolean = false,
+    uiSettings?: CoreRequestHandlerContext['uiSettings'],
+    request?: KibanaRequest
+  ) {
+    this.uiSettings = uiSettings;
+    this.baseESClient = esClient;
+    this.isInspectorEnabled = undefined;
+    this.savedObjectsClient = savedObjectsClient;
+    this.request = request;
+    this.heartbeatIndices = '';
+    this.isDev = isDev;
+    this.inspectableEsQueries = [];
+  }
+
+  async initSettings() {
+    const self = this;
+    if (!self.heartbeatIndices) {
+      const [isInspectorEnabled, dynamicSettings] = await Promise.all([
+        getInspectEnabled(self.uiSettings),
+        savedObjectsAdapter.getUptimeDynamicSettings(self.savedObjectsClient),
+      ]);
+
+      self.heartbeatIndices = dynamicSettings?.heartbeatIndices || '';
+      self.isInspectorEnabled = isInspectorEnabled;
+    }
+  }
+
+  async search<DocumentSource extends unknown, TParams extends estypes.SearchRequest>(
+    params: TParams,
+    operationName?: string,
+    index?: string
+  ): Promise<{ body: ESSearchResponse<DocumentSource, TParams> }> {
+    let res: any;
+    let esError: any;
+
+    await this.initSettings();
+
+    const esParams = { index: index ?? this.heartbeatIndices, ...params };
+    const startTime = process.hrtime();
+
+    const startTimeNow = Date.now();
+
+    let esRequestStatus: RequestStatus = RequestStatus.PENDING;
+
+    try {
+      res = await this.baseESClient.search(esParams, { meta: true });
+      esRequestStatus = RequestStatus.OK;
+    } catch (e) {
+      esError = e;
+      esRequestStatus = RequestStatus.ERROR;
+    }
+    if (this.request) {
+      this.inspectableEsQueries.push(
+        getInspectResponse({
+          esError,
+          esRequestParams: esParams,
+          esRequestStatus,
+          esResponse: res?.body,
+          kibanaRequest: this.request,
+          operationName: operationName ?? '',
+          startTime: startTimeNow,
+        })
       );
+    }
 
-      const esParams = { index: index ?? dynamicSettings!.heartbeatIndices, ...params };
-      const startTime = process.hrtime();
+    if (this.isInspectorEnabled && this.request) {
+      debugESCall({
+        startTime,
+        request: this.request,
+        esError,
+        operationName: 'search',
+        params: esParams,
+      });
+    }
 
-      const startTimeNow = Date.now();
+    if (esError) {
+      throw esError;
+    }
 
-      let esRequestStatus: RequestStatus = RequestStatus.PENDING;
+    return res;
+  }
+  async count<TParams>(params: TParams): Promise<CountResponse> {
+    let res: any;
+    let esError: any;
 
-      try {
-        res = await esClient.search(esParams, { meta: true });
-        esRequestStatus = RequestStatus.OK;
-      } catch (e) {
-        esError = e;
-        esRequestStatus = RequestStatus.ERROR;
-      }
+    await this.initSettings();
 
-      const inspectableEsQueries = inspectableEsQueriesMap.get(request!);
+    const esParams = { index: this.heartbeatIndices, ...params };
+    const startTime = process.hrtime();
 
-      if (inspectableEsQueries) {
-        inspectableEsQueries.push(
-          getInspectResponse({
-            esError,
-            esRequestParams: esParams,
-            esRequestStatus,
-            esResponse: res?.body,
-            kibanaRequest: request!,
-            operationName: operationName ?? '',
-            startTime: startTimeNow,
-          })
-        );
-        if (request && isInspectorEnabled) {
-          debugESCall({ startTime, request, esError, operationName: 'search', params: esParams });
-        }
-      }
+    try {
+      res = await this.baseESClient.count(esParams, { meta: true });
+    } catch (e) {
+      esError = e;
+    }
 
-      if (esError) {
-        throw esError;
-      }
+    if (this.isInspectorEnabled && this.request) {
+      debugESCall({
+        startTime,
+        request: this.request,
+        esError,
+        operationName: 'count',
+        params: esParams,
+      });
+    }
 
-      return res;
-    },
-    async count<TParams>(params: TParams): Promise<CountResponse> {
-      let res: any;
-      let esError: any;
+    if (esError) {
+      throw esError;
+    }
 
-      const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(
-        savedObjectsClient!
-      );
+    return { result: res, indices: this.heartbeatIndices };
+  }
+  getSavedObjectsClient() {
+    return this.savedObjectsClient;
+  }
 
-      const esParams = { index: dynamicSettings!.heartbeatIndices, ...params };
-      const startTime = process.hrtime();
+  getInspectData(path: string) {
+    const isInspectorEnabled =
+      (this.isInspectorEnabled || this.isDev) && path !== API_URLS.DYNAMIC_SETTINGS;
 
-      try {
-        res = await esClient.count(esParams, { meta: true });
-      } catch (e) {
-        esError = e;
-      }
-      const inspectableEsQueries = inspectableEsQueriesMap.get(request!);
+    if (isInspectorEnabled) {
+      return { _inspect: this.inspectableEsQueries };
+    }
+    return {};
+  }
+}
 
-      if (inspectableEsQueries && request && isInspectorEnabled) {
-        debugESCall({ startTime, request, esError, operationName: 'count', params: esParams });
-      }
+function getInspectEnabled(uiSettings?: CoreRequestHandlerContext['uiSettings']) {
+  if (!uiSettings) {
+    return false;
+  }
 
-      if (esError) {
-        throw esError;
-      }
-
-      return { result: res, indices: dynamicSettings.heartbeatIndices };
-    },
-    getSavedObjectsClient() {
-      return savedObjectsClient;
-    },
-  };
+  return uiSettings.client.get<boolean>(enableInspectEsQueries);
 }
 
 /* eslint-disable no-console */
@@ -177,3 +231,7 @@ export function debugESCall({
   }
   console.log(`\n`);
 }
+
+export const isTestUser = (server: UptimeServerSetup) => {
+  return server.config.service?.username === 'localKibanaIntegrationTestsUser';
+};

@@ -11,10 +11,18 @@
   "server": {
     "classes": [],
     "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/logging",
-        "id": "def-server.Logger",
+        "id": "def-common.Logger",
         "type": "Interface",
         "tags": [],
         "label": "Logger",
@@ -27,7 +35,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/logging",
-            "id": "def-server.Logger.trace",
+            "id": "def-common.Logger.trace",
             "type": "Function",
             "tags": [],
             "label": "trace",
@@ -38,17 +46,17 @@
               "<Meta extends ",
               {
                 "pluginId": "@kbn/logging",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.LogMeta",
+                "section": "def-common.LogMeta",
                 "text": "LogMeta"
               },
               " = ",
               {
                 "pluginId": "@kbn/logging",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.LogMeta",
+                "section": "def-common.LogMeta",
                 "text": "LogMeta"
               },
               ">(message: string, meta?: Meta | undefined) => void"
@@ -59,7 +67,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/logging",
-                "id": "def-server.Logger.trace.$1",
+                "id": "def-common.Logger.trace.$1",
                 "type": "string",
                 "tags": [],
                 "label": "message",
@@ -76,7 +84,7 @@
               },
               {
                 "parentPluginId": "@kbn/logging",
-                "id": "def-server.Logger.trace.$2",
+                "id": "def-common.Logger.trace.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "meta",
@@ -96,7 +104,7 @@
           },
           {
             "parentPluginId": "@kbn/logging",
-            "id": "def-server.Logger.debug",
+            "id": "def-common.Logger.debug",
             "type": "Function",
             "tags": [],
             "label": "debug",
@@ -107,17 +115,17 @@
               "<Meta extends ",
               {
                 "pluginId": "@kbn/logging",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.LogMeta",
+                "section": "def-common.LogMeta",
                 "text": "LogMeta"
               },
               " = ",
               {
                 "pluginId": "@kbn/logging",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.LogMeta",
+                "section": "def-common.LogMeta",
                 "text": "LogMeta"
               },
               ">(message: string, meta?: Meta | undefined) => void"
@@ -128,7 +136,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/logging",
-                "id": "def-server.Logger.debug.$1",
+                "id": "def-common.Logger.debug.$1",
                 "type": "string",
                 "tags": [],
                 "label": "message",
@@ -145,7 +153,7 @@
               },
               {
                 "parentPluginId": "@kbn/logging",
-                "id": "def-server.Logger.debug.$2",
+                "id": "def-common.Logger.debug.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "meta",
@@ -165,7 +173,7 @@
           },
           {
             "parentPluginId": "@kbn/logging",
-            "id": "def-server.Logger.info",
+            "id": "def-common.Logger.info",
             "type": "Function",
             "tags": [],
             "label": "info",
@@ -176,17 +184,17 @@
               "<Meta extends ",
               {
                 "pluginId": "@kbn/logging",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.LogMeta",
+                "section": "def-common.LogMeta",
                 "text": "LogMeta"
               },
               " = ",
               {
                 "pluginId": "@kbn/logging",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.LogMeta",
+                "section": "def-common.LogMeta",
                 "text": "LogMeta"
               },
               ">(message: string, meta?: Meta | undefined) => void"
@@ -197,7 +205,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/logging",
-                "id": "def-server.Logger.info.$1",
+                "id": "def-common.Logger.info.$1",
                 "type": "string",
                 "tags": [],
                 "label": "message",
@@ -214,7 +222,7 @@
               },
               {
                 "parentPluginId": "@kbn/logging",
-                "id": "def-server.Logger.info.$2",
+                "id": "def-common.Logger.info.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "meta",
@@ -234,7 +242,7 @@
           },
           {
             "parentPluginId": "@kbn/logging",
-            "id": "def-server.Logger.warn",
+            "id": "def-common.Logger.warn",
             "type": "Function",
             "tags": [],
             "label": "warn",
@@ -245,17 +253,17 @@
               "<Meta extends ",
               {
                 "pluginId": "@kbn/logging",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.LogMeta",
+                "section": "def-common.LogMeta",
                 "text": "LogMeta"
               },
               " = ",
               {
                 "pluginId": "@kbn/logging",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.LogMeta",
+                "section": "def-common.LogMeta",
                 "text": "LogMeta"
               },
               ">(errorOrMessage: string | Error, meta?: Meta | undefined) => void"
@@ -266,7 +274,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/logging",
-                "id": "def-server.Logger.warn.$1",
+                "id": "def-common.Logger.warn.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "errorOrMessage",
@@ -283,7 +291,7 @@
               },
               {
                 "parentPluginId": "@kbn/logging",
-                "id": "def-server.Logger.warn.$2",
+                "id": "def-common.Logger.warn.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "meta",
@@ -303,7 +311,7 @@
           },
           {
             "parentPluginId": "@kbn/logging",
-            "id": "def-server.Logger.error",
+            "id": "def-common.Logger.error",
             "type": "Function",
             "tags": [],
             "label": "error",
@@ -314,17 +322,17 @@
               "<Meta extends ",
               {
                 "pluginId": "@kbn/logging",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.LogMeta",
+                "section": "def-common.LogMeta",
                 "text": "LogMeta"
               },
               " = ",
               {
                 "pluginId": "@kbn/logging",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.LogMeta",
+                "section": "def-common.LogMeta",
                 "text": "LogMeta"
               },
               ">(errorOrMessage: string | Error, meta?: Meta | undefined) => void"
@@ -335,7 +343,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/logging",
-                "id": "def-server.Logger.error.$1",
+                "id": "def-common.Logger.error.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "errorOrMessage",
@@ -352,7 +360,7 @@
               },
               {
                 "parentPluginId": "@kbn/logging",
-                "id": "def-server.Logger.error.$2",
+                "id": "def-common.Logger.error.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "meta",
@@ -372,7 +380,7 @@
           },
           {
             "parentPluginId": "@kbn/logging",
-            "id": "def-server.Logger.fatal",
+            "id": "def-common.Logger.fatal",
             "type": "Function",
             "tags": [],
             "label": "fatal",
@@ -383,17 +391,17 @@
               "<Meta extends ",
               {
                 "pluginId": "@kbn/logging",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.LogMeta",
+                "section": "def-common.LogMeta",
                 "text": "LogMeta"
               },
               " = ",
               {
                 "pluginId": "@kbn/logging",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.LogMeta",
+                "section": "def-common.LogMeta",
                 "text": "LogMeta"
               },
               ">(errorOrMessage: string | Error, meta?: Meta | undefined) => void"
@@ -404,7 +412,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/logging",
-                "id": "def-server.Logger.fatal.$1",
+                "id": "def-common.Logger.fatal.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "errorOrMessage",
@@ -421,7 +429,7 @@
               },
               {
                 "parentPluginId": "@kbn/logging",
-                "id": "def-server.Logger.fatal.$2",
+                "id": "def-common.Logger.fatal.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "meta",
@@ -441,7 +449,7 @@
           },
           {
             "parentPluginId": "@kbn/logging",
-            "id": "def-server.Logger.isLevelEnabled",
+            "id": "def-common.Logger.isLevelEnabled",
             "type": "Function",
             "tags": [],
             "label": "isLevelEnabled",
@@ -459,7 +467,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/logging",
-                "id": "def-server.Logger.isLevelEnabled.$1",
+                "id": "def-common.Logger.isLevelEnabled.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "level",
@@ -479,7 +487,7 @@
           },
           {
             "parentPluginId": "@kbn/logging",
-            "id": "def-server.Logger.get",
+            "id": "def-common.Logger.get",
             "type": "Function",
             "tags": [],
             "label": "get",
@@ -490,9 +498,9 @@
               "(...childContextPaths: string[]) => ",
               {
                 "pluginId": "@kbn/logging",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.Logger",
+                "section": "def-common.Logger",
                 "text": "Logger"
               }
             ],
@@ -502,7 +510,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/logging",
-                "id": "def-server.Logger.get.$1",
+                "id": "def-common.Logger.get.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "childContextPaths",
@@ -523,7 +531,7 @@
       },
       {
         "parentPluginId": "@kbn/logging",
-        "id": "def-server.LoggerFactory",
+        "id": "def-common.LoggerFactory",
         "type": "Interface",
         "tags": [],
         "label": "LoggerFactory",
@@ -536,7 +544,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/logging",
-            "id": "def-server.LoggerFactory.get",
+            "id": "def-common.LoggerFactory.get",
             "type": "Function",
             "tags": [],
             "label": "get",
@@ -547,9 +555,9 @@
               "(...contextParts: string[]) => ",
               {
                 "pluginId": "@kbn/logging",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.Logger",
+                "section": "def-common.Logger",
                 "text": "Logger"
               }
             ],
@@ -559,7 +567,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/logging",
-                "id": "def-server.LoggerFactory.get.$1",
+                "id": "def-common.LoggerFactory.get.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "contextParts",
@@ -585,157 +593,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/logging",
-        "id": "def-server.Ecs",
-        "type": "Type",
-        "tags": [],
-        "label": "Ecs",
-        "description": [
-          "\nRepresents the full ECS schema.\n"
-        ],
-        "signature": [
-          "EcsBase",
-          " & ",
-          "EcsTracing",
-          " & { ecs: EcsField; agent?: ",
-          "EcsAgent",
-          " | undefined; as?: ",
-          "EcsAutonomousSystem",
-          " | undefined; client?: ",
-          "EcsClient",
-          " | undefined; cloud?: ",
-          "EcsCloud",
-          " | undefined; container?: ",
-          "EcsContainer",
-          " | undefined; data_stream?: ",
-          "EcsDataStream",
-          " | undefined; destination?: ",
-          "EcsDestination",
-          " | undefined; dns?: ",
-          "EcsDns",
-          " | undefined; email?: ",
-          "EcsEmail",
-          " | undefined; error?: ",
-          "EcsError",
-          " | undefined; event?: ",
-          "EcsEvent",
-          " | undefined; faas?: ",
-          "EcsFaas",
-          " | undefined; file?: ",
-          "EcsFile",
-          " | undefined; group?: ",
-          "EcsGroup",
-          " | undefined; host?: ",
-          "EcsHost",
-          " | undefined; http?: ",
-          "EcsHttp",
-          " | undefined; log?: ",
-          "EcsLog",
-          " | undefined; network?: ",
-          "EcsNetwork",
-          " | undefined; observer?: ",
-          "EcsObserver",
-          " | undefined; orchestrator?: ",
-          "EcsOrchestrator",
-          " | undefined; organization?: ",
-          "EcsOrganization",
-          " | undefined; package?: ",
-          "EcsPackage",
-          " | undefined; process?: ",
-          "EcsProcess",
-          " | undefined; registry?: ",
-          "EcsRegistry",
-          " | undefined; related?: ",
-          "EcsRelated",
-          " | undefined; rule?: ",
-          "EcsRule",
-          " | undefined; server?: ",
-          "EcsServer",
-          " | undefined; service?: ",
-          "EcsService",
-          " | undefined; source?: ",
-          "EcsSource",
-          " | undefined; threat?: ",
-          "EcsThreat",
-          " | undefined; tls?: ",
-          "EcsTls",
-          " | undefined; url?: ",
-          "EcsUrl",
-          " | undefined; user?: ",
-          "EcsUser",
-          " | undefined; user_agent?: ",
-          "EcsUserAgent",
-          " | undefined; vulnerability?: ",
-          "EcsVulnerability",
-          " | undefined; }"
-        ],
-        "path": "packages/kbn-logging/src/ecs/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/logging",
-        "id": "def-server.EcsEventCategory",
-        "type": "Type",
-        "tags": [],
-        "label": "EcsEventCategory",
-        "description": [],
-        "signature": [
-          "\"host\" | \"database\" | \"email\" | \"package\" | \"network\" | \"web\" | \"file\" | \"session\" | \"registry\" | \"process\" | \"authentication\" | \"configuration\" | \"driver\" | \"iam\" | \"intrusion_detection\" | \"malware\""
-        ],
-        "path": "packages/kbn-logging/src/ecs/event.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/logging",
-        "id": "def-server.EcsEventKind",
-        "type": "Type",
-        "tags": [],
-        "label": "EcsEventKind",
-        "description": [],
-        "signature": [
-          "\"metric\" | \"alert\" | \"signal\" | \"state\" | \"event\" | \"pipeline_error\""
-        ],
-        "path": "packages/kbn-logging/src/ecs/event.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/logging",
-        "id": "def-server.EcsEventOutcome",
-        "type": "Type",
-        "tags": [],
-        "label": "EcsEventOutcome",
-        "description": [],
-        "signature": [
-          "\"success\" | \"unknown\" | \"failure\""
-        ],
-        "path": "packages/kbn-logging/src/ecs/event.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/logging",
-        "id": "def-server.EcsEventType",
-        "type": "Type",
-        "tags": [],
-        "label": "EcsEventType",
-        "description": [],
-        "signature": [
-          "\"start\" | \"error\" | \"connection\" | \"user\" | \"info\" | \"group\" | \"end\" | \"admin\" | \"protocol\" | \"access\" | \"allowed\" | \"change\" | \"creation\" | \"deletion\" | \"denied\" | \"installation\""
-        ],
-        "path": "packages/kbn-logging/src/ecs/event.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/logging",
-        "id": "def-server.LogMeta",
+        "id": "def-common.LogMeta",
         "type": "Type",
         "tags": [],
         "label": "LogMeta",
@@ -817,14 +675,6 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": []
   }
 }

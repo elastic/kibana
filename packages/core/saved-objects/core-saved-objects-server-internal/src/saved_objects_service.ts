@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Subject, Observable, firstValueFrom } from 'rxjs';
+import { Subject, Observable, firstValueFrom, of } from 'rxjs';
 import { filter, take, switchMap } from 'rxjs/operators';
 import type { Logger } from '@kbn/logging';
 import type { ServiceStatus } from '@kbn/core-status-common';
@@ -25,8 +25,11 @@ import type {
   SavedObjectsRepositoryFactory,
   SavedObjectStatusMeta,
   SavedObjectsClientFactoryProvider,
-  SavedObjectsClientWrapperFactory,
   ISavedObjectTypeRegistry,
+  SavedObjectsEncryptionExtensionFactory,
+  SavedObjectsSecurityExtensionFactory,
+  SavedObjectsSpacesExtensionFactory,
+  SavedObjectsExtensions,
 } from '@kbn/core-saved-objects-server';
 import {
   SavedObjectConfig,
@@ -75,12 +78,6 @@ export interface SavedObjectsSetupDeps {
   deprecations: DeprecationRegistryProvider;
 }
 
-interface WrappedClientFactoryWrapper {
-  priority: number;
-  id: string;
-  factory: SavedObjectsClientWrapperFactory;
-}
-
 /** @internal */
 export interface SavedObjectsStartDeps {
   elasticsearch: InternalElasticsearchServiceStart;
@@ -98,7 +95,9 @@ export class SavedObjectsService
   private setupDeps?: SavedObjectsSetupDeps;
   private config?: SavedObjectConfig;
   private clientFactoryProvider?: SavedObjectsClientFactoryProvider;
-  private clientFactoryWrappers: WrappedClientFactoryWrapper[] = [];
+  private encryptionExtensionFactory?: SavedObjectsEncryptionExtensionFactory;
+  private securityExtensionFactory?: SavedObjectsSecurityExtensionFactory;
+  private spacesExtensionFactory?: SavedObjectsSpacesExtensionFactory;
 
   private migrator$ = new Subject<IKibanaMigrator>();
   private typeRegistry = new SavedObjectTypeRegistry();
@@ -148,9 +147,13 @@ export class SavedObjectsService
 
     registerCoreObjectTypes(this.typeRegistry);
 
+    const skipMigration = this.config.migration.skip;
+
     return {
       status$: calculateStatus$(
-        this.migrator$.pipe(switchMap((migrator) => migrator.getStatus$())),
+        skipMigration
+          ? of({ status: 'completed' })
+          : this.migrator$.pipe(switchMap((migrator) => migrator.getStatus$())),
         elasticsearch.status$
       ),
       setClientFactoryProvider: (provider) => {
@@ -162,15 +165,32 @@ export class SavedObjectsService
         }
         this.clientFactoryProvider = provider;
       },
-      addClientWrapper: (priority, id, factory) => {
+      setEncryptionExtension: (factory) => {
         if (this.started) {
-          throw new Error('cannot call `addClientWrapper` after service startup.');
+          throw new Error('cannot call `setEncryptionExtension` after service startup.');
         }
-        this.clientFactoryWrappers.push({
-          priority,
-          id,
-          factory,
-        });
+        if (this.encryptionExtensionFactory) {
+          throw new Error('encryption extension is already set, and can only be set once');
+        }
+        this.encryptionExtensionFactory = factory;
+      },
+      setSecurityExtension: (factory) => {
+        if (this.started) {
+          throw new Error('cannot call `setSecurityExtension` after service startup.');
+        }
+        if (this.securityExtensionFactory) {
+          throw new Error('security extension is already set, and can only be set once');
+        }
+        this.securityExtensionFactory = factory;
+      },
+      setSpacesExtension: (factory) => {
+        if (this.started) {
+          throw new Error('cannot call `setSpacesExtension` after service startup.');
+        }
+        if (this.spacesExtensionFactory) {
+          throw new Error('spaces extension is already set, and can only be set once');
+        }
+        this.spacesExtensionFactory = factory;
       },
       registerType: (type) => {
         if (this.started) {
@@ -255,7 +275,8 @@ export class SavedObjectsService
 
     const createRepository = (
       esClient: ElasticsearchClient,
-      includedHiddenTypes: string[] = []
+      includedHiddenTypes: string[] = [],
+      extensions?: SavedObjectsExtensions
     ) => {
       return SavedObjectsRepository.createRepository(
         migrator,
@@ -263,31 +284,42 @@ export class SavedObjectsService
         kibanaIndex,
         esClient,
         this.logger.get('repository'),
-        includedHiddenTypes
+        includedHiddenTypes,
+        extensions
       );
     };
 
     const repositoryFactory: SavedObjectsRepositoryFactory = {
-      createInternalRepository: (includedHiddenTypes?: string[]) =>
-        createRepository(client.asInternalUser, includedHiddenTypes),
-      createScopedRepository: (req: KibanaRequest, includedHiddenTypes?: string[]) =>
-        createRepository(client.asScoped(req).asCurrentUser, includedHiddenTypes),
+      createInternalRepository: (
+        includedHiddenTypes?: string[],
+        extensions?: SavedObjectsExtensions | undefined
+      ) => createRepository(client.asInternalUser, includedHiddenTypes, extensions),
+      createScopedRepository: (
+        req: KibanaRequest,
+        includedHiddenTypes?: string[],
+        extensions?: SavedObjectsExtensions
+      ) => createRepository(client.asScoped(req).asCurrentUser, includedHiddenTypes, extensions),
     };
 
     const clientProvider = new SavedObjectsClientProvider({
-      defaultClientFactory({ request, includedHiddenTypes }) {
-        const repository = repositoryFactory.createScopedRepository(request, includedHiddenTypes);
+      defaultClientFactory({ request, includedHiddenTypes, extensions }): SavedObjectsClient {
+        const repository = repositoryFactory.createScopedRepository(
+          request,
+          includedHiddenTypes,
+          extensions
+        );
         return new SavedObjectsClient(repository);
       },
       typeRegistry: this.typeRegistry,
+      encryptionExtensionFactory: this.encryptionExtensionFactory,
+      securityExtensionFactory: this.securityExtensionFactory,
+      spacesExtensionFactory: this.spacesExtensionFactory,
     });
+
     if (this.clientFactoryProvider) {
       const clientFactory = this.clientFactoryProvider(repositoryFactory);
       clientProvider.setClientFactory(clientFactory);
     }
-    this.clientFactoryWrappers.forEach(({ id, factory, priority }) => {
-      clientProvider.addClientWrapperFactory(priority, id, factory);
-    });
 
     this.started = true;
 
@@ -303,11 +335,11 @@ export class SavedObjectsService
           exportSizeLimit: this.config!.maxImportExportSize,
           logger: this.logger.get('exporter'),
         }),
-      createImporter: (savedObjectsClient) =>
+      createImporter: (savedObjectsClient, options) =>
         new SavedObjectsImporter({
           savedObjectsClient,
           typeRegistry: this.typeRegistry,
-          importSizeLimit: this.config!.maxImportExportSize,
+          importSizeLimit: options?.importSizeLimit ?? this.config!.maxImportExportSize,
         }),
       getTypeRegistry: () => this.typeRegistry,
     };

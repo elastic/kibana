@@ -118,7 +118,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .send({ query: '', action: BulkActionType.delete })
         .expect(200);
 
-      expect(body.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
+      expect(body.attributes.summary).to.eql({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
 
       // Check that the deleted rule is returned with the response
       expect(body.attributes.results.deleted[0].name).to.eql(testRule.name);
@@ -153,7 +153,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .send({ query: '', action: BulkActionType.delete })
         .expect(200);
 
-      expect(body.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
+      expect(body.attributes.summary).to.eql({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
 
       // Check that the deleted rule is returned with the response
       expect(body.attributes.results.deleted[0].name).to.eql(rule1.name);
@@ -174,7 +174,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .send({ query: '', action: BulkActionType.enable })
         .expect(200);
 
-      expect(body.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
+      expect(body.attributes.summary).to.eql({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
 
       // Check that the updated rule is returned with the response
       expect(body.attributes.results.updated[0].enabled).to.eql(true);
@@ -210,7 +210,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .send({ query: '', action: BulkActionType.enable })
         .expect(200);
 
-      expect(body.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
+      expect(body.attributes.summary).to.eql({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
 
       // Check that the updated rule is returned with the response
       expect(body.attributes.results.updated[0].enabled).to.eql(true);
@@ -243,7 +243,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .send({ query: '', action: BulkActionType.disable })
         .expect(200);
 
-      expect(body.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
+      expect(body.attributes.summary).to.eql({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
 
       // Check that the updated rule is returned with the response
       expect(body.attributes.results.updated[0].enabled).to.eql(false);
@@ -279,7 +279,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .send({ query: '', action: BulkActionType.disable })
         .expect(200);
 
-      expect(body.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
+      expect(body.attributes.summary).to.eql({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
 
       // Check that the updated rule is returned with the response
       expect(body.attributes.results.updated[0].enabled).to.eql(false);
@@ -310,10 +310,14 @@ export default ({ getService }: FtrProviderContext): void => {
       await createRule(supertest, log, ruleToDuplicate);
 
       const { body } = await postBulkAction()
-        .send({ query: '', action: BulkActionType.duplicate })
+        .send({
+          query: '',
+          action: BulkActionType.duplicate,
+          duplicate: { include_exceptions: false },
+        })
         .expect(200);
 
-      expect(body.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
+      expect(body.attributes.summary).to.eql({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
 
       // Check that the duplicated rule is returned with the response
       expect(body.attributes.results.created[0].name).to.eql(`${ruleToDuplicate.name} [Duplicate]`);
@@ -352,10 +356,14 @@ export default ({ getService }: FtrProviderContext): void => {
       );
 
       const { body } = await postBulkAction()
-        .send({ query: '', action: BulkActionType.duplicate })
+        .send({
+          query: '',
+          action: BulkActionType.duplicate,
+          duplicate: { include_exceptions: false },
+        })
         .expect(200);
 
-      expect(body.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
+      expect(body.attributes.summary).to.eql({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
 
       // Check that the duplicated rule is returned with the response
       expect(body.attributes.results.created[0].name).to.eql(`${ruleToDuplicate.name} [Duplicate]`);
@@ -444,6 +452,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
             expect(bulkEditResponse.attributes.summary).to.eql({
               failed: 0,
+              skipped: 0,
               succeeded: 1,
               total: 1,
             });
@@ -466,28 +475,10 @@ export default ({ getService }: FtrProviderContext): void => {
             resultingTags: ['tag3'],
           },
           {
-            caseName: '3 existing tags - 2 other tags(none of them) = 3 tags',
-            existingTags: ['tag1', 'tag2', 'tag3'],
-            tagsToDelete: ['tag4', 'tag5'],
-            resultingTags: ['tag1', 'tag2', 'tag3'],
-          },
-          {
             caseName: '3 existing tags - 1 of them - 2 other tags(none of them) = 2 tags',
             existingTags: ['tag1', 'tag2', 'tag3'],
             tagsToDelete: ['tag3', 'tag4', 'tag5'],
             resultingTags: ['tag1', 'tag2'],
-          },
-          {
-            caseName: '3 existing tags - 0 tags = 3 tags',
-            existingTags: ['tag1', 'tag2', 'tag3'],
-            tagsToDelete: [],
-            resultingTags: ['tag1', 'tag2', 'tag3'],
-          },
-          {
-            caseName: '0 existing tags - 2 tags = 0 tags',
-            existingTags: [],
-            tagsToDelete: ['tag4', 'tag5'],
-            resultingTags: [],
           },
           {
             caseName: '3 existing tags - 3 of them = 0 tags',
@@ -518,6 +509,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
             expect(bulkEditResponse.attributes.summary).to.eql({
               failed: 0,
+              skipped: 0,
               succeeded: 1,
               total: 1,
             });
@@ -533,12 +525,6 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         const addTagsCases = [
-          {
-            caseName: '3 existing tags + 2 of them = 3 tags',
-            existingTags: ['tag1', 'tag2', 'tag3'],
-            addedTags: ['tag1', 'tag2'],
-            resultingTags: ['tag1', 'tag2', 'tag3'],
-          },
           {
             caseName: '3 existing tags + 2 other tags(none of them) = 5 tags',
             existingTags: ['tag1', 'tag2', 'tag3'],
@@ -556,12 +542,6 @@ export default ({ getService }: FtrProviderContext): void => {
             existingTags: [],
             addedTags: ['tag4', 'tag5'],
             resultingTags: ['tag4', 'tag5'],
-          },
-          {
-            caseName: '3 existing tags + 0 tags = 3 tags',
-            existingTags: ['tag1', 'tag2', 'tag3'],
-            addedTags: [],
-            resultingTags: ['tag1', 'tag2', 'tag3'],
           },
         ];
 
@@ -585,6 +565,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
             expect(bulkEditResponse.attributes.summary).to.eql({
               failed: 0,
+              skipped: 0,
               succeeded: 1,
               total: 1,
             });
@@ -598,6 +579,86 @@ export default ({ getService }: FtrProviderContext): void => {
             expect(updatedRule.tags).to.eql(resultingTags);
           });
         });
+
+        const skipTagsUpdateCases = [
+          // Delete no-ops
+          {
+            caseName: '3 existing tags - 0 tags = 3 tags',
+            existingTags: ['tag1', 'tag2', 'tag3'],
+            tagsToUpdate: [],
+            resultingTags: ['tag1', 'tag2', 'tag3'],
+            operation: BulkActionEditType.delete_tags,
+          },
+          {
+            caseName: '0 existing tags - 2 tags = 0 tags',
+            existingTags: [],
+            tagsToUpdate: ['tag4', 'tag5'],
+            resultingTags: [],
+            operation: BulkActionEditType.delete_tags,
+          },
+          {
+            caseName: '3 existing tags - 2 other tags (none of them) = 3 tags',
+            existingTags: ['tag1', 'tag2', 'tag3'],
+            tagsToUpdate: ['tag4', 'tag5'],
+            resultingTags: ['tag1', 'tag2', 'tag3'],
+            operation: BulkActionEditType.delete_tags,
+          },
+          // Add no-ops
+          {
+            caseName: '3 existing tags + 2 of them = 3 tags',
+            existingTags: ['tag1', 'tag2', 'tag3'],
+            tagsToUpdate: ['tag1', 'tag2'],
+            resultingTags: ['tag1', 'tag2', 'tag3'],
+            operation: BulkActionEditType.add_tags,
+          },
+          {
+            caseName: '3 existing tags + 0 tags = 3 tags',
+            existingTags: ['tag1', 'tag2', 'tag3'],
+            tagsToUpdate: [],
+            resultingTags: ['tag1', 'tag2', 'tag3'],
+            operation: BulkActionEditType.add_tags,
+          },
+        ];
+
+        skipTagsUpdateCases.forEach(
+          ({ caseName, existingTags, tagsToUpdate, resultingTags, operation }) => {
+            it(`should skip rule updated for tags, case: "${caseName}"`, async () => {
+              const ruleId = 'ruleId';
+
+              await createRule(supertest, log, { ...getSimpleRule(ruleId), tags: existingTags });
+
+              const { body: bulkEditResponse } = await postBulkAction()
+                .send({
+                  query: '',
+                  action: BulkActionType.edit,
+                  [BulkActionType.edit]: [
+                    {
+                      type: operation,
+                      value: tagsToUpdate,
+                    },
+                  ],
+                })
+                .expect(200);
+
+              expect(bulkEditResponse.attributes.summary).to.eql({
+                failed: 0,
+                skipped: 1,
+                succeeded: 0,
+                total: 1,
+              });
+
+              // Check that the rules is returned as skipped with expected skip reason
+              expect(bulkEditResponse.attributes.results.skipped[0].skip_reason).to.eql(
+                'RULE_NOT_MODIFIED'
+              );
+
+              // Check that the no changes have been persisted
+              const { body: updatedRule } = await fetchRule(ruleId).expect(200);
+
+              expect(updatedRule.tags).to.eql(resultingTags);
+            });
+          }
+        );
       });
 
       describe('index patterns actions', () => {
@@ -618,7 +679,12 @@ export default ({ getService }: FtrProviderContext): void => {
             })
             .expect(200);
 
-          expect(bulkEditResponse.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
+          expect(bulkEditResponse.attributes.summary).to.eql({
+            failed: 0,
+            skipped: 0,
+            succeeded: 1,
+            total: 1,
+          });
 
           // Check that the updated rule is returned with the response
           expect(bulkEditResponse.attributes.results.updated[0].index).to.eql(['initial-index-*']);
@@ -648,7 +714,12 @@ export default ({ getService }: FtrProviderContext): void => {
             })
             .expect(200);
 
-          expect(bulkEditResponse.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
+          expect(bulkEditResponse.attributes.summary).to.eql({
+            failed: 0,
+            skipped: 0,
+            succeeded: 1,
+            total: 1,
+          });
 
           // Check that the updated rule is returned with the response
           expect(bulkEditResponse.attributes.results.updated[0].index).to.eql(
@@ -680,7 +751,12 @@ export default ({ getService }: FtrProviderContext): void => {
             })
             .expect(200);
 
-          expect(bulkEditResponse.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
+          expect(bulkEditResponse.attributes.summary).to.eql({
+            failed: 0,
+            skipped: 0,
+            succeeded: 1,
+            total: 1,
+          });
 
           // Check that the updated rule is returned with the response
           expect(bulkEditResponse.attributes.results.updated[0].index).to.eql(
@@ -709,7 +785,7 @@ export default ({ getService }: FtrProviderContext): void => {
             })
             .expect(500);
 
-          expect(body.attributes.summary).to.eql({ failed: 1, succeeded: 0, total: 1 });
+          expect(body.attributes.summary).to.eql({ failed: 1, skipped: 0, succeeded: 0, total: 1 });
           expect(body.attributes.errors[0]).to.eql({
             message:
               "Index patterns can't be added. Machine learning rule doesn't have index patterns property",
@@ -742,7 +818,7 @@ export default ({ getService }: FtrProviderContext): void => {
             })
             .expect(500);
 
-          expect(body.attributes.summary).to.eql({ failed: 1, succeeded: 0, total: 1 });
+          expect(body.attributes.summary).to.eql({ failed: 1, skipped: 0, succeeded: 0, total: 1 });
           expect(body.attributes.errors[0]).to.eql({
             message: "Mutated params invalid: Index patterns can't be empty",
             status_code: 500,
@@ -775,7 +851,7 @@ export default ({ getService }: FtrProviderContext): void => {
             })
             .expect(500);
 
-          expect(body.attributes.summary).to.eql({ failed: 1, succeeded: 0, total: 1 });
+          expect(body.attributes.summary).to.eql({ failed: 1, skipped: 0, succeeded: 0, total: 1 });
           expect(body.attributes.errors[0]).to.eql({
             message: "Mutated params invalid: Index patterns can't be empty",
             status_code: 500,
@@ -792,6 +868,95 @@ export default ({ getService }: FtrProviderContext): void => {
 
           expect(reFetchedRule.index).to.eql(['simple-index-*']);
         });
+
+        const skipIndexPatternsUpdateCases = [
+          // Delete no-ops
+          {
+            caseName: '3 existing indeces - 0 indeces = 3 indeces',
+            existingIndexPatterns: ['index1-*', 'index2-*', 'index3-*'],
+            indexPatternsToUpdate: [],
+            resultingIndexPatterns: ['index1-*', 'index2-*', 'index3-*'],
+            operation: BulkActionEditType.delete_index_patterns,
+          },
+          {
+            caseName: '0 existing indeces - 2 indeces = 0 indeces',
+            existingIndexPatterns: [],
+            indexPatternsToUpdate: ['index1-*', 'index2-*'],
+            resultingIndexPatterns: [],
+            operation: BulkActionEditType.delete_index_patterns,
+          },
+          {
+            caseName: '3 existing indeces - 2 other indeces (none of them) = 3 indeces',
+            existingIndexPatterns: ['index1-*', 'index2-*', 'index3-*'],
+            indexPatternsToUpdate: ['index8-*', 'index9-*'],
+            resultingIndexPatterns: ['index1-*', 'index2-*', 'index3-*'],
+            operation: BulkActionEditType.delete_index_patterns,
+          },
+          // Add no-ops
+          {
+            caseName: '3 existing indeces + 2 exisiting indeces= 3 indeces',
+            existingIndexPatterns: ['index1-*', 'index2-*', 'index3-*'],
+            indexPatternsToUpdate: ['index1-*', 'index2-*'],
+            resultingIndexPatterns: ['index1-*', 'index2-*', 'index3-*'],
+            operation: BulkActionEditType.add_index_patterns,
+          },
+          {
+            caseName: '3 existing indeces + 0 indeces = 3 indeces',
+            existingIndexPatterns: ['index1-*', 'index2-*', 'index3-*'],
+            indexPatternsToUpdate: [],
+            resultingIndexPatterns: ['index1-*', 'index2-*', 'index3-*'],
+            operation: BulkActionEditType.add_index_patterns,
+          },
+        ];
+
+        skipIndexPatternsUpdateCases.forEach(
+          ({
+            caseName,
+            existingIndexPatterns,
+            indexPatternsToUpdate,
+            resultingIndexPatterns,
+            operation,
+          }) => {
+            it(`should skip rule updated for tags, case: "${caseName}"`, async () => {
+              const ruleId = 'ruleId';
+
+              await createRule(supertest, log, {
+                ...getSimpleRule(ruleId),
+                index: existingIndexPatterns,
+              });
+
+              const { body: bulkEditResponse } = await postBulkAction()
+                .send({
+                  query: '',
+                  action: BulkActionType.edit,
+                  [BulkActionType.edit]: [
+                    {
+                      type: operation,
+                      value: indexPatternsToUpdate,
+                    },
+                  ],
+                })
+                .expect(200);
+
+              expect(bulkEditResponse.attributes.summary).to.eql({
+                failed: 0,
+                skipped: 1,
+                succeeded: 0,
+                total: 1,
+              });
+
+              // Check that the rules is returned as skipped with expected skip reason
+              expect(bulkEditResponse.attributes.results.skipped[0].skip_reason).to.eql(
+                'RULE_NOT_MODIFIED'
+              );
+
+              // Check that the no changes have been persisted
+              const { body: updatedRule } = await fetchRule(ruleId).expect(200);
+
+              expect(updatedRule.index).to.eql(resultingIndexPatterns);
+            });
+          }
+        );
       });
 
       it('should migrate legacy actions on edit', async () => {
@@ -829,7 +994,12 @@ export default ({ getService }: FtrProviderContext): void => {
           ],
         });
 
-        expect(setTagsBody.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
+        expect(setTagsBody.attributes.summary).to.eql({
+          failed: 0,
+          skipped: 0,
+          succeeded: 1,
+          total: 1,
+        });
 
         // Check that the updates have been persisted
         const { body: setTagsRule } = await fetchRule(ruleId).expect(200);
@@ -875,7 +1045,7 @@ export default ({ getService }: FtrProviderContext): void => {
           })
           .expect(200);
 
-        expect(body.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
+        expect(body.attributes.summary).to.eql({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
 
         // Check that the updated rule is returned with the response
         expect(body.attributes.results.updated[0].timeline_id).to.eql(timelineId);
@@ -918,7 +1088,7 @@ export default ({ getService }: FtrProviderContext): void => {
           })
           .expect(200);
 
-        expect(body.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
+        expect(body.attributes.summary).to.eql({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
 
         // Check that the updated rule is returned with the response
         expect(body.attributes.results.updated[0].timeline_id).to.be(undefined);
@@ -947,7 +1117,7 @@ export default ({ getService }: FtrProviderContext): void => {
           })
           .expect(500);
 
-        expect(body.attributes.summary).to.eql({ failed: 1, succeeded: 0, total: 1 });
+        expect(body.attributes.summary).to.eql({ failed: 1, skipped: 0, succeeded: 0, total: 1 });
         expect(body.attributes.errors[0]).to.eql({
           message:
             "Index patterns can't be added. Machine learning rule doesn't have index patterns property",
@@ -980,7 +1150,7 @@ export default ({ getService }: FtrProviderContext): void => {
           })
           .expect(500);
 
-        expect(body.attributes.summary).to.eql({ failed: 1, succeeded: 0, total: 1 });
+        expect(body.attributes.summary).to.eql({ failed: 1, skipped: 0, succeeded: 0, total: 1 });
         expect(body.attributes.errors[0]).to.eql({
           message: "Mutated params invalid: Index patterns can't be empty",
           status_code: 500,
@@ -1054,7 +1224,7 @@ export default ({ getService }: FtrProviderContext): void => {
         ];
         cases.forEach(({ type, value }) => {
           it(`should return error when trying to apply "${type}" edit action to prebuilt rule`, async () => {
-            await installPrePackagedRules(supertest, log);
+            await installPrePackagedRules(supertest, es, log);
             const prebuiltRule = await fetchPrebuiltRule();
 
             const { body } = await postBulkAction()
@@ -1070,7 +1240,12 @@ export default ({ getService }: FtrProviderContext): void => {
               })
               .expect(500);
 
-            expect(body.attributes.summary).to.eql({ failed: 1, succeeded: 0, total: 1 });
+            expect(body.attributes.summary).to.eql({
+              failed: 1,
+              skipped: 0,
+              succeeded: 0,
+              total: 1,
+            });
             expect(body.attributes.errors[0]).to.eql({
               message: "Elastic rule can't be edited",
               status_code: 500,
@@ -1515,7 +1690,7 @@ export default ({ getService }: FtrProviderContext): void => {
           ];
           cases.forEach(({ type }) => {
             it(`should apply "${type}" rule action to prebuilt rule`, async () => {
-              await installPrePackagedRules(supertest, log);
+              await installPrePackagedRules(supertest, es, log);
               const prebuiltRule = await fetchPrebuiltRule();
               const webHookConnector = await createWebHookConnector();
 
@@ -1569,7 +1744,7 @@ export default ({ getService }: FtrProviderContext): void => {
           // if rule action is applied together with another edit action, that can't be applied to prebuilt rule (for example: tags action)
           // bulk edit request should return error
           it(`should return error if one of edit action is not eligible for prebuilt rule`, async () => {
-            await installPrePackagedRules(supertest, log);
+            await installPrePackagedRules(supertest, es, log);
             const prebuiltRule = await fetchPrebuiltRule();
             const webHookConnector = await createWebHookConnector();
 
@@ -1598,7 +1773,12 @@ export default ({ getService }: FtrProviderContext): void => {
               })
               .expect(500);
 
-            expect(body.attributes.summary).to.eql({ failed: 1, succeeded: 0, total: 1 });
+            expect(body.attributes.summary).to.eql({
+              failed: 1,
+              skipped: 0,
+              succeeded: 0,
+              total: 1,
+            });
             expect(body.attributes.errors[0]).to.eql({
               message: "Elastic rule can't be edited",
               status_code: 500,
@@ -1826,7 +2006,7 @@ export default ({ getService }: FtrProviderContext): void => {
             })
             .expect(200);
 
-          expect(body.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
+          expect(body.attributes.summary).to.eql({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
 
           expect(body.attributes.results.updated[0].interval).to.eql(interval);
           expect(body.attributes.results.updated[0].meta).to.eql({ from: `${lookbackMinutes}m` });
@@ -1862,7 +2042,12 @@ export default ({ getService }: FtrProviderContext): void => {
           })
           .expect(200);
 
-        expect(setIndexBody.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
+        expect(setIndexBody.attributes.summary).to.eql({
+          failed: 0,
+          skipped: 0,
+          succeeded: 1,
+          total: 1,
+        });
 
         // Check that the updated rule is returned with the response
         expect(setIndexBody.attributes.results.updated[0].index).to.eql(['initial-index-*']);
@@ -1874,15 +2059,15 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(setIndexRule.index).to.eql(['initial-index-*']);
       });
 
-      it('should NOT add an index pattern to a rule and overwrite the data view when overwrite_data_views is false', async () => {
+      it('should return skipped rule and NOT add an index pattern to a rule or overwrite the data view when overwrite_data_views is false', async () => {
         const ruleId = 'ruleId';
         const dataViewId = 'index1-*';
-        const simpleRule = {
+
+        const simpleRule = await createRule(supertest, log, {
           ...getSimpleRule(ruleId),
           index: undefined,
           data_view_id: dataViewId,
-        };
-        await createRule(supertest, log, simpleRule);
+        });
 
         const { body: setIndexBody } = await postBulkAction()
           .send({
@@ -1898,13 +2083,21 @@ export default ({ getService }: FtrProviderContext): void => {
           })
           .expect(200);
 
-        expect(setIndexBody.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
+        expect(setIndexBody.attributes.summary).to.eql({
+          failed: 0,
+          skipped: 1,
+          succeeded: 0,
+          total: 1,
+        });
 
-        // Check that the updated rule is returned with the response
-        expect(setIndexBody.attributes.results.updated[0].index).to.eql(undefined);
-        expect(setIndexBody.attributes.results.updated[0].data_view_id).to.eql(dataViewId);
+        expect(setIndexBody.attributes.errors).to.be(undefined);
 
-        // Check that the updates have been persisted
+        // Check that the skipped rule is returned with the response
+        expect(setIndexBody.attributes.results.skipped[0].id).to.eql(simpleRule.id);
+        expect(setIndexBody.attributes.results.skipped[0].name).to.eql(simpleRule.name);
+        expect(setIndexBody.attributes.results.skipped[0].skip_reason).to.eql('RULE_NOT_MODIFIED');
+
+        // Check that the rule has not been updated
         const { body: setIndexRule } = await fetchRule(ruleId).expect(200);
 
         expect(setIndexRule.index).to.eql(undefined);
@@ -1935,7 +2128,12 @@ export default ({ getService }: FtrProviderContext): void => {
           })
           .expect(200);
 
-        expect(setIndexBody.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
+        expect(setIndexBody.attributes.summary).to.eql({
+          failed: 0,
+          skipped: 0,
+          succeeded: 1,
+          total: 1,
+        });
 
         // Check that the updated rule is returned with the response
         expect(setIndexBody.attributes.results.updated[0].index).to.eql(['initial-index-*']);
@@ -1971,7 +2169,7 @@ export default ({ getService }: FtrProviderContext): void => {
           })
           .expect(500);
 
-        expect(body.attributes.summary).to.eql({ failed: 1, succeeded: 0, total: 1 });
+        expect(body.attributes.summary).to.eql({ failed: 1, skipped: 0, succeeded: 0, total: 1 });
         expect(body.attributes.errors[0]).to.eql({
           message: "Mutated params invalid: Index patterns can't be empty",
           status_code: 500,
@@ -1984,15 +2182,14 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('should NOT set an index pattern to a rule and overwrite the data view when overwrite_data_views is false', async () => {
+      it('should return skipped rule and NOT set an index pattern to a rule or overwrite the data view when overwrite_data_views is false', async () => {
         const ruleId = 'ruleId';
         const dataViewId = 'index1-*';
-        const simpleRule = {
+        const simpleRule = await createRule(supertest, log, {
           ...getSimpleRule(ruleId),
           index: undefined,
           data_view_id: dataViewId,
-        };
-        await createRule(supertest, log, simpleRule);
+        });
 
         const { body: setIndexBody } = await postBulkAction()
           .send({
@@ -2008,13 +2205,21 @@ export default ({ getService }: FtrProviderContext): void => {
           })
           .expect(200);
 
-        expect(setIndexBody.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
+        expect(setIndexBody.attributes.summary).to.eql({
+          failed: 0,
+          skipped: 1,
+          succeeded: 0,
+          total: 1,
+        });
 
-        // Check that the updated rule is returned with the response
-        expect(setIndexBody.attributes.results.updated[0].index).to.eql(undefined);
-        expect(setIndexBody.attributes.results.updated[0].data_view_id).to.eql(dataViewId);
+        expect(setIndexBody.attributes.errors).to.be(undefined);
 
-        // Check that the updates have been persisted
+        // Check that the skipped rule is returned with the response
+        expect(setIndexBody.attributes.results.skipped[0].id).to.eql(simpleRule.id);
+        expect(setIndexBody.attributes.results.skipped[0].name).to.eql(simpleRule.name);
+        expect(setIndexBody.attributes.results.skipped[0].skip_reason).to.eql('RULE_NOT_MODIFIED');
+
+        // Check that the rule has not been updated
         const { body: setIndexRule } = await fetchRule(ruleId).expect(200);
 
         expect(setIndexRule.index).to.eql(undefined);
@@ -2023,7 +2228,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       // This rule will now not have a source defined - as has been the behavior of rules since the beginning
       // this rule will use the default index patterns on rule run
-      it('should NOT error if all index patterns removed from a rule with data views when no index patterns exist on the rule and overwrite_data_views is true', async () => {
+      it('should be successful on an attempt to remove index patterns from a rule with only a dataView (no index patterns exist on the rule), if overwrite_data_views is true', async () => {
         const dataViewId = 'index1-*';
         const ruleId = 'ruleId';
         const rule = await createRule(supertest, log, {
@@ -2046,7 +2251,12 @@ export default ({ getService }: FtrProviderContext): void => {
           })
           .expect(200);
 
-        expect(body.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
+        expect(body.attributes.summary).to.eql({
+          failed: 0,
+          skipped: 0,
+          succeeded: 1,
+          total: 1,
+        });
 
         // Check that the updated rule is returned with the response
         expect(body.attributes.results.updated[0].index).to.eql(undefined);
@@ -2082,7 +2292,7 @@ export default ({ getService }: FtrProviderContext): void => {
           })
           .expect(500);
 
-        expect(body.attributes.summary).to.eql({ failed: 1, succeeded: 0, total: 1 });
+        expect(body.attributes.summary).to.eql({ failed: 1, skipped: 0, succeeded: 0, total: 1 });
         expect(body.attributes.errors[0]).to.eql({
           message: "Mutated params invalid: Index patterns can't be empty",
           status_code: 500,
@@ -2095,7 +2305,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('should NOT return error if all index patterns removed from a rule with data views and overwrite_data_views is false', async () => {
+      it('should return a skipped rule if all index patterns removed from a rule with data views and overwrite_data_views is false', async () => {
         const dataViewId = 'index1-*';
         const ruleId = 'ruleId';
         const rule = await createRule(supertest, log, {
@@ -2118,17 +2328,134 @@ export default ({ getService }: FtrProviderContext): void => {
           })
           .expect(200);
 
-        expect(body.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
+        expect(body.attributes.summary).to.eql({ failed: 0, skipped: 1, succeeded: 0, total: 1 });
+        expect(body.attributes.errors).to.be(undefined);
+
+        // Check that the skipped rule is returned with the response
+        expect(body.attributes.results.skipped[0].id).to.eql(rule.id);
+        expect(body.attributes.results.skipped[0].name).to.eql(rule.name);
+        expect(body.attributes.results.skipped[0].skip_reason).to.eql('RULE_NOT_MODIFIED');
+      });
+    });
+
+    describe('multiple_actions', () => {
+      it('should return one updated rule when applying two valid operations on a rule', async () => {
+        const ruleId = 'ruleId';
+        const rule = await createRule(supertest, log, {
+          ...getSimpleRule(ruleId),
+          index: ['index1-*'],
+          tags: ['tag1', 'tag2'],
+        });
+
+        const { body } = await postBulkAction()
+          .send({
+            ids: [rule.id],
+            action: BulkActionType.edit,
+            [BulkActionType.edit]: [
+              {
+                type: BulkActionEditType.add_index_patterns,
+                value: ['initial-index-*'],
+              },
+              {
+                type: BulkActionEditType.add_tags,
+                value: ['tag3'],
+              },
+            ],
+          })
+          .expect(200);
+
+        expect(body.attributes.summary).to.eql({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
 
         // Check that the updated rule is returned with the response
-        expect(body.attributes.results.updated[0].index).to.eql(['simple-index-*']);
-        expect(body.attributes.results.updated[0].data_view_id).to.eql(dataViewId);
+        expect(body.attributes.results.updated[0].tags).to.eql(['tag1', 'tag2', 'tag3']);
+        expect(body.attributes.results.updated[0].index).to.eql(['index1-*', 'initial-index-*']);
 
-        // Check that the updates have been persisted
-        const { body: setIndexRule } = await fetchRule(ruleId).expect(200);
+        // Check that the rule has been persisted
+        const { body: updatedRule } = await fetchRule(ruleId).expect(200);
 
-        expect(setIndexRule.index).to.eql(['simple-index-*']);
-        expect(setIndexRule.data_view_id).to.eql(dataViewId);
+        expect(updatedRule.index).to.eql(['index1-*', 'initial-index-*']);
+        expect(updatedRule.tags).to.eql(['tag1', 'tag2', 'tag3']);
+      });
+
+      it('should return one updated rule when applying one valid operation and one operation to be skipped on a rule', async () => {
+        const ruleId = 'ruleId';
+        const rule = await createRule(supertest, log, {
+          ...getSimpleRule(ruleId),
+          index: ['index1-*'],
+          tags: ['tag1', 'tag2'],
+        });
+
+        const { body } = await postBulkAction()
+          .send({
+            ids: [rule.id],
+            action: BulkActionType.edit,
+            [BulkActionType.edit]: [
+              // Valid operation
+              {
+                type: BulkActionEditType.add_index_patterns,
+                value: ['initial-index-*'],
+              },
+              // Operation to be skipped
+              {
+                type: BulkActionEditType.add_tags,
+                value: ['tag1'],
+              },
+            ],
+          })
+          .expect(200);
+
+        expect(body.attributes.summary).to.eql({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
+
+        // Check that the updated rule is returned with the response
+        expect(body.attributes.results.updated[0].tags).to.eql(['tag1', 'tag2']);
+        expect(body.attributes.results.updated[0].index).to.eql(['index1-*', 'initial-index-*']);
+
+        // Check that the rule has been persisted
+        const { body: updatedRule } = await fetchRule(ruleId).expect(200);
+
+        expect(updatedRule.index).to.eql(['index1-*', 'initial-index-*']);
+        expect(updatedRule.tags).to.eql(['tag1', 'tag2']);
+      });
+
+      it('should return one skipped rule when two (all) operations result in a no-op', async () => {
+        const ruleId = 'ruleId';
+        const rule = await createRule(supertest, log, {
+          ...getSimpleRule(ruleId),
+          index: ['index1-*'],
+          tags: ['tag1', 'tag2'],
+        });
+
+        const { body } = await postBulkAction()
+          .send({
+            ids: [rule.id],
+            action: BulkActionType.edit,
+            [BulkActionType.edit]: [
+              // Operation to be skipped
+              {
+                type: BulkActionEditType.add_index_patterns,
+                value: ['index1-*'],
+              },
+              // Operation to be skipped
+              {
+                type: BulkActionEditType.add_tags,
+                value: ['tag1'],
+              },
+            ],
+          })
+          .expect(200);
+
+        expect(body.attributes.summary).to.eql({ failed: 0, skipped: 1, succeeded: 0, total: 1 });
+
+        // Check that the skipped rule is returned with the response
+        expect(body.attributes.results.skipped[0].name).to.eql(rule.name);
+        expect(body.attributes.results.skipped[0].id).to.eql(rule.id);
+        expect(body.attributes.results.skipped[0].skip_reason).to.eql('RULE_NOT_MODIFIED');
+
+        // Check that no change to the rule have been persisted
+        const { body: skippedRule } = await fetchRule(ruleId).expect(200);
+
+        expect(skippedRule.index).to.eql(['index1-*']);
+        expect(skippedRule.tags).to.eql(['tag1', 'tag2']);
       });
     });
 
@@ -2184,7 +2511,7 @@ export default ({ getService }: FtrProviderContext): void => {
         })
         .expect(200);
 
-      expect(body.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
+      expect(body.attributes.summary).to.eql({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
 
       // Check that the updated rule is returned with the response
       expect(body.attributes.results.updated[0].timeline_id).to.eql(timelineId);

@@ -32,6 +32,7 @@ import { ColumnSettingsValue, useToolbarOptions } from './hooks';
 import { useFieldTypes } from '../../../../hooks';
 import { getFieldSchema } from '../../utils';
 import { Pagination } from '../../services';
+import { TABLE_TEST_ID, TABLE_UPDATE_PROGRESS_TEST_ID } from './test_ids';
 
 export interface IndicatorsTableProps {
   indicators: Indicator[];
@@ -49,16 +50,12 @@ export interface IndicatorsTableProps {
   columnSettings: ColumnSettingsValue;
 }
 
-export const TABLE_TEST_ID = 'tiIndicatorsTable';
-
 const gridStyle = {
   border: 'horizontal',
   header: 'underline',
   cellPadding: 'm',
   fontSize: 's',
 } as const;
-
-export const TABLE_UPDATE_PROGRESS_TEST_ID = `${TABLE_TEST_ID}-updating` as const;
 
 export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
   indicators,
@@ -97,7 +94,7 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
     () => [
       {
         id: 'Actions',
-        width: 72,
+        width: 84,
         headerCellRender: () => (
           <FormattedMessage
             id="xpack.threatIntelligence.indicator.table.actionColumnLabel"

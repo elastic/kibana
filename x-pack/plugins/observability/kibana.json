@@ -31,7 +31,9 @@
     "inspector",
     "unifiedSearch",
     "security",
-    "guidedOnboarding"
+    "guidedOnboarding",
+    "share",
+    "spaces"
   ],
   "ui": true,
   "server": true,

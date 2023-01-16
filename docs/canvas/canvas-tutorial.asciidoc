@@ -44,11 +44,11 @@ Customize your data by connecting it to the Sample eCommerce orders data.
 
 . Click *Add element > Chart > Metric*.
 +
-By default, the element is connected to the demo data, which enables you to experiment with the element before you connect it to your own data source.
+By default, the element is connected to the demo data, which enables you to experiment with the element before you connect it to your own.
 
-. To connect the element to your own data source, make sure that the element is selected, click *Data > Demo data > Elasticsearch SQL*.
+. To connect the element to your own data, make sure the element is selected, then click *Data > Demo data > Elasticsearch SQL*.
 
-.. In the *Query* field, enter:
+.. To select the total price field and set it to the sum_total_price field, enter the following in the *Query* field:
 +
 [source,text]
 --
@@ -57,13 +57,13 @@ SELECT sum(taxless_total_price) AS sum_total_price FROM "kibana_sample_data_ecom
 
 .. Click *Save*.
 +
-The query selects the total price field and sets it to the sum_total_price field. All fields are pulled from the kibana_sample_data_ecommerce index.
+All fields are pulled from the sample eCommerce orders {data-source}.
 
 . At this point, the element appears as an error, so you need to change the element display options.
 
 .. Click *Display*
 
-.. From the *Value* dropdowns, make sure *Unique* is selected, then select *sum_total_price*.
+.. From the *Value* dropdowns, make sure *Unique* and *sum_total_price* are selected.
 
 .. Change the *Label* to `Total sales`.
 
@@ -102,9 +102,9 @@ SELECT order_date, taxless_total_price FROM "kibana_sample_data_ecommerce" ORDER
 
 .. Click *Display*
 
-.. From the *X-axis* drop-down lists, select *Value*, then select *order_date*.
+.. From the *X-axis* dropdown, make sure *Value* and *order_date* are selected.
 
-.. From the *Y-axis* drop-down lists, select *Value*, then select *taxless_total_price*.
+.. From the *Y-axis* dropdown, select *Value*, then select *taxless_total_price*.
 
 [role="screenshot"]
 image::images/canvas_tutorialCustomChart_7.17.0.png[Custom line chart added to the workpad using Elasticsearch SQL]

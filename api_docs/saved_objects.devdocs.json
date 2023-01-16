@@ -632,14 +632,6 @@
             "path": "src/plugins/embeddable/public/lib/attribute_service/attribute_service.tsx"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/top_nav/on_save_search.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/top_nav/on_save_search.tsx"
-          },
-          {
             "plugin": "presentationUtil",
             "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx"
           },
@@ -649,11 +641,19 @@
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/top_nav/save_modal.tsx"
+            "path": "src/plugins/dashboard/public/dashboard_container/embeddable/api/overlays/save_modal.tsx"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/top_nav/save_modal.tsx"
+            "path": "src/plugins/dashboard/public/dashboard_container/embeddable/api/overlays/save_modal.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/application/main/components/top_nav/on_save_search.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/application/main/components/top_nav/on_save_search.tsx"
           },
           {
             "plugin": "graph",
@@ -1339,6 +1339,59 @@
     "interfaces": [
       {
         "parentPluginId": "savedObjects",
+        "id": "def-public.FinderAttributes",
+        "type": "Interface",
+        "tags": [],
+        "label": "FinderAttributes",
+        "description": [],
+        "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "savedObjects",
+            "id": "def-public.FinderAttributes.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjects",
+            "id": "def-public.FinderAttributes.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjects",
+            "id": "def-public.FinderAttributes.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "savedObjects",
         "id": "def-public.OnSaveProps",
         "type": "Interface",
         "tags": [],
@@ -1655,15 +1708,15 @@
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/actions/clone_panel_action.tsx"
+            "path": "src/plugins/dashboard/public/dashboard_actions/clone_panel_action.tsx"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/actions/clone_panel_action.tsx"
+            "path": "src/plugins/dashboard/public/dashboard_actions/clone_panel_action.tsx"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/actions/clone_panel_action.tsx"
+            "path": "src/plugins/dashboard/public/dashboard_actions/clone_panel_action.tsx"
           }
         ],
         "children": [

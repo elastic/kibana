@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-// @ts-expect-error no types
 import { SYSTEM_INDICES_SUPERUSER } from '@kbn/es';
 
 const env = process.env;

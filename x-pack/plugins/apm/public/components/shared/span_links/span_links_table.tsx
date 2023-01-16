@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { SpanLinkDetails } from '../../../../common/span_links';
 import { asDuration } from '../../../../common/utils/formatters';
-import { useApmParams } from '../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { ServiceLink } from '../service_link';
 import { getSpanIcon } from '../span_icon/get_span_icon';
@@ -34,7 +34,10 @@ export function SpanLinksTable({ items }: Props) {
   const router = useApmRouter();
   const {
     query: { rangeFrom, rangeTo, comparisonEnabled },
-  } = useApmParams('/services/{serviceName}/transactions/view');
+  } = useAnyOfApmParams(
+    '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/transactions/view'
+  );
   const [idActionMenuOpen, setIdActionMenuOpen] = useState<
     string | undefined
   >();

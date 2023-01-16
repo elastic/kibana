@@ -6,6 +6,7 @@ exports[`GaugeComponent renders the chart 1`] = `
 >
   <Settings
     ariaUseDefaultSummary={true}
+    baseTheme={Object {}}
     debugState={false}
     noResults={
       <EmptyPlaceholder

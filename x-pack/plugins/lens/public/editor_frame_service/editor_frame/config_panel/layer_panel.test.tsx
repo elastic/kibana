@@ -164,15 +164,6 @@ describe('LayerPanel', () => {
       ).toContain('Delete layer');
     });
 
-    it('should show to reset visualization for visualizations only allowing a single layer', async () => {
-      const layerPanelAttributes = getDefaultProps();
-      delete layerPanelAttributes.activeVisualization.removeLayer;
-      const { instance } = await mountWithProvider(<LayerPanel {...getDefaultProps()} />);
-      expect(
-        instance.find('[data-test-subj="lnsLayerRemove--0"]').first().props()['aria-label']
-      ).toContain('Reset visualization');
-    });
-
     it('should call the clear callback', async () => {
       const cb = jest.fn();
       const { instance } = await mountWithProvider(
@@ -697,6 +688,54 @@ describe('LayerPanel', () => {
       instance.update();
       expect(mockDatasource.updateStateOnCloseDimension).toHaveBeenCalled();
       expect(updateDatasource).toHaveBeenCalledWith('testDatasource', { newState: true });
+    });
+
+    it('should display the fake final accessor if present in the group config', async () => {
+      const fakeAccessorLabel = "I'm a fake!";
+      mockVisualization.getConfiguration.mockReturnValue({
+        groups: [
+          {
+            groupLabel: 'A',
+            groupId: 'a',
+            accessors: [{ columnId: 'a' }],
+            filterOperations: () => true,
+            fakeFinalAccessor: {
+              label: fakeAccessorLabel,
+            },
+            supportsMoreColumns: false,
+            dataTestSubj: 'lnsGroup',
+          },
+        ],
+      });
+
+      const { instance } = await mountWithProvider(<LayerPanel {...getDefaultProps()} />);
+
+      expect(instance.exists('[data-test-subj="lns-fakeDimension"]')).toBeTruthy();
+      expect(
+        instance
+          .find('[data-test-subj="lns-fakeDimension"] .lnsLayerPanel__triggerTextLabel')
+          .text()
+      ).toBe(fakeAccessorLabel);
+    });
+
+    it('should not display the fake final accessor if not present in the group config', async () => {
+      mockVisualization.getConfiguration.mockReturnValue({
+        groups: [
+          {
+            groupLabel: 'A',
+            groupId: 'a',
+            accessors: [{ columnId: 'a' }],
+            filterOperations: () => true,
+            fakeFinalAccessor: undefined,
+            supportsMoreColumns: false,
+            dataTestSubj: 'lnsGroup',
+          },
+        ],
+      });
+
+      const { instance } = await mountWithProvider(<LayerPanel {...getDefaultProps()} />);
+
+      expect(instance.exists('[data-test-subj="lns-fakeDimension"]')).toBeFalsy();
     });
   });
 

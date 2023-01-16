@@ -43,12 +43,8 @@ import { TruncatedText } from '../truncated_text';
 import { getConnectorIcon } from '../utils';
 import type { CasesOwners } from '../../client/helpers/can_use_cases';
 import { severities } from '../severity/config';
-import { UserToolTip } from '../user_profiles/user_tooltip';
-import { useAssignees } from '../../containers/user_profiles/use_assignees';
-import { getUsernameDataTestSubj } from '../user_profiles/data_test_subject';
-import type { CurrentUserProfile } from '../types';
-import { SmallUserAvatar } from '../user_profiles/small_user_avatar';
 import { useCasesFeatures } from '../../common/use_cases_features';
+import { AssigneesColumn } from './assignees_column';
 
 type CasesColumns =
   | EuiTableActionsColumnType<Case>
@@ -69,54 +65,19 @@ const LineClampedEuiBadgeGroup = euiStyled(EuiBadgeGroup)`
   word-break: normal;
 `;
 
+// margin-right is required here because -webkit-box-orient: vertical;
+// in the EuiBadgeGroup prevents us from defining gutterSize.
 const StyledEuiBadge = euiStyled(EuiBadge)`
-  max-width: 100px
+  max-width: 100px;
+  margin-right: 5px;
 `; // to allow for ellipsis
 
 const renderStringField = (field: string, dataTestSubj: string) =>
   field != null ? <span data-test-subj={dataTestSubj}>{field}</span> : getEmptyTagValue();
 
-const AssigneesColumn: React.FC<{
-  assignees: Case['assignees'];
-  userProfiles: Map<string, UserProfileWithAvatar>;
-  currentUserProfile: CurrentUserProfile;
-}> = ({ assignees, userProfiles, currentUserProfile }) => {
-  const { allAssignees } = useAssignees({
-    caseAssignees: assignees,
-    userProfiles,
-    currentUserProfile,
-  });
-
-  if (allAssignees.length <= 0) {
-    return getEmptyTagValue();
-  }
-
-  return (
-    <EuiFlexGroup gutterSize="none" data-test-subj="case-table-column-assignee" wrap>
-      {allAssignees.map((assignee) => {
-        const dataTestSubjName = getUsernameDataTestSubj(assignee);
-        return (
-          <EuiFlexItem
-            grow={false}
-            key={assignee.uid}
-            data-test-subj={`case-table-column-assignee-${dataTestSubjName}`}
-          >
-            <UserToolTip userInfo={assignee.profile}>
-              <SmallUserAvatar userInfo={assignee.profile} />
-            </UserToolTip>
-          </EuiFlexItem>
-        );
-      })}
-    </EuiFlexGroup>
-  );
-};
-
-AssigneesColumn.displayName = 'AssigneesColumn';
-
 export interface GetCasesColumn {
   filterStatus: string;
   userProfiles: Map<string, UserProfileWithAvatar>;
-  currentUserProfile: CurrentUserProfile;
   isSelectorView: boolean;
   connectors?: ActionConnector[];
   onRowClick?: (theCase: Case) => void;
@@ -131,7 +92,6 @@ export interface UseCasesColumnsReturnValue {
 export const useCasesColumns = ({
   filterStatus,
   userProfiles,
-  currentUserProfile,
   isSelectorView,
   connectors = [],
   onRowClick,
@@ -152,8 +112,10 @@ export const useCasesColumns = ({
 
   const columns: CasesColumns[] = [
     {
+      field: 'title',
       name: i18n.NAME,
-      render: (theCase: Case) => {
+      sortable: true,
+      render: (title: string, theCase: Case) => {
         if (theCase.id != null && theCase.title != null) {
           const caseDetailsLinkComponent = isSelectorView ? (
             <TruncatedText text={theCase.title} />
@@ -184,12 +146,9 @@ export const useCasesColumns = ({
       field: 'assignees',
       name: i18n.ASSIGNEES,
       render: (assignees: Case['assignees']) => (
-        <AssigneesColumn
-          assignees={assignees}
-          userProfiles={userProfiles}
-          currentUserProfile={currentUserProfile}
-        />
+        <AssigneesColumn assignees={assignees} userProfiles={userProfiles} />
       ),
+      width: !isSelectorView ? '180px' : undefined,
     });
   }
 
@@ -330,23 +289,27 @@ export const useCasesColumns = ({
       },
     },
     {
+      field: 'status',
       name: i18n.STATUS,
-      render: (theCase: Case) => {
-        if (theCase.status === null || theCase.status === undefined) {
-          return getEmptyTagValue();
+      sortable: true,
+      render: (status: Case['status']) => {
+        if (status != null) {
+          return <Status status={status} />;
         }
 
-        return <Status status={theCase.status} />;
+        return getEmptyTagValue();
       },
     },
     {
+      field: 'severity',
       name: i18n.SEVERITY,
-      render: (theCase: Case) => {
-        if (theCase.severity != null) {
-          const severityData = severities[theCase.severity ?? CaseSeverity.LOW];
+      sortable: true,
+      render: (severity: Case['severity']) => {
+        if (severity != null) {
+          const severityData = severities[severity ?? CaseSeverity.LOW];
           return (
             <EuiHealth
-              data-test-subj={`case-table-column-severity-${theCase.severity}`}
+              data-test-subj={`case-table-column-severity-${severity}`}
               color={severityData.color}
             >
               {severityData.label}

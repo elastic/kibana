@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { encode } from 'rison-node';
+import { encode } from '@kbn/rison';
 import uuid from 'uuid';
 import { set } from '@kbn/safer-lodash-set';
 import { LinkDescriptor } from '@kbn/observability-plugin/public';

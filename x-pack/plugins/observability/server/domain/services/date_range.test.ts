@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { TimeWindow } from '../../types/models/time_window';
-import { Duration, DurationUnit } from '../../types/models';
+import { TimeWindow } from '../models/time_window';
+import { Duration, DurationUnit } from '../models';
 import { toDateRange } from './date_range';
 
-const THIRTY_DAYS = new Duration(30, DurationUnit.d);
-const WEEKLY = new Duration(1, DurationUnit.w);
-const BIWEEKLY = new Duration(2, DurationUnit.w);
-const MONTHLY = new Duration(1, DurationUnit.M);
-const QUARTERLY = new Duration(1, DurationUnit.Q);
+const THIRTY_DAYS = new Duration(30, DurationUnit.Day);
+const WEEKLY = new Duration(1, DurationUnit.Week);
+const BIWEEKLY = new Duration(2, DurationUnit.Week);
+const MONTHLY = new Duration(1, DurationUnit.Month);
+const QUARTERLY = new Duration(1, DurationUnit.Quarter);
 
 const NOW = new Date('2022-08-11T08:31:00.000Z');
 
@@ -136,10 +136,10 @@ describe('toDateRange', () => {
 function aCalendarTimeWindow(duration: Duration, startTime: Date): TimeWindow {
   return {
     duration,
-    calendar: { start_time: startTime },
+    calendar: { startTime },
   };
 }
 
 function aRollingTimeWindow(duration: Duration): TimeWindow {
-  return { duration, is_rolling: true };
+  return { duration, isRolling: true };
 }

@@ -37,7 +37,7 @@ describe('<RepositoryAdd />', () => {
     /**
      * TODO: investigate why we need to skip this test.
      * My guess is a change in the useRequest() hook and maybe a setTimout() that hasn't been
-     * mocked with jest.useFakeTimers('legacy');
+     * mocked with jest.useFakeTimers({ legacyFakeTimers: true });
      * I tested locally and the loading spinner is present in the UI so skipping this test for now.
      */
     test.skip('should indicate that the repository types are loading', () => {

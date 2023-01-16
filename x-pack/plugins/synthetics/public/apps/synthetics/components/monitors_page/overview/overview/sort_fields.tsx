@@ -146,7 +146,7 @@ const getOrderContent = (sortField: string) => {
 };
 
 const SORT_TITLE = i18n.translate('xpack.synthetics.overview.sortPopover.sort.title', {
-  defaultMessage: 'Sort',
+  defaultMessage: 'Sort by',
 });
 
 const SORT_ALPHABETICAL_ASC = i18n.translate(

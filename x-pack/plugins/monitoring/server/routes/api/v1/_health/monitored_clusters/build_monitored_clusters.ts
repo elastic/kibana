@@ -43,7 +43,7 @@ const metricbeatMonitoring7Pattern =
   /(.*:)?\.monitoring-(es|kibana|beats|logstash|ent-search)-7.*-mb.*/;
 const metricbeatMonitoring8Pattern =
   /(.*:)?\.ds-\.monitoring-(es|kibana|beats|logstash|ent-search)-8-mb.*/;
-const packagePattern = /(.*:)?\.ds-metrics-(elasticsearch|kibana|logstash)\..*/;
+const packagePattern = /(.*:)?\.ds-metrics-(elasticsearch|kibana|beats|logstash)\..*/;
 
 const getCollectionMode = (index: string): CollectionMode => {
   if (internalMonitoringPattern.test(index)) return CollectionMode.Internal;

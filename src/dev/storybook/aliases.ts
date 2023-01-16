@@ -33,7 +33,6 @@ export const storybookAliases = {
   expression_reveal_image: 'src/plugins/expression_reveal_image/.storybook',
   expression_shape: 'src/plugins/expression_shape/.storybook',
   expression_tagcloud: 'src/plugins/chart_expressions/expression_tagcloud/.storybook',
-  files: 'src/plugins/files/.storybook',
   fleet: 'x-pack/plugins/fleet/.storybook',
   home: 'src/plugins/home/.storybook',
   infra: 'x-pack/plugins/infra/.storybook',
@@ -46,5 +45,6 @@ export const storybookAliases = {
   threat_intelligence: 'x-pack/plugins/threat_intelligence/.storybook',
   triggers_actions_ui: 'x-pack/plugins/triggers_actions_ui/.storybook',
   ui_actions_enhanced: 'src/plugins/ui_actions_enhanced/.storybook',
+  ui_actions: 'src/plugins/ui_actions/.storybook',
   unified_search: 'src/plugins/unified_search/.storybook',
 };

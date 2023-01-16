@@ -9,12 +9,12 @@ import { EuiBadge, EuiBadgeGroup, EuiIcon, EuiLoadingSpinner } from '@elastic/eu
 import { useTheme } from '@kbn/observability-plugin/public';
 import { useStatusByLocation } from '../../../hooks/use_status_by_location';
 
-export const LocationsStatus = () => {
-  const { locations, loading } = useStatusByLocation();
+export const LocationsStatus = ({ configId }: { configId?: string }) => {
+  const { locations, loading } = useStatusByLocation(configId);
 
   const theme = useTheme();
 
-  if (loading) {
+  if (loading && !locations) {
     return <EuiLoadingSpinner />;
   }
 
@@ -22,6 +22,7 @@ export const LocationsStatus = () => {
     <EuiBadgeGroup>
       {locations.map((loc) => (
         <EuiBadge
+          key={loc.observer?.geo?.name}
           iconType={() => (
             <EuiIcon
               size="s"

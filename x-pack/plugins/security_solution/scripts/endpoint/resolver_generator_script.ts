@@ -21,9 +21,29 @@ import { indexHostsAndAlerts } from '../../common/endpoint/index_data';
 import { ANCESTRY_LIMIT, EndpointDocGenerator } from '../../common/endpoint/generate_data';
 import { fetchStackVersion } from './common/stack_services';
 import { ENDPOINT_ALERTS_INDEX, ENDPOINT_EVENTS_INDEX } from './common/constants';
-import { withResponseActionsUser, noResponseActionsUser } from './common/roles_users';
-import { withResponseActionsRole } from './common/roles_users/with_response_actions_role';
-import { noResponseActionsRole } from './common/roles_users/without_response_actions_role';
+import { getWithResponseActionsRole } from './common/roles_users/with_response_actions_role';
+import { getNoResponseActionsRole } from './common/roles_users/without_response_actions_role';
+import { getT1Analyst } from './common/roles_users/t1_analyst';
+import { getT2Analyst } from './common/roles_users/t2_analyst';
+import { getEndpointOperationsAnalyst } from './common/roles_users/endpoint_operations_analyst';
+import { getEndpointSecurityPolicyManager } from './common/roles_users/endpoint_security_policy_manager';
+import { getHunter } from './common/roles_users/hunter';
+import { getPlatformEngineer } from './common/roles_users/platform_engineer';
+import { getSocManager } from './common/roles_users/soc_manager';
+import { getThreadIntelligenceAnalyst } from './common/roles_users/thread_intelligence_analyst';
+
+const rolesMapping: { [id: string]: Omit<Role, 'name'> } = {
+  t1Analyst: getT1Analyst(),
+  t2Analyst: getT2Analyst(),
+  hunter: getHunter(),
+  threadIntelligenceAnalyst: getThreadIntelligenceAnalyst(),
+  socManager: getSocManager(),
+  platformEngineer: getPlatformEngineer(),
+  endpointOperationsAnalyst: getEndpointOperationsAnalyst(),
+  endpointSecurityPolicyManager: getEndpointSecurityPolicyManager(),
+  withResponseActionsRole: getWithResponseActionsRole(),
+  noResponseActionsRole: getNoResponseActionsRole(),
+};
 
 main();
 
@@ -293,7 +313,7 @@ async function main() {
     rbacUser: {
       alias: 'rbac',
       describe:
-        "Creates the 'WithResponseActions'  and 'NoResponseActions' users and roles, password=changeme. The former has the kibana permissions for response actions and the latter does not. Neither have the superuser role. ",
+        'Creates a set of roles and users, password=changeme, with RBAC privileges enabled/disabled. Neither have the superuser role. ',
       type: 'boolean',
       default: false,
     },
@@ -371,28 +391,18 @@ async function main() {
   }
 
   if (argv.rbacUser) {
-    // Add role and user with response actions kibana privileges
-    const withRARole = await addRole(kbnClient, {
-      name: 'withResponseActions',
-      ...withResponseActionsRole,
-    });
-    if (withRARole) {
-      console.log(`Successfully added ${withRARole} role`);
-      await addUser(client, withResponseActionsUser);
-    } else {
-      console.log('Failed to add role, withResponseActions');
-    }
-
-    // Add role and user with no response actions kibana privileges
-    const noRARole = await addRole(kbnClient, {
-      name: 'noResponseActions',
-      ...noResponseActionsRole,
-    });
-    if (noRARole) {
-      console.log(`Successfully added ${noRARole} role`);
-      await addUser(client, noResponseActionsUser);
-    } else {
-      console.log('Failed to add role, noResponseActions');
+    // Add roles and users with response actions kibana privileges
+    for (const role of Object.keys(rolesMapping)) {
+      const addedRole = await addRole(kbnClient, {
+        name: role,
+        ...rolesMapping[role],
+      });
+      if (addedRole) {
+        console.log(`Successfully added ${role} role`);
+        await addUser(client, { username: role, password: 'changeme', roles: [role] });
+      } else {
+        console.log(`Failed to add role, ${role}`);
+      }
     }
   }
 

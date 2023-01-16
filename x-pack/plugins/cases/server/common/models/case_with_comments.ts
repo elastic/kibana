@@ -185,7 +185,6 @@ export class CaseCommentModel {
     await this.params.services.userActionService.createUserAction({
       type: ActionTypes.comment,
       action: Actions.update,
-      unsecuredSavedObjectsClient: this.params.unsecuredSavedObjectsClient,
       caseId: this.caseInfo.id,
       attachmentId: comment.id,
       payload: { attachment: queryRestAttributes },
@@ -339,7 +338,6 @@ export class CaseCommentModel {
     await this.params.services.userActionService.createUserAction({
       type: ActionTypes.comment,
       action: Actions.create,
-      unsecuredSavedObjectsClient: this.params.unsecuredSavedObjectsClient,
       caseId: this.caseInfo.id,
       attachmentId: comment.id,
       payload: {
@@ -352,7 +350,6 @@ export class CaseCommentModel {
 
   private async bulkCreateCommentUserAction(attachments: Array<{ id: string } & CommentRequest>) {
     await this.params.services.userActionService.bulkCreateAttachmentCreation({
-      unsecuredSavedObjectsClient: this.params.unsecuredSavedObjectsClient,
       caseId: this.caseInfo.id,
       attachments: attachments.map(({ id, ...attachment }) => ({
         id,

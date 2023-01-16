@@ -15,27 +15,20 @@ import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 
 export interface LogAlertsParams<
   State extends AlertInstanceState,
-  Context extends AlertInstanceContext,
-  ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  Context extends AlertInstanceContext
 > {
   logger: Logger;
   alertingEventLogger: AlertingEventLogger;
-  newAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
-  activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
-  recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
+  newAlerts: Record<string, Alert<State, Context>>;
+  activeAlerts: Record<string, Alert<State, Context>>;
+  recoveredAlerts: Record<string, Alert<State, Context>>;
   ruleLogPrefix: string;
   ruleRunMetricsStore: RuleRunMetricsStore;
   canSetRecoveryContext: boolean;
   shouldPersistAlerts: boolean;
 }
 
-export function logAlerts<
-  State extends AlertInstanceState,
-  Context extends AlertInstanceContext,
-  ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
->({
+export function logAlerts<State extends AlertInstanceState, Context extends AlertInstanceContext>({
   logger,
   alertingEventLogger,
   newAlerts,
@@ -45,7 +38,7 @@ export function logAlerts<
   ruleRunMetricsStore,
   canSetRecoveryContext,
   shouldPersistAlerts,
-}: LogAlertsParams<State, Context, ActionGroupIds, RecoveryActionGroupId>) {
+}: LogAlertsParams<State, Context>) {
   const newAlertIds = Object.keys(newAlerts);
   const activeAlertIds = Object.keys(activeAlerts);
   const recoveredAlertIds = Object.keys(recoveredAlerts);
@@ -90,19 +83,17 @@ export function logAlerts<
     ruleRunMetricsStore.setNumberOfNewAlerts(newAlertIds.length);
     ruleRunMetricsStore.setNumberOfActiveAlerts(activeAlertIds.length);
     ruleRunMetricsStore.setNumberOfRecoveredAlerts(recoveredAlertIds.length);
-
     for (const id of recoveredAlertIds) {
       const { group: actionGroup } = recoveredAlerts[id].getLastScheduledActions() ?? {};
       const state = recoveredAlerts[id].getState();
       const message = `${ruleLogPrefix} alert '${id}' has recovered`;
-
       alertingEventLogger.logAlert({
         action: EVENT_LOG_ACTIONS.recoveredInstance,
         id,
         group: actionGroup,
         message,
         state,
-        flapping: false,
+        flapping: recoveredAlerts[id].getFlapping(),
       });
     }
 
@@ -116,7 +107,7 @@ export function logAlerts<
         group: actionGroup,
         message,
         state,
-        flapping: false,
+        flapping: activeAlerts[id].getFlapping(),
       });
     }
 
@@ -130,7 +121,7 @@ export function logAlerts<
         group: actionGroup,
         message,
         state,
-        flapping: false,
+        flapping: activeAlerts[id].getFlapping(),
       });
     }
   }

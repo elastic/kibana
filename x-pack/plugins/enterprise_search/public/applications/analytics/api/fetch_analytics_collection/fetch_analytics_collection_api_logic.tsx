@@ -12,9 +12,9 @@ import { HttpLogic } from '../../../shared/http';
 
 export type FetchAnalyticsCollectionApiLogicResponse = AnalyticsCollection;
 
-export const fetchAnalyticsCollection = async ({ name }: { name: string }) => {
+export const fetchAnalyticsCollection = async ({ id }: { id: string }) => {
   const { http } = HttpLogic.values;
-  const route = `/internal/enterprise_search/analytics/collections/${name}`;
+  const route = `/internal/enterprise_search/analytics/collections/${id}`;
   const response = await http.get<AnalyticsCollection>(route);
 
   return response;

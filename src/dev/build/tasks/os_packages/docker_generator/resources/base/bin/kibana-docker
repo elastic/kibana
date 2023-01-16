@@ -165,6 +165,7 @@ kibana_vars=(
     server.securityResponseHeaders.referrerPolicy
     server.securityResponseHeaders.strictTransportSecurity
     server.securityResponseHeaders.xContentTypeOptions
+    server.securityResponseHeaders.crossOriginOpenerPolicy
     server.shutdownTimeout
     server.socketTimeout
     server.ssl.cert
@@ -392,8 +393,6 @@ kibana_vars=(
     xpack.securitySolution.maxTimelineImportExportSize
     xpack.securitySolution.maxTimelineImportPayloadBytes
     xpack.securitySolution.packagerTaskInterval
-    xpack.securitySolution.prebuiltRulesFromFileSystem
-    xpack.securitySolution.prebuiltRulesFromSavedObjects
     xpack.spaces.maxSpaces
     xpack.task_manager.max_attempts
     xpack.task_manager.max_poll_inactivity_cycles

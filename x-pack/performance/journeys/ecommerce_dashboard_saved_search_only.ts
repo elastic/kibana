@@ -10,6 +10,8 @@ import { subj } from '@kbn/test-subj-selector';
 import { waitForVisualizations } from '../utils';
 
 export const journey = new Journey({
+  // FAILING: https://github.com/elastic/kibana/issues/148221
+  skipped: true,
   esArchives: ['x-pack/performance/es_archives/sample_data_ecommerce'],
   kbnArchives: ['x-pack/performance/kbn_archives/ecommerce_saved_search_only_dashboard'],
 })

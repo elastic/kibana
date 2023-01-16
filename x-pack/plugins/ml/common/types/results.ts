@@ -99,6 +99,7 @@ export interface ChartPoint {
   anomalyScore?: number;
   actual?: number[];
   multiBucketImpact?: number;
+  isMultiBucketAnomaly?: boolean;
   typical?: number[];
   value?: number | null;
   entity?: string;

@@ -109,12 +109,6 @@ export const configSchema = schema.object({
    * Artifacts Configuration
    */
   packagerTaskInterval: schema.string({ defaultValue: '60s' }),
-
-  /**
-   * Detection prebuilt rules
-   */
-  prebuiltRulesFromFileSystem: schema.boolean({ defaultValue: true }),
-  prebuiltRulesFromSavedObjects: schema.boolean({ defaultValue: true }),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;

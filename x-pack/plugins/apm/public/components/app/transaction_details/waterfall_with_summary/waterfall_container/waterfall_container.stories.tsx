@@ -4,143 +4,96 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { apm, dedot } from '@kbn/apm-synthtrace-client';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { Meta, Story } from '@storybook/react';
-import React, { ComponentProps } from 'react';
-import { MemoryRouter } from 'react-router-dom';
 import { noop } from 'lodash';
-import { MockApmPluginContextWrapper } from '../../../../../context/apm_plugin/mock_apm_plugin_context';
+import React, { ComponentProps } from 'react';
 import { WaterfallContainer } from '.';
-import { getWaterfall } from './waterfall/waterfall_helpers/waterfall_helpers';
 import {
-  inferredSpans,
-  manyChildrenWithSameLength,
-  simpleTrace,
-  traceChildStartBeforeParent,
-  traceWithErrors,
-} from './waterfall_container.stories.data';
-import type { ApmPluginContextValue } from '../../../../../context/apm_plugin/apm_plugin_context';
+  WaterfallError,
+  WaterfallSpan,
+  WaterfallTransaction,
+} from '../../../../../../common/waterfall/typings';
+import { Transaction } from '../../../../../../typings/es_schemas/ui/transaction';
+import { getWaterfall } from './waterfall/waterfall_helpers/waterfall_helpers';
+import { MockApmPluginStorybook } from '../../../../../context/apm_plugin/mock_apm_plugin_storybook';
 
 type Args = ComponentProps<typeof WaterfallContainer>;
-
-const apmPluginContextMock = {
-  core: {
-    http: {
-      basePath: { prepend: () => {} },
-    },
-  },
-} as unknown as ApmPluginContextValue;
 
 const stories: Meta<Args> = {
   title: 'app/TransactionDetails/waterfall',
   component: WaterfallContainer,
   decorators: [
     (StoryComponent) => (
-      <MemoryRouter
-        initialEntries={[
-          '/services/{serviceName}/transactions/view?rangeFrom=now-15m&rangeTo=now&transactionName=testTransactionName',
-        ]}
-      >
-        <MockApmPluginContextWrapper value={apmPluginContextMock}>
-          <StoryComponent />
-        </MockApmPluginContextWrapper>
-      </MemoryRouter>
+      <MockApmPluginStorybook routePath="/services/{serviceName}/transactions/view?rangeFrom=now-15m&rangeTo=now&transactionName=testTransactionName">
+        <StoryComponent />
+      </MockApmPluginStorybook>
     ),
   ],
 };
 export default stories;
 
-export const Example: Story<Args> = ({
-  serviceName,
-  waterfallItemId,
-  waterfall,
-}) => {
-  return (
-    <WaterfallContainer
-      serviceName={serviceName}
-      waterfallItemId={waterfallItemId}
-      waterfall={waterfall}
-      showCriticalPath={false}
-      onShowCriticalPathChange={noop}
-    />
-  );
-};
-Example.args = {
-  waterfall: getWaterfall(simpleTrace, '975c8d5bfd1dd20b'),
-};
+export const Example: Story<any> = () => {
+  const serviceName = 'synth-apple';
+  const instanceJava = apm
+    .service({
+      name: serviceName,
+      environment: 'production',
+      agentName: 'java',
+    })
+    .instance('instance-b');
+  const events = instanceJava
+    .transaction({ transactionName: 'GET /apple 🍏' })
+    .timestamp(1)
+    .duration(1000)
+    .failure()
+    .errors(
+      instanceJava
+        .error({ message: '[ResponseError] index_not_found_exception' })
+        .timestamp(50)
+    )
+    .children(
+      instanceJava
+        .span({
+          spanName: 'get_green_apple_🍏',
+          spanType: 'db',
+          spanSubtype: 'elasticsearch',
+        })
+        .timestamp(50)
+        .duration(900)
+        .success()
+    )
+    .serialize();
 
-export const WithErrors: Story<Args> = ({
-  serviceName,
-  waterfallItemId,
-  waterfall,
-}) => {
-  return (
-    <WaterfallContainer
-      serviceName={serviceName}
-      waterfallItemId={waterfallItemId}
-      waterfall={waterfall}
-      showCriticalPath={false}
-      onShowCriticalPathChange={noop}
-    />
-  );
-};
-WithErrors.args = {
-  waterfall: getWaterfall(traceWithErrors, '975c8d5bfd1dd20b'),
-};
+  // Only one error is created in the above scenario
+  const errorEventId = events.findIndex((doc) => {
+    return doc['processor.event'] === ProcessorEvent.error;
+  });
 
-export const ChildStartsBeforeParent: Story<Args> = ({
-  serviceName,
-  waterfallItemId,
-  waterfall,
-}) => {
-  return (
-    <WaterfallContainer
-      serviceName={serviceName}
-      waterfallItemId={waterfallItemId}
-      waterfall={waterfall}
-      showCriticalPath={false}
-      onShowCriticalPathChange={noop}
-    />
-  );
-};
-ChildStartsBeforeParent.args = {
-  waterfall: getWaterfall(traceChildStartBeforeParent, '975c8d5bfd1dd20b'),
-};
+  const errorDocs = events.splice(errorEventId, 1);
 
-export const InferredSpans: Story<Args> = ({
-  serviceName,
-  waterfallItemId,
-  waterfall,
-}) => {
-  return (
-    <WaterfallContainer
-      serviceName={serviceName}
-      waterfallItemId={waterfallItemId}
-      waterfall={waterfall}
-      showCriticalPath={false}
-      onShowCriticalPathChange={noop}
-    />
-  );
-};
-InferredSpans.args = {
-  waterfall: getWaterfall(inferredSpans, 'f2387d37260d00bd'),
-};
+  const traceDocs = events
+    .filter((event) => event['processor.event'] !== 'metric')
+    .map((event) => dedot(event, {}) as WaterfallTransaction | WaterfallSpan);
+  const traceItems = {
+    exceedsMax: false,
+    traceDocs,
+    errorDocs: errorDocs.map((error) => dedot(error, {}) as WaterfallError),
+    spanLinksCountById: {},
+    traceItemCount: traceDocs.length,
+    maxTraceItems: 1000,
+  };
 
-export const ManyChildrenWithSameLength: Story<Args> = ({
-  serviceName,
-  waterfallItemId,
-  waterfall,
-}) => {
+  const entryTransaction = dedot(traceDocs[0]!, {}) as Transaction;
+  const waterfall = getWaterfall({ traceItems, entryTransaction });
+
   return (
     <WaterfallContainer
       serviceName={serviceName}
-      waterfallItemId={waterfallItemId}
       waterfall={waterfall}
       showCriticalPath={false}
       onShowCriticalPathChange={noop}
     />
   );
-};
-ManyChildrenWithSameLength.args = {
-  waterfall: getWaterfall(manyChildrenWithSameLength, '9a7f717439921d39'),
 };

@@ -123,8 +123,10 @@ export interface DocLinks {
     readonly languageAnalyzers: string;
     readonly languageClients: string;
     readonly licenseManagement: string;
+    readonly machineLearningStart: string;
     readonly mailService: string;
     readonly start: string;
+    readonly syncRules: string;
     readonly troubleshootSetup: string;
     readonly usersAccess: string;
   };
@@ -283,6 +285,7 @@ export interface DocLinks {
     readonly exceptions: {
       value_lists: string;
     };
+    readonly privileges: string;
   };
   readonly query: {
     readonly eql: string;
@@ -348,7 +351,31 @@ export interface DocLinks {
     syntheticsCommandReference: string;
     syntheticsProjectMonitors: string;
   }>;
-  readonly alerting: Record<string, string>;
+  readonly alerting: Readonly<{
+    guide: string;
+    actionTypes: string;
+    apmRules: string;
+    emailAction: string;
+    emailActionConfig: string;
+    emailExchangeClientSecretConfig: string;
+    emailExchangeClientIdConfig: string;
+    generalSettings: string;
+    indexAction: string;
+    esQuery: string;
+    indexThreshold: string;
+    pagerDutyAction: string;
+    preconfiguredConnectors: string;
+    preconfiguredAlertHistoryConnector: string;
+    serviceNowAction: string;
+    serviceNowSIRAction: string;
+    setupPrerequisites: string;
+    slackAction: string;
+    teamsAction: string;
+    connectors: string;
+  }>;
+  readonly taskManager: Readonly<{
+    healthMonitoring: string;
+  }>;
   readonly maps: Readonly<{
     guide: string;
     importGeospatialPrivileges: string;
@@ -433,7 +460,6 @@ export interface DocLinks {
     readonly netIntroduction: string;
     readonly netNest: string;
     readonly netSingleNode: string;
-    readonly perlGuide: string;
     readonly phpGuide: string;
     readonly phpConnecting: string;
     readonly phpInstallation: string;

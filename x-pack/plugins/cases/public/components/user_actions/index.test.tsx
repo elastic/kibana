@@ -386,6 +386,127 @@ describe(`UserActions`, () => {
     });
   });
 
+  it('it should persist the draft of new comment while existing old comment is updated', async () => {
+    const editedComment = 'it is an edited comment';
+    const newComment = 'another cool comment';
+    const ourActions = [getUserAction('comment', Actions.create)];
+    const props = {
+      ...defaultProps,
+      caseUserActions: ourActions,
+    };
+    const wrapper = mount(
+      <TestProviders>
+        <UserActions {...props} />
+      </TestProviders>
+    );
+
+    // type new comment in text area
+    wrapper
+      .find(`[data-test-subj="add-comment"] textarea`)
+      .first()
+      .simulate('change', { target: { value: newComment } });
+
+    wrapper
+      .find(
+        `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] [data-test-subj="property-actions-ellipses"]`
+      )
+      .first()
+      .simulate('click');
+
+    wrapper
+      .find(
+        `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] [data-test-subj="property-actions-pencil"]`
+      )
+      .first()
+      .simulate('click');
+
+    wrapper
+      .find(`.euiMarkdownEditorTextArea`)
+      .first()
+      .simulate('change', {
+        target: { value: editedComment },
+      });
+
+    wrapper
+      .find(
+        `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] button[data-test-subj="user-action-save-markdown"]`
+      )
+      .first()
+      .simulate('click');
+
+    await waitFor(() => {
+      wrapper.update();
+      expect(
+        wrapper
+          .find(
+            `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] [data-test-subj="user-action-markdown-form"]`
+          )
+          .exists()
+      ).toEqual(false);
+      expect(patchComment).toBeCalledWith({
+        commentUpdate: editedComment,
+        caseId: 'case-id',
+        commentId: props.data.comments[0].id,
+        version: props.data.comments[0].version,
+      });
+    });
+
+    expect(wrapper.find(`[data-test-subj="add-comment"] textarea`).text()).toBe(newComment);
+  });
+
+  it('it should persist the draft of new comment while description is updated', async () => {
+    const newComment = 'another cool comment';
+    const wrapper = mount(
+      <TestProviders>
+        <UserActions {...defaultProps} />
+      </TestProviders>
+    );
+
+    // type new comment in text area
+    wrapper
+      .find(`[data-test-subj="add-comment"] textarea`)
+      .first()
+      .simulate('change', { target: { value: newComment } });
+
+    wrapper
+      .find(`[data-test-subj="description-action"] [data-test-subj="property-actions-ellipses"]`)
+      .first()
+      .simulate('click');
+
+    wrapper
+      .find(`[data-test-subj="description-action"] [data-test-subj="property-actions-pencil"]`)
+      .first()
+      .simulate('click');
+
+    wrapper
+      .find(`.euiMarkdownEditorTextArea`)
+      .first()
+      .simulate('change', {
+        target: { value: sampleData.content },
+      });
+
+    wrapper
+      .find(
+        `[data-test-subj="description-action"] button[data-test-subj="user-action-save-markdown"]`
+      )
+      .first()
+      .simulate('click');
+
+    await waitFor(() => {
+      wrapper.update();
+      expect(
+        wrapper
+          .find(
+            `[data-test-subj="description-action"] [data-test-subj="user-action-markdown-form"]`
+          )
+          .exists()
+      ).toEqual(false);
+      expect(onUpdateField).toBeCalledWith({ key: 'description', value: sampleData.content });
+    });
+
+    expect(wrapper.find(`[data-test-subj="add-comment"] textarea`).text()).toBe(newComment);
+  });
+
   describe('Host isolation action', () => {
     it('renders in the cases details view', async () => {
       const isolateAction = [getHostIsolationUserAction()];

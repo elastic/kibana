@@ -27,7 +27,11 @@ function Wrapper({ children }: { children?: ReactNode }) {
   } as Partial<CoreStart>);
 
   return (
-    <MemoryRouter>
+    <MemoryRouter
+      initialEntries={[
+        '/services/opbeans/alerts?rangeFrom=now-24m&rangeTo=now&environment=testing',
+      ]}
+    >
       <KibanaReactContext.Provider>
         <MockApmPluginContextWrapper>{children}</MockApmPluginContextWrapper>
       </KibanaReactContext.Provider>
@@ -52,7 +56,7 @@ describe('AlertsTable', () => {
     jest.clearAllMocks();
   });
 
-  it('renders alerts table', async () => {
+  it('renders alerts table in service overview', async () => {
     const { getByTestId } = render(<AlertsOverview />, renderOptions);
 
     await waitFor(async () => {

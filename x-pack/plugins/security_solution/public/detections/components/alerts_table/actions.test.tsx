@@ -7,6 +7,8 @@
 
 import sinon from 'sinon';
 import moment from 'moment';
+import set from 'lodash/set';
+import cloneDeep from 'lodash/cloneDeep';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { Filter } from '@kbn/es-query';
@@ -16,6 +18,7 @@ import {
   sendAlertToTimelineAction,
   sendBulkEventsToTimelineAction,
   determineToAndFrom,
+  getNewTermsData,
 } from './actions';
 import {
   defaultTimelineProps,
@@ -436,6 +439,7 @@ describe('alert actions', () => {
             queryFields: [],
             resolveTimelineConfig: undefined,
             savedObjectId: null,
+            selectAll: false,
             selectedEventIds: {},
             sessionViewConfig: null,
             show: true,
@@ -454,7 +458,9 @@ describe('alert actions', () => {
             version: null,
           },
           to: '2018-11-05T19:03:25.937Z',
+          resolveTimelineConfig: undefined,
           ruleNote: '# this is some markdown documentation',
+          ruleAuthor: ['elastic'],
         };
 
         expect(mockGetExceptionFilter).not.toHaveBeenCalled();
@@ -503,6 +509,7 @@ describe('alert actions', () => {
         const defaultTimelinePropsWithoutNote = { ...defaultTimelineProps };
 
         delete defaultTimelinePropsWithoutNote.ruleNote;
+        delete defaultTimelinePropsWithoutNote.ruleAuthor;
 
         expect(updateTimelineIsLoading).toHaveBeenCalledWith({
           id: TimelineId.active,
@@ -933,6 +940,63 @@ describe('alert actions', () => {
       });
     });
 
+    describe('New terms', () => {
+      describe('getNewTermsData', () => {
+        it('should return new terms data correctly for single value field', () => {
+          const newTermsEcsMock = cloneDeep(ecsDataMockWithNoTemplateTimeline[0]);
+          set(newTermsEcsMock, 'kibana.alert.new_terms', ['host-0']);
+          set(newTermsEcsMock, 'kibana.alert.rule.parameters.new_terms_fields', ['host.name']);
+
+          expect(getNewTermsData(newTermsEcsMock).dataProviders).toEqual([
+            {
+              and: [],
+              enabled: true,
+              excluded: false,
+              id: 'send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-timeline-1-host-name-host-0',
+              kqlQuery: '',
+              name: 'host.name',
+              queryMatch: { field: 'host.name', operator: ':', value: 'host-0' },
+            },
+          ]);
+        });
+
+        it('should return new terms data as AND query for multiple values field', () => {
+          const newTermsEcsMock = cloneDeep(ecsDataMockWithNoTemplateTimeline[0]);
+          set(newTermsEcsMock, 'kibana.alert.new_terms', ['host-0', '127.0.0.1']);
+          set(newTermsEcsMock, 'kibana.alert.rule.parameters.new_terms_fields', [
+            'host.name',
+            'host.ip',
+          ]);
+
+          expect(getNewTermsData(newTermsEcsMock).dataProviders).toEqual([
+            {
+              and: [
+                {
+                  and: [],
+                  enabled: true,
+                  excluded: false,
+                  id: 'send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-timeline-1-host-ip-127.0.0.1',
+                  kqlQuery: '',
+                  name: 'host.ip',
+                  queryMatch: {
+                    field: 'host.ip',
+                    operator: ':',
+                    value: '127.0.0.1',
+                  },
+                },
+              ],
+              enabled: true,
+              excluded: false,
+              id: 'send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-timeline-1-host-name-host-0',
+              kqlQuery: '',
+              name: 'host.name',
+              queryMatch: { field: 'host.name', operator: ':', value: 'host-0' },
+            },
+          ]);
+        });
+      });
+    });
+
     describe('determineToAndFrom', () => {
       beforeEach(() => {
         fetchMock.mockResolvedValue({
@@ -1061,6 +1125,7 @@ describe('alert actions', () => {
         };
 
         delete timelineProps.ruleNote;
+        delete timelineProps.ruleAuthor;
 
         await sendAlertToTimelineAction({
           createTimeline,

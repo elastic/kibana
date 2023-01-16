@@ -23,6 +23,7 @@ describe('Add to Cases', () => {
       runKbnArchiverScript(ArchiverMethod.UNLOAD, 'case_observability');
     });
     it('should add result a case and not have add to timeline in result', () => {
+      cy.waitForReact();
       cy.react('CustomItemAction', {
         props: { index: 1 },
       }).click();
@@ -54,6 +55,7 @@ describe('Add to Cases', () => {
     });
 
     it('should add result a case and have add to timeline in result', () => {
+      cy.waitForReact();
       cy.react('CustomItemAction', {
         props: { index: 1 },
       }).click();

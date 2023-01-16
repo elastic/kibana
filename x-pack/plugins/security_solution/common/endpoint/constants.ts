@@ -6,6 +6,8 @@
  */
 
 /** endpoint data streams that are used for host isolation  */
+import { getFileDataIndexName, getFileMetadataIndexName } from '@kbn/fleet-plugin/common';
+
 /** for index patterns `.logs-endpoint.actions-* and .logs-endpoint.action.responses-*`*/
 export const ENDPOINT_ACTIONS_DS = '.logs-endpoint.actions';
 export const ENDPOINT_ACTIONS_INDEX = `${ENDPOINT_ACTIONS_DS}-default`;
@@ -42,18 +44,21 @@ export const policyIndexPattern = 'metrics-endpoint.policy-*';
 export const telemetryIndexPattern = 'metrics-endpoint.telemetry-*';
 
 // File storage indexes supporting endpoint Upload/download
-export const FILE_STORAGE_METADATA_INDEX = '.fleet-endpoint-files';
-export const FILE_STORAGE_DATA_INDEX = '.fleet-endpoint-file-data';
+export const FILE_STORAGE_METADATA_INDEX = getFileMetadataIndexName('endpoint');
+export const FILE_STORAGE_DATA_INDEX = getFileDataIndexName('endpoint');
 
 // Endpoint API routes
 export const BASE_ENDPOINT_ROUTE = '/api/endpoint';
 export const HOST_METADATA_LIST_ROUTE = `${BASE_ENDPOINT_ROUTE}/metadata`;
-export const HOST_METADATA_GET_ROUTE = `${BASE_ENDPOINT_ROUTE}/metadata/{id}`;
+export const HOST_METADATA_GET_ROUTE = `${HOST_METADATA_LIST_ROUTE}/{id}`;
 export const METADATA_TRANSFORMS_STATUS_ROUTE = `${BASE_ENDPOINT_ROUTE}/metadata/transforms`;
 
 export const BASE_POLICY_RESPONSE_ROUTE = `${BASE_ENDPOINT_ROUTE}/policy_response`;
 export const BASE_POLICY_ROUTE = `${BASE_ENDPOINT_ROUTE}/policy`;
 export const AGENT_POLICY_SUMMARY_ROUTE = `${BASE_POLICY_ROUTE}/summaries`;
+
+/** Suggestions routes */
+export const SUGGESTIONS_ROUTE = `${BASE_ENDPOINT_ROUTE}/suggestions/{suggestion_type}`;
 
 /** Host Isolation Routes */
 export const ISOLATE_HOST_ROUTE = `${BASE_ENDPOINT_ROUTE}/isolate`;
@@ -85,3 +90,5 @@ export const ENDPOINT_DEFAULT_PAGE_SIZE = 10;
 export const ENDPOINT_ERROR_CODES: Record<string, number> = {
   ES_CONNECTION_ERROR: -272,
 };
+
+export const ENDPOINT_FIELDS_SEARCH_STRATEGY = 'endpointFields';

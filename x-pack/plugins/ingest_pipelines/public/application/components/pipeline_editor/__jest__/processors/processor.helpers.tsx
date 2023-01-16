@@ -84,6 +84,7 @@ const createActions = (testBed: TestBed<TestSubject>) => {
     async saveNewProcessor() {
       await act(async () => {
         find('addProcessorForm.submitButton').simulate('click');
+        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
       });
       component.update();
     },
@@ -135,6 +136,7 @@ type TestSubject =
   | 'localeField.input'
   | 'processorTypeSelector.input'
   | 'fieldNameField.input'
+  | 'policyNameField.input'
   | 'messageField.input'
   | 'mockCodeEditor'
   | 'pathField.input'

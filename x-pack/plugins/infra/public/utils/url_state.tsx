@@ -9,7 +9,7 @@ import { parse, stringify } from 'query-string';
 import { History, Location } from 'history';
 import React from 'react';
 import { Route, RouteProps } from 'react-router-dom';
-import { decode, encode, RisonValue } from 'rison-node';
+import { decode, encode, RisonValue } from '@kbn/rison';
 import { url } from '@kbn/kibana-utils-plugin/public';
 import { throttle } from 'lodash';
 

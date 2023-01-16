@@ -5,30 +5,27 @@
  * 2.0.
  */
 
-import { SavedObject } from '@kbn/core-saved-objects-common';
 import {
   SavedObjectsClientContract,
   SavedObjectsErrorHelpers,
   SavedObjectsFindResponse,
 } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { sloSchema } from '@kbn/slo-schema';
 
-import { SLO, sloSchema, StoredSLO } from '../../types/models';
+import { SLO, StoredSLO } from '../../domain/models';
 import { SO_SLO_TYPE } from '../../saved_objects';
-import { KibanaSavedObjectsSLORepository } from './slo_repository';
-import { createAPMTransactionDurationIndicator, createSLO } from './fixtures/slo';
+import {
+  KibanaSavedObjectsSLORepository,
+  Pagination,
+  Sort,
+  SortDirection,
+  SortField,
+} from './slo_repository';
+import { createAPMTransactionDurationIndicator, createSLO, aStoredSLO } from './fixtures/slo';
 import { SLONotFound } from '../../errors';
 
 const SOME_SLO = createSLO({ indicator: createAPMTransactionDurationIndicator() });
-
-function aStoredSLO(slo: SLO): SavedObject<StoredSLO> {
-  return {
-    id: slo.id,
-    attributes: sloSchema.encode(slo),
-    type: SO_SLO_TYPE,
-    references: [],
-  };
-}
 
 function aFindResponse(slo: SLO): SavedObjectsFindResponse<StoredSLO> {
   return {
@@ -108,13 +105,129 @@ describe('KibanaSavedObjectsSLORepository', () => {
   });
 
   describe('find', () => {
-    const DEFAULT_PAGINATION = { page: 1, perPage: 25 };
+    const DEFAULT_PAGINATION: Pagination = { page: 1, perPage: 25 };
+    const DEFAULT_SORTING: Sort = {
+      field: SortField.Name,
+      direction: SortDirection.Asc,
+    };
 
-    it('includes the filter on name when provided', async () => {
+    describe('Name filter', () => {
+      it('includes the filter on name with wildcard when provided', async () => {
+        const repository = new KibanaSavedObjectsSLORepository(soClientMock);
+        soClientMock.find.mockResolvedValueOnce(aFindResponse(SOME_SLO));
+
+        const result = await repository.find(
+          { name: 'availability*' },
+          DEFAULT_SORTING,
+          DEFAULT_PAGINATION
+        );
+
+        expect(result).toEqual({
+          page: 1,
+          perPage: 25,
+          total: 1,
+          results: [SOME_SLO],
+        });
+        expect(soClientMock.find).toHaveBeenCalledWith({
+          type: SO_SLO_TYPE,
+          page: 1,
+          perPage: 25,
+          filter: `(slo.attributes.name: *availability*)`,
+          sortField: 'name',
+          sortOrder: 'asc',
+        });
+      });
+
+      it('includes the filter on name with added wildcard when not provided', async () => {
+        const repository = new KibanaSavedObjectsSLORepository(soClientMock);
+        soClientMock.find.mockResolvedValueOnce(aFindResponse(SOME_SLO));
+
+        const result = await repository.find(
+          { name: 'availa' },
+          DEFAULT_SORTING,
+          DEFAULT_PAGINATION
+        );
+
+        expect(result).toEqual({
+          page: 1,
+          perPage: 25,
+          total: 1,
+          results: [SOME_SLO],
+        });
+        expect(soClientMock.find).toHaveBeenCalledWith({
+          type: SO_SLO_TYPE,
+          page: 1,
+          perPage: 25,
+          filter: `(slo.attributes.name: *availa*)`,
+          sortField: 'name',
+          sortOrder: 'asc',
+        });
+      });
+    });
+
+    describe('indicatorTypes filter', () => {
+      it('includes the filter on indicator types when provided', async () => {
+        const repository = new KibanaSavedObjectsSLORepository(soClientMock);
+        soClientMock.find.mockResolvedValueOnce(aFindResponse(SOME_SLO));
+
+        const result = await repository.find(
+          { indicatorTypes: ['sli.kql.custom'] },
+          DEFAULT_SORTING,
+          DEFAULT_PAGINATION
+        );
+
+        expect(result).toEqual({
+          page: 1,
+          perPage: 25,
+          total: 1,
+          results: [SOME_SLO],
+        });
+        expect(soClientMock.find).toHaveBeenCalledWith({
+          type: SO_SLO_TYPE,
+          page: 1,
+          perPage: 25,
+          filter: `(slo.attributes.indicator.type: sli.kql.custom)`,
+          sortField: 'name',
+          sortOrder: 'asc',
+        });
+      });
+
+      it('includes the filter on indicator types as logical OR when provided', async () => {
+        const repository = new KibanaSavedObjectsSLORepository(soClientMock);
+        soClientMock.find.mockResolvedValueOnce(aFindResponse(SOME_SLO));
+
+        const result = await repository.find(
+          { indicatorTypes: ['sli.kql.custom', 'sli.apm.transactionDuration'] },
+          DEFAULT_SORTING,
+          DEFAULT_PAGINATION
+        );
+
+        expect(result).toEqual({
+          page: 1,
+          perPage: 25,
+          total: 1,
+          results: [SOME_SLO],
+        });
+        expect(soClientMock.find).toHaveBeenCalledWith({
+          type: SO_SLO_TYPE,
+          page: 1,
+          perPage: 25,
+          filter: `(slo.attributes.indicator.type: sli.kql.custom or slo.attributes.indicator.type: sli.apm.transactionDuration)`,
+          sortField: 'name',
+          sortOrder: 'asc',
+        });
+      });
+    });
+
+    it('includes filter on name and indicator types', async () => {
       const repository = new KibanaSavedObjectsSLORepository(soClientMock);
       soClientMock.find.mockResolvedValueOnce(aFindResponse(SOME_SLO));
 
-      const result = await repository.find({ name: 'availability' }, DEFAULT_PAGINATION);
+      const result = await repository.find(
+        { name: 'latency', indicatorTypes: ['sli.kql.custom', 'sli.apm.transactionDuration'] },
+        DEFAULT_SORTING,
+        DEFAULT_PAGINATION
+      );
 
       expect(result).toEqual({
         page: 1,
@@ -126,7 +239,9 @@ describe('KibanaSavedObjectsSLORepository', () => {
         type: SO_SLO_TYPE,
         page: 1,
         perPage: 25,
-        filter: `slo.attributes.name: availability`,
+        filter: `(slo.attributes.name: *latency*) and (slo.attributes.indicator.type: sli.kql.custom or slo.attributes.indicator.type: sli.apm.transactionDuration)`,
+        sortField: 'name',
+        sortOrder: 'asc',
       });
     });
 
@@ -134,7 +249,7 @@ describe('KibanaSavedObjectsSLORepository', () => {
       const repository = new KibanaSavedObjectsSLORepository(soClientMock);
       soClientMock.find.mockResolvedValueOnce(aFindResponse(SOME_SLO));
 
-      const result = await repository.find({}, DEFAULT_PAGINATION);
+      const result = await repository.find({}, DEFAULT_SORTING, DEFAULT_PAGINATION);
 
       expect(result).toEqual({
         page: 1,
@@ -146,6 +261,61 @@ describe('KibanaSavedObjectsSLORepository', () => {
         type: SO_SLO_TYPE,
         page: 1,
         perPage: 25,
+        sortField: 'name',
+        sortOrder: 'asc',
+      });
+    });
+
+    it('sorts by name ascending', async () => {
+      const repository = new KibanaSavedObjectsSLORepository(soClientMock);
+      soClientMock.find.mockResolvedValueOnce(aFindResponse(SOME_SLO));
+
+      await repository.find({}, DEFAULT_SORTING, DEFAULT_PAGINATION);
+
+      expect(soClientMock.find).toHaveBeenCalledWith({
+        type: SO_SLO_TYPE,
+        page: 1,
+        perPage: 25,
+        sortField: 'name',
+        sortOrder: 'asc',
+      });
+    });
+
+    it('sorts by name descending', async () => {
+      const repository = new KibanaSavedObjectsSLORepository(soClientMock);
+      soClientMock.find.mockResolvedValueOnce(aFindResponse(SOME_SLO));
+
+      await repository.find(
+        {},
+        { field: SortField.Name, direction: SortDirection.Desc },
+        DEFAULT_PAGINATION
+      );
+
+      expect(soClientMock.find).toHaveBeenCalledWith({
+        type: SO_SLO_TYPE,
+        page: 1,
+        perPage: 25,
+        sortField: 'name',
+        sortOrder: 'desc',
+      });
+    });
+
+    it('sorts by indicator type', async () => {
+      const repository = new KibanaSavedObjectsSLORepository(soClientMock);
+      soClientMock.find.mockResolvedValueOnce(aFindResponse(SOME_SLO));
+
+      await repository.find(
+        {},
+        { field: SortField.IndicatorType, direction: SortDirection.Asc },
+        DEFAULT_PAGINATION
+      );
+
+      expect(soClientMock.find).toHaveBeenCalledWith({
+        type: SO_SLO_TYPE,
+        page: 1,
+        perPage: 25,
+        sortField: 'indicator.type',
+        sortOrder: 'asc',
       });
     });
   });

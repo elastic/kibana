@@ -39,7 +39,7 @@ RUNTIME_DEPS = [
   "@npm//babel-plugin-add-module-exports",
   "@npm//babel-plugin-styled-components",
   "@npm//babel-plugin-transform-react-remove-prop-types",
-  "//packages/kbn-babel-plugin-synthetic-packages",
+  "//packages/kbn-babel-plugin-package-imports",
 ]
 
 js_library(
@@ -49,18 +49,5 @@ js_library(
   ],
   deps = RUNTIME_DEPS,
   package_name = PKG_REQUIRE_NAME,
-  visibility = ["//visibility:public"],
-)
-
-pkg_npm(
-  name = "npm_module",
-  deps = [":" + PKG_DIRNAME],
-)
-
-filegroup(
-  name = "build",
-  srcs = [
-    ":npm_module",
-  ],
   visibility = ["//visibility:public"],
 )

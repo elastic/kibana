@@ -15,7 +15,7 @@ import {
   MonitorFields,
   SyntheticsMonitor,
   EncryptedSyntheticsMonitor,
-  EncryptedSyntheticsMonitorWithId,
+  SyntheticsMonitorWithId,
 } from '../../../../common/runtime_types';
 import { UptimeServerSetup } from '../../../legacy_uptime/lib/adapters';
 import { SyntheticsMonitorClient } from '../../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
@@ -41,8 +41,8 @@ export const deleteMonitorBulk = async ({
     const deleteSyncPromise = syntheticsMonitorClient.deleteMonitors(
       monitors.map((normalizedMonitor) => ({
         ...normalizedMonitor.attributes,
-        id: normalizedMonitor.attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] || normalizedMonitor.id,
-      })) as EncryptedSyntheticsMonitorWithId[],
+        id: normalizedMonitor.attributes[ConfigKey.MONITOR_QUERY_ID],
+      })) as SyntheticsMonitorWithId[],
       request,
       savedObjectsClient,
       spaceId

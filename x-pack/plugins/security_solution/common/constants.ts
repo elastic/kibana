@@ -56,6 +56,7 @@ export const SCROLLING_DISABLED_CLASS_NAME = 'scrolling-disabled' as const;
 export const FULL_SCREEN_TOGGLED_CLASS_NAME = 'fullScreenToggled' as const;
 export const NO_ALERT_INDEX = 'no-alert-index-049FC71A-4C2C-446F-9901-37XMC5024C51' as const;
 export const ENDPOINT_METADATA_INDEX = 'metrics-endpoint.metadata-*' as const;
+export const ENDPOINT_METRICS_INDEX = '.ds-metrics-endpoint.metrics-*' as const;
 export const DEFAULT_RULE_REFRESH_INTERVAL_ON = true as const;
 export const DEFAULT_RULE_REFRESH_INTERVAL_VALUE = 60000 as const; // ms
 export const DEFAULT_RULE_NOTIFICATION_QUERY_SIZE = 100 as const;
@@ -89,7 +90,6 @@ export enum SecurityPageName {
   cloudSecurityPostureBenchmarks = 'cloud_security_posture-benchmarks',
   cloudSecurityPostureDashboard = 'cloud_security_posture-dashboard',
   cloudSecurityPostureFindings = 'cloud_security_posture-findings',
-  cloudSecurityPostureRules = 'cloud_security_posture-rules',
   dashboardsLanding = 'dashboards',
   detections = 'detections',
   detectionAndResponse = 'detection_response',
@@ -148,6 +148,7 @@ export const ALERTS_PATH = '/alerts' as const;
 export const RULES_PATH = '/rules' as const;
 export const RULES_CREATE_PATH = `${RULES_PATH}/create` as const;
 export const EXCEPTIONS_PATH = '/exceptions' as const;
+export const EXCEPTION_LIST_DETAIL_PATH = `${EXCEPTIONS_PATH}/details/:detailName` as const;
 export const HOSTS_PATH = '/hosts' as const;
 export const USERS_PATH = '/users' as const;
 export const KUBERNETES_PATH = '/kubernetes' as const;
@@ -438,7 +439,6 @@ export const LIMITED_CONCURRENCY_ROUTE_TAG_PREFIX = `${APP_ID}:limitedConcurrenc
  * We decided add this limit(number of ids less than 100) in bulk edit API as well, to prevent a huge number of single rule fetches
  */
 export const RULES_TABLE_MAX_PAGE_SIZE = 100;
-export const RULES_TABLE_PAGE_SIZE_OPTIONS = [5, 10, 20, 50, RULES_TABLE_MAX_PAGE_SIZE];
 
 /**
  * Local storage keys we use to store the state of our new features tours we currently show in the app.
@@ -447,7 +447,7 @@ export const RULES_TABLE_PAGE_SIZE_OPTIONS = [5, 10, 20, 50, RULES_TABLE_MAX_PAG
  * we will need to update these constants with the corresponding version.
  */
 export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
-  RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v8.4',
+  RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v8.6',
 };
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
@@ -468,4 +468,30 @@ export const RISKY_HOSTS_DOC_LINK =
 export const RISKY_USERS_DOC_LINK =
   'https://www.elastic.co/guide/en/security/current/user-risk-score.html';
 
+export const MAX_NUMBER_OF_NEW_TERMS_FIELDS = 3;
+
 export const BULK_ADD_TO_TIMELINE_LIMIT = 2000;
+
+export const DEFAULT_DETECTION_PAGE_FILTERS = [
+  {
+    title: 'Status',
+    fieldName: 'kibana.alert.workflow_status',
+    selectedOptions: ['open'],
+  },
+  {
+    title: 'Severity',
+    fieldName: 'kibana.alert.severity',
+    selectedOptions: [],
+  },
+  {
+    title: 'User',
+    fieldName: 'user.name',
+  },
+  {
+    title: 'Host',
+    fieldName: 'host.name',
+  },
+];
+
+export const CELL_ACTIONS_DEFAULT_TRIGGER = 'security-solution-default-cellActions';
+export const CELL_ACTIONS_TIMELINE_TRIGGER = 'security-solution-timeline-cellActions';

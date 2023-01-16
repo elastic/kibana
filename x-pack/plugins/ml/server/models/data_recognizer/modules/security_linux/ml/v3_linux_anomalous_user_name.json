@@ -41,7 +41,7 @@
       "version": "3",
       "updated_date": "5/16/2022"
   },
-    "created_by": "ml-module-security-linux",
+    "created_by": "ml-module-security-linux-v3",
     "custom_urls": [
       {
         "url_name": "Host Details by process name",
@@ -59,6 +59,7 @@
         "url_name": "Hosts Overview by user name",
         "url_value": "security/hosts/ml-hosts?_g=()&query=(query:'user.name%20:%20%22$user.name$%22',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
       }
-    ]
+    ],
+    "security_app_display_name": "Unusual Linux Username"
   }
 }

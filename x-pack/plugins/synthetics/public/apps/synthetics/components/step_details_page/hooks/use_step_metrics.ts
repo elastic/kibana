@@ -32,8 +32,8 @@ export const useStepMetrics = (loadData = true, prevCheckGroupId?: string) => {
           bool: {
             filter: [
               {
-                term: {
-                  'synthetics.type': 'step/metrics',
+                terms: {
+                  'synthetics.type': ['step/metrics', 'step/end'],
                 },
               },
               ...useStepFilters(prevCheckGroupId),
@@ -59,6 +59,11 @@ export const useStepMetrics = (loadData = true, prevCheckGroupId?: string) => {
           dcl: {
             sum: {
               field: SYNTHETICS_DCL,
+            },
+          },
+          totalDuration: {
+            sum: {
+              field: SYNTHETICS_STEP_DURATION,
             },
           },
         },

@@ -5,4 +5,10 @@
  * 2.0.
  */
 
+export {
+  ComparatorFns,
+  getComparatorScript,
+  ComparatorFnNames,
+  getHumanReadableComparator,
+} from './comparator';
 export { STACK_ALERTS_FEATURE_ID } from './constants';

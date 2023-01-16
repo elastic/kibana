@@ -11,7 +11,6 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { CoreStart, SavedObjectReference } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
-import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { flatten, isEqual } from 'lodash';
@@ -25,6 +24,7 @@ import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type {
   DatasourceDimensionEditorProps,
   DatasourceDimensionTriggerProps,
@@ -72,11 +72,12 @@ import {
   cloneLayer,
 } from './utils';
 import { isDraggedDataViewField } from '../../utils';
-import { normalizeOperationDataType } from './pure_utils';
+import { hasField, normalizeOperationDataType } from './pure_utils';
 import { LayerPanel } from './layerpanel';
 import {
   DateHistogramIndexPatternColumn,
   GenericIndexPatternColumn,
+  getCurrentFieldsForOperation,
   getErrorMessages,
   insertNewColumn,
   operationDefinitionMap,
@@ -142,7 +143,7 @@ export function getFormBasedDatasource({
   storage,
   data,
   unifiedSearch,
-  discover,
+  share,
   dataViews,
   fieldFormats,
   charts,
@@ -153,7 +154,7 @@ export function getFormBasedDatasource({
   storage: IStorageWrapper;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
-  discover?: DiscoverStart;
+  share?: SharePluginStart;
   dataViews: DataViewsPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   charts: ChartsPluginSetup;
@@ -260,7 +261,7 @@ export function getFormBasedDatasource({
           ...state,
           layers: {
             ...newLayers,
-            [layerId]: blankLayer(state.currentIndexPatternId, state.layers[layerId].linkToLayers),
+            [layerId]: blankLayer(state.currentIndexPatternId, state.layers[layerId]?.linkToLayers),
           },
         },
       };
@@ -407,7 +408,9 @@ export function getFormBasedDatasource({
       Object.values(state?.layers)?.forEach((l) => {
         const { columns } = l;
         Object.values(columns).forEach((c) => {
-          if ('sourceField' in c) {
+          if (operationDefinitionMap[c.operationType]?.getCurrentFields) {
+            fields.push(...(operationDefinitionMap[c.operationType]?.getCurrentFields?.(c) || []));
+          } else if ('sourceField' in c) {
             fields.push(c.sourceField);
           }
         });
@@ -415,8 +418,8 @@ export function getFormBasedDatasource({
       return fields;
     },
 
-    toExpression: (state, layerId, indexPatterns, searchSessionId) =>
-      toExpression(state, layerId, indexPatterns, uiSettings, searchSessionId),
+    toExpression: (state, layerId, indexPatterns, dateRange, searchSessionId) =>
+      toExpression(state, layerId, indexPatterns, uiSettings, dateRange, searchSessionId),
 
     renderLayerSettings(
       domElement: Element,
@@ -433,7 +436,7 @@ export function getFormBasedDatasource({
                 fieldFormats,
                 charts,
                 unifiedSearch,
-                discover,
+                share,
               }}
             >
               <LayerSettingsPanel {...props} />
@@ -459,7 +462,7 @@ export function getFormBasedDatasource({
                 fieldFormats,
                 charts,
                 unifiedSearch,
-                discover,
+                share,
               }}
             >
               <FormBasedDataPanel
@@ -512,10 +515,10 @@ export function getFormBasedDatasource({
       return columnLabelMap;
     },
 
-    isValidColumn: (state, indexPatterns, layerId, columnId) => {
+    isValidColumn: (state, indexPatterns, layerId, columnId, dateRange) => {
       const layer = state.layers[layerId];
 
-      return !isColumnInvalid(layer, columnId, indexPatterns[layer.indexPatternId]);
+      return !isColumnInvalid(layer, columnId, indexPatterns[layer.indexPatternId], dateRange);
     },
 
     renderDimensionTrigger: (
@@ -618,22 +621,6 @@ export function getFormBasedDatasource({
 
     getDropProps,
     onDrop,
-    getSupportedActionsForLayer(layerId, state, _, openLayerSettings) {
-      if (!openLayerSettings) {
-        return [];
-      }
-      return [
-        {
-          displayName: i18n.translate('xpack.lens.indexPattern.layerSettingsAction', {
-            defaultMessage: 'Layer settings',
-          }),
-          execute: openLayerSettings,
-          icon: 'gear',
-          isCompatible: Boolean(state.layers[layerId]),
-          'data-test-subj': 'lnsLayerSettings',
-        },
-      ];
-    },
 
     getCustomWorkspaceRenderer: (
       state: FormBasedPrivateState,
@@ -986,18 +973,31 @@ export function getFormBasedDatasource({
       return Object.values(state.layers).map(({ indexPatternId }) => indexPatternId);
     },
 
-    getDatasourceInfo: (state, references, indexPatterns) => {
+    getDatasourceInfo: async (state, references, dataViewsService) => {
       const layers = references ? injectReferences(state, references).layers : state.layers;
+      const indexPatterns: DataView[] = [];
+      for (const { indexPatternId } of Object.values(layers)) {
+        const dataView = await dataViewsService?.get(indexPatternId);
+        if (dataView) {
+          indexPatterns.push(dataView);
+        }
+      }
       return Object.entries(layers).reduce<DataSourceInfo[]>((acc, [key, layer]) => {
         const dataView = indexPatterns?.find(
           (indexPattern) => indexPattern.id === layer.indexPatternId
         );
 
         const columns = Object.entries(layer.columns).map(([colId, col]) => {
+          const fields = hasField(col) ? getCurrentFieldsForOperation(col) : undefined;
           return {
             id: colId,
             role: col.isBucketed ? ('split' as const) : ('metric' as const),
-            operation: columnToOperation(col, undefined, dataView),
+            operation: {
+              ...columnToOperation(col, undefined, dataView),
+              type: col.operationType,
+              fields,
+              filter: col.filter,
+            },
           };
         });
 

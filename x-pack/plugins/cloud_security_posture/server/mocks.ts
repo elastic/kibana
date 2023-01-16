@@ -31,6 +31,7 @@ export const createCspRequestHandlerContextMock = () => {
       agentService: createMockAgentService(),
       packagePolicyService: createPackagePolicyServiceMock(),
       packageService: createMockPackageService(),
+      isPluginInitialized: () => false,
     },
   };
 };

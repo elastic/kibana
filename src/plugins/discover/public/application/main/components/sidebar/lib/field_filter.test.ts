@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getDefaultFieldFilter, setFieldFilterProp, isFieldFiltered } from './field_filter';
+import { getDefaultFieldFilter, setFieldFilterProp, doesFieldMatchFilters } from './field_filter';
 import { DataViewField } from '@kbn/data-views-plugin/public';
 
 describe('field_filter', function () {
@@ -14,7 +14,6 @@ describe('field_filter', function () {
     expect(getDefaultFieldFilter()).toMatchInlineSnapshot(`
       Object {
         "aggregatable": null,
-        "missing": true,
         "name": "",
         "searchable": null,
         "type": "any",
@@ -25,7 +24,6 @@ describe('field_filter', function () {
     const state = getDefaultFieldFilter();
     const targetState = {
       aggregatable: true,
-      missing: true,
       name: 'test',
       searchable: true,
       type: 'string',
@@ -36,7 +34,6 @@ describe('field_filter', function () {
     expect(actualState).toMatchInlineSnapshot(`
       Object {
         "aggregatable": true,
-        "missing": true,
         "name": "test",
         "searchable": true,
         "type": "string",
@@ -78,9 +75,7 @@ describe('field_filter', function () {
       { filter: { type: 'string' }, result: ['extension'] },
     ].forEach((test) => {
       const filtered = fieldList
-        .filter((field) =>
-          isFieldFiltered(field, { ...defaultState, ...test.filter }, { bytes: 1, extension: 1 })
-        )
+        .filter((field) => doesFieldMatchFilters(field, { ...defaultState, ...test.filter }))
         .map((field) => field.name);
 
       expect(filtered).toEqual(test.result);
