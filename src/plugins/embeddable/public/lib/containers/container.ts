@@ -166,7 +166,6 @@ export abstract class Container<
     E extends IEmbeddable<EEI, EEO> = IEmbeddable<EEI, EEO>
   >(type: string, explicitInput: Partial<EEI>): Promise<E | ErrorEmbeddable> {
     const factory = this.getFactory(type) as EmbeddableFactory<EEI, EEO, E> | undefined;
-
     if (!factory) {
       throw new EmbeddableFactoryNotFoundError(type);
     }

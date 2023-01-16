@@ -16,6 +16,8 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { PortableDashboardsExampleStartDeps } from './plugin';
 import { StaticByValueExample } from './static_by_value_example';
 import { StaticByReferenceExample } from './static_by_reference_example';
+import { DynamicByReferenceExample } from './dynamically_add_panels_example';
+import { BasicReduxExample } from './basic_redux_example';
 
 export const renderApp = async (
   { data, dashboard }: PortableDashboardsExampleStartDeps,
@@ -30,9 +32,13 @@ export const renderApp = async (
   const examples =
     dataViews.length > 0 ? (
       <>
-        <StaticByValueExample />
+        <DynamicByReferenceExample dataView={dataViews[0]} />
+        <EuiSpacer size="xl" />
+        <BasicReduxExample />
         <EuiSpacer size="xl" />
         <StaticByReferenceExample dashboardId={logsSampleDashboardId} dataView={dataViews[0]} />
+        <EuiSpacer size="xl" />
+        <StaticByValueExample />
       </>
     ) : (
       <div>{'Install web logs sample data to run the embeddable dashboard examples.'}</div>
