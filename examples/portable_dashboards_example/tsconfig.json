@@ -17,12 +17,11 @@
     "@kbn/developer-examples-plugin",
     "@kbn/data-plugin",
     "@kbn/dashboard-plugin",
-    "@kbn/controls-plugin",
     "@kbn/navigation-plugin",
-    "@kbn/presentation-util-plugin",
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/embeddable-plugin",
     "@kbn/data-views-plugin",
-    "@kbn/es-query"
+    "@kbn/es-query",
+    "@kbn/visualizations-plugin"
   ]
 }

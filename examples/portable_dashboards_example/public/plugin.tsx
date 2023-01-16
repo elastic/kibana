@@ -17,7 +17,6 @@ import {
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
 
 import img from './control_group_image.png';

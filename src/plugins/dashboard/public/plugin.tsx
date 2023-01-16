@@ -63,10 +63,7 @@ import {
 } from './dashboard_constants';
 import { PlaceholderEmbeddableFactory } from './placeholder_embeddable';
 import { DashboardMountContextProps } from './dashboard_app/types';
-import {
-  DashboardSavedObjectService,
-  FindDashboardsService,
-} from './services/dashboard_saved_object/types';
+import { FindDashboardsService } from './services/dashboard_saved_object/types';
 
 export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
@@ -125,7 +122,6 @@ export class DashboardPlugin
   private stopUrlTracking: (() => void) | undefined = undefined;
   private currentHistory: ScopedHistory | undefined = undefined;
   private dashboardFeatureFlagConfig?: DashboardFeatureFlagConfig;
-  private dashboardSavedObjectService?: DashboardSavedObjectService;
   private locator?: DashboardAppLocator;
 
   private async startDashboardKibanaServices(
