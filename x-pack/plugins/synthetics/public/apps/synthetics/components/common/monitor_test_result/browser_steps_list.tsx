@@ -122,6 +122,7 @@ export const BrowserStepsList = ({
         <StepDetailsLinkIcon
           checkGroup={item.monitor.check_group}
           stepIndex={item.synthetics?.step?.index}
+          configId={item.config_id!}
         />
       ),
     },
