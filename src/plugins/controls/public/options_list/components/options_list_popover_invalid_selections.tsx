@@ -34,7 +34,9 @@ export const OptionsListPopoverInvalidSelections = () => {
   const invalidSelections = select((state) => state.componentState.invalidSelections);
   const fieldName = select((state) => state.explicitInput.fieldName);
 
-  const suggestionsSelectableOptions = useMemo<EuiSelectableOption[]>(() => {
+  const [selectableOptions, setSelectableOptions] = useState<EuiSelectableOption[]>([]); // will be set in following useEffect
+  useEffect(() => {
+    /* This useEffect makes selectableOptions responsive to unchecking options */
     const options: EuiSelectableOption[] = (invalidSelections ?? []).map((key) => {
       return {
         key,
@@ -52,14 +54,8 @@ export const OptionsListPopoverInvalidSelections = () => {
         ),
       };
     });
-    return options;
+    setSelectableOptions(options);
   }, [invalidSelections]);
-
-  const [selectableOptions, setSelectableOptions] = useState<EuiSelectableOption[]>([]); // will be set in following useEffect
-  useEffect(() => {
-    /* This useEffect makes suggestionsSelectableOptions responsive to search, show only selected, and clear selections */
-    setSelectableOptions(suggestionsSelectableOptions);
-  }, [suggestionsSelectableOptions]);
 
   return (
     <>

@@ -68,7 +68,9 @@ export const OptionsListPopoverSuggestions = ({
     };
   }, [suggestions, existsSelected, showOnlySelected, hideExists]);
 
-  const suggestionsSelectableOptions = useMemo<EuiSelectableOption[]>(() => {
+  const [selectableOptions, setSelectableOptions] = useState<EuiSelectableOption[]>([]); // will be set in following useEffect
+  useEffect(() => {
+    /* This useEffect makes selectableOptions responsive to search, show only selected, and clear selections */
     const options: EuiSelectableOption[] = (suggestions ?? []).map((key) => {
       return {
         key,
@@ -85,7 +87,10 @@ export const OptionsListPopoverSuggestions = ({
           ) : undefined,
       };
     });
-    return existsSelectableOption ? [existsSelectableOption, ...options] : options;
+    const suggestionsSelectableOptions = existsSelectableOption
+      ? [existsSelectableOption, ...options]
+      : options;
+    setSelectableOptions(suggestionsSelectableOptions);
   }, [
     suggestions,
     availableOptions,
@@ -94,12 +99,6 @@ export const OptionsListPopoverSuggestions = ({
     invalidSelectionsSet,
     existsSelectableOption,
   ]);
-
-  const [selectableOptions, setSelectableOptions] = useState<EuiSelectableOption[]>([]); // will be set in following useEffect
-  useEffect(() => {
-    /* This useEffect makes suggestionsSelectableOptions responsive to search, show only selected, and clear selections */
-    setSelectableOptions(suggestionsSelectableOptions);
-  }, [suggestionsSelectableOptions]);
 
   return (
     <EuiSelectable
@@ -122,11 +121,10 @@ export const OptionsListPopoverSuggestions = ({
         setSelectableOptions(newSuggestions);
 
         const key = changedOption.key ?? changedOption.label;
+        // the order of these checks matters, so be careful if rearranging them
         if (key === 'exists-option') {
           dispatch(selectExists(!Boolean(existsSelected)));
-        } else if (showOnlySelected) {
-          dispatch(deselectOption(key));
-        } else if (selectedOptionsSet.has(key)) {
+        } else if (showOnlySelected || selectedOptionsSet.has(key)) {
           dispatch(deselectOption(key));
         } else if (singleSelect) {
           dispatch(replaceSelection(key));
