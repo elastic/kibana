@@ -7,7 +7,7 @@
 
 import * as rt from 'io-ts';
 
-import type { ActionsRt, ActionTypesRt } from './common';
+import type { ActionsRt, ActionTypeValues } from './common';
 import { UserActionCommonAttributesRt, CaseUserActionSavedObjectIdsRt } from './common';
 import { CreateCaseUserActionRt } from './create_case';
 import { DescriptionUserActionRt } from './description';
@@ -84,7 +84,7 @@ export type CaseUserActionsResponse = rt.TypeOf<typeof CaseUserActionsResponseRt
 export type CaseUserActionResponse = rt.TypeOf<typeof CaseUserActionResponseRt>;
 
 export type UserAction = rt.TypeOf<typeof ActionsRt>;
-export type UserActionTypes = rt.TypeOf<typeof ActionTypesRt>;
+export type UserActionTypes = ActionTypeValues;
 
 export type CaseUserAction = rt.TypeOf<typeof CaseUserActionBasicRt>;
 export type CaseUserActionWithoutConnectorId = rt.TypeOf<

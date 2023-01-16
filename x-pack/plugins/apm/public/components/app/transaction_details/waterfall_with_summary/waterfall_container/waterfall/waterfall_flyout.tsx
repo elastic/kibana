@@ -36,6 +36,7 @@ export function WaterfallFlyout({
   } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
     '/mobile-services/{serviceName}/transactions/view',
+    '/traces/explorer/waterfall',
     '/dependencies/operation'
   );
   const currentItem = waterfall.items.find(

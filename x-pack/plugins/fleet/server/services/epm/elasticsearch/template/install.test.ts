@@ -279,7 +279,7 @@ describe('EPM index template install', () => {
     });
 
     expect(indexTemplate.indexTemplate.template.settings).toEqual({
-      index: { mode: 'time_series', routing_path: ['test_dimension'] },
+      index: { mode: 'time_series' },
     });
   });
 });

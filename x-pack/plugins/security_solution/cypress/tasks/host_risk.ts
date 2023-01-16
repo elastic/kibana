@@ -26,7 +26,7 @@ export const openRiskTableFilterAndSelectTheCriticalOption = () => {
 };
 
 export const openRiskTableFilterAndSelectTheLowOption = () => {
-  cy.get(HOST_BY_RISK_TABLE_FILTER).click();
+  cy.get(HOST_BY_RISK_TABLE_FILTER).first().click();
   cy.get(HOST_BY_RISK_TABLE_FILTER_LOW).click();
 };
 

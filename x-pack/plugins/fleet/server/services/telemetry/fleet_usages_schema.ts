@@ -60,6 +60,18 @@ export const fleetUsagesSchema: RootSchema<any> = {
           description: 'The total number of enrolled agents currently offline',
         },
       },
+      inactive: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of enrolled agents currently inactive',
+        },
+      },
+      unenrolled: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of unenrolled agents',
+        },
+      },
       total_all_statuses: {
         type: 'long',
         _meta: {
@@ -111,6 +123,18 @@ export const fleetUsagesSchema: RootSchema<any> = {
         type: 'long',
         _meta: {
           description: 'The number of Fleet Server hosts configured in Fleet settings.',
+        },
+      },
+      inactive: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of enrolled agents currently inactive',
+        },
+      },
+      unenrolled: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of unenrolled agents',
         },
       },
     },

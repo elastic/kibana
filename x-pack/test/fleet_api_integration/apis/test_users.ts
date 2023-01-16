@@ -128,6 +128,17 @@ export const testUsers: {
     username: 'endpoint_fleet_read_integr_none',
     password: 'changeme',
   },
+  // no fleet or integrations but read access to security solution app
+  endpoint_integr_read_only_fleet_none: {
+    permissions: {
+      feature: {
+        siem: ['minimal_all'],
+      },
+      spaces: ['*'],
+    },
+    username: 'endpoint_integr_read_only_fleet_none',
+    password: 'changeme',
+  },
 };
 
 export const setupTestUsers = async (security: SecurityService) => {

@@ -111,7 +111,12 @@ export async function updateTagsBatch(
     } else if (options.tagsToRemove.length === 1 && options.tagsToAdd.length === 0) {
       extraFilters.push(`tags:${options.tagsToRemove[0]}`);
     }
-    query = getElasticsearchQuery(options.kuery, false, false, hostedIds, extraFilters);
+    const DEFAULT_STATUS_FILTER =
+      'status:online or (status:error or status:degraded) or (status:updating or status:unenrolling or status:enrolling) or status:offline';
+    // removing default staus filters, as it is a runtime field and doesn't work with updateByQuery
+    // this is a quick fix for bulk update tags with default filters
+    const kuery = options.kuery === DEFAULT_STATUS_FILTER ? '' : options.kuery;
+    query = getElasticsearchQuery(kuery, false, false, hostedIds, extraFilters);
   } else {
     query = {
       terms: {

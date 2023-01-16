@@ -463,6 +463,10 @@ export class DiscoverPageObject extends FtrService {
     ).getAttribute('innerText');
   }
 
+  public async cleanSidebarLocalStorage(): Promise<void> {
+    await this.browser.setLocalStorageItem('discover.unifiedFieldList.initiallyOpenSections', '{}');
+  }
+
   public async waitUntilSidebarHasLoaded() {
     await this.retry.waitFor('sidebar is loaded', async () => {
       return (await this.getSidebarAriaDescription()).length > 0;

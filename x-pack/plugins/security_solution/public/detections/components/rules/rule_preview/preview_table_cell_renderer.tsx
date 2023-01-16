@@ -12,4 +12,4 @@ import { RenderCellValue } from '../../../configurations/security_solution_detec
 
 export const PreviewRenderCellValue: React.FC<
   EuiDataGridCellValueElementProps & CellValueElementProps
-> = (props) => RenderCellValue({ ...props, enableActions: false });
+> = (props) => RenderCellValue({ ...props, enableActions: false, asPlainText: true });

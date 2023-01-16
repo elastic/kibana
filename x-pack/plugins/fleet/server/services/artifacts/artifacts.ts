@@ -89,21 +89,26 @@ export const bulkCreateArtifacts = async (
   artifacts: NewArtifact[],
   refresh = false
 ): Promise<{ artifacts?: Artifact[]; errors?: Error[] }> => {
-  const ids = artifacts.map((artifact) => uniqueIdFromArtifact(artifact));
-  const newArtifactsData = artifacts.map((artifact) =>
-    newArtifactToElasticsearchProperties(artifact)
+  const { ids, newArtifactsData } = artifacts.reduce<{
+    ids: string[];
+    newArtifactsData: ArtifactElasticsearchProperties[];
+  }>(
+    (acc, artifact) => {
+      acc.ids.push(uniqueIdFromArtifact(artifact));
+      acc.newArtifactsData.push(newArtifactToElasticsearchProperties(artifact));
+      return acc;
+    },
+    { ids: [], newArtifactsData: [] }
   );
 
-  const body = ids
-    .map((id, index) => [
-      {
-        create: {
-          _id: id,
-        },
+  const body = ids.flatMap((id, index) => [
+    {
+      create: {
+        _id: id,
       },
-      newArtifactsData[index],
-    ])
-    .flatMap((arr) => arr);
+    },
+    newArtifactsData[index],
+  ]);
 
   const res = await withPackageSpan('Bulk create fleet artifacts', () =>
     esClient.bulk({
@@ -113,9 +118,12 @@ export const bulkCreateArtifacts = async (
     })
   );
   if (res.errors) {
-    const nonConflictErrors = res.items
-      .filter((item) => item.create?.status !== 409)
-      .map((item) => new Error(item.create?.error?.reason));
+    const nonConflictErrors = res.items.reduce<Error[]>((acc, item) => {
+      if (item.create?.status !== 409) {
+        acc.push(new Error(item.create?.error?.reason));
+      }
+      return acc;
+    }, []);
     if (nonConflictErrors.length > 0) {
       return { errors: nonConflictErrors };
     }

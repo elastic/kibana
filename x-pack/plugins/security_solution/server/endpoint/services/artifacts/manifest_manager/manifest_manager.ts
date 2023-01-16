@@ -8,12 +8,8 @@
 import pMap from 'p-map';
 import semver from 'semver';
 import type LRU from 'lru-cache';
-import { isEqual, isEmpty } from 'lodash';
-import {
-  type Logger,
-  type SavedObjectsClientContract,
-  SavedObjectsErrorHelpers,
-} from '@kbn/core/server';
+import { isEqual, isEmpty, keyBy } from 'lodash';
+import { type Logger, type SavedObjectsClientContract } from '@kbn/core/server';
 import {
   ENDPOINT_EVENT_FILTERS_LIST_ID,
   ENDPOINT_TRUSTED_APPS_LIST_ID,
@@ -335,34 +331,6 @@ export class ManifestManager {
   }
 
   /**
-   * Writes new artifact SO.
-   *
-   * @param artifact An InternalArtifactCompleteSchema representing the artifact.
-   * @returns {Promise<[Error | null, InternalArtifactCompleteSchema | undefined]>} An array with the error if encountered or null and the generated artifact or null.
-   */
-  protected async pushArtifact(
-    artifact: InternalArtifactCompleteSchema
-  ): Promise<[Error | null, InternalArtifactCompleteSchema | undefined]> {
-    const artifactId = getArtifactId(artifact);
-    let fleetArtifact;
-    try {
-      // Write the artifact SO
-      fleetArtifact = await this.artifactClient.createArtifact(artifact);
-
-      // Cache the compressed body of the artifact
-      this.cache.set(artifactId, Buffer.from(artifact.body, 'base64'));
-    } catch (err) {
-      if (SavedObjectsErrorHelpers.isConflictError(err)) {
-        this.logger.debug(`Tried to create artifact ${artifactId}, but it already exists.`);
-      } else {
-        return [err, undefined];
-      }
-    }
-
-    return [null, fleetArtifact];
-  }
-
-  /**
    * Writes new artifact SOs.
    *
    * @param artifacts An InternalArtifactCompleteSchema array representing the artifacts.
@@ -397,10 +365,9 @@ export class ManifestManager {
     }
 
     if (fleetArtifacts) {
+      const fleetArtfactsByIdentifier = keyBy(fleetArtifacts, 'identifier');
       artifactsToCreate.forEach((artifact) => {
-        const fleetArtifact = fleetArtifacts.find(
-          (fleetArt) => fleetArt.identifier === artifact.identifier
-        );
+        const fleetArtifact = fleetArtfactsByIdentifier[artifact.identifier];
         if (!fleetArtifact) return;
         const artifactId = getArtifactId(artifact);
         // Cache the compressed body of the artifact

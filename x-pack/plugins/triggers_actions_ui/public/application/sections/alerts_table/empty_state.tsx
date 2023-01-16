@@ -6,7 +6,15 @@
  */
 
 import React from 'react';
-import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiImage, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiImage,
+  EuiText,
+  EuiTitle,
+  EuiDataGridToolBarAdditionalControlsOptions,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import icon from './assets/illustration_product_no_results_magnifying_glass.svg';
 
@@ -19,9 +27,17 @@ const panelStyle = {
   maxWidth: 500,
 };
 
-export const EmptyState: React.FC<{ height?: keyof typeof heights }> = ({ height = 'tall' }) => {
+export const EmptyState: React.FC<{
+  height?: keyof typeof heights;
+  controls?: EuiDataGridToolBarAdditionalControlsOptions;
+}> = ({ height = 'tall', controls }) => {
   return (
     <EuiPanel color="subdued" data-test-subj="alertsStateTableEmptyState">
+      {controls?.right && (
+        <EuiFlexGroup alignItems="flexEnd" justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>{controls.right}</EuiFlexItem>
+        </EuiFlexGroup>
+      )}
       <EuiFlexGroup style={{ height: heights[height] }} alignItems="center" justifyContent="center">
         <EuiFlexItem grow={false}>
           <EuiPanel hasBorder={true} style={panelStyle}>

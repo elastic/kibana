@@ -16,8 +16,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED, AlertStatus } from '@kbn/rule-data-utils';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { AlertStateInfo } from './alert_state_info';
+import { ACTIVE_ALERT_LABEL, ALL_ALERT_LABEL, RECOVERED_ALERT_LABEL } from './constants';
 import { Alert } from '../../../../../hooks/use_load_alert_summary';
 
 export interface AlertsSummaryWidgetCompactProps {
@@ -58,7 +58,7 @@ export const AlertsSummaryWidgetCompact = ({
   return (
     <EuiPanel
       element="div"
-      data-test-subj="alertSummaryWidget"
+      data-test-subj="alertSummaryWidgetCompact"
       hasShadow={false}
       hasBorder
       onClick={handleClick}
@@ -67,11 +67,7 @@ export const AlertsSummaryWidgetCompact = ({
         <EuiFlexItem>
           <EuiTitle size="xxs">
             <h5 data-test-subj="totalAlertsCount">
-              <FormattedMessage
-                id="xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.title"
-                defaultMessage="Alerts"
-              />
-              &nbsp;({activeAlertCount + recoveredAlertCount})
+              {ALL_ALERT_LABEL}&nbsp;({activeAlertCount + recoveredAlertCount})
             </h5>
           </EuiTitle>
           {!!timeRangeTitle && (
@@ -100,12 +96,7 @@ export const AlertsSummaryWidgetCompact = ({
                   domain={domain}
                   id="active"
                   stroke="#E7664C"
-                  title={
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.activeLabel"
-                      defaultMessage="Active"
-                    />
-                  }
+                  title={ACTIVE_ALERT_LABEL}
                 />
               </EuiLink>
             </EuiFlexItem>
@@ -123,12 +114,7 @@ export const AlertsSummaryWidgetCompact = ({
                   domain={domain}
                   id="recovered"
                   stroke="#54B399"
-                  title={
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.ruleDetails.rule.ruleSummary.recoveredLabel"
-                      defaultMessage="Recovered"
-                    />
-                  }
+                  title={RECOVERED_ALERT_LABEL}
                 />
               </EuiLink>
             </EuiFlexItem>
