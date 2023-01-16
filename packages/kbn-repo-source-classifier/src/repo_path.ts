@@ -60,10 +60,12 @@ export class RepoPath {
   }
 
   private segs: string[] | undefined;
-  /** get and cache the path segments from the repo-realtive versions of this path */
+  /** get and cache the path segments from the repo-realtive dirname of this path */
   getSegs() {
     if (this.segs === undefined) {
-      this.segs = Path.dirname(this.getRepoRel()).split('/');
+      this.segs = Path.dirname(this.getRepoRel())
+        .split('/')
+        .filter((s) => s !== '.');
     }
 
     return this.segs;

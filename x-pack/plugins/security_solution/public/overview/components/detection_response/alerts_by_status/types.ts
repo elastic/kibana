@@ -78,13 +78,6 @@ export type ParsedAlertsData = Partial<
 
 export type AlertsByStatus = 'open' | 'acknowledged' | 'closed';
 
-export interface AlertDonutEmbeddableProps {
-  filters?: Filter[];
-  label: string;
-  status?: AlertsByStatus;
-  timerange: { from: string; to: string };
-}
-
 export interface VisualizationAlertsByStatusData {
   responses: VisualizationAlertsByStatusResponse[];
   requests: ESQuery[];

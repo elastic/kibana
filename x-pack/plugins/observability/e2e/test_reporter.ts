@@ -139,7 +139,9 @@ export class TestReporter implements Reporter {
         fs.unlinkSync('.journeys/videos/' + journeyName + '.webm');
       } catch (e) {
         // eslint-disable-next-line no-console
-        console.log(e);
+        console.log(
+          'Failed to delete video file for path ' + '.journeys/videos/' + journeyName + '.webm'
+        );
       }
     });
 

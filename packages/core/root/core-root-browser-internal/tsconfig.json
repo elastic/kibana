@@ -61,6 +61,8 @@
     "@kbn/core-logging-browser-mocks",
     "@kbn/logging",
     "@kbn/config",
+    "@kbn/core-custom-branding-browser-internal",
+    "@kbn/core-custom-branding-browser-mocks",
   ],
   "exclude": [
     "target/**/*",
