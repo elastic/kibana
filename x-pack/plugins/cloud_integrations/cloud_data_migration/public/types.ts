@@ -7,7 +7,7 @@
 
 import { ManagementSetup } from '@kbn/management-plugin/public';
 
-import { CloudSetup } from '@kbn/cloud-plugin/public';
+import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import { BreadcrumbService } from './application/services/breadcrumbs';
 
 export interface CloudDataMigrationPluginSetup {
@@ -16,5 +16,6 @@ export interface CloudDataMigrationPluginSetup {
   breadcrumbService: BreadcrumbService;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface CloudDataMigrationPluginStart {}
+export interface CloudDataMigrationPluginStart {
+  cloud?: CloudStart;
+}
