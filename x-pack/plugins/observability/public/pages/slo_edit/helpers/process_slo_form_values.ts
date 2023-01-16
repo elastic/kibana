@@ -5,31 +5,55 @@
  * 2.0.
  */
 
-import type { CreateSLOParams, GetSLOResponse } from '@kbn/slo-schema';
+import omit from 'lodash/omit';
+import type { CreateSLOInput, SLOWithSummaryResponse, UpdateSLOInput } from '@kbn/slo-schema';
 
-export function transformGetSloToCreateSloParams(
-  values: GetSLOResponse | undefined
-): CreateSLOParams | undefined {
+import { toDuration } from '../../../utils/slo/duration';
+
+export function transformSloResponseToCreateSloInput(
+  values: SLOWithSummaryResponse | undefined
+): CreateSLOInput | undefined {
   if (!values) return undefined;
 
   return {
-    ...values,
+    ...omit(values, ['id', 'revision', 'createdAt', 'updatedAt', 'summary']),
     objective: {
       target: values.objective.target * 100,
       ...(values.objective.timesliceTarget && {
         timesliceTarget: values.objective.timesliceTarget * 100,
       }),
+      ...(values.objective.timesliceWindow && {
+        timesliceWindow: String(toDuration(values.objective.timesliceWindow).value),
+      }),
     },
-  } as unknown as CreateSLOParams;
+  };
 }
 
-export function processValues(values: CreateSLOParams): CreateSLOParams {
+export function transformValuesToCreateSLOInput(values: CreateSLOInput): CreateSLOInput {
   return {
     ...values,
     objective: {
       target: values.objective.target / 100,
       ...(values.objective.timesliceTarget && {
         timesliceTarget: values.objective.timesliceTarget / 100,
+      }),
+      ...(values.objective.timesliceWindow && {
+        timesliceWindow: `${values.objective.timesliceWindow}m`,
+      }),
+    },
+  };
+}
+
+export function transformValuesToUpdateSLOInput(values: CreateSLOInput): UpdateSLOInput {
+  return {
+    ...values,
+    objective: {
+      target: values.objective.target / 100,
+      ...(values.objective.timesliceTarget && {
+        timesliceTarget: values.objective.timesliceTarget / 100,
+      }),
+      ...(values.objective.timesliceWindow && {
+        timesliceWindow: `${values.objective.timesliceWindow}m`,
       }),
     },
   };

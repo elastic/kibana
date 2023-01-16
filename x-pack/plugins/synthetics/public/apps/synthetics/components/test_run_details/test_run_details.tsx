@@ -10,12 +10,12 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle } from '@elast
 import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useParams } from 'react-router-dom';
+import { MonitorDetailsPanelContainer } from '../monitor_details/monitor_summary/monitor_details_panel';
 import { useSelectedLocation } from '../monitor_details/hooks/use_selected_location';
 import { MonitorDetailsLinkPortal } from '../monitor_add_edit/monitor_details_portal';
 import { StepNumberNav } from './components/step_number_nav';
 import { StepScreenshotDetails } from './step_screenshot_details';
 import { StepTabs } from './step_tabs';
-import { MonitorDetailsPanel } from '../monitor_details/monitor_summary/monitor_details_panel';
 import { useJourneySteps } from '../monitor_details/hooks/use_journey_steps';
 import { StepDurationPanel } from '../monitor_details/monitor_summary/step_duration_panel';
 import { TestRunSteps } from './test_run_steps';
@@ -82,7 +82,7 @@ export const TestRunDetails = () => {
         <EuiFlexItem grow={1}>
           <StepDurationPanel legendPosition="bottom" />
           <EuiSpacer size="m" />
-          <MonitorDetailsPanel />
+          <MonitorDetailsPanelContainer />
         </EuiFlexItem>
       </EuiFlexGroup>
       {/* needed to render the monitor details link in breadcrumb*/}
