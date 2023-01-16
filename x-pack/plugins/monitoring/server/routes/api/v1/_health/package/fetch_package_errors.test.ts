@@ -109,6 +109,7 @@ describe(__filename, () => {
       const monitoredClusters = await fetchPackageErrors({
         timeout: 10,
         timeRange: { min: 1673361577110, max: 1673361567118 },
+        packageIndex: 'metrics-*',
         search: searchFn,
         logger: getMockLogger(),
       });

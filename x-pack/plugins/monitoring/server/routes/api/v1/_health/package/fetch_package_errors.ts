@@ -22,9 +22,13 @@ export const fetchPackageErrors = async ({
   timeRange,
   search,
   logger,
-}: FetchParameters): Promise<PackageResponse> => {
+  packageIndex,
+}: FetchParameters & {
+  packageIndex: string;
+}): Promise<PackageResponse> => {
   const getPackageErrors = async () => {
     const { aggregations, timed_out: timedOut } = await search({
+      index: packageIndex,
       body: errorsQuery({
         timeRange,
         timeout,

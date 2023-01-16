@@ -8,7 +8,7 @@
 import type { LegacyRequest, MonitoringCore } from '../../../../types';
 import type { MonitoringConfig } from '../../../../config';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
-import { getIndexPatterns } from '../../../../lib/cluster/get_index_patterns';
+import { getIndexPatterns, getDsIndexPattern } from '../../../../lib/cluster/get_index_patterns';
 import { getHealthRequestQueryRT } from '../../../../../common/http_api/_health';
 import type { TimeRange } from '../../../../../common/http_api/shared';
 
@@ -54,6 +54,14 @@ export function registerV1HealthRoute(server: MonitoringCore) {
         getIndexPatterns({ config, moduleType: 'logstash' }),
         getIndexPatterns({ config, moduleType: 'beats' }),
       ].join(',');
+
+      const metricsPackageIndex = [
+        getDsIndexPattern({ config, moduleType: 'elasticsearch' }),
+        getDsIndexPattern({ config, moduleType: 'kibana' }),
+        getDsIndexPattern({ config, moduleType: 'logstash' }),
+        getDsIndexPattern({ config, moduleType: 'beats' }),
+      ].join(',');
+
       const entSearchIndex = getIndexPatterns({ config, moduleType: 'enterprise_search' });
 
       const monitoredClustersFn = () =>
@@ -78,6 +86,7 @@ export function registerV1HealthRoute(server: MonitoringCore) {
       const packageErrorsFn = () =>
         fetchPackageErrors({
           ...fetchArgs,
+          packageIndex: metricsPackageIndex,
         }).catch((err: Error) => {
           logger.error(`_health: failed to retrieve package data:\n${err.stack}`);
           return { error: err.message };
