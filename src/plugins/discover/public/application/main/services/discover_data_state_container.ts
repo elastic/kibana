@@ -12,7 +12,6 @@ import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { AggregateQuery, Query } from '@kbn/es-query';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
-import { InspectorAdapters } from '../hooks/use_inspector';
 import { DataTableRecord } from '../../../types';
 import { AppState } from './discover_app_state_container';
 import { DiscoverServices } from '../../../build_services';
@@ -38,13 +37,6 @@ export type DataTotalHits$ = BehaviorSubject<DataTotalHitsMsg>;
 export type AvailableFields$ = BehaviorSubject<DataAvailableFieldsMsg>;
 
 export type DataRefetch$ = Subject<DataRefetchMsg>;
-
-export interface UseSavedSearch {
-  refetch$: DataRefetch$;
-  data$: SavedSearchData;
-  reset: () => void;
-  inspectorAdapters: InspectorAdapters;
-}
 
 export enum RecordRawType {
   /**
@@ -87,15 +79,42 @@ export interface DataAvailableFieldsMsg extends DataMsg {
 }
 
 export interface DataStateContainer {
+  /**
+   * Implicitly starting fetching data from ES
+   */
   fetch: () => void;
+  /**
+   * Container of data observables (orchestration, data table, total hits, available fields)
+   */
   data$: SavedSearchData;
+  /**
+   * Observable triggering fetching data from ES
+   */
   refetch$: DataRefetch$;
+  /**
+   * Start subscribing to other observables that trigger data fetches
+   */
   subscribe: () => () => void;
+  /**
+   * resetting all data observable to initial state
+   */
   reset: () => void;
+  /**
+   * Available Inspector Adaptor allowing to get details about recent requests to ES
+   */
   inspectorAdapters: { requests: RequestAdapter };
+  /**
+   * Initial fetch status
+   *  UNINITIALIZED: data is not fetched initially, without user triggering it
+   *  LOADING: data is fetched initially (when Discover is rendered, or data views are switched)
+   */
   initialFetchStatus: FetchStatus;
 }
-
+/**
+ * Container responsible for fetching of data in Discover Main
+ * Either by triggering requests to Elasticsearch directly, or by
+ * orchestrating unified plugins / components like the histogram
+ */
 export function getDataStateContainer({
   services,
   searchSessionManager,
@@ -155,7 +174,6 @@ export function getDataStateContainer({
     refetch$,
     searchSource: getSavedSearch().searchSource,
     searchSessionManager,
-    initialFetchStatus,
   });
   let abortController: AbortController;
 
