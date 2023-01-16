@@ -102,23 +102,7 @@ export function AlertDetailsAppSection({
         .toISOString();
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-  const { agentName } = useServiceAgentFetcher({
-    serviceName,
-    start,
-    end,
-  });
-  const transactionTypes = useServiceTransactionTypesFetcher({
-    serviceName,
-    start,
-    end,
-  });
-
-  const transactionType = getTransactionType({
-    transactionType: alert.fields[TRANSACTION_TYPE],
-    transactionTypes,
-    agentName,
-  });
-
+  const transactionType = alert.fields[TRANSACTION_TYPE];
   const comparisonChartTheme = getComparisonChartTheme();
   const INITIAL_STATE = {
     currentPeriod: [],
