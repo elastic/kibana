@@ -7,6 +7,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import { get } from 'lodash';
 import { Env } from '@kbn/config';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 
@@ -26,7 +27,9 @@ const configSchema = schema.object({
   ),
 });
 
-export type PluginsConfigType = Omit<TypeOf<typeof configSchema>, '__internal__'>;
+type InternalPluginsConfigType = TypeOf<typeof configSchema>;
+
+export type PluginsConfigType = Omit<InternalPluginsConfigType, '__internal__'>;
 
 export const config: ServiceConfigDescriptor<PluginsConfigType> = {
   path: 'plugins',
@@ -50,9 +53,17 @@ export class PluginsConfig {
    */
   public readonly additionalPluginPaths: readonly string[];
 
+  /**
+   * Whether to enable all plugins.
+   *
+   * @note this is intended to be an undocumented setting.
+   */
+  public readonly shouldEnableAllPlugins: boolean;
+
   constructor(rawConfig: PluginsConfigType, env: Env) {
     this.initialize = rawConfig.initialize;
     this.pluginSearchPaths = env.pluginSearchPaths;
     this.additionalPluginPaths = rawConfig.paths;
+    this.shouldEnableAllPlugins = get(rawConfig, '__internal__.enableAllPlugins', false);
   }
 }

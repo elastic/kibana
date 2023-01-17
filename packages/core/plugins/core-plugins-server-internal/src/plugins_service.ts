@@ -12,7 +12,7 @@ import { filter, map, tap, toArray } from 'rxjs/operators';
 import { getFlattenedObject } from '@kbn/std';
 
 import { Logger } from '@kbn/logging';
-import type { Config, IConfigService } from '@kbn/config';
+import type { IConfigService } from '@kbn/config';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import { type PluginName, PluginType } from '@kbn/core-base-common';
 import type { InternalEnvironmentServicePreboot } from '@kbn/core-environment-server-internal';
@@ -32,7 +32,6 @@ import type { PluginDependencies } from './types';
 import { PluginsConfig, PluginsConfigType } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
 import { createBrowserConfig } from './create_browser_config';
-import { PLUGIN_SYSTEM_ENABLE_ALL_PLUGINS_CONFIG_PATH } from './constants';
 
 /** @internal */
 export type DiscoveredPlugins = {
@@ -82,14 +81,12 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
   private readonly standardUiPluginInternalInfo = new Map<PluginName, InternalPluginInfo>();
   private readonly configService: IConfigService;
   private readonly config$: Observable<PluginsConfig>;
-  private readonly rawConfig$: Observable<Config>;
   private readonly pluginConfigDescriptors = new Map<PluginName, PluginConfigDescriptor>();
   private readonly pluginConfigUsageDescriptors = new Map<string, Record<string, any | any[]>>();
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('plugins-service');
     this.configService = coreContext.configService;
-    this.rawConfig$ = coreContext.configService.getConfig$();
     this.config$ = coreContext.configService
       .atPath<PluginsConfigType>('plugins')
       .pipe(map((rawConfig) => new PluginsConfig(rawConfig, coreContext.env)));
@@ -257,19 +254,6 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     }
   }
 
-  private async shouldEnableAllPlugins(): Promise<boolean> {
-    try {
-      return await firstValueFrom(
-        this.rawConfig$.pipe(
-          map((rawConfig) => rawConfig.get(PLUGIN_SYSTEM_ENABLE_ALL_PLUGINS_CONFIG_PATH) === true)
-        )
-      );
-    } catch (e) {
-      this.log.debug(`Failed to read from global config: "${e.message}"`);
-      return false;
-    }
-  }
-
   private async handleDiscoveredPlugins(plugin$: Observable<PluginWrapper>) {
     const pluginEnableStatuses = new Map<
       PluginName,
@@ -298,7 +282,8 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
       }
     }
 
-    const enableAllPlugins = await this.shouldEnableAllPlugins();
+    const config = await firstValueFrom(this.config$);
+    const enableAllPlugins = config.shouldEnableAllPlugins;
     if (enableAllPlugins) {
       this.log.warn('Detected override configuration; will enable all plugins');
     }

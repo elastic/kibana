@@ -31,4 +31,17 @@ describe('PluginsConfig', () => {
     const config = new PluginsConfig(rawConfig, env);
     expect(config.additionalPluginPaths).toEqual(['some-path', 'another-path']);
   });
+
+  it('retrieves shouldEnableAllPlugins', () => {
+    const env = Env.createDefault(REPO_ROOT, getEnvOptions({ cliArgs: { dev: true } }));
+    const rawConfig: any = {
+      initialize: true,
+      paths: ['some-path', 'another-path'],
+      __internal__: {
+        enableAllPlugins: true,
+      },
+    };
+    const config = new PluginsConfig(rawConfig, env);
+    expect(config.shouldEnableAllPlugins).toBe(true);
+  });
 });
