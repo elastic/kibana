@@ -129,7 +129,9 @@ export function createAlertFactory<
             return [];
           }
 
-          const { recovered } = categorizeAlerts<Alert<State, Context>>({
+          const { recovered } = categorizeAlerts<
+            Alert<State, Context, ActionGroupIds, ActionGroupIds>
+          >({
             reportedAlerts: splitAlerts<State, Context>(alerts, originalAlerts),
             trackedAlerts: originalAlerts,
             hasReachedAlertLimit,
