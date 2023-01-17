@@ -132,7 +132,7 @@ describe('AllCasesListGeneric', () => {
 
   afterEach(() => {
     moment.tz.setDefault('Browser');
-  })
+  });
 
   it('should render AllCasesList', async () => {
     useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
