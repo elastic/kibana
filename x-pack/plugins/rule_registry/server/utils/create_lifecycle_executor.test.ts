@@ -44,10 +44,10 @@ describe('createLifecycleExecutor', () => {
         aRuleStateKey: 'NEXT_RULE_STATE_VALUE',
       };
 
-      return nextRuleState;
+      return { state: nextRuleState };
     });
 
-    const newRuleState = await executor(
+    const newExecutorResult = await executor(
       createDefaultAlertExecutorOptions({
         params: {},
         state: { wrapped: initialRuleState, trackedAlerts: {}, trackedAlertsRecovered: {} },
@@ -55,7 +55,7 @@ describe('createLifecycleExecutor', () => {
       })
     );
 
-    expect(newRuleState).toEqual({
+    expect(newExecutorResult.state).toEqual({
       wrapped: {
         aRuleStateKey: 'NEXT_RULE_STATE_VALUE',
       },
@@ -80,7 +80,7 @@ describe('createLifecycleExecutor', () => {
         fields: {},
       });
 
-      return state;
+      return { state };
     });
 
     await executor(
@@ -181,7 +181,7 @@ describe('createLifecycleExecutor', () => {
         fields: {},
       });
 
-      return state;
+      return { state };
     });
 
     await executor(
@@ -304,7 +304,7 @@ describe('createLifecycleExecutor', () => {
         fields: {},
       });
 
-      return state;
+      return { state };
     });
 
     await executor(
@@ -385,7 +385,7 @@ describe('createLifecycleExecutor', () => {
         aRuleStateKey: 'NEXT_RULE_STATE_VALUE',
       };
 
-      return nextRuleState;
+      return { state: nextRuleState };
     });
 
     await executor(
@@ -414,7 +414,7 @@ describe('createLifecycleExecutor', () => {
         aRuleStateKey: 'NEXT_RULE_STATE_VALUE',
       };
 
-      return nextRuleState;
+      return { state: nextRuleState };
     });
 
     await expect(() =>
@@ -446,10 +446,12 @@ describe('createLifecycleExecutor', () => {
           fields: {},
         });
 
-        return state;
+        return { state };
       });
 
-      const { trackedAlerts, trackedAlertsRecovered } = await executor(
+      const {
+        state: { trackedAlerts, trackedAlertsRecovered },
+      } = await executor(
         createDefaultAlertExecutorOptions({
           params: {},
           state: { wrapped: initialRuleState, trackedAlerts: {}, trackedAlertsRecovered: {} },
@@ -534,10 +536,12 @@ describe('createLifecycleExecutor', () => {
           fields: {},
         });
 
-        return state;
+        return { state };
       });
 
-      const { trackedAlerts, trackedAlertsRecovered } = await executor(
+      const {
+        state: { trackedAlerts, trackedAlertsRecovered },
+      } = await executor(
         createDefaultAlertExecutorOptions({
           alertId: 'TEST_ALERT_0',
           params: {},
@@ -644,10 +648,12 @@ describe('createLifecycleExecutor', () => {
           fields: {},
         });
 
-        return state;
+        return { state };
       });
 
-      const { trackedAlerts, trackedAlertsRecovered } = await executor(
+      const {
+        state: { trackedAlerts, trackedAlertsRecovered },
+      } = await executor(
         createDefaultAlertExecutorOptions({
           alertId: 'TEST_ALERT_0',
           params: {},
@@ -749,10 +755,12 @@ describe('createLifecycleExecutor', () => {
           fields: {},
         });
 
-        return state;
+        return { state };
       });
 
-      const { trackedAlerts, trackedAlertsRecovered } = await executor(
+      const {
+        state: { trackedAlerts, trackedAlertsRecovered },
+      } = await executor(
         createDefaultAlertExecutorOptions({
           alertId: 'TEST_ALERT_0',
           params: {},
@@ -855,10 +863,12 @@ describe('createLifecycleExecutor', () => {
           fields: {},
         });
 
-        return state;
+        return { state };
       });
 
-      const { trackedAlerts, trackedAlertsRecovered } = await executor(
+      const {
+        state: { trackedAlerts, trackedAlertsRecovered },
+      } = await executor(
         createDefaultAlertExecutorOptions({
           alertId: 'TEST_ALERT_0',
           params: {},
@@ -1002,7 +1012,7 @@ describe('createLifecycleExecutor', () => {
           fields: {},
         });
 
-        return state;
+        return { state };
       });
 
       await executor(
@@ -1169,7 +1179,7 @@ describe('createLifecycleExecutor', () => {
         logger,
         ruleDataClientMock
       )<{}, TestRuleState, never, never, never>(async ({ services, state }) => {
-        return state;
+        return { state };
       });
 
       await executor(
