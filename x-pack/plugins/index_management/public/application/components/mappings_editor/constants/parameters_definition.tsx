@@ -448,7 +448,7 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
         },
       ],
     },
-    schema: t.string,
+    schema: t.union([t.string, t.array(t.string)]),
   },
   value: {
     fieldConfig: {
