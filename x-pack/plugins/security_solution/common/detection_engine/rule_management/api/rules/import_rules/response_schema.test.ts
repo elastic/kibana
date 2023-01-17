@@ -14,7 +14,6 @@ import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts
 import type { ErrorSchema } from '../../../../schemas/response/error_schema';
 import { ImportRulesResponse } from './response_schema';
 
-// TODO add tests for the action_connectors_success
 describe('Import rules response schema', () => {
   test('it should validate an empty import response with no errors', () => {
     const payload: ImportRulesResponse = {
@@ -27,6 +26,8 @@ describe('Import rules response schema', () => {
       exceptions_success_count: 0,
       action_connectors_success: true,
       action_connectors_success_count: 0,
+      action_connectors_errors: [],
+      action_connectors_warnings: [],
     };
     const decoded = ImportRulesResponse.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -47,6 +48,8 @@ describe('Import rules response schema', () => {
       exceptions_success_count: 0,
       action_connectors_success: true,
       action_connectors_success_count: 0,
+      action_connectors_errors: [],
+      action_connectors_warnings: [],
     };
     const decoded = ImportRulesResponse.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -67,6 +70,8 @@ describe('Import rules response schema', () => {
       exceptions_success_count: 0,
       action_connectors_success: true,
       action_connectors_success_count: 0,
+      action_connectors_errors: [],
+      action_connectors_warnings: [],
     };
     const decoded = ImportRulesResponse.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -90,6 +95,8 @@ describe('Import rules response schema', () => {
       exceptions_success_count: 0,
       action_connectors_success: true,
       action_connectors_success_count: 0,
+      action_connectors_errors: [],
+      action_connectors_warnings: [],
     };
     const decoded = ImportRulesResponse.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -113,6 +120,8 @@ describe('Import rules response schema', () => {
       exceptions_success_count: 0,
       action_connectors_success: true,
       action_connectors_success_count: 0,
+      action_connectors_errors: [],
+      action_connectors_warnings: [],
     };
     const decoded = ImportRulesResponse.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -133,6 +142,8 @@ describe('Import rules response schema', () => {
       exceptions_success_count: 0,
       action_connectors_success: true,
       action_connectors_success_count: 0,
+      action_connectors_errors: [],
+      action_connectors_warnings: [],
     };
     const decoded = ImportRulesResponse.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -155,6 +166,8 @@ describe('Import rules response schema', () => {
       exceptions_success_count: -1,
       action_connectors_success: true,
       action_connectors_success_count: 0,
+      action_connectors_errors: [],
+      action_connectors_warnings: [],
     };
     const decoded = ImportRulesResponse.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -195,6 +208,8 @@ describe('Import rules response schema', () => {
       exceptions_success_count: 0,
       action_connectors_success: true,
       action_connectors_success_count: 0,
+      action_connectors_errors: [],
+      action_connectors_warnings: [],
     };
     const decoded = ImportRulesResponse.decode(payload);
     const checked = exactCheck(payload, decoded as UnsafeCastForTest);
@@ -236,6 +251,8 @@ describe('Import rules response schema', () => {
       exceptions_success_count: 0,
       action_connectors_success: true,
       action_connectors_success_count: 0,
+      action_connectors_errors: [],
+      action_connectors_warnings: [],
     };
     const decoded = ImportRulesResponse.decode(payload);
     const checked = exactCheck(payload, decoded as UnsafeCastForTest);
@@ -259,6 +276,8 @@ describe('Import rules response schema', () => {
       exceptions_success_count: 0,
       action_connectors_success: true,
       action_connectors_success_count: 0,
+      action_connectors_errors: [],
+      action_connectors_warnings: [],
     };
     const decoded = ImportRulesResponse.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -285,6 +304,8 @@ describe('Import rules response schema', () => {
       exceptions_success_count: 0,
       action_connectors_success: true,
       action_connectors_success_count: 0,
+      action_connectors_errors: [],
+      action_connectors_warnings: [],
     };
     const decoded = ImportRulesResponse.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -292,5 +313,139 @@ describe('Import rules response schema', () => {
 
     expect(getPaths(left(message.errors))).toEqual(['invalid keys "invalid_data"']);
     expect(message.schema).toEqual({});
+  });
+
+  test('it should validate an empty import response with a single connectors error', () => {
+    const payload: ImportRulesResponse = {
+      success: false,
+      success_count: 0,
+      rules_count: 0,
+      errors: [],
+      exceptions_errors: [],
+      exceptions_success: true,
+      exceptions_success_count: 0,
+      action_connectors_success: true,
+      action_connectors_success_count: 0,
+      action_connectors_errors: [{ error: { status_code: 400, message: 'some message' } }],
+      action_connectors_warnings: [],
+    };
+    const decoded = ImportRulesResponse.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
+  });
+  test('it should validate an empty import response with multiple errors', () => {
+    const payload: ImportRulesResponse = {
+      success: false,
+      success_count: 0,
+      rules_count: 0,
+      errors: [
+        { error: { status_code: 400, message: 'some message' } },
+        { error: { status_code: 500, message: 'some message' } },
+      ],
+      exceptions_errors: [],
+      exceptions_success: true,
+      exceptions_success_count: 0,
+      action_connectors_success: true,
+      action_connectors_success_count: 0,
+      action_connectors_errors: [{ error: { status_code: 400, message: 'some message' } }],
+      action_connectors_warnings: [],
+    };
+    const decoded = ImportRulesResponse.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
+  });
+  test('it should NOT validate action_connectors_success that is not boolean', () => {
+    type UnsafeCastForTest = Either<
+      Errors,
+      {
+        success: boolean;
+        action_connectors_success: string;
+        success_count: number;
+        errors: Array<
+          {
+            id?: string | undefined;
+            rule_id?: string | undefined;
+          } & {
+            error: {
+              status_code: number;
+              message: string;
+            };
+          }
+        >;
+      }
+    >;
+    const payload: Omit<ImportRulesResponse, 'action_connectors_success'> & {
+      action_connectors_success: string;
+    } = {
+      success: true,
+      success_count: 0,
+      rules_count: 0,
+      errors: [],
+      exceptions_errors: [],
+      exceptions_success: true,
+      exceptions_success_count: 0,
+      action_connectors_success: 'invalid',
+      action_connectors_success_count: 0,
+      action_connectors_errors: [],
+      action_connectors_warnings: [],
+    };
+    const decoded = ImportRulesResponse.decode(payload);
+    const checked = exactCheck(payload, decoded as UnsafeCastForTest);
+    const message = pipe(checked, foldLeftRight);
+
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "invalid" supplied to "action_connectors_success"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
+  test('it should NOT validate a action_connectors_success_count that is a negative number', () => {
+    const payload: ImportRulesResponse = {
+      success: false,
+      success_count: 0,
+      rules_count: 0,
+      errors: [],
+      exceptions_errors: [],
+      exceptions_success: true,
+      exceptions_success_count: 0,
+      action_connectors_success: true,
+      action_connectors_success_count: -1,
+      action_connectors_errors: [],
+      action_connectors_warnings: [],
+    };
+    const decoded = ImportRulesResponse.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "-1" supplied to "action_connectors_success_count"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
+  test('it should  validate a action_connectors_warnings after importing successfully', () => {
+    const payload: ImportRulesResponse = {
+      success: false,
+      success_count: 0,
+      rules_count: 0,
+      errors: [],
+      exceptions_errors: [],
+      exceptions_success: true,
+      exceptions_success_count: 0,
+      action_connectors_success: true,
+      action_connectors_success_count: 1,
+      action_connectors_errors: [],
+      action_connectors_warnings: [{ type: 'type', message: 'message', actionPath: 'actionPath' }],
+    };
+    const decoded = ImportRulesResponse.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
   });
 });
