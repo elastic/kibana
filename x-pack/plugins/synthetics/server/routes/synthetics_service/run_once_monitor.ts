@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { MonitorFields } from '../../../common/runtime_types';
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS } from '../../../common/constants';
@@ -26,7 +27,7 @@ export const runOnceSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
 
     const validationResult = validateMonitor(monitor);
 
-    const spaceId = server.spaces.spacesService.getSpaceId(request);
+    const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
     if (!validationResult.valid || !validationResult.decodedMonitor) {
       const { reason: message, details, payload } = validationResult;

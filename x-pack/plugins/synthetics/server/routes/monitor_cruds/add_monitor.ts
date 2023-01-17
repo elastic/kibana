@@ -13,6 +13,7 @@ import {
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { getSyntheticsPrivateLocations } from '../../legacy_uptime/lib/saved_objects/private_locations';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import {
@@ -58,7 +59,7 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
     // usually id is auto generated, but this is useful for testing
     const { id } = request.query;
 
-    const spaceId = server.spaces.spacesService.getSpaceId(request);
+    const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
     const monitor: SyntheticsMonitor = request.body as SyntheticsMonitor;
     const monitorType = monitor[ConfigKey.MONITOR_TYPE];
@@ -245,7 +246,7 @@ export const getMonitorNamespace = (
   request: KibanaRequest,
   configuredNamespace: string
 ) => {
-  const spaceId = server.spaces.spacesService.getSpaceId(request);
+  const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
   const kibanaNamespace = formatKibanaNamespace(spaceId);
   const namespace =
     configuredNamespace === DEFAULT_NAMESPACE_STRING ? kibanaNamespace : configuredNamespace;

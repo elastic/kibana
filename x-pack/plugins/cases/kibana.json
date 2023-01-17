@@ -1,43 +1,43 @@
 {
-  "configPath":[
-     "xpack",
-     "cases"
-  ],
-  "description":"The Case management system in Kibana",
-  "extraPublicDirs":[
-     "common"
-  ],
-  "id":"cases",
-  "kibanaVersion":"kibana",
-  "optionalPlugins":[
-    "home",
-    "taskManager",
-    "usageCollection"
-  ],
-  "owner":{
-     "githubTeam":"response-ops",
-     "name":"ResponseOps"
-  },
-  "requiredPlugins":[
-     "actions",
-     "data",
-     "embeddable",
-     "esUiShared",
-     "lens",
-     "licensing",
-     "features",
-     "kibanaReact",
-     "kibanaUtils",
-     "triggersActionsUi",
-     "management",
-     "spaces",
-     "security",
-     "notifications"
-  ],
-  "requiredBundles": [
-    "savedObjects"
-  ],
-  "server":true,
-  "ui":true,
-  "version":"8.0.0"
+   "configPath": [
+      "xpack",
+      "cases"
+   ],
+   "description": "The Case management system in Kibana",
+   "extraPublicDirs": [
+      "common"
+   ],
+   "id": "cases",
+   "kibanaVersion": "kibana",
+   "optionalPlugins": [
+      "home",
+      "spaces",
+      "taskManager",
+      "usageCollection"
+   ],
+   "owner": {
+      "githubTeam": "response-ops",
+      "name": "ResponseOps"
+   },
+   "requiredPlugins": [
+      "actions",
+      "data",
+      "embeddable",
+      "esUiShared",
+      "lens",
+      "licensing",
+      "features",
+      "kibanaReact",
+      "kibanaUtils",
+      "triggersActionsUi",
+      "management",
+      "security",
+      "notifications"
+   ],
+   "requiredBundles": [
+      "savedObjects"
+   ],
+   "server": true,
+   "ui": true,
+   "version": "8.0.0"
 }

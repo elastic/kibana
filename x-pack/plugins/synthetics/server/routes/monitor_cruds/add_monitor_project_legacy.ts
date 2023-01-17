@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { UMServerLibs } from '../../legacy_uptime/lib/lib';
 import { ProjectMonitor } from '../../../common/runtime_types';
 
@@ -41,7 +42,7 @@ export const addSyntheticsProjectMonitorRouteLegacy: SyntheticsStreamingRouteFac
   }): Promise<any> => {
     try {
       const monitors = (request.body?.monitors as ProjectMonitor[]) || [];
-      const spaceId = server.spaces.spacesService.getSpaceId(request);
+      const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
       const { keep_stale: keepStale, project: projectId } = request.body || {};
       const { publicLocations, privateLocations } = await getAllLocations(
         server,

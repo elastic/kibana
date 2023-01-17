@@ -6,6 +6,7 @@
  */
 import { schema } from '@kbn/config-schema';
 import { v4 as uuidv4 } from 'uuid';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { TestNowResponse } from '../../../common/types';
 import {
   ConfigKey,
@@ -44,7 +45,7 @@ export const testNowMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
 
     const testRunId = uuidv4();
 
-    const spaceId = server.spaces.spacesService.getSpaceId(request);
+    const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
     const paramsBySpace = await syntheticsService.getSyntheticsParams({ spaceId });
 

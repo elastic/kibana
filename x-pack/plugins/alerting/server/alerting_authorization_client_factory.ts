@@ -16,7 +16,7 @@ export interface AlertingAuthorizationClientFactoryOpts {
   ruleTypeRegistry: RuleTypeRegistry;
   securityPluginSetup?: SecurityPluginSetup;
   securityPluginStart?: SecurityPluginStart;
-  getSpace: (request: KibanaRequest) => Promise<Space>;
+  getSpace: (request: KibanaRequest) => Promise<Space | undefined>;
   getSpaceId: (request: KibanaRequest) => string;
   features: FeaturesPluginStart;
 }
@@ -26,7 +26,7 @@ export class AlertingAuthorizationClientFactory {
   private ruleTypeRegistry!: RuleTypeRegistry;
   private securityPluginStart?: SecurityPluginStart;
   private features!: FeaturesPluginStart;
-  private getSpace!: (request: KibanaRequest) => Promise<Space>;
+  private getSpace!: (request: KibanaRequest) => Promise<Space | undefined>;
   private getSpaceId!: (request: KibanaRequest) => string;
 
   public initialize(options: AlertingAuthorizationClientFactoryOpts) {

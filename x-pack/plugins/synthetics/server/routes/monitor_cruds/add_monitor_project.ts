@@ -6,6 +6,7 @@
  */
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { ProjectMonitor } from '../../../common/runtime_types';
 
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
@@ -41,7 +42,7 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
     const { projectName } = request.params;
     const decodedProjectName = decodeURI(projectName);
     const monitors = (request.body?.monitors as ProjectMonitor[]) || [];
-    const spaceId = server.spaces.spacesService.getSpaceId(request);
+    const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
     if (monitors.length > 250) {
       return response.badRequest({

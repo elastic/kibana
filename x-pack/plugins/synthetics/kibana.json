@@ -1,8 +1,19 @@
 {
-  "configPath": ["xpack", "uptime"],
+  "configPath": [
+    "xpack",
+    "uptime"
+  ],
   "id": "synthetics",
   "kibanaVersion": "kibana",
-  "optionalPlugins": ["cloud", "data", "fleet", "home", "ml", "telemetry"],
+  "optionalPlugins": [
+    "cloud",
+    "data",
+    "fleet",
+    "home",
+    "ml",
+    "spaces",
+    "telemetry"
+  ],
   "requiredPlugins": [
     "actions",
     "alerting",
@@ -22,13 +33,21 @@
     "triggersActionsUi",
     "usageCollection",
     "unifiedSearch",
-    "spaces",
     "bfetch"
   ],
   "server": true,
   "ui": true,
   "version": "8.0.0",
-  "requiredBundles": ["data","unifiedSearch", "fleet", "kibanaReact", "kibanaUtils", "ml", "observability", "indexLifecycleManagement"],
+  "requiredBundles": [
+    "data",
+    "unifiedSearch",
+    "fleet",
+    "kibanaReact",
+    "kibanaUtils",
+    "ml",
+    "observability",
+    "indexLifecycleManagement"
+  ],
   "owner": {
     "name": "Uptime",
     "githubTeam": "uptime"

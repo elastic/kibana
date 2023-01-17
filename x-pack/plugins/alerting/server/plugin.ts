@@ -20,6 +20,7 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import {
   KibanaRequest,
@@ -155,7 +156,7 @@ export interface AlertingPluginsStart {
   features: FeaturesPluginStart;
   eventLog: IEventLogClientService;
   licensing: LicensingPluginStart;
-  spaces: SpacesPluginStart;
+  spaces?: SpacesPluginStart;
   security?: SecurityPluginStart;
   data: DataPluginStart;
   dataViews: DataViewsPluginStart;
@@ -389,10 +390,10 @@ export class AlertingPlugin {
       securityPluginSetup: security,
       securityPluginStart: plugins.security,
       async getSpace(request: KibanaRequest) {
-        return plugins.spaces.spacesService.getActiveSpace(request);
+        return plugins.spaces?.spacesService.getActiveSpace(request);
       },
       getSpaceId(request: KibanaRequest) {
-        return plugins.spaces.spacesService.getSpaceId(request);
+        return plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
       },
       features: plugins.features,
     });
@@ -406,7 +407,7 @@ export class AlertingPlugin {
       encryptedSavedObjectsClient,
       spaceIdToNamespace,
       getSpaceId(request: KibanaRequest) {
-        return plugins.spaces?.spacesService.getSpaceId(request);
+        return plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
       },
       actions: plugins.actions,
       eventLog: plugins.eventLog,

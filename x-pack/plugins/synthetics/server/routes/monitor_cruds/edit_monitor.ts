@@ -13,6 +13,7 @@ import {
   KibanaRequest,
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { getSyntheticsPrivateLocations } from '../../legacy_uptime/lib/saved_objects/private_locations';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import {
@@ -56,7 +57,7 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
     const monitor = request.body as SyntheticsMonitor;
     const { monitorId } = request.params;
 
-    const spaceId = server.spaces.spacesService.getSpaceId(request);
+    const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
     try {
       const previousMonitor: SavedObject<EncryptedSyntheticsMonitor> = await savedObjectsClient.get(

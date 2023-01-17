@@ -10,6 +10,7 @@ import {
   SavedObjectsClientContract,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import {
   ConfigKey,
@@ -88,7 +89,7 @@ export const deleteMonitor = async ({
   request: KibanaRequest;
 }) => {
   const { logger, telemetry, stackVersion } = server;
-  const spaceId = server.spaces.spacesService.getSpaceId(request);
+  const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
   const { monitor, monitorWithSecret } = await getMonitorToDelete(
     monitorId,

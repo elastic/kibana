@@ -10,7 +10,7 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import Boom from '@hapi/boom';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
-import type { Space, SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { AuthFilterHelpers, OwnerEntity } from './types';
 import { getOwnersFilter, groupByAuthorization } from './utils';
 import type { OperationDetails } from '.';
@@ -57,19 +57,17 @@ export class Authorization {
   }: {
     request: KibanaRequest;
     securityAuth?: SecurityPluginStart['authz'];
-    spaces: SpacesPluginStart;
+    spaces?: SpacesPluginStart;
     features: FeaturesPluginStart;
     auditLogger: AuthorizationAuditLogger;
     logger: Logger;
   }): Promise<Authorization> {
-    const getSpace = async (): Promise<Space> => {
-      return spaces.spacesService.getActiveSpace(request);
-    };
-
     // Since we need to do async operations, this static method handles that before creating the Auth class
     let caseOwners: Set<string>;
     try {
-      const disabledFeatures = new Set((await getSpace()).disabledFeatures ?? []);
+      const disabledFeatures = new Set(
+        spaces ? (await spaces.spacesService.getActiveSpace(request)).disabledFeatures : []
+      );
 
       caseOwners = new Set(
         features

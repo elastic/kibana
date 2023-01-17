@@ -31,7 +31,7 @@ export interface InfraServerPluginSetupDeps {
   features: FeaturesPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
   observability: ObservabilityPluginSetup;
-  spaces: SpacesPluginSetup;
+  spaces?: SpacesPluginSetup;
   usageCollection: UsageCollectionSetup;
   visTypeTimeseries: VisTypeTimeseriesSetup;
   ml?: MlPluginSetup;

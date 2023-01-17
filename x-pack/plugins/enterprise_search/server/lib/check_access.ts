@@ -18,7 +18,7 @@ import { callEnterpriseSearchConfigAPI } from './enterprise_search_config_api';
 interface CheckAccess {
   request: KibanaRequest;
   security: SecurityPluginSetup;
-  spaces: SpacesPluginStart;
+  spaces?: SpacesPluginStart;
   config: ConfigType;
   log: Logger;
 }
@@ -57,8 +57,8 @@ export const checkAccess = async ({
 
   if (attemptSpaceRetrieval) {
     try {
-      const space = await spaces.spacesService.getActiveSpace(request);
-      allowedAtSpace = !space.disabledFeatures?.includes('enterpriseSearch');
+      const space = await spaces?.spacesService.getActiveSpace(request);
+      allowedAtSpace = !space?.disabledFeatures?.includes('enterpriseSearch');
     } catch (err) {
       if (err?.output?.statusCode === 403) {
         allowedAtSpace = false;

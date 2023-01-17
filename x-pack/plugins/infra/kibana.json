@@ -6,7 +6,6 @@
     "share",
     "features",
     "usageCollection",
-    "spaces",
     "embeddable",
     "data",
     "dataViews",
@@ -17,10 +16,19 @@
     "ruleRegistry",
     "unifiedSearch"
   ],
-  "optionalPlugins": ["ml", "home", "embeddable", "osquery"],
+  "optionalPlugins": [
+    "ml",
+    "home",
+    "embeddable",
+    "osquery",
+    "spaces"
+  ],
   "server": true,
   "ui": true,
-  "configPath": ["xpack", "infra"],
+  "configPath": [
+    "xpack",
+    "infra"
+  ],
   "requiredBundles": [
     "unifiedSearch",
     "observability",
@@ -29,7 +37,7 @@
     "kibanaReact",
     "ml",
     "embeddable",
-    "controls"  
+    "controls"
   ],
   "owner": {
     "name": "Logs and Metrics UI",
