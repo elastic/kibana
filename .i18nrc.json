@@ -11,6 +11,7 @@
     "contentManagement": "packages/content-management",
     "core": ["src/core", "packages/core"],
     "customIntegrations": "src/plugins/custom_integrations",
+    "dataCellActions": "packages/kbn-data-cell-actions",
     "dashboard": "src/plugins/dashboard",
     "controls": "src/plugins/controls",
     "data": "src/plugins/data",

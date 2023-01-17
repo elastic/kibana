@@ -908,6 +908,7 @@ packages/kbn-config-schema @elastic/kibana-core
 packages/kbn-crypto @elastic/kibana-security
 packages/kbn-crypto-browser @elastic/kibana-core
 packages/kbn-cypress-config @elastic/kibana-operations
+packages/kbn-data-cell-actions @elastic/security-threat-hunting-explore
 packages/kbn-datemath @elastic/kibana-app-services
 packages/kbn-dev-cli-errors @elastic/kibana-operations
 packages/kbn-dev-cli-runner @elastic/kibana-operations
