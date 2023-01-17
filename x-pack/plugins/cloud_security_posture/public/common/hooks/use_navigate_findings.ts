@@ -32,17 +32,31 @@ const getFindingsQuery = (queryValue: Query['query']): Pick<FindingsBaseURLQuery
   }!;
 };
 
+const createFilter = (key: string, value: string, negate = false): Filter => ({
+  meta: {
+    alias: null,
+    negate,
+    disabled: false,
+    type: 'phrase',
+    key,
+    params: { query: value },
+  },
+  query: { match_phrase: { [key]: value } },
+});
+
 export const useNavigateFindings = () => {
   const history = useHistory();
 
   return (query: Query['query'] = {}) => {
+    const filters = Object.entries(query).map<string[]>(([key, value]) => createFilter(key, value));
+
     history.push({
       pathname: findingsNavigation.findings_default.path,
-      ...(query && {
-        search: encodeQuery({
-          ...getFindingsQuery(query),
-          filters: [],
-        }),
+      search: encodeQuery({
+        query: {
+          query: '',
+        },
+        filters,
       }),
     });
   };
