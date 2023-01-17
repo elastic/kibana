@@ -10,7 +10,7 @@ import type {
   SlackSecrets,
   GetChannelsResponse,
   PostMessageParams,
-} from '../../../common/slack/types';
+} from '../../../../common/slack/types';
 
 export type SlackExecutorResultData = PostMessageResponseList | GetChannelsResponse;
 

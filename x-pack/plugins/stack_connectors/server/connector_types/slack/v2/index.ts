@@ -17,7 +17,7 @@ import {
   SecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common/types';
 import { validate } from './validators';
-import { ExecutorParamsSchema, SlackSecretsSchema } from '../../../common/slack/schema';
+import { ExecutorParamsSchema, SlackSecretsSchema } from '../../../../common/slack/schema';
 import { createExternalService } from './service';
 import { api } from './api';
 import { SlackExecutorResultData } from './types';
@@ -26,8 +26,8 @@ import {
   SlackConfig,
   SlackSecrets,
   SlackExecuteActionParams,
-} from '../../../common/slack/types';
-import { SLACK_CONNECTOR_ID } from '../../../common/slack/constants';
+} from '../../../../common/slack/types';
+import { SLACK_CONNECTOR_ID } from '../../../../common/slack/constants';
 import { SLACK_CONNECTOR_NAME } from './translations';
 
 export type ActionParamsType = TypeOf<typeof ExecutorParamsSchema>;

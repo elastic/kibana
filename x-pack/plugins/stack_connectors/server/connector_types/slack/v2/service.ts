@@ -20,7 +20,7 @@ import type {
   SlackSecrets,
   GetChannelsResponse,
   PostMessageParams,
-} from '../../../common/slack/types';
+} from '../../../../common/slack/types';
 
 const SLACK_URL = 'https://slack.com/api/';
 
