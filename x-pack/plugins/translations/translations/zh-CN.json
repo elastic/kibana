@@ -29981,7 +29981,6 @@
     "xpack.securitySolution.hosts.navigation.sessionsTitle": "会话",
     "xpack.securitySolution.hosts.navigation.uncommonProcessesTitle": "不常见进程",
     "xpack.securitySolution.hosts.navigaton.hostRisk.viewDashboardButtonLabel": "查看源仪表板",
-    "xpack.securitySolution.hosts.navigaton.hostScoreOverTimeTitle": "一段时间的主机风险分数",
     "xpack.securitySolution.hosts.navigaton.matrixHistogram.errorFetchingAuthenticationsData": "无法查询身份验证数据",
     "xpack.securitySolution.hosts.navigaton.matrixHistogram.errorFetchingEventsData": "无法查询事件数据",
     "xpack.securitySolution.hosts.pageTitle": "主机",
