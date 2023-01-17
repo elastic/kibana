@@ -85,7 +85,11 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
   const activeRoute = useActiveRoute(routeList);
 
   const rightSideItems = useMemo(() => {
-    return [...(activeRoute.enableDatePicker ? [<DatePickerWrapper isLoading={isLoading} />] : [])];
+    return [
+      ...(activeRoute.enableDatePicker
+        ? [<DatePickerWrapper isLoading={isLoading} width="full" />]
+        : []),
+    ];
   }, [activeRoute.enableDatePicker, isLoading]);
 
   useDocTitle(activeRoute);

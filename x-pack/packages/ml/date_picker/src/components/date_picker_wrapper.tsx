@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { css } from '@emotion/react';
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Subscription } from 'rxjs';
 import { debounce } from 'lodash';
 
 import {
-  useEuiBreakpoint,
   useIsWithinMaxBreakpoint,
   EuiButton,
   EuiFlexGroup,
@@ -33,7 +31,6 @@ import { useDatePickerContext } from '../hooks/use_date_picker_context';
 import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';
 
 const DEFAULT_REFRESH_INTERVAL_MS = 5000;
-const DATE_PICKER_MAX_WIDTH = '540px';
 
 interface TimePickerQuickRange {
   from: string;
@@ -88,6 +85,10 @@ interface DatePickerWrapperProps {
    * Width setting to be passed on to `EuiSuperDatePicker`
    */
   width?: EuiSuperDatePickerProps['width'];
+  /**
+   * Boolean flag to set use of flex group wrapper
+   */
+  flexGroup?: boolean;
 }
 
 /**
@@ -98,7 +99,7 @@ interface DatePickerWrapperProps {
  * @returns {React.ReactElement} The DatePickerWrapper component.
  */
 export const DatePickerWrapper: FC<DatePickerWrapperProps> = (props) => {
-  const { isAutoRefreshOnly, isLoading = false, showRefresh, width } = props;
+  const { isAutoRefreshOnly, isLoading = false, showRefresh, width, flexGroup = true } = props;
   const {
     data,
     notifications: { toasts },
@@ -279,18 +280,9 @@ export const DatePickerWrapper: FC<DatePickerWrapperProps> = (props) => {
     setRefreshInterval({ pause, value });
   }
 
-  const datePickerWidth = css({
-    [useEuiBreakpoint(['xs', 's', 'm', 'l'])]: {
-      maxWidth: DATE_PICKER_MAX_WIDTH,
-    },
-  });
-
-  return isAutoRefreshSelectorEnabled || isTimeRangeSelectorEnabled ? (
-    <EuiFlexGroup gutterSize="s" alignItems="center">
-      <EuiFlexItem
-        grow={width === undefined || width === 'restricted' ? false : undefined}
-        css={width === undefined || width === 'restricted' ? datePickerWidth : undefined}
-      >
+  const flexItems = (
+    <>
+      <EuiFlexItem>
         <EuiSuperDatePicker
           isLoading={isLoading}
           start={time.from}
@@ -308,7 +300,6 @@ export const DatePickerWrapper: FC<DatePickerWrapperProps> = (props) => {
           width={width}
         />
       </EuiFlexItem>
-
       {showRefresh === true || !isTimeRangeSelectorEnabled ? (
         <EuiFlexItem grow={false}>
           <EuiButton
@@ -323,6 +314,16 @@ export const DatePickerWrapper: FC<DatePickerWrapperProps> = (props) => {
           </EuiButton>
         </EuiFlexItem>
       ) : null}
+    </>
+  );
+
+  const wrapped = flexGroup ? (
+    <EuiFlexGroup gutterSize="s" alignItems="center">
+      {flexItems}
     </EuiFlexGroup>
-  ) : null;
+  ) : (
+    flexItems
+  );
+
+  return isAutoRefreshSelectorEnabled || isTimeRangeSelectorEnabled ? wrapped : null;
 };

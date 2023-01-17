@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
 import React, { FC } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -17,6 +18,10 @@ import { JobSelector } from '../components/job_selector';
 import { HelpMenu } from '../components/help_menu';
 import { useMlKibana } from '../contexts/kibana';
 import { MlPageHeader } from '../components/page_header';
+
+const singleMetricViewerTitle = css({
+  minWidth: '350px',
+});
 
 interface TimeSeriesExplorerPageProps {
   dateFormatTz?: string;
@@ -46,7 +51,7 @@ export const TimeSeriesExplorerPage: FC<TimeSeriesExplorerPageProps> = ({
             <EuiFlexItem grow={false}>
               <AnomalyResultsViewSelector viewId="timeseriesexplorer" />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} css={singleMetricViewerTitle}>
               <FormattedMessage
                 id="xpack.ml.timeSeriesExplorer.pageTitle"
                 defaultMessage="Single Metric Viewer"

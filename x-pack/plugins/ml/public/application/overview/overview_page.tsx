@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
 import React, { FC, useState } from 'react';
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -21,6 +22,10 @@ import { HelpMenu } from '../components/help_menu';
 import { useMlKibana } from '../contexts/kibana';
 import { NodesList } from '../trained_models/nodes_overview';
 import { MlPageHeader } from '../components/page_header';
+
+const overviewPageTitle = css({
+  minWidth: '300px',
+});
 
 export const OverviewPage: FC = () => {
   const canViewMlNodes = checkPermission('canViewMlNodes');
@@ -39,7 +44,9 @@ export const OverviewPage: FC = () => {
   return (
     <div>
       <MlPageHeader>
-        <FormattedMessage id="xpack.ml.overview.overviewLabel" defaultMessage="Overview" />
+        <div css={overviewPageTitle}>
+          <FormattedMessage id="xpack.ml.overview.overviewLabel" defaultMessage="Overview" />
+        </div>
       </MlPageHeader>
       <NodeAvailableWarning />
       <JobsAwaitingNodeWarning jobCount={adLazyJobCount + dfaLazyJobCount} />

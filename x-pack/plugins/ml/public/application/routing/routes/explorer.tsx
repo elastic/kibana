@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
@@ -44,6 +45,10 @@ import {
   useAnomalyExplorerContext,
   AnomalyExplorerContextProvider,
 } from '../../explorer/anomaly_explorer_context';
+
+const anomalyExplorerTitle = css({
+  minWidth: '300px',
+});
 
 export const explorerRouteFactory = (
   navigateToPath: NavigateToPath,
@@ -262,7 +267,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
               selectedJobs={explorerState.selectedJobs}
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} css={anomalyExplorerTitle}>
             <FormattedMessage id="xpack.ml.explorer.pageTitle" defaultMessage="Anomaly Explorer" />
           </EuiFlexItem>
         </EuiFlexGroup>
