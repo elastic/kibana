@@ -6,22 +6,28 @@
  */
 
 import React, { createContext, FC, useEffect, useMemo, useState } from 'react';
-import { Subscription } from 'rxjs';
-import { EuiPageContentBody_Deprecated as EuiPageContentBody } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { Redirect, Route, Switch } from 'react-router-dom';
-import type { AppMountParameters } from '@kbn/core/public';
-import { KibanaPageTemplate, RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
 import { createHtmlPortalNode, HtmlPortalNode } from 'react-reverse-portal';
+import { Redirect, Route, Switch } from 'react-router-dom';
+import { Subscription } from 'rxjs';
+
+import { EuiPageSection } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
+import type { AppMountParameters } from '@kbn/core/public';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { DatePickerWrapper } from '@kbn/ml-date-picker';
-import { MlPageHeaderRenderer } from '../page_header/page_header';
-import { useSideNavItems } from './side_nav';
+
 import * as routes from '../../routing/routes';
 import { MlPageWrapper } from '../../routing/ml_page_wrapper';
 import { useMlKibana, useNavigateToPath } from '../../contexts/kibana';
 import { MlRoute, PageDependencies } from '../../routing/router';
 import { useActiveRoute } from '../../routing/use_active_route';
 import { useDocTitle } from '../../routing/use_doc_title';
+
+import { MlPageHeaderRenderer } from '../page_header/page_header';
+
+import { useSideNavItems } from './side_nav';
 
 export const MlPageControlsContext = createContext<{
   headerPortal: HtmlPortalNode;
@@ -100,8 +106,8 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
         // EUI TODO
         // The different template options need to be manually recreated by the individual pages.
         // These classes help enforce the layouts.
-        pageContentProps={{ className: 'kbnAppWrapper' }}
-        pageContentBodyProps={{ className: 'kbnAppWrapper' }}
+        // pageContentProps={{ className: 'kbnAppWrapper' }}
+        // pageContentBodyProps={{ className: 'kbnAppWrapper' }}
         solutionNav={{
           name: i18n.translate('xpack.ml.plugin.title', {
             defaultMessage: 'Machine Learning',
@@ -114,9 +120,9 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
           rightSideItems,
           restrictWidth: false,
         }}
-        pageBodyProps={{
-          'data-test-subj': activeRoute?.['data-test-subj'],
-        }}
+        // pageBodyProps={{
+        //   'data-test-subj': activeRoute?.['data-test-subj'],
+        // }}
       >
         <CommonPageWrapper
           headerPortal={headerPortalNode}
@@ -144,8 +150,8 @@ const CommonPageWrapper: FC<CommonPageWrapperProps> = React.memo(({ pageDeps, ro
   return (
     /** RedirectAppLinks intercepts all <a> tags to use navigateToUrl
      * avoiding full page reload **/
-    <RedirectAppLinks application={application}>
-      <EuiPageContentBody restrictWidth={false}>
+    <RedirectAppLinks coreStart={{ application }}>
+      <EuiPageSection restrictWidth={false}>
         <Switch>
           {routeList.map((route) => {
             return (
@@ -166,7 +172,7 @@ const CommonPageWrapper: FC<CommonPageWrapperProps> = React.memo(({ pageDeps, ro
           })}
           <Redirect to="/overview" />
         </Switch>
-      </EuiPageContentBody>
+      </EuiPageSection>
     </RedirectAppLinks>
   );
 });

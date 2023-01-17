@@ -17,6 +17,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSuperDatePicker,
+  type EuiSuperDatePickerProps,
   OnRefreshProps,
   OnTimeChangeProps,
 } from '@elastic/eui';
@@ -83,6 +84,10 @@ interface DatePickerWrapperProps {
    * Boolean flag to enforce showing/hiding the refresh button.
    */
   showRefresh?: boolean;
+  /**
+   * Width setting to be passed on to `EuiSuperDatePicker`
+   */
+  width?: EuiSuperDatePickerProps['width'];
 }
 
 /**
@@ -93,7 +98,7 @@ interface DatePickerWrapperProps {
  * @returns {React.ReactElement} The DatePickerWrapper component.
  */
 export const DatePickerWrapper: FC<DatePickerWrapperProps> = (props) => {
-  const { isAutoRefreshOnly, isLoading = false, showRefresh } = props;
+  const { isAutoRefreshOnly, isLoading = false, showRefresh, width } = props;
   const {
     data,
     notifications: { toasts },
@@ -282,7 +287,10 @@ export const DatePickerWrapper: FC<DatePickerWrapperProps> = (props) => {
 
   return isAutoRefreshSelectorEnabled || isTimeRangeSelectorEnabled ? (
     <EuiFlexGroup gutterSize="s" alignItems="center">
-      <EuiFlexItem grow={false} css={datePickerWidth}>
+      <EuiFlexItem
+        grow={width === undefined || width === 'restricted' ? false : undefined}
+        css={width === undefined || width === 'restricted' ? datePickerWidth : undefined}
+      >
         <EuiSuperDatePicker
           isLoading={isLoading}
           start={time.from}
@@ -296,14 +304,15 @@ export const DatePickerWrapper: FC<DatePickerWrapperProps> = (props) => {
           recentlyUsedRanges={recentlyUsedRanges}
           dateFormat={dateFormat}
           commonlyUsedRanges={commonlyUsedRanges}
-          updateButtonProps={{ iconOnly: isWithinLBreakpoint }}
+          updateButtonProps={{ iconOnly: isWithinLBreakpoint, fill: false }}
+          width={width}
         />
       </EuiFlexItem>
 
       {showRefresh === true || !isTimeRangeSelectorEnabled ? (
         <EuiFlexItem grow={false}>
           <EuiButton
-            fill
+            fill={false}
             color="primary"
             iconType={'refresh'}
             onClick={() => updateLastRefresh()}

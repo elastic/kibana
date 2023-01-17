@@ -105,6 +105,7 @@ export const PageHeader: FC = () => {
               <DatePickerWrapper
                 isAutoRefreshOnly={!hasValidTimeField}
                 showRefresh={!hasValidTimeField}
+                width="full"
               />
             </EuiFlexItem>
           </EuiFlexGroup>
