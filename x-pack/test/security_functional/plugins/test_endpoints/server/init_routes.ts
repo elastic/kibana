@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { errors } from '@elastic/elasticsearch';
-import { CoreSetup, PluginInitializerContext } from '@kbn/core/server';
+import { CoreSetup, CoreStart, PluginInitializerContext, KibanaRequest } from '@kbn/core/server';
 import type {
   TaskManagerStartContract,
   ConcreteTaskInstance,
@@ -144,6 +144,43 @@ export function initRoutes(
     }
   }
 
+  async function refreshTaskManagerIndex(
+    request: KibanaRequest,
+    coreStart: CoreStart,
+    taskManager: TaskManagerStartContract
+  ) {
+    // Refresh task manager index before trying to modify a task document.
+    // Might not be needed once https://github.com/elastic/kibana/pull/148985 is merged.
+    try {
+      logger.info(
+        `Refreshing task manager index (enabled: ${
+          request.body.enabled
+        }), current task: ${JSON.stringify(
+          await taskManager.get(SESSION_INDEX_CLEANUP_TASK_NAME)
+        )}...`
+      );
+
+      const refreshResult = await coreStart.elasticsearch.client.asInternalUser.indices.refresh({
+        index: '.kibana_task_manager',
+        expand_wildcards: 'all',
+      });
+
+      logger.info(
+        `Successfully refreshed task manager index (enabled: ${
+          request.body.enabled
+        }), refresh result: ${JSON.stringify(refreshResult)}, current task: ${JSON.stringify(
+          await taskManager.get(SESSION_INDEX_CLEANUP_TASK_NAME)
+        )}.`
+      );
+    } catch (err) {
+      logger.error(
+        `Failed to refresh task manager index (enabled: ${request.body.enabled}): ${
+          err?.message || err
+        }.`
+      );
+    }
+  }
+
   router.post(
     {
       path: '/session/toggle_cleanup_task',
@@ -153,26 +190,7 @@ export function initRoutes(
       const [coreStart, { taskManager }] = await core.getStartServices();
       logger.info(`Toggle session cleanup task (enabled: ${request.body.enabled}).`);
 
-      // Refresh task manager index before trying to modify a task document.
-      // Might not be needed once https://github.com/elastic/kibana/pull/148985 is merged.
-      try {
-        logger.info(`Refreshing task manager index (enabled: ${request.body.enabled})...`);
-        const refreshResult = await coreStart.elasticsearch.client.asInternalUser.indices.refresh({
-          index: '.kibana_task_manager',
-          expand_wildcards: 'all',
-        });
-        logger.info(
-          `Successfully refreshed task manager index (enabled: ${
-            request.body.enabled
-          }): ${JSON.stringify(refreshResult)}.`
-        );
-      } catch (err) {
-        logger.error(
-          `Failed to refresh task manager index (enabled: ${request.body.enabled}): ${
-            err?.message || err
-          }.`
-        );
-      }
+      await refreshTaskManagerIndex(request, coreStart, taskManager);
 
       let bulkEnableDisableResult: BulkUpdateTaskResult;
       try {
@@ -190,8 +208,12 @@ export function initRoutes(
           bulkEnableDisableResult = await taskManager.bulkDisable([
             SESSION_INDEX_CLEANUP_TASK_NAME,
           ]);
+        }
 
-          // Make sure that the task enters idle state before acknowledging that task was disabled.
+        await refreshTaskManagerIndex(request, coreStart, taskManager);
+
+        // Make sure that the task enters idle state before acknowledging that task was disabled.
+        if (!request.body.enabled) {
           await waitUntilTaskIsIdle(taskManager);
         }
       } catch (err) {
