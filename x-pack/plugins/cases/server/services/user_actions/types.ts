@@ -5,13 +5,21 @@
  * 2.0.
  */
 
-import type { SavedObjectReference, SavedObjectsClientContract, Logger } from '@kbn/core/server';
+import type {
+  SavedObjectReference,
+  SavedObjectsClientContract,
+  Logger,
+  ISavedObjectsSerializer,
+  SavedObject,
+} from '@kbn/core/server';
+import type { AuditLogger } from '@kbn/security-plugin/server';
 import type { CaseAssignees } from '../../../common/api/cases/assignee';
 import type {
   CasePostRequest,
   CaseSettings,
   CaseSeverity,
   CaseStatuses,
+  CaseUserActionResponse,
   CommentUserAction,
   ConnectorUserAction,
   PushedUserAction,
@@ -131,4 +139,19 @@ export interface ServiceContext {
   log: Logger;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
+  savedObjectsSerializer: ISavedObjectsSerializer;
+  auditLogger: AuditLogger;
+}
+
+export interface CaseConnectorActivity {
+  connectorId: string;
+  fields: SavedObject<CaseUserActionResponse>;
+  push?: SavedObject<CaseUserActionResponse>;
+}
+
+export type CaseConnectorFields = Map<string, SavedObject<CaseUserActionResponse>>;
+
+export interface PushInfo {
+  date: Date;
+  connectorId: string;
 }

@@ -53,6 +53,7 @@
     "@kbn/logging-mocks",
     "@kbn/ecs",
     "@kbn/core-saved-objects-api-server",
+    "@kbn/core-saved-objects-base-server-mocks",
   ],
   "exclude": [
     "target/**/*",

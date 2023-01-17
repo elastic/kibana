@@ -10,7 +10,7 @@ import { CaseUserActionsResponseRt } from '../../../common/api';
 import { createCaseError } from '../../common/error';
 import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
-import type { UserActionGet } from './client';
+import type { UserActionGet } from './types';
 import { extractAttributes } from './utils';
 
 export const get = async (

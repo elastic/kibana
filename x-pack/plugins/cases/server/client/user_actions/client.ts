@@ -6,23 +6,16 @@
  */
 
 import type {
+  GetCaseConnectorsResponse,
   CaseUserActionsResponse,
   UserActionFindRequest,
   UserActionFindResponse,
 } from '../../../common/api';
 import type { CasesClientArgs } from '../types';
 import { get } from './get';
+import { getConnectors } from './connectors';
+import type { GetConnectorsRequest, UserActionGet } from './types';
 import { find } from './find';
-
-/**
- * Parameters for retrieving user actions for a particular case
- */
-export interface UserActionGet {
-  /**
-   * The ID of the case
-   */
-  caseId: string;
-}
 
 export interface UserActionFind {
   queryOptions: UserActionFindRequest;
@@ -38,17 +31,20 @@ export interface UserActionsSubClient {
    * Retrieves all user actions for a particular case.
    */
   getAll(clientArgs: UserActionGet): Promise<CaseUserActionsResponse>;
+  /**
+   * Retrieves all the connectors used within a given case
+   */
+  getConnectors(clientArgs: GetConnectorsRequest): Promise<GetCaseConnectorsResponse>;
 }
 
 /**
  * Creates an API object for interacting with the user action entities
- *
- * @ignore
  */
 export const createUserActionsSubClient = (clientArgs: CasesClientArgs): UserActionsSubClient => {
   const attachmentSubClient: UserActionsSubClient = {
     find: (params) => find(params, clientArgs),
     getAll: (params: UserActionGet) => get(params, clientArgs),
+    getConnectors: (params: GetConnectorsRequest) => getConnectors(params, clientArgs),
   };
 
   return Object.freeze(attachmentSubClient);

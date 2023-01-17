@@ -39,6 +39,7 @@ export enum ReadOperations {
   FindConfigurations = 'findConfigurations',
   FindUserActions = 'findUserActions',
   GetUserActions = 'getUserActions',
+  GetConnectors = 'getConnectors',
   GetAlertsAttachedToCase = 'getAlertsAttachedToCase',
   GetAttachmentMetrics = 'getAttachmentMetrics',
   GetCaseMetrics = 'getCaseMetrics',
