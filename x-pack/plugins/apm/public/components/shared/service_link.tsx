@@ -39,7 +39,7 @@ interface ServiceLinkProps {
   serviceName: string;
 }
 
-const serviceDroppedBucketName = '_other';
+export const OTHER_SERVICE_NAME = '_other';
 
 export function ServiceLink({
   agentName,
@@ -52,13 +52,16 @@ export function ServiceLink({
     ? '/mobile-services/{serviceName}/overview'
     : '/services/{serviceName}/overview';
 
-  if (serviceName === serviceDroppedBucketName) {
+  if (serviceName === OTHER_SERVICE_NAME) {
     return (
       <EuiFlexGroup alignItems="center" gutterSize="xs">
         <EuiFlexItem grow={false}>
-          {i18n.translate('xpack.apm.serviceLink.other.label', {
-            defaultMessage: '_other',
-          })}
+          <EuiText
+            grow={false}
+            style={{ fontStyle: 'italic', fontSize: '1rem' }}
+          >
+            _other
+          </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
           <PopoverTooltip

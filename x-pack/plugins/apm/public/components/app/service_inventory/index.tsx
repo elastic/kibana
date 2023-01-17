@@ -10,6 +10,8 @@ import {
   EuiFlexItem,
   EuiEmptyPrompt,
   EuiCallOut,
+  EuiText,
+  EuiCode,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -30,6 +32,7 @@ import { useProgressiveFetcher } from '../../../hooks/use_progressive_fetcher';
 import { joinByKey } from '../../../../common/utils/join_by_key';
 import { ServiceInventoryFieldName } from '../../../../common/service_inventory';
 import { orderServiceItems } from './service_list/order_service_items';
+import { OTHER_SERVICE_NAME } from '../../shared/service_link';
 
 const initialData = {
   requestId: '',
@@ -208,8 +211,10 @@ export function ServiceInventory() {
     ...preloadedServices,
   ].some((item) => 'healthStatus' in item);
 
-  const displayMaxGroupReachedCallout = mainStatisticsItems.some(
-    (item) => item.serviceName === '_other'
+  const hasKibanaUiLimitRestrictedData =
+    mainStatisticsFetch.data?.maxServiceGroupsExceeded;
+  const shouldDisplayMaxGroupReachedCallout = mainStatisticsItems.some(
+    (item) => item.serviceName === OTHER_SERVICE_NAME
   );
 
   const displayAlerts = [...mainStatisticsItems, ...preloadedServices].some(
@@ -290,38 +295,74 @@ export function ServiceInventory() {
     'serviceName'
   );
 
+  const mlCallout = (
+    <EuiFlexItem>
+      <MLCallout
+        isOnSettingsPage={false}
+        anomalyDetectionSetupState={anomalyDetectionSetupState}
+        onDismiss={() => setUserHasDismissedCallout(true)}
+      />
+    </EuiFlexItem>
+  );
+
+  const kibanaUiServiceLimitCallout = (
+    <EuiFlexItem>
+      <EuiCallOut
+        title={i18n.translate(
+          'xpack.apm.serviceList.ui.limit.warning.calloutTitle',
+          {
+            defaultMessage:
+              'The performance limit to the number of services reached',
+          }
+        )}
+        color="danger"
+        iconType="alert"
+      >
+        <EuiText size="s">
+          <FormattedMessage
+            defaultMessage="The number of unique service names limit was exceeded. Try narrowing down your results using the search bar"
+            id="xpack.apm.serviceList.ui.limit.warning.calloutDescription"
+          />
+        </EuiText>
+      </EuiCallOut>
+    </EuiFlexItem>
+  );
+
+  const maxGroupReachedCallout = (
+    <EuiFlexItem>
+      <EuiCallOut
+        title={i18n.translate(
+          'xpack.apm.serviceList.apmServer.limit.warning.calloutTitle',
+          {
+            defaultMessage: 'The limit to the number of services reached',
+          }
+        )}
+        color="danger"
+        iconType="alert"
+      >
+        <EuiText size="s">
+          <FormattedMessage
+            defaultMessage="The maximum number of unique services has been reached. Please increase {codeBlock} in APM Server."
+            id="xpack.apm.serviceList.apmServer.limit.warning.calloutDescription"
+            values={{
+              codeBlock: <EuiCode>aggregation.service.max_groups</EuiCode>,
+            }}
+          />
+        </EuiText>
+      </EuiCallOut>
+    </EuiFlexItem>
+  );
+
   return (
     <>
       <SearchBar showTimeComparison />
       <EuiFlexGroup direction="column" gutterSize="m">
-        {displayMlCallout && (
-          <EuiFlexItem>
-            <MLCallout
-              isOnSettingsPage={false}
-              anomalyDetectionSetupState={anomalyDetectionSetupState}
-              onDismiss={() => setUserHasDismissedCallout(true)}
-            />
-          </EuiFlexItem>
-        )}
-        {displayMaxGroupReachedCallout && (
-          <EuiFlexItem>
-            <EuiCallOut
-              title={i18n.translate('xpack.apm.serviceList.limit.warning', {
-                defaultMessage:
-                  'This view shows a subset of reported services.',
-              })}
-              color="danger"
-              iconType="alert"
-            >
-              <p>
-                <FormattedMessage
-                  id="xpack.apm.serviceList.limit.exceeded"
-                  defaultMessage="The number of unique service names limit was exceeded. Try narrowing down your results using the search bar."
-                />
-              </p>
-            </EuiCallOut>
-          </EuiFlexItem>
-        )}
+        {displayMlCallout && mlCallout}
+        {hasKibanaUiLimitRestrictedData
+          ? kibanaUiServiceLimitCallout
+          : shouldDisplayMaxGroupReachedCallout
+          ? maxGroupReachedCallout
+          : null}
         <EuiFlexItem>
           <ServiceList
             isLoading={isLoading}

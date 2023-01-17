@@ -87,15 +87,18 @@ export async function getServicesFromErrorAndMetricDocuments({
     }
   );
 
-  return (
-    response.aggregations?.sample.services.buckets.map((bucket) => {
-      return {
-        serviceName: bucket.key as string,
-        environments: bucket.environments.buckets.map(
-          (envBucket) => envBucket.key as string
-        ),
-        agentName: bucket.latest.top[0].metrics[AGENT_NAME] as AgentName,
-      };
-    }) ?? []
-  );
+  return {
+    serviceGroups:
+      response.aggregations?.sample.services.buckets.map((bucket) => {
+        return {
+          serviceName: bucket.key as string,
+          environments: bucket.environments.buckets.map(
+            (envBucket) => envBucket.key as string
+          ),
+          agentName: bucket.latest.top[0].metrics[AGENT_NAME] as AgentName,
+        };
+      }) ?? [],
+    maxServiceGroupsExceeded:
+      (response.aggregations?.sample.services.sum_other_doc_count ?? 0) > 0,
+  };
 }
