@@ -21,7 +21,7 @@ function isObject(v: unknown): v is object {
  *    in current, check that the same field exists in next
  * 3. If we see any missing fields in next, throw an appropriate error
  */
-export async function checkAdditiveOnlyChange(
+export function checkAdditiveOnlyChange(
   log: SomeDevLog,
   current: SavedObjectsTypeMappingDefinitions,
   next: SavedObjectsTypeMappingDefinitions

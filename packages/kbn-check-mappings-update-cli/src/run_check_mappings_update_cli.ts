@@ -50,7 +50,7 @@ run(
     if (verify) {
       log.info('Checking if any mappings have been removed');
       await log.indent(4, async () => {
-        return await checkAdditiveOnlyChange(log, currentMappings, extractedMappings);
+        return checkAdditiveOnlyChange(log, currentMappings, extractedMappings);
       });
 
       log.info('Starting es...');
