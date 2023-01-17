@@ -30,7 +30,7 @@ import {
 } from './helpers';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
-import { isScriptedField } from './terms/helpers';
+import { isRuntimeField, isScriptedField } from './terms/helpers';
 import { FormRow } from './shared_components/form_row';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
 import { getGroupByKey } from './get_group_by_key';
@@ -107,6 +107,17 @@ function getDateFields(indexPattern: IndexPattern): IndexPatternField[] {
   return dateFields;
 }
 
+function setDefaultShowArrayValues(
+  field: IndexPatternField,
+  oldParams: LastValueIndexPatternColumn['params']
+) {
+  return (
+    isScriptedField(field) ||
+    (isRuntimeField(field) && field.type !== 'number') ||
+    oldParams?.showArrayValues
+  );
+}
+
 export interface LastValueIndexPatternColumn extends FieldBasedIndexPatternColumn {
   operationType: 'last_value';
   params: {
@@ -154,7 +165,7 @@ export const lastValueOperation: OperationDefinition<
   onFieldChange: (oldColumn, field) => {
     const newParams = { ...oldColumn.params };
 
-    newParams.showArrayValues = isScriptedField(field) || oldColumn.params.showArrayValues;
+    newParams.showArrayValues = setDefaultShowArrayValues(field, oldColumn.params);
 
     if ('format' in newParams && field.type !== 'number') {
       delete newParams.format;
@@ -221,7 +232,7 @@ export const lastValueOperation: OperationDefinition<
       );
     }
 
-    const showArrayValues = isScriptedField(field) || lastValueParams?.showArrayValues;
+    const showArrayValues = setDefaultShowArrayValues(field, lastValueParams);
 
     return {
       label: ofName(field.displayName, previousColumn?.timeShift, previousColumn?.reducedTimeRange),
