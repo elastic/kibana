@@ -162,6 +162,7 @@ export class StatusRuleExecutor {
       staleDownConfigs,
       down: 0,
       up: 0,
+      pending: 0,
       enabledIds,
     };
   }
