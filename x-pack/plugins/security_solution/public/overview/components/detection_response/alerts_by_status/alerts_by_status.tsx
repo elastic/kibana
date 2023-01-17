@@ -55,9 +55,12 @@ import { LinkButton, useGetSecuritySolutionLinkProps } from '../../../../common/
 import { useNavigateToTimeline } from '../hooks/use_navigate_to_timeline';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { AlertDonutEmbeddable } from './alert_donut_embeddable';
 import { useAlertsByStatusVisualizationData } from './use_alerts_by_status_visualization_data';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from './types';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
+import type { Status } from '../../../../../common/detection_engine/schemas/common';
+import { getAlertsByStatusAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/alerts/alerts_by_status_donut';
 
 const StyledFlexItem = styled(EuiFlexItem)`
   padding: 0 4px;
@@ -67,6 +70,8 @@ const StyledLegendFlexItem = styled(EuiFlexItem)`
   padding-left: 32px;
   padding-top: 45px;
 `;
+
+const ChartSize = '135px';
 
 interface AlertsByStatusProps {
   additionalFilters?: ESBoolQuery[];
@@ -86,6 +91,10 @@ const eventKindSignalFilter: EntityFilter = {
   field: 'event.kind',
   value: 'signal',
 };
+
+const openDonutOptions = { status: 'open' as Status };
+const acknowledgedDonutOptions = { status: 'acknowledged' as Status };
+const closedDonutOptions = { status: 'closed' as Status };
 
 export const AlertsByStatus = ({
   additionalFilters,
@@ -193,9 +202,9 @@ export const AlertsByStatus = ({
             <>
               <EuiFlexGroup justifyContent="center" gutterSize="none">
                 <EuiFlexItem grow={isChartEmbeddablesEnabled}>
-                  {totalAlerts !== 0 ||
-                    (visualizationTotalAlerts !== 0 && (
-                      <EuiText className="eui-textCenter" size="s">
+                  <EuiText className="eui-textCenter" size="s">
+                    {totalAlerts !== 0 ||
+                      (visualizationTotalAlerts !== 0 && (
                         <>
                           <b>
                             <FormattedCount count={totalAlertsCount} />
@@ -203,16 +212,25 @@ export const AlertsByStatus = ({
                           <> </>
                           <small>{ALERTS(totalAlertsCount)}</small>
                         </>
-                      </EuiText>
-                    ))}
+                      ))}
+                  </EuiText>
+
                   <EuiSpacer size="l" />
                   <EuiFlexGroup justifyContent="center">
                     <StyledFlexItem key="alerts-status-open" grow={isChartEmbeddablesEnabled}>
                       {isChartEmbeddablesEnabled ? (
-                        <AlertDonutEmbeddable
-                          status="open"
-                          timerange={timerange}
+                        <VisualizationEmbeddable
+                          applyGlobalQueriesAndFilters={false}
+                          extraOptions={openDonutOptions}
+                          getLensAttributes={getAlertsByStatusAttributes}
+                          height={ChartSize}
+                          id={`${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-open`}
+                          isDonut={true}
                           label={STATUS_OPEN}
+                          scopeId={SourcererScopeName.detections}
+                          stackByField="kibana.alert.workflow_status"
+                          timerange={timerange}
+                          width={ChartSize}
                         />
                       ) : (
                         <DonutChart
@@ -231,10 +249,18 @@ export const AlertsByStatus = ({
                       grow={isChartEmbeddablesEnabled}
                     >
                       {isChartEmbeddablesEnabled ? (
-                        <AlertDonutEmbeddable
-                          status="acknowledged"
-                          timerange={timerange}
+                        <VisualizationEmbeddable
+                          applyGlobalQueriesAndFilters={false}
+                          extraOptions={acknowledgedDonutOptions}
+                          getLensAttributes={getAlertsByStatusAttributes}
+                          height={ChartSize}
+                          id={`${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-acknowledged`}
+                          isDonut={true}
                           label={STATUS_ACKNOWLEDGED}
+                          scopeId={SourcererScopeName.detections}
+                          stackByField="kibana.alert.workflow_status"
+                          timerange={timerange}
+                          width={ChartSize}
                         />
                       ) : (
                         <DonutChart
@@ -250,10 +276,18 @@ export const AlertsByStatus = ({
                     </StyledFlexItem>
                     <StyledFlexItem key="alerts-status-closed" grow={isChartEmbeddablesEnabled}>
                       {isChartEmbeddablesEnabled ? (
-                        <AlertDonutEmbeddable
-                          status="closed"
-                          timerange={timerange}
+                        <VisualizationEmbeddable
+                          applyGlobalQueriesAndFilters={false}
+                          extraOptions={closedDonutOptions}
+                          getLensAttributes={getAlertsByStatusAttributes}
+                          height={ChartSize}
+                          id={`${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-closed`}
+                          isDonut={true}
                           label={STATUS_CLOSED}
+                          scopeId={SourcererScopeName.detections}
+                          stackByField="kibana.alert.workflow_status"
+                          timerange={timerange}
+                          width={ChartSize}
                         />
                       ) : (
                         <DonutChart
