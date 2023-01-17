@@ -31,6 +31,7 @@ import { SavedObject } from '@kbn/core-saved-objects-common';
 import {
   ISavedObjectsSpacesExtension,
   ISavedObjectsSecurityExtension,
+  ISavedObjectsEncryptionExtension,
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
 import { kibanaMigratorMock } from '../mocks';
@@ -56,6 +57,7 @@ import {
   setupPerformAuthUnauthorized,
   generateIndexPatternSearchResults,
   bulkDeleteSuccess,
+  ENCRYPTED_TYPE,
 } from '../test_helpers/repository.test.common';
 import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
 
@@ -72,6 +74,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
   let serializer: jest.Mocked<SavedObjectsSerializer>;
   let mockSpacesExt: jest.Mocked<ISavedObjectsSpacesExtension>;
   let mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>;
+  let mockEncryptionExt: jest.Mocked<ISavedObjectsEncryptionExtension>;
 
   const registry = createRegistry();
   const documentMigrator = createDocumentMigrator(registry);
@@ -93,7 +96,11 @@ describe('SavedObjectsRepository Spaces Extension', () => {
       serializer,
       allowedTypes,
       logger,
-      extensions: { spacesExtension: mockSpacesExt, securityExtension: mockSecurityExt },
+      extensions: {
+        spacesExtension: mockSpacesExt,
+        securityExtension: mockSecurityExt,
+        encryptionExtension: mockEncryptionExt,
+      },
     });
   };
 
@@ -919,6 +926,91 @@ describe('SavedObjectsRepository Spaces Extension', () => {
         client.search.mockResponseOnce(generatedResults);
         const result = await repository.find({ type, namespaces: [spaceOverride] });
         expect(result).toEqual(expect.objectContaining({ total: 0 }));
+      });
+    });
+  });
+
+  describe(`with encryption extension`, () => {
+    const encryptedSO = {
+      id: 'encrypted-id',
+      type: ENCRYPTED_TYPE,
+      namespaces: ['foo-namespace'],
+      attributes: {
+        attrNotSoSecret: '*not-so-secret*',
+        attrOne: 'one',
+        attrSecret: '*secret*',
+        attrThree: 'three',
+        title: 'Testing',
+      },
+      references: [],
+    };
+    const decryptedStrippedAttributes = {
+      attributes: { attrOne: 'one', attrNotSoSecret: 'not-so-secret', attrThree: 'three' },
+    };
+
+    beforeEach(() => {
+      pointInTimeFinderMock.mockClear();
+      client = elasticsearchClientMock.createElasticsearchClient();
+      migrator = kibanaMigratorMock.create();
+      documentMigrator.prepareMigrations();
+      migrator.migrateDocument = jest.fn().mockImplementation(documentMigrator.migrate);
+      migrator.runMigrations = jest.fn().mockResolvedValue([{ status: 'skipped' }]);
+      logger = loggerMock.create();
+      serializer = createSpySerializer(registry);
+      mockSpacesExt = savedObjectsExtensionsMock.createSpacesExtension();
+      mockEncryptionExt = savedObjectsExtensionsMock.createEncryptionExtension();
+      mockGetCurrentTime.mockReturnValue(mockTimestamp);
+      mockGetSearchDsl.mockClear();
+      repository = instantiateRepository();
+      mockSpacesExt.getCurrentNamespace.mockImplementation((namespace: string | undefined) => {
+        if (namespace) {
+          throw SavedObjectsErrorHelpers.createBadRequestError(ERROR_NAMESPACE_SPECIFIED);
+        }
+        return 'current_space';
+      });
+    });
+
+    // This is a POC to more thoroughly test inputs to other extensions that expect the current space dy default
+    // If this is worth testing, which it may be due to an issue already found (https://github.com/elastic/kibana/issues/149037)
+    // we would want to implement a test case for all applicable repository methods and extension calls.
+    describe(`#update`, () => {
+      it('calls encryptAttributes with the current namespace by default', async () => {
+        mockPreflightCheckForCreate.mockReset();
+        mockPreflightCheckForCreate.mockImplementation(({ objects }) => {
+          return Promise.resolve(objects.map(({ type, id }) => ({ type, id }))); // respond with no errors by default
+        });
+
+        mockEncryptionExt.isEncryptableType.mockReturnValue(true);
+        mockEncryptionExt.decryptOrStripResponseAttributes.mockResolvedValue({
+          ...encryptedSO,
+          ...decryptedStrippedAttributes,
+        });
+        await updateSuccess(
+          client,
+          repository,
+          registry,
+          encryptedSO.type,
+          encryptedSO.id,
+          encryptedSO.attributes,
+          {
+            // no namespace provided
+            references: encryptedSO.references,
+          }
+        );
+        expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
+        expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
+        expect(client.update).toHaveBeenCalledTimes(1);
+        expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledTimes(2); // (no upsert) optionallyEncryptAttributes, optionallyDecryptAndRedactSingleResult
+        expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledWith(encryptedSO.type);
+        expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledTimes(1);
+        expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledWith(
+          {
+            id: encryptedSO.id,
+            namespace: 'current_space',
+            type: ENCRYPTED_TYPE,
+          },
+          encryptedSO.attributes
+        );
       });
     });
   });
