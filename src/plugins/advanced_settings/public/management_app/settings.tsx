@@ -55,7 +55,7 @@ interface Props {
 }
 
 const SPACE_SETTINGS_ID = 'space-settings';
-const GLOBAL_SETTINGS_ID = 'global_settings';
+const GLOBAL_SETTINGS_ID = 'global-settings';
 
 export const Settings = (props: Props) => {
   const { componentRegistry, history, toasts, uiSettings, globalUiSettings } = props;
