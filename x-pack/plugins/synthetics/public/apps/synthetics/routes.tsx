@@ -16,6 +16,7 @@ import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useInspectorContext } from '@kbn/observability-plugin/public';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
+import { MonitorDetailsLocation } from './components/monitor_details/monitor_details_location';
 import { getStepDetailsRoute } from './components/step_details_page/route_config';
 import { getTestRunDetailsRoute } from './components/test_run_details/route_config';
 import { getSettingsRouteConfig } from './components/settings/route_config';
@@ -50,7 +51,6 @@ import { MonitorsPageWithServiceAllowed } from './components/monitors_page/monit
 import { apiService } from '../../utils/api_service';
 import { RunTestManually } from './components/monitor_details/run_test_manually';
 import { MonitorDetailsStatus } from './components/monitor_details/monitor_details_status';
-import { MonitorDetailsLocation } from './components/monitor_details/monitor_details_location';
 import { MonitorDetailsLastRun } from './components/monitor_details/monitor_details_last_run';
 import { MonitorSummary } from './components/monitor_details/monitor_summary/monitor_summary';
 import { MonitorHistory } from './components/monitor_details/monitor_history/monitor_history';
