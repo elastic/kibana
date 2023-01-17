@@ -44,7 +44,7 @@ export const CASE_COMMENT_SAVED_OBJECT = 'cases-comments' as const;
 export const CASE_CONFIGURE_SAVED_OBJECT = 'cases-configure' as const;
 
 /**
- * If more values are added here please also add them here: x-pack/test/cases_api_integration/common/fixtures/plugins
+ * If more values are added here please also add them here: x-pack/test/cases_api_integration/common/plugins
  */
 export const SAVED_OBJECT_TYPES = [
   CASE_SAVED_OBJECT,
@@ -192,4 +192,7 @@ export const SEARCH_DEBOUNCE_MS = 500;
 /**
  * Local storage keys
  */
-export const LOCAL_STORAGE_KEYS = { casesFiltering: 'cases.list.filtering' };
+export const LOCAL_STORAGE_KEYS = {
+  casesQueryParams: 'cases.list.queryParams',
+  casesFilterOptions: 'cases.list.filterOptions',
+};

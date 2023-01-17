@@ -23,7 +23,7 @@ import {
   createCaseWithConnector,
   getRecordingServiceNowSimulatorServer,
 } from '../../../common/lib/connectors';
-import { RecordingServiceNowSimulator } from '../../../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/servicenow_simulation';
+import { RecordingServiceNowSimulator } from '../../../../alerting_api_integration/common/plugins/actions_simulators/server/servicenow_simulation';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
