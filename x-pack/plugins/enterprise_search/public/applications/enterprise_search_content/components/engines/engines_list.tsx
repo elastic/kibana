@@ -119,16 +119,16 @@ export const EnginesList: React.FC = () => {
         <EuiText size="s">
           <FormattedMessage
             id="xpack.enterpriseSearch.content.engines.enginesList.description"
-            defaultMessage="Showing {currentPage}-{size} of {total}"
+            defaultMessage="Showing {from}-{to} of {total}"
             values={{
-              currentPage: (
+              from: (
                 <strong>
-                  <FormattedNumber value={meta.from} />
+                  <FormattedNumber value={meta.from + 1} />
                 </strong>
               ),
-              size: (
+              to: (
                 <strong>
-                  <FormattedNumber value={meta.size} />
+                  <FormattedNumber value={meta.from + (results?.length ?? 0)} />
                 </strong>
               ),
               total: <FormattedNumber value={meta.total} />,
