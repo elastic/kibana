@@ -72,4 +72,31 @@ describe('#checkAdditiveOnlyChange', () => {
       'Checked 6 existing properties. All present in extracted mappings.'
     );
   });
+
+  test('ignores new field', () => {
+    const current: SavedObjectsTypeMappingDefinitions = {
+      foo: {
+        properties: {
+          text: { type: 'text' },
+          number: { type: 'long' },
+          object: { type: 'object', properties: { nestedText: { type: 'text' } } },
+        },
+      },
+      bar: {
+        properties: {
+          text: { type: 'text' },
+          number: { type: 'long' },
+        },
+      },
+    };
+
+    const next = cloneDeep(current);
+    next.foo.properties.newField = { type: 'text' };
+
+    expect(() => checkAdditiveOnlyChange(log, current, next)).not.toThrow();
+    expect(log.success).toHaveBeenCalledTimes(1);
+    expect(log.success).toHaveBeenCalledWith(
+      'Checked 6 existing properties. All present in extracted mappings.'
+    );
+  });
 });
