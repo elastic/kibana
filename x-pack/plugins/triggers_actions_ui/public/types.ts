@@ -13,7 +13,12 @@ import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { IconType, EuiFlyoutSize, RecursivePartial } from '@elastic/eui';
+import type {
+  IconType,
+  EuiFlyoutSize,
+  RecursivePartial,
+  EuiDataGridToolBarAdditionalControlsOptions,
+} from '@elastic/eui';
 import { EuiDataGridColumn, EuiDataGridControlColumn, EuiDataGridSorting } from '@elastic/eui';
 import { HttpSetup } from '@kbn/core/public';
 import { KueryNode } from '@kbn/es-query';
@@ -477,6 +482,7 @@ export interface AlertsTableProps {
   onResetColumns: () => void;
   onColumnsChange: (columns: EuiDataGridColumn[], visibleColumns: string[]) => void;
   onChangeVisibleColumns: (newColumns: string[]) => void;
+  controls?: EuiDataGridToolBarAdditionalControlsOptions;
 }
 
 // TODO We need to create generic type between our plugin, right now we have different one because of the old alerts table
@@ -528,6 +534,9 @@ export interface AlertsTableConfigurationRegistry {
     width?: number;
   };
   useBulkActions?: UseBulkActionsRegistry;
+  usePersistentControls?: () => {
+    right?: ReactNode;
+  };
 }
 
 export enum BulkActionsVerbs {
