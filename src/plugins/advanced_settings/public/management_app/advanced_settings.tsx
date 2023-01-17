@@ -20,7 +20,6 @@ import {
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { AdvancedSettingsVoiceAnnouncement } from './components/advanced_settings_voice_announcement';
 import { Form } from './components/form';
 
@@ -44,6 +43,8 @@ interface AdvancedSettingsProps {
   noResults: boolean;
   clearQuery: () => void;
   queryText: string;
+  callOutTitle: string;
+  callOutSubtitle: string;
 }
 
 type GroupedSettings = Record<string, FieldSetting[]>;
@@ -64,21 +65,8 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps> {
     return (
       <div>
         <EuiSpacer size="xl" />
-        <EuiCallOut
-          title={
-            <FormattedMessage
-              id="advancedSettings.callOutDefaultSpaceTitle"
-              defaultMessage="Changes will affect the `default` space"
-            />
-          }
-          iconType="alert"
-        >
-          <p>
-            <FormattedMessage
-              id="advancedSettings.callOutDefaultSpaceText"
-              defaultMessage="Changes will only be applied to the current space. These settings are intended for advanced users, as improper configurations may adversely affect aspects of Kibana."
-            />
-          </p>
+        <EuiCallOut title={this.props.callOutTitle} iconType="alert">
+          <p>{this.props.callOutSubtitle}</p>
         </EuiCallOut>
         <EuiSpacer size="xl" />
 

@@ -5,11 +5,7 @@ exports[`PageTitle should render normally 1`] = `
   <h1
     data-test-subj="managementSettingsTitle"
   >
-    <FormattedMessage
-      defaultMessage="Settings"
-      id="advancedSettings.pageTitle"
-      values={Object {}}
-    />
+    Advanced Settings
   </h1>
 </EuiText>
 `;
