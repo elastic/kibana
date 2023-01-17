@@ -13,7 +13,7 @@ import { Subscription } from 'rxjs';
 import { EuiPageSection } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { type AppMountParameters } from '@kbn/core/public';
+import type { AppMountParameters } from '@kbn/core/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { DatePickerWrapper } from '@kbn/ml-date-picker';
