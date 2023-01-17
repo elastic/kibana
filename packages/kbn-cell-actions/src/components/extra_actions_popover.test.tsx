@@ -8,11 +8,10 @@
 
 import { act, fireEvent, render } from '@testing-library/react';
 import React from 'react';
-import { CellActionExecutionContext } from './cell_actions';
-import { makeAction } from '../mocks/helpers';
+import { makeAction, makeActionContext } from '../mocks/helpers';
 import { ExtraActionsPopOver, ExtraActionsPopOverWithAnchor } from './extra_actions_popover';
 
-const actionContext = { field: { name: 'fieldName' } } as CellActionExecutionContext;
+const actionContext = makeActionContext();
 describe('ExtraActionsPopOver', () => {
   it('renders', () => {
     const { queryByTestId } = render(

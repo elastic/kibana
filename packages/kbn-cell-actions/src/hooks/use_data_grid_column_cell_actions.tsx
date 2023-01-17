@@ -23,7 +23,7 @@ interface BulkField extends Pick<CellActionField, 'name' | 'type'> {
 }
 
 export interface UseDataGridColumnsCellActionsProps
-  extends Pick<CellActionsProps, 'triggerId' | 'showActionTooltips' | 'metadata'> {
+  extends Pick<CellActionsProps, 'triggerId' | 'metadata'> {
   fields: BulkField[];
   pageSize: number;
 }
@@ -36,7 +36,7 @@ export const useDataGridColumnsCellActions = ({
   const bulkContexts: CellActionExecutionContext[] = useMemo(
     () =>
       fields.map(({ values, ...field }) => ({
-        field,
+        field, // we are getting the actions for the whole column field, so the compatibility check will be done without the value
         trigger: { id: triggerId },
         metadata,
       })),
