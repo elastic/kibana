@@ -267,7 +267,11 @@ export function suggestions({
         ],
       },
       previewIcon: 'bullseye',
-      hide: true,
+      hide:
+        groups.length !== 2 ||
+        table.changeType === 'reduced' ||
+        hasIntervalScale(groups) ||
+        (state && state.shape === 'mosaic'),
     });
   }
 
@@ -307,7 +311,11 @@ export function suggestions({
         ],
       },
       previewIcon: 'bullseye',
-      hide: true,
+      hide:
+        groups.length !== 1 ||
+        table.changeType === 'reduced' ||
+        hasIntervalScale(groups) ||
+        (state && state.shape === 'waffle'),
     });
   }
 

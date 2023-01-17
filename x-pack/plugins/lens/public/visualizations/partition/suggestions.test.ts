@@ -1012,6 +1012,7 @@ describe('suggestions', () => {
                 operation: { label: 'Count', dataType: 'number' as DataType, isBucketed: false },
               },
             ],
+
             changeType: 'unchanged',
           },
           state: {
@@ -1035,7 +1036,43 @@ describe('suggestions', () => {
           },
           keptLayerIds: ['first'],
         }).filter(({ hide, state }) => !hide && state.shape === 'mosaic')
-      ).toMatchInlineSnapshot(`Array []`);
+      ).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "hide": false,
+            "previewIcon": "bullseye",
+            "score": 0.61,
+            "state": Object {
+              "layers": Array [
+                Object {
+                  "allowMultipleMetrics": false,
+                  "categoryDisplay": "default",
+                  "layerId": "first",
+                  "layerType": "data",
+                  "legendDisplay": "show",
+                  "legendMaxLines": 1,
+                  "metrics": Array [
+                    "c",
+                  ],
+                  "nestedLegend": true,
+                  "numberDisplay": "hidden",
+                  "percentDecimals": 0,
+                  "primaryGroups": Array [
+                    "a",
+                  ],
+                  "secondaryGroups": Array [
+                    "b",
+                  ],
+                  "truncateLegend": true,
+                },
+              ],
+              "palette": undefined,
+              "shape": "mosaic",
+            },
+            "title": "As Mosaic",
+          },
+        ]
+      `);
     });
   });
 
@@ -1085,6 +1122,7 @@ describe('suggestions', () => {
                 operation: { label: 'Count', dataType: 'number' as DataType, isBucketed: false },
               },
             ],
+
             changeType: 'unchanged',
           },
           state: {
@@ -1107,7 +1145,40 @@ describe('suggestions', () => {
           },
           keptLayerIds: ['first'],
         }).filter(({ hide, state }) => !hide && state.shape === 'waffle')
-      ).toMatchInlineSnapshot(`Array []`);
+      ).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "hide": false,
+            "previewIcon": "bullseye",
+            "score": 0.56,
+            "state": Object {
+              "layers": Array [
+                Object {
+                  "categoryDisplay": "default",
+                  "layerId": "first",
+                  "layerType": "data",
+                  "legendDisplay": "show",
+                  "legendMaxLines": 1,
+                  "metrics": Array [
+                    "b",
+                  ],
+                  "nestedLegend": true,
+                  "numberDisplay": "hidden",
+                  "percentDecimals": 0,
+                  "primaryGroups": Array [
+                    "a",
+                  ],
+                  "secondaryGroups": Array [],
+                  "truncateLegend": true,
+                },
+              ],
+              "palette": undefined,
+              "shape": "waffle",
+            },
+            "title": "As Waffle",
+          },
+        ]
+      `);
     });
   });
 });
