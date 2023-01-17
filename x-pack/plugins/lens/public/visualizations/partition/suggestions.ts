@@ -283,7 +283,7 @@ export function suggestions({
       title: i18n.translate('xpack.lens.pie.waffleSuggestionLabel', {
         defaultMessage: 'As Waffle',
       }),
-      score: state?.shape === PieChartTypes.WAFFLE ? 0.7 : 0.5,
+      score: state?.shape === PieChartTypes.WAFFLE ? 0.7 : 0.4,
       state: {
         shape: PieChartTypes.WAFFLE,
         palette: mainPalette || state?.palette,
