@@ -19,7 +19,9 @@ import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { orderBy } from 'lodash';
 import { asyncForEach } from '@kbn/std';
 import { satisfies } from 'semver';
-import { updatePackage } from '../../fleet/server/services/epm/packages/update';
+import { installPackage } from '../../fleet/server/services/epm/packages/install';
+import { pkgToPkgKey } from '../../fleet/server/services/epm/registry';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
 import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import type { PackSavedObjectAttributes } from './common/types';
@@ -38,7 +40,6 @@ import type { ConfigType } from '../common/config';
 import { OSQUERY_INTEGRATION_NAME } from '../common';
 import {
   getPackagePolicyDeleteCallback,
-  getPackagePolicyUpdateCallback,
 } from './lib/fleet_integration';
 import { TelemetryEventsSender } from './lib/telemetry/sender';
 import { TelemetryReceiver } from './lib/telemetry/receiver';
@@ -48,7 +49,7 @@ import { createDataViews } from './create_data_views';
 import { createActionHandler } from './handlers/action';
 
 import { registerFeatures } from './utils/register_features';
-import { key } from 'vega';
+import { datasetFilterRT } from '@kbn/infra-plugin/common/log_analysis';
 
 export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginStart> {
   private readonly logger: Logger;
@@ -143,68 +144,64 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
         await this.initialize(core, dataViewsService);
       }
 
-      // TODO: This package update isn't working as I thought it would right now.
+      let updatedPackageResult;
       if (packageInfo && satisfies(packageInfo?.version ?? '', '<1.6.0')) {
-        this.logger.error('updating osquery_manager package');
+        this.logger.info('Updating osquery_manager integration');
         try {
-          const updatedPackageInfo = await updatePackage({savedObjectsClient: client, pkgName: 'osquery_manager', keepPoliciesUpToDate: false});
-          this.logger.error('updated package info: ' + updatedPackageInfo.version);
+          updatedPackageResult = await installPackage({
+            installSource: 'registry',
+            savedObjectsClient: client,
+            pkgkey: pkgToPkgKey({
+              name: packageInfo.name,
+              version: '1.6.0',  // This package upgrade is specific to a bug fix, so keeping the upgrade focused on 1.6.0
+            }),
+            esClient,
+            spaceId: packageInfo.installed_kibana_space_id || DEFAULT_SPACE_ID,
+            // Force install the package will update the index template and the datastream write indices
+            force: true,
+          });
         } catch (e) {
           this.logger.error(e);
         }
-      } else {
-        this.logger.error('not updating package');
       }
 
-      if(satisfies(packageInfo?.version ?? '', '>=1.6.0')) {
-      try {
+      // Check to see if the package has already been updated to at least 1.6.0
+      if(satisfies(packageInfo?.version ?? '', '>=1.6.0') || updatedPackageResult?.status === 'installed') {
+        try {
 
-
-        this.logger.error('checking for rollover');
-
-        // First get all datastreams matching the pattern.
-        const dataStreams = await esClient.indices.getDataStream({
-          name: `logs-${OSQUERY_INTEGRATION_NAME}.result-*`,
-        });
-
-        this.logger.error('dataStreams: ' + dataStreams?.data_streams[0]?.name + dataStreams?.data_streams[0]?.name)
-        // Then for each of those datastreams, we need to see if they need to rollover.
-        await asyncForEach(dataStreams.data_streams, async dataStream => {
-          const mapping = await esClient.indices.getMapping({
-            index: dataStream.name,
+          // First get all datastreams matching the pattern.
+          const dataStreams = await esClient.indices.getDataStream({
+            name: `logs-${OSQUERY_INTEGRATION_NAME}.result-*`,
           });
 
-          const valuesToSort = Object.entries(mapping).map(([key, value]) => {
-            this.logger.error('key: ' + key + ' value: ' + value.mappings.properties.data_stream.properties.dataset.value);
-            return {index: key, mapping: value};
-          });
-
-          // TODO: This sort doesn't look like its working right now.
-          // Sort by index name to get the latest index
-          const dataStreamMapping = orderBy(valuesToSort, ['index'], 'desc');
-
-          dataStreamMapping.forEach(value => {
-            this.logger.error('Sorted value: ' + value.index + ' value: ' + value.mapping.mappings.properties.data_stream.properties.dataset.value);
-          })
-          //?.[0][1]?.mappings?.properties?.data_stream;
-
-          if (
-            dataStreamMapping &&
-            dataStreamMapping[0]?.mapping?.mappings?.properties?.data_stream.properties.dataset.value === 'generic'
-          ) {
-            this.logger.error(dataStream.name + ' ROLLING OVER....');
-            await esClient.indices.rollover({
-              alias: dataStream.name,
+          // Then for each of those datastreams, we need to see if they need to rollover.
+          await asyncForEach(dataStreams.data_streams, async dataStream => {
+            const mapping = await esClient.indices.getMapping({
+              index: dataStream.name,
             });
-          } else {
-            this.logger.error(dataStream.name + ' NOT ROLLING OVER....');
-          }
 
-        });
-      } catch(e) {
-        this.logger.info(e);
+            const valuesToSort = Object.entries(mapping).map(([key, value]) => {
+              return {index: key, mapping: value};
+            });
+
+            // Sort by index name to get the latest index for detecting if we need to rollover
+            const dataStreamMapping = orderBy(valuesToSort, ['index'], 'desc');
+
+            if (
+              dataStreamMapping &&
+              dataStreamMapping[0]?.mapping?.mappings?.properties?.data_stream?.properties?.dataset?.value === 'generic'
+            ) {
+              this.logger.info('Rolling over index: ' + dataStream.name);
+              await esClient.indices.rollover({
+                alias: dataStream.name,
+              });
+            }
+
+          });
+        } catch(e) {
+          this.logger.info(e);
+        }
       }
-    }
 
       if (registerIngestCallback) {
         registerIngestCallback(
@@ -230,9 +227,6 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
             return newPackagePolicy;
           }
         );
-
-
-        //registerIngestCallback('packagePolicyUpdate', getPackagePolicyUpdateCallback(esClient, this.logger));
 
         registerIngestCallback('packagePolicyPostDelete', getPackagePolicyDeleteCallback(client, this.logger));
       }
