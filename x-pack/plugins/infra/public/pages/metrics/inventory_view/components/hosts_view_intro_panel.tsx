@@ -15,6 +15,7 @@ export const HostViewIntroPanel = () => (
       <EuiBetaBadge
         color={'accent'}
         href="#"
+        data-test-subj="inventory-hostsView-button"
         label={i18n.translate('xpack.infra.layout.tryIt', {
           defaultMessage: 'Try it',
         })}

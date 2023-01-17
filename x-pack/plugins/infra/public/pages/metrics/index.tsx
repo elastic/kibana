@@ -126,7 +126,13 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                     <Route path="/detail/:type/:node" component={MetricDetail} />
                     <Route
                       path={'/hosts'}
-                      render={(props) => (isHostViewEnabled ? <HostsPage /> : <HostsLandingPage />)}
+                      render={(props) =>
+                        isHostViewEnabled ? (
+                          <HostsPage />
+                        ) : (
+                          <HostsLandingPage uiSettings={kibana.services.uiSettings} />
+                        )
+                      }
                     />
                     <Route path={'/settings'} component={MetricsSettingsPage} />
                   </Switch>
