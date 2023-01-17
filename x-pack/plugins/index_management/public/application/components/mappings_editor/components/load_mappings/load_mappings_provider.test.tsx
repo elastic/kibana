@@ -61,12 +61,6 @@ describe('<LoadMappingsProvider />', () => {
         title: {
           type: 'text',
         },
-        text1: {
-          copy_to: ['field1', 'field2'],
-          type: 'text',
-        },
-        field1: { type: 'text' },
-        field2: { type: 'text' },
       },
     };
 
