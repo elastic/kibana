@@ -19,7 +19,6 @@
     "@kbn/core-saved-objects-common",
     "@kbn/core-saved-objects-api-server",
     "@kbn/ecs",
-    "@kbn/core-saved-objects-api-server-internal"
   ],
   "exclude": [
     "target/**/*",

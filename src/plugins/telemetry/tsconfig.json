@@ -31,7 +31,7 @@
     "@kbn/utils",
     "@kbn/core-saved-objects-server",
     "@kbn/core-saved-objects-api-server",
-    "@kbn/core-saved-objects-utils-server",
+    "@kbn/core-saved-objects-common",
   ],
   "exclude": [
     "target/**/*",

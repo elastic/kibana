@@ -18,6 +18,7 @@
     "@kbn/core-saved-objects-utils-server",
     "@kbn/std",
     "@kbn/logging-mocks",
+    "@kbn/core-saved-objects-common",
   ],
   "exclude": [
     "target/**/*",
