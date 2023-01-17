@@ -896,6 +896,7 @@ packages/kbn-babel-register @elastic/kibana-operations
 packages/kbn-babel-transform @elastic/kibana-operations
 packages/kbn-bazel-runner @elastic/kibana-operations
 packages/kbn-cases-components @elastic/response-ops
+packages/kbn-cell-actions @elastic/security-threat-hunting-explore
 packages/kbn-chart-icons @elastic/kibana-visualizations
 packages/kbn-ci-stats-core @elastic/kibana-operations
 packages/kbn-ci-stats-performance-metrics @elastic/kibana-operations
@@ -908,7 +909,6 @@ packages/kbn-config-schema @elastic/kibana-core
 packages/kbn-crypto @elastic/kibana-security
 packages/kbn-crypto-browser @elastic/kibana-core
 packages/kbn-cypress-config @elastic/kibana-operations
-packages/kbn-data-cell-actions @elastic/security-threat-hunting-explore
 packages/kbn-datemath @elastic/kibana-app-services
 packages/kbn-dev-cli-errors @elastic/kibana-operations
 packages/kbn-dev-cli-runner @elastic/kibana-operations
