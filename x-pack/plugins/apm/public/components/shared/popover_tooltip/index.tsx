@@ -16,7 +16,7 @@ interface PopoverTooltipProps {
 
 export function PopoverTooltip({
   ariaLabel,
-  iconType,
+  iconType = 'questionInCircle',
   children,
 }: PopoverTooltipProps) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -35,7 +35,7 @@ export function PopoverTooltip({
           }}
           size="xs"
           color="primary"
-          iconType={iconType ?? 'questionInCircle'}
+          iconType={iconType}
           style={{ height: 'auto' }}
         />
       }
