@@ -12,9 +12,13 @@ import {
   createAlertFactory,
   getPublicAlertFactory,
 } from '../alert/create_alert_factory';
-import { determineAlertsToReturn, processAlerts, setFlapping } from '../lib';
+import {
+  determineAlertsToReturn,
+  processAlerts,
+  setFlapping,
+  getAlertsForNotification,
+} from '../lib';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
-import { getAlertsForNotification } from '../lib/get_alerts_for_notification';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { trimRecoveredAlerts } from '../lib/trim_recovered_alerts';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
@@ -137,7 +141,7 @@ export class LegacyAlertsClient<
       this.options.maxAlerts
     );
 
-    const alerts = getAlertsForNotification<State, Context>(
+    const alerts = getAlertsForNotification<State, Context, ActionGroupIds, RecoveryActionGroupId>(
       this.options.ruleType.defaultActionGroupId,
       processedAlertsNew,
       processedAlertsActive,

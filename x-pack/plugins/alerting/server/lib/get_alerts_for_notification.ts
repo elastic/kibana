@@ -12,13 +12,15 @@ import { MAX_FLAP_COUNT } from './flapping_utils';
 
 export function getAlertsForNotification<
   State extends AlertInstanceState,
-  Context extends AlertInstanceContext
+  Context extends AlertInstanceContext,
+  ActionGroupIds extends string,
+  RecoveryActionGroupId extends string
 >(
   actionGroupId: string,
-  newAlerts: Record<string, Alert<State, Context>> = {},
-  activeAlerts: Record<string, Alert<State, Context>> = {},
-  recoveredAlerts: Record<string, Alert<State, Context>> = {},
-  currentRecoveredAlerts: Record<string, Alert<State, Context>> = {}
+  newAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {},
+  activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {},
+  recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>> = {},
+  currentRecoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>> = {}
 ) {
   for (const id of keys(activeAlerts)) {
     const alert = activeAlerts[id];
@@ -36,7 +38,7 @@ export function getAlertsForNotification<
         const context = alert.getContext();
         const lastActionGroupId = alert.getLastScheduledActions()?.group;
 
-        const newAlert = new Alert<State, Context>(id, alert.toRaw());
+        const newAlert = new Alert<State, Context, ActionGroupIds>(id, alert.toRaw());
         // unset the end time in the alert state
         const state = newAlert.getState();
         delete state.end;
@@ -44,7 +46,7 @@ export function getAlertsForNotification<
 
         // schedule actions for the new active alert
         newAlert.scheduleActions(
-          (lastActionGroupId ? lastActionGroupId : actionGroupId) as never,
+          (lastActionGroupId ? lastActionGroupId : actionGroupId) as ActionGroupIds,
           context
         );
         activeAlerts[id] = newAlert;
