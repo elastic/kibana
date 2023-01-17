@@ -20,6 +20,30 @@ describe('#checkIncompatibleMappings', () => {
     esClient = elasticsearchClientMock.createClusterClient().asInternalUser as unknown as Client;
   });
 
+  test('calls ES with the expected inputs', async () => {
+    await checkIncompatibleMappings({ log, esClient, currentMappings: {}, nextMappings: {} });
+    expect(esClient.indices.create).toHaveBeenCalledTimes(1);
+    expect(esClient.indices.create).toHaveBeenCalledWith({
+      index: '.kibana_mappings_check',
+      mappings: {
+        dynamic: false,
+        properties: {},
+      },
+      settings: {
+        mapping: {
+          total_fields: {
+            limit: 1500,
+          },
+        },
+      },
+    });
+    expect(esClient.indices.putMapping).toHaveBeenCalledTimes(1);
+    expect(esClient.indices.putMapping).toHaveBeenCalledWith({
+      index: '.kibana_mappings_check',
+      properties: {},
+    });
+  });
+
   test('throws expected error when cannot put mappings', async () => {
     (esClient.indices.putMapping as jest.Mock).mockRejectedValueOnce(new Error('foo'));
     expect(() =>
