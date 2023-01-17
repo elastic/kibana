@@ -5,22 +5,24 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiBadge, EuiDescriptionList, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiBadge, EuiDescriptionList, EuiLoadingContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EncryptedSyntheticsMonitor } from '../../../../../../common/runtime_types';
 
 const BadgeStatus = ({
   status,
+  monitor,
   loading,
   isBrowserType,
 }: {
   status?: string;
   loading?: boolean;
+  monitor: EncryptedSyntheticsMonitor;
   isBrowserType: boolean;
 }) => {
-  return loading ? (
-    <EuiLoadingSpinner size="s" />
-  ) : !status ? (
+  return loading && !monitor ? (
+    <EuiLoadingContent lines={1} />
+  ) : !status || status === 'unknown' ? (
     <EuiBadge color="default" data-test-subj="monitorLatestStatusPending">
       {PENDING_LABEL}
     </EuiBadge>
@@ -56,7 +58,12 @@ export const MonitorStatus = ({
         {
           title: STATUS_LABEL,
           description: (
-            <BadgeStatus status={status} loading={loading} isBrowserType={isBrowserType} />
+            <BadgeStatus
+              status={status}
+              loading={loading}
+              isBrowserType={isBrowserType}
+              monitor={monitor}
+            />
           ),
         },
       ]}
