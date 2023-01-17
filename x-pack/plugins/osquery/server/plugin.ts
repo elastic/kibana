@@ -228,7 +228,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
           }
         );
 
-        registerIngestCallback('packagePolicyPostDelete', getPackagePolicyDeleteCallback(client, this.logger));
+        registerIngestCallback('packagePolicyPostDelete', getPackagePolicyDeleteCallback(client));
       }
     });
 
