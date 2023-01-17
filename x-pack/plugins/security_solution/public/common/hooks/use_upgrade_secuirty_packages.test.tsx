@@ -70,7 +70,7 @@ describe('When using the `useUpgradeSecurityPackages()` hook', () => {
     );
   });
 
-  it('should send upgrade request WITHOUT prerelease:true if branch is not `main` and build is not `-SNAPSHOT`', async () => {
+  it('should send upgrade request with prerelease:false if branch is not `main` and build does not include `-SNAPSHOT`', async () => {
     mockGetKibanaVersion.mockReturnValue('8.0.0');
     mockGetKibanaBranch.mockReturnValue('release');
 
@@ -89,8 +89,46 @@ describe('When using the `useUpgradeSecurityPackages()` hook', () => {
     );
   });
 
-  it('should send upgrade request with prerelease:true if branch is `main` or build is `-SNAPSHOT`', async () => {
+  it('should send upgrade request with prerelease:true if branch is `main` AND build includes `-SNAPSHOT`', async () => {
     mockGetKibanaVersion.mockReturnValue('8.0.0-SNAPSHOT');
+    mockGetKibanaBranch.mockReturnValue('main');
+
+    renderHook();
+
+    await renderResult.waitFor(
+      () => (kibana.services.http.post as jest.Mock).mock.calls.length > 0
+    );
+
+    expect(kibana.services.http.post).toHaveBeenCalledWith(
+      `${epmRouteService.getBulkInstallPath()}`,
+      expect.objectContaining({
+        body: '{"packages":["endpoint","security_detection_engine"]}',
+        query: expect.objectContaining({ prerelease: true }),
+      })
+    );
+  });
+
+  it('should send upgrade request with prerelease:true if branch is `release` and build includes `-SNAPSHOT`', async () => {
+    mockGetKibanaVersion.mockReturnValue('8.0.0-SNAPSHOT');
+    mockGetKibanaBranch.mockReturnValue('release');
+
+    renderHook();
+
+    await renderResult.waitFor(
+      () => (kibana.services.http.post as jest.Mock).mock.calls.length > 0
+    );
+
+    expect(kibana.services.http.post).toHaveBeenCalledWith(
+      `${epmRouteService.getBulkInstallPath()}`,
+      expect.objectContaining({
+        body: '{"packages":["endpoint","security_detection_engine"]}',
+        query: expect.objectContaining({ prerelease: true }),
+      })
+    );
+  });
+
+  it('should send upgrade request with prerelease:true if branch is `main` and build does not include `-SNAPSHOT`', async () => {
+    mockGetKibanaVersion.mockReturnValue('8.0.0');
     mockGetKibanaBranch.mockReturnValue('main');
 
     renderHook();

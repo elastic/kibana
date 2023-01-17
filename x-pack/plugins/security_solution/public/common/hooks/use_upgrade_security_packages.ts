@@ -24,7 +24,7 @@ const sendUpgradeSecurityPackages = async (
   http: HttpStart,
   options: HttpFetchOptions = {},
   prebuiltRulesPackageVersion?: string
-): Promise<Array<PromiseSettledResult<BulkInstallPackagesResponse | InstallPackageResponse>>> => {
+): Promise<void> => {
   const packages = ['endpoint', 'security_detection_engine'];
   const requests: Array<Promise<InstallPackageResponse | BulkInstallPackagesResponse>> = [];
 
@@ -55,7 +55,7 @@ const sendUpgradeSecurityPackages = async (
     })
   );
 
-  return Promise.allSettled(requests);
+  await Promise.allSettled(requests);
 };
 
 export const useUpgradeSecurityPackages = () => {
@@ -84,7 +84,7 @@ export const useUpgradeSecurityPackages = () => {
             KibanaServices.getKibanaBranch() === 'main';
 
           // ignore the response for now since we aren't notifying the user
-          // Note: response is Promise.allSettled, so must iterate all responses for errors and throw manually
+          // Note: response would be Promise.allSettled, so must iterate all responses for errors and throw manually
           await sendUpgradeSecurityPackages(
             context.services.http,
             {
