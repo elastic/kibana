@@ -68,7 +68,6 @@
     "@kbn/core-notifications-browser",
     "@kbn/slo-schema",
     "@kbn/core-http-server-internal",
-    "@kbn/actions-plugin",
   ],
   "exclude": [
     "target/**/*",
