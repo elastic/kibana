@@ -7,10 +7,14 @@
 
 import { AsApiContract } from '@kbn/actions-plugin/common';
 import { HttpSetup } from '@kbn/core/public';
-import { ALERT_RULE_UUID, ALERT_START, ALERT_TIME_RANGE } from '@kbn/rule-data-utils';
+import {
+  ALERT_RULE_UUID,
+  ALERT_START,
+  ALERT_TIME_RANGE,
+} from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useKibana } from '../utils/kibana_react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 interface UseFetchTriggeredAlertsHistoryProps {
   features: string;
@@ -37,9 +41,10 @@ export function useFetchTriggeredAlertsHistory({
   ruleId,
 }: UseFetchTriggeredAlertsHistoryProps) {
   const { http } = useKibana().services;
-  const [triggeredAlertsHistory, setTriggeredAlertsHistory] = useState<TriggeredAlertsHistory>({
-    isLoadingTriggeredAlertHistory: true,
-  });
+  const [triggeredAlertsHistory, setTriggeredAlertsHistory] =
+    useState<TriggeredAlertsHistory>({
+      isLoadingTriggeredAlertHistory: true,
+    });
   const isCancelledRef = useRef(false);
   const abortCtrlRef = useRef(new AbortController());
   const loadRuleAlertsAgg = useCallback(async () => {
@@ -48,19 +53,24 @@ export function useFetchTriggeredAlertsHistory({
     abortCtrlRef.current = new AbortController();
 
     try {
+      if (!http) throw 'No http client';
       if (!features) return;
       const { index } = await fetchIndexNameAPI({
         http,
         features,
       });
 
-      const { totalTriggeredAlerts, histogramTriggeredAlerts, error, avgTimeToRecoverMS } =
-        await fetchTriggeredAlertsHistory({
-          http,
-          index,
-          ruleId,
-          signal: abortCtrlRef.current.signal,
-        });
+      const {
+        totalTriggeredAlerts,
+        histogramTriggeredAlerts,
+        error,
+        avgTimeToRecoverMS,
+      } = await fetchTriggeredAlertsHistory({
+        http,
+        index,
+        ruleId,
+        signal: abortCtrlRef.current.signal,
+      });
 
       if (error) throw error;
       if (!isCancelledRef.current) {
@@ -105,9 +115,12 @@ export async function fetchIndexNameAPI({
   http: HttpSetup;
   features: string;
 }): Promise<IndexName> {
-  const res = await http.get<{ index_name: string[] }>(`${BASE_RAC_ALERTS_API_PATH}/index`, {
-    query: { features },
-  });
+  const res = await http.get<{ index_name: string[] }>(
+    `${BASE_RAC_ALERTS_API_PATH}/index`,
+    {
+      query: { features },
+    }
+  );
   return {
     index: res.index_name[0],
   };
@@ -125,54 +138,58 @@ export async function fetchTriggeredAlertsHistory({
   signal: AbortSignal;
 }): Promise<FetchTriggeredAlertsHistory> {
   try {
-    const res = await http.post<AsApiContract<any>>(`${BASE_RAC_ALERTS_API_PATH}/find`, {
-      signal,
-      body: JSON.stringify({
-        index,
-        size: 0,
-        query: {
-          bool: {
-            must: [
-              {
-                term: {
-                  [ALERT_RULE_UUID]: ruleId,
-                },
-              },
-              {
-                range: {
-                  [ALERT_TIME_RANGE]: {
-                    gte: 'now-30d',
-                    lt: 'now',
+    const res = await http.post<AsApiContract<any>>(
+      `${BASE_RAC_ALERTS_API_PATH}/find`,
+      {
+        signal,
+        body: JSON.stringify({
+          index,
+          size: 0,
+          query: {
+            bool: {
+              must: [
+                {
+                  term: {
+                    [ALERT_RULE_UUID]: ruleId,
                   },
                 },
-              },
-            ],
+                {
+                  range: {
+                    [ALERT_TIME_RANGE]: {
+                      gte: 'now-30d',
+                      lt: 'now',
+                    },
+                  },
+                },
+              ],
+            },
           },
-        },
-        aggs: {
-          histogramTriggeredAlerts: {
-            date_histogram: {
-              field: ALERT_START,
-              fixed_interval: '1d',
-              extended_bounds: {
-                min: 'now-30d',
-                max: 'now',
+          aggs: {
+            histogramTriggeredAlerts: {
+              date_histogram: {
+                field: ALERT_START,
+                fixed_interval: '1d',
+                extended_bounds: {
+                  min: 'now-30d',
+                  max: 'now',
+                },
+              },
+            },
+            avgTimeToRecoverMS: {
+              avg: {
+                script: {
+                  source:
+                    "if (!doc['kibana.alert.end'].empty){return(doc['kibana.alert.end'].value.millis) - (doc['kibana.alert.start'].value.millis)}",
+                },
               },
             },
           },
-          avgTimeToRecoverMS: {
-            avg: {
-              script: {
-                source:
-                  "if (!doc['kibana.alert.end'].empty){return(doc['kibana.alert.end'].value.millis) - (doc['kibana.alert.start'].value.millis)}",
-              },
-            },
-          },
-        },
-      }),
-    });
+        }),
+      }
+    );
     const totalTriggeredAlerts = res?.hits.total.value;
-    const histogramTriggeredAlerts = res?.aggregations?.histogramTriggeredAlerts.buckets;
+    const histogramTriggeredAlerts =
+      res?.aggregations?.histogramTriggeredAlerts.buckets;
     const avgTimeToRecoverMS = res?.aggregations?.avgTimeToRecoverMS.value;
     return {
       totalTriggeredAlerts,

@@ -121,4 +121,3 @@ export { ExploratoryViewContextProvider } from './components/shared/exploratory_
 export { fromQuery, toQuery } from './utils/url';
 
 export type { NavigationSection } from './services/navigation_registry';
-export { useFetchTriggeredAlertsHistory } from './hooks/use_fetch_triggered_alert_history';

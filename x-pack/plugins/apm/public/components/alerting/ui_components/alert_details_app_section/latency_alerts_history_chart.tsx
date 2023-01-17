@@ -13,7 +13,7 @@ import { EuiFlexItem } from '@elastic/eui';
 import { EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
-import { useFetchTriggeredAlertsHistory } from '@kbn/observability-plugin/public';
+// import { useFetchTriggeredAlertsHistory } from '@kbn/observability-plugin/public';
 import {
   AnnotationDomainType,
   LineAnnotation,
@@ -21,7 +21,11 @@ import {
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import { EuiBadge } from '@elastic/eui';
-import { getDurationFormatter } from '../../../../../common/utils/formatters';
+import { useFetchTriggeredAlertsHistory } from '../../../../hooks/use_fetch_triggered_alert_history';
+import {
+  convertTo,
+  getDurationFormatter,
+} from '../../../../../common/utils/formatters';
 import { getLatencyChartSelector } from '../../../../selectors/latency_chart_selectors';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { useFetcher } from '../../../../hooks/use_fetcher';
@@ -111,12 +115,17 @@ export function LatencyAlertsHistoryChart({
   });
   const getFormattedDuration = (avgTimeToRecover?: number) => {
     if (!avgTimeToRecover || avgTimeToRecover === 0) return '-';
-    const time = moment.duration(avgTimeToRecover);
-    if (time.hours() > 0) {
-      return `${time.hours()}h ${time.minutes()}m`;
-    } else {
-      return `${time.minutes()}m ${time.seconds()}s`;
-    }
+    const hours = convertTo({
+      unit: 'hours',
+      microseconds: avgTimeToRecover * 1000,
+    });
+    const minutes = convertTo({
+      unit: 'minutes',
+      microseconds: avgTimeToRecover * 1000,
+    });
+
+    if (parseInt(minutes.value) > 60) return hours.formatted;
+    return minutes.formatted;
   };
   return (
     <EuiPanel hasBorder={true}>
@@ -146,7 +155,7 @@ export function LatencyAlertsHistoryChart({
             <EuiFlexItem grow={false}>
               <EuiText color="danger">
                 <EuiTitle size="s">
-                  <h3>{triggeredAlertsData?.totalTriggeredAlerts}</h3>
+                  <h3>{triggeredAlertsData?.totalTriggeredAlerts || '-'}</h3>
                 </EuiTitle>
               </EuiText>
             </EuiFlexItem>
