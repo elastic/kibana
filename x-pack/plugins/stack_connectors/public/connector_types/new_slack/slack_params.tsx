@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { TextAreaWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
@@ -34,27 +34,24 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<SlackExecuteA
   index,
   errors,
   messageVariables,
-  defaultMessage,
 }) => {
+  console.log('RENDER');
   const { subAction, subActionParams } = actionParams;
   const { channels, text } = (subActionParams as { text: string; channels: string[] }) ?? {}; // maybe should get rid of & {} in the type
 
-  useEffect(() => {
-    if (!subAction) {
-      editAction('subAction', 'postMessage', index);
-    }
-    if (!subActionParams) {
-      editAction(
-        'subActionParams',
-        {
-          channels,
-          text,
-        },
-        index
-      );
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [actionParams]);
+  if (!subAction) {
+    editAction('subAction', 'postMessage', index);
+  }
+  if (!subActionParams) {
+    editAction(
+      'subActionParams',
+      {
+        channels,
+        text,
+      },
+      index
+    );
+  }
 
   const {
     response: { channels: channelsInfo } = {},
@@ -130,10 +127,24 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<SlackExecuteA
             data-test-subj={'test-data'} // new name
             isLoading={isLoadingChannels}
             options={options}
-            loadingMessage={'Loading channels'} // need translations
-            noMatchesMessage={'No channels found'}
-            emptyMessage={'No channels available'}
-            // errorMessage={}
+            loadingMessage={i18n.translate(
+              'xpack.stackConnectors.components.slack.loadingMessage',
+              {
+                defaultMessage: 'Loading channels',
+              }
+            )}
+            noMatchesMessage={i18n.translate(
+              'xpack.stackConnectors.components.slack.noChannelsFound',
+              {
+                defaultMessage: 'No channels found',
+              }
+            )}
+            emptyMessage={i18n.translate(
+              'xpack.stackConnectors.components.slack.noChannelsAvailable',
+              {
+                defaultMessage: 'No channels available',
+              }
+            )}
             onChange={onChange}
           >
             {(list, search) => (
