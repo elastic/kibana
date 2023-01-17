@@ -58,6 +58,7 @@ export default function (providerContext: FtrProviderContext) {
 
         const { body } = await supertest.get(`/api/fleet/agent_policies/${createdPolicy.id}`);
         expect(body.item.is_managed).to.equal(false);
+        expect(body.item.inactivity_timeout).to.equal(1209600);
         expect(body.item.status).to.be('active');
       });
 
