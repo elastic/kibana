@@ -140,12 +140,12 @@ describe('<FindingsTable />', () => {
     const row = data[0];
 
     const columns = [
-      'resource.id',
       'result.evaluation',
-      'resource.sub_type',
+      'resource.id',
       'resource.name',
+      'resource.sub_type',
+      'rule.rule_number',
       'rule.name',
-      'cluster_id',
     ];
 
     columns.forEach((field) => {
