@@ -34,13 +34,6 @@ export const NO_DATA_MESSAGE = i18n.translate(
   }
 );
 
-export const EXPAND_LOCATIONS_LABEL = i18n.translate(
-  'xpack.synthetics.management.monitorList.locations.expand',
-  {
-    defaultMessage: 'Click to view remaining locations',
-  }
-);
-
 export const EXPAND_TAGS_LABEL = i18n.translate(
   'xpack.synthetics.management.monitorList.tags.expand',
   {

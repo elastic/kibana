@@ -13,7 +13,7 @@ import {
   ConfigKey,
   EncryptedSyntheticsSavedMonitor,
 } from '../../../../../../../common/runtime_types';
-import { useMonitorDetailLocator } from '../../hooks/use_monitor_detail_locator';
+import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_locator';
 
 export const MonitorDetailsLink = ({ monitor }: { monitor: EncryptedSyntheticsSavedMonitor }) => {
   const lastSelectedLocationId = useSelector(selectSelectedLocationId);
