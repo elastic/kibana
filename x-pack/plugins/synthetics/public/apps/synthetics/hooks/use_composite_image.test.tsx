@@ -9,7 +9,7 @@ import * as redux from 'react-redux';
 import { renderHook } from '@testing-library/react-hooks';
 import { ScreenshotRefImageData, ScreenshotBlockCache } from '../../../../common/runtime_types';
 import { fetchBlocksAction } from '../state';
-import { shouldCompose, useCompositeImage } from './use_composite_image';
+import { shouldCompose, useComposeImageFromRef } from './use_composite_image';
 import * as compose from '../utils/monitor_test_result/compose_screenshot_images';
 
 const MIME = 'image/jpeg';
@@ -142,7 +142,7 @@ describe('use composite image', () => {
     });
   });
 
-  describe('useCompositeImage', () => {
+  describe('useComposeImageFromRef', () => {
     let useDispatchMock: jest.Mock;
     let canvasMock: unknown;
     let removeChildSpy: jest.Mock;
@@ -171,30 +171,27 @@ describe('use composite image', () => {
       jest.clearAllMocks();
     });
 
-    it('does not compose if all blocks are not loaded', () => {
+    it('does not compose if all blocks are not loaded 2', () => {
       blocks = {};
-      renderHook(() => useCompositeImage(imgRef, jest.fn(), imageData));
+      renderHook(() => useComposeImageFromRef(imgRef));
 
       expect(useDispatchMock).toHaveBeenCalledWith(fetchBlocksAction(['hash1', 'hash2']));
     });
 
-    it('composes when all required blocks are loaded', async () => {
-      const onComposeImageSuccess = jest.fn();
-      const { waitFor } = renderHook(() => useCompositeImage(imgRef, onComposeImageSuccess));
+    it('composes when all required blocks are loaded 2', async () => {
+      const { waitFor, result } = renderHook(() => useComposeImageFromRef(imgRef));
 
       expect(selectorSpy).toHaveBeenCalled();
+      expect(result.current.isComposing).toBeTruthy();
       expect(composeSpy).toHaveBeenCalledTimes(1);
       expect(composeSpy.mock.calls[0][0]).toEqual(imgRef);
       expect(composeSpy.mock.calls[0][1]).toBe(canvasMock);
       expect(composeSpy.mock.calls[0][2]).toBe(blocks);
 
-      await waitFor(
-        () => {
-          expect(onComposeImageSuccess).toHaveBeenCalledTimes(1);
-          expect(onComposeImageSuccess).toHaveBeenCalledWith('compose success');
-        },
-        { timeout: 10000 }
-      );
+      await waitFor(() => {
+        expect(result.current.imgSrc).toBeTruthy();
+        expect(result.current.isComposing).toBeFalsy();
+      });
     });
   });
 });

@@ -2441,6 +2441,22 @@
             "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.ChromeHelpExtensionMenuCustomLink.external",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "external",
+            "description": [
+              "\nOpens link in new tab"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4497,6 +4513,28 @@
           },
           {
             "parentPluginId": "core",
+            "id": "def-public.CoreSetup.customBranding",
+            "type": "Object",
+            "tags": [],
+            "label": "customBranding",
+            "description": [
+              "{@link CustomBrandingSetup}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-custom-branding-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreCustomBrandingBrowserPluginApi",
+                "section": "def-common.CustomBrandingSetup",
+                "text": "CustomBrandingSetup"
+              }
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_setup.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
             "id": "def-public.CoreSetup.fatalErrors",
             "type": "Object",
             "tags": [],
@@ -4765,6 +4803,28 @@
                 "docId": "kibKbnCoreChromeBrowserPluginApi",
                 "section": "def-common.ChromeStart",
                 "text": "ChromeStart"
+              }
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.CoreStart.customBranding",
+            "type": "Object",
+            "tags": [],
+            "label": "customBranding",
+            "description": [
+              "{@link CustomBrandingStart}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-custom-branding-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreCustomBrandingBrowserPluginApi",
+                "section": "def-common.CustomBrandingStart",
+                "text": "CustomBrandingStart"
               }
             ],
             "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts",
@@ -25608,6 +25668,28 @@
           },
           {
             "parentPluginId": "core",
+            "id": "def-server.CoreSetup.customBranding",
+            "type": "Object",
+            "tags": [],
+            "label": "customBranding",
+            "description": [
+              "{@link CustomBrandingSetup}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-custom-branding-server",
+                "scope": "common",
+                "docId": "kibKbnCoreCustomBrandingServerPluginApi",
+                "section": "def-common.CustomBrandingSetup",
+                "text": "CustomBrandingSetup"
+              }
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-server/src/core_setup.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
             "id": "def-server.CoreSetup.docLinks",
             "type": "Object",
             "tags": [],
@@ -25957,6 +26039,28 @@
                 "docId": "kibKbnCoreCapabilitiesServerPluginApi",
                 "section": "def-common.CapabilitiesStart",
                 "text": "CapabilitiesStart"
+              }
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-server/src/core_start.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreStart.customBranding",
+            "type": "Object",
+            "tags": [],
+            "label": "customBranding",
+            "description": [
+              "{@link CustomBrandingStart}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-custom-branding-server",
+                "scope": "common",
+                "docId": "kibKbnCoreCustomBrandingServerPluginApi",
+                "section": "def-common.CustomBrandingStart",
+                "text": "CustomBrandingStart"
               }
             ],
             "path": "packages/core/lifecycle/core-lifecycle-server/src/core_start.ts",
@@ -57270,7 +57374,9 @@
                 "section": "def-common.SavedObjectsClientContract",
                 "text": "SavedObjectsClientContract"
               },
-              ") => ",
+              ", options?: ",
+              "SavedObjectsImporterOptions",
+              " | undefined) => ",
               {
                 "pluginId": "@kbn/core-saved-objects-server",
                 "scope": "common",
@@ -57303,6 +57409,22 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsServiceStart.createImporter.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "SavedObjectsImporterOptions",
+                  " | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []

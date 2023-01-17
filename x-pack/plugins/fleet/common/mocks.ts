@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DeletePackagePoliciesResponse, NewPackagePolicy, PackagePolicy } from './types';
+import type { PostDeletePackagePoliciesResponse, NewPackagePolicy, PackagePolicy } from './types';
 import type { FleetAuthz } from './authz';
 import { ENDPOINT_PRIVILEGES } from './constants';
 
@@ -47,7 +47,7 @@ export const createPackagePolicyMock = (): PackagePolicy => {
   };
 };
 
-export const deletePackagePolicyMock = (): DeletePackagePoliciesResponse => {
+export const deletePackagePolicyMock = (): PostDeletePackagePoliciesResponse => {
   const newPackagePolicy = createNewPackagePolicyMock();
   return [
     {

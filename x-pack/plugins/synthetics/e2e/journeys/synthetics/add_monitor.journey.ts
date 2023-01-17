@@ -153,6 +153,7 @@ const createMonitorJourney = ({
 
       step('Go to monitor management', async () => {
         await syntheticsApp.navigateToMonitorManagement(true);
+        await syntheticsApp.enableMonitorManagement();
       });
 
       step('Ensure all monitors are deleted', async () => {
@@ -178,7 +179,6 @@ const createMonitorJourney = ({
       });
 
       step(`view ${monitorName} details in Monitor Management UI`, async () => {
-        await syntheticsApp.navigateToMonitorManagement();
         const hasFailure = await syntheticsApp.findMonitorConfiguration(monitorListDetails);
         expect(hasFailure).toBeFalsy();
       });
@@ -191,6 +191,8 @@ const createMonitorJourney = ({
           monitorType
         );
         expect(hasFailure).toBeFalsy();
+        await page.click('text=Update monitor');
+        await page.waitForSelector('text=Monitor updated successfully.');
       });
 
       step('cannot save monitor with the same name', async () => {
@@ -198,12 +200,10 @@ const createMonitorJourney = ({
         await syntheticsApp.createMonitor({ monitorConfig, monitorType });
         await page.waitForSelector('text=Monitor name already exists');
         await syntheticsApp.clickByTestSubj('syntheticsMonitorConfigSubmitButton');
-        const success = page.locator('text=Monitor added successfully.');
-        expect(await success.count()).toBe(0);
+        await page.waitForSelector('text=Cancel');
       });
 
       step('delete monitor', async () => {
-        await syntheticsApp.navigateToMonitorManagement();
         await syntheticsApp.findByText('Monitor');
         const isSuccessful = await syntheticsApp.deleteMonitors();
         expect(isSuccessful).toBeTruthy();

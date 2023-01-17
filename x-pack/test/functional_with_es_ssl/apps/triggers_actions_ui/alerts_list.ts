@@ -493,6 +493,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               id: action.id,
               group: 'default',
               params: { level: 'info', message: 'gfghfhg' },
+              frequency: {
+                summary: false,
+                notifyWhen: 'onActionGroupChange',
+                throttle: null,
+              },
             },
           ],
         },
@@ -669,6 +674,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               id: action.id,
               group: 'default',
               params: { level: 'info', message: 'gfghfhg' },
+              frequency: {
+                summary: false,
+                notifyWhen: 'onActionGroupChange',
+                throttle: null,
+              },
             },
           ],
         },
