@@ -19,7 +19,7 @@ interface SelectedDataset {
 const GENERIC_DATASET_NAME = 'generic';
 
 export const DatasetComboBox: React.FC<{
-  value?: SelectedDataset;
+  value?: SelectedDataset | string;
   onChange: (newValue: SelectedDataset) => void;
   datastreams: DataStream[];
   pkgName?: string;
@@ -32,15 +32,21 @@ export const DatasetComboBox: React.FC<{
     })) ?? [];
   const existingGenericStream = datasetOptions.find((ds) => ds.label === GENERIC_DATASET_NAME);
   const valueAsOption = value
-    ? { label: value.dataset, value: { dataset: value.dataset, package: value.package } }
+    ? typeof value === 'string'
+      ? { label: value, value: { dataset: value, package: pkgName } }
+      : { label: value.dataset, value: { dataset: value.dataset, package: value.package } }
     : undefined;
-  const defaultOption = valueAsOption || existingGenericStream || { label: GENERIC_DATASET_NAME };
+  const defaultOption = valueAsOption ||
+    existingGenericStream || {
+      label: GENERIC_DATASET_NAME,
+      value: { dataset: GENERIC_DATASET_NAME, package: pkgName },
+    };
 
   const [selectedOptions, setSelectedOptions] = useState<Array<{ label: string }>>([defaultOption]);
 
   useEffect(() => {
-    if (!value) onChange({ dataset: defaultOption.label, package: pkgName });
-  }, [value, defaultOption.label, onChange, pkgName]);
+    if (!value || typeof value === 'string') onChange(defaultOption.value as SelectedDataset);
+  }, [value, defaultOption.value, onChange, pkgName]);
 
   const onDatasetChange = (newSelectedOptions: Array<{ label: string; value?: DataStream }>) => {
     setSelectedOptions(newSelectedOptions);

@@ -1998,7 +1998,8 @@ export function _validateRestrictedFieldsNotModifiedOrThrow(opts: {
           if (
             oldStream &&
             oldStream?.vars?.['data_stream.dataset'] &&
-            oldStream?.vars['data_stream.dataset'] !== stream?.vars?.['data_stream.dataset']
+            oldStream?.vars['data_stream.dataset']?.value !==
+              stream?.vars?.['data_stream.dataset']?.value
           ) {
             throw new PackagePolicyValidationError(
               i18n.translate('xpack.fleet.updatePackagePolicy.datasetCannotBeModified', {
