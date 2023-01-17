@@ -280,17 +280,17 @@ describe('AllCasesListGeneric', () => {
     expect(res.getByTestId('tableHeaderCell_severity_7')).toBeInTheDocument();
   });
 
-  // it('should render the case stats', async () => {
-  //   const res = render(
-  //     <TestProviders>
-  //       <AllCasesList />
-  //     </TestProviders>
-  //   );
-
-  //   await waitFor(() =>
-  //     expect(res.getByTestId('cases-count-stats')).toBeInTheDocument()
-  //   );
-  // });
+  it('should render the case stats', async () => {
+    const res = render(
+      <TestProviders>
+        <AllCasesList />
+      </TestProviders>
+    );
+    
+    await waitFor(() => 
+      expect(res.getByTestId('cases-count-stats')).toBeInTheDocument()
+    );
+  });
 
   it('should not render table utility bar when isSelectorView=true', async () => {
     const res = appMockRenderer.render(<AllCasesList isSelectorView={true} />);
@@ -749,10 +749,16 @@ describe('AllCasesListGeneric', () => {
       it('Renders bulk action', async () => {
         const result = appMockRenderer.render(<AllCasesList />);
 
-        await waitForComponentToUpdate();
+        await waitFor(() => {
+          expect(result.getByTestId('checkboxSelectAll')).toBeInTheDocument();
+        });
 
         act(() => {
           userEvent.click(result.getByTestId('checkboxSelectAll'));
+        });
+
+        await waitFor(() => {
+          expect(result.getByText('Bulk actions')).toBeInTheDocument();
         });
 
         act(() => {
@@ -770,10 +776,16 @@ describe('AllCasesListGeneric', () => {
         async (status) => {
           const result = appMockRenderer.render(<AllCasesList />);
 
-          await waitForComponentToUpdate();
+          await waitFor(() => {
+            expect(result.getByTestId('checkboxSelectAll')).toBeInTheDocument();
+          });
 
           act(() => {
             userEvent.click(result.getByTestId('checkboxSelectAll'));
+          });
+
+          await waitFor(() => {
+            expect(result.getByText('Bulk actions')).toBeInTheDocument();
           });
 
           act(() => {
@@ -815,10 +827,16 @@ describe('AllCasesListGeneric', () => {
       ])('Bulk update severity: %s', async (severity) => {
         const result = appMockRenderer.render(<AllCasesList />);
 
-        await waitForComponentToUpdate();
+        await waitFor(() => {
+          expect(result.getByTestId('checkboxSelectAll')).toBeInTheDocument();
+        });
 
         act(() => {
           userEvent.click(result.getByTestId('checkboxSelectAll'));
+        });
+
+        await waitFor(() => {
+          expect(result.getByText('Bulk actions')).toBeInTheDocument();
         });
 
         act(() => {
@@ -856,10 +874,16 @@ describe('AllCasesListGeneric', () => {
       it('Bulk delete', async () => {
         const result = appMockRenderer.render(<AllCasesList />);
 
-        await waitForComponentToUpdate();
+        await waitFor(() => {
+          expect(result.getByTestId('checkboxSelectAll')).toBeInTheDocument();
+        });
 
         act(() => {
           userEvent.click(result.getByTestId('checkboxSelectAll'));
+        });
+
+        await waitFor(() => {
+          expect(result.getByText('Bulk actions')).toBeInTheDocument();
         });
 
         act(() => {
@@ -903,7 +927,9 @@ describe('AllCasesListGeneric', () => {
         appMockRenderer = createAppMockRenderer({ permissions: readCasesPermissions() });
         const res = appMockRenderer.render(<AllCasesList />);
 
-        await waitForComponentToUpdate();
+        await waitFor(() => {
+          expect(res.getByTestId('checkboxSelectAll')).toBeInTheDocument();
+        });
 
         expect(res.getByTestId('checkboxSelectAll')).toBeDisabled();
 
@@ -945,8 +971,6 @@ describe('AllCasesListGeneric', () => {
         const inProgressCase = useGetCasesMockState.data.cases[1];
         const theCase = status === CaseStatuses.open ? inProgressCase : openCase;
 
-        await waitForComponentToUpdate();
-
         await waitFor(() => {
           expect(res.getByTestId(`case-action-popover-button-${theCase.id}`)).toBeInTheDocument();
         });
@@ -986,8 +1010,6 @@ describe('AllCasesListGeneric', () => {
         const lowCase = useGetCasesMockState.data.cases[0];
         const mediumCase = useGetCasesMockState.data.cases[1];
         const theCase = severity === CaseSeverity.LOW ? mediumCase : lowCase;
-
-        await waitForComponentToUpdate();
 
         await waitFor(() => {
           expect(res.getByTestId(`case-action-popover-button-${theCase.id}`)).toBeInTheDocument();
@@ -1061,8 +1083,6 @@ describe('AllCasesListGeneric', () => {
       it('should disable row actions when bulk selecting all cases', async () => {
         const res = appMockRenderer.render(<AllCasesList />);
 
-        await waitForComponentToUpdate();
-
         act(() => {
           userEvent.click(res.getByTestId('checkboxSelectAll'));
         });
@@ -1077,8 +1097,6 @@ describe('AllCasesListGeneric', () => {
       it('should disable row actions when selecting a case', async () => {
         const res = appMockRenderer.render(<AllCasesList />);
         const caseToSelect = defaultGetCases.data.cases[0];
-
-        await waitForComponentToUpdate();
 
         act(() => {
           userEvent.click(res.getByTestId(`checkboxSelectRow-${caseToSelect.id}`));
