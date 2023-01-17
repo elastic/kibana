@@ -54,7 +54,6 @@ export class DashboardPanelActionsService extends FtrService {
 
   async openContextMenu(parent?: WebElementWrapper) {
     this.log.debug(`openContextMenu(${parent}`);
-    if (await this.testSubjects.exists('embeddablePanelContextMenuOpen')) return;
     await this.toggleContextMenu(parent);
     await this.expectContextMenuToBeOpen();
   }
@@ -342,7 +341,6 @@ export class DashboardPanelActionsService extends FtrService {
     await this.customizePanel(panel);
     await this.testSubjects.click('resetCustomEmbeddablePanelTitle');
     await this.testSubjects.click('saveNewTitleButton');
-    await this.toggleContextMenu(panel);
   }
 
   async getActionWebElementByText(text: string): Promise<WebElementWrapper> {
