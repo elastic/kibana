@@ -606,7 +606,7 @@ export const LensTopNavMenu = ({
               objectId: currentDoc?.savedObjectId,
               objectType: 'lens_visualization',
               objectTypeTitle: i18n.translate('xpack.lens.app.share.panelTitle', {
-                defaultMessage: 'Lens visualization',
+                defaultMessage: 'visualization',
               }),
               sharingData,
               isDirty: isCurrentStateDirty,
