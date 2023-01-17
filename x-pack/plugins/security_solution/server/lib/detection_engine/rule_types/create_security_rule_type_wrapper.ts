@@ -58,6 +58,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
         injectReferences: (params, savedObjectReferences) =>
           injectReferences({ logger, params, savedObjectReferences }),
       },
+      autoRecoverAlerts: false,
       async executor(options) {
         agent.setTransactionName(`${options.rule.ruleTypeId} execution`);
         return withSecuritySpan('securityRuleTypeExecutor', async () => {

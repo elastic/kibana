@@ -20,6 +20,7 @@ interface ProcessAlertsOpts<
   previouslyRecoveredAlerts: Record<string, Alert<State, Context>>;
   hasReachedAlertLimit: boolean;
   alertLimit: number;
+  autoRecoverAlerts: boolean;
   // flag used to determine whether or not we want to push the flapping state on to the flappingHistory array
   setFlapping: boolean;
 }
@@ -43,6 +44,7 @@ export function processAlerts<
   previouslyRecoveredAlerts,
   hasReachedAlertLimit,
   alertLimit,
+  autoRecoverAlerts,
   setFlapping,
 }: ProcessAlertsOpts<State, Context>): ProcessAlertsResult<State, Context> {
   return hasReachedAlertLimit
@@ -53,7 +55,13 @@ export function processAlerts<
         alertLimit,
         setFlapping
       )
-    : processAlertsHelper(alerts, existingAlerts, previouslyRecoveredAlerts, setFlapping);
+    : processAlertsHelper(
+        alerts,
+        existingAlerts,
+        previouslyRecoveredAlerts,
+        autoRecoverAlerts,
+        setFlapping
+      );
 }
 
 function processAlertsHelper<
@@ -63,6 +71,7 @@ function processAlertsHelper<
   alerts: Record<string, Alert<State, Context>>,
   existingAlerts: Record<string, Alert<State, Context>>,
   previouslyRecoveredAlerts: Record<string, Alert<State, Context>>,
+  autoRecoverAlerts: boolean,
   setFlapping: boolean
 ): ProcessAlertsResult<State, Context> {
   const existingAlertIds = new Set(Object.keys(existingAlerts));
@@ -112,7 +121,7 @@ function processAlertsHelper<
             updateAlertFlappingHistory(activeAlerts[id], false);
           }
         }
-      } else if (existingAlertIds.has(id)) {
+      } else if (existingAlertIds.has(id) && autoRecoverAlerts) {
         recoveredAlerts[id] = alerts[id];
         currentRecoveredAlerts[id] = alerts[id];
 

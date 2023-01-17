@@ -107,6 +107,10 @@ export class LegacyAlertsClient<
       previouslyRecoveredAlerts: this.recoveredAlertsFromPreviousExecution,
       hasReachedAlertLimit: this.alertFactory!.hasReachedAlertLimit(),
       alertLimit: this.options.maxAlerts,
+      autoRecoverAlerts:
+        this.options.ruleType.autoRecoverAlerts !== undefined
+          ? this.options.ruleType.autoRecoverAlerts
+          : true,
       setFlapping: true,
     });
 
