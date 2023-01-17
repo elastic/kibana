@@ -110,6 +110,10 @@ export class SubFeature {
     return this.config.requireAllSpaces ?? false;
   }
 
+  public get description() {
+    return this.config.description || '';
+  }
+
   public toRaw() {
     return { ...this.config };
   }

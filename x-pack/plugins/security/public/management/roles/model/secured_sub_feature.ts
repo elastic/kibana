@@ -14,7 +14,6 @@ import { SubFeaturePrivilegeGroup } from './sub_feature_privilege_group';
 export class SecuredSubFeature extends SubFeature {
   public readonly privileges: SubFeaturePrivilege[];
   public readonly privilegesTooltip: string;
-  public readonly description: string;
 
   constructor(
     config: SubFeatureConfig,
@@ -23,7 +22,6 @@ export class SecuredSubFeature extends SubFeature {
     super(config);
 
     this.privilegesTooltip = config.privilegesTooltip || '';
-    this.description = config.description || '';
 
     this.privileges = [];
     for (const privilege of this.privilegeIterator()) {
