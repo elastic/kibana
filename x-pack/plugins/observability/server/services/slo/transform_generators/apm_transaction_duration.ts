@@ -6,7 +6,11 @@
  */
 
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
-import { ALL_VALUE, apmTransactionDurationIndicatorSchema } from '@kbn/slo-schema';
+import {
+  ALL_VALUE,
+  apmTransactionDurationIndicatorSchema,
+  timeslicesBudgetingMethodSchema,
+} from '@kbn/slo-schema';
 import { InvalidTransformError } from '../../../errors';
 import {
   SLO_DESTINATION_INDEX_NAME,
@@ -30,7 +34,7 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
       this.buildSource(slo, slo.indicator),
       this.buildDestination(),
       this.buildCommonGroupBy(slo),
-      this.buildAggregations(slo.indicator),
+      this.buildAggregations(slo, slo.indicator),
       this.buildSettings(slo)
     );
   }
@@ -106,7 +110,7 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
     };
   }
 
-  private buildAggregations(indicator: APMTransactionDurationIndicator) {
+  private buildAggregations(slo: SLO, indicator: APMTransactionDurationIndicator) {
     const truncatedThreshold = Math.trunc(indicator.params['threshold.us']);
 
     return {
@@ -133,6 +137,17 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
           field: 'transaction.duration.histogram',
         },
       },
+      ...(timeslicesBudgetingMethodSchema.is(slo.budgetingMethod) && {
+        'slo.isGoodSlice': {
+          bucket_script: {
+            buckets_path: {
+              goodEvents: 'slo.numerator.value',
+              totalEvents: 'slo.denominator.value',
+            },
+            script: `params.goodEvents / params.totalEvents >= ${slo.objective.timesliceTarget} ? 1 : 0`,
+          },
+        },
+      }),
     };
   }
 }
