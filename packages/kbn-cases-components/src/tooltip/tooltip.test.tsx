@@ -74,7 +74,7 @@ describe('Tooltip', () => {
     );
 
     fireEvent.mouseOver(res.getByTestId('sample-span'));
-    expect(await res.findByTestId('cases-components-tooltip')).toBeInTheDocument();
+    expect(await res.findByTestId('tooltip-loading-content')).toBeInTheDocument();
   });
 
   it('renders title correctly', async () => {

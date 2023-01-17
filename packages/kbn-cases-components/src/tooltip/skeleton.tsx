@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { EuiFlexItem, EuiLoadingContent, EuiHorizontalRule } from '@elastic/eui';
+import { EuiFlexItem, EuiLoadingContent, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 
 const SkeletonComponent: React.FC = () => {
   return (
@@ -15,7 +15,7 @@ const SkeletonComponent: React.FC = () => {
       <EuiLoadingContent lines={1} css={{ width: 70, marginBottom: '12px' }} />
       <EuiLoadingContent lines={3} />
       <EuiHorizontalRule margin="xs" />
-      <EuiLoadingContent lines={1} />
+      <EuiSpacer size='s' />
     </EuiFlexItem>
   );
 };
