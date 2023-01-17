@@ -7,4 +7,4 @@
 
 import React from 'react';
 
-export const AlertDonutEmbeddable = () => <div data-test-subj="alert-donut-embeddable" />;
+export const VisualizationEmbeddable = () => <div data-test-subj="visualization-embeddable" />;
