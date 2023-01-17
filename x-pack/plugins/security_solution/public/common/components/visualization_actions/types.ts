@@ -43,7 +43,6 @@ export interface EmbeddableData {
 export type OnEmbeddableLoaded = (data: EmbeddableData) => void;
 
 export interface LensEmbeddableComponentProps {
-  adHocDataViews?: string[];
   applyGlobalQueriesAndFilters?: boolean;
   extraActions?: Action[];
   extraOptions?: ExtraOptions;
