@@ -320,7 +320,9 @@ export class CaseCommentModel {
       await this.updateAlertsStatus(alertAttachments);
     }
 
-    await this.updateAlertsSchemaWithCaseInfo(alertAttachments);
+    if (alertAttachments.length > 0) {
+      await this.updateAlertsSchemaWithCaseInfo(alertAttachments);
+    }
   }
 
   private async updateAlertsStatus(alerts: CommentRequest[]) {

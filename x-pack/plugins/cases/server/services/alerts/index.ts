@@ -209,6 +209,10 @@ export class AlertService {
     try {
       const nonEmptyAlerts = alerts.filter((alert) => !AlertService.isEmptyAlert(alert));
 
+      if (nonEmptyAlerts.length <= 0) {
+        return;
+      }
+
       await this.alertsClient.bulkUpdateCases({
         alerts: nonEmptyAlerts,
         caseIds,

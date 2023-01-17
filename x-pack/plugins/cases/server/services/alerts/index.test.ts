@@ -355,15 +355,30 @@ describe('updateAlertsStatus', () => {
     });
 
     it('filters out alerts with empty id', async () => {
-      await alertService.bulkUpdateCases({ alerts: [{ id: '', index: 'test-index' }], caseIds });
+      await alertService.bulkUpdateCases({
+        alerts: [{ id: '', index: 'test-index' }, ...alerts],
+        caseIds,
+      });
 
-      expect(alertsClient.bulkUpdateCases).toBeCalledWith({ alerts: [], caseIds });
+      expect(alertsClient.bulkUpdateCases).toBeCalledWith({ alerts, caseIds });
     });
 
     it('filters out alerts with empty index', async () => {
-      await alertService.bulkUpdateCases({ alerts: [{ id: 'test-id', index: '' }], caseIds });
+      await alertService.bulkUpdateCases({
+        alerts: [{ id: 'test-id', index: '' }, ...alerts],
+        caseIds,
+      });
 
-      expect(alertsClient.bulkUpdateCases).toBeCalledWith({ alerts: [], caseIds });
+      expect(alertsClient.bulkUpdateCases).toBeCalledWith({ alerts, caseIds });
+    });
+
+    it('does not call the alerts client with no alerts', async () => {
+      await alertService.bulkUpdateCases({
+        alerts: [{ id: '', index: 'test-index' }],
+        caseIds,
+      });
+
+      expect(alertsClient.bulkUpdateCases).not.toHaveBeenCalled();
     });
   });
 });
