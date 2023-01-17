@@ -19,15 +19,17 @@ import type { EmailNotificationService } from './notifications/email_notificatio
 import type { UserActionPersister } from './user_actions/operations/create';
 import type { UserActionFinder } from './user_actions/operations/find';
 
-type FakeUserActionService = PublicMethodsOf<CaseUserActionService> & {
+interface UserActionServiceOperations {
   creator: CaseUserActionPersisterServiceMock;
   finder: CaseUserActionFinderServiceMock;
-};
+}
 
 export type CaseServiceMock = jest.Mocked<CasesService>;
 export type CaseConfigureServiceMock = jest.Mocked<CaseConfigureService>;
 export type ConnectorMappingsServiceMock = jest.Mocked<ConnectorMappingsService>;
-export type CaseUserActionServiceMock = jest.Mocked<FakeUserActionService>;
+export type CaseUserActionServiceMock = jest.Mocked<
+  CaseUserActionService & UserActionServiceOperations
+>;
 export type CaseUserActionPersisterServiceMock = jest.Mocked<UserActionPersister>;
 export type CaseUserActionFinderServiceMock = jest.Mocked<UserActionFinder>;
 export type AlertServiceMock = jest.Mocked<AlertService>;
@@ -102,6 +104,8 @@ const createUserActionFinderServiceMock = (): CaseUserActionFinderServiceMock =>
 
   return service as unknown as CaseUserActionFinderServiceMock;
 };
+
+type FakeUserActionService = PublicMethodsOf<CaseUserActionService> & UserActionServiceOperations;
 
 export const createUserActionServiceMock = (): CaseUserActionServiceMock => {
   const service: FakeUserActionService = {
