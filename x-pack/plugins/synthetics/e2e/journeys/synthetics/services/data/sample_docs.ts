@@ -82,7 +82,7 @@ export const getUpHit = ({
   ecs: {
     version: '8.0.0',
   },
-  config_id: (monitorId || configId) ?? 'b9d9e146-746f-427f-bbf5-6e786b5b4e73',
+  config_id: configId ?? 'b9d9e146-746f-427f-bbf5-6e786b5b4e73',
   data_stream: {
     namespace: 'default',
     type: 'synthetics',
@@ -250,7 +250,7 @@ export const firstDownHit = ({
   ecs: {
     version: '8.0.0',
   },
-  config_id: (monitorId || configId) ?? 'b9d9e146-746f-427f-bbf5-6e786b5b4e73',
+  config_id: configId ?? 'b9d9e146-746f-427f-bbf5-6e786b5b4e73',
   data_stream: {
     namespace: 'default',
     type: 'synthetics',
