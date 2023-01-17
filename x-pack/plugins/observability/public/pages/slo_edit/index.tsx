@@ -9,25 +9,31 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 
-import { ObservabilityAppServices } from '../../application/types';
 import { paths } from '../../config';
+import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
-import { useKibana } from '../../utils/kibana_react';
 import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
+import { useLicense } from '../../hooks/use_license';
 import { SloEditForm } from './components/slo_edit_form';
 import PageNotFound from '../404';
 import { isSloFeatureEnabled } from '../slos/helpers/is_slo_feature_enabled';
 
 export function SloEditPage() {
-  const { http } = useKibana<ObservabilityAppServices>().services;
+  const {
+    application: { navigateToUrl },
+    http: { basePath },
+  } = useKibana().services;
   const { ObservabilityPageTemplate, config } = usePluginContext();
 
   const { sloId } = useParams<{ sloId: string | undefined }>();
 
+  const { hasAtLeast } = useLicense();
+  const hasRightLicense = hasAtLeast('platinum');
+
   useBreadcrumbs([
     {
-      href: http.basePath.prepend(paths.observability.slos),
+      href: basePath.prepend(paths.observability.slos),
       text: i18n.translate('xpack.observability.breadcrumbs.sloEditLinkText', {
         defaultMessage: 'SLOs',
       }),
@@ -38,6 +44,12 @@ export function SloEditPage() {
 
   if (!isSloFeatureEnabled(config)) {
     return <PageNotFound />;
+  }
+
+  console.log('hasRightLicense', hasRightLicense);
+
+  if (hasRightLicense === false) {
+    navigateToUrl(basePath.prepend(paths.observability.slos));
   }
 
   if (loading) {

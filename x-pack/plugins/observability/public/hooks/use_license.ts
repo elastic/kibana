@@ -13,8 +13,8 @@ import type { ILicense, LicenseType } from '@kbn/licensing-plugin/public';
 import { useKibana } from '../utils/kibana_react';
 
 interface UseLicenseReturnValue {
-  getLicense: () => ILicense | null | undefined;
-  hasAtLeast: (level: LicenseType) => boolean;
+  getLicense: () => ILicense | null;
+  hasAtLeast: (level: LicenseType) => boolean | undefined;
 }
 
 export const useLicense = (): UseLicenseReturnValue => {
@@ -24,8 +24,11 @@ export const useLicense = (): UseLicenseReturnValue => {
   return {
     getLicense: () => license,
     hasAtLeast: useCallback(
-      (level: LicenseType): boolean =>
-        !!license && license.isAvailable && license.isActive && license.hasAtLeast(level),
+      (level: LicenseType) => {
+        if (!license) return;
+
+        return !!license && license.isAvailable && license.isActive && license.hasAtLeast(level);
+      },
       [license]
     ),
   };

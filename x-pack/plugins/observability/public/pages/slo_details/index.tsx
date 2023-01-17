@@ -14,29 +14,42 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import { SLOResponse } from '@kbn/slo-schema';
 import { ObservabilityAppServices } from '../../application/types';
 import { paths } from '../../config';
+import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
-import { useKibana } from '../../utils/kibana_react';
+import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
+import { useLicense } from '../../hooks/use_license';
 import PageNotFound from '../404';
 import { isSloFeatureEnabled } from '../slos/helpers/is_slo_feature_enabled';
 import { SLOS_BREADCRUMB_TEXT } from '../slos/translations';
 import { SloDetailsPathParams } from './types';
-import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
 import { SloDetails } from './components/slo_details';
 import { SLO_DETAILS_BREADCRUMB_TEXT } from './translations';
 import { PageTitle } from './components/page_title';
 
 export function SloDetailsPage() {
-  const { http } = useKibana<ObservabilityAppServices>().services;
+  const {
+    application: { navigateToUrl },
+    http: { basePath },
+  } = useKibana<ObservabilityAppServices>().services;
   const { ObservabilityPageTemplate, config } = usePluginContext();
   const { sloId } = useParams<SloDetailsPathParams>();
 
+  const { hasAtLeast } = useLicense();
+  const hasRightLicense = hasAtLeast('platinum');
+
   const { loading, slo } = useFetchSloDetails(sloId);
-  useBreadcrumbs(getBreadcrumbs(http.basePath, slo));
+
+  useBreadcrumbs(getBreadcrumbs(basePath, slo));
 
   const isSloNotFound = !loading && slo === undefined;
+
   if (!isSloFeatureEnabled(config) || isSloNotFound) {
     return <PageNotFound />;
+  }
+
+  if (hasRightLicense === false) {
+    navigateToUrl(basePath.prepend(paths.observability.slos));
   }
 
   return (
