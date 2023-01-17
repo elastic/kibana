@@ -23,6 +23,10 @@ import {
   EuiIcon,
   EuiScreenReaderOnly,
   EuiButton,
+  EuiButtonIcon,
+  EuiPopover,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -37,6 +41,8 @@ import type { IntegrationCardItem } from '../../../../../../common/types/models'
 import type { ExtendedIntegrationCategory, CategoryFacet } from '../screens/home/category_facets';
 
 import type { IntegrationsURLParameters } from '../screens/home/hooks/use_available_packages';
+
+import { ExperimentalFeaturesService } from '../../../services';
 
 import { promoteFeaturedIntegrations } from './utils';
 
@@ -54,7 +60,7 @@ export interface Props {
   setUrlandReplaceHistory: (params: IntegrationsURLParameters) => void;
   setUrlandPushHistory: (params: IntegrationsURLParameters) => void;
   callout?: JSX.Element | null;
-  // Props used only for available packages:
+  // Props used only in AvailablePackages component:
   showCardLabels?: boolean;
   title?: string;
   availableSubCategories?: CategoryFacet[];
@@ -88,6 +94,12 @@ export const PackageListGrid: FunctionComponent<Props> = ({
   const [windowScrollY] = useState(window.scrollY);
   const { euiTheme } = useEuiTheme();
 
+  const [isPopoverOpen, setPopover] = useState(false);
+
+  const MAX_SUBCATEGORIES_NUMBER = 6;
+
+  const { showIntegrationsSubcategories } = ExperimentalFeaturesService.get();
+
   useEffect(() => {
     const menuRefCurrent = menuRef.current;
     const onScroll = () => {
@@ -98,6 +110,14 @@ export const PackageListGrid: FunctionComponent<Props> = ({
     window.addEventListener('scroll', onScroll);
     return () => window.removeEventListener('scroll', onScroll);
   }, [windowScrollY, isSticky]);
+
+  const onButtonClick = () => {
+    setPopover(!isPopoverOpen);
+  };
+
+  const closePopover = () => {
+    setPopover(false);
+  };
 
   const onQueryChange = (e: any) => {
     const queryText = e.target.value;
@@ -112,6 +132,14 @@ export const PackageListGrid: FunctionComponent<Props> = ({
   const resetQuery = () => {
     setSearchTerm('');
     setUrlandReplaceHistory({ searchString: '', categoryId: '', subCategoryId: '' });
+  };
+
+  const onSubCategoryClick = (subCategory: CategoryFacet) => {
+    if (setSelectedSubCategory) setSelectedSubCategory(subCategory);
+    setUrlandPushHistory({
+      categoryId: selectedCategory,
+      subCategoryId: subCategory.id,
+    });
   };
 
   const selectedCategoryTitle = selectedCategory
@@ -130,6 +158,30 @@ export const PackageListGrid: FunctionComponent<Props> = ({
 
     return promoteFeaturedIntegrations(filteredList, selectedCategory);
   }, [isLoading, list, localSearchRef, searchTerm, selectedCategory]);
+
+  let visibleSubCategories;
+  let hiddenSubCategoriesItems;
+  if (availableSubCategories && availableSubCategories?.length < MAX_SUBCATEGORIES_NUMBER) {
+    visibleSubCategories = availableSubCategories;
+  } else if (availableSubCategories && availableSubCategories?.length >= MAX_SUBCATEGORIES_NUMBER) {
+    visibleSubCategories = availableSubCategories.slice(0, MAX_SUBCATEGORIES_NUMBER);
+
+    hiddenSubCategoriesItems = availableSubCategories
+      .slice(MAX_SUBCATEGORIES_NUMBER)
+      .map((subCategory) => {
+        return (
+          <EuiContextMenuItem
+            key={subCategory.id}
+            onClick={() => {
+              onSubCategoryClick(subCategory);
+              closePopover();
+            }}
+          >
+            {subCategory.title}
+          </EuiContextMenuItem>
+        );
+      });
+  }
 
   return (
     <>
@@ -205,37 +257,59 @@ export const PackageListGrid: FunctionComponent<Props> = ({
                 ) : undefined
               }
             />
-            {/* TODO: hide under feature flag */}
-            {availableSubCategories?.length ? <EuiSpacer /> : null}
-            <EuiFlexGroup
-              data-test-subj="epmList.subcategoriesRow"
-              justifyContent="flexStart"
-              direction="row"
-              gutterSize="s"
-            >
-              {availableSubCategories?.map((subCategory) => (
-                <EuiFlexItem grow={0} key={subCategory.id}>
-                  <EuiButton
-                    color="text"
-                    onClick={() => {
-                      if (setSelectedSubCategory) setSelectedSubCategory(subCategory);
-                      setUrlandPushHistory({
-                        categoryId: selectedCategory,
-                        subCategoryId: subCategory.id,
-                      });
-                    }}
-                  >
-                    <FormattedMessage
-                      id="xpack.fleet.epmList.subcategoriesButton"
-                      defaultMessage="{subcategory}"
-                      values={{
-                        subcategory: subCategory.title,
-                      }}
-                    />
-                  </EuiButton>
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
+            {showIntegrationsSubcategories && availableSubCategories?.length ? <EuiSpacer /> : null}
+            {showIntegrationsSubcategories ? (
+              <EuiFlexGroup
+                data-test-subj="epmList.subcategoriesRow"
+                justifyContent="flexStart"
+                direction="row"
+                gutterSize="s"
+                style={{
+                  maxWidth: 943,
+                }}
+              >
+                {visibleSubCategories?.map((subCategory) => (
+                  <EuiFlexItem grow={false} key={subCategory.id}>
+                    <EuiButton
+                      color="text"
+                      aria-label={subCategory?.title}
+                      onClick={() => onSubCategoryClick(subCategory)}
+                    >
+                      <FormattedMessage
+                        id="xpack.fleet.epmList.subcategoriesButton"
+                        defaultMessage="{subcategory}"
+                        values={{
+                          subcategory: subCategory.title,
+                        }}
+                      />
+                    </EuiButton>
+                  </EuiFlexItem>
+                ))}
+                {hiddenSubCategoriesItems ? (
+                  <EuiFlexItem grow={false}>
+                    <EuiPopover
+                      data-test-subj="epmList.showMoreSubCategoriesButton"
+                      id="moreSubCategories"
+                      button={
+                        <EuiButtonIcon
+                          display="base"
+                          onClick={onButtonClick}
+                          iconType="boxesHorizontal"
+                          aria-label="Show more subcategories"
+                          size="m"
+                        />
+                      }
+                      isOpen={isPopoverOpen}
+                      closePopover={closePopover}
+                      panelPaddingSize="none"
+                      anchorPosition="downLeft"
+                    >
+                      <EuiContextMenuPanel size="s" items={hiddenSubCategoriesItems} />
+                    </EuiPopover>
+                  </EuiFlexItem>
+                ) : null}
+              </EuiFlexGroup>
+            ) : null}
             {callout ? (
               <>
                 <EuiSpacer />
