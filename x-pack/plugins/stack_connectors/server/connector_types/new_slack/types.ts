@@ -5,16 +5,8 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
 import { ValidatorServices } from '@kbn/actions-plugin/server/types';
-import {
-  ExecutorSubActionPostMessageParamsSchema,
-  ExecutorSubActionGetChannelsParamsSchema,
-} from '../../../common/slack/schema';
-import type { SlackConfig, SlackSecrets } from '../../../common/slack/types';
-
-// export type SlackConfig = TypeOf<typeof SlackConfigSchema>;
-// export type SlackSecrets = TypeOf<typeof SlackSecretsSchema>;
+import type { SlackConfig, SlackSecrets, GetChannelsResponse } from '../../../common/slack/types';
 
 export type SlackExecutorResultData = PostMessageResponseList | GetChannelsResponse;
 
@@ -34,58 +26,37 @@ export interface PostMessageResponse {
 
 export type PostMessageResponseList = PostMessageResponse[];
 
-export interface GetChannelsResponse {
-  ok: true;
-  channels: [
-    {
-      id: string;
-      name: string;
-      is_channel: boolean;
-      is_archived: boolean;
-      is_private: boolean;
-    }
-  ];
-}
-
-export interface ExternalServiceApi {
-  getChannels: ({
-    externalService,
-  }: {
-    externalService: ExternalService;
-  }) => Promise<GetChannelsResponse>;
-  postMessage: ({
-    externalService,
-    params,
-  }: {
-    externalService: ExternalService;
-    params: PostMessageParams;
-  }) => Promise<PostMessageResponseList>;
-}
-
-export interface ExternalServiceCredentials {
+export interface SlackServiceCredentials {
   config: SlackConfig;
   secrets: SlackSecrets;
 }
-
-// export type ExecutorParams = TypeOf<typeof ExecutorParamsSchema>;
-
-export type ExecutorSubActionGetChannelsParams = TypeOf<
-  typeof ExecutorSubActionGetChannelsParamsSchema
->;
-export type ExecutorSubActionPostMessageParams = TypeOf<
-  typeof ExecutorSubActionPostMessageParamsSchema
->;
 
 export interface PostMessageParams {
   channels: string[];
   text: string;
 }
-export interface ExternalService {
+
+export interface SlackServiceApi {
+  getChannels: ({
+    externalService,
+  }: {
+    externalService: SlackService;
+  }) => Promise<GetChannelsResponse>;
+  postMessage: ({
+    externalService,
+    params,
+  }: {
+    externalService: SlackService;
+    params: PostMessageParams;
+  }) => Promise<PostMessageResponseList>;
+}
+
+export interface SlackService {
   getChannels: ({}) => Promise<GetChannelsResponse>;
   postMessage: ({ channels, text }: PostMessageParams) => Promise<PostMessageResponseList>;
 }
 
-export interface ExternalServiceValidation {
+export interface SlackServiceValidation {
   config: (configObject: {}, validatorServices: ValidatorServices) => void;
   secrets: (secrets: { token: string }, validatorServices: ValidatorServices) => void;
 }

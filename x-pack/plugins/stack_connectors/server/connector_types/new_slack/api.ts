@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ExternalServiceApi, ExternalService, PostMessageParams } from './types';
+import { SlackServiceApi, SlackService, PostMessageParams } from './types';
 
-const getChannelsHandler = async ({ externalService }: { externalService: ExternalService }) => {
+const getChannelsHandler = async ({ externalService }: { externalService: SlackService }) => {
   const res = await externalService.getChannels({});
   return res;
 };
@@ -16,14 +16,14 @@ const postMessageHandler = async ({
   externalService,
   params: { channels, text },
 }: {
-  externalService: ExternalService;
+  externalService: SlackService;
   params: PostMessageParams;
 }) => {
   const res = await externalService.postMessage({ channels, text });
   return res;
 };
 
-export const api: ExternalServiceApi = {
+export const api: SlackServiceApi = {
   getChannels: getChannelsHandler,
   postMessage: postMessageHandler,
 };

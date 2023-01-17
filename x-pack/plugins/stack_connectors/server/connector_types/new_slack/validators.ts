@@ -7,8 +7,7 @@
 
 import { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import type { SlackConfig, SlackSecrets } from '../../../common/slack/types';
-import type { ExternalServiceValidation } from './types';
-// import * as i18n from './translations';
+import type { SlackServiceValidation } from './types';
 
 export const validateCommonConfig = (
   configObject: SlackConfig,
@@ -21,7 +20,7 @@ export const validateCommonSecrets = (
   validatorServices: ValidatorServices
 ) => {};
 
-export const validate: ExternalServiceValidation = {
+export const validate: SlackServiceValidation = {
   config: validateCommonConfig,
   secrets: validateCommonSecrets,
 };

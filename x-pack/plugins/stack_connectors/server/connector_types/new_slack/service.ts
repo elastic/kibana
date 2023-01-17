@@ -10,23 +10,22 @@ import { Logger } from '@kbn/core/server';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { request, getErrorMessage } from '@kbn/actions-plugin/server/lib/axios_utils';
 import {
-  ExternalService,
-  ExternalServiceCredentials,
-  GetChannelsResponse,
+  SlackService,
+  SlackServiceCredentials,
   PostMessageResponse,
   PostMessageResponseList,
   PostMessageParams,
 } from './types';
 import { SLACK_CONNECTOR_NAME } from './translations';
-import type { SlackSecrets } from '../../../common/slack/types';
+import type { SlackSecrets, GetChannelsResponse } from '../../../common/slack/types';
 
 const SLACK_URL = 'https://slack.com/api/';
 
 export const createExternalService = (
-  { secrets }: ExternalServiceCredentials,
+  { secrets }: SlackServiceCredentials,
   logger: Logger,
   configurationUtilities: ActionsConfigurationUtilities
-): ExternalService => {
+): SlackService => {
   const { token } = secrets as SlackSecrets;
 
   if (!token) {
