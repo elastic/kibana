@@ -1,8 +1,6 @@
 # Stack Monitoring integration packages
 
-Infrastructure Observability UI team owns the elasticsearch, kibana, logstash, beats and enterprisesearch integration packages.
-
-Today these packages provide a similar experience as their beats modules counterpart, both for metrics and logs ingestion. Feature wise these two collection modes are used to provide the Stack Monitoring UI the data it needs to power each product views. There is a however a difference in how the data is stored: while standalone beats modules will store all their data in a single data stream, for example `.monitoring-elasticsearch-8-mb`, the integrations will create one data stream for each metricset or filestream, for example `metrics-elasticsearch.stack-monitoring.node-default` for the node metricset. This means the integrations mappings are more specialized because they're split to only define the relevant properties for each metricset but the merged version of an integration data streams should be equivalent to its metricbeat mapping.
+The Stack Monitoring packages provide a similar experience as their beats modules counterpart, both for metrics and logs ingestion. Feature wise these two collection modes are used to provide the Stack Monitoring UI the data it needs to power each product views. There is a however a difference in how the data is stored: while standalone beats modules will store all their data in a single data stream, for example `.monitoring-elasticsearch-8-mb`, the integrations will create one data stream for each metricset or filestream, for example `metrics-elasticsearch.stack-monitoring.node-default` for the node metricset. This means the integrations mappings are more specialized because they're split to only define the relevant properties for each metricset but the merged version of an integration data streams should be equivalent to its metricbeat mapping.
 
 ## Links
 - [Usage dashboard (internal)](https://ela.st/sm-packages-dashboard)
