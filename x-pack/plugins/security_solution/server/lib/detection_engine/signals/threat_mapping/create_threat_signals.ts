@@ -176,20 +176,6 @@ export const createThreatSignals = async ({
     _source: false,
   };
 
-  const threatEnrichment = buildThreatEnrichment({
-    ruleExecutionLogger,
-    services,
-    threatFilters: allThreatFilters,
-    threatIndex,
-    threatIndicatorPath,
-    threatLanguage,
-    threatQuery,
-    pitId: threatPitId,
-    reassignPitId: reassignThreatPitId,
-    listClient,
-    exceptionFilter,
-  });
-
   const createSignals = async ({
     getDocumentList,
     createSignal,
