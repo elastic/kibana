@@ -79,10 +79,7 @@ export const ImportDataModalComponent = ({
   const [actionConnectorsWarnings, setActionConnectorsWarnings] = useState<WarningSchema[] | []>(
     []
   );
-  const {
-    http,
-    application: { navigateToApp },
-  } = useKibana().services;
+  const { http } = useKibana().services;
 
   const cleanupAndCloseModal = useCallback(() => {
     setIsImporting(false);
