@@ -8,12 +8,22 @@
 import expect from '@kbn/expect';
 import {
   ActionTypes,
+  CaseResponse,
   CaseSeverity,
   CaseStatuses,
   CommentUserAction,
   ConnectorTypes,
   FindTypes,
 } from '@kbn/cases-plugin/common/api';
+import {
+  globalRead,
+  noKibanaPrivileges,
+  obsOnly,
+  obsOnlyRead,
+  secOnly,
+  secOnlyRead,
+  superUser,
+} from '../../../../common/lib/authentication/users';
 import { findCaseUserActions } from '../../../../common/lib/user_actions';
 import {
   getPostCaseRequest,
@@ -37,7 +47,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
 
-  describe.only('find_user_actions', () => {
+  describe('find_user_actions', () => {
     afterEach(async () => {
       await deleteAllCaseItems(es);
     });
@@ -573,6 +583,13 @@ export default ({ getService }: FtrProviderContext): void => {
       it('retrieves any non-comment user actions using the action filter', async () => {
         const theCase = await createCase(supertest, getPostCaseRequest());
 
+        // The comment user action should not be returned
+        await createComment({
+          supertest,
+          caseId: theCase.id,
+          params: postCommentUserReq,
+        });
+
         await updateCase({
           supertest,
           params: {
@@ -784,7 +801,134 @@ export default ({ getService }: FtrProviderContext): void => {
       describe('rbac', () => {
         const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-        it('should return the correct user actions', async () => {});
+        let secCase: CaseResponse;
+        let obsCase: CaseResponse;
+        let secCaseSpace2: CaseResponse;
+
+        before(async () => {
+          [secCase, obsCase, secCaseSpace2] = await Promise.all([
+            createCase(
+              supertestWithoutAuth,
+              getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+              200,
+              {
+                user: secOnly,
+                space: 'space1',
+              }
+            ),
+            createCase(
+              supertestWithoutAuth,
+              getPostCaseRequest({ owner: 'observabilityFixture' }),
+              200,
+              {
+                user: obsOnly,
+                space: 'space1',
+              }
+            ),
+            createCase(
+              supertestWithoutAuth,
+              getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+              200,
+              {
+                user: superUser,
+                space: 'space2',
+              }
+            ),
+          ]);
+        });
+
+        it('should return with the correct status code when executing with various users', async () => {
+          for (const scenario of [
+            {
+              user: globalRead,
+              id: secCase.id,
+              space: 'space1',
+            },
+            {
+              user: globalRead,
+              id: obsCase.id,
+              space: 'space1',
+            },
+            {
+              user: superUser,
+              id: secCase.id,
+              space: 'space1',
+            },
+            {
+              user: superUser,
+              id: obsCase.id,
+              space: 'space1',
+            },
+            {
+              user: secOnlyRead,
+              id: secCase.id,
+              space: 'space1',
+            },
+            {
+              user: obsOnlyRead,
+              id: obsCase.id,
+              space: 'space1',
+            },
+          ]) {
+            const res = await findCaseUserActions({
+              caseID: scenario.id,
+              supertest: supertestWithoutAuth,
+              options: {
+                sortOrder: 'asc',
+                types: [ActionTypes.create_case],
+              },
+              auth: { user: scenario.user, space: scenario.space },
+            });
+
+            expect(res.userActions.length).to.be(1);
+          }
+        });
+
+        it('should fail to find user actions for a case that the user is not authorized for', async () => {
+          for (const scenario of [
+            {
+              user: secOnlyRead,
+              id: obsCase.id,
+              space: 'space1',
+              expectedCode: 200,
+            },
+            {
+              user: obsOnlyRead,
+              id: secCase.id,
+              space: 'space1',
+              expectedCode: 200,
+            },
+            {
+              user: noKibanaPrivileges,
+              id: secCase.id,
+              space: 'space1',
+              // this one returns a 403 because the user does not have access to any owners
+              expectedCode: 403,
+            },
+            {
+              user: secOnlyRead,
+              id: secCaseSpace2.id,
+              space: 'space2',
+              // this one returns a 403 because the user does not have access to any owners in this space
+              expectedCode: 403,
+            },
+          ]) {
+            const res = await findCaseUserActions({
+              caseID: scenario.id,
+              supertest: supertestWithoutAuth,
+              expectedHttpCode: scenario.expectedCode,
+              options: {
+                sortOrder: 'asc',
+                types: [ActionTypes.create_case],
+              },
+              auth: { user: scenario.user, space: scenario.space },
+            });
+
+            if (scenario.expectedCode === 200) {
+              expect(res.userActions.length).to.be(0);
+            }
+          }
+        });
       });
     });
   });
