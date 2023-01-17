@@ -26,7 +26,7 @@ export function DownloadPanelContent({
         <p>
           <FormattedMessage
             id="xpack.lens.application.csvPanelContent.generationDescription"
-            defaultMessage="Download the data used in the current visualization."
+            defaultMessage="Download the data displayed in the visualization."
           />
         </p>
         {warnings.map((warning, i) => (
