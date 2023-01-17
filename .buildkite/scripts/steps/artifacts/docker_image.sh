@@ -42,3 +42,27 @@ buildkite-agent artifact upload "kibana-$BASE_VERSION-docker-image.tar.gz"
 buildkite-agent artifact upload "kibana-$BASE_VERSION-docker-image-aarch64.tar.gz"
 buildkite-agent artifact upload "dependencies-$GIT_ABBREV_COMMIT.csv"
 cd -
+
+echo "--- Trigger image tag update"
+if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]]; then
+  if [[ "$BUILDKITE_TRIGGERED_FROM_BUILD_PIPELINE_SLUG" == "kibana-on-merge" ]]
+
+    cat << EOF | buildkite-agent pipeline upload
+steps:
+  - trigger: k8s-gitops-update-image-tag
+    label: "Update image tag for deployment-api"
+    branches: main
+    build:
+      env:
+        MODE: sed
+        TARGET_FILE: app-config-controllers.yaml
+        IMAGE_TAG: "$KIBANA_IMAGE"
+        SERVICE: app-config-controllers
+EOF
+
+  elif
+    echo "Skipping update for untested build.  Update by running kibana-on-merge pipeline"
+  fi
+elif
+  echo "Skipping update for untracked branch $BUILDKITE_BRANCH"
+fi
