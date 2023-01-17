@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { EuiBadge, EuiBadgeGroup, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 interface Props {
@@ -33,47 +33,75 @@ export const TagsBadges = ({ tags, onClick }: Props) => {
   const tagsToDisplay = tags.slice(0, toDisplay);
 
   return (
-    <EuiBadgeGroup>
+    <EuiFlexGroup wrap gutterSize="xs" style={{ maxWidth: 400 }} alignItems="baseline">
       {tagsToDisplay.map((tag) => (
         // filtering only makes sense in monitor list, where we have summary
-
-        <EuiBadge
-          key={tag}
-          title={getFilterLabel(tag)}
-          onClick={() => {
-            onClick?.(tag);
-          }}
-          onClickAriaLabel={getFilterLabel(tag)}
-          color="hollow"
-          className="eui-textTruncate"
-          style={{ maxWidth: 120 }}
-        >
-          {tag}
-        </EuiBadge>
+        <EuiFlexItem key={tag} grow={false}>
+          {onClick ? (
+            <EuiBadge
+              key={tag}
+              title={getFilterLabel(tag)}
+              onClick={() => {
+                onClick(tag);
+              }}
+              onClickAriaLabel={getFilterLabel(tag)}
+              color="hollow"
+              className="eui-textTruncate"
+              style={{ maxWidth: 120 }}
+            >
+              {tag}
+            </EuiBadge>
+          ) : (
+            <EuiBadge
+              key={tag}
+              color="hollow"
+              className="eui-textTruncate"
+              style={{ maxWidth: 120 }}
+            >
+              {tag}
+            </EuiBadge>
+          )}
+        </EuiFlexItem>
       ))}
       {tags.length > toDisplay && (
-        <EuiBadge
-          color="hollow"
-          onClick={() => {
-            setToDisplay(tags.length);
-          }}
-          onClickAriaLabel={EXPAND_TAGS_LABEL}
-        >
-          +{tags.length - toDisplay}
-        </EuiBadge>
+        <EuiFlexItem key={tags.length - toDisplay} grow={false}>
+          <EuiToolTip
+            content={
+              <>
+                {tags.slice(toDisplay, tags.length).map((tag) => (
+                  <EuiText size="s">{tag}</EuiText>
+                ))}
+              </>
+            }
+          >
+            <EuiBadge
+              color="hollow"
+              onClick={() => {
+                setToDisplay(tags.length);
+              }}
+              onClickAriaLabel={EXPAND_TAGS_LABEL}
+            >
+              +{tags.length - toDisplay}
+            </EuiBadge>
+          </EuiToolTip>
+        </EuiFlexItem>
       )}
-      {tags.length === toDisplay && (
-        <EuiBadge
-          color="hollow"
-          onClick={() => {
-            setToDisplay(3);
-          }}
-          onClickAriaLabel={COLLAPSE_TAGS_LABEL}
-        >
-          -{tags.length - 3}
-        </EuiBadge>
+      {toDisplay > 3 && (
+        <EuiFlexItem key={tags.length - 3} grow={false}>
+          <EuiToolTip content={COLLAPSE_TAGS_LABEL} key={toDisplay}>
+            <EuiBadge
+              color="hollow"
+              onClick={() => {
+                setToDisplay(3);
+              }}
+              onClickAriaLabel={COLLAPSE_TAGS_LABEL}
+            >
+              -{tags.length - 3}
+            </EuiBadge>
+          </EuiToolTip>
+        </EuiFlexItem>
       )}
-    </EuiBadgeGroup>
+    </EuiFlexGroup>
   );
 };
 

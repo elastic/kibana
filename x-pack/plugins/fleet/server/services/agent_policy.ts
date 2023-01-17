@@ -1042,7 +1042,7 @@ class AgentPolicyService {
       type: SAVED_OBJECT_TYPE,
       page: 1,
       perPage: SO_SEARCH_LIMIT,
-      filter: `${SAVED_OBJECT_TYPE}.attributes.inactivity_timeout: *`,
+      filter: `${SAVED_OBJECT_TYPE}.attributes.inactivity_timeout > 0`,
       fields: [`inactivity_timeout`],
     });
 

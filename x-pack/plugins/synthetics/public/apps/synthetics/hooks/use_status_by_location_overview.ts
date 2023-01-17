@@ -11,9 +11,10 @@ import { selectOverviewStatus } from '../state/overview';
 export function useStatusByLocationOverview(configId: string, locationName?: string) {
   const { status } = useSelector(selectOverviewStatus);
   if (!locationName || !status) {
-    return 'unknown';
+    return { status: 'unknown' };
   }
   const allConfigs = status.allConfigs;
+  const config = allConfigs[`${configId}-${locationName}`];
 
-  return allConfigs[`${configId}-${locationName}`]?.status || 'unknown';
+  return { status: config?.status || 'unknown', timestamp: config?.timestamp };
 }

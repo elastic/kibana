@@ -20,6 +20,9 @@ import type { DataTableModel } from '../../../store/data_table/model';
 import type { AlertWorkflowStatus, Refetch } from '../../../types';
 import type { DataTableState } from '../../../store/data_table/types';
 import type { OnUpdateAlertStatusError, OnUpdateAlertStatusSuccess } from './types';
+import type { inputsModel } from '../../../store';
+import { inputsSelectors } from '../../../store';
+import { useDeepEqualSelector } from '../../../hooks/use_selector';
 
 interface OwnProps {
   id: string;
@@ -31,7 +34,7 @@ interface OwnProps {
   onActionSuccess?: OnUpdateAlertStatusSuccess;
   onActionFailure?: OnUpdateAlertStatusError;
   customBulkActions?: CustomBulkActionProp[];
-  refetch: Refetch;
+  customRefetch?: Refetch;
 }
 
 export type StatefulAlertBulkActionsProps = OwnProps & PropsFromRedux;
@@ -53,11 +56,16 @@ export const AlertBulkActionsComponent = React.memo<StatefulAlertBulkActionsProp
     onActionSuccess,
     onActionFailure,
     customBulkActions,
-    refetch,
+    customRefetch,
   }) => {
     const dispatch = useDispatch();
 
     const [showClearSelection, setShowClearSelection] = useState(false);
+    const getGlobalQuerySelector = inputsSelectors.globalQuery();
+    const globalQueries = useDeepEqualSelector(getGlobalQuerySelector);
+    const refetchQuery = useCallback(() => {
+      globalQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
+    }, [globalQueries]);
 
     // Catches state change isSelectAllChecked->false (page checkbox) upon user selection change to reset toolbar select all
     useEffect(() => {
@@ -85,22 +93,30 @@ export const AlertBulkActionsComponent = React.memo<StatefulAlertBulkActionsProp
 
     const onUpdateSuccess = useCallback(
       (updated: number, conflicts: number, newStatus: AlertWorkflowStatus) => {
-        refetch();
+        if (customRefetch) {
+          customRefetch();
+        } else {
+          refetchQuery();
+        }
         if (onActionSuccess) {
           onActionSuccess(updated, conflicts, newStatus);
         }
       },
-      [refetch, onActionSuccess]
+      [customRefetch, onActionSuccess, refetchQuery]
     );
 
     const onUpdateFailure = useCallback(
       (newStatus: AlertWorkflowStatus, error: Error) => {
-        refetch();
+        if (customRefetch) {
+          customRefetch();
+        } else {
+          refetchQuery();
+        }
         if (onActionFailure) {
           onActionFailure(newStatus, error);
         }
       },
-      [refetch, onActionFailure]
+      [customRefetch, onActionFailure, refetchQuery]
     );
 
     const setEventsLoading = useCallback<SetEventsLoading>(
