@@ -23,7 +23,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { USERNAME_LABEL, PASSWORD_LABEL } from '../../../../shared/constants';
+import { USERNAME_LABEL, PASSWORD_LABEL } from '../../../../../../shared/constants';
 
 import { AuthenticationPanelLogic } from './authentication_panel_logic';
 import { AUTHENTICATION_LABELS } from './constants';

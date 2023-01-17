@@ -6,7 +6,7 @@
  */
 import { EuiSelectableLIOption } from '@elastic/eui/src/components/selectable/selectable_option';
 
-import { CrawlerDomain } from '../../../api/crawler/types';
+import { CrawlerDomain } from '../../../../../api/crawler/types';
 
 export const getSelectableOptions = (
   domain: CrawlerDomain,

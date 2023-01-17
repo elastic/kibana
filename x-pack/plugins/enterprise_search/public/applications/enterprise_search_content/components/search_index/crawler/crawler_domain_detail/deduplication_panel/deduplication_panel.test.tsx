@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockActions, setMockValues } from '../../../../__mocks__/kea_logic';
+import { setMockActions, setMockValues } from '../../../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -26,8 +26,7 @@ import {
 
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
-import { DataPanel } from '../../../../shared/data_panel/data_panel';
-import { rerender } from '../../../../test_helpers';
+import { rerender } from '../../../../../../test_helpers';
 
 import { DeduplicationPanel } from './deduplication_panel';
 
@@ -63,7 +62,7 @@ describe('DeduplicationPanel', () => {
   it('contains a button to reset to defaults', () => {
     const wrapper = shallow(<DeduplicationPanel />);
 
-    wrapper.find(DataPanel).dive().find(EuiButton).simulate('click');
+    wrapper.find('EuiFlexGroup').first().dive().find(EuiButton).simulate('click');
 
     expect(MOCK_ACTIONS.submitDeduplicationUpdate).toHaveBeenCalledWith({
       fields: [],

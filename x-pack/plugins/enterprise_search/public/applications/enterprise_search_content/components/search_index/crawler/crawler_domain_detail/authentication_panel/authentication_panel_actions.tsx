@@ -17,8 +17,8 @@ import {
   SAVE_BUTTON_LABEL,
   CANCEL_BUTTON_LABEL,
   DELETE_BUTTON_LABEL,
-} from '../../../../shared/constants';
-import { CrawlerAuth } from '../../../api/crawler/types';
+} from '../../../../../../shared/constants';
+import { CrawlerAuth } from '../../../../../api/crawler/types';
 import { CrawlerDomainDetailLogic } from '../crawler_domain_detail_logic';
 
 import { AuthenticationPanelLogic } from './authentication_panel_logic';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mockFlashMessageHelpers, setMockActions } from '../../../__mocks__/kea_logic';
+import { mockFlashMessageHelpers, setMockActions } from '../../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -14,9 +14,9 @@ import { shallow } from 'enzyme';
 import { EuiEmptyPrompt, EuiFieldText } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
-import { GenericEndpointInlineEditableTable } from '../../../shared/tables/generic_endpoint_inline_editable_table';
+import { GenericEndpointInlineEditableTable } from '../../../../../shared/tables/generic_endpoint_inline_editable_table';
 
-import { CrawlerDomain } from '../../api/crawler/types';
+import { CrawlerDomain } from '../../../../api/crawler/types';
 
 import { SitemapsTable } from './sitemaps_table';
 

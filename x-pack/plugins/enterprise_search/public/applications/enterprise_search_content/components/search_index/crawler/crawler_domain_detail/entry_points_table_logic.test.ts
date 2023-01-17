@@ -13,7 +13,7 @@ jest.mock('./crawler_domain_detail_logic', () => ({
   },
 }));
 
-import { LogicMounter, mockFlashMessageHelpers } from '../../../__mocks__/kea_logic';
+import { LogicMounter, mockFlashMessageHelpers } from '../../../../../__mocks__/kea_logic';
 
 import { CrawlerDomainDetailLogic } from './crawler_domain_detail_logic';
 import { EntryPointsTableLogic } from './entry_points_table_logic';
