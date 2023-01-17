@@ -28,10 +28,13 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
   const firstCheckTime = new Date(Date.now()).toISOString();
   let downCheckTime = new Date(Date.now()).toISOString();
 
+  let configId: string;
+  let configId2: string;
+
   before(async () => {
     await services.cleaUp();
     await services.enableMonitorManagedViaApi();
-    await services.addTestMonitor('Test Monitor', {
+    configId = await services.addTestMonitor('Test Monitor', {
       type: 'http',
       urls: 'https://www.google.com',
       custom_heartbeat_id: 'b9d9e146-746f-427f-bbf5-6e786b5b4e73',
@@ -39,7 +42,7 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
         { id: 'us_central', label: 'North America - US Central', isServiceManaged: true },
       ],
     });
-    await services.addTestSummaryDocument({ timestamp: firstCheckTime });
+    await services.addTestSummaryDocument({ timestamp: firstCheckTime, configId });
   });
 
   after(async () => {
@@ -84,6 +87,7 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
     await services.addTestSummaryDocument({
       docType: 'summaryDown',
       timestamp: downCheckTime,
+      configId,
     });
     await page.waitForTimeout(5 * 1000);
 
@@ -119,7 +123,7 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
   });
 
   step('set monitor status to up and verify that alert recovers', async () => {
-    await services.addTestSummaryDocument();
+    await services.addTestSummaryDocument({ configId });
 
     await retry.tryForTime(3 * 60 * 1000, async () => {
       await page.click(byTestId('querySubmitButton'));
@@ -129,7 +133,7 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
   });
 
   step('set the status down again to generate another alert', async () => {
-    await services.addTestSummaryDocument({ docType: 'summaryDown' });
+    await services.addTestSummaryDocument({ docType: 'summaryDown', configId });
 
     await retry.tryForTime(3 * 60 * 1000, async () => {
       await page.click(byTestId('querySubmitButton'));
@@ -141,7 +145,7 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
   step('Adds another down monitor and it auto adds the alert', async () => {
     const monitorId = uuid.v4();
     const name = `Test Monitor 2`;
-    await services.addTestMonitor(name, {
+    configId2 = await services.addTestMonitor(name, {
       type: 'http',
       urls: 'https://www.google.com',
       custom_heartbeat_id: monitorId,
@@ -157,6 +161,7 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
       monitorId,
       docType: 'summaryDown',
       name,
+      configId: configId2,
     });
 
     const reasonMessage = getReasonMessage({
@@ -186,6 +191,9 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
       const alertsCount = await page.waitForSelector(`text=1 Alert`, { timeout: 10 * 1000 });
       expect(await alertsCount.isVisible()).toBe(true);
     });
+
+    await page.click(byTestId('alert-status-filter-active-button'));
+    await page.waitForTimeout(5 * 1000);
 
     await page.click('[aria-label="View in app"]');
     await page.click(byTestId('syntheticsMonitorOverviewTab'));
