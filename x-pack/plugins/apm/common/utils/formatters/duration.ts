@@ -100,7 +100,7 @@ function getUnitLabelAndConvertedValue(
 /**
  * Converts a microseconds value into the unit defined.
  */
-export function convertTo({
+function convertTo({
   unit,
   microseconds,
   defaultValue = NOT_AVAILABLE_LABEL,
