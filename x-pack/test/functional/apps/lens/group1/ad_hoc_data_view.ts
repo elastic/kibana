@@ -256,6 +256,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // adhoc data view should be persisted after refresh
       await browser.refresh();
       await checkDiscoverNavigationResult();
+
+      await browser.closeCurrentWindow();
+      await browser.switchToWindow(daashboardHandle);
     });
   });
 }
