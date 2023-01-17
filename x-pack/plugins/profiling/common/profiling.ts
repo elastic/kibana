@@ -59,6 +59,7 @@ export enum FrameType {
   Ruby,
   Perl,
   JavaScript,
+  PHPJIT,
 }
 
 const frameTypeDescriptions = {
@@ -71,6 +72,7 @@ const frameTypeDescriptions = {
   [FrameType.Ruby]: 'Ruby',
   [FrameType.Perl]: 'Perl',
   [FrameType.JavaScript]: 'JavaScript',
+  [FrameType.PHPJIT]: 'PHP JIT',
 };
 
 export function describeFrameType(ft: FrameType): string {
