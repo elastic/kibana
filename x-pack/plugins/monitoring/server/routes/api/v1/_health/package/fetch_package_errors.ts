@@ -12,34 +12,34 @@ import type { Products } from '../errors_helpers/build_errors';
 import { errorsQuery } from '../errors_helpers/errors_query';
 import { buildErrors } from '../errors_helpers/build_errors';
 
-interface MetricbeatResponse {
+interface PackageResponse {
   products?: Products;
   execution: FetchExecution;
 }
 
-export const fetchMetricbeatErrors = async ({
+export const fetchPackageErrors = async ({
   timeout,
-  metricbeatIndex,
   timeRange,
   search,
   logger,
+  packageIndex,
 }: FetchParameters & {
-  metricbeatIndex: string;
-}): Promise<MetricbeatResponse> => {
-  const getMetricbeatErrors = async () => {
+  packageIndex: string;
+}): Promise<PackageResponse> => {
+  const getPackageErrors = async () => {
     const { aggregations, timed_out: timedOut } = await search({
-      index: metricbeatIndex,
+      index: packageIndex,
       body: errorsQuery({
         timeRange,
         timeout,
         products: [
           MonitoredProduct.Beats,
           MonitoredProduct.Elasticsearch,
-          MonitoredProduct.EnterpriseSearch,
           MonitoredProduct.Kibana,
           MonitoredProduct.Logstash,
         ],
-        errorQueryType: 'metricbeatErrorsQuery',
+        errorQueryType: 'packageErrorsQuery',
+        errorQueryIsDataStream: true,
       }),
       size: 0,
       ignore_unavailable: true,
@@ -49,7 +49,7 @@ export const fetchMetricbeatErrors = async ({
   };
 
   try {
-    const { products, timedOut } = await getMetricbeatErrors();
+    const { products, timedOut } = await getPackageErrors();
     return {
       products,
       execution: {
@@ -58,7 +58,7 @@ export const fetchMetricbeatErrors = async ({
       },
     };
   } catch (err) {
-    logger.error(`fetchMetricbeatErrors: failed to fetch:\n${err.stack}`);
+    logger.error(`fetchPackageErrors: failed to fetch:\n${err.stack}`);
     return {
       execution: {
         timedOut: false,
