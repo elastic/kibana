@@ -30,7 +30,7 @@ export async function fetchScreenshotBlockSet(params: string[]): Promise<Screens
   });
 }
 
-export async function fetchJourneySteps(
+export async function fetchBrowserJourney(
   params: FetchJourneyStepsParams
 ): Promise<SyntheticsJourneyApiResponse> {
   return apiService.get(

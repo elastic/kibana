@@ -64,7 +64,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables endpoint package level rbac
    */
-  endpointRbacEnabled: false,
+  endpointRbacEnabled: true,
 
   /**
    * Enables endpoint package level rbac for response actions only.

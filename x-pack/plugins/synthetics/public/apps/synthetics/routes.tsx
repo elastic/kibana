@@ -16,9 +16,12 @@ import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useInspectorContext } from '@kbn/observability-plugin/public';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
+import { EditMonitorLink } from './components/common/links/edit_monitor';
+import { MonitorDetailsLocation } from './components/monitor_details/monitor_details_location';
+import { getStepDetailsRoute } from './components/step_details_page/route_config';
+import { getTestRunDetailsRoute } from './components/test_run_details/route_config';
 import { getSettingsRouteConfig } from './components/settings/route_config';
 import { TestRunDetails } from './components/test_run_details/test_run_details';
-import { StepTitle } from './components/step_details_page/step_title';
 import { MonitorAddPageWithServiceAllowed } from './components/monitor_add_edit/monitor_add_page';
 import { MonitorEditPageWithServiceAllowed } from './components/monitor_add_edit/monitor_edit_page';
 import { MonitorDetailsPageTitle } from './components/monitor_details/monitor_details_page_title';
@@ -41,7 +44,6 @@ import {
   MONITOR_ERRORS_ROUTE,
   MONITOR_HISTORY_ROUTE,
   MONITOR_ROUTE,
-  STEP_DETAIL_ROUTE,
   OVERVIEW_ROUTE,
   TEST_RUN_DETAILS_ROUTE,
 } from '../../../common/constants';
@@ -50,12 +52,10 @@ import { MonitorsPageWithServiceAllowed } from './components/monitors_page/monit
 import { apiService } from '../../utils/api_service';
 import { RunTestManually } from './components/monitor_details/run_test_manually';
 import { MonitorDetailsStatus } from './components/monitor_details/monitor_details_status';
-import { MonitorDetailsLocation } from './components/monitor_details/monitor_details_location';
 import { MonitorDetailsLastRun } from './components/monitor_details/monitor_details_last_run';
 import { MonitorSummary } from './components/monitor_details/monitor_summary/monitor_summary';
 import { MonitorHistory } from './components/monitor_details/monitor_history/monitor_history';
 import { MonitorErrors } from './components/monitor_details/monitor_errors/monitor_errors';
-import { StepDetailPage } from './components/step_details_page/step_detail_page';
 import { getErrorDetailsRouteConfig } from './components/error_details/route_config';
 
 export type RouteProps = LazyObservabilityPageTemplateProps & {
@@ -84,6 +84,8 @@ const getRoutes = (
   return [
     ...getSettingsRouteConfig(history, syntheticsPath, baseTitle),
     getErrorDetailsRouteConfig(history, syntheticsPath, baseTitle),
+    getTestRunDetailsRoute(history, syntheticsPath, baseTitle),
+    getStepDetailsRoute(history, syntheticsPath, baseTitle),
     {
       title: i18n.translate('xpack.synthetics.gettingStartedRoute.title', {
         defaultMessage: 'Synthetics Getting Started | {baseTitle}',
@@ -268,24 +270,6 @@ const getRoutes = (
       },
     },
     {
-      title: i18n.translate('xpack.synthetics.stepDetailsRoute.title', {
-        defaultMessage: 'Step details | {baseTitle}',
-        values: { baseTitle },
-      }),
-      path: STEP_DETAIL_ROUTE,
-      component: StepDetailPage,
-      dataTestSubj: 'syntheticsMonitorEditPage',
-      pageHeader: {
-        pageTitle: <StepTitle />,
-        rightSideItems: [],
-        breadcrumbs: [
-          {
-            text: <OutPortal node={MonitorDetailsLinkPortalNode} />,
-          },
-        ],
-      },
-    },
-    {
       title: i18n.translate('xpack.synthetics.testRunDetailsRoute.title', {
         defaultMessage: 'Test run details | {baseTitle}',
         values: { baseTitle },
@@ -339,6 +323,7 @@ const getMonitorSummaryHeader = (
       },
     ],
     rightSideItems: [
+      <EditMonitorLink />,
       <RunTestManually />,
       <MonitorDetailsLastRun />,
       <MonitorDetailsStatus />,
