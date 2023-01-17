@@ -488,6 +488,7 @@ export const DEFAULT_DETECTION_PAGE_FILTERS = [
     fieldName: 'user.name',
   },
   {
+    title: 'Host',
     fieldName: 'host.name',
   },
 ];
