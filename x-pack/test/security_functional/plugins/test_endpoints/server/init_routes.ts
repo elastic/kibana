@@ -206,7 +206,7 @@ export function initRoutes(
           ]);
         }
 
-        await refreshTaskManagerIndex(request, coreStart, taskManager);
+        await refreshTaskManagerIndex(request.body.enabled, coreStart, taskManager);
 
         // Make sure that the task enters idle state before acknowledging that task was disabled.
         if (!request.body.enabled) {
