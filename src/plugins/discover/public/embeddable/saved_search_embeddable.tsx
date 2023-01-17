@@ -242,6 +242,7 @@ export class SavedSearchEmbeddable
         this.searchProps!.isSortEnabled = false;
         return;
       }
+      console.log('fetching data', this.searchProps!);
 
       // Request document data
       const { rawResponse: resp } = await lastValueFrom(
