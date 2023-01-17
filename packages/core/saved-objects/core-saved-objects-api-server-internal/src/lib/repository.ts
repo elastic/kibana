@@ -17,7 +17,7 @@ import {
   isSupportedEsServer,
   isNotFoundFromUnsupportedServer,
 } from '@kbn/core-elasticsearch-server-internal';
-import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { BulkResolveError, SavedObject } from '@kbn/core-saved-objects-common';
 import type {
   SavedObjectsBaseOptions,
   SavedObjectsIncrementCounterOptions,
@@ -76,11 +76,8 @@ import {
   AuthorizeCreateObject,
   AuthorizeUpdateObject,
 } from '@kbn/core-saved-objects-server';
-import {
-  DEFAULT_NAMESPACE_STRING,
-  SavedObjectsErrorHelpers,
-  type DecoratedError,
-} from '@kbn/core-saved-objects-utils-server';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
+import { SavedObjectsErrorHelpers, type DecoratedError } from '@kbn/core-saved-objects-common';
 import {
   ALL_NAMESPACES_STRING,
   FIND_DEFAULT_PAGE,
@@ -104,11 +101,7 @@ import { PointInTimeFinder } from './point_in_time_finder';
 import { createRepositoryEsClient, type RepositoryEsClient } from './repository_es_client';
 import { getSearchDsl } from './search_dsl';
 import { includedFields } from './included_fields';
-import {
-  internalBulkResolve,
-  type InternalBulkResolveError,
-  isBulkResolveError,
-} from './internal_bulk_resolve';
+import { internalBulkResolve, isBulkResolveError } from './internal_bulk_resolve';
 import { validateConvertFilterToKueryNode } from './filter_utils';
 import { validateAndConvertAggregations } from './aggregations';
 import {
@@ -1739,7 +1732,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     const resolvedObjects = bulkResults.map<SavedObjectsResolveResponse<T>>((result) => {
       // extract payloads from saved object errors
       if (isBulkResolveError(result)) {
-        const errorResult = result as InternalBulkResolveError;
+        const errorResult = result as BulkResolveError;
         const { type, id, error } = errorResult;
         return {
           saved_object: { type, id, error: errorContent(error) } as unknown as SavedObject<T>,

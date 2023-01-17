@@ -9,7 +9,7 @@
 import type { MgetResponseItem } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
-import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { BulkResolveError, SavedObject } from '@kbn/core-saved-objects-common';
 import type {
   SavedObjectsBaseOptions,
   SavedObjectsBulkResolveObject,
@@ -23,10 +23,7 @@ import {
   type ISavedObjectTypeRegistry,
   type SavedObjectsRawDocSource,
 } from '@kbn/core-saved-objects-server';
-import {
-  SavedObjectsErrorHelpers,
-  type DecoratedError,
-} from '@kbn/core-saved-objects-utils-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-common';
 import {
   LEGACY_URL_ALIAS_TYPE,
   type LegacyUrlAlias,
@@ -81,25 +78,14 @@ export interface InternalBulkResolveParams {
  * @public
  */
 export interface InternalSavedObjectsBulkResolveResponse<T = unknown> {
-  resolved_objects: Array<SavedObjectsResolveResponse<T> | InternalBulkResolveError>;
-}
-
-/**
- * Error result for the internal bulkResolve function.
- *
- * @internal
- */
-export interface InternalBulkResolveError {
-  type: string;
-  id: string;
-  error: DecoratedError;
+  resolved_objects: Array<SavedObjectsResolveResponse<T> | BulkResolveError>;
 }
 
 /** Type guard used in the repository. */
 export function isBulkResolveError<T>(
-  result: SavedObjectsResolveResponse<T> | InternalBulkResolveError
-): result is InternalBulkResolveError {
-  return !!(result as InternalBulkResolveError).error;
+  result: SavedObjectsResolveResponse<T> | BulkResolveError
+): result is BulkResolveError {
+  return !!(result as BulkResolveError).error;
 }
 
 type AliasInfo = Pick<LegacyUrlAlias, 'targetId' | 'purpose'>;
@@ -199,9 +185,7 @@ export async function internalBulkResolve<T>(
   }
 
   // map function for pMap below
-  const mapper = async (
-    either: Either<InternalBulkResolveError, SavedObjectsBulkResolveObject>
-  ) => {
+  const mapper = async (either: Either<BulkResolveError, SavedObjectsBulkResolveObject>) => {
     if (isLeft(either)) {
       return either.value;
     }
@@ -280,7 +264,7 @@ export async function internalBulkResolve<T>(
 
 /** Separates valid and invalid object types */
 function validateObjectTypes(objects: SavedObjectsBulkResolveObject[], allowedTypes: string[]) {
-  return objects.map<Either<InternalBulkResolveError, SavedObjectsBulkResolveObject>>((object) => {
+  return objects.map<Either<BulkResolveError, SavedObjectsBulkResolveObject>>((object) => {
     const { type, id } = object;
     if (!allowedTypes.includes(type)) {
       return {

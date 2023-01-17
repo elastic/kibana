@@ -24,12 +24,8 @@ import {
   type ISavedObjectTypeRegistry,
   type SavedObjectsRawDocSource,
 } from '@kbn/core-saved-objects-server';
-import {
-  SavedObjectsErrorHelpers,
-  ALL_NAMESPACES_STRING,
-  type DecoratedError,
-  SavedObjectsUtils,
-} from '@kbn/core-saved-objects-utils-server';
+import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
+import { SavedObjectsErrorHelpers, type DecoratedError } from '@kbn/core-saved-objects-common';
 import type {
   IndexMapping,
   SavedObjectsSerializer,

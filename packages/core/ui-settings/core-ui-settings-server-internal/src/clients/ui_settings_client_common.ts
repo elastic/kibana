@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-common';
 import { createOrUpgradeSavedConfig } from '../create_or_upgrade_saved_config';
 import { CannotOverrideError } from '../ui_settings_errors';
 import { Cache } from '../cache';

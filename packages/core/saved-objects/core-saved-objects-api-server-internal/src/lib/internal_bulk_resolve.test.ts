@@ -18,7 +18,8 @@ import type {
   SavedObjectsBulkResolveObject,
   SavedObjectsBaseOptions,
 } from '@kbn/core-saved-objects-api-server';
-import { SavedObjectsErrorHelpers, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-common';
 import {
   SavedObjectsSerializer,
   LEGACY_URL_ALIAS_TYPE,

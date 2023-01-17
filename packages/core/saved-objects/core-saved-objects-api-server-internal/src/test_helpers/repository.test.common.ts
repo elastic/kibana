@@ -37,7 +37,7 @@ import {
   SavedObjectsFindOptions,
   SavedObjectsUpdateOptions,
 } from '@kbn/core-saved-objects-api-server';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-common';
 
 import {
   encodeHitVersion,

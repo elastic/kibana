@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-common';
 import type { ValidateReferencesParams } from './validate_references';
 import { validateReferences } from './validate_references';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';

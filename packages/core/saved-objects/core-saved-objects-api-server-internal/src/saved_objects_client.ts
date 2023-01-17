@@ -43,7 +43,7 @@ import type {
   SavedObjectsBulkDeleteOptions,
   SavedObjectsBulkDeleteResponse,
 } from '@kbn/core-saved-objects-api-server';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-common';
 
 /**
  * Core internal implementation of {@link SavedObjectsClientContract}

@@ -9,7 +9,7 @@
 jest.mock('uuid');
 
 import supertest from 'supertest';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-common';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { ICoreUsageStatsClient } from '@kbn/core-usage-data-base-server-internal';
 import {

@@ -10,9 +10,9 @@ import type {
   SavedObjectsResolveResponse,
 } from '@kbn/core-saved-objects-api-server';
 import type { SavedObjectsClient } from '@kbn/core-saved-objects-api-server-internal';
-import type { InternalBulkResolveError } from '@kbn/core-saved-objects-api-server-internal/src/lib/internal_bulk_resolve';
 import { isBulkResolveError } from '@kbn/core-saved-objects-api-server-internal/src/lib/internal_bulk_resolve';
-import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { BulkResolveError, SavedObject } from '@kbn/core-saved-objects-common';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-common';
 import { AuditAction, SecurityAction } from '@kbn/core-saved-objects-server';
 import type {
   AddAuditEventParams,
@@ -37,11 +37,7 @@ import type {
   AuthorizeBulkUpdateParams,
   InternalAuthorizeOptions,
 } from '@kbn/core-saved-objects-server/src/extensions/security';
-import {
-  ALL_NAMESPACES_STRING,
-  SavedObjectsErrorHelpers,
-  SavedObjectsUtils,
-} from '@kbn/core-saved-objects-utils-server';
+import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../common/constants';
 import type { AuditLogger } from '../audit';
@@ -742,7 +738,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
    */
   async authorizeAndRedactInternalBulkResolve<T = unknown>(
     params: AuthorizeAndRedactInternalBulkResolveParams<T>
-  ): Promise<Array<SavedObjectsResolveResponse<T> | InternalBulkResolveError>> {
+  ): Promise<Array<SavedObjectsResolveResponse<T> | BulkResolveError>> {
     const { namespace, objects } = params;
     const namespaceString = SavedObjectsUtils.namespaceIdToString(namespace); // ToDo: prefer this methodology for other methods (as opposed to having to pass in the qualified namespaceString)?
     const typesAndSpaces = new Map<string, Set<string>>();

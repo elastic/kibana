@@ -18,7 +18,9 @@ import {
   type ISavedObjectsSecurityExtension,
   type ISavedObjectTypeRegistry,
 } from '@kbn/core-saved-objects-server';
-import { SavedObjectsErrorHelpers, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-common';
+
 import {
   type SavedObjectsSerializer,
   getObjectKey,

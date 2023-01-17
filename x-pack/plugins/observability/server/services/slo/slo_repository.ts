@@ -10,7 +10,7 @@ import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-common';
 import { sloSchema } from '@kbn/slo-schema';
 
 import { StoredSLO, SLO } from '../../domain/models';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { InternalBulkResolveError } from '@kbn/core-saved-objects-api-server-internal/src/lib/internal_bulk_resolve';
+import type { BulkResolveError } from '@kbn/core-saved-objects-common';
 import type { AuthorizeCreateObject, AuthorizeUpdateObject } from '@kbn/core-saved-objects-server';
 import { AuditAction, SecurityAction } from '@kbn/core-saved-objects-server';
 import type {
@@ -3283,7 +3283,7 @@ describe('#authorizeAndRedactInternalBulkResolve', () => {
 
   test('returns empty arry when no objects are provided`', async () => {
     const { securityExtension } = setup();
-    const emptyObjects: Array<SavedObjectsResolveResponse<unknown> | InternalBulkResolveError> = [];
+    const emptyObjects: Array<SavedObjectsResolveResponse<unknown> | BulkResolveError> = [];
 
     const result = await securityExtension.authorizeAndRedactInternalBulkResolve({
       namespace,

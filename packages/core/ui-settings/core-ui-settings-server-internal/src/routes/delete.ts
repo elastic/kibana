@@ -8,7 +8,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-common';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 import type { InternalUiSettingsRouter } from '../internal_types';

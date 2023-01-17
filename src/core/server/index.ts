@@ -260,6 +260,8 @@ export type {
   SavedObjectsImportWarning,
   SavedObjectTypeIdTuple,
 } from '@kbn/core-saved-objects-common';
+export { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-common';
+
 export type {
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
@@ -375,7 +377,6 @@ export {
   SPACES_EXTENSION_ID,
 } from '@kbn/core-saved-objects-server';
 export {
-  SavedObjectsErrorHelpers,
   SavedObjectsUtils,
   mergeSavedObjectMigrationMaps,
 } from '@kbn/core-saved-objects-utils-server';

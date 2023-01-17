@@ -37,6 +37,16 @@ export interface DecoratedError extends Boom.Boom {
   [code]?: string;
 }
 
+/**
+ * Error result for the internal bulkResolve function.
+ *
+ */
+export interface BulkResolveError {
+  type: string;
+  id: string;
+  error: DecoratedError;
+}
+
 function decorate(
   error: Error | DecoratedError,
   errorCode: string,

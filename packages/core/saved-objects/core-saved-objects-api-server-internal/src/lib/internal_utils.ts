@@ -13,11 +13,8 @@ import type {
   SavedObjectsRawDoc,
   SavedObjectsRawDocSource,
 } from '@kbn/core-saved-objects-server';
-import {
-  SavedObjectsErrorHelpers,
-  SavedObjectsUtils,
-  ALL_NAMESPACES_STRING,
-} from '@kbn/core-saved-objects-utils-server';
+import { SavedObjectsUtils, ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-common';
 import {
   decodeRequestVersion,
   encodeHitVersion,

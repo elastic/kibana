@@ -10,7 +10,7 @@ import { get } from 'lodash';
 import { errors as esErrors } from '@elastic/elasticsearch';
 import type { ElasticsearchErrorDetails } from '@kbn/es-errors';
 import { isSupportedEsServer } from '@kbn/core-elasticsearch-server-internal';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-common';
 
 const responseErrors = {
   isServiceUnavailable: (statusCode?: number) => statusCode === 503,

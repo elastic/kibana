@@ -6,13 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { InternalBulkResolveError } from '@kbn/core-saved-objects-api-server-internal/src/lib/internal_bulk_resolve';
-
 import {
   SavedObjectReferenceWithContext,
   SavedObjectsResolveResponse,
 } from '@kbn/core-saved-objects-api-server';
-import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { BulkResolveError, SavedObject } from '@kbn/core-saved-objects-common';
 import { EcsEventOutcome } from '@kbn/ecs';
 
 /**
@@ -383,7 +381,7 @@ export interface AuthorizeAndRedactMultiNamespaceReferencesParams {
 
 export interface AuthorizeAndRedactInternalBulkResolveParams<T> {
   namespace: string | undefined;
-  objects: Array<SavedObjectsResolveResponse<T> | InternalBulkResolveError>;
+  objects: Array<SavedObjectsResolveResponse<T> | BulkResolveError>;
 }
 
 /**
@@ -434,7 +432,7 @@ export interface ISavedObjectsSecurityExtension {
    */
   authorizeAndRedactInternalBulkResolve: <T = unknown>(
     params: AuthorizeAndRedactInternalBulkResolveParams<T>
-  ) => Promise<Array<SavedObjectsResolveResponse<T> | InternalBulkResolveError>>;
+  ) => Promise<Array<SavedObjectsResolveResponse<T> | BulkResolveError>>;
 
   /**
    * Performs authorization (check & enforce) of actions on specified types in specified spaces.

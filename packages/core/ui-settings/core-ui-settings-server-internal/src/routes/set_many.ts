@@ -7,7 +7,7 @@
  */
 
 import { schema, ValidationError } from '@kbn/config-schema';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-common';
 import { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { InternalUiSettingsRouter } from '../internal_types';

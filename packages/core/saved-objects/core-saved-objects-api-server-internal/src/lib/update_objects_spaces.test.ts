@@ -18,11 +18,11 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { loggerMock } from '@kbn/logging-mocks';
 import type { SavedObjectsUpdateObjectsSpacesObject } from '@kbn/core-saved-objects-api-server';
 import {
-  SavedObjectsErrorHelpers,
   ALL_NAMESPACES_STRING,
   setsAreEqual,
   setMapsAreEqual,
 } from '@kbn/core-saved-objects-utils-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-common';
 import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import type { UpdateObjectsSpacesParams } from './update_objects_spaces';
