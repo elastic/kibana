@@ -15,10 +15,11 @@ import type {
   ThreatListItem,
   ThreatMatchNamedQuery,
   SignalMatch,
+  SignalValuesMap,
+  ThreatTermNamedQuery,
 } from './types';
+import { ThreatMatchQueryType } from './types';
 import { extractNamedQueries } from './utils';
-
-export const MAX_NUMBER_OF_SIGNAL_MATCHES = 1000;
 
 const extractQuery = (hit) =>
   hit.matched_queries.map((query) => {
@@ -27,29 +28,58 @@ const extractQuery = (hit) =>
   });
 export const getSignalMatchesFromThreatList = (
   threatList: ThreatListItem[] = [],
-  signals
+  signalValueMap?: SignalValuesMap
 ): SignalMatch[] => {
   const signalMap: { [key: string]: ThreatMatchNamedQuery[] } = {};
+  const addSignalValueToMap = ({
+    id,
+    threatHit,
+    query,
+  }: {
+    id: string;
+    threatHit: ThreatListItem;
+    query: ThreatMatchNamedQuery | ThreatTermNamedQuery;
+  }) => {
+    if (!signalMap[id]) {
+      signalMap[id] = [];
+    }
 
+    signalMap[id].push({
+      id: threatHit._id,
+      index: threatHit._index,
+      field: query.field,
+      value: query.value,
+      queryType: '',
+    });
+  };
   threatList.forEach((threatHit) =>
-    extractQuery(threatHit).forEach((item) => {
-      console.log('----------');
-      console.log(JSON.stringify(item));
-      console.log(JSON.stringify(threatHit));
-      const signalF = signals.find((signal) => {
-        const signalValue = signal?.fields?.[item.field]?.[0];
-        if (!signalValue) return false;
+    extractNamedQueries(threatHit).forEach((query) => {
+      const signalId = query.id;
 
-        return signalValue === threatHit?.fields?.[item.value]?.[0];
-      });
-      const signalId = signalF._id;
-      console.log(JSON.stringify(signalF));
-      if (!signalId) {
-        return;
-      }
+      if (query.queryType === ThreatMatchQueryType.term) {
+        const threatValue = get(threatHit?._source, query.value);
+        // TODO: check types
+        if (threatValue && typeof threatValue === 'string' && signalValueMap) {
+          const ids = signalValueMap[query.field][threatValue];
 
-      if (!signalMap[signalId]) {
-        signalMap[signalId] = [];
+          ids.forEach((id: string) => {
+            addSignalValueToMap({
+              id,
+              threatHit,
+              query,
+            });
+          });
+        }
+      } else {
+        if (!signalId) {
+          return;
+        }
+
+        addSignalValueToMap({
+          id: signalId,
+          threatHit,
+          query,
+        });
       }
 
       // creating map of signal with large number of threats could lead to out of memory Kibana crash
@@ -74,7 +104,8 @@ export const getSignalMatchesFromThreatList = (
     signalId: key,
     queries: value,
   }));
-
+  console.log('signalMatches');
+  console.log(signalMatches);
   return signalMatches;
 };
 
@@ -150,7 +181,7 @@ export const enrichSignalThreatMatches = async (
     ? signalMatchesArg
     : uniqueHits.map((signalHit) => ({
         signalId: signalHit._id,
-        queries: extractNamedQueries(signalHit),
+        queries: extractNamedQueries(signalHit) as ThreatMatchNamedQuery[],
       }));
 
   const matchedThreatIds = [

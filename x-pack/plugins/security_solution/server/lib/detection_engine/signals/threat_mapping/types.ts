@@ -32,7 +32,6 @@ import type {
   BulkCreate,
   RuleRangeTuple,
   SearchAfterAndBulkCreateReturnType,
-  SignalsEnrichment,
   WrapHits,
   OverrideBodyQuery,
 } from '../types';
@@ -91,7 +90,6 @@ export interface CreateThreatSignalOptions {
   savedId: string | undefined;
   searchAfterSize: number;
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
-  threatEnrichment: SignalsEnrichment;
   threatMapping: ThreatMapping;
   tuple: RuleRangeTuple;
   type: Type;
@@ -101,6 +99,15 @@ export interface CreateThreatSignalOptions {
   secondaryTimestamp?: string;
   exceptionFilter: Filter | undefined;
   unprocessedExceptions: ExceptionListItemSchema[];
+  threatFilters: unknown[];
+  threatIndex: ThreatIndex;
+  threatIndicatorPath: ThreatIndicatorPath;
+  threatLanguage: ThreatLanguageOrUndefined;
+  threatQuery: ThreatQuery;
+  perPage?: number;
+  threatPitId: OpenPointInTimeResponse['id'];
+  reassignThreatPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
+  allowedFieldsForTermsQuery: AllowedFieldsForTermsQuery;
 }
 
 export interface CreateEventSignalOptions {
@@ -120,7 +127,6 @@ export interface CreateEventSignalOptions {
   savedId: string | undefined;
   searchAfterSize: number;
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
-  threatEnrichment: SignalsEnrichment;
   tuple: RuleRangeTuple;
   type: Type;
   wrapHits: WrapHits;
@@ -138,6 +144,8 @@ export interface CreateEventSignalOptions {
   secondaryTimestamp?: string;
   exceptionFilter: Filter | undefined;
   unprocessedExceptions: ExceptionListItemSchema[];
+  allowedFieldsForTermsQuery: AllowedFieldsForTermsQuery;
+  threatMatchedFields: ThreatMatchedFields;
 }
 
 type EntryKey = 'field' | 'value';
@@ -146,6 +154,7 @@ export interface BuildThreatMappingFilterOptions {
   threatList: ThreatListItem[];
   threatMapping: ThreatMapping;
   entryKey: EntryKey;
+  allowedFieldsForTermsQuery: AllowedFieldsForTermsQuery;
 }
 
 export interface FilterThreatMappingOptions {
@@ -171,15 +180,22 @@ export interface BuildEntriesMappingFilterOptions {
   threatList: ThreatListItem[];
   threatMapping: ThreatMapping;
   entryKey: EntryKey;
+  allowedFieldsForTermsQuery: AllowedFieldsForTermsQuery;
 }
 
 export interface SplitShouldClausesOptions {
   chunkSize: number;
-  should: BooleanFilter[];
+  should: Array<BooleanFilter | TermQuery>;
 }
 
 export interface BooleanFilter {
   bool: { should: unknown[]; minimum_should_match: number };
+}
+
+export interface TermQuery {
+  terms: {
+    [key: string]: string[] | string;
+  };
 }
 
 interface ThreatListConfig {
@@ -234,8 +250,16 @@ export interface ThreatMatchNamedQuery {
   index: string;
   field: string;
   value: string;
+  queryType: string;
 }
 
+export interface ThreatTermNamedQuery {
+  id?: string;
+  index?: string;
+  field: string;
+  value: string;
+  queryType: string;
+}
 export type GetMatchedThreats = (ids: string[]) => Promise<ThreatListItem[]>;
 
 export interface BuildThreatEnrichmentOptions {
@@ -302,4 +326,25 @@ export type CreateSignalInterface = (
 export interface GetSortForThreatList {
   index: string[];
   listItemIndex: string;
+}
+
+export enum ThreatMatchQueryType {
+  match = 'mq',
+  term = 'tq',
+}
+
+export interface ThreatMatchedFields {
+  source: string[];
+  threat: string[];
+}
+
+export interface AllowedFieldsForTermsQuery {
+  source: { [key: string]: boolean };
+  threat: { [key: string]: boolean };
+}
+
+export interface SignalValuesMap {
+  [field: string]: {
+    [fieldValue: string]: string[];
+  };
 }

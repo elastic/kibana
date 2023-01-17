@@ -7,18 +7,23 @@
 
 import chunk from 'lodash/fp/chunk';
 import type { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-
+import type { IndicesGetFieldMappingResponse } from '@elastic/elasticsearch/lib/api/types';
 import { getThreatList, getThreatListCount } from './get_threat_list';
 import type {
   CreateThreatSignalsOptions,
   CreateSignalInterface,
   GetDocumentListInterface,
+  AllowedFieldsForTermsQuery,
 } from './types';
 import { createThreatSignal } from './create_threat_signal';
 import { createEventSignal } from './create_event_signal';
 import type { SearchAfterAndBulkCreateReturnType } from '../types';
-import { buildExecutionIntervalValidator, combineConcurrentResults } from './utils';
-import { buildThreatEnrichment } from './build_threat_enrichment';
+import {
+  buildExecutionIntervalValidator,
+  combineConcurrentResults,
+  getMatchedFields,
+} from './utils';
+
 import { getEventCount, getEventList } from './get_event_count';
 import { getMappingFilters } from './get_mapping_filters';
 import { THREAT_PIT_KEEP_ALIVE } from '../../../../../common/cti/constants';
@@ -55,9 +60,51 @@ export const createThreatSignals = async ({
   exceptionFilter,
   unprocessedExceptions,
 }: CreateThreatSignalsOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
+  const threatMatchedFields = getMatchedFields(threatMapping);
+
+  const getAllowedFieldFromMapping = (
+    indexMapping: IndicesGetFieldMappingResponse
+  ): { [key: string]: boolean } => {
+    const allowedFieldTypes = ['keyword', 'constant_keyword', 'wildcard', 'ip'];
+
+    const result: { [key: string]: boolean } = {};
+    const indicies = Object.values(indexMapping);
+    indicies.forEach((index) => {
+      Object.entries(index.mappings).forEach(([field, fieldValue]) => {
+        Object.values(fieldValue.mapping).forEach((mapping) => {
+          if (mapping?.type && allowedFieldTypes.includes(mapping?.type)) {
+            result[field] = true;
+          }
+        });
+      });
+    });
+
+    return result;
+  };
+  const sourceFieldsMapping =
+    await services.scopedClusterClient.asCurrentUser.indices.getFieldMapping({
+      index: inputIndex,
+      fields: threatMatchedFields.source,
+    });
+  const threatFieldsMapping =
+    await services.scopedClusterClient.asCurrentUser.indices.getFieldMapping({
+      index: threatIndex,
+      fields: threatMatchedFields.threat,
+    });
+
+  const allowedFieldsForTermsQuery: AllowedFieldsForTermsQuery = {
+    source: getAllowedFieldFromMapping(sourceFieldsMapping),
+    threat: getAllowedFieldFromMapping(threatFieldsMapping),
+  };
+
+  console.log('threatMapping');
+  console.log(`${JSON.stringify(threatMapping)}`);
+  // console.log(`${JSON.stringify(sourceFieldsMapping)}`);
+  console.log(`${JSON.stringify(allowedFieldsForTermsQuery)}`);
+
   const params = completeRule.ruleParams;
   ruleExecutionLogger.debug('Indicator matching rule starting');
-  const perPage = 60000 ?? concurrentSearches * itemsPerSearch;
+  const perPage = 9000 ?? concurrentSearches * itemsPerSearch;
   const verifyExecutionCanProceed = buildExecutionIntervalValidator(
     completeRule.ruleConfig.schedule.interval
   );
@@ -224,7 +271,6 @@ export const createThreatSignals = async ({
           savedId,
           searchAfterSize,
           services,
-          threatEnrichment,
           threatFilters: allThreatFilters,
           threatIndex,
           threatIndicatorPath,
@@ -240,6 +286,8 @@ export const createThreatSignals = async ({
           secondaryTimestamp,
           exceptionFilter,
           unprocessedExceptions,
+          allowedFieldsForTermsQuery,
+          threatMatchedFields,
         }),
     });
   } else {
@@ -281,7 +329,6 @@ export const createThreatSignals = async ({
           savedId,
           searchAfterSize,
           services,
-          threatEnrichment,
           threatMapping,
           tuple,
           type,
@@ -291,6 +338,14 @@ export const createThreatSignals = async ({
           secondaryTimestamp,
           exceptionFilter,
           unprocessedExceptions,
+          threatFilters: allThreatFilters,
+          threatIndex,
+          threatIndicatorPath,
+          threatLanguage,
+          threatPitId,
+          threatQuery,
+          reassignThreatPitId,
+          allowedFieldsForTermsQuery,
         }),
     });
   }

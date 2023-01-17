@@ -7,7 +7,10 @@
 
 import get from 'lodash/fp/get';
 import type { Filter } from '@kbn/es-query';
-import type { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
+import type {
+  ThreatMapping,
+  ThreatMappingEntries,
+} from '@kbn/securitysolution-io-ts-alerting-types';
 import type {
   BooleanFilter,
   BuildEntriesMappingFilterOptions,
@@ -16,8 +19,9 @@ import type {
   CreateInnerAndClausesOptions,
   FilterThreatMappingOptions,
   SplitShouldClausesOptions,
-  ThreatListItem,
+  TermQuery,
 } from './types';
+import { ThreatMatchQueryType } from './types';
 import { encodeThreatMatchNamedQuery } from './utils';
 
 export const MAX_CHUNK_SIZE = 1024;
@@ -27,6 +31,7 @@ export const buildThreatMappingFilter = ({
   threatList,
   chunkSize,
   entryKey = 'value',
+  allowedFieldsForTermsQuery,
 }: BuildThreatMappingFilterOptions): Filter => {
   const computedChunkSize = chunkSize ?? MAX_CHUNK_SIZE;
   if (computedChunkSize > 1024) {
@@ -37,6 +42,7 @@ export const buildThreatMappingFilter = ({
     threatList,
     chunkSize: computedChunkSize,
     entryKey,
+    allowedFieldsForTermsQuery,
   });
   const filterChunk: Filter = {
     meta: {
@@ -76,8 +82,6 @@ export const createInnerAndClauses = ({
   threatListItem,
   entryKey,
 }: CreateInnerAndClausesOptions): BooleanFilter[] => {
-  console.log('threat item list', JSON.stringify(threatMappingEntries));
-  console.log('threatListItem item list', JSON.stringify(threatListItem));
   return threatMappingEntries.reduce<BooleanFilter[]>((accum, threatMappingEntry) => {
     const value = get(threatMappingEntry[entryKey], threatListItem.fields);
     if (value != null && value.length === 1) {
@@ -94,6 +98,7 @@ export const createInnerAndClauses = ({
                     index: threatListItem._index,
                     field: threatMappingEntry.field,
                     value: threatMappingEntry.value,
+                    queryType: ThreatMatchQueryType.match,
                   }),
                 },
               },
@@ -113,70 +118,7 @@ export const createAndOrClauses = ({
   entryKey,
 }: CreateAndOrClausesOptions): BooleanFilter => {
   const should = threatMapping.reduce<unknown[]>((accum, threatMap) => {
-    const innerAndClauses =
-      threatMap.entries.length > 1
-        ? createInnerAndClauses({
-            threatMappingEntries: threatMap.entries,
-            threatListItem,
-            entryKey,
-          })
-        : createInnerAndClausesTerm({
-            threatMappingEntries: threatMap.entries,
-            threatListItem,
-            entryKey,
-          });
-    if (innerAndClauses.length !== 0) {
-      // These values could be potentially 10k+ large so mutating the array intentionally
-      accum.push({
-        bool: { filter: innerAndClauses },
-      });
-    }
-    return accum;
-  }, []);
-  return { bool: { should, minimum_should_match: 1 } };
-};
-
-export const createInnerAndClausesTerm = ({
-  threatMappingEntries,
-  threatListItem,
-  entryKey,
-}: CreateInnerAndClausesOptions): BooleanFilter[] => {
-  return threatMappingEntries.reduce<BooleanFilter[]>((accum, threatMappingEntry) => {
-    const value = get(threatMappingEntry[entryKey], threatListItem.fields);
-    if (value != null && value.length === 1) {
-      // These values could be potentially 10k+ large so mutating the array intentionally
-      accum.push({
-        bool: {
-          should: [
-            {
-              match: {
-                [threatMappingEntry[entryKey === 'field' ? 'value' : 'field']]: {
-                  query: value[0],
-                  _name: encodeThreatMatchNamedQuery({
-                    id: threatListItem._id,
-                    index: threatListItem._index,
-                    field: threatMappingEntry.field,
-                    value: threatMappingEntry.value,
-                  }),
-                },
-              },
-            },
-          ],
-          minimum_should_match: 1,
-        },
-      });
-    }
-    return accum;
-  }, []);
-};
-
-export const createAndOrClausesTerm = ({
-  threatMapping,
-  threatListItem,
-  entryKey,
-}: CreateAndOrClausesOptions): BooleanFilter => {
-  const should = threatMapping.reduce<unknown[]>((accum, threatMap) => {
-    const innerAndClauses = createInnerAndClausesTerm({
+    const innerAndClauses = createInnerAndClauses({
       threatMappingEntries: threatMap.entries,
       threatListItem,
       entryKey,
@@ -197,53 +139,66 @@ export const buildEntriesMappingFilter = ({
   threatList,
   chunkSize,
   entryKey,
+  allowedFieldsForTermsQuery,
 }: BuildEntriesMappingFilterOptions): BooleanFilter => {
-  const terms = threatMapping.reduce<ThreatListItem[]>((accum, entries) => {
-    const threatMappingEntry = entries.entries[0];
-    // console.log(threatMappingEntry, entryKey, JSON.stringify(threatList))
-    const threats = threatList
-      .map((threatListItem) => get(threatMappingEntry[entryKey], threatListItem.fields))
-      .filter((val) => val)
-      .map((val) => val[0]);
-    console.log('threats', JSON.stringify(threats));
-    if (threats.length > 0) {
-      accum.push({
-        terms: {
-          _name: `${threatMappingEntry.field}:${threatMappingEntry.value}`,
-          [threatMappingEntry[entryKey === 'field' ? 'value' : 'field']]: threats,
-        },
-      });
-    }
-    return accum;
-  }, []);
-  console.log(terms, entryKey, JSON.stringify(terms));
-  return { bool: { should: terms, minimum_should_match: 1 } };
+  const allFieldAllowedForTermQuery = (entries: ThreatMappingEntries) =>
+    entries.every(
+      (entry) =>
+        allowedFieldsForTermsQuery.source[entry.field] &&
+        allowedFieldsForTermsQuery.threat[entry.value]
+    );
+  const combinedShould = threatMapping.reduce<Array<BooleanFilter | TermQuery>>(
+    (acc, threatMap) => {
+      if (threatMap.entries.length > 1 || !allFieldAllowedForTermQuery(threatMap.entries)) {
+        threatList.forEach((threatListSearchItem) => {
+          const filteredEntries = filterThreatMapping({
+            threatMapping: [threatMap],
+            threatListItem: threatListSearchItem,
+            entryKey,
+          });
+          const queryWithAndOrClause = createAndOrClauses({
+            threatMapping: filteredEntries,
+            threatListItem: threatListSearchItem,
+            entryKey,
+          });
+          if (queryWithAndOrClause.bool.should.length !== 0) {
+            // These values can be 10k+ large, so using a push here for performance
+            acc.push(queryWithAndOrClause);
+          }
+        });
+      } else {
+        const threatMappingEntry = threatMap.entries[0];
+        // console.log(threatMappingEntry, entryKey, JSON.stringify(threatList))
+        const threats: string[] = threatList
+          .map((threatListItem) => get(threatMappingEntry[entryKey], threatListItem.fields))
+          .filter((val) => val)
+          .map((val) => val[0]);
+        if (threats.length > 0) {
+          acc.push({
+            terms: {
+              _name: encodeThreatMatchNamedQuery({
+                field: threatMappingEntry.field,
+                value: threatMappingEntry.value,
+                queryType: ThreatMatchQueryType.term,
+              }),
+              [threatMappingEntry[entryKey === 'field' ? 'value' : 'field']]: threats,
+            },
+          });
+        }
+      }
+      return acc;
+    },
+    []
+  );
 
-  // const combinedShould = threatList.reduce<BooleanFilter[]>((accum, threatListSearchItem) => {
-  //   const filteredEntries = filterThreatMapping({
-  //     threatMapping,
-  //     threatListItem: threatListSearchItem,
-  //     entryKey,
-  //   });
-  //   const queryWithAndOrClause = createAndOrClauses({
-  //     threatMapping: filteredEntries,
-  //     threatListItem: threatListSearchItem,
-  //     entryKey,
-  //   });
-  //   if (queryWithAndOrClause.bool.should.length !== 0) {
-  //     // These values can be 10k+ large, so using a push here for performance
-  //     accum.push(queryWithAndOrClause);
-  //   }
-  //   return accum;
-  // }, []);
-  // const should = splitShouldClauses({ should: combinedShould, chunkSize });
-  // return { bool: { should, minimum_should_match: 1 } };
+  const should = splitShouldClauses({ should: combinedShould, chunkSize });
+  return { bool: { should, minimum_should_match: 1 } };
 };
 
 export const splitShouldClauses = ({
   should,
   chunkSize,
-}: SplitShouldClausesOptions): BooleanFilter[] => {
+}: SplitShouldClausesOptions): Array<BooleanFilter | TermQuery> => {
   if (should.length <= chunkSize) {
     return should;
   } else {

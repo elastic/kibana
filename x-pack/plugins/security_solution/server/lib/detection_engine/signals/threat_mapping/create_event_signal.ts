@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { get } from 'lodash';
 import { buildThreatMappingFilter } from './build_threat_mapping_filter';
 import { getFilter } from '../get_filter';
 import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
 import { buildReasonMessageForThreatMatchAlert } from '../reason_formatters';
-import type { CreateEventSignalOptions } from './types';
+import type { CreateEventSignalOptions, SignalValuesMap } from './types';
 import type { SearchAfterAndBulkCreateReturnType, SignalSourceHit } from '../types';
 import { getAllThreatListHits } from './get_threat_list';
 import {
@@ -50,12 +50,32 @@ export const createEventSignal = async ({
   secondaryTimestamp,
   exceptionFilter,
   unprocessedExceptions,
+  allowedFieldsForTermsQuery,
+  threatMatchedFields,
 }: CreateEventSignalOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
+  const signalValueMap: SignalValuesMap = currentEventList.reduce<SignalValuesMap>((acc, event) => {
+    threatMatchedFields.source.forEach((field) => {
+      const fieldValue = get(event.fields, field)?.[0];
+      if (!acc[field]) {
+        acc[field] = {};
+      }
+      if (!acc[field][fieldValue]) {
+        acc[field][fieldValue] = [];
+      }
+      acc[field][fieldValue].push(event._id);
+    });
+    return acc;
+  }, {});
+
+  console.log('singnalValueMap', JSON.stringify(signalValueMap, null, 2));
   const threatFilter = buildThreatMappingFilter({
     threatMapping,
     threatList: currentEventList,
     entryKey: 'field',
+    allowedFieldsForTermsQuery,
   });
+
+  console.log(JSON.stringify(threatFilter));
 
   if (!threatFilter.query || threatFilter.query?.bool.should.length === 0) {
     // empty event list and we do not want to return everything as being
@@ -73,8 +93,8 @@ export const createEventSignal = async ({
       index: threatIndex,
       ruleExecutionLogger,
       threatListConfig: {
-        _source: [`${threatIndicatorPath}.*`, 'threat.feed.*'],
-        fields: ['alert_data.threat_0.keyword'],
+        _source: [`${threatIndicatorPath}.*`, 'threat.feed.*', ...threatMatchedFields.threat],
+        fields: undefined,
       },
       pitId: threatPitId,
       reassignPitId: reassignThreatPitId,
@@ -83,7 +103,7 @@ export const createEventSignal = async ({
       exceptionFilter,
     });
 
-    const signalMatches = getSignalMatchesFromThreatList(threatListHits, currentEventList);
+    const signalMatches = getSignalMatchesFromThreatList(threatListHits, signalValueMap);
 
     const ids = signalMatches.map((item) => item.signalId);
 

@@ -11,7 +11,7 @@ import { getQueryFilter } from '../get_query_filter';
 import { singleSearchAfter } from '../single_search_after';
 import { buildEventsSearchQuery } from '../build_events_query';
 
-export const MAX_PER_PAGE = 60000;
+export const MAX_PER_PAGE = 9000;
 
 export const getEventList = async ({
   services,

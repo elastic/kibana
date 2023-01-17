@@ -7,9 +7,15 @@
 
 import moment from 'moment';
 
+import type { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { SearchAfterAndBulkCreateReturnType, SignalSourceHit } from '../types';
 import { parseInterval } from '../utils';
-import type { ThreatMatchNamedQuery, ThreatListItem } from './types';
+import type {
+  ThreatMatchNamedQuery,
+  ThreatListItem,
+  ThreatMatchedFields,
+  ThreatTermNamedQuery,
+} from './types';
 
 /**
  * Given two timers this will take the max of each and add them to each other and return that addition.
@@ -134,26 +140,29 @@ export const encodeThreatMatchNamedQuery = ({
   index,
   field,
   value,
-}: ThreatMatchNamedQuery): string => {
-  return [id, index, field, value].join(separator);
+  queryType,
+}: Partial<ThreatMatchNamedQuery>): string => {
+  return [id, index, field, value, queryType].join(separator);
 };
 
-export const decodeThreatMatchNamedQuery = (encoded: string): ThreatMatchNamedQuery => {
+export const decodeThreatMatchNamedQuery = (
+  encoded: string
+): ThreatMatchNamedQuery | ThreatTermNamedQuery => {
   const queryValues = encoded.split(separator);
-  const [id, index, field, value] = queryValues;
-  const query = { id, index, field, value };
+  const [id, index, field, value, queryType] = queryValues;
+  const query = { id, index, field, value, queryType };
 
-  if (queryValues.length !== 4 || !queryValues.every(Boolean)) {
-    const queryString = JSON.stringify(query);
-    throw new Error(`Decoded query is invalid. Decoded value: ${queryString}`);
-  }
+  // if (queryValues.length !== 4 || !queryValues.every(Boolean)) {
+  //   const queryString = JSON.stringify(query);
+  //   throw new Error(`Decoded query is invalid. Decoded value: ${queryString}`);
+  // }
 
   return query;
 };
 
 export const extractNamedQueries = (
   hit: SignalSourceHit | ThreatListItem
-): ThreatMatchNamedQuery[] =>
+): Array<ThreatMatchNamedQuery | ThreatTermNamedQuery> =>
   hit.matched_queries?.map((match) => decodeThreatMatchNamedQuery(match)) ?? [];
 
 export const buildExecutionIntervalValidator: (interval: string) => () => void = (interval) => {
@@ -173,3 +182,20 @@ export const buildExecutionIntervalValidator: (interval: string) => () => void =
     }
   };
 };
+
+// Return list of fields by type used for matching in IM rule
+export const getMatchedFields = (threatMapping: ThreatMapping): ThreatMatchedFields =>
+  threatMapping.reduce(
+    (acc: ThreatMatchedFields, val) => {
+      val.entries.forEach((mapping) => {
+        if (!acc.source.includes(mapping.field)) {
+          acc.source.push(mapping.field);
+        }
+        if (!acc.threat.includes(mapping.value)) {
+          acc.threat.push(mapping.value);
+        }
+      });
+      return acc;
+    },
+    { source: [], threat: [] }
+  );
