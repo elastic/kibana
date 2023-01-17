@@ -3757,6 +3757,21 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.AlertsTableProps.controls",
+            "type": "Object",
+            "tags": [],
+            "label": "controls",
+            "description": [],
+            "signature": [
+              "EuiDataGridToolBarAdditionalControlsOptions",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5491,7 +5506,7 @@
             "label": "setRuleProperty",
             "description": [],
             "signature": [
-              "<Prop extends \"name\" | \"params\" | \"tags\" | \"id\" | \"monitoring\" | \"enabled\" | \"actions\" | \"throttle\" | \"consumer\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"ruleTypeId\">(key: Prop, value: ",
+              "<Prop extends \"name\" | \"params\" | \"tags\" | \"id\" | \"monitoring\" | \"enabled\" | \"actions\" | \"throttle\" | \"consumer\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"running\" | \"ruleTypeId\">(key: Prop, value: ",
               "SanitizedRule",
               "<Params>[Prop] | null) => void"
             ],

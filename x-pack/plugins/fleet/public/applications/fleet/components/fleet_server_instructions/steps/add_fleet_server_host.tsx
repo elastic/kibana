@@ -163,6 +163,7 @@ export const AddFleetServerHostStepContent = ({
                     defaultMessage: 'Specify host URL',
                   }
                 )}
+                isUrl
               />
               {error && <EuiFormErrorText>{error}</EuiFormErrorText>}
             </>

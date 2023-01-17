@@ -6,6 +6,8 @@
  */
 import Semver from 'semver';
 import Boom from '@hapi/boom';
+import { omit } from 'lodash';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 import { parseDuration } from '../../../common/parse_duration';
@@ -89,6 +91,17 @@ export async function create<Params extends RuleTypeParams = never>(
       : null;
   } catch (error) {
     throw Boom.badRequest(`Error creating rule: could not create API key - ${error.message}`);
+  }
+
+  // TODO https://github.com/elastic/kibana/issues/148414
+  // If any action-level frequencies get pushed into a SIEM rule, strip their frequencies
+  const firstFrequency = data.actions[0]?.frequency;
+  if (data.consumer === AlertConsumers.SIEM && firstFrequency) {
+    data.actions = data.actions.map((action) => omit(action, 'frequency'));
+    if (!data.notifyWhen) {
+      data.notifyWhen = firstFrequency.notifyWhen;
+      data.throttle = firstFrequency.throttle;
+    }
   }
 
   await validateActions(context, ruleType, data);

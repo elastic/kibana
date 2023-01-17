@@ -8,13 +8,14 @@
 import type { LegacyRequest, MonitoringCore } from '../../../../types';
 import type { MonitoringConfig } from '../../../../config';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
-import { getIndexPatterns } from '../../../../lib/cluster/get_index_patterns';
+import { getIndexPatterns, getDsIndexPattern } from '../../../../lib/cluster/get_index_patterns';
 import { getHealthRequestQueryRT } from '../../../../../common/http_api/_health';
 import type { TimeRange } from '../../../../../common/http_api/shared';
 
 import { fetchMonitoredClusters } from './monitored_clusters';
 import { fetchMetricbeatErrors } from './metricbeat';
 import type { FetchParameters } from './types';
+import { fetchPackageErrors } from './package/fetch_package_errors';
 
 const DEFAULT_QUERY_TIMERANGE = { min: 'now-15m', max: 'now' };
 const DEFAULT_QUERY_TIMEOUT_SECONDS = 15;
@@ -53,7 +54,15 @@ export function registerV1HealthRoute(server: MonitoringCore) {
         getIndexPatterns({ config, moduleType: 'logstash' }),
         getIndexPatterns({ config, moduleType: 'beats' }),
       ].join(',');
-      const entSearchIndex = getIndexPatterns({ config, moduleType: 'enterprisesearch' });
+
+      const metricsPackageIndex = [
+        getDsIndexPattern({ config, moduleType: 'elasticsearch' }),
+        getDsIndexPattern({ config, moduleType: 'kibana' }),
+        getDsIndexPattern({ config, moduleType: 'logstash' }),
+        getDsIndexPattern({ config, moduleType: 'beats' }),
+      ].join(',');
+
+      const entSearchIndex = getIndexPatterns({ config, moduleType: 'enterprise_search' });
 
       const monitoredClustersFn = () =>
         fetchMonitoredClusters({
@@ -74,12 +83,22 @@ export function registerV1HealthRoute(server: MonitoringCore) {
           return { error: err.message };
         });
 
-      const [monitoredClusters, metricbeatErrors] = await Promise.all([
+      const packageErrorsFn = () =>
+        fetchPackageErrors({
+          ...fetchArgs,
+          packageIndex: metricsPackageIndex,
+        }).catch((err: Error) => {
+          logger.error(`_health: failed to retrieve package data:\n${err.stack}`);
+          return { error: err.message };
+        });
+
+      const [monitoredClusters, metricbeatErrors, packageErrors] = await Promise.all([
         monitoredClustersFn(),
         metricbeatErrorsFn(),
+        packageErrorsFn(),
       ]);
 
-      return { monitoredClusters, metricbeatErrors, settings };
+      return { monitoredClusters, metricbeatErrors, packageErrors, settings };
     },
   });
 }

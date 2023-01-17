@@ -19,8 +19,14 @@ Any modifications made to this file will be overwritten.
   <h4><a href="#Alerting">Alerting</a></h4>
   <ul>
   <li><a href="#deleteRule"><code><span class="http-method">delete</span> /s/{spaceId}/api/alerting/rule/{ruleId}</code></a></li>
+  <li><a href="#disableRule"><code><span class="http-method">post</span> /s/{spaceId}/api/alerting/rule/{ruleId}/_disable</code></a></li>
+  <li><a href="#enableRule"><code><span class="http-method">post</span> /s/{spaceId}/api/alerting/rule/{ruleId}/_enable</code></a></li>
   <li><a href="#findRules"><code><span class="http-method">get</span> /s/{spaceId}/api/alerting/rules/_find</code></a></li>
   <li><a href="#getRule"><code><span class="http-method">get</span> /s/{spaceId}/api/alerting/rule/{ruleId}</code></a></li>
+  <li><a href="#muteAlert"><code><span class="http-method">post</span> /s/{spaceId}/api/alerting/rule/{ruleId}/alert/{alertId}/_mute</code></a></li>
+  <li><a href="#muteAllAlerts"><code><span class="http-method">post</span> /s/{spaceId}/api/alerting/rule/{ruleId}/_mute_all</code></a></li>
+  <li><a href="#unmuteAlert"><code><span class="http-method">post</span> /s/{spaceId}/api/alerting/rule/{ruleId}/alert/{alertId}/_unmute</code></a></li>
+  <li><a href="#unmuteAllAlerts"><code><span class="http-method">post</span> /s/{spaceId}/api/alerting/rule/{ruleId}/_unmute_all</code></a></li>
   <li><a href="#updateRule"><code><span class="http-method">put</span> /s/{spaceId}/api/alerting/rule/{ruleId}</code></a></li>
   </ul>
 
@@ -31,6 +37,84 @@ Any modifications made to this file will be overwritten.
     <pre class="delete"><code class="huge"><span class="http-method">delete</span> /s/{spaceId}/api/alerting/rule/{ruleId}</code></pre></div>
     <div class="method-summary">Deletes a rule. (<span class="nickname">deleteRule</span>)</div>
     <div class="method-notes">You must have <code>all</code> privileges for the appropriate Kibana features, depending on the <code>consumer</code> and <code>rule_type_id</code> of the rule you're deleting. For example, the <strong>Management</strong> &gt; <strong>Stack Rules</strong> feature, <strong>Analytics</strong> &gt; <strong>Discover</strong> or <strong>Machine Learning</strong> features, <strong>Observability</strong>, or <strong>Security</strong> features. WARNING: After you delete a rule, you cannot recover it.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">ruleId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the rule. default: null </div><div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+    <h3 class="field-label">Request headers</h3>
+    <div class="field-items">
+      <div class="param">kbn-xsrf (required)</div>
+
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash;  default: null </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">204</h4>
+    Indicates a successful call.
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="disableRule"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /s/{spaceId}/api/alerting/rule/{ruleId}/_disable</code></pre></div>
+    <div class="method-summary">Disable a rule. (<span class="nickname">disableRule</span>)</div>
+    <div class="method-notes">You must have <code>all</code> privileges for the appropriate Kibana features, depending on the <code>consumer</code> and <code>rule_type_id</code> of the rule. For example, the <strong>Management &gt; Stack Rules</strong> feature, <strong>Analytics &gt; Discover</strong> and <strong>Machine Learning</strong> features, <strong>Observability</strong>, and <strong>Security</strong> features.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">ruleId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the rule. default: null </div><div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+    <h3 class="field-label">Request headers</h3>
+    <div class="field-items">
+      <div class="param">kbn-xsrf (required)</div>
+
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash;  default: null </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">204</h4>
+    Indicates a successful call.
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="enableRule"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /s/{spaceId}/api/alerting/rule/{ruleId}/_enable</code></pre></div>
+    <div class="method-summary">Enable a rule. (<span class="nickname">enableRule</span>)</div>
+    <div class="method-notes">This API supports token-based authentication only. You must have <code>all</code> privileges for the appropriate Kibana features, depending on the <code>consumer</code> and <code>rule_type_id</code> of the rule. For example, the <strong>Management &gt; Stack Rules</strong> feature, <strong>Analytics &gt; Discover</strong> and <strong>Machine Learning</strong> features, <strong>Observability</strong>, and <strong>Security</strong> features.</div>
 
     <h3 class="field-label">Path parameters</h3>
     <div class="field-items">
@@ -340,6 +424,166 @@ Any modifications made to this file will be overwritten.
     <h4 class="field-label">200</h4>
     Indicates a successful call.
         <a href="#rule_response_properties">rule_response_properties</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="muteAlert"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /s/{spaceId}/api/alerting/rule/{ruleId}/alert/{alertId}/_mute</code></pre></div>
+    <div class="method-summary">Mute an alert. (<span class="nickname">muteAlert</span>)</div>
+    <div class="method-notes">You must have <code>all</code> privileges for the appropriate Kibana features, depending on the <code>consumer</code> and <code>rule_type_id</code> of the rule. For example, the <strong>Management &gt; Stack Rules</strong> feature, <strong>Analytics &gt; Discover</strong> and <strong>Machine Learning</strong> features, <strong>Observability</strong>, and <strong>Security</strong> features. If the rule has actions, you must also have <code>read</code> privileges for the <strong>Management &gt; Actions and Connectors</strong> feature.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">alertId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the alert. The identifier is generated by the rule and might be any arbitrary string. default: null </div><div class="param">ruleId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the rule. default: null </div><div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+    <h3 class="field-label">Request headers</h3>
+    <div class="field-items">
+      <div class="param">kbn-xsrf (required)</div>
+
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash;  default: null </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">204</h4>
+    Indicates a successful call.
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="muteAllAlerts"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /s/{spaceId}/api/alerting/rule/{ruleId}/_mute_all</code></pre></div>
+    <div class="method-summary">Mute all alerts. (<span class="nickname">muteAllAlerts</span>)</div>
+    <div class="method-notes">This API snoozes the notifications for the rule indefinitely. The rule checks continue to occur but alerts will not trigger any actions. You must have <code>all</code> privileges for the appropriate Kibana features, depending on the <code>consumer</code> and <code>rule_type_id</code> of the rule. For example, the <strong>Management &gt; Stack Rules</strong> feature, <strong>Analytics &gt; Discover</strong> and <strong>Machine Learning</strong> features, <strong>Observability</strong>, and <strong>Security</strong> features. If the rule has actions, you must also have <code>read</code> privileges for the <strong>Management &gt; Actions and Connectors</strong> feature.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">ruleId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the rule. default: null </div><div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+    <h3 class="field-label">Request headers</h3>
+    <div class="field-items">
+      <div class="param">kbn-xsrf (required)</div>
+
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash;  default: null </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">204</h4>
+    Indicates a successful call.
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="unmuteAlert"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /s/{spaceId}/api/alerting/rule/{ruleId}/alert/{alertId}/_unmute</code></pre></div>
+    <div class="method-summary">Unmute an alert. (<span class="nickname">unmuteAlert</span>)</div>
+    <div class="method-notes">You must have <code>all</code> privileges for the appropriate Kibana features, depending on the <code>consumer</code> and <code>rule_type_id</code> of the rule. For example, the <strong>Management &gt; Stack Rules</strong> feature, <strong>Analytics &gt; Discover</strong> and <strong>Machine Learning</strong> features, <strong>Observability</strong>, and <strong>Security</strong> features. If the rule has actions, you must also have <code>read</code> privileges for the <strong>Management &gt; Actions and Connectors</strong> feature.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">alertId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the alert. The identifier is generated by the rule and might be any arbitrary string. default: null </div><div class="param">ruleId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the rule. default: null </div><div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+    <h3 class="field-label">Request headers</h3>
+    <div class="field-items">
+      <div class="param">kbn-xsrf (required)</div>
+
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash;  default: null </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">204</h4>
+    Indicates a successful call.
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="unmuteAllAlerts"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /s/{spaceId}/api/alerting/rule/{ruleId}/_unmute_all</code></pre></div>
+    <div class="method-summary">Unmute all alerts. (<span class="nickname">unmuteAllAlerts</span>)</div>
+    <div class="method-notes">If the rule has its notifications snoozed indefinitely, this API cancels the snooze. You must have <code>all</code> privileges for the appropriate Kibana features, depending on the <code>consumer</code> and <code>rule_type_id</code> of the rule. For example, the <strong>Management &gt; Stack Rules</strong> feature, <strong>Analytics &gt; Discover</strong> and <strong>Machine Learning</strong> features, <strong>Observability</strong>, and <strong>Security</strong> features. If the rule has actions, you must also have <code>read</code> privileges for the <strong>Management &gt; Actions and Connectors</strong> feature.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">ruleId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the rule. default: null </div><div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+    <h3 class="field-label">Request headers</h3>
+    <div class="field-items">
+      <div class="param">kbn-xsrf (required)</div>
+
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash;  default: null </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">204</h4>
+    Indicates a successful call.
+        <a href="#"></a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="updateRule"/>
