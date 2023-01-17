@@ -966,26 +966,50 @@ export async function installAssetsForInputPackagePolicy(opts: {
       logger.info(
         `Data stream ${dataStream.name} already exists, skipping index template creation for ${packagePolicy.id}`
       );
+      return;
     }
-  } else {
-    const installedPkg = await getInstallation({
-      savedObjectsClient: soClient,
-      pkgName: pkgInfo.name,
-      logger,
-    });
-    if (!installedPkg)
-      throw new Error('Unable to find installed package while creating index templates');
-    await installIndexTemplatesAndPipelines({
-      installedPkg,
-      paths,
-      packageInfo: pkgInfo,
-      esReferences: installedPkg.installed_es || [],
-      savedObjectsClient: soClient,
-      esClient,
-      logger,
-      onlyForDataStreams: [dataStream],
-    });
   }
+
+  const existingIndexTemplate = await dataStreamService.getMatchingIndexTemplate(esClient, {
+    type: dataStream.type,
+    dataset: datasetName,
+  });
+
+  if (existingIndexTemplate) {
+    const indexTemplateOwnnedByDifferentPackage =
+      existingIndexTemplate._meta?.package?.name !== pkgInfo.name;
+    if (indexTemplateOwnnedByDifferentPackage && !force) {
+      // index template already exists but there is no data stream yet
+      // we do not want to override the index template
+
+      throw new PackagePolicyValidationError(
+        `Index template "${dataStream.type}-${datasetName}" already exist and is not managed by this package, force flag is required`
+      );
+    } else {
+      logger.info(
+        `Index template "${dataStream.type}-${datasetName}" already exists, skipping index template creation for ${packagePolicy.id}`
+      );
+      return;
+    }
+  }
+
+  const installedPkg = await getInstallation({
+    savedObjectsClient: soClient,
+    pkgName: pkgInfo.name,
+    logger,
+  });
+  if (!installedPkg)
+    throw new Error('Unable to find installed package while creating index templates');
+  await installIndexTemplatesAndPipelines({
+    installedPkg,
+    paths,
+    packageInfo: pkgInfo,
+    esReferences: installedPkg.installed_es || [],
+    savedObjectsClient: soClient,
+    esClient,
+    logger,
+    onlyForDataStreams: [dataStream],
+  });
 }
 
 interface NoPkgArgs {

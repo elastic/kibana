@@ -107,8 +107,6 @@ export default function (providerContext: FtrProviderContext) {
   };
 
   const getComponentTemplate = async (name: string) => {
-    // use es client to get component template
-
     try {
       const { component_templates: templates } = await es.cluster.getComponentTemplate({ name });
 
@@ -122,9 +120,20 @@ export default function (providerContext: FtrProviderContext) {
     }
   };
 
-  const createFakeFleetDataStream = async (dataset: string, pkgName = PACKAGE_NAME) => {
+  const getIndexTemplate = async (name: string) => {
+    try {
+      const { index_templates: templates } = await es.indices.getIndexTemplate({ name });
+
+      return templates?.[0]?.index_template || null;
+    } catch (e) {
+      if (e.statusCode === 404) {
+        return null;
+      }
+    }
+  };
+
+  const createFakeFleetIndexTemplate = async (dataset: string, pkgName = PACKAGE_NAME) => {
     const templateName = `logs-${dataset}`;
-    const indexName = `logs-${dataset}-default`;
     const template = {
       name: templateName,
       index_patterns: [`${templateName}-*`],
@@ -147,6 +156,11 @@ export default function (providerContext: FtrProviderContext) {
       },
     };
     await es.indices.putIndexTemplate(template);
+  };
+
+  const createFakeFleetDataStream = async (dataset: string, pkgName = PACKAGE_NAME) => {
+    const indexName = `logs-${dataset}-default`;
+    await createFakeFleetIndexTemplate(dataset, pkgName);
 
     await es.index({
       index: indexName,
@@ -157,9 +171,13 @@ export default function (providerContext: FtrProviderContext) {
     });
   };
 
-  const deleteDataStream = async (streamName: string) => {
-    await es.indices.deleteDataStream({ name: streamName + '-default' });
-    await es.indices.deleteIndexTemplate({ name: streamName });
+  const deleteDataStream = async (templateName: string) => {
+    await es.indices.deleteDataStream({ name: templateName + '-default' });
+    await deleteIndexTemplate(templateName);
+  };
+
+  const deleteIndexTemplate = async (templateName: string) => {
+    await es.indices.deleteIndexTemplate({ name: templateName });
   };
 
   describe('Package Policy - input package behavior', async function () {
@@ -281,6 +299,18 @@ export default function (providerContext: FtrProviderContext) {
       await deleteDataStream('logs-dataset4');
     });
 
+    it('should not allow existing index template to be overwritten if not owned by package', async () => {
+      await createFakeFleetIndexTemplate('dataset4', 'different_package');
+
+      const expectedStatusCode = 400;
+      await createPackagePolicyWithDataset(agentPolicyId, 'dataset4', expectedStatusCode);
+
+      const dataset4PkgComponentTemplate = await getComponentTemplate('logs-dataset4@package');
+      expect(dataset4PkgComponentTemplate).eql(null);
+
+      await deleteIndexTemplate('logs-dataset4');
+    });
+
     it('should allow data to be sent to existing stream if not owned by package if force flag provided', async () => {
       await createFakeFleetDataStream('dataset5', 'different_package');
 
@@ -288,10 +318,29 @@ export default function (providerContext: FtrProviderContext) {
       const force = true;
       await createPackagePolicyWithDataset(agentPolicyId, 'dataset5', expectedStatusCode, force);
 
-      const dataset4PkgComponentTemplate = await getComponentTemplate('logs-dataset5@package');
-      expect(dataset4PkgComponentTemplate).eql(null);
+      const dataset5PkgComponentTemplate = await getComponentTemplate('logs-dataset5@package');
+      expect(dataset5PkgComponentTemplate).eql(null);
+
+      const dataset5IndexTemplate = await getIndexTemplate('logs-dataset5');
+      expect(dataset5IndexTemplate?._meta?.package?.name).eql('different_package');
 
       await deleteDataStream('logs-dataset5');
+    });
+
+    it('should not override existing index template with no associated streams ', async () => {
+      await createFakeFleetIndexTemplate('dataset6', 'different_package');
+
+      const expectedStatusCode = 200;
+      const force = true;
+      await createPackagePolicyWithDataset(agentPolicyId, 'dataset6', expectedStatusCode, force);
+
+      const dataset6PkgComponentTemplate = await getComponentTemplate('logs-dataset6@package');
+      expect(dataset6PkgComponentTemplate).eql(null);
+
+      const dataset6IndexTemplate = await getIndexTemplate('logs-dataset6');
+      expect(dataset6IndexTemplate?._meta?.package?.name).eql('different_package');
+
+      await deleteIndexTemplate('logs-dataset6');
     });
 
     it('should update all index templates created by package policies when the package is upgraded', async () => {
