@@ -8,6 +8,8 @@
 import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression } from '@kbn/es-query';
 import type { SavedObjectsFindResponse } from '@kbn/core-saved-objects-api-server';
+import type { SavedObject } from '@kbn/core-saved-objects-common';
+import { defaultSortField } from '../../../common/utils';
 import type {
   CaseUserActionAttributesWithoutConnectorId,
   CaseUserActionResponse,
@@ -15,13 +17,17 @@ import type {
   UserActionFindRequest,
   ActionTypeValues,
   FindTypeField,
-} from '../../../common/api';
-import { ActionTypes, CommentType } from '../../../common/api';
-import { CASE_SAVED_OBJECT, CASE_USER_ACTION_SAVED_OBJECT } from '../../../common/constants';
+} from '../../../../common/api';
+import { Actions, ActionTypes, CommentType } from '../../../../common/api';
+import {
+  CASE_SAVED_OBJECT,
+  CASE_USER_ACTION_SAVED_OBJECT,
+  MAX_DOCS_PER_PAGE,
+} from '../../../../common/constants';
 
-import type { ServiceContext } from './types';
-import { transformFindResponseToExternalModel } from '.';
-import { buildFilter, combineFilters, NodeBuilderOperators } from '../../client/utils';
+import type { ServiceContext } from '../types';
+import { transformFindResponseToExternalModel, transformToExternalModel } from '../transform';
+import { buildFilter, combineFilters, NodeBuilderOperators } from '../../../client/utils';
 
 interface FindOptions extends UserActionFindRequest {
   caseId: string;
@@ -155,5 +161,59 @@ export class UserActionFinder {
       operator: 'or',
       type: CASE_USER_ACTION_SAVED_OBJECT,
     });
+  }
+
+  public async findStatusChanges({
+    caseId,
+    filter,
+  }: {
+    caseId: string;
+    filter?: KueryNode;
+  }): Promise<Array<SavedObject<CaseUserActionResponse>>> {
+    try {
+      this.context.log.debug('Attempting to find status changes');
+
+      const updateActionFilter = buildFilter({
+        filters: Actions.update,
+        field: 'action',
+        operator: 'or',
+        type: CASE_USER_ACTION_SAVED_OBJECT,
+      });
+
+      const statusChangeFilter = buildFilter({
+        filters: ActionTypes.status,
+        field: 'type',
+        operator: 'or',
+        type: CASE_USER_ACTION_SAVED_OBJECT,
+      });
+
+      const combinedFilters = combineFilters([updateActionFilter, statusChangeFilter, filter]);
+
+      const finder =
+        this.context.unsecuredSavedObjectsClient.createPointInTimeFinder<CaseUserActionAttributesWithoutConnectorId>(
+          {
+            type: CASE_USER_ACTION_SAVED_OBJECT,
+            hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
+            sortField: defaultSortField,
+            sortOrder: 'asc',
+            filter: combinedFilters,
+            perPage: MAX_DOCS_PER_PAGE,
+          }
+        );
+
+      let userActions: Array<SavedObject<CaseUserActionResponse>> = [];
+      for await (const findResults of finder.find()) {
+        userActions = userActions.concat(
+          findResults.saved_objects.map((so) =>
+            transformToExternalModel(so, this.context.persistableStateAttachmentTypeRegistry)
+          )
+        );
+      }
+
+      return userActions;
+    } catch (error) {
+      this.context.log.error(`Error finding status changes: ${error}`);
+      throw error;
+    }
   }
 }

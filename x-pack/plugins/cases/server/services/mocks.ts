@@ -17,12 +17,19 @@ import type {
 import type { LicensingService } from './licensing';
 import type { EmailNotificationService } from './notifications/email_notification_service';
 import type { UserActionPersister } from './user_actions/operations/create';
+import type { UserActionFinder } from './user_actions/operations/find';
+
+type FakeUserActionService = PublicMethodsOf<CaseUserActionService> & {
+  creator: CaseUserActionPersisterServiceMock;
+  finder: CaseUserActionFinderServiceMock;
+};
 
 export type CaseServiceMock = jest.Mocked<CasesService>;
 export type CaseConfigureServiceMock = jest.Mocked<CaseConfigureService>;
 export type ConnectorMappingsServiceMock = jest.Mocked<ConnectorMappingsService>;
-export type CaseUserActionServiceMock = jest.Mocked<CaseUserActionService>;
+export type CaseUserActionServiceMock = jest.Mocked<FakeUserActionService>;
 export type CaseUserActionPersisterServiceMock = jest.Mocked<UserActionPersister>;
+export type CaseUserActionFinderServiceMock = jest.Mocked<UserActionFinder>;
 export type AlertServiceMock = jest.Mocked<AlertService>;
 export type AttachmentServiceMock = jest.Mocked<AttachmentService>;
 export type LicensingServiceMock = jest.Mocked<LicensingService>;
@@ -87,18 +94,23 @@ const createUserActionPersisterServiceMock = (): CaseUserActionPersisterServiceM
   return service as unknown as CaseUserActionPersisterServiceMock;
 };
 
-type FakeUserActionService = PublicMethodsOf<CaseUserActionService> & {
-  creator: CaseUserActionPersisterServiceMock;
+const createUserActionFinderServiceMock = (): CaseUserActionFinderServiceMock => {
+  const service: PublicMethodsOf<UserActionFinder> = {
+    find: jest.fn(),
+    findStatusChanges: jest.fn(),
+  };
+
+  return service as unknown as CaseUserActionFinderServiceMock;
 };
 
 export const createUserActionServiceMock = (): CaseUserActionServiceMock => {
   const service: FakeUserActionService = {
     creator: createUserActionPersisterServiceMock(),
+    finder: createUserActionFinderServiceMock(),
     getConnectorFieldsBeforeLatestPush: jest.fn(),
     getMostRecentUserAction: jest.fn(),
     getCaseConnectorInformation: jest.fn(),
     getAll: jest.fn(),
-    findStatusChanges: jest.fn(),
     getUniqueConnectors: jest.fn(),
     getUserActionIdsForCases: jest.fn(),
   };

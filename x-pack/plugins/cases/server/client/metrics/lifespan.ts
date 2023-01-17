@@ -47,7 +47,7 @@ export class Lifespan extends SingleCaseBaseHandler {
         Operations.getUserActionMetrics
       );
 
-      const statusUserActions = await userActionService.findStatusChanges({
+      const statusUserActions = await userActionService.finder.findStatusChanges({
         caseId: this.caseId,
         filter: authorizationFilter,
       });
