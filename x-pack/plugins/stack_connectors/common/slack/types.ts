@@ -9,8 +9,8 @@ import { TypeOf } from '@kbn/config-schema';
 import {
   SlackConfigSchema,
   SlackSecretsSchema,
+  ExecutorGetChannelsParamsSchema,
   ExecutorPostMessageParamsSchema,
-  ExecutorParamsSchema,
 } from './schema';
 
 export type SlackConfig = TypeOf<typeof SlackConfigSchema>;
@@ -18,8 +18,16 @@ export type SlackSecrets = TypeOf<typeof SlackSecretsSchema>;
 
 export type SubAction = 'postMessage' | 'getChannels';
 
-export type SlackExecuteActionParams = TypeOf<typeof ExecutorParamsSchema>;
+export type ExecutorGetChannelsParams = TypeOf<typeof ExecutorGetChannelsParamsSchema>;
+
 export type ExecutorPostMessageParams = TypeOf<typeof ExecutorPostMessageParamsSchema>;
+
+export type SlackExecuteActionParams = ExecutorGetChannelsParams | ExecutorPostMessageParams;
+
+export interface PostMessageParams {
+  channels: string[];
+  text: string;
+}
 
 export interface GetChannelsResponse {
   ok: true;

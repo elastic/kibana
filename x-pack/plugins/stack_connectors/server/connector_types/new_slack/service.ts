@@ -14,10 +14,13 @@ import {
   SlackServiceCredentials,
   PostMessageResponse,
   PostMessageResponseList,
-  PostMessageParams,
 } from './types';
 import { SLACK_CONNECTOR_NAME } from './translations';
-import type { SlackSecrets, GetChannelsResponse } from '../../../common/slack/types';
+import type {
+  SlackSecrets,
+  GetChannelsResponse,
+  PostMessageParams,
+} from '../../../common/slack/types';
 
 const SLACK_URL = 'https://slack.com/api/';
 

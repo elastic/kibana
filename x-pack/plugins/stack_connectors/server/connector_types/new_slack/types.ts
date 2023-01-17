@@ -6,7 +6,11 @@
  */
 
 import { ValidatorServices } from '@kbn/actions-plugin/server/types';
-import type { SlackConfig, SlackSecrets, GetChannelsResponse } from '../../../common/slack/types';
+import type {
+  SlackSecrets,
+  GetChannelsResponse,
+  PostMessageParams,
+} from '../../../common/slack/types';
 
 export type SlackExecutorResultData = PostMessageResponseList | GetChannelsResponse;
 
@@ -27,13 +31,7 @@ export interface PostMessageResponse {
 export type PostMessageResponseList = PostMessageResponse[];
 
 export interface SlackServiceCredentials {
-  config: SlackConfig;
   secrets: SlackSecrets;
-}
-
-export interface PostMessageParams {
-  channels: string[];
-  text: string;
 }
 
 export interface SlackServiceApi {

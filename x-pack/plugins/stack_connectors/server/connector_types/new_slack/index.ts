@@ -17,12 +17,16 @@ import {
   SecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common/types';
 import { validate } from './validators';
-import { SlackConfigSchema, SlackSecretsSchema } from '../../../common/slack/schema';
-import { ExecutorParamsSchema } from '../../../common/slack/schema';
+import { ExecutorParamsSchema, SlackSecretsSchema } from '../../../common/slack/schema';
 import { createExternalService } from './service';
 import { api } from './api';
-import { SlackExecutorResultData, ExecutorSubActionPostMessageParams } from './types';
-import { SlackConfig, SlackSecrets, SlackExecuteActionParams } from '../../../common/slack/types';
+import { SlackExecutorResultData } from './types';
+import {
+  PostMessageParams,
+  SlackConfig,
+  SlackSecrets,
+  SlackExecuteActionParams,
+} from '../../../common/slack/types';
 import { SLACK_CONNECTOR_ID } from '../../../common/slack/constants';
 import { SLACK_CONNECTOR_NAME } from './translations';
 
@@ -46,10 +50,6 @@ export const getConnectorType = (): ConnectorType<
       SecurityConnectorFeatureId,
     ],
     validate: {
-      config: {
-        schema: SlackConfigSchema,
-        customValidator: validate.config,
-      },
       secrets: {
         schema: SlackSecretsSchema,
         customValidator: validate.secrets,
@@ -71,7 +71,6 @@ const executor = async (
 
   const externalService = createExternalService(
     {
-      config: {},
       secrets,
     },
     logger,
@@ -97,14 +96,11 @@ const executor = async (
   }
 
   if (subAction === 'postMessage') {
-    const postMessageParams = subActionParams as ExecutorSubActionPostMessageParams;
+    const postMessageParams = subActionParams as PostMessageParams;
     data = await api.postMessage({
       externalService,
       params: postMessageParams,
     });
-
-    // complete text
-    logger.debug(`response push to service for incident id: `);
   }
 
   return { status: 'ok', data: data ?? {}, actionId };
