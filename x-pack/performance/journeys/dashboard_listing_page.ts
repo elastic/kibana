@@ -37,5 +37,9 @@ export const journey = new Journey({
       delay: inputDelays.TYPING,
     });
     await page.click('[data-test-subj="confirmSaveSavedObjectButton"]');
-    await page.locator('text="Editing foobar dashboard"');
+    await page.locator('[data-test-subj="saveDashboardSuccess"]');
+  })
+  .step('Return to dashboard list', async ({ page, inputDelays }) => {
+    await page.click('[data-test-subj="breadcrumb dashboardListingBreadcrumb first"]');
+    await page.waitForSelector(`[data-test-subj="table-is-ready"]`);
   });
