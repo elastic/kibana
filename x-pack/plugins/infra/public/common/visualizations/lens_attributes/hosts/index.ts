@@ -10,3 +10,5 @@ export { cpuCores } from './cpu_cores';
 export { memory } from './memory';
 export { rx } from './rx';
 export { tx } from './tx';
+export { diskIORead } from './diskio_read';
+export { diskIOWrite } from './diskio_write';

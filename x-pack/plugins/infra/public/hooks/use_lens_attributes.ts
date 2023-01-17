@@ -5,45 +5,116 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { Filter, Query } from '@kbn/es-query';
-import { LensAttributes } from '../types';
+import { Filter, Query, TimeRange } from '@kbn/es-query';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { FormulaPublicApi } from '@kbn/lens-plugin/public';
+import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import { InfraClientSetupDeps, LensAttributes, LensOptions } from '../types';
+import {
+  buildLensVisualization,
+  HostLensAttributesTypes,
+  hostMetricsLensAttributes,
+} from '../common/visualizations';
+
+const DEFAULT_BREAKDOWN_SIZE = 20;
 
 interface UseLensAttributesParams {
+  type: HostLensAttributesTypes;
   dataView: DataView | undefined;
-  filters: Filter[];
-  attributes: LensAttributes;
-  query: Query;
-  title?: string;
+  options?: LensOptions;
 }
 
 export const useLensAttributes = ({
+  type,
   dataView,
-  filters = [],
-  attributes,
-  query,
-  title,
-}: UseLensAttributesParams): LensAttributes | null => {
-  const lensAttrsWithInjectedData = useMemo(() => {
-    if (!dataView?.id) {
+  options = {
+    breakdownSize: DEFAULT_BREAKDOWN_SIZE,
+  },
+}: UseLensAttributesParams) => {
+  const {
+    services: { lens },
+  } = useKibana<InfraClientSetupDeps>();
+  const { navigateToPrefilledEditor } = lens;
+  const [formulaAPI, setFormulaAPI] = useState<FormulaPublicApi>();
+
+  useEffect(() => {
+    lens.getXyVisTypes();
+    const getFormulaApi = async () => {
+      const { formula } = await lens.stateHelperApi();
+      return setFormulaAPI(formula);
+    };
+    getFormulaApi();
+  }, [lens]);
+
+  const attributes: LensAttributes | null = useMemo(() => {
+    if (!dataView || !formulaAPI) {
       return null;
     }
 
-    return {
-      ...attributes,
-      ...(title != null ? { title } : {}),
-      state: {
-        ...attributes.state,
-        query,
-        filters: [...attributes.state.filters, ...filters],
-      },
-      references: attributes.references.map((ref: { id: string; name: string; type: string }) => ({
-        ...ref,
-        id: dataView.id,
-      })),
-    } as LensAttributes;
-  }, [dataView?.id, attributes, title, filters, query]);
+    const visualizationAttributes = buildLensVisualization(
+      hostMetricsLensAttributes[type].getAttributes(dataView, options, formulaAPI)
+    );
 
-  return lensAttrsWithInjectedData;
+    return visualizationAttributes;
+  }, [dataView, formulaAPI, options, type]);
+
+  const injectData = useCallback(
+    (data: { filters: Filter[]; query: Query; title?: string }): LensAttributes | null => {
+      if (!attributes) {
+        return null;
+      }
+
+      return {
+        ...attributes,
+        ...(!!data.title ? { title: data.title } : {}),
+        state: {
+          ...attributes.state,
+          query: data.query,
+          filters: [...attributes.state.filters, ...data.filters],
+        },
+      };
+    },
+    [attributes]
+  );
+
+  const getExtraActions = useCallback(
+    (currentAttributes: LensAttributes | null, timeRange: TimeRange) => {
+      return {
+        openInLens: {
+          id: 'openInLens',
+
+          getDisplayName(_context: ActionExecutionContext): string {
+            return 'Open in Lens';
+          },
+          getIconType(_context: ActionExecutionContext): string | undefined {
+            return 'visArea';
+          },
+          type: 'actionButton',
+          async isCompatible(_context: ActionExecutionContext): Promise<boolean> {
+            return true;
+          },
+          async execute(_context: ActionExecutionContext): Promise<void> {
+            if (currentAttributes) {
+              navigateToPrefilledEditor(
+                {
+                  id: '',
+                  timeRange,
+                  attributes: currentAttributes,
+                },
+                {
+                  openInNewTab: true,
+                }
+              );
+            }
+          },
+          order: 100,
+        },
+      };
+    },
+    [navigateToPrefilledEditor]
+  );
+
+  return { attributes, injectData, getExtraActions };
 };

@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { cpu, cpuCores, memory, rx, tx } from './hosts';
+import { cpu, cpuCores, memory, rx, tx, diskIORead, diskIOWrite } from './lens_attributes/hosts';
+
+export { buildLensAttributes as buildLensVisualization } from './lens_attributes/attributes_builder';
 
 export const hostMetricsLensAttributes = {
   cpu,
@@ -13,6 +15,8 @@ export const hostMetricsLensAttributes = {
   memory,
   rx,
   tx,
+  diskIORead,
+  diskIOWrite,
 };
 
 export type HostLensAttributesTypes = keyof typeof hostMetricsLensAttributes;

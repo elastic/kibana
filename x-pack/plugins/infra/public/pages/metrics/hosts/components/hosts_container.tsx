@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { InfraLoadingPanel } from '../../../../components/loading';
@@ -14,7 +14,7 @@ import { UnifiedSearchBar } from './unified_search_bar';
 import { HostsTable } from './hosts_table';
 import { HostsViewProvider } from '../hooks/use_hosts_view';
 import { KPICharts } from './kpi_charts/kpi_charts';
-import { ChartContainer } from './charts/chart_container';
+import { Tabs } from './tabs/tabs';
 
 export const HostContainer = () => {
   const { metricsDataView, isDataViewLoading, hasFailedLoadingDataView } =
@@ -37,11 +37,17 @@ export const HostContainer = () => {
       <UnifiedSearchBar dataView={metricsDataView} />
       <EuiSpacer />
       <HostsViewProvider>
-        <KPICharts />
-        <EuiSpacer />
-        <HostsTable />
-        <EuiSpacer />
-        <ChartContainer />
+        <EuiFlexGroup direction="column">
+          <EuiFlexItem>
+            <KPICharts />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <HostsTable />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <Tabs />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </HostsViewProvider>
     </>
   );

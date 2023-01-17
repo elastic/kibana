@@ -41,7 +41,7 @@ export const CloudProviderIconWithTitle = ({
           />
         </EuiToolTip>
       </EuiFlexItem>
-      <EuiFlexItem grow={false} className="eui-textTruncate">
+      <EuiFlexItem grow={false} className="eui-textTruncate" data-test-subj={`test-gcp`}>
         {title ?? (
           <EuiText size="relative" className="eui-textTruncate">
             {text}

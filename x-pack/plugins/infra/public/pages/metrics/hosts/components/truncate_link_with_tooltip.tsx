@@ -27,7 +27,11 @@ export function TruncateLinkWithTooltip(props: Props) {
         content={text}
         anchorClassName="eui-fullWidth"
       >
-        <EuiLink className="eui-displayBlock eui-textTruncate" {...link}>
+        <EuiLink
+          className="eui-displayBlock eui-textTruncate"
+          {...link}
+          data-test-subj={`test-host-${text}`}
+        >
           {text}
         </EuiLink>
       </EuiToolTip>

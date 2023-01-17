@@ -6,14 +6,14 @@
  */
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import createContainer from 'constate';
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { buildEsQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import { debounce } from 'lodash';
 import type { SavedQuery } from '@kbn/data-plugin/public';
+import { debounce } from 'lodash';
 import type { InfraClientStartDeps } from '../../../../types';
 import { useMetricsDataViewContext } from './use_data_view';
 import { useSyncKibanaTimeFilterTime } from '../../../../hooks/use_kibana_timefilter_time';
-import { useHostsUrlState, INITIAL_DATE_RANGE } from './use_hosts_url_state';
+import { useHostsUrlState, INITIAL_DATE_RANGE } from './use_unified_search_url_state';
 
 export const useUnifiedSearch = () => {
   const { state, dispatch, getRangeInTimestamp, getTime } = useHostsUrlState();
@@ -29,6 +29,28 @@ export const useUnifiedSearch = () => {
   });
 
   const { filterManager } = queryManager;
+
+  useEffect(() => {
+    const next = () => {
+      const globalFilters = filterManager.getFilters();
+      debounceOnSubmit({
+        filters: globalFilters,
+        dateRange: getTime(),
+      });
+    };
+
+    const filterSubscription = filterManager.getUpdates$().subscribe({
+      next,
+    });
+    const timeSubscription = queryManager.timefilter.timefilter.getTimeUpdate$().subscribe({
+      next,
+    });
+
+    return () => {
+      filterSubscription.unsubscribe();
+      timeSubscription.unsubscribe();
+    };
+  });
 
   const onSubmit = useCallback(
     (data?: {
@@ -107,7 +129,7 @@ export const useUnifiedSearch = () => {
     onSubmit: debounceOnSubmit,
     saveQuery,
     unifiedSearchQuery: state.query,
-    unifiedSearchDateRange: getTime(),
+    unifiedSearchDateRange: state.dateRange,
     unifiedSearchFilters: state.filters,
   };
 };
