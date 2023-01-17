@@ -208,7 +208,18 @@ export default function (providerContext: FtrProviderContext) {
                 mapping: { total_fields: { limit: '10000' } },
               },
             },
-            mappings: { properties: {} },
+            mappings: {
+              properties: {
+                input: {
+                  properties: {
+                    name: {
+                      type: 'constant_keyword',
+                      value: 'logs',
+                    },
+                  },
+                },
+              },
+            },
           },
           _meta: {
             package: { name: 'input_package_upgrade' },
@@ -290,17 +301,27 @@ export default function (providerContext: FtrProviderContext) {
 
       const dataset1PkgComponentTemplate = await getComponentTemplate('logs-dataset1@package');
       expect(dataset1PkgComponentTemplate).not.eql(null);
-      expect(dataset1PkgComponentTemplate!.component_template.template?.mappings?.properties).eql({
+      const mappingsWithTimestamp = {
         '@timestamp': { ignore_malformed: false, type: 'date' },
-      });
+        input: {
+          properties: {
+            name: {
+              type: 'constant_keyword',
+              value: 'logs',
+            },
+          },
+        },
+      };
+      expect(dataset1PkgComponentTemplate!.component_template.template?.mappings?.properties).eql(
+        mappingsWithTimestamp
+      );
 
       const dataset2PkgComponentTemplate = await getComponentTemplate('logs-dataset2@package');
       expect(dataset2PkgComponentTemplate).not.eql(null);
-      expect(dataset2PkgComponentTemplate!.component_template.template?.mappings?.properties).eql({
-        '@timestamp': { ignore_malformed: false, type: 'date' },
-      });
+      expect(dataset2PkgComponentTemplate!.component_template.template?.mappings?.properties).eql(
+        mappingsWithTimestamp
+      );
     });
-
     it('should delete all index templates created by package policies when the package is uninstalled', async () => {
       for (const packagePolicyId of packagePolicyIds) {
         await deletePackagePolicy(packagePolicyId);
