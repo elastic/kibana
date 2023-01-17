@@ -13,11 +13,11 @@ import { EuiSpacer } from '@elastic/eui';
 import { AppMountParameters } from '@kbn/core/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
+import { DualReduxExample } from './dual_redux_example';
 import { PortableDashboardsExampleStartDeps } from './plugin';
 import { StaticByValueExample } from './static_by_value_example';
 import { StaticByReferenceExample } from './static_by_reference_example';
 import { DynamicByReferenceExample } from './dynamically_add_panels_example';
-import { BasicReduxExample } from './basic_redux_example';
 
 export const renderApp = async (
   { data, dashboard }: PortableDashboardsExampleStartDeps,
@@ -34,7 +34,7 @@ export const renderApp = async (
       <>
         <DynamicByReferenceExample dataView={dataViews[0]} />
         <EuiSpacer size="xl" />
-        <BasicReduxExample />
+        <DualReduxExample />
         <EuiSpacer size="xl" />
         <StaticByReferenceExample dashboardId={logsSampleDashboardId} dataView={dataViews[0]} />
         <EuiSpacer size="xl" />

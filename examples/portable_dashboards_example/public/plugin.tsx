@@ -19,7 +19,7 @@ import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public'
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
 
-import img from './control_group_image.png';
+import img from './portable_dashboard_image.png';
 import { PLUGIN_ID } from './constants';
 
 interface SetupDeps {

@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
-export const BasicReduxExample = () => {
+export const DualReduxExample = () => {
   const [firstDashboardContainer, setFirstDashboardContainer] = useState<
     DashboardContainer | undefined
   >();
@@ -75,12 +75,12 @@ export const BasicReduxExample = () => {
   return (
     <>
       <EuiTitle>
-        <h2>Basic redux example</h2>
+        <h2>Dual redux example</h2>
       </EuiTitle>
       <EuiText>
         <p>
-          Use the redux context from the dashboard container to independently set the view mode of
-          two side-by-side dashboards.
+          Use the redux contexts from two different dashboard containers to independently set the
+          view mode of each dashboard.
         </p>
       </EuiText>
       <EuiSpacer size="m" />
@@ -88,7 +88,7 @@ export const BasicReduxExample = () => {
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiTitle size="xs">
-              <h1>Dashboard #1</h1>
+              <h3>Dashboard #1</h3>
             </EuiTitle>
             <EuiSpacer size="m" />
             {FirstDashboardReduxWrapper && (
@@ -108,7 +108,7 @@ export const BasicReduxExample = () => {
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiTitle size="xs">
-              <h1>Dashboard #2</h1>
+              <h3>Dashboard #2</h3>
             </EuiTitle>
             <EuiSpacer size="m" />
             {SecondDashboardReduxWrapper && (
