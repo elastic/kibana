@@ -8,6 +8,7 @@
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import { useEuiTheme } from '@elastic/eui';
+import { COMPLETE_LABEL } from './monitor_complete_count';
 import { ClientPluginsStart } from '../../../../../plugin';
 import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 import { useSelectedLocation } from '../hooks/use_selected_location';
@@ -46,7 +47,7 @@ export const MonitorCompleteSparklines = (props: Props) => {
           },
           dataType: 'synthetics',
           selectedMetricField: 'state.id',
-          name: 'Monitor complete',
+          name: COMPLETE_LABEL,
           color: euiTheme.colors.success,
           operationType: 'unique_count',
         },

@@ -118,9 +118,12 @@ const TEST_NOW_DESCRIPTION = i18n.translate('xpack.synthetics.testRun.descriptio
   defaultMessage: 'Test your monitor and verify the results before saving',
 });
 
-const TEST_SCHEDULED_LABEL = i18n.translate('xpack.synthetics.monitorList.testNow.scheduled', {
-  defaultMessage: 'Test is already scheduled',
-});
+export const TEST_SCHEDULED_LABEL = i18n.translate(
+  'xpack.synthetics.monitorList.testNow.scheduled',
+  {
+    defaultMessage: 'Test is already scheduled',
+  }
+);
 
 const PRIVATE_AVAILABLE_LABEL = i18n.translate(
   'xpack.synthetics.monitorList.testNow.available.private',
@@ -129,9 +132,12 @@ const PRIVATE_AVAILABLE_LABEL = i18n.translate(
   }
 );
 
-const TEST_NOW_ARIA_LABEL = i18n.translate('xpack.synthetics.monitorList.testNow.AriaLabel', {
-  defaultMessage: 'Click to run test now',
-});
+export const TEST_NOW_ARIA_LABEL = i18n.translate(
+  'xpack.synthetics.monitorList.testNow.AriaLabel',
+  {
+    defaultMessage: 'Click to run test now',
+  }
+);
 
 const RUN_TEST = i18n.translate('xpack.synthetics.monitorList.runTest.label', {
   defaultMessage: 'Run test',

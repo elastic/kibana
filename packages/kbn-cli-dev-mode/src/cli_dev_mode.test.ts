@@ -35,13 +35,6 @@ const { BasePathProxyServer } = jest.requireMock('./base_path_proxy_server');
 jest.mock('@kbn/ci-stats-reporter');
 const { CiStatsReporter } = jest.requireMock('@kbn/ci-stats-reporter');
 
-jest.mock('./get_server_watch_paths', () => ({
-  getServerWatchPaths: jest.fn(() => ({
-    watchPaths: ['<mock watch paths>'],
-    ignorePaths: ['<mock ignore paths>'],
-  })),
-}));
-
 const mockBasePathProxy = {
   targetPort: 9999,
   basePath: '/foo/bar',
@@ -142,15 +135,9 @@ it('passes correct args to sub-classes', () => {
     Array [
       Array [
         Object {
-          "cwd": <absolute path>,
           "enabled": true,
-          "ignore": Array [
-            "<mock ignore paths>",
-          ],
           "log": <TestLog>,
-          "paths": Array [
-            "<mock watch paths>",
-          ],
+          "repoRoot": <absolute path>,
         },
       ],
     ]
