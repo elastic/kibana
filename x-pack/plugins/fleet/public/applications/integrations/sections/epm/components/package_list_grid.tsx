@@ -45,21 +45,22 @@ import { PackageCard } from './package_card';
 export interface Props {
   isLoading?: boolean;
   controls?: ReactNode | ReactNode[];
-  title?: string;
   list: IntegrationCardItem[];
   searchTerm: string;
   setSearchTerm: (search: string) => void;
   selectedCategory: ExtendedIntegrationCategory;
   setCategory: (category: ExtendedIntegrationCategory) => void;
   categories: CategoryFacet[];
+  setUrlandReplaceHistory: (params: IntegrationsURLParameters) => void;
+  setUrlandPushHistory: (params: IntegrationsURLParameters) => void;
+  callout?: JSX.Element | null;
+  // Props used only for available packages:
+  showCardLabels?: boolean;
+  title?: string;
   availableSubCategories?: CategoryFacet[];
   selectedSubCategory?: CategoryFacet;
   setSelectedSubCategory?: (c: CategoryFacet | undefined) => void;
-  setUrlandReplaceHistory: (params: IntegrationsURLParameters) => void;
-  setUrlandPushHistory: (params: IntegrationsURLParameters) => void;
   showMissingIntegrationMessage?: boolean;
-  callout?: JSX.Element | null;
-  showCardLabels?: boolean;
 }
 
 export const PackageListGrid: FunctionComponent<Props> = ({
