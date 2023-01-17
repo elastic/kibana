@@ -15,7 +15,7 @@ describe('api_itom', () => {
   let externalService: jest.Mocked<ExternalServiceITOM>;
   const eventParamsWithFormattedDate = {
     ...itomEventParams,
-    time_of_event: '2021-10-13, 10:51:44',
+    time_of_event: '2021-10-13 10:51:44',
   };
 
   beforeEach(() => {

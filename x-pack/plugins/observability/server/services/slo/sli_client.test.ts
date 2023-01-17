@@ -226,47 +226,14 @@ describe('SLIClient', () => {
                 },
               },
               aggs: {
-                slices: {
-                  date_histogram: {
-                    field: '@timestamp',
-                    fixed_interval: '10m',
-                  },
-                  aggs: {
-                    good: {
-                      sum: {
-                        field: 'slo.numerator',
-                      },
-                    },
-                    total: {
-                      sum: {
-                        field: 'slo.denominator',
-                      },
-                    },
-                    good_slice: {
-                      bucket_script: {
-                        buckets_path: {
-                          good: 'good',
-                          total: 'total',
-                        },
-                        script: `params.good / params.total >= ${slo.objective.timesliceTarget} ? 1 : 0`,
-                      },
-                    },
-                    count_slice: {
-                      bucket_script: {
-                        buckets_path: {},
-                        script: '1',
-                      },
-                    },
-                  },
-                },
                 good: {
-                  sum_bucket: {
-                    buckets_path: 'slices>good_slice.value',
+                  sum: {
+                    field: 'slo.isGoodSlice',
                   },
                 },
                 total: {
-                  sum_bucket: {
-                    buckets_path: 'slices>count_slice.value',
+                  value_count: {
+                    field: 'slo.isGoodSlice',
                   },
                 },
               },
@@ -314,47 +281,14 @@ describe('SLIClient', () => {
                 },
               },
               aggs: {
-                slices: {
-                  date_histogram: {
-                    field: '@timestamp',
-                    fixed_interval: '10m',
-                  },
-                  aggs: {
-                    good: {
-                      sum: {
-                        field: 'slo.numerator',
-                      },
-                    },
-                    total: {
-                      sum: {
-                        field: 'slo.denominator',
-                      },
-                    },
-                    good_slice: {
-                      bucket_script: {
-                        buckets_path: {
-                          good: 'good',
-                          total: 'total',
-                        },
-                        script: `params.good / params.total >= ${slo.objective.timesliceTarget} ? 1 : 0`,
-                      },
-                    },
-                    count_slice: {
-                      bucket_script: {
-                        buckets_path: {},
-                        script: '1',
-                      },
-                    },
-                  },
-                },
                 good: {
-                  sum_bucket: {
-                    buckets_path: 'slices>good_slice.value',
+                  sum: {
+                    field: 'slo.isGoodSlice',
                   },
                 },
                 total: {
-                  sum_bucket: {
-                    buckets_path: 'slices>count_slice.value',
+                  value_count: {
+                    field: 'slo.isGoodSlice',
                   },
                 },
               },
@@ -519,47 +453,14 @@ describe('SLIClient', () => {
                 ranges: [{ from: 'now-1h/m', to: 'now/m' }],
               },
               aggs: {
-                slices: {
-                  date_histogram: {
-                    field: '@timestamp',
-                    fixed_interval: '10m',
-                  },
-                  aggs: {
-                    good: {
-                      sum: {
-                        field: 'slo.numerator',
-                      },
-                    },
-                    total: {
-                      sum: {
-                        field: 'slo.denominator',
-                      },
-                    },
-                    good_slice: {
-                      bucket_script: {
-                        buckets_path: {
-                          good: 'good',
-                          total: 'total',
-                        },
-                        script: 'params.good / params.total >= 0.9 ? 1 : 0',
-                      },
-                    },
-                    count_slice: {
-                      bucket_script: {
-                        buckets_path: {},
-                        script: '1',
-                      },
-                    },
-                  },
-                },
                 good: {
-                  sum_bucket: {
-                    buckets_path: 'slices>good_slice.value',
+                  sum: {
+                    field: 'slo.isGoodSlice',
                   },
                 },
                 total: {
-                  sum_bucket: {
-                    buckets_path: 'slices>count_slice.value',
+                  value_count: {
+                    field: 'slo.isGoodSlice',
                   },
                 },
               },
@@ -570,47 +471,14 @@ describe('SLIClient', () => {
                 ranges: [{ from: 'now-5m/m', to: 'now/m' }],
               },
               aggs: {
-                slices: {
-                  date_histogram: {
-                    field: '@timestamp',
-                    fixed_interval: '10m',
-                  },
-                  aggs: {
-                    good: {
-                      sum: {
-                        field: 'slo.numerator',
-                      },
-                    },
-                    total: {
-                      sum: {
-                        field: 'slo.denominator',
-                      },
-                    },
-                    good_slice: {
-                      bucket_script: {
-                        buckets_path: {
-                          good: 'good',
-                          total: 'total',
-                        },
-                        script: 'params.good / params.total >= 0.9 ? 1 : 0',
-                      },
-                    },
-                    count_slice: {
-                      bucket_script: {
-                        buckets_path: {},
-                        script: '1',
-                      },
-                    },
-                  },
-                },
                 good: {
-                  sum_bucket: {
-                    buckets_path: 'slices>good_slice.value',
+                  sum: {
+                    field: 'slo.isGoodSlice',
                   },
                 },
                 total: {
-                  sum_bucket: {
-                    buckets_path: 'slices>count_slice.value',
+                  value_count: {
+                    field: 'slo.isGoodSlice',
                   },
                 },
               },
@@ -636,6 +504,7 @@ expect.extend({
     };
   },
 });
+
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace jest {
