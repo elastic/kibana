@@ -5,47 +5,13 @@
  * 2.0.
  */
 import React, { memo } from 'react';
-import { EuiForm } from '@elastic/eui';
 import type { PackagePolicyCreateExtensionComponentProps } from '@kbn/fleet-plugin/public';
-import { CLOUDBEAT_AWS, CLOUDBEAT_EKS, CLOUDBEAT_INTEGRATION } from '../../../common/constants';
-import { DeploymentTypeSelect } from './deployment_type_select';
-import { EksFormWrapper } from './eks_form';
-import {
-  getEnabledInput,
-  getEnabledInputType,
-  getUpdatedDeploymentType,
-  getUpdatedEksVar,
-} from './utils';
+import { CspPolicyTemplateForm } from './policy_template_form';
 
 export const CspCreatePolicyExtension = memo<PackagePolicyCreateExtensionComponentProps>(
-  ({ newPolicy, onChange }) => {
-    const selectedDeploymentType = getEnabledInputType(newPolicy.inputs);
-    const selectedInput = getEnabledInput(newPolicy.inputs);
-    const policyTemplate = selectedInput?.policy_template;
-    const updateDeploymentType = (inputType: CLOUDBEAT_INTEGRATION) =>
-      onChange(getUpdatedDeploymentType(newPolicy, inputType));
-
-    const updateEksVar = (key: string, value: string) =>
-      onChange(getUpdatedEksVar(newPolicy, key, value));
-
-    return (
-      <EuiForm style={{ marginTop: 0 }}>
-        {selectedInput && (policyTemplate === 'kspm' || policyTemplate === 'cspm') && (
-          <>
-            <DeploymentTypeSelect
-              policyTemplate={policyTemplate}
-              type={selectedDeploymentType}
-              onChange={updateDeploymentType}
-            />
-            {(selectedDeploymentType === CLOUDBEAT_EKS ||
-              selectedDeploymentType === CLOUDBEAT_AWS) && (
-              <EksFormWrapper inputs={newPolicy.inputs} onChange={updateEksVar} />
-            )}
-          </>
-        )}
-      </EuiForm>
-    );
-  }
+  ({ newPolicy, onChange }) => (
+    <CspPolicyTemplateForm newPolicy={newPolicy} onChange={onChange} edit={false} />
+  )
 );
 
 CspCreatePolicyExtension.displayName = 'CspCreatePolicyExtension';

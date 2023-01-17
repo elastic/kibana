@@ -10,11 +10,19 @@ import { Chart, Settings, Metric, MetricTrendShape } from '@elastic/charts';
 import { EuiPanel } from '@elastic/eui';
 import { DARK_THEME } from '@elastic/charts';
 import { useTheme } from '@kbn/observability-plugin/public';
+import { useDispatch, useSelector } from 'react-redux';
+import moment from 'moment';
+import { ManualTestRunProgress } from './manual_run_progress';
 import { useLocationName, useStatusByLocationOverview } from '../../../../hooks';
 import { formatDuration } from '../../../../utils/formatting';
 import { MonitorOverviewItem } from '../../../../../../../common/runtime_types';
 import { ActionsPopover } from './actions_popover';
 import { OverviewGridItemLoader } from './overview_grid_item_loader';
+import {
+  hideTestNowFlyoutAction,
+  manualTestRunInProgressSelector,
+  toggleTestNowFlyoutAction,
+} from '../../../../state/manual_test_runs';
 
 export const getColor = (
   theme: ReturnType<typeof useTheme>,
@@ -47,18 +55,23 @@ export const MetricItem = ({
   data: Array<{ x: number; y: number }>;
   averageDuration: number;
   loaded: boolean;
-  onClick: (params: { id: string; configId: string; location: string }) => void;
+  onClick: (params: { id: string; configId: string; location: string; locationId: string }) => void;
 }) => {
   const [isMouseOver, setIsMouseOver] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const locationName = useLocationName({ locationId: monitor.location?.id });
-  const status = useStatusByLocationOverview(monitor.configId, locationName);
+  const { status, timestamp } = useStatusByLocationOverview(monitor.configId, locationName);
   const theme = useTheme();
+
+  const testInProgress = useSelector(manualTestRunInProgressSelector(monitor.configId));
+
+  const dispatch = useDispatch();
 
   return (
     <div data-test-subj={`${monitor.name}-metric-item`} style={{ height: '160px' }}>
       {loaded ? (
         <EuiPanel
+          data-test-subj={`${monitor.name}-metric-item-${locationName}-${status}`}
           paddingSize="none"
           onMouseOver={() => {
             if (!isMouseOver) {
@@ -74,14 +87,25 @@ export const MetricItem = ({
             height: '100%',
             overflow: 'hidden',
           }}
+          title={moment(timestamp).format('LLL')}
         >
           <Chart>
             <Settings
-              onElementClick={() =>
-                monitor.configId &&
-                locationName &&
-                onClick({ configId: monitor.configId, id: monitor.id, location: locationName })
-              }
+              onElementClick={() => {
+                if (testInProgress) {
+                  dispatch(toggleTestNowFlyoutAction(monitor.configId));
+                } else {
+                  dispatch(hideTestNowFlyoutAction());
+                }
+                if (!testInProgress && locationName) {
+                  onClick({
+                    configId: monitor.configId,
+                    id: monitor.id,
+                    location: locationName,
+                    locationId: monitor.location?.id,
+                  });
+                }
+              }}
               baseTheme={DARK_THEME}
             />
             <Metric
@@ -89,6 +113,7 @@ export const MetricItem = ({
               data={[
                 [
                   {
+                    icon: () => <ManualTestRunProgress configId={monitor.configId} />,
                     title: monitor.name,
                     subtitle: locationName,
                     value: averageDuration,

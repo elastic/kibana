@@ -41,13 +41,16 @@ export const SortableControl = (frameProps: SortableControlProps) => {
       disabled: !isEditable,
     });
 
-  frameProps.dragInfo = { ...frameProps.dragInfo, isOver: over?.id === embeddableId, isDragging };
+  const sortableFrameProps = {
+    ...frameProps,
+    dragInfo: { ...frameProps.dragInfo, isOver: over?.id === embeddableId, isDragging },
+  };
 
   return (
     <SortableControlInner
       key={embeddableId}
       ref={setNodeRef}
-      {...frameProps}
+      {...sortableFrameProps}
       {...attributes}
       {...listeners}
       style={{

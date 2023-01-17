@@ -11,6 +11,7 @@ import type {
   CoreStart,
   Plugin,
   Logger,
+  Ecs,
 } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
@@ -92,8 +93,8 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     this.telemetryEventsSender.setup(this.telemetryReceiver, plugins.taskManager, core.analytics);
 
     return {
-      osqueryCreateAction: (params: CreateLiveQueryRequestBodySchema) =>
-        createActionHandler(osqueryContext, params),
+      osqueryCreateAction: (params: CreateLiveQueryRequestBodySchema, ecsData?: Ecs) =>
+        createActionHandler(osqueryContext, params, { ecsData }),
     };
   }
 
@@ -159,7 +160,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
           }
         );
 
-        registerIngestCallback('postPackagePolicyDelete', getPackagePolicyDeleteCallback(client));
+        registerIngestCallback('packagePolicyPostDelete', getPackagePolicyDeleteCallback(client));
       }
     });
 

@@ -11,6 +11,15 @@ import useDebounce from 'react-use/lib/useDebounce';
 import { monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 
+export interface MonacoError {
+  message: string;
+  startColumn: number;
+  startLineNumber: number;
+  endColumn: number;
+  endLineNumber: number;
+  severity: monaco.MarkerSeverity;
+}
+
 export const useDebounceWithOptions = (
   fn: Function,
   { skipFirstRender }: { skipFirstRender: boolean } = { skipFirstRender: false },
@@ -33,7 +42,7 @@ export const useDebounceWithOptions = (
   );
 };
 
-export const parseErrors = (errors: Error[], code: string) => {
+export const parseErrors = (errors: Error[], code: string): MonacoError[] => {
   return errors.map((error) => {
     if (error.message.includes('line')) {
       const text = error.message.split('line')[1];

@@ -39,8 +39,6 @@ export const getSLOMappingsTemplate = (name: string) => ({
                 objective: {
                   properties: {
                     target: { type: 'double' },
-                    timeslice_target: { type: 'double' },
-                    timeslice_window: { type: 'keyword' },
                   },
                 },
                 time_window: {

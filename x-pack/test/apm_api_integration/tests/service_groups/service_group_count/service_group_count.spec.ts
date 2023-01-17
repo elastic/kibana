@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { waitForActiveAlert } from '../wait_for_active_alert';
+import { waitForActiveAlert } from '../../../common/utils/wait_for_active_alert';
 import { generateData } from './generate_data';
 
 export default function ApiTest({ getService }: FtrProviderContext) {

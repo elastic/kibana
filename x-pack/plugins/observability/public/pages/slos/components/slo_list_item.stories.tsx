@@ -8,7 +8,7 @@
 import React from 'react';
 import { ComponentStory } from '@storybook/react';
 
-import { anSLO } from '../../../../common/data/slo';
+import { anSLO } from '../../../data/slo';
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
 import { SloListItem as Component, SloListItemProps } from './slo_list_item';
 

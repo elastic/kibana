@@ -9,6 +9,13 @@ Object {
           "transaction.root": true,
         },
       },
+      Object {
+        "range": Object {
+          "@timestamp": Object {
+            "gte": "now-7d",
+          },
+        },
+      },
     ],
   },
 }
@@ -105,6 +112,13 @@ Object {
           Object {
             "match": Object {
               "transaction.root": true,
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "gte": "now-7d",
+              },
             },
           },
           Object {

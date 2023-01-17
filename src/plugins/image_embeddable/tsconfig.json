@@ -10,6 +10,7 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/files-plugin",
+    "@kbn/security-plugin",
     "@kbn/shared-ux-file-context",
     "@kbn/shared-ux-file-upload",
     "@kbn/shared-ux-file-picker",
@@ -19,6 +20,7 @@
     "@kbn/i18n",
     "@kbn/core-http-browser",
     "@kbn/shared-ux-file-image",
+    "@kbn/ui-actions-plugin"
   ],
   "exclude": [
     "target/**/*",

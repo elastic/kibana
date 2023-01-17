@@ -431,4 +431,54 @@ describe('UnifiedFieldList <FieldListGrouped /> + useGroupedFields()', () => {
       '2 selected fields. 10 popular fields. 25 available fields. 112 unmapped fields. 0 empty fields. 3 meta fields.'
     );
   });
+
+  it('persists sections state in local storage', async () => {
+    const wrapper = await mountGroupedList({
+      listProps: {
+        ...defaultProps,
+        fieldsExistenceStatus: ExistenceFetchStatus.succeeded,
+        localStorageKeyPrefix: 'test',
+      },
+      hookParams: {
+        dataViewId: dataView.id!,
+        allFields: manyFields,
+      },
+    });
+
+    // only Available is open
+    expect(
+      wrapper.find(FieldsAccordion).map((accordion) => accordion.prop('initialIsOpen'))
+    ).toStrictEqual([true, false, false, false]);
+
+    await act(async () => {
+      await wrapper
+        .find('[data-test-subj="fieldListGroupedEmptyFields"]')
+        .find('button')
+        .first()
+        .simulate('click');
+      await wrapper.update();
+    });
+
+    // now Empty is open too
+    expect(
+      wrapper.find(FieldsAccordion).map((accordion) => accordion.prop('initialIsOpen'))
+    ).toStrictEqual([true, false, true, false]);
+
+    const wrapper2 = await mountGroupedList({
+      listProps: {
+        ...defaultProps,
+        fieldsExistenceStatus: ExistenceFetchStatus.succeeded,
+        localStorageKeyPrefix: 'test',
+      },
+      hookParams: {
+        dataViewId: dataView.id!,
+        allFields: manyFields,
+      },
+    });
+
+    // both Available and Empty are open for the second instance
+    expect(
+      wrapper2.find(FieldsAccordion).map((accordion) => accordion.prop('initialIsOpen'))
+    ).toStrictEqual([true, false, true, false]);
+  });
 });

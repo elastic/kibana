@@ -18,6 +18,7 @@ import {
 } from '../../../assets/constants';
 import { APMTransactionErrorRateIndicator, SLO } from '../../../domain/models';
 import { DEFAULT_APM_INDEX } from './constants';
+import { Query } from './types';
 
 const ALLOWED_STATUS_CODES = ['2xx', '3xx', '4xx', '5xx'];
 const DEFAULT_GOOD_STATUS_CODES = ['2xx', '3xx', '4xx'];
@@ -43,7 +44,16 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
   }
 
   private buildSource(slo: SLO, indicator: APMTransactionErrorRateIndicator) {
-    const queryFilter = [];
+    const queryFilter: Query[] = [
+      {
+        range: {
+          [slo.settings.timestampField]: {
+            gte: `now-${slo.timeWindow.duration.format()}`,
+          },
+        },
+      },
+    ];
+
     if (indicator.params.service !== ALL_VALUE) {
       queryFilter.push({
         match: {

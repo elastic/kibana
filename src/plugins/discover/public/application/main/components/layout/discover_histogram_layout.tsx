@@ -30,7 +30,6 @@ export const DiscoverHistogramLayout = ({
   resetSavedSearch,
   savedSearch,
   savedSearchData$,
-  state,
   stateContainer,
   isTimeBased,
   resizeRef,
@@ -45,7 +44,6 @@ export const DiscoverHistogramLayout = ({
     isPlainRecord,
     stateContainer,
     savedSearch,
-    state,
     savedSearchData$,
   };
 

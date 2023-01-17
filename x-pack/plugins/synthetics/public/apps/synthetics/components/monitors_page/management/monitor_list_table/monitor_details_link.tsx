@@ -17,13 +17,7 @@ import {
 import { useMonitorDetailLocator } from '../../hooks/use_monitor_detail_locator';
 import * as labels from './labels';
 
-export const MonitorDetailsLink = ({
-  basePath,
-  monitor,
-}: {
-  basePath: string;
-  monitor: EncryptedSyntheticsSavedMonitor;
-}) => {
+export const MonitorDetailsLink = ({ monitor }: { monitor: EncryptedSyntheticsSavedMonitor }) => {
   const lastSelectedLocationId = useSelector(selectSelectedLocationId);
   const monitorHasLocation = monitor[ConfigKey.LOCATIONS]?.find(
     (loc) => loc.id === lastSelectedLocationId

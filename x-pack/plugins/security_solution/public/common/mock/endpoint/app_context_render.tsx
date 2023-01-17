@@ -40,7 +40,7 @@ import type { ExperimentalFeatures } from '../../../../common/experimental_featu
 import { APP_UI_ID, APP_PATH } from '../../../../common/constants';
 import { KibanaContextProvider, KibanaServices } from '../../lib/kibana';
 import { getDeepLinks } from '../../../app/deep_links';
-import { fleetGetPackageListHttpMock } from '../../../management/mocks';
+import { fleetGetPackageHttpMock } from '../../../management/mocks';
 
 const REAL_REACT_DOM_CREATE_PORTAL = ReactDOM.createPortal;
 
@@ -373,5 +373,5 @@ const applyDefaultCoreHttpMocks = (http: AppContextTestRender['coreStart']['http
   // Need to mock getting the endpoint package from the fleet API because it is used as soon
   // as the store middleware for Endpoint list is initialized, thus mocking it here would avoid
   // unnecessary errors being output to the console
-  fleetGetPackageListHttpMock(http, { ignoreUnMockedApiRouteErrors: true });
+  fleetGetPackageHttpMock(http, { ignoreUnMockedApiRouteErrors: true });
 };

@@ -5,57 +5,46 @@
  * 2.0.
  */
 import React, { FC, useState, useEffect, useCallback, useMemo } from 'react';
-import type { SavedSearch } from '@kbn/discover-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import { Filter, Query } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+
 import {
   EuiButton,
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageBody,
-  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
-  EuiPageContentHeaderSection_Deprecated as EuiPageContentHeaderSection,
-  EuiTitle,
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiFormRow,
   EuiLoadingContent,
 } from '@elastic/eui';
 
+import { Filter, Query } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useUrlState } from '@kbn/ml-url-state';
-import { FullTimeRangeSelector } from '../full_time_range_selector';
-import { DatePickerWrapper } from '../date_picker_wrapper';
+
+import { useDataSource } from '../../hooks/use_data_source';
 import { useData } from '../../hooks/use_data';
-import { SearchPanel } from '../search_panel';
-import type {
-  SearchQueryLanguage,
-  SavedSearchSavedObject,
-} from '../../application/utils/search_utils';
+import type { SearchQueryLanguage } from '../../application/utils/search_utils';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
+
 import { restorableDefaults } from '../explain_log_rate_spikes/explain_log_rate_spikes_app_state';
-import { useCategorizeRequest } from './use_categorize_request';
+import { SearchPanel } from '../search_panel';
+import { PageHeader } from '../page_header';
+
 import type { EventRate, Category, SparkLinesPerCategory } from './use_categorize_request';
+import { useCategorizeRequest } from './use_categorize_request';
 import { CategoryTable } from './category_table';
 import { DocumentCountChart } from './document_count_chart';
 import { InformationText } from './information_text';
 
-export interface LogCategorizationPageProps {
-  dataView: DataView;
-  savedSearch: SavedSearch | SavedSearchSavedObject | null;
-}
-
 const BAR_TARGET = 20;
 
-export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
-  dataView,
-  savedSearch,
-}) => {
+export const LogCategorizationPage: FC = () => {
   const {
     notifications: { toasts },
   } = useAiopsAppContext();
+  const { dataView, savedSearch } = useDataSource();
 
   const { runCategorizeRequest, cancelRequest } = useCategorizeRequest();
   const [aiopsListState, setAiopsListState] = useState(restorableDefaults);
@@ -217,41 +206,8 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
   };
 
   return (
-    <EuiPageBody data-test-subj="aiopsExplainLogRateSpikesPage" paddingSize="none" panelled={false}>
-      <EuiFlexGroup gutterSize="none">
-        <EuiFlexItem>
-          <EuiPageContentHeader className="aiopsPageHeader">
-            <EuiPageContentHeaderSection>
-              <div className="dataViewTitleHeader">
-                <EuiTitle size="s">
-                  <h2>{dataView.getName()}</h2>
-                </EuiTitle>
-              </div>
-            </EuiPageContentHeaderSection>
-
-            <EuiFlexGroup
-              alignItems="center"
-              justifyContent="flexEnd"
-              gutterSize="s"
-              data-test-subj="aiopsTimeRangeSelectorSection"
-            >
-              {dataView.timeFieldName !== undefined && (
-                <EuiFlexItem grow={false}>
-                  <FullTimeRangeSelector
-                    dataView={dataView}
-                    query={undefined}
-                    disabled={false}
-                    timefilter={timefilter}
-                  />
-                </EuiFlexItem>
-              )}
-              <EuiFlexItem grow={false}>
-                <DatePickerWrapper />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPageContentHeader>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+    <EuiPageBody data-test-subj="aiopsLogCategorizationPage" paddingSize="none" panelled={false}>
+      <PageHeader />
       <EuiSpacer />
       <EuiFlexGroup gutterSize="none">
         <EuiFlexItem>

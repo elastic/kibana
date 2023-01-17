@@ -26,8 +26,6 @@ export const ANOMALY_THRESHOLD_INPUT = '[data-test-subj="anomalyThresholdSlider"
 
 export const ADVANCED_SETTINGS_BTN = '[data-test-subj="advancedSettings"] .euiAccordion__button';
 
-export const BACK_TO_ALL_RULES_LINK = '[data-test-subj="ruleDetailsBackToAllRules"]';
-
 export const COMBO_BOX_CLEAR_BTN = '[data-test-subj="comboBoxClearButton"]';
 
 export const CREATE_AND_ENABLE_BTN = '[data-test-subj="create-enable"]';

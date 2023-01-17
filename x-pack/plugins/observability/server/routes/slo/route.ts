@@ -33,8 +33,8 @@ import { IndicatorTypes } from '../../domain/models';
 import { createObservabilityServerRoute } from '../create_observability_server_route';
 
 const transformGenerators: Record<IndicatorTypes, TransformGenerator> = {
-  'sli.apm.transaction_duration': new ApmTransactionDurationTransformGenerator(),
-  'sli.apm.transaction_error_rate': new ApmTransactionErrorRateTransformGenerator(),
+  'sli.apm.transactionDuration': new ApmTransactionDurationTransformGenerator(),
+  'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(),
   'sli.kql.custom': new KQLCustomTransformGenerator(),
 };
 

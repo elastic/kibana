@@ -8,6 +8,7 @@
 import { takeLeading, put, call, takeLatest } from 'redux-saga/effects';
 import { Action } from 'redux-actions';
 import { i18n } from '@kbn/i18n';
+import { updateDefaultAlertingAction } from '../alert_rules';
 import { DynamicSettings } from '../../../../../common/runtime_types';
 import { kibanaService } from '../../../../utils/kibana_service';
 import { getConnectorsAction, setDynamicSettingsAction, getDynamicSettingsAction } from './actions';
@@ -61,6 +62,7 @@ export function* setDynamicSettingsEffect() {
     function* (action: Action<DynamicSettings>) {
       try {
         yield call(setDynamicSettings, { settings: action.payload });
+        yield put(updateDefaultAlertingAction.get());
         yield put(setDynamicSettingsAction.success(action.payload));
         kibanaService.core.notifications.toasts.addSuccess(
           i18n.translate('xpack.synthetics.settings.saveSuccess', {

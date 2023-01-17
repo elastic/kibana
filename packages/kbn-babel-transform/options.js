@@ -31,7 +31,7 @@ function getBabelOptions(path, config = {}) {
     ],
     cwd,
     babelrc: false,
-    sourceMaps: !config.disableSourceMaps,
+    sourceMaps: config.disableSourceMaps ? false : 'both',
     ast: false,
   };
 }

@@ -383,7 +383,8 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
           expect(await waitFor(hasBeenAppliedByAgent)).to.be(true);
         });
       });
-    }
+    },
+    true
   );
 
   registry.when('Agent configurations through fleet', { config: 'basic', archives: [] }, () => {

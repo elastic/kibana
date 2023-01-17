@@ -36,6 +36,9 @@
     "@kbn/core-logging-server-mocks",
     "@kbn/core-saved-objects-common",
     "@kbn/securitysolution-rules",
+    "@kbn/apm-utils",
+    "@kbn/data-views-plugin",
+    "@kbn/share-plugin",
   ],
   "exclude": [
     "target/**/*",

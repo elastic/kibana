@@ -78,4 +78,25 @@ describe('Duration', () => {
       expect(short.isLongerOrEqualThan(new Duration(1, DurationUnit.Year))).toBe(false);
     });
   });
+
+  describe('add', () => {
+    it('returns the duration result in minute', () => {
+      const someDuration = new Duration(1, DurationUnit.Minute);
+      expect(someDuration.add(new Duration(1, DurationUnit.Minute))).toEqual(
+        new Duration(2, DurationUnit.Minute)
+      );
+      expect(someDuration.add(new Duration(1, DurationUnit.Hour))).toEqual(
+        new Duration(61, DurationUnit.Minute)
+      );
+      expect(someDuration.add(new Duration(1, DurationUnit.Day))).toEqual(
+        new Duration(1441, DurationUnit.Minute)
+      );
+      expect(someDuration.add(new Duration(1, DurationUnit.Week))).toEqual(
+        new Duration(10081, DurationUnit.Minute)
+      );
+      expect(someDuration.add(new Duration(1, DurationUnit.Month))).toEqual(
+        new Duration(43201, DurationUnit.Minute)
+      );
+    });
+  });
 });

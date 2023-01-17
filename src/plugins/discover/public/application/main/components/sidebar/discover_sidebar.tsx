@@ -27,6 +27,7 @@ import {
   triggerVisualizeActionsTextBasedLanguages,
   useGroupedFields,
 } from '@kbn/unified-field-list-plugin/public';
+import { VIEW_MODE } from '../../../../../common/constants';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverField } from './discover_field';
@@ -40,7 +41,6 @@ import {
 } from './lib/group_fields';
 import { doesFieldMatchFilters, FieldFilterState, setFieldFilterProp } from './lib/field_filter';
 import { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
-import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { getUiActions } from '../../../../kibana_services';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { RecordRawType } from '../../hooks/use_saved_search';
@@ -377,6 +377,7 @@ export function DiscoverSidebarComponent({
               {...fieldListGroupedProps}
               renderFieldItem={renderFieldItem}
               screenReaderDescriptionId={fieldSearchDescriptionId}
+              localStorageKeyPrefix="discover"
             />
           )}
         </EuiFlexItem>

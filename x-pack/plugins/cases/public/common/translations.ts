@@ -21,6 +21,14 @@ export const DELETE_CASE = (quantity: number = 1) =>
     defaultMessage: `Delete {quantity, plural, =1 {case} other {{quantity} cases}}`,
   });
 
+export const COPY_ID_ACTION_LABEL = i18n.translate('xpack.cases.caseView.copyID', {
+  defaultMessage: 'Copy Case ID',
+});
+
+export const COPY_ID_ACTION_SUCCESS = i18n.translate('xpack.cases.caseView.copyIDSuccess', {
+  defaultMessage: 'Copied Case ID to clipboard',
+});
+
 export const NAME = i18n.translate('xpack.cases.caseView.name', {
   defaultMessage: 'Name',
 });
@@ -314,7 +322,7 @@ export const ADD_TAG_CUSTOM_OPTION_LABEL = (searchValue: string) =>
 export const VERSION_CONFLICT_WARNING = (markdownId: string) =>
   i18n.translate('xpack.cases.configure.commentVersionConflictWarning', {
     defaultMessage:
-      'This {markdownId} was updated. Saving your changes will overwrite the updated value.',
+      'This {markdownId} has been updated by another user. Saving your {markdownId} will overwrite their update.',
     values: { markdownId },
   });
 

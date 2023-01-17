@@ -18,8 +18,7 @@
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/observability-plugin",
     "@kbn/fleet-plugin",
-    "@kbn/unified-search-plugin"
-  ,
+    "@kbn/unified-search-plugin",
     "@kbn/index-lifecycle-management-plugin",
     "@kbn/i18n",
     "@kbn/core",
@@ -68,6 +67,8 @@
     "@kbn/core-saved-objects-common",
     "@kbn/features-plugin",
     "@kbn/bfetch-plugin",
+    "@kbn/actions-plugin",
+    "@kbn/core-elasticsearch-server",
   ],
   "exclude": [
     "target/**/*",

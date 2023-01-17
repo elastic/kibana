@@ -6,9 +6,12 @@
  */
 
 import { journey, step, expect } from '@elastic/synthetics';
+import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
 import { loginPageProvider } from '../../page_objects/login';
 
 journey('StepsDuration', async ({ page, params }) => {
+  recordVideo(page);
+
   const login = loginPageProvider({ page });
 
   const queryParams = new URLSearchParams({

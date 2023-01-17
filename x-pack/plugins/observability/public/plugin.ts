@@ -39,6 +39,7 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { RuleDetailsLocatorDefinition } from './locators/rule_details';
 import { observabilityAppId, observabilityFeatureId, casesPath } from '../common';
 import { createLazyObservabilityPageTemplate } from './components/shared';
@@ -102,6 +103,7 @@ export interface ObservabilityPublicPluginsStart {
   actionTypeRegistry: ActionTypeRegistryContract;
   security: SecurityPluginStart;
   guidedOnboarding: GuidedOnboardingPluginStart;
+  spaces: SpacesPluginStart;
 }
 
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
@@ -344,6 +346,7 @@ export class Plugin
     });
 
     return {
+      observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
       navigation: {
         PageTemplate,
       },

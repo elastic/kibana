@@ -56,7 +56,7 @@ describe('FindSLO', () => {
                 transactionType: 'irrelevant',
                 'threshold.us': 500000,
               },
-              type: 'sli.apm.transaction_duration',
+              type: 'sli.apm.transactionDuration',
             },
             objective: {
               target: 0.999,
@@ -71,6 +71,7 @@ describe('FindSLO', () => {
               frequency: '1m',
             },
             summary: {
+              status: 'HEALTHY',
               sliValue: 0.9999,
               errorBudget: {
                 initial: 0.001,
@@ -115,12 +116,12 @@ describe('FindSLO', () => {
       );
     });
 
-    it('calls the repository with the indicator_type filter criteria', async () => {
+    it('calls the repository with the indicatorType filter criteria', async () => {
       const slo = createSLO();
       mockRepository.find.mockResolvedValueOnce(createPaginatedSLO(slo));
       mockSLIClient.fetchCurrentSLIData.mockResolvedValueOnce(someIndicatorData(slo));
 
-      await findSLO.execute({ indicator_types: ['sli.kql.custom'] });
+      await findSLO.execute({ indicatorTypes: ['sli.kql.custom'] });
 
       expect(mockRepository.find).toHaveBeenCalledWith(
         { indicatorTypes: ['sli.kql.custom'] },
@@ -134,7 +135,7 @@ describe('FindSLO', () => {
       mockRepository.find.mockResolvedValueOnce(createPaginatedSLO(slo));
       mockSLIClient.fetchCurrentSLIData.mockResolvedValueOnce(someIndicatorData(slo));
 
-      await findSLO.execute({ name: 'My SLO*', page: '2', per_page: '100' });
+      await findSLO.execute({ name: 'My SLO*', page: '2', perPage: '100' });
 
       expect(mockRepository.find).toHaveBeenCalledWith(
         { name: 'My SLO*' },
@@ -148,7 +149,7 @@ describe('FindSLO', () => {
       mockRepository.find.mockResolvedValueOnce(createPaginatedSLO(slo));
       mockSLIClient.fetchCurrentSLIData.mockResolvedValueOnce(someIndicatorData(slo));
 
-      await findSLO.execute({ page: '-1', per_page: '0' });
+      await findSLO.execute({ page: '-1', perPage: '0' });
 
       expect(mockRepository.find).toHaveBeenCalledWith(
         { name: undefined },
@@ -162,7 +163,7 @@ describe('FindSLO', () => {
       mockRepository.find.mockResolvedValueOnce(createPaginatedSLO(slo));
       mockSLIClient.fetchCurrentSLIData.mockResolvedValueOnce(someIndicatorData(slo));
 
-      await findSLO.execute({ sort_by: undefined });
+      await findSLO.execute({ sortBy: undefined });
 
       expect(mockRepository.find).toHaveBeenCalledWith(
         { name: undefined },
@@ -176,7 +177,7 @@ describe('FindSLO', () => {
       mockRepository.find.mockResolvedValueOnce(createPaginatedSLO(slo));
       mockSLIClient.fetchCurrentSLIData.mockResolvedValueOnce(someIndicatorData(slo));
 
-      await findSLO.execute({ sort_by: 'indicator_type' });
+      await findSLO.execute({ sortBy: 'indicatorType' });
 
       expect(mockRepository.find).toHaveBeenCalledWith(
         { name: undefined },
@@ -190,7 +191,7 @@ describe('FindSLO', () => {
       mockRepository.find.mockResolvedValueOnce(createPaginatedSLO(slo));
       mockSLIClient.fetchCurrentSLIData.mockResolvedValueOnce(someIndicatorData(slo));
 
-      await findSLO.execute({ sort_by: 'indicator_type', sort_direction: 'desc' });
+      await findSLO.execute({ sortBy: 'indicatorType', sortDirection: 'desc' });
 
       expect(mockRepository.find).toHaveBeenCalledWith(
         { name: undefined },

@@ -237,28 +237,28 @@ export class EnterpriseSearchPlugin implements Plugin {
      * Register logs source configuration, used by LogStream components
      * @see https://github.com/elastic/kibana/blob/main/x-pack/plugins/infra/public/components/log_stream/log_stream.stories.mdx#with-a-source-configuration
      */
-    infra.defineInternalSourceConfiguration(ENTERPRISE_SEARCH_RELEVANCE_LOGS_SOURCE_ID, {
-      name: 'Enterprise Search Search Relevance Logs',
+    infra.logViews.defineInternalLogView(ENTERPRISE_SEARCH_RELEVANCE_LOGS_SOURCE_ID, {
       logIndices: {
-        type: 'index_name',
         indexName: 'logs-app_search.search_relevance_suggestions-*',
+        type: 'index_name',
       },
+      name: 'Enterprise Search Search Relevance Logs',
     });
 
-    infra.defineInternalSourceConfiguration(ENTERPRISE_SEARCH_AUDIT_LOGS_SOURCE_ID, {
-      name: 'Enterprise Search Audit Logs',
+    infra.logViews.defineInternalLogView(ENTERPRISE_SEARCH_AUDIT_LOGS_SOURCE_ID, {
       logIndices: {
-        type: 'index_name',
         indexName: 'logs-enterprise_search*',
+        type: 'index_name',
       },
+      name: 'Enterprise Search Audit Logs',
     });
 
-    infra.defineInternalSourceConfiguration(ENTERPRISE_SEARCH_ANALYTICS_LOGS_SOURCE_ID, {
-      name: 'Enterprise Search Behaviorial Analytics Logs',
+    infra.logViews.defineInternalLogView(ENTERPRISE_SEARCH_ANALYTICS_LOGS_SOURCE_ID, {
       logIndices: {
-        type: 'index_name',
         indexName: 'logs-elastic_analytics.events-*',
+        type: 'index_name',
       },
+      name: 'Enterprise Search Behavioral Analytics Logs',
     });
 
     /**

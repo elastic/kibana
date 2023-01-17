@@ -138,6 +138,11 @@ export default function ({ getService }: FtrProviderContext) {
             config_id: decryptedCreatedMonitor.body.id,
             custom_heartbeat_id: `${journeyId}-${project}-default`,
             enabled: true,
+            alert: {
+              status: {
+                enabled: true,
+              },
+            },
             'filter_journeys.match': 'check if title is present',
             'filter_journeys.tags': [],
             form_monitor_type: 'multistep',
@@ -197,6 +202,49 @@ export default function ({ getService }: FtrProviderContext) {
             id: `${journeyId}-${project}-default`,
             hash: 'ekrjelkjrelkjre',
           });
+        }
+      } finally {
+        await Promise.all([
+          successfulMonitors.map((monitor) => {
+            return deleteMonitor(monitor.id, project);
+          }),
+        ]);
+      }
+    });
+
+    it('project monitors - allows throttling false for browser monitors', async () => {
+      const successfulMonitors = [projectMonitors.monitors[0]];
+      const project = `test-project-${uuid.v4()}`;
+
+      try {
+        const { body } = await supertest
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project))
+          .set('kbn-xsrf', 'true')
+          .send({
+            ...projectMonitors,
+            monitors: [{ ...projectMonitors.monitors[0], throttling: false }],
+          })
+          .expect(200);
+        expect(body).eql({
+          updatedMonitors: [],
+          createdMonitors: successfulMonitors.map((monitor) => monitor.id),
+          failedMonitors: [],
+        });
+
+        for (const monitor of successfulMonitors) {
+          const journeyId = monitor.id;
+          const createdMonitorsResponse = await supertest
+            .get(API_URLS.SYNTHETICS_MONITORS)
+            .query({ filter: `${syntheticsMonitorType}.attributes.journey_id: ${journeyId}` })
+            .set('kbn-xsrf', 'true')
+            .expect(200);
+
+          const decryptedCreatedMonitor = await supertest
+            .get(`${API_URLS.SYNTHETICS_MONITORS}/${createdMonitorsResponse.body.monitors[0].id}`)
+            .set('kbn-xsrf', 'true')
+            .expect(200);
+
+          expect(decryptedCreatedMonitor.body.attributes['throttling.is_enabled']).to.eql(false);
         }
       } finally {
         await Promise.all([
@@ -268,6 +316,11 @@ export default function ({ getService }: FtrProviderContext) {
               'Content-Type': 'application/x-www-form-urlencoded',
             },
             enabled: false,
+            alert: {
+              status: {
+                enabled: true,
+              },
+            },
             form_monitor_type: 'http',
             journey_id: journeyId,
             locations: [
@@ -373,6 +426,11 @@ export default function ({ getService }: FtrProviderContext) {
             'check.receive': '',
             'check.send': '',
             enabled: true,
+            alert: {
+              status: {
+                enabled: true,
+              },
+            },
             form_monitor_type: 'tcp',
             journey_id: journeyId,
             locations: [
@@ -469,6 +527,11 @@ export default function ({ getService }: FtrProviderContext) {
             config_id: decryptedCreatedMonitor.body.id,
             custom_heartbeat_id: `${journeyId}-${project}-default`,
             enabled: true,
+            alert: {
+              status: {
+                enabled: true,
+              },
+            },
             form_monitor_type: 'icmp',
             journey_id: journeyId,
             locations: [

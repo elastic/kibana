@@ -6,32 +6,25 @@
  */
 
 import React from 'react';
-import { EuiBadge } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { euiLightVars } from '@kbn/ui-theme';
-import { isSloHealthy } from '../helpers/is_slo_healthy';
-import { SLO } from '../../../typings';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 
-export interface SloBadgesProps {
-  slo: SLO;
+import { SloStatusBadge } from './slo_status_badge';
+import { SloForecastedBadge } from './slo_forecasted_badge';
+
+export interface Props {
+  slo: SLOWithSummaryResponse;
 }
 
-export function SloBadges({ slo }: SloBadgesProps) {
+export function SloBadges({ slo }: Props) {
   return (
-    <>
-      {isSloHealthy(slo) ? (
-        <EuiBadge color={euiLightVars.euiColorSuccess}>
-          {i18n.translate('xpack.observability.slos.slo.state.healthy', {
-            defaultMessage: 'Healthy',
-          })}
-        </EuiBadge>
-      ) : (
-        <EuiBadge color={euiLightVars.euiColorDanger}>
-          {i18n.translate('xpack.observability.slos.slo.state.violated', {
-            defaultMessage: 'Violated',
-          })}
-        </EuiBadge>
-      )}
-    </>
+    <EuiFlexGroup direction="row" responsive={false} gutterSize="m">
+      <EuiFlexItem grow={false}>
+        <SloStatusBadge slo={slo} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <SloForecastedBadge slo={slo} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

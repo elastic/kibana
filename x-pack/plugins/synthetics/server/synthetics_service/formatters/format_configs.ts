@@ -28,6 +28,7 @@ const UI_KEYS_TO_SKIP = [
   ConfigKey.FORM_MONITOR_TYPE,
   ConfigKey.TEXT_ASSERTION,
   ConfigKey.CONFIG_HASH,
+  ConfigKey.ALERT_CONFIG,
   'secrets',
 ];
 
