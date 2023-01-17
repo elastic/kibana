@@ -212,11 +212,11 @@ export function LatencyAlertsHistoryChart({
               line: { strokeWidth: 3, stroke: 'red', opacity: 1 },
             }}
             marker={<EuiIcon type="alert" color={'red'} />}
-            markerBody={(data) => (
+            markerBody={(annotationData) => (
               <>
                 <EuiBadge color="#BD271E">
                   <EuiText size="xs" color="white">
-                    {data.header}
+                    {annotationData.header}
                   </EuiText>
                 </EuiBadge>
                 <EuiSpacer size="xs" />
