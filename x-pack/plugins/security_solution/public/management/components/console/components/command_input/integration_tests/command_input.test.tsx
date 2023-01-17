@@ -463,4 +463,37 @@ describe('When entering data into the Console input', () => {
       expect(getRightOfCursorText()).toEqual('');
     });
   });
+
+  describe('and a command argument has a value SelectorComponent defined', () => {
+    it('should insert Selector component when argument name is used', async () => {
+      render();
+      enterCommand('cmd7 --foo', { inputOnly: true });
+
+      expect(getLeftOfCursorText()).toEqual('cmd7 --foo="foo selected"');
+    });
+
+    it('should support using argument multiple times (allowMultiples: true)', async () => {
+      render();
+      enterCommand('cmd7 --foo --foo', { inputOnly: true });
+
+      expect(getLeftOfCursorText()).toEqual('cmd7 --foo="foo selected" --foo="foo selected"');
+    });
+
+    it(`should remove entire argument if BACKSPACE key is pressed`, async () => {
+      render();
+      enterCommand('cmd7 --foo', { inputOnly: true });
+      typeKeyboardKey('{backspace}');
+
+      expect(getLeftOfCursorText()).toEqual('cmd7 ');
+    });
+
+    it(`should remove entire argument if DELETE key is pressed`, async () => {
+      render();
+      enterCommand('cmd7 --foo', { inputOnly: true });
+      typeKeyboardKey('{ArrowLeft}');
+      typeKeyboardKey('{Delete}');
+
+      expect(getLeftOfCursorText()).toEqual('cmd7 ');
+    });
+  });
 });

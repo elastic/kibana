@@ -77,7 +77,7 @@ export const getUploadCommand = ({
         required: false,
         allowMultiples: false,
         about: 'using a selector',
-        SelectorComponent: ArgumentSelectorComponentMock,
+        SelectorComponent: ArgumentSelectorComponentTest,
       },
 
       comment: {
@@ -93,7 +93,7 @@ export const getUploadCommand = ({
   };
 };
 
-const ArgumentSelectorComponentMock = memo<
+const ArgumentSelectorComponentTest = memo<
   CommandArgumentValueSelectorProps<{ selection: string }>
 >(({ value, valueText, onChange }) => {
   useEffect(() => {
@@ -104,6 +104,6 @@ const ArgumentSelectorComponentMock = memo<
 
   return <span data-test-subj="argSelectorValueText">{valueText}</span>;
 });
-ArgumentSelectorComponentMock.displayName = 'ArgumentSelectorComponentMock';
+ArgumentSelectorComponentTest.displayName = 'ArgumentSelectorComponentTest';
 
 document.body.classList.add('style2');

@@ -290,5 +290,6 @@ export class EnteredInput {
   clear() {
     this.leftOfCursorContent = [];
     this.rightOfCursorContent = [];
+    this.argState = undefined;
   }
 }
