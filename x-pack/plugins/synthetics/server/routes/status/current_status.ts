@@ -118,7 +118,7 @@ export async function getStatus(
     }
   }
 
-  const { up, down, upConfigs, downConfigs } = await queryMonitorStatus(
+  const { up, down, pending, upConfigs, downConfigs } = await queryMonitorStatus(
     uptimeEsClient,
     [...listOfLocationsSet],
     { from: maxPeriod, to: 'now' },
@@ -131,6 +131,7 @@ export async function getStatus(
     disabledCount,
     up,
     down,
+    pending,
     upConfigs,
     downConfigs,
   };

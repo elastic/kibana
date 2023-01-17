@@ -20,11 +20,11 @@ export const OverviewStatusMetaDataCodec = t.interface({
 export const OverviewStatusCodec = t.interface({
   up: t.number,
   down: t.number,
+  pending: t.number,
   disabledCount: t.number,
   upConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
   downConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
   enabledIds: t.array(t.string),
-  summary: t.unknown,
 });
 
 export const OverviewStatusStateCodec = t.intersection([
