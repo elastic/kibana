@@ -17,7 +17,7 @@ servers:
 paths:
   /s/{spaceId}/api/alerting/rule/{ruleId}:
     get:
-      summary: Retrieve a rule by its identifier.
+      summary: Retrieves a rule by its identifier.
       operationId: getRule
       description: |
         You must have `read` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rules you're seeking. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability** features, or **Security** features. To get rules associated with the **Stack Monitoring** feature, use the `monitoring_user` built-in role.
@@ -34,8 +34,22 @@ paths:
               schema:
                 $ref: '#/components/schemas/rule_response_properties'
               examples:
-                updateRuleResponse:
+                getRuleResponse:
                   $ref: '#/components/examples/get_rule_response'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401_response'
+        '404':
+          description: Object is not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404_response'
+      servers:
+        - url: https://localhost:5601
     delete:
       summary: Deletes a rule.
       operationId: deleteRule
@@ -50,6 +64,18 @@ paths:
       responses:
         '204':
           description: Indicates a successful call.
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401_response'
+        '404':
+          description: Object is not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404_response'
       servers:
         - url: https://localhost:5601
     put:
@@ -82,6 +108,80 @@ paths:
               examples:
                 updateRuleResponse:
                   $ref: '#/components/examples/update_rule_response'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401_response'
+        '404':
+          description: Object is not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404_response'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /s/{spaceId}/api/alerting/rule/{ruleId}/_disable:
+    post:
+      summary: Disables a rule.
+      operationId: disableRule
+      description: |
+        You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features.
+      tags:
+        - alerting
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/rule_id'
+        - $ref: '#/components/parameters/space_id'
+      responses:
+        '204':
+          description: Indicates a successful call.
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401_response'
+        '404':
+          description: Object is not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404_response'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /s/{spaceId}/api/alerting/rule/{ruleId}/_enable:
+    post:
+      summary: Enables a rule.
+      operationId: enableRule
+      description: |
+        This API supports token-based authentication only. You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features.
+      tags:
+        - alerting
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/rule_id'
+        - $ref: '#/components/parameters/space_id'
+      responses:
+        '204':
+          description: Indicates a successful call.
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401_response'
+        '404':
+          description: Object is not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -191,6 +291,426 @@ paths:
               examples:
                 findRulesResponse:
                   $ref: '#/components/examples/find_rules_response'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401_response'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /s/{spaceId}/api/alerting/_health:
+    get:
+      summary: Retrieves the health status of the alerting framework.
+      operationId: getAlertingHealth
+      description: |
+        You must have `read` privileges for the **Management > Stack Rules** feature or for at least one of the **Analytics > Discover**, **Analytics > Machine Learning**, **Observability**, or **Security** features.
+      tags:
+        - alerting
+      parameters:
+        - $ref: '#/components/parameters/space_id'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  alerting_framework_heath:
+                    type: object
+                    description: This property has a typo. Use `alerting_framework_health` instead.
+                    deprecated: true
+                    properties:
+                      _deprecated:
+                        type: string
+                        example: This state property has a typo, use "alerting_framework_health" instead.
+                      decryption_health:
+                        type: object
+                        properties:
+                          status:
+                            type: string
+                            example: ok
+                          timestamp:
+                            type: string
+                            format: date-time
+                            example: '2023-01-13T01:28:00.280Z'
+                      execution_health:
+                        type: object
+                        properties:
+                          status:
+                            type: string
+                            example: ok
+                          timestamp:
+                            type: string
+                            format: date-time
+                            example: '2023-01-13T01:28:00.280Z'
+                      read_health:
+                        type: object
+                        properties:
+                          status:
+                            type: string
+                            example: ok
+                          timestamp:
+                            type: string
+                            format: date-time
+                            example: '2023-01-13T01:28:00.280Z'
+                  alerting_framework_health:
+                    type: object
+                    description: |
+                      Three substates identify the health of the alerting framework: `decryption_health`, `execution_health`, and `read_health`.
+                    properties:
+                      decryption_health:
+                        type: object
+                        description: The timestamp and status of the rule decryption.
+                        properties:
+                          status:
+                            type: string
+                            example: ok
+                            enum:
+                              - error
+                              - ok
+                              - warn
+                          timestamp:
+                            type: string
+                            format: date-time
+                            example: '2023-01-13T01:28:00.280Z'
+                      execution_health:
+                        type: object
+                        description: The timestamp and status of the rule run.
+                        properties:
+                          status:
+                            type: string
+                            example: ok
+                            enum:
+                              - error
+                              - ok
+                              - warn
+                          timestamp:
+                            type: string
+                            format: date-time
+                            example: '2023-01-13T01:28:00.280Z'
+                      read_health:
+                        type: object
+                        description: The timestamp and status of the rule reading events.
+                        properties:
+                          status:
+                            type: string
+                            example: ok
+                            enum:
+                              - error
+                              - ok
+                              - warn
+                          timestamp:
+                            type: string
+                            format: date-time
+                            example: '2023-01-13T01:28:00.280Z'
+                  has_permanent_encryption_key:
+                    type: boolean
+                    description: If `false`, the encrypted saved object plugin does not have a permanent encryption key.
+                    example: true
+                  is_sufficiently_secure:
+                    type: boolean
+                    description: If `false`, security is enabled but TLS is not.
+                    example: true
+              examples:
+                getAlertingHealthResponse:
+                  $ref: '#/components/examples/get_health_response'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401_response'
+    servers:
+      - url: https://localhost:5601
+  /s/{spaceId}/api/alerting/rule_types:
+    get:
+      summary: Retrieves a list of rule types.
+      operationId: getRuleTypes
+      description: |
+        If you have `read` privileges for one or more Kibana features, the API response contains information about the appropriate rule types. For example, there are rule types associated with the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability** features, and **Security** features. To get rule types associated with the **Stack Monitoring** feature, use the `monitoring_user` built-in role.
+      tags:
+        - alerting
+      parameters:
+        - $ref: '#/components/parameters/space_id'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    action_groups:
+                      description: |
+                        An explicit list of groups for which the rule type can schedule actions, each with the action group's unique ID and human readable name. Rule actions validation uses this configuration to ensure that groups are valid.
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                          name:
+                            type: string
+                    action_variables:
+                      description: |
+                        A list of action variables that the rule type makes available via context and state in action parameter templates, and a short human readable description. When you create a rule in Kibana, it uses this information to prompt you for these variables in action parameter editors.
+                      type: object
+                      properties:
+                        context:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              name:
+                                type: string
+                              description:
+                                type: string
+                              useWithTripleBracesInTemplates:
+                                type: boolean
+                        params:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              description:
+                                type: string
+                              name:
+                                type: string
+                        state:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              description:
+                                type: string
+                              name:
+                                type: string
+                    authorized_consumers:
+                      description: The list of the plugins IDs that have access to the rule type.
+                      type: object
+                      properties:
+                        alerts:
+                          type: object
+                          properties:
+                            all:
+                              type: boolean
+                            read:
+                              type: boolean
+                        apm:
+                          type: object
+                          properties:
+                            all:
+                              type: boolean
+                            read:
+                              type: boolean
+                        discover:
+                          type: object
+                          properties:
+                            all:
+                              type: boolean
+                            read:
+                              type: boolean
+                        infrastructure:
+                          type: object
+                          properties:
+                            all:
+                              type: boolean
+                            read:
+                              type: boolean
+                        logs:
+                          type: object
+                          properties:
+                            all:
+                              type: boolean
+                            read:
+                              type: boolean
+                        ml:
+                          type: object
+                          properties:
+                            all:
+                              type: boolean
+                            read:
+                              type: boolean
+                        monitoring:
+                          type: object
+                          properties:
+                            all:
+                              type: boolean
+                            read:
+                              type: boolean
+                        siem:
+                          type: object
+                          properties:
+                            all:
+                              type: boolean
+                            read:
+                              type: boolean
+                        stackAlerts:
+                          type: object
+                          properties:
+                            all:
+                              type: boolean
+                            read:
+                              type: boolean
+                        uptime:
+                          type: object
+                          properties:
+                            all:
+                              type: boolean
+                            read:
+                              type: boolean
+                    default_action_group_id:
+                      description: The default identifier for the rule type group.
+                      type: string
+                    does_set_recovery_context:
+                      description: Indicates whether the rule passes context variables to its recovery action.
+                      type: boolean
+                    enabled_in_license:
+                      description: Indicates whether the rule type is enabled or disabled based on the subscription.
+                      type: boolean
+                    id:
+                      description: The unique identifier for the rule type.
+                      type: string
+                    is_exportable:
+                      description: Indicates whether the rule type is exportable in **Stack Management > Saved Objects**.
+                      type: boolean
+                    minimum_license_required:
+                      description: The subscriptions required to use the rule type.
+                      type: string
+                      example: basic
+                    name:
+                      description: The descriptive name of the rule type.
+                      type: string
+                    producer:
+                      description: An identifier for the application that produces this rule type.
+                      type: string
+                      example: stackAlerts
+                    recovery_action_group:
+                      description: An action group to use when an alert goes from an active state to an inactive one.
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        name:
+                          type: string
+                    rule_task_timeout:
+                      type: string
+                      example: 5m
+              examples:
+                getRuleTypesResponse:
+                  $ref: '#/components/examples/get_rule_types_response'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401_response'
+    servers:
+      - url: https://localhost:5601
+  /s/{spaceId}/api/alerting/rule/{ruleId}/_mute_all:
+    post:
+      summary: Mutes all alerts.
+      operationId: muteAllAlerts
+      description: |
+        This API snoozes the notifications for the rule indefinitely. The rule checks continue to occur but alerts will not trigger any actions. You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature.
+      tags:
+        - alerting
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/rule_id'
+        - $ref: '#/components/parameters/space_id'
+      responses:
+        '204':
+          description: Indicates a successful call.
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401_response'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /s/{spaceId}/api/alerting/rule/{ruleId}/_unmute_all:
+    post:
+      summary: Unmutes all alerts.
+      operationId: unmuteAllAlerts
+      description: |
+        If the rule has its notifications snoozed indefinitely, this API cancels the snooze. You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature.
+      tags:
+        - alerting
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/rule_id'
+        - $ref: '#/components/parameters/space_id'
+      responses:
+        '204':
+          description: Indicates a successful call.
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401_response'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /s/{spaceId}/api/alerting/rule/{ruleId}/alert/{alertId}/_mute:
+    post:
+      summary: Mutes an alert.
+      operationId: muteAlert
+      description: |
+        You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature. 
+      tags:
+        - alerting
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/alert_id'
+        - $ref: '#/components/parameters/rule_id'
+        - $ref: '#/components/parameters/space_id'
+      responses:
+        '204':
+          description: Indicates a successful call.
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401_response'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /s/{spaceId}/api/alerting/rule/{ruleId}/alert/{alertId}/_unmute:
+    post:
+      summary: Unmutes an alert.
+      operationId: unmuteAlert
+      description: |
+        You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature. 
+      tags:
+        - alerting
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/alert_id'
+        - $ref: '#/components/parameters/rule_id'
+        - $ref: '#/components/parameters/space_id'
+      responses:
+        '204':
+          description: Indicates a successful call.
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -227,6 +747,14 @@ components:
       in: header
       name: kbn-xsrf
       required: true
+    alert_id:
+      in: path
+      name: alertId
+      description: An identifier for the alert. The identifier is generated by the rule and might be any arbitrary string.
+      required: true
+      schema:
+        type: string
+        example: ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74
   schemas:
     actions:
       type: array
@@ -415,6 +943,38 @@ components:
           description: The identifier for the user that updated this rule most recently.
           nullable: true
           example: elastic
+    401_response:
+      type: object
+      title: Unsuccessful rule API response
+      properties:
+        error:
+          type: string
+          example: Unauthorized
+          enum:
+            - Unauthorized
+        message:
+          type: string
+        statusCode:
+          type: integer
+          example: 401
+          enum:
+            - 401
+    404_response:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Not Found
+          enum:
+            - Not Found
+        message:
+          type: string
+          example: Saved object [alert/caaad6d0-920c-11ed-b36a-874bd1548a00] not found
+        statusCode:
+          type: integer
+          example: 404
+          enum:
+            - 404
     update_rule_request:
       title: Update rule request
       description: The update rule API request body varies depending on the type of rule and actions.
@@ -646,6 +1206,114 @@ components:
               warning: null
               outcome: succeeded
             next_run: '2022-12-06T01:45:23.912Z'
+    get_health_response:
+      summary: Retrieve information about the health of the alerting framework.
+      value:
+        is_sufficiently_secure: true
+        has_permanent_encryption_key: true
+        alerting_framework_health:
+          decryption_health:
+            status: ok
+            timestamp: '2023-01-13T01:28:00.280Z'
+          execution_health:
+            status: ok
+            timestamp: '2023-01-13T01:28:00.280Z'
+          read_health:
+            status: ok
+            timestamp: '2023-01-13T01:28:00.280Z'
+        alerting_framework_heath:
+          _deprecated: This state property has a typo, use "alerting_framework_health" instead.
+          decryption_health:
+            status: ok
+            timestamp: '2023-01-13T01:28:00.280Z'
+          execution_health:
+            status: ok
+            timestamp: '2023-01-13T01:28:00.280Z'
+          read_health:
+            status: ok
+            timestamp: '2023-01-13T01:28:00.280Z'
+    get_rule_types_response:
+      summary: Retrieve rule types associated with Kibana machine learning features
+      value:
+        - id: xpack.ml.anomaly_detection_alert
+          action_groups:
+            - id: anomaly_score_match
+              name: Anomaly score matched the condition
+            - id: recovered
+              name: Recovered
+          action_variables:
+            context:
+              - name: timestamp
+                description: The bucket timestamp of the anomaly
+              - name: timestampIso8601
+                description: The bucket time of the anomaly in ISO8601 format
+              - name: jobIds
+                description: List of job IDs that triggered the alert
+              - name: message
+                description: Alert info message
+              - name: isInterim
+                description: Indicate if top hits contain interim results
+              - name: score
+                description: Anomaly score at the time of the notification action
+              - name: topRecords
+                description: Top records
+              - name: topInfluencers
+                description: Top influencers
+              - name: anomalyExplorerUrl
+                description: URL to open in the Anomaly Explorer
+                useWithTripleBracesInTemplates: true
+            params: []
+            state: []
+          authorized_consumers:
+            alerts:
+              all: true
+              read: true
+            ml:
+              all: true
+              read: true
+          default_action_group_id: anomaly_score_match
+          does_set_recovery_context: true
+          enabled_in_license: true
+          is_exportable: true
+          minimum_license_required: platinum
+          name: Anomaly detection alert
+          producer: ml
+          recovery_action_group:
+            id: recovered
+            name: Recovered
+          rule_task_timeout: 5m
+        - id: xpack.ml.anomaly_detection_jobs_health
+          action_groups:
+            - id: anomaly_detection_realtime_issue
+              name: Issue detected
+            - id: recovered
+              name: Recovered
+          action_variables:
+            context:
+              - name: results
+                description: Results of the rule execution
+              - name: message
+                description: Alert info message
+            params: []
+            state: []
+          authorized_consumers:
+            alerts:
+              all: true
+              read: true
+            ml:
+              all: true
+              read: true
+          default_action_group_id: anomaly_detection_realtime_issue
+          does_set_recovery_context: true
+          enabled_in_license: true
+          is_exportable: true
+          minimum_license_required: platinum
+          name: Anomaly detection jobs health
+          producer: ml
+          recovery_action_group:
+            id: recovered
+            name: Recovered
+          rule_task_timeout: 5m
 security:
   - basicAuth: []
   - apiKeyAuth: []

@@ -18,7 +18,7 @@ export async function queryMonitorStatus(
   range: { from: string | number; to: string },
   ids: string[],
   monitorLocationsMap?: Record<string, string[]>
-): Promise<Omit<OverviewStatus, 'disabledCount'>> {
+): Promise<Omit<OverviewStatus, 'disabledCount' | 'allMonitorsCount' | 'disabledMonitorsCount'>> {
   const idSize = Math.trunc(DEFAULT_MAX_ES_BUCKET_SIZE / listOfLocations.length || 1);
   const pageCount = Math.ceil(ids.length / idSize);
   const promises: Array<Promise<any>> = [];
@@ -110,7 +110,7 @@ export async function queryMonitorStatus(
     response.body.aggregations?.id.buckets.forEach(
       ({ location, key: queryId }: { location: any; key: string }) => {
         location.buckets.forEach(({ status }: { key: string; status: any }) => {
-          const ping = status.hits.hits[0]._source as Ping;
+          const ping = status.hits.hits[0]._source as Ping & { '@timestamp': string };
 
           const locationName = ping.observer?.geo?.name!;
 
@@ -132,6 +132,7 @@ export async function queryMonitorStatus(
               monitorQueryId,
               location: locationName,
               status: 'up',
+              timestamp: ping['@timestamp'],
             };
           } else if (downCount > 0) {
             down += 1;
@@ -141,6 +142,7 @@ export async function queryMonitorStatus(
               monitorQueryId,
               location: locationName,
               status: 'down',
+              timestamp: ping['@timestamp'],
             };
           }
         });

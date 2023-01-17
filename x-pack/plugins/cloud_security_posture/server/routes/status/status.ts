@@ -6,7 +6,7 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract, Logger } from '@kbn/core/server';
 import type { AgentPolicyServiceInterface, AgentService } from '@kbn/fleet-plugin/server';
 import moment from 'moment';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
@@ -37,7 +37,8 @@ const getHealthyAgents = async (
   soClient: SavedObjectsClientContract,
   installedCspPackagePolicies: PackagePolicy[],
   agentPolicyService: AgentPolicyServiceInterface,
-  agentService: AgentService
+  agentService: AgentService,
+  logger: Logger
 ): Promise<number> => {
   // Get agent policies of package policies (from installed package policies)
   const agentPolicies = await getCspAgentPolicies(
@@ -49,7 +50,8 @@ const getHealthyAgents = async (
   // Get agents statuses of the following agent policies
   const agentStatusesByAgentPolicyId = await getAgentStatusesByAgentPolicies(
     agentService,
-    agentPolicies
+    agentPolicies,
+    logger
   );
 
   return Object.values(agentStatusesByAgentPolicyId).reduce(
@@ -123,7 +125,8 @@ const getCspStatus = async ({
     soClient,
     installedPackagePolicies.items,
     agentPolicyService,
-    agentService
+    agentService,
+    logger
   );
 
   const installedPackagePoliciesTotal = installedPackagePolicies.total;

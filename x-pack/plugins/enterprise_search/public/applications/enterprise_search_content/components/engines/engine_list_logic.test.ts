@@ -10,41 +10,47 @@ import { LogicMounter, mockFlashMessageHelpers } from '../../../__mocks__/kea_lo
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import { HttpError, Status } from '../../../../../common/types/api';
+import { EnterpriseSearchEngine } from '../../../../../common/types/engines';
 
 import { FetchEnginesAPILogic } from '../../api/engines/fetch_engines_api_logic';
 
 import { EnginesListLogic } from './engines_list_logic';
-import { DEFAULT_META, EngineListDetails } from './types';
+import { DEFAULT_META } from './types';
 
 const DEFAULT_VALUES = {
   data: undefined,
-  results: [],
+  deleteModalEngine: null,
+  deleteModalEngineName: '',
+  deleteStatus: Status.IDLE,
+  isDeleteLoading: false,
+  isDeleteModalVisible: false,
+  isLoading: false,
   meta: DEFAULT_META,
   parameters: { meta: DEFAULT_META },
+  results: [],
   status: Status.IDLE,
 };
 
-// sample engines list
+// may need to call  mock engines response when ready
 
-const results: EngineListDetails[] = [
+const results: EnterpriseSearchEngine[] = [
   {
-    name: 'engine-name-1',
+    created: '1999-12-31T23:59:59Z',
     indices: ['index-18', 'index-23'],
-    last_updated: '21 March 2021',
-    document_count: 18,
+    name: 'engine-name-1',
+    updated: '1999-12-31T23:59:59Z',
   },
   {
-    name: 'engine-name-2',
+    created: '1999-12-31T23:59:59Z',
     indices: ['index-180', 'index-230', 'index-8', 'index-2'],
-    last_updated: '10 Jul 2018',
-    document_count: 10,
+    name: 'engine-name-2',
+    updated: '1999-12-31T23:59:59Z',
   },
-
   {
-    name: 'engine-name-3',
+    created: '1999-12-31T23:59:59Z',
     indices: ['index-2', 'index-3'],
-    last_updated: '21 December 2022',
-    document_count: 8,
+    name: 'engine-name-3',
+    updated: '1999-12-31T23:59:59Z',
   },
 ];
 
@@ -65,15 +71,57 @@ describe('EnginesListLogic', () => {
     describe('onPaginate', () => {
       it('updates meta with newPageIndex', () => {
         expect(EnginesListLogic.values).toEqual(DEFAULT_VALUES);
-        // This test does not work for now, test below code when Kibana GET API for pagination is ready
-        // EnginesListLogic.actions.onPaginate(2);
-        // expect(EnginesListLogic.values).toEqual({
-        //   ...DEFAULT_VALUES,
-        //   meta: {
-        //     ...DEFAULT_META,
-        //     from: 2,
-        //   },
-        // });
+
+        EnginesListLogic.actions.onPaginate({ page: { index: 1 } });
+        expect(EnginesListLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          meta: {
+            ...DEFAULT_META,
+            from: 10,
+          },
+          parameters: {
+            meta: {
+              ...DEFAULT_META,
+              from: 10,
+            },
+          },
+        });
+
+        EnginesListLogic.actions.onPaginate({ page: { index: 0 } });
+        expect(EnginesListLogic.values).toEqual(DEFAULT_VALUES);
+
+        EnginesListLogic.actions.onPaginate({ page: { index: 3 } });
+        expect(EnginesListLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          meta: {
+            ...DEFAULT_META,
+            from: 30,
+          },
+          parameters: {
+            meta: {
+              ...DEFAULT_META,
+              from: 30,
+            },
+          },
+        });
+      });
+    });
+    describe('closeDeleteEngineModal', () => {
+      it('set isDeleteModalVisible to false and engineName to empty string', () => {
+        EnginesListLogic.actions.openDeleteEngineModal(results[0]);
+        EnginesListLogic.actions.closeDeleteEngineModal();
+        expect(EnginesListLogic.values).toEqual(DEFAULT_VALUES);
+      });
+    });
+    describe('openDeleteEngineModal', () => {
+      it('set deleteModalEngineName and set isDeleteModalVisible to true', () => {
+        EnginesListLogic.actions.openDeleteEngineModal(results[0]);
+        expect(EnginesListLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          deleteModalEngine: results[0],
+          deleteModalEngineName: 'engine-name-1',
+          isDeleteModalVisible: true,
+        });
       });
     });
   });
@@ -89,33 +137,69 @@ describe('EnginesListLogic', () => {
         EnginesListLogic.actions.apiSuccess({
           meta: newPageMeta,
           results,
-          searchQuery: 'k',
+          // searchQuery: 'k',
         });
         expect(EnginesListLogic.values).toEqual({
           ...DEFAULT_VALUES,
           data: {
             results,
             meta: newPageMeta,
-            searchQuery: 'k',
+            // searchQuery: 'k',
           },
           meta: newPageMeta,
           parameters: {
             meta: newPageMeta,
-            searchQuery: 'k',
+            // searchQuery: 'k',
           },
           results,
           status: Status.SUCCESS,
         });
       });
     });
+    describe('request to delete Engine', () => {
+      it('should set isDeleteLoading to true on delete engine request', () => {
+        EnginesListLogic.actions.deleteEngine({ engineName: results[0].name });
+        EnginesListLogic.actions.deleteError({} as HttpError);
+        expect(EnginesListLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          deleteStatus: Status.ERROR,
+          isDeleteLoading: false,
+        });
+      });
+      it('should set isDeleteLoading to false on delete apiError', () => {
+        EnginesListLogic.actions.deleteEngine({ engineName: results[0].name });
+        EnginesListLogic.actions.deleteError({} as HttpError);
+        expect(EnginesListLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          deleteStatus: Status.ERROR,
+          isDeleteLoading: false,
+        });
+      });
+      it('should set isDeleteLoading to false on delete apiSuccess', () => {
+        EnginesListLogic.actions.deleteEngine({ engineName: results[0].name });
+        EnginesListLogic.actions.deleteSuccess({ engineName: results[0].name });
+        expect(EnginesListLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          deleteStatus: Status.SUCCESS,
+          isDeleteLoading: false,
+          isLoading: true,
+          status: Status.LOADING, // fetchEngine api status
+        });
+      });
+    });
   });
   describe('listeners', () => {
-    it('call flashAPIErrors on apiError', () => {
-      EnginesListLogic.actions.apiError({} as HttpError);
-      expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledTimes(1);
-      expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledWith({});
-    });
+    it('calls flashSuccessToast, closeDeleteEngineModal and fetchEngines on deleteSuccess', () => {
+      EnginesListLogic.actions.fetchEngines = jest.fn();
+      EnginesListLogic.actions.closeDeleteEngineModal = jest.fn();
+      EnginesListLogic.actions.deleteSuccess({ engineName: results[0].name });
 
+      expect(mockFlashMessageHelpers.flashSuccessToast).toHaveBeenCalledTimes(1);
+      expect(EnginesListLogic.actions.fetchEngines).toHaveBeenCalledWith(
+        EnginesListLogic.values.parameters
+      );
+      expect(EnginesListLogic.actions.closeDeleteEngineModal).toHaveBeenCalled();
+    });
     it('call makeRequest on fetchEngines', async () => {
       jest.useFakeTimers({ legacyFakeTimers: true });
       EnginesListLogic.actions.makeRequest = jest.fn();

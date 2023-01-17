@@ -7,6 +7,7 @@
 
 import React, { useReducer, useState, useEffect, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import {
   EuiTitle,
   EuiFlyoutHeader,
@@ -23,7 +24,7 @@ import {
   EuiLoadingSpinner,
   EuiIconTip,
 } from '@elastic/eui';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
   Rule,
@@ -32,6 +33,7 @@ import {
   IErrorObject,
   RuleType,
   TriggersActionsUiConfig,
+  RuleNotifyWhenType,
 } from '../../../types';
 import { RuleForm } from './rule_form';
 import { getRuleActionErrors, getRuleErrors, isValidRule } from './rule_errors';
@@ -45,6 +47,29 @@ import { hasRuleChanged } from './has_rule_changed';
 import { getRuleWithInvalidatedFields } from '../../lib/value_validators';
 import { triggersActionsUiConfig } from '../../../common/lib/config_api';
 
+const cloneAndMigrateRule = (initialRule: Rule) => {
+  const clonedRule = cloneDeep(omit(initialRule, 'notifyWhen', 'throttle'));
+
+  const hasRuleLevelNotifyWhen = Boolean(initialRule.notifyWhen);
+  const hasRuleLevelThrottle = Boolean(initialRule.throttle);
+
+  if (hasRuleLevelNotifyWhen || hasRuleLevelThrottle) {
+    const frequency = hasRuleLevelNotifyWhen
+      ? {
+          summary: false,
+          notifyWhen: initialRule.notifyWhen as RuleNotifyWhenType,
+          throttle:
+            initialRule.notifyWhen === RuleNotifyWhen.THROTTLE ? initialRule.throttle! : null,
+        }
+      : { summary: false, notifyWhen: RuleNotifyWhen.THROTTLE, throttle: initialRule.throttle! };
+    clonedRule.actions = clonedRule.actions.map((action) => ({
+      ...action,
+      frequency,
+    }));
+  }
+  return clonedRule;
+};
+
 export const RuleEdit = ({
   initialRule,
   onClose,
@@ -57,7 +82,7 @@ export const RuleEdit = ({
 }: RuleEditProps) => {
   const onSaveHandler = onSave ?? reloadRules;
   const [{ rule }, dispatch] = useReducer(ruleReducer as ConcreteRuleReducer, {
-    rule: cloneDeep(initialRule),
+    rule: cloneAndMigrateRule(initialRule),
   });
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [hasActionsDisabled, setHasActionsDisabled] = useState<boolean>(false);

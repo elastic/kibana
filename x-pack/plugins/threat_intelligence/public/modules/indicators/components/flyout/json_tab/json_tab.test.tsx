@@ -9,8 +9,9 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProvidersComponent } from '../../../../../common/mocks/test_providers';
 import { generateMockIndicator, Indicator } from '../../../../../../common/types/indicator';
-import { CODE_BLOCK_TEST_ID, IndicatorsFlyoutJson } from '.';
+import { IndicatorsFlyoutJson } from '.';
 import { EMPTY_PROMPT_TEST_ID } from '../empty_prompt';
+import { CODE_BLOCK_TEST_ID } from './test_ids';
 
 const mockIndicator: Indicator = generateMockIndicator();
 

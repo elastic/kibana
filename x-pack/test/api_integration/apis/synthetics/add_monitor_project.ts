@@ -212,6 +212,49 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
+    it('project monitors - allows throttling false for browser monitors', async () => {
+      const successfulMonitors = [projectMonitors.monitors[0]];
+      const project = `test-project-${uuid.v4()}`;
+
+      try {
+        const { body } = await supertest
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project))
+          .set('kbn-xsrf', 'true')
+          .send({
+            ...projectMonitors,
+            monitors: [{ ...projectMonitors.monitors[0], throttling: false }],
+          })
+          .expect(200);
+        expect(body).eql({
+          updatedMonitors: [],
+          createdMonitors: successfulMonitors.map((monitor) => monitor.id),
+          failedMonitors: [],
+        });
+
+        for (const monitor of successfulMonitors) {
+          const journeyId = monitor.id;
+          const createdMonitorsResponse = await supertest
+            .get(API_URLS.SYNTHETICS_MONITORS)
+            .query({ filter: `${syntheticsMonitorType}.attributes.journey_id: ${journeyId}` })
+            .set('kbn-xsrf', 'true')
+            .expect(200);
+
+          const decryptedCreatedMonitor = await supertest
+            .get(`${API_URLS.SYNTHETICS_MONITORS}/${createdMonitorsResponse.body.monitors[0].id}`)
+            .set('kbn-xsrf', 'true')
+            .expect(200);
+
+          expect(decryptedCreatedMonitor.body.attributes['throttling.is_enabled']).to.eql(false);
+        }
+      } finally {
+        await Promise.all([
+          successfulMonitors.map((monitor) => {
+            return deleteMonitor(monitor.id, project);
+          }),
+        ]);
+      }
+    });
+
     it('project monitors - handles http monitors', async () => {
       const kibanaVersion = await kibanaServer.version.get();
       const successfulMonitors = [httpProjectMonitors.monitors[1]];

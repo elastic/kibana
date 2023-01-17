@@ -184,6 +184,30 @@ describe('AppContainer', () => {
     expect(setIsMounting).toHaveBeenLastCalledWith(false);
   });
 
+  it('should show plain spinner', async () => {
+    const [waitPromise] = createResolver();
+    const mounter = createMounter(waitPromise);
+
+    const wrapper = mountWithIntl(
+      <AppContainer
+        appPath={`/app/${appId}`}
+        appId={appId}
+        appStatus={AppStatus.accessible}
+        mounter={mounter}
+        setAppLeaveHandler={setAppLeaveHandler}
+        setAppActionMenu={setAppActionMenu}
+        setIsMounting={setIsMounting}
+        createScopedHistory={(appPath: string) =>
+          // Create a history using the appPath as the current location
+          new ScopedHistory(createMemoryHistory({ initialEntries: [appPath] }), appPath)
+        }
+        theme$={theme$}
+        showPlainSpinner={true}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="appContainer-loadingSpinner"]').exists()).toBeTruthy();
+  });
+
   it('should call setIsMounting(false) if mounting throws', async () => {
     const [waitPromise, resolvePromise] = createResolver();
     const mounter = {
