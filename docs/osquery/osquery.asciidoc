@@ -56,10 +56,10 @@ TIP: To save a single query for future use, click *Save for later* and define th
 
 . Review the results and do any of the following:
 
-** Click *View in Discover* (image:images/discover-button-osquery.png[Click the View in Discover button,20,20]) to explore the results in Discover.
-** Click *View in Lens* (image:images/lens-button-osquery.png[Click the View in Lens button,20,20]) to navigate to Lens, where you can use the drag-and-drop *Lens* editor to create visualizations.
-** Click *Add to Case* (image:images/case-button-osquery.png[Click Add to Case button,20,20]) to add the query results to a new or existing case. 
-** Click the view details button (image:images/view-osquery-details.png[Click View details button,20,20]) to examine the query ID and statement.  
+** Click *View in Discover* (image:images/discover-button-osquery.png[View in Discover icon,20,20]) to explore the results in Discover.
+** Click *View in Lens* (image:images/lens-button-osquery.png[View in Lens icon,20,20]) to navigate to Lens, where you can use the drag-and-drop *Lens* editor to create visualizations.
+** Click *Add to Case* (image:images/case-button-osquery.png[Add to Case icon,20,20]) to add the query results to a new or existing case. 
+** Click the view details icon (image:images/view-osquery-details.png[View details icon,20,20]) to examine the query ID and statement.  
 
 . To view more information about the request, such as failures, open the *Status* tab.
 
