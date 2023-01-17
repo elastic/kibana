@@ -8,7 +8,7 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { useRouteMatch } from 'react-router-dom';
 import { useEffect } from 'react';
-import { OVERVIEW_ROUTE } from '../../../../../../common/constants';
+import { MONITOR_ROUTE, OVERVIEW_ROUTE } from '../../../../../../common/constants';
 import { hideTestNowFlyoutAction, testNowRunsSelector } from '../../../state/manual_test_runs';
 
 export const useTestFlyoutOpen = () => {
@@ -18,14 +18,20 @@ export const useTestFlyoutOpen = () => {
     path: [OVERVIEW_ROUTE],
   });
 
+  const isMonitorDetails = useRouteMatch<{ monitorId: string }>({
+    path: [MONITOR_ROUTE],
+  });
+
   const dispatch = useDispatch();
 
   const flyoutTestOpen = Object.values(testNowRuns).find((value) => {
     return value.isTestNowFlyoutOpen;
   });
 
+  const isSameMonitor = flyoutTestOpen?.configId === isMonitorDetails?.params.monitorId;
+
   useEffect(() => {
-    if (!isOverview?.isExact && flyoutTestOpen) {
+    if (!isOverview?.isExact && flyoutTestOpen && !isSameMonitor) {
       dispatch(hideTestNowFlyoutAction());
     }
   });
