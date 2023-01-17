@@ -81,7 +81,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   const { params } = useRouteMatch<AddToPolicyParams>();
 
   const [newAgentPolicy, setNewAgentPolicy] = useState<NewAgentPolicy>(
-    generateNewAgentPolicyWithDefaults()
+    generateNewAgentPolicyWithDefaults({ name: 'Agent policy 1' })
   );
 
   const [withSysMonitoring, setWithSysMonitoring] = useState<boolean>(true);
