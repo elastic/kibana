@@ -2698,7 +2698,7 @@
                 "section": "def-common.WithoutReservedActionGroups",
                 "text": "WithoutReservedActionGroups"
               },
-              "<ActionGroupIds, RecoveryActionGroupId>>) => Promise<void | State>"
+              "<ActionGroupIds, RecoveryActionGroupId>>) => Promise<{ state: State; }>"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
@@ -3122,6 +3122,53 @@
         "path": "x-pack/plugins/alerting/server/config.ts",
         "deprecated": false,
         "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-server.ExecutorType",
+        "type": "Type",
+        "tags": [],
+        "label": "ExecutorType",
+        "description": [],
+        "signature": [
+          "(options: ",
+          {
+            "pluginId": "alerting",
+            "scope": "server",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-server.RuleExecutorOptions",
+            "text": "RuleExecutorOptions"
+          },
+          "<Params, State, InstanceState, InstanceContext, ActionGroupIds>) => Promise<{ state: State; }>"
+        ],
+        "path": "x-pack/plugins/alerting/server/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.ExecutorType.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "alerting",
+                "scope": "server",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-server.RuleExecutorOptions",
+                "text": "RuleExecutorOptions"
+              },
+              "<Params, State, InstanceState, InstanceContext, ActionGroupIds>"
+            ],
+            "path": "x-pack/plugins/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {

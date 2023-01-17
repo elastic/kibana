@@ -2441,6 +2441,22 @@
             "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.ChromeHelpExtensionMenuCustomLink.external",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "external",
+            "description": [
+              "\nOpens link in new tab"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -57358,7 +57374,9 @@
                 "section": "def-common.SavedObjectsClientContract",
                 "text": "SavedObjectsClientContract"
               },
-              ") => ",
+              ", options?: ",
+              "SavedObjectsImporterOptions",
+              " | undefined) => ",
               {
                 "pluginId": "@kbn/core-saved-objects-server",
                 "scope": "common",
@@ -57391,6 +57409,22 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsServiceStart.createImporter.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "SavedObjectsImporterOptions",
+                  " | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []

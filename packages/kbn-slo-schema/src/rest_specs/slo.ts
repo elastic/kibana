@@ -96,7 +96,7 @@ const updateSLOParamsSchema = t.type({
     timeWindow: timeWindowSchema,
     budgetingMethod: budgetingMethodSchema,
     objective: objectiveSchema,
-    settings: settingsSchema,
+    settings: optionalSettingsSchema,
   }),
 });
 
@@ -112,11 +112,13 @@ const findSLOResponseSchema = t.type({
 type SLOResponse = t.OutputOf<typeof sloResponseSchema>;
 type SLOWithSummaryResponse = t.OutputOf<typeof sloWithSummaryResponseSchema>;
 
-type CreateSLOParams = t.TypeOf<typeof createSLOParamsSchema.props.body>;
-type CreateSLOResponse = t.TypeOf<typeof createSLOResponseSchema>;
+type CreateSLOInput = t.OutputOf<typeof createSLOParamsSchema.props.body>; // Raw payload sent by the frontend
+type CreateSLOParams = t.TypeOf<typeof createSLOParamsSchema.props.body>; // Parsed payload used by the backend
+type CreateSLOResponse = t.TypeOf<typeof createSLOResponseSchema>; // Raw response sent to the frontend
 
 type GetSLOResponse = t.OutputOf<typeof getSLOResponseSchema>;
 
+type UpdateSLOInput = t.OutputOf<typeof updateSLOParamsSchema.props.body>;
 type UpdateSLOParams = t.TypeOf<typeof updateSLOParamsSchema.props.body>;
 type UpdateSLOResponse = t.OutputOf<typeof updateSLOResponseSchema>;
 
@@ -139,6 +141,7 @@ export {
 };
 export type {
   BudgetingMethod,
+  CreateSLOInput,
   CreateSLOParams,
   CreateSLOResponse,
   FindSLOParams,
@@ -146,6 +149,7 @@ export type {
   GetSLOResponse,
   SLOResponse,
   SLOWithSummaryResponse,
+  UpdateSLOInput,
   UpdateSLOParams,
   UpdateSLOResponse,
 };
