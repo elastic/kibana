@@ -984,6 +984,41 @@
           },
           {
             "parentPluginId": "@kbn/journeys",
+            "id": "def-common.ScalabilitySetup.responseTimeMetric",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "responseTimeMetric",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/journeys",
+                "scope": "common",
+                "docId": "kibKbnJourneysPluginApi",
+                "section": "def-common.ResponseTimeMetric",
+                "text": "ResponseTimeMetric"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.ScalabilitySetup.responseTimeThreshold",
+            "type": "Object",
+            "tags": [],
+            "label": "responseTimeThreshold",
+            "description": [],
+            "signature": [
+              "{ threshold1: number; threshold2: number; threshold3: number; } | undefined"
+            ],
+            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
             "id": "def-common.ScalabilitySetup.warmup",
             "type": "Array",
             "tags": [],
@@ -1111,6 +1146,21 @@
     ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "@kbn/journeys",
+        "id": "def-common.ResponseTimeMetric",
+        "type": "Type",
+        "tags": [],
+        "label": "ResponseTimeMetric",
+        "description": [],
+        "signature": [
+          "\"min\" | \"max\" | \"25%\" | \"50%\" | \"75%\" | \"80%\" | \"85%\" | \"90%\" | \"95%\" | \"99%\""
+        ],
+        "path": "packages/kbn-journeys/journey/journey_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/journeys",
         "id": "def-common.ScalabilityAction",

@@ -598,12 +598,12 @@
           "trackAdoption": true,
           "references": [
             {
-              "plugin": "filesManagement",
-              "path": "src/plugins/files_management/public/mount_management_section.tsx"
-            },
-            {
               "plugin": "imageEmbeddable",
               "path": "src/plugins/image_embeddable/public/plugin.ts"
+            },
+            {
+              "plugin": "filesManagement",
+              "path": "src/plugins/files_management/public/mount_management_section.tsx"
             }
           ]
         },
@@ -4153,12 +4153,44 @@
           },
           {
             "parentPluginId": "files",
+            "id": "def-server.FindFileArgs.mimeType",
+            "type": "Array",
+            "tags": [],
+            "label": "mimeType",
+            "description": [
+              "\nFile mime type(s)."
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/plugins/files/server/file_service/file_action_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "files",
             "id": "def-server.FindFileArgs.status",
             "type": "Array",
             "tags": [],
             "label": "status",
             "description": [
               "\nFile status(es)."
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/plugins/files/server/file_service/file_action_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-server.FindFileArgs.user",
+            "type": "Array",
+            "tags": [],
+            "label": "user",
+            "description": [
+              "\nID of user who created the file."
             ],
             "signature": [
               "string[] | undefined"

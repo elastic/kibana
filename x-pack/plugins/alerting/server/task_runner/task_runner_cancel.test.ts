@@ -251,6 +251,7 @@ describe('Task Runner Cancel', () => {
           },
         },
         nextRun: '1970-01-01T00:00:10.000Z',
+        running: false,
       },
       { refresh: false, namespace: undefined }
     );
@@ -273,6 +274,7 @@ describe('Task Runner Cancel', () => {
         string
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
+        return { state: {} };
       }
     );
     // setting cancelAlertsOnRuleTimeout to false here
@@ -340,6 +342,7 @@ describe('Task Runner Cancel', () => {
         string
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
+        return { state: {} };
       }
     );
     // setting cancelAlertsOnRuleTimeout for ruleType to false here
@@ -401,6 +404,7 @@ describe('Task Runner Cancel', () => {
         string
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
+        return { state: {} };
       }
     );
     const taskRunner = new TaskRunner(

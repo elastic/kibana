@@ -15,13 +15,8 @@ import { DashboardGrid } from '../grid';
 import { pluginServices } from '../../../services/plugin_services';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
 import { useDashboardContainerContext } from '../../dashboard_container_renderer';
-import { DashboardLoadedInfo } from '../../embeddable/dashboard_container';
 
-export const DashboardViewport = ({
-  onDataLoaded,
-}: {
-  onDataLoaded?: (data: DashboardLoadedInfo) => void;
-}) => {
+export const DashboardViewport = () => {
   const {
     settings: { isProjectEnabledInLabs },
   } = pluginServices.getServices();
@@ -83,7 +78,7 @@ export const DashboardViewport = ({
             <DashboardEmptyScreen isEditMode={viewMode === ViewMode.EDIT} />
           </div>
         )}
-        <DashboardGrid onDataLoaded={onDataLoaded} />
+        <DashboardGrid />
       </div>
     </>
   );

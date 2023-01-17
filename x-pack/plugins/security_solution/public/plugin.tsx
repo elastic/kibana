@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { Subscription } from 'rxjs';
 import { Subject } from 'rxjs';
 import { combineLatestWith } from 'rxjs/operators';
+import type * as H from 'history';
 import type {
   AppMountParameters,
   AppUpdater,
@@ -160,10 +161,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         const [coreStart, startPlugins] = await core.getStartServices();
         const subPlugins = await this.startSubPlugins(this.storage, coreStart, startPlugins);
         const store = await this.store(coreStart, startPlugins, subPlugins);
-        await this.registerActions(startPlugins, store);
+        const services = await startServices(params);
+        await this.registerActions(startPlugins, store, params.history, services);
 
         const { renderApp } = await this.lazyApplicationDependencies();
         const { getSubPluginRoutesByCapabilities } = await this.lazyHelpersForRoutes();
+
         return renderApp({
           ...params,
           services: await startServices(params),
@@ -420,10 +423,15 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     return this._store;
   }
 
-  private async registerActions({ uiActions }: StartPlugins, store: SecurityAppStore) {
+  private async registerActions(
+    plugins: StartPlugins,
+    store: SecurityAppStore,
+    history: H.History,
+    services: StartServices
+  ) {
     if (!this._actionsRegistered) {
       const { registerActions } = await this.lazyActions();
-      registerActions(uiActions, store);
+      registerActions(plugins, store, history, services);
       this._actionsRegistered = true;
     }
   }

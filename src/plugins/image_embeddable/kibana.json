@@ -8,6 +8,7 @@
     "githubTeam": "@elastic/kibana-global-experience"
   },
   "description": "Image embeddable",
-  "requiredPlugins": ["embeddable", "files"],
-  "requiredBundles": ["kibanaUtils", "kibanaReact"]
+  "requiredPlugins": ["embeddable", "files", "uiActions"],
+  "requiredBundles": ["kibanaUtils", "kibanaReact"],
+  "optionalPlugins": ["security"]
 }

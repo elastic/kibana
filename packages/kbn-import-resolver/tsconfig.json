@@ -11,10 +11,9 @@
     "**/*.ts"
   ],
   "kbn_references": [
-    "@kbn/bazel-packages",
-    "@kbn/package-map",
     "@kbn/repo-info",
     "@kbn/jest-serializers",
+    "@kbn/repo-packages",
   ],
   "exclude": [
     "target/**/*",
