@@ -9,7 +9,7 @@ import { isEqual } from 'lodash';
 
 import type { SavedObject } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { ActionResult, ActionsClient } from '@kbn/actions-plugin/server';
 import type {
   CaseUserActionResponse,
   GetCaseConnectorsResponse,
@@ -44,25 +44,13 @@ export const getConnectors = async (
 
     await checkConnectorsAuthorization({ authorization, connectors, latestUserAction });
 
-    const enrichedConnectors = await enrichConnectors({
+    const results = await getConnectorsInfo({
       caseId,
       actionsClient,
       connectors,
       latestUserAction,
       userActionService,
     });
-
-    const results: GetCaseConnectorsResponse = {};
-
-    for (const enrichedConnector of enrichedConnectors) {
-      results[enrichedConnector.connector.id] = {
-        ...enrichedConnector.connector,
-        name: enrichedConnector.name,
-        needsToBePushed: hasDataToPush(enrichedConnector),
-        latestPushDate: enrichedConnector.pushInfo?.pushDate.toISOString(),
-        hasBeenPushed: hasBeenPushed(enrichedConnector),
-      };
-    }
 
     return GetCaseConnectorsResponseRt.encode(results);
   } catch (error) {
@@ -112,14 +100,7 @@ interface EnrichedPushInfo {
   connectorFieldsUsedInPush: CaseConnector;
 }
 
-interface EnrichedConnector {
-  connector: CaseConnector;
-  name: string;
-  pushInfo?: EnrichedPushInfo;
-  latestUserActionDate?: Date;
-}
-
-const enrichConnectors = async ({
+const getConnectorsInfo = async ({
   caseId,
   connectors,
   latestUserAction,
@@ -131,28 +112,15 @@ const enrichConnectors = async ({
   latestUserAction?: SavedObject<CaseUserActionResponse>;
   actionsClient: PublicMethodsOf<ActionsClient>;
   userActionService: CaseUserActionService;
-}): Promise<EnrichedConnector[]> => {
-  const pushInfo = await getPushInfo({ caseId, activity: connectors, userActionService });
+}): Promise<GetCaseConnectorsResponse> => {
+  const connectorIds = connectors.map((connector) => connector.connectorId);
 
-  const enrichedConnectors: EnrichedConnector[] = [];
+  const [pushInfo, actionConnectors] = await Promise.all([
+    getPushInfo({ caseId, activity: connectors, userActionService }),
+    actionsClient.getBulk(connectorIds),
+  ]);
 
-  for (const aggregationConnector of connectors) {
-    const connectorDetails = await actionsClient.get({ id: aggregationConnector.connectorId });
-    const connector = getConnectorInfoFromSavedObject(aggregationConnector.fields);
-
-    const latestUserActionCreatedAt = getDate(latestUserAction?.attributes.created_at);
-
-    if (connector != null) {
-      enrichedConnectors.push({
-        connector,
-        name: connectorDetails.name,
-        pushInfo: pushInfo.get(aggregationConnector.connectorId),
-        latestUserActionDate: latestUserActionCreatedAt,
-      });
-    }
-  }
-
-  return enrichedConnectors;
+  return createConnectorInfoResult({ actionConnectors, connectors, pushInfo, latestUserAction });
 };
 
 const getPushInfo = async ({
@@ -174,11 +142,7 @@ const getPushInfo = async ({
     }
   }
 
-  if (pushRequest.length <= 0) {
-    return new Map();
-  }
-
-  const connectorFieldsForPushes = await userActionService.getConnectorFieldsUsedInPushes(
+  const connectorFieldsForPushes = await userActionService.getConnectorFieldsBeforeLatestPush(
     caseId,
     pushRequest
   );
@@ -227,6 +191,47 @@ const getConnectorInfoFromSavedObject = (
   }
 };
 
+const createConnectorInfoResult = ({
+  actionConnectors,
+  connectors,
+  pushInfo,
+  latestUserAction,
+}: {
+  actionConnectors: ActionResult[];
+  connectors: CaseConnectorActivity[];
+  pushInfo: Map<string, EnrichedPushInfo>;
+  latestUserAction?: SavedObject<CaseUserActionResponse>;
+}) => {
+  const results: GetCaseConnectorsResponse = {};
+
+  for (let i = 0; i < connectors.length; i++) {
+    const connectorDetails = actionConnectors[i];
+    const aggregationConnector = connectors[i];
+    const connector = getConnectorInfoFromSavedObject(aggregationConnector.fields);
+
+    const latestUserActionCreatedAt = getDate(latestUserAction?.attributes.created_at);
+
+    if (connector != null) {
+      const enrichedPushInfo = pushInfo.get(aggregationConnector.connectorId);
+      const needsToBePushed = hasDataToPush({
+        connector,
+        pushInfo: enrichedPushInfo,
+        latestUserActionDate: latestUserActionCreatedAt,
+      });
+
+      results[connector.id] = {
+        ...connector,
+        name: connectorDetails.name,
+        needsToBePushed,
+        latestPushDate: enrichedPushInfo?.pushDate.toISOString(),
+        hasBeenPushed: hasBeenPushed(enrichedPushInfo),
+      };
+    }
+  }
+
+  return results;
+};
+
 /**
  * The algorithm to determine if a specific connector within a case needs to be pushed is as follows:
  * 1. Check to see if the connector has been used to push, if it hasn't then we need to push
@@ -236,22 +241,25 @@ const getConnectorInfoFromSavedObject = (
  *  tags, or creation of a comment) was created after the most recent push (aka did the user do something new that needs
  *  to be pushed)
  */
-const hasDataToPush = (enrichedConnectorInfo: EnrichedConnector): boolean => {
+const hasDataToPush = ({
+  connector,
+  pushInfo,
+  latestUserActionDate,
+}: {
+  connector: CaseConnector;
+  pushInfo?: EnrichedPushInfo;
+  latestUserActionDate?: Date;
+}): boolean => {
   return (
     /**
      * This isEqual call satisfies the first two steps of the algorithm above because if a push never occurred then the
      * push fields will be undefined which will not equal the latest connector fields anyway.
      */
-    !isEqual(
-      enrichedConnectorInfo.connector,
-      enrichedConnectorInfo.pushInfo?.connectorFieldsUsedInPush
-    ) ||
-    (enrichedConnectorInfo.pushInfo != null &&
-      enrichedConnectorInfo.latestUserActionDate != null &&
-      enrichedConnectorInfo.latestUserActionDate > enrichedConnectorInfo.pushInfo.pushDate)
+    !isEqual(connector, pushInfo?.connectorFieldsUsedInPush) ||
+    (pushInfo != null && latestUserActionDate != null && latestUserActionDate > pushInfo.pushDate)
   );
 };
 
-const hasBeenPushed = (enrichedConnectorInfo: EnrichedConnector): boolean => {
-  return enrichedConnectorInfo.pushInfo != null;
+const hasBeenPushed = (pushInfo: EnrichedPushInfo | undefined): boolean => {
+  return pushInfo != null;
 };

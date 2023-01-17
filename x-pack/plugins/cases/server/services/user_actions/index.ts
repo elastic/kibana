@@ -106,7 +106,7 @@ export class CaseUserActionService {
     return this._creator;
   }
 
-  public async getConnectorFieldsUsedInPushes(
+  public async getConnectorFieldsBeforeLatestPush(
     caseId: string,
     pushes: PushInfo[]
   ): Promise<CaseConnectorFields> {
@@ -114,6 +114,10 @@ export class CaseUserActionService {
       this.context.log.debug(
         `Attempting to retrieve the connector fields before the last push for case id: ${caseId}`
       );
+
+      if (pushes.length <= 0) {
+        return new Map();
+      }
 
       const connectorsFilter = buildFilter({
         filters: [ActionTypes.connector, ActionTypes.create_case],
