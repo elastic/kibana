@@ -509,8 +509,22 @@ export interface BulkActionsConfig {
   'data-test-subj'?: string;
   disableOnQuery: boolean;
   disabledLabel?: string;
-  onClick: (selectedIds: TimelineItem[], isAllSelected: boolean) => void;
+  onClick: (
+    selectedIds: TimelineItem[],
+    isAllSelected: boolean,
+    setIsBulkActionsLoading: (isLoading: boolean) => void
+  ) => void;
 }
+
+export type UseActionsColumnRegistry = () => {
+  renderCustomActionsRow: (
+    alert: EcsFieldsResponse,
+    setFlyoutAlert: (data: unknown) => void,
+    id?: string,
+    setIsActionLoading?: (isLoading: boolean) => void
+  ) => JSX.Element;
+  width?: number;
+};
 
 export type UseBulkActionsRegistry = () => BulkActionsConfig[];
 
@@ -525,14 +539,7 @@ export interface AlertsTableConfigurationRegistry {
   };
   sort?: SortCombinations[];
   getRenderCellValue?: GetRenderCellValue;
-  useActionsColumn?: () => {
-    renderCustomActionsRow: (
-      alert: EcsFieldsResponse,
-      setFlyoutAlert: (data: unknown) => void,
-      id?: string
-    ) => JSX.Element;
-    width?: number;
-  };
+  useActionsColumn?: UseActionsColumnRegistry;
   useBulkActions?: UseBulkActionsRegistry;
   usePersistentControls?: () => {
     right?: ReactNode;
@@ -546,19 +553,28 @@ export enum BulkActionsVerbs {
   selectCurrentPage = 'selectCurrentPage',
   selectAll = 'selectAll',
   rowCountUpdate = 'rowCountUpdate',
+  updateRowLoadingState = 'updateRowLoadingState',
+  updateAllLoadingState = 'updateAllLoadingState',
 }
 
 export interface BulkActionsReducerAction {
   action: BulkActionsVerbs;
   rowIndex?: number;
   rowCount?: number;
+  isLoading?: boolean;
 }
 
 export interface BulkActionsState {
-  rowSelection: Set<number>;
+  rowSelection: Map<number, RowSelectionState>;
   isAllSelected: boolean;
   areAllVisibleRowsSelected: boolean;
   rowCount: number;
+}
+
+export type RowSelection = Map<number, RowSelectionState>;
+
+export interface RowSelectionState {
+  isLoading: boolean;
 }
 
 export type RuleStatus = 'enabled' | 'disabled' | 'snoozed';
