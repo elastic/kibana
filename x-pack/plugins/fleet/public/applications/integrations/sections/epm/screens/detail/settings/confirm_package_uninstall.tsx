@@ -20,11 +20,13 @@ export const ConfirmPackageUninstall = (props: ConfirmPackageUninstallProps) => 
   return (
     <EuiConfirmModal
       title={
-        <FormattedMessage
-          id="xpack.fleet.integrations.settings.confirmUninstallModal.uninstallTitle"
-          defaultMessage="Uninstall {packageName}"
-          values={{ packageName }}
-        />
+        <span>
+          <FormattedMessage
+            id="xpack.fleet.integrations.settings.confirmUninstallModal.uninstallTitle"
+            defaultMessage="Uninstall {packageName}"
+            values={{ packageName }}
+          />
+        </span>
       }
       onCancel={onCancel}
       onConfirm={onConfirm}

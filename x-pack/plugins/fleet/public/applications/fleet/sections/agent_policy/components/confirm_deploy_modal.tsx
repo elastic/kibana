@@ -21,10 +21,12 @@ export const ConfirmDeployAgentPolicyModal: React.FunctionComponent<{
   return (
     <EuiConfirmModal
       title={
-        <FormattedMessage
-          id="xpack.fleet.agentPolicy.confirmModalTitle"
-          defaultMessage="Save and deploy changes"
-        />
+        <span>
+          <FormattedMessage
+            id="xpack.fleet.agentPolicy.confirmModalTitle"
+            defaultMessage="Save and deploy changes"
+          />
+        </span>
       }
       onCancel={onCancel}
       onConfirm={onConfirm}

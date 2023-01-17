@@ -79,16 +79,20 @@ export const AgentRequestDiagnosticsModal: React.FunctionComponent<Props> = ({
       data-test-subj="requestDiagnosticsModal"
       title={
         isSingleAgent ? (
-          <FormattedMessage
-            id="xpack.fleet.requestDiagnostics.singleTitle"
-            defaultMessage="Request diagnostics"
-          />
+          <span>
+            <FormattedMessage
+              id="xpack.fleet.requestDiagnostics.singleTitle"
+              defaultMessage="Request diagnostics"
+            />
+          </span>
         ) : (
-          <FormattedMessage
-            id="xpack.fleet.requestDiagnostics.multipleTitle"
-            defaultMessage="Request diagnostics for {count} agents"
-            values={{ count: agentCount }}
-          />
+          <span>
+            <FormattedMessage
+              id="xpack.fleet.requestDiagnostics.multipleTitle"
+              defaultMessage="Request diagnostics for {count} agents"
+              values={{ count: agentCount }}
+            />
+          </span>
         )
       }
       onCancel={onClose}

@@ -36,13 +36,15 @@ export const PostInstallAddAgentModal: React.FunctionComponent<{
     <EuiModal data-test-subj="postInstallAddAgentModal" onClose={onCancel}>
       <EuiModalHeader>
         <EuiModalHeaderTitle data-test-subj="confirmModalTitleText">
-          <FormattedMessage
-            id="xpack.fleet.agentPolicy.postInstallAddAgentModal"
-            defaultMessage="{packageName} integration added"
-            values={{
-              packageName: toTitleCase(packageInfo.title),
-            }}
-          />
+          <h1>
+            <FormattedMessage
+              id="xpack.fleet.agentPolicy.postInstallAddAgentModal"
+              defaultMessage="{packageName} integration added"
+              values={{
+                packageName: toTitleCase(packageInfo.title),
+              }}
+            />
+          </h1>
         </EuiModalHeaderTitle>
       </EuiModalHeader>
 

@@ -102,10 +102,12 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
     <EuiConfirmModal
       data-test-subj="agentReassignPolicyModal"
       title={
-        <FormattedMessage
-          id="xpack.fleet.agentReassignPolicy.flyoutTitle"
-          defaultMessage="Assign new agent policy"
-        />
+        <span>
+          <FormattedMessage
+            id="xpack.fleet.agentReassignPolicy.flyoutTitle"
+            defaultMessage="Assign new agent policy"
+          />
+        </span>
       }
       onCancel={onClose}
       onConfirm={onSubmit}

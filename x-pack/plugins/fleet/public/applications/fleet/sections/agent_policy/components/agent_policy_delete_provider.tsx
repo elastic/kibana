@@ -117,10 +117,12 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({
     return (
       <EuiConfirmModal
         title={
-          <FormattedMessage
-            id="xpack.fleet.deleteAgentPolicy.confirmModal.deletePolicyTitle"
-            defaultMessage="Delete this agent policy?"
-          />
+          <span>
+            <FormattedMessage
+              id="xpack.fleet.deleteAgentPolicy.confirmModal.deletePolicyTitle"
+              defaultMessage="Delete this agent policy?"
+            />
+          </span>
         }
         onCancel={closeModal}
         onConfirm={deleteAgentPolicy}

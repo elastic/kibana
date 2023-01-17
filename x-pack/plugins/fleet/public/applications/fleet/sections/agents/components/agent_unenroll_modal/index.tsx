@@ -88,16 +88,20 @@ export const AgentUnenrollAgentModal: React.FunctionComponent<Props> = ({
       data-test-subj="agentUnenrollModal"
       title={
         isSingleAgent ? (
-          <FormattedMessage
-            id="xpack.fleet.unenrollAgents.deleteSingleTitle"
-            defaultMessage="Unenroll agent"
-          />
+          <span>
+            <FormattedMessage
+              id="xpack.fleet.unenrollAgents.deleteSingleTitle"
+              defaultMessage="Unenroll agent"
+            />
+          </span>
         ) : (
-          <FormattedMessage
-            id="xpack.fleet.unenrollAgents.forceDeleteMultipleTitle"
-            defaultMessage="Unenroll {count} agents"
-            values={{ count: agentCount }}
-          />
+          <span>
+            <FormattedMessage
+              id="xpack.fleet.unenrollAgents.forceDeleteMultipleTitle"
+              defaultMessage="Unenroll {count} agents"
+              values={{ count: agentCount }}
+            />
+          </span>
         )
       }
       onCancel={onClose}

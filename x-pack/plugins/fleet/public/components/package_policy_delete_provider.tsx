@@ -146,11 +146,13 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
     return (
       <EuiConfirmModal
         title={
-          <FormattedMessage
-            id="xpack.fleet.deletePackagePolicy.confirmModal.deleteMultipleTitle"
-            defaultMessage="Delete {count, plural, one {integration} other {# integrations}}?"
-            values={{ count: packagePolicies.length }}
-          />
+          <span>
+            <FormattedMessage
+              id="xpack.fleet.deletePackagePolicy.confirmModal.deleteMultipleTitle"
+              defaultMessage="Delete {count, plural, one {integration} other {# integrations}}?"
+              values={{ count: packagePolicies.length }}
+            />
+          </span>
         }
         onCancel={closeModal}
         onConfirm={deletePackagePolicies}

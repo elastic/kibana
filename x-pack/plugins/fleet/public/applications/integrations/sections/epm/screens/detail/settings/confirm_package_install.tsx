@@ -20,11 +20,13 @@ export const ConfirmPackageInstall = (props: ConfirmPackageInstallProps) => {
   return (
     <EuiConfirmModal
       title={
-        <FormattedMessage
-          id="xpack.fleet.integrations.settings.confirmInstallModal.installTitle"
-          defaultMessage="Install {packageName}"
-          values={{ packageName }}
-        />
+        <span>
+          <FormattedMessage
+            id="xpack.fleet.integrations.settings.confirmInstallModal.installTitle"
+            defaultMessage="Install {packageName}"
+            values={{ packageName }}
+          />
+        </span>
       }
       onCancel={onCancel}
       onConfirm={onConfirm}
