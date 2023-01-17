@@ -130,6 +130,10 @@ describe('AllCasesListGeneric', () => {
     window.localStorage.clear();
   });
 
+  afterEach(() => {
+    moment.tz.setDefault('Browser');
+  })
+
   it('should render AllCasesList', async () => {
     useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
 
