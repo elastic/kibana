@@ -18,6 +18,13 @@ interface LogViewSwitcherProps {
   logView: ResolvedLogView;
 }
 
+/**
+ * TODO: this component is called LogViewSwitcher because it will allow,
+ * in a following implementation, to switch between the available logViews
+ * with the support of multi-logView concept.
+ * It currently renders a read-only expression to tell the user to which logView
+ * is the new alert associated with.
+ */
 export const LogViewSwitcher: React.FC<LogViewSwitcherProps> = ({ logView }) => {
   return (
     <EuiFlexGroup gutterSize="s">
