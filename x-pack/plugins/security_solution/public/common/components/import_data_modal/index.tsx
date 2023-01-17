@@ -5,11 +5,15 @@
  * 2.0.
  */
 
+import React, { useCallback, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiCheckbox,
   EuiFilePicker,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -18,7 +22,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import React, { useCallback, useState } from 'react';
+import type { WarningSchema } from '../../../../common/detection_engine/schemas/response';
 
 import type {
   ImportDataResponse,
@@ -27,6 +31,7 @@ import type {
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import * as i18n from './translations';
 import { showToasterMessage } from './utils';
+import { useKibana } from '../../lib/kibana/kibana_react';
 
 interface ImportDataModalProps {
   checkBoxLabel: string;
@@ -70,6 +75,14 @@ export const ImportDataModalComponent = ({
   const [overwrite, setOverwrite] = useState(false);
   const [overwriteExceptions, setOverwriteExceptions] = useState(false);
   const { addError, addSuccess } = useAppToasts();
+  // TODO Ask if we use schema on the FE
+  const [actionConnectorsWarnings, setActionConnectorsWarnings] = useState<WarningSchema[] | []>(
+    []
+  );
+  const {
+    http,
+    application: { navigateToApp },
+  } = useKibana().services;
 
   const cleanupAndCloseModal = useCallback(() => {
     setIsImporting(false);
@@ -85,12 +98,14 @@ export const ImportDataModalComponent = ({
       const abortCtrl = new AbortController();
 
       try {
-        const importResponse = await importData({
+        const { action_connectors_warnings: warnings, ...importResponse } = await importData({
           fileToImport: selectedFiles[0],
           overwrite,
           overwriteExceptions,
           signal: abortCtrl.signal,
         });
+        const showWarnings = !!warnings?.length;
+        setActionConnectorsWarnings(warnings as WarningSchema[]);
 
         showToasterMessage({
           importResponse,
@@ -102,19 +117,24 @@ export const ImportDataModalComponent = ({
           addSuccess,
         });
 
-        importComplete();
-        cleanupAndCloseModal();
+        if (!showWarnings) {
+          importComplete();
+          return cleanupAndCloseModal();
+        }
+
+        setIsImporting(false);
+        setSelectedFiles(null);
       } catch (error) {
         cleanupAndCloseModal();
         addError(error, { title: errorMessage(1) });
       }
     }
   }, [
+    showExceptionsCheckBox,
     selectedFiles,
-    importData,
     overwrite,
     overwriteExceptions,
-    showExceptionsCheckBox,
+    importData,
     successMessage,
     errorMessage,
     failedDetailed,
@@ -163,6 +183,34 @@ export const ImportDataModalComponent = ({
               isLoading={isImporting}
             />
             <EuiSpacer size="s" />
+            {!!actionConnectorsWarnings?.length &&
+              actionConnectorsWarnings.map(({ message, actionPath, buttonLabel }) => (
+                <EuiCallOut
+                  title={`${actionConnectorsWarnings.length} connector imported`} // TODO about title
+                  color="warning"
+                  iconType="alert"
+                >
+                  <EuiFlexGroup direction="column">
+                    <EuiFlexItem>
+                      <EuiText size="s">{message}</EuiText>
+                    </EuiFlexItem>
+
+                    {buttonLabel && (
+                      <EuiFlexItem grow={false}>
+                        <EuiButton
+                          color="warning"
+                          href={http.basePath.prepend(actionPath)}
+                          target="_blank"
+                        >
+                          {buttonLabel}
+                        </EuiButton>
+                      </EuiFlexItem>
+                    )}
+                  </EuiFlexGroup>
+                </EuiCallOut>
+              ))}
+            <EuiSpacer size="s" />
+
             {showCheckBox && (
               <>
                 <EuiCheckbox

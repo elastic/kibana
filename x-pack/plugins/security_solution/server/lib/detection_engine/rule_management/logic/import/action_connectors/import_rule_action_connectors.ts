@@ -6,22 +6,18 @@
  */
 import { Readable } from 'stream';
 
-import type { ActionResult, ActionsClient } from '@kbn/actions-plugin/server';
+import type { ActionResult } from '@kbn/actions-plugin/server';
 import type { SavedObject, SavedObjectsImportResponse } from '@kbn/core-saved-objects-common';
-import type { ISavedObjectsImporter } from '@kbn/core-saved-objects-server';
-
-interface ImportRuleActionConnectorsParams {
-  actionConnectors: SavedObject[];
-  actionsClient: ActionsClient;
-  actionsImporter: ISavedObjectsImporter;
-}
+import type { WarningSchema } from '../../../../../../../common/detection_engine/schemas/response';
+import { mapSOErrorToRuleError } from './validate_action_connectors_import_result';
+import type { ImportRuleActionConnectorsParams, ImportRuleActionConnectorsResult } from './types';
 
 export const importRuleActionConnectors = async ({
   actionConnectors,
   actionsClient,
   actionsImporter,
-}: ImportRuleActionConnectorsParams): Promise<SavedObjectsImportResponse> => {
-  const importResult: SavedObjectsImportResponse = {
+}: ImportRuleActionConnectorsParams): Promise<ImportRuleActionConnectorsResult> => {
+  const importResult: ImportRuleActionConnectorsResult = {
     success: true,
     errors: [],
     successCount: 0,
@@ -51,12 +47,18 @@ export const importRuleActionConnectors = async ({
   const readStream = Readable.from(actionConnectors);
 
   // TODO add overwrite & createNewCopies based on request query
-  const result: SavedObjectsImportResponse = await actionsImporter.import({
-    readStream,
-    overwrite: false,
-    createNewCopies: false,
-  });
+  const { success, successCount, successResults, warnings, errors }: SavedObjectsImportResponse =
+    await actionsImporter.import({
+      readStream,
+      overwrite: false,
+      createNewCopies: false,
+    });
 
-  // TODO map to errorSchema of the rule
-  return result;
+  return {
+    success,
+    successCount,
+    successResults,
+    errors: mapSOErrorToRuleError(errors) || [],
+    warnings: (warnings as WarningSchema[]) || [],
+  };
 };

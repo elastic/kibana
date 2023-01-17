@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 import { PositiveInteger } from '@kbn/securitysolution-io-ts-types';
-import { errorSchema } from '../../../../schemas/response/error_schema';
+import { errorSchema, warningSchema } from '../../../../schemas/response';
 
 export type ImportRulesResponse = t.TypeOf<typeof ImportRulesResponse>;
 export const ImportRulesResponse = t.exact(
@@ -19,9 +19,8 @@ export const ImportRulesResponse = t.exact(
     success: t.boolean,
     success_count: PositiveInteger,
     errors: t.array(errorSchema),
-    // TODO need to map SavedObjectsImportFailure to errorschema
-    //   action_connectors_errors: t.array(errorSchema),
-    // action_connectors_warnings: t.array(),
+    action_connectors_errors: t.array(errorSchema),
+    action_connectors_warnings: t.array(warningSchema),
     action_connectors_success: t.boolean,
     action_connectors_success_count: PositiveInteger,
   })

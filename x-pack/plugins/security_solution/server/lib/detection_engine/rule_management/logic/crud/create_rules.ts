@@ -19,6 +19,7 @@ export interface CreateRulesOptions<T extends RuleCreateProps = RuleCreateProps>
   id?: string;
   immutable?: boolean;
   defaultEnabled?: boolean;
+  validateRuleActionConnectors?: boolean;
 }
 
 export const createRules = async ({
@@ -27,6 +28,7 @@ export const createRules = async ({
   id,
   immutable = false,
   defaultEnabled = true,
+  validateRuleActionConnectors,
 }: CreateRulesOptions): Promise<SanitizedRule<RuleParams>> => {
   const internalRule = convertCreateAPIToInternalSchema(params, immutable, defaultEnabled);
   const rule = await rulesClient.create<RuleParams>({
@@ -34,6 +36,7 @@ export const createRules = async ({
       id,
     },
     data: internalRule,
+    validateRuleActionConnectors,
   });
 
   // Mute the rule if it is first created with the explicit no actions

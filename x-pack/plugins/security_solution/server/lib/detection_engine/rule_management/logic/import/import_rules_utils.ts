@@ -61,6 +61,7 @@ export const importRules = async ({
   exceptionsClient,
   spaceId,
   existingLists,
+  validateRuleActionConnectors,
 }: {
   ruleChunks: PromiseFromStreams[][];
   rulesResponseAcc: ImportRuleResponse[];
@@ -71,6 +72,7 @@ export const importRules = async ({
   exceptionsClient: ExceptionListClient | undefined;
   spaceId: string;
   existingLists: Record<string, ExceptionListSchema>;
+  validateRuleActionConnectors: boolean;
 }) => {
   let importRuleResponse: ImportRuleResponse[] = [...rulesResponseAcc];
 
@@ -119,6 +121,7 @@ export const importRules = async ({
                       ...parsedRule,
                       exceptions_list: [...exceptions],
                     },
+                    validateRuleActionConnectors,
                   });
                   resolve({
                     rule_id: parsedRule.rule_id,
