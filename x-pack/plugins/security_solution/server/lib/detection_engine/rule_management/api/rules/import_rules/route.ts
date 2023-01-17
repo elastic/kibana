@@ -163,7 +163,7 @@ export const importRulesRoute = (
           exceptionsClient,
           spaceId: ctx.securitySolution.getSpaceId(),
           existingLists: foundReferencedExceptionLists,
-          skipActionConnectorsValidations: !actionConnectors.length,
+          skipActionConnectorsValidations: !!actionConnectors.length,
         });
 
         const errorsResp = importRuleResponse.filter((resp) => isBulkError(resp)) as BulkError[];
