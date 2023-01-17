@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
-import { OperationDefinition } from '.';
+import { OperationDefinition, TermsIndexPatternColumn } from '.';
 import { FieldBasedIndexPatternColumn, ValueFormatConfig } from './column_types';
 import type { IndexPatternField, IndexPattern } from '../../../../types';
 import { DataType } from '../../../../types';
@@ -27,10 +27,11 @@ import {
   getInvalidFieldMessage,
   getSafeName,
   getFilter,
+  isColumnOfType,
 } from './helpers';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
-import { isRuntimeField, isScriptedField } from './terms/helpers';
+import { isScriptedField } from './terms/helpers';
 import { FormRow } from './shared_components/form_row';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
 import { getGroupByKey } from './get_group_by_key';
@@ -62,6 +63,8 @@ const supportedTypes = new Set([
   'number_range',
   'date_range',
 ]);
+
+const RUNTIME_FIELD_ERROR_REGEXP = /top_metrics.*Field \[(.+)\] of.type \[(.+)\].*/;
 
 export function getInvalidSortFieldMessage(sortField: string, indexPattern?: IndexPattern) {
   if (!indexPattern) {
@@ -111,7 +114,7 @@ function shouldShowArrayValues(
   field: IndexPatternField,
   params?: LastValueIndexPatternColumn['params']
 ) {
-  return Boolean(isScriptedField(field) || isRuntimeField(field) || params?.showArrayValues);
+  return Boolean(isScriptedField(field) || params?.showArrayValues);
 }
 
 export interface LastValueIndexPatternColumn extends FieldBasedIndexPatternColumn {
@@ -213,6 +216,69 @@ export const lastValueOperation: OperationDefinition<
     errorMessages.push(...(getDisallowedPreviousShiftMessage(layer, columnId) || []));
     errorMessages.push(...(getColumnReducedTimeRangeError(layer, columnId, indexPattern) || []));
     return errorMessages.length ? errorMessages : undefined;
+  },
+  getRuntimeErrorHandler(layer, columnId, indexPattern, operationDefinitionMap) {
+    const column = layer.columns[columnId] as LastValueIndexPatternColumn;
+    const field = indexPattern.getFieldByName(column.sourceField);
+
+    // check if last_value column has been used to rank in a top values column
+    const columnUsingLastValueToRank = Object.values(layer.columns).find(
+      (otherColumn) =>
+        isColumnOfType<TermsIndexPatternColumn>('terms', otherColumn) &&
+        otherColumn.params?.orderBy.type === 'column' &&
+        otherColumn.params?.orderBy.columnId === columnId
+    );
+    return (runtimeError: string) => {
+      if (!field || !field.runtime) {
+        return runtimeError;
+      }
+      const matchedField = runtimeError ? runtimeError.match(RUNTIME_FIELD_ERROR_REGEXP) : null;
+      if (matchedField) {
+        const [_, errorField, errorType] = matchedField;
+        if (field.name === errorField && field.runtimeField?.type === errorType) {
+          if (!columnUsingLastValueToRank) {
+            return i18n.translate('xpack.lens.indexPattern.runtimeErrorForArrayValues', {
+              defaultMessage:
+                'The runtime field "{field}" of type "{type}" has returned an array value. Enable array value support in "{column}" to fix.',
+              values: {
+                field: errorField,
+                type: errorType,
+                column:
+                  column.customLabel ||
+                  operationDefinitionMap?.[column.operationType].getDefaultLabel(
+                    column,
+                    indexPattern,
+                    layer.columns
+                  ),
+              },
+            });
+          }
+          return i18n.translate('xpack.lens.indexPattern.runtimeErrorForArrayValues', {
+            defaultMessage:
+              'The runtime field "{field}" of type "{type}" has returned an array value. Enable array value support in "{column}" to fix. Note that "{columnUsingToRank}" will change ranking to the default one.',
+            values: {
+              field: errorField,
+              type: errorType,
+              column:
+                column.customLabel ||
+                operationDefinitionMap?.[column.operationType].getDefaultLabel(
+                  column,
+                  indexPattern,
+                  layer.columns
+                ),
+              columnUsingToRank:
+                columnUsingLastValueToRank.customLabel ||
+                operationDefinitionMap?.[columnUsingLastValueToRank.operationType].getDefaultLabel(
+                  columnUsingLastValueToRank,
+                  indexPattern,
+                  layer.columns
+                ),
+            },
+          });
+        }
+      }
+      return runtimeError;
+    };
   },
   buildColumn({ field, previousColumn, indexPattern }, columnParams) {
     const lastValueParams = columnParams as LastValueIndexPatternColumn['params'];

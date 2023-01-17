@@ -320,6 +320,20 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     ]
   );
 
+  const runtimeErrorsHandler = useMemo(() => {
+    if (
+      !activeDatasourceId ||
+      !datasourceMap[activeDatasourceId] ||
+      !datasourceStates[activeDatasourceId]
+    ) {
+      return (runtimeErrors: string[]) => runtimeErrors;
+    }
+    return datasourceMap[activeDatasourceId].getRuntimeErrorHandlers(
+      datasourceStates[activeDatasourceId].state,
+      dataViews.indexPatterns
+    );
+  }, [activeDatasourceId, datasourceMap, datasourceStates, dataViews.indexPatterns]);
+
   // if the expression is undefined, it means we hit an error that should be displayed to the user
   const unappliedExpression = useMemo(() => {
     if (!configurationValidationError?.length && !missingRefsErrors.length && !unknownVisError) {
@@ -594,6 +608,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         activeDatasourceId={activeDatasourceId}
         onRender$={onRender$}
         onData$={onData$}
+        runtimeErrorsHandler={runtimeErrorsHandler}
       />
     );
   };
@@ -669,6 +684,7 @@ export const VisualizationWrapper = ({
   activeDatasourceId,
   onRender$,
   onData$,
+  runtimeErrorsHandler,
 }: {
   expression: string | null | undefined;
   framePublicAPI: FramePublicAPI;
@@ -690,6 +706,7 @@ export const VisualizationWrapper = ({
   activeDatasourceId: string | null;
   onRender$: () => void;
   onData$: (data: unknown, adapters?: Partial<DefaultInspectorAdapters>) => void;
+  runtimeErrorsHandler: (runtimeErrors: string[]) => string[];
 }) => {
   const context = useLensSelector(selectExecutionContext);
   const searchContext: ExecutionContextSearch = useMemo(
@@ -898,8 +915,9 @@ export const VisualizationWrapper = ({
         renderMode="edit"
         renderError={(errorMessage?: string | null, error?: ExpressionRenderError | null) => {
           const errorsFromRequest = getOriginalRequestErrorMessages(error);
-          const visibleErrorMessages = errorsFromRequest.length
-            ? errorsFromRequest
+          const errorsHandled = runtimeErrorsHandler(errorsFromRequest);
+          const visibleErrorMessages = errorsHandled.length
+            ? errorsHandled
             : errorMessage
             ? [errorMessage]
             : [];

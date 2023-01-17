@@ -70,6 +70,7 @@ import {
   getVisualDefaultsForLayer,
   isColumnInvalid,
   cloneLayer,
+  nonNullable,
 } from './utils';
 import { isDraggedDataViewField } from '../../utils';
 import { hasField, normalizeOperationDataType } from './pure_utils';
@@ -812,6 +813,35 @@ export function getFormBasedDatasource({
     getDatasourceSuggestionsFromCurrentState,
     getDatasourceSuggestionsForVisualizeField,
     getDatasourceSuggestionsForVisualizeCharts,
+
+    getRuntimeErrorHandlers(state, indexPatterns) {
+      // ask each column operation if it has a runtime handler
+      const operationsHandlers = Object.values(state.layers)
+        .flatMap((layer) => {
+          return Object.entries(layer.columns).map(([cId, column]) => {
+            const runtimeHandler =
+              operationDefinitionMap[column.operationType]?.getRuntimeErrorHandler;
+            if (runtimeHandler) {
+              return runtimeHandler(
+                layer,
+                cId,
+                indexPatterns[layer.indexPatternId],
+                operationDefinitionMap
+              );
+            }
+          });
+        })
+        .filter(nonNullable);
+      return (errorMessages: string[]) => {
+        // ideally it should not happen to
+        return errorMessages.map((runtimeError) => {
+          return operationsHandlers.reduce(
+            (lastRevision, handler) => handler(lastRevision),
+            runtimeError
+          );
+        });
+      };
+    },
 
     getErrorMessages(state, indexPatterns) {
       if (!state) {

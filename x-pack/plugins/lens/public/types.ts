@@ -444,6 +444,11 @@ export interface Datasource<T = unknown, P = unknown> {
       }>
     | undefined;
 
+  getRuntimeErrorHandlers: (
+    state: T,
+    indexPatterns: Record<string, IndexPattern>
+  ) => (runtimeErrors: string[]) => string[];
+
   /**
    * The frame calls this function to display warnings about visualization
    */

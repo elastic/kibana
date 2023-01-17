@@ -330,6 +330,13 @@ interface BaseOperationDefinitionProps<
       >
     | undefined;
 
+  getRuntimeErrorHandler?: (
+    layer: FormBasedLayer,
+    columnId: string,
+    indexPattern: IndexPattern,
+    operationDefinitionMap?: Record<string, GenericOperationDefinition>
+  ) => (runtimeError: string) => string;
+
   /*
    * Flag whether this operation can be scaled by time unit if a date histogram is available.
    * If set to mandatory or optional, a UI element is shown in the config flyout to configure the time unit
