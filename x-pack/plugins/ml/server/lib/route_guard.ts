@@ -117,7 +117,6 @@ export class RouteGuard {
       );
 
       const [coreStart] = await this._getStartServices();
-      // const { name, page } = coreStart.executionContext.getAsLabels();
       const executionContext = await createExecutionContext(coreStart, request.route.path);
 
       return await coreStart.executionContext.withContext(executionContext, () =>
