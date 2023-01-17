@@ -227,6 +227,7 @@ describe('Legacy Alerts Client', () => {
       previouslyRecoveredAlerts: {},
       hasReachedAlertLimit: false,
       alertLimit: 1000,
+      autoRecoverAlerts: true,
       setFlapping: true,
     });
 

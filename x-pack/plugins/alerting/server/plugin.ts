@@ -339,8 +339,7 @@ export class AlertingPlugin {
         ruleType.cancelAlertsOnRuleTimeout =
           ruleType.cancelAlertsOnRuleTimeout ?? this.config.cancelAlertsOnRuleTimeout;
         ruleType.doesSetRecoveryContext = ruleType.doesSetRecoveryContext ?? false;
-        ruleType.autoRecoverAlerts =
-          ruleType.autoRecoverAlerts === undefined ? true : ruleType.autoRecoverAlerts;
+        ruleType.autoRecoverAlerts = ruleType.autoRecoverAlerts ?? true;
         ruleTypeRegistry.register(ruleType);
       },
       getSecurityHealth: async () => {
