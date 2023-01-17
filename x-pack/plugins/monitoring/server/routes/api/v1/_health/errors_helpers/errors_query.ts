@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MetricbeatMonitoredProduct, QueryOptions } from '../types';
+import type { MetricbeatMonitoredProduct, PackagesMonitoredProduct, QueryOptions } from '../types';
 
 const MAX_BUCKET_SIZE = 50;
 
@@ -13,16 +13,20 @@ const MAX_BUCKET_SIZE = 50;
  * Returns a nested aggregation of error messages per event.datasets.
  * Each module (beats, kibana...) can contain one or multiple metricsets with error messages
  */
-interface MetricbeatErrorsQueryOptions extends QueryOptions {
-  products: MetricbeatMonitoredProduct[];
+interface ErrorsQueryOptions extends QueryOptions {
+  products: MetricbeatMonitoredProduct[] | PackagesMonitoredProduct[];
+  errorQueryType: 'metricbeatErrorsQuery' | 'packageErrorsQuery';
+  errorQueryIsDataStream?: boolean;
 }
 
-export const metricbeatErrorsQuery = ({
+export const errorsQuery = ({
   timeRange,
   timeout,
   products,
-}: MetricbeatErrorsQueryOptions) => {
-  if (!timeRange) throw new Error('metricbeatErrorsQuery: missing timeRange parameter');
+  errorQueryType,
+  errorQueryIsDataStream,
+}: ErrorsQueryOptions) => {
+  if (!timeRange) throw new Error(`${errorQueryType}: missing timeRange parameter`);
   return {
     timeout: `${timeout}s`,
     query: {
@@ -37,7 +41,8 @@ export const metricbeatErrorsQuery = ({
               },
               {
                 terms: {
-                  'event.module': Object.values(products),
+                  [errorQueryIsDataStream ? 'service.type' : 'event.module']:
+                    Object.values(products),
                 },
               },
               {
@@ -54,7 +59,7 @@ export const metricbeatErrorsQuery = ({
       },
     },
     aggs: {
-      errors_aggregation: errorsAggregation,
+      errors_aggregation: errorsAggregation(errorQueryIsDataStream),
     },
   };
 };
@@ -82,11 +87,34 @@ const errorsByMetricset = {
   },
 };
 
-const errorsAggregation = {
+const errorsByDataStream = {
   terms: {
-    field: 'event.module',
+    field: 'data_stream.dataset',
   },
   aggs: {
-    errors_by_dataset: errorsByMetricset,
+    latest_docs: {
+      top_hits: {
+        sort: [
+          {
+            '@timestamp': {
+              order: 'desc',
+            },
+          },
+        ],
+        size: MAX_BUCKET_SIZE,
+        _source: {
+          includes: ['@timestamp', 'error', 'data_stream'],
+        },
+      },
+    },
   },
 };
+
+const errorsAggregation = (errorQueryIsDataStream?: boolean) => ({
+  terms: {
+    field: errorQueryIsDataStream ? 'service.type' : 'event.module',
+  },
+  aggs: {
+    errors_by_dataset: errorQueryIsDataStream ? errorsByDataStream : errorsByMetricset,
+  },
+});
