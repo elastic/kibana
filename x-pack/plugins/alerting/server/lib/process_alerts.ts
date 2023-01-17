@@ -26,18 +26,22 @@ interface ProcessAlertsOpts<
 }
 interface ProcessAlertsResult<
   State extends AlertInstanceState,
-  Context extends AlertInstanceContext
+  Context extends AlertInstanceContext,
+  ActionGroupIds extends string,
+  RecoveryActionGroupId extends string
 > {
-  newAlerts: Record<string, Alert<State, Context>>;
-  activeAlerts: Record<string, Alert<State, Context>>;
+  newAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
+  activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
   // recovered alerts in the current rule run that were previously active
-  currentRecoveredAlerts: Record<string, Alert<State, Context>>;
-  recoveredAlerts: Record<string, Alert<State, Context>>;
+  currentRecoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
+  recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
 }
 
 export function processAlerts<
   State extends AlertInstanceState,
-  Context extends AlertInstanceContext
+  Context extends AlertInstanceContext,
+  ActionGroupIds extends string,
+  RecoveryActionGroupId extends string
 >({
   alerts,
   existingAlerts,
@@ -46,7 +50,12 @@ export function processAlerts<
   alertLimit,
   autoRecoverAlerts,
   setFlapping,
-}: ProcessAlertsOpts<State, Context>): ProcessAlertsResult<State, Context> {
+}: ProcessAlertsOpts<State, Context>): ProcessAlertsResult<
+  State,
+  Context,
+  ActionGroupIds,
+  RecoveryActionGroupId
+> {
   return hasReachedAlertLimit
     ? processAlertsLimitReached(
         alerts,
@@ -66,22 +75,24 @@ export function processAlerts<
 
 function processAlertsHelper<
   State extends AlertInstanceState,
-  Context extends AlertInstanceContext
+  Context extends AlertInstanceContext,
+  ActionGroupIds extends string,
+  RecoveryActionGroupId extends string
 >(
   alerts: Record<string, Alert<State, Context>>,
   existingAlerts: Record<string, Alert<State, Context>>,
   previouslyRecoveredAlerts: Record<string, Alert<State, Context>>,
   autoRecoverAlerts: boolean,
   setFlapping: boolean
-): ProcessAlertsResult<State, Context> {
+): ProcessAlertsResult<State, Context, ActionGroupIds, RecoveryActionGroupId> {
   const existingAlertIds = new Set(Object.keys(existingAlerts));
   const previouslyRecoveredAlertsIds = new Set(Object.keys(previouslyRecoveredAlerts));
 
   const currentTime = new Date().toISOString();
-  const newAlerts: Record<string, Alert<State, Context>> = {};
-  const activeAlerts: Record<string, Alert<State, Context>> = {};
-  const currentRecoveredAlerts: Record<string, Alert<State, Context>> = {};
-  const recoveredAlerts: Record<string, Alert<State, Context>> = {};
+  const newAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {};
+  const activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {};
+  const currentRecoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>> = {};
+  const recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>> = {};
 
   for (const id in alerts) {
     if (alerts.hasOwnProperty(id)) {
@@ -156,14 +167,16 @@ function processAlertsHelper<
 
 function processAlertsLimitReached<
   State extends AlertInstanceState,
-  Context extends AlertInstanceContext
+  Context extends AlertInstanceContext,
+  ActionGroupIds extends string,
+  RecoveryActionGroupId extends string
 >(
   alerts: Record<string, Alert<State, Context>>,
   existingAlerts: Record<string, Alert<State, Context>>,
   previouslyRecoveredAlerts: Record<string, Alert<State, Context>>,
   alertLimit: number,
   setFlapping: boolean
-): ProcessAlertsResult<State, Context> {
+): ProcessAlertsResult<State, Context, ActionGroupIds, RecoveryActionGroupId> {
   const existingAlertIds = new Set(Object.keys(existingAlerts));
   const previouslyRecoveredAlertsIds = new Set(Object.keys(previouslyRecoveredAlerts));
 
@@ -173,10 +186,12 @@ function processAlertsLimitReached<
   // - add any new alerts, up to the max allowed
 
   const currentTime = new Date().toISOString();
-  const newAlerts: Record<string, Alert<State, Context>> = {};
+  const newAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {};
 
   // all existing alerts stay active
-  const activeAlerts: Record<string, Alert<State, Context>> = cloneDeep(existingAlerts);
+  const activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = cloneDeep(
+    existingAlerts
+  );
 
   // update duration for existing alerts
   for (const id in activeAlerts) {
@@ -240,8 +255,10 @@ function processAlertsLimitReached<
 
 export function updateAlertFlappingHistory<
   State extends AlertInstanceState,
-  Context extends AlertInstanceContext
->(alert: Alert<State, Context>, state: boolean) {
+  Context extends AlertInstanceContext,
+  ActionGroupIds extends string,
+  RecoveryActionGroupId extends string
+>(alert: Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>, state: boolean) {
   const updatedFlappingHistory = updateFlappingHistory(alert.getFlappingHistory() || [], state);
   alert.setFlappingHistory(updatedFlappingHistory);
 }

@@ -17,7 +17,12 @@ import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { logAlerts } from '../task_runner/log_alerts';
-import { AlertInstanceContext, AlertInstanceState, RawAlertInstance } from '../types';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  RawAlertInstance,
+  WithoutReservedActionGroups,
+} from '../types';
 
 interface ConstructorOpts {
   logger: Logger;
@@ -28,19 +33,24 @@ interface ConstructorOpts {
 export class LegacyAlertsClient<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
-  ActionGroupIds extends string
+  ActionGroupIds extends string,
+  RecoveryActionGroupId extends string
 > {
   private activeAlertsFromPreviousExecution: Record<string, Alert<State, Context>>;
   private recoveredAlertsFromPreviousExecution: Record<string, Alert<State, Context>>;
   private alerts: Record<string, Alert<State, Context>>;
   private processedAlerts: {
-    new: Record<string, Alert<State, Context>>;
-    active: Record<string, Alert<State, Context>>;
-    recovered: Record<string, Alert<State, Context>>;
-    recoveredCurrent: Record<string, Alert<State, Context>>;
+    new: Record<string, Alert<State, Context, ActionGroupIds>>;
+    active: Record<string, Alert<State, Context, ActionGroupIds>>;
+    recovered: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
+    recoveredCurrent: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
   };
 
-  private alertFactory?: AlertFactory<State, Context, ActionGroupIds>;
+  private alertFactory?: AlertFactory<
+    State,
+    Context,
+    WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
+  >;
   constructor(private readonly options: ConstructorOpts) {
     this.alerts = {};
     this.activeAlertsFromPreviousExecution = {};
@@ -77,7 +87,11 @@ export class LegacyAlertsClient<
 
     this.alerts = cloneDeep(this.activeAlertsFromPreviousExecution);
 
-    this.alertFactory = createAlertFactory<State, Context, ActionGroupIds>({
+    this.alertFactory = createAlertFactory<
+      State,
+      Context,
+      WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
+    >({
       alerts: this.alerts,
       logger: this.options.logger,
       maxAlerts: this.options.maxAlerts,
@@ -101,7 +115,7 @@ export class LegacyAlertsClient<
       activeAlerts: processedAlertsActive,
       currentRecoveredAlerts: processedAlertsRecoveredCurrent,
       recoveredAlerts: processedAlertsRecovered,
-    } = processAlerts<State, Context>({
+    } = processAlerts<State, Context, ActionGroupIds, RecoveryActionGroupId>({
       alerts: this.alerts,
       existingAlerts: this.activeAlertsFromPreviousExecution,
       previouslyRecoveredAlerts: this.recoveredAlertsFromPreviousExecution,
@@ -114,7 +128,10 @@ export class LegacyAlertsClient<
       setFlapping: true,
     });
 
-    setFlapping<State, Context>(processedAlertsActive, processedAlertsRecovered);
+    setFlapping<State, Context, ActionGroupIds, RecoveryActionGroupId>(
+      processedAlertsActive,
+      processedAlertsRecovered
+    );
 
     this.processedAlerts.new = processedAlertsNew;
     this.processedAlerts.active = processedAlertsActive;
@@ -143,7 +160,7 @@ export class LegacyAlertsClient<
   }
 
   public getAlertsToSerialize() {
-    return determineAlertsToReturn<State, Context>(
+    return determineAlertsToReturn<State, Context, ActionGroupIds, RecoveryActionGroupId>(
       this.processedAlerts.active,
       this.processedAlerts.recovered
     );
