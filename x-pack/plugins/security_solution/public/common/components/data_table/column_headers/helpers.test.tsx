@@ -374,7 +374,7 @@ describe('helpers', () => {
           type: 'date',
         };
 
-        const browserField = { base: { fields: { [fieldName]: testField } } };
+        const browserField = { base: { fields: { [fieldName]: testField }, name: 'base' } };
 
         const header: ColumnHeaderOptions = {
           columnHeaderType: 'not-filtered',
@@ -407,7 +407,9 @@ describe('helpers', () => {
           type: 'date',
         };
 
-        const browserField = { [fieldName]: { fields: { [fieldName]: testField } } };
+        const browserField = {
+          [fieldName]: { fields: { [fieldName]: testField }, name: fieldName },
+        };
 
         const header: ColumnHeaderOptions = {
           columnHeaderType: 'not-filtered',
@@ -440,7 +442,7 @@ describe('helpers', () => {
           type: 'date',
         };
 
-        const browserField = { test: { fields: { [fieldName]: testField } } };
+        const browserField = { test: { fields: { [fieldName]: testField }, name: 'test' } };
 
         const header: ColumnHeaderOptions = {
           columnHeaderType: 'not-filtered',

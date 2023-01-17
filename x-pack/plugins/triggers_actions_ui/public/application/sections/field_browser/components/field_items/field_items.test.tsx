@@ -21,7 +21,7 @@ describe('field_items', () => {
     it('should return browser field item format', () => {
       const { fieldItems } = getFieldItemsData({
         selectedCategoryIds: ['base'],
-        browserFields: { base: { fields: { [timestampFieldId]: timestampField } } },
+        browserFields: { base: { fields: { [timestampFieldId]: timestampField }, name: 'base' } },
         columnIds: [],
       });
 
@@ -39,7 +39,7 @@ describe('field_items', () => {
     it('should return selected item', () => {
       const { fieldItems } = getFieldItemsData({
         selectedCategoryIds: ['base'],
-        browserFields: { base: { fields: { [timestampFieldId]: timestampField } } },
+        browserFields: { base: { fields: { [timestampFieldId]: timestampField }, name: 'base' } },
         columnIds,
       });
 
@@ -59,6 +59,7 @@ describe('field_items', () => {
                 runtimeField: { type: 'keyword', script: { source: 'scripts are fun' } },
               },
             },
+            name: 'base',
           },
         },
         columnIds,
@@ -104,7 +105,7 @@ describe('field_items', () => {
     it('should show description field', () => {
       const { fieldItems, showDescriptionColumn } = getFieldItemsData({
         selectedCategoryIds: ['base'],
-        browserFields: { base: { fields: { [timestampFieldId]: timestampField } } },
+        browserFields: { base: { fields: { [timestampFieldId]: timestampField }, name: 'base' } },
         columnIds: [],
       });
 
@@ -125,7 +126,7 @@ describe('field_items', () => {
       const { fieldItems, showDescriptionColumn } = getFieldItemsData({
         selectedCategoryIds: ['base'],
         browserFields: {
-          base: { fields: { [timestampFieldId]: timestampFieldWithoutDescription } },
+          base: { fields: { [timestampFieldId]: timestampFieldWithoutDescription }, name: 'base' },
         },
         columnIds: [],
       });
@@ -218,7 +219,7 @@ describe('field_items', () => {
       const timestampField = mockBrowserFields.base.fields![timestampFieldId];
       const { fieldItems } = getFieldItemsData({
         selectedCategoryIds: ['base'],
-        browserFields: { base: { fields: { [timestampFieldId]: timestampField } } },
+        browserFields: { base: { fields: { [timestampFieldId]: timestampField }, name: 'base' } },
         columnIds: [],
       });
 
@@ -235,7 +236,7 @@ describe('field_items', () => {
       const timestampField = mockBrowserFields.base.fields![timestampFieldId];
       const { fieldItems } = getFieldItemsData({
         selectedCategoryIds: ['base'],
-        browserFields: { base: { fields: { [timestampFieldId]: timestampField } } },
+        browserFields: { base: { fields: { [timestampFieldId]: timestampField }, name: 'base' } },
         columnIds: [],
       });
 
@@ -262,7 +263,7 @@ describe('field_items', () => {
       const timestampField = mockBrowserFields.base.fields![timestampFieldId];
       const { fieldItems } = getFieldItemsData({
         selectedCategoryIds: ['base'],
-        browserFields: { base: { fields: { [timestampFieldId]: timestampField } } },
+        browserFields: { base: { fields: { [timestampFieldId]: timestampField }, name: 'base' } },
         columnIds: [],
       });
 

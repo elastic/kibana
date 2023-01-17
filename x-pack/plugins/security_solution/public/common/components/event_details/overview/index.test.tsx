@@ -120,6 +120,7 @@ const props = {
   ],
   browserFields: {
     kibana: {
+      name: 'kibana',
       fields: {
         'kibana.alert.severity': {
           category: 'kibana',
@@ -212,7 +213,7 @@ const fieldsWithoutSeverity = {
 
 const propsWithoutSeverity = {
   ...props,
-  browserFields: { kibana: { fields: fieldsWithoutSeverity } },
+  browserFields: { kibana: { fields: fieldsWithoutSeverity, name: 'kibana' } },
   data: dataWithoutSeverity,
 };
 

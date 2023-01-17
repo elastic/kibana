@@ -6,8 +6,8 @@
  */
 
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { BrowserFields } from '@kbn/timelines-plugin/common';
 import { EMPTY_BROWSER_FIELDS, EMPTY_INDEX_FIELDS } from '@kbn/timelines-plugin/common';
+import type { BrowserFields } from '../../containers/source';
 import type { SecuritySolutionDataViewBase } from '../../types';
 /** Uniquely identifies a Sourcerer Scope */
 export enum SourcererScopeName {

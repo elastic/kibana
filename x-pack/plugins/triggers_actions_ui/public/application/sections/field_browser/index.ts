@@ -6,6 +6,7 @@
  */
 import { FieldBrowser } from './field_browser';
 export type { FieldBrowserProps } from './types';
+export { ruleRegistryBrowserFieldsMapper } from './rule_registry_browser_fields_mapper';
 
 export { FieldBrowser };
 // eslint-disable-next-line import/no-default-export

@@ -10,7 +10,7 @@ import { findIndex } from 'lodash/fp';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { DataProviderType } from '@kbn/timelines-plugin/common';
 
-import type { BrowserField, BrowserFields } from '../../../common/containers/source';
+import type { BrowserFields, BrowserFieldCategory } from '../../../common/containers/source';
 import { getAllFieldsByName } from '../../../common/containers/source';
 import type { QueryOperator } from '../timeline/data_providers/data_provider';
 import {
@@ -46,7 +46,7 @@ export const operatorLabels: EuiComboBoxOptionOption[] = [
 export const EMPTY_ARRAY_RESULT = [];
 
 /** Returns the names of fields in a category */
-export const getFieldNames = (category: Partial<BrowserField>): string[] =>
+export const getFieldNames = (category: BrowserFieldCategory): string[] =>
   category.fields != null && Object.keys(category.fields).length > 0
     ? Object.keys(category.fields)
     : EMPTY_ARRAY_RESULT;

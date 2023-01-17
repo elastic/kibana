@@ -8,9 +8,9 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import type { BrowserField } from '@kbn/timelines-plugin/common';
 import type { GlobalTimeArgs } from '../../../../common/containers/use_global_time';
 import { getScopeFromPath, useSourcererDataView } from '../../../../common/containers/sourcerer';
+import type { BrowserField } from '../../../../common/containers/source';
 import { getAllFieldsByName } from '../../../../common/containers/source';
 
 export interface UseInspectButtonParams extends Pick<GlobalTimeArgs, 'setQuery' | 'deleteQuery'> {

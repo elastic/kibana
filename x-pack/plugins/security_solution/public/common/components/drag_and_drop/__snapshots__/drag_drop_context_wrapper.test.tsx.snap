@@ -79,6 +79,7 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "type": "string",
           },
         },
+        "name": "agent",
       },
       "auditd": Object {
         "fields": Object {
@@ -131,6 +132,7 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "type": "string",
           },
         },
+        "name": "auditd",
       },
       "base": Object {
         "fields": Object {
@@ -187,6 +189,7 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "type": "string",
           },
         },
+        "name": "base",
       },
       "client": Object {
         "fields": Object {
@@ -263,6 +266,7 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "type": "string",
           },
         },
+        "name": "client",
       },
       "cloud": Object {
         "fields": Object {
@@ -303,6 +307,7 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "type": "string",
           },
         },
+        "name": "cloud",
       },
       "container": Object {
         "fields": Object {
@@ -361,6 +366,7 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "type": "string",
           },
         },
+        "name": "container",
       },
       "destination": Object {
         "fields": Object {
@@ -455,6 +461,7 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "type": "number",
           },
         },
+        "name": "destination",
       },
       "event": Object {
         "fields": Object {
@@ -555,6 +562,7 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "type": "number",
           },
         },
+        "name": "event",
       },
       "host": Object {
         "fields": Object {
@@ -582,6 +590,7 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "type": "string",
           },
         },
+        "name": "host",
       },
       "nestedField": Object {
         "fields": Object {
@@ -646,6 +655,7 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "type": "date",
           },
         },
+        "name": "nestedField",
       },
       "source": Object {
         "fields": Object {
@@ -686,6 +696,7 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "type": "number",
           },
         },
+        "name": "source",
       },
       "user": Object {
         "fields": Object {
@@ -708,6 +719,7 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "type": "string",
           },
         },
+        "name": "user",
       },
     }
   }

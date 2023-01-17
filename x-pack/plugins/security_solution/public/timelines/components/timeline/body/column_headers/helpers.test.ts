@@ -185,6 +185,7 @@ describe('helpers', () => {
 
       const oneLevelDeep: BrowserFields = {
         test_field_1: {
+          name: 'test_field_1',
           fields: {
             test_field_1: {
               aggregatable: true,
@@ -252,6 +253,7 @@ describe('helpers', () => {
 
       const twoLevelsDeep: BrowserFields = {
         foo: {
+          name: 'foo',
           fields: {
             'foo.bar': {
               aggregatable: true,

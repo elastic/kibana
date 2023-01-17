@@ -100,7 +100,7 @@ export const getToolbarVisibility = ({
   columnIds: string[];
   onToggleColumn: (columnId: string) => void;
   onResetColumns: () => void;
-  browserFields: any;
+  browserFields: BrowserFields;
   controls?: EuiDataGridToolBarAdditionalControlsOptions;
 }): EuiDataGridToolBarVisibilityOptions => {
   const selectedRowsCount = rowSelection.size;

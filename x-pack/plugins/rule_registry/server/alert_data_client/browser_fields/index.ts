@@ -6,7 +6,7 @@
  */
 
 import { FieldDescriptor } from '@kbn/data-views-plugin/server';
-import { BrowserFields, BrowserField } from '../../../common';
+import { BrowserFields } from '../../../common';
 
 const getFieldCategory = (fieldCapability: FieldDescriptor) => {
   const name = fieldCapability.name.split('.');
@@ -18,27 +18,18 @@ const getFieldCategory = (fieldCapability: FieldDescriptor) => {
   return name[0];
 };
 
-const browserFieldFactory = (
-  fieldCapability: FieldDescriptor,
-  category: string
-): Readonly<Record<string, Partial<BrowserField>>> => {
-  return {
-    [fieldCapability.name]: {
-      ...fieldCapability,
-      category,
-    },
-  };
-};
-
 export const fieldDescriptorToBrowserFieldMapper = (fields: FieldDescriptor[]): BrowserFields => {
   return fields.reduce((browserFields: BrowserFields, field: FieldDescriptor) => {
     const category = getFieldCategory(field);
-    const browserField = browserFieldFactory(field, category);
+    const browserField = {
+      ...field,
+      category,
+    };
 
-    if (browserFields[category]) {
-      browserFields[category] = { fields: { ...browserFields[category].fields, ...browserField } };
+    if (browserFields[category] && browserFields[category].fields) {
+      browserFields[category].fields[field.name] = browserField;
     } else {
-      browserFields[category] = { fields: browserField };
+      browserFields[category] = { fields: { [field.name]: browserField }, name: category };
     }
 
     return browserFields;

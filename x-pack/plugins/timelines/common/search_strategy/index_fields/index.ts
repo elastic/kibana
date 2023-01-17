@@ -73,7 +73,5 @@ export interface BrowserField {
   runtimeField?: RuntimeField;
 }
 
-export type BrowserFields = Readonly<Record<string, Partial<BrowserField>>>;
-
 export const EMPTY_BROWSER_FIELDS = {};
 export const EMPTY_INDEX_FIELDS: FieldSpec[] = [];

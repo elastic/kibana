@@ -55,6 +55,7 @@ import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strat
 import { SortCombinations } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React from 'react';
 import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
+import { BrowserFields as RuleRegistryBrowserFields } from '@kbn/rule-registry-plugin/common/types';
 import { TypeRegistry } from './application/type_registry';
 import type { ComponentOpts as RuleStatusDropdownProps } from './application/sections/rules_list/components/rule_status_dropdown';
 import type { RuleTagFilterProps } from './application/sections/rules_list/components/rule_tag_filter';
@@ -477,7 +478,7 @@ export interface AlertsTableProps {
   visibleColumns: string[];
   'data-test-subj': string;
   updatedAt: number;
-  browserFields: any;
+  browserFields: RuleRegistryBrowserFields;
   onToggleColumn: (columnId: string) => void;
   onResetColumns: () => void;
   onColumnsChange: (columns: EuiDataGridColumn[], visibleColumns: string[]) => void;
