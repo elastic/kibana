@@ -39,7 +39,7 @@ export const MonitorTestRunsSparkline = ({ from = 'now-30d', to = 'now' }: Props
             'observer.geo.name': [],
           },
           dataType: 'synthetics',
-          selectedMetricField: 'state.id',
+          selectedMetricField: 'monitor.check_group',
           name: labels.TEST_RUNS_LABEL,
           color: theme.eui.euiColorVis1,
           operationType: 'unique_count',
