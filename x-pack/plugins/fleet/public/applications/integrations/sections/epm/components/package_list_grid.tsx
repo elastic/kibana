@@ -227,7 +227,10 @@ export const PackageListGrid: FunctionComponent<Props> = ({
                   >
                     <FormattedMessage
                       id="xpack.fleet.epmList.subcategoriesButton"
-                      defaultMessage={subCategory.title}
+                      defaultMessage="{subcategory}"
+                      values={{
+                        subcategory: subCategory.title,
+                      }}
                     />
                   </EuiButton>
                 </EuiFlexItem>

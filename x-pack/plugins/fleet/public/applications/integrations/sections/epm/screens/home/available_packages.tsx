@@ -178,15 +178,15 @@ export const AvailablePackages: React.FC<{}> = ({}) => {
       list={filteredCards}
       selectedCategory={selectedCategory}
       setCategory={setCategory}
-      availableSubCategories={availableSubCategories}
       categories={mainCategories}
-      showMissingIntegrationMessage
-      callout={noEprCallout}
-      showCardLabels={false}
-      setSelectedSubCategory={setSelectedSubCategory}
-      selectedSubCategory={selectedSubCategory}
       setUrlandReplaceHistory={setUrlandReplaceHistory}
       setUrlandPushHistory={setUrlandPushHistory}
+      callout={noEprCallout}
+      showCardLabels={false}
+      availableSubCategories={availableSubCategories}
+      selectedSubCategory={selectedSubCategory}
+      setSelectedSubCategory={setSelectedSubCategory}
+      showMissingIntegrationMessage
     />
   );
 };
