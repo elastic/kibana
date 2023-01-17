@@ -7,7 +7,7 @@
 
 import { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
-import uuid from 'uuid';
+// import uuid from 'uuid';
 import { createEsoMigration, isEsQueryRuleType, pipeMigrations } from '../utils';
 import { RawRule } from '../../../types';
 
@@ -32,30 +32,30 @@ function addGroupByToEsQueryRule(
   return doc;
 }
 
-function addActionUuid(
-  doc: SavedObjectUnsanitizedDoc<RawRule>
-): SavedObjectUnsanitizedDoc<RawRule> {
-  const {
-    attributes: { actions },
-  } = doc;
-
-  return {
-    ...doc,
-    attributes: {
-      ...doc.attributes,
-      actions: actions
-        ? actions.map((action) => ({
-            ...action,
-            uuid: uuid.v4(),
-          }))
-        : [],
-    },
-  };
-}
+// function addActionUuid(
+//   doc: SavedObjectUnsanitizedDoc<RawRule>
+// ): SavedObjectUnsanitizedDoc<RawRule> {
+//   const {
+//     attributes: { actions },
+//   } = doc;
+//
+//   return {
+//     ...doc,
+//     attributes: {
+//       ...doc.attributes,
+//       actions: actions
+//         ? actions.map((action) => ({
+//             ...action,
+//             uuid: uuid.v4(),
+//           }))
+//         : [],
+//     },
+//   };
+// }
 
 export const getMigrations870 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) =>
   createEsoMigration(
     encryptedSavedObjects,
     (doc): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
-    pipeMigrations(addGroupByToEsQueryRule, addActionUuid)
+    pipeMigrations(addGroupByToEsQueryRule)
   );

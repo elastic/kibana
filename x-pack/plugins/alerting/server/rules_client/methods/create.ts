@@ -10,6 +10,7 @@ import { omit } from 'lodash';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
+import { v4 } from 'uuid';
 import { parseDuration } from '../../../common/parse_duration';
 import { RawRule, SanitizedRule, RuleTypeParams, Rule } from '../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
@@ -102,6 +103,11 @@ export async function create<Params extends RuleTypeParams = never>(
       data.throttle = firstFrequency.throttle;
     }
   }
+
+  data.actions = data.actions.map((action) => ({
+    ...action,
+    uuid: v4(),
+  }));
 
   await validateActions<Omit<NormalizedAlertAction, 'uuid'>>(context, ruleType, data);
   await withSpan({ name: 'validateActions', type: 'rules' }, () =>

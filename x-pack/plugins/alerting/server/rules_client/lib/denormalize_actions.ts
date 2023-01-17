@@ -6,8 +6,7 @@
  */
 
 import { SavedObjectReference } from '@kbn/core/server';
-import { v4 } from 'uuid';
-import { RawRule } from '../../types';
+import { RawRule, RawRuleAction } from '../../types';
 import { preconfiguredConnectorActionRefPrefix } from '../common/constants';
 import { NormalizedAlertActionOptionalUuid, RulesClientContext } from '../types';
 
@@ -34,8 +33,7 @@ export async function denormalizeActions(
             ...alertAction,
             actionRef: `${preconfiguredConnectorActionRefPrefix}${id}`,
             actionTypeId: actionResultValue.actionTypeId,
-            uuid: alertAction.uuid || v4(),
-          });
+          } as RawRuleAction);
         } else {
           const actionRef = `action_${i}`;
           references.push({
@@ -47,16 +45,14 @@ export async function denormalizeActions(
             ...alertAction,
             actionRef,
             actionTypeId: actionResultValue.actionTypeId,
-            uuid: alertAction.uuid || v4(),
-          });
+          } as RawRuleAction);
         }
       } else {
         actions.push({
           ...alertAction,
           actionRef: '',
           actionTypeId: '',
-          uuid: alertAction.uuid || v4(),
-        });
+        } as RawRuleAction);
       }
     });
   }
