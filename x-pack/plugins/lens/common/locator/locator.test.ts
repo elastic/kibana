@@ -21,7 +21,7 @@ const setup = async () => {
 const lensShareableState: LensAppLocatorParams = {
   visualization: { activeId: 'bar_chart', state: {} },
   activeDatasourceId: 'xxxxx',
-  datasourceState: { formBased: {} },
+  datasourceStates: { formBased: { state: {} } },
   references: [],
 };
 
@@ -145,7 +145,7 @@ describe('Lens url generator', () => {
     const { locator } = await setup();
     const { state } = await locator.getLocation(lensShareableState);
 
-    expect(Object.keys(state.payload)).toHaveLength(0);
+    expect(Object.keys(state.payload)).toHaveLength(Object.keys(lensShareableState).length);
   });
 
   test('should return no state for partial/missing state params', async () => {
@@ -162,7 +162,10 @@ describe('Lens url generator', () => {
       timeFieldName: 'mock-time-field-name',
     };
     const { locator } = await setup();
-    const { state } = await locator.getLocation({ dataViewSpecs: [dataViewSpecMock] });
+    const { state } = await locator.getLocation({
+      ...lensShareableState,
+      dataViewSpecs: [dataViewSpecMock],
+    });
 
     expect(state.payload.dataViewSpecs).toEqual([dataViewSpecMock]);
   });
