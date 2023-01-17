@@ -125,6 +125,17 @@ export class RepoSourceClassifier {
   }
 
   /**
+   * Apply screenshotting specific rules
+   * @param root the root dir within the screenshotting plugin
+   * @returns a type, or undefined if the file should be classified as a standard file
+   */
+  private classifyScreenshotting(root: string): ModuleType | undefined {
+    if (root === 'chromium') {
+      return 'non-package';
+    }
+  }
+
+  /**
    * Determine the "type" of a file
    */
   private getType(path: RepoPath): ModuleType {
@@ -190,6 +201,13 @@ export class RepoSourceClassifier {
 
     if (pkgId === '@kbn/canvas-plugin') {
       const type = this.classifyCanvas(root, dirs);
+      if (type) {
+        return type;
+      }
+    }
+
+    if (pkgId === '@kbn/screenshotting-plugin') {
+      const type = this.classifyScreenshotting(root);
       if (type) {
         return type;
       }
