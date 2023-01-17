@@ -19,11 +19,11 @@ import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { orderBy } from 'lodash';
 import { asyncForEach } from '@kbn/std';
 import { satisfies } from 'semver';
-import { installPackage } from '../../fleet/server/services/epm/packages/install';
-import { pkgToPkgKey } from '../../fleet/server/services/epm/registry';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
-
 import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
+import { installPackage } from '@kbn/fleet-plugin/server/services/epm/packages/install';
+import { pkgToPkgKey } from '@kbn/fleet-plugin/server/services/epm/registry';
+
 import type { PackSavedObjectAttributes } from './common/types';
 import { updateGlobalPacksCreateCallback } from './lib/update_global_packs';
 import { packSavedObjectType } from '../common/types';
@@ -38,9 +38,7 @@ import type { OsqueryAppContext } from './lib/osquery_app_context_services';
 import { OsqueryAppContextService } from './lib/osquery_app_context_services';
 import type { ConfigType } from '../common/config';
 import { OSQUERY_INTEGRATION_NAME } from '../common';
-import {
-  getPackagePolicyDeleteCallback,
-} from './lib/fleet_integration';
+import { getPackagePolicyDeleteCallback } from './lib/fleet_integration';
 import { TelemetryEventsSender } from './lib/telemetry/sender';
 import { TelemetryReceiver } from './lib/telemetry/receiver';
 import { initializeTransformsIndices } from './create_indices/create_transforms_indices';
@@ -152,7 +150,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
             savedObjectsClient: client,
             pkgkey: pkgToPkgKey({
               name: packageInfo.name,
-              version: '1.6.0',  // This package upgrade is specific to a bug fix, so keeping the upgrade focused on 1.6.0
+              version: '1.6.0', // This package upgrade is specific to a bug fix, so keeping the upgrade focused on 1.6.0
             }),
             esClient,
             spaceId: packageInfo.installed_kibana_space_id || DEFAULT_SPACE_ID,
@@ -165,39 +163,42 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       }
 
       // Check to see if the package has already been updated to at least 1.6.0
-      if(satisfies(packageInfo?.version ?? '', '>=1.6.0') || updatedPackageResult?.status === 'installed') {
+      if (
+        satisfies(packageInfo?.version ?? '', '>=1.6.0') ||
+        updatedPackageResult?.status === 'installed'
+      ) {
         try {
-
           // First get all datastreams matching the pattern.
           const dataStreams = await esClient.indices.getDataStream({
             name: `logs-${OSQUERY_INTEGRATION_NAME}.result-*`,
           });
 
           // Then for each of those datastreams, we need to see if they need to rollover.
-          await asyncForEach(dataStreams.data_streams, async dataStream => {
+          await asyncForEach(dataStreams.data_streams, async (dataStream) => {
             const mapping = await esClient.indices.getMapping({
               index: dataStream.name,
             });
 
-            const valuesToSort = Object.entries(mapping).map(([key, value]) => {
-              return {index: key, mapping: value};
-            });
+            const valuesToSort = Object.entries(mapping).map(([key, value]) => ({
+              index: key,
+              mapping: value,
+            }));
 
             // Sort by index name to get the latest index for detecting if we need to rollover
             const dataStreamMapping = orderBy(valuesToSort, ['index'], 'desc');
 
             if (
               dataStreamMapping &&
-              dataStreamMapping[0]?.mapping?.mappings?.properties?.data_stream?.properties?.dataset?.value === 'generic'
+              dataStreamMapping[0]?.mapping?.mappings?.properties?.data_stream?.properties?.dataset
+                ?.value === 'generic'
             ) {
               this.logger.info('Rolling over index: ' + dataStream.name);
               await esClient.indices.rollover({
                 alias: dataStream.name,
               });
             }
-
           });
-        } catch(e) {
+        } catch (e) {
           this.logger.info(e);
         }
       }
