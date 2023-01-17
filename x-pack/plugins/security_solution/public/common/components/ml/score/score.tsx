@@ -10,7 +10,7 @@ import { CellActions, CellActionsMode } from '@kbn/ui-actions-plugin/public';
 import type { Anomaly } from '../types';
 import { Spacer } from '../../page';
 import { getScoreString } from './score_health';
-import { SECURITY_SOLUTION_ACTION_TRIGGER } from '../../../../../common/constants';
+import { CELL_ACTIONS_DEFAULT_TRIGGER } from '../../../../../common/constants';
 
 export const ScoreComponent = ({
   index = 0,
@@ -29,7 +29,7 @@ export const ScoreComponent = ({
         value: score.entityValue,
         type: 'keyword',
       }}
-      triggerId={SECURITY_SOLUTION_ACTION_TRIGGER}
+      triggerId={CELL_ACTIONS_DEFAULT_TRIGGER}
       visibleCellActions={5}
     >
       <>

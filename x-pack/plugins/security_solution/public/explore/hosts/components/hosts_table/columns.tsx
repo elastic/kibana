@@ -16,7 +16,7 @@ import * as i18n from './translations';
 import type { Maybe, RiskSeverity } from '../../../../../common/search_strategy';
 import { VIEW_HOSTS_BY_SEVERITY } from '../host_risk_score_table/translations';
 import { RiskScore } from '../../../components/risk_score/severity/common';
-import { SECURITY_SOLUTION_ACTION_TRIGGER } from '../../../../../common/constants';
+import { CELL_ACTIONS_DEFAULT_TRIGGER } from '../../../../../common/constants';
 
 export const getHostsColumns = (
   showRiskColumn: boolean,
@@ -36,7 +36,7 @@ export const getHostsColumns = (
               mode={CellActionsMode.HOVER_POPOVER}
               visibleCellActions={5}
               showActionTooltips
-              triggerId={SECURITY_SOLUTION_ACTION_TRIGGER}
+              triggerId={CELL_ACTIONS_DEFAULT_TRIGGER}
               field={{
                 name: 'host.name',
                 value: hostName[0],
@@ -93,7 +93,7 @@ export const getHostsColumns = (
               mode={CellActionsMode.HOVER_POPOVER}
               visibleCellActions={5}
               showActionTooltips
-              triggerId={SECURITY_SOLUTION_ACTION_TRIGGER}
+              triggerId={CELL_ACTIONS_DEFAULT_TRIGGER}
               field={{
                 name: 'host.os.name',
                 value: hostOsName[0],
@@ -120,7 +120,7 @@ export const getHostsColumns = (
               mode={CellActionsMode.HOVER_POPOVER}
               visibleCellActions={5}
               showActionTooltips
-              triggerId={SECURITY_SOLUTION_ACTION_TRIGGER}
+              triggerId={CELL_ACTIONS_DEFAULT_TRIGGER}
               field={{
                 name: 'host.os.version',
                 value: hostOsVersion[0],

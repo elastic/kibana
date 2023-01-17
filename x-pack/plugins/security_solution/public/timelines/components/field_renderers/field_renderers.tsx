@@ -27,8 +27,8 @@ import { HostDetailsLink, ReputationLink, WhoIsLink } from '../../../common/comp
 import { Spacer } from '../../../common/components/page';
 import * as i18n from '../../../explore/network/components/details/translations';
 import {
-  SECURITY_SOLUTION_ACTION_TRIGGER,
-  TIMELINE_ACTION_TRIGGER,
+  CELL_ACTIONS_DEFAULT_TRIGGER,
+  CELL_ACTIONS_TIMELINE_TRIGGER,
 } from '../../../../common/constants';
 import { TimelineContext } from '../timeline';
 
@@ -311,7 +311,7 @@ export const MoreContainer = React.memo<MoreContainerProps>(
                   visibleCellActions={5}
                   showActionTooltips
                   triggerId={
-                    timelineId ? TIMELINE_ACTION_TRIGGER : SECURITY_SOLUTION_ACTION_TRIGGER
+                    timelineId ? CELL_ACTIONS_TIMELINE_TRIGGER : CELL_ACTIONS_DEFAULT_TRIGGER
                   }
                   field={{
                     name: fieldName,
@@ -348,7 +348,6 @@ export const MoreContainer = React.memo<MoreContainerProps>(
 );
 MoreContainer.displayName = 'MoreContainer';
 
-// TODO add dragging to FieldRendererOverflow when render in timeline
 export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverflowProps>(
   ({ attrName, idPrefix, moreMaxHeight, overflowIndexStart = 5, render, rowItems, fieldType }) => {
     const [isOpen, setIsOpen] = useState(false);

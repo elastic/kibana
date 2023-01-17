@@ -12,7 +12,7 @@ import { CellActions, CellActionsMode } from '@kbn/ui-actions-plugin/public';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { defaultToEmptyTag, getEmptyTagValue } from '../empty_value';
 import { MoreRowItems } from '../page';
-import { SECURITY_SOLUTION_ACTION_TRIGGER } from '../../../../common/constants';
+import { CELL_ACTIONS_DEFAULT_TRIGGER } from '../../../../common/constants';
 import { MoreContainer } from '../../../timelines/components/field_renderers/field_renderers';
 
 const Subtext = styled.div`
@@ -47,7 +47,7 @@ export const getRowItemsWithActions = ({
           mode={CellActionsMode.HOVER_POPOVER}
           visibleCellActions={5}
           showActionTooltips
-          triggerId={SECURITY_SOLUTION_ACTION_TRIGGER}
+          triggerId={CELL_ACTIONS_DEFAULT_TRIGGER}
           field={{
             name: fieldName,
             value,

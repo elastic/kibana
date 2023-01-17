@@ -10,7 +10,7 @@ exports[`entity_draggable renders correctly against snapshot 1`] = `
     }
   }
   mode="hover-popover"
-  triggerId="security-solution-default"
+  triggerId="security-solution-default-cellActions"
   visibleCellActions={5}
 >
   entity-name: "entity-value"
