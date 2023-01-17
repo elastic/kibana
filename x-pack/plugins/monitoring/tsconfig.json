@@ -37,6 +37,7 @@
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/logging-mocks",
     "@kbn/io-ts-utils",
+    "@kbn/dashboard-plugin",
   ],
   "exclude": [
     "target/**/*",
