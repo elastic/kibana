@@ -65,15 +65,19 @@ export function useMonitorListColumns({
         <MonitorDetailsLink monitor={monitor} />
       ),
     },
-    {
-      align: 'left' as const,
-      field: ConfigKey.PROJECT_ID as string,
-      name: i18n.translate('xpack.synthetics.management.monitorList.projectId', {
-        defaultMessage: 'Project ID',
-      }),
-      sortable: true,
-      render: (projectId: string) => projectId,
-    },
+    // Only show Project ID column if project monitors are present
+    ...(status?.projectMonitorsCount ?? 0 > 0
+      ? [
+          {
+            align: 'left' as const,
+            field: ConfigKey.PROJECT_ID as string,
+            name: i18n.translate('xpack.synthetics.management.monitorList.projectId', {
+              defaultMessage: 'Project ID',
+            }),
+            sortable: true,
+          },
+        ]
+      : []),
     {
       align: 'left' as const,
       field: ConfigKey.MONITOR_TYPE,
@@ -82,7 +86,17 @@ export function useMonitorListColumns({
       }),
       sortable: true,
       render: (_: string, monitor: EncryptedSyntheticsSavedMonitor) => (
-        <MonitorTypeBadge monitor={monitor} />
+        <MonitorTypeBadge
+          monitor={monitor}
+          ariaLabel={labels.getFilterForTypeMessage(monitor[ConfigKey.MONITOR_TYPE])}
+          onClick={() => {
+            history.push({
+              search: `monitorType=${encodeURIComponent(
+                JSON.stringify([monitor[ConfigKey.MONITOR_TYPE]])
+              )}`,
+            });
+          }}
+        />
       ),
     },
     {
@@ -119,7 +133,7 @@ export function useMonitorListColumns({
         <TagsBadges
           tags={tags}
           onClick={(tag) => {
-            history.push({ search: `tags=${JSON.stringify([tag])}` });
+            history.push({ search: `tags=${encodeURIComponent(JSON.stringify([tag]))}` });
           }}
         />
       ),

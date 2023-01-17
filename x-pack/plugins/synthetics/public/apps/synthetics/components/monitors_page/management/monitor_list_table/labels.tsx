@@ -211,3 +211,9 @@ export const getMonitorEnabledUpdateFailureMessage = (name: string) =>
     defaultMessage: 'Unable to update monitor {name}.',
     values: { name },
   });
+
+export const getFilterForTypeMessage = (typeName: string) =>
+  i18n.translate('xpack.synthetics.management.filter.clickTypeMessage', {
+    defaultMessage: 'Click to filter records for type {typeName}.',
+    values: { typeName },
+  });

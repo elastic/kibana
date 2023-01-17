@@ -10,15 +10,13 @@ import { EncryptedSyntheticsSavedMonitor } from '../../../../../../common/runtim
 import { useStatusByLocation } from '../../../hooks/use_status_by_location';
 
 export const LocationsStatus = ({
-  monitorId,
   configId,
   monitorLocations,
 }: {
-  monitorId: string;
   configId: string;
   monitorLocations?: EncryptedSyntheticsSavedMonitor['locations'];
 }) => {
-  const { locations, loading } = useStatusByLocation({ configId: monitorId, monitorLocations });
+  const { locations, loading } = useStatusByLocation({ configId, monitorLocations });
 
   return <LocationStatusBadges configId={configId} locations={locations} loading={loading} />;
 };
