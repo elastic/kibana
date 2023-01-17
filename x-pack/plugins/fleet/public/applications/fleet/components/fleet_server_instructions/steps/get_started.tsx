@@ -147,6 +147,7 @@ const GettingStartedStepContent: React.FunctionComponent<QuickStartCreateForm> =
                       defaultMessage: 'Specify host URL',
                     }
                   )}
+                  isUrl
                 />
                 {status === 'error' && <EuiFormErrorText>{error}</EuiFormErrorText>}
               </>

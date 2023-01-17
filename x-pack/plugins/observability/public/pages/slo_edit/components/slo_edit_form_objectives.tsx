@@ -17,26 +17,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Control, Controller, UseFormWatch } from 'react-hook-form';
-import type { BudgetingMethod, CreateSLOParams } from '@kbn/slo-schema';
+import type { CreateSLOInput } from '@kbn/slo-schema';
 
 import { SloEditFormObjectivesTimeslices } from './slo_edit_form_objectives_timeslices';
-
-export const BUDGETING_METHOD_OPTIONS: Array<{ value: BudgetingMethod; text: string }> = [
-  { value: 'occurrences', text: 'Occurences' },
-  { value: 'timeslices', text: 'Timeslices' },
-];
-
-export const TIMEWINDOW_OPTIONS = [30, 7].map((number) => ({
-  value: `${number}d`,
-  text: i18n.translate('xpack.observability.slos.sloEdit.objectives.days', {
-    defaultMessage: '{number} days',
-    values: { number },
-  }),
-}));
+import { BUDGETING_METHOD_OPTIONS, TIMEWINDOW_OPTIONS } from '../constants';
 
 export interface Props {
-  control: Control<CreateSLOParams>;
-  watch: UseFormWatch<CreateSLOParams>;
+  control: Control<CreateSLOInput>;
+  watch: UseFormWatch<CreateSLOInput>;
 }
 
 export function SloEditFormObjectives({ control, watch }: Props) {
@@ -48,7 +36,7 @@ export function SloEditFormObjectives({ control, watch }: Props) {
       <EuiFlexGrid columns={3}>
         <EuiFlexItem>
           <EuiFormLabel>
-            {i18n.translate('xpack.observability.slos.sloEdit.objectives.budgetingMethod', {
+            {i18n.translate('xpack.observability.slos.sloEdit.budgetingMethod.label', {
               defaultMessage: 'Budgeting method',
             })}
           </EuiFormLabel>
@@ -70,7 +58,7 @@ export function SloEditFormObjectives({ control, watch }: Props) {
 
         <EuiFlexItem>
           <EuiFormLabel>
-            {i18n.translate('xpack.observability.slos.sloEdit.objectives.timeWindow', {
+            {i18n.translate('xpack.observability.slos.sloEdit.timeWindow.label', {
               defaultMessage: 'Time window',
             })}
           </EuiFormLabel>
@@ -93,7 +81,7 @@ export function SloEditFormObjectives({ control, watch }: Props) {
 
         <EuiFlexItem>
           <EuiFormLabel>
-            {i18n.translate('xpack.observability.slos.sloEdit.objectives.targetSlo', {
+            {i18n.translate('xpack.observability.slos.sloEdit.targetSlo.label', {
               defaultMessage: 'Target / SLO (%)',
             })}
           </EuiFormLabel>
@@ -110,6 +98,7 @@ export function SloEditFormObjectives({ control, watch }: Props) {
               <EuiFieldNumber
                 data-test-subj="sloFormObjectiveTargetInput"
                 {...field}
+                value={String(field.value)}
                 min={0.001}
                 max={99.999}
                 step={0.001}
