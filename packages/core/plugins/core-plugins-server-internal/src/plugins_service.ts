@@ -257,7 +257,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     }
   }
 
-  private async enableAllPlugins(): Promise<boolean> {
+  private async shouldEnableAllPlugins(): Promise<boolean> {
     try {
       return await firstValueFrom(
         this.rawConfig$.pipe(
@@ -298,7 +298,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
       }
     }
 
-    const enableAllPlugins = await this.enableAllPlugins();
+    const enableAllPlugins = await this.shouldEnableAllPlugins();
     if (enableAllPlugins) {
       this.log.warn('Detected override configuration; will enable all plugins');
     }
