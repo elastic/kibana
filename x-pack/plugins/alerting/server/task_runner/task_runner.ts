@@ -44,7 +44,6 @@ import {
   RuleTypeParams,
   RuleTypeState,
   parseDuration,
-  WithoutReservedActionGroups,
 } from '../../common';
 import { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
@@ -114,7 +113,8 @@ export class TaskRunner<
   private legacyAlertsClient: LegacyAlertsClient<
     State,
     Context,
-    WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
+    ActionGroupIds,
+    RecoveryActionGroupId
   >;
 
   constructor(

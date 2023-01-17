@@ -160,6 +160,9 @@ Any modifications made to this file will be overwritten.
     <h4 class="field-label">200</h4>
     Indicates a successful call.
         <a href="#case_response_properties">case_response_properties</a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="createCase"/>
@@ -277,6 +280,9 @@ Any modifications made to this file will be overwritten.
     <h4 class="field-label">200</h4>
     Indicates a successful call.
         <a href="#case_response_properties">case_response_properties</a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="deleteCase"/>
@@ -315,11 +321,20 @@ Any modifications made to this file will be overwritten.
     <!--Todo: process Response Object and its headers, schema, examples -->
 
 
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
 
     <h3 class="field-label">Responses</h3>
     <h4 class="field-label">204</h4>
     Indicates a successful call.
         <a href="#"></a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="deleteCaseComment"/>
@@ -356,11 +371,20 @@ Any modifications made to this file will be overwritten.
     <!--Todo: process Response Object and its headers, schema, examples -->
 
 
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
 
     <h3 class="field-label">Responses</h3>
     <h4 class="field-label">204</h4>
     Indicates a successful call.
         <a href="#"></a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="deleteCaseComments"/>
@@ -395,11 +419,20 @@ Any modifications made to this file will be overwritten.
     <!--Todo: process Response Object and its headers, schema, examples -->
 
 
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
 
     <h3 class="field-label">Responses</h3>
     <h4 class="field-label">204</h4>
     Indicates a successful call.
         <a href="#"></a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="getAllCaseComments"/>
@@ -500,6 +533,9 @@ Any modifications made to this file will be overwritten.
     <h4 class="field-label">200</h4>
     Indicates a successful call.
         <a href="#case_response_properties">case_response_properties</a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="getCase"/>
@@ -606,6 +642,9 @@ Any modifications made to this file will be overwritten.
     <h4 class="field-label">200</h4>
     Indicates a successful call.
         <a href="#case_response_properties">case_response_properties</a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="getCaseActivity"/>
@@ -666,6 +705,9 @@ Any modifications made to this file will be overwritten.
     <h4 class="field-label">200</h4>
     Indicates a successful call.
         
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="getCaseAlerts"/>
@@ -716,6 +758,9 @@ Any modifications made to this file will be overwritten.
     <h4 class="field-label">200</h4>
     Indicates a successful call.
         
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="getCaseComment"/>
@@ -764,6 +809,9 @@ Any modifications made to this file will be overwritten.
     <h4 class="field-label">200</h4>
     Indicates a successful call.
         <a href="#getCaseComment_200_response">getCaseComment_200_response</a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="getCaseConfiguration"/>
@@ -849,6 +897,9 @@ Any modifications made to this file will be overwritten.
     <h4 class="field-label">200</h4>
     Indicates a successful call.
         
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="getCaseConnectors"/>
@@ -905,6 +956,9 @@ Any modifications made to this file will be overwritten.
     <h4 class="field-label">200</h4>
     Indicates a successful call.
         
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="getCaseReporters"/>
@@ -960,6 +1014,9 @@ Any modifications made to this file will be overwritten.
     <h4 class="field-label">200</h4>
     Indicates a successful call.
         
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="getCaseStatus"/>
@@ -1014,6 +1071,9 @@ Any modifications made to this file will be overwritten.
     <h4 class="field-label">200</h4>
     Indicates a successful call.
         <a href="#getCaseStatus_200_response">getCaseStatus_200_response</a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="getCaseTags"/>
@@ -1064,6 +1124,9 @@ Any modifications made to this file will be overwritten.
     <h4 class="field-label">200</h4>
     Indicates a successful call.
         
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="getCases"/>
@@ -1260,6 +1323,9 @@ Any modifications made to this file will be overwritten.
     <h4 class="field-label">200</h4>
     Indicates a successful call.
         <a href="#getCases_200_response">getCases_200_response</a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="getCasesByAlert"/>
@@ -1315,6 +1381,9 @@ Any modifications made to this file will be overwritten.
     <h4 class="field-label">200</h4>
     Indicates a successful call.
         
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="pushCase"/>
@@ -1436,6 +1505,9 @@ Any modifications made to this file will be overwritten.
     <h4 class="field-label">200</h4>
     Indicates a successful call.
         <a href="#case_response_properties">case_response_properties</a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="setCaseConfiguration"/>
@@ -1534,6 +1606,9 @@ Any modifications made to this file will be overwritten.
     <h4 class="field-label">200</h4>
     Indicates a successful call.
         <a href="#getCaseConfiguration_200_response_inner">getCaseConfiguration_200_response_inner</a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="updateCase"/>
@@ -1651,6 +1726,9 @@ Any modifications made to this file will be overwritten.
     <h4 class="field-label">200</h4>
     Indicates a successful call.
         
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="updateCaseComment"/>
@@ -1770,6 +1848,9 @@ Any modifications made to this file will be overwritten.
     <h4 class="field-label">200</h4>
     Indicates a successful call.
         <a href="#case_response_properties">case_response_properties</a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="updateCaseConfiguration"/>
@@ -1870,6 +1951,9 @@ Any modifications made to this file will be overwritten.
     <h4 class="field-label">200</h4>
     Indicates a successful call.
         
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
 
@@ -1878,6 +1962,7 @@ Any modifications made to this file will be overwritten.
 
   <h3>Table of Contents</h3>
   <ol>
+    <li><a href="#4xx_response"><code>4xx_response</code> - Unsuccessful cases API response</a></li>
     <li><a href="#Case_response_properties_for_comments_inner"><code>Case_response_properties_for_comments_inner</code> - </a></li>
     <li><a href="#Case_response_properties_for_connectors"><code>Case_response_properties_for_connectors</code> - Case response properties for connectors</a></li>
     <li><a href="#action_types"><code>action_types</code> - </a></li>
@@ -1964,6 +2049,15 @@ Any modifications made to this file will be overwritten.
     <li><a href="#user_comment_response_properties"><code>user_comment_response_properties</code> - Case response properties for user comments</a></li>
   </ol>
 
+  <div class="model">
+    <h3><a name="4xx_response"><code>4xx_response</code> - Unsuccessful cases API response</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">error (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">message (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">statusCode (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
   <div class="model">
     <h3><a name="Case_response_properties_for_comments_inner"><code>Case_response_properties_for_comments_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>

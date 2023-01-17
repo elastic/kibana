@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { MetricbeatMonitoredProduct } from '../types';
+import type { MonitoredProduct } from '../types';
 
-export type MetricbeatProducts = {
-  [product in MetricbeatMonitoredProduct]?: ErrorsByMetricset;
+export type Products = {
+  [product in MonitoredProduct]?: ErrorsByMetricset;
 };
 
 interface ErrorsByMetricset {
@@ -21,14 +21,14 @@ interface ErrorDetails {
 }
 
 /**
- * builds a normalized representation of the metricbeat errors from the provided
+ * builds a normalized representation of the metricbeat and integration package errors from the provided
  * query buckets with a product->metricset hierarchy where
  *  product: the monitored products (eg elasticsearch)
  *  metricset: the collected metricsets for a given entity
  *
  * example:
  * {
- *   "product": {
+ *   "products": {
  *     "logstash": {
  *        "node": {
  *          "message": "some error message",
@@ -38,7 +38,7 @@ interface ErrorDetails {
  *   }
  * }
  */
-export const buildMetricbeatErrors = (modulesBucket: any[]): MetricbeatProducts => {
+export const buildErrors = (modulesBucket: any[]): Products => {
   return (modulesBucket ?? []).reduce((module, { key, errors_by_dataset: errorsByDataset }) => {
     const datasets = buildMetricsets(errorsByDataset.buckets);
     if (Object.keys(datasets).length === 0) {
@@ -49,7 +49,7 @@ export const buildMetricbeatErrors = (modulesBucket: any[]): MetricbeatProducts 
       ...module,
       [key]: datasets,
     };
-  }, {} as MetricbeatProducts);
+  }, {} as Products);
 };
 
 const buildMetricsets = (errorsByDataset: any[]): ErrorsByMetricset => {
