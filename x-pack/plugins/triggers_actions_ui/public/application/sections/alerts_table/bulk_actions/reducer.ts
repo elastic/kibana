@@ -7,21 +7,22 @@
 
 import { BulkActionsReducerAction, BulkActionsState, BulkActionsVerbs } from '../../../../types';
 
-const getAllRowsInPage = (rowCount: number) => new Set(Array.from(Array(rowCount).keys()));
+const getAllRowsInPage = (rowCount: number) =>
+  new Map(Array.from(Array(rowCount).keys()).map((idx) => [idx, { isLoading: false }]));
 
 export const bulkActionsReducer = (
   currentState: BulkActionsState,
-  { action, rowIndex, rowCount }: BulkActionsReducerAction
+  { action, rowIndex, rowCount, isLoading = false }: BulkActionsReducerAction
 ): BulkActionsState => {
   const { rowSelection, rowCount: currentRowCount } = currentState;
   const nextState = { ...currentState };
 
   if (action === BulkActionsVerbs.add && rowIndex !== undefined) {
-    const nextRowSelection = new Set(rowSelection);
-    nextRowSelection.add(rowIndex);
+    const nextRowSelection = new Map(rowSelection);
+    nextRowSelection.set(rowIndex, { isLoading });
     nextState.rowSelection = nextRowSelection;
   } else if (action === BulkActionsVerbs.delete && rowIndex !== undefined) {
-    const nextRowSelection = new Set(rowSelection);
+    const nextRowSelection = new Map(rowSelection);
     nextRowSelection.delete(rowIndex);
     nextState.rowSelection = nextRowSelection;
   } else if (action === BulkActionsVerbs.selectCurrentPage) {
@@ -30,10 +31,17 @@ export const bulkActionsReducer = (
     nextState.rowSelection = getAllRowsInPage(currentRowCount);
     nextState.isAllSelected = true;
   } else if (action === BulkActionsVerbs.clear) {
-    nextState.rowSelection = new Set();
+    nextState.rowSelection = new Map();
     nextState.isAllSelected = false;
   } else if (action === BulkActionsVerbs.rowCountUpdate && rowCount !== undefined) {
     nextState.rowCount = rowCount;
+  } else if (action === BulkActionsVerbs.updateAllLoadingState) {
+    const nextRowSelection = new Map(
+      Array.from(rowSelection.keys()).map((idx: number) => [idx, { isLoading }])
+    );
+    nextState.rowSelection = nextRowSelection;
+  } else if (action === BulkActionsVerbs.updateRowLoadingState && rowIndex !== undefined) {
+    nextState.rowSelection.set(rowIndex, { isLoading });
   }
 
   nextState.areAllVisibleRowsSelected = nextState.rowSelection.size === nextState.rowCount;

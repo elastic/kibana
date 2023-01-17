@@ -16,10 +16,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Control, Controller } from 'react-hook-form';
-import type { CreateSLOParams } from '@kbn/slo-schema';
+import type { CreateSLOInput } from '@kbn/slo-schema';
 
 export interface Props {
-  control: Control<CreateSLOParams>;
+  control: Control<CreateSLOInput>;
 }
 
 export function SloEditFormDescription({ control }: Props) {

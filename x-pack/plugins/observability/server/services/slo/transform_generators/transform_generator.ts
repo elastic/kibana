@@ -6,11 +6,8 @@
  */
 
 import { MappingRuntimeFieldType } from '@elastic/elasticsearch/lib/api/types';
-import {
-  AggregationsCalendarInterval,
-  TransformPutTransformRequest,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { calendarAlignedTimeWindowSchema } from '@kbn/slo-schema';
+import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { calendarAlignedTimeWindowSchema, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 
 import { TransformSettings } from '../../../assets/transform_templates/slo_transform_template';
 import { SLO } from '../../../domain/models';
@@ -66,6 +63,11 @@ export abstract class TransformGenerator {
   }
 
   public buildCommonGroupBy(slo: SLO) {
+    let fixedInterval = '1m';
+    if (timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)) {
+      fixedInterval = slo.objective.timesliceWindow!.format();
+    }
+
     return {
       'slo.id': {
         terms: {
@@ -106,7 +108,7 @@ export abstract class TransformGenerator {
       '@timestamp': {
         date_histogram: {
           field: slo.settings.timestampField,
-          calendar_interval: '1m' as AggregationsCalendarInterval,
+          fixed_interval: fixedInterval,
         },
       },
     };
