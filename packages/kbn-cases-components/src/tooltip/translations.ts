@@ -6,8 +6,16 @@
  * Side Public License, v 1.
  */
 
-export { Status } from './src/status/status';
-export { CaseStatuses } from './src/status/types';
-export { getStatusConfiguration } from './src/status/config';
-export { Tooltip } from './src/tooltip/tooltip';
-export type { CaseTooltipProps, CaseTooltipContentProps } from './src/tooltip/types';
+import { i18n } from '@kbn/i18n';
+
+export const OPENED = i18n.translate('cases.components.tooltip.opened', {
+  defaultMessage: 'Opened',
+});
+
+export const CLOSED = i18n.translate('cases.components.tooltip.closed', {
+  defaultMessage: 'Closed',
+});
+
+export const BY = i18n.translate('cases.components.tooltip.by', {
+  defaultMessage: 'by',
+});
