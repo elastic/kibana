@@ -13,7 +13,6 @@ import {
   EuiFlexItem,
   EuiInMemoryTable,
   EuiLink,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ComplianceScoreBar } from '../../../components/compliance_score_bar';
@@ -47,8 +46,6 @@ export const RisksTable = ({
   viewAllButtonTitle,
   compact,
 }: RisksTableProps) => {
-  const { euiTheme } = useEuiTheme();
-
   const columns: Array<EuiBasicTableColumn<GroupedFindingsEvaluation>> = useMemo(
     () => [
       {
@@ -78,14 +75,7 @@ export const RisksTable = ({
         ),
       },
     ],
-    [
-      compact,
-      euiTheme.border.radius.medium,
-      euiTheme.font.weight.bold,
-      euiTheme.size.s,
-      euiTheme.size.xs,
-      onCellClick,
-    ]
+    [compact, onCellClick]
   );
 
   const sortedByComplianceScore = getTopRisks(cisSectionsEvaluations, maxItems);
