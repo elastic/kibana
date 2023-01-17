@@ -301,7 +301,7 @@ describe('AddDomainLogic', () => {
 
         expect(flashSuccessToast).toHaveBeenCalled();
         expect(navigateToUrl).toHaveBeenCalledWith(
-          '/search_indices/index-name/domain-management/test-domain'
+          '/search_indices/index-name/domain_management/test-domain'
         );
       });
     });
