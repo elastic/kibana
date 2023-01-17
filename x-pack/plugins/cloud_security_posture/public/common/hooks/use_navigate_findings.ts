@@ -53,8 +53,10 @@ export const useNavigateFindings = () => {
     history.push({
       pathname: findingsNavigation.findings_default.path,
       search: encodeQuery({
+        // query: getFindingsQuery,
         query: {
           query: '',
+          language: 'kuery',
         },
         filters,
       }),

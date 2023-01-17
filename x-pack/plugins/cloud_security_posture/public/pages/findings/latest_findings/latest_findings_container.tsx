@@ -32,7 +32,6 @@ import { usePageSize } from '../../../common/hooks/use_page_size';
 import { ErrorCallout } from '../layout/error_callout';
 import { useLimitProperties } from '../utils/get_limit_properties';
 import { LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY } from '../../../common/constants';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 export const getDefaultQuery = ({
   query,
@@ -77,13 +76,6 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
     pageSize,
   });
 
-  const [queryLocal, setQueryLocal] = useLocalStorage('test-ricky', {
-    query: {
-      query: '',
-      language: 'kuery',
-    },
-  });
-
   const handleDistributionClick = (evaluation: Evaluation) => {
     setUrlQuery({
       pageIndex: 0,
@@ -103,7 +95,6 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
         dataView={dataView}
         setQuery={(query) => {
           setUrlQuery({ ...query, pageIndex: 0 });
-          setQueryLocal(query.query);
         }}
         loading={findingsGroupByNone.isFetching}
       />
