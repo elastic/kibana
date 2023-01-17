@@ -9,20 +9,16 @@ import { EuiBadge, EuiDescriptionList, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EncryptedSyntheticsMonitor } from '../../../../../../common/runtime_types';
 
-export const MonitorStatus = ({
-  loading,
-  monitor,
+const BadgeStatus = ({
   status,
-  compressed = true,
+  loading,
+  isBrowserType,
 }: {
-  loading?: boolean;
-  compressed?: boolean;
-  monitor: EncryptedSyntheticsMonitor;
   status?: string;
+  loading?: boolean;
+  isBrowserType: boolean;
 }) => {
-  const isBrowserType = monitor.type === 'browser';
-
-  const badge = loading ? (
+  return loading ? (
     <EuiLoadingSpinner size="s" />
   ) : !status ? (
     <EuiBadge color="default" data-test-subj="monitorLatestStatusPending">
@@ -37,12 +33,33 @@ export const MonitorStatus = ({
       {isBrowserType ? FAILED_LABEL : DOWN_LABEL}
     </EuiBadge>
   );
+};
+
+export const MonitorStatus = ({
+  loading,
+  monitor,
+  status,
+  compressed = true,
+}: {
+  loading?: boolean;
+  compressed?: boolean;
+  monitor: EncryptedSyntheticsMonitor;
+  status?: string;
+}) => {
+  const isBrowserType = monitor.type === 'browser';
 
   return (
     <EuiDescriptionList
       align="left"
       compressed={compressed}
-      listItems={[{ title: STATUS_LABEL, description: badge }]}
+      listItems={[
+        {
+          title: STATUS_LABEL,
+          description: (
+            <BadgeStatus status={status} loading={loading} isBrowserType={isBrowserType} />
+          ),
+        },
+      ]}
     />
   );
 };
