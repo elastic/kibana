@@ -96,38 +96,41 @@ export class EnteredInput {
       ];
 
       for (const [argName, argDef] of Object.entries(enteredCommand.argsWithValueSelectors)) {
-        const argInstance = 0;
+        // If the argument has been used, then replace it with the Arguments Selector
+        if (parsedInput.hasArg(argName)) {
+          let argInstance = 0;
 
-        // Loop through the input pieces (left and right side of cursor) looking for the Argument name
-        for (const { input, items } of inputPieces) {
-          // TODO:PT Support multiple occurrences of the argument
+          // Loop through the input pieces (left and right side of cursor) looking for the Argument name
+          for (const { input, items } of inputPieces) {
+            const argNameMatch = `--${argName}`;
+            let pos = input.indexOf(argNameMatch);
 
-          const argNameMatch = `--${argName}`;
-          const pos = input.indexOf(argNameMatch);
+            while (pos > -1) {
+              const argChrLength = argNameMatch.length;
+              const replaceValues: InputCharacter[] = Array.from(
+                { length: argChrLength },
+                createInputCharacter
+              );
+              const argState = enteredCommand.argState[argName]?.at(argInstance);
 
-          if (parsedInput.hasArg(argName) && pos !== -1) {
-            const argChrLength = argNameMatch.length;
-            const replaceValues: InputCharacter[] = Array.from(
-              { length: argChrLength },
-              createInputCharacter
-            );
-            const argState = enteredCommand.argState[argName]?.at(argInstance);
+              replaceValues[0] = createInputCharacter({
+                value: argNameMatch,
+                renderValue: (
+                  <ArgumentSelectorWrapper
+                    argName={argName}
+                    argDefinition={argDef as ArgumentSelectorWrapperProps['argDefinition']}
+                  />
+                ),
+                isArgSelector: true,
+                argName,
+                argInstance: argInstance++,
+                argState,
+              });
 
-            replaceValues[0] = createInputCharacter({
-              value: argNameMatch,
-              renderValue: (
-                <ArgumentSelectorWrapper
-                  argName={argName}
-                  argDefinition={argDef as ArgumentSelectorWrapperProps['argDefinition']}
-                />
-              ),
-              isArgSelector: true,
-              argName,
-              argInstance,
-              argState,
-            });
+              items.splice(pos, argChrLength, ...replaceValues);
 
-            items.splice(pos, argChrLength, ...replaceValues);
+              pos = input.indexOf(argNameMatch, pos + argChrLength);
+            }
           }
         }
       }
