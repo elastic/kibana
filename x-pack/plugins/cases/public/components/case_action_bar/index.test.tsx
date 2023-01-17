@@ -233,8 +233,10 @@ describe('CaseActionBar', () => {
       </TestProviders>
     );
 
-    expect(queryByTestId('property-actions-ellipses')).not.toBeInTheDocument();
+    userEvent.click(screen.getByTestId('property-actions-ellipses'));
     expect(queryByText('Delete case')).not.toBeInTheDocument();
+    expect(queryByTestId('property-actions-trash')).not.toBeInTheDocument();
+    expect(queryByTestId('property-actions-copyClipboard')).toBeInTheDocument();
   });
 
   it('should show the the delete item in the menu when the user does have delete privileges', () => {
