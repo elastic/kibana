@@ -10,9 +10,10 @@ The `ml_apis_v2.json` file uses OpenAPI Specification Version 2.0.
 
  ## Tools
 
-It is possible to validate the docs before bundling them by running the following command in the `x-pack/plugins/ml/common/openapi/` folder:
+It is possible to validate the docs before bundling them by running these commands in the `x-pack/plugins/ml/common/openapi/` folder:
   ```
     npx swagger-cli validate ml_apis_v3.yaml
+    npx @redocly/cli lint ml_apis_v3.yaml
   ```
 
 You can optionally generate `bundled` files with the following commands:

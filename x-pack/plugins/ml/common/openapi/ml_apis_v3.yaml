@@ -10,7 +10,7 @@ tags:
   - name: ml
     description: Machine learning
 servers:
-  - url: https://localhost:5601/
+  - url: https://localhost:5601
 paths:
   /s/{spaceId}/api/ml/saved_objects/sync:
     get:
@@ -31,31 +31,16 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/mlSyncResponse'
+                $ref: '#/components/schemas/mlSync200Response'
               examples:
                 syncExample:
                   $ref: '#/components/examples/mlSyncExample'
-  /api/ml/saved_objects/sync:
-    get:
-      summary: Synchronizes Kibana saved objects for machine learning jobs and trained models in the default space.
-      description: >
-        You must have `all` privileges for the **Machine Learning** feature in the **Analytics** section of the Kibana feature privileges.
-        This API runs automatically when you start Kibana and periodically thereafter.
-      operationId: ml-sync-default
-      tags:
-        - ml
-      parameters:
-        - $ref: '#/components/parameters/simulateParam'
-      responses:
-        '200':
-          description: Indicates a successful call
+        '401':
+          description: Authorization information is missing or invalid.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/mlSyncResponse'
-              examples:
-                syncExample:
-                  $ref: '#/components/examples/mlSyncExample'
+                $ref: '#/components/schemas/mlSync4xxResponse'
 components:
  parameters:
   spaceParam:
@@ -103,8 +88,9 @@ components:
       properties:
         success:
           $ref: '#/components/schemas/mlSyncResponseSuccess'
-    mlSyncResponse:
+    mlSync200Response:
       type: object
+      title: Successful sync API response
       properties:
         datafeedsAdded:
           type: object
@@ -133,36 +119,33 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/mlSyncResponseModels'
         savedObjectsDeleted:
-          type: object
-          description: If saved objects exist for machine learning jobs or trained models that no longer exist, they are deleted when you run the sync machine learning saved objects API.
-          properties:
-            anomaly-detector:
-              type: object
-              additionalProperties:
-                $ref: '#/components/schemas/mlSyncResponseJobs'
-            data-frame-analytics:
-              type: object
-              additionalProperties:
-                $ref: '#/components/schemas/mlSyncResponseJobs'
-            trained-model:
-              type: object
-              additionalProperties:
-                $ref: '#/components/schemas/mlSyncResponseModels'
+          $ref: '#/components/schemas/mlSyncResponseSavedObjectsDeleted'
+    mlSync4xxResponse:
+      type: object
+      title: Unsuccessful sync API response
+      properties:
+        error:
+          type: string
+          example: Unauthorized
+        message:
+          type: string 
+        statusCode:
+          type: integer
+          example: 401
  examples:
    mlSyncExample:
      summary: Two anomaly detection jobs required synchronization in this example.
      value:
        {
          "savedObjectsCreated": {
-           "anomaly_detector": {
+           "anomaly-detector": {
              "myjob1": { "success":true },
-             "myjob2":{ "success":true }
+             "myjob2": { "success":true }
            }
           },
           "savedObjectsDeleted": {},
-          "datafeedsAdded":{},
-          "datafeedsRemoved":{}
+          "datafeedsAdded": {},
+          "datafeedsRemoved": {}
         }
 security:
   - basicAuth: [ ]
-  - ApiKeyAuth: [ ]
