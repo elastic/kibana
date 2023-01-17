@@ -10,7 +10,7 @@ import http from 'http';
 import expect from '@kbn/expect';
 import { URL, format as formatUrl } from 'url';
 import getPort from 'get-port';
-import { getHttpProxyServer } from '../../../../../common/lib/get_proxy_server';
+import { getHttpProxyServer } from '@kbn/alerting-api-integration-helpers';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import {
   getExternalServiceSimulatorPath,

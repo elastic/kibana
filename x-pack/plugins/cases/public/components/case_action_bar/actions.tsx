@@ -16,6 +16,7 @@ import type { Case } from '../../../common/ui/types';
 import type { CaseService } from '../../containers/use_get_case_user_actions';
 import { useAllCasesNavigation } from '../../common/navigation';
 import { useCasesContext } from '../cases_context/use_cases_context';
+import { useCasesToast } from '../../common/use_cases_toast';
 
 interface CaseViewActions {
   caseData: Case;
@@ -26,6 +27,7 @@ const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternal
   const { mutate: deleteCases } = useDeleteCases();
   const { navigateToAllCases } = useAllCasesNavigation();
   const { permissions } = useCasesContext();
+  const { showSuccessToast } = useCasesToast();
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
 
   const openModal = useCallback(() => {
@@ -38,11 +40,20 @@ const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternal
 
   const propertyActions = useMemo(
     () => [
+      {
+        iconType: 'copyClipboard',
+        label: i18n.COPY_ID_ACTION_LABEL,
+        onClick: () => {
+          navigator.clipboard.writeText(caseData.id);
+          showSuccessToast(i18n.COPY_ID_ACTION_SUCCESS);
+        },
+      },
       ...(permissions.delete
         ? [
             {
               iconType: 'trash',
               label: i18n.DELETE_CASE(),
+              color: 'danger' as const,
               onClick: openModal,
             },
           ]
@@ -57,7 +68,7 @@ const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternal
           ]
         : []),
     ],
-    [permissions.delete, openModal, currentExternalIncident]
+    [permissions.delete, openModal, currentExternalIncident, caseData.id, showSuccessToast]
   );
 
   const onConfirmDeletion = useCallback(() => {

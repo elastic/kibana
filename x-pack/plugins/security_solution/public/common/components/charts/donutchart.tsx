@@ -56,7 +56,7 @@ export interface DonutChartProps {
 export interface DonutChartWrapperProps {
   children?: React.ReactElement;
   dataExists: boolean;
-  label: React.ReactElement | string;
+  label?: React.ReactElement | string;
   title: React.ReactElement | string | number | null;
   isChartEmbeddablesEnabled?: boolean;
 }
@@ -111,17 +111,19 @@ const DonutChartWrapperComponent: React.FC<DonutChartWrapperProps> = ({
           justifyContent="center"
         >
           <EuiFlexItem>{title}</EuiFlexItem>
-          <EuiFlexItem className={className}>
-            <EuiToolTip content={label}>
-              <EuiText
-                className={className}
-                size="s"
-                style={dataExists ? undefined : emptyLabelStyle}
-              >
-                {label}
-              </EuiText>
-            </EuiToolTip>
-          </EuiFlexItem>
+          {label && (
+            <EuiFlexItem className={className}>
+              <EuiToolTip content={label}>
+                <EuiText
+                  className={className}
+                  size="s"
+                  style={dataExists ? undefined : emptyLabelStyle}
+                >
+                  {label}
+                </EuiText>
+              </EuiToolTip>
+            </EuiFlexItem>
+          )}
         </DonutTextWrapper>
         {children}
       </StyledEuiFlexItem>

@@ -79,6 +79,8 @@ export type ColumnHeaderOptions = Pick<
   | 'initialWidth'
   | 'isSortable'
   | 'schema'
+  | 'isExpandable'
+  | 'isResizable'
 > & {
   aggregatable?: boolean;
   dataTableCellActions?: DataTableCellAction[];

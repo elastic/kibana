@@ -16,6 +16,8 @@
       "@kbn/aiops-plugin/*": ["x-pack/plugins/aiops/*"],
       "@kbn/aiops-utils": ["x-pack/packages/ml/aiops_utils"],
       "@kbn/aiops-utils/*": ["x-pack/packages/ml/aiops_utils/*"],
+      "@kbn/alerting-api-integration-helpers": ["x-pack/test/alerting_api_integration/packages/helpers"],
+      "@kbn/alerting-api-integration-helpers/*": ["x-pack/test/alerting_api_integration/packages/helpers/*"],
       "@kbn/alerting-example-plugin": ["x-pack/examples/alerting_example"],
       "@kbn/alerting-example-plugin/*": ["x-pack/examples/alerting_example/*"],
       "@kbn/alerting-fixture-plugin": ["x-pack/test/functional_with_es_ssl/plugins/alerts"],
@@ -1300,6 +1302,8 @@
       "@kbn/watcher-plugin/*": ["x-pack/plugins/watcher/*"],
       "@kbn/web-worker-stub": ["packages/kbn-web-worker-stub"],
       "@kbn/web-worker-stub/*": ["packages/kbn-web-worker-stub/*"],
+      "@kbn/whereis-pkg-cli": ["packages/kbn-whereis-pkg-cli"],
+      "@kbn/whereis-pkg-cli/*": ["packages/kbn-whereis-pkg-cli/*"],
       "@kbn/yarn-lock-validator": ["packages/kbn-yarn-lock-validator"],
       "@kbn/yarn-lock-validator/*": ["packages/kbn-yarn-lock-validator/*"],
       // END AUTOMATED PACKAGE LISTING

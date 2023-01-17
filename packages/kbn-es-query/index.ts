@@ -51,6 +51,7 @@ export type {
 export {
   buildEsQuery,
   buildQueryFromFilters,
+  filterToQueryDsl,
   decorateQuery,
   luceneStringToDsl,
   migrateFilter,
