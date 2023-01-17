@@ -16,8 +16,6 @@ import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
 
 import { DataPanel } from '../../../shared/data_panel/data_panel';
 
-import { handlePageChange } from '../../../shared/table_pagination';
-
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
 import { EnginesListTable } from './components/tables/engines_table';
@@ -149,7 +147,7 @@ export const EnginesList: React.FC = () => {
           <EnginesListTable
             enginesList={results}
             meta={meta}
-            onChange={handlePageChange(onPaginate)}
+            onChange={onPaginate}
             onDelete={openDeleteEngineModal}
             loading={false}
           />

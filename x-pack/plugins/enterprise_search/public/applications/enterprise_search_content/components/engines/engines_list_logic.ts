@@ -28,13 +28,17 @@ import {
 
 import { DEFAULT_META, Meta, updateMetaPageIndex } from './types';
 
+interface EuiBasicTableOnChange {
+  page: { index: number };
+}
+
 type EnginesListActions = Pick<
   Actions<EnginesListAPIArguments, EnterpriseSearchEnginesResponse>,
   'apiError' | 'apiSuccess' | 'makeRequest'
 > & {
   closeDeleteEngineModal(): void;
-  deleteError: DeleteEnginesApiLogicActions['apiError'];
   deleteEngine: DeleteEnginesApiLogicActions['makeRequest'];
+  deleteError: DeleteEnginesApiLogicActions['apiError'];
   deleteSuccess: DeleteEnginesApiLogicActions['apiSuccess'];
 
   fetchEngines({ meta, searchQuery }: { meta: Meta; searchQuery?: string }): {
@@ -42,17 +46,17 @@ type EnginesListActions = Pick<
     searchQuery?: string;
   };
 
+  onPaginate(args: EuiBasicTableOnChange): { pageNumber: number };
   openDeleteEngineModal: (engine: EnterpriseSearchEngine) => { engine: EnterpriseSearchEngine };
-  onPaginate(pageNumber: number): { pageNumber: number };
 };
 interface EngineListValues {
   data: typeof FetchEnginesAPILogic.values.data;
   deleteModalEngine: EnterpriseSearchEngine | null;
   deleteModalEngineName: string;
   deleteStatus: typeof DeleteEngineAPILogic.values.status;
-  isLoading: boolean;
   isDeleteLoading: boolean;
   isDeleteModalVisible: boolean;
+  isLoading: boolean;
   meta: Meta;
   parameters: { meta: Meta; searchQuery?: string }; // Added this variable to store to the search Query value as well
   results: EnterpriseSearchEngine[]; // stores engine list value from data
@@ -80,8 +84,8 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
       meta,
       searchQuery,
     }),
+    onPaginate: (args: EuiBasicTableOnChange) => ({ pageNumber: args.page.index }),
     openDeleteEngineModal: (engine) => ({ engine }),
-    onPaginate: (pageNumber) => ({ pageNumber }),
   },
   path: ['enterprise_search', 'content', 'engine_list_logic'],
   reducers: ({}) => ({

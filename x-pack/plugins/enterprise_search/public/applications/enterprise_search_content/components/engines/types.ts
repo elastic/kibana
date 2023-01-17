@@ -25,5 +25,5 @@ export const convertMetaToPagination = (meta: Meta) => {
   };
 };
 export const updateMetaPageIndex = (oldState: Meta, newPageIndex: number) => {
-  return { ...oldState, from: (newPageIndex - 1) * oldState.size };
+  return { ...oldState, from: newPageIndex * oldState.size };
 };
