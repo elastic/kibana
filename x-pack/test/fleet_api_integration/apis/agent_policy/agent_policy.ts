@@ -625,6 +625,7 @@ export default function (providerContext: FtrProviderContext) {
           revision: 2,
           schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
           updated_by: 'elastic',
+          inactivity_timeout: 1209600,
           package_policies: [],
         });
       });
@@ -788,6 +789,7 @@ export default function (providerContext: FtrProviderContext) {
           updated_by: 'elastic',
           package_policies: [],
           monitoring_enabled: ['logs', 'metrics'],
+          inactivity_timeout: 1209600,
         });
 
         const listResponseAfterUpdate = await fetchPackageList();
