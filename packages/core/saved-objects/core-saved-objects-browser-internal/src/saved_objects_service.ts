@@ -12,7 +12,7 @@ import type { SavedObjectsStart } from '@kbn/core-saved-objects-browser';
 import { SavedObjectsClient } from './saved_objects_client';
 
 /**
- * @deprecated TODO: Replace with issue link
+ * @deprecated See https://github.com/elastic/dev/issues/2194
  */
 export class SavedObjectsService implements CoreService<void, SavedObjectsStart> {
   public async setup() {}

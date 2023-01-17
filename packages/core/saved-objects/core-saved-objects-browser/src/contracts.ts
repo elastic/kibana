@@ -9,7 +9,7 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-bro
 
 /**
  * @public
- * @deprecated TODO: Replace with issue link
+ * @deprecated See https://github.com/elastic/dev/issues/2194
  */
 export interface SavedObjectsStart {
   /** {@link SavedObjectsClientContract} */

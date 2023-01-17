@@ -14,7 +14,7 @@ import type { SimpleSavedObject } from '../simple_saved_object';
  * with the {@link SavedObjectsClientContract}.
  *
  * @public
- * @deprecated TODO: Replace with issue link
+ * @deprecated See https://github.com/elastic/dev/issues/2194
  */
 export interface ResolvedSimpleSavedObject<T = unknown> {
   /**

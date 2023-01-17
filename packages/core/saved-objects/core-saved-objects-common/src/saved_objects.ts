@@ -51,30 +51,30 @@ export interface SavedObjectError {
 
 /**
  * @public
- * @deprecated TODO: Replace with issue link
+ * @deprecated See https://github.com/elastic/dev/issues/2194
  */
 export type SavedObjectAttributeSingle = serverTypes.SavedObjectAttributeSingle;
 
 /**
  * @public
- * @deprecated TODO: Replace with issue link
+ * @deprecated See https://github.com/elastic/dev/issues/2194
  */
 export type SavedObjectAttribute = serverTypes.SavedObjectAttribute;
 
 /**
  * @public
- * @deprecated TODO: Replace with issue link
+ * @deprecated See https://github.com/elastic/dev/issues/2194
  */
 export type SavedObjectAttributes = serverTypes.SavedObjectAttributes;
 
 /**
  * @public
- * @deprecated TODO: Replace with issue link
+ * @deprecated See https://github.com/elastic/dev/issues/2194
  */
 export type SavedObjectReference = serverTypes.SavedObjectReference;
 
 /**
  * @public
- * @deprecated TODO: Replace with issue link
+ * @deprecated See https://github.com/elastic/dev/issues/2194
  */
 export type SavedObject<T = unknown> = serverTypes.SavedObject<T>;

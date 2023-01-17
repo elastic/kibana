@@ -12,7 +12,7 @@ import { SimpleSavedObject } from '../simple_saved_object';
  * Batch response for simple saved objects
  *
  * @public
- * @deprecated TODO: Replace with issue link
+ * @deprecated See https://github.com/elastic/dev/issues/2194
  */
 export interface SavedObjectsBatchResponse<T = unknown> {
   /** Array of simple saved objects */

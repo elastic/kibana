@@ -12,7 +12,7 @@ import { SavedObjectError } from '@kbn/core-saved-objects-common';
  * Options for bulk delete operation
  *
  * @public
- * @deprecated TODO: Replace with issue link
+ * @deprecated See https://github.com/elastic/dev/issues/2194
  */
 export interface SavedObjectsBulkDeleteOptions {
   /** Force deletion of any objects that exist in multiple namespaces (default=false) */
@@ -23,7 +23,7 @@ export interface SavedObjectsBulkDeleteOptions {
  * Single item within the statuses array of the bulk delete response
  *
  * @public
- * @deprecated TODO: Replace with issue link
+ * @deprecated See https://github.com/elastic/dev/issues/2194
  */
 export interface SavedObjectsBulkDeleteResponseItem {
   /** saved object id */
@@ -40,7 +40,7 @@ export interface SavedObjectsBulkDeleteResponseItem {
  * Return type of the Saved Objects `bulkDelete()` method.
  *
  * @public
- * @deprecated TODO: Replace with issue link
+ * @deprecated See https://github.com/elastic/dev/issues/2194
  */
 export interface SavedObjectsBulkDeleteResponse {
   /** array of statuses per object */

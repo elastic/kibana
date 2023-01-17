@@ -18,7 +18,7 @@ import type {
  * Core internal implementation of {@link SimpleSavedObject}
  *
  * @internal Should use the {@link SimpleSavedObject} interface instead
- * @deprecated TODO: Replace with issue link
+ * @deprecated See https://github.com/elastic/dev/issues/2194
  */
 export class SimpleSavedObjectImpl<T = unknown> implements SimpleSavedObject<T> {
   public attributes: T;

@@ -12,7 +12,7 @@ import type { SavedObjectsCreateOptions } from './create';
  * Per-object parameters for bulk create operation
  *
  * @public
- * @deprecated TODO: Replace with issue link
+ * @deprecated See https://github.com/elastic/dev/issues/2194
  */
 export interface SavedObjectsBulkCreateObject<T = unknown> extends SavedObjectsCreateOptions {
   /** Create a SavedObject of this type. */
@@ -25,7 +25,7 @@ export interface SavedObjectsBulkCreateObject<T = unknown> extends SavedObjectsC
  * Options for bulk create operation
  *
  * @public
- * @deprecated TODO: Replace with issue link
+ * @deprecated See https://github.com/elastic/dev/issues/2194
  * */
 export interface SavedObjectsBulkCreateOptions {
   /** If a document with the given `id` already exists, overwrite its contents (default=false). */

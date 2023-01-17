@@ -16,7 +16,7 @@ import type { SavedObject as SavedObjectType } from '@kbn/core-saved-objects-com
  * but doesn't include any type-specific implementations.
  *
  * @public
- * @deprecated TODO: Replace with issue link
+ * @deprecated See https://github.com/elastic/dev/issues/2194
  */
 export interface SimpleSavedObject<T = unknown> {
   /** attributes of the object, templated */

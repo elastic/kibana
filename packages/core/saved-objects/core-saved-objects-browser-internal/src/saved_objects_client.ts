@@ -104,7 +104,7 @@ const getObjectsToResolve = (queue: BatchResolveQueueEntry[]) => {
  * HTTP API for interacting with Saved Objects.
  *
  * @internal
- * @deprecated TODO: Replace with issue link
+ * @deprecated See https://github.com/elastic/dev/issues/2194
  */
 export class SavedObjectsClient implements SavedObjectsClientContract {
   private http: HttpSetup;
