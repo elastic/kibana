@@ -9,6 +9,8 @@
 import { createRootWithCorePlugins } from '@kbn/core-test-helpers-kbn-server';
 import { mergeTypes } from '@kbn/core-saved-objects-migration-server-internal';
 import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-base-server-internal';
+import { set } from 'lodash';
+import { PLUGIN_SYSTEM_ENABLE_ALL_PLUGINS_CONFIG_PATH } from '@kbn/core-plugins-server-internal/src/constants';
 
 export interface Result {
   mappings: SavedObjectsTypeMappingDefinitions;
@@ -19,24 +21,25 @@ export interface Result {
     throw new Error('worker must be run in a node.js fork');
   }
 
-  const root = createRootWithCorePlugins(
-    {
-      logging: {
-        loggers: [{ name: 'root', level: 'info', appenders: ['console'] }],
-      },
+  const settings = {
+    logging: {
+      loggers: [{ name: 'root', level: 'info', appenders: ['console'] }],
     },
-    {
-      basePath: false,
-      cache: false,
-      dev: true,
-      disableOptimizer: true,
-      silent: false,
-      dist: false,
-      oss: false,
-      runExamples: false,
-      watch: false,
-    }
-  );
+  };
+
+  set(settings, PLUGIN_SYSTEM_ENABLE_ALL_PLUGINS_CONFIG_PATH, true);
+
+  const root = createRootWithCorePlugins(settings, {
+    basePath: false,
+    cache: false,
+    dev: true,
+    disableOptimizer: true,
+    silent: false,
+    dist: false,
+    oss: false,
+    runExamples: false,
+    watch: false,
+  });
 
   await root.preboot();
   const { savedObjects } = await root.setup();
