@@ -29,7 +29,7 @@ import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { ServiceOverviewThroughputChart } from '../../service_overview/service_overview_throughput_chart';
 import { TransactionsTable } from '../../../shared/transactions_table';
 import {
-  DEVICE_MODEL_NAME,
+  DEVICE_MODEL_IDENTIFIER,
   HOST_OS_VERSION,
   NETWORK_CONNECTION_TYPE,
   SERVICE_VERSION,
@@ -42,6 +42,7 @@ import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transact
 import { LatencyChart } from '../../../shared/charts/latency_chart';
 import { useFiltersForEmbeddableCharts } from '../../../../hooks/use_filters_for_embeddable_charts';
 import { getKueryWithMobileFilters } from '../../../../../common/utils/get_kuery_with_mobile_filters';
+import { MobileStats } from './stats';
 /**
  * The height a chart should be if it's next to a table with 5 rows and a title.
  * Add the height of the pagination row.
@@ -147,6 +148,13 @@ export function MobileServiceOverview() {
             </EuiFlexItem>
           )}
           <EuiFlexItem>
+            <MobileStats
+              start={start}
+              end={end}
+              kuery={kueryWithMobileFilters}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem grow={5}>
                 <EuiPanel hasBorder={true}>
@@ -183,7 +191,7 @@ export function MobileServiceOverview() {
                             defaultMessage: 'Devices',
                           }
                         )}
-                        metric={DEVICE_MODEL_NAME}
+                        metric={DEVICE_MODEL_IDENTIFIER}
                         start={start}
                         end={end}
                         kuery={kueryWithMobileFilters}
