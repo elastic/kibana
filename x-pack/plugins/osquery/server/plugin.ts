@@ -49,7 +49,6 @@ import { createDataViews } from './create_data_views';
 import { createActionHandler } from './handlers/action';
 
 import { registerFeatures } from './utils/register_features';
-import { datasetFilterRT } from '@kbn/infra-plugin/common/log_analysis';
 
 export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginStart> {
   private readonly logger: Logger;
