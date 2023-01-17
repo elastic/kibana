@@ -118,6 +118,7 @@ export class EnteredInput {
                 renderValue: (
                   <ArgumentSelectorWrapper
                     argName={argName}
+                    argInstance={argInstance}
                     argDefinition={argDef as ArgumentSelectorWrapperProps['argDefinition']}
                   />
                 ),

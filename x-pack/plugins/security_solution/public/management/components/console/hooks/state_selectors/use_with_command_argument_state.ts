@@ -13,16 +13,22 @@ import type { ArgSelectorState } from '../../components/console_state/types';
  * Returns the Command argument state for a given argument name. Should be used ONLY when a
  * command has been entered that matches a `CommandDefinition`
  * @param argName
+ * @param instance
  */
-export const useWithCommandArgumentState = (argName: string): ArgSelectorState => {
+export const useWithCommandArgumentState = (
+  argName: string,
+  instance: number
+): ArgSelectorState => {
   const enteredCommand = useConsoleStore().state.input.enteredCommand;
 
   return useMemo(() => {
-    return enteredCommand && enteredCommand.argState[argName] && enteredCommand.argState[argName][0]
-      ? enteredCommand.argState[argName][0]
-      : {
-          value: undefined,
-          valueText: '',
-        };
-  }, [argName, enteredCommand]);
+    const argInstanceState = enteredCommand?.argState[argName]?.at(instance);
+
+    return (
+      argInstanceState ?? {
+        value: undefined,
+        valueText: '',
+      }
+    );
+  }, [argName, enteredCommand, instance]);
 };

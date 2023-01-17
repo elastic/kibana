@@ -201,6 +201,9 @@ export type ConsoleDataAction =
       payload: {
         /** Name of argument */
         name: string;
+        /** Instance of the argument */
+        instance: number;
+        /** The updated state for the argument */
         state: ArgSelectorState;
       };
     }

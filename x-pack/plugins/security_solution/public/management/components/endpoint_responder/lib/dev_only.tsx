@@ -105,3 +105,5 @@ const ArgumentSelectorComponentMock = memo<
   return <span data-test-subj="argSelectorValueText">{valueText}</span>;
 });
 ArgumentSelectorComponentMock.displayName = 'ArgumentSelectorComponentMock';
+
+document.body.classList.add('style2');

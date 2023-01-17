@@ -178,13 +178,16 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
 
     case 'updateInputCommandArgState':
       if (state.input.enteredCommand) {
-        const { name: argName, state: newArgState } = payload;
+        const { name: argName, instance: argInstance, state: newArgState } = payload;
+        const updatedArgState = [...(state.input.enteredCommand.argState[argName] ?? [])];
+
+        updatedArgState[argInstance] = newArgState;
 
         const updatedEnteredCommand = {
           ...state.input.enteredCommand,
           argState: {
             ...state.input.enteredCommand.argState,
-            [argName]: [newArgState],
+            [argName]: updatedArgState,
           },
         };
 

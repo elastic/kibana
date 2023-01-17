@@ -78,6 +78,7 @@ type ArgDefinitionWithRequiredSelector = Omit<CommandArgDefinition, 'SelectorCom
 
 export interface ArgumentSelectorWrapperProps {
   argName: string;
+  argInstance: number;
   argDefinition: ArgDefinitionWithRequiredSelector;
 }
 
@@ -85,9 +86,9 @@ export interface ArgumentSelectorWrapperProps {
  * handles displaying a custom argument value selector and manages its state
  */
 export const ArgumentSelectorWrapper = memo<ArgumentSelectorWrapperProps>(
-  ({ argName, argDefinition: { SelectorComponent } }) => {
+  ({ argName, argInstance, argDefinition: { SelectorComponent } }) => {
     const dispatch = useConsoleStateDispatch();
-    const { valueText, value } = useWithCommandArgumentState(argName);
+    const { valueText, value } = useWithCommandArgumentState(argName, argInstance);
 
     const handleSelectorComponentOnChange = useCallback<
       CommandArgumentValueSelectorProps['onChange']
@@ -97,11 +98,12 @@ export const ArgumentSelectorWrapper = memo<ArgumentSelectorWrapperProps>(
           type: 'updateInputCommandArgState',
           payload: {
             name: argName,
+            instance: argInstance,
             state: updates,
           },
         });
       },
-      [argName, dispatch]
+      [argInstance, argName, dispatch]
     );
 
     return (
