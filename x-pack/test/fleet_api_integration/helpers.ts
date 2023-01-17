@@ -80,7 +80,7 @@ export async function generateAgent(
     index: '.fleet-agents',
     id,
     body: {
-      id: id + '-' + status,
+      id,
       active: true,
       last_checkin: new Date().toISOString(),
       policy_id: policyId,
