@@ -8,94 +8,90 @@
 import { millisToNanos } from '@kbn/event-log-plugin/server';
 import { updateFlappingHistory } from './flapping_utils';
 
-export interface UpdateValuesOpts<Alert> {
-  alert: Alert;
+export interface UpdateValuesOpts {
   id: string;
   start?: string;
   duration?: string;
   end?: string;
   flappingHistory: boolean[];
 }
-interface PrepareAlertsOpts<Alert> {
-  alerts: Record<string, Alert>;
+interface PrepareAlertsOpts {
+  alertIds: string[];
   startTimes?: Record<string, string | undefined>;
   setEnd?: boolean;
   flappingHistories: Record<string, boolean[]>;
   flapping: boolean;
-  updateValues: (opts: UpdateValuesOpts<Alert>) => void;
+  updateValues: (opts: UpdateValuesOpts) => void;
 }
-function prepareAlerts<Alert>({
-  alerts,
+function prepareAlerts({
+  alertIds,
   startTimes,
   flappingHistories,
   setEnd = false,
   flapping,
   updateValues,
-}: PrepareAlertsOpts<Alert>) {
+}: PrepareAlertsOpts) {
   const currentTime = new Date().toISOString();
 
-  for (const id in alerts) {
-    if (alerts.hasOwnProperty(id)) {
-      // If no start times are defined, set start time and initial duration
-      let start;
-      let startTime;
-      let duration;
-      let end;
+  for (const id of alertIds) {
+    // If no start times are defined, set start time and initial duration
+    let start;
+    let startTime;
+    let duration;
+    let end;
 
-      if (!startTimes) {
-        start = currentTime;
-        duration = '0';
-      } else {
-        startTime = startTimes[id];
-        start = startTime ? startTime : undefined;
-        const durationInMs =
-          new Date(currentTime).valueOf() - new Date(startTime as string).valueOf();
-        duration = startTime ? millisToNanos(durationInMs) : undefined;
-      }
-
-      if (setEnd) {
-        end = currentTime;
-      }
-
-      const flappingHistory = flappingHistories[id] ? flappingHistories[id] : [];
-      const updatedFlappingHistory = updateFlappingHistory(flappingHistory, flapping);
-
-      updateValues({
-        alert: alerts[id],
-        id,
-        flappingHistory: updatedFlappingHistory,
-        ...(start ? { start } : {}),
-        ...(start && end ? { end } : {}),
-        ...(duration !== undefined ? { duration } : {}),
-      });
+    if (!startTimes) {
+      start = currentTime;
+      duration = '0';
+    } else {
+      startTime = startTimes[id];
+      start = startTime ? startTime : undefined;
+      const durationInMs =
+        new Date(currentTime).valueOf() - new Date(startTime as string).valueOf();
+      duration = startTime ? millisToNanos(durationInMs) : undefined;
     }
+
+    if (setEnd) {
+      end = currentTime;
+    }
+
+    const flappingHistory = flappingHistories[id] ? flappingHistories[id] : [];
+    const updatedFlappingHistory = updateFlappingHistory(flappingHistory, flapping);
+
+    updateValues({
+      id,
+      flappingHistory: updatedFlappingHistory,
+      ...(start ? { start } : {}),
+      ...(start && end ? { end } : {}),
+      ...(duration !== undefined ? { duration } : {}),
+    });
   }
 }
 
 /**
  * For alerts categorized as new, set the start time, initialize the duration
  */
-export function prepareNewAlerts<Alert>(
-  alerts: Record<string, Alert>,
+export function prepareNewAlerts(
+  newAlertIds: string[],
   flappingHistories: Record<string, boolean[]>,
-  updateValues: (opts: UpdateValuesOpts<Alert>) => void
+  updateValues: (opts: UpdateValuesOpts) => void
 ) {
   prepareAlerts({
-    alerts,
+    alertIds: newAlertIds,
     flappingHistories,
     flapping: true,
     updateValues,
   });
 }
 
-export function prepareOngoingAlerts<Alert>(
-  alerts: Record<string, Alert>,
+export function prepareOngoingAlerts(
+  ongoingAlertIds: string[],
   startTimes: Record<string, string | undefined>,
   flappingHistories: Record<string, boolean[]>,
-  updateValues: (opts: UpdateValuesOpts<Alert>) => void
+  updateValues: (opts: UpdateValuesOpts) => void
 ) {
   prepareAlerts({
-    alerts,
+    alertIds: ongoingAlertIds,
     startTimes,
     flappingHistories,
     flapping: false,
@@ -103,18 +99,45 @@ export function prepareOngoingAlerts<Alert>(
   });
 }
 
-export function prepareRecoveredAlerts<Alert>(
-  alerts: Record<string, Alert>,
+export function prepareRecoveredAlerts(
+  recoveredAlertIds: string[],
   startTimes: Record<string, string | undefined>,
   flappingHistories: Record<string, boolean[]>,
-  updateValues: (opts: UpdateValuesOpts<Alert>) => void
+  updateValues: (opts: UpdateValuesOpts) => void
 ) {
   prepareAlerts({
-    alerts,
+    alertIds: recoveredAlertIds,
     startTimes,
     setEnd: true,
     flappingHistories,
     flapping: true,
     updateValues,
   });
+}
+
+interface PrepareAllAlerts<Alert> {
+  newAlerts: Record<string, Alert>;
+  trackedRecoveredAlerts: Record<string, Alert>;
+  getFlappingHistories: (alerts: Record<string, Alert>) => Record<string, boolean[] | undefined>;
+}
+
+export function prepareAllAlerts<Alert>({
+  newAlerts,
+  trackedRecoveredAlerts,
+  getFlappingHistories,
+}: PrepareAllAlerts<Alert>) {
+  // For alerts categorized as new, set the start time and duration
+  // and check to see if it's a flapping alert
+  prepareNewAlerts(
+    Object.keys(newAlerts),
+    // For new alerts we look at the tracked recovered alerts
+    // to see if that alert has previously recovered and if so,
+    // carry over the flapping history
+    getFlappingHistories(trackedRecoveredAlerts),
+    // Callback function for each new alert to set start time and duration
+    (opts: UpdateValuesOpts) => {
+      updateAlertValues(opts, categorized.new[opts.id]);
+      activeAlerts[opts.id] = categorized.new[opts.id];
+    }
+  );
 }

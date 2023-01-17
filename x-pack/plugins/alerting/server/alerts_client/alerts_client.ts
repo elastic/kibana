@@ -315,19 +315,20 @@ export class AlertsClient implements IAlertsClient {
       alertLimit: this.options.maxAlerts,
     });
 
-    const updateAlertValues = ({
-      alert,
-      start,
-      duration,
-      end,
-      flappingHistory,
-    }: {
-      alert: Alert;
-      start?: string;
-      duration?: string;
-      end?: string;
-      flappingHistory: boolean[];
-    }) => {
+    const updateAlertValues = (
+      {
+        start,
+        duration,
+        end,
+        flappingHistory,
+      }: {
+        start?: string;
+        duration?: string;
+        end?: string;
+        flappingHistory: boolean[];
+      },
+      alert: Alert
+    ) => {
       alert = {
         ...alert,
         ...(start ? { [ALERT_START]: start } : {}),
@@ -345,34 +346,39 @@ export class AlertsClient implements IAlertsClient {
 
     // For alerts categorized as new, set the start time and duration
     // and check to see if it's a flapping alert
-    prepareNewAlerts<Alert>(
-      categorized.new,
+    prepareNewAlerts(
+      Object.keys(categorized.new),
+      // For new alerts we look at the tracked recovered alerts
+      // to see if that alert has previously recovered and if so,
+      // carry over the flapping history
       getFlappingHistories(this.trackedAlerts.recovered),
-      (opts: UpdateValuesOpts<Alert>) => {
-        updateAlertValues(opts);
-        activeAlerts[opts.id] = opts.alert;
+      (opts: UpdateValuesOpts) => {
+        updateAlertValues(opts, categorized.new[opts.id]);
+        activeAlerts[opts.id] = categorized.new[opts.id];
       }
     );
 
     // For alerts categorized as ongoing, update the duration
-    prepareOngoingAlerts<Alert>(
-      categorized.ongoing,
+    prepareOngoingAlerts(
+      Object.keys(categorized.ongoing),
       getStartTimes(categorized.ongoing),
       getFlappingHistories(categorized.ongoing),
-      (opts: UpdateValuesOpts<Alert>) => {
-        updateAlertValues(opts);
-        activeAlerts[opts.id] = opts.alert;
+      // Callback function for each ongoing alert to set duration
+      (opts: UpdateValuesOpts) => {
+        updateAlertValues(opts, categorized.ongoing[opts.id]);
+        activeAlerts[opts.id] = categorized.ongoing[opts.id];
       }
     );
 
     // For alerts categorized as recovered, update the duration and set end time
-    prepareRecoveredAlerts<Alert>(
-      categorized.recovered,
+    prepareRecoveredAlerts(
+      Object.keys(categorized.recovered),
       getStartTimes(categorized.recovered),
       getFlappingHistories(categorized.recovered),
-      (opts: UpdateValuesOpts<Alert>) => {
-        updateAlertValues(opts);
-        allRecoveredAlerts[opts.id] = opts.alert;
+      // Callback function for each recovered alert to set duration and end time
+      (opts: UpdateValuesOpts) => {
+        updateAlertValues(opts, categorized.recovered[opts.id]);
+        allRecoveredAlerts[opts.id] = categorized.recovered[opts.id];
       }
     );
 
