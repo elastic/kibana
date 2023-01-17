@@ -25,7 +25,7 @@ describe('Security Telemetry filters', () => {
       'event.outcome': true,
       'event.provider': true,
       'event.type': true,
-      'package.version': true,
+      package_version: true,
     };
 
     it('filters top level', () => {
