@@ -7,7 +7,6 @@
 
 import type { ReactNode } from 'react';
 import React from 'react';
-import type { MaybeImmutable } from '../../../../../../../common/endpoint/types';
 import type { ArgumentSelectorWrapperProps } from '../components/argument_selector_wrapper';
 import { ArgumentSelectorWrapper } from '../components/argument_selector_wrapper';
 import type { ParsedCommandInterface } from '../../../service/types';
@@ -67,16 +66,14 @@ export class EnteredInput {
   private leftOfCursorContent: InputCharacter[];
   private rightOfCursorContent: InputCharacter[];
   private canHaveArgValueSelectors: boolean;
+  private argState: undefined | EnteredCommand['argState'];
 
   constructor(
     leftOfCursorText: string,
     rightOfCursorText: string,
-    parsedInput_: MaybeImmutable<ParsedCommandInterface>,
-    enteredCommand: undefined | MaybeImmutable<EnteredCommand>
+    parsedInput: ParsedCommandInterface,
+    enteredCommand: undefined | EnteredCommand
   ) {
-    // Cast the `parseInput` to remove `Immutable` type from it
-    const parsedInput = parsedInput_ as ParsedCommandInterface;
-
     this.leftOfCursorContent = getInputCharacters(leftOfCursorText);
     this.rightOfCursorContent = getInputCharacters(rightOfCursorText);
 
@@ -84,6 +81,8 @@ export class EnteredInput {
 
     // Determine if any argument value selector should be inserted
     if (parsedInput.hasArgs && enteredCommand && enteredCommand.argsWithValueSelectors) {
+      this.argState = enteredCommand.argState;
+
       const inputPieces = [
         {
           input: leftOfCursorText,
@@ -161,7 +160,7 @@ export class EnteredInput {
       });
     }
 
-    fullContent.splice(start, selection.length);
+    const removedChars = fullContent.splice(start, selection.length);
 
     if (newValueContent) {
       fullContent.splice(start, 0, newValueContent);
@@ -170,6 +169,27 @@ export class EnteredInput {
 
     this.leftOfCursorContent = fullContent.splice(0, start);
     this.rightOfCursorContent = fullContent;
+    this.removeArgState(removedChars);
+  }
+
+  private removeArgState(argStateList: InputCharacter[]) {
+    if (this.argState) {
+      let argStateWasAdjusted = false;
+      const newArgState = { ...this.argState };
+
+      for (const { argName, argInstance, isArgSelector } of argStateList) {
+        if (isArgSelector && newArgState[argName]?.at(argInstance)) {
+          newArgState[argName] = newArgState[argName].filter((_, index) => {
+            return index !== argInstance;
+          });
+          argStateWasAdjusted = true;
+        }
+      }
+
+      if (argStateWasAdjusted) {
+        this.argState = newArgState;
+      }
+    }
   }
 
   getLeftOfCursorText(includeArgSelectorValues: boolean = false): string {
@@ -197,6 +217,10 @@ export class EnteredInput {
 
   getRightOfCursorRenderingContent(): ReactNode {
     return <>{this.rightOfCursorContent.map(toReactJsxFragment.bind(null, 'right'))}</>;
+  }
+
+  getArgState(): undefined | EnteredCommand['argState'] {
+    return this.argState;
   }
 
   moveCursorTo(direction: 'left' | 'right' | 'end' | 'home') {
@@ -243,7 +267,11 @@ export class EnteredInput {
     if (replaceSelection) {
       this.replaceSelection(replaceSelection, '');
     } else {
-      this.rightOfCursorContent.shift();
+      const removedChar = this.rightOfCursorContent.shift();
+
+      if (removedChar?.isArgSelector) {
+        this.removeArgState([removedChar]);
+      }
     }
   }
 
@@ -251,7 +279,11 @@ export class EnteredInput {
     if (replaceSelection) {
       this.replaceSelection(replaceSelection, '');
     } else {
-      this.leftOfCursorContent.pop();
+      const removedChar = this.leftOfCursorContent.pop();
+
+      if (removedChar?.isArgSelector) {
+        this.removeArgState([removedChar]);
+      }
     }
   }
 

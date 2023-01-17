@@ -236,6 +236,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
           return {
             leftOfCursorText: inputText.getLeftOfCursorText(),
             rightOfCursorText: inputText.getRightOfCursorText(),
+            argState: inputText.getArgState(),
           };
         },
       });

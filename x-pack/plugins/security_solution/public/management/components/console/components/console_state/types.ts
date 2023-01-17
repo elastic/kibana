@@ -8,7 +8,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { Dispatch, Reducer } from 'react';
-import type { Immutable } from '../../../../../../common/endpoint/types';
 import type { ParsedCommandInterface } from '../../service/types';
 import type { CommandInputProps } from '../command_input';
 import type {
@@ -165,8 +164,11 @@ export type ConsoleDataAction =
   | {
       type: 'updateInputTextEnteredState';
       payload: PayloadValueOrFunction<
-        Pick<ConsoleDataState['input'], 'leftOfCursorText' | 'rightOfCursorText'>,
-        Immutable<ConsoleDataState['input']>
+        Pick<ConsoleDataState['input'], 'leftOfCursorText' | 'rightOfCursorText'> & {
+          /** updates (if necessary) to any of the argument's state */
+          argState?: Record<string, ArgSelectorState[]>;
+        },
+        ConsoleDataState['input']
       >;
     }
   | {

@@ -93,8 +93,11 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
       };
 
     case 'updateInputTextEnteredState':
-      const { leftOfCursorText: newTextEntered, rightOfCursorText: newRightOfCursor = '' } =
-        typeof payload === 'function' ? payload(state.input) : payload;
+      const {
+        leftOfCursorText: newTextEntered,
+        rightOfCursorText: newRightOfCursor = '',
+        argState: adjustedArgState,
+      } = typeof payload === 'function' ? payload(state.input) : payload;
 
       if (
         state.input.leftOfCursorText !== newTextEntered ||
@@ -104,6 +107,13 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
 
         let enteredCommand: ConsoleDataState['input']['enteredCommand'] =
           state.input.enteredCommand;
+
+        if (enteredCommand && adjustedArgState && enteredCommand?.argState !== adjustedArgState) {
+          enteredCommand = {
+            ...enteredCommand,
+            argState: adjustedArgState,
+          };
+        }
 
         // Determine if `enteredCommand` should be re-defined
         if (
