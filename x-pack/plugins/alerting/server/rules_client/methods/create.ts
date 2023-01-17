@@ -46,12 +46,12 @@ export interface CreateOptions<Params extends RuleTypeParams> {
     | 'nextRun'
   > & { actions: NormalizedAlertAction[] };
   options?: SavedObjectOptions;
-  validateRuleActionConnectors?: boolean;
+  skipActionConnectorsValidations?: boolean;
 }
 
 export async function create<Params extends RuleTypeParams = never>(
   context: RulesClientContext,
-  { data, options, validateRuleActionConnectors }: CreateOptions<Params>
+  { data, options, skipActionConnectorsValidations }: CreateOptions<Params>
 ): Promise<SanitizedRule<Params>> {
   const id = options?.id || SavedObjectsUtils.generateId();
 
@@ -105,7 +105,7 @@ export async function create<Params extends RuleTypeParams = never>(
     }
   }
 
-  if (validateRuleActionConnectors) {
+  if (!skipActionConnectorsValidations) {
     await validateActions(context, ruleType, data);
     await withSpan({ name: 'validateActions', type: 'rules' }, () =>
       validateActions(context, ruleType, data)

@@ -448,4 +448,48 @@ describe('Import rules response schema', () => {
     expect(getPaths(left(message.errors))).toEqual([]);
     expect(message.schema).toEqual(payload);
   });
+  test('it should NOT validate a action_connectors_warnings that is not WarningSchema', () => {
+    type UnsafeCastForTest = Either<
+      Errors,
+      {
+        success: boolean;
+        action_connectors_warnings: string;
+        success_count: number;
+        errors: Array<
+          {
+            id?: string | undefined;
+            rule_id?: string | undefined;
+          } & {
+            error: {
+              status_code: number;
+              message: string;
+            };
+          }
+        >;
+      }
+    >;
+    const payload: Omit<ImportRulesResponse, 'action_connectors_warnings'> & {
+      action_connectors_warnings: string;
+    } = {
+      success: true,
+      success_count: 0,
+      rules_count: 0,
+      errors: [],
+      exceptions_errors: [],
+      exceptions_success: true,
+      exceptions_success_count: 0,
+      action_connectors_success: true,
+      action_connectors_success_count: 0,
+      action_connectors_errors: [],
+      action_connectors_warnings: 'invalid',
+    };
+    const decoded = ImportRulesResponse.decode(payload);
+    const checked = exactCheck(payload, decoded as UnsafeCastForTest);
+    const message = pipe(checked, foldLeftRight);
+
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "invalid" supplied to "action_connectors_warnings"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
 });
