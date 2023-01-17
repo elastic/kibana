@@ -177,7 +177,6 @@ export const RulesSettingsFlappingFormSection = memo(
             value={lookBackWindow}
             onChange={(e) => onChange('lookBackWindow', parseInt(e.currentTarget.value, 10))}
             label={lookBackWindowLabel}
-            labelPopoverText="TODO: look back window helper text"
             disabled={!canWriteFlappingSettings}
           />
         </EuiFlexItem>
@@ -189,7 +188,6 @@ export const RulesSettingsFlappingFormSection = memo(
             value={statusChangeThreshold}
             onChange={(e) => onChange('statusChangeThreshold', parseInt(e.currentTarget.value, 10))}
             label={statusChangeThresholdLabel}
-            labelPopoverText="TODO: status threshold helper text"
             disabled={!canWriteFlappingSettings}
           />
         </EuiFlexItem>
