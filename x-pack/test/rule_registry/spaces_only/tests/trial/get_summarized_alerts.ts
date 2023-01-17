@@ -151,7 +151,7 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
           });
         }
 
-        return Promise.resolve({ shouldTriggerAlert: triggerAlert });
+        return Promise.resolve({ state: { shouldTriggerAlert: triggerAlert } });
       });
 
       const getSummarizedAlerts = createGetSummarizedAlerts();
@@ -187,7 +187,7 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
       // Execute the rule the first time - this creates a new alert
       const preExecution1Start = new Date();
       const execution1Uuid = uuid.v4();
-      const execution1Results = await executor({
+      const execution1Result = await executor({
         ...options,
         startedAt: new Date(),
         state: getState(true, {}),
@@ -207,10 +207,10 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
       // Execute again to update the existing alert
       const preExecution2Start = new Date();
       const execution2Uuid = uuid.v4();
-      const execution2Results = await executor({
+      const execution2Result = await executor({
         ...options,
         startedAt: new Date(),
-        state: getState(true, execution1Results.trackedAlerts),
+        state: getState(true, execution1Result.state.trackedAlerts),
         executionId: execution2Uuid,
       });
 
@@ -229,7 +229,7 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
       await executor({
         ...options,
         startedAt: new Date(),
-        state: getState(false, execution2Results.trackedAlerts),
+        state: getState(false, execution2Result.state.trackedAlerts),
         executionId: execution3Uuid,
       });
 
@@ -288,7 +288,7 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
       // This creates the executor that is passed to the Alerting framework.
       const executor = createLifecycleRuleExecutor<
         MockRuleParams,
-        { shouldTriggerAlert: boolean },
+        {},
         MockAlertState,
         MockAlertContext,
         MockAllowedActionGroups
@@ -308,6 +308,8 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
             [ALERT_REASON]: 'Test alert is firing',
           },
         });
+
+        return { state: {} };
       });
 
       const getSummarizedAlerts = createGetSummarizedAlerts();
