@@ -36,7 +36,7 @@ export async function retryableBulkUpdate({
   }
 
   let retry = 1;
-  while (retry++ < MAX_RETRIES && getRetriableTaskIds(resultMap).length > 0) {
+  while (retry++ <= MAX_RETRIES && getRetriableTaskIds(resultMap).length > 0) {
     const retriesToGet = getRetriableTaskIds(resultMap);
     const retriesToUpdate = (await getTasks(retriesToGet)).filter(filter).map(map);
     const retryResult = await store.bulkUpdate(retriesToUpdate);
@@ -65,6 +65,6 @@ function getId(bulkUpdateResult: BulkUpdateResult): string {
 
 function getRetriableTaskIds(resultMap: Record<string, BulkUpdateResult>) {
   return Object.values(resultMap)
-    .filter((result) => isErr(result) && result.error.error.statusCode === 409)
+    .filter((result) => isErr(result) && result.error.error.error.statusCode === 409)
     .map((result) => getId(result));
 }

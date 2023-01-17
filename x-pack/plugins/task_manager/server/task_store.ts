@@ -259,7 +259,7 @@ export class TaskStore {
           docs.map((doc) => ({
             type: 'task',
             id: doc.id,
-            options: { version: doc.version },
+            version: doc.version,
             attributes: attributesByDocId.get(doc.id)!,
           })),
           {
