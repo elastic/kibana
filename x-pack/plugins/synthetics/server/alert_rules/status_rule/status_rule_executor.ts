@@ -106,7 +106,7 @@ export class StatusRuleExecutor {
   async getDownChecks(
     prevDownConfigs: OverviewStatus['downConfigs'] = {}
   ): Promise<AlertOverviewStatus> {
-    const { listOfLocations, enabledIds, monitorLocationMap } = await this.getMonitors();
+    const { listOfLocations, enabledIds,allIds, monitorLocationMap } = await this.getMonitors();
 
     if (enabledIds.length > 0) {
       const currentStatus = await queryMonitorStatus(
@@ -131,7 +131,12 @@ export class StatusRuleExecutor {
 
       const staleDownConfigs = this.markDeletedConfigs(downConfigs);
 
-      return { ...currentStatus, staleDownConfigs };
+      return {
+        ...currentStatus,
+        staleDownConfigs,
+        allMonitorsCount: allIds.length,
+        disabledMonitorsCount: allIds.length - enabledIds.length,
+      };
     }
     const staleDownConfigs = this.markDeletedConfigs(prevDownConfigs);
     return {
@@ -142,6 +147,8 @@ export class StatusRuleExecutor {
       up: 0,
       pending: 0,
       enabledIds,
+      allMonitorsCount: allIds.length,
+      disabledMonitorsCount: allIds.length,
     };
   }
 

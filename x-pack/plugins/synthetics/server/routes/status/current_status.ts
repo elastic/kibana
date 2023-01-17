@@ -77,6 +77,8 @@ export async function getStatus(
   );
 
   return {
+    allMonitorsCount: allMonitors.length,
+    disabledMonitorsCount,
     enabledIds,
     disabledCount,
     up,
