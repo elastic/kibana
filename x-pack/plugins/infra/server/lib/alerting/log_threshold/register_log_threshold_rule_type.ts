@@ -18,6 +18,7 @@ import { getAlertDetailsPageEnabledForApp } from '../common/utils';
 import {
   alertDetailUrlActionVariableDescription,
   groupByKeysActionVariableDescription,
+  legacyGroupActionVariableDescription,
 } from '../common/messages';
 
 const timestampActionVariableDescription = i18n.translate(
@@ -38,13 +39,6 @@ const conditionsActionVariableDescription = i18n.translate(
   'xpack.infra.logs.alerting.threshold.conditionsActionVariableDescription',
   {
     defaultMessage: 'The conditions that log entries needed to fulfill',
-  }
-);
-
-const groupByActionVariableDescription = i18n.translate(
-  'xpack.infra.logs.alerting.threshold.groupByActionVariableDescription',
-  {
-    defaultMessage: 'The name of the group responsible for triggering the alert',
   }
 );
 
@@ -124,7 +118,7 @@ export async function registerLogThresholdRuleType(
         { name: 'timestamp', description: timestampActionVariableDescription },
         { name: 'matchingDocuments', description: documentCountActionVariableDescription },
         { name: 'conditions', description: conditionsActionVariableDescription },
-        { name: 'group', description: groupByActionVariableDescription },
+        { name: 'group', description: legacyGroupActionVariableDescription, deprecated: true },
         { name: 'groupByKeys', description: groupByKeysActionVariableDescription },
         // Ratio alerts
         { name: 'isRatio', description: isRatioActionVariableDescription },

@@ -16620,7 +16620,6 @@
     "xpack.infra.logs.alerting.threshold.documentCountActionVariableDescription": "匹配所提供条件的日志条目数",
     "xpack.infra.logs.alerting.threshold.everythingSeriesName": "日志条目",
     "xpack.infra.logs.alerting.threshold.fired": "已触发",
-    "xpack.infra.logs.alerting.threshold.groupByActionVariableDescription": "负责触发告警的组的名称",
     "xpack.infra.logs.alerting.threshold.isRatioActionVariableDescription": "表示此告警是否配置了比率",
     "xpack.infra.logs.alerting.threshold.numeratorConditionsActionVariableDescription": "比率的分子需要满足的条件",
     "xpack.infra.logs.alerting.threshold.ratioActionVariableDescription": "两组条件的比率值",

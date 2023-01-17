@@ -162,6 +162,13 @@ export const groupActionVariableDescription = i18n.translate(
   }
 );
 
+export const legacyGroupActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.legacyGroupActionVariableDescription',
+  {
+    defaultMessage: 'This has been deprecated in favor of context.groupByKeys.',
+  }
+);
+
 export const groupByKeysActionVariableDescription = i18n.translate(
   'xpack.infra.metrics.alerting.groupByKeysActionVariableDescription',
   {

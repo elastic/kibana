@@ -17,10 +17,10 @@ import {
   alertStateActionVariableDescription,
   cloudActionVariableDescription,
   containerActionVariableDescription,
-  groupActionVariableDescription,
   groupByKeysActionVariableDescription,
   hostActionVariableDescription,
   labelsActionVariableDescription,
+  legacyGroupActionVariableDescription,
   metricActionVariableDescription,
   orchestratorActionVariableDescription,
   reasonActionVariableDescription,
@@ -106,7 +106,7 @@ export async function registerMetricThresholdRuleType(
     doesSetRecoveryContext: true,
     actionVariables: {
       context: [
-        { name: 'group', description: groupActionVariableDescription },
+        { name: 'group', description: legacyGroupActionVariableDescription, deprecated: true },
         { name: 'groupByKeys', description: groupByKeysActionVariableDescription },
         ...(getAlertDetailsPageEnabledForApp(config, 'metrics')
           ? [{ name: 'alertDetailsUrl', description: alertDetailUrlActionVariableDescription }]
