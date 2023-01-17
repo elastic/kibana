@@ -13,6 +13,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { FindingsBaseProps, FindingsBaseURLQuery } from '../types';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import type { CspFinding } from '../../../../common/schemas/csp_finding';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 export { getFilters } from './get_filters';
 
 const getBaseQuery = ({ dataView, query, filters }: FindingsBaseURLQuery & FindingsBaseProps) => {
@@ -43,17 +44,24 @@ export const getPaginationTableParams = (
 export const usePersistedQuery = <T>(getter: ({ filters, query }: FindingsBaseURLQuery) => T) => {
   const {
     data: {
-      query: { filterManager, queryString },
+      query: { filterManager },
     },
   } = useKibana().services;
+
+  const [query, setQuery] = useLocalStorage('test-ricky', {
+    query: {
+      query: '',
+      language: 'kuery',
+    },
+  });
 
   return useCallback(
     () =>
       getter({
         filters: filterManager.getAppFilters(),
-        query: queryString.getQuery() as Query,
+        query,
       }),
-    [getter, filterManager, queryString]
+    [getter, filterManager]
   );
 };
 
