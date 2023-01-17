@@ -41,7 +41,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
   /**
    * Attachment types are being registered in
-   * x-pack/test/cases_api_integration/common/fixtures/plugins/cases/server/plugin.ts
+   * x-pack/test/cases_api_integration/common/plugins/cases/server/plugin.ts
    */
   describe('Persistable state attachments', () => {
     describe('references', () => {

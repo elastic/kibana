@@ -65,8 +65,8 @@ import { User } from './authentication/types';
 import { superUser } from './authentication/users';
 import { getPostCaseRequest, postCaseReq } from './mock';
 import { ObjectRemover as ActionsRemover } from '../../../alerting_api_integration/common/lib';
-import { getServiceNowServer } from '../../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/plugin';
-import { RecordingServiceNowSimulator } from '../../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/servicenow_simulation';
+import { getServiceNowServer } from '../../../alerting_api_integration/common/plugins/actions_simulators/server/plugin';
+import { RecordingServiceNowSimulator } from '../../../alerting_api_integration/common/plugins/actions_simulators/server/servicenow_simulation';
 
 function toArray<T>(input: T | T[]): T[] {
   if (Array.isArray(input)) {
