@@ -22,7 +22,6 @@ import {
   deleteAllCaseItems,
   createCase,
   updateCase,
-  getCaseUserActions,
   superUserSpace1Auth,
   deleteCases,
   createComment,
@@ -30,6 +29,7 @@ import {
   deleteComment,
   extractWarningValueFromWarningHeader,
 } from '../../../../common/lib/utils';
+import { getCaseUserActions } from '../../../../common/lib/user_actions';
 import {
   globalRead,
   noKibanaPrivileges,

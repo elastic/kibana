@@ -9,12 +9,43 @@ import {
   UserActionFindResponse,
   getCaseFindUserActionsUrl,
   UserActionFindRequest,
+  CaseUserActionsResponse,
+  getCaseUserActionUrl,
+  CaseUserActionResponse,
 } from '@kbn/cases-plugin/common/api';
 import type SuperTest from 'supertest';
 import { User } from './authentication/types';
 
 import { superUser } from './authentication/users';
-import { getSpaceUrlPrefix } from './utils';
+import { getSpaceUrlPrefix, removeServerGeneratedPropertiesFromObject } from './utils';
+
+export const removeServerGeneratedPropertiesFromUserAction = (
+  attributes: CaseUserActionResponse
+) => {
+  const keysToRemove: Array<keyof CaseUserActionResponse> = ['action_id', 'created_at'];
+  return removeServerGeneratedPropertiesFromObject<
+    CaseUserActionResponse,
+    typeof keysToRemove[number]
+  >(attributes, keysToRemove);
+};
+
+export const getCaseUserActions = async ({
+  supertest,
+  caseID,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  caseID: string;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<CaseUserActionsResponse> => {
+  const { body: userActions } = await supertest
+    .get(`${getSpaceUrlPrefix(auth.space)}${getCaseUserActionUrl(caseID)}`)
+    .auth(auth.user.username, auth.user.password)
+    .expect(expectedHttpCode);
+  return userActions;
+};
 
 export const findCaseUserActions = async ({
   supertest,
