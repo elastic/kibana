@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
-import { EuiSpacer, Query, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { EuiSpacer, Query, EuiNotificationBadge, EuiTab, EuiTabs } from '@elastic/eui';
 import { ScopedHistory } from '@kbn/core-application-browser';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { DocLinksStart } from '@kbn/core-doc-links-browser';
@@ -17,8 +17,7 @@ import { UiCounterMetricType } from '@kbn/analytics';
 import { url } from '@kbn/kibana-utils-plugin/common';
 import { parse } from 'query-string';
 import { UiSettingsScope } from '@kbn/core-ui-settings-common';
-import { CallOuts } from './components/call_outs';
-import { AdvancedSettingsVoiceAnnouncement } from './components/advanced_settings_voice_announcement';
+import { PageTitle } from '../component_registry/page_title';
 import { DEFAULT_CATEGORY, fieldSorter, getAriaName, toEditableConfig } from './lib';
 import { parseErrorMsg } from './components/search/search';
 import { AdvancedSettings, QUERY } from './advanced_settings';
@@ -202,6 +201,91 @@ export const Settings = (props: Props) => {
     [history]
   );
 
+  const tabs = useMemo(() => {
+    return [
+      {
+        id: 'advanced-settings',
+        name: 'Advanced Settings',
+        append: (
+          <EuiNotificationBadge className="eui-alignCenter" size="m">
+            {Object.keys(queryState.filteredSettings).length}
+          </EuiNotificationBadge>
+        ),
+        content: (
+          <AdvancedSettings
+            settings={settings}
+            groupedSettings={groupedSettings.namespace}
+            categoryCounts={categoryCounts.namespace}
+            categories={categories.namespace}
+            visibleSettings={queryState.filteredSettings.namespace}
+            clearQuery={() => setUrlQuery('')}
+            noResults={!queryState.footerQueryMatched}
+            queryText={queryState.query.text}
+            {...props}
+          />
+        ),
+      },
+      {
+        id: 'global-settings',
+        name: 'Global Settings',
+        append: (
+          <EuiNotificationBadge className="eui-alignCenter" size="m">
+            {19}
+          </EuiNotificationBadge>
+        ),
+        content: (
+          <AdvancedSettings
+            settings={globalSettings}
+            groupedSettings={groupedSettings.global}
+            categoryCounts={categoryCounts.global}
+            categories={categories.global}
+            visibleSettings={queryState.filteredSettings.global}
+            clearQuery={() => setUrlQuery('')}
+            noResults={!queryState.footerQueryMatched}
+            queryText={queryState.query.text}
+            {...props}
+          />
+        ),
+      },
+    ];
+  }, [
+    categories.global,
+    categories.namespace,
+    categoryCounts.global,
+    categoryCounts.namespace,
+    globalSettings,
+    groupedSettings.global,
+    groupedSettings.namespace,
+    props,
+    queryState.filteredSettings,
+    queryState.footerQueryMatched,
+    queryState.query.text,
+    setUrlQuery,
+    settings,
+  ]);
+
+  const [selectedTabId, setSelectedTabId] = useState('advanced-settings');
+
+  const selectedTabContent = useMemo(() => {
+    return tabs.find((obj) => obj.id === selectedTabId)?.content;
+  }, [selectedTabId, tabs]);
+
+  const onSelectedTabChanged = (id: string) => {
+    setSelectedTabId(id);
+  };
+
+  const renderTabs = () => {
+    return tabs.map((tab, index) => (
+      <EuiTab
+        key={index}
+        onClick={() => onSelectedTabChanged(tab.id)}
+        isSelected={tab.id === selectedTabId}
+      >
+        {tab.name}
+      </EuiTab>
+    ));
+  };
+
   const getQuery = (queryString: string, initialQuery = false): Query => {
     try {
       const query = initialQuery ? getAriaName(queryString) : queryString ?? '';
@@ -244,47 +328,20 @@ export const Settings = (props: Props) => {
     setQueryState({ ...queryState, footerQueryMatched: matched });
   };
 
-  const PageTitle = componentRegistry.get(componentRegistry.componentType.PAGE_TITLE_COMPONENT);
-  const PageSubtitle = componentRegistry.get(
-    componentRegistry.componentType.PAGE_SUBTITLE_COMPONENT
-  );
   const PageFooter = componentRegistry.get(componentRegistry.componentType.PAGE_FOOTER_COMPONENT);
 
   return (
     <div>
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <PageTitle />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <Search
-            query={queryState.query}
-            categories={categories.global.concat(categories.namespace)}
-            onQueryChange={onQueryChange}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <PageSubtitle />
-      <EuiSpacer size="m" />
-      <CallOuts />
-      <EuiSpacer size="m" />
-
-      <AdvancedSettingsVoiceAnnouncement
-        queryText={queryState.query.text}
-        settings={queryState.filteredSettings.namespace}
+      <Search
+        query={queryState.query}
+        categories={categories.global.concat(categories.namespace)}
+        onQueryChange={onQueryChange}
       />
-
-      <AdvancedSettings
-        settings={settings}
-        groupedSettings={groupedSettings.namespace}
-        categoryCounts={categoryCounts.namespace}
-        categories={categories.namespace}
-        visibleSettings={queryState.filteredSettings.namespace}
-        clearQuery={() => setUrlQuery('')}
-        noResults={!queryState.footerQueryMatched}
-        queryText={queryState.query.text}
-        {...props}
-      />
+      <EuiSpacer size="m" />
+      <PageTitle title={'Advanced Settings'} />
+      <EuiSpacer size="m" />
+      <EuiTabs>{renderTabs()}</EuiTabs>
+      {selectedTabContent}
       <PageFooter
         toasts={props.toasts}
         query={queryState.query}

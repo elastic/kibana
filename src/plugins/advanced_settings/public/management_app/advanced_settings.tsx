@@ -19,6 +19,9 @@ import {
 } from '@kbn/core/public';
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { AdvancedSettingsVoiceAnnouncement } from './components/advanced_settings_voice_announcement';
 import { Form } from './components/form';
 
 import { FieldSetting, SettingsChanges } from './types';
@@ -59,23 +62,48 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps> {
 
   render() {
     return (
-      <KibanaContextProvider services={{ uiSettings: this.props.uiSettings }}>
-        <Form
-          settings={this.props.groupedSettings}
-          visibleSettings={this.props.visibleSettings}
-          categories={this.props.categories}
-          categoryCounts={this.props.categoryCounts}
-          clearQuery={this.props.clearQuery}
-          save={this.saveConfig}
-          showNoResultsMessage={this.props.noResults}
-          enableSaving={this.props.enableSaving}
-          docLinks={this.props.docLinks}
-          toasts={this.props.toasts}
-          trackUiMetric={this.props.trackUiMetric}
+      <div>
+        <EuiSpacer size="xl" />
+        <EuiCallOut
+          title={
+            <FormattedMessage
+              id="advancedSettings.callOutDefaultSpaceTitle"
+              defaultMessage="Changes will affect the `default` space"
+            />
+          }
+          iconType="alert"
+        >
+          <p>
+            <FormattedMessage
+              id="advancedSettings.callOutDefaultSpaceText"
+              defaultMessage="Changes will only be applied to the current space. These settings are intended for advanced users, as improper configurations may adversely affect aspects of Kibana."
+            />
+          </p>
+        </EuiCallOut>
+        <EuiSpacer size="xl" />
+
+        <AdvancedSettingsVoiceAnnouncement
           queryText={this.props.queryText}
-          theme={this.props.theme}
+          settings={this.props.visibleSettings}
         />
-      </KibanaContextProvider>
+        <KibanaContextProvider services={{ uiSettings: this.props.uiSettings }}>
+          <Form
+            settings={this.props.groupedSettings}
+            visibleSettings={this.props.visibleSettings}
+            categories={this.props.categories}
+            categoryCounts={this.props.categoryCounts}
+            clearQuery={this.props.clearQuery}
+            save={this.saveConfig}
+            showNoResultsMessage={this.props.noResults}
+            enableSaving={this.props.enableSaving}
+            docLinks={this.props.docLinks}
+            toasts={this.props.toasts}
+            trackUiMetric={this.props.trackUiMetric}
+            queryText={this.props.queryText}
+            theme={this.props.theme}
+          />
+        </KibanaContextProvider>
+      </div>
     );
   }
 }
