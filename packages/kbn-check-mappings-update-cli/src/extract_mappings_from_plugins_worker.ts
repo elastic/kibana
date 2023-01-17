@@ -7,7 +7,6 @@
  */
 
 import { createRootWithCorePlugins } from '@kbn/core-test-helpers-kbn-server';
-import { PluginSystemOverrides } from '@kbn/core-plugins-server-internal';
 import { mergeTypes } from '@kbn/core-saved-objects-migration-server-internal';
 import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-base-server-internal';
 
@@ -20,7 +19,6 @@ export interface Result {
     throw new Error('worker must be run in a node.js fork');
   }
 
-  PluginSystemOverrides.setAllPluginsEnabled();
   const root = createRootWithCorePlugins(
     {
       logging: {

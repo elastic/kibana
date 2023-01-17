@@ -13,4 +13,3 @@ export type {
   DiscoveredPlugins,
   PluginDependencies,
 } from './src';
-export { PluginSystemOverrides } from './src/plugin_system_overrides';
