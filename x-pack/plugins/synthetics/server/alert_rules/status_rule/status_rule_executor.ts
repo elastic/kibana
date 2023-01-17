@@ -10,10 +10,12 @@ import {
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { resolveMissingLabels } from '../../routes/status/current_status';
 import { AlertConfigKey } from '../../../common/constants/monitor_management';
 import { getAllLocations } from '../../synthetics_service/get_all_locations';
-import { getAllMonitors } from '../../saved_objects/synthetics_monitor/get_all_monitors';
+import {
+  getAllMonitors,
+  processMonitors,
+} from '../../saved_objects/synthetics_monitor/get_all_monitors';
 import { GetMonitorDownStatusMessageParams } from '../../legacy_uptime/lib/requests/get_monitor_status';
 import { queryMonitorStatus } from '../../queries/query_monitor_status';
 import { UptimeEsClient } from '../../legacy_uptime/lib/lib';
@@ -90,56 +92,32 @@ export class StatusRuleExecutor {
       soClient: this.soClient,
       search: `attributes.${AlertConfigKey.STATUS_ENABLED}: true`,
     });
-    const allIds: string[] = [];
-    const enabledIds: string[] = [];
-    let listOfLocationsSet = new Set<string>();
-    const missingLabelLocations = new Set<string>();
 
-    this.monitors.forEach((monitor) => {
-      const attrs = monitor.attributes;
-      allIds.push(attrs[ConfigKey.MONITOR_QUERY_ID]);
-      if (attrs[ConfigKey.ENABLED] === true) {
-        enabledIds.push(attrs[ConfigKey.MONITOR_QUERY_ID]);
-      }
-
-      listOfLocationsSet = new Set([
-        ...listOfLocationsSet,
-        ...(attrs[ConfigKey.LOCATIONS]
-          .filter((loc) => {
-            if (!loc.label) {
-              missingLabelLocations.add(loc.id);
-            }
-            return loc.label;
-          })
-          .map((location) => location.label) as string[]),
-      ]);
-    });
-
-    const { listOfLocations } = await resolveMissingLabels(
+    const { allIds, enabledIds, listOfLocations, monitorLocationMap } = await processMonitors(
+      this.monitors,
       this.server,
       this.soClient,
-      this.syntheticsMonitorClient,
-      listOfLocationsSet,
-      missingLabelLocations
+      this.syntheticsMonitorClient
     );
 
-    return { enabledIds, listOfLocations, allIds };
+    return { enabledIds, listOfLocations, allIds, monitorLocationMap };
   }
 
   async getDownChecks(
     prevDownConfigs: OverviewStatus['downConfigs'] = {}
   ): Promise<AlertOverviewStatus> {
-    const { listOfLocations, enabledIds } = await this.getMonitors();
+    const { listOfLocations, enabledIds, monitorLocationMap } = await this.getMonitors();
 
     if (enabledIds.length > 0) {
       const currentStatus = await queryMonitorStatus(
         this.esClient,
-        [...listOfLocations],
+        listOfLocations,
         {
           to: 'now',
           from: this.previousStartedAt?.toISOString() ?? 'now-1m',
         },
-        enabledIds
+        enabledIds,
+        monitorLocationMap
       );
 
       const downConfigs = currentStatus.downConfigs;

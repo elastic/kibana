@@ -17,7 +17,7 @@ export async function queryMonitorStatus(
   listOfLocations: string[],
   range: { from: string | number; to: string },
   ids: string[],
-  monitorLocationsMap?: Record<string, string[]>
+  monitorLocationsMap: Record<string, string[]>
 ): Promise<Omit<OverviewStatus, 'disabledCount'>> {
   const idSize = Math.trunc(DEFAULT_MAX_ES_BUCKET_SIZE / listOfLocations.length || 1);
   const pageCount = Math.ceil(ids.length / idSize);
