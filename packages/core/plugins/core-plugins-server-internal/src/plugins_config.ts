@@ -21,10 +21,12 @@ const configSchema = schema.object({
    * Internal config, not intended to be used by end users. Only for specific
    * internal purposes.
    */
-  __internal__: schema.object({ enableAllPlugins: schema.boolean({ defaultValue: false }) }),
+  __internal__: schema.maybe(
+    schema.object({ enableAllPlugins: schema.boolean({ defaultValue: false }) })
+  ),
 });
 
-export type PluginsConfigType = TypeOf<typeof configSchema>;
+export type PluginsConfigType = Omit<TypeOf<typeof configSchema>, '__internal__'>;
 
 export const config: ServiceConfigDescriptor<PluginsConfigType> = {
   path: 'plugins',
