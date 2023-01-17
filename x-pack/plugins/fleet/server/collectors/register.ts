@@ -39,8 +39,8 @@ export interface FleetUsage extends Usage {
     degraded: number;
   };
   agents_per_policy: number[];
-  agent_logs_top_errors: string[];
-  fleet_server_logs_top_errors: string[];
+  agent_logs_top_errors?: string[];
+  fleet_server_logs_top_errors?: string[];
 }
 
 export const fetchFleetUsage = async (
