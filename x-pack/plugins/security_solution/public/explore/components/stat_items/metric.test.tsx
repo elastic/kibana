@@ -16,7 +16,6 @@ import type { LensAttributes } from '../../../common/components/visualization_ac
 jest.mock('../../../common/components/visualization_actions', () => {
   return {
     VisualizationActions: () => <div data-test-subj="visualizationActions" />,
-    HISTOGRAM_ACTIONS_BUTTON_CLASS: 'histogram-actions-trigger',
   };
 });
 

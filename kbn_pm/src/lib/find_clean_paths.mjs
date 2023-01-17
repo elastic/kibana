@@ -16,11 +16,11 @@ import External from './external_packages.js';
  * Attempt to load the package map, if bootstrap hasn't run successfully
  * this might fail.
  * @param {import('@kbn/some-dev-log').SomeDevLog} log
- * @returns {Promise<import('@kbn/package-map').PackageMap>}
+ * @returns {Promise<import('@kbn/repo-packages').PackageMap>}
  */
 async function tryToGetPackageMap(log) {
   try {
-    const { readPackageMap } = External['@kbn/package-map']();
+    const { readPackageMap } = External['@kbn/repo-packages']();
     return readPackageMap();
   } catch (error) {
     log.warning('unable to load package map, unable to clean target directories in packages');

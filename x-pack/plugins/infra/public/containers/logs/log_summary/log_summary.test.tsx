@@ -19,9 +19,12 @@ import { datemathToEpochMillis } from '../../../utils/datemath';
 jest.mock('./api/fetch_log_summary', () => ({ fetchLogSummary: jest.fn() }));
 const fetchLogSummaryMock = fetchLogSummary as jest.MockedFunction<typeof fetchLogSummary>;
 
-jest.mock('../../../hooks/use_kibana', () => ({
-  useKibanaContextForPlugin: () => ({ services: mockCoreMock.createStart() }),
-}));
+jest.mock('../../../hooks/use_kibana', () => {
+  const services = mockCoreMock.createStart();
+  return {
+    useKibanaContextForPlugin: () => ({ services }),
+  };
+});
 
 describe('useLogSummary hook', () => {
   beforeEach(() => {
@@ -157,6 +160,34 @@ describe('useLogSummary hook', () => {
       expect.objectContaining({
         startTimestamp: secondRange.startTimestamp,
         endTimestamp: secondRange.endTimestamp,
+      }),
+      expect.anything()
+    );
+  });
+
+  it("doesn't query for new summary buckets when the previous request is still in flight", async () => {
+    fetchLogSummaryMock.mockResolvedValueOnce(createMockResponse([]));
+
+    const firstRange = createMockDateRange();
+    const { waitForNextUpdate, rerender } = renderHook(
+      ({ startTimestamp, endTimestamp }) =>
+        useLogSummary('SOURCE_ID', startTimestamp, endTimestamp, null),
+      {
+        initialProps: firstRange,
+      }
+    );
+
+    const secondRange = createMockDateRange('now-20s', 'now');
+
+    // intentionally don't wait for an update to test the throttling
+    rerender(secondRange);
+    await waitForNextUpdate();
+
+    expect(fetchLogSummaryMock).toHaveBeenCalledTimes(1);
+    expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        startTimestamp: firstRange.startTimestamp,
+        endTimestamp: firstRange.endTimestamp,
       }),
       expect.anything()
     );

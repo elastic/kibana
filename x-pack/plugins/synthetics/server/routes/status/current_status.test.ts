@@ -184,6 +184,7 @@ describe('current status route', () => {
             location: 'Asia/Pacific - Japan',
             status: 'up',
             ping: expect.any(Object),
+            timestamp: expect.any(String),
           },
           'id2-Asia/Pacific - Japan': {
             configId: 'id2',
@@ -191,6 +192,7 @@ describe('current status route', () => {
             location: 'Asia/Pacific - Japan',
             status: 'up',
             ping: expect.any(Object),
+            timestamp: expect.any(String),
           },
         },
         downConfigs: {
@@ -200,6 +202,7 @@ describe('current status route', () => {
             location: 'Europe - Germany',
             status: 'down',
             ping: expect.any(Object),
+            timestamp: expect.any(String),
           },
         },
       });
@@ -334,6 +337,7 @@ describe('current status route', () => {
             location: 'Asia/Pacific - Japan',
             status: 'up',
             ping: expect.any(Object),
+            timestamp: expect.any(String),
           },
           'id2-Asia/Pacific - Japan': {
             configId: 'id2',
@@ -341,6 +345,7 @@ describe('current status route', () => {
             location: 'Asia/Pacific - Japan',
             status: 'up',
             ping: expect.any(Object),
+            timestamp: expect.any(String),
           },
         },
         downConfigs: {
@@ -350,6 +355,7 @@ describe('current status route', () => {
             location: 'Europe - Germany',
             status: 'down',
             ping: expect.any(Object),
+            timestamp: expect.any(String),
           },
         },
       });

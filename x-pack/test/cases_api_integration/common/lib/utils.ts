@@ -53,6 +53,7 @@ import {
   BulkCreateCommentRequest,
   CommentType,
   CasesMetricsResponse,
+  CasesBulkGetResponse,
 } from '@kbn/cases-plugin/common/api';
 import { getCaseUserActionUrl } from '@kbn/cases-plugin/common/api/helpers';
 import { SignalHit } from '@kbn/security-solution-plugin/server/lib/detection_engine/signals/types';
@@ -64,8 +65,8 @@ import { User } from './authentication/types';
 import { superUser } from './authentication/users';
 import { getPostCaseRequest, postCaseReq } from './mock';
 import { ObjectRemover as ActionsRemover } from '../../../alerting_api_integration/common/lib';
-import { getServiceNowServer } from '../../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/plugin';
-import { RecordingServiceNowSimulator } from '../../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/servicenow_simulation';
+import { getServiceNowServer } from '../../../alerting_api_integration/common/plugins/actions_simulators/server/plugin';
+import { RecordingServiceNowSimulator } from '../../../alerting_api_integration/common/plugins/actions_simulators/server/servicenow_simulation';
 
 function toArray<T>(input: T | T[]): T[] {
   if (Array.isArray(input)) {
@@ -1418,3 +1419,26 @@ export const getReferenceFromEsResponse = (
   esResponse: TransportResult<GetResponse<SavedObjectsRawDocSource>, unknown>,
   id: string
 ) => esResponse.body._source?.references?.find((r) => r.id === id);
+
+export const bulkGetCases = async ({
+  supertest,
+  ids,
+  fields,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  ids: string[];
+  fields?: string[];
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<CasesBulkGetResponse> => {
+  const { body: res } = await supertest
+    .post(`${getSpaceUrlPrefix(auth.space)}${CASES_INTERNAL_URL}/_bulk_get`)
+    .auth(auth.user.username, auth.user.password)
+    .set('kbn-xsrf', 'true')
+    .send({ ids, fields })
+    .expect(expectedHttpCode);
+
+  return res;
+};

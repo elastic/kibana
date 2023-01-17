@@ -16,7 +16,7 @@ import type {
 } from '@kbn/core/server';
 import type { DeepReadonly } from 'utility-types';
 import type {
-  DeletePackagePoliciesResponse,
+  PostDeletePackagePoliciesResponse,
   PackagePolicy,
   NewPackagePolicy,
 } from '@kbn/fleet-plugin/common';
@@ -145,8 +145,8 @@ export class CspPlugin
       );
 
       plugins.fleet.registerExternalCallback(
-        'postPackagePolicyDelete',
-        async (deletedPackagePolicies: DeepReadonly<DeletePackagePoliciesResponse>) => {
+        'packagePolicyPostDelete',
+        async (deletedPackagePolicies: DeepReadonly<PostDeletePackagePoliciesResponse>) => {
           for (const deletedPackagePolicy of deletedPackagePolicies) {
             if (isCspPackage(deletedPackagePolicy.package?.name)) {
               const soClient = core.savedObjects.createInternalRepository();

@@ -22,6 +22,7 @@ export type MonitorOverviewFlyoutConfig = {
   configId: string;
   id: string;
   location: string;
+  locationId: string;
 } | null;
 
 export interface MonitorOverviewState {

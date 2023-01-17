@@ -80,6 +80,7 @@ export default function ({ getService }: FtrProviderContext) {
             scheduledTaskId: '1d72eb10-8046-11ed-9c27-7d79cab2e477',
             executionStatus: { status: 'pending', lastExecutionDate: '2022-12-20T09:10:15.500Z' },
             ruleTypeId: 'xpack.synthetics.alerts.monitorStatus',
+            running: false,
           },
           omitFields
         )
