@@ -53,7 +53,7 @@ export function useFetchTriggeredAlertsHistory({
     abortCtrlRef.current = new AbortController();
 
     try {
-      if (!http) throw 'No http client';
+      if (!http) throw new Error('No http client');
       if (!features) return;
       const { index } = await fetchIndexNameAPI({
         http,
