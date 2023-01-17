@@ -10,14 +10,9 @@ import { Alert } from '../alert';
 import { AlertInstanceState, AlertInstanceContext } from '../types';
 import { isFlapping } from './flapping_utils';
 
-export function setFlapping<
-  State extends AlertInstanceState,
-  Context extends AlertInstanceContext,
-  ActionGroupIds extends string,
-  RecoveryActionGroupIds extends string
->(
-  activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {},
-  recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupIds>> = {}
+export function setFlapping<State extends AlertInstanceState, Context extends AlertInstanceContext>(
+  activeAlerts: Record<string, Alert<State, Context>> = {},
+  recoveredAlerts: Record<string, Alert<State, Context>> = {}
 ) {
   for (const id of keys(activeAlerts)) {
     const alert = activeAlerts[id];
@@ -34,10 +29,8 @@ export function setFlapping<
 
 export function isAlertFlapping<
   State extends AlertInstanceState,
-  Context extends AlertInstanceContext,
-  ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
->(alert: Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>): boolean {
+  Context extends AlertInstanceContext
+>(alert: Alert<State, Context>): boolean {
   const flappingHistory: boolean[] = alert.getFlappingHistory() || [];
   const isCurrentlyFlapping = alert.getFlapping();
   return isFlapping(flappingHistory, isCurrentlyFlapping);

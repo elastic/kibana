@@ -1,0 +1,130 @@
+{
+  "id": "@kbn/core-custom-branding-server-internal",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/core-custom-branding-server-internal",
+        "id": "def-common.CustomBrandingService",
+        "type": "Class",
+        "tags": [],
+        "label": "CustomBrandingService",
+        "description": [],
+        "path": "packages/core/custom-branding/core-custom-branding-server-internal/custom_branding_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-custom-branding-server-internal",
+            "id": "def-common.CustomBrandingService.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/core/custom-branding/core-custom-branding-server-internal/custom_branding_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-custom-branding-server-internal",
+                "id": "def-common.CustomBrandingService.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "coreContext",
+                "description": [],
+                "signature": [
+                  "CoreContext"
+                ],
+                "path": "packages/core/custom-branding/core-custom-branding-server-internal/custom_branding_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-custom-branding-server-internal",
+            "id": "def-common.CustomBrandingService.setup",
+            "type": "Function",
+            "tags": [],
+            "label": "setup",
+            "description": [],
+            "signature": [
+              "() => ",
+              "InternalCustomBrandingSetup"
+            ],
+            "path": "packages/core/custom-branding/core-custom-branding-server-internal/custom_branding_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-custom-branding-server-internal",
+            "id": "def-common.CustomBrandingService.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/core-custom-branding-server",
+                "scope": "common",
+                "docId": "kibKbnCoreCustomBrandingServerPluginApi",
+                "section": "def-common.CustomBrandingStart",
+                "text": "CustomBrandingStart"
+              }
+            ],
+            "path": "packages/core/custom-branding/core-custom-branding-server-internal/custom_branding_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-custom-branding-server-internal",
+            "id": "def-common.CustomBrandingService.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "packages/core/custom-branding/core-custom-branding-server-internal/custom_branding_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}
