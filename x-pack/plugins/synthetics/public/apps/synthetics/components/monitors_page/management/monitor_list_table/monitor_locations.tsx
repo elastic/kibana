@@ -37,6 +37,13 @@ export const MonitorLocations = ({ locations, monitorId, status }: Props) => {
   return <LocationStatusBadges locations={locationsToDisplay} loading={false} />;
 };
 
+const EuiBadgeGroupStyled = euiStyled(EuiBadgeGroup)`
+  .euiBadge {
+    -webkit-margin-start: 0;
+    margin-inline-start: 0;
+  }
+`;
+
 function getLocationStatusColor(
   euiTheme: ReturnType<typeof useTheme>,
   locationLabel: string | undefined,
@@ -57,3 +64,7 @@ function getLocationStatusColor(
 
   return { status: 'unknown', color: euiColorDisabled };
 }
+
+const CLICK_LOCATION_LABEL = i18n.translate('xpack.synthetics.management.location.clickMessage', {
+  defaultMessage: 'Click to view details for this location.',
+});

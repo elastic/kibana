@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
@@ -21,13 +21,13 @@ import { MonitorDetailsLink } from './monitor_details_link';
 
 import {
   ConfigKey,
-  DataStream,
   EncryptedSyntheticsSavedMonitor,
   OverviewStatusState,
   ServiceLocations,
   SyntheticsMonitorSchedule,
 } from '../../../../../../../common/runtime_types';
 
+import { MonitorTypeBadge } from '../../../common/components/monitor_type_badge';
 import { getFrequencyLabel } from './labels';
 import { MonitorEnabled } from './monitor_enabled';
 import { MonitorLocations } from './monitor_locations';
@@ -67,13 +67,22 @@ export function useMonitorListColumns({
     },
     {
       align: 'left' as const,
+      field: ConfigKey.PROJECT_ID as string,
+      name: i18n.translate('xpack.synthetics.management.monitorList.projectId', {
+        defaultMessage: 'Project ID',
+      }),
+      sortable: true,
+      render: (projectId: string) => projectId,
+    },
+    {
+      align: 'left' as const,
       field: ConfigKey.MONITOR_TYPE,
       name: i18n.translate('xpack.synthetics.management.monitorList.monitorType', {
         defaultMessage: 'Type',
       }),
       sortable: true,
-      render: (monitorType: DataStream) => (
-        <EuiBadge>{monitorType === DataStream.BROWSER ? 'Browser' : 'Ping'}</EuiBadge>
+      render: (_: string, monitor: EncryptedSyntheticsSavedMonitor) => (
+        <MonitorTypeBadge monitor={monitor} />
       ),
     },
     {

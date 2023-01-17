@@ -201,10 +201,6 @@ export const DISABLE_MONITOR_LABEL = i18n.translate(
   }
 );
 
-export const PROJECT = i18n.translate('xpack.synthetics.management.project', {
-  defaultMessage: 'Project',
-});
-
 export const getMonitorEnabledSuccessLabel = (name: string) =>
   i18n.translate('xpack.synthetics.management.monitorEnabledSuccessMessage', {
     defaultMessage: 'Monitor {name} enabled successfully.',
