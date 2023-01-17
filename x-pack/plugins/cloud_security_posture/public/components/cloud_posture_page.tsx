@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { NoDataPage, NoDataPageProps } from '@kbn/kibana-react-plugin/public';
@@ -73,28 +74,39 @@ export const CspNoDataPage = ({
   actionTitle,
   actionDescription,
   testId,
-}: CspNoDataPageProps) => (
-  <NoDataPage
-    data-test-subj={testId}
-    css={css`
-      max-width: 950px;
-    `}
-    pageTitle={pageTitle}
-    solution={i18n.translate('xpack.csp.cloudPosturePage.packageNotInstalled.solutionNameLabel', {
-      defaultMessage: 'Cloud Security Posture',
-    })}
-    docsLink={docsLink}
-    logo="logoSecurity"
-    actions={{
-      elasticAgent: {
-        href: actionHref,
-        isDisabled: !actionHref,
-        title: actionTitle,
-        description: actionDescription,
-      },
-    }}
-  />
-);
+}: CspNoDataPageProps) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <NoDataPage
+      data-test-subj={testId}
+      css={css`
+        div:nth-child(3) {
+          display: block;
+          margin: auto;
+          width: 450px;
+          button {
+            margin: 0 auto;
+            margin-top: ${euiTheme.size.base};
+          }
+        }
+      `}
+      pageTitle={pageTitle}
+      solution={i18n.translate('xpack.csp.cloudPosturePage.packageNotInstalled.solutionNameLabel', {
+        defaultMessage: 'Cloud Security Posture',
+      })}
+      docsLink={docsLink}
+      logo="logoSecurity"
+      actions={{
+        elasticAgent: {
+          href: actionHref,
+          isDisabled: !actionHref,
+          title: actionTitle,
+          description: actionDescription,
+        },
+      }}
+    />
+  );
+};
 
 const packageNotInstalledRenderer = ({
   kspmIntegrationLink,
