@@ -99,4 +99,17 @@ describe('#checkAdditiveOnlyChange', () => {
       'Checked 6 existing properties. All present in extracted mappings.'
     );
   });
+
+  test('handles empty current', () => {
+    const current: SavedObjectsTypeMappingDefinitions = {};
+    const next: SavedObjectsTypeMappingDefinitions = {
+      foo: { properties: { text: { type: 'text' } } },
+    };
+
+    expect(() => checkAdditiveOnlyChange(log, current, next)).not.toThrow();
+    expect(log.success).toHaveBeenCalledTimes(1);
+    expect(log.success).toHaveBeenCalledWith(
+      'Checked 0 existing properties. All present in extracted mappings.'
+    );
+  });
 });
