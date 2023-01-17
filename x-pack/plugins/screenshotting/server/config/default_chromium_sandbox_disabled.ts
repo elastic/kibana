@@ -11,7 +11,7 @@ import { promisify } from 'util';
 const getOs = promisify(getOsSync);
 
 const distroSupportsUnprivilegedUsernamespaces = (distro: string) => {
-  // Debian 7 and 8 don't support usernamespaces by default
+  // Debian 7 and 8 don't support user namespaces by default
   // this should be reevaluated when Debian 9 is available
   if (distro.toLowerCase() === 'debian') {
     return false;
@@ -39,7 +39,16 @@ interface OsSummary {
 
 export async function getDefaultChromiumSandboxDisabled(): Promise<OsSummary> {
   const os = await getOs();
-  const enableSandbox = os.os !== 'linux' || distroSupportsUnprivilegedUsernamespaces(os.dist);
+
+  let enableSandbox: boolean;
+  if (process.env.ELASTIC_CONTAINER) {
+    // In the Elastic Docker image, user namespaces is not supported. This is relatively safe since Docker
+    // provides a level of isolation. In addition, Chromium is only used to open Kibana URLs within the
+    // deployment, which makes it relatively locked down from being able to exploit Chromium.
+    enableSandbox = false;
+  } else {
+    enableSandbox = os.os !== 'linux' || distroSupportsUnprivilegedUsernamespaces(os.dist);
+  }
 
   return { os, disableSandbox: !enableSandbox };
 }
