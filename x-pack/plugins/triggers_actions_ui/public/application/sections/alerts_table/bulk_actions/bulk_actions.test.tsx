@@ -12,7 +12,12 @@ import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strat
 
 import { BulkActionsContext } from './context';
 import { AlertsTable } from '../alerts_table';
-import { AlertsField, AlertsTableProps, BulkActionsState } from '../../../../types';
+import {
+  AlertsField,
+  AlertsTableProps,
+  BulkActionsState,
+  RowSelectionState,
+} from '../../../../types';
 import { bulkActionsReducer } from './reducer';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
@@ -120,7 +125,7 @@ describe('AlertsTable.BulkActions', () => {
   };
 
   const defaultBulkActionsState = {
-    rowSelection: new Map<number, boolean>(),
+    rowSelection: new Map<number, RowSelectionState>(),
     isAllSelected: false,
     areAllVisibleRowsSelected: false,
     rowCount: 2,
@@ -185,8 +190,8 @@ describe('AlertsTable.BulkActions', () => {
             ...defaultBulkActionsState,
             areAllVisibleRowsSelected: true,
             rowSelection: new Map([
-              [0, false],
-              [1, false],
+              [0, { isLoading: false }],
+              [1, { isLoading: false }],
             ]),
           },
         };
@@ -204,8 +209,8 @@ describe('AlertsTable.BulkActions', () => {
               ...defaultBulkActionsState,
               areAllVisibleRowsSelected: true,
               rowSelection: new Map([
-                [0, false],
-                [1, false],
+                [0, { isLoading: false }],
+                [1, { isLoading: false }],
               ]),
             },
           };
@@ -247,7 +252,7 @@ describe('AlertsTable.BulkActions', () => {
             initialBulkActionsState: {
               ...defaultBulkActionsState,
               areAllVisibleRowsSelected: true,
-              rowSelection: new Map([[0, false]]),
+              rowSelection: new Map([[0, { isLoading: false }]]),
             },
           };
           render(<AlertsTableWithBulkActionsContext {...props} />);
@@ -267,8 +272,8 @@ describe('AlertsTable.BulkActions', () => {
             ...defaultBulkActionsState,
             areAllVisibleRowsSelected: true,
             rowSelection: new Map([
-              [0, false],
-              [1, false],
+              [0, { isLoading: false }],
+              [1, { isLoading: false }],
             ]),
           },
         };
@@ -314,7 +319,7 @@ describe('AlertsTable.BulkActions', () => {
             ...tablePropsWithBulkActions,
             initialBulkActionsState: {
               ...defaultBulkActionsState,
-              rowSelection: new Map([[0, false]]),
+              rowSelection: new Map([[0, { isLoading: false }]]),
             },
           };
           const { queryByTestId, getAllByTestId, getByTestId } = render(
@@ -341,7 +346,7 @@ describe('AlertsTable.BulkActions', () => {
             ...tablePropsWithBulkActions,
             initialBulkActionsState: {
               ...defaultBulkActionsState,
-              rowSelection: new Map([[1, false]]),
+              rowSelection: new Map([[1, { isLoading: false }]]),
             },
             alertsTableConfiguration: {
               ...alertsTableConfiguration,
@@ -413,7 +418,7 @@ describe('AlertsTable.BulkActions', () => {
           it('should show the loading state on each selected row', async () => {
             const initialBulkActionsState = {
               ...defaultBulkActionsState,
-              rowSelection: new Map([[1, false]]),
+              rowSelection: new Map([[1, { isLoading: false }]]),
             };
             render(
               <AlertsTableWithBulkActionsContext
@@ -443,7 +448,7 @@ describe('AlertsTable.BulkActions', () => {
           it('should hide the loading state on each selected row', async () => {
             const initialBulkActionsState = {
               ...defaultBulkActionsState,
-              rowSelection: new Map([[1, true]]),
+              rowSelection: new Map([[1, { isLoading: true }]]),
             };
             render(
               <AlertsTableWithBulkActionsContext
@@ -470,7 +475,7 @@ describe('AlertsTable.BulkActions', () => {
             ...tablePropsWithBulkActions,
             initialBulkActionsState: {
               ...defaultBulkActionsState,
-              rowSelection: new Map([[0, false]]),
+              rowSelection: new Map([[0, { isLoading: false }]]),
             },
           };
 
@@ -506,8 +511,8 @@ describe('AlertsTable.BulkActions', () => {
                 areAllVisibleRowsSelected: true,
                 isAllSelected: true,
                 rowSelection: new Map([
-                  [0, false],
-                  [1, false],
+                  [0, { isLoading: false }],
+                  [1, { isLoading: false }],
                 ]),
               },
             };
@@ -546,8 +551,8 @@ describe('AlertsTable.BulkActions', () => {
                 isAllSelected: true,
                 rowCount: 2,
                 rowSelection: new Map([
-                  [0, false],
-                  [1, false],
+                  [0, { isLoading: false }],
+                  [1, { isLoading: false }],
                 ]),
               },
               alertsTableConfiguration: {

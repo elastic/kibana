@@ -12,14 +12,14 @@ import { BulkActionsContext } from '../bulk_actions/context';
 const DEFAULT_ACTIONS_COLUMNS_WIDTH = 75;
 
 interface UseActionsColumnProps {
-  config?: UseActionsColumnRegistry;
+  options?: UseActionsColumnRegistry;
 }
 
-export const useActionsColumn = ({ config }: UseActionsColumnProps) => {
+export const useActionsColumn = ({ options }: UseActionsColumnProps) => {
   const [, updateBulkActionsState] = useContext(BulkActionsContext);
 
-  const useUserActionsColumn = config
-    ? config
+  const useUserActionsColumn = options
+    ? options
     : () => ({
         renderCustomActionsRow: undefined,
         width: undefined,
@@ -30,7 +30,7 @@ export const useActionsColumn = ({ config }: UseActionsColumnProps) => {
 
   // we save the rowIndex when creating the function to be used by the clients
   // so they don't have to manage it
-  const setIsActionLoadingFactory =
+  const getSetIsActionLoadingCallback =
     (rowIndex: number) =>
     (isLoading: boolean = true) => {
       updateBulkActionsState({
@@ -43,6 +43,6 @@ export const useActionsColumn = ({ config }: UseActionsColumnProps) => {
   return {
     renderCustomActionsRow,
     actionsColumnWidth,
-    setIsActionLoadingFactory,
+    getSetIsActionLoadingCallback,
   };
 };

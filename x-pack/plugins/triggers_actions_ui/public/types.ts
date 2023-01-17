@@ -565,10 +565,16 @@ export interface BulkActionsReducerAction {
 }
 
 export interface BulkActionsState {
-  rowSelection: Map<number, boolean>; // number = selected index, boolean = is loading
+  rowSelection: Map<number, RowSelectionState>;
   isAllSelected: boolean;
   areAllVisibleRowsSelected: boolean;
   rowCount: number;
+}
+
+export type RowSelection = Map<number, RowSelectionState>;
+
+export interface RowSelectionState {
+  isLoading: boolean;
 }
 
 export type RuleStatus = 'enabled' | 'disabled' | 'snoozed';

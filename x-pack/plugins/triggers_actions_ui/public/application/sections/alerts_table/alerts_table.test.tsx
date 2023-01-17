@@ -12,7 +12,7 @@ import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 
 import { AlertsTable } from './alerts_table';
-import { AlertsField, AlertsTableProps, BulkActionsState } from '../../../types';
+import { AlertsField, AlertsTableProps, BulkActionsState, RowSelectionState } from '../../../types';
 import { EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { BulkActionsContext } from './bulk_actions/context';
@@ -113,7 +113,7 @@ describe('AlertsTable', () => {
   };
 
   const defaultBulkActionsState = {
-    rowSelection: new Map<number, boolean>(),
+    rowSelection: new Map<number, RowSelectionState>(),
     isAllSelected: false,
     areAllVisibleRowsSelected: false,
     rowCount: 2,
@@ -339,7 +339,7 @@ describe('AlertsTable', () => {
         it('should show the row loader when callback triggered with false', async () => {
           const initialBulkActionsState = {
             ...defaultBulkActionsState,
-            rowSelection: new Map([[0, true]]),
+            rowSelection: new Map([[0, { isLoading: true }]]),
           };
 
           render(

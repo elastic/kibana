@@ -13,7 +13,7 @@ import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strat
 import React, { lazy, Suspense } from 'react';
 import { BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { AlertsCount } from './components/alerts_count/alerts_count';
-import { BulkActionsConfig } from '../../../../types';
+import { BulkActionsConfig, RowSelection } from '../../../../types';
 import { LastUpdatedAt } from './components/last_updated_at';
 import { FieldBrowser } from '../../field_browser';
 
@@ -94,7 +94,7 @@ export const getToolbarVisibility = ({
 }: {
   bulkActions: BulkActionsConfig[];
   alertsCount: number;
-  rowSelection: Map<number, boolean>;
+  rowSelection: RowSelection;
   alerts: EcsFieldsResponse[];
   isLoading: boolean;
   updatedAt: number;

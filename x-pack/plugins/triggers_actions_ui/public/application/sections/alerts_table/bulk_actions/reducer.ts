@@ -8,7 +8,7 @@
 import { BulkActionsReducerAction, BulkActionsState, BulkActionsVerbs } from '../../../../types';
 
 const getAllRowsInPage = (rowCount: number) =>
-  new Map(Array.from(Array(rowCount).keys()).map((idx) => [idx, false]));
+  new Map(Array.from(Array(rowCount).keys()).map((idx) => [idx, { isLoading: false }]));
 
 export const bulkActionsReducer = (
   currentState: BulkActionsState,
@@ -19,7 +19,7 @@ export const bulkActionsReducer = (
 
   if (action === BulkActionsVerbs.add && rowIndex !== undefined) {
     const nextRowSelection = new Map(rowSelection);
-    nextRowSelection.set(rowIndex, isLoading);
+    nextRowSelection.set(rowIndex, { isLoading });
     nextState.rowSelection = nextRowSelection;
   } else if (action === BulkActionsVerbs.delete && rowIndex !== undefined) {
     const nextRowSelection = new Map(rowSelection);
@@ -37,11 +37,11 @@ export const bulkActionsReducer = (
     nextState.rowCount = rowCount;
   } else if (action === BulkActionsVerbs.updateAllLoadingState) {
     const nextRowSelection = new Map(
-      Array.from(rowSelection.keys()).map((idx: number) => [idx, isLoading])
+      Array.from(rowSelection.keys()).map((idx: number) => [idx, { isLoading }])
     );
     nextState.rowSelection = nextRowSelection;
   } else if (action === BulkActionsVerbs.updateRowLoadingState && rowIndex !== undefined) {
-    nextState.rowSelection.set(rowIndex, isLoading);
+    nextState.rowSelection.set(rowIndex, { isLoading });
   }
 
   nextState.areAllVisibleRowsSelected = nextState.rowSelection.size === nextState.rowCount;

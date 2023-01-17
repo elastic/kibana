@@ -50,9 +50,9 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   } = alertsData;
   const { sortingColumns, onSort } = useSorting(onSortChange, sortingFields);
 
-  const { renderCustomActionsRow, actionsColumnWidth, setIsActionLoadingFactory } =
+  const { renderCustomActionsRow, actionsColumnWidth, getSetIsActionLoadingCallback } =
     useActionsColumn({
-      config: props.alertsTableConfiguration.useActionsColumn,
+      options: props.alertsTableConfiguration.useActionsColumn,
     });
 
   const {
@@ -177,7 +177,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
                     alerts[visibleRowIndex],
                     handleFlyoutAlert,
                     props.id,
-                    setIsActionLoadingFactory(visibleRowIndex)
+                    getSetIsActionLoadingCallback(visibleRowIndex)
                   )}
               </EuiFlexGroup>
             );
@@ -203,7 +203,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     props.showExpandToDetails,
     renderCustomActionsRow,
     setFlyoutAlertIndex,
-    setIsActionLoadingFactory,
+    getSetIsActionLoadingCallback,
   ]);
 
   useEffect(() => {

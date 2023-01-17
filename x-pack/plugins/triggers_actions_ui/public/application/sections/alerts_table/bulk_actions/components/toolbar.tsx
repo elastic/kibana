@@ -11,7 +11,7 @@ import React, { useState, useCallback, useMemo, useContext, useEffect } from 're
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
-import { BulkActionsConfig, BulkActionsVerbs } from '../../../../../types';
+import { BulkActionsConfig, BulkActionsVerbs, RowSelection } from '../../../../../types';
 import * as i18n from '../translations';
 import { BulkActionsContext } from '../context';
 
@@ -41,7 +41,7 @@ const containerStyles = { display: 'inline-block', position: 'relative' } as con
 
 const selectedIdsToTimelineItemMapper = (
   alerts: EcsFieldsResponse[],
-  rowSelection: Map<number, boolean>
+  rowSelection: RowSelection
 ): TimelineItem[] => {
   return Array.from(rowSelection.keys()).map((rowIndex: number) => {
     const alert = alerts[rowIndex];

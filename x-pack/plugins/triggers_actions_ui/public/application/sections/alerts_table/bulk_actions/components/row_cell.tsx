@@ -14,7 +14,7 @@ import { BulkActionsContext } from '../context';
 const BulkActionsRowCellComponent = ({ rowIndex }: { rowIndex: number }) => {
   const [{ rowSelection }, updateSelectedRows] = useContext(BulkActionsContext);
   const isChecked = rowSelection.has(rowIndex);
-  const isLoading = isChecked && rowSelection.get(rowIndex);
+  const isLoading = isChecked && rowSelection.get(rowIndex)?.isLoading;
 
   if (isLoading) {
     return <EuiLoadingSpinner size="m" data-test-subj="row-loader" />;
