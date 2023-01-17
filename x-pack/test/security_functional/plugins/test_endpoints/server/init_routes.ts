@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { errors } from '@elastic/elasticsearch';
-import { CoreSetup, CoreStart, PluginInitializerContext, KibanaRequest } from '@kbn/core/server';
+import { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/server';
 import type {
   TaskManagerStartContract,
   ConcreteTaskInstance,
@@ -145,7 +145,7 @@ export function initRoutes(
   }
 
   async function refreshTaskManagerIndex(
-    request: KibanaRequest,
+    enabled: boolean,
     coreStart: CoreStart,
     taskManager: TaskManagerStartContract
   ) {
@@ -153,9 +153,7 @@ export function initRoutes(
     // Might not be needed once https://github.com/elastic/kibana/pull/148985 is merged.
     try {
       logger.info(
-        `Refreshing task manager index (enabled: ${
-          request.body.enabled
-        }), current task: ${JSON.stringify(
+        `Refreshing task manager index (enabled: ${enabled}), current task: ${JSON.stringify(
           await taskManager.get(SESSION_INDEX_CLEANUP_TASK_NAME)
         )}...`
       );
@@ -166,17 +164,15 @@ export function initRoutes(
       });
 
       logger.info(
-        `Successfully refreshed task manager index (enabled: ${
-          request.body.enabled
-        }), refresh result: ${JSON.stringify(refreshResult)}, current task: ${JSON.stringify(
+        `Successfully refreshed task manager index (enabled: ${enabled}), refresh result: ${JSON.stringify(
+          refreshResult
+        )}, current task: ${JSON.stringify(
           await taskManager.get(SESSION_INDEX_CLEANUP_TASK_NAME)
         )}.`
       );
     } catch (err) {
       logger.error(
-        `Failed to refresh task manager index (enabled: ${request.body.enabled}): ${
-          err?.message || err
-        }.`
+        `Failed to refresh task manager index (enabled: ${enabled}): ${err?.message || err}.`
       );
     }
   }
@@ -190,7 +186,7 @@ export function initRoutes(
       const [coreStart, { taskManager }] = await core.getStartServices();
       logger.info(`Toggle session cleanup task (enabled: ${request.body.enabled}).`);
 
-      await refreshTaskManagerIndex(request, coreStart, taskManager);
+      await refreshTaskManagerIndex(request.body.enabled, coreStart, taskManager);
 
       let bulkEnableDisableResult: BulkUpdateTaskResult;
       try {
