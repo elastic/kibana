@@ -9,6 +9,7 @@ import React from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiLink, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { get } from 'lodash/fp';
+import { CellActions, CellActionsMode } from '@kbn/ui-actions-plugin/public';
 import { UsersTableType } from '../../../../explore/users/store/model';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { HostDetailsLink, UserDetailsLink } from '../../../../common/components/links';
@@ -22,7 +23,10 @@ import type {
 import { RiskScoreEntity, RiskScoreFields } from '../../../../../common/search_strategy';
 import * as i18n from './translations';
 import { FormattedCount } from '../../../../common/components/formatted_number';
-import { EntityAnalyticsHoverActions } from '../common/entity_hover_actions';
+import { CELL_ACTIONS_DEFAULT_TRIGGER } from '../../../../../common/constants';
+import { ACTION_ID as FILTER_IN_ACTION_ID } from '../../../../actions/filter/default/filter_in';
+import { ACTION_ID as FILTER_OUT_ACTION_ID } from '../../../../actions/filter/default/filter_out';
+import { ACTION_ID as SHOW_TOP_N_ACTION_ID } from '../../../../actions/show_top_n/default/show_top_n';
 
 type HostRiskScoreColumns = Array<EuiBasicTableColumn<HostRiskScore & UserRiskScore>>;
 
@@ -40,19 +44,30 @@ export const getRiskScoreColumns = (
         return riskEntity === RiskScoreEntity.host ? (
           <>
             <HostDetailsLink hostName={entityName} hostTab={HostsTableType.risk} />
-            <EntityAnalyticsHoverActions
-              idPrefix={`hosts-risk-table-${entityName}`}
-              fieldName={'host.name'}
-              fieldValue={entityName}
+            <CellActions
+              field={{
+                name: 'host.name',
+                value: entityName,
+                type: 'keyword',
+              }}
+              triggerId={CELL_ACTIONS_DEFAULT_TRIGGER}
+              mode={CellActionsMode.ALWAYS_VISIBLE}
+              visibleCellActions={2}
+              disabledActions={[SHOW_TOP_N_ACTION_ID, FILTER_IN_ACTION_ID, FILTER_OUT_ACTION_ID]}
             />
           </>
         ) : (
           <>
             <UserDetailsLink userName={entityName} userTab={UsersTableType.risk} />
-            <EntityAnalyticsHoverActions
-              idPrefix={`users-risk-table-${entityName}`}
-              fieldName={'user.name'}
-              fieldValue={entityName}
+            <CellActions
+              field={{
+                name: 'user.name',
+                value: entityName,
+                type: 'keyword',
+              }}
+              triggerId={CELL_ACTIONS_DEFAULT_TRIGGER}
+              mode={CellActionsMode.ALWAYS_VISIBLE}
+              disabledActions={[SHOW_TOP_N_ACTION_ID, FILTER_IN_ACTION_ID, FILTER_OUT_ACTION_ID]}
             />
           </>
         );
