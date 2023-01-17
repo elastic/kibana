@@ -11,7 +11,7 @@ import {
 } from '../../../../common/endpoint/constants';
 import { login, loginWithRole, ROLE } from '../tasks/login';
 import { setupLicense } from '../tasks/license';
-import { licenses } from '../fixtures/licenses';
+import { platinum, gold } from '../fixtures/licenses';
 import { loadEndpointIfNoneExist } from '../tasks/common/load_endpoint_data';
 
 const loginWithWriteAccess = (url: string) => {
@@ -27,7 +27,7 @@ describe('Endpoint list', () => {
 
   describe('Platinum license', () => {
     beforeEach(() => {
-      setupLicense(licenses.platinum);
+      setupLicense(platinum);
     });
 
     it('should allow isolating endpoint', () => {
@@ -43,24 +43,24 @@ describe('Endpoint list', () => {
             headers: { 'kbn-xsrf': 'kibana' },
             body: {
               endpoint_ids: [endpointIds[0]],
-              comment: 'Isolating from Cypress',
+              comment: 'Isolating from Cypress with Platinum license',
             },
+            failOnStatusCode: false,
           });
         })
-        .then((response) => {
-          expect(response.status).to.eq(200);
+        .then((isolateResp) => {
+          expect(isolateResp.status).to.eq(200);
         });
     });
   });
 
   describe('Gold license', () => {
     beforeEach(() => {
-      setupLicense(licenses.gold);
+      setupLicense(gold);
     });
 
     it('should not allow isolating endpoint', () => {
       loginWithWriteAccess('/app/security/administration/endpoints');
-
       cy.request('GET', HOST_METADATA_LIST_ROUTE)
         .then((metadataResponse) => {
           const endpointIds = metadataResponse.body.data.map(
@@ -72,14 +72,15 @@ describe('Endpoint list', () => {
             headers: { 'kbn-xsrf': 'kibana' },
             body: {
               endpoint_ids: [endpointIds[0]],
-              comment: 'Isolating from Cypress',
+              comment: 'Isolating from Cypress with Gold license',
             },
+            failOnStatusCode: false,
           });
         })
-        .then((response) => {
-          expect(response.status).to.eq(403);
-          expect(response.body).to.have.property('error', 'Forbidden');
-          expect(response.body).to.have.property('message', 'Endpoint authorization failure');
+        .then((isolateResp) => {
+          expect(isolateResp.status).to.eq(403);
+          expect(isolateResp.body).to.have.property('error', 'Forbidden');
+          expect(isolateResp.body).to.have.property('message', 'Endpoint authorization failure');
         });
     });
   });

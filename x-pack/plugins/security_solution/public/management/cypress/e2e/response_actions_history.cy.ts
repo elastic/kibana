@@ -7,7 +7,7 @@
 
 import { login, loginWithRole, ROLE } from '../tasks/login';
 import { setupLicense } from '../tasks/license';
-import { licenses } from '../fixtures/licenses';
+import { enterprise, platinum } from '../fixtures/licenses';
 import { loadEndpointIfNoneExist } from '../tasks/common/load_endpoint_data';
 
 const loginWithReadAccess = (url: string) => {
@@ -15,49 +15,47 @@ const loginWithReadAccess = (url: string) => {
   cy.visit(url);
 };
 
-describe('Enterprise license', () => {
+describe('Response actions history', () => {
   before(() => {
     login();
   });
 
-  beforeEach(() => {
-    setupLicense(licenses.enterprise);
+  describe('Enterprise license', () => {
+    beforeEach(() => {
+      setupLicense(enterprise);
+    });
+
+    it('should show response actions history nav link', () => {
+      loginWithReadAccess('/app/security/manage');
+      cy.contains('Response actions history').should('exist');
+    });
+
+    it('should show response actions history page', () => {
+      loginWithReadAccess('/app/security/administration/response_actions_history');
+      cy.getBySel('responseActionsPage').should('exist');
+    });
   });
 
-  it('should show response actions history nav link', () => {
-    loginWithReadAccess('/app/security/manage');
-    cy.contains('Response actions history').should('exist');
-  });
+  describe('Platinum license', () => {
+    beforeEach(() => {
+      setupLicense(platinum);
+    });
 
-  it('should show response actions history page', () => {
-    loginWithReadAccess('/app/security/administration/response_actions_history');
-    cy.getBySel('responseActionsPage').should('exist');
-  });
-});
+    it('should not show response actions history nav link', () => {
+      loginWithReadAccess('/app/security/manage');
+      cy.contains('Response actions history').should('not.exist');
+    });
 
-describe('Platinum license', () => {
-  before(() => {
-    login();
-  });
+    it('shows the privilege required callout while accessing response actions history page', () => {
+      loginWithReadAccess('/app/security/administration/response_actions_history');
+      cy.get("[data-test-subj='noPrivilegesPage']").should('exist');
+    });
 
-  beforeEach(() => {
-    setupLicense(licenses.platinum);
-  });
-
-  it('should not show response actions history nav link', () => {
-    loginWithReadAccess('/app/security/manage');
-    cy.contains('Response actions history').should('not.exist');
-  });
-
-  it('shows the privilege required callout while accessing response actions history page', () => {
-    loginWithReadAccess('/app/security/administration/response_actions_history');
-    cy.get("[data-test-subj='noPrivilegesPage']").should('exist');
-  });
-
-  it('should display response action history for an endpoint', () => {
-    loadEndpointIfNoneExist();
-    loginWithReadAccess('/app/security/administration/endpoints');
-    cy.getBySel('hostnameCellLink').first().click();
-    cy.getBySel('endpoint-details-flyout-tab-activity_log').should('exist');
+    it('should display response action history for an endpoint', () => {
+      loadEndpointIfNoneExist();
+      loginWithReadAccess('/app/security/administration/endpoints');
+      cy.getBySel('hostnameCellLink').first().click();
+      cy.getBySel('endpoint-details-flyout-tab-activity_log').should('exist');
+    });
   });
 });

@@ -7,7 +7,7 @@
 
 import { login, loginWithRole, ROLE } from '../tasks/login';
 import { setupLicense } from '../tasks/license';
-import { licenses } from '../fixtures/licenses';
+import { enterprise, platinum } from '../fixtures/licenses';
 import { loadEndpointIfNoneExist } from '../tasks/common/load_endpoint_data';
 
 const loginWithWriteAccess = (url: string) => {
@@ -23,7 +23,7 @@ describe('Responder', () => {
 
   describe('Enterprise license', () => {
     beforeEach(() => {
-      setupLicense(licenses.enterprise);
+      setupLicense(enterprise);
     });
 
     it('should display responder action item for an endpoint', () => {
@@ -35,7 +35,7 @@ describe('Responder', () => {
 
   describe('Platinum license', () => {
     beforeEach(() => {
-      setupLicense(licenses.platinum);
+      setupLicense(platinum);
     });
 
     it('should not display responder action item for an endpoint', () => {

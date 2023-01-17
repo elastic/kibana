@@ -8,20 +8,35 @@
 export const setupLicense = (body: {
   license: Record<string, unknown | { type: 'gold' | 'platinum' | 'enterprise' }>;
 }) => {
+  const auth = {
+    user: Cypress.env('ELASTICSEARCH_USERNAME'),
+    pass: Cypress.env('ELASTICSEARCH_PASSWORD'),
+  };
   cy.request({
-    method: 'POST',
-    auth: {
-      user: Cypress.env('ELASTICSEARCH_USERNAME'),
-      pass: Cypress.env('ELASTICSEARCH_PASSWORD'),
-    },
+    auth,
+    body,
     headers: {
       'kbn-xsrf': 'cypress',
     },
-    url: `${Cypress.env('ELASTICSEARCH_URL')}/_license/?acknowledge=true`,
-    body,
-  }).should((response) => {
-    expect(response.status).equal(200);
-    expect(response.body.acknowledged).equal(true);
-    expect(response.body.license_status).equal('valid');
-  });
+    method: 'PUT',
+    url: '/api/license?acknowledge=true',
+    failOnStatusCode: false,
+  })
+    .then((response) => {
+      expect(response.status).equal(200);
+      expect(response.body.acknowledged).equal(true);
+      expect(response.body.license_status).equal('valid');
+
+      cy.request({
+        auth,
+        method: 'GET',
+        url: 'api/licensing/info',
+      });
+    })
+    .then((licenseInfo) => {
+      expect(licenseInfo.status).to.eq(200);
+      expect(licenseInfo.body.license.status).to.eq('active');
+      expect(licenseInfo.body.license.type).to.eq(body.license.type);
+      expect(licenseInfo.body.license.mode).to.eq(body.license.type);
+    });
 };
