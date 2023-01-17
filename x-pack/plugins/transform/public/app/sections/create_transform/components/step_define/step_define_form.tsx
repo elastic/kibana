@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, FC } from 'react';
-
-import { i18n } from '@kbn/i18n';
+import React, { useEffect, useMemo, FC } from 'react';
 
 import {
   EuiButton,
@@ -23,14 +21,18 @@ import {
   EuiText,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+import { mlTimefilterRefresh$, useTimefilter, DatePickerWrapper } from '@kbn/ml-date-picker';
+import { useUrlState } from '@kbn/ml-url-state';
+
 import { PivotAggDict } from '../../../../../../common/types/pivot_aggs';
 import { PivotGroupByDict } from '../../../../../../common/types/pivot_group_by';
+import { TRANSFORM_FUNCTION } from '../../../../../../common/constants';
 
 import {
   getIndexDevConsoleStatement,
   getPivotPreviewDevConsoleStatement,
 } from '../../../../common/data_grid';
-
 import {
   getPreviewTransformRequestBody,
   PivotAggsConfigDict,
@@ -43,21 +45,23 @@ import { useIndexData } from '../../../../hooks/use_index_data';
 import { usePivotData } from '../../../../hooks/use_pivot_data';
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import { SearchItems } from '../../../../hooks/use_search_items';
+import { getAggConfigFromEsAgg } from '../../../../common/pivot_aggs';
 
 import { AdvancedPivotEditor } from '../advanced_pivot_editor';
 import { AdvancedPivotEditorSwitch } from '../advanced_pivot_editor_switch';
 import { AdvancedQueryEditorSwitch } from '../advanced_query_editor_switch';
 import { AdvancedSourceEditor } from '../advanced_source_editor';
+import { DatePickerApplySwitch } from '../date_picker_apply_switch';
 import { PivotConfiguration } from '../pivot_configuration';
 import { SourceSearchBar } from '../source_search_bar';
+import { AdvancedRuntimeMappingsSettings } from '../advanced_runtime_mappings_settings';
 
 import { StepDefineExposedState } from './common';
 import { useStepDefineForm } from './hooks/use_step_define_form';
-import { getAggConfigFromEsAgg } from '../../../../common/pivot_aggs';
 import { TransformFunctionSelector } from './transform_function_selector';
-import { TRANSFORM_FUNCTION } from '../../../../../../common/constants';
 import { LatestFunctionForm } from './latest_function_form';
-import { AdvancedRuntimeMappingsSettings } from '../advanced_runtime_mappings_settings';
+
+const advancedEditorsSidebarWidth = '220px';
 
 export interface StepDefineFormProps {
   overrides?: StepDefineExposedState;
@@ -66,6 +70,7 @@ export interface StepDefineFormProps {
 }
 
 export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
+  const [globalState, setGlobalState] = useUrlState('_g');
   const { searchItems } = props;
   const { dataView } = searchItems;
   const indexPattern = useMemo(() => dataView.getIndexPattern(), [dataView]);
@@ -194,7 +199,33 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
 
   const { esQueryDsl, esTransformPivot } = useDocumentationLinks();
 
-  const advancedEditorsSidebarWidth = '220px';
+  const hasValidTimeField = useMemo(
+    () => dataView.timeFieldName !== undefined && dataView.timeFieldName !== '',
+    [dataView.timeFieldName]
+  );
+  console.log('hasValidTimeField', hasValidTimeField);
+
+  const timefilter = useTimefilter({
+    timeRangeSelector: dataView?.timeFieldName !== undefined,
+    autoRefreshSelector: false,
+  });
+
+  useEffect(() => {
+    if (globalState?.time !== undefined) {
+      timefilter.setTime({
+        from: globalState.time.from,
+        to: globalState.time.to,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(globalState?.time), timefilter]);
+
+  useEffect(() => {
+    if (globalState?.refreshInterval !== undefined) {
+      timefilter.setRefreshInterval(globalState.refreshInterval);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(globalState?.refreshInterval), timefilter]);
 
   return (
     <div data-test-subj="transformStepDefineForm">
@@ -216,15 +247,46 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
           </EuiFormRow>
         )}
 
+        {hasValidTimeField && (
+          <EuiFormRow
+            fullWidth
+            label={i18n.translate('xpack.transform.stepDefineForm.datePickerLabel', {
+              defaultMessage: 'Time range',
+            })}
+          >
+            <EuiFlexGroup alignItems="flexStart" justifyContent="spaceBetween">
+              {/* Flex Column #1: Date Picker */}
+              <EuiFlexItem>
+                <DatePickerWrapper
+                  isAutoRefreshOnly={!hasValidTimeField}
+                  showRefresh={!hasValidTimeField}
+                  width="full"
+                />
+              </EuiFlexItem>
+              {/* Flex Column #2: Apply-To-Config option */}
+              <EuiFlexItem grow={false} style={{ width: advancedEditorsSidebarWidth }}>
+                <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+                  <EuiFlexItem grow={false}>
+                    {searchItems.savedSearch === undefined && (
+                      <DatePickerApplySwitch {...stepDefineForm} />
+                    )}
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFormRow>
+        )}
+
         <EuiFormRow
           fullWidth
-          hasEmptyLabelSpace={searchItems?.savedSearch?.id === undefined}
           label={
             searchItems?.savedSearch?.id !== undefined
               ? i18n.translate('xpack.transform.stepDefineForm.savedSearchLabel', {
                   defaultMessage: 'Saved search',
                 })
-              : ''
+              : i18n.translate('xpack.transform.stepDefineForm.savedSearchLabel', {
+                  defaultMessage: 'Search filter',
+                })
           }
         >
           <>
@@ -314,7 +376,14 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
             <AdvancedRuntimeMappingsSettings {...stepDefineForm} />
             <EuiSpacer size="s" />
 
-            <DataGrid {...indexPreviewProps} />
+            <EuiFormRow
+              fullWidth={true}
+              label={i18n.translate('xpack.transform.stepDefineForm.dataGridLabel', {
+                defaultMessage: 'Source documents',
+              })}
+            >
+              <DataGrid {...indexPreviewProps} />
+            </EuiFormRow>
           </>
         </EuiFormRow>
       </EuiForm>

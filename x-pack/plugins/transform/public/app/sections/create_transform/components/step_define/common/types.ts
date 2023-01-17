@@ -56,6 +56,7 @@ export interface StepDefineExposedState {
   latestConfig: LatestFunctionConfigUI;
   isAdvancedPivotEditorEnabled: boolean;
   isAdvancedSourceEditorEnabled: boolean;
+  isDatePickerApplyEnabled: boolean;
   searchLanguage: QUERY_LANGUAGE;
   searchString: string | undefined;
   searchQuery: string | SavedSearchQuery;

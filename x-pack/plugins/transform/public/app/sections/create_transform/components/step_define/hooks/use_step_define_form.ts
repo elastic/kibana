@@ -15,6 +15,7 @@ import { StepDefineFormProps } from '../step_define_form';
 
 import { useAdvancedPivotEditor } from './use_advanced_pivot_editor';
 import { useAdvancedSourceEditor } from './use_advanced_source_editor';
+import { useDatePicker } from './use_date_picker';
 import { usePivotConfig } from './use_pivot_config';
 import { useSearchBar } from './use_search_bar';
 import { useLatestFunctionConfig } from './use_latest_function_config';
@@ -29,6 +30,7 @@ export const useStepDefineForm = ({ overrides, onChange, searchItems }: StepDefi
 
   const [transformFunction, setTransformFunction] = useState(defaults.transformFunction);
 
+  const datePicker = useDatePicker(defaults, dataView);
   const searchBar = useSearchBar(defaults, dataView);
   const pivotConfig = usePivotConfig(defaults, dataView);
 
@@ -79,6 +81,7 @@ export const useStepDefineForm = ({ overrides, onChange, searchItems }: StepDefi
       groupByList: pivotConfig.state.groupByList,
       isAdvancedPivotEditorEnabled: advancedPivotEditor.state.isAdvancedPivotEditorEnabled,
       isAdvancedSourceEditorEnabled: advancedSourceEditor.state.isAdvancedSourceEditorEnabled,
+      isDatePickerApplyEnabled: datePicker.state.isDatePickerApplyEnabled,
       searchLanguage: searchBar.state.searchLanguage,
       searchString: searchBar.state.searchString,
       searchQuery: searchBar.state.searchQuery,
@@ -121,6 +124,7 @@ export const useStepDefineForm = ({ overrides, onChange, searchItems }: StepDefi
     advancedPivotEditor,
     advancedSourceEditor,
     runtimeMappingsEditor,
+    datePicker,
     pivotConfig,
     latestFunctionConfig,
     searchBar,

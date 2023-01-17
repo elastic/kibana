@@ -6,16 +6,21 @@
  */
 
 import React, { type FC, useRef, useState, createContext, useMemo } from 'react';
-
-import { i18n } from '@kbn/i18n';
+import { pick } from 'lodash';
 
 import { EuiSteps, EuiStepStatus } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
 import { DataView } from '@kbn/data-views-plugin/public';
+import { DatePickerContextProvider } from '@kbn/ml-date-picker';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
+
 import type { TransformConfigUnion } from '../../../../../../common/types/transform';
 
 import { getCreateTransformRequestBody } from '../../../../common';
 import { SearchItems } from '../../../../hooks/use_search_items';
+import { useAppDependencies } from '../../../../app_dependencies';
 
 import {
   applyTransformConfigToDefineState,
@@ -94,6 +99,7 @@ export const CreateTransformWizardContext = createContext<{
 });
 
 export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems }) => {
+  const appDependencies = useAppDependencies();
   const { dataView } = searchItems;
 
   // The current WIZARD_STEP
@@ -206,11 +212,20 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
 
   const stepsConfig = [stepDefine, stepDetails, stepCreate];
 
+  const datePickerDeps = {
+    ...pick(appDependencies, ['data', 'http', 'notifications', 'theme', 'uiSettings']),
+    toMountPoint,
+    wrapWithTheme,
+    uiSettingsKeys: UI_SETTINGS,
+  };
+
   return (
     <CreateTransformWizardContext.Provider
       value={{ dataView, runtimeMappings: stepDefineState.runtimeMappings }}
     >
-      <EuiSteps className="transform__steps" steps={stepsConfig} />
+      <DatePickerContextProvider {...datePickerDeps}>
+        <EuiSteps className="transform__steps" steps={stepsConfig} />
+      </DatePickerContextProvider>
     </CreateTransformWizardContext.Provider>
   );
 });
