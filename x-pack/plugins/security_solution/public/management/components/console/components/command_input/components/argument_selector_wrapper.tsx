@@ -8,6 +8,7 @@
 import React, { memo, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled, { createGlobalStyle } from 'styled-components';
+import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { useConsoleStateDispatch } from '../../../hooks/state_selectors/use_console_state_dispatch';
 import { useWithCommandArgumentState } from '../../../hooks/state_selectors/use_with_command_argument_state';
 import type { CommandArgDefinition, CommandArgumentValueSelectorProps } from '../../../types';
@@ -24,7 +25,7 @@ const ArgumentSelectorWrapperContainer = styled.span`
 `;
 
 // FIXME:PT Delete below. Only here for DEV purposes
-const DevUxStyles = createGlobalStyle<{ theme: { eui: { euiColorPrimary: string } } }>`
+const DevUxStyles = createGlobalStyle<{ theme: EuiTheme }>`
 
   body {
 
