@@ -34,6 +34,7 @@ const RegisteredAttachmentsPropertyActionsComponent: React.FC<Props> = ({
         ? [
             {
               iconType: 'trash',
+              color: 'danger' as const,
               label: i18n.DELETE_ATTACHMENT,
               onClick: onModalOpen,
             },
