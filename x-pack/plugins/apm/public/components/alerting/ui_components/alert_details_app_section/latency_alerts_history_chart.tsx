@@ -124,7 +124,7 @@ export function LatencyAlertsHistoryChart({
       microseconds: avgTimeToRecover * 1000,
     });
 
-    if (parseInt(minutes.value) > 60) return hours.formatted;
+    if (parseInt(minutes.value, 10) > 60) return hours.formatted;
     return minutes.formatted;
   };
   return (
