@@ -1,5 +1,5 @@
 get:
-  summary: Retrieve a rule by its identifier.
+  summary: Retrieves a rule by its identifier.
   operationId: getRule
   description: >
     You must have `read` privileges for the appropriate Kibana features,
@@ -21,8 +21,22 @@ get:
           schema:
             $ref: '../components/schemas/rule_response_properties.yaml' 
           examples:
-            updateRuleResponse:
+            getRuleResponse:
               $ref: '../components/examples/get_rule_response.yaml'
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/401_response.yaml'
+    '404':
+      description: Object is not found.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/404_response.yaml'
+  servers:
+    - url: https://localhost:5601
 
 delete:
   summary: Deletes a rule.
@@ -42,6 +56,18 @@ delete:
   responses:
     '204':
       description: Indicates a successful call.
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/401_response.yaml'
+    '404':
+      description: Object is not found.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/404_response.yaml'
   servers:
     - url: https://localhost:5601
 
@@ -88,6 +114,18 @@ put:
           examples:
             updateRuleResponse:
               $ref: '../components/examples/update_rule_response.yaml'
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/401_response.yaml'
+    '404':
+      description: Object is not found.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/404_response.yaml'
   servers:
     - url: https://localhost:5601
 servers:
