@@ -69,6 +69,7 @@ function usingWorkerProc<T>(
         [],
         {
           nodeOptions: [
+            '--openssl-legacy-provider',
             '--preserve-symlinks',
             '--preserve-symlinks-main',
             ...(inspectFlag && config.inspectWorkers

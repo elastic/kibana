@@ -74,6 +74,9 @@ webpack(
     "--env.prod",
     "--display=minimal"
   ],
+  env = {
+    "NODE_OPTIONS": "--openssl-legacy-provider",
+  }
 )
 
 ts_config(
