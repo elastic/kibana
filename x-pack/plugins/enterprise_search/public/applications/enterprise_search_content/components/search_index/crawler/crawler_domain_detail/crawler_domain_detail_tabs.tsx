@@ -86,7 +86,7 @@ export const CrawlerDomainDetailTabs: React.FC<CrawlerDomainDetailTabsProps> = (
         </>
       ),
       id: CrawlerDomainTabId.CRAWL_RULES,
-      name: i18n.translate('xpack.enterpriseSearch.content.crawler.siteMaps', {
+      name: i18n.translate('xpack.enterpriseSearch.content.crawler.crawlRules', {
         defaultMessage: 'Crawl rules',
       }),
     },
