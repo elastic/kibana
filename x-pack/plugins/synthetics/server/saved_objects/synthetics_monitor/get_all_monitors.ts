@@ -69,6 +69,7 @@ export const processMonitors = async (
 
   const enabledIds: string[] = [];
   let disabledCount = 0;
+  let disabledMonitorsCount = 0;
   let maxPeriod = 0;
   const allIds: string[] = [];
   let listOfLocationsSet = new Set<string>();
@@ -97,6 +98,7 @@ export const processMonitors = async (
 
     if (attrs[ConfigKey.ENABLED] === false) {
       disabledCount += attrs[ConfigKey.LOCATIONS].length;
+      disabledMonitorsCount += 1;
     } else {
       const missingLabels = new Set<string>();
 
@@ -132,6 +134,7 @@ export const processMonitors = async (
     enabledIds,
     disabledCount,
     monitorLocationMap,
+    disabledMonitorsCount,
     listOfLocations: [...listOfLocationsSet],
   };
 };

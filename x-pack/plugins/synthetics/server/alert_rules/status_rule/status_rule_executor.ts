@@ -106,7 +106,7 @@ export class StatusRuleExecutor {
   async getDownChecks(
     prevDownConfigs: OverviewStatus['downConfigs'] = {}
   ): Promise<AlertOverviewStatus> {
-    const { listOfLocations, enabledIds,allIds, monitorLocationMap } = await this.getMonitors();
+    const { listOfLocations, enabledIds, allIds, monitorLocationMap } = await this.getMonitors();
 
     if (enabledIds.length > 0) {
       const currentStatus = await queryMonitorStatus(

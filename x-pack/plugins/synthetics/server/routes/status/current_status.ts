@@ -56,7 +56,7 @@ export async function getStatus(
 
   const allMonitors = await getAllMonitors({
     soClient,
-    search: `${query}*`,
+    search: query ? `${query}*` : undefined,
     fields: [
       ConfigKey.ENABLED,
       ConfigKey.LOCATIONS,
@@ -65,8 +65,14 @@ export async function getStatus(
     ],
   });
 
-  const { enabledIds, disabledCount, maxPeriod, listOfLocations, monitorLocationMap } =
-    await processMonitors(allMonitors, server, soClient, syntheticsMonitorClient);
+  const {
+    enabledIds,
+    disabledCount,
+    maxPeriod,
+    listOfLocations,
+    monitorLocationMap,
+    disabledMonitorsCount,
+  } = await processMonitors(allMonitors, server, soClient, syntheticsMonitorClient);
 
   const { up, down, pending, upConfigs, downConfigs } = await queryMonitorStatus(
     uptimeEsClient,
