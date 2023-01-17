@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { UserActionFindRequest } from '../../../common/api';
+
 /**
  * Parameters for retrieving user actions for a particular case
  */
@@ -16,3 +18,8 @@ export interface UserActionGet {
 }
 
 export type GetConnectorsRequest = UserActionGet;
+
+export interface UserActionFind {
+  queryOptions: UserActionFindRequest;
+  caseId: string;
+}

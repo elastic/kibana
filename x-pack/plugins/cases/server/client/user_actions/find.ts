@@ -18,7 +18,7 @@ import {
   UserActionFindResponseRt,
 } from '../../../common/api';
 import type { CasesClientArgs } from '../types';
-import type { UserActionFind } from './client';
+import type { UserActionFind } from './types';
 import { Operations } from '../../authorization';
 import { extractAttributes } from './utils';
 import { createCaseError } from '../../common/error';

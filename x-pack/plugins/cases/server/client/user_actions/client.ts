@@ -8,19 +8,13 @@
 import type {
   GetCaseConnectorsResponse,
   CaseUserActionsResponse,
-  UserActionFindRequest,
   UserActionFindResponse,
 } from '../../../common/api';
 import type { CasesClientArgs } from '../types';
 import { get } from './get';
 import { getConnectors } from './connectors';
-import type { GetConnectorsRequest, UserActionGet } from './types';
+import type { GetConnectorsRequest, UserActionFind, UserActionGet } from './types';
 import { find } from './find';
-
-export interface UserActionFind {
-  queryOptions: UserActionFindRequest;
-  caseId: string;
-}
 
 /**
  * API for interacting the actions performed by a user when interacting with the cases entities.
