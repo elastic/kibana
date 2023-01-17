@@ -18,6 +18,10 @@ export enum MonitoredProduct {
   EnterpriseSearch = 'enterpriseSearch',
 }
 export type MetricbeatMonitoredProduct = Exclude<MonitoredProduct, MonitoredProduct.Cluster>;
+export type PackagesMonitoredProduct = Exclude<
+  MetricbeatMonitoredProduct,
+  MonitoredProduct.EnterpriseSearch
+>;
 
 export type SearchFn = (params: any) => Promise<ElasticsearchResponse>;
 
