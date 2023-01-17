@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexItem, EuiFlexGroup, EuiExpression } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiExpression, EuiToolTip } from '@elastic/eui';
 import { ResolvedLogView } from '../../../../../common/log_views';
 
 const description = i18n.translate('xpack.infra.logs.alertFlyout.logViewDescription', {
@@ -29,7 +29,9 @@ export const LogViewSwitcher: React.FC<LogViewSwitcherProps> = ({ logView }) => 
   return (
     <EuiFlexGroup gutterSize="s">
       <EuiFlexItem grow={false}>
-        <EuiExpression description={description} value={logView.name} />
+        <EuiToolTip content={logView.indices}>
+          <EuiExpression description={description} value={logView.name} />
+        </EuiToolTip>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

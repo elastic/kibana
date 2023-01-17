@@ -88,4 +88,14 @@ describe('Log threshold references manager', () => {
       expect(invalidCaller).toThrow('Could not find reference for log-view-reference-0');
     });
   });
+
+  describe('extractReferences and injectReferences', () => {
+    it('should have a complementary effect on the params object', () => {
+      const extracted = extractReferences(params);
+
+      const updatedParams = injectReferences(extracted.params, extracted.references);
+
+      expect(updatedParams).toEqual(params);
+    });
+  });
 });

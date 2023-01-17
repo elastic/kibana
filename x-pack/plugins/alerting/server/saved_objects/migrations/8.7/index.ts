@@ -7,7 +7,12 @@
 
 import { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
-import { createEsoMigration, isEsQueryRuleType, pipeMigrations } from '../utils';
+import {
+  createEsoMigration,
+  isEsQueryRuleType,
+  isLogThresholdRuleType,
+  pipeMigrations,
+} from '../utils';
 import { RawRule } from '../../../types';
 
 function addGroupByToEsQueryRule(
@@ -31,9 +36,31 @@ function addGroupByToEsQueryRule(
   return doc;
 }
 
+function addLogViewToLogThresholdRule(
+  doc: SavedObjectUnsanitizedDoc<RawRule>
+): SavedObjectUnsanitizedDoc<RawRule> {
+  if (isLogThresholdRuleType(doc)) {
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        params: {
+          ...doc.attributes.params,
+          logView: {
+            logViewId: 'log-view-reference-0',
+            type: 'log-view-reference',
+          },
+        },
+      },
+    };
+  }
+
+  return doc;
+}
+
 export const getMigrations870 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) =>
   createEsoMigration(
     encryptedSavedObjects,
-    (doc): doc is SavedObjectUnsanitizedDoc<RawRule> => isEsQueryRuleType(doc),
-    pipeMigrations(addGroupByToEsQueryRule)
+    (doc: SavedObjectUnsanitizedDoc<RawRule>): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
+    pipeMigrations(addGroupByToEsQueryRule, addLogViewToLogThresholdRule)
   );
