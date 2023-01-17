@@ -100,8 +100,8 @@ export const createThreatSignal = async ({
     const threatEnrichmentForTermQuery = async (
       signals: SignalSourceHit[]
     ): Promise<SignalSourceHit[]> => {
-      console.log('signals');
-      console.log(signals);
+      // console.log('signals');
+      // console.log(signals);
       const threatFilter = buildThreatMappingFilter({
         threatMapping,
         threatList: signals,

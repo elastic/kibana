@@ -97,10 +97,10 @@ export const createThreatSignals = async ({
     threat: getAllowedFieldFromMapping(threatFieldsMapping),
   };
 
-  console.log('threatMapping');
-  console.log(`${JSON.stringify(threatMapping)}`);
+  // console.log('threatMapping');
+  // console.log(`${JSON.stringify(threatMapping)}`);
   // console.log(`${JSON.stringify(sourceFieldsMapping)}`);
-  console.log(`${JSON.stringify(allowedFieldsForTermsQuery)}`);
+  // console.log(`${JSON.stringify(allowedFieldsForTermsQuery)}`);
 
   const params = completeRule.ruleParams;
   ruleExecutionLogger.debug('Indicator matching rule starting');

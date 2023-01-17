@@ -67,7 +67,7 @@ export const createEventSignal = async ({
     return acc;
   }, {});
 
-  console.log('singnalValueMap', JSON.stringify(signalValueMap, null, 2));
+  // console.log('singnalValueMap', JSON.stringify(signalValueMap, null, 2));
   const threatFilter = buildThreatMappingFilter({
     threatMapping,
     threatList: currentEventList,
@@ -75,7 +75,7 @@ export const createEventSignal = async ({
     allowedFieldsForTermsQuery,
   });
 
-  console.log(JSON.stringify(threatFilter));
+  // console.log(JSON.stringify(threatFilter));
 
   if (!threatFilter.query || threatFilter.query?.bool.should.length === 0) {
     // empty event list and we do not want to return everything as being
