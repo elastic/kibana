@@ -151,6 +151,7 @@ Object.keys(configuration).forEach((type) => {
 });
 
 journey('Monitor Management breadcrumbs', async ({ page, params }: { page: Page; params: any }) => {
+  recordVideo(page);
   const uptime = monitorManagementPageProvider({ page, kibanaUrl: params.kibanaUrl });
   const defaultMonitorDetails = {
     name: `Sample monitor ${uuid.v4()}`,
@@ -212,6 +213,7 @@ journey('Monitor Management breadcrumbs', async ({ page, params }: { page: Page;
 journey(
   'MonitorManagement-case-insensitive sort',
   async ({ page, params }: { page: Page; params: any }) => {
+    recordVideo(page);
     const uptime = monitorManagementPageProvider({ page, kibanaUrl: params.kibanaUrl });
 
     const sortedMonitors = [

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { map, uniq } from 'lodash';
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract, Logger } from '@kbn/core/server';
 import type {
   AgentPolicyServiceInterface,
   AgentService,
@@ -17,6 +17,7 @@ import type {
   ListResult,
   PackagePolicy,
 } from '@kbn/fleet-plugin/common';
+import { errors } from '@elastic/elasticsearch';
 import { PosturePolicyTemplate } from '../../common/types';
 import { SUPPORTED_POLICY_TEMPLATES } from '../../common/constants';
 import { CSP_FLEET_PACKAGE_KUERY } from '../../common/utils/helpers';
@@ -26,6 +27,9 @@ import {
 } from '../../common/schemas/benchmark';
 
 export const PACKAGE_POLICY_SAVED_OBJECT_TYPE = 'ingest-package-policies';
+
+const isFleetMissingAgentHttpError = (error: unknown) =>
+  error instanceof errors.ResponseError && error.statusCode === 404;
 
 const isPolicyTemplate = (input: any): input is PosturePolicyTemplate =>
   SUPPORTED_POLICY_TEMPLATES.includes(input);
@@ -43,17 +47,26 @@ export type AgentStatusByAgentPolicyMap = Record<string, GetAgentStatusResponse[
 
 export const getAgentStatusesByAgentPolicies = async (
   agentService: AgentService,
-  agentPolicies: AgentPolicy[] | undefined
+  agentPolicies: AgentPolicy[] | undefined,
+  logger: Logger
 ): Promise<AgentStatusByAgentPolicyMap> => {
   if (!agentPolicies?.length) return {};
 
   const internalAgentService = agentService.asInternalUser;
   const result: AgentStatusByAgentPolicyMap = {};
 
-  for (const agentPolicy of agentPolicies) {
-    result[agentPolicy.id] = await internalAgentService.getAgentStatusForAgentPolicy(
-      agentPolicy.id
-    );
+  try {
+    for (const agentPolicy of agentPolicies) {
+      result[agentPolicy.id] = await internalAgentService.getAgentStatusForAgentPolicy(
+        agentPolicy.id
+      );
+    }
+  } catch (error) {
+    if (isFleetMissingAgentHttpError(error)) {
+      logger.debug('failed to get agent status for agent policy');
+    } else {
+      throw error;
+    }
   }
 
   return result;

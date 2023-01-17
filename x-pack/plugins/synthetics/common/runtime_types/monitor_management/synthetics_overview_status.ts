@@ -12,11 +12,14 @@ export const OverviewStatusMetaDataCodec = t.interface({
   monitorQueryId: t.string,
   configId: t.string,
   location: t.string,
+  timestamp: t.string,
   status: t.string,
   ping: PingType,
 });
 
 export const OverviewStatusCodec = t.interface({
+  allMonitorsCount: t.number,
+  disabledMonitorsCount: t.number,
   up: t.number,
   down: t.number,
   disabledCount: t.number,
