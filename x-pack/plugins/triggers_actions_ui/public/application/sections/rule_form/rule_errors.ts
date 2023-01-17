@@ -59,12 +59,15 @@ export function validateBaseProperties(
     }
   }
 
-  const invalidThrottleActions = ruleObject.actions.filter(
-    (a) =>
-      a.frequency?.notifyWhen === RuleNotifyWhen.THROTTLE &&
-      parseDuration(a.frequency.throttle ?? '0m') <
-        parseDuration(ruleObject.schedule.interval ?? '0m')
-  );
+  const invalidThrottleActions = ruleObject.actions.filter((a) => {
+    const throttleDuration = a.frequency?.throttle ? parseDuration(a.frequency.throttle) : 0;
+    const intervalDuration = ruleObject.schedule.interval
+      ? parseDuration(ruleObject.schedule.interval)
+      : 0;
+    return (
+      a.frequency?.notifyWhen === RuleNotifyWhen.THROTTLE && throttleDuration < intervalDuration
+    );
+  });
   if (invalidThrottleActions.length) {
     errors['schedule.interval'].push(
       i18n.translate(
