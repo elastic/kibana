@@ -189,7 +189,8 @@ export const updateFilters = (
     getFilterByPath(newFilters, dest.path),
     field?.name,
     operator,
-    params
+    params,
+    field?.type
   );
   const pathInArray = getPathInArray(dest.path);
   const { targetArray } = getContainerMetaByPath(newFilters, pathInArray);

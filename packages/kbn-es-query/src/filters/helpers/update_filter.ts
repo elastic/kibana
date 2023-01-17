@@ -17,8 +17,9 @@ export const updateFilter = (
   filter: Filter,
   field?: string,
   operator?: FilterOperator,
-  params?: Filter['meta']['params']
-): Filter => {
+  params?: Filter['meta']['params'],
+  fieldType?: string
+) => {
   if (!field || !operator) {
     return updateField(filter, field);
   }
@@ -33,7 +34,7 @@ export const updateFilter = (
     return updateWithIsOneOfOperator(filter, operator, params);
   }
 
-  return updateWithIsOperator(filter, operator, params);
+  return updateWithIsOperator(filter, operator, params, fieldType);
 };
 
 function updateField(filter: Filter, field?: string) {
@@ -69,18 +70,21 @@ function updateWithExistsOperator(filter: Filter, operator?: FilterOperator) {
 function updateWithIsOperator(
   filter: Filter,
   operator?: FilterOperator,
-  params?: Filter['meta']['params']
+  params?: Filter['meta']['params'],
+  fieldType?: string
 ) {
   if (typeof filter.meta.params === 'object') {
+    const safeParams = fieldType === 'number' && !params ? 0 : params;
     return {
       ...filter,
       meta: {
         ...filter.meta,
         negate: operator?.negate,
         type: operator?.type,
-        params: { ...filter.meta.params, query: params },
+        params: { ...filter.meta.params, query: safeParams },
+        value: undefined,
       },
-      query: { match_phrase: { [filter.meta.key!]: params ?? '' } },
+      query: { match_phrase: { [filter.meta.key!]: safeParams ?? '' } },
     };
   } else {
     return filter;
@@ -92,7 +96,7 @@ function updateWithRangeOperator(
   operator: FilterOperator,
   rawParams: Filter['meta']['params'] | undefined,
   field: string
-): Filter {
+) {
   if (filter.meta.params !== undefined && typeof rawParams === 'object') {
     const rangeParams: RangeFilterParams = filter.meta.params;
     const params = {
