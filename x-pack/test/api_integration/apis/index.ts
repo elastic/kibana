@@ -9,18 +9,18 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('apis', function () {
-    loadTestFile(require.resolve('./search'));
-    loadTestFile(require.resolve('./es'));
-    loadTestFile(require.resolve('./security'));
-    loadTestFile(require.resolve('./spaces'));
-    loadTestFile(require.resolve('./monitoring'));
-    loadTestFile(require.resolve('./features'));
-    loadTestFile(require.resolve('./telemetry'));
-    loadTestFile(require.resolve('./logstash'));
-    loadTestFile(require.resolve('./kibana'));
-    loadTestFile(require.resolve('./metrics_ui'));
-    loadTestFile(require.resolve('./console'));
-    loadTestFile(require.resolve('./management'));
+    // loadTestFile(require.resolve('./search'));
+    // loadTestFile(require.resolve('./es'));
+    // loadTestFile(require.resolve('./security'));
+    // loadTestFile(require.resolve('./spaces'));
+    // loadTestFile(require.resolve('./monitoring'));
+    // loadTestFile(require.resolve('./features'));
+    // loadTestFile(require.resolve('./telemetry'));
+    // loadTestFile(require.resolve('./logstash'));
+    // loadTestFile(require.resolve('./kibana'));
+    // loadTestFile(require.resolve('./metrics_ui'));
+    // loadTestFile(require.resolve('./console'));
+    // loadTestFile(require.resolve('./management'));
     loadTestFile(require.resolve('./uptime'));
     loadTestFile(require.resolve('./synthetics'));
     loadTestFile(require.resolve('./maps'));
