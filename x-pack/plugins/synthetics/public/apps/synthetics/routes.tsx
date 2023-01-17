@@ -16,6 +16,7 @@ import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useInspectorContext } from '@kbn/observability-plugin/public';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
+import { EditMonitorLink } from './components/common/links/edit_monitor';
 import { MonitorDetailsLocation } from './components/monitor_details/monitor_details_location';
 import { getStepDetailsRoute } from './components/step_details_page/route_config';
 import { getTestRunDetailsRoute } from './components/test_run_details/route_config';
@@ -322,6 +323,7 @@ const getMonitorSummaryHeader = (
       },
     ],
     rightSideItems: [
+      <EditMonitorLink />,
       <RunTestManually />,
       <MonitorDetailsLastRun />,
       <MonitorDetailsStatus />,
