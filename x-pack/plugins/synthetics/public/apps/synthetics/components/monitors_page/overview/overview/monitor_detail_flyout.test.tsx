@@ -23,6 +23,9 @@ describe('Monitor Detail Flyout', () => {
       data: null,
       refetch: () => null,
     });
+    jest
+      .spyOn(observabilityPublic, 'useTheme')
+      .mockReturnValue({ eui: { euiColorVis0: 'red', euiColorVis9: 'red' } } as any);
     jest.spyOn(monitorDetail, 'useMonitorDetail').mockReturnValue({
       data: {
         docId: 'docId',
@@ -36,6 +39,7 @@ describe('Monitor Detail Flyout', () => {
         url: {
           full: 'https://www.elastic.co',
         },
+        tags: ['tag1', 'tag2'],
       },
     });
     jest.spyOn(statusByLocation, 'useStatusByLocation').mockReturnValue({
@@ -118,14 +122,15 @@ describe('Monitor Detail Flyout', () => {
             number: '1',
             unit: 'm',
           },
+          tags: ['prod'],
         },
-        tags: ['prod'],
         type: 'browser',
         updated_at: '1996-02-27',
       },
       refetch: jest.fn(),
     });
     const detailLink = '/app/synthetics/monitor/test-id';
+    jest.spyOn(monitorDetailLocator, 'useMonitorDetailLocator').mockReturnValue(detailLink);
     jest.spyOn(monitorDetailLocator, 'useMonitorDetailLocator').mockReturnValue(detailLink);
 
     const { getByRole, getByText, getAllByRole } = render(

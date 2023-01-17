@@ -21,6 +21,14 @@ export const DELETE_CASE = (quantity: number = 1) =>
     defaultMessage: `Delete {quantity, plural, =1 {case} other {{quantity} cases}}`,
   });
 
+export const COPY_ID_ACTION_LABEL = i18n.translate('xpack.cases.caseView.copyID', {
+  defaultMessage: 'Copy Case ID',
+});
+
+export const COPY_ID_ACTION_SUCCESS = i18n.translate('xpack.cases.caseView.copyIDSuccess', {
+  defaultMessage: 'Copied Case ID to clipboard',
+});
+
 export const NAME = i18n.translate('xpack.cases.caseView.name', {
   defaultMessage: 'Name',
 });
@@ -158,7 +166,7 @@ export const NO_TAGS = i18n.translate('xpack.cases.caseView.noTags', {
 });
 
 export const TITLE_REQUIRED = i18n.translate('xpack.cases.createCase.titleFieldRequiredError', {
-  defaultMessage: 'A title is required.',
+  defaultMessage: 'A name is required.',
 });
 
 export const CONFIGURE_CASES_PAGE_TITLE = i18n.translate('xpack.cases.configureCases.headerTitle', {
