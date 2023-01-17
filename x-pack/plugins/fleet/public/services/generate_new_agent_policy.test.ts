@@ -9,15 +9,14 @@ import { generateNewAgentPolicyWithDefaults } from './generate_new_agent_policy'
 
 describe('generateNewAgentPolicyWithDefaults', () => {
   it('should generate a new agent policy with defaults', () => {
-    const newAgentPolicy = generateNewAgentPolicyWithDefaults({
-      name: 'test',
-    });
+    const newAgentPolicy = generateNewAgentPolicyWithDefaults();
 
     expect(newAgentPolicy).toEqual({
-      name: 'test',
+      name: '',
       description: '',
       namespace: 'default',
-      monitoring_enabled: ['logs', 'metrics', 'endpoint'],
+      monitoring_enabled: ['logs', 'metrics'],
+      inactivity_timeout: 1209600,
     });
   });
 
@@ -34,6 +33,7 @@ describe('generateNewAgentPolicyWithDefaults', () => {
       description: 'test description',
       namespace: 'test-namespace',
       monitoring_enabled: ['logs'],
+      inactivity_timeout: 1209600,
     });
   });
 });
