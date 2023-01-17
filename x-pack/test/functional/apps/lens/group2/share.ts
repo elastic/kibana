@@ -89,7 +89,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should preserve filter and query when sharing', async () => {
-      await filterBarService.addFilter({ field: 'bytes', operation: 'is', value: '-1' });
+      await filterBarService.addFilter({ field: 'bytes', operation: 'is', value: '1' });
       await queryBar.setQuery('host.keyword www.elastic.co');
       await queryBar.submitQuery();
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -102,7 +102,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.navigateTo(url);
       // check that it's the same configuration in the new URL when ready
       await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(await filterBarService.getFiltersLabel()).to.eql(['bytes: -1']);
+      expect(await filterBarService.getFiltersLabel()).to.eql(['bytes: 1']);
       expect(await queryBar.getQueryString()).to.be('host.keyword www.elastic.co');
       await browser.closeCurrentWindow();
       await browser.switchToWindow(lensWindowHandler);
