@@ -146,9 +146,9 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
       </EuiTitle>
       <EuiSpacer size="s" />
 
-      <EuiDescriptionList textStyle="reverse">
-        <EuiFlexGroup>
-          <EuiFlexItem data-test-subj="version">
+      <EuiFlexGroup>
+        <EuiFlexItem data-test-subj="version">
+          <EuiDescriptionList textStyle="reverse">
             <EuiDescriptionListTitle data-test-subj="title">
               <FormattedMessage
                 id="xpack.snapshotRestore.policyDetails.versionLabel"
@@ -159,9 +159,11 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
             <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
               {version}
             </EuiDescriptionListDescription>
-          </EuiFlexItem>
+          </EuiDescriptionList>
+        </EuiFlexItem>
 
-          <EuiFlexItem data-test-subj="modified">
+        <EuiFlexItem data-test-subj="modified">
+          <EuiDescriptionList textStyle="reverse">
             <EuiDescriptionListTitle data-test-subj="title">
               <FormattedMessage
                 id="xpack.snapshotRestore.policyDetails.modifiedDateLabel"
@@ -172,11 +174,14 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
             <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
               <FormattedDateTime epochMs={modifiedDateMillis} />
             </EuiDescriptionListDescription>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+          </EuiDescriptionList>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
 
-        <EuiFlexGroup>
-          <EuiFlexItem data-test-subj="name">
+      <EuiFlexGroup>
+        <EuiFlexItem data-test-subj="name">
+          <EuiDescriptionList textStyle="reverse">
             <EuiDescriptionListTitle data-test-subj="title">
               <FormattedMessage
                 id="xpack.snapshotRestore.policyDetails.snapshotNameLabel"
@@ -189,9 +194,11 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
                 {snapshotName}
               </EuiLink>
             </EuiDescriptionListDescription>
-          </EuiFlexItem>
+          </EuiDescriptionList>
+        </EuiFlexItem>
 
-          <EuiFlexItem data-test-subj="repository">
+        <EuiFlexItem data-test-subj="repository">
+          <EuiDescriptionList textStyle="reverse">
             <EuiDescriptionListTitle data-test-subj="title">
               <FormattedMessage
                 id="xpack.snapshotRestore.policyDetails.repositoryLabel"
@@ -204,11 +211,14 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
                 {repository}
               </EuiLink>
             </EuiDescriptionListDescription>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+          </EuiDescriptionList>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
 
-        <EuiFlexGroup>
-          <EuiFlexItem data-test-subj="schedule">
+      <EuiFlexGroup>
+        <EuiFlexItem data-test-subj="schedule">
+          <EuiDescriptionList textStyle="reverse">
             <EuiDescriptionListTitle data-test-subj="title">
               <FormattedMessage
                 id="xpack.snapshotRestore.policyDetails.scheduleLabel"
@@ -219,9 +229,11 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
             <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
               {schedule}
             </EuiDescriptionListDescription>
-          </EuiFlexItem>
+          </EuiDescriptionList>
+        </EuiFlexItem>
 
-          <EuiFlexItem data-test-subj="execution">
+        <EuiFlexItem data-test-subj="execution">
+          <EuiDescriptionList textStyle="reverse">
             <EuiDescriptionListTitle data-test-subj="title">
               <FormattedMessage
                 id="xpack.snapshotRestore.policyDetails.nextExecutionLabel"
@@ -232,11 +244,14 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
             <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
               <FormattedDateTime epochMs={nextExecutionMillis} />
             </EuiDescriptionListDescription>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+          </EuiDescriptionList>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
 
-        <EuiFlexGroup>
-          <EuiFlexItem data-test-subj="indices">
+      <EuiFlexGroup>
+        <EuiFlexItem data-test-subj="indices">
+          <EuiDescriptionList textStyle="reverse">
             <EuiDescriptionListTitle data-test-subj="title">
               <FormattedMessage
                 id="xpack.snapshotRestore.policyDetails.dataStreamsAndIndicesLabel"
@@ -247,9 +262,11 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
             <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
               <CollapsibleIndicesList indices={indices} />
             </EuiDescriptionListDescription>
-          </EuiFlexItem>
+          </EuiDescriptionList>
+        </EuiFlexItem>
 
-          <EuiFlexItem data-test-subj="ignoreUnavailable">
+        <EuiFlexItem data-test-subj="ignoreUnavailable">
+          <EuiDescriptionList textStyle="reverse">
             <EuiDescriptionListTitle data-test-subj="title">
               <FormattedMessage
                 id="xpack.snapshotRestore.policyDetails.ignoreUnavailableLabel"
@@ -270,11 +287,14 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
                 />
               )}
             </EuiDescriptionListDescription>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+          </EuiDescriptionList>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
 
-        <EuiFlexGroup>
-          <EuiFlexItem data-test-subj="includeGlobalState">
+      <EuiFlexGroup>
+        <EuiFlexItem data-test-subj="includeGlobalState">
+          <EuiDescriptionList textStyle="reverse">
             <EuiDescriptionListTitle data-test-subj="title">
               <FormattedMessage
                 id="xpack.snapshotRestore.policyDetails.includeGlobalStateLabel"
@@ -297,16 +317,19 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
                 />
               )}
             </EuiDescriptionListDescription>
-          </EuiFlexItem>
+          </EuiDescriptionList>
+        </EuiFlexItem>
 
-          <PolicyFeatureStatesSummary
-            includeGlobalState={includeGlobalState}
-            featureStates={featureStates}
-          />
-        </EuiFlexGroup>
+        <PolicyFeatureStatesSummary
+          includeGlobalState={includeGlobalState}
+          featureStates={featureStates}
+        />
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
 
-        <EuiFlexGroup>
-          <EuiFlexItem data-test-subj="partial">
+      <EuiFlexGroup>
+        <EuiFlexItem data-test-subj="partial">
+          <EuiDescriptionList textStyle="reverse">
             <EuiDescriptionListTitle data-test-subj="title">
               <FormattedMessage
                 id="xpack.snapshotRestore.policyDetails.partialLabel"
@@ -327,9 +350,9 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
                 />
               )}
             </EuiDescriptionListDescription>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiDescriptionList>
+          </EuiDescriptionList>
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
       {retention && (
         <Fragment>

@@ -252,7 +252,7 @@ export class TaskStore {
       return attrsById;
     }, new Map());
 
-    let updatedSavedObjects: Array<SavedObjectsUpdateResponse<SerializedConcreteTaskInstance>>;
+    let updatedSavedObjects: Array<SavedObjectsUpdateResponse | Error>;
     try {
       ({ saved_objects: updatedSavedObjects } =
         await this.savedObjectsRepository.bulkUpdate<SerializedConcreteTaskInstance>(
@@ -271,14 +271,9 @@ export class TaskStore {
       throw e;
     }
 
-    return updatedSavedObjects.map((updatedSavedObject) => {
-      const doc = docs.find((d) => d.id === updatedSavedObject.id);
-      return updatedSavedObject.error !== undefined
-        ? asErr({
-            entity: doc,
-            error: updatedSavedObject,
-          })
-        : asOk(
+    return updatedSavedObjects.map<BulkUpdateResult>((updatedSavedObject, index) =>
+      isSavedObjectsUpdateResponse(updatedSavedObject)
+        ? asOk(
             savedObjectToConcreteTaskInstance({
               ...updatedSavedObject,
               attributes: defaults(
@@ -286,8 +281,15 @@ export class TaskStore {
                 attributesByDocId.get(updatedSavedObject.id)!
               ),
             })
-          );
-    }) as BulkUpdateResult[];
+          )
+        : asErr({
+            // The SavedObjectsRepository maintains the order of the docs
+            // so we can rely on the index in the `docs` to match an error
+            // on the same index in the `bulkUpdate` result
+            entity: docs[index],
+            error: updatedSavedObject,
+          })
+    );
   }
 
   /**
@@ -551,4 +553,10 @@ function ensureAggregationOnlyReturnsTaskObjects(opts: AggregationOpts): Aggrega
     ...opts,
     query,
   };
+}
+
+function isSavedObjectsUpdateResponse(
+  result: SavedObjectsUpdateResponse | Error
+): result is SavedObjectsUpdateResponse {
+  return result && typeof (result as SavedObjectsUpdateResponse).id === 'string';
 }
