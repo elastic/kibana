@@ -162,7 +162,7 @@ export class HeaderHelpMenu extends Component<Props, State> {
         <EuiButtonEmpty href={helpSupportUrl} target="_blank" size="s" flush="left">
           <FormattedMessage
             id="core.ui.chrome.headerGlobalNav.helpMenuAskElasticTitle"
-            defaultMessage="Ask Elastic"
+            defaultMessage="Ask Elastic Support"
           />
         </EuiButtonEmpty>
 
