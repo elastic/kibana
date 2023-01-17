@@ -72,7 +72,7 @@ export const importRules = async ({
   exceptionsClient: ExceptionListClient | undefined;
   spaceId: string;
   existingLists: Record<string, ExceptionListSchema>;
-  skipActionConnectorsValidations: boolean;
+  skipActionConnectorsValidations?: boolean;
 }) => {
   let importRuleResponse: ImportRuleResponse[] = [...rulesResponseAcc];
 
