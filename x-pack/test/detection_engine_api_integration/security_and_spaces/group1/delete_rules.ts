@@ -174,6 +174,7 @@ export default ({ getService }: FtrProviderContext): void => {
               message:
                 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
             },
+            uuid: body.actions[0].uuid,
           },
         ]);
       });

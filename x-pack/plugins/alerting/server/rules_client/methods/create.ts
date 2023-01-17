@@ -104,11 +104,6 @@ export async function create<Params extends RuleTypeParams = never>(
     }
   }
 
-  data.actions = data.actions.map((action) => ({
-    ...action,
-    uuid: v4(),
-  }));
-
   await validateActions<Omit<NormalizedAlertAction, 'uuid'>>(context, ruleType, data);
   await withSpan({ name: 'validateActions', type: 'rules' }, () =>
     validateActions(context, ruleType, data)
@@ -143,7 +138,10 @@ export async function create<Params extends RuleTypeParams = never>(
     ...data,
     ...apiKeyAsAlertAttributes(createdAPIKey, username),
     legacyId,
-    actions,
+    actions: actions.map((action) => ({
+      ...action,
+      uuid: v4(),
+    })),
     createdBy: username,
     updatedBy: username,
     createdAt: new Date(createTime).toISOString(),
