@@ -56,6 +56,7 @@ import { createExploratoryViewUrl } from './components/shared/exploratory_view/c
 import { createUseRulesLink } from './hooks/create_use_rules_link';
 import getAppDataView from './utils/observability_data_views/get_app_data_view';
 import { registerObservabilityRuleTypes } from './rules/register_observability_rule_types';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 
 export interface ConfigSchema {
   unsafe: {
@@ -89,21 +90,22 @@ export interface ObservabilityPublicPluginsSetup {
 }
 
 export interface ObservabilityPublicPluginsStart {
-  usageCollection: UsageCollectionSetup;
+  actionTypeRegistry: ActionTypeRegistryContract;
   cases: CasesUiStart;
-  embeddable: EmbeddableStart;
-  home?: HomePublicPluginStart;
-  share: SharePluginStart;
-  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
-  lens: LensPublicStart;
   discover: DiscoverStart;
-  ruleTypeRegistry: RuleTypeRegistryContract;
-  actionTypeRegistry: ActionTypeRegistryContract;
-  security: SecurityPluginStart;
+  embeddable: EmbeddableStart;
   guidedOnboarding: GuidedOnboardingPluginStart;
+  lens: LensPublicStart;
+  licensing: LicensingPluginStart;
+  ruleTypeRegistry: RuleTypeRegistryContract;
+  security: SecurityPluginStart;
+  share: SharePluginStart;
   spaces: SpacesPluginStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  usageCollection: UsageCollectionSetup;
+  home?: HomePublicPluginStart;
 }
 
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
