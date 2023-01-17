@@ -31,11 +31,11 @@ node scripts/build \
   --skip-docker-contexts
 
 echo "--- Tag images"
-docker rmi --ignore "$KIBANA_IMAGE"
+docker rmi "$KIBANA_IMAGE"
 docker load < "target/kibana-$BASE_VERSION-docker-image.tar.gz"
 docker tag "$KIBANA_IMAGE" "$KIBANA_IMAGE-amd64"
 
-docker rmi --ignore "$KIBANA_IMAGE"
+docker rmi "$KIBANA_IMAGE"
 docker load < "target/kibana-$BASE_VERSION-docker-image-aarch64.tar.gz"
 docker tag "$KIBANA_IMAGE" "$KIBANA_IMAGE-arm64"
 
@@ -44,7 +44,7 @@ docker image push "$KIBANA_IMAGE-arm64"
 docker image push "$KIBANA_IMAGE-amd64"
 
 echo "--- Create manifest"
-docker rmi --ignore "$KIBANA_IMAGE"
+docker rmi "$KIBANA_IMAGE"
 docker manifest create \
   "$KIBANA_IMAGE" \
   --amend "$KIBANA_IMAGE-arm64" \
