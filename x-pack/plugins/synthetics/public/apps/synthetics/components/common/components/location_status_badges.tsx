@@ -16,6 +16,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { EXPAND_LOCATIONS_LABEL } from '../../monitors_page/management/monitor_list_table/labels';
 import { LocationsStatus } from '../../../hooks';
 const DEFAULT_DISPLAY_COUNT = 3;
 
@@ -87,13 +88,6 @@ export const LocationStatusBadges = ({
     </EuiFlexGroup>
   );
 };
-
-const EXPAND_LOCATIONS_LABEL = i18n.translate(
-  'xpack.synthetics.management.monitorList.locations.expand',
-  {
-    defaultMessage: 'Click to expand remaining locations',
-  }
-);
 
 const COLLAPSE_LOCATIONS_LABEL = i18n.translate(
   'xpack.synthetics.management.monitorList.locations.collapse',
