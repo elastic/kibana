@@ -118,8 +118,9 @@ export function LatencyAlertsHistoryChart({
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
             <h2>
+              {serviceName}
               {i18n.translate('xpack.apm.latencyChartHistory.chartTitle', {
-                defaultMessage: 'Kibana latency alerts history',
+                defaultMessage: ' latency alerts history',
               })}
             </h2>
           </EuiTitle>
