@@ -6,8 +6,12 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
-import { SlackConfigSchema, SlackSecretsSchema } from './schema';
-import { ExecutorParamsSchema } from './schema';
+import {
+  SlackConfigSchema,
+  SlackSecretsSchema,
+  ExecutorPostMessageParamsSchema,
+  ExecutorParamsSchema,
+} from './schema';
 
 export type SlackConfig = TypeOf<typeof SlackConfigSchema>;
 export type SlackSecrets = TypeOf<typeof SlackSecretsSchema>;
@@ -20,6 +24,7 @@ export type SubAction = 'postMessage' | 'getChannels';
 // }
 
 export type SlackExecuteActionParams = TypeOf<typeof ExecutorParamsSchema>;
+export type ExecutorPostMessageParams = TypeOf<typeof ExecutorPostMessageParamsSchema>;
 
 export interface GetChannelsResponse {
   ok: true;

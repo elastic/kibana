@@ -14,7 +14,7 @@ import type {
 import { SlackConfig } from '../../../common/slack/types';
 import { SlackSecrets } from '../../../common/slack/types';
 import { SLACK_CONNECTOR_ID } from '../../../common/slack/constants';
-import { SlackExecuteActionParams } from '../../../common/slack/types';
+import { SlackExecuteActionParams, ExecutorPostMessageParams } from '../../../common/slack/types';
 
 export const SLACK_DESC = i18n.translate(
   'xpack.stackConnectors.components.slack.selectMessageText',
@@ -33,7 +33,7 @@ export const SLACK_TITLE = i18n.translate(
 export const getConnectorType = (): ConnectorTypeModel<
   SlackConfig,
   SlackSecrets,
-  SlackExecuteActionParams
+  ExecutorPostMessageParams
 > => {
   return {
     id: SLACK_CONNECTOR_ID,

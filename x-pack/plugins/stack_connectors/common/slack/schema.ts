@@ -18,11 +18,18 @@ export const ExecutorSubActionPostMessageParamsSchema = schema.object({
   text: schema.string(),
 });
 
+export const ExecutorGetChannelsParamsSchema = schema.object({
+  subAction: schema.literal('getChannels'),
+  subActionParams: ExecutorSubActionGetChannelsParamsSchema,
+});
+
+export const ExecutorPostMessageParamsSchema = schema.object({
+  subAction: schema.literal('postMessage'),
+  subActionParams: ExecutorSubActionPostMessageParamsSchema,
+});
+
 export const ExecutorParamsSchema = schema.oneOf([
-  schema.object({
-    subAction: schema.literal('getChannels'),
-    subActionParams: ExecutorSubActionGetChannelsParamsSchema,
-  }),
+  ExecutorGetChannelsParamsSchema,
   schema.object({
     subAction: schema.literal('postMessage'),
     subActionParams: ExecutorSubActionPostMessageParamsSchema,

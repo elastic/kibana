@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { TextAreaWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
@@ -17,9 +17,9 @@ import {
   EuiSelectable,
   EuiSelectableOption,
 } from '@elastic/eui';
-import { useSubAction } from '@kbn/triggers-actions-ui-plugin/public';
+import { useSubAction, useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { SlackExecuteActionParams } from '../../../common/slack/types';
+import type { ExecutorPostMessageParams } from '../../../common/slack/types';
 import type { GetChannelsResponse } from '../../../common/slack/types';
 
 interface ChannelsStatus {
@@ -27,7 +27,7 @@ interface ChannelsStatus {
   checked?: 'on';
 }
 
-const SlackParamsFields: React.FunctionComponent<ActionParamsProps<SlackExecuteActionParams>> = ({
+const SlackParamsFields: React.FunctionComponent<ActionParamsProps<ExecutorPostMessageParams>> = ({
   actionConnector,
   actionParams,
   editAction,
@@ -35,9 +35,8 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<SlackExecuteA
   errors,
   messageVariables,
 }) => {
-  console.log('RENDER');
   const { subAction, subActionParams } = actionParams;
-  const { channels, text } = (subActionParams as { text: string; channels: string[] }) ?? {}; // maybe should get rid of & {} in the type
+  const { channels, text } = subActionParams ?? {};
 
   if (!subAction) {
     editAction('subAction', 'postMessage', index);
@@ -56,11 +55,26 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<SlackExecuteA
   const {
     response: { channels: channelsInfo } = {},
     isLoading: isLoadingChannels,
-    error: getChannelsError,
+    error: channelsError,
   } = useSubAction<void, GetChannelsResponse>({
     connectorId: actionConnector?.id,
     subAction: 'getChannels',
   });
+
+  const { toasts } = useKibana().notifications;
+  useEffect(() => {
+    if (channelsError) {
+      toasts.danger({
+        title: i18n.translate(
+          'xpack.stackConnectors.slack.params.componentError.getChannelsRequestFailed',
+          {
+            defaultMessage: 'Failed to retrieve Slack channels list',
+          }
+        ),
+        body: channelsError.message,
+      });
+    }
+  }, [toasts, channelsError]);
 
   const slackChannels = useMemo(
     () =>
@@ -77,7 +91,6 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<SlackExecuteA
     <EuiFilterButton
       iconType="arrowDown"
       onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-      // isSelected={isPopoverOpen}
       numFilters={selectedChannels.length}
       hasActiveFilters={selectedChannels.length > 0}
       numActiveFilters={selectedChannels.length}
@@ -124,7 +137,7 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<SlackExecuteA
         >
           <EuiSelectable
             searchable
-            data-test-subj={'test-data'} // new name
+            data-test-subj={'slackChannelsSelectableList'}
             isLoading={isLoadingChannels}
             options={options}
             loadingMessage={i18n.translate(
