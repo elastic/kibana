@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
 import moment from 'moment-timezone';
 import { render, waitFor, screen, act, within } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
@@ -146,15 +145,14 @@ describe('AllCasesListGeneric', () => {
         useGetCasesMockState.data.cases[0].title
       );
       expect(
+        res.getAllByTestId('case-user-profile-avatar-damaged_raccoon')[0]
+      ).toHaveTextContent('DR');
+      expect(
         res.getAllByTestId('case-table-column-tags-coke')[0]
       ).toHaveAttribute('title', useGetCasesMockState.data.cases[0].tags[0]);
       expect(
-        res.getAllByTestId('case-user-profile-avatar-damaged_raccoon')[0]
-      ).toHaveTextContent('DR');
-      // expect(
-      //   res.getAllByTestId('case-table-column-createdAt')[0].firstChild
-      // ).toHaveAttribute('value', useGetCasesMockState.data.cases[0].createdAt);
-
+        res.getAllByTestId('case-table-column-createdAt')[0].querySelector('.euiToolTipAnchor')
+      ).toHaveTextContent(useGetCasesMockState.data.cases[0].createdAt);
       expect(res.getByTestId('case-table-case-count')).toHaveTextContent(
         'Showing 10 cases'
       );
@@ -214,16 +212,16 @@ describe('AllCasesListGeneric', () => {
       },
     });
 
-    const wrapper = mount(
+    const res = render(
       <TestProviders>
         <AllCasesList />
       </TestProviders>
     );
 
     const checkIt = (columnName: string, key: number) => {
-      const column = wrapper.find('[data-test-subj="cases-table"] tbody .euiTableRowCell').at(key);
-      expect(column.find('.euiTableRowCell--hideForDesktop').text()).toEqual(columnName);
-      expect(column.find('span').text()).toEqual(emptyTag);
+      const column = res.getByTestId('cases-table').querySelectorAll('tbody .euiTableRowCell');
+      expect(column[key].querySelector('.euiTableRowCell--hideForDesktop')).toHaveTextContent(columnName);
+      expect(column[key].querySelector('span')).toHaveTextContent(emptyTag);
     };
 
     const { result } = renderHook<GetCasesColumn, UseCasesColumnsReturnValue>(
@@ -241,12 +239,14 @@ describe('AllCasesListGeneric', () => {
   });
 
   it('should tableHeaderSortButton AllCasesList', async () => {
-    const wrapper = mount(
+    const res = render(
       <TestProviders>
         <AllCasesList />
       </TestProviders>
     );
-    wrapper.find('[data-test-subj="tableHeaderSortButton"]').first().simulate('click');
+
+    userEvent.click(res.getAllByTestId('tableHeaderSortButton')[0]);
+
     await waitFor(() => {
       expect(useGetCasesMock).toBeCalledWith(
         expect.objectContaining({
@@ -749,6 +749,8 @@ describe('AllCasesListGeneric', () => {
       it('Renders bulk action', async () => {
         const result = appMockRenderer.render(<AllCasesList />);
 
+        await waitForComponentToUpdate();
+
         act(() => {
           userEvent.click(result.getByTestId('checkboxSelectAll'));
         });
@@ -767,6 +769,8 @@ describe('AllCasesListGeneric', () => {
         'Bulk update status: %s',
         async (status) => {
           const result = appMockRenderer.render(<AllCasesList />);
+
+          await waitForComponentToUpdate();
 
           act(() => {
             userEvent.click(result.getByTestId('checkboxSelectAll'));
@@ -811,6 +815,8 @@ describe('AllCasesListGeneric', () => {
       ])('Bulk update severity: %s', async (severity) => {
         const result = appMockRenderer.render(<AllCasesList />);
 
+        await waitForComponentToUpdate();
+
         act(() => {
           userEvent.click(result.getByTestId('checkboxSelectAll'));
         });
@@ -849,6 +855,8 @@ describe('AllCasesListGeneric', () => {
 
       it('Bulk delete', async () => {
         const result = appMockRenderer.render(<AllCasesList />);
+
+        await waitForComponentToUpdate();
 
         act(() => {
           userEvent.click(result.getByTestId('checkboxSelectAll'));
@@ -895,6 +903,8 @@ describe('AllCasesListGeneric', () => {
         appMockRenderer = createAppMockRenderer({ permissions: readCasesPermissions() });
         const res = appMockRenderer.render(<AllCasesList />);
 
+        await waitForComponentToUpdate();
+
         expect(res.getByTestId('checkboxSelectAll')).toBeDisabled();
 
         await waitFor(() => {
@@ -935,6 +945,8 @@ describe('AllCasesListGeneric', () => {
         const inProgressCase = useGetCasesMockState.data.cases[1];
         const theCase = status === CaseStatuses.open ? inProgressCase : openCase;
 
+        await waitForComponentToUpdate();
+
         await waitFor(() => {
           expect(res.getByTestId(`case-action-popover-button-${theCase.id}`)).toBeInTheDocument();
         });
@@ -974,6 +986,8 @@ describe('AllCasesListGeneric', () => {
         const lowCase = useGetCasesMockState.data.cases[0];
         const mediumCase = useGetCasesMockState.data.cases[1];
         const theCase = severity === CaseSeverity.LOW ? mediumCase : lowCase;
+
+        await waitForComponentToUpdate();
 
         await waitFor(() => {
           expect(res.getByTestId(`case-action-popover-button-${theCase.id}`)).toBeInTheDocument();
@@ -1047,6 +1061,8 @@ describe('AllCasesListGeneric', () => {
       it('should disable row actions when bulk selecting all cases', async () => {
         const res = appMockRenderer.render(<AllCasesList />);
 
+        await waitForComponentToUpdate();
+
         act(() => {
           userEvent.click(res.getByTestId('checkboxSelectAll'));
         });
@@ -1061,6 +1077,8 @@ describe('AllCasesListGeneric', () => {
       it('should disable row actions when selecting a case', async () => {
         const res = appMockRenderer.render(<AllCasesList />);
         const caseToSelect = defaultGetCases.data.cases[0];
+
+        await waitForComponentToUpdate();
 
         act(() => {
           userEvent.click(res.getByTestId(`checkboxSelectRow-${caseToSelect.id}`));
