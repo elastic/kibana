@@ -17,6 +17,9 @@ const ArgumentSelectorWrapperContainer = styled.span`
 
   .selectorContainer {
     max-width: 25vw;
+    display: flex;
+    align-items: center;
+    height: 100%;
   }
 `;
 
@@ -38,13 +41,6 @@ const DevUxStyles = createGlobalStyle<{ theme: { eui: { euiColorPrimary: string 
     }
 
     &.style2 {
-
-      [data-test-subj="endpointResponseActionsConsole-cmdInput-leftOfCursor"],
-      [data-test-subj="endpointResponseActionsConsole-cmdInput-rightOfCursor"] {
-        display: flex;
-        align-items: center;
-      }
-
       .argSelectorWrapper {
         border: ${({ theme: { eui } }) => eui.euiBorderThin};
         border-radius: ${({ theme: { eui } }) => eui.euiBorderRadiusSmall};
