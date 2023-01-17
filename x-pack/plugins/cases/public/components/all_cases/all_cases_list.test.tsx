@@ -140,22 +140,24 @@ describe('AllCasesListGeneric', () => {
     );
 
     await waitFor(() => {
-      expect(res.getAllByTestId('case-details-link')[0]).toHaveAttribute('href','/app/security/cases/test');
+      expect(res.getAllByTestId('case-details-link')[0]).toHaveAttribute(
+        'href',
+        '/app/security/cases/test'
+      );
       expect(res.getAllByTestId('case-details-link')[0]).toHaveTextContent(
         useGetCasesMockState.data.cases[0].title
       );
-      expect(
-        res.getAllByTestId('case-user-profile-avatar-damaged_raccoon')[0]
-      ).toHaveTextContent('DR');
-      expect(
-        res.getAllByTestId('case-table-column-tags-coke')[0]
-      ).toHaveAttribute('title', useGetCasesMockState.data.cases[0].tags[0]);
+      expect(res.getAllByTestId('case-user-profile-avatar-damaged_raccoon')[0]).toHaveTextContent(
+        'DR'
+      );
+      expect(res.getAllByTestId('case-table-column-tags-coke')[0]).toHaveAttribute(
+        'title',
+        useGetCasesMockState.data.cases[0].tags[0]
+      );
       expect(
         res.getAllByTestId('case-table-column-createdAt')[0].querySelector('.euiToolTipAnchor')
       ).toHaveTextContent(useGetCasesMockState.data.cases[0].createdAt);
-      expect(res.getByTestId('case-table-case-count')).toHaveTextContent(
-        'Showing 10 cases'
-      );
+      expect(res.getByTestId('case-table-case-count')).toHaveTextContent('Showing 10 cases');
     });
   });
 
@@ -220,7 +222,9 @@ describe('AllCasesListGeneric', () => {
 
     const checkIt = (columnName: string, key: number) => {
       const column = res.getByTestId('cases-table').querySelectorAll('tbody .euiTableRowCell');
-      expect(column[key].querySelector('.euiTableRowCell--hideForDesktop')).toHaveTextContent(columnName);
+      expect(column[key].querySelector('.euiTableRowCell--hideForDesktop')).toHaveTextContent(
+        columnName
+      );
       expect(column[key].querySelector('span')).toHaveTextContent(emptyTag);
     };
 
@@ -282,14 +286,14 @@ describe('AllCasesListGeneric', () => {
   //       <AllCasesList />
   //     </TestProviders>
   //   );
-    
-  //   await waitFor(() => 
+
+  //   await waitFor(() =>
   //     expect(res.getByTestId('cases-count-stats')).toBeInTheDocument()
   //   );
   // });
 
   it('should not render table utility bar when isSelectorView=true', async () => {
-    const res = appMockRenderer.render(<AllCasesList isSelectorView={true} />); 
+    const res = appMockRenderer.render(<AllCasesList isSelectorView={true} />);
 
     await waitFor(() => {
       expect(res.queryByTestId('case-table-selected-case-count')).not.toBeInTheDocument();
@@ -493,19 +497,15 @@ describe('AllCasesListGeneric', () => {
         <AllCasesList isSelectorView={false} />
       </TestProviders>
     );
-    
+
     userEvent.click(res.getByTestId('case-status-filter'));
 
     await waitFor(() => {
-      expect(res.getByTestId('case-status-filter-open')).toHaveTextContent(
-        'Open (20)'
-      );
+      expect(res.getByTestId('case-status-filter-open')).toHaveTextContent('Open (20)');
       expect(res.getByTestId('case-status-filter-in-progress')).toHaveTextContent(
         'In progress (40)'
       );
-      expect(res.getByTestId('case-status-filter-closed')).toHaveTextContent(
-        'Closed (130)'
-      );
+      expect(res.getByTestId('case-status-filter-closed')).toHaveTextContent('Closed (130)');
     });
   });
 
@@ -516,7 +516,7 @@ describe('AllCasesListGeneric', () => {
       </TestProviders>
     );
 
-    await waitFor(() => 
+    await waitFor(() =>
       expect(res.getAllByTestId('case-status-badge-in-progress')[0]).toBeInTheDocument()
     );
   });
@@ -840,7 +840,7 @@ describe('AllCasesListGeneric', () => {
         });
 
         await waitForComponentToUpdate();
-      
+
         await waitFor(() => {
           expect(updateCasesSpy).toBeCalledWith(
             useGetCasesMockState.data.cases.map(({ id, version }) => ({
@@ -849,7 +849,7 @@ describe('AllCasesListGeneric', () => {
               severity,
             })),
             expect.anything()
-          )
+          );
         });
       });
 
@@ -1096,58 +1096,58 @@ describe('AllCasesListGeneric', () => {
     describe('Assignees', () => {
       it('should hide the assignees column on basic license', async () => {
         useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => false });
-    
+
         const result = render(
           <TestProviders>
             <AllCasesList />
           </TestProviders>
         );
-    
+
         await waitFor(() => {
           expect(result.getByTestId('cases-table')).toBeTruthy();
           expect(result.queryAllByTestId('case-table-column-assignee').length).toBe(0);
         });
       });
-    
+
       it('should show the assignees column on platinum license', async () => {
         useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
-    
+
         const result = render(
           <TestProviders>
             <AllCasesList />
           </TestProviders>
         );
-    
+
         await waitFor(() => {
           expect(result.getByTestId('cases-table')).toBeTruthy();
           expect(result.queryAllByTestId('case-table-column-assignee').length).toBeGreaterThan(0);
         });
       });
-    
+
       it('should hide the assignees filters on basic license', async () => {
         useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => false });
-    
+
         const result = render(
           <TestProviders>
             <AllCasesList />
           </TestProviders>
         );
-    
+
         await waitFor(() => {
           expect(result.getByTestId('cases-table')).toBeTruthy();
           expect(result.queryAllByTestId('options-filter-popover-button-assignees').length).toBe(0);
         });
       });
-    
+
       it('should show the assignees filters on platinum license', async () => {
         useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
-    
+
         const result = render(
           <TestProviders>
             <AllCasesList />
           </TestProviders>
         );
-    
+
         await waitFor(() => {
           expect(result.getByTestId('cases-table')).toBeTruthy();
           expect(
