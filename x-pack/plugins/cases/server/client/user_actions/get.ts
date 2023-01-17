@@ -11,7 +11,7 @@ import { CaseUserActionsResponseRt } from '../../../common/api';
 import { createCaseError } from '../../common/error';
 import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
-import type { UserActionGet } from './client';
+import type { UserActionGet } from './types';
 
 export const get = async (
   { caseId }: UserActionGet,
