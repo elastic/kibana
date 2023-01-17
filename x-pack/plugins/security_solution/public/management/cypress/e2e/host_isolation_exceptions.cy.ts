@@ -14,7 +14,7 @@
 import { login, loginWithRole, ROLE } from '../tasks/login';
 import { setupLicense } from '../tasks/license';
 import { platinum, gold } from '../fixtures/licenses';
-import { hieEntry } from '../fixtures/host_isolation_exception_entry';
+import { hieListResponse } from '../fixtures/exception_list_entries';
 
 const loginWithReadAccess = (url: string) => {
   loginWithRole(ROLE.t2_analyst);
@@ -29,7 +29,7 @@ const loginWithWriteAccess = (url: string) => {
 const stubHIEResponse = () => {
   cy.intercept('GET', `/api/exception_lists/items/_find?*`, {
     statusCode: 200,
-    body: hieEntry,
+    body: hieListResponse,
   }).as('getHIEEntry');
 };
 

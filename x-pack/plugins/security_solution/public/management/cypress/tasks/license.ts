@@ -34,9 +34,10 @@ export const setupLicense = (body: {
       });
     })
     .then((licenseInfo) => {
+      const licenseType = body.license.type;
       expect(licenseInfo.status).to.eq(200);
       expect(licenseInfo.body.license.status).to.eq('active');
-      expect(licenseInfo.body.license.type).to.eq(body.license.type);
-      expect(licenseInfo.body.license.mode).to.eq(body.license.type);
+      expect(licenseInfo.body.license.type).to.eq(licenseType);
+      expect(licenseInfo.body.license.mode).to.eq(licenseType);
     });
 };
