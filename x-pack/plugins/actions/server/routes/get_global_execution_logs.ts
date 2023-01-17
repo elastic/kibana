@@ -29,7 +29,7 @@ const sortFieldsSchema = schema.arrayOf(sortFieldSchema, {
   defaultValue: [{ timestamp: { order: 'desc' } }],
 });
 
-const querySchema = schema.object({
+const bodySchema = schema.object({
   date_start: schema.string(),
   date_end: schema.maybe(schema.string()),
   filter: schema.maybe(schema.string()),
@@ -51,18 +51,18 @@ export const getGlobalExecutionLogRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
-  router.get(
+  router.post(
     {
       path: `${INTERNAL_BASE_ACTION_API_PATH}/_global_connector_execution_logs`,
       validate: {
-        query: querySchema,
+        body: bodySchema,
       },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const actionsClient = (await context.actions).getActionsClient();
         return res.ok({
-          body: await actionsClient.getGlobalExecutionLogWithAuth(rewriteBodyReq(req.query)),
+          body: await actionsClient.getGlobalExecutionLogWithAuth(rewriteBodyReq(req.body)),
         });
       })
     )

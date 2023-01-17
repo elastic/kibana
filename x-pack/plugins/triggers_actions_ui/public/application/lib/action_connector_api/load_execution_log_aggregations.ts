@@ -66,10 +66,10 @@ export const loadGlobalConnectorExecutionLogAggregations = async ({
   const sortField: any[] = sort;
   const filter = getFilter({ outcomeFilter, message });
 
-  const result = await http.get<AsApiContract<IExecutionLogResult>>(
+  const result = await http.post<AsApiContract<IExecutionLogResult>>(
     `${INTERNAL_BASE_ACTION_API_PATH}/_global_connector_execution_logs`,
     {
-      query: {
+      body: JSON.stringify({
         date_start: dateStart,
         date_end: dateEnd,
         filter: filter.length ? filter.join(' and ') : undefined,
@@ -79,7 +79,7 @@ export const loadGlobalConnectorExecutionLogAggregations = async ({
         page: page + 1,
         sort: sortField.length ? JSON.stringify(sortField) : undefined,
         namespaces: namespaces ? JSON.stringify(namespaces) : undefined,
-      },
+      }),
     }
   );
 

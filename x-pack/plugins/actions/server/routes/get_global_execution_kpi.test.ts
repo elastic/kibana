@@ -36,7 +36,7 @@ describe('getGlobalExecutionKPIRoute', () => {
 
     getGlobalExecutionKPIRoute(router, licenseState);
 
-    const [config, handler] = router.get.mock.calls[0];
+    const [config, handler] = router.post.mock.calls[0];
 
     expect(config.path).toMatchInlineSnapshot(
       `"/internal/actions/_global_connector_execution_kpi"`
@@ -47,7 +47,7 @@ describe('getGlobalExecutionKPIRoute', () => {
     const [context, req, res] = mockHandlerArguments(
       { actionsClient },
       {
-        query: {
+        body: {
           date_start: dateString,
         },
       },

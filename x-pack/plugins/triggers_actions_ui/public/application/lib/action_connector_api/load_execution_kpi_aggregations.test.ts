@@ -19,7 +19,7 @@ const mockResponse = {
 
 describe('loadGlobalConnectorExecutionKPIAggregations', () => {
   test('should call load execution kpi aggregation API', async () => {
-    http.get.mockResolvedValueOnce(mockResponse);
+    http.post.mockResolvedValueOnce(mockResponse);
 
     const result = await loadGlobalConnectorExecutionKPIAggregations({
       dateStart: '2022-03-23T16:17:53.482Z',
@@ -33,16 +33,11 @@ describe('loadGlobalConnectorExecutionKPIAggregations', () => {
       ...mockResponse,
     });
 
-    expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(http.post.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "/internal/actions/_global_connector_execution_kpi",
         Object {
-          "query": Object {
-            "date_end": "2022-03-23T16:17:53.482Z",
-            "date_start": "2022-03-23T16:17:53.482Z",
-            "filter": "(message: \\"test-message\\" OR error.message: \\"test-message\\") and (kibana.alerting.outcome:success OR (event.outcome: success AND NOT kibana.alerting.outcome:*) OR kibana.alerting.outcome: warning)",
-            "namespaces": undefined,
-          },
+          "body": "{\\"filter\\":\\"(message: \\\\\\"test-message\\\\\\" OR error.message: \\\\\\"test-message\\\\\\") and (kibana.alerting.outcome:success OR (event.outcome: success AND NOT kibana.alerting.outcome:*) OR kibana.alerting.outcome: warning)\\",\\"date_start\\":\\"2022-03-23T16:17:53.482Z\\",\\"date_end\\":\\"2022-03-23T16:17:53.482Z\\"}",
         },
       ]
     `);

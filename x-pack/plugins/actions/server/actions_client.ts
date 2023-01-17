@@ -798,7 +798,7 @@ export class ActionsClient {
           start: parsedDateStart.toISOString(),
           end: parsedDateEnd.toISOString(),
           aggs: getExecutionLogAggregation({
-            filter: filter ? `${filter} AND ${ACTION_FILTER}` : ACTION_FILTER,
+            filter: filter ? `${filter} AND (${ACTION_FILTER})` : ACTION_FILTER,
             page,
             perPage,
             sort,
@@ -857,7 +857,7 @@ export class ActionsClient {
           start: parsedDateStart.toISOString(),
           end: parsedDateEnd.toISOString(),
           aggs: getExecutionKPIAggregation(
-            filter ? `${filter} AND ${ACTION_FILTER}` : ACTION_FILTER
+            filter ? `${filter} AND (${ACTION_FILTER})` : ACTION_FILTER
           ),
         },
         namespaces

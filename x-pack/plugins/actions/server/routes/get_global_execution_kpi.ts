@@ -16,7 +16,7 @@ import { ActionsRequestHandlerContext } from '../types';
 import { ILicenseState } from '../lib';
 import { rewriteNamespaces } from './rewrite_namespaces';
 
-const querySchema = schema.object({
+const bodySchema = schema.object({
   date_start: schema.string(),
   date_end: schema.maybe(schema.string()),
   filter: schema.maybe(schema.string()),
@@ -39,18 +39,18 @@ export const getGlobalExecutionKPIRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
-  router.get(
+  router.post(
     {
       path: `${INTERNAL_BASE_ACTION_API_PATH}/_global_connector_execution_kpi`,
       validate: {
-        query: querySchema,
+        body: bodySchema,
       },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const actionsClient = (await context.actions).getActionsClient();
         return res.ok({
-          body: await actionsClient.getGlobalExecutionKpiWithAuth(rewriteReq(req.query)),
+          body: await actionsClient.getGlobalExecutionKpiWithAuth(rewriteReq(req.body)),
         });
       })
     )

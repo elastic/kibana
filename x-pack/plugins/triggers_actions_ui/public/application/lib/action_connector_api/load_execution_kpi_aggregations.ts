@@ -28,15 +28,15 @@ export const loadGlobalConnectorExecutionKPIAggregations = ({
 }: LoadGlobalConnectorExecutionKPIAggregationsProps & { http: HttpSetup }) => {
   const filter = getFilter({ outcomeFilter, message });
 
-  return http.get<IExecutionKPIResult>(
+  return http.post<IExecutionKPIResult>(
     `${INTERNAL_BASE_ACTION_API_PATH}/_global_connector_execution_kpi`,
     {
-      query: {
+      body: JSON.stringify({
         filter: filter.length ? filter.join(' and ') : undefined,
         date_start: dateStart,
         date_end: dateEnd,
         namespaces: namespaces ? JSON.stringify(namespaces) : namespaces,
-      },
+      }),
     }
   );
 };

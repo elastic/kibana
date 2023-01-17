@@ -49,7 +49,7 @@ describe('getRuleExecutionLogRoute', () => {
 
     getGlobalExecutionLogRoute(router, licenseState);
 
-    const [config, handler] = router.get.mock.calls[0];
+    const [config, handler] = router.post.mock.calls[0];
 
     expect(config.path).toMatchInlineSnapshot(
       `"/internal/actions/_global_connector_execution_logs"`
@@ -60,7 +60,7 @@ describe('getRuleExecutionLogRoute', () => {
     const [context, req, res] = mockHandlerArguments(
       { actionsClient },
       {
-        query: {
+        body: {
           date_start: dateString,
           per_page: 10,
           page: 1,
