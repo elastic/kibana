@@ -111,6 +111,8 @@ describe('Import rules route', () => {
         exceptions_success_count: 0,
         action_connectors_success: true,
         action_connectors_success_count: 0,
+        action_connectors_warnings: [],
+        action_connectors_errors: [],
       });
     });
 
@@ -152,6 +154,8 @@ describe('Import rules route', () => {
         exceptions_success_count: 0,
         action_connectors_success: true,
         action_connectors_success_count: 0,
+        action_connectors_warnings: [],
+        action_connectors_errors: [],
       });
     });
 
@@ -179,6 +183,8 @@ describe('Import rules route', () => {
         exceptions_success_count: 0,
         action_connectors_success: true,
         action_connectors_success_count: 0,
+        action_connectors_warnings: [],
+        action_connectors_errors: [],
       });
     });
 
@@ -206,6 +212,8 @@ describe('Import rules route', () => {
           exceptions_success_count: 0,
           action_connectors_success: true,
           action_connectors_success_count: 0,
+          action_connectors_warnings: [],
+          action_connectors_errors: [],
         });
       });
 
@@ -230,6 +238,8 @@ describe('Import rules route', () => {
           exceptions_success_count: 0,
           action_connectors_success: true,
           action_connectors_success_count: 0,
+          action_connectors_warnings: [],
+          action_connectors_errors: [],
         });
       });
     });
@@ -256,6 +266,8 @@ describe('Import rules route', () => {
         exceptions_success_count: 0,
         action_connectors_success: true,
         action_connectors_success_count: 0,
+        action_connectors_warnings: [],
+        action_connectors_errors: [],
       });
     });
 
@@ -278,6 +290,8 @@ describe('Import rules route', () => {
         exceptions_success_count: 0,
         action_connectors_success: true,
         action_connectors_success_count: 0,
+        action_connectors_warnings: [],
+        action_connectors_errors: [],
       });
     });
 
@@ -320,6 +334,8 @@ describe('Import rules route', () => {
         exceptions_success_count: 0,
         action_connectors_success: true,
         action_connectors_success_count: 0,
+        action_connectors_warnings: [],
+        action_connectors_errors: [],
       });
     });
 
@@ -352,6 +368,8 @@ describe('Import rules route', () => {
           exceptions_success_count: 0,
           action_connectors_success: true,
           action_connectors_success_count: 0,
+          action_connectors_warnings: [],
+          action_connectors_errors: [],
         });
       });
 
@@ -375,6 +393,8 @@ describe('Import rules route', () => {
           exceptions_success_count: 0,
           action_connectors_success: true,
           action_connectors_success_count: 0,
+          action_connectors_warnings: [],
+          action_connectors_errors: [],
         });
       });
     });
@@ -411,6 +431,8 @@ describe('Import rules route', () => {
           exceptions_success_count: 0,
           action_connectors_success: true,
           action_connectors_success_count: 0,
+          action_connectors_warnings: [],
+          action_connectors_errors: [],
         });
       });
 
@@ -433,6 +455,8 @@ describe('Import rules route', () => {
           exceptions_success_count: 0,
           action_connectors_success: true,
           action_connectors_success_count: 0,
+          action_connectors_warnings: [],
+          action_connectors_errors: [],
         });
       });
     });
