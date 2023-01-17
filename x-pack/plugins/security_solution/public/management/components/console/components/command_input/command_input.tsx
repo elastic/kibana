@@ -139,17 +139,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
       enteredCommand,
       parsedInput,
     });
-
-    // FIXME:PT reset input state
-
-    dispatch({
-      type: 'updateInputTextEnteredState',
-      payload: {
-        leftOfCursorText: '',
-        rightOfCursorText: '',
-      },
-    });
-  }, [dispatch, enteredCommand, parsedInput, userInput]);
+  }, [enteredCommand, parsedInput, userInput]);
 
   const handleOnChangeFocus = useCallback<NonNullable<InputCaptureProps['onChangeFocus']>>(
     (hasFocus) => {
@@ -258,6 +248,15 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
     if (commandToExecute) {
       dispatch({ type: 'executeCommand', payload: commandToExecute });
       setCommandToExecute(undefined);
+
+      // reset input
+      dispatch({
+        type: 'updateInputTextEnteredState',
+        payload: {
+          leftOfCursorText: '',
+          rightOfCursorText: '',
+        },
+      });
     }
   }, [commandToExecute, dispatch]);
 
