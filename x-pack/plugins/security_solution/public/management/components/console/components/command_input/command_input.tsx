@@ -42,9 +42,10 @@ const CommandInputContainer = styled.div`
   }
 
   .inputDisplay {
-    min-height: ${({ theme: { eui } }) => {
-      return `calc(${eui.euiLineHeight}em + 0.5em)`;
-    }};
+    & > * {
+      flex-direction: row;
+      align-items: center;
+    }
   }
 
   .textEntered {
@@ -290,18 +291,14 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
                       gutterSize="none"
                       className="inputDisplay"
                     >
-                      <EuiFlexItem grow={false}>
-                        <div data-test-subj={getTestId('cmdInput-leftOfCursor')}>
-                          {userInput.getLeftOfCursorRenderingContent()}
-                        </div>
+                      <EuiFlexItem grow={false} data-test-subj={getTestId('cmdInput-leftOfCursor')}>
+                        {userInput.getLeftOfCursorRenderingContent()}
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <span className="cursor essentialAnimation" />
                       </EuiFlexItem>
-                      <EuiFlexItem>
-                        <div data-test-subj={getTestId('cmdInput-rightOfCursor')}>
-                          {userInput.getRightOfCursorRenderingContent()}
-                        </div>
+                      <EuiFlexItem data-test-subj={getTestId('cmdInput-rightOfCursor')}>
+                        {userInput.getRightOfCursorRenderingContent()}
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </InputCapture>
