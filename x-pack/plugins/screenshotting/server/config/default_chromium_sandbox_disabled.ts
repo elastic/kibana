@@ -39,9 +39,7 @@ interface OsSummary {
 
 export async function getDefaultChromiumSandboxDisabled(): Promise<OsSummary> {
   const os = await getOs();
+  const enableSandbox = os.os !== 'linux' || distroSupportsUnprivilegedUsernamespaces(os.dist);
 
-  return {
-    os,
-    disableSandbox: os.os === 'linux' && !distroSupportsUnprivilegedUsernamespaces(os.dist),
-  };
+  return { os, disableSandbox: !enableSandbox };
 }
