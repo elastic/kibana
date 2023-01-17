@@ -16,4 +16,10 @@ export const alertTableViewModeSelector = () =>
 export const isAlertTableLoadingSelector = () =>
   createSelector(selectAlertTable, (model) => model.isLoading);
 
+export const showBuildingBlockAlertsSelector = () =>
+  createSelector(selectAlertTable, (model) => model.showBuildingBlockAlerts);
+
+export const showOnlyThreatIndicatorAlertsSelector = () =>
+  createSelector(selectAlertTable, (model) => model.showOnlyThreatIndicatorAlerts);
+
 export const totalAlertsCount = createSelector(selectAlertTable, (model) => model.totalCount);

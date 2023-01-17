@@ -202,6 +202,11 @@ export const DetectionEngineAlertTable: FC<DetectionEngineAlertTableProps> = ({
     [evenRenderedColumns, alertColumns, tableView]
   );
 
+  const finalBrowserFields = useMemo(
+    () => (tableView === VIEW_SELECTION.eventRenderedView ? undefined : browserFields),
+    [tableView, browserFields]
+  );
+
   const alertStateProps: AlertsTableStateProps = useMemo(
     () => ({
       alertsTableConfigurationRegistry: triggersActionsUi.alertsTableConfigurationRegistry,
@@ -213,12 +218,13 @@ export const DetectionEngineAlertTable: FC<DetectionEngineAlertTableProps> = ({
         bool: boolQueryDSL,
       },
       showExpandToDetails: false,
-      additionalControls: {
+      controls: {
         right: additionalRightControls,
       },
       gridStyle,
       rowHeightsOptions,
       columns: finalColumns,
+      browserFields: finalBrowserFields,
     }),
     [
       additionalRightControls,
@@ -229,6 +235,7 @@ export const DetectionEngineAlertTable: FC<DetectionEngineAlertTableProps> = ({
       gridStyle,
       rowHeightsOptions,
       finalColumns,
+      finalBrowserFields,
     ]
   );
 

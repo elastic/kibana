@@ -20,6 +20,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import type { Filter } from '@kbn/es-query';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SerializableRecord } from '@kbn/utility-types';
+import { useAlertTableFilters } from '../../../detections/pages/detection_engine/use_alert_table_filters';
+import { AdditionalFiltersAction } from '../../../detections/components/alerts_table/additional_filters_action';
 import { useUserData } from '../../../detections/components/user_info';
 import { getAlertsDefaultModel } from '../../../detections/components/alerts_table/default_config';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
@@ -55,7 +57,13 @@ import { useBulkAlertActionItems } from './use_alert_actions';
 import { FIELDS_WITHOUT_CELL_ACTIONS } from '../cell_actions/constants';
 import { alertTableViewModeSelector } from '../../store/alert_table/selectors';
 import { useShallowEqualSelector } from '../../hooks/use_selector';
-import { VIEW_SELECTION } from '../../components/events_viewer/summary_view_select';
+import type { ViewSelection } from '../../components/events_viewer/summary_view_select';
+import {
+  ALERTS_TABLE_VIEW_SELECTION_KEY,
+  VIEW_SELECTION,
+} from '../../components/events_viewer/summary_view_select';
+import { changeAlertTableViewMode } from '../../store/alert_table/actions';
+import { RightTopMenu } from '../../components/events_viewer/right_top_menu';
 
 function getFiltersForDSLQuery(datafeedQuery: QueryDslQueryContainer): Filter[] {
   if (isKnownEmptyQuery(datafeedQuery)) {
@@ -306,6 +314,68 @@ const registerAlertsTableConfiguration = (
     };
   };
 
+  const usePersistentControls = () => {
+    const dispatch = useDispatch();
+
+    const getViewMode = alertTableViewModeSelector();
+
+    const storedTableView = storage.get(ALERTS_TABLE_VIEW_SELECTION_KEY);
+
+    const stateTableView = useShallowEqualSelector((state) => getViewMode(state));
+
+    const tableView = storedTableView ?? stateTableView;
+
+    const handleChangeTableView = useCallback(
+      (selectedView: ViewSelection) => {
+        dispatch(
+          changeAlertTableViewMode({
+            viewMode: selectedView,
+          })
+        );
+      },
+      [dispatch]
+    );
+
+    const {
+      showBuildingBlockAlerts,
+      setShowBuildingBlockAlerts,
+      showOnlyThreatIndicatorAlerts,
+      setShowOnlyThreatIndicatorAlerts,
+    } = useAlertTableFilters();
+
+    const additionalFiltersComponent = useMemo(
+      () => (
+        <AdditionalFiltersAction
+          areEventsLoading={false}
+          onShowBuildingBlockAlertsChanged={setShowBuildingBlockAlerts}
+          showBuildingBlockAlerts={showBuildingBlockAlerts}
+          onShowOnlyThreatIndicatorAlertsChanged={setShowOnlyThreatIndicatorAlerts}
+          showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
+        />
+      ),
+      [
+        showBuildingBlockAlerts,
+        setShowBuildingBlockAlerts,
+        showOnlyThreatIndicatorAlerts,
+        setShowOnlyThreatIndicatorAlerts,
+      ]
+    );
+
+    return {
+      right: (
+        <RightTopMenu
+          tableView={tableView}
+          loading={false}
+          tableId={TableId.alertsOnAlertsPage}
+          title={'Some Title'}
+          onViewChange={handleChangeTableView}
+          hasRightOffset={false}
+          additionalFilters={additionalFiltersComponent}
+        />
+      ),
+    };
+  };
+
   const renderCellValueHookAlertPage = getRenderCellValueHook({
     scopeId: SourcererScopeName.default,
   });
@@ -324,6 +394,7 @@ const registerAlertsTableConfiguration = (
     useInternalFlyout,
     useBulkActions: useBulkActionHook,
     useCellActions,
+    usePersistentControls,
   });
 
   registry.register({
@@ -335,6 +406,7 @@ const registerAlertsTableConfiguration = (
     useInternalFlyout,
     useBulkActions: useBulkActionHook,
     useCellActions,
+    usePersistentControls,
   });
 };
 

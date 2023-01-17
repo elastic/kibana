@@ -70,7 +70,7 @@ const getDefaultVisibility = ({
   };
 
   return {
-    additionalControls: localAdditionalControls,
+    additionalControls,
     showColumnSelector: {
       allowHide: false,
     },

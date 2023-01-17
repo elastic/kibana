@@ -16,3 +16,11 @@ export const createAlertTableData = actionCreator<AlertTableState>('CREATE_ALERT
 export const changeAlertTableViewMode = actionCreator<{
   viewMode: ViewSelection;
 }>('CHANGE_ALERT_TABLE_VIEW_MODE');
+
+export const updateShowBuildingBlockAlertsFilter = actionCreator<{
+  showBuildingBlockAlerts: boolean;
+}>('UPDATE_BUILDING_BLOCK_ALERTS_FILTER');
+
+export const updateShowThreatIndicatorAlertsFilter = actionCreator<{
+  showOnlyThreatIndicatorAlerts: boolean;
+}>('UPDATE_SHOW_THREAT_INDICATOR_ALERTS_FILTER');

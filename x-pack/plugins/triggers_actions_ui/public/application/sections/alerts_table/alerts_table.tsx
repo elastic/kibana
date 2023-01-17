@@ -38,7 +38,7 @@ const GridStyles: EuiDataGridStyle = {
 };
 
 const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTableProps) => {
-  const dataGridRef = useRef<EuiDataGridRefProps | null>();
+  const dataGridRef = useRef<EuiDataGridRefProps>(null);
   const [rowClasses, setRowClasses] = useState<EuiDataGridStyle['rowClasses']>({});
   const alertsData = props.useFetchAlertsData();
   const {
@@ -334,7 +334,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
           leadingControlColumns={leadingControlColumns}
           rowCount={alertsCount}
           renderCellValue={handleRenderCellValue}
-          gridStyle={{ ...GridStyles, rowClasses, ...(props.gridStyle ?? {}) }}
+          gridStyle={{ ...GridStyles, ...(props.gridStyle ?? {}) }}
           sorting={{ columns: sortingColumns, onSort }}
           toolbarVisibility={toolbarVisibility}
           pagination={{

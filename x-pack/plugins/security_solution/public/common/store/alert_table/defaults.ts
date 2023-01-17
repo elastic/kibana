@@ -17,4 +17,6 @@ export const defaultAlertTableModel: AlertTableModel = {
   viewMode:
     new Storage(localStorage).get(ALERTS_TABLE_VIEW_SELECTION_KEY) ?? VIEW_SELECTION.gridView,
   isLoading: false,
+  showOnlyThreatIndicatorAlerts: false,
+  showBuildingBlockAlerts: false,
 };

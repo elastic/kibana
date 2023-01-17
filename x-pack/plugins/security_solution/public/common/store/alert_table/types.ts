@@ -11,6 +11,8 @@ export interface AlertTableModel {
   viewMode: ViewSelection;
   totalCount: number;
   isLoading: boolean;
+  showBuildingBlockAlerts: boolean;
+  showOnlyThreatIndicatorAlerts: boolean;
 }
 
 export interface AlertTableState {

@@ -74,6 +74,7 @@ import { LandingPageComponent } from '../../../common/components/landing_page';
 import { AlertsTable } from '../../components/alerts_table';
 import { DetectionPageFilterSet } from '../../components/detection_page_filters';
 import { DetectionEngineAlertTable } from './trigger_alert_table';
+import { useAlertTableFilters } from './use_alert_table_filters';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -128,8 +129,14 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
   } = useSourcererDataView(SourcererScopeName.detections);
 
   const { formatUrl } = useFormatUrl(SecurityPageName.rules);
-  const [showBuildingBlockAlerts, setShowBuildingBlockAlerts] = useState(false);
-  const [showOnlyThreatIndicatorAlerts, setShowOnlyThreatIndicatorAlerts] = useState(false);
+
+  const {
+    showBuildingBlockAlerts,
+    setShowBuildingBlockAlerts,
+    showOnlyThreatIndicatorAlerts,
+    setShowOnlyThreatIndicatorAlerts,
+  } = useAlertTableFilters();
+
   const loading = userInfoLoading || listsConfigLoading;
   const {
     application: { navigateToUrl },

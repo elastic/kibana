@@ -6,15 +6,25 @@
  */
 
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
-import { changeAlertTableViewMode } from './actions';
+import {
+  changeAlertTableViewMode,
+  updateShowBuildingBlockAlertsFilter,
+  updateShowThreatIndicatorAlertsFilter,
+} from './actions';
 import { defaultAlertTableModel } from './defaults';
 
 const initialAlertTableState = defaultAlertTableModel;
 
-export const alertTableReducer = reducerWithInitialState(initialAlertTableState).case(
-  changeAlertTableViewMode,
-  (state, { viewMode }) => ({
+export const alertTableReducer = reducerWithInitialState(initialAlertTableState)
+  .case(changeAlertTableViewMode, (state, { viewMode }) => ({
     ...state,
     viewMode,
-  })
-);
+  }))
+  .case(updateShowBuildingBlockAlertsFilter, (state, { showBuildingBlockAlerts }) => ({
+    ...state,
+    showBuildingBlockAlerts,
+  }))
+  .case(updateShowThreatIndicatorAlertsFilter, (state, { showOnlyThreatIndicatorAlerts }) => ({
+    ...state,
+    showOnlyThreatIndicatorAlerts,
+  }));

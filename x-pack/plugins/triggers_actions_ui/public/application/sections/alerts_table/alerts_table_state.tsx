@@ -14,10 +14,12 @@ import {
   EuiEmptyPrompt,
   EuiFlyoutSize,
   EuiDataGridProps,
-  EuiDataGridToolBarAdditionalControlsOptions,
 } from '@elastic/eui';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
-import type { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
+import type {
+  BrowserFields,
+  RuleRegistrySearchRequestPagination,
+} from '@kbn/rule-registry-plugin/common';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type {
@@ -60,7 +62,7 @@ export type AlertsTableStateProps = {
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   pageSize?: number;
   showExpandToDetails: boolean;
-  additionalControls?: EuiDataGridToolBarAdditionalControlsOptions;
+  browserFields?: BrowserFields;
 } & Partial<EuiDataGridProps>;
 
 export interface AlertsTableStorage {
@@ -99,11 +101,11 @@ const AlertsTableState = ({
   pageSize,
   showExpandToDetails,
   leadingControlColumns,
-  additionalControls,
   rowHeightsOptions,
   renderCellValue,
   columns: propColumns,
   gridStyle,
+  browserFields: propBrowserFields,
 }: AlertsTableStateProps) => {
   const { cases } = useKibana<{ cases: CaseUi }>().services;
 
@@ -164,6 +166,11 @@ const AlertsTableState = ({
     id,
     defaultColumns: columnsLocal ?? [],
   });
+
+  const finalBrowserFields = useMemo(
+    () => propBrowserFields ?? browserFields,
+    [propBrowserFields, browserFields]
+  );
 
   const [
     isLoading,
@@ -267,7 +274,7 @@ const AlertsTableState = ({
       visibleColumns,
       'data-test-subj': 'internalAlertsState',
       updatedAt,
-      browserFields,
+      browserFields: finalBrowserFields,
       onToggleColumn,
       onResetColumns,
       onColumnsChange,
@@ -288,7 +295,7 @@ const AlertsTableState = ({
       useFetchAlertsData,
       visibleColumns,
       updatedAt,
-      browserFields,
+      finalBrowserFields,
       onToggleColumn,
       onResetColumns,
       onColumnsChange,
