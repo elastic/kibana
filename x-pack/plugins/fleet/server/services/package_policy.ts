@@ -162,7 +162,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
     }
 
-    let elasticsearch: PackagePolicy['elasticsearch'];
+    let elasticsearchPrivileges: NonNullable<PackagePolicy['elasticsearch']>['privileges'];
     // Add ids to stream
     const packagePolicyId = options?.id || uuid.v4();
     let inputs: PackagePolicyInput[] = packagePolicy.inputs.map((input) =>
@@ -207,7 +207,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
       inputs = await _compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs);
 
-      if (pkgInfo.type === 'integration') elasticsearch = pkgInfo.elasticsearch;
+      elasticsearchPrivileges = pkgInfo.elasticsearch?.privileges;
 
       if (pkgInfo.type === 'input') {
         await installAssetsForInputPackagePolicy({
@@ -230,7 +230,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           ? { package: omit(packagePolicy.package, 'experimental_data_stream_features') }
           : {}),
         inputs,
-        elasticsearch,
+        ...(elasticsearchPrivileges && { elasticsearch: { privileges: elasticsearchPrivileges } }),
         revision: 1,
         created_at: isoDate,
         created_by: options?.user?.username ?? 'system',
@@ -524,7 +524,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     );
 
     inputs = enforceFrozenInputs(oldPackagePolicy.inputs, inputs, options?.force);
-    let elasticsearch: PackagePolicy['elasticsearch'];
+    let elasticsearchPrivileges: NonNullable<PackagePolicy['elasticsearch']>['privileges'];
     if (packagePolicy.package?.name) {
       const pkgInfo = await getPackageInfo({
         savedObjectsClient: soClient,
@@ -540,7 +540,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
 
       inputs = await _compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs);
-      elasticsearch = pkgInfo.elasticsearch;
+      elasticsearchPrivileges = pkgInfo.elasticsearch?.privileges;
     }
 
     // Handle component template/mappings updates for experimental features, e.g. synthetic source
@@ -555,7 +555,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           ? { package: omit(restOfPackagePolicy.package, 'experimental_data_stream_features') }
           : {}),
         inputs,
-        elasticsearch,
+        ...(elasticsearchPrivileges && { elasticsearch: { privileges: elasticsearchPrivileges } }),
         revision: oldPackagePolicy.revision + 1,
         updated_at: new Date().toISOString(),
         updated_by: options?.user?.username ?? 'system',
@@ -627,7 +627,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         );
 
         inputs = enforceFrozenInputs(oldPackagePolicy.inputs, inputs, options?.force);
-        let elasticsearch: PackagePolicy['elasticsearch'];
+        let elasticsearchPrivileges: NonNullable<PackagePolicy['elasticsearch']>['privileges'];
         if (packagePolicy.package?.name) {
           const pkgInfo = packageInfos.get(
             `${packagePolicy.package.name}-${packagePolicy.package.version}`
@@ -636,7 +636,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
 
             inputs = await _compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs);
-            elasticsearch = pkgInfo.elasticsearch;
+            elasticsearchPrivileges = pkgInfo.elasticsearch?.privileges;
           }
         }
 
@@ -652,7 +652,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
               ? { package: omit(restOfPackagePolicy.package, 'experimental_data_stream_features') }
               : {}),
             inputs,
-            elasticsearch,
+            ...(elasticsearchPrivileges && {
+              elasticsearch: { privileges: elasticsearchPrivileges },
+            }),
             revision: oldPackagePolicy.revision + 1,
             updated_at: new Date().toISOString(),
             updated_by: options?.user?.username ?? 'system',
