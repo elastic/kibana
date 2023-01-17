@@ -74,6 +74,7 @@ export async function getMobileStats({
         ProcessorEvent.error,
         ProcessorEvent.metric,
         ProcessorEvent.transaction,
+        ProcessorEvent.span,
       ],
     },
     body: {
