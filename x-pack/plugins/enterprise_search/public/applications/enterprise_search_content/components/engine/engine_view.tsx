@@ -15,10 +15,12 @@ import { Status } from '../../../../../common/types/api';
 import { KibanaLogic } from '../../../shared/kibana';
 import { ENGINE_PATH, EngineViewTabs } from '../../routes';
 
+import { DeleteEngineModal } from '../engines/delete_engine_modal';
 import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_template';
 
 import { EngineError } from './engine_error';
 import { EngineIndices } from './engine_indices';
+import { EngineViewHeaderActions } from './engine_view_header_actions';
 import { EngineViewLogic } from './engine_view_logic';
 import { EngineHeaderDocsAction } from './header_docs_action';
 
@@ -62,11 +64,13 @@ export const EngineView: React.FC = () => {
             pageViewTelemetry={tabId}
             pageHeader={{
               pageTitle: tabId,
-              rightSideItems: [],
+              rightSideItems: [<EngineViewHeaderActions />],
             }}
             engineName={engineName}
             isLoading={isLoadingEngine}
-          />
+          >
+            <DeleteEngineModal />
+          </EnterpriseSearchEnginesPageTemplate>
         )}
       />
     </Switch>

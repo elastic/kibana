@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EnterpriseSearchEngineDetails } from '../../../../../common/types/engines';
+import { EnterpriseSearchEngine } from '../../../../../common/types/engines';
 import { Actions, createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
@@ -13,14 +13,14 @@ export interface FetchEngineApiParams {
   engineName: string;
 }
 
-export type FetchEngineApiResponse = EnterpriseSearchEngineDetails;
+export type FetchEngineApiResponse = EnterpriseSearchEngine;
 
 export const fetchEngine = async ({
   engineName,
 }: FetchEngineApiParams): Promise<FetchEngineApiResponse> => {
   const route = `/internal/enterprise_search/engines/${engineName}`;
 
-  return await HttpLogic.values.http.get<EnterpriseSearchEngineDetails>(route);
+  return await HttpLogic.values.http.get<EnterpriseSearchEngine>(route);
 };
 
 export const FetchEngineApiLogic = createApiLogic(['fetch_engine_api_logic'], fetchEngine);
