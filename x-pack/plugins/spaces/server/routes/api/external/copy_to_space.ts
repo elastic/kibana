@@ -68,11 +68,16 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
             includeReferences: schema.boolean({ defaultValue: false }),
             overwrite: schema.boolean({ defaultValue: false }),
             createNewCopies: schema.boolean({ defaultValue: true }),
+            compatibilityMode: schema.boolean({ defaultValue: false }),
           },
           {
             validate: (object) => {
               if (object.overwrite && object.createNewCopies) {
                 return 'cannot use [overwrite] with [createNewCopies]';
+              }
+
+              if (object.compatibilityMode && object.createNewCopies) {
+                return 'cannot use [compatibilityMode] with [createNewCopies]';
               }
             },
           }
@@ -87,6 +92,7 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
         includeReferences,
         overwrite,
         createNewCopies,
+        compatibilityMode,
       } = request.body;
 
       const { headers } = request;
@@ -104,6 +110,7 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
         includeReferences,
         overwrite,
         createNewCopies,
+        compatibilityMode,
       });
       return response.ok({ body: copyResponse });
     })

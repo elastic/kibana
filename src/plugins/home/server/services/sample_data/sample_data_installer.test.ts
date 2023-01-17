@@ -193,6 +193,7 @@ describe('SampleDataInstaller', () => {
         readStream: expect.any(Readable),
         overwrite: true,
         createNewCopies: false,
+        compatibilityMode: false,
       });
     });
 

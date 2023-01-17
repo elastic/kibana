@@ -934,6 +934,7 @@ describe('CoreUsageStatsClient', () => {
           `${IMPORT_STATS_PREFIX}.namespace.default.kibanaRequest.no`,
           `${IMPORT_STATS_PREFIX}.createNewCopiesEnabled.no`,
           `${IMPORT_STATS_PREFIX}.overwriteEnabled.no`,
+          `${IMPORT_STATS_PREFIX}.compatibilityModeEnabled.no`,
         ],
         incrementOptions
       );
@@ -947,11 +948,13 @@ describe('CoreUsageStatsClient', () => {
         request,
         createNewCopies: true,
         overwrite: true,
+        compatibilityMode: true,
       } as IncrementSavedObjectsImportOptions);
       await usageStatsClient.incrementSavedObjectsImport({
         request,
         createNewCopies: false,
         overwrite: true,
+        compatibilityMode: true,
       } as IncrementSavedObjectsImportOptions);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(2);
       expect(repositoryMock.incrementCounter).toHaveBeenNthCalledWith(
@@ -963,7 +966,8 @@ describe('CoreUsageStatsClient', () => {
           `${IMPORT_STATS_PREFIX}.namespace.default.total`,
           `${IMPORT_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
           `${IMPORT_STATS_PREFIX}.createNewCopiesEnabled.yes`,
-          // excludes 'overwriteEnabled.yes' and 'overwriteEnabled.no' when createNewCopies is true
+          // excludes 'overwriteEnabled.yes', 'overwriteEnabled.no', 'compatibilityModeEnabled.yes`, and
+          // `compatibilityModeEnabled.no` when createNewCopies is true
         ],
         incrementOptions
       );
@@ -977,6 +981,7 @@ describe('CoreUsageStatsClient', () => {
           `${IMPORT_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
           `${IMPORT_STATS_PREFIX}.createNewCopiesEnabled.no`,
           `${IMPORT_STATS_PREFIX}.overwriteEnabled.yes`,
+          `${IMPORT_STATS_PREFIX}.compatibilityModeEnabled.yes`,
         ],
         incrementOptions
       );
@@ -999,6 +1004,7 @@ describe('CoreUsageStatsClient', () => {
           `${IMPORT_STATS_PREFIX}.namespace.custom.kibanaRequest.no`,
           `${IMPORT_STATS_PREFIX}.createNewCopiesEnabled.no`,
           `${IMPORT_STATS_PREFIX}.overwriteEnabled.no`,
+          `${IMPORT_STATS_PREFIX}.compatibilityModeEnabled.no`,
         ],
         incrementOptions
       );

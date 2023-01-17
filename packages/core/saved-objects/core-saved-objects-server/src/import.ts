@@ -64,6 +64,11 @@ export interface SavedObjectsImportOptions {
   createNewCopies: boolean;
   /** Refresh setting, defaults to `wait_for` */
   refresh?: boolean | 'wait_for';
+  /**
+   * If true, Kibana will apply various adjustments to the data that's being imported to maintain compatibility between
+   * different Kibana versions (e.g. generate legacy URL aliases for all imported objects that have to change IDs).
+   */
+  compatibilityMode: boolean;
 }
 
 /**

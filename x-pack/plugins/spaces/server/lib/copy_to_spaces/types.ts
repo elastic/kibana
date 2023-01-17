@@ -19,6 +19,7 @@ export interface CopyOptions {
   overwrite: boolean;
   includeReferences: boolean;
   createNewCopies: boolean;
+  compatibilityMode: boolean;
 }
 
 export interface ResolveConflictsOptions {

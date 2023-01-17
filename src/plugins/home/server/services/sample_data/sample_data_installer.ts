@@ -197,6 +197,7 @@ export class SampleDataInstaller {
       readStream,
       overwrite: true,
       createNewCopies: false,
+      compatibilityMode: false,
     });
     if (errors.length > 0) {
       const errMsg = `sample_data install errors while loading saved objects. Errors: ${JSON.stringify(

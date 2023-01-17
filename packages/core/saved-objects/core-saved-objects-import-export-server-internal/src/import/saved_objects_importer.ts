@@ -56,6 +56,7 @@ export class SavedObjectsImporter implements ISavedObjectsImporter {
     namespace,
     overwrite,
     refresh,
+    compatibilityMode,
   }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse> {
     return importSavedObjectsFromStream({
       readStream,
@@ -63,6 +64,7 @@ export class SavedObjectsImporter implements ISavedObjectsImporter {
       namespace,
       overwrite,
       refresh,
+      compatibilityMode,
       objectLimit: this.#importSizeLimit,
       savedObjectsClient: this.#savedObjectsClient,
       typeRegistry: this.#typeRegistry,

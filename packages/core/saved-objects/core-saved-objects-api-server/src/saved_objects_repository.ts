@@ -526,4 +526,13 @@ export interface ISavedObjectsRepository {
     findOptions: SavedObjectsCreatePointInTimeFinderOptions,
     dependencies?: SavedObjectsCreatePointInTimeFinderDependencies
   ): ISavedObjectsPointInTimeFinder<T, A>;
+
+  /**
+   * If the spaces extension is enabled, it's used to get the current namespace (and optionally throws an error if a
+   * consumer attempted to specify the namespace explicitly).
+   *
+   * If the spaces extension is *not* enabled, this function simply normalizes the specified namespace so that
+   * `'default'` can be used interchangeably with `undefined`.
+   */
+  getCurrentNamespace(namespace?: string): string | undefined;
 }

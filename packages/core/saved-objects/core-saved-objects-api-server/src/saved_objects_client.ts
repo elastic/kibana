@@ -412,4 +412,10 @@ export interface SavedObjectsClientContract {
     spacesToRemove: string[],
     options?: SavedObjectsUpdateObjectsSpacesOptions
   ): Promise<SavedObjectsUpdateObjectsSpacesResponse>;
+
+  /**
+   * Returns namespace associated with the client, if any. Otherwise, normalizes the specified namespace so that
+   * `'default'` can be used interchangeably with `undefined`.
+   */
+  getCurrentNamespace(namespace?: string): string | undefined;
 }

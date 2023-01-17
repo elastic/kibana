@@ -112,6 +112,7 @@ describe(`POST ${URL}`, () => {
       request: expect.anything(),
       createNewCopies: false,
       overwrite: false,
+      compatibilityMode: false,
     });
   });
 

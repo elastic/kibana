@@ -9,6 +9,13 @@
 import type { SavedObjectsImportFailure } from '@kbn/core-saved-objects-common';
 import type { SavedObject } from '@kbn/core-saved-objects-server';
 import type { CreatedObject } from '@kbn/core-saved-objects-server';
+import { LEGACY_URL_ALIAS_TYPE } from '@kbn/core-saved-objects-base-server-internal';
+
+function isLegacyUrlAlias(
+  savedObject: CreatedObject<unknown>
+): savedObject is CreatedObject<{ sourceId: string; targetType: string; targetId: string }> {
+  return savedObject.type === LEGACY_URL_ALIAS_TYPE;
+}
 
 export function extractErrors(
   // TODO: define saved object type
@@ -21,34 +28,41 @@ export function extractErrors(
     originalSavedObjectsMap.set(`${savedObject.type}:${savedObject.id}`, savedObject);
   }
   for (const savedObject of savedObjectResults) {
-    if (savedObject.error) {
-      const originalSavedObject = originalSavedObjectsMap.get(
-        `${savedObject.type}:${savedObject.id}`
-      );
-      const title = originalSavedObject?.attributes?.title;
-      const { destinationId } = savedObject;
-      if (savedObject.error.statusCode === 409) {
-        errors.push({
-          id: savedObject.id,
-          type: savedObject.type,
-          meta: { title },
-          error: {
-            type: 'conflict',
-            ...(destinationId && { destinationId }),
-          },
-        });
-        continue;
-      }
+    if (!savedObject.error) {
+      continue;
+    }
+
+    const originalSavedObject = isLegacyUrlAlias(savedObject)
+      ? originalSavedObjectsMap.get(
+          `${savedObject.attributes.targetType}:${savedObject.attributes.sourceId}`
+        ) ??
+        originalSavedObjectsMap.get(
+          `${savedObject.attributes.targetType}:${savedObject.attributes.targetId}`
+        )
+      : originalSavedObjectsMap.get(`${savedObject.type}:${savedObject.id}`);
+    const title = originalSavedObject?.attributes?.title;
+    const { destinationId } = savedObject;
+    if (savedObject.error.statusCode === 409) {
       errors.push({
         id: savedObject.id,
         type: savedObject.type,
         meta: { title },
         error: {
-          ...savedObject.error,
-          type: 'unknown',
+          type: 'conflict',
+          ...(destinationId && { destinationId }),
         },
       });
+      continue;
     }
+    errors.push({
+      id: savedObject.id,
+      type: savedObject.type,
+      meta: { title },
+      error: {
+        ...savedObject.error,
+        type: 'unknown',
+      },
+    });
   }
   return errors;
 }
