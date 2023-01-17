@@ -118,22 +118,22 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       onToggleColumn,
       onResetColumns,
       browserFields,
-      additionalControls: props.additionalControls,
       refresh,
+      controls: props.controls,
     });
   }, [
-    props.additionalControls,
     refresh,
     bulkActionsState,
     bulkActions,
     alertsCount,
     alertsData.alerts,
     updatedAt,
-    browserFields,
     isLoading,
     visibleColumns,
     onToggleColumn,
     onResetColumns,
+    browserFields,
+    props.controls,
   ])();
 
   const leadingControlColumns = useMemo(() => {

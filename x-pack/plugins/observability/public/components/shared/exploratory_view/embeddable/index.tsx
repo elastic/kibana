@@ -75,13 +75,21 @@ export function getExploratoryViewEmbeddable(
       return <EmptyState height={props.customHeight} />;
     }
 
+    const embedProps = { ...props };
+    if (props.sparklineMode) {
+      embedProps.axisTitlesVisibility = { x: false, yRight: false, yLeft: false };
+      embedProps.gridlinesVisibilitySettings = { x: false, yRight: false, yLeft: false };
+      embedProps.legendIsVisible = false;
+      embedProps.hideTicks = true;
+    }
+
     return (
       <EuiErrorBoundary>
         <EuiThemeProvider darkMode={isDarkMode}>
           <KibanaContextProvider services={services}>
-            <Wrapper customHeight={props.customHeight}>
+            <Wrapper customHeight={props.customHeight} data-test-subj={props.dataTestSubj}>
               <ExploratoryViewEmbeddable
-                {...props}
+                {...embedProps}
                 dataViewState={dataViews}
                 lens={lens}
                 lensFormulaHelper={lensHelper.formula}

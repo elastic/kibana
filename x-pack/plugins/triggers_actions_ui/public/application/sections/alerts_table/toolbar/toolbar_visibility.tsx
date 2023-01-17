@@ -19,6 +19,19 @@ import { FieldBrowser } from '../../field_browser';
 
 const BulkActionsToolbar = lazy(() => import('../bulk_actions/components/toolbar'));
 
+const rightControl = ({
+  controls,
+  updatedAt,
+}: {
+  controls?: EuiDataGridToolBarAdditionalControlsOptions;
+  updatedAt: number;
+}) => (
+  <>
+    <LastUpdatedAt updatedAt={updatedAt} />
+    {controls?.right}
+  </>
+);
+
 const getDefaultVisibility = ({
   alertsCount,
   updatedAt,
@@ -26,7 +39,7 @@ const getDefaultVisibility = ({
   onToggleColumn,
   onResetColumns,
   browserFields,
-  additionalControls,
+  controls,
 }: {
   alertsCount: number;
   updatedAt: number;
@@ -34,29 +47,23 @@ const getDefaultVisibility = ({
   onToggleColumn: (columnId: string) => void;
   onResetColumns: () => void;
   browserFields: BrowserFields;
-  additionalControls?: EuiDataGridToolBarAdditionalControlsOptions;
+  controls?: EuiDataGridToolBarAdditionalControlsOptions;
 }): EuiDataGridToolBarVisibilityOptions => {
   const hasBrowserFields = Object.keys(browserFields).length > 0;
-  const localAdditionalControls = {
-    right: (
-      <Fragment>
-        <LastUpdatedAt updatedAt={updatedAt} />
-        {additionalControls?.right ? additionalControls.right : null}
-      </Fragment>
-    ),
+  const additionalControls = {
+    right: rightControl({ controls, updatedAt }),
     left: {
       append: (
         <>
           <AlertsCount count={alertsCount} />
-          {hasBrowserFields ? (
+          {hasBrowserFields && (
             <FieldBrowser
               columnIds={columnIds}
               browserFields={browserFields}
               onResetColumns={onResetColumns}
               onToggleColumn={onToggleColumn}
             />
-          ) : undefined}
-          {additionalControls?.left ? additionalControls.left : null}
+          )}
         </>
       ),
     },
@@ -82,8 +89,8 @@ export const getToolbarVisibility = ({
   onToggleColumn,
   onResetColumns,
   browserFields,
-  additionalControls,
   refresh,
+  controls,
 }: {
   bulkActions: BulkActionsConfig[];
   alertsCount: number;
@@ -95,8 +102,8 @@ export const getToolbarVisibility = ({
   onToggleColumn: (columnId: string) => void;
   onResetColumns: () => void;
   browserFields: any;
-  additionalControls?: EuiDataGridToolBarAdditionalControlsOptions;
   refresh: () => void;
+  controls?: EuiDataGridToolBarAdditionalControlsOptions;
 }): EuiDataGridToolBarVisibilityOptions => {
   const selectedRowsCount = rowSelection.size;
   const defaultVisibility = getDefaultVisibility({
@@ -106,7 +113,7 @@ export const getToolbarVisibility = ({
     onToggleColumn,
     onResetColumns,
     browserFields,
-    additionalControls,
+    controls,
   });
   const isBulkActionsActive =
     selectedRowsCount === 0 || selectedRowsCount === undefined || bulkActions.length === 0;
@@ -117,12 +124,7 @@ export const getToolbarVisibility = ({
     showColumnSelector: false,
     showSortSelector: false,
     additionalControls: {
-      right: (
-        <div className="right-controls">
-          <LastUpdatedAt updatedAt={updatedAt} />
-          {additionalControls?.right ? additionalControls.right : null}
-        </div>
-      ),
+      right: rightControl({ controls, updatedAt }),
       left: {
         append: (
           <>
@@ -135,7 +137,6 @@ export const getToolbarVisibility = ({
                 refresh={refresh}
               />
             </Suspense>
-            {additionalControls?.left ? additionalControls.left : null}
           </>
         ),
       },

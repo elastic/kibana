@@ -498,7 +498,7 @@ export type AlertsTableProps = {
   onColumnsChange: (columns: EuiDataGridColumn[], visibleColumns: string[]) => void;
   onChangeVisibleColumns: (newColumns: string[]) => void;
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
-  additionalControls?: EuiDataGridToolBarAdditionalControlsOptions;
+  controls?: EuiDataGridToolBarAdditionalControlsOptions;
 } & Partial<Pick<EuiDataGridProps, 'gridStyle' | 'rowHeightsOptions'>>;
 
 // TODO We need to create generic type between our plugin, right now we have different one because of the old alerts table
@@ -577,6 +577,9 @@ export interface AlertsTableConfigurationRegistry {
   };
   useBulkActions?: UseBulkActionsRegistry;
   useCellActions?: UseCellActions;
+  usePersistentControls?: () => {
+    right?: ReactNode;
+  };
 }
 
 export enum BulkActionsVerbs {

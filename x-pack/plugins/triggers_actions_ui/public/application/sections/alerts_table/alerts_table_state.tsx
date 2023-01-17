@@ -69,21 +69,11 @@ export interface AlertsTableStorage {
   sort: SortCombinations[];
 }
 
-const EmptyConfiguration = {
+const EmptyConfiguration: AlertsTableConfigurationRegistry = {
   id: '',
   casesFeatureId: '',
   columns: [],
   sort: [],
-  externalFlyout: {
-    header: () => null,
-    body: () => null,
-    footer: () => null,
-  },
-  internalFlyout: {
-    header: () => null,
-    body: () => null,
-    footer: () => null,
-  },
   getRenderCellValue: () => () => null,
 };
 
@@ -125,6 +115,7 @@ const AlertsTableState = ({
 
   const storage = useRef(new Storage(window.localStorage));
   const localAlertsTableConfig = storage.current.get(id) as Partial<AlertsTableStorage>;
+  const persistentControls = alertsTableConfiguration?.usePersistentControls?.();
 
   const columnsLocal =
     localAlertsTableConfig &&
@@ -282,10 +273,10 @@ const AlertsTableState = ({
       onColumnsChange,
       onChangeVisibleColumns,
       query,
-      additionalControls,
       rowHeightsOptions,
       renderCellValue,
       gridStyle,
+      controls: persistentControls,
     }),
     [
       alertsTableConfiguration,
@@ -304,10 +295,10 @@ const AlertsTableState = ({
       onChangeVisibleColumns,
       leadingControlColumns,
       query,
-      additionalControls,
       rowHeightsOptions,
       renderCellValue,
       gridStyle,
+      persistentControls,
     ]
   );
 
@@ -316,7 +307,7 @@ const AlertsTableState = ({
 
   return hasAlertsTableConfiguration ? (
     <>
-      {!isLoading && alertsCount === 0 && <EmptyState />}
+      {!isLoading && alertsCount === 0 && <EmptyState controls={persistentControls} />}
       {(isLoading || isBrowserFieldDataLoading) && (
         <EuiProgress size="xs" color="accent" data-test-subj="internalAlertsPageLoading" />
       )}
