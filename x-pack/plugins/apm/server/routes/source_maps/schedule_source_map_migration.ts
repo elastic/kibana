@@ -24,13 +24,11 @@ const TASK_TYPE = 'apm-source-map-migration-task';
 export async function scheduleSourceMapMigration({
   coreStartPromise,
   pluginStartPromise,
-  fleetStartPromise,
   taskManager,
   logger,
 }: {
   coreStartPromise: Promise<CoreStart>;
   pluginStartPromise: Promise<APMPluginStartDependencies>;
-  fleetStartPromise?: Promise<FleetStartContract>;
   taskManager?: TaskManagerSetupContract;
   logger: Logger;
 }) {
@@ -64,7 +62,8 @@ export async function scheduleSourceMapMigration({
               logger,
             });
 
-            const fleet = await fleetStartPromise;
+            const pluginStart = await pluginStartPromise;
+            const fleet = await pluginStart.fleet;
             if (fleet) {
               await runFleetSourcemapArtifactsMigration({
                 taskState,

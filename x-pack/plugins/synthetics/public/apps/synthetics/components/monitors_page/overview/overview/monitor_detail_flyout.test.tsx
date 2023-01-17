@@ -23,6 +23,9 @@ describe('Monitor Detail Flyout', () => {
       data: null,
       refetch: () => null,
     });
+    jest
+      .spyOn(observabilityPublic, 'useTheme')
+      .mockReturnValue({ eui: { euiColorVis0: 'red', euiColorVis9: 'red' } } as any);
     jest.spyOn(monitorDetail, 'useMonitorDetail').mockReturnValue({
       data: {
         docId: 'docId',
@@ -36,6 +39,7 @@ describe('Monitor Detail Flyout', () => {
         url: {
           full: 'https://www.elastic.co',
         },
+        tags: ['tag1', 'tag2'],
       },
     });
     jest.spyOn(statusByLocation, 'useStatusByLocation').mockReturnValue({
@@ -53,6 +57,7 @@ describe('Monitor Detail Flyout', () => {
         configId="test-id"
         id="test-id"
         location="US East"
+        locationId="us-east"
         onClose={onCloseMock}
         onEnabledChange={jest.fn()}
         onLocationChange={jest.fn()}
@@ -76,6 +81,7 @@ describe('Monitor Detail Flyout', () => {
         configId="test-id"
         id="test-id"
         location="US East"
+        locationId="us-east"
         onClose={jest.fn()}
         onEnabledChange={jest.fn()}
         onLocationChange={jest.fn()}
@@ -95,6 +101,7 @@ describe('Monitor Detail Flyout', () => {
         configId="test-id"
         id="test-id"
         location="US East"
+        locationId="us-east"
         onClose={jest.fn()}
         onEnabledChange={jest.fn()}
         onLocationChange={jest.fn()}
@@ -115,8 +122,8 @@ describe('Monitor Detail Flyout', () => {
             number: '1',
             unit: 'm',
           },
+          tags: ['prod'],
         },
-        tags: ['prod'],
         type: 'browser',
         updated_at: '1996-02-27',
       },
@@ -124,12 +131,14 @@ describe('Monitor Detail Flyout', () => {
     });
     const detailLink = '/app/synthetics/monitor/test-id';
     jest.spyOn(monitorDetailLocator, 'useMonitorDetailLocator').mockReturnValue(detailLink);
+    jest.spyOn(monitorDetailLocator, 'useMonitorDetailLocator').mockReturnValue(detailLink);
 
     const { getByRole, getByText, getAllByRole } = render(
       <MonitorDetailFlyout
         configId="test-id"
         id="test-id"
         location="US East"
+        locationId="us-east"
         onClose={jest.fn()}
         onEnabledChange={jest.fn()}
         onLocationChange={jest.fn()}

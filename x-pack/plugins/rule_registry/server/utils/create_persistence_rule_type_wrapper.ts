@@ -19,7 +19,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
     return {
       ...type,
       executor: async (options) => {
-        const state = await type.executor({
+        const result = await type.executor({
           ...options,
           services: {
             ...options.services,
@@ -149,7 +149,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
           },
         });
 
-        return state;
+        return result;
       },
       getSummarizedAlerts: createGetSummarizedAlertsFn({
         ruleDataClient,
