@@ -11,6 +11,7 @@ import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { FilesContext } from '@kbn/shared-ux-file-context';
 import { skip, take, takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
 import { ImageConfig } from '../types';
 import { ImageEditorFlyout } from './image_editor_flyout';
 import { ImageViewerContext } from '../image_viewer';
@@ -34,6 +35,7 @@ export async function configureImage(
     currentAppId$: ApplicationStart['currentAppId$'];
     validateUrl: ValidateUrlFn;
     getImageDownloadHref: (fileId: string) => string;
+    user?: AuthenticatedUser;
   },
   initialImageConfig?: ImageConfig
 ): Promise<ImageConfig> {
@@ -69,6 +71,7 @@ export async function configureImage(
               onSave={onSave}
               initialImageConfig={initialImageConfig}
               validateUrl={deps.validateUrl}
+              user={deps.user}
             />
           </ImageViewerContext.Provider>
         </FilesContext>,

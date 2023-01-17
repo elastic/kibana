@@ -14,14 +14,17 @@ import type {
 import type { AuthenticatedUser } from '@kbn/security-plugin/server';
 
 import type {
-  DeletePackagePoliciesResponse,
+  PostDeletePackagePoliciesResponse,
   UpgradePackagePolicyResponse,
   PackageInfo,
   ListWithKuery,
   ListResult,
   UpgradePackagePolicyDryRunResponseItem,
 } from '../../common';
-import type { ExperimentalDataStreamFeature } from '../../common/types';
+import type {
+  DeletePackagePoliciesResponse,
+  ExperimentalDataStreamFeature,
+} from '../../common/types';
 import type { NewPackagePolicy, UpdatePackagePolicy, PackagePolicy } from '../types';
 import type { ExternalCallback } from '..';
 
@@ -106,7 +109,7 @@ export interface PackagePolicyClient {
     esClient: ElasticsearchClient,
     ids: string[],
     options?: { user?: AuthenticatedUser; skipUnassignFromAgentPolicies?: boolean; force?: boolean }
-  ): Promise<DeletePackagePoliciesResponse>;
+  ): Promise<PostDeletePackagePoliciesResponse>;
 
   upgrade(
     soClient: SavedObjectsClientContract,
@@ -137,15 +140,19 @@ export interface PackagePolicyClient {
 
   runExternalCallbacks<A extends ExternalCallback[0]>(
     externalCallbackType: A,
-    packagePolicy: A extends 'postPackagePolicyDelete'
+    packagePolicy: A extends 'packagePolicyDelete'
       ? DeletePackagePoliciesResponse
+      : A extends 'packagePolicyPostDelete'
+      ? PostDeletePackagePoliciesResponse
       : A extends 'packagePolicyPostCreate'
       ? PackagePolicy
       : NewPackagePolicy,
     context: RequestHandlerContext,
     request: KibanaRequest
   ): Promise<
-    A extends 'postPackagePolicyDelete'
+    A extends 'packagePolicyDelete'
+      ? void
+      : A extends 'packagePolicyPostDelete'
       ? void
       : A extends 'packagePolicyPostCreate'
       ? PackagePolicy
@@ -153,6 +160,10 @@ export interface PackagePolicyClient {
   >;
 
   runDeleteExternalCallbacks(deletedPackagePolicies: DeletePackagePoliciesResponse): Promise<void>;
+
+  runPostDeleteExternalCallbacks(
+    deletedPackagePolicies: PostDeletePackagePoliciesResponse
+  ): Promise<void>;
 
   getUpgradePackagePolicyInfo(
     soClient: SavedObjectsClientContract,

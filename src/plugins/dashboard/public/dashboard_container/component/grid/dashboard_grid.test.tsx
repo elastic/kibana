@@ -17,12 +17,12 @@ import {
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { pluginServices } from '../../../services/plugin_services';
-import { DashboardGrid, DashboardGridProps } from './dashboard_grid';
+import { DashboardGrid } from './dashboard_grid';
 import { getSampleDashboardInput, mockDashboardReduxEmbeddableTools } from '../../../mocks';
 
 const DashboardServicesProvider = pluginServices.getContextProvider();
 
-async function prepare(props?: Partial<DashboardGridProps>) {
+async function prepare() {
   const embeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
   pluginServices.getServices().embeddable.getEmbeddableFactory = jest
     .fn()
@@ -43,12 +43,10 @@ async function prepare(props?: Partial<DashboardGridProps>) {
     },
   });
   const dashboardMock = await mockDashboardReduxEmbeddableTools({ explicitInput: initialInput });
-  const defaultTestProps: DashboardGridProps = {};
 
   return {
     tools: dashboardMock.tools,
     dashboardContainer: dashboardMock.dashboardContainer,
-    props: Object.assign(defaultTestProps, props),
   };
 }
 
@@ -64,12 +62,12 @@ afterAll(() => {
 
 // unhandled promise rejection: https://github.com/elastic/kibana/issues/112699
 test.skip('renders DashboardGrid', async () => {
-  const { props, tools } = await prepare();
+  const { tools } = await prepare();
 
   const component = mountWithIntl(
     <DashboardServicesProvider>
       <tools.Wrapper>
-        <DashboardGrid {...props} />
+        <DashboardGrid />
       </tools.Wrapper>
     </DashboardServicesProvider>
   );
@@ -79,11 +77,11 @@ test.skip('renders DashboardGrid', async () => {
 
 // unhandled promise rejection: https://github.com/elastic/kibana/issues/112699
 test.skip('renders DashboardGrid with no visualizations', async () => {
-  const { props, tools, dashboardContainer } = await prepare();
+  const { tools, dashboardContainer } = await prepare();
   const component = mountWithIntl(
     <DashboardServicesProvider>
       <tools.Wrapper>
-        <DashboardGrid {...props} />
+        <DashboardGrid />
       </tools.Wrapper>
     </DashboardServicesProvider>
   );
@@ -95,11 +93,11 @@ test.skip('renders DashboardGrid with no visualizations', async () => {
 
 // unhandled promise rejection: https://github.com/elastic/kibana/issues/112699
 test.skip('DashboardGrid removes panel when removed from container', async () => {
-  const { props, tools, dashboardContainer } = await prepare();
+  const { tools, dashboardContainer } = await prepare();
   const component = mountWithIntl(
     <DashboardServicesProvider>
       <tools.Wrapper>
-        <DashboardGrid {...props} />
+        <DashboardGrid />
       </tools.Wrapper>
     </DashboardServicesProvider>
   );
@@ -115,11 +113,11 @@ test.skip('DashboardGrid removes panel when removed from container', async () =>
 
 // unhandled promise rejection: https://github.com/elastic/kibana/issues/112699
 test.skip('DashboardGrid renders expanded panel', async () => {
-  const { props, tools, dashboardContainer } = await prepare();
+  const { tools, dashboardContainer } = await prepare();
   const component = mountWithIntl(
     <DashboardServicesProvider>
       <tools.Wrapper>
-        <DashboardGrid {...props} />
+        <DashboardGrid />
       </tools.Wrapper>
     </DashboardServicesProvider>
   );

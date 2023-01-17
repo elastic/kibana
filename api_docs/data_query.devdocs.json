@@ -2173,14 +2173,6 @@
             "path": "src/plugins/discover/public/application/main/services/discover_state.ts"
           },
           {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/routes/map_page/url_state/global_sync.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/routes/map_page/url_state/global_sync.ts"
-          },
-          {
             "plugin": "monitoring",
             "path": "x-pack/plugins/monitoring/public/url_state.ts"
           },

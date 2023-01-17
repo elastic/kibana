@@ -61,6 +61,7 @@ const storybookStubOptionsListRequest = async (
             {}
           ),
           totalCardinality: 100,
+          rejected: false,
         }),
       120
     )
