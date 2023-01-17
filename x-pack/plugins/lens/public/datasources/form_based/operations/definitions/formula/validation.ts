@@ -26,7 +26,6 @@ import {
   getValueOrName,
   groupArgsByType,
   isMathNode,
-  nonNullable,
   tinymathFunctions,
 } from './util';
 
@@ -38,6 +37,7 @@ import type {
 import type { FormBasedLayer } from '../../../types';
 import type { IndexPattern } from '../../../../../types';
 import type { TinymathNodeTypes } from './types';
+import { nonNullable } from '../../../utils';
 
 interface ValidationErrors {
   missingField: { message: string; type: { variablesLength: number; variablesList: string } };

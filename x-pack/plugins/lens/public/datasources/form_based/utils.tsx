@@ -672,3 +672,7 @@ export const cloneLayer = (
   }
   return layers;
 };
+
+export function nonNullable<T>(v: T): v is NonNullable<T> {
+  return v != null;
+}

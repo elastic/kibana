@@ -26,10 +26,10 @@ import {
   getOperationParams,
   groupArgsByType,
   mergeWithGlobalFilters,
-  nonNullable,
 } from './util';
 import { FormulaIndexPatternColumn, isFormulaIndexPatternColumn } from './formula';
 import { getColumnOrder } from '../../layer_helpers';
+import { nonNullable } from '../../../utils';
 
 /** @internal **/
 export function getManagedId(mainId: string, index: number) {

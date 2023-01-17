@@ -20,6 +20,7 @@ import type {
   GenericOperationDefinition,
 } from '..';
 import type { GroupedNodes } from './types';
+import { nonNullable } from '../../../utils';
 
 export const unquotedStringRegex = /[^0-9A-Za-z._@\[\]/]/;
 
@@ -735,10 +736,6 @@ Example: Average revenue per customer but in some cases customer id is not provi
     }),
   },
 };
-
-export function nonNullable<T>(v: T): v is NonNullable<T> {
-  return v != null;
-}
 
 export function isMathNode(node: TinymathAST | string) {
   return isObject(node) && node.type === 'function' && tinymathFunctions[node.name];

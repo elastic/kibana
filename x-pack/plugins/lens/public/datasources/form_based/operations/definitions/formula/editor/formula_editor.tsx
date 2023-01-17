@@ -53,9 +53,10 @@ import { LANGUAGE_ID } from './math_tokenization';
 import './formula.scss';
 import { FormulaIndexPatternColumn } from '../formula';
 import { insertOrReplaceFormulaColumn } from '../parse';
-import { filterByVisibleOperation, nonNullable } from '../util';
+import { filterByVisibleOperation } from '../util';
 import { getColumnTimeShiftWarnings, getDateHistogramInterval } from '../../../../time_shift_utils';
 import { getDocumentationSections } from './formula_help';
+import { nonNullable } from '../../../../utils';
 
 function tableHasData(
   activeData: ParamEditorProps<FormulaIndexPatternColumn>['activeData'],

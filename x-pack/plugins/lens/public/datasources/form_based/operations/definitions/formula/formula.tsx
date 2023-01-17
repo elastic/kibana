@@ -13,9 +13,10 @@ import { runASTValidation, tryToParse } from './validation';
 import { WrappedFormulaEditor } from './editor';
 import { insertOrReplaceFormulaColumn } from './parse';
 import { generateFormula } from './generate';
-import { filterByVisibleOperation, nonNullable } from './util';
+import { filterByVisibleOperation } from './util';
 import { getManagedColumnsFrom } from '../../layer_helpers';
 import { getFilter, isColumnFormatted } from '../helpers';
+import { nonNullable } from '../../../utils';
 
 const defaultLabel = i18n.translate('xpack.lens.indexPattern.formulaLabel', {
   defaultMessage: 'Formula',

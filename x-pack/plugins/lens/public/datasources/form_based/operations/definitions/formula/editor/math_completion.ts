@@ -26,7 +26,7 @@ import moment from 'moment';
 import { DateRange } from '../../../../../../../common/types';
 import type { IndexPattern } from '../../../../../../types';
 import { memoizedGetAvailableOperationsByMetadata } from '../../../operations';
-import { tinymathFunctions, groupArgsByType, unquotedStringRegex, nonNullable } from '../util';
+import { tinymathFunctions, groupArgsByType, unquotedStringRegex } from '../util';
 import type { GenericOperationDefinition } from '../..';
 import { getFunctionSignatureLabel, getHelpTextContent } from './formula_help';
 import { hasFunctionFieldArgument } from '../validation';
@@ -35,6 +35,7 @@ import {
   reducedTimeRangeOptionOrder,
   reducedTimeRangeOptions,
 } from '../../../../reduced_time_range_utils';
+import { nonNullable } from '../../../../utils';
 
 export enum SUGGESTION_TYPE {
   FIELD = 'field',
