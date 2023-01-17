@@ -18,7 +18,7 @@ import {
 } from '../../common/options_list/suggestions_sorting';
 
 export const getDefaultComponentState = (): OptionsListReduxState['componentState'] => ({
-  page: 1,
+  size: 10,
   searchString: { value: '', valid: true },
 });
 
@@ -33,6 +33,7 @@ export const optionsListReducers = {
     }
   },
   setSearchString: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<string>) => {
+    state.componentState.size = 10;
     state.componentState.searchString.value = action.payload;
     if (
       action.payload !== '' && // empty string search is never invalid
@@ -45,7 +46,7 @@ export const optionsListReducers = {
     state: WritableDraft<OptionsListReduxState>,
     action: PayloadAction<Partial<OptionsListSortingType>>
   ) => {
-    state.componentState.page = 1;
+    state.componentState.size = 10;
     state.explicitInput.sort = {
       ...(state.explicitInput.sort ?? OPTIONS_LIST_DEFAULT_SORT),
       ...action.payload,
@@ -78,8 +79,13 @@ export const optionsListReducers = {
   setExclude: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<boolean>) => {
     state.explicitInput.exclude = action.payload;
   },
-  setPage: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<number>) => {
-    state.componentState.page = action.payload;
+  setSize: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<number>) => {
+    state.componentState.size = Math.min(action.payload, 1000); // size can never be > 1000
+    // if (state.componentState.totalCardinality) {
+    //   state.componentState.size = state.componentState.totalCardinality;
+    // } else {
+    //   state.componentState.size = 10;
+    // }
   },
   clearValidAndInvalidSelections: (state: WritableDraft<OptionsListReduxState>) => {
     state.componentState.invalidSelections = [];

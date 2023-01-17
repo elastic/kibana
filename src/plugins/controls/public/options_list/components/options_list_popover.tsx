@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { isEmpty } from 'lodash';
 
 import { EuiPopoverTitle } from '@elastic/eui';
@@ -23,14 +23,14 @@ import { OptionsListPopoverInvalidSelections } from './options_list_popover_inva
 export interface OptionsListPopoverProps {
   width: number;
   isLoading: boolean;
-  updatePage: (newPage: number) => void; // make parameter fetchNewResults and handle logic elsewhere?
+  clickLoadMore: (cardinality: number) => void;
   updateSearchString: (newSearchString: string) => void;
 }
 
 export const OptionsListPopover = ({
   width,
   isLoading,
-  updatePage,
+  clickLoadMore,
   updateSearchString,
 }: OptionsListPopoverProps) => {
   // Redux embeddable container Context
@@ -63,7 +63,6 @@ export const OptionsListPopover = ({
       {field?.type !== 'boolean' && !hideActionBar && (
         <OptionsListPopoverActionBar
           showOnlySelected={showOnlySelected}
-          setShowOnlySelected={setShowOnlySelected}
           updateSearchString={updateSearchString}
         />
       )}
@@ -71,12 +70,21 @@ export const OptionsListPopover = ({
         data-test-subj={`optionsList-control-available-options`}
         data-option-count={isLoading ? 0 : Object.keys(availableOptions ?? {}).length}
       >
-        <OptionsListPopoverSuggestions showOnlySelected={showOnlySelected} isLoading={isLoading} />
+        <OptionsListPopoverSuggestions
+          isLoading={isLoading}
+          clickLoadMore={clickLoadMore}
+          showOnlySelected={showOnlySelected}
+        />
         {!showOnlySelected && invalidSelections && !isEmpty(invalidSelections) && (
           <OptionsListPopoverInvalidSelections />
         )}
       </div>
-      {!hideExclude && <OptionsListPopoverFooter updatePage={updatePage} />}
+      {!hideExclude && (
+        <OptionsListPopoverFooter
+          showOnlySelected={showOnlySelected}
+          setShowOnlySelected={setShowOnlySelected}
+        />
+      )}
     </div>
   );
 };

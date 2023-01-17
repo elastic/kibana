@@ -39,8 +39,8 @@ export const setupOptionsListSuggestionsRoute = (
         ),
         body: schema.object(
           {
+            size: schema.number(),
             fieldName: schema.string(),
-            page: schema.maybe(schema.number()),
             sort: schema.maybe(schema.any()),
             filters: schema.maybe(schema.any()),
             fieldSpec: schema.maybe(schema.any()),
@@ -135,14 +135,10 @@ export const setupOptionsListSuggestionsRoute = (
      */
     const results = suggestionBuilder.parse(rawEsResult);
     const totalCardinality = results.totalCardinality;
-    const remainingSuggestionCount = totalCardinality - ((request.page ?? 1) - 1) * 10;
-    const suggestions = takeRight(
-      Object.keys(results.suggestions),
-      remainingSuggestionCount >= 10 ? 10 : remainingSuggestionCount
-    );
+    // const remainingSuggestionCount = totalCardinality - ((request.page ?? 1) - 1) * 10;
     const invalidSelections = validationBuilder.parse(rawEsResult);
     return {
-      suggestions: pick(results.suggestions, suggestions),
+      suggestions: results.suggestions,
       totalCardinality,
       invalidSelections,
       rejected: false,

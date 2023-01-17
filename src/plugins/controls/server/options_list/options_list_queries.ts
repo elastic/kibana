@@ -20,11 +20,10 @@ import {
   OptionsListSortingType,
 } from '../../common/options_list/suggestions_sorting';
 import { getIpRangeQuery, type IpRangeQuery } from '../../common/options_list/ip_search';
-import { raw } from '@storybook/react';
 
 export interface OptionsListValidationAggregationBuilder {
   buildAggregation: (req: OptionsListRequestBody) => unknown;
-  parse: (response: SearchResponse, page?: number) => string[];
+  parse: (response: SearchResponse) => string[];
 }
 
 export interface OptionsListSuggestionAggregationBuilder {
@@ -111,7 +110,7 @@ const suggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBu
    * the "Keyword only" query / parser should be used when the options list is built on a field which has only keyword mappings.
    */
   textOrKeyword: {
-    buildAggregation: ({ fieldName, searchString, sort, page = 1 }: OptionsListRequestBody) => ({
+    buildAggregation: ({ fieldName, searchString, sort, size }: OptionsListRequestBody) => ({
       filter: {
         prefix: {
           [fieldName]: {
@@ -123,7 +122,7 @@ const suggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBu
       aggs: {
         keywordSuggestions: {
           terms: {
-            size: page === 1 ? 10 : page * 10,
+            size,
             field: fieldName,
             shard_size: 10,
             order: getSortType(sort),
@@ -180,7 +179,7 @@ const suggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBu
    * the "IP" query / parser should be used when the options list is built on a field of type IP.
    */
   ip: {
-    buildAggregation: ({ fieldName, searchString, sort, page = 1 }: OptionsListRequestBody) => {
+    buildAggregation: ({ fieldName, searchString, sort, size }: OptionsListRequestBody) => {
       let ipRangeQuery: IpRangeQuery = {
         validSearch: true,
         rangeQuery: [
@@ -210,7 +209,7 @@ const suggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBu
         aggs: {
           filteredSuggestions: {
             terms: {
-              size: page === 1 ? 10 : page * 10,
+              size,
               field: fieldName,
               execution_hint: 'map',
               shard_size: 10,
@@ -256,7 +255,7 @@ const suggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBu
   /** TODO: CFIX THIS */
   subtypeNested: {
     buildAggregation: (req: OptionsListRequestBody) => {
-      const { fieldSpec, fieldName, searchString, sort, page = 1 } = req;
+      const { fieldSpec, fieldName, searchString, sort, size } = req;
       const subTypeNested = fieldSpec && getFieldSubtypeNested(fieldSpec);
       if (!subTypeNested) {
         // if this field is not subtype nested, fall back to keywordOnly
@@ -269,7 +268,7 @@ const suggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBu
         aggs: {
           nestedSuggestions: {
             terms: {
-              size: page === 1 ? 10 : page * 10,
+              size,
               field: fieldName,
               include: `${getEscapedQuery(searchString)}.*`,
               execution_hint: 'map',

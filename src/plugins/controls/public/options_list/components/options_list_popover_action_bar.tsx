@@ -26,26 +26,22 @@ import { OptionsListPopoverSortingButton } from './options_list_popover_sorting_
 
 interface OptionsListPopoverProps {
   showOnlySelected: boolean;
-  setShowOnlySelected: (value: boolean) => void;
   updateSearchString: (newSearchString: string) => void;
 }
 
 export const OptionsListPopoverActionBar = ({
   showOnlySelected,
   updateSearchString,
-  setShowOnlySelected,
 }: OptionsListPopoverProps) => {
   // Redux embeddable container Context
-  const {
-    useEmbeddableDispatch,
-    useEmbeddableSelector: select,
-    actions: { clearSelections },
-  } = useReduxEmbeddableContext<OptionsListReduxState, typeof optionsListReducers>();
-  const dispatch = useEmbeddableDispatch();
+  const { useEmbeddableSelector: select } = useReduxEmbeddableContext<
+    OptionsListReduxState,
+    typeof optionsListReducers
+  >();
 
   // Select current state from Redux using multiple selectors to avoid rerenders.
   const invalidSelections = select((state) => state.componentState.invalidSelections);
-  const totalCardinality = select((state) => state.componentState.totalCardinality);
+  const totalCardinality = select((state) => state.componentState.totalCardinality) ?? 0;
   const searchString = select((state) => state.componentState.searchString);
 
   const hideSort = select((state) => state.explicitInput.hideSort);
@@ -78,15 +74,18 @@ export const OptionsListPopoverActionBar = ({
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
+            <EuiBadge className="optionsList__cardinalityBadge">
+              {totalCardinality.toLocaleString()}
+            </EuiBadge>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
             {(invalidSelections?.length ?? 0) > 0 && (
               <EuiToolTip
                 content={OptionsListStrings.popover.getInvalidSelectionsTooltip(
                   invalidSelections?.length ?? 0
                 )}
               >
-                <EuiBadge className="optionsList__ignoredBadge" color="warning">
-                  {invalidSelections?.length}
-                </EuiBadge>
+                <EuiBadge color="warning">{invalidSelections?.length}</EuiBadge>
               </EuiToolTip>
             )}
           </EuiFlexItem>
@@ -95,46 +94,6 @@ export const OptionsListPopoverActionBar = ({
               <OptionsListPopoverSortingButton showOnlySelected={showOnlySelected} />
             </EuiFlexItem>
           )}
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              position="top"
-              content={
-                showOnlySelected
-                  ? OptionsListStrings.popover.getAllOptionsButtonTitle()
-                  : OptionsListStrings.popover.getSelectedOptionsButtonTitle()
-              }
-            >
-              <EuiButtonIcon
-                size="s"
-                iconType="list"
-                aria-pressed={showOnlySelected}
-                color={showOnlySelected ? 'primary' : 'text'}
-                display={showOnlySelected ? 'base' : 'empty'}
-                onClick={() => setShowOnlySelected(!showOnlySelected)}
-                data-test-subj="optionsList-control-show-only-selected"
-                aria-label={
-                  showOnlySelected
-                    ? OptionsListStrings.popover.getAllOptionsButtonTitle()
-                    : OptionsListStrings.popover.getSelectedOptionsButtonTitle()
-                }
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              position="top"
-              content={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
-            >
-              <EuiButtonIcon
-                size="s"
-                color="danger"
-                iconType="eraser"
-                onClick={() => dispatch(clearSelections({}))}
-                data-test-subj="optionsList-control-clear-all-selections"
-                aria-label={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFormRow>
     </div>

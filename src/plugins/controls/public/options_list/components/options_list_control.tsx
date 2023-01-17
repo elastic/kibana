@@ -23,10 +23,10 @@ import './options_list.scss';
 
 export const OptionsListControl = ({
   typeaheadSubject,
-  paginationSubject,
+  sizeSubject,
 }: {
   typeaheadSubject: Subject<string>;
-  paginationSubject: Subject<number>;
+  sizeSubject: Subject<number>;
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -36,7 +36,7 @@ export const OptionsListControl = ({
   // Redux embeddable Context
   const {
     useEmbeddableDispatch,
-    actions: { replaceSelection, setSearchString, setPage },
+    actions: { replaceSelection, setSearchString, setSize },
     useEmbeddableSelector: select,
   } = useReduxEmbeddableContext<OptionsListReduxState, typeof optionsListReducers>();
   const dispatch = useEmbeddableDispatch();
@@ -83,13 +83,13 @@ export const OptionsListControl = ({
     [typeaheadSubject, dispatch, setSearchString]
   );
 
-  const updatePage = useCallback(
-    (newPage: number) => {
-      console.log('new page', newPage);
-      paginationSubject.next(newPage);
-      dispatch(setPage(newPage));
+  const clickLoadMore = useCallback(
+    (cardinality: number) => {
+      sizeSubject.next(cardinality);
+      // console.log('CLICK LOAD MORE', cardinality);
+      dispatch(setSize(cardinality));
     },
-    [paginationSubject, dispatch, setPage]
+    [sizeSubject, dispatch, setSize]
   );
 
   const { hasSelections, selectionDisplayNode, validSelectionsCount } = useMemo(() => {
@@ -169,9 +169,9 @@ export const OptionsListControl = ({
         aria-label={OptionsListStrings.popover.getAriaLabel(fieldName)}
       >
         <OptionsListPopover
-          updatePage={updatePage}
           width={dimensions.width}
           isLoading={debouncedLoading}
+          clickLoadMore={clickLoadMore}
           updateSearchString={updateSearchString}
         />
       </EuiPopover>

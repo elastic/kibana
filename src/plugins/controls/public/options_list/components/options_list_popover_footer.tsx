@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiButtonIcon,
   EuiBadge,
+  EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
@@ -35,23 +36,21 @@ const aggregationToggleButtons = [
 ];
 
 export const OptionsListPopoverFooter = ({
-  updatePage,
+  showOnlySelected,
+  setShowOnlySelected,
 }: {
-  updatePage: (newPage: number) => void;
+  showOnlySelected: boolean;
+  setShowOnlySelected: (value: boolean) => void;
 }) => {
   // Redux embeddable container Context
   const {
     useEmbeddableDispatch,
     useEmbeddableSelector: select,
-    actions: { setExclude },
+    actions: { setExclude, clearSelections },
   } = useReduxEmbeddableContext<OptionsListReduxState, typeof optionsListReducers>();
   const dispatch = useEmbeddableDispatch();
 
-  // Select current state from Redux using multiple selectors to avoid rerenders.
-  const page = select((state) => state.componentState.page);
-
   const exclude = select((state) => state.explicitInput.exclude);
-  const totalCardinality = select((state) => state.componentState.totalCardinality) ?? 0;
 
   return (
     <>
@@ -74,48 +73,50 @@ export const OptionsListPopoverFooter = ({
               data-test-subj="optionsList__includeExcludeButtonGroup"
             />
           </EuiFlexItem>
-          {totalCardinality > 0 && (
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
-                <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="none" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  position="top"
+                  content={
+                    showOnlySelected
+                      ? OptionsListStrings.popover.getAllOptionsButtonTitle()
+                      : OptionsListStrings.popover.getSelectedOptionsButtonTitle()
+                  }
+                >
                   <EuiButtonIcon
-                    iconType="arrowStart"
-                    disabled={page === 1}
-                    onClick={() => {
-                      updatePage(1);
-                    }}
+                    size="s"
+                    iconType="list"
+                    aria-pressed={showOnlySelected}
+                    color={showOnlySelected ? 'primary' : 'text'}
+                    display={showOnlySelected ? 'base' : 'empty'}
+                    onClick={() => setShowOnlySelected(!showOnlySelected)}
+                    data-test-subj="optionsList-control-show-only-selected"
+                    aria-label={
+                      showOnlySelected
+                        ? OptionsListStrings.popover.getAllOptionsButtonTitle()
+                        : OptionsListStrings.popover.getSelectedOptionsButtonTitle()
+                    }
                   />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
+                </EuiToolTip>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  position="top"
+                  content={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
+                >
                   <EuiButtonIcon
-                    iconType="arrowLeft"
-                    disabled={page === 1}
-                    onClick={() => {
-                      updatePage(page - 1);
-                    }}
+                    size="s"
+                    color="danger"
+                    iconType="eraser"
+                    onClick={() => dispatch(clearSelections({}))}
+                    data-test-subj="optionsList-control-clear-all-selections"
+                    aria-label={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
                   />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiBadge>
-                    {OptionsListStrings.popover.getCardinalityBadge(
-                      (page - 1) * 10 + 1,
-                      Math.min((page - 1) * 10 + 10, totalCardinality),
-                      totalCardinality
-                    )}
-                  </EuiBadge>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    iconType="arrowRight"
-                    disabled={totalCardinality - page * 10 <= 0}
-                    onClick={() => {
-                      updatePage(page + 1);
-                    }}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          )}
+                </EuiToolTip>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPopoverFooter>
     </>
