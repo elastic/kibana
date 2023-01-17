@@ -286,10 +286,8 @@ describe('AllCasesListGeneric', () => {
         <AllCasesList />
       </TestProviders>
     );
-    
-    await waitFor(() => 
-      expect(res.getByTestId('cases-count-stats')).toBeInTheDocument()
-    );
+
+    await waitFor(() => expect(res.getByTestId('cases-count-stats')).toBeInTheDocument());
   });
 
   it('should not render table utility bar when isSelectorView=true', async () => {
