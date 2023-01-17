@@ -15,7 +15,7 @@ const SkeletonComponent: React.FC = () => {
       <EuiLoadingContent lines={1} css={{ width: 70, marginBottom: '12px' }} />
       <EuiLoadingContent lines={3} />
       <EuiHorizontalRule margin="xs" />
-      <EuiSpacer size='s' />
+      <EuiSpacer size="s" />
     </EuiFlexItem>
   );
 };
