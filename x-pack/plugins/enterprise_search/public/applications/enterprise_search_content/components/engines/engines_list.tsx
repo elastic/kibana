@@ -8,6 +8,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { useActions, useValues } from 'kea';
+import useThrottle from 'react-use/lib/useThrottle';
 
 import { EuiButton, EuiFieldSearch, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 
@@ -22,17 +23,20 @@ import { EnginesListTable } from './components/tables/engines_table';
 import { DeleteEngineModal } from './delete_engine_modal';
 import { EnginesListLogic } from './engines_list_logic';
 
+const ENGINES_SEARCH_THROTTLE_MS = 500;
+
 export const EnginesList: React.FC = () => {
   const { fetchEngines, onPaginate, openDeleteEngineModal } = useActions(EnginesListLogic);
   const { meta, results } = useValues(EnginesListLogic);
   const [searchQuery, setSearchValue] = useState('');
+  const throttledSearchQuery = useThrottle(searchQuery, ENGINES_SEARCH_THROTTLE_MS);
 
   useEffect(() => {
     fetchEngines({
       meta,
-      searchQuery,
+      searchQuery: throttledSearchQuery,
     });
-  }, [meta.from, meta.size, searchQuery]);
+  }, [meta.from, meta.size, throttledSearchQuery]);
 
   return (
     <>
