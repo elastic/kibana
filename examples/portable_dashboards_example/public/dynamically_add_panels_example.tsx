@@ -9,7 +9,7 @@
 import React, { useMemo, useState } from 'react';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { DashboardContainer, DashboardContainerRenderer } from '@kbn/dashboard-plugin/public';
+import { DashboardContainer, LazyDashboardContainerRenderer } from '@kbn/dashboard-plugin/public';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -24,8 +24,11 @@ import {
   VisualizeInput,
   VisualizeOutput,
 } from '@kbn/visualizations-plugin/public/embeddable/visualize_embeddable';
+import { withSuspense } from '@kbn/presentation-util-plugin/public';
 
 const INPUT_KEY = 'portableDashboard:saveExample:input';
+
+const DashboardContainerRenderer = withSuspense(LazyDashboardContainerRenderer);
 
 export const DynamicByReferenceExample = ({ dataView }: { dataView: DataView }) => {
   const [isSaving, setIsSaving] = useState(false);

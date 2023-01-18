@@ -18,8 +18,8 @@ export {
   DASHBOARD_CONTAINER_TYPE,
   type DashboardContainer,
   type DashboardCreationOptions,
-  DashboardContainerRenderer,
   useDashboardContainerContext,
+  LazyDashboardContainerRenderer,
 } from './dashboard_container';
 export type { DashboardSetup, DashboardStart, DashboardFeatureFlagConfig } from './plugin';
 

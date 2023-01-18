@@ -10,7 +10,7 @@ import React, { useMemo, useState } from 'react';
 
 import {
   DashboardContainer,
-  DashboardContainerRenderer,
+  LazyDashboardContainerRenderer,
   useDashboardContainerContext,
 } from '@kbn/dashboard-plugin/public';
 import {
@@ -23,6 +23,9 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { withSuspense } from '@kbn/presentation-util-plugin/public';
+
+const DashboardContainerRenderer = withSuspense(LazyDashboardContainerRenderer);
 
 export const DualReduxExample = () => {
   const [firstDashboardContainer, setFirstDashboardContainer] = useState<

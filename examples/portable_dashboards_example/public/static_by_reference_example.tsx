@@ -10,9 +10,15 @@ import React from 'react';
 
 import { buildPhraseFilter, Filter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { DashboardContainerRenderer, DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
+import {
+  LazyDashboardContainerRenderer,
+  DashboardCreationOptions,
+} from '@kbn/dashboard-plugin/public';
 import { EuiCode, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { withSuspense } from '@kbn/presentation-util-plugin/public';
+
+const DashboardContainerRenderer = withSuspense(LazyDashboardContainerRenderer);
 
 export const StaticByReferenceExample = ({
   dashboardId,

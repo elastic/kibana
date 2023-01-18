@@ -146,10 +146,12 @@ export class DashboardPlugin
           useHashedUrl: core.uiSettings.get('state:storeInSessionStorage'),
           getDashboardFilterFields: async (dashboardId: string) => {
             const { pluginServices } = await import('./services/plugin_services');
-            const { dashboardSavedObject } = pluginServices.getServices();
+            const {
+              dashboardSavedObject: { loadDashboardStateFromSavedObject },
+            } = pluginServices.getServices();
             return (
-              (await dashboardSavedObject.loadDashboardStateFromSavedObject({ id: dashboardId }))
-                .dashboardInput?.filters ?? []
+              (await loadDashboardStateFromSavedObject({ id: dashboardId })).dashboardInput
+                ?.filters ?? []
             );
           },
         })
@@ -302,6 +304,7 @@ export class DashboardPlugin
         allowByValueEmbeddables: this.dashboardFeatureFlagConfig?.allowByValueEmbeddables,
       });
     });
+
     return {
       locator: this.locator,
       dashboardFeatureFlagConfig: this.dashboardFeatureFlagConfig!,
