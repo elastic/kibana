@@ -50,12 +50,6 @@ async function getMobileStats({
     offset,
   });
 
-  const { intervalString } = getBucketSize({
-    start: startWithOffset,
-    end: endWithOffset,
-    minBucketSize: 60,
-  });
-
   const commonProps = {
     kuery,
     apmEventClient,

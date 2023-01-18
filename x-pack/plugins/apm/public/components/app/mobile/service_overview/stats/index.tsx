@@ -81,7 +81,7 @@ export function MobileStats({
         </span>
       );
     },
-    [comparisonEnabled]
+    [comparisonEnabled, previousPeriodLabel]
   );
 
   const metrics: MetricDatum[] = [
