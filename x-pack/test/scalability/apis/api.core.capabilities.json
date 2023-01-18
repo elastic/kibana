@@ -5,7 +5,7 @@
       {
         "action": "constantUsersPerSec",
         "userCount": 10,
-        "duration": "1m"
+        "duration": "30s"
       }
     ],
     "test": [
