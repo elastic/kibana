@@ -56,7 +56,7 @@ export class ShareContextMenu extends Component<ShareContextMenuProps> {
     const permalinkPanel = {
       id: panels.length + 1,
       title: i18n.translate('share.contextMenu.permalinkPanelTitle', {
-        defaultMessage: 'Permalink',
+        defaultMessage: 'Get link',
       }),
       content: (
         <UrlPanelContent
@@ -73,7 +73,7 @@ export class ShareContextMenu extends Component<ShareContextMenuProps> {
     };
     menuItems.push({
       name: i18n.translate('share.contextMenu.permalinksLabel', {
-        defaultMessage: 'Permalinks',
+        defaultMessage: 'Get links',
       }),
       icon: 'link',
       panel: permalinkPanel.id,
