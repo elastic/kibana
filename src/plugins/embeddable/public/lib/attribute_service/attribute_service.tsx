@@ -9,7 +9,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { get, omit } from 'lodash';
-import { I18nStart, NotificationsStart } from '@kbn/core/public';
+import { NotificationsStart } from '@kbn/core/public';
 import { SavedObjectSaveModal, OnSaveProps, SaveResult, showSaveModal } from '@kbn/saved-objects-plugin/public';
 import {
   EmbeddableInput,
