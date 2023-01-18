@@ -44,11 +44,6 @@ interface IActionExecution
 interface IExecutionUuidKpiAggBucket extends estypes.AggregationsStringTermsBucketKeys {
   actionExecution: {
     doc_count: number;
-    numTriggeredActions: estypes.AggregationsSumAggregate;
-    numGeneratedActions: estypes.AggregationsSumAggregate;
-    numActiveAlerts: estypes.AggregationsSumAggregate;
-    numRecoveredAlerts: estypes.AggregationsSumAggregate;
-    numNewAlerts: estypes.AggregationsSumAggregate;
     actionExecutionOutcomes: IActionExecution;
   };
 }
@@ -139,16 +134,6 @@ export const getExecutionKPIAggregation = (filter?: IExecutionLogAggOptions['fil
                     size: 3,
                     field: OUTCOME_FIELD,
                   },
-                },
-              },
-            },
-            minExecutionUuidBucket: {
-              bucket_selector: {
-                buckets_path: {
-                  count: 'actionExecution._count',
-                },
-                script: {
-                  source: 'params.count > 0',
                 },
               },
             },
@@ -287,17 +272,6 @@ export function getExecutionLogAggregation({
                       },
                     },
                   ],
-                },
-              },
-            },
-            // Filter out execution UUID buckets where actionExecution doc count is 0
-            minExecutionUuidBucket: {
-              bucket_selector: {
-                buckets_path: {
-                  count: 'actionExecution._count',
-                },
-                script: {
-                  source: 'params.count > 0',
                 },
               },
             },

@@ -767,7 +767,7 @@ export class ActionsClient {
 
     const authorizationTuple = {} as KueryNode;
     try {
-      await this.authorization.ensureAuthorized('get_execution_log');
+      await this.authorization.ensureAuthorized('get');
     } catch (error) {
       this.auditLogger?.log(
         connectorAuditEvent({
@@ -826,7 +826,7 @@ export class ActionsClient {
 
     const authorizationTuple = {} as KueryNode;
     try {
-      await this.authorization.ensureAuthorized('get_execution_kpi');
+      await this.authorization.ensureAuthorized('get');
     } catch (error) {
       this.auditLogger?.log(
         connectorAuditEvent({

@@ -2623,7 +2623,7 @@ describe('getGlobalExecutionLogWithAuth()', () => {
         return AuthorizationMode.RBAC;
       });
       await actionsClient.getGlobalExecutionLogWithAuth(opts);
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get_execution_log');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
     });
 
     test('throws when user is not authorised to access logs', async () => {
@@ -2636,7 +2636,7 @@ describe('getGlobalExecutionLogWithAuth()', () => {
         `[Error: Unauthorized to access logs]`
       );
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get_execution_log');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
     });
   });
 
@@ -2678,7 +2678,7 @@ describe('getGlobalExecutionKpiWithAuth()', () => {
         return AuthorizationMode.RBAC;
       });
       await actionsClient.getGlobalExecutionKpiWithAuth(opts);
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get_execution_kpi');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
     });
 
     test('throws when user is not authorised to access kpi', async () => {
@@ -2691,7 +2691,7 @@ describe('getGlobalExecutionKpiWithAuth()', () => {
         `[Error: Unauthorized to access kpi]`
       );
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get_execution_kpi');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
     });
   });
 

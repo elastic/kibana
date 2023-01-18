@@ -136,16 +136,6 @@ describe('getExecutionLogAggregation', () => {
                   ],
                 },
               },
-              minExecutionUuidBucket: {
-                bucket_selector: {
-                  buckets_path: {
-                    count: 'actionExecution._count',
-                  },
-                  script: {
-                    source: 'params.count > 0',
-                  },
-                },
-              },
               timeoutMessage: {
                 filter: {
                   bool: {
@@ -272,16 +262,6 @@ describe('getExecutionLogAggregation', () => {
                       },
                     },
                   ],
-                },
-              },
-              minExecutionUuidBucket: {
-                bucket_selector: {
-                  buckets_path: {
-                    count: 'actionExecution._count',
-                  },
-                  script: {
-                    source: 'params.count > 0',
-                  },
                 },
               },
               timeoutMessage: {
@@ -426,16 +406,6 @@ describe('getExecutionLogAggregation', () => {
                       },
                     },
                   ],
-                },
-              },
-              minExecutionUuidBucket: {
-                bucket_selector: {
-                  buckets_path: {
-                    count: 'actionExecution._count',
-                  },
-                  script: {
-                    source: 'params.count > 0',
-                  },
                 },
               },
               timeoutMessage: {
@@ -760,16 +730,6 @@ describe('getExecutionKPIAggregation', () => {
                   size: 10000,
                 },
               },
-              minExecutionUuidBucket: {
-                bucket_selector: {
-                  buckets_path: {
-                    count: 'actionExecution._count',
-                  },
-                  script: {
-                    source: 'params.count > 0',
-                  },
-                },
-              },
             },
             terms: {
               field: 'kibana.action.execution.uuid',
@@ -823,16 +783,6 @@ describe('getExecutionKPIAggregation', () => {
                   from: 0,
                   gap_policy: 'insert_zeros',
                   size: 10000,
-                },
-              },
-              minExecutionUuidBucket: {
-                bucket_selector: {
-                  buckets_path: {
-                    count: 'actionExecution._count',
-                  },
-                  script: {
-                    source: 'params.count > 0',
-                  },
                 },
               },
             },
@@ -904,16 +854,6 @@ describe('getExecutionKPIAggregation', () => {
                   from: 0,
                   gap_policy: 'insert_zeros',
                   size: 10000,
-                },
-              },
-              minExecutionUuidBucket: {
-                bucket_selector: {
-                  buckets_path: {
-                    count: 'actionExecution._count',
-                  },
-                  script: {
-                    source: 'params.count > 0',
-                  },
                 },
               },
             },

@@ -32,7 +32,7 @@ interface CreateActionEventLogRecordParams {
     relation?: string;
   }>;
   relatedSavedObjects?: RelatedSavedObjects;
-  actionExecutionId?: string;
+  actionExecutionId: string;
 }
 
 export function createActionEventLogRecordObject(params: CreateActionEventLogRecordParams): Event {
@@ -78,7 +78,7 @@ export function createActionEventLogRecordObject(params: CreateActionEventLogRec
       ...(spaceId ? { space_ids: [spaceId] } : {}),
       ...(task ? { task: { scheduled: task.scheduled, schedule_delay: task.scheduleDelay } } : {}),
       action: {
-        name,
+        ...(name ? { name } : {}),
         execution: {
           uuid: actionExecutionId,
         },
