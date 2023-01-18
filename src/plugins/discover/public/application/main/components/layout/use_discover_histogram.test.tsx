@@ -526,18 +526,18 @@ describe('useDiscoverHistogram', () => {
 
   describe('refetching', () => {
     it("should call input$.next({ type: 'refetch' }) when savedSearchFetch$ is triggered", async () => {
-      const savedSearchFetch$ = new BehaviorSubject(undefined);
+      const savedSearchFetch$ = new BehaviorSubject({ reset: false, searchSessionId: '1234' });
       const { hook } = await renderUseDiscoverHistogram({ savedSearchFetch$ });
       const onRefetch = jest.fn();
       hook.result.current?.input$.subscribe(onRefetch);
       act(() => {
-        savedSearchFetch$.next(undefined);
+        savedSearchFetch$.next({ reset: false, searchSessionId: '1234' });
       });
       expect(onRefetch).toHaveBeenCalledWith({ type: 'refetch' });
     });
 
     it("should not call input$.next({ type: 'refetch' }) when searchSessionId is not set", async () => {
-      const savedSearchFetch$ = new BehaviorSubject(undefined);
+      const savedSearchFetch$ = new BehaviorSubject({ reset: false, searchSessionId: '1234' });
       const { hook } = await renderUseDiscoverHistogram({
         savedSearchFetch$,
         searchSessionId: null,
@@ -545,13 +545,13 @@ describe('useDiscoverHistogram', () => {
       const onRefetch = jest.fn();
       hook.result.current?.input$.subscribe(onRefetch);
       act(() => {
-        savedSearchFetch$.next(undefined);
+        savedSearchFetch$.next({ reset: false, searchSessionId: '1234' });
       });
       expect(onRefetch).not.toHaveBeenCalled();
     });
 
     it("should call input$.next({ type: 'refetch' }) when searchSessionId is not set and isPlainRecord is true", async () => {
-      const savedSearchFetch$ = new BehaviorSubject(undefined);
+      const savedSearchFetch$ = new BehaviorSubject({ reset: false, searchSessionId: '1234' });
       const { hook } = await renderUseDiscoverHistogram({
         savedSearchFetch$,
         searchSessionId: null,
@@ -560,13 +560,13 @@ describe('useDiscoverHistogram', () => {
       const onRefetch = jest.fn();
       hook.result.current?.input$.subscribe(onRefetch);
       act(() => {
-        savedSearchFetch$.next(undefined);
+        savedSearchFetch$.next({ reset: false, searchSessionId: '1234' });
       });
       expect(onRefetch).toHaveBeenCalledWith({ type: 'refetch' });
     });
 
     it('should skip the next refetch when state.hideChart changes from true to false', async () => {
-      const savedSearchFetch$ = new BehaviorSubject(undefined);
+      const savedSearchFetch$ = new BehaviorSubject({ reset: false, searchSessionId: '1234' });
       const { hook } = await renderUseDiscoverHistogram({ savedSearchFetch$ });
       const onRefetch = jest.fn();
       hook.result.current?.input$.subscribe(onRefetch);
@@ -577,7 +577,7 @@ describe('useDiscoverHistogram', () => {
         hook.result.current?.onChartHiddenChange(false);
       });
       act(() => {
-        savedSearchFetch$.next(undefined);
+        savedSearchFetch$.next({ reset: false, searchSessionId: '1234' });
       });
       expect(onRefetch).not.toHaveBeenCalled();
     });
