@@ -15,6 +15,7 @@ import { EuiButton, EuiFieldSearch, EuiLink, EuiSpacer, EuiText } from '@elastic
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
 
+import { INPUT_THROTTLE_DELAY_MS } from '../../../shared/constants/timers';
 import { DataPanel } from '../../../shared/data_panel/data_panel';
 
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
@@ -23,13 +24,11 @@ import { EnginesListTable } from './components/tables/engines_table';
 import { DeleteEngineModal } from './delete_engine_modal';
 import { EnginesListLogic } from './engines_list_logic';
 
-const ENGINES_SEARCH_THROTTLE_MS = 500;
-
 export const EnginesList: React.FC = () => {
   const { fetchEngines, onPaginate, openDeleteEngineModal } = useActions(EnginesListLogic);
   const { meta, results } = useValues(EnginesListLogic);
   const [searchQuery, setSearchValue] = useState('');
-  const throttledSearchQuery = useThrottle(searchQuery, ENGINES_SEARCH_THROTTLE_MS);
+  const throttledSearchQuery = useThrottle(searchQuery, INPUT_THROTTLE_DELAY_MS);
 
   useEffect(() => {
     fetchEngines({
