@@ -7,35 +7,31 @@
 
 import apm from 'elastic-apm-node';
 import { Logger } from '@kbn/core/server';
-import { Alert } from '../alert';
 import { EVENT_LOG_ACTIONS } from '../plugin';
-import { AlertInstanceContext, AlertInstanceState } from '../types';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
+import { LastScheduledActions } from '../types';
 
-export interface LogAlertsParams<
-  State extends AlertInstanceState,
-  Context extends AlertInstanceContext,
-  ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
-> {
+export interface LogAlertsParams<Alert> {
   logger: Logger;
   alertingEventLogger: AlertingEventLogger;
-  newAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
-  activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
-  recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
+  newAlerts: Record<string, Alert>;
+  activeAlerts: Record<string, Alert>;
+  recoveredAlerts: Record<string, Alert>;
   ruleLogPrefix: string;
   ruleRunMetricsStore: RuleRunMetricsStore;
   canSetRecoveryContext: boolean;
   shouldPersistAlerts: boolean;
+  getAlertData: (alert: Alert) => {
+    actionGroup: string | undefined;
+    hasContext: boolean;
+    lastScheduledActions: LastScheduledActions;
+    state: Record<string, unknown>;
+    flapping: boolean;
+  };
 }
 
-export function logAlerts<
-  State extends AlertInstanceState,
-  Context extends AlertInstanceContext,
-  ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
->({
+export function logAlerts<Alert>({
   logger,
   alertingEventLogger,
   newAlerts,
@@ -45,7 +41,8 @@ export function logAlerts<
   ruleRunMetricsStore,
   canSetRecoveryContext,
   shouldPersistAlerts,
-}: LogAlertsParams<State, Context, ActionGroupIds, RecoveryActionGroupId>) {
+  getAlertData,
+}: LogAlertsParams<Alert>) {
   const newAlertIds = Object.keys(newAlerts);
   const activeAlertIds = Object.keys(activeAlerts);
   const recoveredAlertIds = Object.keys(recoveredAlerts);
@@ -63,7 +60,7 @@ export function logAlerts<
       `rule ${ruleLogPrefix} has ${activeAlertIds.length} active alerts: ${JSON.stringify(
         activeAlertIds.map((alertId) => ({
           instanceId: alertId,
-          actionGroup: activeAlerts[alertId].getScheduledActionOptions()?.actionGroup,
+          actionGroup: getAlertData(activeAlerts[alertId]).actionGroup,
         }))
       )}`
     );
@@ -77,7 +74,7 @@ export function logAlerts<
 
     if (canSetRecoveryContext) {
       for (const id of recoveredAlertIds) {
-        if (!recoveredAlerts[id].hasContext()) {
+        if (!getAlertData(recoveredAlerts[id]).hasContext) {
           logger.debug(
             `rule ${ruleLogPrefix} has no recovery context specified for recovered alert ${id}`
           );
@@ -91,8 +88,9 @@ export function logAlerts<
     ruleRunMetricsStore.setNumberOfActiveAlerts(activeAlertIds.length);
     ruleRunMetricsStore.setNumberOfRecoveredAlerts(recoveredAlertIds.length);
     for (const id of recoveredAlertIds) {
-      const { group: actionGroup } = recoveredAlerts[id].getLastScheduledActions() ?? {};
-      const state = recoveredAlerts[id].getState();
+      const recoveredAlertData = getAlertData(recoveredAlerts[id]);
+      const { group: actionGroup } = recoveredAlertData.lastScheduledActions ?? {};
+      const state = recoveredAlertData.state;
       const message = `${ruleLogPrefix} alert '${id}' has recovered`;
       alertingEventLogger.logAlert({
         action: EVENT_LOG_ACTIONS.recoveredInstance,
@@ -100,13 +98,14 @@ export function logAlerts<
         group: actionGroup,
         message,
         state,
-        flapping: recoveredAlerts[id].getFlapping(),
+        flapping: recoveredAlertData.flapping,
       });
     }
 
     for (const id of newAlertIds) {
-      const { actionGroup } = activeAlerts[id].getScheduledActionOptions() ?? {};
-      const state = activeAlerts[id].getState();
+      const newAlertData = getAlertData(activeAlerts[id]);
+      const actionGroup = newAlertData.actionGroup;
+      const state = newAlertData.state;
       const message = `${ruleLogPrefix} created new alert: '${id}'`;
       alertingEventLogger.logAlert({
         action: EVENT_LOG_ACTIONS.newInstance,
@@ -114,13 +113,14 @@ export function logAlerts<
         group: actionGroup,
         message,
         state,
-        flapping: activeAlerts[id].getFlapping(),
+        flapping: newAlertData.flapping,
       });
     }
 
     for (const id of activeAlertIds) {
-      const { actionGroup } = activeAlerts[id].getScheduledActionOptions() ?? {};
-      const state = activeAlerts[id].getState();
+      const activeAlertData = getAlertData(activeAlerts[id]);
+      const actionGroup = activeAlertData.actionGroup;
+      const state = activeAlertData.state;
       const message = `${ruleLogPrefix} active alert: '${id}' in actionGroup: '${actionGroup}'`;
       alertingEventLogger.logAlert({
         action: EVENT_LOG_ACTIONS.activeInstance,
@@ -128,7 +128,7 @@ export function logAlerts<
         group: actionGroup,
         message,
         state,
-        flapping: activeAlerts[id].getFlapping(),
+        flapping: activeAlertData.flapping,
       });
     }
   }

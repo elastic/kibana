@@ -9,7 +9,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { Alert } from '../alert';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
-import { DefaultActionGroupId } from '../types';
+import { DefaultActionGroupId, LastScheduledActions } from '../types';
 import { logAlerts } from './log_alerts';
 
 const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
@@ -24,7 +24,7 @@ describe('logAlerts', () => {
   });
 
   test('should debug log active alerts if they exist', () => {
-    logAlerts({
+    logAlerts<Alert<{}, {}, DefaultActionGroupId>>({
       logger,
       alertingEventLogger,
       newAlerts: {},
@@ -37,6 +37,15 @@ describe('logAlerts', () => {
       ruleRunMetricsStore,
       canSetRecoveryContext: false,
       shouldPersistAlerts: true,
+      getAlertData: (alert) => {
+        return {
+          actionGroup: alert.getScheduledActionOptions()?.actionGroup,
+          hasContext: alert.hasContext(),
+          lastScheduledActions: alert.getLastScheduledActions() as LastScheduledActions,
+          state: alert.getState(),
+          flapping: alert.getFlapping(),
+        };
+      },
     });
 
     expect(logger.debug).toHaveBeenCalledTimes(1);
@@ -47,7 +56,7 @@ describe('logAlerts', () => {
   });
 
   test('should debug log recovered alerts if they exist', () => {
-    logAlerts({
+    logAlerts<Alert<{}, {}, DefaultActionGroupId>>({
       logger,
       alertingEventLogger,
       newAlerts: {},
@@ -62,6 +71,15 @@ describe('logAlerts', () => {
       ruleRunMetricsStore,
       canSetRecoveryContext: false,
       shouldPersistAlerts: true,
+      getAlertData: (alert) => {
+        return {
+          actionGroup: alert.getScheduledActionOptions()?.actionGroup,
+          hasContext: alert.hasContext(),
+          lastScheduledActions: alert.getLastScheduledActions() as LastScheduledActions,
+          state: alert.getState(),
+          flapping: alert.getFlapping(),
+        };
+      },
     });
 
     expect(logger.debug).toHaveBeenCalledTimes(2);
@@ -84,7 +102,7 @@ describe('logAlerts', () => {
     };
 
     recoveredAlerts['8'].setContext({ value: 'hey' });
-    logAlerts({
+    logAlerts<Alert<{}, {}, DefaultActionGroupId>>({
       logger,
       alertingEventLogger,
       newAlerts: {},
@@ -94,6 +112,15 @@ describe('logAlerts', () => {
       ruleRunMetricsStore,
       canSetRecoveryContext: true,
       shouldPersistAlerts: true,
+      getAlertData: (alert) => {
+        return {
+          actionGroup: alert.getScheduledActionOptions()?.actionGroup,
+          hasContext: alert.hasContext(),
+          lastScheduledActions: alert.getLastScheduledActions() as LastScheduledActions,
+          state: alert.getState(),
+          flapping: alert.getFlapping(),
+        };
+      },
     });
 
     expect(logger.debug).toHaveBeenCalledTimes(2);
@@ -108,7 +135,7 @@ describe('logAlerts', () => {
   });
 
   test('should not debug log if no alerts', () => {
-    logAlerts({
+    logAlerts<Alert<{}, {}, DefaultActionGroupId>>({
       logger,
       alertingEventLogger,
       newAlerts: {},
@@ -118,13 +145,22 @@ describe('logAlerts', () => {
       ruleRunMetricsStore,
       canSetRecoveryContext: true,
       shouldPersistAlerts: true,
+      getAlertData: (alert) => {
+        return {
+          actionGroup: alert.getScheduledActionOptions()?.actionGroup,
+          hasContext: alert.hasContext(),
+          lastScheduledActions: alert.getLastScheduledActions() as LastScheduledActions,
+          state: alert.getState(),
+          flapping: alert.getFlapping(),
+        };
+      },
     });
 
     expect(logger.debug).not.toHaveBeenCalled();
   });
 
   test('should correctly set values in ruleRunMetricsStore and call alertingEventLogger.logAlert if shouldPersistAlerts is true', () => {
-    logAlerts({
+    logAlerts<Alert<{}, {}, DefaultActionGroupId>>({
       logger,
       alertingEventLogger,
       newAlerts: {
@@ -145,6 +181,15 @@ describe('logAlerts', () => {
       ruleRunMetricsStore,
       canSetRecoveryContext: false,
       shouldPersistAlerts: true,
+      getAlertData: (alert) => {
+        return {
+          actionGroup: alert.getScheduledActionOptions()?.actionGroup,
+          hasContext: alert.hasContext(),
+          lastScheduledActions: alert.getLastScheduledActions() as LastScheduledActions,
+          state: alert.getState(),
+          flapping: alert.getFlapping(),
+        };
+      },
     });
 
     expect(ruleRunMetricsStore.getNumberOfNewAlerts()).toEqual(1);
@@ -212,7 +257,7 @@ describe('logAlerts', () => {
   });
 
   test('should not call alertingEventLogger.logAlert or update ruleRunMetricsStore if shouldPersistAlerts is false', () => {
-    logAlerts({
+    logAlerts<Alert<{}, {}, DefaultActionGroupId>>({
       logger,
       alertingEventLogger,
       newAlerts: {
@@ -233,6 +278,15 @@ describe('logAlerts', () => {
       ruleRunMetricsStore,
       canSetRecoveryContext: false,
       shouldPersistAlerts: false,
+      getAlertData: (alert) => {
+        return {
+          actionGroup: alert.getScheduledActionOptions()?.actionGroup,
+          hasContext: alert.hasContext(),
+          lastScheduledActions: alert.getLastScheduledActions() as LastScheduledActions,
+          state: alert.getState(),
+          flapping: alert.getFlapping(),
+        };
+      },
     });
 
     expect(ruleRunMetricsStore.getNumberOfNewAlerts()).toEqual(0);
@@ -243,7 +297,7 @@ describe('logAlerts', () => {
   });
 
   test('should correctly set flapping values', () => {
-    logAlerts({
+    logAlerts<Alert<{}, {}, DefaultActionGroupId>>({
       logger,
       alertingEventLogger,
       newAlerts: {
@@ -264,6 +318,15 @@ describe('logAlerts', () => {
       ruleRunMetricsStore,
       canSetRecoveryContext: false,
       shouldPersistAlerts: true,
+      getAlertData: (alert) => {
+        return {
+          actionGroup: alert.getScheduledActionOptions()?.actionGroup,
+          hasContext: alert.hasContext(),
+          lastScheduledActions: alert.getLastScheduledActions() as LastScheduledActions,
+          state: alert.getState(),
+          flapping: alert.getFlapping(),
+        };
+      },
     });
 
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(1, {
