@@ -655,7 +655,7 @@ export type DatasourceDimensionProps<T> = SharedDimensionProps & {
   indexPatterns: IndexPatternMap;
   hideTooltip?: boolean;
   invalid?: boolean;
-  invalidMessage?: string;
+  invalidMessage?: string | React.ReactNode;
 };
 export type ParamEditorCustomProps = Record<string, unknown> & {
   labels?: string[];
@@ -1243,7 +1243,7 @@ export interface Visualization<T = unknown, P = unknown> {
     label: string;
     hideTooltip?: boolean;
     invalid?: boolean;
-    invalidMessage?: string;
+    invalidMessage?: string | React.ReactNode;
   }) => JSX.Element | null;
   /**
    * Creates map of columns ids and unique lables. Used only for noDatasource layers

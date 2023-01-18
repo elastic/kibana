@@ -891,19 +891,7 @@ export const getXyVisualization = ({
       state?.layers.filter(isAnnotationsLayer).map(({ indexPatternId }) => indexPatternId) ?? []
     );
   },
-  renderDimensionTrigger({
-    columnId,
-    label,
-    hideTooltip,
-    invalid,
-    invalidMessage,
-  }: {
-    columnId: string;
-    label?: string;
-    hideTooltip?: boolean;
-    invalid?: boolean;
-    invalidMessage?: string;
-  }) {
+  renderDimensionTrigger({ columnId, label, hideTooltip, invalid, invalidMessage }) {
     if (label) {
       return (
         <DimensionTrigger
