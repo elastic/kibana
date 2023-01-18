@@ -269,6 +269,14 @@ export class Plugin
             path: '/overview',
           };
 
+          const dataExplorationLink = {
+            label: i18n.translate('xpack.observability.dataExploration', {
+              defaultMessage: 'Data Exploration',
+            }),
+            app: 'data-exploration',
+            path: '/data-exploration',
+          };
+
           // Reformat the visible links to be NavigationEntry objects instead of
           // AppDeepLink objects.
           //
@@ -292,7 +300,7 @@ export class Plugin
             {
               label: '',
               sortKey: 100,
-              entries: [overviewLink, ...otherLinks],
+              entries: [overviewLink, dataExplorationLink, ...otherLinks],
             },
           ];
 

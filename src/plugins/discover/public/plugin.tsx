@@ -340,10 +340,10 @@ export class DiscoverPlugin
     });
 
     core.application.register({
-      id: PLUGIN_ID + '-obs',
-      title: 'Discover Observability',
+      id: 'data-exploration',
+      title: 'Data Exploration',
       updater$: this.appStateUpdater.asObservable(),
-      order: 1000,
+      order: 8001,
       euiIconType: 'logoKibana',
       defaultPath: '#/',
       category: DEFAULT_APP_CATEGORIES.observability,
