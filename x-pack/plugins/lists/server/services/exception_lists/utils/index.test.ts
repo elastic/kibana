@@ -7,7 +7,6 @@
 
 import sinon from 'sinon';
 import moment from 'moment';
-import { v4 as uuidv4 } from 'uuid';
 
 import { transformCreateCommentsToComments, transformUpdateCommentsToComments } from '.';
 

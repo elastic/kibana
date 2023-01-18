@@ -12,7 +12,6 @@ import {
   timeRange,
   chartOptions,
 } from '../../../../../utils/fixtures/metrics_explorer';
-import { v4 as uuidv4 } from 'uuid';
 import { OutputBuffer } from 'uuid/interfaces';
 import {
   MetricsExplorerYAxisMode,
