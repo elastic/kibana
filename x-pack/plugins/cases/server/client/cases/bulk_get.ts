@@ -47,7 +47,6 @@ export const bulkGet = async <Field extends keyof CaseResponse = keyof CaseRespo
     services: { caseService, attachmentService },
     logger,
     authorization,
-    unsecuredSavedObjectsClient,
   } = clientArgs;
 
   try {
@@ -76,8 +75,7 @@ export const bulkGet = async <Field extends keyof CaseResponse = keyof CaseRespo
     );
 
     const commentTotals = requestForTotals
-      ? await attachmentService.getCaseCommentStats({
-          unsecuredSavedObjectsClient,
+      ? await attachmentService.getter.getCaseCommentStats({
           caseIds: authorizedCases.map((theCase) => theCase.id),
         })
       : new Map();

@@ -41,7 +41,6 @@ export async function update(
 ): Promise<CaseResponse> {
   const {
     services: { attachmentService },
-    unsecuredSavedObjectsClient,
     logger,
     authorization,
   } = clientArgs;
@@ -55,8 +54,7 @@ export async function update(
 
     decodeCommentRequest(queryRestAttributes);
 
-    const myComment = await attachmentService.get({
-      unsecuredSavedObjectsClient,
+    const myComment = await attachmentService.getter.get({
       attachmentId: queryCommentId,
     });
 

@@ -101,7 +101,6 @@ export const getAllAlertsAttachToCase = async (
   casesClient: CasesClient
 ): Promise<AlertResponse> => {
   const {
-    unsecuredSavedObjectsClient,
     authorization,
     services: { attachmentService },
     logger,
@@ -117,8 +116,7 @@ export const getAllAlertsAttachToCase = async (
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
       await authorization.getAuthorizationFilter(Operations.getAlertsAttachedToCase);
 
-    const alerts = await attachmentService.getAllAlertsAttachToCase({
-      unsecuredSavedObjectsClient,
+    const alerts = await attachmentService.getter.getAllAlertsAttachToCase({
       caseId: theCase.id,
       filter: authorizationFilter,
     });
@@ -228,14 +226,12 @@ export async function get(
 ): Promise<CommentResponse> {
   const {
     services: { attachmentService },
-    unsecuredSavedObjectsClient,
     logger,
     authorization,
   } = clientArgs;
 
   try {
-    const comment = await attachmentService.get({
-      unsecuredSavedObjectsClient,
+    const comment = await attachmentService.getter.get({
       attachmentId: attachmentID,
     });
 

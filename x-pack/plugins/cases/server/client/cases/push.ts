@@ -241,7 +241,6 @@ export const push = async (
       }),
 
       attachmentService.bulkUpdate({
-        unsecuredSavedObjectsClient,
         comments: comments.saved_objects
           .filter((comment) => comment.attributes.pushed_at == null)
           .map((comment) => ({

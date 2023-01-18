@@ -95,8 +95,7 @@ export class CaseCommentModel {
       };
 
       if (queryRestAttributes.type === CommentType.user && queryRestAttributes?.comment) {
-        const currentComment = (await this.params.services.attachmentService.get({
-          unsecuredSavedObjectsClient: this.params.unsecuredSavedObjectsClient,
+        const currentComment = (await this.params.services.attachmentService.getter.get({
           attachmentId: id,
         })) as SavedObject<CommentRequestUserType>;
 
@@ -110,7 +109,6 @@ export class CaseCommentModel {
 
       const [comment, commentableCase] = await Promise.all([
         this.params.services.attachmentService.update({
-          unsecuredSavedObjectsClient: this.params.unsecuredSavedObjectsClient,
           attachmentId: id,
           updatedAttributes: {
             ...queryRestAttributes,
@@ -212,7 +210,6 @@ export class CaseCommentModel {
 
       const [comment, commentableCase] = await Promise.all([
         this.params.services.attachmentService.create({
-          unsecuredSavedObjectsClient: this.params.unsecuredSavedObjectsClient,
           attributes: transformNewComment({
             createdDate,
             ...commentReq,
@@ -276,7 +273,6 @@ export class CaseCommentModel {
   private async validateAlertsLimitOnCase(totalAlertsInReq: number) {
     const alertsValueCount =
       await this.params.services.attachmentService.valueCountAlertsAttachedToCase({
-        unsecuredSavedObjectsClient: this.params.unsecuredSavedObjectsClient,
         caseId: this.caseInfo.id,
       });
 
@@ -410,7 +406,6 @@ export class CaseCommentModel {
 
       const [newlyCreatedAttachments, commentableCase] = await Promise.all([
         this.params.services.attachmentService.bulkCreate({
-          unsecuredSavedObjectsClient: this.params.unsecuredSavedObjectsClient,
           attachments: attachments.map(({ id, ...attachment }) => {
             return {
               attributes: transformNewComment({

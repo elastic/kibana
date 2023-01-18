@@ -226,8 +226,7 @@ export class CasesService {
       return accMap;
     }, new Map<string, SavedObjectsFindResult<CaseAttributes>>());
 
-    const commentTotals = await this.attachmentService.getCaseCommentStats({
-      unsecuredSavedObjectsClient: this.unsecuredSavedObjectsClient,
+    const commentTotals = await this.attachmentService.getter.getCaseCommentStats({
       caseIds: Array.from(casesMap.keys()),
     });
 
@@ -411,7 +410,6 @@ export class CasesService {
       this.log.debug(`Attempting to GET all comments internal for id ${JSON.stringify(id)}`);
       if (options?.page !== undefined || options?.perPage !== undefined) {
         return this.attachmentService.find({
-          unsecuredSavedObjectsClient: this.unsecuredSavedObjectsClient,
           options: {
             sortField: defaultSortField,
             ...options,
@@ -420,7 +418,6 @@ export class CasesService {
       }
 
       return this.attachmentService.find({
-        unsecuredSavedObjectsClient: this.unsecuredSavedObjectsClient,
         options: {
           page: 1,
           perPage: MAX_DOCS_PER_PAGE,

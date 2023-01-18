@@ -51,7 +51,6 @@ export async function deleteAll(
 ): Promise<void> {
   const {
     user,
-    unsecuredSavedObjectsClient,
     services: { caseService, attachmentService, userActionService },
     logger,
     authorization,
@@ -76,7 +75,6 @@ export async function deleteAll(
 
     const mapper = async (comment: SavedObject<CommentAttributes>) =>
       attachmentService.delete({
-        unsecuredSavedObjectsClient,
         attachmentId: comment.id,
         refresh: false,
       });
@@ -115,15 +113,13 @@ export async function deleteComment(
 ) {
   const {
     user,
-    unsecuredSavedObjectsClient,
     services: { attachmentService, userActionService },
     logger,
     authorization,
   } = clientArgs;
 
   try {
-    const myComment = await attachmentService.get({
-      unsecuredSavedObjectsClient,
+    const myComment = await attachmentService.getter.get({
       attachmentId: attachmentID,
     });
 
@@ -145,7 +141,6 @@ export async function deleteComment(
     }
 
     await attachmentService.delete({
-      unsecuredSavedObjectsClient,
       attachmentId: attachmentID,
       refresh: false,
     });
