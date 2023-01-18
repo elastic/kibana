@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIconTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIconTip, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
 import {
   ExceptionListType,
@@ -27,6 +27,7 @@ import {
   getEntryOnOperatorChange,
   getEntryOnWildcardChange,
   getFilteredIndexPatterns,
+  getMappingConflictsInfo,
   getOperatorOptions,
 } from '@kbn/securitysolution-list-utils';
 import {
@@ -194,8 +195,36 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
           onChange={handleFieldChange}
           acceptsCustomOptions={entry.nested == null}
           data-test-subj="exceptionBuilderEntryField"
+          showMappingConflicts={true}
         />
       );
+
+      const getMappingConflictsWarning = (field: DataViewFieldBase): React.ReactNode | null => {
+        const conflictsInfo = getMappingConflictsInfo(field);
+        if (!conflictsInfo) {
+          return null;
+        }
+        return (
+          <>
+            {i18n.FIELD_CONFLICT_INDICES_WARNING_DESCRIPTION}
+            {conflictsInfo.map((info) => {
+              const groupDetails = info.groupedIndices.map(({ name: indexName, count }) =>
+                i18n.CONFLICT_INDEX_DESCRIPTION(indexName, count)
+              );
+              return (
+                <>
+                  <EuiSpacer size="s" />
+                  {`${i18n.CONFLICT_INDEX_DESCRIPTION(
+                    info.type,
+                    info.totalIndexCount
+                  )}: ${groupDetails.join(', ')}`}
+                </>
+              );
+            })}
+            <EuiSpacer size="s" />
+          </>
+        );
+      };
 
       if (isFirst) {
         return (
@@ -203,9 +232,12 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
             fullWidth
             label={i18n.FIELD}
             helpText={
-              entry.nested == null && allowCustomOptions
-                ? i18n.CUSTOM_COMBOBOX_OPTION_TEXT
-                : undefined
+              <>
+                {entry.field?.type === 'conflict' && getMappingConflictsWarning(entry.field)}
+                {entry.nested == null && allowCustomOptions
+                  ? i18n.CUSTOM_COMBOBOX_OPTION_TEXT
+                  : undefined}
+              </>
             }
             data-test-subj="exceptionBuilderEntryFieldFormRow"
           >
@@ -218,9 +250,12 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
             fullWidth
             label={''}
             helpText={
-              entry.nested == null && allowCustomOptions
-                ? i18n.CUSTOM_COMBOBOX_OPTION_TEXT
-                : undefined
+              <>
+                {entry.field?.type === 'conflict' && getMappingConflictsWarning(entry.field)}
+                {entry.nested == null && allowCustomOptions
+                  ? i18n.CUSTOM_COMBOBOX_OPTION_TEXT
+                  : undefined}
+              </>
             }
             data-test-subj="exceptionBuilderEntryFieldFormRow"
           >

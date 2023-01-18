@@ -58,6 +58,10 @@ export type DataViewFieldBase = {
    * ES field types as strings array.
    */
   esTypes?: string[];
+  /**
+   * Description of field type conflicts across indices
+   */
+  conflictDescriptions?: Record<string, string[]>;
 };
 
 /**

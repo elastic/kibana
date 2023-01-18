@@ -7,10 +7,18 @@
  */
 import React from 'react';
 import { useCallback, useMemo, useState } from 'react';
-import { EuiComboBoxOptionOption, EuiToolTip } from '@elastic/eui';
+import {
+  EuiComboBoxOptionOption,
+  EuiIcon,
+  EuiSpacer,
+  EuiToolTip,
+  useEuiPaddingSize,
+} from '@elastic/eui';
 import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 
+import { FieldConflictsInfo, getMappingConflictsInfo } from '@kbn/securitysolution-list-utils';
 import { getGenericComboBoxProps } from '../get_generic_combo_box_props';
+import * as i18n from '../translations';
 import {
   ComboBoxFields,
   DataViewField,
@@ -72,6 +80,22 @@ const getDisabledLabelTooltipTexts = (fields: ComboBoxFields) => {
   );
   return disabledLabelTooltipTexts;
 };
+
+const getMappingConflictTooltipTexts = (fields: ComboBoxFields) => {
+  const mappingConflictTooltipTexts = fields.availableFields.reduce(
+    (acc: { [label: string]: FieldConflictsInfo[] }, field: DataViewField) => {
+      const conflictsInfo = getMappingConflictsInfo(field);
+      if (!conflictsInfo) {
+        return acc;
+      }
+      acc[field.name] = conflictsInfo;
+      return acc;
+    },
+    {}
+  );
+  return mappingConflictTooltipTexts;
+};
+
 const getComboBoxProps = (fields: ComboBoxFields): GetFieldComboBoxPropsReturn => {
   const { availableFields, selectedFields } = fields;
 
@@ -81,9 +105,11 @@ const getComboBoxProps = (fields: ComboBoxFields): GetFieldComboBoxPropsReturn =
     selectedOptions: selectedFields,
   });
   const disabledLabelTooltipTexts = getDisabledLabelTooltipTexts(fields);
+  const mappingConflictTooltipTexts = getMappingConflictTooltipTexts(fields);
   return {
     ...genericProps,
     disabledLabelTooltipTexts,
+    mappingConflictTooltipTexts,
   };
 };
 
@@ -93,11 +119,13 @@ export const useField = ({
   isRequired,
   selectedField,
   fieldInputWidth,
+  showMappingConflicts,
   onChange,
 }: FieldBaseProps) => {
   const [touched, setIsTouched] = useState(false);
 
   const [customOption, setCustomOption] = useState<DataViewFieldBase | null>(null);
+  const sPaddingSize = useEuiPaddingSize('s');
 
   const { availableFields, selectedFields } = useMemo(() => {
     const indexPatternsToUse =
@@ -107,7 +135,13 @@ export const useField = ({
     return getComboBoxFields(indexPatternsToUse, selectedField, fieldTypeFilter);
   }, [indexPattern, fieldTypeFilter, selectedField, customOption]);
 
-  const { comboOptions, labels, selectedComboOptions, disabledLabelTooltipTexts } = useMemo(
+  const {
+    comboOptions,
+    labels,
+    selectedComboOptions,
+    disabledLabelTooltipTexts,
+    mappingConflictTooltipTexts,
+  } = useMemo(
     () => getComboBoxProps({ availableFields, selectedFields }),
     [availableFields, selectedFields]
   );
@@ -168,6 +202,44 @@ export const useField = ({
         </EuiToolTip>
       );
     }
+
+    const conflictsInfo = mappingConflictTooltipTexts[label];
+    if (showMappingConflicts && conflictsInfo) {
+      const tooltipContent = (
+        <>
+          {i18n.FIELD_CONFLICT_INDICES_WARNING_DESCRIPTION}
+          {conflictsInfo.map((info) => {
+            const groupDetails = info.groupedIndices.map(({ name: indexName, count }) =>
+              i18n.CONFLICT_INDEX_DESCRIPTION(indexName, count)
+            );
+            return (
+              <>
+                <EuiSpacer size="s" />
+                {`${i18n.CONFLICT_INDEX_DESCRIPTION(
+                  info.type,
+                  info.totalIndexCount
+                )}: ${groupDetails.join(', ')}`}
+              </>
+            );
+          })}
+        </>
+      );
+      return (
+        <EuiToolTip position="bottom" content={tooltipContent}>
+          <>
+            {label}
+            <EuiIcon
+              tabIndex={0}
+              type="alert"
+              title={i18n.FIELD_CONFLICT_INDICES_WARNING_TITLE}
+              size="s"
+              css={{ marginLeft: `${sPaddingSize}` }}
+            />
+          </>
+        </EuiToolTip>
+      );
+    }
+
     return label;
   };
   return {

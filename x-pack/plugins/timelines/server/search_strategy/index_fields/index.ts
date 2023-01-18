@@ -8,6 +8,7 @@
 import { from } from 'rxjs';
 import isEmpty from 'lodash/isEmpty';
 import get from 'lodash/get';
+import deepmerge from 'deepmerge';
 import { ElasticsearchClient, StartServicesAccessor } from '@kbn/core/server';
 import {
   DataViewsServerPluginStart,
@@ -158,8 +159,12 @@ export const requestIndexFieldSearch = async (
                 pattern: index,
               });
             }
+            const fieldCapsOptions = request.includeUnmapped
+              ? { includeUnmapped: true, allow_no_indices: true }
+              : undefined;
             return indexPatternsFetcherAsCurrentUser.getFieldsForWildcard({
               pattern: index,
+              fieldCapsOptions,
             });
           })
         )
@@ -264,7 +269,7 @@ export const createFieldItem = (
 };
 
 /**
- * Iterates over each field, adds description, category, and indexes (index alias)
+ * Iterates over each field, adds description, category, conflictDescriptions, and indexes (index alias)
  *
  * This is a mutatious HOT CODE PATH function that will have array sizes up to 4.7 megs
  * in size at a time when being called. This function should be as optimized as possible
@@ -298,6 +303,12 @@ export const formatIndexFields = async (
                 const existingIndexField = accumulator[alreadyExistingIndexField];
                 if (isEmpty(accumulator[alreadyExistingIndexField].description)) {
                   accumulator[alreadyExistingIndexField].description = item.description;
+                }
+                if (item.conflictDescriptions) {
+                  accumulator[alreadyExistingIndexField].conflictDescriptions = deepmerge(
+                    existingIndexField.conflictDescriptions ?? {},
+                    item.conflictDescriptions
+                  );
                 }
                 accumulator[alreadyExistingIndexField].indexes = Array.from(
                   new Set(existingIndexField.indexes.concat(item.indexes))

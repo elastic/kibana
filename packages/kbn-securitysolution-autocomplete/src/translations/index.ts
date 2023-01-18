@@ -43,6 +43,26 @@ export const SEE_DOCUMENTATION = i18n.translate('autocomplete.seeDocumentation',
   defaultMessage: 'See Documentation',
 });
 
+export const FIELD_CONFLICT_INDICES_WARNING_TITLE = i18n.translate(
+  'autocomplete.conflictIndicesWarning.title',
+  {
+    defaultMessage: 'Mapping Conflict',
+  }
+);
+
+export const FIELD_CONFLICT_INDICES_WARNING_DESCRIPTION = i18n.translate(
+  'autocomplete.conflictIndicesWarning.description',
+  {
+    defaultMessage: 'This field is defined as several types across different indices.',
+  }
+);
+
+export const CONFLICT_INDEX_DESCRIPTION = (name: string, count: number): string =>
+  i18n.translate('autocomplete.conflictIndicesWarning.index.description', {
+    defaultMessage: `{name}${count > 1 ? ' ({count} indices)' : ''}`,
+    values: { count, name },
+  });
+
 // eslint-disable-next-line import/no-default-export
 export default {
   LOADING,

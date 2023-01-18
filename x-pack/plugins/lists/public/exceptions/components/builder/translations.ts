@@ -83,3 +83,16 @@ export const CUSTOM_COMBOBOX_OPTION_TEXT = i18n.translate(
       'Select a field from the list. If your field is not available, create a custom one.',
   }
 );
+
+export const FIELD_CONFLICT_INDICES_WARNING_DESCRIPTION = i18n.translate(
+  'xpack.lists.exceptions.field.mappingConflict.description',
+  {
+    defaultMessage: 'This field is defined as several types across different indices.',
+  }
+);
+
+export const CONFLICT_INDEX_DESCRIPTION = (name: string, count: number): string =>
+  i18n.translate('xpack.lists.exceptions.field.index.description', {
+    defaultMessage: `{name}${count > 1 ? ' ({count} indices)' : ''}`,
+    values: { count, name },
+  });

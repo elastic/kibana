@@ -40,6 +40,7 @@ export type BeatFields = Record<string, FieldInfo>;
 export interface IndexFieldsStrategyRequestByIndices extends IEsSearchRequest {
   indices: string[];
   onlyCheckIfIndicesExist: boolean;
+  includeUnmapped: boolean;
 }
 export interface IndexFieldsStrategyRequestById extends IEsSearchRequest {
   dataViewId: string;
