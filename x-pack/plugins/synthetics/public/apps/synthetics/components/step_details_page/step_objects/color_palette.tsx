@@ -6,9 +6,17 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiLoadingContent } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiLoadingContent,
+  EuiIcon,
+  EuiToolTip,
+} from '@elastic/eui';
 import { useTheme } from '@kbn/observability-plugin/public';
 import styled from 'styled-components';
+import { i18n } from '@kbn/i18n';
 import { colourPalette } from '../common/network_data/data_formatting';
 
 export const ColorPalette = ({
@@ -17,17 +25,43 @@ export const ColorPalette = ({
   percent,
   value,
   loading,
+  delta,
+  hasAnyThresholdBreach,
   labelWidth = 40,
-  valueWidth = 60,
+  valueWidth = 65,
 }: {
   label: string;
   mimeType: string;
   percent: number;
+  delta: number;
   value: string;
   loading: boolean;
+  hasAnyThresholdBreach: boolean;
   labelWidth?: number;
   valueWidth?: number;
 }) => {
+  const getToolTipContent = () => {
+    return i18n.translate('xpack.synthetics.stepDetails.palette.tooltip', {
+      defaultMessage: 'Value is {deltaLabel} compared to previous steps in last 24 hours.',
+      values: {
+        deltaLabel:
+          Math.abs(delta) === 0
+            ? i18n.translate('xpack.synthetics.stepDetails.palette.tooltip.noChange', {
+                defaultMessage: 'same',
+              })
+            : delta > 0
+            ? i18n.translate('xpack.synthetics.stepDetails.palette.increased', {
+                defaultMessage: '{delta}% higher',
+                values: { delta },
+              })
+            : i18n.translate('xpack.synthetics.stepDetails.palette.decreased', {
+                defaultMessage: '{delta}% lower',
+                values: { delta },
+              }),
+      },
+    });
+  };
+
   return (
     <EuiFlexGroup gutterSize="s">
       <EuiFlexItem grow={false} style={{ width: labelWidth }}>
@@ -49,6 +83,21 @@ export const ColorPalette = ({
           {value}
         </EuiText>
       </EuiFlexItem>
+      {hasAnyThresholdBreach && (
+        <EuiFlexItem grow={false} style={{ width: 40 }}>
+          <EuiToolTip content={getToolTipContent()}>
+            {Math.abs(delta) > 5 ? (
+              <EuiIcon
+                type={delta > 5 ? 'sortUp' : 'sortDown'}
+                size="m"
+                color={delta > 5 ? 'danger' : 'success'}
+              />
+            ) : (
+              <EuiIcon type="minus" size="m" color="subdued" />
+            )}
+          </EuiToolTip>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };

@@ -51,7 +51,7 @@ export const NetworkTimingsDonut = () => {
         <h3>{TIMINGS_BREAKDOWN}</h3>
       </EuiTitle>
       <EuiSpacer size="m" />
-      <Chart size={{ height: 180 }}>
+      <Chart size={{ height: 240 }}>
         <Settings theme={[themeOverrides, LIGHT_THEME ?? {}]} showLegend={false} />
         <Partition
           id="spec_1"

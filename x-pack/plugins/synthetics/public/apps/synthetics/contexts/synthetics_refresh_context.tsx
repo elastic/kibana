@@ -13,7 +13,7 @@ interface SyntheticsRefreshContext {
   refreshApp: () => void;
 }
 
-export const APP_DEFAULT_REFRESH_INTERVAL = 1000 * 30;
+export const APP_DEFAULT_REFRESH_INTERVAL = 1000 * 300;
 
 const defaultContext: SyntheticsRefreshContext = {
   lastRefresh: 0,
