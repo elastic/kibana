@@ -137,7 +137,7 @@ export const useCasesColumns = ({
         }
         return getEmptyTagValue();
       },
-      width: '20%',
+      width: !isSelectorView ? '20%' : undefined,
     },
   ];
 
@@ -197,7 +197,7 @@ export const useCasesColumns = ({
       }
       return getEmptyTagValue();
     },
-    width: '15%',
+    width: !isSelectorView ? '15%' : undefined,
   });
 
   if (isAlertsEnabled) {
@@ -209,7 +209,7 @@ export const useCasesColumns = ({
         totalAlerts != null
           ? renderStringField(`${totalAlerts}`, `case-table-column-alertsCount`)
           : getEmptyTagValue(),
-      width: '80px',
+      width: !isSelectorView ? '80px' : '55px',
     });
   }
 
@@ -292,6 +292,7 @@ export const useCasesColumns = ({
       }
       return getEmptyTagValue();
     },
+    width: isSelectorView ? '80px' : undefined,
   });
 
   columns.push(
@@ -303,6 +304,7 @@ export const useCasesColumns = ({
         }
         return getEmptyTagValue();
       },
+      width: isSelectorView ? '80px' : undefined,
     },
     {
       field: 'status',
