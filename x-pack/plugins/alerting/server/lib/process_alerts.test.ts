@@ -7,7 +7,7 @@
 
 import sinon from 'sinon';
 import { cloneDeep } from 'lodash';
-import { processAlerts, updateAlertFlappingHistory } from './process_alerts';
+import { processAlerts } from './process_alerts';
 import { Alert } from '../alert';
 import { AlertInstanceState, AlertInstanceContext } from '../types';
 
@@ -24,1193 +24,811 @@ describe('processAlerts', () => {
 
   afterAll(() => clock.restore());
 
-  describe('newAlerts', () => {
-    test('considers alert new if it has scheduled actions and its id is not in originalAlertIds or previouslyRecoveredAlertIds list', () => {
-      const newAlert = new Alert<AlertInstanceState, AlertInstanceContext>('1');
-      const existingAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('2');
-      const existingAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('3', {});
-      const existingRecoveredAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('4');
+  describe('process legacy alerts', () => {
+    describe('newAlerts', () => {
+      test('considers alert new if it has scheduled actions and its ID is not in trackedAlerts.active IDs', () => {
+        const newAlert = new Alert<AlertInstanceState, AlertInstanceContext>('1');
+        const trackedActiveAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('2');
+        const trackedActiveAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('3', {});
 
-      const existingAlerts = {
-        '2': existingAlert1,
-        '3': existingAlert2,
-      };
+        const trackedAlerts = {
+          active: { '2': trackedActiveAlert1, '3': trackedActiveAlert2 },
+          recovered: {},
+        };
 
-      const previouslyRecoveredAlerts = {
-        '4': existingRecoveredAlert1,
-      };
+        const reportedAlerts = {
+          active: { ...cloneDeep(trackedAlerts.active), '1': newAlert },
+          recovered: {},
+        };
 
-      const updatedAlerts = {
-        ...cloneDeep(existingAlerts),
-        '1': newAlert,
-      };
+        const { newAlerts } = processAlerts({
+          reportedAlerts,
+          trackedAlerts,
+          hasReachedAlertLimit: false,
+          alertLimit: 10,
+        });
 
-      updatedAlerts['1'].scheduleActions('default' as never, { foo: '1' });
-      updatedAlerts['2'].scheduleActions('default' as never, { foo: '1' });
-      updatedAlerts['3'].scheduleActions('default' as never, { foo: '2' });
-
-      const { newAlerts } = processAlerts({
-        alerts: updatedAlerts,
-        existingAlerts,
-        previouslyRecoveredAlerts,
-        hasReachedAlertLimit: false,
-        alertLimit: 10,
-        setFlapping: false,
+        expect(newAlerts).toEqual({ '1': newAlert });
       });
 
-      expect(newAlerts).toEqual({ '1': newAlert });
-    });
-
-    test('sets start time in new alert state', () => {
-      const newAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('1');
-      const newAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('2');
-      const existingAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('3');
-      const existingAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('4');
-
-      const existingAlerts = {
-        '3': existingAlert1,
-        '4': existingAlert2,
-      };
-
-      const updatedAlerts = {
-        ...cloneDeep(existingAlerts),
-        '1': newAlert1,
-        '2': newAlert2,
-      };
-
-      updatedAlerts['1'].scheduleActions('default' as never, { foo: '1' });
-      updatedAlerts['2'].scheduleActions('default' as never, { foo: '1' });
-      updatedAlerts['3'].scheduleActions('default' as never, { foo: '1' });
-      updatedAlerts['4'].scheduleActions('default' as never, { foo: '2' });
-
-      expect(newAlert1.getState()).toStrictEqual({});
-      expect(newAlert2.getState()).toStrictEqual({});
-
-      const { newAlerts } = processAlerts({
-        alerts: updatedAlerts,
-        existingAlerts,
-        previouslyRecoveredAlerts: {},
-        hasReachedAlertLimit: false,
-        alertLimit: 10,
-        setFlapping: false,
-      });
-
-      expect(newAlerts).toEqual({ '1': newAlert1, '2': newAlert2 });
-
-      const newAlert1State = newAlerts['1'].getState();
-      const newAlert2State = newAlerts['2'].getState();
-
-      expect(newAlert1State.start).toEqual('1970-01-01T00:00:00.000Z');
-      expect(newAlert2State.start).toEqual('1970-01-01T00:00:00.000Z');
-
-      expect(newAlert1State.duration).toEqual('0');
-      expect(newAlert2State.duration).toEqual('0');
-
-      expect(newAlert1State.end).not.toBeDefined();
-      expect(newAlert2State.end).not.toBeDefined();
-    });
-  });
-
-  describe('activeAlerts', () => {
-    test('considers alert active if it has scheduled actions', () => {
-      const newAlert = new Alert<AlertInstanceState, AlertInstanceContext>('1');
-      const existingAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('2');
-      const existingAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('3');
-
-      const existingAlerts = {
-        '2': existingAlert1,
-        '3': existingAlert2,
-      };
-
-      const updatedAlerts = {
-        ...cloneDeep(existingAlerts),
-        '1': newAlert,
-      };
-
-      updatedAlerts['1'].scheduleActions('default' as never, { foo: '1' });
-      updatedAlerts['2'].scheduleActions('default' as never, { foo: '1' });
-      updatedAlerts['3'].scheduleActions('default' as never, { foo: '2' });
-
-      const { activeAlerts } = processAlerts({
-        alerts: updatedAlerts,
-        existingAlerts,
-        previouslyRecoveredAlerts: {},
-        hasReachedAlertLimit: false,
-        alertLimit: 10,
-        setFlapping: false,
-      });
-
-      expect(activeAlerts).toEqual({
-        '1': updatedAlerts['1'],
-        '2': updatedAlerts['2'],
-        '3': updatedAlerts['3'],
-      });
-    });
-
-    test('updates duration in active alerts if start is available', () => {
-      const newAlert = new Alert<AlertInstanceState, AlertInstanceContext>('1');
-      const existingAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('2');
-      const existingAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('3');
-
-      const existingAlerts = {
-        '2': existingAlert1,
-        '3': existingAlert2,
-      };
-      existingAlerts['2'].replaceState({ start: '1969-12-30T00:00:00.000Z', duration: 33000 });
-      existingAlerts['3'].replaceState({ start: '1969-12-31T07:34:00.000Z', duration: 23532 });
-
-      const updatedAlerts = {
-        ...cloneDeep(existingAlerts),
-        '1': newAlert,
-      };
-
-      updatedAlerts['1'].scheduleActions('default' as never, { foo: '1' });
-      updatedAlerts['2'].scheduleActions('default' as never, { foo: '1' });
-      updatedAlerts['3'].scheduleActions('default' as never, { foo: '2' });
-
-      const { activeAlerts } = processAlerts({
-        alerts: updatedAlerts,
-        existingAlerts,
-        previouslyRecoveredAlerts: {},
-        hasReachedAlertLimit: false,
-        alertLimit: 10,
-        setFlapping: false,
-      });
-
-      expect(activeAlerts).toEqual({
-        '1': updatedAlerts['1'],
-        '2': updatedAlerts['2'],
-        '3': updatedAlerts['3'],
-      });
-
-      const activeAlert1State = activeAlerts['2'].getState();
-      const activeAlert2State = activeAlerts['3'].getState();
-
-      expect(activeAlert1State.start).toEqual('1969-12-30T00:00:00.000Z');
-      expect(activeAlert2State.start).toEqual('1969-12-31T07:34:00.000Z');
-
-      expect(activeAlert1State.duration).toEqual('172800000000000');
-      expect(activeAlert2State.duration).toEqual('59160000000000');
-
-      expect(activeAlert1State.end).not.toBeDefined();
-      expect(activeAlert2State.end).not.toBeDefined();
-    });
-
-    test('does not update duration in active alerts if start is not available', () => {
-      const newAlert = new Alert<AlertInstanceState, AlertInstanceContext>('1');
-      const existingAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('2');
-      const existingAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('3');
-
-      const existingAlerts = {
-        '2': existingAlert1,
-        '3': existingAlert2,
-      };
-
-      const updatedAlerts = {
-        ...cloneDeep(existingAlerts),
-        '1': newAlert,
-      };
-
-      updatedAlerts['1'].scheduleActions('default' as never, { foo: '1' });
-      updatedAlerts['2'].scheduleActions('default' as never, { foo: '1' });
-      updatedAlerts['3'].scheduleActions('default' as never, { foo: '2' });
-
-      const { activeAlerts } = processAlerts({
-        alerts: updatedAlerts,
-        existingAlerts,
-        previouslyRecoveredAlerts: {},
-        hasReachedAlertLimit: false,
-        alertLimit: 10,
-        setFlapping: false,
-      });
-
-      expect(activeAlerts).toEqual({
-        '1': updatedAlerts['1'],
-        '2': updatedAlerts['2'],
-        '3': updatedAlerts['3'],
-      });
-
-      const activeAlert1State = activeAlerts['2'].getState();
-      const activeAlert2State = activeAlerts['3'].getState();
-
-      expect(activeAlert1State.start).not.toBeDefined();
-      expect(activeAlert2State.start).not.toBeDefined();
-
-      expect(activeAlert1State.duration).not.toBeDefined();
-      expect(activeAlert2State.duration).not.toBeDefined();
-
-      expect(activeAlert1State.end).not.toBeDefined();
-      expect(activeAlert2State.end).not.toBeDefined();
-    });
-
-    test('preserves other state fields', () => {
-      const newAlert = new Alert<AlertInstanceState, AlertInstanceContext>('1');
-      const existingAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('2');
-      const existingAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('3');
-
-      const existingAlerts = {
-        '2': existingAlert1,
-        '3': existingAlert2,
-      };
-      existingAlerts['2'].replaceState({
-        stateField1: 'xyz',
-        start: '1969-12-30T00:00:00.000Z',
-        duration: 33000,
-      });
-      existingAlerts['3'].replaceState({
-        anotherState: true,
-        start: '1969-12-31T07:34:00.000Z',
-        duration: 23532,
-      });
-
-      const updatedAlerts = {
-        ...cloneDeep(existingAlerts),
-        '1': newAlert,
-      };
-
-      updatedAlerts['1'].scheduleActions('default' as never, { foo: '1' });
-      updatedAlerts['2'].scheduleActions('default' as never, { foo: '1' });
-      updatedAlerts['3'].scheduleActions('default' as never, { foo: '2' });
-
-      const { activeAlerts } = processAlerts({
-        alerts: updatedAlerts,
-        existingAlerts,
-        previouslyRecoveredAlerts: {},
-        hasReachedAlertLimit: false,
-        alertLimit: 10,
-        setFlapping: false,
-      });
-
-      expect(activeAlerts).toEqual({
-        '1': updatedAlerts['1'],
-        '2': updatedAlerts['2'],
-        '3': updatedAlerts['3'],
-      });
-
-      const activeAlert1State = activeAlerts['2'].getState();
-      const activeAlert2State = activeAlerts['3'].getState();
-
-      expect(activeAlert1State.start).toEqual('1969-12-30T00:00:00.000Z');
-      expect(activeAlert2State.start).toEqual('1969-12-31T07:34:00.000Z');
-
-      expect(activeAlert1State.stateField1).toEqual('xyz');
-      expect(activeAlert2State.anotherState).toEqual(true);
-
-      expect(activeAlert1State.duration).toEqual('172800000000000');
-      expect(activeAlert2State.duration).toEqual('59160000000000');
-
-      expect(activeAlert1State.end).not.toBeDefined();
-      expect(activeAlert2State.end).not.toBeDefined();
-    });
-
-    test('sets start time in active alert state if alert was previously recovered', () => {
-      const previouslyRecoveredAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('1');
-      const previouslyRecoveredAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('2');
-      const existingAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('3');
-      const existingAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('4');
-
-      const existingAlerts = {
-        '3': existingAlert1,
-        '4': existingAlert2,
-      };
-
-      const previouslyRecoveredAlerts = {
-        '1': previouslyRecoveredAlert1,
-        '2': previouslyRecoveredAlert2,
-      };
-
-      const updatedAlerts = {
-        ...cloneDeep(existingAlerts),
-        ...cloneDeep(previouslyRecoveredAlerts),
-      };
-
-      updatedAlerts['1'].scheduleActions('default' as never, { foo: '1' });
-      updatedAlerts['2'].scheduleActions('default' as never, { foo: '1' });
-      updatedAlerts['3'].scheduleActions('default' as never, { foo: '1' });
-      updatedAlerts['4'].scheduleActions('default' as never, { foo: '2' });
-
-      expect(updatedAlerts['1'].getState()).toStrictEqual({});
-      expect(updatedAlerts['2'].getState()).toStrictEqual({});
-
-      const { activeAlerts } = processAlerts({
-        alerts: updatedAlerts,
-        existingAlerts,
-        previouslyRecoveredAlerts,
-        hasReachedAlertLimit: false,
-        alertLimit: 10,
-        setFlapping: true,
-      });
-
-      expect(
-        Object.keys(activeAlerts).map((id) => ({ [id]: activeAlerts[id].getFlappingHistory() }))
-      ).toEqual([{ '1': [true] }, { '2': [true] }, { '3': [false] }, { '4': [false] }]);
-
-      const previouslyRecoveredAlert1State = activeAlerts['1'].getState();
-      const previouslyRecoveredAlert2State = activeAlerts['2'].getState();
-
-      expect(previouslyRecoveredAlert1State.start).toEqual('1970-01-01T00:00:00.000Z');
-      expect(previouslyRecoveredAlert2State.start).toEqual('1970-01-01T00:00:00.000Z');
-
-      expect(previouslyRecoveredAlert1State.duration).toEqual('0');
-      expect(previouslyRecoveredAlert2State.duration).toEqual('0');
-
-      expect(previouslyRecoveredAlert1State.end).not.toBeDefined();
-      expect(previouslyRecoveredAlert2State.end).not.toBeDefined();
-    });
-  });
-
-  describe('recoveredAlerts', () => {
-    test('considers alert recovered if it has no scheduled actions', () => {
-      const activeAlert = new Alert<AlertInstanceState, AlertInstanceContext>('1');
-      const recoveredAlert = new Alert<AlertInstanceState, AlertInstanceContext>('2');
-
-      const existingAlerts = {
-        '1': activeAlert,
-        '2': recoveredAlert,
-      };
-
-      const updatedAlerts = cloneDeep(existingAlerts);
-
-      updatedAlerts['1'].scheduleActions('default' as never, { foo: '1' });
-      updatedAlerts['2'].setContext({ foo: '2' });
-
-      const { recoveredAlerts } = processAlerts({
-        alerts: updatedAlerts,
-        existingAlerts,
-        previouslyRecoveredAlerts: {},
-        hasReachedAlertLimit: false,
-        alertLimit: 10,
-        setFlapping: false,
-      });
-
-      expect(recoveredAlerts).toEqual({ '2': updatedAlerts['2'] });
-    });
-
-    test('does not consider alert recovered if it has no actions but was not in original alerts list', () => {
-      const activeAlert = new Alert<AlertInstanceState, AlertInstanceContext>('1');
-      const notRecoveredAlert = new Alert<AlertInstanceState, AlertInstanceContext>('2');
-
-      const existingAlerts = {
-        '1': activeAlert,
-      };
-
-      const updatedAlerts = {
-        ...cloneDeep(existingAlerts),
-        '2': notRecoveredAlert,
-      };
-
-      updatedAlerts['1'].scheduleActions('default' as never, { foo: '1' });
-
-      const { recoveredAlerts } = processAlerts({
-        alerts: updatedAlerts,
-        existingAlerts,
-        previouslyRecoveredAlerts: {},
-        hasReachedAlertLimit: false,
-        alertLimit: 10,
-        setFlapping: false,
-      });
-
-      expect(recoveredAlerts).toEqual({});
-    });
-
-    test('updates duration in recovered alerts if start is available and adds end time', () => {
-      const activeAlert = new Alert<AlertInstanceState, AlertInstanceContext>('1');
-      const recoveredAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('2');
-      const recoveredAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('3');
-
-      const existingAlerts = {
-        '1': activeAlert,
-        '2': recoveredAlert1,
-        '3': recoveredAlert2,
-      };
-      existingAlerts['2'].replaceState({ start: '1969-12-30T00:00:00.000Z', duration: 33000 });
-      existingAlerts['3'].replaceState({ start: '1969-12-31T07:34:00.000Z', duration: 23532 });
-
-      const updatedAlerts = cloneDeep(existingAlerts);
-
-      updatedAlerts['1'].scheduleActions('default' as never, { foo: '1' });
-
-      const { recoveredAlerts } = processAlerts({
-        alerts: updatedAlerts,
-        existingAlerts,
-        previouslyRecoveredAlerts: {},
-        hasReachedAlertLimit: false,
-        alertLimit: 10,
-        setFlapping: false,
-      });
-
-      expect(recoveredAlerts).toEqual({ '2': updatedAlerts['2'], '3': updatedAlerts['3'] });
-
-      const recoveredAlert1State = recoveredAlerts['2'].getState();
-      const recoveredAlert2State = recoveredAlerts['3'].getState();
-
-      expect(recoveredAlert1State.start).toEqual('1969-12-30T00:00:00.000Z');
-      expect(recoveredAlert2State.start).toEqual('1969-12-31T07:34:00.000Z');
-
-      expect(recoveredAlert1State.duration).toEqual('172800000000000');
-      expect(recoveredAlert2State.duration).toEqual('59160000000000');
-
-      expect(recoveredAlert1State.end).toEqual('1970-01-01T00:00:00.000Z');
-      expect(recoveredAlert2State.end).toEqual('1970-01-01T00:00:00.000Z');
-    });
-
-    test('does not update duration or set end in recovered alerts if start is not available', () => {
-      const activeAlert = new Alert<AlertInstanceState, AlertInstanceContext>('1');
-      const recoveredAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('2');
-      const recoveredAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('3');
-
-      const existingAlerts = {
-        '1': activeAlert,
-        '2': recoveredAlert1,
-        '3': recoveredAlert2,
-      };
-      const updatedAlerts = cloneDeep(existingAlerts);
-
-      updatedAlerts['1'].scheduleActions('default' as never, { foo: '1' });
-
-      const { recoveredAlerts } = processAlerts({
-        alerts: updatedAlerts,
-        existingAlerts,
-        previouslyRecoveredAlerts: {},
-        hasReachedAlertLimit: false,
-        alertLimit: 10,
-        setFlapping: false,
-      });
-
-      expect(recoveredAlerts).toEqual({ '2': updatedAlerts['2'], '3': updatedAlerts['3'] });
-
-      const recoveredAlert1State = recoveredAlerts['2'].getState();
-      const recoveredAlert2State = recoveredAlerts['3'].getState();
-
-      expect(recoveredAlert1State.start).not.toBeDefined();
-      expect(recoveredAlert2State.start).not.toBeDefined();
-
-      expect(recoveredAlert1State.duration).not.toBeDefined();
-      expect(recoveredAlert2State.duration).not.toBeDefined();
-
-      expect(recoveredAlert1State.end).not.toBeDefined();
-      expect(recoveredAlert2State.end).not.toBeDefined();
-    });
-
-    test('considers alert recovered if it was previously recovered and not active', () => {
-      const recoveredAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('1');
-      const recoveredAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('2');
-
-      const previouslyRecoveredAlerts = {
-        '1': recoveredAlert1,
-        '2': recoveredAlert2,
-      };
-
-      const updatedAlerts = cloneDeep(previouslyRecoveredAlerts);
-
-      updatedAlerts['1'].setFlappingHistory([false]);
-      updatedAlerts['2'].setFlappingHistory([false]);
-
-      const { recoveredAlerts } = processAlerts({
-        alerts: {},
-        existingAlerts: {},
-        previouslyRecoveredAlerts,
-        hasReachedAlertLimit: false,
-        alertLimit: 10,
-        setFlapping: true,
-      });
-
-      expect(recoveredAlerts).toEqual(updatedAlerts);
-    });
-  });
-
-  describe('when hasReachedAlertLimit is true', () => {
-    test('does not calculate recovered alerts', () => {
-      const existingAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('1');
-      const existingAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('2');
-      const existingAlert3 = new Alert<AlertInstanceState, AlertInstanceContext>('3');
-      const existingAlert4 = new Alert<AlertInstanceState, AlertInstanceContext>('4');
-      const existingAlert5 = new Alert<AlertInstanceState, AlertInstanceContext>('5');
-      const newAlert6 = new Alert<AlertInstanceState, AlertInstanceContext>('6');
-      const newAlert7 = new Alert<AlertInstanceState, AlertInstanceContext>('7');
-
-      const existingAlerts = {
-        '1': existingAlert1,
-        '2': existingAlert2,
-        '3': existingAlert3,
-        '4': existingAlert4,
-        '5': existingAlert5,
-      };
-
-      const updatedAlerts = {
-        ...cloneDeep(existingAlerts),
-        '6': newAlert6,
-        '7': newAlert7,
-      };
-
-      updatedAlerts['1'].scheduleActions('default' as never, { foo: '1' });
-      updatedAlerts['2'].scheduleActions('default' as never, { foo: '1' });
-      updatedAlerts['3'].scheduleActions('default' as never, { foo: '2' });
-      updatedAlerts['4'].scheduleActions('default' as never, { foo: '2' });
-      // intentionally not scheduling actions for alert "5"
-      updatedAlerts['6'].scheduleActions('default' as never, { foo: '2' });
-      updatedAlerts['7'].scheduleActions('default' as never, { foo: '2' });
-
-      const { recoveredAlerts } = processAlerts({
-        alerts: updatedAlerts,
-        existingAlerts,
-        previouslyRecoveredAlerts: {},
-        hasReachedAlertLimit: true,
-        alertLimit: 7,
-        setFlapping: false,
-      });
-
-      expect(recoveredAlerts).toEqual({});
-    });
-
-    test('persists existing alerts', () => {
-      const existingAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('1');
-      const existingAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('2');
-      const existingAlert3 = new Alert<AlertInstanceState, AlertInstanceContext>('3');
-      const existingAlert4 = new Alert<AlertInstanceState, AlertInstanceContext>('4');
-      const existingAlert5 = new Alert<AlertInstanceState, AlertInstanceContext>('5');
-
-      const existingAlerts = {
-        '1': existingAlert1,
-        '2': existingAlert2,
-        '3': existingAlert3,
-        '4': existingAlert4,
-        '5': existingAlert5,
-      };
-
-      const updatedAlerts = cloneDeep(existingAlerts);
-
-      updatedAlerts['1'].scheduleActions('default' as never, { foo: '1' });
-      updatedAlerts['2'].scheduleActions('default' as never, { foo: '1' });
-      updatedAlerts['3'].scheduleActions('default' as never, { foo: '2' });
-      updatedAlerts['4'].scheduleActions('default' as never, { foo: '2' });
-      // intentionally not scheduling actions for alert "5"
-
-      const { activeAlerts } = processAlerts({
-        alerts: updatedAlerts,
-        existingAlerts,
-        previouslyRecoveredAlerts: {},
-        hasReachedAlertLimit: true,
-        alertLimit: 7,
-        setFlapping: false,
-      });
-
-      expect(activeAlerts).toEqual({
-        '1': updatedAlerts['1'],
-        '2': updatedAlerts['2'],
-        '3': updatedAlerts['3'],
-        '4': updatedAlerts['4'],
-        '5': existingAlert5,
-      });
-    });
-
-    test('adds new alerts up to max allowed', () => {
-      const MAX_ALERTS = 7;
-      const existingAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('1');
-      const existingAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('2');
-      const existingAlert3 = new Alert<AlertInstanceState, AlertInstanceContext>('3');
-      const existingAlert4 = new Alert<AlertInstanceState, AlertInstanceContext>('4');
-      const existingAlert5 = new Alert<AlertInstanceState, AlertInstanceContext>('5');
-      const newAlert6 = new Alert<AlertInstanceState, AlertInstanceContext>('6');
-      const newAlert7 = new Alert<AlertInstanceState, AlertInstanceContext>('7');
-      const newAlert8 = new Alert<AlertInstanceState, AlertInstanceContext>('8');
-      const newAlert9 = new Alert<AlertInstanceState, AlertInstanceContext>('9');
-      const newAlert10 = new Alert<AlertInstanceState, AlertInstanceContext>('10');
-
-      const existingAlerts = {
-        '1': existingAlert1,
-        '2': existingAlert2,
-        '3': existingAlert3,
-        '4': existingAlert4,
-        '5': existingAlert5,
-      };
-
-      const updatedAlerts = {
-        ...cloneDeep(existingAlerts),
-        '6': newAlert6,
-        '7': newAlert7,
-        '8': newAlert8,
-        '9': newAlert9,
-        '10': newAlert10,
-      };
-
-      updatedAlerts['1'].scheduleActions('default' as never, { foo: '1' });
-      updatedAlerts['2'].scheduleActions('default' as never, { foo: '1' });
-      updatedAlerts['3'].scheduleActions('default' as never, { foo: '2' });
-      updatedAlerts['4'].scheduleActions('default' as never, { foo: '2' });
-      // intentionally not scheduling actions for alert "5"
-      updatedAlerts['6'].scheduleActions('default' as never, { foo: '2' });
-      updatedAlerts['7'].scheduleActions('default' as never, { foo: '2' });
-      updatedAlerts['8'].scheduleActions('default' as never, { foo: '2' });
-      updatedAlerts['9'].scheduleActions('default' as never, { foo: '2' });
-      updatedAlerts['10'].scheduleActions('default' as never, { foo: '2' });
-
-      const { activeAlerts, newAlerts } = processAlerts({
-        alerts: updatedAlerts,
-        existingAlerts,
-        previouslyRecoveredAlerts: {},
-        hasReachedAlertLimit: true,
-        alertLimit: MAX_ALERTS,
-        setFlapping: false,
-      });
-
-      expect(Object.keys(activeAlerts).length).toEqual(MAX_ALERTS);
-      expect(activeAlerts).toEqual({
-        '1': updatedAlerts['1'],
-        '2': updatedAlerts['2'],
-        '3': updatedAlerts['3'],
-        '4': updatedAlerts['4'],
-        '5': existingAlert5,
-        '6': newAlert6,
-        '7': newAlert7,
-      });
-      expect(newAlerts).toEqual({
-        '6': newAlert6,
-        '7': newAlert7,
-      });
-    });
-  });
-
-  describe('updating flappingHistory', () => {
-    test('if new alert, set flapping state to true', () => {
-      const activeAlert = new Alert<AlertInstanceState, AlertInstanceContext>('1');
-
-      const alerts = cloneDeep({ '1': activeAlert });
-      alerts['1'].scheduleActions('default' as never, { foo: '1' });
-
-      const { activeAlerts, newAlerts, recoveredAlerts } = processAlerts({
-        alerts,
-        existingAlerts: {},
-        previouslyRecoveredAlerts: {},
-        hasReachedAlertLimit: false,
-        alertLimit: 10,
-        setFlapping: true,
-      });
-
-      expect(activeAlerts).toMatchInlineSnapshot(`
-        Object {
-          "1": Object {
-            "meta": Object {
-              "flappingHistory": Array [
-                true,
-              ],
+      test('if callbacks are defined, sets start time and initial duration for new alerts', () => {
+        const updateAlertValues = ({
+          alert,
+          start,
+          duration,
+          end,
+        }: {
+          alert: Alert<AlertInstanceState, AlertInstanceContext>;
+          start?: string;
+          duration?: string;
+          end?: string;
+          flappingHistory: boolean[];
+        }) => {
+          switch (alert.getId()) {
+            case '1':
+              expect(start).toEqual('1970-01-01T00:00:00.000Z');
+              expect(duration).toEqual('0');
+              expect(end).not.toBeDefined();
+              break;
+            case '2':
+              expect(start).toEqual('1970-01-01T00:00:00.000Z');
+              expect(duration).toEqual('0');
+              expect(end).not.toBeDefined();
+              break;
+          }
+        };
+
+        const newAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('1');
+        const newAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('2');
+        const trackedActiveAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('3');
+        const trackedActiveAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('4');
+
+        const trackedAlerts = {
+          active: { '3': trackedActiveAlert1, '4': trackedActiveAlert2 },
+          recovered: {},
+        };
+
+        const reportedAlerts = {
+          active: { ...cloneDeep(trackedAlerts.active), '1': newAlert1, '2': newAlert2 },
+          recovered: {},
+        };
+
+        const { newAlerts } = processAlerts({
+          reportedAlerts,
+          trackedAlerts,
+          hasReachedAlertLimit: false,
+          alertLimit: 10,
+          callbacks: {
+            getFlappingHistory: (alert) => alert.getFlappingHistory() ?? [],
+            getStartTime: (alert) => {
+              const state = alert.getState();
+              return state?.start ? (state.start as string) : undefined;
             },
-            "state": Object {
-              "duration": "0",
-              "start": "1970-01-01T00:00:00.000Z",
-            },
+            updateAlertValues,
           },
-        }
-      `);
-      expect(newAlerts).toMatchInlineSnapshot(`
-        Object {
-          "1": Object {
-            "meta": Object {
-              "flappingHistory": Array [
-                true,
-              ],
+        });
+
+        expect(newAlerts).toEqual({ '1': newAlert1, '2': newAlert2 });
+      });
+
+      test('if callbacks are defined, sets flapping history for new alerts using previously recovered alert flapping history, if it exists', () => {
+        const updateAlertValues = ({
+          alert,
+          start,
+          duration,
+          end,
+          flappingHistory,
+        }: {
+          alert: Alert<AlertInstanceState, AlertInstanceContext>;
+          start?: string;
+          duration?: string;
+          end?: string;
+          flappingHistory: boolean[];
+        }) => {
+          switch (alert.getId()) {
+            case '1':
+              expect(start).toEqual('1970-01-01T00:00:00.000Z');
+              expect(duration).toEqual('0');
+              expect(end).not.toBeDefined();
+              // flapping history is copied from previously recovered alert '1' and updated
+              expect(flappingHistory).toEqual([true, true, true, true]);
+              break;
+            case '2':
+              expect(start).toEqual('1970-01-01T00:00:00.000Z');
+              expect(duration).toEqual('0');
+              expect(end).not.toBeDefined();
+              // flapping history is initialized
+              expect(flappingHistory).toEqual([true]);
+              break;
+          }
+        };
+
+        const newAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('1');
+        const newAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('2');
+        const trackedActiveAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('3');
+        const trackedActiveAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('4');
+        const trackedRecoveredAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('1');
+        // new alert '1' should copy over and update this flapping history
+        trackedRecoveredAlert1.setFlappingHistory([true, true, true]);
+
+        const trackedAlerts = {
+          active: { '3': trackedActiveAlert1, '4': trackedActiveAlert2 },
+          recovered: { '1': trackedRecoveredAlert1 },
+        };
+
+        const reportedAlerts = {
+          active: { ...cloneDeep(trackedAlerts.active), '1': newAlert1, '2': newAlert2 },
+          recovered: {},
+        };
+
+        const { newAlerts } = processAlerts({
+          reportedAlerts,
+          trackedAlerts,
+          hasReachedAlertLimit: false,
+          alertLimit: 10,
+          callbacks: {
+            getFlappingHistory: (alert) => alert.getFlappingHistory() ?? [],
+            getStartTime: (alert) => {
+              const state = alert.getState();
+              return state?.start ? (state.start as string) : undefined;
             },
-            "state": Object {
-              "duration": "0",
-              "start": "1970-01-01T00:00:00.000Z",
-            },
+            updateAlertValues,
           },
-        }
-      `);
-      expect(recoveredAlerts).toMatchInlineSnapshot(`Object {}`);
+        });
+
+        expect(newAlerts).toEqual({ '1': newAlert1, '2': newAlert2 });
+      });
     });
 
-    test('if alert is still active, set flapping state to false', () => {
-      const activeAlert = new Alert<AlertInstanceState, AlertInstanceContext>('1', {
-        meta: { flappingHistory: [false] },
+    describe('activeAlerts', () => {
+      test('considers alert active if it has scheduled actions', () => {
+        const newAlert = new Alert<AlertInstanceState, AlertInstanceContext>('1');
+        const trackedActiveAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('2');
+        const trackedActiveAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('3');
+
+        const trackedAlerts = {
+          active: { '2': trackedActiveAlert1, '3': trackedActiveAlert2 },
+          recovered: {},
+        };
+
+        const reportedAlerts = {
+          active: { ...cloneDeep(trackedAlerts.active), '1': newAlert },
+          recovered: {},
+        };
+
+        const { activeAlerts } = processAlerts({
+          reportedAlerts,
+          trackedAlerts,
+          hasReachedAlertLimit: false,
+          alertLimit: 10,
+        });
+
+        // new alerts are also considered active
+        expect(activeAlerts).toEqual({
+          '1': reportedAlerts.active['1'],
+          '2': reportedAlerts.active['2'],
+          '3': reportedAlerts.active['3'],
+        });
       });
 
-      const alerts = cloneDeep({ '1': activeAlert });
-      alerts['1'].scheduleActions('default' as never, { foo: '1' });
+      test('if callbacks are defined, updates duration for active (ongoing) alerts if start value is available', () => {
+        const updateAlertValues = ({
+          alert,
+          start,
+          duration,
+          end,
+        }: {
+          alert: Alert<AlertInstanceState, AlertInstanceContext>;
+          start?: string;
+          duration?: string;
+          end?: string;
+          flappingHistory: boolean[];
+        }) => {
+          switch (alert.getId()) {
+            case '2':
+              expect(start).toEqual('1969-12-30T00:00:00.000Z');
+              expect(duration).toEqual('172800000000000');
+              expect(end).not.toBeDefined();
+              break;
+            case '3':
+              expect(start).toEqual('1969-12-31T07:34:00.000Z');
+              expect(duration).toEqual('59160000000000');
+              expect(end).not.toBeDefined();
+              break;
+          }
+        };
+        const newAlert = new Alert<AlertInstanceState, AlertInstanceContext>('1');
+        const trackedActiveAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('2');
+        const trackedActiveAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('3');
 
-      const { activeAlerts, newAlerts, recoveredAlerts } = processAlerts({
-        alerts,
-        existingAlerts: alerts,
-        previouslyRecoveredAlerts: {},
-        hasReachedAlertLimit: false,
-        alertLimit: 10,
-        setFlapping: true,
-      });
+        const trackedAlerts = {
+          active: { '2': trackedActiveAlert1, '3': trackedActiveAlert2 },
+          recovered: {},
+        };
+        trackedAlerts.active['2'].replaceState({
+          start: '1969-12-30T00:00:00.000Z',
+          duration: 33000,
+        });
+        trackedAlerts.active['3'].replaceState({
+          start: '1969-12-31T07:34:00.000Z',
+          duration: 23532,
+        });
 
-      expect(activeAlerts).toMatchInlineSnapshot(`
-        Object {
-          "1": Object {
-            "meta": Object {
-              "flappingHistory": Array [
-                false,
-                false,
-              ],
+        const reportedAlerts = {
+          active: { ...cloneDeep(trackedAlerts.active), '1': newAlert },
+          recovered: {},
+        };
+
+        const { activeAlerts } = processAlerts({
+          reportedAlerts,
+          trackedAlerts,
+          hasReachedAlertLimit: false,
+          alertLimit: 10,
+          callbacks: {
+            getFlappingHistory: (alert) => alert.getFlappingHistory() ?? [],
+            getStartTime: (alert) => {
+              const state = alert.getState();
+              return state?.start ? (state.start as string) : undefined;
             },
-            "state": Object {},
+            updateAlertValues,
           },
-        }
-      `);
-      expect(newAlerts).toMatchInlineSnapshot(`Object {}`);
-      expect(recoveredAlerts).toMatchInlineSnapshot(`Object {}`);
+        });
+
+        expect(activeAlerts).toEqual({
+          '1': reportedAlerts.active['1'],
+          '2': reportedAlerts.active['2'],
+          '3': reportedAlerts.active['3'],
+        });
+      });
+
+      test('if callbacks are defined, does not update duration for active (ongoing) alerts if start value is not available', () => {
+        const updateAlertValues = ({
+          alert,
+          start,
+          duration,
+          end,
+        }: {
+          alert: Alert<AlertInstanceState, AlertInstanceContext>;
+          start?: string;
+          duration?: string;
+          end?: string;
+          flappingHistory: boolean[];
+        }) => {
+          switch (alert.getId()) {
+            case '2':
+              expect(start).not.toBeDefined();
+              expect(duration).not.toBeDefined();
+              expect(end).not.toBeDefined();
+              break;
+            case '3':
+              expect(start).not.toBeDefined();
+              expect(duration).not.toBeDefined();
+              expect(end).not.toBeDefined();
+              break;
+          }
+        };
+        const newAlert = new Alert<AlertInstanceState, AlertInstanceContext>('1');
+        const trackedActiveAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('2');
+        const trackedActiveAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('3');
+
+        const trackedAlerts = {
+          active: { '2': trackedActiveAlert1, '3': trackedActiveAlert2 },
+          recovered: {},
+        };
+
+        const reportedAlerts = {
+          active: { ...cloneDeep(trackedAlerts.active), '1': newAlert },
+          recovered: {},
+        };
+
+        const { activeAlerts } = processAlerts({
+          reportedAlerts,
+          trackedAlerts,
+          hasReachedAlertLimit: false,
+          alertLimit: 10,
+          callbacks: {
+            getFlappingHistory: (alert) => alert.getFlappingHistory() ?? [],
+            getStartTime: (alert) => {
+              const state = alert.getState();
+              return state?.start ? (state.start as string) : undefined;
+            },
+            updateAlertValues,
+          },
+        });
+
+        expect(activeAlerts).toEqual({
+          '1': reportedAlerts.active['1'],
+          '2': reportedAlerts.active['2'],
+          '3': reportedAlerts.active['3'],
+        });
+      });
+
+      test('if callbacks are defined, sets or updates flapping history for active (ongoing) alerts using previous active flapping history if available', () => {
+        const updateAlertValues = ({
+          alert,
+          flappingHistory,
+        }: {
+          alert: Alert<AlertInstanceState, AlertInstanceContext>;
+          start?: string;
+          duration?: string;
+          end?: string;
+          flappingHistory: boolean[];
+        }) => {
+          switch (alert.getId()) {
+            case '2':
+              // flapping history is copied from previous active alert '2' and updated
+              expect(flappingHistory).toEqual([true, true, false, false]);
+              break;
+            case '3':
+              // flapping history is initialized
+              expect(flappingHistory).toEqual([false]);
+              break;
+          }
+        };
+        const newAlert = new Alert<AlertInstanceState, AlertInstanceContext>('1');
+        const trackedActiveAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('2');
+        const trackedActiveAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('3');
+
+        const trackedAlerts = {
+          active: { '2': trackedActiveAlert1, '3': trackedActiveAlert2 },
+          recovered: {},
+        };
+        trackedAlerts.active['2'].setFlappingHistory([true, true, false]);
+
+        const reportedAlerts = {
+          active: { ...cloneDeep(trackedAlerts.active), '1': newAlert },
+          recovered: {},
+        };
+
+        const { activeAlerts } = processAlerts({
+          reportedAlerts,
+          trackedAlerts,
+          hasReachedAlertLimit: false,
+          alertLimit: 10,
+          callbacks: {
+            getFlappingHistory: (alert) => alert.getFlappingHistory() ?? [],
+            getStartTime: (alert) => {
+              const state = alert.getState();
+              return state?.start ? (state.start as string) : undefined;
+            },
+            updateAlertValues,
+          },
+        });
+
+        expect(activeAlerts).toEqual({
+          '1': reportedAlerts.active['1'],
+          '2': reportedAlerts.active['2'],
+          '3': reportedAlerts.active['3'],
+        });
+      });
     });
 
-    test('if alert is active and previously recovered, set flapping state to true', () => {
-      const activeAlert = new Alert<AlertInstanceState, AlertInstanceContext>('1');
-      const recoveredAlert = new Alert<AlertInstanceState, AlertInstanceContext>('1', {
-        meta: { flappingHistory: [false] },
+    describe('recoveredAlerts', () => {
+      test('considers alert recovered if it is reported as recovered', () => {
+        const trackedActiveAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('1');
+        const trackedActiveAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('2');
+
+        const trackedAlerts = {
+          active: { '1': trackedActiveAlert1, '2': trackedActiveAlert2 },
+          recovered: {},
+        };
+
+        const reportedAlerts = {
+          active: { '1': cloneDeep(trackedActiveAlert1) },
+          recovered: { '2': cloneDeep(trackedActiveAlert2) },
+        };
+
+        const { currentRecoveredAlerts, recoveredAlerts } = processAlerts({
+          reportedAlerts,
+          trackedAlerts,
+          hasReachedAlertLimit: false,
+          alertLimit: 10,
+        });
+
+        expect(currentRecoveredAlerts).toEqual({ '2': reportedAlerts.recovered['2'] });
+        expect(recoveredAlerts).toEqual(currentRecoveredAlerts);
       });
 
-      const alerts = cloneDeep({ '1': activeAlert });
-      alerts['1'].scheduleActions('default' as never, { foo: '1' });
-      alerts['1'].setFlappingHistory([false]);
+      test('if callbacks are defined, updates duration and sets end time for recovered alerts if start value is available', () => {
+        const updateAlertValues = ({
+          alert,
+          duration,
+          end,
+        }: {
+          alert: Alert<AlertInstanceState, AlertInstanceContext>;
+          start?: string;
+          duration?: string;
+          end?: string;
+          flappingHistory: boolean[];
+        }) => {
+          switch (alert.getId()) {
+            case '2':
+              expect(duration).toEqual('172800000000000');
+              expect(end).toEqual('1970-01-01T00:00:00.000Z');
+              break;
+            case '3':
+              expect(duration).toEqual('59160000000000');
+              expect(end).toEqual('1970-01-01T00:00:00.000Z');
+              break;
+          }
+        };
+        const trackedActiveAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('1');
+        const trackedActiveAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('2');
+        const trackedActiveAlert3 = new Alert<AlertInstanceState, AlertInstanceContext>('3');
 
-      const { activeAlerts, newAlerts, recoveredAlerts } = processAlerts({
-        alerts,
-        existingAlerts: {},
-        previouslyRecoveredAlerts: { '1': recoveredAlert },
-        hasReachedAlertLimit: false,
-        alertLimit: 10,
-        setFlapping: true,
-      });
+        const trackedAlerts = {
+          active: { '1': trackedActiveAlert1, '2': trackedActiveAlert2, '3': trackedActiveAlert3 },
+          recovered: {},
+        };
+        trackedAlerts.active['2'].replaceState({
+          start: '1969-12-30T00:00:00.000Z',
+          duration: 33000,
+        });
+        trackedAlerts.active['3'].replaceState({
+          start: '1969-12-31T07:34:00.000Z',
+          duration: 23532,
+        });
 
-      expect(activeAlerts).toMatchInlineSnapshot(`
-        Object {
-          "1": Object {
-            "meta": Object {
-              "flappingHistory": Array [
-                false,
-                true,
-              ],
+        const reportedAlerts = {
+          active: { '1': cloneDeep(trackedActiveAlert1) },
+          recovered: { '2': cloneDeep(trackedActiveAlert2), '3': cloneDeep(trackedActiveAlert3) },
+        };
+
+        const { currentRecoveredAlerts, recoveredAlerts } = processAlerts({
+          trackedAlerts,
+          reportedAlerts,
+          hasReachedAlertLimit: false,
+          alertLimit: 10,
+          callbacks: {
+            getFlappingHistory: (alert) => alert.getFlappingHistory() ?? [],
+            getStartTime: (alert) => {
+              const state = alert.getState();
+              return state?.start ? (state.start as string) : undefined;
             },
-            "state": Object {
-              "duration": "0",
-              "start": "1970-01-01T00:00:00.000Z",
-            },
+            updateAlertValues,
           },
-        }
-      `);
-      expect(newAlerts).toMatchInlineSnapshot(`
-        Object {
-          "1": Object {
-            "meta": Object {
-              "flappingHistory": Array [
-                false,
-                true,
-              ],
+        });
+
+        expect(currentRecoveredAlerts).toEqual({
+          '2': reportedAlerts.recovered['2'],
+          '3': reportedAlerts.recovered['3'],
+        });
+        expect(recoveredAlerts).toEqual(currentRecoveredAlerts);
+      });
+
+      test('if callbacks are defined, does not update duration or set end for recovered alerts if start value is not available', () => {
+        const updateAlertValues = ({
+          alert,
+          duration,
+          end,
+        }: {
+          alert: Alert<AlertInstanceState, AlertInstanceContext>;
+          start?: string;
+          duration?: string;
+          end?: string;
+          flappingHistory: boolean[];
+        }) => {
+          switch (alert.getId()) {
+            case '2':
+              expect(duration).not.toBeDefined();
+              expect(end).not.toBeDefined();
+              break;
+            case '3':
+              expect(duration).not.toBeDefined();
+              expect(end).not.toBeDefined();
+              break;
+          }
+        };
+        const trackedActiveAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('1');
+        const trackedActiveAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('2');
+        const trackedActiveAlert3 = new Alert<AlertInstanceState, AlertInstanceContext>('3');
+
+        const trackedAlerts = {
+          active: { '1': trackedActiveAlert1, '2': trackedActiveAlert2, '3': trackedActiveAlert3 },
+          recovered: {},
+        };
+        const reportedAlerts = {
+          active: { '1': cloneDeep(trackedActiveAlert1) },
+          recovered: { '2': cloneDeep(trackedActiveAlert2), '3': cloneDeep(trackedActiveAlert3) },
+        };
+
+        const { currentRecoveredAlerts, recoveredAlerts } = processAlerts({
+          trackedAlerts,
+          reportedAlerts,
+          hasReachedAlertLimit: false,
+          alertLimit: 10,
+          callbacks: {
+            getFlappingHistory: (alert) => alert.getFlappingHistory() ?? [],
+            getStartTime: (alert) => {
+              const state = alert.getState();
+              return state?.start ? (state.start as string) : undefined;
             },
-            "state": Object {
-              "duration": "0",
-              "start": "1970-01-01T00:00:00.000Z",
-            },
+            updateAlertValues,
           },
-        }
-      `);
-      expect(recoveredAlerts).toMatchInlineSnapshot(`Object {}`);
-    });
+        });
 
-    test('if alert is recovered and previously active, set flapping state to true', () => {
-      const activeAlert = new Alert<AlertInstanceState, AlertInstanceContext>('1', {
-        meta: { flappingHistory: [false] },
-      });
-      activeAlert.scheduleActions('default' as never, { foo: '1' });
-      const recoveredAlert = new Alert<AlertInstanceState, AlertInstanceContext>('1', {
-        meta: { flappingHistory: [false] },
+        expect(currentRecoveredAlerts).toEqual({
+          '2': reportedAlerts.recovered['2'],
+          '3': reportedAlerts.recovered['3'],
+        });
+        expect(recoveredAlerts).toEqual(currentRecoveredAlerts);
       });
 
-      const alerts = cloneDeep({ '1': recoveredAlert });
+      test('if callbacks are defined, sets or updates flapping history for recovered alerts using previous recovered flapping history if available', () => {
+        const updateAlertValues = ({
+          alert,
+          flappingHistory,
+        }: {
+          alert: Alert<AlertInstanceState, AlertInstanceContext>;
+          start?: string;
+          duration?: string;
+          end?: string;
+          flappingHistory: boolean[];
+        }) => {
+          switch (alert.getId()) {
+            case '2':
+              expect(flappingHistory).toEqual([true, true, false, true, true]);
+              break;
+            case '3':
+              expect(flappingHistory).toEqual([true]);
+              break;
+          }
+        };
+        const trackedActiveAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('1');
+        const trackedActiveAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('2');
+        const trackedActiveAlert3 = new Alert<AlertInstanceState, AlertInstanceContext>('3');
 
-      const { activeAlerts, newAlerts, recoveredAlerts } = processAlerts({
-        alerts,
-        existingAlerts: { '1': activeAlert },
-        previouslyRecoveredAlerts: {},
-        hasReachedAlertLimit: false,
-        alertLimit: 10,
-        setFlapping: true,
-      });
+        const trackedAlerts = {
+          active: { '1': trackedActiveAlert1, '2': trackedActiveAlert2, '3': trackedActiveAlert3 },
+          recovered: {},
+        };
+        trackedAlerts.active['2'].setFlappingHistory([true, true, false, true]);
 
-      expect(activeAlerts).toMatchInlineSnapshot(`Object {}`);
-      expect(newAlerts).toMatchInlineSnapshot(`Object {}`);
-      expect(recoveredAlerts).toMatchInlineSnapshot(`
-        Object {
-          "1": Object {
-            "meta": Object {
-              "flappingHistory": Array [
-                false,
-                true,
-              ],
+        const reportedAlerts = {
+          active: { '1': cloneDeep(trackedActiveAlert1) },
+          recovered: { '2': cloneDeep(trackedActiveAlert2), '3': cloneDeep(trackedActiveAlert3) },
+        };
+
+        const { currentRecoveredAlerts, recoveredAlerts } = processAlerts({
+          trackedAlerts,
+          reportedAlerts,
+          hasReachedAlertLimit: false,
+          alertLimit: 10,
+          callbacks: {
+            getFlappingHistory: (alert) => alert.getFlappingHistory() ?? [],
+            getStartTime: (alert) => {
+              const state = alert.getState();
+              return state?.start ? (state.start as string) : undefined;
             },
-            "state": Object {},
+            updateAlertValues,
           },
-        }
-      `);
-    });
+        });
 
-    test('if alert is still recovered, set flapping state to false', () => {
-      const recoveredAlert = new Alert<AlertInstanceState, AlertInstanceContext>('1', {
-        meta: { flappingHistory: [false] },
+        expect(currentRecoveredAlerts).toEqual({
+          '2': reportedAlerts.recovered['2'],
+          '3': reportedAlerts.recovered['3'],
+        });
+        expect(recoveredAlerts).toEqual(currentRecoveredAlerts);
       });
 
-      const alerts = cloneDeep({ '1': recoveredAlert });
+      test('considers alert recovered if it was previously recovered and not reported as active', () => {
+        const previouslyRecoveredAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('1');
+        const previouslyRecoveredAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('2');
 
-      const { activeAlerts, newAlerts, recoveredAlerts } = processAlerts({
-        alerts: {},
-        existingAlerts: {},
-        previouslyRecoveredAlerts: alerts,
-        hasReachedAlertLimit: false,
-        alertLimit: 10,
-        setFlapping: true,
+        const trackedAlerts = {
+          active: {},
+          recovered: {
+            '1': previouslyRecoveredAlert1,
+            '2': previouslyRecoveredAlert2,
+          },
+        };
+
+        const { currentRecoveredAlerts, recoveredAlerts } = processAlerts({
+          reportedAlerts: { active: {}, recovered: {} },
+          trackedAlerts,
+          hasReachedAlertLimit: false,
+          alertLimit: 10,
+        });
+
+        expect(currentRecoveredAlerts).toEqual({});
+        expect(recoveredAlerts).toEqual(trackedAlerts.recovered);
       });
 
-      expect(activeAlerts).toMatchInlineSnapshot(`Object {}`);
-      expect(newAlerts).toMatchInlineSnapshot(`Object {}`);
-      expect(recoveredAlerts).toMatchInlineSnapshot(`
-        Object {
-          "1": Object {
-            "meta": Object {
-              "flappingHistory": Array [
-                false,
-                false,
-              ],
-            },
-            "state": Object {},
+      test('if callbacks are defined, sets or updates flapping history for previously recovered alerts that are still recovered', () => {
+        const updateAlertValues = ({
+          alert,
+          flappingHistory,
+        }: {
+          alert: Alert<AlertInstanceState, AlertInstanceContext>;
+          start?: string;
+          duration?: string;
+          end?: string;
+          flappingHistory: boolean[];
+        }) => {
+          switch (alert.getId()) {
+            case '1':
+              expect(flappingHistory).toEqual([false]);
+              break;
+            case '2':
+              expect(flappingHistory).toEqual([false, false, true, false, true, false]);
+              break;
+          }
+        };
+        const previouslyRecoveredAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('1');
+        const previouslyRecoveredAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('2');
+        previouslyRecoveredAlert2.setFlappingHistory([false, false, true, false, true]);
+        const trackedAlerts = {
+          active: {},
+          recovered: {
+            '1': previouslyRecoveredAlert1,
+            '2': previouslyRecoveredAlert2,
           },
-        }
-      `);
-    });
+        };
 
-    test('if setFlapping is false should not update flappingHistory', () => {
-      const activeAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('1');
-      activeAlert1.scheduleActions('default' as never, { foo: '1' });
-      const activeAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('2', {
-        meta: { flappingHistory: [false] },
+        const { currentRecoveredAlerts, recoveredAlerts } = processAlerts({
+          reportedAlerts: { active: {}, recovered: {} },
+          trackedAlerts,
+          hasReachedAlertLimit: false,
+          alertLimit: 10,
+          callbacks: {
+            getFlappingHistory: (alert) => alert.getFlappingHistory() ?? [],
+            getStartTime: (alert) => {
+              const state = alert.getState();
+              return state?.start ? (state.start as string) : undefined;
+            },
+            updateAlertValues,
+          },
+        });
+
+        expect(currentRecoveredAlerts).toEqual({});
+        expect(recoveredAlerts).toEqual(trackedAlerts.recovered);
       });
-      activeAlert2.scheduleActions('default' as never, { foo: '1' });
-      const recoveredAlert = new Alert<AlertInstanceState, AlertInstanceContext>('3', {
-        meta: { flappingHistory: [false] },
-      });
-
-      const previouslyRecoveredAlerts = cloneDeep({ '3': recoveredAlert });
-      const alerts = cloneDeep({ '1': activeAlert1, '2': activeAlert2 });
-      const existingAlerts = cloneDeep({ '2': activeAlert2 });
-
-      const { activeAlerts, newAlerts, recoveredAlerts } = processAlerts({
-        alerts,
-        existingAlerts,
-        previouslyRecoveredAlerts,
-        hasReachedAlertLimit: false,
-        alertLimit: 10,
-        setFlapping: false,
-      });
-
-      expect(activeAlerts).toMatchInlineSnapshot(`
-        Object {
-          "1": Object {
-            "meta": Object {
-              "flappingHistory": Array [],
-            },
-            "state": Object {
-              "duration": "0",
-              "start": "1970-01-01T00:00:00.000Z",
-            },
-          },
-          "2": Object {
-            "meta": Object {
-              "flappingHistory": Array [
-                false,
-              ],
-            },
-            "state": Object {},
-          },
-        }
-      `);
-      expect(newAlerts).toMatchInlineSnapshot(`
-        Object {
-          "1": Object {
-            "meta": Object {
-              "flappingHistory": Array [],
-            },
-            "state": Object {
-              "duration": "0",
-              "start": "1970-01-01T00:00:00.000Z",
-            },
-          },
-        }
-      `);
-      expect(recoveredAlerts).toMatchInlineSnapshot(`
-        Object {
-          "3": Object {
-            "meta": Object {
-              "flappingHistory": Array [
-                false,
-              ],
-            },
-            "state": Object {},
-          },
-        }
-      `);
     });
 
     describe('when hasReachedAlertLimit is true', () => {
-      test('if alert is still active, set flapping state to false', () => {
-        const activeAlert = new Alert<AlertInstanceState, AlertInstanceContext>('1', {
-          meta: { flappingHistory: [false] },
-        });
+      test('does not calculate recovered alerts', () => {
+        const trackedActiveAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('1');
+        const trackedActiveAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('2');
+        const trackedActiveAlert3 = new Alert<AlertInstanceState, AlertInstanceContext>('3');
+        const trackedActiveAlert4 = new Alert<AlertInstanceState, AlertInstanceContext>('4');
+        const trackedActiveAlert5 = new Alert<AlertInstanceState, AlertInstanceContext>('5');
+        const reportedActiveAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('6');
+        const reportedActiveAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('7');
 
-        const alerts = cloneDeep({ '1': activeAlert });
-        alerts['1'].scheduleActions('default' as never, { foo: '1' });
+        const trackedAlerts = {
+          active: {
+            '1': trackedActiveAlert1,
+            '2': trackedActiveAlert2,
+            '3': trackedActiveAlert3,
+            '4': trackedActiveAlert4,
+            '5': trackedActiveAlert5,
+          },
+          recovered: {},
+        };
 
-        const { activeAlerts, newAlerts, recoveredAlerts } = processAlerts({
-          alerts,
-          existingAlerts: alerts,
-          previouslyRecoveredAlerts: {},
+        const reportedAlerts = {
+          active: {
+            '1': cloneDeep(trackedActiveAlert1),
+            '2': cloneDeep(trackedActiveAlert2),
+            '3': cloneDeep(trackedActiveAlert3),
+            '4': cloneDeep(trackedActiveAlert4),
+            '6': reportedActiveAlert1,
+            '7': reportedActiveAlert2,
+          },
+          recovered: {
+            '5': cloneDeep(trackedActiveAlert5),
+          },
+        };
+
+        const { currentRecoveredAlerts } = processAlerts({
+          reportedAlerts,
+          trackedAlerts,
           hasReachedAlertLimit: true,
-          alertLimit: 10,
-          setFlapping: true,
+          alertLimit: 7,
         });
 
-        expect(activeAlerts).toMatchInlineSnapshot(`
-          Object {
-            "1": Object {
-              "meta": Object {
-                "flappingHistory": Array [
-                  false,
-                  false,
-                ],
-              },
-              "state": Object {},
-            },
-          }
-        `);
-        expect(newAlerts).toMatchInlineSnapshot(`Object {}`);
-        expect(recoveredAlerts).toMatchInlineSnapshot(`Object {}`);
+        expect(currentRecoveredAlerts).toEqual({});
       });
 
-      test('if new alert, set flapping state to true', () => {
-        const activeAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('1', {
-          meta: { flappingHistory: [false] },
-        });
-        activeAlert1.scheduleActions('default' as never, { foo: '1' });
-        const activeAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('1');
-        activeAlert2.scheduleActions('default' as never, { foo: '1' });
+      test('keeps existing active alerts active even if they are categorized as recovered', () => {
+        const trackedActiveAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('1');
+        const trackedActiveAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('2');
+        const trackedActiveAlert3 = new Alert<AlertInstanceState, AlertInstanceContext>('3');
+        const trackedActiveAlert4 = new Alert<AlertInstanceState, AlertInstanceContext>('4');
+        const trackedActiveAlert5 = new Alert<AlertInstanceState, AlertInstanceContext>('5');
 
-        const alerts = cloneDeep({ '1': activeAlert1, '2': activeAlert2 });
+        const trackedAlerts = {
+          active: {
+            '1': trackedActiveAlert1,
+            '2': trackedActiveAlert2,
+            '3': trackedActiveAlert3,
+            '4': trackedActiveAlert4,
+            '5': trackedActiveAlert5,
+          },
+          recovered: {},
+        };
 
-        const { activeAlerts, newAlerts, recoveredAlerts } = processAlerts({
-          alerts,
-          existingAlerts: { '1': activeAlert1 },
-          previouslyRecoveredAlerts: {},
+        const reportedAlerts = {
+          active: {
+            '1': cloneDeep(trackedActiveAlert1),
+            '2': cloneDeep(trackedActiveAlert2),
+            '3': cloneDeep(trackedActiveAlert3),
+            '4': cloneDeep(trackedActiveAlert4),
+          },
+          recovered: {
+            '5': cloneDeep(trackedActiveAlert5),
+          },
+        };
+
+        const { activeAlerts } = processAlerts({
+          reportedAlerts,
+          trackedAlerts,
           hasReachedAlertLimit: true,
-          alertLimit: 10,
-          setFlapping: true,
+          alertLimit: 7,
         });
 
-        expect(activeAlerts).toMatchInlineSnapshot(`
-          Object {
-            "1": Object {
-              "meta": Object {
-                "flappingHistory": Array [
-                  false,
-                  false,
-                ],
-              },
-              "state": Object {},
-            },
-            "2": Object {
-              "meta": Object {
-                "flappingHistory": Array [
-                  true,
-                ],
-              },
-              "state": Object {
-                "duration": "0",
-                "start": "1970-01-01T00:00:00.000Z",
-              },
-            },
-          }
-        `);
-        expect(newAlerts).toMatchInlineSnapshot(`
-          Object {
-            "2": Object {
-              "meta": Object {
-                "flappingHistory": Array [
-                  true,
-                ],
-              },
-              "state": Object {
-                "duration": "0",
-                "start": "1970-01-01T00:00:00.000Z",
-              },
-            },
-          }
-        `);
-        expect(recoveredAlerts).toMatchInlineSnapshot(`Object {}`);
+        expect(activeAlerts).toEqual(trackedAlerts.active);
       });
 
-      test('if alert is active and previously recovered, set flapping state to true', () => {
-        const activeAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('1', {
-          meta: { flappingHistory: [false] },
-        });
-        activeAlert1.scheduleActions('default' as never, { foo: '1' });
-        const activeAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('1');
-        activeAlert2.scheduleActions('default' as never, { foo: '1' });
+      test('adds new alerts up to max allowed', () => {
+        const MAX_ALERTS = 7;
+        const trackedActiveAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('1');
+        const trackedActiveAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('2');
+        const trackedActiveAlert3 = new Alert<AlertInstanceState, AlertInstanceContext>('3');
+        const trackedActiveAlert4 = new Alert<AlertInstanceState, AlertInstanceContext>('4');
+        const trackedActiveAlert5 = new Alert<AlertInstanceState, AlertInstanceContext>('5');
+        const reportedActiveAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('6');
+        const reportedActiveAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('7');
+        const reportedActiveAlert3 = new Alert<AlertInstanceState, AlertInstanceContext>('8');
+        const reportedActiveAlert4 = new Alert<AlertInstanceState, AlertInstanceContext>('9');
+        const reportedActiveAlert5 = new Alert<AlertInstanceState, AlertInstanceContext>('10');
 
-        const alerts = cloneDeep({ '1': activeAlert1, '2': activeAlert2 });
+        const trackedAlerts = {
+          active: {
+            '1': trackedActiveAlert1,
+            '2': trackedActiveAlert2,
+            '3': trackedActiveAlert3,
+            '4': trackedActiveAlert4,
+            '5': trackedActiveAlert5,
+          },
+          recovered: {},
+        };
 
-        const { activeAlerts, newAlerts, recoveredAlerts } = processAlerts({
-          alerts,
-          existingAlerts: {},
-          previouslyRecoveredAlerts: { '1': activeAlert1 },
+        const reportedAlerts = {
+          active: {
+            '1': cloneDeep(trackedActiveAlert1),
+            '2': cloneDeep(trackedActiveAlert2),
+            '3': cloneDeep(trackedActiveAlert3),
+            '4': cloneDeep(trackedActiveAlert4),
+            '6': reportedActiveAlert1,
+            '7': reportedActiveAlert2,
+            '8': reportedActiveAlert3,
+            '9': reportedActiveAlert4,
+            '10': reportedActiveAlert5,
+          },
+          recovered: {
+            '5': cloneDeep(trackedActiveAlert5),
+          },
+        };
+
+        const { activeAlerts, newAlerts } = processAlerts({
+          reportedAlerts,
+          trackedAlerts,
           hasReachedAlertLimit: true,
-          alertLimit: 10,
-          setFlapping: true,
+          alertLimit: MAX_ALERTS,
         });
 
-        expect(activeAlerts).toMatchInlineSnapshot(`
-          Object {
-            "1": Object {
-              "meta": Object {
-                "flappingHistory": Array [
-                  false,
-                  true,
-                ],
-              },
-              "state": Object {
-                "duration": "0",
-                "start": "1970-01-01T00:00:00.000Z",
-              },
-            },
-            "2": Object {
-              "meta": Object {
-                "flappingHistory": Array [
-                  true,
-                ],
-              },
-              "state": Object {
-                "duration": "0",
-                "start": "1970-01-01T00:00:00.000Z",
-              },
-            },
-          }
-        `);
-        expect(newAlerts).toMatchInlineSnapshot(`
-          Object {
-            "1": Object {
-              "meta": Object {
-                "flappingHistory": Array [
-                  false,
-                  true,
-                ],
-              },
-              "state": Object {
-                "duration": "0",
-                "start": "1970-01-01T00:00:00.000Z",
-              },
-            },
-            "2": Object {
-              "meta": Object {
-                "flappingHistory": Array [
-                  true,
-                ],
-              },
-              "state": Object {
-                "duration": "0",
-                "start": "1970-01-01T00:00:00.000Z",
-              },
-            },
-          }
-        `);
-        expect(recoveredAlerts).toMatchInlineSnapshot(`Object {}`);
-      });
-
-      test('if setFlapping is false should not update flappingHistory', () => {
-        const activeAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('1', {
-          meta: { flappingHistory: [false] },
+        expect(Object.keys(activeAlerts).length).toEqual(MAX_ALERTS);
+        expect(activeAlerts).toEqual({
+          ...trackedAlerts.active,
+          '6': reportedActiveAlert1,
+          '7': reportedActiveAlert2,
         });
-        activeAlert1.scheduleActions('default' as never, { foo: '1' });
-        const activeAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('1');
-        activeAlert2.scheduleActions('default' as never, { foo: '1' });
-
-        const alerts = cloneDeep({ '1': activeAlert1, '2': activeAlert2 });
-
-        const { activeAlerts, newAlerts, recoveredAlerts } = processAlerts({
-          alerts,
-          existingAlerts: { '1': activeAlert1 },
-          previouslyRecoveredAlerts: {},
-          hasReachedAlertLimit: true,
-          alertLimit: 10,
-          setFlapping: false,
+        expect(newAlerts).toEqual({
+          '6': reportedActiveAlert1,
+          '7': reportedActiveAlert2,
         });
-
-        expect(activeAlerts).toMatchInlineSnapshot(`
-          Object {
-            "1": Object {
-              "meta": Object {
-                "flappingHistory": Array [
-                  false,
-                ],
-              },
-              "state": Object {},
-            },
-            "2": Object {
-              "meta": Object {
-                "flappingHistory": Array [],
-              },
-              "state": Object {
-                "duration": "0",
-                "start": "1970-01-01T00:00:00.000Z",
-              },
-            },
-          }
-        `);
-        expect(newAlerts).toMatchInlineSnapshot(`
-          Object {
-            "2": Object {
-              "meta": Object {
-                "flappingHistory": Array [],
-              },
-              "state": Object {
-                "duration": "0",
-                "start": "1970-01-01T00:00:00.000Z",
-              },
-            },
-          }
-        `);
-        expect(recoveredAlerts).toMatchInlineSnapshot(`Object {}`);
       });
-    });
-  });
-
-  describe('updateAlertFlappingHistory function', () => {
-    test('correctly updates flappingHistory', () => {
-      const alert = new Alert<AlertInstanceState, AlertInstanceContext>('1', {
-        meta: { flappingHistory: [false, false] },
-      });
-      updateAlertFlappingHistory(alert, true);
-      expect(alert.getFlappingHistory()).toEqual([false, false, true]);
-    });
-
-    test('correctly updates flappingHistory while maintaining a fixed size', () => {
-      const flappingHistory = new Array(20).fill(false);
-      const alert = new Alert<AlertInstanceState, AlertInstanceContext>('1', {
-        meta: { flappingHistory },
-      });
-      updateAlertFlappingHistory(alert, true);
-      const fh = alert.getFlappingHistory() || [];
-      expect(fh.length).toEqual(20);
-      const result = new Array(19).fill(false);
-      expect(fh).toEqual(result.concat(true));
-    });
-
-    test('correctly updates flappingHistory while maintaining if array is larger than fixed size', () => {
-      const flappingHistory = new Array(23).fill(false);
-      const alert = new Alert<AlertInstanceState, AlertInstanceContext>('1', {
-        meta: { flappingHistory },
-      });
-      updateAlertFlappingHistory(alert, true);
-      const fh = alert.getFlappingHistory() || [];
-      expect(fh.length).toEqual(20);
-      const result = new Array(19).fill(false);
-      expect(fh).toEqual(result.concat(true));
     });
   });
 });

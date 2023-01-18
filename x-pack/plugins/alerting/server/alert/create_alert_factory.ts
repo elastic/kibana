@@ -128,20 +128,14 @@ export function createAlertFactory<
             );
             return [];
           }
-
-          const { currentRecoveredAlerts } = processAlerts<
-            State,
-            Context,
-            ActionGroupIds,
-            ActionGroupIds
-          >({
-            alerts,
-            existingAlerts: originalAlerts,
-            previouslyRecoveredAlerts: {},
+          const { currentRecoveredAlerts } = processAlerts<Alert<State, Context, ActionGroupIds>>({
+            reportedAlerts: splitAlerts<State, Context>(alerts, originalAlerts),
+            trackedAlerts: {
+              active: originalAlerts,
+              recovered: {},
+            },
             hasReachedAlertLimit,
             alertLimit: maxAlerts,
-            // setFlapping is false, as we only want to use this function to get the recovered alerts
-            setFlapping: false,
           });
           return Object.keys(currentRecoveredAlerts ?? {}).map(
             (alertId: string) => currentRecoveredAlerts[alertId]
@@ -150,6 +144,39 @@ export function createAlertFactory<
       };
     },
   };
+}
+
+/**
+ * Split reported alerts into reported active and reported recovered
+ * based on whether or not actions have been scheduled for the alert
+ *
+ */
+export function splitAlerts<State extends AlertInstanceState, Context extends AlertInstanceContext>(
+  reportedAlerts: Record<string, Alert<State, Context>>,
+  trackedActiveAlerts: Record<string, Alert<State, Context>>
+): {
+  active: Record<string, Alert<State, Context>>;
+  recovered: Record<string, Alert<State, Context>>;
+} {
+  const alerts: {
+    active: Record<string, Alert<State, Context>>;
+    recovered: Record<string, Alert<State, Context>>;
+  } = {
+    active: {},
+    recovered: {},
+  };
+
+  for (const id in reportedAlerts) {
+    if (reportedAlerts.hasOwnProperty(id)) {
+      if (reportedAlerts[id].hasScheduledActions()) {
+        alerts.active[id] = reportedAlerts[id];
+      } else if (trackedActiveAlerts[id]) {
+        alerts.recovered[id] = reportedAlerts[id];
+      }
+    }
+  }
+
+  return alerts;
 }
 
 export function getPublicAlertFactory<

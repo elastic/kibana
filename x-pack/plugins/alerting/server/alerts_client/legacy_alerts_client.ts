@@ -11,8 +11,9 @@ import {
   AlertFactory,
   createAlertFactory,
   getPublicAlertFactory,
+  splitAlerts,
 } from '../alert/create_alert_factory';
-import { determineAlertsToReturn, processAlerts, setFlapping } from '../lib';
+import { determineAlertsToReturn, isFlapping, processAlerts } from '../lib';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
@@ -20,10 +21,10 @@ import { logAlerts } from '../task_runner/log_alerts';
 import {
   AlertInstanceContext,
   AlertInstanceState,
+  LastScheduledActions,
   RawAlertInstance,
   WithoutReservedActionGroups,
 } from '../types';
-
 interface ConstructorOpts {
   logger: Logger;
   maxAlerts: number;
@@ -36,9 +37,16 @@ export class LegacyAlertsClient<
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string
 > {
-  private activeAlertsFromPreviousExecution: Record<string, Alert<State, Context>>;
-  private recoveredAlertsFromPreviousExecution: Record<string, Alert<State, Context>>;
-  private alerts: Record<string, Alert<State, Context>>;
+  // Alerts that were reported as active or recovered in the previous rule execution
+  private trackedAlerts: {
+    active: Record<string, Alert<State, Context>>;
+    recovered: Record<string, Alert<State, Context>>;
+  } = {
+    active: {},
+    recovered: {},
+  };
+
+  private reportedAlerts: Record<string, Alert<State, Context>> = {};
   private processedAlerts: {
     new: Record<string, Alert<State, Context, ActionGroupIds>>;
     active: Record<string, Alert<State, Context, ActionGroupIds>>;
@@ -52,9 +60,6 @@ export class LegacyAlertsClient<
     WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
   >;
   constructor(private readonly options: ConstructorOpts) {
-    this.alerts = {};
-    this.activeAlertsFromPreviousExecution = {};
-    this.recoveredAlertsFromPreviousExecution = {};
     this.processedAlerts = {
       new: {},
       active: {},
@@ -69,30 +74,30 @@ export class LegacyAlertsClient<
   ) {
     for (const id in activeAlertsFromState) {
       if (activeAlertsFromState.hasOwnProperty(id)) {
-        this.activeAlertsFromPreviousExecution[id] = new Alert<State, Context>(
-          id,
-          activeAlertsFromState[id]
-        );
+        this.trackedAlerts.active[id] = new Alert<State, Context>(id, activeAlertsFromState[id]);
       }
     }
 
     for (const id in recoveredAlertsFromState) {
       if (recoveredAlertsFromState.hasOwnProperty(id)) {
-        this.recoveredAlertsFromPreviousExecution[id] = new Alert<State, Context>(
+        this.trackedAlerts.recovered[id] = new Alert<State, Context>(
           id,
           recoveredAlertsFromState[id]
         );
       }
     }
 
-    this.alerts = cloneDeep(this.activeAlertsFromPreviousExecution);
+    // Legacy alerts client creates a copy of the active tracked alerts
+    // This copy is updated when rule executors report alerts back to the framework
+    // while the original alert is preserved
+    this.reportedAlerts = cloneDeep(this.trackedAlerts.active);
 
     this.alertFactory = createAlertFactory<
       State,
       Context,
       WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
     >({
-      alerts: this.alerts,
+      alerts: this.reportedAlerts,
       logger: this.options.logger,
       maxAlerts: this.options.maxAlerts,
       canSetRecoveryContext: this.options.ruleType.doesSetRecoveryContext ?? false,
@@ -103,38 +108,75 @@ export class LegacyAlertsClient<
     eventLogger,
     ruleLabel,
     ruleRunMetricsStore,
-    shouldLogAndScheduleActionsForAlerts,
+    shouldLogAlerts,
   }: {
     eventLogger: AlertingEventLogger;
     ruleLabel: string;
-    shouldLogAndScheduleActionsForAlerts: boolean;
+    shouldLogAlerts: boolean;
     ruleRunMetricsStore: RuleRunMetricsStore;
   }) {
+    const updateAlertValues = ({
+      alert,
+      start,
+      duration,
+      end,
+      flappingHistory,
+    }: {
+      alert: Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>;
+      start?: string;
+      duration?: string;
+      end?: string;
+      flappingHistory: boolean[];
+    }) => {
+      const state = alert.getState();
+      alert.replaceState({
+        ...state,
+        ...(start ? { start } : {}),
+        ...(end ? { end } : {}),
+        ...(duration !== undefined ? { duration } : {}),
+      });
+      alert.setFlappingHistory(flappingHistory);
+      alert.setFlapping(isAlertFlapping(alert));
+    };
+
     const {
       newAlerts: processedAlertsNew,
       activeAlerts: processedAlertsActive,
       currentRecoveredAlerts: processedAlertsRecoveredCurrent,
       recoveredAlerts: processedAlertsRecovered,
-    } = processAlerts<State, Context, ActionGroupIds, RecoveryActionGroupId>({
-      alerts: this.alerts,
-      existingAlerts: this.activeAlertsFromPreviousExecution,
-      previouslyRecoveredAlerts: this.recoveredAlertsFromPreviousExecution,
+    } = processAlerts<Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>>({
+      reportedAlerts: splitAlerts<State, Context>(this.reportedAlerts, this.trackedAlerts.active),
+      trackedAlerts: this.trackedAlerts,
       hasReachedAlertLimit: this.alertFactory!.hasReachedAlertLimit(),
       alertLimit: this.options.maxAlerts,
-      setFlapping: true,
+      callbacks: {
+        getFlappingHistory: (alert) => alert.getFlappingHistory() ?? [],
+        getStartTime: (alert) => {
+          const state = alert.getState();
+          return state?.start ? (state.start as string) : undefined;
+        },
+        updateAlertValues,
+      },
     });
 
-    setFlapping<State, Context, ActionGroupIds, RecoveryActionGroupId>(
-      processedAlertsActive,
-      processedAlertsRecovered
-    );
+    this.processedAlerts.new = processedAlertsNew as Record<
+      string,
+      Alert<State, Context, ActionGroupIds>
+    >;
+    this.processedAlerts.active = processedAlertsActive as Record<
+      string,
+      Alert<State, Context, ActionGroupIds>
+    >;
+    this.processedAlerts.recovered = processedAlertsRecovered as Record<
+      string,
+      Alert<State, Context, RecoveryActionGroupId>
+    >;
+    this.processedAlerts.recoveredCurrent = processedAlertsRecoveredCurrent as Record<
+      string,
+      Alert<State, Context, RecoveryActionGroupId>
+    >;
 
-    this.processedAlerts.new = processedAlertsNew;
-    this.processedAlerts.active = processedAlertsActive;
-    this.processedAlerts.recovered = processedAlertsRecovered;
-    this.processedAlerts.recoveredCurrent = processedAlertsRecoveredCurrent;
-
-    logAlerts({
+    logAlerts<Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>>({
       logger: this.options.logger,
       alertingEventLogger: eventLogger,
       newAlerts: processedAlertsNew,
@@ -143,7 +185,16 @@ export class LegacyAlertsClient<
       ruleLogPrefix: ruleLabel,
       ruleRunMetricsStore,
       canSetRecoveryContext: this.options.ruleType.doesSetRecoveryContext ?? false,
-      shouldPersistAlerts: shouldLogAndScheduleActionsForAlerts,
+      shouldPersistAlerts: shouldLogAlerts,
+      getAlertData: (alert: Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>) => {
+        return {
+          actionGroup: alert.getScheduledActionOptions()?.actionGroup,
+          hasContext: alert.hasContext(),
+          lastScheduledActions: alert.getLastScheduledActions() as LastScheduledActions,
+          state: alert.getState(),
+          flapping: alert.getFlapping(),
+        };
+      },
     });
   }
 
@@ -173,4 +224,14 @@ export class LegacyAlertsClient<
   public getExecutorServices() {
     return getPublicAlertFactory(this.alertFactory!);
   }
+}
+
+function isAlertFlapping<
+  State extends AlertInstanceState,
+  Context extends AlertInstanceContext,
+  ActionGroupIds extends string
+>(alert: Alert<State, Context, ActionGroupIds>): boolean {
+  const flappingHistory: boolean[] = alert.getFlappingHistory() || [];
+  const isCurrentlyFlapping = alert.getFlapping();
+  return isFlapping(flappingHistory, isCurrentlyFlapping);
 }
