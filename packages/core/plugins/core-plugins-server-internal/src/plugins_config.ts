@@ -11,6 +11,8 @@ import { get } from 'lodash';
 import { Env } from '@kbn/config';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 
+import { ENABLE_ALL_PLUGINS_CONFIG_PATH } from './constants';
+
 const configSchema = schema.object({
   initialize: schema.boolean({ defaultValue: true }),
 
@@ -64,6 +66,6 @@ export class PluginsConfig {
     this.initialize = rawConfig.initialize;
     this.pluginSearchPaths = env.pluginSearchPaths;
     this.additionalPluginPaths = rawConfig.paths;
-    this.shouldEnableAllPlugins = get(rawConfig, '__internal__.enableAllPlugins', false);
+    this.shouldEnableAllPlugins = get(rawConfig, ENABLE_ALL_PLUGINS_CONFIG_PATH, false);
   }
 }

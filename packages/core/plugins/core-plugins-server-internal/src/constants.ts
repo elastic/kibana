@@ -7,11 +7,14 @@
  */
 
 /**
+ * @internal
+ */
+export const ENABLE_ALL_PLUGINS_CONFIG_PATH = '__internal__.enableAllPlugins' as const;
+
+/**
  * Set this to true in the raw configuration passed to {@link Root} to force
  * enable all plugins.
- *
- * Intended for internal use only.
  * @internal
  */
 export const PLUGIN_SYSTEM_ENABLE_ALL_PLUGINS_CONFIG_PATH =
-  'plugins.__internal__.enableAllPlugins' as const;
+  `plugins.${ENABLE_ALL_PLUGINS_CONFIG_PATH}` as const;
