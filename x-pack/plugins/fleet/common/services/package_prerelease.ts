@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IntegrationCardReleaseLabel, RegistryRelease } from '../../common/types';
+import type { IntegrationCardReleaseLabel, RegistryRelease } from '../types';
 
 export function isPackagePrerelease(version: string): boolean {
   // derive from semver
