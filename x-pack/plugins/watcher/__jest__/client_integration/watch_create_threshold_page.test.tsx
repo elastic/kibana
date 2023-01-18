@@ -28,6 +28,7 @@ const ES_FIELDS = [{ name: '@timestamp', type: 'date' }];
 // against it.
 jest.mock('uuid', () => ({
   v4: () => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     return require('./helpers/jest_constants').WATCH_ID;
   },
 }));
