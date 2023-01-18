@@ -62,6 +62,8 @@ import {
   getReasonMessageForUngroupedCountAlert,
   getReasonMessageForUngroupedRatioAlert,
 } from './reason_formatters';
+import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import { ParsedExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
 
 export type LogThresholdActionGroups = ActionGroupIdsOf<typeof FIRED_ACTIONS>;
 export type LogThresholdRuleTypeParams = RuleParams;
@@ -1030,7 +1032,7 @@ const processRecoveredAlerts = async ({
   spaceId: string;
   startedAt: Date;
   validatedParams: RuleParams;
-  getAlertByAlertUuid: (alertUuid: string) => { [x: string]: any } | null;
+  getAlertByAlertUuid: (alertUuid: string) => Promise<Partial<ParsedTechnicalFields & ParsedExperimentalFields> | null> | null;
 }) => {
   const groupByKeysObjectForRecovered = getGroupByObject(
     validatedParams.groupBy,
