@@ -63,7 +63,6 @@ const FindingsByResourceTableComponent = ({
       createColumnWithFilters(findingsByResourceColumns['resource.sub_type'], { onAddFilter }),
       createColumnWithFilters(findingsByResourceColumns['resource.name'], { onAddFilter }),
       createColumnWithFilters(findingsByResourceColumns['rule.benchmark.name'], { onAddFilter }),
-      findingsByResourceColumns['rule.section'],
       createColumnWithFilters(findingsByResourceColumns.cluster_id, { onAddFilter }),
       findingsByResourceColumns.compliance_score,
     ],

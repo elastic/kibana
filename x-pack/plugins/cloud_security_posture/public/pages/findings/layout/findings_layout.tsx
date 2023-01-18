@@ -109,7 +109,6 @@ const baseColumns = [
   },
   {
     field: 'resource.name',
-    width: '200px',
     name: i18n.translate(
       'xpack.csp.findings.findingsTable.findingsTableColumn.resourceNameColumnLabel',
       { defaultMessage: 'Resource Name' }
@@ -148,11 +147,18 @@ const baseColumns = [
   },
   {
     field: 'rule.benchmark.name',
-    name: i18n.translate(
-      'xpack.csp.findings.findingsTable.findingsTableColumn.ruleBenchmarkColumnLabel',
-      { defaultMessage: 'Benchmark' }
+    name: (
+      <ColumnNameWithTooltip
+        columnName={i18n.translate(
+          'xpack.csp.findings.findingsTable.findingsTableColumn.ruleBenchmarkColumnLabel',
+          { defaultMessage: 'Applicable Benchmark' }
+        )}
+        tooltipContent={i18n.translate(
+          'xpack.csp.findings.findingsTable.findingsTableColumn.ruleBenchmarkColumnTooltipLabel',
+          { defaultMessage: 'The benchmark(s) rules used to evaluate this resource came from' }
+        )}
+      />
     ),
-    width: '10%',
     sortable: true,
     truncateText: true,
   },
