@@ -7,7 +7,7 @@
 
 import { failure } from 'io-ts/lib/PathReporter';
 import { getOr } from 'lodash/fp';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fold } from 'fp-ts/lib/Either';

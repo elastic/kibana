@@ -8,7 +8,7 @@
 import type { Client } from '@elastic/elasticsearch';
 import { cloneDeep } from 'lodash';
 import type { AxiosResponse } from 'axios';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import type { KbnClient } from '@kbn/test';
 import type { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Agent, CreatePackagePolicyResponse, GetInfoResponse } from '@kbn/fleet-plugin/common';

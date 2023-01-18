@@ -8,7 +8,7 @@
 
 import React, { Component } from 'react';
 import { get } from 'lodash';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import {
   htmlIdGenerator,
   EuiTabs,

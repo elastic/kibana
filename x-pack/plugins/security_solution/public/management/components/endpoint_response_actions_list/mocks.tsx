@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import type { ActionListApiResponse } from '../../../../common/endpoint/types';
 import type {
   ResponseActionsApiCommandNames,

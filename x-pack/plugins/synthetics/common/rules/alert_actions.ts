@@ -15,7 +15,7 @@ import type {
   EmailActionParams,
 } from '@kbn/stack-connectors-plugin/server/connector_types';
 import { RuleAction as RuleActionOrig } from '@kbn/alerting-plugin/common';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 
 import { ActionConnector, ActionTypeId } from './types';
 import { DefaultEmail } from '../runtime_types';

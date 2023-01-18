@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { snakeCase } from 'lodash';
 import moment from 'moment';
-import uuid from 'uuid/v4';
+import { v4 as uuid } from 'uuid';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { waitForIndexStatus } from '@kbn/core-saved-objects-migration-server-internal';
 import { ML_ERRORS } from '../../../common/anomaly_detection';

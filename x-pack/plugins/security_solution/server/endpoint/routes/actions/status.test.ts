@@ -30,7 +30,7 @@ import {
   createRouteHandlerContext,
 } from '../../mocks';
 import { registerActionStatusRoutes } from './status';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { ACTION_RESPONSE_INDICES } from '../../services/actions/constants';
 import type {
   LogsEndpointAction,

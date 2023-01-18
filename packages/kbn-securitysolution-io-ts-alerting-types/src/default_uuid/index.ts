@@ -8,7 +8,7 @@
 
 import * as t from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { NonEmptyString } from '@kbn/securitysolution-io-ts-types';
 
 /**

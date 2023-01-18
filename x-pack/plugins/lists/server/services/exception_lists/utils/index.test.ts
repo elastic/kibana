@@ -7,11 +7,11 @@
 
 import sinon from 'sinon';
 import moment from 'moment';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 
 import { transformCreateCommentsToComments, transformUpdateCommentsToComments } from '.';
 
-jest.mock('uuid/v4');
+jest.mock('uuid');
 
 describe('utils', () => {
   const oldDate = '2020-03-17T20:34:51.337Z';
@@ -20,7 +20,7 @@ describe('utils', () => {
   let clock: sinon.SinonFakeTimers;
 
   beforeEach(() => {
-    (uuid.v4 as unknown as jest.Mock)
+    (uuid as unknown as jest.Mock)
       .mockImplementationOnce(() => '123')
       .mockImplementationOnce(() => '456');
 

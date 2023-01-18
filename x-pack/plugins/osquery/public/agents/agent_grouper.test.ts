@@ -8,7 +8,7 @@
 import { AgentGrouper } from './agent_grouper';
 import type { Group, GroupedAgent, GroupOptionValue } from './types';
 import { AGENT_GROUP_KEY } from './types';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { ALL_AGENTS_LABEL } from './translations';
 
 type GroupData = {

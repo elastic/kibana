@@ -6,7 +6,7 @@
  */
 
 import * as React from 'react';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { mount, ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 

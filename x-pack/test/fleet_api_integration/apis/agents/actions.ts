@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import uuid from 'uuid/v4';
+import { v4 as uuid } from 'uuid';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { testUsers } from '../test_users';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { DecoratorFn } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import type { HttpStart, HttpFetchOptions, HttpHandler } from '@kbn/core/public';

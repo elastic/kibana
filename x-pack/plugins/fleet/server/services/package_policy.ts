@@ -17,7 +17,7 @@ import type {
   SavedObjectsClientContract,
   Logger,
 } from '@kbn/core/server';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { safeLoad } from 'js-yaml';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';

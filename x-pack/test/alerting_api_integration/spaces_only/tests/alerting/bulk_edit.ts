@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { Spaces } from '../../scenarios';
 import {

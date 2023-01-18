@@ -8,7 +8,7 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import { AddDeleteButtons } from '../add_delete_buttons';

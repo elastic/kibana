@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import {
   EuiForm,
   EuiButton,

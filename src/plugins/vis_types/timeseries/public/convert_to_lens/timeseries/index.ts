@@ -12,7 +12,7 @@ import {
   isAnnotationsLayer,
   Layer,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { PANEL_TYPES } from '../../../common/enums';
 import { getDataViewsStart } from '../../services';

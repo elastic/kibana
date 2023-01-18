@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useMemo, useReducer } from 'react';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { statReducer } from './stat_reducer';
 import type { GlobalTimeArgs } from '../../../../../common/containers/use_global_time';
 import { useKibana } from '../../../../../common/lib/kibana';

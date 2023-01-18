@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 
 import type { LegendItem } from '../../../charts/draggable_legend_item';
 import { getFillColor } from '../chart_palette';

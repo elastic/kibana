@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { merge, flattenDeep } from 'lodash';
 import type { Client } from '@elastic/elasticsearch';
 import { makePing } from './make_ping';

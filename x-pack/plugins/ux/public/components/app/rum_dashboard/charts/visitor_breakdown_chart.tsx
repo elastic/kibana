@@ -17,7 +17,7 @@ import {
 import { EuiText } from '@elastic/eui';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/public';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { TRANSACTION_PAGE_LOAD } from '../../../../../common/transaction_types';
 import {
   PROCESSOR_EVENT,

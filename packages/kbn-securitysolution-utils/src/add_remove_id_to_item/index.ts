@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 
 /**
  * This is useful for when you have arrays without an ID and need to add one for

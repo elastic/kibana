@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid/v4';
+import { v4 as uuid } from 'uuid';
 import {
   AGG_TYPE,
   COLOR_MAP_TYPE,

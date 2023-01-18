@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid/v4';
+import { v4 as uuid } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import type { Query } from '@kbn/es-query';
 import type { SerializableRecord } from '@kbn/utility-types';

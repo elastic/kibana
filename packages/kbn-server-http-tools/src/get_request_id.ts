@@ -7,7 +7,7 @@
  */
 
 import { Request } from '@hapi/hapi';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 
 export function getRequestId(
   request: Request,

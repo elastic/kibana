@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { RulesClient, ConstructorOptions } from '../rules_client';
 import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';

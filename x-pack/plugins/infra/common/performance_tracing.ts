@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 
 export const tracingSpanRT = rt.type({
   duration: rt.number,

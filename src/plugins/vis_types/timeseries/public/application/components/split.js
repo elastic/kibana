@@ -8,7 +8,7 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { get } from 'lodash';
 import { SplitByTerms } from './splits/terms';
 import { SplitByFilter } from './splits/filter';

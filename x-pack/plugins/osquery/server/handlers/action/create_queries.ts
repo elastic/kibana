@@ -6,7 +6,7 @@
  */
 
 import { isEmpty, map, pickBy } from 'lodash';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import type { Ecs } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 

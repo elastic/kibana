@@ -10,7 +10,7 @@ import React, { useMemo } from 'react';
 import { Chart, BarSeries, Axis, Position, ScaleType, Settings } from '@elastic/charts';
 import { getOr, get, isNumber } from 'lodash/fp';
 import deepmerge from 'deepmerge';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 

@@ -7,7 +7,7 @@
  */
 
 import { URL } from 'url';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import type { Request, RouteOptions } from '@hapi/hapi';
 import { fromEvent, NEVER } from 'rxjs';
 import { shareReplay, first, filter } from 'rxjs/operators';

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { FiltersParams } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { FiltersColumn, FiltersSeries } from './types';
 

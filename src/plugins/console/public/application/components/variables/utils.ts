@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import type { DevToolsVariable } from './variables_flyout';
 
 export const editVariable = (

@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { uniq } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
@@ -133,15 +133,15 @@ export async function updateTagsBatch(
       refresh: true,
       wait_for_completion: true,
       script: {
-        source: `   
+        source: `
       if (ctx._source.tags == null) {
         ctx._source.tags = [];
       }
-      if (params.tagsToAdd.length == 1 && params.tagsToRemove.length == 1) { 
+      if (params.tagsToAdd.length == 1 && params.tagsToRemove.length == 1) {
         ctx._source.tags.replaceAll(tag -> params.tagsToRemove[0] == tag ? params.tagsToAdd[0] : tag);
       } else {
         ctx._source.tags.removeAll(params.tagsToRemove);
-      } 
+      }
       ctx._source.tags.addAll(params.tagsToAdd);
 
       LinkedHashSet uniqueSet = new LinkedHashSet();

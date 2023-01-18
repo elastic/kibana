@@ -20,7 +20,7 @@ import {
   STYLE_TYPE,
   SYMBOLIZE_AS_TYPES,
 } from '@kbn/maps-plugin/common';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import type { MapsStartApi } from '@kbn/maps-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {

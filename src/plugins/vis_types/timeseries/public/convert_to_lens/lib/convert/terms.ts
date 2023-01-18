@@ -8,7 +8,7 @@
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { DataType, TermsParams } from '@kbn/visualizations-plugin/common';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { excludeMetaFromColumn, getFormat, isColumnWithMeta } from './column';
 import { Column, TermsColumn, TermsSeries } from './types';
 

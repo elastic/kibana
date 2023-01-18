@@ -6,7 +6,7 @@
  */
 
 import { useRef } from 'react';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 
 import { useHighlightContext, OnHighlightChangeArgs } from './highlight_context';
 

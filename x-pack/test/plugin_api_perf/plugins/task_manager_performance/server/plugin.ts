@@ -8,7 +8,7 @@
 import { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
 import { firstValueFrom, Subject } from 'rxjs';
 
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import _ from 'lodash';
 import stats from 'stats-lite';
 import prettyMilliseconds from 'pretty-ms';

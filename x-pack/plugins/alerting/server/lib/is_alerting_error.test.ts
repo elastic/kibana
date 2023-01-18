@@ -8,7 +8,7 @@
 import { isAlertSavedObjectNotFoundError, isEsUnavailableError } from './is_alerting_error';
 import { ErrorWithReason } from './error_with_reason';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { RuleExecutionStatusErrorReasons } from '../types';
 
 describe('isAlertSavedObjectNotFoundError', () => {

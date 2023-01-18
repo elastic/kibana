@@ -6,7 +6,7 @@
  */
 
 import { encode } from '@kbn/rison';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { set } from '@kbn/safer-lodash-set';
 import { LinkDescriptor } from '@kbn/observability-plugin/public';
 import { TIMESTAMP_FIELD } from '../../../../../../common/constants';

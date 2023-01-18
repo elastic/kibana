@@ -9,7 +9,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiTextAlign } from '@elastic/eui';
 import React, { useEffect, useMemo, useState, useCallback, FC } from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 
 import {
   getFlightOptionsAsync,

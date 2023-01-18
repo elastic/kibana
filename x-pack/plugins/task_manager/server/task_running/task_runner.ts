@@ -12,7 +12,7 @@
  */
 
 import apm from 'elastic-apm-node';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { withSpan } from '@kbn/apm-utils';
 import { identity, defaults, flow, omit } from 'lodash';
 import { Logger, SavedObjectsErrorHelpers, ExecutionContextStart } from '@kbn/core/server';

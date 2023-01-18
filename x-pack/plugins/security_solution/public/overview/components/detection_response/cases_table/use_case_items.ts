@@ -10,7 +10,7 @@ import { useState, useEffect, useMemo } from 'react';
 import type { CaseStatuses } from '@kbn/cases-plugin/common';
 import type { Cases } from '@kbn/cases-plugin/common/ui';
 
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { APP_ID } from '../../../../../common/constants';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useKibana } from '../../../../common/lib/kibana';

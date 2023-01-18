@@ -20,7 +20,7 @@ import {
   ReadOperations,
   AlertingAuthorizationEntity,
 } from './alerting_authorization';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { RecoveredActionGroup } from '../../common';
 import { RegistryRuleType } from '../rule_type_registry';
 import { AlertingAuthorizationFilterType } from './alerting_authorization_kuery';

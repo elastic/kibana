@@ -6,7 +6,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import { TrustedAppGenerator } from '../../../../common/endpoint/data_generators/trusted_app_generator';

@@ -14,7 +14,7 @@ import {
   GenericColumnWithMeta,
   FormatParams,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import type { Metric, Series } from '../../../../common/types';
 import { DATA_FORMATTERS } from '../../../../common/enums';
 import { getTimeScale } from '../metrics';

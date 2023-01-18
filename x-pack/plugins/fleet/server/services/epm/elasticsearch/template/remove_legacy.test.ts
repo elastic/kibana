@@ -12,7 +12,7 @@ import type {
 
 import type { Logger } from '@kbn/core/server';
 
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 

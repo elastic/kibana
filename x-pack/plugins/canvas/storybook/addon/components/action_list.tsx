@@ -8,7 +8,7 @@
 import React, { FC, useEffect, useState } from 'react';
 import { EuiSelectable, EuiSelectableOption } from '@elastic/eui';
 import addons from '@storybook/addons';
-import uuid from 'uuid/v4';
+import { v4 as uuid } from 'uuid';
 
 import { EVENTS } from '../constants';
 import { RecordedAction, RecordedPayload } from '../types';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { getActionsMigrations } from './actions_migrations';
 import { RawAction } from '../types';
 import { SavedObjectUnsanitizedDoc } from '@kbn/core/server';

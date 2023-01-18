@@ -18,7 +18,7 @@ import {
 import { createPromiseFromStreams } from '@kbn/utils';
 import { SavedObjectsClientContract } from '@kbn/core/server';
 import { chunk } from 'lodash/fp';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 
 import { importExceptionLists } from './utils/import/import_exception_lists';
 import { importExceptionListItems } from './utils/import/import_exception_list_items';

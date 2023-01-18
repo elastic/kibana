@@ -6,7 +6,7 @@
  */
 
 import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 
 export function createServiceDependencyDocs({
   time,

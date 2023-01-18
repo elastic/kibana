@@ -12,7 +12,7 @@ import {
   getConnectorWithInvalidatedFields,
   getRuleWithInvalidatedFields,
 } from './value_validators';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { Rule, IErrorObject, UserConfiguredActionConnector } from '../../types';
 
 describe('throwIfAbsent', () => {

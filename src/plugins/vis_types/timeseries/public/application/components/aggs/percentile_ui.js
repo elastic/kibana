@@ -13,7 +13,7 @@ import _ from 'lodash';
 import { TSVB_DEFAULT_COLOR } from '../../../../common/constants';
 import { collectionActions } from '../lib/collection_actions';
 import { AddDeleteButtons } from '../add_delete_buttons';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import {
   htmlIdGenerator,
   EuiFlexGroup,

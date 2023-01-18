@@ -7,7 +7,7 @@
 
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import moment from 'moment';
 
 import { isAgentUpgradeable } from '../../../common/services';

@@ -9,7 +9,7 @@ import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import moment from 'moment';
 import React from 'react';
 import styled from 'styled-components';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 
 import type { Note } from '../../../common/lib/note';
 

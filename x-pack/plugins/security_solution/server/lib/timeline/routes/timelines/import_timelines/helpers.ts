@@ -7,7 +7,7 @@
 
 import { has, chunk, omit } from 'lodash/fp';
 import type { Readable } from 'stream';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { createPromiseFromStreams } from '@kbn/utils';
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';

@@ -8,7 +8,7 @@
 
 import './_dashboard_container.scss';
 
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import classNames from 'classnames';
 import { EuiLoadingElastic } from '@elastic/eui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';

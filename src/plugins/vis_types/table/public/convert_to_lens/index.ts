@@ -13,7 +13,7 @@ import {
   getVisSchemas,
   getDataViewByIndexPatternId,
 } from '@kbn/visualizations-plugin/public';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { getDataViewsStart } from '../services';
 import { getConfiguration } from './configurations';
 import { ConvertTableToLensVisualization } from './types';

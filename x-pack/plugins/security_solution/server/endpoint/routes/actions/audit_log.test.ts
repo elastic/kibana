@@ -31,7 +31,7 @@ import {
   createRouteHandlerContext,
 } from '../../mocks';
 import { registerActionAuditLogRoutes } from './audit_log';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import type { Results } from './mocks';
 import { mockAuditLogSearchResult } from './mocks';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';

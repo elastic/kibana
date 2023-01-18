@@ -13,7 +13,7 @@ import { Logger } from '@kbn/core/server';
 import { asOk } from './lib/result_type';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import moment from 'moment';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { TaskRunningStage } from './task_running';
 
 describe('TaskPool', () => {

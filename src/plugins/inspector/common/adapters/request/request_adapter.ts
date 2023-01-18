@@ -7,7 +7,7 @@
  */
 
 import { EventEmitter } from 'events';
-import uuid from 'uuid/v4';
+import { v4 as uuid } from 'uuid';
 import { RequestResponder } from './request_responder';
 import { Request, RequestParams, RequestStatus } from './types';
 

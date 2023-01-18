@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { Filter, Query } from '@kbn/es-query';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import * as i18n from './translations';
 import { KpiPanel } from '../common/components';
 import { HeaderSection } from '../../../../common/components/header_section';

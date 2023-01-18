@@ -6,7 +6,7 @@
  */
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { SpanLink } from '@kbn/apm-plugin/typings/es_schemas/raw/fields/span_links';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 
 function getProducerInternalOnly() {
   const producerInternalOnlyInstance = apm

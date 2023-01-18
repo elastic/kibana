@@ -10,7 +10,7 @@ import dateMath from '@kbn/datemath';
 import expect from '@kbn/expect';
 import moment from 'moment';
 import { set } from '@kbn/safer-lodash-set';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import {
   getRuleExecutionResultsUrl,
   RuleExecutionStatus,

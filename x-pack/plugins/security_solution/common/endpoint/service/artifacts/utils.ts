@@ -9,7 +9,7 @@ import type {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { BY_POLICY_ARTIFACT_TAG_PREFIX, GLOBAL_ARTIFACT_TAG } from './constants';
 
 const POLICY_ID_START_POSITION = BY_POLICY_ARTIFACT_TAG_PREFIX.length;

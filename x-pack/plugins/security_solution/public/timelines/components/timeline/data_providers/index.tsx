@@ -8,7 +8,7 @@
 import { rgba } from 'polished';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';

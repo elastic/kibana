@@ -7,7 +7,7 @@
  */
 
 import { BUCKET_TYPES } from '@kbn/data-plugin/common';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { DataType, TermsParams } from '../../types';
 import { getFieldNameFromField, isColumnWithMeta } from '../utils';
 import { convertToSchemaConfig } from '../../../vis_schemas';

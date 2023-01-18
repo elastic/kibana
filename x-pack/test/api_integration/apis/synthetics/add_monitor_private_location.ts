@@ -5,7 +5,7 @@
  * 2.0.
  */
 import semver from 'semver';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { ConfigKey, HTTPFields } from '@kbn/synthetics-plugin/common/runtime_types';
 import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters';

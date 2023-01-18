@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { Reducer, useReducer, Dispatch } from 'react';
 import { DeserializeResult } from '../deserialize';
 import { getValue, setValue } from '../utils';

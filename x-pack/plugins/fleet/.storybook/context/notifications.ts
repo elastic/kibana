@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { of } from 'rxjs';
 import { action } from '@storybook/addon-actions';
 import type { NotificationsStart } from '@kbn/core/public';

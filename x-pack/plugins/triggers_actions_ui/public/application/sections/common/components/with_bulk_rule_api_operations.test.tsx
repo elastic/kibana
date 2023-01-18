@@ -7,7 +7,7 @@
 
 import * as React from 'react';
 import { shallow, mount } from 'enzyme';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { withBulkRuleOperations, ComponentOpts } from './with_bulk_rule_api_operations';
 import * as ruleApi from '../../../lib/rule_api';
 import { SortField } from '../../../lib/rule_api/load_execution_log_aggregations';

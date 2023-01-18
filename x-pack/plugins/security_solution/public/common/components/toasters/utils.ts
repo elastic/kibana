@@ -6,7 +6,7 @@
  */
 
 import type React from 'react';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { isError } from 'lodash/fp';
 import { isAppError } from '@kbn/securitysolution-t-grid';
 

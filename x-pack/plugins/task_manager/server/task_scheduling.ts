@@ -8,7 +8,7 @@
 import { filter, take } from 'rxjs/operators';
 import pMap from 'p-map';
 
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { chunk, pick } from 'lodash';
 import { Subject } from 'rxjs';
 import agent from 'elastic-apm-node';

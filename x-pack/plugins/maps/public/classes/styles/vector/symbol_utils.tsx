@@ -7,7 +7,7 @@
 
 import React, { CSSProperties } from 'react';
 import xml2js from 'xml2js';
-import uuid from 'uuid/v4';
+import { v4 as uuid } from 'uuid';
 import { Canvg } from 'canvg';
 // @ts-expect-error
 import calcSDF from 'bitmap-sdf';

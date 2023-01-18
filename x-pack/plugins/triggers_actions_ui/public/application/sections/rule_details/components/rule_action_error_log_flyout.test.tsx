@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { RuleActionErrorLogFlyout } from './rule_action_error_log_flyout';

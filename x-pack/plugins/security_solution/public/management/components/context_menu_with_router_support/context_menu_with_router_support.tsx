@@ -9,7 +9,7 @@ import type { CSSProperties, HTMLAttributes } from 'react';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import type { CommonProps, EuiContextMenuPanelProps, EuiPopoverProps } from '@elastic/eui';
 import { EuiContextMenuPanel, EuiPopover, EuiPopoverTitle, EuiLoadingContent } from '@elastic/eui';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import type { ContextMenuItemNavByRouterProps } from './context_menu_item_nav_by_router';
 import { ContextMenuItemNavByRouter } from './context_menu_item_nav_by_router';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import * as t from 'io-ts';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 
 import { SHARED_EXCEPTION_LIST_URL } from '../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';

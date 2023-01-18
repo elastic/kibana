@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import _ from 'lodash';
 import { newMetricAggFn } from './new_metric_agg_fn';
 import { STACKED_OPTIONS } from '../../visualizations/constants';

@@ -7,7 +7,7 @@
 
 import React, { FC } from 'react';
 import { isObject, isDate } from 'lodash';
-import uuid from 'uuid/v4';
+import { v4 as uuid } from 'uuid';
 import { EuiTreeView } from '@elastic/eui';
 
 import { Node } from '@elastic/eui/src/components/tree_view/tree_view';

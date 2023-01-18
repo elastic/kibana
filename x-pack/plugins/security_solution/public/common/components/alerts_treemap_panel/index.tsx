@@ -11,7 +11,7 @@ import { EuiProgress } from '@elastic/eui';
 import type { Filter, Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import React, { useEffect, useMemo } from 'react';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 
 import { useGlobalTime } from '../../containers/use_global_time';
 import { AlertsTreemap, DEFAULT_MIN_CHART_HEIGHT } from '../alerts_treemap';

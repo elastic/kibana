@@ -7,7 +7,7 @@
 import type { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 import { Installation } from '@kbn/fleet-plugin/common';
-import uuid from 'uuid/v4';
+import { v4 as uuid } from 'uuid';
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';

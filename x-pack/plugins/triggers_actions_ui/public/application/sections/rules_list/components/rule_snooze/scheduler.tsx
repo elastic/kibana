@@ -9,7 +9,7 @@ import React, { useState, useCallback, useMemo } from 'react';
 import moment, { Moment } from 'moment';
 import { i18n } from '@kbn/i18n';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import {
   EuiDatePicker,
   EuiDatePickerRange,

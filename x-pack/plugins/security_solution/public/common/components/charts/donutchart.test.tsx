@@ -15,7 +15,7 @@ import { DonutChart } from './donutchart';
 import { DraggableLegend } from './draggable_legend';
 import { ChartLabel } from '../../../overview/components/detection_response/alerts_by_status/chart_label';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 
 jest.mock('@elastic/charts', () => {
   const actual = jest.requireActual('@elastic/charts');

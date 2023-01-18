@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { journey, step, expect, Page } from '@elastic/synthetics';
 import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
 import { FormMonitorType } from '../../../common/runtime_types';

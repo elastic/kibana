@@ -23,11 +23,9 @@ jest.mock('../../../../../kibana_services', () => {
   };
 });
 
-jest.mock('uuid/v4', () => {
-  return function () {
-    return '12345';
-  };
-});
+jest.mock('uuid', () => jest.fn().mockReturnValue({
+  v4: () => '12345'
+}));
 
 import { createLayerDescriptor } from './create_layer_descriptor';
 import { OBSERVABILITY_LAYER_TYPE } from './layer_select';

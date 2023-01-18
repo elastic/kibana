@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useState, useCallback, memo } from 'react';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,

@@ -6,7 +6,7 @@
  */
 
 import sinon from 'sinon';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { getMigrations } from '.';
 import { RawRule } from '../../types';
 import { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from '@kbn/core/server';

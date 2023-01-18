@@ -6,7 +6,7 @@
  */
 
 import { of, Subject } from 'rxjs';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { sleep } from '../test_utils';

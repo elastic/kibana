@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 
 const defaultPrefStorageKey = 'globalSearch:defaultPref';
 

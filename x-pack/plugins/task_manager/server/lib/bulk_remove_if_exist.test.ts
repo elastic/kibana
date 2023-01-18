@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { bulkRemoveIfExist } from './bulk_remove_if_exist';
 import { taskStoreMock } from '../task_store.mock';

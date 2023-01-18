@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { ControlPanelState, OptionsListEmbeddableInput } from '../../common';
 import {
   DEFAULT_CONTROL_GROW,

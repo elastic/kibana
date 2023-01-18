@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import path from 'path';
-import uuid from 'uuid/v4';
+import { v4 as uuid } from 'uuid';
 
 export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['geoFileUpload', 'maps']);

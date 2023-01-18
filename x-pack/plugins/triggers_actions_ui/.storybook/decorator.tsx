@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { action } from '@storybook/addon-actions';
 import { DecoratorFn } from '@storybook/react';
 import { EMPTY, of } from 'rxjs';

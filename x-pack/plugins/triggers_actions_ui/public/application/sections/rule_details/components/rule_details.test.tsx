@@ -6,7 +6,7 @@
  */
 
 import * as React from 'react';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { shallow } from 'enzyme';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from '@testing-library/react';

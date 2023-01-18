@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { DataType, FormatParams } from '../../types';
 import { SchemaConfig } from '../../../types';

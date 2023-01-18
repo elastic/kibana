@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { ElasticsearchClient } from '@kbn/core/server';
 import type {
   Description,

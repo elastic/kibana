@@ -6,7 +6,7 @@
  */
 
 import { SavedObjectProviderRegistry } from './saved_object_provider_registry';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { KibanaRequest } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 

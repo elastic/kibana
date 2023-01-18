@@ -12,7 +12,7 @@ import {
   IEmbeddable,
   PanelState,
 } from '@kbn/embeddable-plugin/public';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 
 import {
   IPanelPlacementArgs,

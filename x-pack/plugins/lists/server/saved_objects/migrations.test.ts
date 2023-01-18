@@ -6,7 +6,7 @@
  */
 
 import { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import {
   ENDPOINT_LIST_ID,
   ENDPOINT_TRUSTED_APPS_LIST_ID,

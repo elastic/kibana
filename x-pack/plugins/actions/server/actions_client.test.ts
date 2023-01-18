@@ -27,7 +27,7 @@ import {
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { actionExecutorMock } from './lib/action_executor.mock';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { ActionsAuthorization } from './authorization/actions_authorization';
 import {
   getAuthorizationModeBySource,

@@ -7,7 +7,7 @@
 
 import { partition } from 'lodash/fp';
 import pMap from 'p-map';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { RuleAction } from '@kbn/securitysolution-io-ts-alerting-types';

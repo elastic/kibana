@@ -5,7 +5,7 @@
  * 2.0.
  */
 import moment from 'moment';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { QUERY_RULE_TYPE_ID, SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import type { Logger, StartServicesAccessor } from '@kbn/core/server';

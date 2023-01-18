@@ -8,7 +8,7 @@
 import { Observable, of, Subject } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { merge } from 'lodash';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { httpServiceMock, docLinksServiceMock } from '@kbn/core/server/mocks';
 import { healthRoute } from './health';
 import { mockHandlerArguments } from './_mock_handler_arguments';

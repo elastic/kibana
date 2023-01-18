@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid/v4';
+import { v4 as uuid } from 'uuid';
 import { SOURCE_DATA_REQUEST_ID } from '../../../../../common/constants';
 import { Timeslice, VectorSourceRequestMeta } from '../../../../../common/descriptor_types';
 import { DataRequest } from '../../../util/data_request';

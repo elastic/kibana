@@ -17,7 +17,7 @@ import {
   EuiPopover,
   EuiIcon,
 } from '@elastic/eui';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { useDispatch } from 'react-redux';
 
 import type { BrowserFields } from '../../../../common/containers/source';

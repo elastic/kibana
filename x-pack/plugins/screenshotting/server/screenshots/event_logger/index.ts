@@ -7,7 +7,7 @@
 
 import { Logger, LogMeta } from '@kbn/core/server';
 import apm from 'elastic-apm-node';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { CaptureResult } from '..';
 import { PLUGIN_ID } from '../../../common';
 import { ConfigType } from '../../config';

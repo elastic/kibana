@@ -8,7 +8,7 @@
 
 import { AggParamsRange, AggParamsHistogram } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { RANGE_MODES } from '../../constants';
 import { DataType, RangeParams } from '../../types';
 import { getFieldNameFromField } from '../utils';

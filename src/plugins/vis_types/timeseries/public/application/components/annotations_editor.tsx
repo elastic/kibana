@@ -7,7 +7,7 @@
  */
 
 import React, { useCallback } from 'react';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { EuiSpacer, EuiTitle, EuiButton, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataView } from '@kbn/data-views-plugin/public';

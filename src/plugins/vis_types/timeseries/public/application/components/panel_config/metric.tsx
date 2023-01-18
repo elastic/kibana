@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Component } from 'react';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import {
   htmlIdGenerator,
   EuiTabs,

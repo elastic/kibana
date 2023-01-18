@@ -5,7 +5,7 @@
  * 2.0.
  */
 import fetch, { BodyInit, HeadersInit, Response } from 'node-fetch';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import expect from '@kbn/expect';
 import { format as formatUrl } from 'url';
 import {

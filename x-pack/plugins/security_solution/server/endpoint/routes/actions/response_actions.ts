@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import moment from 'moment';
 
 import type { RequestHandler, Logger } from '@kbn/core/server';

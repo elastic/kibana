@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid/v4';
+import { v4 as uuid } from 'uuid';
 
 export function getId(type: string): string {
   return `${type}-${uuid()}`;

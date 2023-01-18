@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { merge } from 'lodash';
 import type { Client } from '@elastic/elasticsearch';
 import { makeTls, TlsProps } from './make_tls';

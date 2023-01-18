@@ -11,7 +11,7 @@ import {
   AuthorizationMode,
 } from './get_authorization_mode_by_source';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { asSavedObjectExecutionSource } from '../lib';
 
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();

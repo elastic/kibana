@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import {
   EuiPageContent_Deprecated as EuiPageContent,

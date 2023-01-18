@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { cloneDeep } from 'lodash';
-import uuid from 'uuid/v4';
+import { v4 as uuid } from 'uuid';
 import type {
   FindFileStructureResponse,
   IngestPipeline,

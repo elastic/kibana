@@ -6,7 +6,7 @@
  */
 
 import seedrandom from 'seedrandom';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 const OS_FAMILY = ['windows', 'macos', 'linux'];

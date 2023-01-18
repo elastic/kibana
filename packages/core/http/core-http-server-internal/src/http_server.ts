@@ -9,7 +9,7 @@
 import { Server, Request } from '@hapi/hapi';
 import HapiStaticFiles from '@hapi/inert';
 import url from 'url';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import {
   createServer,
   getListenerOptions,

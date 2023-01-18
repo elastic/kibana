@@ -12,7 +12,7 @@ import type { Query } from '@kbn/es-query';
 import { asyncMap } from '@kbn/std';
 import React, { ReactElement } from 'react';
 import { EuiIcon } from '@elastic/eui';
-import uuid from 'uuid/v4';
+import { v4 as uuid } from 'uuid';
 import { LAYER_TYPE, MAX_ZOOM, MIN_ZOOM } from '../../../../common/constants';
 import { DataRequest } from '../../util/data_request';
 import { copyPersistentState } from '../../../reducers/copy_persistent_state';

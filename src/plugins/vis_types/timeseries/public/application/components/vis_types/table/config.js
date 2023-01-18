@@ -8,7 +8,7 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import { last } from 'lodash';
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';

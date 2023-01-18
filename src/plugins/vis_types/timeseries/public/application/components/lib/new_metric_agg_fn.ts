@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import type { Metric } from '../../../../common/types';
 

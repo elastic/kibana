@@ -6,7 +6,7 @@
  */
 
 import React, { lazy } from 'react';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { ActionTypeModel, ActionTypeRegistryContract } from '../types';
 
 const createActionTypeRegistryMock = () => {

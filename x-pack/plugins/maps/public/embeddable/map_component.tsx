@@ -6,7 +6,7 @@
  */
 
 import React, { Component, RefObject } from 'react';
-import uuid from 'uuid/v4';
+import { v4 as uuid } from 'uuid';
 import { EuiLoadingChart } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import type { Query, TimeRange } from '@kbn/es-query';

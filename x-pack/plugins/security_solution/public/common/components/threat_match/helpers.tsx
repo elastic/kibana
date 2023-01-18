@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import { addIdToItem } from '@kbn/securitysolution-utils';
 import type { ThreatMap, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';

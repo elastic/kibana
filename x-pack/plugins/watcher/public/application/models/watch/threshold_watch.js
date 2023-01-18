@@ -6,7 +6,7 @@
  */
 
 import { BaseWatch } from './base_watch';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { WATCH_TYPES, SORT_ORDERS, COMPARATORS } from '../../../../common/constants';
 import { getTimeUnitLabel } from '../../lib/get_time_unit_label';
 import { i18n } from '@kbn/i18n';

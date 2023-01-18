@@ -8,7 +8,7 @@
 import { set } from '@kbn/safer-lodash-set/fp';
 import { getOr, isEmpty } from 'lodash/fp';
 import type { Action } from 'typescript-fsa';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import type { Dispatch } from 'redux';
 import deepMerge from 'deepmerge';
 
