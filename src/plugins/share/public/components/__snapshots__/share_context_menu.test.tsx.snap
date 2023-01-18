@@ -14,7 +14,7 @@ exports[`shareContextMenuExtensions should sort ascending on sort order first an
             urlService={Object {}}
           />,
           "id": 1,
-          "title": "Permalink",
+          "title": "Get link",
         },
         Object {
           "content": <div>
@@ -34,9 +34,9 @@ exports[`shareContextMenuExtensions should sort ascending on sort order first an
           "id": 4,
           "items": Array [
             Object {
-              "data-test-subj": "sharePanel-Permalinks",
+              "data-test-subj": "sharePanel-Getlinks",
               "icon": "link",
-              "name": "Permalinks",
+              "name": "Get links",
               "panel": 1,
             },
             Object {
@@ -73,7 +73,7 @@ exports[`should only render permalink panel when there are no other panels 1`] =
             urlService={Object {}}
           />,
           "id": 1,
-          "title": "Permalink",
+          "title": "Get link",
         },
       ]
     }
@@ -96,7 +96,7 @@ exports[`should render context menu panel when there are more than one panel 1`]
             urlService={Object {}}
           />,
           "id": 1,
-          "title": "Permalink",
+          "title": "Get link",
         },
         Object {
           "content": <UrlPanelContent
@@ -118,9 +118,9 @@ exports[`should render context menu panel when there are more than one panel 1`]
               "panel": 2,
             },
             Object {
-              "data-test-subj": "sharePanel-Permalinks",
+              "data-test-subj": "sharePanel-Getlinks",
               "icon": "link",
-              "name": "Permalinks",
+              "name": "Get links",
               "panel": 1,
             },
           ],
