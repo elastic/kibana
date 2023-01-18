@@ -1296,6 +1296,8 @@
       "@kbn/watcher-plugin/*": ["x-pack/plugins/watcher/*"],
       "@kbn/web-worker-stub": ["packages/kbn-web-worker-stub"],
       "@kbn/web-worker-stub/*": ["packages/kbn-web-worker-stub/*"],
+      "@kbn/whereis-pkg-cli": ["packages/kbn-whereis-pkg-cli"],
+      "@kbn/whereis-pkg-cli/*": ["packages/kbn-whereis-pkg-cli/*"],
       "@kbn/yarn-lock-validator": ["packages/kbn-yarn-lock-validator"],
       "@kbn/yarn-lock-validator/*": ["packages/kbn-yarn-lock-validator/*"],
       // END AUTOMATED PACKAGE LISTING
