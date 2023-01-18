@@ -14,6 +14,7 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import type { RequestAdapter } from '@kbn/inspector-plugin/public';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
+import type { Subject } from 'rxjs';
 
 /**
  * The fetch status of a unified histogram request
@@ -52,10 +53,6 @@ export type UnifiedHistogramAdapters = Partial<DefaultInspectorAdapters>;
  * Emitted when the histogram loading status changes
  */
 export interface UnifiedHistogramChartLoadEvent {
-  /**
-   * True if loading is complete
-   */
-  complete: boolean;
   /**
    * Inspector adapters for the request
    */
@@ -117,3 +114,20 @@ export interface UnifiedHistogramBreakdownContext {
    */
   field?: DataViewField;
 }
+
+/**
+ * Message to refetch the chart and total hits
+ */
+export interface UnifiedHistogramRefetchMessage {
+  type: 'refetch';
+}
+
+/**
+ * Unified histogram input message
+ */
+export type UnifiedHistogramInputMessage = UnifiedHistogramRefetchMessage;
+
+/**
+ * Unified histogram input observable
+ */
+export type UnifiedHistogramInput$ = Subject<UnifiedHistogramInputMessage>;

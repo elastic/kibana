@@ -71,6 +71,16 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/4xx_response"
+                }
+              }
+            }
           }
         },
         "servers": [
@@ -107,6 +117,16 @@
         "responses": {
           "204": {
             "description": "Indicates a successful call."
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/4xx_response"
+                }
+              }
+            }
           }
         },
         "servers": [
@@ -159,6 +179,16 @@
                   "updateCaseResponse": {
                     "$ref": "#/components/examples/update_case_response"
                   }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/4xx_response"
                 }
               }
             }
@@ -419,6 +449,16 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/4xx_response"
+                }
+              }
+            }
           }
         },
         "servers": [
@@ -479,6 +519,16 @@
                       "title": "security_case"
                     }
                   ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/4xx_response"
                 }
               }
             }
@@ -646,6 +696,16 @@
                       }
                     }
                   }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/4xx_response"
                 }
               }
             }
@@ -882,6 +942,16 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/4xx_response"
+                }
+              }
+            }
           }
         },
         "servers": [
@@ -1104,6 +1174,16 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/4xx_response"
+                }
+              }
+            }
           }
         },
         "servers": [
@@ -1184,6 +1264,16 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/4xx_response"
+                }
+              }
+            }
           }
         },
         "servers": [
@@ -1253,6 +1343,16 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/4xx_response"
+                }
+              }
+            }
           }
         },
         "servers": [
@@ -1307,6 +1407,16 @@
                   "getStatusResponse": {
                     "$ref": "#/components/examples/get_status_response"
                   }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/4xx_response"
                 }
               }
             }
@@ -1373,6 +1483,16 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/4xx_response"
+                }
+              }
+            }
           }
         },
         "servers": [
@@ -1428,6 +1548,16 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/4xx_response"
+                }
+              }
+            }
           }
         },
         "servers": [
@@ -1474,6 +1604,16 @@
                   "getCaseAlertsResponse": {
                     "$ref": "#/components/examples/get_case_alerts_response"
                   }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/4xx_response"
                 }
               }
             }
@@ -1540,6 +1680,16 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/4xx_response"
+                }
+              }
+            }
           }
         },
         "servers": [
@@ -1569,6 +1719,16 @@
         "responses": {
           "204": {
             "description": "Indicates a successful call."
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/4xx_response"
+                }
+              }
+            }
           }
         },
         "servers": [
@@ -1625,6 +1785,16 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/4xx_response"
+                }
+              }
+            }
           }
         },
         "servers": [
@@ -1656,6 +1826,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/case_response_properties"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/4xx_response"
                 }
               }
             }
@@ -1698,6 +1878,16 @@
         "responses": {
           "204": {
             "description": "Indicates a successful call."
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/4xx_response"
+                }
+              }
+            }
           }
         },
         "servers": [
@@ -1743,6 +1933,16 @@
                   "getCaseCommentResponse": {
                     "$ref": "#/components/examples/get_comment_response"
                   }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/4xx_response"
                 }
               }
             }
@@ -1807,6 +2007,16 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/4xx_response"
+                }
+              }
+            }
           }
         },
         "servers": [
@@ -1853,6 +2063,16 @@
                   "getCaseActivityResponse": {
                     "$ref": "#/components/examples/get_case_activity_response"
                   }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/4xx_response"
                 }
               }
             }
@@ -3005,6 +3225,23 @@
           "version": {
             "type": "string",
             "example": "WzUzMiwxXQ=="
+          }
+        }
+      },
+      "4xx_response": {
+        "type": "object",
+        "title": "Unsuccessful cases API response",
+        "properties": {
+          "error": {
+            "type": "string",
+            "example": "Unauthorized"
+          },
+          "message": {
+            "type": "string"
+          },
+          "statusCode": {
+            "type": "integer",
+            "example": 401
           }
         }
       },

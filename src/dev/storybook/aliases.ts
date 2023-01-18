@@ -10,7 +10,8 @@
 export const storybookAliases = {
   apm: 'x-pack/plugins/apm/.storybook',
   canvas: 'x-pack/plugins/canvas/storybook',
-  cell_actions: 'packages/cell-actions/.storybook',
+  cases: 'packages/kbn-cases-components/.storybook',
+  cell_actions: 'packages/kbn-cell-actions/.storybook',
   ci_composite: '.ci/.storybook',
   cloud_chat: 'x-pack/plugins/cloud_integrations/cloud_chat/.storybook',
   coloring: 'packages/kbn-coloring/.storybook',

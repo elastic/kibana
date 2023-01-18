@@ -23,13 +23,14 @@ import {
   RECOVERED_COLOR,
   TOOLTIP_DATE_FORMAT,
 } from './constants';
-import { Alert } from '../../../../../hooks/use_load_alert_summary';
+import { Alert } from '../types';
 
 export interface AlertsSummaryWidgetFullSizeProps {
   activeAlertCount: number;
   activeAlerts: Alert[];
   recoveredAlertCount: number;
   recoveredAlerts: Alert[];
+  dateFormat?: string;
 }
 
 export const AlertsSummaryWidgetFullSize = ({
@@ -37,6 +38,7 @@ export const AlertsSummaryWidgetFullSize = ({
   activeAlerts,
   recoveredAlertCount,
   recoveredAlerts,
+  dateFormat,
 }: AlertsSummaryWidgetFullSizeProps) => {
   const isDarkMode = useUiSetting<boolean>('theme:darkMode');
   const { euiTheme } = useEuiTheme();
@@ -106,7 +108,8 @@ export const AlertsSummaryWidgetFullSize = ({
           // TODO Use the EUI charts theme https://github.com/elastic/kibana/issues/148297
           theme={chartTheme}
           tooltip={{
-            headerFormatter: (tooltip) => moment(tooltip.value).format(TOOLTIP_DATE_FORMAT),
+            headerFormatter: (tooltip) =>
+              moment(tooltip.value).format(dateFormat || TOOLTIP_DATE_FORMAT),
           }}
         />
         <Axis

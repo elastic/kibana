@@ -12,6 +12,9 @@ import { THREAT_INTELLIGENCE_BASE_PATH } from '@kbn/threat-intelligence-plugin/p
 import type { SourcererDataView } from '@kbn/threat-intelligence-plugin/public/types';
 import type { Store } from 'redux';
 import { useSelector } from 'react-redux';
+import { useSetUrlParams } from '../management/components/artifact_list_page/hooks/use_set_url_params';
+import { BlockListForm } from '../management/pages/blocklist/view/components/blocklist_form';
+import { BlocklistsApiClient } from '../management/pages/blocklist/services';
 import { useInvestigateInTimeline } from './use_investigate_in_timeline';
 import { getStore, inputsSelectors } from '../common/store';
 import { useKibana } from '../common/lib/kibana';
@@ -26,9 +29,10 @@ import { SiemSearchBar } from '../common/components/search_bar';
 import { useGlobalTime } from '../common/containers/use_global_time';
 import { deleteOneQuery, setQuery } from '../common/store/inputs/actions';
 import { InputsModelId } from '../common/store/inputs/constants';
+import { ArtifactFlyout } from '../management/components/artifact_list_page/components/artifact_flyout';
 
 const ThreatIntelligence = memo(() => {
-  const { threatIntelligence } = useKibana().services;
+  const { threatIntelligence, http } = useKibana().services;
   const ThreatIntelligencePlugin = threatIntelligence.getComponent();
 
   const sourcererDataView = useSourcererDataView();
@@ -43,6 +47,15 @@ const ThreatIntelligence = memo(() => {
     licenseService,
     sourcererDataView: sourcererDataView as unknown as SourcererDataView,
     getUseInvestigateInTimeline: useInvestigateInTimeline,
+
+    blockList: {
+      exceptionListApiClient: BlocklistsApiClient.getInstance(http),
+      useSetUrlParams,
+      // @ts-ignore
+      getFlyoutComponent: () => ArtifactFlyout,
+      // @ts-ignore
+      getFormComponent: () => BlockListForm,
+    },
 
     useQuery: () => useSelector(inputsSelectors.globalQuerySelector()),
     useFilters: () => useSelector(inputsSelectors.globalFiltersQuerySelector()),
