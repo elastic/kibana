@@ -42,15 +42,21 @@ export const ThreatMatchRow = ({
   eventId: string;
   isDraggable?: boolean;
 }) => {
+  const normalizeData = {
+    [REFERENCE]: [],
+    [FEED_NAME]: [],
+    [MATCHED_TYPE]: [],
+    ...data,
+  };
   const props = {
     contextId,
     eventId,
-    indicatorReference: get(data, REFERENCE)[0] as string | undefined,
-    feedName: get(data, FEED_NAME)[0] as string | undefined,
-    indicatorType: get(data, MATCHED_TYPE)[0] as string | undefined,
+    indicatorReference: get(normalizeData, REFERENCE)[0] as string | undefined,
+    feedName: get(normalizeData, FEED_NAME)[0] as string | undefined,
+    indicatorType: get(normalizeData, MATCHED_TYPE)[0] as string | undefined,
     isDraggable,
-    sourceField: get(data, MATCHED_FIELD)[0] as string,
-    sourceValue: get(data, MATCHED_ATOMIC)[0] as string,
+    sourceField: get(normalizeData, MATCHED_FIELD)[0] as string,
+    sourceValue: get(normalizeData, MATCHED_ATOMIC)[0] as string,
   };
 
   return <ThreatMatchRowView {...props} />;
