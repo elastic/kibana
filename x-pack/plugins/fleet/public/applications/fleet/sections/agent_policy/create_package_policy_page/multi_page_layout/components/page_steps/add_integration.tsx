@@ -28,6 +28,7 @@ import type { PackagePolicyValidationResults } from '../../../services';
 import { validatePackagePolicy, validationHasErrors } from '../../../services';
 import { NotObscuredByBottomBar } from '..';
 import { StepConfigurePackagePolicy, StepDefinePackagePolicy } from '../../../components';
+import { prepareInputPackagePolicyDataset } from '../../../services/prepare_input_pkg_policy_dataset';
 
 const ExpandableAdvancedSettings: React.FC = ({ children }) => {
   const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(false);
@@ -147,7 +148,11 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
     force?: boolean;
   }) => {
     setFormState('LOADING');
-    const result = await sendCreatePackagePolicy({ ...newPackagePolicy, force });
+    const { policy, forceCreateNeeded } = await prepareInputPackagePolicyDataset(newPackagePolicy);
+    const result = await sendCreatePackagePolicy({
+      ...policy,
+      force: forceCreateNeeded || force,
+    });
     setFormState('SUBMITTED');
     return result;
   };
