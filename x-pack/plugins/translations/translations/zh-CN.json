@@ -18122,7 +18122,6 @@
     "xpack.lens.indexPattern.cumulativeSumOf": "{name} 的累计和",
     "xpack.lens.indexPattern.dateHistogram.autoLongerExplanation": "要选择时间间隔，Lens 会按 {targetBarSetting} 高级设置分割指定的时间范围，并为您的数据计算最佳时间间隔。例如，当时间间隔为 4 天时，数据将分割为每小时存储桶。要配置最大条形数，请使用 {maxBarSetting} 高级设置。",
     "xpack.lens.indexPattern.dateHistogram.restrictedInterval": "由于聚合限制，时间间隔固定为 {intervalValue}。",
-    "xpack.lens.indexPattern.dateHistogramTimeShift": "在单个图层中，您无法组合上一时间范围偏移与 Date Histogram。在“{column}”中使用显式时间偏移持续时间，或替换 Date Histogram。",
     "xpack.lens.indexPattern.derivativeOf": "{name} 的差异",
     "xpack.lens.indexPattern.fieldNoOperation": "没有运算，无法使用字段 {field}",
     "xpack.lens.indexPattern.fieldsNotFound": "找不到{count, plural, other {字段}} {missingFields} {count, plural, other {}}",
