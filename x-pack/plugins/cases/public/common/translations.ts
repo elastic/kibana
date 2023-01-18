@@ -170,7 +170,7 @@ export const NO_TAGS = i18n.translate('xpack.cases.caseView.noTags', {
 });
 
 export const TITLE_REQUIRED = i18n.translate('xpack.cases.createCase.titleFieldRequiredError', {
-  defaultMessage: 'A title is required.',
+  defaultMessage: 'A name is required.',
 });
 
 export const CONFIGURE_CASES_PAGE_TITLE = i18n.translate('xpack.cases.configureCases.headerTitle', {
