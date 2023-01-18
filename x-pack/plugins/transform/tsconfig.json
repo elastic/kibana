@@ -46,6 +46,8 @@
     "@kbn/field-types",
     "@kbn/ml-nested-property",
     "@kbn/ml-is-defined",
+    "@kbn/ml-date-picker",
+    "@kbn/ml-url-state",
   ],
   "exclude": [
     "target/**/*",
