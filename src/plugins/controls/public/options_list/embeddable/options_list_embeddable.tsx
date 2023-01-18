@@ -41,6 +41,7 @@ import { OptionsListControl } from '../components/options_list_control';
 import { ControlsDataViewsService } from '../../services/data_views/types';
 import { ControlsOptionsListService } from '../../services/options_list/types';
 import { OptionsListField } from '../../../common/options_list/types';
+import { OptionsListStrings } from '../components/options_list_strings';
 
 const diffDataFetchProps = (
   last?: OptionsListDataFetchProps,
@@ -111,6 +112,10 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
     this.initialize();
   }
+
+  public getInputPlaceHolder = () =>
+    this.reduxEmbeddableTools.getState().explicitInput.placeholder ??
+    OptionsListStrings.control.getPlaceholder();
 
   private initialize = async () => {
     const { selectedOptions: initialSelectedOptions } = this.getInput();
@@ -268,7 +273,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     return { dataView: this.dataView, field: this.field! };
   };
 
-  private runOptionsListQuery = async () => {
+  private runOptionsListQuery = async (clearCache: boolean = false) => {
     const {
       dispatch,
       getState,
@@ -307,6 +312,9 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
               mode: 'absolute' as 'absolute',
             }
           : globalTimeRange;
+      if (clearCache) {
+        this.optionsListService.clearOptionsListCache();
+      }
       const { suggestions, invalidSelections, totalCardinality, rejected } =
         await this.optionsListService.runOptionsListRequest(
           {
@@ -405,8 +413,8 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     return [newFilter];
   };
 
-  reload = () => {
-    this.runOptionsListQuery();
+  reload = (clearCache: boolean = false) => {
+    this.runOptionsListQuery(clearCache);
   };
 
   public destroy = () => {

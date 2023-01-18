@@ -1,3 +1,5 @@
+@import '../../control_group/control_group.scss';
+
 .optionsList__anchorOverride {
   display:block;
 }
@@ -85,4 +87,8 @@
 
 .optionsList--sortPopover {
   width: $euiSizeXL * 7;
+}
+
+.optionsList__popover {
+  min-width: $controlMinWidth;
 }

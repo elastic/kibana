@@ -189,9 +189,11 @@ export interface IEmbeddable<
 
   /**
    * Reload the embeddable so output and rendering is up to date. Especially relevant
-   * if the embeddable takes relative time as input (e.g. now to now-15)
+   * if the embeddable takes relative time as input (e.g. now to now-15).
+   *
+   * @param clearCache can be passed in case there is a need to clear any cache by the embeddable
    */
-  reload(): void;
+  reload(clearCache?: boolean): void;
 
   /**
    * An embeddable can return inspector adapters if it wants the inspector to be

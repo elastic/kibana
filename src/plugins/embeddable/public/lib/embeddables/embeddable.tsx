@@ -119,6 +119,8 @@ export abstract class Embeddable<
    *
    * In case if input data did change and reload is requested input$ and output$ would still emit before `reload` is called
    *
+   * @param clearCache can be passed in case there is cache that needs to cleared before reloading the data
+   *
    * The order would be as follows:
    * input$
    * output$
@@ -126,7 +128,7 @@ export abstract class Embeddable<
    * ----
    * updated$
    */
-  public abstract reload(): void;
+  public abstract reload(clearCache?: boolean): void;
 
   /**
    * Merges input$ and output$ streams and debounces emit till next macro-task.
