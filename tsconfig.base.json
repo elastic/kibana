@@ -956,6 +956,8 @@
       "@kbn/saved-object-import-warnings-plugin/*": ["test/plugin_functional/plugins/saved_object_import_warnings/*"],
       "@kbn/saved-objects-finder-plugin": ["src/plugins/saved_objects_finder"],
       "@kbn/saved-objects-finder-plugin/*": ["src/plugins/saved_objects_finder/*"],
+      "@kbn/saved-objects-hidden-from-http-apis-type-plugin": ["test/plugin_functional/plugins/saved_objects_hidden_from_http_apis_type"],
+      "@kbn/saved-objects-hidden-from-http-apis-type-plugin/*": ["test/plugin_functional/plugins/saved_objects_hidden_from_http_apis_type/*"],
       "@kbn/saved-objects-hidden-type-plugin": ["test/plugin_functional/plugins/saved_objects_hidden_type"],
       "@kbn/saved-objects-hidden-type-plugin/*": ["test/plugin_functional/plugins/saved_objects_hidden_type/*"],
       "@kbn/saved-objects-management-plugin": ["src/plugins/saved_objects_management"],
