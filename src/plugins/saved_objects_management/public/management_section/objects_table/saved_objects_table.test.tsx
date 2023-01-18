@@ -606,9 +606,9 @@ describe('SavedObjectsTable', () => {
       await component.instance().delete();
 
       expect(defaultProps.dataViews.clearCache).toHaveBeenCalled();
-      expect(notifications.toasts.addDanger).toHaveBeenCalledWith(
+      expect(notifications.toasts.addInfo).toHaveBeenCalledWith(
         expect.objectContaining({
-          text: 'Something went wrong.',
+          title: expect.stringContaining('1 object.'),
         })
       );
     });

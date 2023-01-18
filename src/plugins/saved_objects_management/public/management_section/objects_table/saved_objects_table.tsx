@@ -522,23 +522,14 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         .map(({ id, type }) => ({ id, type }))
     );
 
-    deleteStatus
-      .filter(({ success }) => !success)
-      .forEach(({ id, type, error }) => {
-        notifications.toasts.addDanger({
-          title: i18n.translate(
-            'savedObjectsManagement.objectView.unableDeleteSavedObjectNotificationMessage',
-            {
-              defaultMessage: `Failed to delete '{title}' {type} object`,
-              values: {
-                type,
-                title: selectedSavedObjects.find(matches({ id, type }))?.meta?.title,
-              },
-            }
-          ),
-          text: error?.message,
-        });
-      });
+    notifications.toasts.addInfo({
+      title: i18n.translate('savedObjectsManagement.objectsTable.delete.successNotification', {
+        defaultMessage: `Successfully deleted {count, plural, one {# object} other {# objects}}.`,
+        values: {
+          count: deleteStatus.filter(({ success }) => !!success).length,
+        },
+      }),
+    });
 
     // Unset this
     this.setState({
