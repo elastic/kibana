@@ -39,6 +39,8 @@ import type {
   DatasourceLayerSettingsProps,
   DataSourceInfo,
   UserMessage,
+  FrameDatasourceAPI,
+  StateSetter,
 } from '../../types';
 import {
   changeIndexPattern,
@@ -833,116 +835,17 @@ export function getFormBasedDatasource({
         return [];
       }
 
-      const indexPatterns = frameDatasourceAPI.dataViews.indexPatterns;
+      const layerErrorMessages = getLayerErrorMessages(
+        state,
+        frameDatasourceAPI,
+        setState,
+        core,
+        data
+      );
 
-      const layerErrors: UserMessage[][] = Object.entries(state.layers)
-        .filter(([_, layer]) => !!indexPatterns[layer.indexPatternId])
-        .map(([layerId, layer]) =>
-          (
-            getErrorMessages(
-              layer,
-              indexPatterns[layer.indexPatternId],
-              state,
-              layerId,
-              core,
-              data
-            ) ?? []
-          ).map((error) => {
-            const message: UserMessage = {
-              severity: 'error',
-              fixableInEditor: true,
-              displayLocations: [{ id: 'visualization' }],
-              shortMessage: '',
-              longMessage:
-                typeof error === 'string' ? (
-                  error
-                ) : (
-                  <>
-                    {error.message}
-                    {error.fixAction && (
-                      <EuiButton
-                        data-test-subj="errorFixAction"
-                        onClick={async () => {
-                          const newState = await error.fixAction?.newState(frameDatasourceAPI);
-                          if (newState) {
-                            setState(newState);
-                          }
-                        }}
-                      >
-                        {error.fixAction?.label}
-                      </EuiButton>
-                    )}
-                  </>
-                ),
-            };
-
-            return message;
-          })
-        );
-
-      let errorMessages: UserMessage[];
-      if (layerErrors.length <= 1) {
-        // Single layer case, no need to explain more
-        errorMessages = layerErrors[0]?.length ? layerErrors[0] : [];
-      } else {
-        // For multiple layers we will prepend each error with the layer number
-        errorMessages = layerErrors.flatMap((errors, index) => {
-          return errors.map((error) => {
-            const message: UserMessage = {
-              ...error,
-              shortMessage: i18n.translate('xpack.lens.indexPattern.layerErrorWrapper', {
-                defaultMessage: 'Layer {position} error: {wrappedMessage}',
-                values: {
-                  position: index + 1,
-                  wrappedMessage: error.shortMessage,
-                },
-              }),
-              longMessage: (
-                <FormattedMessage
-                  id="xpack.lens.indexPattern.layerErrorWrapper"
-                  defaultMessage="Layer {position} error: {wrappedMessage}"
-                  values={{
-                    position: index + 1,
-                    wrappedMessage: <>{error.longMessage}</>,
-                  }}
-                />
-              ),
-            };
-
-            return message;
-          });
-        });
-      }
-
-      // generate messages for invalid columns
-      const columnErrorMessages: UserMessage[] = Object.keys(state.layers)
-        .map((layerId) => {
-          const messages: UserMessage[] = [];
-          for (const columnId of Object.keys(state.layers[layerId].columns)) {
-            if (!this.isValidColumn(state, indexPatterns, layerId, columnId)) {
-              messages.push({
-                severity: 'error',
-                displayLocations: [{ id: 'dimensionTrigger', dimensionId: columnId, layerId }],
-                fixableInEditor: true,
-                shortMessage: '',
-                longMessage: (
-                  <p>
-                    {i18n.translate('xpack.lens.configure.invalidConfigTooltip', {
-                      defaultMessage: 'Invalid configuration.',
-                    })}
-                    <br />
-                    {i18n.translate('xpack.lens.configure.invalidConfigTooltipClick', {
-                      defaultMessage: 'Click for more details.',
-                    })}
-                  </p>
-                ),
-              });
-            }
-          }
-
-          return messages;
-        })
-        .flat();
+      const dimensionErrorMessages = getDimensionErrorMessages(state, (layerId, columnId) =>
+        this.isValidColumn(state, frameDatasourceAPI.dataViews.indexPatterns, layerId, columnId)
+      );
 
       const warningMessages = [
         ...[
@@ -972,7 +875,7 @@ export function getFormBasedDatasource({
         ...getDeprecatedSamplingWarningMessage(core),
       ];
 
-      return [...errorMessages, ...columnErrorMessages, ...warningMessages];
+      return [...layerErrorMessages, ...dimensionErrorMessages, ...warningMessages];
     },
 
     getSearchWarningMessages: (state, warning, request, response) => {
@@ -1074,4 +977,126 @@ function blankLayer(indexPatternId: string, linkToLayers?: string[]): FormBasedL
     columnOrder: [],
     sampling: 1,
   };
+}
+
+function getLayerErrorMessages(
+  state: FormBasedPrivateState,
+  frameDatasourceAPI: FrameDatasourceAPI,
+  setState: StateSetter<FormBasedPrivateState, unknown>,
+  core: CoreStart,
+  data: DataPublicPluginStart
+) {
+  const indexPatterns = frameDatasourceAPI.dataViews.indexPatterns;
+
+  const layerErrors: UserMessage[][] = Object.entries(state.layers)
+    .filter(([_, layer]) => !!indexPatterns[layer.indexPatternId])
+    .map(([layerId, layer]) =>
+      (
+        getErrorMessages(layer, indexPatterns[layer.indexPatternId], state, layerId, core, data) ??
+        []
+      ).map((error) => {
+        const message: UserMessage = {
+          severity: 'error',
+          fixableInEditor: true,
+          displayLocations: [{ id: 'visualization' }],
+          shortMessage: '',
+          longMessage:
+            typeof error === 'string' ? (
+              error
+            ) : (
+              <>
+                {error.message}
+                {error.fixAction && (
+                  <EuiButton
+                    data-test-subj="errorFixAction"
+                    onClick={async () => {
+                      const newState = await error.fixAction?.newState(frameDatasourceAPI);
+                      if (newState) {
+                        setState(newState);
+                      }
+                    }}
+                  >
+                    {error.fixAction?.label}
+                  </EuiButton>
+                )}
+              </>
+            ),
+        };
+
+        return message;
+      })
+    );
+
+  let errorMessages: UserMessage[];
+  if (layerErrors.length <= 1) {
+    // Single layer case, no need to explain more
+    errorMessages = layerErrors[0]?.length ? layerErrors[0] : [];
+  } else {
+    // For multiple layers we will prepend each error with the layer number
+    errorMessages = layerErrors.flatMap((errors, index) => {
+      return errors.map((error) => {
+        const message: UserMessage = {
+          ...error,
+          shortMessage: i18n.translate('xpack.lens.indexPattern.layerErrorWrapper', {
+            defaultMessage: 'Layer {position} error: {wrappedMessage}',
+            values: {
+              position: index + 1,
+              wrappedMessage: error.shortMessage,
+            },
+          }),
+          longMessage: (
+            <FormattedMessage
+              id="xpack.lens.indexPattern.layerErrorWrapper"
+              defaultMessage="Layer {position} error: {wrappedMessage}"
+              values={{
+                position: index + 1,
+                wrappedMessage: <>{error.longMessage}</>,
+              }}
+            />
+          ),
+        };
+
+        return message;
+      });
+    });
+  }
+
+  return errorMessages;
+}
+
+function getDimensionErrorMessages(
+  state: FormBasedPrivateState,
+  isValidColumn: (layerId: string, columnId: string) => boolean
+) {
+  // generate messages for invalid columns
+  const columnErrorMessages: UserMessage[] = Object.keys(state.layers)
+    .map((layerId) => {
+      const messages: UserMessage[] = [];
+      for (const columnId of Object.keys(state.layers[layerId].columns)) {
+        if (!isValidColumn(layerId, columnId)) {
+          messages.push({
+            severity: 'error',
+            displayLocations: [{ id: 'dimensionTrigger', dimensionId: columnId, layerId }],
+            fixableInEditor: true,
+            shortMessage: '',
+            longMessage: (
+              <p>
+                {i18n.translate('xpack.lens.configure.invalidConfigTooltip', {
+                  defaultMessage: 'Invalid configuration.',
+                })}
+                <br />
+                {i18n.translate('xpack.lens.configure.invalidConfigTooltipClick', {
+                  defaultMessage: 'Click for more details.',
+                })}
+              </p>
+            ),
+          });
+        }
+      }
+
+      return messages;
+    })
+    .flat();
+
+  return columnErrorMessages;
 }
