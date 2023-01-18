@@ -367,10 +367,7 @@ export const processUngroupedResults = (
   const { count, criteria, timeSize, timeUnit } = params;
   const documentCount = results.hits.total.value;
   const additionalContextHits = results.aggregations?.additionalContext?.hits?.hits;
-  const additionalContext =
-    additionalContextHits && additionalContextHits.length > 0
-      ? additionalContextHits[0]._source
-      : undefined;
+  const additionalContext = additionalContextHits?.[0]?._source;
   const reasonMessage = getReasonMessageForUngroupedCountAlert(
     documentCount,
     count.value,
@@ -419,10 +416,7 @@ export const processUngroupedRatioResults = (
   const numeratorCount = numeratorResults.hits.total.value;
   const denominatorCount = denominatorResults.hits.total.value;
   const additionalContextHits = numeratorResults.aggregations?.additionalContext?.hits?.hits;
-  const additionalContext =
-    additionalContextHits && additionalContextHits.length > 0
-      ? additionalContextHits[0]._source
-      : undefined;
+  const additionalContext = additionalContextHits?.[0]?._source;
   const ratio = getRatio(numeratorCount, denominatorCount);
 
   if (ratio !== undefined && checkValueAgainstComparatorMap[count.comparator](ratio, count.value)) {
@@ -491,10 +485,7 @@ const getReducedGroupByResults = (
       reducedGroupByResults.push({
         name: groupName,
         documentCount: groupBucket.doc_count,
-        context:
-          additionalContextHits && additionalContextHits.length > 0
-            ? additionalContextHits[0]._source
-            : undefined,
+        context:additionalContextHits?.[0]?._source,
       });
     }
   } else {
@@ -504,10 +495,7 @@ const getReducedGroupByResults = (
       reducedGroupByResults.push({
         name: groupName,
         documentCount: groupBucket.filtered_results.doc_count,
-        context:
-          additionalContextHits && additionalContextHits.length > 0
-            ? additionalContextHits[0]._source
-            : undefined,
+        context: additionalContextHits?.[0]?._source,
       });
     }
   }
@@ -1108,21 +1096,10 @@ export const getIncludeSet = (
   groupBy: string | string[] | undefined,
   validPrefix: string[]
 ): Set<string> => {
-  const includesList = [];
-  if (groupBy) {
-    if (Array.isArray(groupBy)) {
-      groupBy.forEach((group) => {
-        const groupPrefix = group.split('.')[0];
-        if (validPrefix.includes(groupPrefix)) {
-          includesList.push(groupPrefix);
-        }
-      });
-    } else {
-      const groupPrefix = groupBy.split('.')[0];
-      if (validPrefix.includes(groupPrefix)) {
-        includesList.push(groupPrefix);
-      }
-    }
-  }
-  return new Set<string>(includesList);
+  return new Set<string>(
+    [groupBy ?? []]
+      .flat()
+      .map((currentGroupBy) => currentGroupBy.split('.')[0])
+      .filter((groupByPrefix) => validPrefix.includes(groupByPrefix))
+  );
 };
