@@ -15,14 +15,12 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useTheme } from '@kbn/observability-plugin/public';
 import React, { useMemo, useState, useCallback } from 'react';
 
 import {
   EncryptedSyntheticsSavedMonitor,
   ServiceLocation,
 } from '../../../../../../common/runtime_types';
-import { useLocations } from '../../../hooks';
 import { useStatusByLocation } from '../../../hooks';
 
 export const MonitorLocationSelect = ({
@@ -40,11 +38,10 @@ export const MonitorLocationSelect = ({
   selectedLocation?: ServiceLocation | null;
   monitorLocations?: EncryptedSyntheticsSavedMonitor['locations'];
 }) => {
-  const { locations } = useLocations();
-  const theme = useTheme();
-
-  const { locations: locationsStatus, loading: loadingLocationsStatus } =
-    useStatusByLocation(configId);
+  const { locations: locationsStatus, loading: loadingLocationsStatus } = useStatusByLocation({
+    configId,
+    monitorLocations,
+  });
 
   const [isLocationListOpen, setIsLocationListOpen] = useState(false);
   const openLocationList = useCallback(() => setIsLocationListOpen(true), []);
@@ -65,34 +62,18 @@ export const MonitorLocationSelect = ({
       const menuItems =
         loadingLocationsStatus && !locationsStatus
           ? [<span key="loading">Loading...</span>]
-          : monitorLocations
+          : locationsStatus
               .map((location) => {
-                const fullLocation = locations.find((l) => l.id === location.id);
-                if (!fullLocation) {
-                  return;
-                }
-
-                const locationStatus = locationsStatus.find(
-                  (ls) => ls.observer?.geo?.name === fullLocation.label
-                );
-
-                const locationHealthColor =
-                  typeof locationStatus === 'undefined'
-                    ? 'subdued'
-                    : (locationStatus?.summary?.down ?? 0) > 0
-                    ? theme.eui.euiColorVis9 // down
-                    : theme.eui.euiColorVis0; // up
-
                 return (
                   <EuiContextMenuItem
                     key={location.label}
-                    icon={<EuiHealth color={locationHealthColor} />}
+                    icon={<EuiHealth color={location.color} />}
                     onClick={() => {
                       closeLocationList();
-                      onChange(fullLocation.id, fullLocation.label);
+                      onChange(location.id, location.label);
                     }}
                   >
-                    {fullLocation.label}
+                    {location.label}
                   </EuiContextMenuItem>
                 );
               })
@@ -123,14 +104,11 @@ export const MonitorLocationSelect = ({
     isDisabled,
     isLocationListOpen,
     loadingLocationsStatus,
-    locations,
     locationsStatus,
     monitorLocations,
     onChange,
     openLocationList,
     selectedLocation,
-    theme.eui.euiColorVis0,
-    theme.eui.euiColorVis9,
   ]);
 
   if (!selectedLocation || !monitorLocations) {
