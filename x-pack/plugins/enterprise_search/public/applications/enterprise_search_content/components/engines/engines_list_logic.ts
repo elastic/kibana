@@ -28,7 +28,7 @@ import {
 
 import { DEFAULT_META, Meta, updateMetaPageIndex } from './types';
 
-type EnginesListActions = Pick<
+export type EnginesListActions = Pick<
   Actions<EnginesListAPIArguments, EnterpriseSearchEnginesResponse>,
   'apiError' | 'apiSuccess' | 'makeRequest'
 > & {

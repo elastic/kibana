@@ -9,14 +9,21 @@ import { kea, MakeLogicType } from 'kea';
 
 import { Status } from '../../../../../common/types/api';
 
+import { KibanaLogic } from '../../../shared/kibana';
+
 import {
   FetchEngineApiLogic,
   FetchEngineApiLogicActions,
 } from '../../api/engines/fetch_engine_api_logic';
 
+import { ENGINES_PATH } from '../../routes';
+
+import { EnginesListLogic, EnginesListActions } from '../engines/engines_list_logic';
+
 import { EngineNameLogic } from './engine_name_logic';
 
 export interface EngineViewActions {
+  deleteSuccess: EnginesListActions['deleteSuccess'];
   fetchEngine: FetchEngineApiLogicActions['makeRequest'];
 }
 
@@ -30,7 +37,12 @@ export interface EngineViewValues {
 
 export const EngineViewLogic = kea<MakeLogicType<EngineViewValues, EngineViewActions>>({
   connect: {
-    actions: [FetchEngineApiLogic, ['makeRequest as fetchEngine']],
+    actions: [
+      FetchEngineApiLogic,
+      ['makeRequest as fetchEngine'],
+      EnginesListLogic,
+      ['deleteSuccess'],
+    ],
     values: [
       EngineNameLogic,
       ['engineName'],
@@ -38,6 +50,11 @@ export const EngineViewLogic = kea<MakeLogicType<EngineViewValues, EngineViewAct
       ['data as engineData', 'status as fetchEngineApiStatus', 'error as fetchEngineApiError'],
     ],
   },
+  listeners: () => ({
+    deleteSuccess: () => {
+      KibanaLogic.values.navigateToUrl(ENGINES_PATH);
+    },
+  }),
   path: ['enterprise_search', 'content', 'engine_view_logic'],
   selectors: ({ selectors }) => ({
     isLoadingEngine: [
