@@ -11,6 +11,7 @@
 import { AlertsHealth } from './rule';
 
 export * from './rule';
+export * from './rules_settings';
 export * from './rule_type';
 export * from './rule_task_instance';
 export * from './alert_instance';

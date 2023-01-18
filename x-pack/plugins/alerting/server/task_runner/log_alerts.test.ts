@@ -9,6 +9,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { Alert } from '../alert';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
+import { DefaultActionGroupId } from '../types';
 import { logAlerts } from './log_alerts';
 
 const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
@@ -28,8 +29,8 @@ describe('logAlerts', () => {
       alertingEventLogger,
       newAlerts: {},
       activeAlerts: {
-        '1': new Alert<{}, {}>('1'),
-        '2': new Alert<{}, {}>('2'),
+        '1': new Alert<{}, {}, DefaultActionGroupId>('1'),
+        '2': new Alert<{}, {}, DefaultActionGroupId>('2'),
       },
       recoveredAlerts: {},
       ruleLogPrefix: `test-rule-type-id:123: 'test rule'`,
@@ -51,11 +52,11 @@ describe('logAlerts', () => {
       alertingEventLogger,
       newAlerts: {},
       activeAlerts: {
-        '1': new Alert<{}, {}>('1'),
-        '2': new Alert<{}, {}>('2'),
+        '1': new Alert<{}, {}, DefaultActionGroupId>('1'),
+        '2': new Alert<{}, {}, DefaultActionGroupId>('2'),
       },
       recoveredAlerts: {
-        '8': new Alert<{}, {}>('8'),
+        '8': new Alert<{}, {}, DefaultActionGroupId>('8'),
       },
       ruleLogPrefix: `test-rule-type-id:123: 'test rule'`,
       ruleRunMetricsStore,
@@ -75,8 +76,8 @@ describe('logAlerts', () => {
   });
 
   test('should correctly debug log recovered alerts if canSetRecoveryContext is true', () => {
-    const recoveredAlert1 = new Alert<{ value: string }, {}>('8');
-    const recoveredAlert2 = new Alert<{ value: string }, {}>('9');
+    const recoveredAlert1 = new Alert<{ value: string }, {}, DefaultActionGroupId>('8');
+    const recoveredAlert2 = new Alert<{ value: string }, {}, DefaultActionGroupId>('9');
     const recoveredAlerts = {
       '8': recoveredAlert1,
       '9': recoveredAlert2,
@@ -127,18 +128,18 @@ describe('logAlerts', () => {
       logger,
       alertingEventLogger,
       newAlerts: {
-        '4': new Alert<{}, {}>('4'),
+        '4': new Alert<{}, {}, DefaultActionGroupId>('4'),
       },
       activeAlerts: {
-        '1': new Alert<{}, {}>('1'),
-        '2': new Alert<{}, {}>('2'),
-        '4': new Alert<{}, {}>('4'),
+        '1': new Alert<{}, {}, DefaultActionGroupId>('1'),
+        '2': new Alert<{}, {}, DefaultActionGroupId>('2'),
+        '4': new Alert<{}, {}, DefaultActionGroupId>('4'),
       },
       recoveredAlerts: {
-        '7': new Alert<{}, {}>('7'),
-        '8': new Alert<{}, {}>('8'),
-        '9': new Alert<{}, {}>('9'),
-        '10': new Alert<{}, {}>('10'),
+        '7': new Alert<{}, {}, DefaultActionGroupId>('7'),
+        '8': new Alert<{}, {}, DefaultActionGroupId>('8'),
+        '9': new Alert<{}, {}, DefaultActionGroupId>('9'),
+        '10': new Alert<{}, {}, DefaultActionGroupId>('10'),
       },
       ruleLogPrefix: `test-rule-type-id:123: 'test rule'`,
       ruleRunMetricsStore,
@@ -215,18 +216,18 @@ describe('logAlerts', () => {
       logger,
       alertingEventLogger,
       newAlerts: {
-        '4': new Alert<{}, {}>('4'),
+        '4': new Alert<{}, {}, DefaultActionGroupId>('4'),
       },
       activeAlerts: {
-        '1': new Alert<{}, {}>('1'),
-        '2': new Alert<{}, {}>('2'),
-        '4': new Alert<{}, {}>('4'),
+        '1': new Alert<{}, {}, DefaultActionGroupId>('1'),
+        '2': new Alert<{}, {}, DefaultActionGroupId>('2'),
+        '4': new Alert<{}, {}, DefaultActionGroupId>('4'),
       },
       recoveredAlerts: {
-        '7': new Alert<{}, {}>('7'),
-        '8': new Alert<{}, {}>('8'),
-        '9': new Alert<{}, {}>('9'),
-        '10': new Alert<{}, {}>('10'),
+        '7': new Alert<{}, {}, DefaultActionGroupId>('7'),
+        '8': new Alert<{}, {}, DefaultActionGroupId>('8'),
+        '9': new Alert<{}, {}, DefaultActionGroupId>('9'),
+        '10': new Alert<{}, {}, DefaultActionGroupId>('10'),
       },
       ruleLogPrefix: `test-rule-type-id:123: 'test rule'`,
       ruleRunMetricsStore,
@@ -246,18 +247,18 @@ describe('logAlerts', () => {
       logger,
       alertingEventLogger,
       newAlerts: {
-        '4': new Alert<{}, {}>('4'),
+        '4': new Alert<{}, {}, DefaultActionGroupId>('4'),
       },
       activeAlerts: {
-        '1': new Alert<{}, {}>('1', { meta: { flapping: true } }),
-        '2': new Alert<{}, {}>('2'),
-        '4': new Alert<{}, {}>('4'),
+        '1': new Alert<{}, {}, DefaultActionGroupId>('1', { meta: { flapping: true } }),
+        '2': new Alert<{}, {}, DefaultActionGroupId>('2'),
+        '4': new Alert<{}, {}, DefaultActionGroupId>('4'),
       },
       recoveredAlerts: {
-        '7': new Alert<{}, {}>('7'),
-        '8': new Alert<{}, {}>('8', { meta: { flapping: true } }),
-        '9': new Alert<{}, {}>('9'),
-        '10': new Alert<{}, {}>('10'),
+        '7': new Alert<{}, {}, DefaultActionGroupId>('7'),
+        '8': new Alert<{}, {}, DefaultActionGroupId>('8', { meta: { flapping: true } }),
+        '9': new Alert<{}, {}, DefaultActionGroupId>('9'),
+        '10': new Alert<{}, {}, DefaultActionGroupId>('10'),
       },
       ruleLogPrefix: `test-rule-type-id:123: 'test rule'`,
       ruleRunMetricsStore,
