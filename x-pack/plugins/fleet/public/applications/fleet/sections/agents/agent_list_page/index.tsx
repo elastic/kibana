@@ -40,6 +40,8 @@ import { useFleetServerUnhealthy } from '../hooks/use_fleet_server_unhealthy';
 
 import { AgentRequestDiagnosticsModal } from '../components/agent_request_diagnostics_modal';
 
+import { useLastSeenInactiveAgentsCount } from './hooks';
+
 import { AgentTableHeader } from './components/table_header';
 import type { SelectionMode } from './components/types';
 import { SearchAndFilterBar } from './components/search_and_filter_bar';
@@ -220,7 +222,26 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const [totalAgents, setTotalAgents] = useState(0);
   const [totalInactiveAgents, setTotalInactiveAgents] = useState(0);
   const [showAgentActivityTour, setShowAgentActivityTour] = useState({ isOpen: false });
+  const [lastSeenInactiveAgentsCount, updateLastSeenInactiveAgentsCount] =
+    useLastSeenInactiveAgentsCount();
 
+  const newlyInactiveAgentsCount = useMemo(() => {
+    const newVal = totalInactiveAgents - lastSeenInactiveAgentsCount;
+
+    if (newVal < 0) {
+      return 0;
+    }
+
+    return newVal;
+  }, [lastSeenInactiveAgentsCount, totalInactiveAgents]);
+
+  useEffect(() => {
+    // reduce the number of last seen inactive agents count to the total inactive agents count
+    // e.g if agents have become healthy again
+    if (totalInactiveAgents > 0 && lastSeenInactiveAgentsCount > totalInactiveAgents) {
+      updateLastSeenInactiveAgentsCount(totalInactiveAgents);
+    }
+  }, [lastSeenInactiveAgentsCount, totalInactiveAgents, updateLastSeenInactiveAgentsCount]);
   const getSortFieldForAPI = (field: keyof Agent): string => {
     if ([VERSION_FIELD, HOSTNAME_FIELD].includes(field as string)) {
       return `${field}.keyword`;
@@ -565,6 +586,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       {/* Search and filter bar */}
       <SearchAndFilterBar
         agentPolicies={agentPolicies}
+        newlyInactiveAgentsCount={newlyInactiveAgentsCount}
+        onInactiveAgentsViewed={() => updateLastSeenInactiveAgentsCount(totalInactiveAgents)}
         draftKuery={draftKuery}
         onDraftKueryChange={setDraftKuery}
         onSubmitSearch={onSubmitSearch}

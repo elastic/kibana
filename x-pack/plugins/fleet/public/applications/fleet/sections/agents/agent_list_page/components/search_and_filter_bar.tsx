@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiButton,
   EuiFilterButton,
@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
+  EuiNotificationBadge,
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
@@ -79,6 +80,10 @@ const FlexEndEuiFlexItem = styled(EuiFlexItem)`
   align-self: flex-end;
 `;
 
+const LeftpaddedNotificationBadge = styled(EuiNotificationBadge)`
+  margin-left: 10px;
+`;
+
 export const SearchAndFilterBar: React.FunctionComponent<{
   agentPolicies: AgentPolicy[];
   draftKuery: string;
@@ -104,6 +109,8 @@ export const SearchAndFilterBar: React.FunctionComponent<{
   visibleAgents: Agent[];
   onClickAgentActivity: () => void;
   showAgentActivityTour: { isOpen: boolean };
+  newlyInactiveAgentsCount: number;
+  onInactiveAgentsViewed: () => void;
 }> = ({
   agentPolicies,
   draftKuery,
@@ -129,6 +136,8 @@ export const SearchAndFilterBar: React.FunctionComponent<{
   visibleAgents,
   onClickAgentActivity,
   showAgentActivityTour,
+  newlyInactiveAgentsCount,
+  onInactiveAgentsViewed,
 }) => {
   // Policies state for filtering
   const [isAgentPoliciesFilterOpen, setIsAgentPoliciesFilterOpen] = useState<boolean>(false);
@@ -157,6 +166,12 @@ export const SearchAndFilterBar: React.FunctionComponent<{
   const removeTagsFilter = (tag: string) => {
     onSelectedTagsChange(selectedTags.filter((t) => t !== tag));
   };
+
+  useEffect(() => {
+    if (selectedStatus.length && selectedStatus.includes('inactive') && newlyInactiveAgentsCount) {
+      onInactiveAgentsViewed();
+    }
+  }, [selectedStatus, newlyInactiveAgentsCount, onInactiveAgentsViewed]);
 
   return (
     <>
@@ -259,7 +274,14 @@ export const SearchAndFilterBar: React.FunctionComponent<{
                           }
                         }}
                       >
-                        {label}
+                        <span>
+                          {label}
+                          {status === 'inactive' && newlyInactiveAgentsCount > 0 && (
+                            <LeftpaddedNotificationBadge>
+                              {newlyInactiveAgentsCount}
+                            </LeftpaddedNotificationBadge>
+                          )}
+                        </span>
                       </EuiFilterSelectItem>
                     ))}
                   </div>
