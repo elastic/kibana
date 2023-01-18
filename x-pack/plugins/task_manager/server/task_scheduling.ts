@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Payload } from '@hapi/boom';
 import { filter, take } from 'rxjs/operators';
 import pMap from 'p-map';
 
