@@ -14,6 +14,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { useMonitorErrors } from '../hooks/use_monitor_errors';
 import { SyntheticsDatePicker } from '../../common/date_picker/synthetics_date_picker';
 import { ErrorsTabContent } from './errors_tab_content';
@@ -40,19 +41,19 @@ export const MonitorErrors = () => {
 
 const LoadingErrors = () => {
   return (
-    <EuiFlexGroup alignItems="center" justifyContent="center" style={{ height: '70vh' }}>
+    <EuiFlexGroup alignItems="center" justifyContent="center" style={{ height: '65vh' }}>
       <EuiFlexItem grow={false} style={{ textAlign: 'center' }}>
         <span>
           <EuiLoadingSpinner size="xxl" />
         </span>
         <EuiSpacer size="m" />
         <EuiTitle size="m">
-          <h3>Checking for errors</h3>
+          <h3>{CHEKCING_FOR_ERRORS}</h3>
         </EuiTitle>
 
         <EuiSpacer size="m" />
 
-        <EuiText color="subdued">This will take just a second.</EuiText>
+        <EuiText color="subdued">{LOADING_DESCRIPTION}</EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -60,20 +61,36 @@ const LoadingErrors = () => {
 
 const EmptyErrors = () => {
   return (
-    <EuiFlexGroup alignItems="center" justifyContent="center" style={{ height: '70vh' }}>
+    <EuiFlexGroup alignItems="center" justifyContent="center" style={{ height: '65vh' }}>
       <EuiFlexItem grow={false} style={{ textAlign: 'center' }}>
         <span>
           <EuiIcon type="checkInCircleFilled" color="success" size="xl" />
         </span>
         <EuiSpacer size="m" />
         <EuiTitle size="m">
-          <h3>No errors founds</h3>
+          <h3>{NO_ERRORS_FOUND}</h3>
         </EuiTitle>
 
         <EuiSpacer size="m" />
 
-        <EuiText color="subdued">Keep calm and carry on.</EuiText>
+        <EuiText color="subdued">{KEEP_CALM}</EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
+
+const KEEP_CALM = i18n.translate('xpack.synthetics.errors.keepCalm', {
+  defaultMessage: 'Keep calm and carry on.',
+});
+
+const NO_ERRORS_FOUND = i18n.translate('xpack.synthetics.errors.noErrorsFound', {
+  defaultMessage: 'No errors found',
+});
+
+const LOADING_DESCRIPTION = i18n.translate('xpack.synthetics.errors.loadingDescription', {
+  defaultMessage: 'This will take just a second.',
+});
+
+const CHEKCING_FOR_ERRORS = i18n.translate('xpack.synthetics.errors.checkingForErrors', {
+  defaultMessage: 'Checking for errors',
+});
