@@ -11,14 +11,13 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { ALERTS_TABLE_GROUPS_SELECTION_KEY } from '../../event_rendered_view/helpers';
 
 const storage = new Storage(localStorage);
 
-export type GroupSelection = 'ruleName' | 'userName' | 'hostName' | 'sourceIP';
+export type GroupSelection = 'kibana.alert.rule.name' | 'user.name' | 'host.name' | 'source.ip';
 
 const ContainerEuiSelectable = styled.div`
-  width: 150px;
+  width: 200px;
   .euiSelectableListItem__text {
     white-space: pre-wrap !important;
     line-height: normal;
@@ -39,11 +38,16 @@ const sourceIP = i18n.translate('xpack.securitySolution.selector.grouping.source
 });
 
 interface GroupSelectorProps {
-  onGroupChange: (groupSelection: GroupSelection) => void;
+  onGroupChange: (groupSelection?: GroupSelection) => void;
   groupSelected?: GroupSelection;
+  localStorageGroupKey?: string;
 }
 
-const GroupsSelectorComponent = ({ groupSelected, onGroupChange }: GroupSelectorProps) => {
+const GroupsSelectorComponent = ({
+  groupSelected,
+  onGroupChange,
+  localStorageGroupKey,
+}: GroupSelectorProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const onButtonClick = useCallback(() => setIsPopoverOpen((currentVal) => !currentVal), []);
@@ -51,14 +55,18 @@ const GroupsSelectorComponent = ({ groupSelected, onGroupChange }: GroupSelector
   const onChangeSelectable = useCallback(
     (opts: EuiSelectableOption[]) => {
       const selected = opts.filter((i) => i.checked === 'on');
-      storage.set(ALERTS_TABLE_GROUPS_SELECTION_KEY, selected[0]?.key);
+      if (localStorageGroupKey) {
+        storage.set(localStorageGroupKey, selected[0]?.key);
+      }
 
       if (selected.length > 0 && selected[0]) {
         onGroupChange(selected[0].key as GroupSelection);
+      } else {
+        onGroupChange(undefined);
       }
       setIsPopoverOpen(false);
     },
-    [onGroupChange]
+    [localStorageGroupKey, onGroupChange]
   );
 
   const button = useMemo(
@@ -75,38 +83,40 @@ const GroupsSelectorComponent = ({ groupSelected, onGroupChange }: GroupSelector
         {i18n.translate('xpack.securitySolution.selector.grouping.label', {
           defaultMessage: 'Group alerts',
         })}
+        {groupSelected ? ': ' : ''}
+        {groupSelected ? groupSelected : ''}
       </EuiButtonEmpty>
     ),
-    [onButtonClick]
+    [groupSelected, onButtonClick]
   );
 
   const options = useMemo(
     () => [
       {
         label: ruleName,
-        key: 'ruleName',
-        checked: (groupSelected === 'ruleName'
+        key: 'kibana.alert.rule.name',
+        checked: (groupSelected === 'kibana.alert.rule.name'
           ? 'on'
           : undefined) as EuiSelectableOption['checked'],
       },
       {
         label: userName,
-        key: 'userName',
-        checked: (groupSelected === 'userName'
+        key: 'user.name',
+        checked: (groupSelected === 'user.name'
           ? 'on'
           : undefined) as EuiSelectableOption['checked'],
       },
       {
         label: hostName,
-        key: 'hostName',
-        checked: (groupSelected === 'hostName'
+        key: 'host.name',
+        checked: (groupSelected === 'host.name'
           ? 'on'
           : undefined) as EuiSelectableOption['checked'],
       },
       {
         label: sourceIP,
-        key: 'sourceIP',
-        checked: (groupSelected === 'sourceIP'
+        key: 'source.ip',
+        checked: (groupSelected === 'source.ip'
           ? 'on'
           : undefined) as EuiSelectableOption['checked'],
       },
@@ -124,8 +134,7 @@ const GroupsSelectorComponent = ({ groupSelected, onGroupChange }: GroupSelector
 
   const listProps = useMemo(
     () => ({
-      // rowHeight: 80,
-      showIcons: true,
+      rowHeight: 40,
     }),
     []
   );

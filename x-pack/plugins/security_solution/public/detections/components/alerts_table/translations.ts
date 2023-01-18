@@ -294,3 +294,38 @@ export const INVESTIGATE_BULK_IN_TIMELINE = i18n.translate(
     defaultMessage: 'Investigate in timeline',
   }
 );
+
+export const TAKE_ACTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.groups.additionalActions.takeAction',
+  {
+    defaultMessage: 'Take actions',
+  }
+);
+
+export const STATS_GROUP_ALERTS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.groups.stats.alertsCount',
+  {
+    defaultMessage: 'Alerts:',
+  }
+);
+
+export const STATS_GROUP_HOSTS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.groups.stats.hostsCount',
+  {
+    defaultMessage: 'Hosts:',
+  }
+);
+
+export const STATS_GROUP_USERS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.groups.stats.usersCount',
+  {
+    defaultMessage: 'Users:',
+  }
+);
+
+export const STATS_GROUP_SEVERITY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.groups.stats.severity',
+  {
+    defaultMessage: 'Severity',
+  }
+);

@@ -853,6 +853,8 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                         }
                         onRuleChange={refreshRule}
                         to={to}
+                        signalIndexName={signalIndexName}
+                        runtimeMappings={runtimeMappings}
                       />
                     )}
                   </>

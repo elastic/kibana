@@ -9,7 +9,6 @@ import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { TableId } from '../../../../common/types';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
-import { GroupsSelector } from '../grouping_table/select_group';
 import { InspectButton } from '../inspect';
 import { UpdatedFlexGroup, UpdatedFlexItem } from './styles';
 import type { ViewSelection } from './summary_view_select';
@@ -27,6 +26,7 @@ interface Props {
   onViewChange: (viewSelection: ViewSelection) => void;
   additionalFilters?: React.ReactNode;
   hasRightOffset?: boolean;
+  additionalMenuOptions?: React.ReactNode[];
 }
 
 export const RightTopMenu = ({
@@ -37,6 +37,7 @@ export const RightTopMenu = ({
   onViewChange,
   additionalFilters,
   hasRightOffset,
+  additionalMenuOptions = [],
 }: Props) => {
   const alignItems = tableView === 'gridView' ? 'baseline' : 'center';
   const justTitle = useMemo(() => <TitleText data-test-subj="title">{title}</TitleText>, [title]);
@@ -64,9 +65,13 @@ export const RightTopMenu = ({
             <SummaryViewSelector viewSelected={tableView} onViewChange={onViewChange} />
           </UpdatedFlexItem>
         )}
-      <UpdatedFlexItem grow={false} $show={!loading}>
-        <GroupsSelector onGroupChange={() => {}} />
-      </UpdatedFlexItem>
+      {additionalMenuOptions.length
+        ? additionalMenuOptions.map((additionalMenuOption) => (
+            <UpdatedFlexItem grow={false} $show={!loading}>
+              {additionalMenuOption}
+            </UpdatedFlexItem>
+          ))
+        : null}
     </UpdatedFlexGroup>
   );
 };

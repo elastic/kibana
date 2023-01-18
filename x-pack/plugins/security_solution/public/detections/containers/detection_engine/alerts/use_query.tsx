@@ -104,7 +104,6 @@ export const useQueryAlerts = <Hit, Aggs>({
           query,
           signal: abortCtrl.signal,
         });
-
         if (isSubscribed) {
           setAlerts({
             data: alertResponse,
