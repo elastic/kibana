@@ -183,6 +183,23 @@ describe('Properties validator', () => {
     expect(errors).toEqual([]);
   });
 
+  it(`should allow copy_to to be an array of strings`, () => {
+    const properties = {
+      text1: { type: 'text', copy_to: ['field1', 'field2'] },
+      field1: { type: 'text' },
+      field2: { type: 'text' },
+    };
+
+    const { value, errors } = validateProperties(properties as any);
+
+    expect(value).toEqual({
+      text1: { type: 'text', copy_to: ['field1', 'field2'] },
+      field1: { type: 'text' },
+      field2: { type: 'text' },
+    });
+    expect(errors).toEqual([]);
+  });
+
   it('should strip field whose type is not a string or is unknown', () => {
     const properties = {
       prop1: { type: 123 },
@@ -254,7 +271,7 @@ describe('Properties validator', () => {
         ignore_malformed: 0,
         null_value_numeric: 'abc',
         null_value_boolean: [],
-        copy_to: [],
+        copy_to: [1],
         max_input_length: true,
         locale: 1,
         orientation: [],

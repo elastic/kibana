@@ -14,8 +14,8 @@ import {
 } from '@kbn/controls-plugin/common';
 import { ControlGroupChainingSystem } from '@kbn/controls-plugin/common/control_group/types';
 import { OptionsListSortingType } from '@kbn/controls-plugin/common/options_list/suggestions_sorting';
-import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
+import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 import { FtrService } from '../ftr_provider_context';
 
 const CONTROL_DISPLAY_NAMES: { [key: string]: string } = {
@@ -48,6 +48,7 @@ export class DashboardPageControls extends FtrService {
   private readonly log = this.ctx.getService('log');
   private readonly find = this.ctx.getService('find');
   private readonly retry = this.ctx.getService('retry');
+  private readonly browser = this.ctx.getService('browser');
   private readonly testSubjects = this.ctx.getService('testSubjects');
 
   private readonly common = this.ctx.getPageObject('common');
@@ -354,6 +355,7 @@ export class DashboardPageControls extends FtrService {
 
   public async optionsListGetSelectionsString(controlId: string) {
     this.log.debug(`Getting selections string for Options List: ${controlId}`);
+    await this.optionsListWaitForLoading(controlId);
     const controlElement = await this.getControlElementById(controlId);
     return (await controlElement.getVisibleText()).split('\n')[1];
   }
@@ -362,7 +364,7 @@ export class DashboardPageControls extends FtrService {
     this.log.debug(`Opening popover for Options List: ${controlId}`);
     await this.testSubjects.click(`optionsList-control-${controlId}`);
     await this.retry.try(async () => {
-      await this.testSubjects.existOrFail(`optionsList-control-available-options`);
+      await this.testSubjects.existOrFail(`optionsList-control-popover`);
     });
   }
 
@@ -382,25 +384,27 @@ export class DashboardPageControls extends FtrService {
 
   public async optionsListPopoverGetAvailableOptionsCount() {
     this.log.debug(`getting available options count from options list`);
+    await this.optionsListPopoverWaitForLoading();
     const availableOptions = await this.testSubjects.find(`optionsList-control-available-options`);
     return +(await availableOptions.getAttribute('data-option-count'));
   }
 
   public async optionsListPopoverGetAvailableOptions() {
     this.log.debug(`getting available options from options list`);
+    await this.optionsListPopoverWaitForLoading();
     const availableOptions = await this.testSubjects.find(`optionsList-control-available-options`);
+    const optionsCount = await this.optionsListPopoverGetAvailableOptionsCount();
 
-    const suggestionElements = await availableOptions.findAllByClassName(
-      'optionsList__validSuggestion'
-    );
-    const suggestions: { [key: string]: number } = await suggestionElements.reduce(
-      async (promise, option) => {
-        const acc = await promise;
-        const [key, docCount] = (await option.getVisibleText()).split('\n');
-        return { ...acc, [key]: Number(docCount) };
-      },
-      Promise.resolve({} as { [key: string]: number })
-    );
+    const selectableListItems = await availableOptions.findByClassName('euiSelectableList__list');
+    const suggestions: { [key: string]: number } = {};
+    while (Object.keys(suggestions).length < optionsCount) {
+      await selectableListItems._webElement.sendKeys(this.browser.keys.ARROW_DOWN);
+      const currentOption = await selectableListItems.findByCssSelector('[aria-selected="true"]');
+      const [suggestion, docCount] = (await currentOption.getVisibleText()).split('\n');
+      if (suggestion !== 'Exists') {
+        suggestions[suggestion] = Number(docCount);
+      }
+    }
 
     const invalidSelectionElements = await availableOptions.findAllByClassName(
       'optionsList__selectionInvalid'
@@ -419,6 +423,7 @@ export class DashboardPageControls extends FtrService {
     expectation: { suggestions: { [key: string]: number }; invalidSelections: string[] },
     skipOpen?: boolean
   ) {
+    await this.optionsListWaitForLoading(controlId);
     if (!skipOpen) await this.optionsListOpenPopover(controlId);
     await this.retry.try(async () => {
       expect(await this.optionsListPopoverGetAvailableOptions()).to.eql(expectation);
@@ -456,10 +461,25 @@ export class DashboardPageControls extends FtrService {
     });
   }
 
+  public async optionsListPopoverSelectExists() {
+    await this.retry.try(async () => {
+      await this.testSubjects.existOrFail(`optionsList-control-selection-exists`);
+      await this.testSubjects.click(`optionsList-control-selection-exists`);
+    });
+  }
+
   public async optionsListPopoverSelectOption(availableOption: string) {
     this.log.debug(`selecting ${availableOption} from options list`);
-    await this.optionsListPopoverAssertOpen();
-    await this.testSubjects.click(`optionsList-control-selection-${availableOption}`);
+    await this.optionsListPopoverSearchForOption(availableOption);
+    await this.optionsListPopoverWaitForLoading();
+
+    await this.retry.try(async () => {
+      await this.testSubjects.existOrFail(`optionsList-control-selection-${availableOption}`);
+      await this.testSubjects.click(`optionsList-control-selection-${availableOption}`);
+    });
+
+    await this.optionsListPopoverClearSearch();
+    await this.optionsListPopoverWaitForLoading();
   }
 
   public async optionsListPopoverClearSelections() {
@@ -482,7 +502,14 @@ export class DashboardPageControls extends FtrService {
   }
 
   public async optionsListWaitForLoading(controlId: string) {
+    this.log.debug(`wait for ${controlId} to load`);
     await this.testSubjects.waitForEnabled(`optionsList-control-${controlId}`);
+  }
+
+  public async optionsListPopoverWaitForLoading() {
+    this.log.debug(`wait for the suggestions in the popover to load`);
+    await this.optionsListPopoverAssertOpen();
+    await this.testSubjects.waitForDeleted('optionsList-control-popover-loading');
   }
 
   /* -----------------------------------------------------------
