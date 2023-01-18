@@ -211,12 +211,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       getEmbeddableFactory: this.getEmbeddableFactory,
       getEmbeddableFactories: this.getEmbeddableFactories,
       getAttributeService: (type: string, options) =>
-        new AttributeService(
-          type,
-          core.notifications.toasts,
-          options,
-          this.getEmbeddableFactory
-        ),
+        new AttributeService(type, core.notifications.toasts, options, this.getEmbeddableFactory),
       getStateTransfer: (storage?: Storage) =>
         storage
           ? new EmbeddableStateTransfer(

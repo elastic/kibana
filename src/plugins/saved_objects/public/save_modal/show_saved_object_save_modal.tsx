@@ -60,9 +60,8 @@ export function showSaveModal(
   const I18nContext = getI18n().Context;
   ReactDOM.render(
     <KibanaThemeProvider theme$={getTheme().theme$}>
-      <I18nContext>
-        {Wrapper ? <Wrapper>{element}</Wrapper> : element}
-      </I18nContext>
+      <I18nContext>{Wrapper ? <Wrapper>{element}</Wrapper> : element}</I18nContext>
     </KibanaThemeProvider>,
-    container);
+    container
+  );
 }
