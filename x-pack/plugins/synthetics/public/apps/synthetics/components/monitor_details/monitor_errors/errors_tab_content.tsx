@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { Ping } from '../../../../../../common/runtime_types';
 import { PanelWithTitle } from '../../common/components/panel_with_title';
 import { MonitorErrorsCount } from '../monitor_summary/monitor_errors_count';
 import { FailedTestsCount } from './failed_tests_count';
@@ -16,7 +17,13 @@ import { ErrorsList } from './errors_list';
 import { useAbsoluteDate, useGetUrlParams } from '../../../hooks';
 import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 
-export const ErrorsTabContent = () => {
+export const ErrorsTabContent = ({
+  errorStates,
+  loading,
+}: {
+  errorStates: Ping[];
+  loading: boolean;
+}) => {
   const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
 
   const time = useAbsoluteDate({ from: dateRangeStart, to: dateRangeEnd });
@@ -50,7 +57,7 @@ export const ErrorsTabContent = () => {
       <EuiFlexGroup gutterSize="m">
         <EuiFlexItem grow={2}>
           <PanelWithTitle title={ERRORS_LABEL}>
-            <ErrorsList />
+            <ErrorsList errorStates={errorStates} loading={loading} />
           </PanelWithTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={1}>

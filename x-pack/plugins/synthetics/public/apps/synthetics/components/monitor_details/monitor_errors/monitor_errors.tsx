@@ -4,28 +4,76 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiSpacer } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLoadingSpinner,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import React from 'react';
 import { useMonitorErrors } from '../hooks/use_monitor_errors';
-import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
-import { useAbsoluteDate, useGetUrlParams } from '../../../hooks';
 import { SyntheticsDatePicker } from '../../common/date_picker/synthetics_date_picker';
 import { ErrorsTabContent } from './errors_tab_content';
 
 export const MonitorErrors = () => {
   const { errorStates, loading } = useMonitorErrors();
 
-  const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
+  const initialLoading = loading && errorStates.length === 0;
 
-  const time = useAbsoluteDate({ from: dateRangeStart, to: dateRangeEnd });
-
-  const monitorId = useMonitorQueryId();
+  const emptyState = !loading && errorStates.length === 0;
 
   return (
     <>
       <SyntheticsDatePicker fullWidth={true} />
       <EuiSpacer size="m" />
-      <ErrorsTabContent errorStates={errorStates} loading={loading} />
+      {initialLoading && <LoadingErrors />}
+      {emptyState && <EmptyErrors />}
+      <div style={{ visibility: initialLoading || emptyState ? 'collapse' : 'initial' }}>
+        <ErrorsTabContent errorStates={errorStates} loading={loading} />
+      </div>
     </>
+  );
+};
+
+const LoadingErrors = () => {
+  return (
+    <EuiFlexGroup alignItems="center" justifyContent="center" style={{ height: '70vh' }}>
+      <EuiFlexItem grow={false} style={{ textAlign: 'center' }}>
+        <span>
+          <EuiLoadingSpinner size="xxl" />
+        </span>
+        <EuiSpacer size="m" />
+        <EuiTitle size="m">
+          <h3>Checking for errors</h3>
+        </EuiTitle>
+
+        <EuiSpacer size="m" />
+
+        <EuiText color="subdued">This will take just a second.</EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
+const EmptyErrors = () => {
+  return (
+    <EuiFlexGroup alignItems="center" justifyContent="center" style={{ height: '70vh' }}>
+      <EuiFlexItem grow={false} style={{ textAlign: 'center' }}>
+        <span>
+          <EuiIcon type="checkInCircleFilled" color="success" size="xl" />
+        </span>
+        <EuiSpacer size="m" />
+        <EuiTitle size="m">
+          <h3>No errors founds</h3>
+        </EuiTitle>
+
+        <EuiSpacer size="m" />
+
+        <EuiText color="subdued">Keep calm and carry on.</EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

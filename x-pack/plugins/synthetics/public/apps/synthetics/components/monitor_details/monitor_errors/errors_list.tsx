@@ -17,16 +17,13 @@ import {
   formatTestDuration,
   formatTestRunAt,
 } from '../../../utils/monitor_test_result/test_time_formats';
-import { useMonitorErrors } from '../hooks/use_monitor_errors';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 
-export const ErrorsList = () => {
+export const ErrorsList = ({ errorStates, loading }: { errorStates: Ping[]; loading: boolean }) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [sortField, setSortField] = useState('@timestamp');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
-
-  const { errorStates, loading } = useMonitorErrors();
 
   const { monitorId } = useParams<{ monitorId: string }>();
 
