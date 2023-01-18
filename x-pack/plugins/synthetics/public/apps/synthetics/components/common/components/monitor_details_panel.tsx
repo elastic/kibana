@@ -7,32 +7,39 @@
 
 import React from 'react';
 import {
-  EuiDescriptionList,
-  EuiDescriptionListTitle as TitleLabel,
-  EuiDescriptionListDescription as DescriptionLabel,
-  EuiBadge,
-  EuiSpacer,
   EuiLink,
   EuiText,
+  EuiBadge,
+  EuiSpacer,
+  EuiDescriptionList,
   EuiLoadingContent,
+  EuiDescriptionListTitle,
+  EuiDescriptionListDescription,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useDispatch } from 'react-redux';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import moment from 'moment';
 import { capitalize } from 'lodash';
+import { TagsBadges } from './tag_badges';
+import { useFormatTestRunAt } from '../../../utils/monitor_test_result/test_time_formats';
 import { PanelWithTitle } from './panel_with_title';
-import { useKibanaDateFormat } from '../../../../../hooks/use_kibana_date_format';
 import { MonitorEnabled } from '../../monitors_page/management/monitor_list_table/monitor_enabled';
 import { getMonitorAction } from '../../../state';
 import { LocationsStatus } from '../../monitor_details/monitor_summary/locations_status';
-import { MonitorTags } from '../../monitor_details/monitor_summary/monitor_tags';
 import {
   ConfigKey,
   EncryptedSyntheticsSavedMonitor,
   MonitorFields,
   Ping,
 } from '../../../../../../common/runtime_types';
+
+const TitleLabel = euiStyled(EuiDescriptionListTitle)`
+  width: 40%;
+`;
+
+const DescriptionLabel = euiStyled(EuiDescriptionListDescription)`
+  width: 60%;
+`;
 
 export const MonitorDetailsPanel = ({
   monitor,
@@ -116,12 +123,12 @@ export const MonitorDetailsPanel = ({
           <DescriptionLabel>{frequencyStr(monitor[ConfigKey.SCHEDULE])}</DescriptionLabel>
           <TitleLabel>{LOCATIONS_LABEL}</TitleLabel>
           <DescriptionLabel>
-            <LocationsStatus configId={monitor.id} />
+            <LocationsStatus configId={configId} monitorLocations={monitor.locations} />
           </DescriptionLabel>
 
           <TitleLabel>{TAGS_LABEL}</TitleLabel>
           <DescriptionLabel>
-            <MonitorTags tags={monitor[ConfigKey.TAGS]} />
+            <TagsBadges tags={monitor[ConfigKey.TAGS]} />
           </DescriptionLabel>
         </EuiDescriptionList>
       </WrapperStyle>
@@ -183,9 +190,9 @@ function translateUnitMessage(unitMsg: string) {
 }
 
 const Time = ({ timestamp }: { timestamp?: string }) => {
-  const formatStr = useKibanaDateFormat();
+  const dateTimeFormatted = useFormatTestRunAt(timestamp);
 
-  return timestamp ? <time dateTime={timestamp}>{moment(timestamp).format(formatStr)}</time> : null;
+  return timestamp ? <time dateTime={timestamp}>{dateTimeFormatted}</time> : null;
 };
 
 export const WrapperStyle = euiStyled.div`
