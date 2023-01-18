@@ -7,17 +7,9 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import usePrevious from 'react-use/lib/usePrevious';
 
 import { debounce } from 'lodash';
-import {
-  EuiButton,
-  EuiLink,
-  EuiLoadingSpinner,
-  EuiSelectable,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiSelectable } from '@elastic/eui';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 
@@ -50,7 +42,6 @@ export const OptionsListPopoverSuggestions = ({
   const invalidSelections = select((state) => state.componentState.invalidSelections);
   const availableOptions = select((state) => state.componentState.availableOptions);
   const totalCardinality = select((state) => state.componentState.totalCardinality) ?? 0;
-  const searchString = select((state) => state.componentState.searchString);
   const size = select((state) => state.componentState.size) ?? 0;
 
   const selectedOptions = select((state) => state.explicitInput.selectedOptions);
@@ -58,7 +49,6 @@ export const OptionsListPopoverSuggestions = ({
   const singleSelect = select((state) => state.explicitInput.singleSelect);
   const hideExists = select((state) => state.explicitInput.hideExists);
   const fieldName = select((state) => state.explicitInput.fieldName);
-  const sort = select((state) => state.explicitInput.sort);
 
   const listRef = useRef<HTMLDivElement>(null);
 
@@ -133,13 +123,11 @@ export const OptionsListPopoverSuggestions = ({
     }
   }, [clickLoadMore, totalCardinality, canLoadMoreSuggestions]);
 
-  const debouncedLoadMoreOptions = useMemo(
-    () =>
-      debounce(() => {
-        loadMoreOptions();
-      }, 1000),
-    [loadMoreOptions]
-  );
+  const debouncedLoadMoreOptions = useMemo(() => {
+    return debounce(() => {
+      loadMoreOptions();
+    }, 1000);
+  }, [loadMoreOptions]);
 
   useEffect(() => {
     const container = listRef.current;
@@ -148,53 +136,43 @@ export const OptionsListPopoverSuggestions = ({
   }, [debouncedLoadMoreOptions]);
 
   useEffect(() => {
-    console.log(size);
     // scroll back to the top when the size is reset back to 10, because this means either sort or search changed
     if (size === 10) {
+      console.log('scroll back to top');
       const listbox = listRef.current?.querySelector('.euiSelectableList__list');
       listbox?.scrollTo({ top: 0 });
     }
   }, [size]);
 
   return (
-    <div ref={listRef}>
-      <EuiSelectable
-        isLoading={isLoading}
-        loadingMessage={
-          <div
-            style={{ height: '100%', backgroundColor: 'red' }}
-            data-test-subj="optionsList-control-popover-loading"
-          >
-            {selectableOptions.length}
-            <EuiLoadingSpinner size="m" />
-            <EuiSpacer size="xs" />
-            {OptionsListStrings.popover.getLoadingMessage()}
-          </div>
-        }
-        options={selectableOptions}
-        listProps={{ onFocusBadge: false }}
-        aria-label={OptionsListStrings.popover.getSuggestionsAriaLabel(
-          fieldName,
-          selectableOptions.length
-        )}
-        emptyMessage={<OptionsListPopoverEmptyMessage showOnlySelected={showOnlySelected} />}
-        onChange={(newSuggestions, _, changedOption) => {
-          const key = changedOption.key ?? changedOption.label;
-          setSelectableOptions(newSuggestions);
-          // the order of these checks matters, so be careful if rearranging them
-          if (key === 'exists-option') {
-            dispatch(selectExists(!Boolean(existsSelected)));
-          } else if (showOnlySelected || selectedOptionsSet.has(key)) {
-            dispatch(deselectOption(key));
-          } else if (singleSelect) {
-            dispatch(replaceSelection(key));
-          } else {
-            dispatch(selectOption(key));
-          }
-        }}
-      >
-        {(list) => list}
-      </EuiSelectable>
-    </div>
+    <>
+      <div ref={listRef}>
+        <EuiSelectable
+          options={selectableOptions}
+          listProps={{ onFocusBadge: false }}
+          aria-label={OptionsListStrings.popover.getSuggestionsAriaLabel(
+            fieldName,
+            selectableOptions.length
+          )}
+          emptyMessage={<OptionsListPopoverEmptyMessage showOnlySelected={showOnlySelected} />}
+          onChange={(newSuggestions, _, changedOption) => {
+            const key = changedOption.key ?? changedOption.label;
+            setSelectableOptions(newSuggestions);
+            // the order of these checks matters, so be careful if rearranging them
+            if (key === 'exists-option') {
+              dispatch(selectExists(!Boolean(existsSelected)));
+            } else if (showOnlySelected || selectedOptionsSet.has(key)) {
+              dispatch(deselectOption(key));
+            } else if (singleSelect) {
+              dispatch(replaceSelection(key));
+            } else {
+              dispatch(selectOption(key));
+            }
+          }}
+        >
+          {(list) => list}
+        </EuiSelectable>
+      </div>
+    </>
   );
 };

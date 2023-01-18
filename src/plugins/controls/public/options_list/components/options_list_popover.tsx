@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { isEmpty } from 'lodash';
 
-import { EuiPopoverTitle } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiPopoverTitle } from '@elastic/eui';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
 import { OptionsListReduxState } from '../types';
@@ -53,38 +53,57 @@ export const OptionsListPopover = ({
   const [showOnlySelected, setShowOnlySelected] = useState(false);
 
   return (
-    <div
-      id={`control-popover-${id}`}
-      style={{ width, minWidth: 300 }}
-      data-test-subj={`optionsList-control-popover`}
-      aria-label={OptionsListStrings.popover.getAriaLabel(fieldName)}
-    >
-      <EuiPopoverTitle paddingSize="s">{title}</EuiPopoverTitle>
-      {field?.type !== 'boolean' && !hideActionBar && (
-        <OptionsListPopoverActionBar
-          showOnlySelected={showOnlySelected}
-          updateSearchString={updateSearchString}
-        />
-      )}
+    <>
       <div
-        data-test-subj={`optionsList-control-available-options`}
-        data-option-count={isLoading ? 0 : Object.keys(availableOptions ?? {}).length}
+        id={`control-popover-${id}`}
+        style={{ width: width > 300 ? width : undefined }}
+        data-test-subj={`optionsList-control-popover`}
+        aria-label={OptionsListStrings.popover.getAriaLabel(fieldName)}
       >
-        <OptionsListPopoverSuggestions
-          isLoading={isLoading}
-          clickLoadMore={clickLoadMore}
-          showOnlySelected={showOnlySelected}
-        />
-        {!showOnlySelected && invalidSelections && !isEmpty(invalidSelections) && (
-          <OptionsListPopoverInvalidSelections />
+        <EuiPopoverTitle paddingSize="s">{title}</EuiPopoverTitle>
+
+        {field?.type !== 'boolean' && !hideActionBar && (
+          <OptionsListPopoverActionBar
+            showOnlySelected={showOnlySelected}
+            updateSearchString={updateSearchString}
+          />
+        )}
+        <div
+          data-test-subj={`optionsList-control-available-options`}
+          data-option-count={isLoading ? 0 : Object.keys(availableOptions ?? {}).length}
+          style={{ width: '100%', height: '100%' }}
+        >
+          <div
+            hidden={!isLoading}
+            style={{
+              position: 'fixed',
+              top: 0,
+              width: '100%',
+              height: '100%',
+              pointerEvents: 'none',
+              zIndex: 1,
+              textAlign: 'center',
+            }}
+          >
+            <EuiLoadingSpinner style={{ top: '50%', position: 'fixed' }} size="l" />
+          </div>
+          <OptionsListPopoverSuggestions
+            isLoading={isLoading}
+            clickLoadMore={clickLoadMore}
+            showOnlySelected={showOnlySelected}
+          />
+          {!showOnlySelected && invalidSelections && !isEmpty(invalidSelections) && (
+            <OptionsListPopoverInvalidSelections />
+          )}
+        </div>
+
+        {!hideExclude && (
+          <OptionsListPopoverFooter
+            showOnlySelected={showOnlySelected}
+            setShowOnlySelected={setShowOnlySelected}
+          />
         )}
       </div>
-      {!hideExclude && (
-        <OptionsListPopoverFooter
-          showOnlySelected={showOnlySelected}
-          setShowOnlySelected={setShowOnlySelected}
-        />
-      )}
-    </div>
+    </>
   );
 };
