@@ -339,6 +339,52 @@ export class DiscoverPlugin
       },
     });
 
+    core.application.register({
+      id: PLUGIN_ID + '-obs',
+      title: 'Discover Observability',
+      updater$: this.appStateUpdater.asObservable(),
+      order: 1000,
+      euiIconType: 'logoKibana',
+      defaultPath: '#/',
+      category: DEFAULT_APP_CATEGORIES.observability,
+      mount: async (params: AppMountParameters) => {
+        const [coreStart, discoverStartPlugins] = await core.getStartServices();
+        setScopedHistory(params.history);
+        setHeaderActionMenuMounter(params.setHeaderActionMenu);
+        syncHistoryLocations();
+        appMounted();
+
+        // dispatch synthetic hash change event to update hash history objects
+        // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
+        const unlistenParentHistory = params.history.listen(() => {
+          window.dispatchEvent(new HashChangeEvent('hashchange'));
+        });
+
+        const services = buildServices(
+          coreStart,
+          discoverStartPlugins,
+          this.initializerContext,
+          this.locator!,
+          this.contextLocator!,
+          this.singleDocLocator!
+        );
+
+        // make sure the data view list is up to date
+        await discoverStartPlugins.dataViews.clearCache();
+
+        const { renderApp } = await import('./application');
+        // FIXME: Temporarily hide overflow-y in Discover app when Field Stats table is shown
+        // due to EUI bug https://github.com/elastic/eui/pull/5152
+        params.element.classList.add('dscAppWrapper');
+        const unmount = renderApp(params.element, services, isDev);
+        return () => {
+          unlistenParentHistory();
+          unmount();
+          appUnMounted();
+        };
+      },
+    });
+
     plugins.urlForwarding.forwardApp('doc', 'discover', (path) => {
       return `#${path}`;
     });
