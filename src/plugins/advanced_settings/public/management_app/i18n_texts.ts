@@ -29,7 +29,7 @@ export const i18nTexts = {
     defaultMessage:
       'Changes will be applied to all users across all spaces. This includes both native Kibana users and single-sign on users.',
   }),
-  advancedSettingsTitle: i18n.translate('advancedSettings.advancedSettingsTitle', {
+  advancedSettingsTitle: i18n.translate('advancedSettings.advancedSettingsLabel', {
     defaultMessage: 'Advanced Settings',
   }),
 };

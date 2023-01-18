@@ -15,6 +15,7 @@ import {
   EuiTabs,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiText,
 } from '@elastic/eui';
 import { ScopedHistory } from '@kbn/core-application-browser';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
@@ -25,7 +26,6 @@ import { UiCounterMetricType } from '@kbn/analytics';
 import { url } from '@kbn/kibana-utils-plugin/common';
 import { parse } from 'query-string';
 import { UiSettingsScope } from '@kbn/core-ui-settings-common';
-import { PageTitle } from '../component_registry/page_title';
 import { DEFAULT_CATEGORY, fieldSorter, getAriaName, toEditableConfig } from './lib';
 import { parseErrorMsg } from './components/search/search';
 import { AdvancedSettings, QUERY } from './advanced_settings';
@@ -278,6 +278,7 @@ export const Settings = (props: Props) => {
     return tabs.map((tab, index) => (
       <EuiTab
         key={index}
+        data-test-subj={`advancedSettingsTab-${tab.id}`}
         onClick={() => onSelectedTabChanged(tab.id)}
         isSelected={tab.id === selectedTabId}
         append={tab.append}
@@ -329,14 +330,17 @@ export const Settings = (props: Props) => {
     setQueryState({ ...queryState, footerQueryMatched: matched });
   };
 
+  const PageTitle = (
+    <EuiText>
+      <h1 data-test-subj="managementSettingsTitle">{i18nTexts.advancedSettingsTitle}</h1>
+    </EuiText>
+  );
   const PageFooter = componentRegistry.get(componentRegistry.componentType.PAGE_FOOTER_COMPONENT);
 
   return (
     <div>
       <EuiFlexGroup>
-        <EuiFlexItem>
-          <PageTitle title={i18nTexts.advancedSettingsTitle} />
-        </EuiFlexItem>
+        <EuiFlexItem>{PageTitle}</EuiFlexItem>
         <EuiFlexItem>
           <Search
             query={queryState.query}

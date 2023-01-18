@@ -13,6 +13,6 @@ import { PageTitle } from './page_title';
 
 describe('PageTitle', () => {
   it('should render normally', () => {
-    expect(shallowWithI18nProvider(<PageTitle title={'Advanced Settings'} />)).toMatchSnapshot();
+    expect(shallowWithI18nProvider(<PageTitle />)).toMatchSnapshot();
   });
 });
