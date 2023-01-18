@@ -7,8 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { MouseEvent, useMemo, useState } from 'react';
-import { EuiBasicTable, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiBasicTable, EuiSpacer, EuiText } from '@elastic/eui';
 import { useHistory, useParams } from 'react-router-dom';
+import { ErrorDetailsLink } from '../../common/links/error_details_link';
 import { useSelectedLocation } from '../hooks/use_selected_location';
 import { useKibanaDateFormat } from '../../../../../hooks/use_kibana_date_format';
 import { Ping } from '../../../../../../common/runtime_types';
@@ -17,7 +18,6 @@ import {
   formatTestDuration,
   formatTestRunAt,
 } from '../../../utils/monitor_test_result/test_time_formats';
-import { useSyntheticsSettingsContext } from '../../../contexts';
 
 export const ErrorsList = ({ errorStates, loading }: { errorStates: Ping[]; loading: boolean }) => {
   const [pageIndex, setPageIndex] = useState(0);
@@ -39,8 +39,6 @@ export const ErrorsList = ({ errorStates, loading }: { errorStates: Ping[]; load
 
   const isBrowserType = errorStates[0]?.monitor.type === 'browser';
 
-  const { basePath } = useSyntheticsSettingsContext();
-
   const history = useHistory();
 
   const format = useKibanaDateFormat();
@@ -54,16 +52,11 @@ export const ErrorsList = ({ errorStates, loading }: { errorStates: Ping[]; load
       sortable: true,
       render: (value: string, item: Ping) => {
         return (
-          <EuiLink
-            href={getErrorDetailsUrl({
-              basePath,
-              monitorId,
-              locationId: selectedLocation!.id,
-              stateId: item.state?.id!,
-            })}
-          >
-            {formatTestRunAt(item.state!.started_at, format)}
-          </EuiLink>
+          <ErrorDetailsLink
+            configId={monitorId}
+            stateId={item.state?.id!}
+            label={formatTestRunAt(item.state!.started_at, format)}
+          />
         );
       },
     },
@@ -149,16 +142,16 @@ export const ErrorsList = ({ errorStates, loading }: { errorStates: Ping[]; load
 
 export const getErrorDetailsUrl = ({
   basePath,
-  monitorId,
+  configId,
   stateId,
   locationId,
 }: {
   stateId: string;
   basePath: string;
-  monitorId: string;
+  configId: string;
   locationId: string;
 }) => {
-  return `${basePath}/app/synthetics/monitor/${monitorId}/errors/${stateId}?locationId=${locationId}`;
+  return `${basePath}/app/synthetics/monitor/${configId}/errors/${stateId}?locationId=${locationId}`;
 };
 
 const ERRORS_LIST_LABEL = i18n.translate('xpack.synthetics.errorsList.label', {
