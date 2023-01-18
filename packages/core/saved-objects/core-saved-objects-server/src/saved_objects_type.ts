@@ -113,6 +113,7 @@ export interface SavedObjectsType<Attributes = any> {
    * ```
    *
    * Note: migration function(s) can be optionally specified for any of these versions and will not interfere with the conversion process.
+   * @deprecated Converting to multi-namespace clashes with the ZDT requirement for serverless
    */
   convertToMultiNamespaceTypeVersion?: string;
   /**

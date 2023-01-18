@@ -8,9 +8,10 @@
 
 import { join } from 'path';
 import type { PackageInfo } from '@kbn/config';
-import { fromRoot } from '@kbn/utils';
+import { fromRoot } from '@kbn/repo-info';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import { distDir as UiSharedDepsSrcDistDir } from '@kbn/ui-shared-deps-src';
+import * as KbnMonaco from '@kbn/monaco/server';
 import type { IRouter } from '@kbn/core-http-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import { FileHashCache } from './file_hash_cache';
@@ -61,6 +62,13 @@ export function registerBundleRoutes({
     publicPath: `${serverBasePath}/${buildNum}/bundles/core/`,
     routePath: `/${buildNum}/bundles/core/`,
     bundlesPath: fromRoot(join('src', 'core', 'target', 'public')),
+    fileHashCache,
+    isDist,
+  });
+  registerRouteForBundle(router, {
+    publicPath: `${serverBasePath}/${buildNum}/bundles/kbn-monaco/`,
+    routePath: `/${buildNum}/bundles/kbn-monaco/`,
+    bundlesPath: KbnMonaco.bundleDir,
     fileHashCache,
     isDist,
   });

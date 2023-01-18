@@ -1,11 +1,12 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
+    "outDir": "target/types",
   },
-  "exclude": ["cypress.config.ts"],
+  "exclude": [
+    "cypress.config.ts",
+    "target/**/*",
+  ],
   "include": [
     // add all the folders contains files to be compiled
     "common/**/*",
@@ -19,22 +20,51 @@
     "public/common/schemas/*/**.json",
   ],
   "kbn_references": [
-    { "path": "../../../src/core/tsconfig.json" },
+    "@kbn/core",
     { "path": "../../../src/setup_node_env/tsconfig.json" },
     // add references to other TypeScript projects the plugin depends on
 
     // requiredPlugins from ./kibana.json
-    { "path": "../../../src/plugins/data/tsconfig.json" },
-    { "path": "../../../src/plugins/navigation/tsconfig.json" },
-    { "path": "../fleet/tsconfig.json" },
+    "@kbn/data-plugin",
+    "@kbn/navigation-plugin",
+    "@kbn/fleet-plugin",
 
     // optionalPlugins from ./kibana.json
-    { "path": "../../../src/plugins/home/tsconfig.json" },
-    { "path": "../cases/tsconfig.json" },
+    "@kbn/cases-plugin",
 
     // requiredBundles from ./kibana.json
-    { "path": "../../../src/plugins/es_ui_shared/tsconfig.json" },
-    { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
-    { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
+    "@kbn/es-ui-shared-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/kibana-utils-plugin",
+
+    // packages
+    "@kbn/config-schema",
+    "@kbn/es-query",
+    "@kbn/utility-types",
+    "@kbn/securitysolution-io-ts-utils",
+    "@kbn/osquery-io-ts-types",
+    "@kbn/ui-theme",
+    "@kbn/i18n-react",
+    "@kbn/discover-plugin",
+    "@kbn/lens-plugin",
+    "@kbn/security-plugin",
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/timelines-plugin",
+    "@kbn/spaces-plugin",
+    "@kbn/i18n",
+    "@kbn/rison",
+    "@kbn/react-field",
+    "@kbn/dev-cli-runner",
+    "@kbn/telemetry-plugin",
+    "@kbn/actions-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/features-plugin",
+    "@kbn/task-manager-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/rule-registry-plugin",
+    "@kbn/securitysolution-es-utils",
+    "@kbn/core-elasticsearch-client-server-mocks",
+    "@kbn/std",
+    "@kbn/ecs",
   ]
 }

@@ -52,12 +52,13 @@ import {
 import { LazySyntheticsCustomAssetsExtension } from './legacy_uptime/components/fleet_package/lazy_synthetics_custom_assets_extension';
 import { uptimeOverviewNavigatorParams } from './apps/locators/overview';
 import {
-  alertTypeInitializers,
+  uptimeAlertTypeInitializers,
   legacyAlertTypeInitializers,
 } from './legacy_uptime/lib/alert_types';
 import { monitorDetailNavigatorParams } from './apps/locators/monitor_detail';
 import { editMonitorNavigatorParams } from './apps/locators/edit_monitor';
 import { setStartServices } from './kibana_services';
+import { syntheticsAlertTypeInitializers } from './apps/synthetics/lib/alert_types';
 
 export interface ClientPluginsSetup {
   home?: HomePublicPluginSetup;
@@ -69,7 +70,7 @@ export interface ClientPluginsSetup {
 }
 
 export interface ClientPluginsStart {
-  fleet?: FleetStart;
+  fleet: FleetStart;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   discover: DiscoverStart;
@@ -84,6 +85,7 @@ export interface ClientPluginsStart {
   cloud?: CloudStart;
   appName: string;
   storage: IStorageWrapper;
+  application: CoreStart['application'];
   notifications: CoreStart['notifications'];
   http: CoreStart['http'];
   docLinks: DocLinksStart;
@@ -145,35 +147,7 @@ export class UptimePlugin
 
     registerUptimeRoutesWithNavigation(core, plugins);
 
-    const { observabilityRuleTypeRegistry } = plugins.observability;
-
-    core.getStartServices().then(([coreStart, clientPluginsStart]) => {
-      alertTypeInitializers.forEach((init) => {
-        const alertInitializer = init({
-          core: coreStart,
-          plugins: clientPluginsStart,
-        });
-        if (
-          clientPluginsStart.triggersActionsUi &&
-          !clientPluginsStart.triggersActionsUi.ruleTypeRegistry.has(alertInitializer.id)
-        ) {
-          observabilityRuleTypeRegistry.register(alertInitializer);
-        }
-      });
-
-      legacyAlertTypeInitializers.forEach((init) => {
-        const alertInitializer = init({
-          core: coreStart,
-          plugins: clientPluginsStart,
-        });
-        if (
-          clientPluginsStart.triggersActionsUi &&
-          !clientPluginsStart.triggersActionsUi.ruleTypeRegistry.has(alertInitializer.id)
-        ) {
-          plugins.triggersActionsUi.ruleTypeRegistry.register(alertInitializer);
-        }
-      });
-    });
+    core.getStartServices().then(([coreStart, clientPluginsStart]) => {});
 
     const appKeywords = [
       'Synthetics',
@@ -236,30 +210,46 @@ export class UptimePlugin
     }
   }
 
-  public start(start: CoreStart, plugins: ClientPluginsStart): void {
-    if (plugins.fleet) {
-      const { registerExtension } = plugins.fleet;
-      setStartServices(start);
+  public start(coreStart: CoreStart, pluginsStart: ClientPluginsStart): void {
+    const { triggersActionsUi } = pluginsStart;
 
-      registerExtension({
-        package: 'synthetics',
-        view: 'package-policy-create',
-        Component: LazySyntheticsPolicyCreateExtension,
-      });
+    const { registerExtension } = pluginsStart.fleet;
+    setStartServices(coreStart);
+    registerUptimeFleetExtensions(registerExtension);
 
-      registerExtension({
-        package: 'synthetics',
-        view: 'package-policy-edit',
-        useLatestPackageVersion: true,
-        Component: LazySyntheticsPolicyEditExtension,
-      });
+    syntheticsAlertTypeInitializers.forEach((init) => {
+      const { observabilityRuleTypeRegistry } = pluginsStart.observability;
 
-      registerExtension({
-        package: 'synthetics',
-        view: 'package-detail-assets',
-        Component: LazySyntheticsCustomAssetsExtension,
+      const alertInitializer = init({
+        core: coreStart,
+        plugins: pluginsStart,
       });
-    }
+      if (!triggersActionsUi.ruleTypeRegistry.has(alertInitializer.id)) {
+        observabilityRuleTypeRegistry.register(alertInitializer);
+      }
+    });
+
+    uptimeAlertTypeInitializers.forEach((init) => {
+      const { observabilityRuleTypeRegistry } = pluginsStart.observability;
+
+      const alertInitializer = init({
+        core: coreStart,
+        plugins: pluginsStart,
+      });
+      if (!triggersActionsUi.ruleTypeRegistry.has(alertInitializer.id)) {
+        observabilityRuleTypeRegistry.register(alertInitializer);
+      }
+    });
+
+    legacyAlertTypeInitializers.forEach((init) => {
+      const alertInitializer = init({
+        core: coreStart,
+        plugins: pluginsStart,
+      });
+      if (!triggersActionsUi.ruleTypeRegistry.has(alertInitializer.id)) {
+        triggersActionsUi.ruleTypeRegistry.register(alertInitializer);
+      }
+    });
   }
 
   public stop(): void {}
@@ -284,7 +274,7 @@ function registerSyntheticsRoutesWithNavigation(
                   }),
                   app: 'synthetics',
                   path: OVERVIEW_ROUTE,
-                  matchFullPath: true,
+                  matchFullPath: false,
                   ignoreTrailingSlash: true,
                 },
               ],
@@ -337,4 +327,25 @@ function registerUptimeRoutesWithNavigation(
       })
     )
   );
+}
+
+function registerUptimeFleetExtensions(registerExtension: FleetStart['registerExtension']) {
+  registerExtension({
+    package: 'synthetics',
+    view: 'package-policy-create',
+    Component: LazySyntheticsPolicyCreateExtension,
+  });
+
+  registerExtension({
+    package: 'synthetics',
+    view: 'package-policy-edit',
+    useLatestPackageVersion: true,
+    Component: LazySyntheticsPolicyEditExtension,
+  });
+
+  registerExtension({
+    package: 'synthetics',
+    view: 'package-detail-assets',
+    Component: LazySyntheticsCustomAssetsExtension,
+  });
 }

@@ -39,6 +39,7 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { RuleDetailsLocatorDefinition } from './locators/rule_details';
 import { observabilityAppId, observabilityFeatureId, casesPath } from '../common';
 import { createLazyObservabilityPageTemplate } from './components/shared';
@@ -102,6 +103,7 @@ export interface ObservabilityPublicPluginsStart {
   actionTypeRegistry: ActionTypeRegistryContract;
   security: SecurityPluginStart;
   guidedOnboarding: GuidedOnboardingPluginStart;
+  spaces: SpacesPluginStart;
 }
 
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
@@ -311,10 +313,14 @@ export class Plugin
 
   public start(coreStart: CoreStart, pluginsStart: ObservabilityPublicPluginsStart) {
     const { application } = coreStart;
+    const config = this.initContext.config.get();
+
+    const filterSlo = (link: AppDeepLink) =>
+      link.id === 'slos' ? config.unsafe.slo.enabled : link;
 
     updateGlobalNavigation({
       capabilities: application.capabilities,
-      deepLinks: this.deepLinks,
+      deepLinks: this.deepLinks.filter(filterSlo),
       updater$: this.appUpdater$,
     });
 
@@ -331,18 +337,16 @@ export class Plugin
       const { getO11yAlertsTableConfiguration } = await import(
         './config/register_alerts_table_configuration'
       );
-      return getO11yAlertsTableConfiguration(
-        this.observabilityRuleTypeRegistry,
-        this.initContext.config.get()
-      );
+      return getO11yAlertsTableConfiguration(this.observabilityRuleTypeRegistry, config);
     };
 
     const { alertsTableConfigurationRegistry } = pluginsStart.triggersActionsUi;
-    getAsyncO11yAlertsTableConfiguration().then((config) => {
-      alertsTableConfigurationRegistry.register(config);
+    getAsyncO11yAlertsTableConfiguration().then((alertsTableConfig) => {
+      alertsTableConfigurationRegistry.register(alertsTableConfig);
     });
 
     return {
+      observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
       navigation: {
         PageTemplate,
       },

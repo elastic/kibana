@@ -268,6 +268,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 owner: postedCase.owner,
                 connector: postedCase.connector,
                 severity: postedCase.severity,
+                status: postedCase.status,
                 comments: [],
                 totalAlerts: 0,
                 totalComment: 0,

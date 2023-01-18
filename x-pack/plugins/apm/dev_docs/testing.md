@@ -3,7 +3,7 @@
 ## Unit Tests (Jest)
 
 ```
-node scripts/test/jest [--watch] [--updateSnapshot]
+node x-pack/plugins/apm/scripts/test/jest [--watch] [--updateSnapshot]
 ```
 
 #### Coverage
@@ -56,7 +56,7 @@ node x-pack/plugins/apm/scripts/test/api --runner --basic --grep-files=error_gro
 To update snapshots append `--updateSnapshots` to the `--runner` command:
 
 ```
-node scripts/test/api --runner --basic --updateSnapshots
+node x-pack/plugins/apm/scripts/test/api --runner --basic --updateSnapshots
 ```
 
 (The test server needs to be running)
@@ -70,7 +70,16 @@ node scripts/test/api --runner --basic --updateSnapshots
 
 ## E2E Tests (Cypress)
 
-The E2E tests are located in [`x-pack/plugins/apm/ftr_e2e`](../ftr_e2e)
+The E2E tests are located in [`x-pack/plugins/apm/ftr_e2e`](../ftr_e2e).
+
+Test runs are recorded to the [Cypress Dashboard](https://dashboard.cypress.io). Tests run on buildkite PR pipeline are parallelized (4 parallel jobs) and are orchestrated by the Cypress dashboard service. It can be configured in [.buildkite/pipelines/pull_request/apm_cypress.yml](https://github.com/elastic/kibana/blob/main/.buildkite/pipelines/pull_request/apm_cypress.yml) with the property `parallelism`.
+
+```yml
+    ...
+    depends_on: build
+    parallelism: 4
+    ...
+```
 
 [Test tips and best practices](../ftr_e2e/README.md)
 

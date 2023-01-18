@@ -11,19 +11,41 @@ import { pipe } from 'fp-ts/lib/pipeable';
 
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
+import { sloSchema } from '@kbn/slo-schema';
 
 import { StoredSLO, SLO } from '../../domain/models';
 import { SO_SLO_TYPE } from '../../saved_objects';
 import { SLONotFound } from '../../errors';
-import { sloSchema } from '../../types/schema';
+
+type ObjectValues<T> = T[keyof T];
 
 export interface Criteria {
   name?: string;
+  indicatorTypes?: string[];
 }
 
 export interface Pagination {
   page: number;
   perPage: number;
+}
+
+export const SortDirection = {
+  Asc: 'Asc',
+  Desc: 'Desc',
+} as const;
+
+type SortDirection = ObjectValues<typeof SortDirection>;
+
+export const SortField = {
+  Name: 'Name',
+  IndicatorType: 'IndicatorType',
+};
+
+type SortField = ObjectValues<typeof SortField>;
+
+export interface Sort {
+  field: SortField;
+  direction: SortDirection;
 }
 
 export interface Paginated<T> {
@@ -37,7 +59,7 @@ export interface SLORepository {
   save(slo: SLO): Promise<SLO>;
   findById(id: string): Promise<SLO>;
   deleteById(id: string): Promise<void>;
-  find(criteria: Criteria, pagination: Pagination): Promise<Paginated<SLO>>;
+  find(criteria: Criteria, sort: Sort, pagination: Pagination): Promise<Paginated<SLO>>;
 }
 
 export class KibanaSavedObjectsSLORepository implements SLORepository {
@@ -75,13 +97,16 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
     }
   }
 
-  async find(criteria: Criteria, pagination: Pagination): Promise<Paginated<SLO>> {
+  async find(criteria: Criteria, sort: Sort, pagination: Pagination): Promise<Paginated<SLO>> {
     const filterKuery = buildFilterKuery(criteria);
+    const { sortField, sortOrder } = buildSortQuery(sort);
     const response = await this.soClient.find<StoredSLO>({
       type: SO_SLO_TYPE,
       page: pagination.page,
       perPage: pagination.perPage,
       filter: filterKuery,
+      sortField,
+      sortOrder,
     });
 
     return {
@@ -96,9 +121,35 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
 function buildFilterKuery(criteria: Criteria): string | undefined {
   const filters: string[] = [];
   if (!!criteria.name) {
-    filters.push(`slo.attributes.name: ${addWildcardIfAbsent(criteria.name)}`);
+    filters.push(`(slo.attributes.name: ${addWildcardsIfAbsent(criteria.name)})`);
   }
+
+  if (!!criteria.indicatorTypes) {
+    const indicatorTypesFilter: string[] = criteria.indicatorTypes.map(
+      (indicatorType) => `slo.attributes.indicator.type: ${indicatorType}`
+    );
+    filters.push(`(${indicatorTypesFilter.join(' or ')})`);
+  }
+
   return filters.length > 0 ? filters.join(' and ') : undefined;
+}
+
+function buildSortQuery(sort: Sort): { sortField: string; sortOrder: 'asc' | 'desc' } {
+  let sortField: string;
+  switch (sort.field) {
+    case SortField.IndicatorType:
+      sortField = 'indicator.type';
+      break;
+    case SortField.Name:
+    default:
+      sortField = 'name';
+      break;
+  }
+
+  return {
+    sortField,
+    sortOrder: sort.direction === SortDirection.Desc ? 'desc' : 'asc',
+  };
 }
 
 function toStoredSLO(slo: SLO): StoredSLO {
@@ -115,7 +166,15 @@ function toSLO(storedSLO: StoredSLO): SLO {
 }
 
 const WILDCARD_CHAR = '*';
-function addWildcardIfAbsent(value: string): string {
-  if (value.substring(value.length - 1) === WILDCARD_CHAR) return value;
-  return `${value}${WILDCARD_CHAR}`;
+function addWildcardsIfAbsent(value: string): string {
+  let updatedValue = value;
+  if (updatedValue.substring(0, 1) !== WILDCARD_CHAR) {
+    updatedValue = `${WILDCARD_CHAR}${updatedValue}`;
+  }
+
+  if (value.substring(value.length - 1) !== WILDCARD_CHAR) {
+    updatedValue = `${updatedValue}${WILDCARD_CHAR}`;
+  }
+
+  return updatedValue;
 }

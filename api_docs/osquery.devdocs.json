@@ -43,7 +43,7 @@
             "((props: ",
             "OsqueryActionProps",
             " & { ecsData?: ",
-            "AlertEcsData",
+            "Ecs",
             " | undefined; }) => JSX.Element) | undefined"
           ],
           "path": "x-pack/plugins/osquery/public/types.ts",
@@ -190,6 +190,46 @@
               "trackAdoption": false
             }
           ]
+        },
+        {
+          "parentPluginId": "osquery",
+          "id": "def-public.OsqueryPluginStart.fetchAllLiveQueries",
+          "type": "Function",
+          "tags": [],
+          "label": "fetchAllLiveQueries",
+          "description": [],
+          "signature": [
+            "(config: ",
+            "UseAllLiveQueriesConfig",
+            ") => ",
+            "UseQueryResult",
+            "<{ data: Omit<",
+            "ActionsStrategyResponse",
+            ", \"edges\"> & { items: ",
+            "SearchHit",
+            "<object>[]; }; }, Error>"
+          ],
+          "path": "x-pack/plugins/osquery/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "osquery",
+              "id": "def-public.OsqueryPluginStart.fetchAllLiveQueries.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "config",
+              "description": [],
+              "signature": [
+                "UseAllLiveQueriesConfig"
+              ],
+              "path": "x-pack/plugins/osquery/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",
@@ -222,7 +262,15 @@
           "label": "osqueryCreateAction",
           "description": [],
           "signature": [
-            "(payload: { agent_ids?: string[] | undefined; agent_all?: boolean | undefined; agent_platforms?: string[] | undefined; agent_policy_ids?: string[] | undefined; query?: string | undefined; queries?: { id: string; query: string; ecs_mapping: { [x: string]: { field?: string | undefined; value?: string | string[] | undefined; }; } | undefined; version: string | undefined; platform: string | undefined; }[] | { [x: string]: { query: string; id: string; ecs_mapping: { [x: string]: { field?: string | undefined; value?: string | string[] | undefined; }; } | undefined; version: string | undefined; platform: string | undefined; saved_query_id: string | undefined; }; } | undefined; saved_query_id?: string | undefined; ecs_mapping?: { [x: string]: { field?: string | undefined; value?: string | string[] | undefined; }; } | undefined; pack_id?: string | undefined; alert_ids?: string[] | undefined; case_ids?: string[] | undefined; event_ids?: string[] | undefined; metadata?: object | undefined; }) => void"
+            "(payload: { agent_ids?: string[] | undefined; agent_all?: boolean | undefined; agent_platforms?: string[] | undefined; agent_policy_ids?: string[] | undefined; query?: string | undefined; queries?: { id: string; query: string; ecs_mapping: { [x: string]: { field?: string | undefined; value?: string | string[] | undefined; }; } | undefined; version: string | undefined; platform: string | undefined; removed: boolean | undefined; snapshot: boolean | undefined; }[] | undefined; saved_query_id?: string | undefined; ecs_mapping?: { [x: string]: { field?: string | undefined; value?: string | string[] | undefined; }; } | undefined; pack_id?: string | undefined; alert_ids?: string[] | undefined; case_ids?: string[] | undefined; event_ids?: string[] | undefined; metadata?: object | undefined; }, ecsData?: ",
+            {
+              "pluginId": "@kbn/ecs",
+              "scope": "common",
+              "docId": "kibKbnEcsPluginApi",
+              "section": "def-common.Ecs",
+              "text": "Ecs"
+            },
+            " | undefined) => void"
           ],
           "path": "x-pack/plugins/osquery/server/types.ts",
           "deprecated": false,
@@ -236,12 +284,34 @@
               "label": "payload",
               "description": [],
               "signature": [
-                "{ agent_ids?: string[] | undefined; agent_all?: boolean | undefined; agent_platforms?: string[] | undefined; agent_policy_ids?: string[] | undefined; query?: string | undefined; queries?: { id: string; query: string; ecs_mapping: { [x: string]: { field?: string | undefined; value?: string | string[] | undefined; }; } | undefined; version: string | undefined; platform: string | undefined; }[] | { [x: string]: { query: string; id: string; ecs_mapping: { [x: string]: { field?: string | undefined; value?: string | string[] | undefined; }; } | undefined; version: string | undefined; platform: string | undefined; saved_query_id: string | undefined; }; } | undefined; saved_query_id?: string | undefined; ecs_mapping?: { [x: string]: { field?: string | undefined; value?: string | string[] | undefined; }; } | undefined; pack_id?: string | undefined; alert_ids?: string[] | undefined; case_ids?: string[] | undefined; event_ids?: string[] | undefined; metadata?: object | undefined; }"
+                "{ agent_ids?: string[] | undefined; agent_all?: boolean | undefined; agent_platforms?: string[] | undefined; agent_policy_ids?: string[] | undefined; query?: string | undefined; queries?: { id: string; query: string; ecs_mapping: { [x: string]: { field?: string | undefined; value?: string | string[] | undefined; }; } | undefined; version: string | undefined; platform: string | undefined; removed: boolean | undefined; snapshot: boolean | undefined; }[] | undefined; saved_query_id?: string | undefined; ecs_mapping?: { [x: string]: { field?: string | undefined; value?: string | string[] | undefined; }; } | undefined; pack_id?: string | undefined; alert_ids?: string[] | undefined; case_ids?: string[] | undefined; event_ids?: string[] | undefined; metadata?: object | undefined; }"
               ],
               "path": "x-pack/plugins/osquery/server/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
+            },
+            {
+              "parentPluginId": "osquery",
+              "id": "def-server.OsqueryPluginSetup.osqueryCreateAction.$2",
+              "type": "CompoundType",
+              "tags": [],
+              "label": "ecsData",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "@kbn/ecs",
+                  "scope": "common",
+                  "docId": "kibKbnEcsPluginApi",
+                  "section": "def-common.Ecs",
+                  "text": "Ecs"
+                },
+                " | undefined"
+              ],
+              "path": "x-pack/plugins/osquery/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": false
             }
           ],
           "returnComment": []

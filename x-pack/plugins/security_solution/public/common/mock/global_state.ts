@@ -349,6 +349,7 @@ export const mockGlobalState: State = {
         resolveTimelineConfig: undefined,
         pinnedEventIds: {},
         pinnedEventsSaveObject: {},
+        selectAll: false,
         sessionViewConfig: null,
         show: false,
         sort: [

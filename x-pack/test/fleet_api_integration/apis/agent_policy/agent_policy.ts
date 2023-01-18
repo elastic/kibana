@@ -58,6 +58,7 @@ export default function (providerContext: FtrProviderContext) {
 
         const { body } = await supertest.get(`/api/fleet/agent_policies/${createdPolicy.id}`);
         expect(body.item.is_managed).to.equal(false);
+        expect(body.item.inactivity_timeout).to.equal(1209600);
         expect(body.item.status).to.be('active');
       });
 
@@ -624,6 +625,7 @@ export default function (providerContext: FtrProviderContext) {
           revision: 2,
           schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
           updated_by: 'elastic',
+          inactivity_timeout: 1209600,
           package_policies: [],
         });
       });
@@ -787,6 +789,7 @@ export default function (providerContext: FtrProviderContext) {
           updated_by: 'elastic',
           package_policies: [],
           monitoring_enabled: ['logs', 'metrics'],
+          inactivity_timeout: 1209600,
         });
 
         const listResponseAfterUpdate = await fetchPackageList();

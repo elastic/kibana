@@ -18,3 +18,13 @@ jest.mock('../../lib', () => {
     validateKibanaPrivileges: mockValidateKibanaPrivileges,
   };
 });
+
+export const mockGetFakeKibanaRequest = jest.fn();
+
+jest.mock('./fake_kibana_request', () => {
+  const actual = jest.requireActual('./fake_kibana_request');
+  return {
+    ...actual,
+    getFakeKibanaRequest: mockGetFakeKibanaRequest,
+  };
+});

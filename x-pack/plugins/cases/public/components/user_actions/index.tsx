@@ -36,6 +36,12 @@ const MyEuiCommentList = styled(EuiCommentList)`
       transition: 0.8s;
     }
 
+    & .draftFooter {
+      & .euiCommentEvent__body {
+        padding: 0;
+      }
+    }
+
     & .euiComment.isEdit {
       & .euiCommentEvent {
         border: none;
@@ -91,8 +97,11 @@ export const UserActions = React.memo(
   }: UserActionTreeProps) => {
     const { detailName: caseId, commentId } = useCaseViewParams();
     const [initLoading, setInitLoading] = useState(true);
-    const { externalReferenceAttachmentTypeRegistry, persistableStateAttachmentTypeRegistry } =
-      useCasesContext();
+    const {
+      externalReferenceAttachmentTypeRegistry,
+      persistableStateAttachmentTypeRegistry,
+      appId,
+    } = useCasesContext();
 
     const alertIdsWithoutRuleInfo = useMemo(
       () => getManualAlertIdsWithNoRuleId(caseData.comments),
@@ -141,6 +150,7 @@ export const UserActions = React.memo(
     const descriptionCommentListObj: EuiCommentProps = useMemo(
       () =>
         getDescriptionUserAction({
+          appId,
           userProfiles,
           caseData,
           commentRefs,
@@ -151,6 +161,7 @@ export const UserActions = React.memo(
           handleManageQuote,
         }),
       [
+        appId,
         userProfiles,
         caseData,
         commentRefs,
@@ -177,6 +188,7 @@ export const UserActions = React.memo(
             }
 
             const userActionBuilder = builder({
+              appId,
               caseData,
               externalReferenceAttachmentTypeRegistry,
               persistableStateAttachmentTypeRegistry,
@@ -207,6 +219,7 @@ export const UserActions = React.memo(
           [descriptionCommentListObj]
         ),
       [
+        appId,
         caseUserActions,
         userProfiles,
         currentUserProfile,

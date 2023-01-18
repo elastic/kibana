@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import datemath, { Unit } from '@kbn/datemath';
-import { IKibanaResponse, SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
+import pMap from 'p-map';
+import { getAllMonitors } from '../../saved_objects/synthetics_monitor/get_all_monitors';
+import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
+import { getAllLocations } from '../../synthetics_service/get_all_locations';
+import { queryMonitorStatus } from '../../queries/query_monitor_status';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { UMServerLibs } from '../../legacy_uptime/uptime_server';
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes';
-import { getMonitors } from '../common';
 import { UptimeEsClient } from '../../legacy_uptime/lib/lib';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
-import { ConfigKey, OverviewStatus, OverviewStatusMetaData } from '../../../common/runtime_types';
+import { ConfigKey, ServiceLocation } from '../../../common/runtime_types';
 import { QuerySchema, MonitorsQuery } from '../common';
 
 /**
@@ -29,117 +32,6 @@ export function periodToMs(schedule: { number: string; unit: Unit }) {
   return parseInt(schedule.number, 10) * datemath.unitsMap[schedule.unit].base;
 }
 
-const DEFAULT_MAX_ES_BUCKET_SIZE = 10000;
-
-export async function queryMonitorStatus(
-  esClient: UptimeEsClient,
-  maxLocations: number,
-  maxPeriod: number,
-  ids: string[]
-): Promise<Omit<OverviewStatus, 'disabledCount'>> {
-  const idSize = Math.trunc(DEFAULT_MAX_ES_BUCKET_SIZE / maxLocations);
-  const pageCount = Math.ceil(ids.length / idSize);
-  const promises: Array<Promise<any>> = [];
-  for (let i = 0; i < pageCount; i++) {
-    const params: estypes.SearchRequest = {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            {
-              range: {
-                '@timestamp': {
-                  gte: maxPeriod,
-                  // @ts-expect-error can't mix number and string in client definition
-                  lte: 'now',
-                },
-              },
-            },
-            {
-              terms: {
-                'monitor.id': (ids as string[]).slice(i * idSize, i * idSize + idSize),
-              },
-            },
-            {
-              exists: {
-                field: 'summary',
-              },
-            },
-          ],
-        },
-      },
-      aggs: {
-        id: {
-          terms: {
-            field: 'monitor.id',
-            size: idSize,
-          },
-          aggs: {
-            location: {
-              terms: {
-                field: 'observer.geo.name',
-                size: maxLocations,
-              },
-              aggs: {
-                status: {
-                  top_hits: {
-                    size: 1,
-                    sort: [
-                      {
-                        '@timestamp': {
-                          order: 'desc',
-                        },
-                      },
-                    ],
-                    _source: {
-                      includes: ['@timestamp', 'summary', 'monitor', 'observer', 'config_id'],
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    };
-
-    promises.push(esClient.baseESClient.search(params));
-  }
-  let up = 0;
-  let down = 0;
-  const upConfigs: Record<string, OverviewStatusMetaData> = {};
-  const downConfigs: Record<string, OverviewStatusMetaData> = {};
-  for await (const response of promises) {
-    response.aggregations?.id.buckets.forEach(({ location }: { key: string; location: any }) => {
-      location.buckets.forEach(({ status }: { key: string; status: any }) => {
-        const downCount = status.hits.hits[0]._source.summary.down;
-        const upCount = status.hits.hits[0]._source.summary.up;
-        const configId = status.hits.hits[0]._source.config_id;
-        const monitorQueryId = status.hits.hits[0]._source.monitor.id;
-        const locationName = status.hits.hits[0]._source.observer?.geo?.name;
-        if (upCount > 0) {
-          up += 1;
-          upConfigs[`${configId}-${locationName}`] = {
-            configId,
-            monitorQueryId,
-            location: locationName,
-            status: 'up',
-          };
-        } else if (downCount > 0) {
-          down += 1;
-          downConfigs[`${configId}-${locationName}`] = {
-            configId,
-            monitorQueryId,
-            location: locationName,
-            status: 'down',
-          };
-        }
-      });
-    });
-  }
-  return { up, down, upConfigs, downConfigs, enabledIds: ids };
-}
-
 /**
  * Multi-stage function that first queries all the user's saved object monitor configs.
  *
@@ -147,62 +39,98 @@ export async function queryMonitorStatus(
  * @returns The counts of up/down/disabled monitor by location, and a map of each monitor:location status.
  */
 export async function getStatus(
+  server: UptimeServerSetup,
   uptimeEsClient: UptimeEsClient,
-  savedObjectsClient: SavedObjectsClientContract,
+  soClient: SavedObjectsClientContract,
   syntheticsMonitorClient: SyntheticsMonitorClient,
   params: MonitorsQuery
 ) {
   const { query } = params;
-  let monitors;
   const enabledIds: string[] = [];
   let disabledCount = 0;
-  let page = 1;
+  let disabledMonitorsCount = 0;
   let maxPeriod = 0;
-  let maxLocations = 1;
+  let listOfLocationsSet = new Set<string>();
+  const monitorLocationMap: Record<string, string[]> = {};
   /**
    * Walk through all monitor saved objects, bucket IDs by disabled/enabled status.
    *
    * Track max period to make sure the snapshot query should reach back far enough to catch
    * latest ping for all enabled monitors.
    */
-  do {
-    monitors = await getMonitors(
-      {
-        perPage: 500,
-        page,
-        sortField: 'name.keyword',
-        sortOrder: 'asc',
-        query,
-        fields: [
-          ConfigKey.ENABLED,
-          ConfigKey.LOCATIONS,
-          ConfigKey.MONITOR_QUERY_ID,
-          ConfigKey.SCHEDULE,
-        ],
-      },
-      syntheticsMonitorClient.syntheticsService,
-      savedObjectsClient
-    );
-    page++;
-    monitors.saved_objects.forEach((monitor) => {
-      if (monitor.attributes[ConfigKey.ENABLED] === false) {
-        disabledCount += monitor.attributes[ConfigKey.LOCATIONS].length;
-      } else {
-        enabledIds.push(monitor.attributes[ConfigKey.MONITOR_QUERY_ID]);
-        maxLocations = Math.max(maxLocations, monitor.attributes[ConfigKey.LOCATIONS].length);
-        maxPeriod = Math.max(maxPeriod, periodToMs(monitor.attributes[ConfigKey.SCHEDULE]));
-      }
-    });
-  } while (monitors.saved_objects.length === monitors.per_page);
+
+  const allMonitors = await getAllMonitors({
+    soClient,
+    search: `${query}*`,
+    fields: [
+      ConfigKey.ENABLED,
+      ConfigKey.LOCATIONS,
+      ConfigKey.MONITOR_QUERY_ID,
+      ConfigKey.SCHEDULE,
+    ],
+  });
+
+  let allLocations: ServiceLocation[] | null = null;
+
+  const getLocationLabel = async (locationId: string) => {
+    if (!allLocations) {
+      const { publicLocations, privateLocations } = await getAllLocations(
+        server,
+        syntheticsMonitorClient,
+        soClient
+      );
+
+      allLocations = [...publicLocations, ...privateLocations];
+    }
+
+    return allLocations.find((loc) => loc.id === locationId)?.label ?? locationId;
+  };
+
+  for (const monitor of allMonitors) {
+    const attrs = monitor.attributes;
+    if (attrs[ConfigKey.ENABLED] === false) {
+      disabledCount += attrs[ConfigKey.LOCATIONS].length;
+      disabledMonitorsCount += 1;
+    } else {
+      const missingLabels = new Set<string>();
+
+      enabledIds.push(attrs[ConfigKey.MONITOR_QUERY_ID]);
+      const monLocs = new Set([
+        ...(attrs[ConfigKey.LOCATIONS]
+          .filter((loc) => {
+            if (!loc.label) {
+              missingLabels.add(loc.id);
+            }
+            return loc.label;
+          })
+          .map((location) => location.label) as string[]),
+      ]);
+
+      // since label wasn't always part of location, there can be a case where we have a location
+      // with an id but no label. We need to fetch the label from the API
+      // Adding a migration to add the label to the saved object is a future consideration
+      const locLabels = await pMap([...missingLabels], async (locationId) =>
+        getLocationLabel(locationId)
+      );
+
+      monitorLocationMap[attrs[ConfigKey.MONITOR_QUERY_ID]] = [...monLocs, ...locLabels];
+      listOfLocationsSet = new Set([...listOfLocationsSet, ...monLocs, ...locLabels]);
+
+      maxPeriod = Math.max(maxPeriod, periodToMs(attrs[ConfigKey.SCHEDULE]));
+    }
+  }
 
   const { up, down, upConfigs, downConfigs } = await queryMonitorStatus(
     uptimeEsClient,
-    maxLocations,
-    maxPeriod,
-    enabledIds
+    [...listOfLocationsSet],
+    { from: maxPeriod, to: 'now' },
+    enabledIds,
+    monitorLocationMap
   );
 
   return {
+    allMonitorsCount: allMonitors.length,
+    disabledMonitorsCount,
     enabledIds,
     disabledCount,
     up,
@@ -219,15 +147,49 @@ export const createGetCurrentStatusRoute: SyntheticsRestApiRouteFactory = (libs:
     query: QuerySchema,
   },
   handler: async ({
+    server,
     uptimeEsClient,
     savedObjectsClient,
     syntheticsMonitorClient,
-    response,
     request,
-  }): Promise<IKibanaResponse<OverviewStatus>> => {
+  }): Promise<any> => {
     const params = request.query;
-    return response.ok({
-      body: await getStatus(uptimeEsClient, savedObjectsClient, syntheticsMonitorClient, params),
-    });
+    return await getStatus(
+      server,
+      uptimeEsClient,
+      savedObjectsClient,
+      syntheticsMonitorClient,
+      params
+    );
   },
 });
+
+export const resolveMissingLabels = async (
+  server: UptimeServerSetup,
+  savedObjectsClient: SavedObjectsClientContract,
+  syntheticsMonitorClient: SyntheticsMonitorClient,
+  listOfLocationsSet: Set<string>,
+  missingLabelLocations: Set<string>
+) => {
+  const listOfLocations = Array.from(listOfLocationsSet);
+
+  if (missingLabelLocations.size > 0) {
+    const { publicLocations, privateLocations } = await getAllLocations(
+      server,
+      syntheticsMonitorClient,
+      savedObjectsClient
+    );
+
+    const locations = [...publicLocations, ...privateLocations];
+
+    missingLabelLocations.forEach((id) => {
+      const location = locations.find((loc) => loc.id === id);
+      if (location) {
+        listOfLocations.push(location.label);
+      }
+    });
+    return { listOfLocations };
+  }
+
+  return { listOfLocations };
+};

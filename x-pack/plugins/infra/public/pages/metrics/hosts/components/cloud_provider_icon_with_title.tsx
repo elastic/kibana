@@ -5,13 +5,11 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiToolTip } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
-import React from 'react';
-import { SnapshotNodePath } from '../../../../../common/http_api';
 
-export type CloudProviders = NonNullable<SnapshotNodePath['cloudProvider']>;
-const cloudIcons: Record<CloudProviders, string> = {
+const cloudIcons: Record<string, string> = {
   gcp: 'logoGCP',
   aws: 'logoAWS',
   azure: 'logoAzure',
@@ -23,7 +21,7 @@ export const CloudProviderIconWithTitle = ({
   title,
   text,
 }: {
-  provider?: CloudProviders | null;
+  provider?: string | null;
   title?: React.ReactNode;
   text: string;
 }) => {

@@ -14,11 +14,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
-
+import { EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { enableAwsLambdaMetrics } from '@kbn/observability-plugin/common';
 import { omit } from 'lodash';
 import React from 'react';
-import { enableAwsLambdaMetrics } from '@kbn/observability-plugin/common';
 import { useHistory } from 'react-router-dom';
 import {
   isMobileAgentName,
@@ -32,16 +32,16 @@ import { useBreadcrumb } from '../../../../context/breadcrumbs/use_breadcrumb';
 import { ServiceAnomalyTimeseriesContextProvider } from '../../../../context/service_anomaly_timeseries/service_anomaly_timeseries_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
+import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
+import { BetaBadge } from '../../../shared/beta_badge';
+import { replace } from '../../../shared/links/url_helpers';
 import { SearchBar } from '../../../shared/search_bar';
 import { ServiceIcons } from '../../../shared/service_icons';
-import { BetaBadge } from '../../../shared/beta_badge';
 import { TechnicalPreviewBadge } from '../../../shared/technical_preview_badge';
 import { ApmMainTemplate } from '../apm_main_template';
 import { AnalyzeDataButton } from './analyze_data_button';
-import { replace } from '../../../shared/links/url_helpers';
-import { isPending } from '../../../../hooks/use_fetcher';
 
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key:
@@ -213,6 +213,22 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
     query: queryFromUrl,
   } = useApmParams(`/services/{serviceName}/${selectedTab}` as const);
 
+  const { data: serviceAlertsCount = { alertsCount: 0 } } = useFetcher(
+    (callApmApi) => {
+      return callApmApi(
+        'GET /internal/apm/services/{serviceName}/alerts_count',
+        {
+          params: {
+            path: {
+              serviceName,
+            },
+          },
+        }
+      );
+    },
+    [serviceName]
+  );
+
   const query = omit(
     queryFromUrl,
     'page',
@@ -323,6 +339,12 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         path: { serviceName },
         query,
       }),
+      prepend:
+        serviceAlertsCount.alertsCount > 0 ? (
+          <EuiBadge iconType="alert" color="danger">
+            {serviceAlertsCount.alertsCount}
+          </EuiBadge>
+        ) : null,
       append: <TechnicalPreviewBadge icon="beaker" />,
       label: i18n.translate('xpack.apm.home.alertsTabLabel', {
         defaultMessage: 'Alerts',
@@ -333,9 +355,10 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
 
   return tabs
     .filter((t) => !t.hidden)
-    .map(({ href, key, label, append }) => ({
+    .map(({ href, key, label, prepend, append }) => ({
       href,
       label,
+      prepend,
       append,
       isSelected: key === selectedTab,
     }));

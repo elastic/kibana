@@ -14,14 +14,11 @@ import {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { assertNever } from '@kbn/std';
+import { occurrencesBudgetingMethodSchema, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 import { SLO_DESTINATION_INDEX_NAME } from '../../assets/constants';
 import { toDateRange } from '../../domain/services/date_range';
 import { InternalQueryError } from '../../errors';
 import { DateRange, Duration, IndicatorData, SLO, SLOId } from '../../domain/models';
-import {
-  occurrencesBudgetingMethodSchema,
-  timeslicesBudgetingMethodSchema,
-} from '../../types/schema';
 
 export interface SLIClient {
   fetchCurrentSLIData(sloList: SLO[]): Promise<Record<SLOId, IndicatorData>>;
@@ -46,10 +43,9 @@ export class DefaultSLIClient implements SLIClient {
 
   async fetchCurrentSLIData(sloList: SLO[]): Promise<Record<SLOId, IndicatorData>> {
     const dateRangeBySlo: Record<SLOId, DateRange> = sloList.reduce(
-      (acc, slo) => ({ [slo.id]: toDateRange(slo.time_window), ...acc }),
+      (acc, slo) => ({ [slo.id]: toDateRange(slo.timeWindow), ...acc }),
       {}
     );
-
     const searches = sloList.flatMap((slo) => [
       { index: `${SLO_DESTINATION_INDEX_NAME}*` },
       generateSearchQuery(slo, dateRangeBySlo[slo.id]),
@@ -68,7 +64,7 @@ export class DefaultSLIClient implements SLIClient {
       const slo = sloList[i];
       if ('error' in result.responses[i]) {
         // handle errorneous responses with default zero values, and keep going
-        indicatorDataBySlo[slo.id] = { date_range: dateRangeBySlo[slo.id], good: 0, total: 0 };
+        indicatorDataBySlo[slo.id] = { dateRange: dateRangeBySlo[slo.id], good: 0, total: 0 };
         continue;
       }
 
@@ -88,10 +84,10 @@ export class DefaultSLIClient implements SLIClient {
     const longestLookbackWindow = sortedLookbackWindows[0];
     const longestDateRange = toDateRange({
       duration: longestLookbackWindow.duration,
-      is_rolling: true,
+      isRolling: true,
     });
 
-    if (occurrencesBudgetingMethodSchema.is(slo.budgeting_method)) {
+    if (occurrencesBudgetingMethodSchema.is(slo.budgetingMethod)) {
       const result = await this.esClient.search<unknown, EsAggregations>({
         ...commonQuery(slo, longestDateRange),
         index: `${SLO_DESTINATION_INDEX_NAME}*`,
@@ -101,7 +97,7 @@ export class DefaultSLIClient implements SLIClient {
       return handleWindowedResult(result.aggregations, lookbackWindows);
     }
 
-    if (timeslicesBudgetingMethodSchema.is(slo.budgeting_method)) {
+    if (timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)) {
       const result = await this.esClient.search<unknown, EsAggregations>({
         ...commonQuery(slo, longestDateRange),
         index: `${SLO_DESTINATION_INDEX_NAME}*`,
@@ -111,12 +107,12 @@ export class DefaultSLIClient implements SLIClient {
       return handleWindowedResult(result.aggregations, lookbackWindows);
     }
 
-    assertNever(slo.budgeting_method);
+    assertNever(slo.budgetingMethod);
   }
 }
 
 function generateSearchQuery(slo: SLO, dateRange: DateRange): MsearchMultisearchBody {
-  if (occurrencesBudgetingMethodSchema.is(slo.budgeting_method)) {
+  if (occurrencesBudgetingMethodSchema.is(slo.budgetingMethod)) {
     return {
       ...commonQuery(slo, dateRange),
       aggs: {
@@ -126,50 +122,25 @@ function generateSearchQuery(slo: SLO, dateRange: DateRange): MsearchMultisearch
     };
   }
 
-  if (timeslicesBudgetingMethodSchema.is(slo.budgeting_method)) {
+  if (timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)) {
     return {
       ...commonQuery(slo, dateRange),
       aggs: {
-        slices: {
-          date_histogram: {
-            field: '@timestamp',
-            fixed_interval: toInterval(slo.objective.timeslice_window),
-          },
-          aggs: {
-            good: { sum: { field: 'slo.numerator' } },
-            total: { sum: { field: 'slo.denominator' } },
-            good_slice: {
-              bucket_script: {
-                buckets_path: {
-                  good: 'good',
-                  total: 'total',
-                },
-                script: `params.good / params.total >= ${slo.objective.timeslice_target} ? 1 : 0`,
-              },
-            },
-            count_slice: {
-              bucket_script: {
-                buckets_path: {},
-                script: '1',
-              },
-            },
-          },
-        },
         good: {
-          sum_bucket: {
-            buckets_path: 'slices>good_slice.value',
+          sum: {
+            field: 'slo.isGoodSlice',
           },
         },
         total: {
-          sum_bucket: {
-            buckets_path: 'slices>count_slice.value',
+          value_count: {
+            field: 'slo.isGoodSlice',
           },
         },
       },
     };
   }
 
-  assertNever(slo.budgeting_method);
+  assertNever(slo.budgetingMethod);
 }
 
 function commonQuery(
@@ -204,7 +175,7 @@ function handleResult(dateRange: DateRange, response: MsearchResponseItem): Indi
   }
 
   return {
-    date_range: dateRange,
+    dateRange,
     good: good.value,
     total: total.value,
   };
@@ -244,47 +215,14 @@ function toLookbackWindowsSlicedAggregationsQuery(slo: SLO, lookbackWindows: Loo
           ],
         },
         aggs: {
-          slices: {
-            date_histogram: {
-              field: '@timestamp',
-              fixed_interval: toInterval(slo.objective.timeslice_window),
-            },
-            aggs: {
-              good: {
-                sum: {
-                  field: 'slo.numerator',
-                },
-              },
-              total: {
-                sum: {
-                  field: 'slo.denominator',
-                },
-              },
-              good_slice: {
-                bucket_script: {
-                  buckets_path: {
-                    good: 'good',
-                    total: 'total',
-                  },
-                  script: `params.good / params.total >= ${slo.objective.timeslice_target} ? 1 : 0`,
-                },
-              },
-              count_slice: {
-                bucket_script: {
-                  buckets_path: {},
-                  script: '1',
-                },
-              },
-            },
-          },
           good: {
-            sum_bucket: {
-              buckets_path: 'slices>good_slice.value',
+            sum: {
+              field: 'slo.isGoodSlice',
             },
           },
           total: {
-            sum_bucket: {
-              buckets_path: 'slices>count_slice.value',
+            value_count: {
+              field: 'slo.isGoodSlice',
             },
           },
         },
@@ -318,15 +256,9 @@ function handleWindowedResult(
     indicatorDataPerLookbackWindow[lookbackWindow.name] = {
       good,
       total,
-      date_range: { from: new Date(bucket.from_as_string!), to: new Date(bucket.to_as_string!) },
+      dateRange: { from: new Date(bucket.from_as_string!), to: new Date(bucket.to_as_string!) },
     };
   });
 
   return indicatorDataPerLookbackWindow;
-}
-
-function toInterval(duration: Duration | undefined): string {
-  if (duration === undefined) return '1m';
-
-  return duration.format();
 }

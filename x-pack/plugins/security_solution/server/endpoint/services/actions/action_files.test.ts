@@ -95,8 +95,8 @@ describe('Action Files service', () => {
         status: 'DELETED',
       });
 
-      expect(loggerMock.debug).toHaveBeenCalledWith(
-        'File with id [123] has no data chunks. Status will be adjusted to DELETED'
+      expect(loggerMock.warn).toHaveBeenCalledWith(
+        'File with id [123] has no data chunks in index [.fleet-file-data-endpoint]. File status will be adjusted to DELETED'
       );
     });
 

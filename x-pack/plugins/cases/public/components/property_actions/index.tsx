@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useState } from 'react';
+import type { EuiButtonProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiPopover, EuiButtonIcon, EuiButtonEmpty } from '@elastic/eui';
 
 import * as i18n from './translations';
@@ -15,15 +16,16 @@ export interface PropertyActionButtonProps {
   onClick: () => void;
   iconType: string;
   label: string;
+  color?: EuiButtonProps['color'];
 }
 
 const ComponentId = 'property-actions';
 
 const PropertyActionButton = React.memo<PropertyActionButtonProps>(
-  ({ disabled = false, onClick, iconType, label }) => (
+  ({ disabled = false, onClick, iconType, label, color }) => (
     <EuiButtonEmpty
       aria-label={label}
-      color="text"
+      color={color ? color : 'text'}
       data-test-subj={`${ComponentId}-${iconType}`}
       iconSide="left"
       iconType={iconType}
@@ -86,6 +88,7 @@ export const PropertyActions = React.memo<PropertyActionsProps>(({ propertyActio
                 disabled={action.disabled}
                 iconType={action.iconType}
                 label={action.label}
+                color={action.color}
                 onClick={() => onClosePopover(action.onClick)}
               />
             </span>

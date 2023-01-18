@@ -28,14 +28,12 @@ import { selectRange } from '../tasks/select_range';
 
 const THREAT_INTELLIGENCE = '/app/security/threat_intelligence/indicators';
 
-before(() => {
-  login();
-});
-
 describe('Indicators', () => {
   before(() => {
     esArchiverLoad('threat_intelligence/indicators_data');
+    login();
   });
+
   after(() => {
     esArchiverUnload('threat_intelligence/indicators_data');
   });

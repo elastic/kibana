@@ -42,6 +42,7 @@ import type {
   CalculateExcludeFiltersState,
   WaitForMigrationCompletionState,
   CheckTargetMappingsState,
+  PrepareCompatibleMigration,
 } from './state';
 import type { TransformRawDocs } from './types';
 import * as Actions from './actions';
@@ -62,6 +63,8 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
   return {
     INIT: (state: InitState) =>
       Actions.initAction({ client, indices: [state.currentAlias, state.versionAlias] }),
+    PREPARE_COMPATIBLE_MIGRATION: (state: PrepareCompatibleMigration) =>
+      Actions.updateAliases({ client, aliasActions: state.preTransformDocsActions }),
     WAIT_FOR_MIGRATION_COMPLETION: (state: WaitForMigrationCompletionState) =>
       Actions.fetchIndices({ client, indices: [state.currentAlias, state.versionAlias] }),
     WAIT_FOR_YELLOW_SOURCE: (state: WaitForYellowSourceState) =>
@@ -132,7 +135,7 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
       Actions.refreshIndex({ client, targetIndex: state.targetIndex }),
     CHECK_TARGET_MAPPINGS: (state: CheckTargetMappingsState) =>
       Actions.checkTargetMappings({
-        actualMappings: state.targetIndexCurrentMappings,
+        actualMappings: state.targetIndexRawMappings,
         expectedMappings: state.targetIndexMappings,
       }),
     UPDATE_TARGET_MAPPINGS: (state: UpdateTargetMappingsState) =>

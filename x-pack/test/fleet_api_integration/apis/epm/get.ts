@@ -208,5 +208,34 @@ export default function (providerContext: FtrProviderContext) {
       );
       expect(dataStream?.elasticsearch?.source_mode).equal(undefined);
     });
+
+    it('allows user with only package level permission to access corresponding packages', async function () {
+      const pkg = 'endpoint';
+      const pkgVersion = '8.6.0';
+      await installPackage(pkg, pkgVersion);
+      const response = await supertestWithoutAuth
+        .get(`/api/fleet/epm/packages/${pkg}`)
+        .auth(
+          testUsers.endpoint_integr_read_only_fleet_none.username,
+          testUsers.endpoint_integr_read_only_fleet_none.password
+        )
+        .expect(200);
+      expect(response.body.item.name).to.be(pkg);
+      expect(response.body.item.version).to.be(pkgVersion);
+      await uninstallPackage(pkg, pkgVersion);
+    });
+
+    it('rejects user with only package level permission to access unauthorized packages', async function () {
+      const response = await supertestWithoutAuth
+        .get(`/api/fleet/epm/packages/${testPkgName}`)
+        .auth(
+          testUsers.endpoint_integr_read_only_fleet_none.username,
+          testUsers.endpoint_integr_read_only_fleet_none.password
+        )
+        .expect(403);
+      expect(response.body.message).to.be(
+        'Authorization denied to package: apache. Allowed package(s): endpoint'
+      );
+    });
   });
 }

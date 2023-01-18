@@ -8,7 +8,7 @@
 import { readFile } from 'fs/promises';
 import Path from 'path';
 
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { uniq } from 'lodash';
 import semverGte from 'semver/functions/gte';
 import semverGt from 'semver/functions/gt';
@@ -52,10 +52,11 @@ export const getAgentHandler: RequestHandler<
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const soClient = coreContext.savedObjects.client;
 
   try {
     const body: GetOneAgentResponse = {
-      item: await AgentService.getAgentById(esClient, request.params.agentId),
+      item: await AgentService.getAgentById(esClient, soClient, request.params.agentId),
     };
 
     return response.ok({ body });
@@ -103,6 +104,7 @@ export const updateAgentHandler: RequestHandler<
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const soClient = coreContext.savedObjects.client;
 
   const partialAgent: any = {};
   if (request.body.user_provided_metadata) {
@@ -115,7 +117,7 @@ export const updateAgentHandler: RequestHandler<
   try {
     await AgentService.updateAgent(esClient, request.params.agentId, partialAgent);
     const body = {
-      item: await AgentService.getAgentById(esClient, request.params.agentId),
+      item: await AgentService.getAgentById(esClient, soClient, request.params.agentId),
     };
 
     return response.ok({ body });
@@ -163,9 +165,16 @@ export const getAgentsHandler: RequestHandler<
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const soClient = coreContext.savedObjects.client;
 
   try {
-    const { agents, total, page, perPage } = await AgentService.getAgentsByKuery(esClient, {
+    const {
+      agents,
+      total,
+      page,
+      perPage,
+      totalInactive = 0,
+    } = await AgentService.getAgentsByKuery(esClient, soClient, {
       page: request.query.page,
       perPage: request.query.perPage,
       showInactive: request.query.showInactive,
@@ -173,12 +182,8 @@ export const getAgentsHandler: RequestHandler<
       kuery: request.query.kuery,
       sortField: request.query.sortField,
       sortOrder: request.query.sortOrder,
+      getTotalInactive: true,
     });
-    const totalInactive = request.query.showInactive
-      ? await AgentService.countInactiveAgents(esClient, {
-          kuery: request.query.kuery,
-        })
-      : 0;
 
     const body: GetAgentsResponse = {
       list: agents, // deprecated
@@ -200,9 +205,10 @@ export const getAgentTagsHandler: RequestHandler<
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const soClient = coreContext.savedObjects.client;
 
   try {
-    const tags = await AgentService.getAgentTags(esClient, {
+    const tags = await AgentService.getAgentTags(soClient, esClient, {
       showInactive: request.query.showInactive,
       kuery: request.query.kuery,
     });
@@ -271,9 +277,11 @@ export const getAgentStatusForAgentPolicyHandler: RequestHandler<
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const soClient = coreContext.savedObjects.client;
   try {
     const results = await AgentService.getAgentStatusForAgentPolicy(
       esClient,
+      soClient,
       request.query.policyId,
       request.query.kuery
     );

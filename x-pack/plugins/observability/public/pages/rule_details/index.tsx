@@ -35,14 +35,14 @@ import {
 // TODO: use a Delete modal from triggersActionUI when it's sharable
 import { ALERTS_FEATURE_ID, RuleExecutionStatusErrorReasons } from '@kbn/alerting-plugin/common';
 import { Query, BoolQuery } from '@kbn/es-query';
-import { AlertConsumers } from '@kbn/rule-data-utils';
+import { ValidFeatureId } from '@kbn/rule-data-utils';
 import { RuleDefinitionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { fromQuery, toQuery } from '../../utils/url';
 import { ObservabilityAlertSearchbarWithUrlSync } from '../../components/shared/alert_search_bar';
 import { DeleteModalConfirmation } from './components/delete_modal_confirmation';
 import { CenterJustifiedSpinner } from './components/center_justified_spinner';
-import { getDefaultAlertSummaryTimeRange } from './helpers';
+import { getAlertSummaryWidgetTimeRange } from './helpers';
 
 import {
   EXECUTION_TAB,
@@ -75,7 +75,7 @@ export function RuleDetailsPage() {
       getEditAlertFlyout,
       getRuleEventLogList,
       getAlertsStateTable: AlertsStateTable,
-      getRuleAlertsSummary: AlertSummaryWidget,
+      getAlertSummaryWidget: AlertSummaryWidget,
       getRuleStatusPanel,
       getRuleDefinition,
     },
@@ -104,14 +104,16 @@ export function RuleDetailsPage() {
     const urlTabId = (toQuery(location.search)?.tabId as TabId) || EXECUTION_TAB;
     return [EXECUTION_TAB, ALERTS_TAB].includes(urlTabId) ? urlTabId : EXECUTION_TAB;
   });
-  const [features, setFeatures] = useState<string>('');
+  const [featureIds, setFeatureIds] = useState<ValidFeatureId[]>();
   const [ruleType, setRuleType] = useState<RuleType<string, string>>();
   const [ruleToDelete, setRuleToDelete] = useState<string[]>([]);
   const [isPageLoading, setIsPageLoading] = useState(false);
   const [editFlyoutVisible, setEditFlyoutVisible] = useState<boolean>(false);
   const [isRuleEditPopoverOpen, setIsRuleEditPopoverOpen] = useState(false);
   const [esQuery, setEsQuery] = useState<{ bool: BoolQuery }>();
-  const [defaultAlertTimeRange] = useState(getDefaultAlertSummaryTimeRange);
+  const [alertSummaryWidgetTimeRange, setAlertSummaryWidgetTimeRange] = useState(
+    getAlertSummaryWidgetTimeRange
+  );
   const ruleQuery = useRef<Query[]>([
     { query: `kibana.alert.rule.uuid: ${ruleId}`, language: 'kuery' },
   ]);
@@ -123,11 +125,15 @@ export function RuleDetailsPage() {
   const tabsRef = useRef<HTMLDivElement>(null);
 
   const onAlertSummaryWidgetClick = async (status: AlertStatus = ALERT_STATUS_ALL) => {
+    const timeRange = getAlertSummaryWidgetTimeRange();
+    setAlertSummaryWidgetTimeRange(timeRange);
     await locators.get(ruleDetailsLocatorID)?.navigate(
       {
+        rangeFrom: timeRange.utcFrom,
+        rangeTo: timeRange.utcTo,
         ruleId,
-        tabId: ALERTS_TAB,
         status,
+        tabId: ALERTS_TAB,
       },
       {
         replace: true,
@@ -187,8 +193,8 @@ export function RuleDetailsPage() {
       setRuleType(matchedRuleType);
 
       if (rule.consumer === ALERTS_FEATURE_ID && matchedRuleType && matchedRuleType.producer) {
-        setFeatures(matchedRuleType.producer);
-      } else setFeatures(rule.consumer);
+        setFeatureIds([matchedRuleType.producer] as ValidFeatureId[]);
+      } else setFeatureIds([rule.consumer] as ValidFeatureId[]);
     }
   }, [rule, ruleTypes]);
 
@@ -260,13 +266,13 @@ export function RuleDetailsPage() {
           <EuiSpacer size="s" />
           <EuiFlexGroup style={{ minHeight: 450 }} direction={'column'}>
             <EuiFlexItem>
-              {esQuery && features && (
+              {esQuery && featureIds && (
                 <AlertsStateTable
                   alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
                   configurationId={observabilityFeatureId}
                   id={RULE_DETAILS_PAGE_ID}
                   flyoutSize={'s' as EuiFlyoutSize}
-                  featureIds={[features] as AlertConsumers[]}
+                  featureIds={featureIds}
                   query={esQuery}
                   showExpandToDetails={false}
                 />
@@ -372,7 +378,7 @@ export function RuleDetailsPage() {
           : [],
       }}
     >
-      <EuiFlexGroup wrap={true} gutterSize="m">
+      <EuiFlexGroup wrap gutterSize="m">
         <EuiFlexItem style={{ minWidth: 350 }}>
           {getRuleStatusPanel({
             rule,
@@ -382,18 +388,15 @@ export function RuleDetailsPage() {
             statusMessage,
           })}
         </EuiFlexItem>
-        <EuiSpacer size="m" />
         <EuiFlexItem style={{ minWidth: 350 }}>
           <AlertSummaryWidget
-            rule={rule}
-            filteredRuleTypes={filteredRuleTypes}
-            onClick={(status) => onAlertSummaryWidgetClick(status)}
-            timeRange={defaultAlertTimeRange}
+            featureIds={featureIds}
+            onClick={onAlertSummaryWidgetClick}
+            timeRange={alertSummaryWidgetTimeRange}
             filter={alertSummaryWidgetFilter.current}
           />
         </EuiFlexItem>
-        <EuiSpacer size="m" />
-        {getRuleDefinition({ rule, onEditRule: () => reloadRule() } as RuleDefinitionProps)}
+        {getRuleDefinition({ rule, onEditRule: reloadRule } as RuleDefinitionProps)}
       </EuiFlexGroup>
 
       <EuiSpacer size="l" />

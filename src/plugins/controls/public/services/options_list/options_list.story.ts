@@ -18,8 +18,9 @@ let optionsListRequestMethod = async (request: OptionsListRequest, abortSignal: 
     setTimeout(
       () =>
         r({
-          suggestions: [],
+          suggestions: {},
           totalCardinality: 100,
+          rejected: false,
         }),
       120
     )

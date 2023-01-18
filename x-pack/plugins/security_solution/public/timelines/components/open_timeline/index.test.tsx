@@ -29,6 +29,7 @@ import { TimelineTabsStyle } from './types';
 import type { UseTimelineTypesArgs, UseTimelineTypesResult } from './use_timeline_types';
 import { useTimelineTypes } from './use_timeline_types';
 import { deleteTimelinesByIds } from '../../containers/api';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 
 jest.mock('react-router-dom', () => {
   const originalModule = jest.requireActual('react-router-dom');
@@ -86,6 +87,9 @@ jest.mock('../../containers/api', () => ({
   deleteTimelinesByIds: jest.fn(),
 }));
 
+jest.mock('../../../common/components/user_privileges');
+const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
+
 describe('StatefulOpenTimeline', () => {
   const title = 'All Timelines / Open Timelines';
   let mockHistory: History[];
@@ -95,6 +99,9 @@ describe('StatefulOpenTimeline', () => {
     (useParams as jest.Mock).mockReturnValue({
       tabName: TimelineType.default,
       pageName: SecurityPageName.timelines,
+    });
+    useUserPrivilegesMock.mockReturnValue({
+      kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
     });
     mockHistory = [];
     (useHistory as jest.Mock).mockReturnValue(mockHistory);

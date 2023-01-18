@@ -16,19 +16,23 @@ import React, {
 } from 'react';
 import { type DataViewField } from '@kbn/data-views-plugin/public';
 import { startWith } from 'rxjs';
-import useMount from 'react-use/lib/useMount';
 import type { Query, Filter } from '@kbn/es-query';
+import { usePageUrlState } from '@kbn/ml-url-state';
+import { useTimefilter, useTimeRangeUpdates } from '@kbn/ml-date-picker';
 import {
   createMergedEsQuery,
   getEsQueryFromSavedSearch,
 } from '../../application/utils/search_utils';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
-import { useTimefilter, useTimeRangeUpdates } from '../../hooks/use_time_filter';
 import { useChangePointResults } from './use_change_point_agg_request';
 import { type TimeBuckets, TimeBucketsInterval } from '../../../common/time_buckets';
 import { useDataSource } from '../../hooks/use_data_source';
-import { usePageUrlState } from '../../hooks/use_url_state';
 import { useTimeBuckets } from '../../hooks/use_time_buckets';
+
+export interface ChangePointDetectionPageUrlState {
+  pageKey: 'changePoint';
+  pageUrlState: ChangePointDetectionRequestParams;
+}
 
 export interface ChangePointDetectionRequestParams {
   fn: string;
@@ -124,7 +128,7 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
 
   const timeRange = useTimeRangeUpdates();
 
-  useMount(function updateIntervalOnTimeBoundsChange() {
+  useEffect(function updateIntervalOnTimeBoundsChange() {
     const timeUpdateSubscription = timefilter
       .getTimeUpdate$()
       .pipe(startWith(timefilter.getTime()))
@@ -140,7 +144,8 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
     return () => {
       timeUpdateSubscription.unsubscribe();
     };
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const metricFieldOptions = useMemo<DataViewField[]>(() => {
     return dataView.fields.filter(({ aggregatable, type }) => aggregatable && type === 'number');
@@ -157,7 +162,7 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
   }, [dataView]);
 
   const [requestParamsFromUrl, updateRequestParams] =
-    usePageUrlState<ChangePointDetectionRequestParams>('changePoint');
+    usePageUrlState<ChangePointDetectionPageUrlState>('changePoint');
 
   const resultQuery = useMemo<Query>(() => {
     return (
@@ -190,7 +195,7 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
     [filterManager]
   );
 
-  useMount(() => {
+  useEffect(() => {
     setResultFilter(filterManager.getFilters());
     const sub = filterManager.getUpdates$().subscribe(() => {
       setResultFilter(filterManager.getFilters());
@@ -198,7 +203,8 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
     return () => {
       sub.unsubscribe();
     };
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(
     function syncFilters() {

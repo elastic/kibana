@@ -15,7 +15,7 @@ export function useDataState<T extends DataMsg>(data$: BehaviorSubject<T>) {
   useEffect(() => {
     const subscription = data$.subscribe((next) => {
       if (next.fetchStatus !== fetchState.fetchStatus) {
-        setFetchState({ ...fetchState, ...next });
+        setFetchState({ ...fetchState, ...next, ...(next.error ? {} : { error: undefined }) });
       }
     });
     return () => subscription.unsubscribe();

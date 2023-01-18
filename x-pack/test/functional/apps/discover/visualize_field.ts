@@ -141,10 +141,30 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await testSubjects.click('textBased-visualize');
 
-      await retry.try(async () => {
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await retry.waitFor('lens visualization', async () => {
         const dimensions = await testSubjects.findAll('lns-dimensionTrigger-textBased');
-        expect(dimensions).to.have.length(2);
-        expect(await dimensions[1].getVisibleText()).to.be('average');
+        return dimensions.length === 2 && (await dimensions[1].getVisibleText()) === 'average';
+      });
+    });
+
+    it('should visualize correctly text based language queries based on index patterns', async () => {
+      await PageObjects.discover.selectTextBaseLang('SQL');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await monacoEditor.setCodeEditorValue(
+        'SELECT extension, AVG("bytes") as average FROM "logstash*" GROUP BY extension'
+      );
+      await testSubjects.click('querySubmitButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await testSubjects.click('textBased-visualize');
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await retry.waitFor('lens visualization', async () => {
+        const dimensions = await testSubjects.findAll('lns-dimensionTrigger-textBased');
+        return dimensions.length === 2 && (await dimensions[1].getVisibleText()) === 'average';
       });
     });
   });

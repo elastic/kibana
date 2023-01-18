@@ -22,7 +22,7 @@ import { getAgentActions } from './actions';
 import { closePointInTime, getAgentsByKuery } from './crud';
 import type { BulkActionsResolver } from './bulk_actions_resolver';
 
-export const MAX_RETRY_COUNT = 3;
+export const MAX_RETRY_COUNT = 5;
 
 export interface ActionParams {
   kuery: string;
@@ -113,10 +113,10 @@ export abstract class ActionRunner {
               );
 
             if (this.retryParams.retryCount === MAX_RETRY_COUNT) {
-              const errorMessage = `Stopping after ${MAX_RETRY_COUNT}rd retry. Error: ${error.message}`;
+              const errorMessage = `Stopping after retry #${MAX_RETRY_COUNT}. Error: ${error.message}`;
               appContextService.getLogger().warn(errorMessage);
 
-              // clean up tasks after 3rd retry reached
+              // clean up tasks after last retry reached
               await Promise.all([
                 this.bulkActionsResolver!.removeIfExists(this.checkTaskId!),
                 this.bulkActionsResolver!.removeIfExists(this.retryParams.taskId!),
@@ -191,7 +191,7 @@ export abstract class ActionRunner {
     const perPage = this.actionParams.batchSize ?? SO_SEARCH_LIMIT;
 
     const getAgents = () =>
-      getAgentsByKuery(this.esClient, {
+      getAgentsByKuery(this.esClient, this.soClient, {
         kuery: this.actionParams.kuery,
         showInactive: this.actionParams.showInactive ?? false,
         page: 1,

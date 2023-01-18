@@ -65,6 +65,7 @@ export function getMetadataListRequestHandler(
     const endpointMetadataService = endpointAppContext.service.getEndpointMetadataService();
     const fleetServices = endpointAppContext.service.getInternalFleetServices();
     const esClient = (await context.core).elasticsearch.client.asInternalUser;
+    const soClient = (await context.core).savedObjects.client;
 
     let doesUnitedIndexExist = false;
     let didUnitedIndexError = false;
@@ -107,6 +108,7 @@ export function getMetadataListRequestHandler(
     try {
       const { data, total } = await endpointMetadataService.getHostMetadataList(
         esClient,
+        soClient,
         fleetServices,
         request.query
       );

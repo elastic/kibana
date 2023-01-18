@@ -16,12 +16,13 @@ import * as TEST_SUBJ from './test_subjects';
 import { useCspBenchmarkIntegrations } from './use_csp_benchmark_integrations';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
-import { useCISIntegrationLink } from '../../common/navigation/use_navigate_to_cis_integration';
+import { useCspIntegrationLink } from '../../common/navigation/use_csp_integration_link';
 
 jest.mock('./use_csp_benchmark_integrations');
 jest.mock('../../common/api/use_setup_status_api');
 jest.mock('../../common/hooks/use_subscription_status');
-jest.mock('../../common/navigation/use_navigate_to_cis_integration');
+jest.mock('../../common/navigation/use_csp_integration_link');
+
 const chance = new Chance();
 
 describe('<Benchmarks />', () => {
@@ -41,7 +42,7 @@ describe('<Benchmarks />', () => {
       })
     );
 
-    (useCISIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
+    (useCspIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
   });
 
   const renderBenchmarks = (

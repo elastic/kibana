@@ -10,7 +10,8 @@ import { pipeline } from 'stream';
 import { promisify } from 'util';
 
 import vfs from 'vinyl-fs';
-import { transformFileWithBabel, transformFileStream } from '@kbn/dev-utils';
+import { transformFileStream } from '@kbn/dev-utils';
+import { transformFileWithBabel } from './transform_file_with_babel';
 
 import { BuildContext } from '../build_context';
 

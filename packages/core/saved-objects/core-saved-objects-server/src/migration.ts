@@ -76,6 +76,7 @@ export interface SavedObjectMigrationContext {
   readonly migrationVersion: string;
   /**
    * The version in which this object type is being converted to a multi-namespace type
+   * @deprecated Converting to multi-namespace clashes with the ZDT requirement for serverless
    */
   readonly convertToMultiNamespaceTypeVersion?: string;
   /**

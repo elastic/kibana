@@ -97,7 +97,7 @@ Object {
           "href": "securitySolutionUI/exceptions",
           "id": "exceptions",
           "isSelected": false,
-          "name": "Rule Exceptions",
+          "name": "Shared Exception Lists",
           "onClick": [Function],
         },
       ],

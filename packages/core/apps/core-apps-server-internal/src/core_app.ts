@@ -9,7 +9,7 @@
 import { stringify } from 'querystring';
 import { Env } from '@kbn/config';
 import { schema } from '@kbn/config-schema';
-import { fromRoot } from '@kbn/utils';
+import { fromRoot } from '@kbn/repo-info';
 import type { Logger } from '@kbn/logging';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type {

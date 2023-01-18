@@ -16,14 +16,13 @@ import { omit } from 'lodash';
 import React from 'react';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { ApmServiceContextProvider } from '../../../../context/apm_service/apm_service_context';
-// import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useBreadcrumb } from '../../../../context/breadcrumbs/use_breadcrumb';
 import { ServiceAnomalyTimeseriesContextProvider } from '../../../../context/service_anomaly_timeseries/service_anomaly_timeseries_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
-import { SearchBar } from '../../../shared/search_bar';
+import { MobileSearchBar } from '../../../app/mobile/search_bar';
 import { ServiceIcons } from '../../../shared/service_icons';
 import { TechnicalPreviewBadge } from '../../../shared/technical_preview_badge';
 import { ApmMainTemplate } from '../apm_main_template';
@@ -38,7 +37,7 @@ interface Props {
   title: string;
   children: React.ReactChild;
   selectedTab: Tab['key'];
-  searchBarOptions?: React.ComponentProps<typeof SearchBar>;
+  searchBarOptions?: React.ComponentProps<typeof MobileSearchBar>;
 }
 
 export function MobileServiceTemplate(props: Props) {
@@ -116,7 +115,7 @@ function TemplateWithContext({
         ),
       }}
     >
-      <SearchBar {...searchBarOptions} />
+      <MobileSearchBar {...searchBarOptions} />
       <ServiceAnomalyTimeseriesContextProvider>
         {children}
       </ServiceAnomalyTimeseriesContextProvider>

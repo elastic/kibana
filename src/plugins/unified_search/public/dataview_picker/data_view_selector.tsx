@@ -14,7 +14,7 @@ import { DataViewsList } from './dataview_list';
 import { IUnifiedSearchPluginServices } from '../types';
 import { ExploreMatchingButton } from './explore_matching_button';
 
-interface DataViewSelectorProps {
+export interface DataViewSelectorProps {
   currentDataViewId?: string;
   searchListInputId?: string;
   dataViewsList: DataViewListItem[];
@@ -95,3 +95,7 @@ export const DataViewSelector = ({
     </Fragment>
   );
 };
+
+// React.lazy support
+// eslint-disable-next-line import/no-default-export
+export default DataViewSelector;

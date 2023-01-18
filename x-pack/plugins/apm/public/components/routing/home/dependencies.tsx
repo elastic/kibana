@@ -86,6 +86,7 @@ export const dependencies = {
               sampleRangeFrom: toNumberRt,
               sampleRangeTo: toNumberRt,
               waterfallItemId: t.string,
+              flyoutDetailTab: t.string,
             }),
           ]),
         }),

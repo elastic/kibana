@@ -7,9 +7,15 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+
 import { getSLOTransformId } from '../../assets/constants';
 import { SLO } from '../../domain/models';
-import { createAPMTransactionErrorRateIndicator, createSLO } from './fixtures/slo';
+import { fiveMinute, oneMinute } from './fixtures/duration';
+import {
+  createAPMTransactionErrorRateIndicator,
+  createSLO,
+  createSLOWithTimeslicesBudgetingMethod,
+} from './fixtures/slo';
 import { createSLORepositoryMock, createTransformManagerMock } from './mocks';
 import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
@@ -39,10 +45,11 @@ describe('UpdateSLO', () => {
       expectTransformManagerNeverCalled();
       expect(mockEsClient.deleteByQuery).not.toBeCalled();
       expect(mockRepository.save).toBeCalledWith(
-        expect.objectContaining({ ...slo, name: newName, updated_at: expect.anything() })
+        expect.objectContaining({ ...slo, name: newName, updatedAt: expect.anything() })
       );
       expect(response.name).toBe(newName);
-      expect(response.updated_at).not.toBe(slo.updated_at);
+      expect(response.updatedAt).not.toBe(slo.updatedAt);
+      expect(response.revision).toBe(slo.revision);
     });
   });
 
@@ -60,9 +67,58 @@ describe('UpdateSLO', () => {
           ...slo,
           settings: newSettings,
           revision: 2,
-          updated_at: expect.anything(),
+          updatedAt: expect.anything(),
         })
       );
+      expectInstallationOfNewSLOTransform();
+    });
+
+    it('consideres a budgeting method change as a breaking change', async () => {
+      const slo = createSLO({ budgetingMethod: 'occurrences' });
+      mockRepository.findById.mockResolvedValueOnce(slo);
+
+      await updateSLO.execute(slo.id, {
+        budgetingMethod: 'timeslices',
+        objective: {
+          target: slo.objective.target,
+          timesliceTarget: 0.9,
+          timesliceWindow: oneMinute(),
+        },
+      });
+
+      expectDeletionOfObsoleteSLOData(slo);
+      expectInstallationOfNewSLOTransform();
+    });
+
+    it('consideres a timeslice target change as a breaking change', async () => {
+      const slo = createSLOWithTimeslicesBudgetingMethod();
+      mockRepository.findById.mockResolvedValueOnce(slo);
+
+      await updateSLO.execute(slo.id, {
+        objective: {
+          target: slo.objective.target,
+          timesliceTarget: 0.1,
+          timesliceWindow: slo.objective.timesliceWindow,
+        },
+      });
+
+      expectDeletionOfObsoleteSLOData(slo);
+      expectInstallationOfNewSLOTransform();
+    });
+
+    it('consideres a timeslice window change as a breaking change', async () => {
+      const slo = createSLOWithTimeslicesBudgetingMethod();
+      mockRepository.findById.mockResolvedValueOnce(slo);
+
+      await updateSLO.execute(slo.id, {
+        objective: {
+          target: slo.objective.target,
+          timesliceTarget: slo.objective.timesliceTarget,
+          timesliceWindow: fiveMinute(),
+        },
+      });
+
+      expectDeletionOfObsoleteSLOData(slo);
       expectInstallationOfNewSLOTransform();
     });
 
@@ -81,7 +137,7 @@ describe('UpdateSLO', () => {
           ...slo,
           indicator: newIndicator,
           revision: 2,
-          updated_at: expect.anything(),
+          updatedAt: expect.anything(),
         })
       );
       expectInstallationOfNewSLOTransform();

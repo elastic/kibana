@@ -50,7 +50,6 @@ const IntegrationButtonLink = ({
   policyId: string;
 }) => {
   const { application } = useKibana().services;
-
   return (
     <EuiLink
       href={application.getUrlForApp('security', {
@@ -83,7 +82,7 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
     'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.INTEGRATION_NAME,
   },
   {
-    field: 'rules.enabled',
+    field: 'rules_count',
     name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.rulesColumnTitle', {
       defaultMessage: 'Rules',
     }),

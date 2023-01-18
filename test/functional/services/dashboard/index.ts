@@ -11,3 +11,5 @@ export { DashboardExpectService } from './expectations';
 export { DashboardAddPanelService } from './add_panel';
 export { DashboardReplacePanelService } from './replace_panel';
 export { DashboardPanelActionsService } from './panel_actions';
+export { DashboardDrilldownPanelActionsProvider } from './panel_drilldown_actions';
+export { DashboardDrilldownsManageProvider } from './drilldowns_manage';

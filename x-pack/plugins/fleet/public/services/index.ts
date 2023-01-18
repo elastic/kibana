@@ -49,3 +49,4 @@ export { createExtensionRegistrationCallback } from './ui_extensions';
 export { incrementPolicyName } from './increment_policy_name';
 export { policyHasFleetServer } from './has_fleet_server';
 export { isPackagePrerelease } from './package_prerelease';
+export { generateNewAgentPolicyWithDefaults } from './generate_new_agent_policy';

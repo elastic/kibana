@@ -10,12 +10,13 @@ import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import { uniq } from 'lodash';
 import React from 'react';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, withEuiTheme, WithEuiThemeProps } from '@elastic/eui';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
 import { PhraseSuggestorUI, PhraseSuggestorProps } from './phrase_suggestor';
 import { TruncatedLabel } from './truncated_label';
+import { phrasesValuesComboboxCss } from './phrases_values_input.styles';
 
-export interface PhrasesValuesInputProps extends PhraseSuggestorProps {
+interface Props {
   values?: string[];
   onChange: (values: string[]) => void;
   onParamsUpdate: (value: string) => void;
@@ -24,6 +25,8 @@ export interface PhrasesValuesInputProps extends PhraseSuggestorProps {
   compressed?: boolean;
   disabled?: boolean;
 }
+
+export type PhrasesValuesInputProps = Props & PhraseSuggestorProps & WithEuiThemeProps;
 
 const DEFAULT_COMBOBOX_WIDTH = 250;
 const COMBOBOX_PADDINGS = 20;
@@ -41,6 +44,7 @@ class PhrasesValuesInputUI extends PhraseSuggestorUI<PhrasesValuesInputProps> {
     const { suggestions } = this.state;
     const { values, intl, onChange, fullWidth, onParamsUpdate, compressed, disabled } = this.props;
     const options = values ? uniq([...values, ...suggestions]) : suggestions;
+
     return (
       <div ref={this.comboBoxRef}>
         <StringComboBox
@@ -58,6 +62,7 @@ class PhrasesValuesInputUI extends PhraseSuggestorUI<PhrasesValuesInputProps> {
           onCreateOption={(option: string) => {
             onParamsUpdate(option.trim());
           }}
+          className={phrasesValuesComboboxCss(this.props.theme)}
           onChange={onChange}
           isClearable={false}
           data-test-subj="filterParamsComboBox phrasesParamsComboxBox"
@@ -86,4 +91,4 @@ function StringComboBox(props: GenericComboBoxProps<string>) {
   return GenericComboBox(props);
 }
 
-export const PhrasesValuesInput = injectI18n(withKibana(PhrasesValuesInputUI));
+export const PhrasesValuesInput = injectI18n(withEuiTheme(withKibana(PhrasesValuesInputUI)));

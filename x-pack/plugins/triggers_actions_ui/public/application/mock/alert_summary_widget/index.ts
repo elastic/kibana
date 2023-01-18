@@ -6,81 +6,51 @@
  */
 
 import { AlertSummaryTimeRange } from '../../hooks/use_load_alert_summary';
-import { Rule } from '../../../types';
 
-export const mockRule = (): Rule => {
-  return {
-    id: '1',
-    name: 'test rule',
-    tags: ['tag1'],
-    enabled: true,
-    ruleTypeId: 'test_rule_type',
-    schedule: { interval: '1s' },
-    actions: [],
-    params: { name: 'test rule type name' },
-    createdBy: null,
-    updatedBy: null,
-    apiKeyOwner: null,
-    throttle: '1m',
-    muteAll: false,
-    mutedInstanceIds: [],
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    consumer: 'alerts',
-    notifyWhen: 'onActiveAlert',
-    executionStatus: {
-      status: 'active',
-      lastDuration: 500,
-      lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
-    },
-    monitoring: {
-      run: {
-        history: [
-          {
-            success: true,
-            duration: 1000000,
-            timestamp: 1234567,
-          },
-          {
-            success: true,
-            duration: 200000,
-            timestamp: 1234567,
-          },
-          {
-            success: false,
-            duration: 300000,
-            timestamp: 1234567,
-          },
-        ],
-        calculated_metrics: {
-          success_ratio: 0.66,
-          p50: 200000,
-          p95: 300000,
-          p99: 390000,
-        },
-        last_run: {
-          timestamp: '2020-08-20T19:23:38Z',
-          metrics: {
-            duration: 500,
-          },
-        },
-      },
-    },
-  };
-};
-
-export const mockAggsResponse = () => {
-  return {
-    aggregations: {
-      total: {
-        buckets: { totalActiveAlerts: { doc_count: 1 }, totalRecoveredAlerts: { doc_count: 7 } },
-      },
-    },
-  };
+export const mockAlertSummaryResponse = {
+  activeAlertCount: 2,
+  activeAlerts: [
+    { key: 1671108000000, doc_count: 0 },
+    { key: 1671208000000, doc_count: 0 },
+    { key: 1671308000000, doc_count: 0 },
+    { key: 1671408000000, doc_count: 2 },
+    { key: 1671508000000, doc_count: 4 },
+    { key: 1671608000000, doc_count: 5 },
+    { key: 1671708000000, doc_count: 3 },
+    { key: 1671808000000, doc_count: 6 },
+    { key: 1671908000000, doc_count: 14 },
+    { key: 1672008000000, doc_count: 15 },
+    { key: 1672108000000, doc_count: 15 },
+    { key: 1672208000000, doc_count: 10 },
+    { key: 1672308000000, doc_count: 9 },
+    { key: 1672408000000, doc_count: 7 },
+    { key: 1672508000000, doc_count: 2 },
+    { key: 1672608000000, doc_count: 2 },
+  ],
+  recoveredAlertCount: 15,
+  recoveredAlerts: [
+    { key: 1671108000000, doc_count: 0 },
+    { key: 1671208000000, doc_count: 0 },
+    { key: 1671308000000, doc_count: 0 },
+    { key: 1671408000000, doc_count: 0 },
+    { key: 1671508000000, doc_count: 0 },
+    { key: 1671608000000, doc_count: 0 },
+    { key: 1671708000000, doc_count: 2 },
+    { key: 1671808000000, doc_count: 0 },
+    { key: 1671908000000, doc_count: 0 },
+    { key: 1672008000000, doc_count: 0 },
+    { key: 1672108000000, doc_count: 0 },
+    { key: 1672208000000, doc_count: 5 },
+    { key: 1672308000000, doc_count: 1 },
+    { key: 1672408000000, doc_count: 2 },
+    { key: 1672508000000, doc_count: 5 },
+    { key: 1672608000000, doc_count: 0 },
+  ],
 };
 
 export const mockAlertSummaryTimeRange: AlertSummaryTimeRange = {
   utcFrom: 'mockedUtcFrom',
   utcTo: 'mockedUtcTo',
+  fixedInterval: 'mockedFixedInterval',
   title: 'mockedTitle',
 };

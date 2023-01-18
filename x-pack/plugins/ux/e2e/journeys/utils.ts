@@ -44,7 +44,7 @@ export async function loginToKibana({
 }
 
 export const byTestId = (testId: string) => {
-  return `[data-test-subj=${testId}]`;
+  return `[data-test-subj="${testId}"]`;
 };
 
 export const assertText = async ({

@@ -124,12 +124,13 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
           data-test-subj="timeline-context-menu-button"
           size="s"
           iconType="boxesHorizontal"
+          data-popover-open={isPopoverOpen}
           onClick={onButtonClick}
           isDisabled={disabled}
         />
       </EuiToolTip>
     );
-  }, [disabled, onButtonClick, ariaLabel]);
+  }, [disabled, onButtonClick, ariaLabel, isPopoverOpen]);
 
   const refetchQuery = (newQueries: inputsModel.GlobalQuery[]) => {
     newQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
@@ -258,7 +259,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
               anchorPosition="downLeft"
               repositionOnScroll
             >
-              <EuiContextMenuPanel size="s" items={items} />
+              <EuiContextMenuPanel size="s" items={items} data-test-subj="actions-context-menu" />
             </EuiPopover>
           </EventsTdContent>
         </div>

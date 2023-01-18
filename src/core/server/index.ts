@@ -194,6 +194,8 @@ export type {
   HttpServerInfo,
   HttpServicePreboot,
   HttpServiceStart,
+  RawRequest,
+  FakeRawRequest,
 } from '@kbn/core-http-server';
 export type { IExternalUrlPolicy } from '@kbn/core-http-common';
 
