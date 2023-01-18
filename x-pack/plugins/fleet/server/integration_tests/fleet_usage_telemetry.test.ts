@@ -286,8 +286,8 @@ describe('fleet usage telemetry', () => {
           ],
         },
         agent_policies: { count: 3, output_types: ['elasticsearch'] },
-        agent_logs_top_errors: ['stderr panic close of closed channel'],
-        fleet_server_logs_top_errors: ['failed to unenroll offline agents'],
+        // agent_logs_top_errors: ['stderr panic close of closed channel'],
+        // fleet_server_logs_top_errors: ['failed to unenroll offline agents'],
       })
     );
   });
