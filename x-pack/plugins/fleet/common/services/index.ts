@@ -51,4 +51,8 @@ export {
 } from './datastream_es_name';
 
 export * from './file_storage';
-export { isPackagePrerelease } from './package_prerelease';
+export {
+  getPackageReleaseLabel,
+  isPackagePrerelease,
+  mapPackageReleaseToIntegrationCardRelease,
+} from './package_prerelease';

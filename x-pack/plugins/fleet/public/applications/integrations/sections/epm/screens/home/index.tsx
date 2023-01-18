@@ -10,7 +10,7 @@ import { Switch, Route } from 'react-router-dom';
 
 import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
 
-import { getPackageReleaseLabel } from '../../../../../../../common/services/package_prerelease';
+import { getPackageReleaseLabel } from '../../../../../../../common/services';
 
 import { installationStatuses } from '../../../../../../../common/constants';
 

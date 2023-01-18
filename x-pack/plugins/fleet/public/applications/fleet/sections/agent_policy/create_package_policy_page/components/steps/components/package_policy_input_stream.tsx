@@ -23,7 +23,7 @@ import { useRouteMatch } from 'react-router-dom';
 
 import { useConfig, useGetDataStreams } from '../../../../../../../../hooks';
 
-import { mapPackageReleaseToIntegrationCardRelease } from '../../../../../../../../../common/services/package_prerelease';
+import { mapPackageReleaseToIntegrationCardRelease } from '../../../../../../../../../common/services';
 import type { ExperimentalDataStreamFeature } from '../../../../../../../../../common/types/models/epm';
 
 import type {
