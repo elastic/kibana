@@ -6,14 +6,12 @@
  */
 
 import React from 'react';
-
 import { useParams } from 'react-router-dom';
-import { IBasePath } from '@kbn/core-http-browser';
 import { EuiBreadcrumbProps } from '@elastic/eui/src/components/breadcrumbs/breadcrumb';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { SLOResponse } from '@kbn/slo-schema';
-import { ObservabilityAppServices } from '../../application/types';
-import { paths } from '../../config';
+import { i18n } from '@kbn/i18n';
+import type { IBasePath } from '@kbn/core-http-browser';
+import type { SLOResponse } from '@kbn/slo-schema';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
@@ -22,16 +20,18 @@ import { useLicense } from '../../hooks/use_license';
 import PageNotFound from '../404';
 import { isSloFeatureEnabled } from '../slos/helpers/is_slo_feature_enabled';
 import { SLOS_BREADCRUMB_TEXT } from '../slos/translations';
-import { SloDetailsPathParams } from './types';
 import { SloDetails } from './components/slo_details';
-import { SLO_DETAILS_BREADCRUMB_TEXT } from './translations';
 import { PageTitle } from './components/page_title';
+import { paths } from '../../config';
+import type { SloDetailsPathParams } from './types';
+import type { ObservabilityAppServices } from '../../application/types';
 
 export function SloDetailsPage() {
   const {
     application: { navigateToUrl },
     http: { basePath },
   } = useKibana<ObservabilityAppServices>().services;
+
   const { ObservabilityPageTemplate, config } = usePluginContext();
   const { sloId } = useParams<SloDetailsPathParams>();
 
@@ -71,10 +71,16 @@ function getBreadcrumbs(basePath: IBasePath, slo: SLOResponse | undefined): EuiB
   return [
     {
       href: basePath.prepend(paths.observability.slos),
-      text: SLOS_BREADCRUMB_TEXT,
+      text: i18n.translate('xpack.observability.breadcrumbs.slosLinkText', {
+        defaultMessage: 'SLOs',
+      }),
     },
     {
-      text: slo?.name ?? SLO_DETAILS_BREADCRUMB_TEXT,
+      text:
+        slo?.name ??
+        i18n.translate('xpack.observability.breadcrumbs.sloDetailsLinkText', {
+          defaultMessage: 'Details',
+        }),
     },
   ];
 }

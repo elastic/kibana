@@ -128,6 +128,7 @@ export function SloListWelcomePrompt() {
                         fill
                         href="https://www.elastic.co/cloud/elasticsearch-service/signup"
                         target="_blank"
+                        data-test-subj="slosPageWelcomePromptSignupForCloudButton"
                       >
                         {i18n.translate(
                           'xpack.observability.slos.sloList.welcomePrompt.signupForCloud',
@@ -139,7 +140,11 @@ export function SloListWelcomePrompt() {
                     </EuiFlexItem>
 
                     <EuiFlexItem>
-                      <EuiButton href="https://www.elastic.co/subscriptions" target="_blank">
+                      <EuiButton
+                        href="https://www.elastic.co/subscriptions"
+                        target="_blank"
+                        data-test-subj="slosPageWelcomePromptSignupForLicenseButton"
+                      >
                         {i18n.translate(
                           'xpack.observability.slos.sloList.welcomePrompt.signupForLicense',
                           {

@@ -46,8 +46,6 @@ export function SloEditPage() {
     return <PageNotFound />;
   }
 
-  console.log('hasRightLicense', hasRightLicense);
-
   if (hasRightLicense === false) {
     navigateToUrl(basePath.prepend(paths.observability.slos));
   }
