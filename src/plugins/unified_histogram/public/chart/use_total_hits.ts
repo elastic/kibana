@@ -10,68 +10,63 @@ import { isCompleteResponse } from '@kbn/data-plugin/public';
 import { DataView, DataViewType } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { MutableRefObject, useRef } from 'react';
-import useDebounce from 'react-use/lib/useDebounce';
-import { catchError, filter, lastValueFrom, map, of } from 'rxjs';
+import { MutableRefObject, useEffect, useRef } from 'react';
+import useEffectOnce from 'react-use/lib/useEffectOnce';
+import { catchError, filter, lastValueFrom, map, Observable, of } from 'rxjs';
 import {
-  UnifiedHistogramBreakdownContext,
-  UnifiedHistogramChartContext,
   UnifiedHistogramFetchStatus,
   UnifiedHistogramHitsContext,
+  UnifiedHistogramInputMessage,
   UnifiedHistogramRequestContext,
   UnifiedHistogramServices,
 } from '../types';
-import { REQUEST_DEBOUNCE_MS } from './consts';
+import { useStableCallback } from './use_stable_callback';
 
 export const useTotalHits = ({
   services,
   dataView,
-  lastReloadRequestTime,
   request,
   hits,
-  chart,
   chartVisible,
-  breakdown,
   filters,
   query,
-  timeRange,
-  refetchId,
+  getTimeRange,
+  refetch$,
   onTotalHitsChange,
 }: {
   services: UnifiedHistogramServices;
   dataView: DataView;
-  lastReloadRequestTime: number | undefined;
   request: UnifiedHistogramRequestContext | undefined;
   hits: UnifiedHistogramHitsContext | undefined;
-  chart: UnifiedHistogramChartContext | undefined;
   chartVisible: boolean;
-  breakdown: UnifiedHistogramBreakdownContext | undefined;
   filters: Filter[];
   query: Query | AggregateQuery;
-  timeRange: TimeRange;
-  refetchId: number;
+  getTimeRange: () => TimeRange;
+  refetch$: Observable<UnifiedHistogramInputMessage>;
   onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, result?: number | Error) => void;
 }) => {
   const abortController = useRef<AbortController>();
+  const fetch = useStableCallback(() => {
+    fetchTotalHits({
+      services,
+      abortController,
+      dataView,
+      request,
+      hits,
+      chartVisible,
+      filters,
+      query,
+      timeRange: getTimeRange(),
+      onTotalHitsChange,
+    });
+  });
 
-  useDebounce(
-    () => {
-      fetchTotalHits({
-        services,
-        abortController,
-        dataView,
-        request,
-        hits,
-        chartVisible,
-        filters,
-        query,
-        timeRange,
-        onTotalHitsChange,
-      });
-    },
-    REQUEST_DEBOUNCE_MS,
-    [onTotalHitsChange, refetchId, services]
-  );
+  useEffectOnce(fetch);
+
+  useEffect(() => {
+    const subscription = refetch$.subscribe(fetch);
+    return () => subscription.unsubscribe();
+  }, [fetch, refetch$]);
 };
 
 const fetchTotalHits = async ({
