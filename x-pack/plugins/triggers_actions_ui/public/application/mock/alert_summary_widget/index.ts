@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertSummaryTimeRange } from '../../hooks/use_load_alert_summary';
+import { AlertSummaryTimeRange } from '../../sections/rule_details/components/alert_summary/types';
 
 export const mockAlertSummaryResponse = {
   activeAlertCount: 2,

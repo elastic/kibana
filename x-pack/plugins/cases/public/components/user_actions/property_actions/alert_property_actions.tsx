@@ -32,6 +32,7 @@ const AlertPropertyActionsComponent: React.FC<Props> = ({ isLoading, totalAlerts
         ? [
             {
               iconType: 'minusInCircle',
+              color: 'danger' as const,
               label: i18n.REMOVE_ALERTS(totalAlerts),
               onClick: onModalOpen,
             },

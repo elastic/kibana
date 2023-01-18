@@ -15,8 +15,9 @@ export const manualTestRunSelector =
     configId ? manualTestRuns[configId] : undefined;
 
 export const manualTestRunInProgressSelector =
-  (configId: string) =>
+  (configId?: string) =>
   ({ manualTestRuns }: SyntheticsAppState) => {
+    if (!configId) return false;
     return (
       manualTestRuns[configId]?.status === 'in-progress' ||
       manualTestRuns[configId]?.status === 'loading'
