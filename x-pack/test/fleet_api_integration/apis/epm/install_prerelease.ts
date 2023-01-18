@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
@@ -38,6 +38,22 @@ export default function (providerContext: FtrProviderContext) {
         .post(`/api/fleet/epm/packages/${testPackage}/${testPackageVersion}`)
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
+    });
+
+    describe('installs GA package that has a prerelease version', async () => {
+      const pkg = 'endpoint';
+      const version = '8.6.1';
+
+      it('should install the GA package correctly', async function () {
+        const response = await supertest
+          .post(`/api/fleet/epm/packages/${pkg}/${version}`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
+        expect(response.body.items.find((item: any) => item.id.includes(version)));
+
+        await deletePackage(pkg, version);
+      });
     });
   });
 }

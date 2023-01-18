@@ -92,15 +92,15 @@ export const EngineIndices: React.FC = () => {
       width: '15%',
     },
     {
-      field: 'ingestionMethod',
+      field: 'source',
       name: i18n.translate(
         'xpack.enterpriseSearch.content.engine.indices.ingestionMethod.columnTitle',
         {
           defaultMessage: 'Ingestion method',
         }
       ),
-      render: (ingestionMethod: IngestionMethod) => (
-        <EuiText size="s">{ingestionMethodToText(ingestionMethod)}</EuiText>
+      render: (source: IngestionMethod) => (
+        <EuiText size="s">{ingestionMethodToText(source)}</EuiText>
       ),
       truncateText: true,
       width: '15%',
