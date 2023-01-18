@@ -8,129 +8,151 @@
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { JourneyStep, Ping, SyntheticsJourneyApiResponse } from '../../common/runtime_types';
 import { UMElasticsearchQueryFn } from '../legacy_uptime/lib/adapters';
+import { createEsParams } from '../legacy_uptime/lib/lib';
 
 export interface GetJourneyDetails {
   checkGroup: string;
 }
 
+type DocumentSource = (Ping & { '@timestamp': string }) | JourneyStep;
+
 export const getJourneyDetails: UMElasticsearchQueryFn<
   GetJourneyDetails,
   SyntheticsJourneyApiResponse['details']
 > = async ({ uptimeEsClient, checkGroup }) => {
-  const baseParams = {
-    query: {
-      bool: {
-        filter: [
-          {
-            term: {
-              'monitor.check_group': checkGroup,
+  const params = createEsParams({
+    body: {
+      query: {
+        bool: {
+          filter: [
+            {
+              term: {
+                'monitor.check_group': checkGroup,
+              },
             },
-          },
-          {
-            terms: {
-              'synthetics.type': ['journey/start', 'heartbeat/summary'],
+            {
+              terms: {
+                'synthetics.type': ['journey/start', 'heartbeat/summary'],
+              },
             },
-          },
-        ] as QueryDslQueryContainer[],
+          ],
+        },
       },
+      size: 2,
     },
-    size: 2,
-  };
+  });
 
-  const { body: thisJourney } = await uptimeEsClient.search(
-    { body: baseParams },
+  const { body: thisJourney } = await uptimeEsClient.search<DocumentSource, typeof params>(
+    params,
     'getJourneyDetailsCurrentJourney'
   );
 
-  if (thisJourney.hits.hits.length > 0) {
-    const { _id, _source } = thisJourney.hits.hits[0];
+  const journeyStart = thisJourney.hits.hits.find(
+    (hit) => hit._source.synthetics?.type === 'journey/start'
+  );
+
+  if (journeyStart) {
+    const { _id, _source } = journeyStart;
     const thisJourneySource = Object.assign({ _id }, _source) as JourneyStep;
 
-    const baseSiblingParams = {
-      query: {
-        bool: {
-          filter: [
-            {
-              term: {
-                'monitor.id': thisJourneySource.monitor.id,
-              },
-            },
-            {
-              term: {
-                'synthetics.type': 'journey/start',
-              },
-            },
-          ] as QueryDslQueryContainer[],
-        },
-      },
-      _source: ['@timestamp', 'monitor.check_group'],
-      size: 1,
-    };
-
-    const previousParams = {
-      ...baseSiblingParams,
-      query: {
-        bool: {
-          filter: [
-            ...baseSiblingParams.query.bool.filter,
-            {
-              range: {
-                '@timestamp': {
-                  lt: thisJourneySource['@timestamp'],
+    const baseSiblingParams = createEsParams({
+      body: {
+        query: {
+          bool: {
+            filter: [
+              {
+                term: {
+                  'monitor.id': thisJourneySource.monitor.id,
                 },
               },
-            },
-          ],
-        },
-      },
-      sort: [{ '@timestamp': { order: 'desc' as const } }],
-    };
-
-    const nextParams = {
-      ...baseSiblingParams,
-      query: {
-        bool: {
-          filter: [
-            ...baseSiblingParams.query.bool.filter,
-            {
-              range: {
-                '@timestamp': {
-                  gt: thisJourneySource['@timestamp'],
+              {
+                term: {
+                  'synthetics.type': 'journey/start',
                 },
               },
-            },
-          ],
+            ] as QueryDslQueryContainer[],
+          },
         },
+        _source: ['@timestamp', 'monitor.check_group'],
+        size: 1,
       },
-      sort: [{ '@timestamp': { order: 'asc' as const } }],
-    };
+    });
+
+    const previousParams = createEsParams({
+      body: {
+        ...baseSiblingParams.body,
+        query: {
+          bool: {
+            filter: [
+              ...baseSiblingParams.body.query.bool.filter,
+              {
+                range: {
+                  '@timestamp': {
+                    lt: thisJourneySource['@timestamp'],
+                  },
+                },
+              },
+            ],
+          },
+        },
+        sort: [{ '@timestamp': { order: 'desc' as const } }],
+      },
+    });
+
+    const nextParams = createEsParams({
+      body: {
+        ...baseSiblingParams.body,
+        query: {
+          bool: {
+            filter: [
+              ...baseSiblingParams.body.query.bool.filter,
+              {
+                range: {
+                  '@timestamp': {
+                    gt: thisJourneySource['@timestamp'],
+                  },
+                },
+              },
+            ],
+          },
+        },
+        sort: [{ '@timestamp': { order: 'asc' as const } }],
+      },
+    });
 
     const [previousJourneyPromise, nextJourneyPromise] = await Promise.all([
-      uptimeEsClient.search({ body: previousParams }, 'getJourneyDetailsNextJourney'),
-      uptimeEsClient.search({ body: nextParams }, 'getJourneyDetailsPreviousJourney'),
+      uptimeEsClient.search<JourneyStep, typeof previousParams>(
+        previousParams,
+        'getJourneyDetailsPreviousJourney'
+      ),
+      uptimeEsClient.search<JourneyStep, typeof nextParams>(
+        nextParams,
+        'getJourneyDetailsNextJourney'
+      ),
     ]);
 
     const { body: previousJourneyResult } = previousJourneyPromise;
     const { body: nextJourneyResult } = nextJourneyPromise;
 
-    const previousJourney: any =
+    const previousJourney =
       previousJourneyResult?.hits?.hits.length > 0 ? previousJourneyResult?.hits?.hits[0] : null;
-    const nextJourney: any =
+    const nextJourney =
       nextJourneyResult?.hits?.hits.length > 0 ? nextJourneyResult?.hits?.hits[0] : null;
 
     const summaryPing = thisJourney.hits.hits.find(
-      ({ _source: summarySource }) =>
-        (summarySource as Ping).synthetics?.type === 'heartbeat/summary'
-    ) as { _source: Ping };
+      ({ _source: summarySource }) => summarySource.synthetics?.type === 'heartbeat/summary'
+    )?._source;
 
     return {
       timestamp: thisJourneySource['@timestamp'],
       journey: thisJourneySource,
-      summary: summaryPing
+      ...(summaryPing && 'state' in summaryPing && summaryPing.state
         ? {
-            state: summaryPing._source.state,
+            summary: {
+              state: summaryPing.state,
+            },
           }
-        : undefined,
+        : {}),
       previous: previousJourney
         ? {
             checkGroup: previousJourney._source.monitor.check_group,
@@ -143,7 +165,7 @@ export const getJourneyDetails: UMElasticsearchQueryFn<
             timestamp: nextJourney._source['@timestamp'],
           }
         : undefined,
-    } as SyntheticsJourneyApiResponse['details'];
+    };
   } else {
     return null;
   }

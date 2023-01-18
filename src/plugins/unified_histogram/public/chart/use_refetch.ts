@@ -9,17 +9,18 @@
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { cloneDeep, isEqual } from 'lodash';
-import { useEffect, useRef, useState } from 'react';
-import type {
+import { useEffect, useMemo, useRef } from 'react';
+import { filter, share, tap } from 'rxjs';
+import {
   UnifiedHistogramBreakdownContext,
   UnifiedHistogramChartContext,
   UnifiedHistogramHitsContext,
+  UnifiedHistogramInput$,
   UnifiedHistogramRequestContext,
 } from '../types';
 
-export const useRefetchId = ({
+export const useRefetch = ({
   dataView,
-  lastReloadRequestTime,
   request,
   hits,
   chart,
@@ -27,10 +28,12 @@ export const useRefetchId = ({
   breakdown,
   filters,
   query,
-  relativeTimeRange: relativeTimeRange,
+  relativeTimeRange,
+  disableAutoFetching,
+  input$,
+  beforeRefetch,
 }: {
   dataView: DataView;
-  lastReloadRequestTime: number | undefined;
   request: UnifiedHistogramRequestContext | undefined;
   hits: UnifiedHistogramHitsContext | undefined;
   chart: UnifiedHistogramChartContext | undefined;
@@ -39,17 +42,23 @@ export const useRefetchId = ({
   filters: Filter[];
   query: Query | AggregateQuery;
   relativeTimeRange: TimeRange;
+  disableAutoFetching?: boolean;
+  input$: UnifiedHistogramInput$;
+  beforeRefetch: () => void;
 }) => {
   const refetchDeps = useRef<ReturnType<typeof getRefetchDeps>>();
-  const [refetchId, setRefetchId] = useState(0);
 
   // When the unified histogram props change, we must compare the current subset
   // that should trigger a histogram refetch against the previous subset. If they
   // are different, we must refetch the histogram to ensure it's up to date.
   useEffect(() => {
+    // Skip if auto fetching if disabled
+    if (disableAutoFetching) {
+      return;
+    }
+
     const newRefetchDeps = getRefetchDeps({
       dataView,
-      lastReloadRequestTime,
       request,
       hits,
       chart,
@@ -62,7 +71,7 @@ export const useRefetchId = ({
 
     if (!isEqual(refetchDeps.current, newRefetchDeps)) {
       if (refetchDeps.current) {
-        setRefetchId((id) => id + 1);
+        input$.next({ type: 'refetch' });
       }
 
       refetchDeps.current = newRefetchDeps;
@@ -72,20 +81,28 @@ export const useRefetchId = ({
     chart,
     chartVisible,
     dataView,
+    disableAutoFetching,
     filters,
     hits,
-    lastReloadRequestTime,
+    input$,
     query,
-    request,
     relativeTimeRange,
+    request,
   ]);
 
-  return refetchId;
+  return useMemo(
+    () =>
+      input$.pipe(
+        filter((message) => message.type === 'refetch'),
+        tap(beforeRefetch),
+        share()
+      ),
+    [beforeRefetch, input$]
+  );
 };
 
 const getRefetchDeps = ({
   dataView,
-  lastReloadRequestTime,
   request,
   hits,
   chart,
@@ -96,7 +113,6 @@ const getRefetchDeps = ({
   relativeTimeRange,
 }: {
   dataView: DataView;
-  lastReloadRequestTime: number | undefined;
   request: UnifiedHistogramRequestContext | undefined;
   hits: UnifiedHistogramHitsContext | undefined;
   chart: UnifiedHistogramChartContext | undefined;
@@ -108,7 +124,6 @@ const getRefetchDeps = ({
 }) =>
   cloneDeep([
     dataView.id,
-    lastReloadRequestTime,
     request?.searchSessionId,
     Boolean(hits),
     chartVisible,
