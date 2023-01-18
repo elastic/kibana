@@ -30,9 +30,9 @@ import {
   KQLCustomTransformGenerator,
   TransformGenerator,
 } from '../../services/slo/transform_generators';
-import { IndicatorTypes } from '../../domain/models';
 import { createObservabilityServerRoute } from '../create_observability_server_route';
-import { ObservabilityRequestHandlerContext } from '../../types';
+import type { IndicatorTypes } from '../../domain/models';
+import type { ObservabilityRequestHandlerContext } from '../../types';
 
 const transformGenerators: Record<IndicatorTypes, TransformGenerator> = {
   'sli.apm.transactionDuration': new ApmTransactionDurationTransformGenerator(),

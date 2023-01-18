@@ -19,7 +19,6 @@ import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
 import { useLicense } from '../../hooks/use_license';
 import PageNotFound from '../404';
 import { isSloFeatureEnabled } from '../slos/helpers/is_slo_feature_enabled';
-import { SLOS_BREADCRUMB_TEXT } from '../slos/translations';
 import { SloDetails } from './components/slo_details';
 import { PageTitle } from './components/page_title';
 import { paths } from '../../config';
