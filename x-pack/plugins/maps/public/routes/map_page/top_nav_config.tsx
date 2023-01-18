@@ -28,6 +28,7 @@ import {
   getCoreOverlays,
   getSavedObjectsTagging,
   getPresentationUtilContext,
+  getTheme,
 } from '../../kibana_services';
 import { MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import { SavedMap } from './saved_map';
@@ -245,7 +246,7 @@ export function getTopNavConfig({
           );
         }
 
-        showSaveModal(saveModal, getCoreI18n().Context, PresentationUtilContext);
+        showSaveModal(saveModal, getCoreI18n().Context, getTheme().theme$, PresentationUtilContext);
       },
     });
 

@@ -15,7 +15,6 @@ import { parse } from 'query-string';
 
 import { Capabilities } from '@kbn/core/public';
 import { TopNavMenuData } from '@kbn/navigation-plugin/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import {
   showSaveModal,
   SavedObjectSaveModalOrigin,
@@ -598,18 +597,12 @@ export const getTopNavConfig = (
                 );
               }
 
-              const WrapperComponent = ({ children }: { children?: React.ReactNode }) => {
-                const ContextProvider = !originatingApp
-                  ? presentationUtil.ContextProvider
-                  : React.Fragment;
-                return (
-                  <KibanaThemeProvider theme$={theme.theme$}>
-                    <ContextProvider>{children}</ContextProvider>
-                  </KibanaThemeProvider>
-                );
-              };
-
-              showSaveModal(saveModal, I18nContext, WrapperComponent);
+              showSaveModal(
+                saveModal,
+                I18nContext,
+                theme.theme$, 
+                presentationUtil.ContextProvider,
+              );
             },
           },
         ]
