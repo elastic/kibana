@@ -992,7 +992,7 @@ describe('suggestions', () => {
       expect(suggs[0].state.layers[0].allowMultipleMetrics).toBeFalsy();
     });
 
-    it('mosaic type should be hidden from the suggestion list', () => {
+    it('mosaic type not should be hidden from the suggestion list', () => {
       expect(
         suggestions({
           table: {
@@ -1106,7 +1106,7 @@ describe('suggestions', () => {
       ).toHaveLength(0);
     });
 
-    it('waffle type should be hidden from the suggestion list', () => {
+    it('waffle type should not be hidden from the suggestion list', () => {
       expect(
         suggestions({
           table: {
@@ -1150,7 +1150,7 @@ describe('suggestions', () => {
           Object {
             "hide": false,
             "previewIcon": "bullseye",
-            "score": 0.56,
+            "score": 0.46,
             "state": Object {
               "layers": Array [
                 Object {
