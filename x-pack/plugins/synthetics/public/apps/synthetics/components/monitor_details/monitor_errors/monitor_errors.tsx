@@ -14,6 +14,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { PanelWithTitle } from '../../common/components/panel_with_title';
 import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 import { FailedTestsCount } from './failed_tests_count';
 import { useAbsoluteDate, useGetUrlParams } from '../../../hooks';
@@ -31,16 +32,15 @@ export const MonitorErrors = () => {
 
   const monitorId = useMonitorQueryId();
 
+  const panelTitleStyle = { margin: euiTheme.size.s, marginBottom: 0 };
+
   return (
     <>
       <SyntheticsDatePicker fullWidth={true} />
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="m">
         <EuiFlexItem grow={1}>
-          <EuiPanel hasBorder>
-            <EuiTitle size="xs">
-              <h3 css={{ margin: euiTheme.size.s, marginBottom: 0 }}>{OVERVIEW_LABEL}</h3>
-            </EuiTitle>
+          <PanelWithTitle title={OVERVIEW_LABEL}>
             <EuiFlexGroup>
               <EuiFlexItem>
                 {monitorId && (
@@ -51,33 +51,25 @@ export const MonitorErrors = () => {
                 <FailedTestsCount from={time.from} to={time.to} />
               </EuiFlexItem>
             </EuiFlexGroup>
-          </EuiPanel>
+          </PanelWithTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={3}>
-          <EuiPanel hasBorder>
-            <EuiTitle size="xs">
-              <h3 css={{ margin: euiTheme.size.s, marginBottom: 0 }}>{FAILED_TESTS_LABEL}</h3>
-            </EuiTitle>
+          <PanelWithTitle title={FAILED_TESTS_LABEL}>
             <MonitorFailedTests time={time} />
-          </EuiPanel>
+          </PanelWithTitle>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="m">
         <EuiFlexItem grow={2}>
-          <EuiPanel hasBorder>
-            <EuiTitle size="xs">
-              <h3 css={{ margin: euiTheme.size.s, marginBottom: 0 }}>{ERRORS_LABEL}</h3>
-            </EuiTitle>
+          <PanelWithTitle title={ERRORS_LABEL}>
             <ErrorsList />
-          </EuiPanel>
+          </PanelWithTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
           <EuiPanel hasBorder>
             <EuiTitle size="xs">
-              <h3 css={{ margin: euiTheme.size.s, marginBottom: 0 }}>
-                {FAILED_TESTS_BY_STEPS_LABEL}
-              </h3>
+              <h3 css={panelTitleStyle}>{FAILED_TESTS_BY_STEPS_LABEL}</h3>
             </EuiTitle>
           </EuiPanel>
         </EuiFlexItem>
