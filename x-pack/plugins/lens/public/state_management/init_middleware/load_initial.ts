@@ -10,7 +10,7 @@ import { MiddlewareAPI } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
 import { setState, initEmpty, LensStoreDeps } from '..';
-import { disableAutoApply, getPreloadedState, initialState } from '../lens_slice';
+import { disableAutoApply, getPreloadedState } from '../lens_slice';
 import { SharingSavedObjectProps } from '../../types';
 import { LensEmbeddableInput, LensByReferenceInput } from '../../embeddable/embeddable';
 import { getInitialDatasourceId, getInitialDataViewsObject } from '../../utils';
