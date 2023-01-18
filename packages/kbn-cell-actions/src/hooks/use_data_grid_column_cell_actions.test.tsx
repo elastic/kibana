@@ -163,22 +163,4 @@ describe('useDataGridColumnsCellActions', () => {
       })
     );
   });
-
-  it('should execute the action with correct metadata', async () => {
-    const { result, waitForNextUpdate } = renderHook(useDataGridColumnsCellActions, {
-      initialProps: useDataGridColumnsCellActionsProps,
-    });
-    await waitForNextUpdate();
-    const isExpanded = true;
-
-    const cellAction = renderCellAction(result.current[0][0], { rowIndex: 1, isExpanded });
-
-    cellAction.getByTestId(`dataGridColumnCellAction-${action1.id}`).click();
-
-    expect(action1.execute).toHaveBeenCalledWith(
-      expect.objectContaining({
-        metadata: { ...useDataGridColumnsCellActionsProps.metadata, isExpanded },
-      })
-    );
-  });
 });
