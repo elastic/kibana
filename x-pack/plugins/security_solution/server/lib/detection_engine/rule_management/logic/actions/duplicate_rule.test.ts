@@ -84,7 +84,7 @@ describe('duplicateRule', () => {
   });
 
   beforeAll(() => {
-    (uuid.v4 as jest.Mock).mockReturnValue('new ruleId');
+    (uuid as jest.Mock).mockReturnValue('new ruleId');
   });
 
   afterAll(() => {

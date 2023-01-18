@@ -26,7 +26,7 @@ const mockedActionParamsFields = lazy(async () => ({
 }));
 
 const createMockActionTypeModel = (actionType: Partial<ActionTypeModel> = {}): ActionTypeModel => {
-  const id = uuid.v4();
+  const id = uuid();
   return {
     id,
     iconClass: `iconClass-${id}`,

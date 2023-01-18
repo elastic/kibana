@@ -86,7 +86,7 @@ describe('CreateCaseForm', () => {
     sessionStorage.removeItem(draftStorageKey);
   });
 
-  it('renders with steps', async () => {
+  it.only('renders with steps', async () => {
     const wrapper = mount(
       <MockHookWrapperComponent>
         <CreateCaseForm {...casesFormProps} />

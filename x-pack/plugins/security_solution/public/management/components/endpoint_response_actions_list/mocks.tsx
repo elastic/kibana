@@ -42,12 +42,12 @@ export const getActionListMock = async ({
 }): Promise<ActionListApiResponse> => {
   const endpointActionGenerator = new EndpointActionGenerator('seed');
 
-  const agentIds = _agentIds ?? [uuid.v4()];
+  const agentIds = _agentIds ?? [uuid()];
 
   const data: ActionListApiResponse['data'] = agentIds.map((id) => {
     const actionIds = Array(actionCount)
       .fill(1)
-      .map(() => uuid.v4());
+      .map(() => uuid());
 
     const actionDetails: ActionListApiResponse['data'] = actionIds.map((actionId) => {
       return endpointActionGenerator.generateActionDetails({
