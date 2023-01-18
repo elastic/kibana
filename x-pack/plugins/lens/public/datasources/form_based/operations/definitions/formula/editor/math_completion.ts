@@ -394,10 +394,12 @@ export async function getNamedArgumentSuggestions({
       .filter(({ value }) => {
         if (dateHistogramInterval == null) return true;
         const parsedValue = parseTimeShift(value);
+        if (parsedValue === 'previous') {
+          return true;
+        }
         return (
-          parsedValue !== 'previous' &&
-          (parsedValue === 'invalid' ||
-            Number.isInteger(parsedValue.asMilliseconds() / dateHistogramInterval))
+          parsedValue === 'invalid' ||
+          Number.isInteger(parsedValue.asMilliseconds() / dateHistogramInterval)
         );
       })
       .map(({ value }) => value);

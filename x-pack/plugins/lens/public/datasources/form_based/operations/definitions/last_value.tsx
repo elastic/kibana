@@ -29,7 +29,6 @@ import {
   getFilter,
 } from './helpers';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
-import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 import { isScriptedField } from './terms/helpers';
 import { FormRow } from './shared_components/form_row';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
@@ -203,7 +202,6 @@ export const lastValueOperation: OperationDefinition<
     if (invalidSortFieldMessage) {
       errorMessages = [invalidSortFieldMessage];
     }
-    errorMessages.push(...(getDisallowedPreviousShiftMessage(layer, columnId) || []));
     errorMessages.push(...(getColumnReducedTimeRangeError(layer, columnId, indexPattern) || []));
     return errorMessages.length ? errorMessages : undefined;
   },
