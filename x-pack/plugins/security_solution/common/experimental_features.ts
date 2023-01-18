@@ -84,7 +84,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables top charts on Alerts Page
    */
-  alertsPageChartsEnabled: false,
+  alertsPageChartsEnabled: true,
 
   /**
    * Keep DEPRECATED experimental flags that are documented to prevent failed upgrades.
