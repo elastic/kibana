@@ -1050,7 +1050,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   },
   {
     key: 'linux.advanced.host_isolation.allowed',
-    first_supported_version: '8.6',
+    first_supported_version: '8.6.1',
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.host_isolation.allowed',
       {
