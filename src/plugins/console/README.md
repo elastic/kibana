@@ -234,3 +234,43 @@ Some autocomplete definitions need to be configured with dynamic values that can
 A list of variables is defined in the  `parametrizedComponentFactories` function in [`kb.js`](https://github.com/elastic/kibana/blob/main/src/plugins/console/public/lib/kb/kb.js) file. The values of these variables are assigned dynamically for every cluster. 
 Use these variables with curly braces, for example `{indices}`, `{types}`, `{id}`, `{username}`, `{template}`, `{nodes}` etc.
 
+### New features
+#### Kibana API support
+Console plugin now supports Kibana API endpoints. `kbn:` prefix must be used in the request URL to send a request to Kibana API. For example, the following request sends a request to the Kibana API to retrieve the list of available spaces:
+```
+GET kbn:api/spaces/space
+```
+
+#### Request-body comments
+Single-line and multiline comments can be added to the request body. The comments are displayed in the request editor, but are not sent to the cluster. The comments are useful for adding notes to the request body. For example, the following request body contains a single-line comment and a multiline comment:
+```
+POST /_some_endpoint
+{
+  // This is a single-line comment
+  /* This is a multiline comment */
+  "field": "value"
+}
+```
+
+#### Variables
+Console plugin now supports variables. The variables can be used in the request body and in the request URL. The variables are defined in the `Variables` flyout in the Console UI and used in the request body and URL by wrapping the variable name with `${}`. For example, the following request body contains a variable:
+```
+POST /_some_endpoint
+{
+  "field": "${variable}"
+}
+```
+
+### Architecture changes
+One of the main changes in architecture is refactoring the retrieval of autocomplete suggestions. Console used to send a separate request to ES for each autocomplete entity (mappings, aliases, templates, data-streams etc). This has been refactored to send a single request to Kibana API and retrieve all the autocomplete entities in one response. The autocomplete entities' data and methods are encapsulated into a class in [`autocomplete.ts`](https://github.com/elastic/kibana/blob/main/src/plugins/console/public/services/autocomplete.ts) and instantiated in the [`plugin.ts`](https://github.com/elastic/kibana/blob/main/src/plugins/console/public/plugin.ts#L32) file.
+
+Another change is using core http client instead of jquery to send requests to Elasticsearch and Kibana APIs. The core http client is used in the [`es.ts`](https://github.com/elastic/kibana/blob/main/src/plugins/console/public/lib/es/es.ts#L36) and [`autocomplete.ts`](https://github.com/elastic/kibana/blob/main/src/plugins/console/public/services/autocomplete.ts#L72) files.
+
+### Outstanding issues
+#### Autocomplete suggestions for Kinaba API endpoints
+Console currently supports autocomplete suggestions for Elasticsearch API endpoints. The autocomplete suggestions for Kibana API endpoints are not supported yet.
+Related issue: [#130661](https://github.com/elastic/kibana/issues/130661)
+
+#### Migration to Monaco Editor
+Console plugin is currently using Ace Editor and it is planned to migrate to Monaco Editor in the future.
+Related issue: [#57435](https://github.com/elastic/kibana/issues/57435)
