@@ -176,11 +176,11 @@ const baseColumns = [
       <ColumnNameWithTooltip
         columnName={i18n.translate(
           'xpack.csp.findings.findingsTable.findingsTableColumn.clusterIdColumnLabel',
-          { defaultMessage: 'Cluster ID' }
+          { defaultMessage: 'Belongs To' }
         )}
         tooltipContent={i18n.translate(
           'xpack.csp.findings.findingsTable.findingsTableColumn.clusterIdColumnTooltipLabel',
-          { defaultMessage: 'Kube-System Namespace ID' }
+          { defaultMessage: 'Kubernetes Cluster ID or Cloud Account Name' }
         )}
       />
     ),

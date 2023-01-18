@@ -120,7 +120,6 @@ const baseColumns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = 
   {
     field: 'rule.section',
     truncateText: true,
-    // width: '200px',
     name: (
       <FormattedMessage
         id="xpack.csp.findings.findingsByResourceTable.cisSectionsColumnLabel"
