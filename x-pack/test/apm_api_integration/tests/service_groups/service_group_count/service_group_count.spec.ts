@@ -100,64 +100,60 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
   }
 
-  registry.when(
-    'Service group counts',
-    { config: 'basic', archives: [] },
-    () => {
-      let synthbeansServiceGroupId: string;
-      let opbeansServiceGroupId: string;
+  registry.when('Service group counts', { config: 'basic', archives: [] }, () => {
+    let synthbeansServiceGroupId: string;
+    let opbeansServiceGroupId: string;
+    before(async () => {
+      const [, { body: synthbeansServiceGroup }, { body: opbeansServiceGroup }] = await Promise.all(
+        [
+          generateData({ start, end, synthtraceEsClient }),
+          saveServiceGroup({
+            groupName: 'synthbeans',
+            kuery: 'service.name: synth*',
+          }),
+          saveServiceGroup({
+            groupName: 'opbeans',
+            kuery: 'service.name: opbeans*',
+          }),
+        ]
+      );
+      synthbeansServiceGroupId = synthbeansServiceGroup.id;
+      opbeansServiceGroupId = opbeansServiceGroup.id;
+    });
+
+    after(async () => {
+      await deleteAllServiceGroups();
+      await synthtraceEsClient.clean();
+    });
+
+    it('returns the correct number of services', async () => {
+      const response = await getServiceGroupCounts();
+      expect(response.status).to.be(200);
+      expect(Object.keys(response.body).length).to.be(2);
+      expect(response.body[synthbeansServiceGroupId]).to.have.property('services', 2);
+      expect(response.body[opbeansServiceGroupId]).to.have.property('services', 1);
+    });
+
+    describe('with alerts', () => {
+      let ruleId: string;
       before(async () => {
-        const [, { body: synthbeansServiceGroup }, { body: opbeansServiceGroup }] =
-          await Promise.all([
-            generateData({ start, end, synthtraceEsClient }),
-            saveServiceGroup({
-              groupName: 'synthbeans',
-              kuery: 'service.name: synth*',
-            }),
-            saveServiceGroup({
-              groupName: 'opbeans',
-              kuery: 'service.name: opbeans*',
-            }),
-          ]);
-        synthbeansServiceGroupId = synthbeansServiceGroup.id;
-        opbeansServiceGroupId = opbeansServiceGroup.id;
+        const { body: createdRule } = await createRule();
+        ruleId = createdRule.id;
+        await waitForActiveAlert({ ruleId, esClient, log });
       });
 
       after(async () => {
-        await deleteAllServiceGroups();
-        await synthtraceEsClient.clean();
+        await supertest.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'true');
+        await esDeleteAllIndices('.alerts*');
       });
 
-      it('returns the correct number of services', async () => {
+      it('returns the correct number of alerts', async () => {
         const response = await getServiceGroupCounts();
         expect(response.status).to.be(200);
         expect(Object.keys(response.body).length).to.be(2);
-        expect(response.body[synthbeansServiceGroupId]).to.have.property('services', 2);
-        expect(response.body[opbeansServiceGroupId]).to.have.property('services', 1);
+        expect(response.body[synthbeansServiceGroupId]).to.have.property('alerts', 1);
+        expect(response.body[opbeansServiceGroupId]).to.have.property('alerts', 0);
       });
-
-      describe('with alerts', () => {
-        let ruleId: string;
-        before(async () => {
-          const { body: createdRule } = await createRule();
-          ruleId = createdRule.id;
-          await waitForActiveAlert({ ruleId, esClient, log });
-        });
-
-        after(async () => {
-          await supertest.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'true');
-          await esDeleteAllIndices('.alerts*');
-        });
-
-        it('returns the correct number of alerts', async () => {
-          const response = await getServiceGroupCounts();
-          expect(response.status).to.be(200);
-          expect(Object.keys(response.body).length).to.be(2);
-          expect(response.body[synthbeansServiceGroupId]).to.have.property('alerts', 1);
-          expect(response.body[opbeansServiceGroupId]).to.have.property('alerts', 0);
-        });
-      });
-    },
-    true // skipped Failing: See https://github.com/elastic/kibana/issues/147473
-  );
+    });
+  });
 }

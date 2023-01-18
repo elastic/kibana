@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { useKibana } from '../lib/kibana';
+import { KibanaServices, useKibana } from '../lib/kibana';
 import type { RenderHookResult } from '@testing-library/react-hooks';
 import { renderHook as _renderHook } from '@testing-library/react-hooks';
 import { useUpgradeSecurityPackages } from './use_upgrade_security_packages';
@@ -23,8 +23,11 @@ jest.mock('../components/user_privileges', () => {
 });
 jest.mock('../lib/kibana');
 
-// FLAKY: https://github.com/elastic/kibana/issues/112910
-describe.skip('When using the `useUpgradeSecurityPackages()` hook', () => {
+describe('When using the `useUpgradeSecurityPackages()` hook', () => {
+  const mockGetPrebuiltRulesPackageVersion =
+    KibanaServices.getPrebuiltRulesPackageVersion as jest.Mock;
+  const mockGetKibanaVersion = KibanaServices.getKibanaVersion as jest.Mock;
+  const mockGetKibanaBranch = KibanaServices.getKibanaBranch as jest.Mock;
   let renderResult: RenderHookResult<object, void>;
   let renderHook: () => RenderHookResult<object, void>;
   let kibana: ReturnType<typeof useKibana>;
@@ -43,6 +46,7 @@ describe.skip('When using the `useUpgradeSecurityPackages()` hook', () => {
   });
 
   afterEach(() => {
+    jest.clearAllMocks();
     if (renderResult) {
       renderResult.unmount();
     }
@@ -62,6 +66,106 @@ describe.skip('When using the `useUpgradeSecurityPackages()` hook', () => {
       `${epmRouteService.getBulkInstallPath()}`,
       expect.objectContaining({
         body: '{"packages":["endpoint","security_detection_engine"]}',
+      })
+    );
+  });
+
+  it('should send upgrade request with prerelease:false if branch is not `main` and build does not include `-SNAPSHOT`', async () => {
+    mockGetKibanaVersion.mockReturnValue('8.0.0');
+    mockGetKibanaBranch.mockReturnValue('release');
+
+    renderHook();
+
+    await renderResult.waitFor(
+      () => (kibana.services.http.post as jest.Mock).mock.calls.length > 0
+    );
+
+    expect(kibana.services.http.post).toHaveBeenCalledWith(
+      `${epmRouteService.getBulkInstallPath()}`,
+      expect.objectContaining({
+        body: '{"packages":["endpoint","security_detection_engine"]}',
+        query: expect.objectContaining({ prerelease: false }),
+      })
+    );
+  });
+
+  it('should send upgrade request with prerelease:true if branch is `main` AND build includes `-SNAPSHOT`', async () => {
+    mockGetKibanaVersion.mockReturnValue('8.0.0-SNAPSHOT');
+    mockGetKibanaBranch.mockReturnValue('main');
+
+    renderHook();
+
+    await renderResult.waitFor(
+      () => (kibana.services.http.post as jest.Mock).mock.calls.length > 0
+    );
+
+    expect(kibana.services.http.post).toHaveBeenCalledWith(
+      `${epmRouteService.getBulkInstallPath()}`,
+      expect.objectContaining({
+        body: '{"packages":["endpoint","security_detection_engine"]}',
+        query: expect.objectContaining({ prerelease: true }),
+      })
+    );
+  });
+
+  it('should send upgrade request with prerelease:true if branch is `release` and build includes `-SNAPSHOT`', async () => {
+    mockGetKibanaVersion.mockReturnValue('8.0.0-SNAPSHOT');
+    mockGetKibanaBranch.mockReturnValue('release');
+
+    renderHook();
+
+    await renderResult.waitFor(
+      () => (kibana.services.http.post as jest.Mock).mock.calls.length > 0
+    );
+
+    expect(kibana.services.http.post).toHaveBeenCalledWith(
+      `${epmRouteService.getBulkInstallPath()}`,
+      expect.objectContaining({
+        body: '{"packages":["endpoint","security_detection_engine"]}',
+        query: expect.objectContaining({ prerelease: true }),
+      })
+    );
+  });
+
+  it('should send upgrade request with prerelease:true if branch is `main` and build does not include `-SNAPSHOT`', async () => {
+    mockGetKibanaVersion.mockReturnValue('8.0.0');
+    mockGetKibanaBranch.mockReturnValue('main');
+
+    renderHook();
+
+    await renderResult.waitFor(
+      () => (kibana.services.http.post as jest.Mock).mock.calls.length > 0
+    );
+
+    expect(kibana.services.http.post).toHaveBeenCalledWith(
+      `${epmRouteService.getBulkInstallPath()}`,
+      expect.objectContaining({
+        body: '{"packages":["endpoint","security_detection_engine"]}',
+        query: expect.objectContaining({ prerelease: true }),
+      })
+    );
+  });
+
+  it('should send separate upgrade requests if prebuiltRulesPackageVersion is provided', async () => {
+    mockGetPrebuiltRulesPackageVersion.mockReturnValue('8.2.1');
+
+    renderHook();
+
+    await renderResult.waitFor(
+      () => (kibana.services.http.post as jest.Mock).mock.calls.length > 0
+    );
+
+    expect(kibana.services.http.post).toHaveBeenNthCalledWith(
+      1,
+      `${epmRouteService.getInstallPath('security_detection_engine', '8.2.1')}`,
+      expect.objectContaining({ query: { prerelease: true } })
+    );
+    expect(kibana.services.http.post).toHaveBeenNthCalledWith(
+      2,
+      `${epmRouteService.getBulkInstallPath()}`,
+      expect.objectContaining({
+        body: expect.stringContaining('endpoint'),
+        query: expect.objectContaining({ prerelease: true }),
       })
     );
   });

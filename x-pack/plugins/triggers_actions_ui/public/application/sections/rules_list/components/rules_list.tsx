@@ -97,6 +97,7 @@ import {
   MULTIPLE_RULE_TITLE,
 } from '../translations';
 import { useBulkOperationToast } from '../../../hooks/use_bulk_operation_toast';
+import { RulesSettingsLink } from '../../../components/rules_setting/rules_settings_link';
 import { useRulesListUiState as useUiState } from '../../../hooks/use_rules_list_ui_state';
 
 // Directly lazy import the flyouts because the suspendedComponentWithProps component
@@ -614,11 +615,15 @@ export const RulesList = ({
     if (!setHeaderActions) return;
 
     if (showHeaderWithoutCreateButton) {
-      setHeaderActions([<RulesListDocLink />]);
+      setHeaderActions([<RulesListDocLink />, <RulesSettingsLink />]);
       return;
     }
     if (showHeaderWithCreateButton) {
-      setHeaderActions([<CreateRuleButton openFlyout={openFlyout} />, <RulesListDocLink />]);
+      setHeaderActions([
+        <CreateRuleButton openFlyout={openFlyout} />,
+        <RulesSettingsLink />,
+        <RulesListDocLink />,
+      ]);
       return;
     }
     setHeaderActions();

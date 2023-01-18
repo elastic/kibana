@@ -370,7 +370,7 @@ export class SecurityPlugin
     const clusterClient = core.elasticsearch.client;
     const { watchOnlineStatus$ } = this.elasticsearchService.start();
     const { session } = this.sessionManagementService.start({
-      auditLogger: this.auditSetup!.withoutRequest,
+      audit: this.auditSetup!,
       elasticsearchClient: clusterClient.asInternalUser,
       kibanaIndexName: this.getKibanaIndexName(),
       online$: watchOnlineStatus$(),

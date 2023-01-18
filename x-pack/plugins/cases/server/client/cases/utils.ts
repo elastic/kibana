@@ -208,12 +208,14 @@ export const createIncident = async ({
 };
 
 export const mapCaseFieldsToExternalSystemFields = (
-  caseFields: Record<Exclude<CaseField, 'comments'>, unknown>,
+  caseFields: Record<Exclude<CaseField, 'comments' | 'tags'>, unknown>,
   mapping: ConnectorMappingsAttributes[]
 ): Record<ThirdPartyField, unknown> => {
   const mappedCaseFields: Record<ThirdPartyField, unknown> = {};
 
-  for (const caseFieldKey of Object.keys(caseFields) as Array<Exclude<CaseField, 'comments'>>) {
+  for (const caseFieldKey of Object.keys(caseFields) as Array<
+    Exclude<CaseField, 'comments' | 'tags'>
+  >) {
     const mapDefinition = mapping.find(
       (mappingEntry) => mappingEntry.source === caseFieldKey && mappingEntry.target !== 'not_mapped'
     );
