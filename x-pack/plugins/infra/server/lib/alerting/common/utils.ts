@@ -12,16 +12,19 @@ import type { ElasticsearchClient, IBasePath } from '@kbn/core/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { ObservabilityConfig } from '@kbn/observability-plugin/server';
 import { ALERT_RULE_PARAMETERS, TIMESTAMP } from '@kbn/rule-data-utils';
-import { ParsedTechnicalFields, parseTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
+import {
+  ParsedTechnicalFields,
+  parseTechnicalFields,
+} from '@kbn/rule-registry-plugin/common/parse_technical_fields';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { set } from '@kbn/safer-lodash-set';
+import { ParsedExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
 import { LINK_TO_METRICS_EXPLORER } from '../../../../common/alerting/metrics';
 import { getInventoryViewInAppUrl } from '../../../../common/alerting/metrics/alert_link';
 import {
   AlertExecutionDetails,
   InventoryMetricConditions,
 } from '../../../../common/alerting/metrics/types';
-import { ParsedExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
 
 const ALERT_CONTEXT_CONTAINER = 'container';
 const ALERT_CONTEXT_ORCHESTRATOR = 'orchestrator';
@@ -240,7 +243,7 @@ export const flattenAdditionalContext = (
 export const getContextForRecoveredAlerts = (
   alertHitSource: Partial<ParsedTechnicalFields & ParsedExperimentalFields> | undefined | null
 ): AdditionalContext => {
-  const alert = alertHitSource ? unflattenObject(alertHitSource) : undefined
+  const alert = alertHitSource ? unflattenObject(alertHitSource) : undefined;
 
   return {
     cloud: alert?.[ALERT_CONTEXT_CLOUD],
