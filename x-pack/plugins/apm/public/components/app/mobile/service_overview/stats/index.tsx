@@ -6,12 +6,13 @@
  */
 import { MetricDatum, MetricTrendShape } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React from 'react';
+import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
+import React, { useCallback } from 'react';
 import { useTheme } from '@kbn/observability-plugin/public';
 import { useAnyOfApmParams } from '../../../../../hooks/use_apm_params';
 import { useFetcher, FETCH_STATUS } from '../../../../../hooks/use_fetcher';
 import { MetricItem } from './metric_item';
+import { usePreviousPeriodLabel } from '../../../../../hooks/use_previous_period_text';
 
 const valueFormatter = (value: number, suffix = '') => {
   return `${value} ${suffix}`;
@@ -43,7 +44,7 @@ export function MobileStats({
 
   const {
     path: { serviceName },
-    query: { environment, transactionType },
+    query: { environment, transactionType, offset, comparisonEnabled },
   } = useAnyOfApmParams('/mobile-services/{serviceName}/overview');
 
   const { data, status } = useFetcher(
@@ -59,19 +60,37 @@ export function MobileStats({
               environment,
               kuery,
               transactionType,
+              offset,
             },
           },
         }
       );
     },
-    [start, end, environment, kuery, serviceName, transactionType]
+    [start, end, environment, kuery, serviceName, transactionType, offset]
+  );
+
+  const getComparisonValueFormatter = useCallback(
+    (value) => {
+      const previousPeriodLabel = usePreviousPeriodLabel();
+      return (
+        <span>
+          {value && comparisonEnabled
+            ? `${previousPeriodLabel}: ${value}`
+            : null}
+        </span>
+      );
+    },
+    [comparisonEnabled]
   );
 
   const metrics: MetricDatum[] = [
     {
-      color: euiTheme.eui.euiColorLightestShade,
+      color: euiTheme.eui.euiColorDisabled,
       title: i18n.translate('xpack.apm.mobile.metrics.crash.rate', {
         defaultMessage: 'Crash Rate',
+      }),
+      subtitle: i18n.translate('xpack.apm.mobile.coming.soon', {
+        defaultMessage: 'Coming Soon',
       }),
       icon: getIcon('bug'),
       value: 'N/A',
@@ -80,9 +99,12 @@ export function MobileStats({
       trendShape: MetricTrendShape.Area,
     },
     {
-      color: euiTheme.eui.euiColorLightestShade,
+      color: euiTheme.eui.euiColorDisabled,
       title: i18n.translate('xpack.apm.mobile.metrics.load.time', {
         defaultMessage: 'Slowest App load time',
+      }),
+      subtitle: i18n.translate('xpack.apm.mobile.coming.soon', {
+        defaultMessage: 'Coming Soon',
       }),
       icon: getIcon('visGauge'),
       value: 'N/A',
@@ -99,6 +121,7 @@ export function MobileStats({
       value: data?.currentPeriod?.sessions?.value ?? NaN,
       valueFormatter: (value: number) => valueFormatter(value),
       trend: data?.currentPeriod?.sessions?.timeseries,
+      extra: getComparisonValueFormatter(data?.previousPeriod.sessions?.value),
       trendShape: MetricTrendShape.Area,
     },
     {
@@ -107,9 +130,10 @@ export function MobileStats({
         defaultMessage: 'HTTP requests',
       }),
       icon: getIcon('kubernetesPod'),
-      value: data?.currentPeriod?.requests?.value ?? NaN,
+      value: data?.currentPeriod.requests?.value ?? NaN,
+      extra: getComparisonValueFormatter(data?.previousPeriod.requests?.value),
       valueFormatter: (value: number) => valueFormatter(value),
-      trend: data?.currentPeriod?.requests?.timeseries ?? [],
+      trend: data?.currentPeriod.requests.timeseries,
       trendShape: MetricTrendShape.Area,
     },
   ];

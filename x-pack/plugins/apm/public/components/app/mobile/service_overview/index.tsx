@@ -16,6 +16,7 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiCallOut,
+  EuiBadge,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -65,6 +66,7 @@ export function MobileServiceOverview() {
       osVersion,
       appVersion,
       netConnectionType,
+      comparisonEnabled,
     },
   } = useApmParams('/mobile-services/{serviceName}/overview');
 
@@ -163,24 +165,40 @@ export function MobileServiceOverview() {
                     end={end}
                     kuery={kueryWithMobileFilters}
                     filters={embeddableFilters}
+                    comparisonEnabled={comparisonEnabled}
                   />
                 </EuiPanel>
               </EuiFlexItem>
 
               <EuiFlexItem grow={7}>
                 <EuiPanel hasBorder={true}>
-                  <EuiFlexItem grow={false}>
-                    <EuiTitle size="xs">
-                      <h2>
-                        {i18n.translate(
-                          'xpack.apm.serviceOverview.mostUsedTitle',
-                          {
-                            defaultMessage: 'Most used',
-                          }
-                        )}
-                      </h2>
-                    </EuiTitle>
-                  </EuiFlexItem>
+                  <EuiFlexGroup
+                    direction={rowDirection}
+                    justifyContent="spaceBetween"
+                  >
+                    <EuiFlexItem grow={false}>
+                      <EuiTitle size="xs">
+                        <h2>
+                          {i18n.translate(
+                            'xpack.apm.serviceOverview.mostUsedTitle',
+                            {
+                              defaultMessage: 'Top 5 most used',
+                            }
+                          )}
+                        </h2>
+                      </EuiTitle>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      {comparisonEnabled && (
+                        <EuiBadge color="warning">
+                          {i18n.translate('xpack.apm.comparison.not.support', {
+                            defaultMessage: 'comparison not supported',
+                          })}
+                        </EuiBadge>
+                      )}
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+
                   <EuiFlexGroup direction={rowDirection} gutterSize="s">
                     {/* Device */}
                     <EuiFlexItem>

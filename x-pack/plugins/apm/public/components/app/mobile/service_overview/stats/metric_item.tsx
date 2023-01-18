@@ -23,7 +23,7 @@ export function MetricItem({
         resize: 'none',
         padding: '0px',
         overflow: 'auto',
-        height: '100px',
+        height: '120px',
         borderRadius: '6px',
       }}
     >
