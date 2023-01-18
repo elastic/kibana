@@ -469,14 +469,16 @@ describe('When entering data into the Console input', () => {
       render();
       enterCommand('cmd7 --foo', { inputOnly: true });
 
-      expect(getLeftOfCursorText()).toEqual('cmd7 --foo="foo selected"');
+      expect(getLeftOfCursorText()).toEqual('cmd7 --foo="foo[0]: foo selected"');
     });
 
     it('should support using argument multiple times (allowMultiples: true)', async () => {
       render();
       enterCommand('cmd7 --foo --foo', { inputOnly: true });
 
-      expect(getLeftOfCursorText()).toEqual('cmd7 --foo="foo selected" --foo="foo selected"');
+      expect(getLeftOfCursorText()).toEqual(
+        'cmd7 --foo="foo[0]: foo selected" --foo="foo[1]: foo selected"'
+      );
     });
 
     it(`should remove entire argument if BACKSPACE key is pressed`, async () => {
