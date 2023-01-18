@@ -992,7 +992,7 @@ describe('suggestions', () => {
       expect(suggs[0].state.layers[0].allowMultipleMetrics).toBeFalsy();
     });
 
-    it('mosaic type should not be hidden from the suggestion list', () => {
+    it('mosaic type should be shown in the suggestion list', () => {
       expect(
         suggestions({
           table: {
