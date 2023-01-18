@@ -12,6 +12,7 @@ import { EuiBreadcrumb, EuiConfirmModal } from '@elastic/eui';
 import { useExecutionContext, useKibana } from '@kbn/kibana-react-plugin/public';
 import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import type { LensAppLocatorParams } from '../../common/locator/locator';
 import { LensAppProps, LensAppServices } from './types';
 import { LensTopNavMenu } from './lens_top_nav';
 import { LensByReferenceInput } from '../embeddable';
@@ -35,7 +36,10 @@ import { SaveModalContainer, runSaveLensVisualization } from './save_modal_conta
 import { LensInspector } from '../lens_inspector_service';
 import { getEditPath } from '../../common';
 import { isLensEqual } from './lens_document_equality';
-import { IndexPatternServiceAPI, createIndexPatternService } from '../data_views_service/service';
+import {
+  type IndexPatternServiceAPI,
+  createIndexPatternService,
+} from '../data_views_service/service';
 import { replaceIndexpattern } from '../state_management/lens_slice';
 import { filterUserMessages, getApplicationUserMessages } from './get_application_user_messages';
 
@@ -82,6 +86,8 @@ export function App({
     executionContext,
     // Temporarily required until the 'by value' paradigm is default.
     dashboardFeatureFlag,
+    locator,
+    share,
   } = lensAppServices;
 
   const saveAndExit = useRef<() => void>();
@@ -115,6 +121,8 @@ export function App({
   const currentDoc = useLensSelector((state) =>
     selectSavedObjectFormat(state, selectorDependencies)
   );
+
+  const shortUrls = useMemo(() => share?.url.shortUrls.get(null), [share]);
 
   // Used to show a popover that guides the user towards changing the date range when no data is available.
   const [indicateNoData, setIndicateNoData] = useState(false);
@@ -434,6 +442,31 @@ export function App({
     };
   }, []);
 
+  // remember latest URL based on the configuration
+  // url_panel_content has a similar logic
+  const shareURLCache = useRef({ params: '', url: '' });
+
+  const shortUrlService = useCallback(
+    async (params: LensAppLocatorParams) => {
+      const cacheKey = JSON.stringify(params);
+      if (shareURLCache.current.params === cacheKey) {
+        return shareURLCache.current.url;
+      }
+      if (locator && shortUrls) {
+        // This is a stripped down version of what the share URL plugin is doing
+        const relativeUrl = await shortUrls.create({ locator, params });
+        const absoluteShortUrl = application.getUrlForApp('', {
+          path: `/r/s/${relativeUrl.data.slug}`,
+          absolute: true,
+        });
+        shareURLCache.current = { params: cacheKey, url: absoluteShortUrl };
+        return absoluteShortUrl;
+      }
+      return '';
+    },
+    [locator, application, shortUrls]
+  );
+
   const returnToOriginSwitchLabelForContext =
     initialContext &&
     'isEmbeddable' in initialContext &&
@@ -556,6 +589,14 @@ export function App({
           title={persistedDoc?.title}
           lensInspector={lensInspector}
           currentDoc={currentDoc}
+          isCurrentStateDirty={
+            !isLensEqual(
+              persistedDoc,
+              lastKnownDoc,
+              data.query.filterManager.inject.bind(data.query.filterManager),
+              datasourceMap
+            )
+          }
           goBackToOriginatingApp={goBackToOriginatingApp}
           contextOriginatingApp={contextOriginatingApp}
           initialContextIsEmbedded={initialContextIsEmbedded}
@@ -565,6 +606,7 @@ export function App({
           indexPatternService={indexPatternService}
           onTextBasedSavedAndExit={onTextBasedSavedAndExit}
           getUserMessages={getUserMessages}
+          shortUrlService={shortUrlService}
         />
         {getLegacyUrlConflictCallout()}
         {(!isLoading || persistedDoc) && (

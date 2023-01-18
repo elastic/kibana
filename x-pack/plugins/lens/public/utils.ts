@@ -120,6 +120,30 @@ export async function refreshIndexPatternsList({
   });
 }
 
+export function extractReferencesFromState({
+  activeDatasources,
+  datasourceStates,
+  visualizationState,
+  activeVisualization,
+}: {
+  activeDatasources: Record<string, Datasource>;
+  datasourceStates: DatasourceStates;
+  visualizationState: unknown;
+  activeVisualization?: Visualization;
+}): SavedObjectReference[] {
+  const references: SavedObjectReference[] = [];
+  Object.entries(activeDatasources).forEach(([id, datasource]) => {
+    const { savedObjectReferences } = datasource.getPersistableState(datasourceStates[id].state);
+    references.push(...savedObjectReferences);
+  });
+
+  if (activeVisualization?.getPersistableState) {
+    const { savedObjectReferences } = activeVisualization.getPersistableState(visualizationState);
+    references.push(...savedObjectReferences);
+  }
+  return references;
+}
+
 export function getIndexPatternsIds({
   activeDatasources,
   datasourceStates,
@@ -131,19 +155,21 @@ export function getIndexPatternsIds({
   visualizationState: unknown;
   activeVisualization?: Visualization;
 }): string[] {
-  let currentIndexPatternId: string | undefined;
-  const references: SavedObjectReference[] = [];
-  Object.entries(activeDatasources).forEach(([id, datasource]) => {
-    const { savedObjectReferences } = datasource.getPersistableState(datasourceStates[id].state);
-    const indexPatternId = datasource.getUsedDataView(datasourceStates[id].state);
-    currentIndexPatternId = indexPatternId;
-    references.push(...savedObjectReferences);
+  const references: SavedObjectReference[] = extractReferencesFromState({
+    activeDatasources,
+    datasourceStates,
+    visualizationState,
+    activeVisualization,
   });
 
-  if (activeVisualization?.getPersistableState) {
-    const { savedObjectReferences } = activeVisualization.getPersistableState(visualizationState);
-    references.push(...savedObjectReferences);
-  }
+  const currentIndexPatternId: string | undefined = Object.entries(activeDatasources).reduce<
+    string | undefined
+  >((currentId, [id, datasource]) => {
+    if (currentId == null) {
+      return datasource.getUsedDataView(datasourceStates[id].state);
+    }
+    return currentId;
+  }, undefined);
   const referencesIds = references
     .filter(({ type }) => type === 'index-pattern')
     .map(({ id }) => id);

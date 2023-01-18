@@ -39,18 +39,19 @@ function getIndexPatterns(
   adHocDataviews?: string[]
 ) {
   const indexPatternIds = [];
+
+  // use the initialId only when no context is passed over
+  if (!initialContext && initialId) {
+    indexPatternIds.push(initialId);
+  }
   if (initialContext) {
     if ('isVisualizeAction' in initialContext) {
       indexPatternIds.push(...initialContext.indexPatternIds);
     } else {
       indexPatternIds.push(initialContext.dataViewSpec.id!);
     }
-  } else {
-    // use the initialId only when no context is passed over
-    if (initialId) {
-      indexPatternIds.push(initialId);
-    }
   }
+
   if (references) {
     for (const reference of references) {
       if (reference.type === 'index-pattern') {
