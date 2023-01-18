@@ -41,7 +41,6 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
     const { projectName } = request.params;
     const decodedProjectName = decodeURI(projectName);
     const monitors = (request.body?.monitors as ProjectMonitor[]) || [];
-    const spaceId = server.spaces.spacesService.getSpaceId(request);
 
     if (monitors.length > 250) {
       return response.badRequest({
@@ -52,6 +51,7 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
     }
 
     try {
+      const { id: spaceId } = await server.spaces.spacesService.getActiveSpace(request);
       const encryptedSavedObjectsClient = server.encryptedSavedObjects.getClient();
 
       const pushMonitorFormatter = new ProjectMonitorFormatter({

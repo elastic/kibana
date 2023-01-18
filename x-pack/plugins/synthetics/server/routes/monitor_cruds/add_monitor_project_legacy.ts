@@ -41,7 +41,8 @@ export const addSyntheticsProjectMonitorRouteLegacy: SyntheticsStreamingRouteFac
   }): Promise<any> => {
     try {
       const monitors = (request.body?.monitors as ProjectMonitor[]) || [];
-      const spaceId = server.spaces.spacesService.getSpaceId(request);
+      const { id: spaceId } = await server.spaces.spacesService.getActiveSpace(request);
+
       const { keep_stale: keepStale, project: projectId } = request.body || {};
       const { publicLocations, privateLocations } = await getAllLocations(
         server,
