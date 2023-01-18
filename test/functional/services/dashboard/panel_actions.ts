@@ -42,13 +42,14 @@ export class DashboardPanelActionsService extends FtrService {
   }
 
   async toggleContextMenu(parent?: WebElementWrapper) {
-    this.log.debug('toggleContextMenu');
+    this.log.debug(`toggleContextMenu(${parent})`);
     await (parent ? parent.moveMouseTo() : this.testSubjects.moveMouseTo('dashboardPanelTitle'));
     const toggleMenuItem = await this.findContextMenu(parent);
     await toggleMenuItem.click();
   }
 
   async expectContextMenuToBeOpen() {
+    this.log.debug('expectContextMenuToBeOpen');
     await this.testSubjects.existOrFail('embeddablePanelContextMenuOpen');
   }
 
@@ -63,7 +64,9 @@ export class DashboardPanelActionsService extends FtrService {
   }
 
   async clickContextMenuMoreItem() {
-    const hasMoreSubPanel = await this.testSubjects.exists('embeddablePanelMore-mainMenu');
+    this.log.debug('clickContextMenuMoreItem');
+    await this.expectContextMenuToBeOpen();
+    const hasMoreSubPanel = await this.hasContextMenuMoreItem();
     if (hasMoreSubPanel) {
       await this.testSubjects.click('embeddablePanelMore-mainMenu');
     }
@@ -76,7 +79,7 @@ export class DashboardPanelActionsService extends FtrService {
 
   async clickEdit() {
     this.log.debug('clickEdit');
-    await this.openContextMenu();
+    await this.expectContextMenuToBeOpen();
     const isActionVisible = await this.testSubjects.exists(EDIT_PANEL_DATA_TEST_SUBJ);
     if (!isActionVisible) await this.clickContextMenuMoreItem();
     await this.testSubjects.clickWhenNotDisabledWithoutRetry(EDIT_PANEL_DATA_TEST_SUBJ);
@@ -97,7 +100,7 @@ export class DashboardPanelActionsService extends FtrService {
 
   async clickExpandPanelToggle() {
     this.log.debug(`clickExpandPanelToggle`);
-    await this.openContextMenu();
+    await this.expectContextMenuToBeOpen();
     const isActionVisible = await this.testSubjects.exists(TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ);
     if (!isActionVisible) await this.clickContextMenuMoreItem();
     await this.testSubjects.click(TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ);

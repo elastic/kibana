@@ -120,6 +120,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('opens a saved search when edit link is clicked', async () => {
+        await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.clickEdit();
         await PageObjects.header.waitUntilLoadingHasFinished();
         const queryName = await PageObjects.discover.getCurrentQueryName();
@@ -148,6 +149,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       before('expand panel to "full screen"', async () => {
+        await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.clickExpandPanelToggle();
       });
 
