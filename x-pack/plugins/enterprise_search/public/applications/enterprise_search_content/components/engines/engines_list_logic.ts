@@ -11,6 +11,7 @@ import { Status } from '../../../../../common/types/api';
 
 import {
   EnterpriseSearchEngine,
+  EnterpriseSearchEngineDetails,
   EnterpriseSearchEnginesResponse,
 } from '../../../../../common/types/engines';
 
@@ -47,7 +48,9 @@ export type EnginesListActions = Pick<
   };
 
   onPaginate(args: EuiBasicTableOnChange): { pageNumber: number };
-  openDeleteEngineModal: (engine: EnterpriseSearchEngine) => { engine: EnterpriseSearchEngine };
+  openDeleteEngineModal: (engine: EnterpriseSearchEngine | EnterpriseSearchEngineDetails) => {
+    engine: EnterpriseSearchEngine;
+  };
 };
 interface EngineListValues {
   data: typeof FetchEnginesAPILogic.values.data;
