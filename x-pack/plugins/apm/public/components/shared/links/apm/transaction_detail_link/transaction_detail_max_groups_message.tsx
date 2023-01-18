@@ -15,7 +15,7 @@ export const txGroupsDroppedBucketName = '_other';
 export function TransactionDetailMaxGroupsMessage() {
   return (
     <FormattedMessage
-      defaultMessage="The transaction group limit has been reached. Please see the {apmServerDocs} for {codeBlock} to increase this."
+      defaultMessage="The transaction group limit in APM Server has been reached. Excess groups have been captured in _other. Please see the {apmServerDocs} for {codeBlock} to increase this limit."
       id="xpack.apm.transactionDetail.maxGroups.message"
       values={{
         apmServerDocs: (

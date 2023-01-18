@@ -24,23 +24,20 @@ export function TransactionsCallout({
     return <></>;
   }
 
+  const title = i18n.translate(
+    'xpack.apm.transactionsTable.cardinalityWarning.title',
+    {
+      defaultMessage: 'This view shows a subset of reported transactions.',
+    }
+  );
+
   if (maxTransactionGroupsExceeded) {
     return (
-      <EuiCallOut
-        title={i18n.translate(
-          'xpack.apm.transactionsTable.cardinalityWarning.title',
-          {
-            defaultMessage:
-              'This view shows a subset of reported transactions.',
-          }
-        )}
-        color="danger"
-        iconType="alert"
-      >
+      <EuiCallOut title={title} color="danger" iconType="alert">
         <p>
           <FormattedMessage
-            id="xpack.apm.transactionsTable.transactiongrouplimit.exceeded"
-            defaultMessage="The number of unique transaction names limit was exceeded. Try narrowing down your results using the query bar."
+            id="xpack.apm.transactionsTable.transactionGroupLimit.exceeded"
+            defaultMessage="The transaction group limit in Kibana has been reached. Excess groups have been omitted. Try narrowing down your results using the query bar."
           />
         </p>
       </EuiCallOut>
@@ -48,16 +45,7 @@ export function TransactionsCallout({
   }
 
   return (
-    <EuiCallOut
-      title={i18n.translate(
-        'xpack.apm.transactionsTable.cardinalityWarning.title',
-        {
-          defaultMessage: 'This view shows a subset of reported transactions.',
-        }
-      )}
-      color="danger"
-      iconType="alert"
-    >
+    <EuiCallOut title={title} color="danger" iconType="alert">
       <p>
         <TransactionDetailMaxGroupsMessage />
       </p>
