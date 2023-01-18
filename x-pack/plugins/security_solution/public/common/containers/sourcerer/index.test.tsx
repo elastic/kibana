@@ -586,6 +586,7 @@ describe('Sourcerer Hooks', () => {
           '-filebeat-*',
           '-packetbeat-*',
         ]);
+        expect(result.current.indexPattern).toHaveProperty('getName');
       });
     });
   });
