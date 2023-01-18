@@ -6,8 +6,8 @@
  */
 import { Location } from 'history';
 import React from 'react';
-import { getRenderedHref } from '../../../../utils/test_helpers';
-import { TransactionDetailLink } from './transaction_detail_link';
+import { getRenderedHref } from '../../../../../utils/test_helpers';
+import { TransactionDetailLink } from '.';
 
 describe('TransactionDetailLink', () => {
   describe('With comparison in the url', () => {

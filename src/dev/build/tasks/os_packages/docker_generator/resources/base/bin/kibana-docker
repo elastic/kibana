@@ -244,6 +244,7 @@ kibana_vars=(
     xpack.apm.serviceMapFingerprintGlobalBucketSize
     xpack.apm.ui.enabled
     xpack.apm.ui.maxTraceItems
+    xpack.apm.ui.transactionGroupBucketSize
     xpack.banners.backgroundColor
     xpack.banners.disableSpaceBanners
     xpack.banners.placement

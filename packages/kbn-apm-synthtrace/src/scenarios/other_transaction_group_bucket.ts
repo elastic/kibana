@@ -9,9 +9,8 @@ import { range as lodashRange } from 'lodash';
 import { ApmFields, apm } from '@kbn/apm-synthtrace-client';
 import { Scenario } from '../cli/scenario';
 
-const scenario: Scenario<ApmFields> = async (runOptions) => {
-  const { logger } = runOptions;
-  const numServices = 10;
+const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
+  const { services: numServices = 10, txGroups: numTxGroups = 10 } = scenarioOpts ?? {};
 
   return {
     generate: ({ range }) => {
@@ -36,7 +35,7 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
       });
 
       const transactionGroupRange = [
-        ...lodashRange(0, 10).map((groupId) => `transaction-${groupId}`),
+        ...lodashRange(0, numTxGroups).map((groupId) => `transaction-${groupId}`),
         '_other',
       ];
 

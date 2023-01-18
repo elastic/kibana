@@ -7,13 +7,11 @@
 
 import {
   EuiBasicTable,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { orderBy } from 'lodash';
 import React, { useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -28,11 +26,13 @@ import {
   useFetcher,
 } from '../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
+import { txGroupsDroppedBucketName } from '../links/apm/transaction_detail_link/transaction_detail_max_groups_message';
 import { TransactionOverviewLink } from '../links/apm/transaction_overview_link';
 import { fromQuery, toQuery } from '../links/url_helpers';
 import { OverviewTableContainer } from '../overview_table_container';
 import { isTimeComparison } from '../time_comparison/get_comparison_options';
 import { getColumns } from './get_columns';
+import { TransactionsCallout } from './transactions_callout';
 
 type ApiResponse =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;
@@ -48,7 +48,7 @@ const INITIAL_STATE: InitialState = {
   requestId: '',
   mainStatisticsData: {
     transactionGroups: [],
-    isAggregationAccurate: true,
+    maxTransactionGroupsExceeded: true,
     transactionGroupsTotalItems: 0,
   },
 };
@@ -65,7 +65,7 @@ interface Props {
   isSingleColumn?: boolean;
   numberOfTransactionsPerPage?: number;
   showPerPageOptions?: boolean;
-  showAggregationAccurateCallout?: boolean;
+  showMaxTransactionGroupsExceededWarning?: boolean;
   environment: string;
   fixedHeight?: boolean;
   kuery: string;
@@ -80,7 +80,7 @@ export function TransactionsTable({
   isSingleColumn = true,
   numberOfTransactionsPerPage = 5,
   showPerPageOptions = true,
-  showAggregationAccurateCallout = false,
+  showMaxTransactionGroupsExceededWarning = false,
   environment,
   kuery,
   start,
@@ -190,7 +190,7 @@ export function TransactionsTable({
     requestId,
     mainStatisticsData: {
       transactionGroups,
-      isAggregationAccurate,
+      maxTransactionGroupsExceeded,
       transactionGroupsTotalItems,
     },
   } = data;
@@ -238,6 +238,10 @@ export function TransactionsTable({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [requestId],
     { preservePreviousData: false }
+  );
+
+  const otherBucketTransactionGroup = transactionGroups.some(
+    (item) => item.name === txGroupsDroppedBucketName
   );
 
   const columns = getColumns({
@@ -302,28 +306,15 @@ export function TransactionsTable({
           )}
         </EuiFlexGroup>
       </EuiFlexItem>
-      {showAggregationAccurateCallout && !isAggregationAccurate && (
-        <EuiFlexItem>
-          <EuiCallOut
-            title={i18n.translate(
-              'xpack.apm.transactionsTable.cardinalityWarning.title',
-              {
-                defaultMessage:
-                  'This view shows a subset of reported transactions.',
-              }
-            )}
-            color="danger"
-            iconType="alert"
-          >
-            <p>
-              <FormattedMessage
-                id="xpack.apm.transactionsTable.transactiongrouplimit.exceeded"
-                defaultMessage="The number of unique transaction names limit was exceeded. Try narrowing down your results using the search bar."
-              />
-            </p>
-          </EuiCallOut>
-        </EuiFlexItem>
-      )}
+      {showMaxTransactionGroupsExceededWarning &&
+        (maxTransactionGroupsExceeded || otherBucketTransactionGroup) && (
+          <EuiFlexItem>
+            <TransactionsCallout
+              maxTransactionGroupsExceeded={maxTransactionGroupsExceeded}
+              otherBucketTransactionGroup={otherBucketTransactionGroup}
+            />
+          </EuiFlexItem>
+        )}
       <EuiFlexItem>
         <EuiFlexItem>
           <OverviewTableContainer

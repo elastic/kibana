@@ -5,22 +5,24 @@
  * 2.0.
  */
 
-import { EuiCode } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { identity, pickBy } from 'lodash';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
-import { pickKeys } from '../../../../../common/utils/pick_keys';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { unit } from '../../../../utils/style';
-import { PopoverTooltip } from '../../popover_tooltip';
-import { getComparisonEnabled } from '../../time_comparison/get_comparison_enabled';
-import { TruncateWithTooltip } from '../../truncate_with_tooltip';
-import { APMQueryParams } from '../url_helpers';
-import { APMLinkExtendProps, getLegacyApmHref } from './apm_link';
+import { pickKeys } from '../../../../../../common/utils/pick_keys';
+import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
+import { useLegacyUrlParams } from '../../../../../context/url_params_context/use_url_params';
+import { unit } from '../../../../../utils/style';
+import { PopoverTooltip } from '../../../popover_tooltip';
+import { getComparisonEnabled } from '../../../time_comparison/get_comparison_enabled';
+import { TruncateWithTooltip } from '../../../truncate_with_tooltip';
+import { APMQueryParams } from '../../url_helpers';
+import { APMLinkExtendProps, getLegacyApmHref } from '../apm_link';
+import {
+  TransactionDetailMaxGroupsMessage,
+  txGroupsDroppedBucketName,
+} from './transaction_detail_max_groups_message';
 
 interface Props extends APMLinkExtendProps {
   serviceName: string;
@@ -38,8 +40,6 @@ const persistedFilters: Array<keyof APMQueryParams> = [
   'transactionResult',
   'serviceVersion',
 ];
-
-const txGroupsDroppedBucketName = '_other';
 
 export function TransactionDetailLink({
   serviceName,
@@ -87,10 +87,8 @@ export function TransactionDetailLink({
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="xs">
-      <EuiFlexItem grow={false}>
-        {i18n.translate('xpack.apm.transactionDetail.other.label', {
-          defaultMessage: 'other',
-        })}
+      <EuiFlexItem grow={false} style={{ fontStyle: 'italic' }}>
+        {txGroupsDroppedBucketName}
       </EuiFlexItem>
       <EuiFlexItem>
         <PopoverTooltip
@@ -100,30 +98,7 @@ export function TransactionDetailLink({
           iconType="alert"
         >
           <EuiText style={{ width: `${unit * 28}px` }} size="s">
-            <FormattedMessage
-              defaultMessage="The transaction group limit has been reached. Please see the {apmServerDocs} for {codeBlock} to increase this."
-              id="xpack.apm.transactionDetail.tooltip.message"
-              values={{
-                apmServerDocs: (
-                  <EuiLink
-                    href={
-                      'https://www.elastic.co/guide/en/apm/guide/current/transaction-metrics.html#transactions-max_groups'
-                    }
-                    target="_blank"
-                  >
-                    {i18n.translate(
-                      'xpack.apm.transactionDetail.tooltip.apmServerDocs',
-                      {
-                        defaultMessage: 'APM Server docs',
-                      }
-                    )}
-                  </EuiLink>
-                ),
-                codeBlock: (
-                  <EuiCode>aggregation.transaction.max_groups</EuiCode>
-                ),
-              }}
-            />
+            <TransactionDetailMaxGroupsMessage />
           </EuiText>
         </PopoverTooltip>
       </EuiFlexItem>

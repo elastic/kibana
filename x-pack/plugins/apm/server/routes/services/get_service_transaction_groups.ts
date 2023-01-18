@@ -144,8 +144,7 @@ export async function getServiceTransactionGroups({
       ...transactionGroup,
       transactionType,
     })),
-    isAggregationAccurate:
-      (response.aggregations?.transaction_groups.sum_other_doc_count ?? 0) ===
-      0,
+    maxTransactionGroupsExceeded:
+      (response.aggregations?.transaction_groups.sum_other_doc_count ?? 0) > 0,
   };
 }
