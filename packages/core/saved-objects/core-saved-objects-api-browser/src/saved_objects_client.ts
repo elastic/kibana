@@ -30,7 +30,7 @@ import type { SimpleSavedObject } from './simple_saved_object';
  * HTTP API for interacting with Saved Objects.
  *
  * @public
- * @deprecated See https://github.com/elastic/dev/issues/2194
+ * @deprecated See https://github.com/elastic/kibana/issues/149098
  */
 export interface SavedObjectsClientContract {
   /**

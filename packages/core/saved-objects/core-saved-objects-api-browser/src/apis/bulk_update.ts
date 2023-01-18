@@ -12,7 +12,7 @@ import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
  * Per-object parameters for bulk update operation
  *
  * @public
- * @deprecated See https://github.com/elastic/dev/issues/2194
+ * @deprecated See https://github.com/elastic/kibana/issues/149098
  */
 export interface SavedObjectsBulkUpdateObject<T = unknown> {
   /** Type of the saved object to update */
@@ -31,7 +31,7 @@ export interface SavedObjectsBulkUpdateObject<T = unknown> {
  * Options for bulk update operation
  *
  * @public
- * @deprecated See https://github.com/elastic/dev/issues/2194
+ * @deprecated See https://github.com/elastic/kibana/issues/149098
  * */
 export interface SavedObjectsBulkUpdateOptions {
   /**

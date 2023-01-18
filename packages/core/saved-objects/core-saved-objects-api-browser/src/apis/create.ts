@@ -15,7 +15,7 @@ import type {
  * Options for creating a saved object.
  *
  * @public
- * @deprecated See https://github.com/elastic/dev/issues/2194
+ * @deprecated See https://github.com/elastic/kibana/issues/149098
  */
 export interface SavedObjectsCreateOptions {
   /**

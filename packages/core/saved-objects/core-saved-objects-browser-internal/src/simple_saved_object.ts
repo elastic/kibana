@@ -18,7 +18,7 @@ import type {
  * Core internal implementation of {@link SimpleSavedObject}
  *
  * @internal Should use the {@link SimpleSavedObject} interface instead
- * @deprecated See https://github.com/elastic/dev/issues/2194
+ * @deprecated See https://github.com/elastic/kibana/issues/149098
  */
 export class SimpleSavedObjectImpl<T = unknown> implements SimpleSavedObject<T> {
   public attributes: T;

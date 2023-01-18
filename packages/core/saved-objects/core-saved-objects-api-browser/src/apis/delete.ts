@@ -10,7 +10,7 @@
  * Options for deleting a saved object.
  *
  * @public
- * @deprecated See https://github.com/elastic/dev/issues/2194
+ * @deprecated See https://github.com/elastic/kibana/issues/149098
  */
 export interface SavedObjectsDeleteOptions {
   /** Force deletion of an object that exists in multiple namespaces (default=false) */

@@ -12,7 +12,7 @@ import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
  * Options for updating a saved object
  *
  * @public
- * @deprecated See https://github.com/elastic/dev/issues/2194
+ * @deprecated See https://github.com/elastic/kibana/issues/149098
  */
 export interface SavedObjectsUpdateOptions<Attributes = unknown> {
   /** version of the saved object */
