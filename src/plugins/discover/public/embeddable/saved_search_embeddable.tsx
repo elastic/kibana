@@ -145,12 +145,10 @@ export class SavedSearchEmbeddable
     this.inspectorAdapters = {
       requests: new RequestAdapter(),
     };
-    this.panelTitle = savedSearch.title ?? '';
+    this.panelTitle = this.input.title ? this.input.title : savedSearch.title ?? '';
     this.initializeSearchEmbeddableProps();
-    console.log('savedSearch constructed');
 
     this.subscription = this.getUpdated$().subscribe(() => {
-      console.log('savedSearch subscribe triggered');
       const titleChanged = this.output.title && this.panelTitle !== this.output.title;
       if (titleChanged) {
         this.panelTitle = this.output.title || '';
@@ -171,7 +169,6 @@ export class SavedSearchEmbeddable
   }
 
   private fetch = async () => {
-    console.log('fetch');
     const searchSessionId = this.input.searchSessionId;
     const useNewFieldsApi = !this.services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE, false);
     if (!this.searchProps) return;
@@ -225,7 +222,6 @@ export class SavedSearchEmbeddable
     const dataView = this.savedSearch.searchSource.getField('index')!;
     const recordRawType = getRawRecordType(query);
     const useSql = recordRawType === RecordRawType.PLAIN;
-    console.log('fetch start');
 
     try {
       // Request SQL data
@@ -271,7 +267,6 @@ export class SavedSearchEmbeddable
           executionContext,
         })
       );
-      console.log('fetch end', resp);
 
       this.updateOutput({
         ...this.getOutput(),
@@ -302,7 +297,6 @@ export class SavedSearchEmbeddable
   }
 
   private initializeSearchEmbeddableProps() {
-    console.log('initializeSearchEmbeddableProps');
     const { searchSource } = this.savedSearch;
 
     const dataView = searchSource.getField('index');
@@ -426,7 +420,6 @@ export class SavedSearchEmbeddable
   }
 
   private isFetchRequired(searchProps?: SearchProps) {
-    console.log('isFetchRequired', { searchProps });
     if (!searchProps || !searchProps.dataView) {
       return false;
     }
@@ -436,7 +429,6 @@ export class SavedSearchEmbeddable
       !isEqual(this.prevTimeRange, this.getTimeRange()) ||
       !isEqual(this.prevSort, this.input.sort) ||
       this.prevSearchSessionId !== this.input.searchSessionId;
-    console.log('isFetchRequired result', result);
 
     return result;
   }
@@ -499,7 +491,6 @@ export class SavedSearchEmbeddable
    * @param {Element} domNode
    */
   public async render(domNode: HTMLElement) {
-    console.log('render', { searchProps: this.searchProps });
     if (!this.searchProps) {
       throw new Error('Search props not defined');
     }

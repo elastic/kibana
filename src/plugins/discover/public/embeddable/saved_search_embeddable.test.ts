@@ -72,6 +72,7 @@ describe('saved search embeddable', () => {
       columns: ['message', 'extension'],
       rowHeight: 30,
       rowsPerPage: 50,
+      title: 'custom title',
     };
 
     executeTriggerActions = jest.fn();
@@ -279,6 +280,35 @@ describe('saved search embeddable', () => {
     embeddable.updateOutput({ title: 'custom title' });
     embeddable.updateInput(searchInput);
     await waitOneTick();
+    expect(search).toHaveBeenCalledTimes(1);
+  });
+  it('a should not render and fetch data more often then necessary when the embeddable title changes', async () => {
+    const search = jest.fn().mockReturnValue(
+      of({
+        rawResponse: { hits: { hits: [], total: 0 } },
+        isPartial: false,
+        isRunning: false,
+      })
+    );
+    const { embeddable } = createEmbeddable(search);
+    embeddable.render(mountpoint);
+    // wait for data fetching
+    await waitOneTick();
+    expect(search).toHaveBeenCalledTimes(1);
+
+    embeddable.reload = jest.fn();
+    // wait for data fetching
+    await waitOneTick();
+    embeddable.updateOutput({ title: 'custom title' });
+    await waitOneTick();
+
+    // there shouldn't be another rendering when the title of the saved change didn't change
+    expect(embeddable.reload).toHaveBeenCalledTimes(0);
+    expect(search).toHaveBeenCalledTimes(1);
+    embeddable.updateOutput({ title: 'custom title modified' });
+    await waitOneTick();
+    // there should be another rendering when the title of the saved change didn't change
+    expect(embeddable.reload).toHaveBeenCalledTimes(1);
     expect(search).toHaveBeenCalledTimes(1);
   });
 });
