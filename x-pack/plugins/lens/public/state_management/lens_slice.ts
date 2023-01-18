@@ -56,12 +56,33 @@ export const initialState: LensAppState = {
 export const getPreloadedState = ({
   lensServices: { data },
   initialContext,
+  initialStateFromLocator,
   embeddableEditorIncomingState,
   datasourceMap,
   visualizationMap,
 }: LensStoreDeps) => {
   const initialDatasourceId = getInitialDatasourceId(datasourceMap);
   const datasourceStates: LensAppState['datasourceStates'] = {};
+  if (initialStateFromLocator) {
+    if ('datasourceStates' in initialStateFromLocator) {
+      Object.keys(datasourceMap).forEach((datasourceId) => {
+        datasourceStates[datasourceId] = {
+          state: initialStateFromLocator.datasourceStates[datasourceId],
+          isLoading: true,
+        };
+      });
+    }
+    return {
+      ...initialState,
+      isLoading: true,
+      ...initialStateFromLocator,
+      activeDatasourceId:
+        ('activeDatasourceId' in initialStateFromLocator &&
+          initialStateFromLocator.activeDatasourceId) ||
+        initialDatasourceId,
+      datasourceStates,
+    };
+  }
   if (initialDatasourceId) {
     Object.keys(datasourceMap).forEach((datasourceId) => {
       datasourceStates[datasourceId] = {

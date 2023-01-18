@@ -513,6 +513,7 @@ enum SortFieldCase {
   status = 'status',
   title = 'title.keyword',
   severity = 'severity',
+  updatedAt = 'updated_at',
 }
 
 export const convertSortField = (sortField: string | undefined): SortFieldCase => {
@@ -529,6 +530,9 @@ export const convertSortField = (sortField: string | undefined): SortFieldCase =
       return SortFieldCase.title;
     case 'severity':
       return SortFieldCase.severity;
+    case 'updatedAt':
+    case 'updated_at':
+      return SortFieldCase.updatedAt;
     default:
       return SortFieldCase.createdAt;
   }
