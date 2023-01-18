@@ -304,7 +304,7 @@ export const MoreContainer = React.memo<MoreContainerProps>(
 
           if (typeof value === 'string' && fieldName != null) {
             acc.push(
-              <EuiFlexItem key={`${idPrefix}-${id}`}>
+              <EuiFlexItem key={id}>
                 <CellActions
                   key={id}
                   mode={CellActionsMode.HOVER_POPOVER}
