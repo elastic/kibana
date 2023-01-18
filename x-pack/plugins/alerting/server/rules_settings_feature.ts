@@ -19,7 +19,7 @@ import {
 export const rulesSettingsFeature: KibanaFeatureConfig = {
   id: RULES_SETTINGS_FEATURE_ID,
   name: i18n.translate('xpack.alerting.feature.rulesSettingsFeatureName', {
-    defaultMessage: 'Rules Settings',
+    defaultMessage: 'Rules settings',
   }),
   category: DEFAULT_APP_CATEGORIES.management,
   app: [],
@@ -55,7 +55,7 @@ export const rulesSettingsFeature: KibanaFeatureConfig = {
   subFeatures: [
     {
       name: i18n.translate('xpack.alerting.feature.flappingSettingsSubFeatureName', {
-        defaultMessage: 'Flapping Detection',
+        defaultMessage: 'Flapping detection',
       }),
       privilegeGroups: [
         {
