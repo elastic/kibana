@@ -29,7 +29,7 @@ const ES_FIELDS = [{ name: '@timestamp', type: 'date' }];
 jest.mock('uuid', () => ({
   v4: () => {
     return require('./helpers/jest_constants').WATCH_ID;
-  }
+  },
 }));
 
 const SETTINGS = {
