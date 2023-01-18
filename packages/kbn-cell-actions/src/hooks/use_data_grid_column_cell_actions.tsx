@@ -7,12 +7,13 @@
  */
 
 import React, { useMemo, useRef } from 'react';
-import {
-  EuiDataGridColumnCellAction,
-  EuiDataGridColumnCellActionProps,
-  EuiLoadingSpinner,
-} from '@elastic/eui';
-import { CellActionExecutionContext, CellActionField, CellActionsProps } from '../types';
+import { EuiLoadingSpinner, type EuiDataGridColumnCellAction } from '@elastic/eui';
+import type {
+  CellAction,
+  CellActionExecutionContext,
+  CellActionField,
+  CellActionsProps,
+} from '../types';
 import { useBulkLoadActions } from './use_load_actions';
 
 interface BulkField extends Pick<CellActionField, 'name' | 'type'> {
@@ -53,48 +54,54 @@ export const useDataGridColumnsCellActions = ({
       return [];
     }
     return columnsActions.map((actions, columnIndex) =>
-      actions.map<EuiDataGridColumnCellAction>(
-        (action) =>
-          function ColumnCellAction({
-            Component,
-            rowIndex,
-            isExpanded,
-          }: EuiDataGridColumnCellActionProps) {
-            const nodeRef = useRef<HTMLElement | null>(null);
-            const extraContentNodeRef = useRef<HTMLDivElement | null>(null);
-
-            const { name, type } = fields[columnIndex];
-            // rowIndex refers to all pages, the row index relative to the page is needed in order to get the value
-            const pageRowIndex = rowIndex % fields[columnIndex].values.length;
-            const value = fields[columnIndex].values[pageRowIndex];
-
-            const actionContext: CellActionExecutionContext = {
-              field: { name, type, value },
-              trigger: { id: triggerId },
-              extraContentNodeRef,
-              nodeRef,
-              metadata: { ...metadata, isExpanded },
-            };
-
-            return (
-              <Component
-                buttonRef={() => nodeRef}
-                aria-label={action.getDisplayName(actionContext)}
-                title={action.getDisplayName(actionContext)}
-                data-test-subj={`dataGridColumnCellAction-${action.id}`}
-                iconType={action.getIconType(actionContext)!}
-                onClick={() => {
-                  action.execute(actionContext);
-                }}
-              >
-                {action.getDisplayName(actionContext)}
-                <div ref={() => extraContentNodeRef} />
-              </Component>
-            );
-          }
+      actions.map((action) =>
+        createColumnCellAction({ action, metadata, triggerId, field: fields[columnIndex] })
       )
     );
   }, [columnsActions, fields, loading, metadata, triggerId]);
 
   return columnsCellActions;
 };
+
+interface CreateColumnCellActionParams extends Pick<CellActionsProps, 'triggerId' | 'metadata'> {
+  field: BulkField;
+  action: CellAction;
+}
+const createColumnCellAction = ({
+  field,
+  action,
+  metadata,
+  triggerId,
+}: CreateColumnCellActionParams): EuiDataGridColumnCellAction =>
+  function ColumnCellAction({ Component, rowIndex }) {
+    const nodeRef = useRef<HTMLElement | null>(null);
+    const extraContentNodeRef = useRef<HTMLDivElement | null>(null);
+
+    const { name, type, values } = field;
+    // rowIndex refers to all pages, we need to use the row index relative to the page to get the value
+    const value = values[rowIndex % values.length];
+
+    const actionContext: CellActionExecutionContext = {
+      field: { name, type, value },
+      trigger: { id: triggerId },
+      extraContentNodeRef,
+      nodeRef,
+      metadata,
+    };
+
+    return (
+      <Component
+        buttonRef={() => nodeRef}
+        aria-label={action.getDisplayName(actionContext)}
+        title={action.getDisplayName(actionContext)}
+        data-test-subj={`dataGridColumnCellAction-${action.id}`}
+        iconType={action.getIconType(actionContext)!}
+        onClick={() => {
+          action.execute(actionContext);
+        }}
+      >
+        {action.getDisplayName(actionContext)}
+        <div ref={() => extraContentNodeRef} />
+      </Component>
+    );
+  };
