@@ -35,6 +35,7 @@ import type {
   AuthorizeAndRedactInternalBulkResolveParams,
   AuthorizeBulkCreateParams,
   AuthorizeBulkUpdateParams,
+  AuthorizeUpdateSpacesParams,
   InternalAuthorizeOptions,
 } from '@kbn/core-saved-objects-server/src/extensions/security';
 import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
@@ -333,6 +334,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       useSuccessOutcome,
     } = params.auditOptions || {};
 
+    // ToDo: get rid of this check and move it to the one authz method that requires this (close PIT)
     // If there are no actions to authorize then we can just add any audits for the sec actions
     // Example: SecurityAction.CLOSE_POINT_IN_TIME does not need authz, but we want an audit trail
     if (authzActions.size === 0) {
@@ -794,6 +796,59 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
           savedObject: result.saved_object,
         }),
       };
+    });
+  }
+
+  async authorizeUpdateSpaces(
+    params: AuthorizeUpdateSpacesParams
+  ): Promise<CheckAuthorizationResult<string> | undefined> {
+    const action = SecurityAction.UPDATE_OBJECTS_SPACES;
+    const { objects, spacesToAdd, spacesToRemove } = params;
+
+    if (params.objects.length === 0) {
+      throw new Error(
+        `No objects specified for ${
+          this.actionMap.get(action)?.authzAction ?? 'unknown'
+        } authorization`
+      );
+    }
+    const namespaceString = SavedObjectsUtils.namespaceIdToString(params.namespace);
+    const typesAndSpaces = new Map<string, Set<string>>();
+    const spacesToAuthorize = new Set<string>();
+    for (const obj of objects) {
+      const { type, existingNamespaces } = obj;
+
+      const spacesToEnforce =
+        typesAndSpaces.get(type) ?? new Set([...spacesToAdd, ...spacesToRemove, namespaceString]); // Always enforce authZ for the active space
+      typesAndSpaces.set(type, spacesToEnforce);
+
+      for (const space of spacesToEnforce) {
+        spacesToAuthorize.add(space);
+      }
+
+      for (const space of existingNamespaces ?? []) {
+        // Existing namespaces are included so we can later redact if necessary
+        // If this is a specific space, add it to the spaces we'll check privileges for (don't accidentally check for global privileges)
+        if (space === ALL_NAMESPACES_STRING) continue;
+        spacesToAuthorize.add(space);
+      }
+    }
+
+    const addToSpaces = spacesToAdd.length ? spacesToAdd : undefined;
+    const deleteFromSpaces = spacesToRemove.length ? spacesToRemove : undefined;
+    return await this.authorize({
+      // If a user tries to share/unshare an object to/from '*', they need to have 'share_to_space' privileges for the Global Resource (e.g.,
+      // All privileges for All Spaces).
+      actions: new Set([SecurityAction.UPDATE_OBJECTS_SPACES]),
+      types: new Set(typesAndSpaces.keys()),
+      spaces: spacesToAuthorize,
+      enforceMap: typesAndSpaces,
+      options: { allowGlobalResource: true },
+      auditOptions: {
+        objects,
+        addToSpaces,
+        deleteFromSpaces,
+      },
     });
   }
 }

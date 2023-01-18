@@ -1435,7 +1435,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       });
     });
 
-    test(`calls authorizeUpdate with correct parameters`, async () => {
+    test(`calls authorizeBulkUpdate with correct parameters`, async () => {
       setupAuthorizeUpdate(mockSecurityExt, 'fully_authorized');
 
       await bulkUpdateSuccess(client, repository, registry, [obj1, obj2], {
@@ -1443,12 +1443,6 @@ describe('SavedObjectsRepository Security Extension', () => {
       });
 
       expect(mockSecurityExt.authorizeBulkUpdate).toHaveBeenCalledTimes(1);
-      // const expectedActions = new Set([SecurityAction.BULK_UPDATE]);
-      // const expectedSpaces = new Set([namespace]);
-      // const expectedTypes = new Set([obj1.type, obj2.type]);
-      // const expectedEnforceMap = new Map<string, Set<string>>();
-      // expectedEnforceMap.set(obj1.type, new Set([namespace]));
-      // expectedEnforceMap.set(obj2.type, new Set([namespace]));
       const expectedNamespace = namespace;
       const expectedObjects = [
         {
@@ -1468,7 +1462,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       expect(actualObjects).toEqual(expectedObjects);
     });
 
-    test(`calls authorizeUpdate with object spaces`, async () => {
+    test(`calls authorizeBulkUpdate with object spaces`, async () => {
       const objA = {
         ...obj1,
         namespace: 'ns-1', // object namespace

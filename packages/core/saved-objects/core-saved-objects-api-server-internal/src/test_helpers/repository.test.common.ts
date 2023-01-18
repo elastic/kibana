@@ -53,6 +53,7 @@ import {
   AuthorizeAndRedactInternalBulkResolveParams,
   AuthorizeBulkCreateParams,
   AuthorizeBulkUpdateParams,
+  AuthorizeUpdateSpacesParams,
 } from '@kbn/core-saved-objects-server/src/extensions/security';
 import { mockGetSearchDsl } from '../lib/repository.test.mock';
 import { SavedObjectsRepository } from '../lib/repository';
@@ -298,6 +299,18 @@ export const setupAuthorizeBulkUpdate = (
 ) => {
   mockSecurityExt.authorizeBulkUpdate.mockImplementation(
     (params: AuthorizeBulkUpdateParams): Promise<CheckAuthorizationResult<string>> => {
+      if (status === 'unauthorized') throw enforceError;
+      return Promise.resolve({ status, typeMap: authMap });
+    }
+  );
+};
+
+export const setupAuthorizeUpdateSpaces = (
+  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>,
+  status: 'fully_authorized' | 'partially_authorized' | 'unauthorized'
+) => {
+  mockSecurityExt.authorizeUpdateSpaces.mockImplementation(
+    (params: AuthorizeUpdateSpacesParams): Promise<CheckAuthorizationResult<string>> => {
       if (status === 'unauthorized') throw enforceError;
       return Promise.resolve({ status, typeMap: authMap });
     }

@@ -340,18 +340,17 @@ export interface RedactNamespacesParams<T, A extends string> {
   typeMap: AuthorizationTypeMap<A>;
 }
 
-export interface AuthorizeCreateObject {
+export interface AuthorizeObject {
   type: string;
   id: string;
-  initialNamespaces?: string[];
   existingNamespaces?: string[];
 }
+export interface AuthorizeCreateObject extends AuthorizeObject {
+  initialNamespaces?: string[];
+}
 
-export interface AuthorizeUpdateObject {
-  type: string;
-  id: string;
+export interface AuthorizeUpdateObject extends AuthorizeObject {
   objectNamespace?: string;
-  existingNamespaces?: string[];
 }
 
 export interface AuthorizeBulkCreateParams {
@@ -382,6 +381,13 @@ export interface AuthorizeAndRedactMultiNamespaceReferencesParams {
 export interface AuthorizeAndRedactInternalBulkResolveParams<T> {
   namespace: string | undefined;
   objects: Array<SavedObjectsResolveResponse<T> | BulkResolveError>;
+}
+
+export interface AuthorizeUpdateSpacesParams {
+  namespace: string | undefined;
+  spacesToAdd: string[];
+  spacesToRemove: string[];
+  objects: AuthorizeObject[];
 }
 
 /**
@@ -433,6 +439,16 @@ export interface ISavedObjectsSecurityExtension {
   authorizeAndRedactInternalBulkResolve: <T = unknown>(
     params: AuthorizeAndRedactInternalBulkResolveParams<T>
   ) => Promise<Array<SavedObjectsResolveResponse<T> | BulkResolveError>>;
+
+  /**
+   * Performs authorization for the updateObjectsSpaces repository method
+   * @param params namespace, spacesToAdd, spacesToRemove, objects to authorize
+   * @returns CheckAuthorizationResult or undefined - the resulting authorization level and authorization map, undefined
+   * if the authorization action does not require an authorization check. (ToDo: remove this possibility for actions that are not applicable?)
+   */
+  authorizeUpdateSpaces: (
+    params: AuthorizeUpdateSpacesParams
+  ) => Promise<CheckAuthorizationResult<string> | undefined>;
 
   /**
    * Performs authorization (check & enforce) of actions on specified types in specified spaces.

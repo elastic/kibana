@@ -19,18 +19,18 @@ import type {
   SavedObjectsUpdateObjectsSpacesResponseObject,
 } from '@kbn/core-saved-objects-api-server';
 import {
-  SecurityAction,
   type ISavedObjectsSecurityExtension,
   type ISavedObjectTypeRegistry,
   type SavedObjectsRawDocSource,
 } from '@kbn/core-saved-objects-server';
-import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
+import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 import { SavedObjectsErrorHelpers, type DecoratedError } from '@kbn/core-saved-objects-common';
 import type {
   IndexMapping,
   SavedObjectsSerializer,
 } from '@kbn/core-saved-objects-base-server-internal';
 import type { SavedObject } from '@kbn/core-saved-objects-common';
+import { AuthorizeObject } from '@kbn/core-saved-objects-server/src/extensions/security';
 import {
   getBulkOperationError,
   getExpectedVersionProperties,
@@ -176,45 +176,65 @@ export async function updateObjectsSpaces({
     throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
   }
 
-  const namespaceString = SavedObjectsUtils.namespaceIdToString(namespace);
-  const addToSpaces = spacesToAdd.length ? spacesToAdd : undefined;
-  const deleteFromSpaces = spacesToRemove.length ? spacesToRemove : undefined;
-  const typesAndSpaces = new Map<string, Set<string>>();
-  const spacesToAuthorize = new Set<string>();
-  for (const { value } of validObjects) {
-    const { type, esRequestIndex: index } = value;
+  // const namespaceString = SavedObjectsUtils.namespaceIdToString(namespace);
+  // const addToSpaces = spacesToAdd.length ? spacesToAdd : undefined;
+  // const deleteFromSpaces = spacesToRemove.length ? spacesToRemove : undefined;
+  // const typesAndSpaces = new Map<string, Set<string>>();
+  // const spacesToAuthorize = new Set<string>();
+  // for (const { value } of validObjects) {
+  //   const { type, esRequestIndex: index } = value;
+  //   const preflightResult = index !== undefined ? bulkGetResponse?.body.docs[index] : undefined;
+
+  //   const spacesToEnforce =
+  //     typesAndSpaces.get(type) ?? new Set([...spacesToAdd, ...spacesToRemove, namespaceString]); // Always enforce authZ for the active space
+  //   typesAndSpaces.set(type, spacesToEnforce);
+  //   for (const space of spacesToEnforce) {
+  //     spacesToAuthorize.add(space);
+  //   }
+  //   // @ts-expect-error MultiGetHit._source is optional
+  //   for (const space of preflightResult?._source?.namespaces ?? []) {
+  //     // Existing namespaces are included so we can later redact if necessary
+  //     // If this is a specific space, add it to the spaces we'll check privileges for (don't accidentally check for global privileges)
+  //     if (space === ALL_NAMESPACES_STRING) continue;
+  //     spacesToAuthorize.add(space);
+  //   }
+  // }
+
+  // const authorizationResult = await securityExtension?.authorize({
+  //   // If a user tries to share/unshare an object to/from '*', they need to have 'share_to_space' privileges for the Global Resource (e.g.,
+  //   // All privileges for All Spaces).
+  //   actions: new Set([SecurityAction.UPDATE_OBJECTS_SPACES]),
+  //   types: new Set(typesAndSpaces.keys()),
+  //   spaces: spacesToAuthorize,
+  //   enforceMap: typesAndSpaces,
+  //   options: { allowGlobalResource: true },
+  //   auditOptions: {
+  //     objects: validObjects.map((obj) => {
+  //       return { type: obj.value.type, id: obj.value.id };
+  //     }),
+  //     addToSpaces,
+  //     deleteFromSpaces,
+  //   },
+  // });
+
+  const authObjects: AuthorizeObject[] = validObjects.map((element) => {
+    const { type, id, esRequestIndex: index } = element.value;
     const preflightResult = index !== undefined ? bulkGetResponse?.body.docs[index] : undefined;
+    return {
+      type,
+      id,
+      // @ts-expect-error MultiGetHit._source is optional
+      existingNamespaces: preflightResult?._source?.namespaces,
+    };
+  });
 
-    const spacesToEnforce =
-      typesAndSpaces.get(type) ?? new Set([...spacesToAdd, ...spacesToRemove, namespaceString]); // Always enforce authZ for the active space
-    typesAndSpaces.set(type, spacesToEnforce);
-    for (const space of spacesToEnforce) {
-      spacesToAuthorize.add(space);
-    }
-    // @ts-expect-error MultiGetHit._source is optional
-    for (const space of preflightResult?._source?.namespaces ?? []) {
-      // Existing namespaces are included so we can later redact if necessary
-      // If this is a specific space, add it to the spaces we'll check privileges for (don't accidentally check for global privileges)
-      if (space === ALL_NAMESPACES_STRING) continue;
-      spacesToAuthorize.add(space);
-    }
-  }
-
-  const authorizationResult = await securityExtension?.authorize({
-    // If a user tries to share/unshare an object to/from '*', they need to have 'share_to_space' privileges for the Global Resource (e.g.,
-    // All privileges for All Spaces).
-    actions: new Set([SecurityAction.UPDATE_OBJECTS_SPACES]),
-    types: new Set(typesAndSpaces.keys()),
-    spaces: spacesToAuthorize,
-    enforceMap: typesAndSpaces,
-    options: { allowGlobalResource: true },
-    auditOptions: {
-      objects: validObjects.map((obj) => {
-        return { type: obj.value.type, id: obj.value.id };
-      }),
-      addToSpaces,
-      deleteFromSpaces,
-    },
+  // If a user tries to share/unshare an object to/from '*', they need to have 'share_to_space' privileges for the Global Resource (e.g.,
+  // All privileges for All Spaces).
+  const authorizationResult = await securityExtension?.authorizeUpdateSpaces({
+    namespace,
+    spacesToAdd,
+    spacesToRemove,
+    objects: authObjects,
   });
 
   const time = new Date().toISOString();

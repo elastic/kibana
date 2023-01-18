@@ -8,6 +8,7 @@
 import type { BulkResolveError } from '@kbn/core-saved-objects-common';
 import type { AuthorizeCreateObject, AuthorizeUpdateObject } from '@kbn/core-saved-objects-server';
 import { AuditAction, SecurityAction } from '@kbn/core-saved-objects-server';
+import type { AuthorizeObject } from '@kbn/core-saved-objects-server/src/extensions/security';
 import type {
   EcsEventOutcome,
   SavedObjectReferenceWithContext,
@@ -2801,7 +2802,7 @@ describe('#authorizeAndRedactMultiNamespaceReferences', () => {
         ['login:']: { authorizedSpaces: ['x', 'space-1', 'space-2'] },
       });
 
-    test('returns empty arry when no objects are provided`', async () => {
+    test('returns empty array when no objects are provided`', async () => {
       const { securityExtension } = setup();
       const emptyObjects: SavedObjectReferenceWithContext[] = [];
 
@@ -3281,7 +3282,7 @@ describe('#authorizeAndRedactInternalBulkResolve', () => {
       ['login:']: { authorizedSpaces: ['x', 'foo'] },
     });
 
-  test('returns empty arry when no objects are provided`', async () => {
+  test('returns empty array when no objects are provided`', async () => {
     const { securityExtension } = setup();
     const emptyObjects: Array<SavedObjectsResolveResponse<unknown> | BulkResolveError> = [];
 
@@ -3483,5 +3484,525 @@ describe('#authorizeAndRedactInternalBulkResolve', () => {
       },
       message: `Failed attempt to resolve saved objects`,
     });
+  });
+});
+
+describe('#authorizeUpdateSpaces', () => {
+  const namespace = 'x';
+
+  const multiSpaceObj1 = {
+    type: 'a',
+    id: '1',
+    existingNamespaces: ['add_space_1', 'add_space_2'],
+  };
+  const multiSpaceObj2 = {
+    type: 'b',
+    id: '2',
+    existingNamespaces: ['*'],
+  };
+  const multiSpaceObj3 = {
+    type: 'a',
+    id: '3',
+    existingNamespaces: ['rem_space_2', 'add_space_2'],
+  };
+  const multiSpaceObj4 = {
+    type: 'b',
+    id: '4',
+    existingNamespaces: ['foo', 'add_space_1'],
+  };
+
+  const objects = [multiSpaceObj1, multiSpaceObj2, multiSpaceObj3, multiSpaceObj4];
+
+  beforeEach(() => {
+    checkAuthorizationSpy.mockClear();
+    enforceAuthorizationSpy.mockClear();
+    redactNamespacesSpy.mockClear();
+    authorizeSpy.mockClear();
+    auditHelperSpy.mockClear();
+    addAuditEventSpy.mockClear();
+  });
+
+  const actionString = 'share_to_space';
+
+  const spacesToAdd = ['add_space_1', 'add_space_2'];
+  const spacesToRemove = ['rem_space_1', 'rem_space_2'];
+
+  const fullyAuthorizedCheckPrivilegesResponse = {
+    hasAllRequested: true,
+    privileges: {
+      kibana: [
+        { privilege: 'mock-saved_object:a/share_to_space', authorized: true },
+        { privilege: 'login:', authorized: true },
+        {
+          resource: 'x',
+          privilege: 'mock-saved_object:b/share_to_space',
+          authorized: true,
+        },
+        {
+          resource: 'add_space_1',
+          privilege: 'mock-saved_object:b/share_to_space',
+          authorized: true,
+        },
+        {
+          resource: 'add_space_2',
+          privilege: 'mock-saved_object:b/share_to_space',
+          authorized: true,
+        },
+        {
+          resource: 'rem_space_1',
+          privilege: 'mock-saved_object:b/share_to_space',
+          authorized: true,
+        },
+        {
+          resource: 'rem_space_2',
+          privilege: 'mock-saved_object:b/share_to_space',
+          authorized: true,
+        },
+      ],
+    },
+  } as CheckPrivilegesResponse;
+
+  const expectedTypes = new Set(objects.map((obj) => obj.type));
+
+  const expectedActions = new Set([SecurityAction.UPDATE_OBJECTS_SPACES]);
+  const expectedSpaces = new Set([...spacesToAdd, ...spacesToRemove, namespace, 'foo']);
+
+  const expectedEnforceMap = new Map([
+    [multiSpaceObj1.type, new Set([...spacesToAdd, ...spacesToRemove, namespace])],
+    [multiSpaceObj2.type, new Set([...spacesToAdd, ...spacesToRemove, namespace])],
+  ]);
+
+  const expectedTypeMap = new Map()
+    .set('a', {
+      share_to_space: { isGloballyAuthorized: true, authorizedSpaces: [] },
+      ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+    })
+    .set('b', {
+      share_to_space: { authorizedSpaces: ['x', ...spacesToAdd, ...spacesToRemove] },
+      ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+    });
+
+  test('throws an error when `objects` is empty', async () => {
+    const { securityExtension, checkPrivileges } = setup();
+    const emptyObjects: AuthorizeObject[] = [];
+
+    await expect(
+      securityExtension.authorizeUpdateSpaces({
+        namespace,
+        spacesToAdd,
+        spacesToRemove,
+        objects: emptyObjects,
+      })
+    ).rejects.toThrowError('No objects specified for share_to_space authorization');
+    expect(checkPrivileges).not.toHaveBeenCalled();
+  });
+
+  test('throws an error when `namespace` is an empty string', async () => {
+    const { securityExtension, checkPrivileges } = setup();
+    checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
+
+    await expect(
+      securityExtension.authorizeUpdateSpaces({
+        namespace: '',
+        spacesToAdd,
+        spacesToRemove,
+        objects,
+      })
+    ).rejects.toThrowError('namespace cannot be an empty string');
+    expect(checkPrivileges).not.toHaveBeenCalled();
+  });
+
+  test('throws an error when checkAuthorization fails', async () => {
+    const { securityExtension, checkPrivileges } = setup();
+    checkPrivileges.mockRejectedValue(new Error('Oh no!'));
+
+    await expect(
+      securityExtension.authorizeUpdateSpaces({ namespace, spacesToAdd, spacesToRemove, objects })
+    ).rejects.toThrowError('Oh no!');
+  });
+
+  test(`calls authorize methods with expected actions, types, spaces, and enforce map`, async () => {
+    const { securityExtension, checkPrivileges } = setup();
+    checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
+
+    await securityExtension.authorizeUpdateSpaces({
+      namespace,
+      spacesToAdd,
+      spacesToRemove,
+      objects,
+    });
+
+    expect(authorizeSpy).toHaveBeenCalledTimes(1);
+    expect(authorizeSpy).toHaveBeenCalledWith({
+      actions: expectedActions,
+      types: expectedTypes,
+      spaces: expectedSpaces,
+      enforceMap: expectedEnforceMap,
+      options: { allowGlobalResource: true },
+      auditOptions: {
+        objects,
+        addToSpaces: spacesToAdd,
+        deleteFromSpaces: spacesToRemove,
+      },
+    });
+
+    expect(checkAuthorizationSpy).toHaveBeenCalledTimes(1);
+    expect(checkAuthorizationSpy).toHaveBeenCalledWith({
+      actions: new Set([actionString]),
+      spaces: expectedSpaces,
+      types: expectedTypes,
+      options: { allowGlobalResource: true },
+    });
+
+    expect(checkPrivileges).toHaveBeenCalledTimes(1);
+    expect(checkPrivileges).toHaveBeenCalledWith(
+      [
+        `mock-saved_object:${multiSpaceObj1.type}/${actionString}`,
+        `mock-saved_object:${multiSpaceObj2.type}/${actionString}`,
+        'login:',
+      ],
+      [...expectedSpaces]
+    );
+
+    expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
+    expect(enforceAuthorizationSpy).toHaveBeenCalledWith({
+      action: SecurityAction.UPDATE_OBJECTS_SPACES,
+      typesAndSpaces: expectedEnforceMap,
+      typeMap: expectedTypeMap,
+      auditOptions: { objects, addToSpaces: spacesToAdd, deleteFromSpaces: spacesToRemove },
+    });
+  });
+
+  test(`calls authorize methods with '*' when spacesToAdd includes '*'`, async () => {
+    const { securityExtension, checkPrivileges } = setup();
+    checkPrivileges.mockResolvedValue({
+      hasAllRequested: true,
+      privileges: {
+        kibana: [
+          { privilege: 'mock-saved_object:a/share_to_space', authorized: true },
+          { privilege: 'mock-saved_object:b/share_to_space', authorized: true },
+          { privilege: 'login:', authorized: true },
+        ],
+      },
+    } as CheckPrivilegesResponse);
+
+    await securityExtension.authorizeUpdateSpaces({
+      namespace,
+      spacesToAdd: ['*'],
+      spacesToRemove,
+      objects,
+    });
+
+    const spaces = new Set(['*', ...spacesToRemove, 'x', 'add_space_1', 'add_space_2', 'foo']);
+    const enforceMap = new Map([
+      [multiSpaceObj1.type, new Set(['*', ...spacesToRemove, namespace])],
+      [multiSpaceObj2.type, new Set(['*', ...spacesToRemove, namespace])],
+    ]);
+
+    expect(authorizeSpy).toHaveBeenCalledTimes(1);
+    expect(authorizeSpy).toHaveBeenCalledWith({
+      actions: expectedActions,
+      types: expectedTypes,
+      spaces,
+      enforceMap,
+      options: { allowGlobalResource: true },
+      auditOptions: {
+        objects,
+        addToSpaces: ['*'],
+        deleteFromSpaces: spacesToRemove,
+      },
+    });
+
+    expect(checkAuthorizationSpy).toHaveBeenCalledTimes(1);
+    expect(checkAuthorizationSpy).toHaveBeenCalledWith({
+      actions: new Set([actionString]),
+      spaces,
+      types: expectedTypes,
+      options: { allowGlobalResource: true },
+    });
+
+    expect(checkPrivileges).toHaveBeenCalledTimes(1);
+    expect(checkPrivileges).toHaveBeenCalledWith(
+      [
+        `mock-saved_object:${multiSpaceObj1.type}/${actionString}`,
+        `mock-saved_object:${multiSpaceObj2.type}/${actionString}`,
+        'login:',
+      ],
+      [...spaces]
+    );
+
+    expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
+    expect(enforceAuthorizationSpy).toHaveBeenCalledWith({
+      action: SecurityAction.UPDATE_OBJECTS_SPACES,
+      typesAndSpaces: enforceMap,
+      typeMap: new Map()
+        .set('a', {
+          share_to_space: { isGloballyAuthorized: true, authorizedSpaces: [] },
+          ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+        })
+        .set('b', {
+          share_to_space: { isGloballyAuthorized: true, authorizedSpaces: [] },
+          ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+        }),
+      auditOptions: { objects, addToSpaces: ['*'], deleteFromSpaces: spacesToRemove },
+    });
+  });
+
+  test(`calls authorize methods with '*' when spacesToRemove includes '*'`, async () => {
+    const { securityExtension, checkPrivileges } = setup();
+    checkPrivileges.mockResolvedValue({
+      hasAllRequested: true,
+      privileges: {
+        kibana: [
+          { privilege: 'mock-saved_object:a/share_to_space', authorized: true },
+          { privilege: 'mock-saved_object:b/share_to_space', authorized: true },
+          { privilege: 'login:', authorized: true },
+        ],
+      },
+    } as CheckPrivilegesResponse);
+
+    await securityExtension.authorizeUpdateSpaces({
+      namespace,
+      spacesToAdd,
+      spacesToRemove: ['*'],
+      objects,
+    });
+
+    const spaces = new Set([...spacesToAdd, '*', 'x', 'rem_space_2', 'foo']);
+    const enforceMap = new Map([
+      [multiSpaceObj1.type, new Set([...spacesToAdd, '*', namespace])],
+      [multiSpaceObj2.type, new Set([...spacesToAdd, '*', namespace])],
+    ]);
+
+    expect(authorizeSpy).toHaveBeenCalledTimes(1);
+    expect(authorizeSpy).toHaveBeenCalledWith({
+      actions: expectedActions,
+      types: expectedTypes,
+      spaces,
+      enforceMap,
+      options: { allowGlobalResource: true },
+      auditOptions: {
+        objects,
+        addToSpaces: spacesToAdd,
+        deleteFromSpaces: ['*'],
+      },
+    });
+
+    expect(checkAuthorizationSpy).toHaveBeenCalledTimes(1);
+    expect(checkAuthorizationSpy).toHaveBeenCalledWith({
+      actions: new Set([actionString]),
+      spaces,
+      types: expectedTypes,
+      options: { allowGlobalResource: true },
+    });
+
+    expect(checkPrivileges).toHaveBeenCalledTimes(1);
+    expect(checkPrivileges).toHaveBeenCalledWith(
+      [
+        `mock-saved_object:${multiSpaceObj1.type}/${actionString}`,
+        `mock-saved_object:${multiSpaceObj2.type}/${actionString}`,
+        'login:',
+      ],
+      [...spaces]
+    );
+
+    expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
+    expect(enforceAuthorizationSpy).toHaveBeenCalledWith({
+      action: SecurityAction.UPDATE_OBJECTS_SPACES,
+      typesAndSpaces: enforceMap,
+      typeMap: new Map()
+        .set('a', {
+          share_to_space: { isGloballyAuthorized: true, authorizedSpaces: [] },
+          ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+        })
+        .set('b', {
+          share_to_space: { isGloballyAuthorized: true, authorizedSpaces: [] },
+          ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+        }),
+      auditOptions: { objects, addToSpaces: spacesToAdd, deleteFromSpaces: ['*'] },
+    });
+  });
+
+  test(`returns result when fully authorized`, async () => {
+    const { securityExtension, checkPrivileges } = setup();
+    checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
+
+    const result = await securityExtension.authorizeUpdateSpaces({
+      namespace,
+      spacesToAdd,
+      spacesToRemove,
+      objects,
+    });
+    expect(result).toEqual({
+      status: 'fully_authorized',
+      typeMap: expectedTypeMap,
+    });
+    expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
+  });
+
+  test(`returns result when partially authorized`, async () => {
+    const { securityExtension, checkPrivileges } = setup();
+    checkPrivileges.mockResolvedValue({
+      hasAllRequested: false,
+      privileges: {
+        kibana: [
+          { privilege: 'mock-saved_object:a/share_to_space', authorized: true },
+          { privilege: 'login:', authorized: true },
+          {
+            resource: 'x',
+            privilege: 'mock-saved_object:b/share_to_space',
+            authorized: true,
+          },
+          {
+            resource: 'foo',
+            privilege: 'mock-saved_object:b/share_to_space',
+            authorized: false,
+          },
+          {
+            resource: 'add_space_1',
+            privilege: 'mock-saved_object:b/share_to_space',
+            authorized: true,
+          },
+          {
+            resource: 'add_space_2',
+            privilege: 'mock-saved_object:b/share_to_space',
+            authorized: true,
+          },
+          {
+            resource: 'rem_space_1',
+            privilege: 'mock-saved_object:b/share_to_space',
+            authorized: true,
+          },
+          {
+            resource: 'rem_space_2',
+            privilege: 'mock-saved_object:b/share_to_space',
+            authorized: true,
+          },
+        ],
+      },
+    } as CheckPrivilegesResponse);
+
+    const result = await securityExtension.authorizeUpdateSpaces({
+      namespace,
+      spacesToAdd,
+      spacesToRemove,
+      objects,
+    });
+    expect(result).toEqual({
+      status: 'partially_authorized',
+      typeMap: new Map()
+        .set(multiSpaceObj1.type, {
+          share_to_space: { isGloballyAuthorized: true, authorizedSpaces: [] },
+          ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+        })
+        .set(multiSpaceObj2.type, {
+          share_to_space: { authorizedSpaces: ['x', ...spacesToAdd, ...spacesToRemove] },
+          ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+        }),
+    });
+    expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
+  });
+
+  test(`adds an audit event per object when successful`, async () => {
+    const { securityExtension, checkPrivileges, auditLogger } = setup();
+    checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
+
+    await securityExtension.authorizeUpdateSpaces({
+      namespace,
+      spacesToAdd,
+      spacesToRemove,
+      objects,
+    });
+
+    expect(auditHelperSpy).toHaveBeenCalledTimes(1);
+    expect(addAuditEventSpy).toHaveBeenCalledTimes(objects.length);
+    expect(auditLogger.log).toHaveBeenCalledTimes(objects.length);
+    let i = 1;
+    for (const obj of objects) {
+      expect(auditLogger.log).toHaveBeenNthCalledWith(i++, {
+        error: undefined,
+        event: {
+          action: AuditAction.UPDATE_OBJECTS_SPACES,
+          category: ['database'],
+          outcome: 'unknown',
+          type: ['change'],
+        },
+        kibana: {
+          add_to_spaces: undefined,
+          delete_from_spaces: undefined,
+          saved_object: { type: obj.type, id: obj.id },
+        },
+        message: `User is updating spaces of ${obj.type} [id=${obj.id}]`,
+      });
+    }
+  });
+
+  test(`throws when unauthorized`, async () => {
+    const { securityExtension, checkPrivileges } = setup();
+    checkPrivileges.mockResolvedValue({
+      hasAllRequested: false,
+      privileges: {
+        kibana: [
+          { privilege: 'mock-saved_object:a/share_to_space', authorized: true },
+          { privilege: 'login:', authorized: true },
+        ],
+      },
+    } as CheckPrivilegesResponse);
+
+    await expect(
+      securityExtension.authorizeUpdateSpaces({
+        namespace,
+        spacesToAdd,
+        spacesToRemove,
+        objects,
+      })
+    ).rejects.toThrow(`Unable to share_to_space ${multiSpaceObj2.type}`);
+    expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
+  });
+
+  test(`adds an audit event per object when unauthorized`, async () => {
+    const { securityExtension, checkPrivileges, auditLogger } = setup();
+    checkPrivileges.mockResolvedValue({
+      hasAllRequested: false,
+      privileges: {
+        kibana: [
+          { privilege: 'mock-saved_object:a/share_to_space', authorized: false },
+          { privilege: 'login:', authorized: true },
+        ],
+      },
+    } as CheckPrivilegesResponse);
+
+    await expect(
+      securityExtension.authorizeUpdateSpaces({
+        namespace,
+        spacesToAdd,
+        spacesToRemove,
+        objects,
+      })
+    ).rejects.toThrow(`Unable to share_to_space ${multiSpaceObj1.type},${multiSpaceObj2.type}`);
+    expect(auditHelperSpy).toHaveBeenCalledTimes(1);
+    expect(addAuditEventSpy).toHaveBeenCalledTimes(objects.length);
+    expect(auditLogger.log).toHaveBeenCalledTimes(objects.length);
+    let i = 1;
+    for (const obj of objects) {
+      expect(auditLogger.log).toHaveBeenNthCalledWith(i++, {
+        error: {
+          code: 'Error',
+          message: `Unable to share_to_space ${multiSpaceObj1.type},${multiSpaceObj2.type}`,
+        },
+        event: {
+          action: AuditAction.UPDATE_OBJECTS_SPACES,
+          category: ['database'],
+          outcome: 'failure',
+          type: ['change'],
+        },
+        kibana: {
+          add_to_spaces: spacesToAdd,
+          delete_from_spaces: spacesToRemove,
+          saved_object: { type: obj.type, id: obj.id },
+        },
+        message: `Failed attempt to update spaces of ${obj.type} [id=${obj.id}]`,
+      });
+    }
   });
 });
