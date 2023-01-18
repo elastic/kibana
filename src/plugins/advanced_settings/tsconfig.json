@@ -20,6 +20,13 @@
     "@kbn/i18n-react",
     "@kbn/expect",
     "@kbn/monaco",
+    "@kbn/core-ui-settings-browser-mocks",
+    "@kbn/core-application-browser",
+    "@kbn/core-ui-settings-browser",
+    "@kbn/core-doc-links-browser",
+    "@kbn/core-notifications-browser",
+    "@kbn/core-theme-browser",
+    "@kbn/core-ui-settings-common",
   ],
   "exclude": [
     "target/**/*",
