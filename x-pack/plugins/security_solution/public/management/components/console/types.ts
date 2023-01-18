@@ -231,6 +231,17 @@ export interface CommandArgumentValueSelectorProps<TSelection = any> {
   valueText: string;
 
   /**
+   * The name of the Argument
+   */
+  argName: string;
+
+  /**
+   * The instance of the argument in the current command. This is a zero-based number indicating
+   * which instance of the argument is being rendered.
+   */
+  argInstance: number;
+
+  /**
    * callback for the Value Selector to call and provide the selection value.
    * This selection value will then be passed along with the argument to the command execution
    * component.

@@ -122,6 +122,8 @@ export const ArgumentSelectorWrapper = memo<ArgumentSelectorWrapperProps>(
               <SelectorComponent
                 value={value}
                 valueText={valueText ?? ''}
+                argName={argName}
+                argInstance={argInstance}
                 onChange={handleSelectorComponentOnChange}
               />
             </div>
