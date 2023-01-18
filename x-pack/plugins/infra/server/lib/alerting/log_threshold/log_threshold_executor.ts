@@ -24,6 +24,8 @@ import {
 } from '@kbn/alerting-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 
+import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import { ParsedExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
 import {
   RuleParams,
   ruleParamsRT,
@@ -62,8 +64,6 @@ import {
   getReasonMessageForUngroupedCountAlert,
   getReasonMessageForUngroupedRatioAlert,
 } from './reason_formatters';
-import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
-import { ParsedExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
 
 export type LogThresholdActionGroups = ActionGroupIdsOf<typeof FIRED_ACTIONS>;
 export type LogThresholdRuleTypeParams = RuleParams;
@@ -487,7 +487,7 @@ const getReducedGroupByResults = (
       reducedGroupByResults.push({
         name: groupName,
         documentCount: groupBucket.doc_count,
-        context:additionalContextHits?.[0]?._source,
+        context: additionalContextHits?.[0]?._source,
       });
     }
   } else {
@@ -1032,7 +1032,9 @@ const processRecoveredAlerts = async ({
   spaceId: string;
   startedAt: Date;
   validatedParams: RuleParams;
-  getAlertByAlertUuid: (alertUuid: string) => Promise<Partial<ParsedTechnicalFields & ParsedExperimentalFields> | null> | null;
+  getAlertByAlertUuid: (
+    alertUuid: string
+  ) => Promise<Partial<ParsedTechnicalFields & ParsedExperimentalFields> | null> | null;
 }) => {
   const groupByKeysObjectForRecovered = getGroupByObject(
     validatedParams.groupBy,
@@ -1101,7 +1103,8 @@ export const getIncludeSet = (
   validPrefix: string[]
 ): Set<string> => {
   return new Set<string>(
-    groupBy?.map((currentGroupBy) => currentGroupBy.split('.')[0])
+    groupBy
+      ?.map((currentGroupBy) => currentGroupBy.split('.')[0])
       .filter((groupByPrefix) => validPrefix.includes(groupByPrefix))
   );
 };
