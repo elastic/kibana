@@ -22,10 +22,14 @@ import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 
 import type { Agent, AgentPolicy } from '../../../../../types';
 import { useKibanaVersion } from '../../../../../hooks';
-import { isAgentUpgradeable } from '../../../../../services';
+import {
+  ExperimentalFeaturesService,
+  formatBytes,
+  isAgentUpgradeable,
+} from '../../../../../services';
 import { AgentPolicySummaryLine } from '../../../../../components';
 import { AgentHealth } from '../../../components';
-import { Tags } from '../../../agent_list_page/components/tags';
+import { Tags } from '../../../components/tags';
 
 // Allows child text to be truncated
 const FlexItemWithMinWidth = styled(EuiFlexItem)`
@@ -37,12 +41,34 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
   agentPolicy?: AgentPolicy;
 }> = memo(({ agent, agentPolicy }) => {
   const kibanaVersion = useKibanaVersion();
+  const { displayAgentMetrics } = ExperimentalFeaturesService.get();
 
   return (
     <EuiPanel>
       <EuiDescriptionList compressed>
         <EuiFlexGroup direction="column" gutterSize="m">
           {[
+            ...(displayAgentMetrics
+              ? [
+                  {
+                    title: i18n.translate('xpack.fleet.agentDetails.cpuLabel', {
+                      defaultMessage: 'CPU',
+                    }),
+                    description:
+                      agent.metrics?.cpu_avg && agent.metrics?.cpu_avg !== 0
+                        ? agent.metrics?.cpu_avg
+                        : 'N/A',
+                  },
+                  {
+                    title: i18n.translate('xpack.fleet.agentDetails.memoryLabel', {
+                      defaultMessage: 'Memory',
+                    }),
+                    description: agent.metrics?.memory_size_byte_avg
+                      ? formatBytes(agent.metrics?.memory_size_byte_avg)
+                      : 'N/A',
+                  },
+                ]
+              : []),
             {
               title: i18n.translate('xpack.fleet.agentDetails.statusLabel', {
                 defaultMessage: 'Status',
