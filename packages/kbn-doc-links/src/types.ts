@@ -109,7 +109,7 @@ export interface DocLinks {
   };
   readonly enterpriseSearch: {
     readonly apiKeys: string;
-    readonly behaviouralAnalyticsEvents: string;
+    readonly behavioralAnalyticsEvents: string;
     readonly bulkApi: string;
     readonly configuration: string;
     readonly connectors: string;

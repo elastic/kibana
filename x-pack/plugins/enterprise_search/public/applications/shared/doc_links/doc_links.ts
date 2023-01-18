@@ -266,7 +266,7 @@ class DocLinks {
     this.appSearchWebCrawler = docLinks.links.appSearch.webCrawler;
     this.appSearchWebCrawlerEventLogs = docLinks.links.appSearch.webCrawlerEventLogs;
     this.appSearchWebCrawlerReference = docLinks.links.appSearch.webCrawlerReference;
-    this.behavioralAnalyticsEvents = docLinks.links.enterpriseSearch.behaviouralAnalyticsEvents;
+    this.behavioralAnalyticsEvents = docLinks.links.enterpriseSearch.behavioralAnalyticsEvents;
     this.bulkApi = docLinks.links.enterpriseSearch.bulkApi;
     this.clientsGoIndex = docLinks.links.clients.goIndex;
     this.clientsGuide = docLinks.links.clients.guide;

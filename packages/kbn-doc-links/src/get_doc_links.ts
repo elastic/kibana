@@ -124,7 +124,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     },
     enterpriseSearch: {
       apiKeys: `${KIBANA_DOCS}api-keys.html`,
-      behaviouralAnalyticsEvents: `${ENTERPRISE_SEARCH_DOCS}analytics-events.html`,
+      behavioralAnalyticsEvents: `${ENTERPRISE_SEARCH_DOCS}analytics-events.html`,
       bulkApi: `${ELASTICSEARCH_DOCS}docs-bulk.html`,
       configuration: `${ENTERPRISE_SEARCH_DOCS}configuration.html`,
       connectors: `${ENTERPRISE_SEARCH_DOCS}connectors.html`,
