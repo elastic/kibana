@@ -1116,6 +1116,42 @@
       }
     }
   },
+  "rules-settings": {
+    "properties": {
+      "flapping": {
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "index": false
+          },
+          "lookBackWindow": {
+            "type": "long",
+            "index": false
+          },
+          "statusChangeThreshold": {
+            "type": "long",
+            "index": false
+          },
+          "createdBy": {
+            "type": "keyword",
+            "index": false
+          },
+          "updatedBy": {
+            "type": "keyword",
+            "index": false
+          },
+          "createdAt": {
+            "type": "date",
+            "index": false
+          },
+          "updatedAt": {
+            "type": "date",
+            "index": false
+          }
+        }
+      }
+    }
+  },
   "search": {
     "properties": {
       "columns": {
@@ -1959,6 +1995,19 @@
           "connector": {
             "properties": {
               "type": {
+                "type": "keyword"
+              }
+            }
+          },
+          "comment": {
+            "properties": {
+              "type": {
+                "type": "keyword"
+              },
+              "externalReferenceAttachmentTypeId": {
+                "type": "keyword"
+              },
+              "persistableStateAttachmentTypeId": {
                 "type": "keyword"
               }
             }
