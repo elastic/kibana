@@ -27,14 +27,23 @@ import { HeaderSection } from '../../../../common/components/header_section';
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
 import * as i18n from './translations';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
-import type { HostRiskScore, UserRiskScore } from '../../../../../common/search_strategy';
+import type {
+  HostRiskScore,
+  RiskScoreEntity,
+  UserRiskScore,
+} from '../../../../../common/search_strategy';
 import { isUserRiskScore } from '../../../../../common/search_strategy';
+import { useSpaceId } from '../../../../common/hooks/use_space_id';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
+import { getRiskScoreOverTimeAreaAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/risk_scores/risk_score_overtime_area';
 
 export interface RiskScoreOverTimeProps {
   from: string;
   to: string;
   loading: boolean;
   riskScore?: Array<HostRiskScore | UserRiskScore>;
+  riskEntity: RiskScoreEntity;
   queryId: string;
   title: string;
   toggleStatus: boolean;
@@ -63,6 +72,7 @@ const RiskScoreOverTimeComponent: React.FC<RiskScoreOverTimeProps> = ({
   riskScore,
   loading,
   queryId,
+  riskEntity,
   title,
   toggleStatus,
   toggleQuery,
@@ -87,7 +97,15 @@ const RiskScoreOverTimeComponent: React.FC<RiskScoreOverTimeProps> = ({
         .reverse() ?? [],
     [riskScore]
   );
-
+  const spaceId = useSpaceId();
+  const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
+  const timerange = useMemo(
+    () => ({
+      from,
+      to,
+    }),
+    [from, to]
+  );
   return (
     <InspectButtonContainer>
       <EuiPanel hasBorder data-test-subj="RiskScoreOverTime">
@@ -100,7 +118,7 @@ const RiskScoreOverTimeComponent: React.FC<RiskScoreOverTimeProps> = ({
               toggleStatus={toggleStatus}
             />
           </EuiFlexItem>
-          {toggleStatus && (
+          {toggleStatus && !isChartEmbeddablesEnabled && (
             <EuiFlexItem grow={false}>
               <InspectButton queryId={queryId} title={title} />
             </EuiFlexItem>
@@ -110,84 +128,96 @@ const RiskScoreOverTimeComponent: React.FC<RiskScoreOverTimeProps> = ({
         {toggleStatus && (
           <EuiFlexGroup gutterSize="none" direction="column">
             <EuiFlexItem grow={1}>
-              <div style={{ height: DEFAULT_CHART_HEIGHT }}>
-                {loading ? (
-                  <LoadingChart size="l" data-test-subj="RiskScoreOverTime-loading" />
-                ) : (
-                  <Chart>
-                    <Settings
-                      {...chartDefaultSettings}
-                      theme={theme}
-                      tooltip={{
-                        headerFormatter,
-                      }}
-                    />
-                    <Axis
-                      id="bottom"
-                      position={Position.Bottom}
-                      tickFormat={dataTimeFormatter}
-                      showGridLines
-                      gridLine={{
-                        strokeWidth: 1,
-                        opacity: 1,
-                        dash: [3, 5],
-                      }}
-                    />
-                    <Axis
-                      domain={{
-                        min: 0,
-                        max: 100,
-                      }}
-                      id="left"
-                      position={Position.Left}
-                      ticks={3}
-                      style={{
-                        tickLine: {
-                          visible: false,
-                        },
-                        tickLabel: {
-                          padding: 10,
-                        },
-                      }}
-                    />
-                    <LineSeries
-                      id="RiskOverTime"
-                      name={i18n.RISK_SCORE}
-                      xScaleType={ScaleType.Time}
-                      yScaleType={ScaleType.Linear}
-                      xAccessor="x"
-                      yAccessors={['y']}
-                      timeZone={timeZone}
-                      data={graphData}
-                      tickFormat={scoreFormatter}
-                    />
-                    <LineAnnotation
-                      id="RiskOverTime_annotation"
-                      domainType={AnnotationDomainType.YDomain}
-                      dataValues={[
-                        {
-                          dataValue: RISKY_THRESHOLD,
-                          details: `${RISKY_THRESHOLD}`,
-                          header: i18n.RISK_THRESHOLD,
-                        },
-                      ]}
-                      markerPosition="left"
-                      style={{
-                        line: {
+              {isChartEmbeddablesEnabled && spaceId ? (
+                <VisualizationEmbeddable
+                  applyGlobalQueriesAndFilters={false}
+                  timerange={timerange}
+                  getLensAttributes={getRiskScoreOverTimeAreaAttributes}
+                  stackByField={riskEntity}
+                  id={`${queryId}-embeddable`}
+                  height="180px"
+                  extraOptions={{ spaceId }}
+                />
+              ) : (
+                <div style={{ height: DEFAULT_CHART_HEIGHT }}>
+                  {loading ? (
+                    <LoadingChart size="l" data-test-subj="RiskScoreOverTime-loading" />
+                  ) : (
+                    <Chart>
+                      <Settings
+                        {...chartDefaultSettings}
+                        theme={theme}
+                        tooltip={{
+                          headerFormatter,
+                        }}
+                      />
+                      <Axis
+                        id="bottom"
+                        position={Position.Bottom}
+                        tickFormat={dataTimeFormatter}
+                        showGridLines
+                        gridLine={{
                           strokeWidth: 1,
-                          stroke: euiThemeVars.euiColorDanger,
                           opacity: 1,
-                        },
-                      }}
-                      marker={
-                        <StyledEuiText color={euiThemeVars.euiColorDarkestShade}>
-                          {i18n.RISKY}
-                        </StyledEuiText>
-                      }
-                    />
-                  </Chart>
-                )}
-              </div>
+                          dash: [3, 5],
+                        }}
+                      />
+                      <Axis
+                        domain={{
+                          min: 0,
+                          max: 100,
+                        }}
+                        id="left"
+                        position={Position.Left}
+                        ticks={3}
+                        style={{
+                          tickLine: {
+                            visible: false,
+                          },
+                          tickLabel: {
+                            padding: 10,
+                          },
+                        }}
+                      />
+                      <LineSeries
+                        id="RiskOverTime"
+                        name={i18n.RISK_SCORE}
+                        xScaleType={ScaleType.Time}
+                        yScaleType={ScaleType.Linear}
+                        xAccessor="x"
+                        yAccessors={['y']}
+                        timeZone={timeZone}
+                        data={graphData}
+                        tickFormat={scoreFormatter}
+                      />
+                      <LineAnnotation
+                        id="RiskOverTime_annotation"
+                        domainType={AnnotationDomainType.YDomain}
+                        dataValues={[
+                          {
+                            dataValue: RISKY_THRESHOLD,
+                            details: `${RISKY_THRESHOLD}`,
+                            header: i18n.RISK_THRESHOLD,
+                          },
+                        ]}
+                        markerPosition="left"
+                        style={{
+                          line: {
+                            strokeWidth: 1,
+                            stroke: euiThemeVars.euiColorDanger,
+                            opacity: 1,
+                          },
+                        }}
+                        marker={
+                          <StyledEuiText color={euiThemeVars.euiColorDarkestShade}>
+                            {i18n.RISKY}
+                          </StyledEuiText>
+                        }
+                      />
+                    </Chart>
+                  )}
+                </div>
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
         )}
