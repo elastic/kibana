@@ -394,6 +394,7 @@ kibana_vars=(
     xpack.securitySolution.maxTimelineImportExportSize
     xpack.securitySolution.maxTimelineImportPayloadBytes
     xpack.securitySolution.packagerTaskInterval
+    xpack.securitySolution.prebuiltRulesPackageVersion
     xpack.spaces.maxSpaces
     xpack.task_manager.max_attempts
     xpack.task_manager.max_poll_inactivity_cycles
