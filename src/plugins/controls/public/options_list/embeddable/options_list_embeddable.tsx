@@ -273,7 +273,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     return { dataView: this.dataView, field: this.field! };
   };
 
-  private runOptionsListQuery = async (clearCache: boolean = false) => {
+  private runOptionsListQuery = async () => {
     const {
       dispatch,
       getState,
@@ -312,9 +312,6 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
               mode: 'absolute' as 'absolute',
             }
           : globalTimeRange;
-      if (clearCache) {
-        this.optionsListService.clearOptionsListCache();
-      }
       const { suggestions, invalidSelections, totalCardinality, rejected } =
         await this.optionsListService.runOptionsListRequest(
           {
@@ -414,7 +411,8 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
   };
 
   reload = (clearCache: boolean = false) => {
-    this.runOptionsListQuery(clearCache);
+    if (clearCache) this.optionsListService.clearOptionsListCache();
+    this.runOptionsListQuery();
   };
 
   public destroy = () => {
