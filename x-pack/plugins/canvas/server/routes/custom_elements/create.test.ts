@@ -30,11 +30,9 @@ const mockedUUID = '123abc';
 const now = new Date();
 const nowIso = now.toISOString();
 
-jest.mock('uuid', () =>
-  jest.fn().mockReturnValue({
-    v4: () => '123abc',
-  })
-);
+jest.mock('uuid', () => ({
+  v4: jest.fn().mockReturnValue('123abc'),
+}));
 
 describe('POST custom element', () => {
   let routeHandler: RequestHandler<any, any, any>;

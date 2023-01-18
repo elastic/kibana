@@ -11,11 +11,9 @@ jest.mock('../../styles/vector/vector_style', () => ({
   VectorStyle: class MockVectorStyle {},
 }));
 
-jest.mock('uuid', () =>
-  jest.fn().mockReturnValue({
-    v4: () => '12345',
-  })
-);
+jest.mock('uuid', () => ({
+  v4: jest.fn().mockReturnValue('12345'),
+}));
 
 import {
   AGG_TYPE,

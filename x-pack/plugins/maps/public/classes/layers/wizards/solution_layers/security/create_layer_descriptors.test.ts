@@ -22,11 +22,9 @@ jest.mock('../../../../../kibana_services', () => {
   };
 });
 
-jest.mock('uuid', () =>
-  jest.fn().mockReturnValue({
-    v4: () => '12345',
-  })
-);
+jest.mock('uuid', () => ({
+  v4: jest.fn().mockReturnValue('12345'),
+}));
 
 import { createSecurityLayerDescriptors } from './create_layer_descriptors';
 

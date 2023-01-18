@@ -31,11 +31,9 @@ const mockRouteContext = {
 const now = new Date();
 const nowIso = now.toISOString();
 
-jest.mock('uuid', () =>
-  jest.fn().mockReturnValue({
-    v4: () => '123abc',
-  })
-);
+jest.mock('uuid', () => ({
+  v4: jest.fn().mockReturnValue('123abc'),
+}));
 
 type CustomElementPayload = CustomElement & {
   '@timestamp': string;
