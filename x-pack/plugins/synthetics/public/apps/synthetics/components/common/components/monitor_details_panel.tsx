@@ -123,7 +123,7 @@ export const MonitorDetailsPanel = ({
           <DescriptionLabel>{frequencyStr(monitor[ConfigKey.SCHEDULE])}</DescriptionLabel>
           <TitleLabel>{LOCATIONS_LABEL}</TitleLabel>
           <DescriptionLabel>
-            <LocationsStatus configId={monitor.id} monitorLocations={monitor.locations} />
+            <LocationsStatus configId={configId} monitorLocations={monitor.locations} />
           </DescriptionLabel>
 
           <TitleLabel>{TAGS_LABEL}</TitleLabel>
