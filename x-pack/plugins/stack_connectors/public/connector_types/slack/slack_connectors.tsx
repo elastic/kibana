@@ -6,55 +6,48 @@
  */
 
 import React from 'react';
-import { EuiLink } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { FieldConfig, UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import { DocLinksStart } from '@kbn/core/public';
 import type { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
-import * as i18n from './translations';
-
-const { urlField } = fieldValidators;
-
-const getWebhookUrlConfig = (docLinks: DocLinksStart): FieldConfig => ({
-  label: i18n.WEBHOOK_URL_LABEL,
-  helpText: (
-    <EuiLink href={docLinks.links.alerting.slackAction} target="_blank">
-      <FormattedMessage
-        id="xpack.stackConnectors.components.slack.webhookUrlHelpLabel"
-        defaultMessage="Create a Slack Webhook URL"
-      />
-    </EuiLink>
-  ),
-  validations: [
-    {
-      validator: urlField(i18n.WEBHOOK_URL_INVALID),
-    },
-  ],
-});
+import { EuiTabbedContent, EuiSpacer } from '@elastic/eui';
+import { SlackWebApiConnectorFields } from './slack_web_api_connectors';
+import { SlackWebhookActionFields } from './slack_webhook_connectors';
 
 const SlackActionFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   isEdit,
   readOnly,
+  registerPreSubmitValidator,
 }) => {
-  const { docLinks } = useKibana().services;
+  const tabs = [
+    {
+      id: 'webhook',
+      name: 'Webhook',
+      content: (
+        <>
+          <EuiSpacer size="m" />
+          <SlackWebhookActionFields
+            isEdit={isEdit}
+            readOnly={readOnly}
+            registerPreSubmitValidator={registerPreSubmitValidator}
+          />
+        </>
+      ),
+    },
+    {
+      id: 'web_api',
+      name: 'Web API',
+      content: (
+        <>
+          <EuiSpacer size="m" />
+          <SlackWebApiConnectorFields
+            isEdit={isEdit}
+            readOnly={readOnly}
+            registerPreSubmitValidator={registerPreSubmitValidator}
+          />
+        </>
+      ),
+    },
+  ];
 
-  return (
-    <UseField
-      path="secrets.webhookUrl"
-      config={getWebhookUrlConfig(docLinks)}
-      component={Field}
-      componentProps={{
-        euiFieldProps: {
-          readOnly,
-          'data-test-subj': 'slackWebhookUrlInput',
-          fullWidth: true,
-        },
-      }}
-    />
-  );
+  return <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[1]} autoFocus="selected" />;
 };
 
 // eslint-disable-next-line import/no-default-export

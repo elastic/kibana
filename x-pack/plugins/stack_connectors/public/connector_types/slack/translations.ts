@@ -27,3 +27,10 @@ export const WEBHOOK_URL_LABEL = i18n.translate(
     defaultMessage: 'Webhook URL',
   }
 );
+
+export const TOKEN_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.slack.tokenTextFieldLabel',
+  {
+    defaultMessage: 'Api token',
+  }
+);
