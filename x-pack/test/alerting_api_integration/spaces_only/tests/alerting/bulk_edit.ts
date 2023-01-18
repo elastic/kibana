@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { Spaces } from '../../scenarios';
 import {
@@ -20,7 +20,7 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 const getSnoozeSchedule = () => {
   return {
-    id: uuid.v4(),
+    id: uuidv4(),
     duration: 28800000,
     rRule: {
       dtstart: '2022-09-19T11:49:59.329Z',

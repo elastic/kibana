@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import {
   CreateAgentPolicyRequest,
   CreateAgentPolicyResponse,
@@ -159,7 +159,7 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
       let agentPolicy: CreateAgentPolicyResponse['item'];
       try {
         const newAgentPolicyData: CreateAgentPolicyRequest['body'] = {
-          name: `East Coast ${uuid.v4()}`,
+          name: `East Coast ${uuidv4()}`,
           description: 'East Coast call center',
           namespace: 'default',
         };
@@ -180,7 +180,7 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
       let packagePolicy: CreatePackagePolicyResponse['item'];
       try {
         const newPackagePolicyData: CreatePackagePolicyRequest['body'] = {
-          name: `Protect East Coast ${uuid.v4()}`,
+          name: `Protect East Coast ${uuidv4()}`,
           description: 'Protect the worlds data - but in the East Coast',
           policy_id: agentPolicy!.id,
           enabled: true,

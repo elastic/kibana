@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
 import { filter, flatten, isEmpty, map, omit, pick, pickBy, some } from 'lodash';
 import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
@@ -67,7 +67,7 @@ export const createActionHandler = async (
   }
 
   const osqueryAction = {
-    action_id: uuid.v4(),
+    action_id: uuidv4(),
     '@timestamp': moment().toISOString(),
     expiration: moment().add(5, 'minutes').toISOString(),
     type: 'INPUT_ACTION',
@@ -91,7 +91,7 @@ export const createActionHandler = async (
       ? map(convertSOQueriesToPack(packSO.attributes.queries), (packQuery, packQueryId) =>
           pickBy(
             {
-              action_id: uuid.v4(),
+              action_id: uuidv4(),
               id: packQueryId,
               query: packQuery.query,
               ecs_mapping: packQuery.ecs_mapping,

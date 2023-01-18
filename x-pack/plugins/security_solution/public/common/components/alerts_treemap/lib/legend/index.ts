@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import type { LegendItem } from '../../../charts/draggable_legend_item';
 import { getFillColor } from '../chart_palette';
@@ -34,7 +34,7 @@ export const getLegendItemFromRawBucket = ({
     : undefined,
   count: bucket.doc_count,
   dataProviderId: escapeDataProviderId(
-    `draggable-legend-item-treemap-${stackByField0}-${bucket.key}-${uuid.v4()}`
+    `draggable-legend-item-treemap-${stackByField0}-${bucket.key}-${uuidv4()}`
   ),
   render: () =>
     getLabel({
@@ -64,7 +64,7 @@ export const getLegendItemFromFlattenedBucket = ({
   }),
   count: stackByField1DocCount,
   dataProviderId: escapeDataProviderId(
-    `draggable-legend-item-treemap-${key}-${stackByField1Key}-${uuid.v4()}`
+    `draggable-legend-item-treemap-${key}-${stackByField1Key}-${uuidv4()}`
   ),
   render: () => `${stackByField1Key}`,
   field: `${stackByField1}`,

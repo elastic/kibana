@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { journey, step, expect, Page } from '@elastic/synthetics';
 import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
 import { FormMonitorType } from '../../../common/runtime_types';
@@ -16,11 +16,11 @@ const basicMonitorDetails = {
   location: customLocation || 'US Central',
   schedule: '3',
 };
-const httpName = `http monitor ${uuid.v4()}`;
-const icmpName = `icmp monitor ${uuid.v4()}`;
-const tcpName = `tcp monitor ${uuid.v4()}`;
-const browserName = `browser monitor ${uuid.v4()}`;
-const browserRecorderName = `browser monitor recorder ${uuid.v4()}`;
+const httpName = `http monitor ${uuidv4()}`;
+const icmpName = `icmp monitor ${uuidv4()}`;
+const tcpName = `tcp monitor ${uuidv4()}`;
+const browserName = `browser monitor ${uuidv4()}`;
+const browserRecorderName = `browser monitor recorder ${uuidv4()}`;
 const apmServiceName = 'apmServiceName';
 
 const configuration = {

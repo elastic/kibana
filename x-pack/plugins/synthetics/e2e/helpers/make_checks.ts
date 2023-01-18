@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { merge, flattenDeep } from 'lodash';
 import type { Client } from '@elastic/elasticsearch';
 import { makePing } from './make_ping';
@@ -37,7 +37,7 @@ export const makeCheck = async ({
 }: CheckProps): Promise<{ monitorId: string; docs: any }> => {
   const cgFields = {
     monitor: {
-      check_group: uuid.v4(),
+      check_group: uuidv4(),
     },
   };
 

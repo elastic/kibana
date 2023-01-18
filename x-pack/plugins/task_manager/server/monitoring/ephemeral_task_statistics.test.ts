@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { Subject, Observable } from 'rxjs';
 import stats from 'stats-lite';
 import { take, bufferCount, skip, map } from 'rxjs/operators';
@@ -366,7 +366,7 @@ const mockTaskRunEvent = (
 };
 
 const mockTaskInstance = (overrides: Partial<ConcreteTaskInstance> = {}): ConcreteTaskInstance => ({
-  id: uuid.v4(),
+  id: uuidv4(),
   attempts: 0,
   status: TaskStatus.Running,
   version: '123',

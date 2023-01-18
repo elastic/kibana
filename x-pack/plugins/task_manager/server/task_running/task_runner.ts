@@ -12,7 +12,7 @@
  */
 
 import apm from 'elastic-apm-node';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { withSpan } from '@kbn/apm-utils';
 import { identity, defaults, flow, omit } from 'lodash';
 import { Logger, SavedObjectsErrorHelpers, ExecutionContextStart } from '@kbn/core/server';
@@ -183,7 +183,7 @@ export class TaskManagerRunner implements TaskRunner {
     this.defaultMaxAttempts = defaultMaxAttempts;
     this.executionContext = executionContext;
     this.usageCounter = usageCounter;
-    this.uuid = uuid.v4();
+    this.uuid = uuidv4();
     this.eventLoopDelayConfig = eventLoopDelayConfig;
   }
 

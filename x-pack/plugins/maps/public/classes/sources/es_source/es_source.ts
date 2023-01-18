@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { Filter } from '@kbn/es-query';
 import { DataViewField, DataView, ISearchSource } from '@kbn/data-plugin/common';

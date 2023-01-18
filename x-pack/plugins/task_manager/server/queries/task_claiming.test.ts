@@ -6,7 +6,7 @@
  */
 
 import _ from 'lodash';
-import { v4 as uuid } from 'uuid';
+import { v1 as uuidv1, v4 as uuidv4 } from 'uuid';
 import { filter, take, toArray } from 'rxjs/operators';
 
 import { TaskStatus, ConcreteTaskInstance } from '../task';
@@ -395,7 +395,7 @@ if (doc['task.runAt'].size()!=0) {
     test('it should claim in batches partitioned by maxConcurrency', async () => {
       const maxAttempts = _.random(2, 43);
       const definitions = new TaskTypeDictionary(mockLogger());
-      const taskManagerId = uuid.v1();
+      const taskManagerId = uuidv1();
       const fieldUpdates = {
         ownerId: taskManagerId,
         retryAt: new Date(Date.now()),
@@ -547,7 +547,7 @@ if (doc['task.runAt'].size()!=0) {
     test('it should reduce the available capacity from batch to batch', async () => {
       const maxAttempts = _.random(2, 43);
       const definitions = new TaskTypeDictionary(mockLogger());
-      const taskManagerId = uuid.v1();
+      const taskManagerId = uuidv1();
       definitions.registerTaskDefinitions({
         unlimited: {
           title: 'unlimited',
@@ -642,7 +642,7 @@ if (doc['task.runAt'].size()!=0) {
     test('it shuffles the types claimed in batches to ensure no type starves another', async () => {
       const maxAttempts = _.random(2, 43);
       const definitions = new TaskTypeDictionary(mockLogger());
-      const taskManagerId = uuid.v1();
+      const taskManagerId = uuidv1();
       definitions.registerTaskDefinitions({
         unlimited: {
           title: 'unlimited',
@@ -730,7 +730,7 @@ if (doc['task.runAt'].size()!=0) {
     test('it passes any unusedTaskTypes to script', async () => {
       const maxAttempts = _.random(2, 43);
       const customMaxAttempts = _.random(44, 100);
-      const taskManagerId = uuid.v1();
+      const taskManagerId = uuidv1();
       const fieldUpdates = {
         ownerId: taskManagerId,
         retryAt: new Date(Date.now()),
@@ -853,7 +853,7 @@ if (doc['task.runAt'].size()!=0) {
     });
 
     test('it claims tasks by setting their ownerId, status and retryAt', async () => {
-      const taskManagerId = uuid.v1();
+      const taskManagerId = uuidv1();
       const claimOwnershipUntil = new Date(Date.now());
       const fieldUpdates = {
         ownerId: taskManagerId,
@@ -891,7 +891,7 @@ if (doc['task.runAt'].size()!=0) {
     });
 
     test('it filters out running tasks', async () => {
-      const taskManagerId = uuid.v1();
+      const taskManagerId = uuidv1();
       const claimOwnershipUntil = new Date(Date.now());
       const runAt = new Date();
       const tasks = [
@@ -979,7 +979,7 @@ if (doc['task.runAt'].size()!=0) {
     });
 
     test('it returns task objects', async () => {
-      const taskManagerId = uuid.v1();
+      const taskManagerId = uuidv1();
       const claimOwnershipUntil = new Date(Date.now());
       const runAt = new Date();
       const tasks = [
@@ -1093,7 +1093,7 @@ if (doc['task.runAt'].size()!=0) {
     });
 
     test('it returns version_conflicts that do not include conflicts that were proceeded against', async () => {
-      const taskManagerId = uuid.v1();
+      const taskManagerId = uuidv1();
       const claimOwnershipUntil = new Date(Date.now());
       const runAt = new Date();
       const tasks = [
@@ -1211,7 +1211,7 @@ if (doc['task.runAt'].size()!=0) {
     }
 
     function instantiateStoreWithMockedApiResponses({
-      taskManagerId = uuid.v4(),
+      taskManagerId = uuidv4(),
       definitions = taskDefinitions,
       getCapacity = () => 10,
       tasksClaimed,
@@ -1305,7 +1305,7 @@ function generateFakeTasks(count: number = 1) {
 function mockInstance(instance: Partial<ConcreteTaskInstance> = {}) {
   return Object.assign(
     {
-      id: uuid.v4(),
+      id: uuidv4(),
       taskType: 'bar',
       sequenceNumber: 32,
       primaryTerm: 32,

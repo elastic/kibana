@@ -6,7 +6,7 @@
  */
 
 import { of, Subject } from 'rxjs';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { sleep } from '../test_utils';
@@ -43,7 +43,7 @@ describe('backgroundTaskUtilizationRoute', () => {
       router,
       monitoringStats$: of(),
       logger,
-      taskManagerId: uuid.v4(),
+      taskManagerId: uuidv4(),
       config: getTaskManagerConfig(),
       kibanaVersion: '8.0',
       kibanaIndexName: '.kibana',
@@ -67,7 +67,7 @@ describe('backgroundTaskUtilizationRoute', () => {
       router,
       monitoringStats$: of(),
       logger,
-      taskManagerId: uuid.v4(),
+      taskManagerId: uuidv4(),
       config: getTaskManagerConfig(),
       kibanaVersion: '8.0',
       kibanaIndexName: 'foo',
@@ -107,7 +107,7 @@ describe('backgroundTaskUtilizationRoute', () => {
       router,
       monitoringStats$: of(),
       logger,
-      taskManagerId: uuid.v4(),
+      taskManagerId: uuidv4(),
       config: getTaskManagerConfig(),
       kibanaVersion: '8.0',
       kibanaIndexName: 'foo',
@@ -153,7 +153,7 @@ describe('backgroundTaskUtilizationRoute', () => {
       router,
       monitoringStats$: of(),
       logger,
-      taskManagerId: uuid.v4(),
+      taskManagerId: uuidv4(),
       config: getTaskManagerConfig(),
       kibanaVersion: '8.0',
       kibanaIndexName: 'foo',
@@ -170,7 +170,7 @@ describe('backgroundTaskUtilizationRoute', () => {
   it(`logs an error if the utilization stats are null`, async () => {
     const router = httpServiceMock.createRouter();
     const stats$ = new Subject<MonitoringStats>();
-    const id = uuid.v4();
+    const id = uuidv4();
     backgroundTaskUtilizationRoute({
       router,
       monitoringStats$: stats$,

@@ -9,7 +9,7 @@
 import Path from 'path';
 import { format } from 'url';
 import del from 'del';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import globby from 'globby';
 import createArchiver from 'archiver';
 import Fs from 'fs';
@@ -307,7 +307,7 @@ export function createTestEsCluster<
         return;
       }
 
-      const uuid = Uuid.v4();
+      const uuid = uuidv4();
       const debugPath = Path.resolve(REPO_ROOT, `data/es_debug_${uuid}.tar.gz`);
       log.error(`[es] debug files found, archiving install to ${debugPath}`);
       const archiver = createArchiver('tar', { gzip: true });

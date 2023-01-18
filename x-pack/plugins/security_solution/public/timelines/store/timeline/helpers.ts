@@ -7,7 +7,7 @@
 
 import { getOr, omit, uniq, isEmpty, isEqualWith, cloneDeep, union } from 'lodash/fp';
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import type { Filter } from '@kbn/es-query';
 
@@ -173,7 +173,7 @@ export const addNewTimeline = ({
   const templateTimelineInfo =
     timelineType === TimelineType.template
       ? {
-          templateTimelineId: uuid.v4(),
+          templateTimelineId: uuidv4(),
           templateTimelineVersion: 1,
         }
       : {};

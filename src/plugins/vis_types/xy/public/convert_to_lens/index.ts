@@ -164,7 +164,7 @@ export const convertToLens: ConvertXYToLensVisualization = async (vis, timefilte
   const uuid = await import('uuid');
 
   const layers = dataLayers.map<Layer>((l) => {
-    const layerId = uuid.v4();
+    const layerId = uuidv4();
     const seriesIdsMap: Record<string, string> = {};
     visibleSeries.forEach((s) => {
       const column = l.columns.find(
@@ -197,7 +197,7 @@ export const convertToLens: ConvertXYToLensVisualization = async (vis, timefilte
     const staticValueColumn = createStaticValueColumn(vis.params.thresholdLine.value || 0);
     layers.push({
       indexPatternId,
-      layerId: uuid.v4(),
+      layerId: uuidv4(),
       columns: [staticValueColumn],
       columnOrder: [],
       metrics: [staticValueColumn.columnId],

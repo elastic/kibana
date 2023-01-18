@@ -14,7 +14,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
 import React, { useState } from 'react';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';

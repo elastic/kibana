@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 
 import type { Agent } from '../../types';

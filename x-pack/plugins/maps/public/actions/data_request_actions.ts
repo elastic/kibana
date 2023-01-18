@@ -9,7 +9,7 @@
 
 import { AnyAction, Dispatch } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { FeatureCollection } from 'geojson';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { MapStoreState } from '../reducers/store';

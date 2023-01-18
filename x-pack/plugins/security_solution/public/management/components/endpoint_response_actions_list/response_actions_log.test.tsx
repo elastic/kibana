@@ -22,7 +22,7 @@ import type {
 import { MANAGEMENT_PATH } from '../../../../common/constants';
 import { getActionListMock } from './mocks';
 import { useGetEndpointsList } from '../../hooks/endpoint/use_get_endpoints_list';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../../common/endpoint/service/response_actions/constants';
 import { useUserPrivileges as _useUserPrivileges } from '../../../common/components/user_privileges';
 import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mocks';
@@ -179,7 +179,7 @@ describe.skip('Response actions history', () => {
 
     mockUseGetEndpointsList.mockReturnValue({
       data: Array.from({ length: 50 }).map(() => {
-        const id = uuid.v4();
+        const id = uuidv4();
         return {
           id,
           name: `Host-${id.slice(0, 8)}`,

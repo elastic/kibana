@@ -7,7 +7,7 @@
 
 import { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';

@@ -12,7 +12,7 @@ import type { Query } from '@kbn/es-query';
 import _ from 'lodash';
 import React, { ReactElement } from 'react';
 import { EuiIcon } from '@elastic/eui';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { FeatureCollection } from 'geojson';
 import { DataRequest } from '../util/data_request';
 import {

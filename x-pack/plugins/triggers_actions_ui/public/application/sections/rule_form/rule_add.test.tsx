@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import React, { FunctionComponent } from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
@@ -370,9 +370,9 @@ describe('rule_add', () => {
 
 function mockRule(overloads: Partial<Rule> = {}): Rule {
   return {
-    id: uuid.v4(),
+    id: uuidv4(),
     enabled: true,
-    name: `rule-${uuid.v4()}`,
+    name: `rule-${uuidv4()}`,
     tags: [],
     ruleTypeId: '.noop',
     consumer: 'consumer',

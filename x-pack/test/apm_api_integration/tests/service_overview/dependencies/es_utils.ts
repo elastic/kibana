@@ -6,7 +6,7 @@
  */
 
 import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 export function createServiceDependencyDocs({
   time,
@@ -42,7 +42,7 @@ export function createServiceDependencyDocs({
     agentName: string;
   };
 }) {
-  const spanId = uuid.v4();
+  const spanId = uuidv4();
 
   return [
     {

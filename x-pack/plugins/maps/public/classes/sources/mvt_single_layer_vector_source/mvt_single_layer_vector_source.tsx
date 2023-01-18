@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import React from 'react';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';
 import { AbstractSource, ImmutableSourceProperty, SourceEditorArgs } from '../source';

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 /**
  * This is useful for when you have arrays without an ID and need to add one for
@@ -23,7 +23,7 @@ export const addIdToItem = <T>(item: NotArray<T>): T => {
   if (maybeId.id != null) {
     return item;
   } else {
-    return { ...item, id: uuid.v4() };
+    return { ...item, id: uuidv4() };
   }
 };
 

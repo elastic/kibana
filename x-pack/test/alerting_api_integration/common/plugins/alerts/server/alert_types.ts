@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { Logger } from '@kbn/logging';
 import { CoreSetup } from '@kbn/core/server';
 import { schema, TypeOf } from '@kbn/config-schema';
@@ -293,7 +293,7 @@ function getExceedsAlertLimitRuleType() {
       const alertsToCreate = limit ? limit : 25;
 
       range(alertsToCreate)
-        .map(() => uuid.v4())
+        .map(() => uuidv4())
         .forEach((id: string) => {
           services.alertFactory.create(id).scheduleActions('default');
         });

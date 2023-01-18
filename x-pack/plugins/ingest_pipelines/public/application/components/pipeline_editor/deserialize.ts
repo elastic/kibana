@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { Processor } from '../../../../common/types';
 import {
   ProcessorInternal,
@@ -44,7 +44,7 @@ const convertToPipelineInternalProcessor = (processor: Processor): ProcessorInte
     ? convertProcessors(originalOnFailure)
     : (originalOnFailure as ProcessorInternal[] | undefined);
   return {
-    id: uuid.v4(),
+    id: uuidv4(),
     type,
     onFailure,
     options,

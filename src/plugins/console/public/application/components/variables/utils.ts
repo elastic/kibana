@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import type { DevToolsVariable } from './variables_flyout';
 
 export const editVariable = (
@@ -33,7 +33,7 @@ export const deleteVariable = (variables: DevToolsVariable[], id: string) => {
 };
 
 export const generateEmptyVariableField = (): DevToolsVariable => ({
-  id: uuid.v4(),
+  id: uuidv4(),
   name: '',
   value: '',
 });

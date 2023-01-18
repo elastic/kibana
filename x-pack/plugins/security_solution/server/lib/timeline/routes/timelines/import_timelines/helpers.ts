@@ -7,7 +7,7 @@
 
 import { has, chunk, omit } from 'lodash/fp';
 import type { Readable } from 'stream';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { createPromiseFromStreams } from '@kbn/utils';
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
@@ -79,7 +79,7 @@ export const setTimeline = (
     templateTimelineVersion: isTemplateTimeline
       ? parsedTimeline.templateTimelineVersion ?? 1
       : null,
-    templateTimelineId: isTemplateTimeline ? parsedTimeline.templateTimelineId ?? uuid.v4() : null,
+    templateTimelineId: isTemplateTimeline ? parsedTimeline.templateTimelineId ?? uuidv4() : null,
   };
 };
 

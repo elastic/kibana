@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
@@ -25,7 +25,7 @@ interface DuplicateRuleParams {
 
 export const duplicateRule = async ({ rule }: DuplicateRuleParams): Promise<InternalRuleCreate> => {
   // Generate a new static ruleId
-  const ruleId = uuid.v4();
+  const ruleId = uuidv4();
 
   // If it's a prebuilt rule, reset Related Integrations, Required Fields and Setup Guide.
   // We do this because for now we don't allow the users to edit these fields for custom rules.

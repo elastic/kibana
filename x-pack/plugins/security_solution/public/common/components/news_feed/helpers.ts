@@ -7,7 +7,7 @@
 
 import { get } from 'lodash/fp';
 import moment from 'moment';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import semverCoerce from 'semver/functions/coerce';
 import type { NewsItem, RawNewsApiItem, RawNewsApiResponse } from './types';
 import { KibanaServices } from '../../lib/kibana';
@@ -73,7 +73,7 @@ export const getNewsItemsFromApiResponse = (response?: RawNewsApiResponse | null
       description:
         get(locale, x.description) ?? get(NEWS_FEED_FALLBACK_LANGUAGE, x.description) ?? '',
       expireOn: new Date(x.expire_on ?? ''),
-      hash: x.hash ?? uuid.v4(),
+      hash: x.hash ?? uuidv4(),
       imageUrl: get(locale, x.image_url) ?? get(NEWS_FEED_FALLBACK_LANGUAGE, x.image_url) ?? null,
       linkUrl: get(locale, x.link_url) ?? get(NEWS_FEED_FALLBACK_LANGUAGE, x.link_url) ?? '',
       publishOn: new Date(x.publish_on ?? ''),

@@ -7,7 +7,7 @@
  */
 
 import { AggParamsFilters } from '@kbn/data-plugin/common';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { FiltersColumn } from './types';
 
 export const convertToFiltersColumn = (

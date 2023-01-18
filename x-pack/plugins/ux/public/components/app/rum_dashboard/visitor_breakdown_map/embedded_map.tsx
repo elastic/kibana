@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState, useRef } from 'react';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import styled from 'styled-components';
 
 import { MapEmbeddable, MapEmbeddableInput } from '@kbn/maps-plugin/public';
@@ -66,7 +66,7 @@ export function EmbeddedMapComponent() {
 
   const input: MapEmbeddableInput = {
     attributes: { title: '' },
-    id: uuid.v4(),
+    id: uuidv4(),
     filters: mapFilters,
     viewMode: ViewMode.VIEW,
     isLayerTOCOpen: false,

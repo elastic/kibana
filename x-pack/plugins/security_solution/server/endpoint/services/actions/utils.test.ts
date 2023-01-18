@@ -29,7 +29,7 @@ import type {
   LogsEndpointAction,
   LogsEndpointActionResponse,
 } from '../../../../common/endpoint/types';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import type { Results } from '../../routes/actions/mocks';
 import { mockAuditLogSearchResult } from '../../routes/actions/mocks';
 
@@ -230,7 +230,7 @@ describe('When using Actions service utilities', () => {
       let endpointResponseAtError: EndpointActivityLogActionResponse;
 
       beforeEach(() => {
-        const actionId = uuid.v4();
+        const actionId = uuidv4();
         fleetResponseAtError = fleetActionGenerator.generateActivityLogActionResponse({
           item: {
             data: { agent_id: '123', action_id: actionId, error: 'agent failed to deliver' },
@@ -326,7 +326,7 @@ describe('When using Actions service utilities', () => {
 
       beforeEach(() => {
         agentIds = ['123', '456', '789'];
-        actionId = uuid.v4();
+        actionId = uuidv4();
         action123Responses = [
           fleetActionGenerator.generateActivityLogActionResponse({
             item: { data: { agent_id: '123', error: '', action_id: actionId } },
@@ -599,8 +599,8 @@ describe('When using Actions service utilities', () => {
     let errorResponses: Array<ActivityLogActionResponse | EndpointActivityLogActionResponse>;
 
     beforeEach(() => {
-      const actionId0 = uuid.v4();
-      const actionId1 = uuid.v4();
+      const actionId0 = uuidv4();
+      const actionId1 = uuidv4();
       actionRequests123 = [
         fleetActionGenerator.generateActivityLogAction({
           item: {
@@ -723,7 +723,7 @@ describe('When using Actions service utilities', () => {
 
     beforeEach(() => {
       const agents = ['agent-id'];
-      const actionIds = [uuid.v4(), uuid.v4()];
+      const actionIds = [uuidv4(), uuidv4()];
 
       fleetActions = actionIds.map((id) => {
         return {

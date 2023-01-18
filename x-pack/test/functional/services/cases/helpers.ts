@@ -6,13 +6,13 @@
  */
 
 import { CaseConnector, CasePostRequest } from '@kbn/cases-plugin/common/api';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 export function generateRandomCaseWithoutConnector(): CasePostRequest {
   return {
-    title: 'random-' + uuid.v4(),
-    tags: ['test', uuid.v4()],
-    description: 'This is a description with id: ' + uuid.v4(),
+    title: 'random-' + uuidv4(),
+    tags: ['test', uuidv4()],
+    description: 'This is a description with id: ' + uuidv4(),
     connector: {
       id: 'none',
       name: 'none',

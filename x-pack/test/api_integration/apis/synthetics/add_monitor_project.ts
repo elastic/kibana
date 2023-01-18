@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
 import { ConfigKey, ProjectMonitorsRequest } from '@kbn/synthetics-plugin/common/runtime_types';
 import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
@@ -38,7 +38,7 @@ export default function ({ getService }: FtrProviderContext) {
     const setUniqueIds = (request: ProjectMonitorsRequest) => {
       return {
         ...request,
-        monitors: request.monitors.map((monitor) => ({ ...monitor, id: uuid.v4() })),
+        monitors: request.monitors.map((monitor) => ({ ...monitor, id: uuidv4() })),
       };
     };
 
@@ -100,7 +100,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('project monitors - handles browser monitors', async () => {
       const successfulMonitors = [projectMonitors.monitors[0]];
-      const project = `test-project-${uuid.v4()}`;
+      const project = `test-project-${uuidv4()}`;
 
       try {
         const { body } = await supertest
@@ -214,7 +214,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('project monitors - allows throttling false for browser monitors', async () => {
       const successfulMonitors = [projectMonitors.monitors[0]];
-      const project = `test-project-${uuid.v4()}`;
+      const project = `test-project-${uuidv4()}`;
 
       try {
         const { body } = await supertest
@@ -258,7 +258,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('project monitors - handles http monitors', async () => {
       const kibanaVersion = await kibanaServer.version.get();
       const successfulMonitors = [httpProjectMonitors.monitors[1]];
-      const project = `test-project-${uuid.v4()}`;
+      const project = `test-project-${uuidv4()}`;
 
       try {
         const { body } = await supertest
@@ -378,7 +378,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('project monitors - handles tcp monitors', async () => {
       const successfulMonitors = [tcpProjectMonitors.monitors[0], tcpProjectMonitors.monitors[1]];
       const kibanaVersion = await kibanaServer.version.get();
-      const project = `test-project-${uuid.v4()}`;
+      const project = `test-project-${uuidv4()}`;
 
       try {
         const { body } = await supertest
@@ -485,7 +485,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('project monitors - handles icmp monitors', async () => {
       const successfulMonitors = [icmpProjectMonitors.monitors[0], icmpProjectMonitors.monitors[1]];
       const kibanaVersion = await kibanaServer.version.get();
-      const project = `test-project-${uuid.v4()}`;
+      const project = `test-project-${uuidv4()}`;
 
       try {
         const { body } = await supertest
@@ -587,7 +587,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('project monitors - returns a list of successfully created monitors', async () => {
-      const project = `test-project-${uuid.v4()}`;
+      const project = `test-project-${uuidv4()}`;
       try {
         const { body } = await supertest
           .put(API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project))
@@ -610,7 +610,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('project monitors - returns a list of successfully updated monitors', async () => {
-      const project = `test-project-${uuid.v4()}`;
+      const project = `test-project-${uuidv4()}`;
 
       try {
         await supertest
@@ -639,7 +639,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('project monitors - validates monitor type', async () => {
-      const project = `test-project-${uuid.v4()}`;
+      const project = `test-project-${uuidv4()}`;
 
       try {
         const { body } = await supertest
@@ -693,12 +693,12 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('project monitors - saves space as data stream namespace', async () => {
-      const project = `test-project-${uuid.v4()}`;
+      const project = `test-project-${uuidv4()}`;
       const username = 'admin';
       const roleName = `synthetics_admin`;
       const password = `${username}-password`;
-      const SPACE_ID = `test-space-${uuid.v4()}`;
-      const SPACE_NAME = `test-space-name ${uuid.v4()}`;
+      const SPACE_ID = `test-space-${uuidv4()}`;
+      const SPACE_NAME = `test-space-name ${uuidv4()}`;
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
       try {
         await security.role.create(roleName, {
@@ -747,12 +747,12 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('project monitors - formats custom id appropriately', async () => {
-      const project = `test project ${uuid.v4()}`;
+      const project = `test project ${uuidv4()}`;
       const username = 'admin';
       const roleName = `synthetics_admin`;
       const password = `${username}-password`;
-      const SPACE_ID = `test-space-${uuid.v4()}`;
-      const SPACE_NAME = `test-space-name ${uuid.v4()}`;
+      const SPACE_ID = `test-space-${uuidv4()}`;
+      const SPACE_NAME = `test-space-name ${uuidv4()}`;
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
       try {
         await security.role.create(roleName, {
@@ -802,7 +802,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('project monitors - is able to decrypt monitor when updated after hydration', async () => {
-      const project = `test-project-${uuid.v4()}`;
+      const project = `test-project-${uuidv4()}`;
       try {
         await supertest
           .put(API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project))
@@ -862,7 +862,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('project monitors - is able to enable and disable monitors', async () => {
-      const project = `test-project-${uuid.v4()}`;
+      const project = `test-project-${uuidv4()}`;
 
       try {
         await supertest
@@ -902,7 +902,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('project monitors - returns a failed monitor when user defines a private location without fleet permissions', async () => {
-      const project = `test-project-${uuid.v4()}`;
+      const project = `test-project-${uuidv4()}`;
 
       const secondMonitor = {
         ...projectMonitors.monitors[0],
@@ -985,7 +985,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('project monitors - returns a successful monitor when user defines a private location with fleet permissions', async () => {
-      const project = `test-project-${uuid.v4()}`;
+      const project = `test-project-${uuidv4()}`;
       const secondMonitor = {
         ...projectMonitors.monitors[0],
         id: 'test-id-2',
@@ -1036,7 +1036,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('creates integration policies for project monitors with private locations', async () => {
-      const project = `test-project-${uuid.v4()}`;
+      const project = `test-project-${uuidv4()}`;
 
       try {
         await supertest
@@ -1099,7 +1099,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('deletes integration policies for project monitors when private location is removed from the monitor - lightweight', async () => {
-      const project = `test-project-${uuid.v4()}`;
+      const project = `test-project-${uuidv4()}`;
 
       const monitorRequest = {
         monitors: [
@@ -1162,7 +1162,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('deletes integration policies for project monitors when private location is removed from the monitor', async () => {
-      const project = `test-project-${uuid.v4()}`;
+      const project = `test-project-${uuidv4()}`;
 
       try {
         await supertest
@@ -1244,7 +1244,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('handles updating package policies when project monitors are updated', async () => {
-      const project = `test-project-${uuid.v4()}`;
+      const project = `test-project-${uuidv4()}`;
 
       try {
         await supertest
@@ -1340,7 +1340,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('handles location formatting for both private and public locations', async () => {
-      const project = `test-project-${uuid.v4()}`;
+      const project = `test-project-${uuidv4()}`;
       try {
         await supertest
           .put(API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project))
@@ -1390,7 +1390,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('only allows 250 requests at a time', async () => {
-      const project = `test-project-${uuid.v4()}`;
+      const project = `test-project-${uuidv4()}`;
       const monitors = [];
       for (let i = 0; i < 251; i++) {
         monitors.push({
@@ -1421,7 +1421,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('project monitors - cannot update a monitor of one type to another type', async () => {
-      const project = `test-project-${uuid.v4()}`;
+      const project = `test-project-${uuidv4()}`;
 
       try {
         await supertest

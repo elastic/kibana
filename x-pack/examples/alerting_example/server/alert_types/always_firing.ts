@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { range } from 'lodash';
 import { RuleType } from '@kbn/alerting-plugin/server';
 import {
@@ -63,7 +63,7 @@ export const alertType: RuleType<
     const count = (state.count ?? 0) + 1;
 
     range(instances)
-      .map(() => uuid.v4())
+      .map(() => uuidv4())
       .forEach((id: string) => {
         services.alertFactory
           .create(id)

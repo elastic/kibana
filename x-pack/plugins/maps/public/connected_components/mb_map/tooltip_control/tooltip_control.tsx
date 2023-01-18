@@ -16,7 +16,7 @@ import {
   Point2D,
   PointLike,
 } from '@kbn/mapbox-gl';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { Geometry } from 'geojson';
 import { Filter } from '@kbn/es-query';
 import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import fetch, { BodyInit, HeadersInit, Response } from 'node-fetch';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
 import { format as formatUrl } from 'url';
 import {
@@ -45,7 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
     const setUniqueIds = (request: LegacyProjectMonitorsRequest) => {
       return {
         ...request,
-        monitors: request.monitors.map((monitor) => ({ ...monitor, id: uuid.v4() })),
+        monitors: request.monitors.map((monitor) => ({ ...monitor, id: uuidv4() })),
       };
     };
 
@@ -824,8 +824,8 @@ export default function ({ getService }: FtrProviderContext) {
       const username = 'admin';
       const roleName = `synthetics_admin`;
       const password = `${username}-password`;
-      const SPACE_ID = `test-space-${uuid.v4()}`;
-      const SPACE_NAME = `test-space-name ${uuid.v4()}`;
+      const SPACE_ID = `test-space-${uuidv4()}`;
+      const SPACE_NAME = `test-space-name ${uuidv4()}`;
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
       try {
         await security.role.create(roleName, {
@@ -961,8 +961,8 @@ export default function ({ getService }: FtrProviderContext) {
       const username = 'admin';
       const roleName = `synthetics_admin`;
       const password = `${username}-password`;
-      const SPACE_ID = `test-space-${uuid.v4()}`;
-      const SPACE_NAME = `test-space-name ${uuid.v4()}`;
+      const SPACE_ID = `test-space-${uuidv4()}`;
+      const SPACE_NAME = `test-space-name ${uuidv4()}`;
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
       try {
         await security.role.create(roleName, {
@@ -1015,8 +1015,8 @@ export default function ({ getService }: FtrProviderContext) {
       const username = 'admin';
       const roleName = `synthetics_admin`;
       const password = `${username}-password`;
-      const SPACE_ID = `test-space-${uuid.v4()}`;
-      const SPACE_NAME = `test-space-name ${uuid.v4()}`;
+      const SPACE_ID = `test-space-${uuidv4()}`;
+      const SPACE_NAME = `test-space-name ${uuidv4()}`;
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
       try {
         await security.role.create(roleName, {

@@ -8,11 +8,11 @@
 import { isAlertSavedObjectNotFoundError, isEsUnavailableError } from './is_alerting_error';
 import { ErrorWithReason } from './error_with_reason';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { RuleExecutionStatusErrorReasons } from '../types';
 
 describe('isAlertSavedObjectNotFoundError', () => {
-  const id = uuid.v4();
+  const id = uuidv4();
   const errorSONF = SavedObjectsErrorHelpers.createGenericNotFoundError('alert', id);
 
   test('identifies SavedObjects Not Found errors', () => {
@@ -33,7 +33,7 @@ describe('isAlertSavedObjectNotFoundError', () => {
 });
 
 describe('isEsUnavailableError', () => {
-  const id = uuid.v4();
+  const id = uuidv4();
   const errorSONF = SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError('alert', id);
 
   test('identifies es unavailable errors', () => {

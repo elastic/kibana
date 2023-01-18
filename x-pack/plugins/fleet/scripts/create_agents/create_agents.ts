@@ -6,7 +6,7 @@
  */
 import fetch from 'node-fetch';
 import { ToolingLog } from '@kbn/tooling-log';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import yargs from 'yargs';
 
 import type { AgentStatus } from '../../common';

@@ -6,7 +6,7 @@
  */
 
 import { isEmpty, map, pickBy } from 'lodash';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import type { Ecs } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 
@@ -25,7 +25,7 @@ export const createQueries = async (
         pickBy(
           {
             ...query,
-            action_id: uuid.v4(),
+            action_id: uuidv4(),
             agents,
           },
           (value) => !isEmpty(value) || value === true
@@ -34,8 +34,8 @@ export const createQueries = async (
     : [
         pickBy(
           {
-            action_id: uuid.v4(),
-            id: uuid.v4(),
+            action_id: uuidv4(),
+            id: uuidv4(),
             query: params.query,
             saved_query_id: params.saved_query_id,
             saved_query_prebuilt: params.saved_query_id
@@ -64,7 +64,7 @@ export const createDynamicQueries = async (
           {
             ...replacedQuery,
             ...restQuery,
-            action_id: uuid.v4(),
+            action_id: uuidv4(),
             alert_ids: params.alert_ids,
             agents: params.agent_ids,
           },
@@ -74,8 +74,8 @@ export const createDynamicQueries = async (
     : [
         pickBy(
           {
-            action_id: uuid.v4(),
-            id: uuid.v4(),
+            action_id: uuidv4(),
+            id: uuidv4(),
             ...replacedQueries(params.query, alert),
             // just for single queries - we need to overwrite the error property
             error: undefined,

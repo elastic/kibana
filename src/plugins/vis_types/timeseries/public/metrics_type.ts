@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
 import {
   Vis,

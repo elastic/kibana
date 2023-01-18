@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { parseTimeShift } from '@kbn/data-plugin/common';
 import { getIndexPatternIds, Layer } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { PANEL_TYPES } from '../../../common/enums';

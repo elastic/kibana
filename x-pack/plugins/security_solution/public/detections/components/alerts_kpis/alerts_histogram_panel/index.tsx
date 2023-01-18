@@ -13,7 +13,7 @@ import numeral from '@elastic/numeral';
 import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { isEmpty, noop } from 'lodash/fp';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import type { Filter, Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
@@ -140,7 +140,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     const { to, from, deleteQuery, setQuery } = useGlobalTime(false);
 
     // create a unique, but stable (across re-renders) query id
-    const uniqueQueryId = useMemo(() => `${DETECTIONS_HISTOGRAM_ID}-${uuid.v4()}`, []);
+    const uniqueQueryId = useMemo(() => `${DETECTIONS_HISTOGRAM_ID}-${uuidv4()}`, []);
     const [isInitialLoading, setIsInitialLoading] = useState(true);
     const [isInspectDisabled, setIsInspectDisabled] = useState(false);
     const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
@@ -229,7 +229,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
               color: i < defaultLegendColors.length ? defaultLegendColors[i] : undefined,
               count: showCountsInLegend ? bucket.doc_count : undefined,
               dataProviderId: escapeDataProviderId(
-                `draggable-legend-item-${uuid.v4()}-${selectedStackByOption}-${bucket.key}`
+                `draggable-legend-item-${uuidv4()}-${selectedStackByOption}-${bucket.key}`
               ),
               field: selectedStackByOption,
               timelineId,

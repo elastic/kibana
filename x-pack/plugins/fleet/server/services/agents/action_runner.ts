@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
@@ -485,7 +485,7 @@ export const convertCreateAPIToInternalSchema = (
   defaultEnabled = true
 ): InternalRuleCreate => {
   const typeSpecificParams = typeSpecificSnakeToCamel(input);
-  const newRuleId = input.rule_id ?? uuid.v4();
+  const newRuleId = input.rule_id ?? uuidv4();
   return {
     name: input.name,
     tags: input.tags ?? [],

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import type { FilterSpecification, Map as MbMap, LayerSpecification } from '@kbn/mapbox-gl';
 import type { Query } from '@kbn/data-plugin/common';
 import { Feature, GeoJsonProperties, Geometry, Position } from 'geojson';

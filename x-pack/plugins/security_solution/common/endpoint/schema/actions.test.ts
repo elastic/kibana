@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import {
   EndpointActionListRequestSchema,
@@ -29,20 +29,20 @@ describe('actions schemas', () => {
 
     it('should accept an agent ID if not in an array', () => {
       expect(() => {
-        EndpointActionListRequestSchema.query.validate({ agentIds: uuid.v4() });
+        EndpointActionListRequestSchema.query.validate({ agentIds: uuidv4() });
       }).not.toThrow();
     });
 
     it('should accept an agent ID in an array', () => {
       expect(() => {
-        EndpointActionListRequestSchema.query.validate({ agentIds: [uuid.v4()] });
+        EndpointActionListRequestSchema.query.validate({ agentIds: [uuidv4()] });
       }).not.toThrow();
     });
 
     it('should accept multiple agent IDs in an array', () => {
       expect(() => {
         EndpointActionListRequestSchema.query.validate({
-          agentIds: [uuid.v4(), uuid.v4(), uuid.v4()],
+          agentIds: [uuidv4(), uuidv4(), uuidv4()],
         });
       }).not.toThrow();
     });
@@ -52,7 +52,7 @@ describe('actions schemas', () => {
         EndpointActionListRequestSchema.query.validate({
           agentIds: Array(255)
             .fill(1)
-            .map(() => uuid.v4()),
+            .map(() => uuidv4()),
         });
       }).not.toThrow();
     });

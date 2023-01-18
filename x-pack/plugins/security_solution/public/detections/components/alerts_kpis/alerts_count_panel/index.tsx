@@ -8,7 +8,7 @@
 import type { EuiComboBox } from '@elastic/eui';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import React, { memo, useMemo, useState, useEffect, useCallback } from 'react';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import type { Filter, Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
@@ -75,7 +75,7 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
     const { to, from, deleteQuery, setQuery } = useGlobalTime(false);
 
     // create a unique, but stable (across re-renders) query id
-    const uniqueQueryId = useMemo(() => `${DETECTIONS_ALERTS_COUNT_ID}-${uuid.v4()}`, []);
+    const uniqueQueryId = useMemo(() => `${DETECTIONS_ALERTS_COUNT_ID}-${uuidv4()}`, []);
 
     // Disabling the fecth method in useQueryAlerts since it is defaulted to the old one
     // const fetchMethod = fetchQueryRuleRegistryAlerts;

@@ -7,7 +7,7 @@
 
 import { partition } from 'lodash/fp';
 import pMap from 'p-map';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { RuleAction } from '@kbn/securitysolution-io-ts-alerting-types';
@@ -139,12 +139,12 @@ export const getTupleDuplicateErrorsAndUniqueRules = (
   const { errors, rulesAcc } = rules.reduce(
     (acc, parsedRule) => {
       if (parsedRule instanceof Error) {
-        acc.rulesAcc.set(uuid.v4(), parsedRule);
+        acc.rulesAcc.set(uuidv4(), parsedRule);
       } else {
         const { rule_id: ruleId } = parsedRule;
         if (acc.rulesAcc.has(ruleId) && !isOverwrite) {
           acc.errors.set(
-            uuid.v4(),
+            uuidv4(),
             createBulkErrorObject({
               ruleId,
               statusCode: 400,
@@ -302,7 +302,7 @@ export const getInvalidConnectors = async (
   } catch (exc) {
     if (exc?.output?.statusCode === 403) {
       reducerAccumulator.errors.set(
-        uuid.v4(),
+        uuidv4(),
         createBulkErrorObject({
           statusCode: exc.output.statusCode,
           message: `You may not have actions privileges required to import rules with actions: ${exc.output.payload.message}`,
@@ -310,7 +310,7 @@ export const getInvalidConnectors = async (
       );
     } else {
       reducerAccumulator.errors.set(
-        uuid.v4(),
+        uuidv4(),
         createBulkErrorObject({
           statusCode: 404,
           message: JSON.stringify(exc),
@@ -322,7 +322,7 @@ export const getInvalidConnectors = async (
   const { errors, rulesAcc } = rules.reduce(
     (acc, parsedRule) => {
       if (parsedRule instanceof Error) {
-        acc.rulesAcc.set(uuid.v4(), parsedRule);
+        acc.rulesAcc.set(uuidv4(), parsedRule);
       } else {
         const { rule_id: ruleId, actions } = parsedRule;
         const missingActionIds = actions
@@ -342,7 +342,7 @@ export const getInvalidConnectors = async (
               ? 'connectors are missing. Connector ids missing are:'
               : 'connector is missing. Connector id missing is:';
           acc.errors.set(
-            uuid.v4(),
+            uuidv4(),
             createBulkErrorObject({
               ruleId,
               statusCode: 404,

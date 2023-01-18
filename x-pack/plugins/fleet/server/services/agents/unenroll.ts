@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import type { Agent } from '../../types';
 import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';

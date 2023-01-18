@@ -8,7 +8,7 @@
 import { act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { getFoundExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/found_exception_list_item_schema.mock';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
@@ -178,8 +178,8 @@ describe('Policy details artifacts flyout', () => {
   });
 
   describe('when submitting the form', () => {
-    const FIRST_ONE_NAME = uuid.v4();
-    const SECOND_ONE_NAME = uuid.v4();
+    const FIRST_ONE_NAME = uuidv4();
+    const SECOND_ONE_NAME = uuidv4();
     const testTags = ['policy:1234', 'non-policy-tag', 'policy:4321'];
     let exceptions: FoundExceptionListItemSchema;
 
@@ -190,12 +190,12 @@ describe('Policy details artifacts flyout', () => {
         data: [
           getExceptionListItemSchemaMock({
             name: FIRST_ONE_NAME,
-            id: uuid.v4(),
+            id: uuidv4(),
             tags: testTags,
           }),
           getExceptionListItemSchemaMock({
             name: SECOND_ONE_NAME,
-            id: uuid.v4(),
+            id: uuidv4(),
             tags: testTags,
           }),
         ],

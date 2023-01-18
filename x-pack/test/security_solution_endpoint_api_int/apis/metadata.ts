@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
 import { TransformGetTransformStatsTransformStats } from '@elastic/elasticsearch/lib/api/types';
 import {
@@ -59,7 +59,7 @@ export default function ({ getService }: FtrProviderContext) {
             // metadata list api filters down to endpoint policies only
             const policy = await indexFleetEndpointPolicy(
               getService('kibanaServer'),
-              `Default ${uuid.v4()}`,
+              `Default ${uuidv4()}`,
               '1.1.1'
             );
             const policyId = policy.integrationPolicies[0].policy_id;

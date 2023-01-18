@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { Filter } from '@kbn/es-query';
 import { SavedObjectReference } from '@kbn/core/types';
 import { MigrateFunctionsObject, VersionedState } from '@kbn/kibana-utils-plugin/common';

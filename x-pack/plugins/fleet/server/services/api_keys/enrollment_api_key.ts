@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import { errors } from '@elastic/elasticsearch';
@@ -161,7 +161,7 @@ export async function generateEnrollmentAPIKey(
     forceRecreate?: boolean;
   }
 ): Promise<EnrollmentAPIKey> {
-  const id = uuid.v4();
+  const id = uuidv4();
   const { name: providedKeyName, forceRecreate } = data;
   if (data.agentPolicyId) {
     await validateAgentPolicyId(soClient, data.agentPolicyId);

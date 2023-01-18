@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { apmServiceInventoryOptimizedSorting } from '@kbn/observability-plugin/common';
 import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';

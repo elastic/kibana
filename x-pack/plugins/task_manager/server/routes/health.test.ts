@@ -8,7 +8,7 @@
 import { Observable, of, Subject } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { merge } from 'lodash';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { httpServiceMock, docLinksServiceMock } from '@kbn/core/server/mocks';
 import { healthRoute } from './health';
 import { mockHandlerArguments } from './_mock_handler_arguments';
@@ -59,7 +59,7 @@ describe('healthRoute', () => {
       router,
       monitoringStats$: of(),
       logger,
-      taskManagerId: uuid.v4(),
+      taskManagerId: uuidv4(),
       config: getTaskManagerConfig(),
       kibanaVersion: '8.0',
       kibanaIndexName: '.kibana',
@@ -83,7 +83,7 @@ describe('healthRoute', () => {
       router,
       monitoringStats$: of(),
       logger,
-      taskManagerId: uuid.v4(),
+      taskManagerId: uuidv4(),
       config: getTaskManagerConfig(),
       kibanaVersion: '8.0',
       kibanaIndexName: 'foo',
@@ -125,7 +125,7 @@ describe('healthRoute', () => {
       router,
       monitoringStats$: of(),
       logger,
-      taskManagerId: uuid.v4(),
+      taskManagerId: uuidv4(),
       config: getTaskManagerConfig(),
       kibanaVersion: '8.0',
       kibanaIndexName: 'foo',
@@ -173,7 +173,7 @@ describe('healthRoute', () => {
       router,
       monitoringStats$: of(),
       logger,
-      taskManagerId: uuid.v4(),
+      taskManagerId: uuidv4(),
       config: getTaskManagerConfig(),
       kibanaVersion: '8.0',
       kibanaIndexName: 'foo',
@@ -203,7 +203,7 @@ describe('healthRoute', () => {
 
     const stats$ = new Subject<MonitoringStats>();
 
-    const id = uuid.v4();
+    const id = uuidv4();
     healthRoute({
       router,
       monitoringStats$: stats$,
@@ -264,7 +264,7 @@ describe('healthRoute', () => {
 
     const stats$ = new Subject<MonitoringStats>();
 
-    const id = uuid.v4();
+    const id = uuidv4();
     healthRoute({
       router,
       monitoringStats$: stats$,
@@ -343,7 +343,7 @@ describe('healthRoute', () => {
 
     const stats$ = new Subject<MonitoringStats>();
 
-    const id = uuid.v4();
+    const id = uuidv4();
     healthRoute({
       router,
       monitoringStats$: stats$,
@@ -418,7 +418,7 @@ describe('healthRoute', () => {
       router,
       monitoringStats$: stats$,
       logger,
-      taskManagerId: uuid.v4(),
+      taskManagerId: uuidv4(),
       config: getTaskManagerConfig({
         monitored_stats_required_freshness: 1000,
         monitored_aggregated_stats_refresh_rate: 60000,
@@ -501,7 +501,7 @@ describe('healthRoute', () => {
       router,
       monitoringStats$: stats$,
       logger,
-      taskManagerId: uuid.v4(),
+      taskManagerId: uuidv4(),
       config: getTaskManagerConfig({
         monitored_stats_required_freshness: 5000,
         monitored_aggregated_stats_refresh_rate: 60000,
@@ -576,7 +576,7 @@ describe('healthRoute', () => {
       router,
       monitoringStats$: stats$,
       logger,
-      taskManagerId: uuid.v4(),
+      taskManagerId: uuidv4(),
       config: getTaskManagerConfig({
         monitored_stats_required_freshness: 1000,
         monitored_aggregated_stats_refresh_rate: 60000,

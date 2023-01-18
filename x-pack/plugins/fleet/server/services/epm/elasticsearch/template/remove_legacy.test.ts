@@ -12,7 +12,7 @@ import type {
 
 import type { Logger } from '@kbn/core/server';
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
@@ -39,7 +39,7 @@ const createMockDataStream = ({
 }) => {
   return {
     type: type || pickRandomType(),
-    dataset: dataset || uuid.v4(),
+    dataset: dataset || uuidv4(),
     title: packageName,
     package: packageName,
     path: 'some_path',

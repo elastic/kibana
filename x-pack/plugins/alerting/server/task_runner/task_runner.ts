@@ -8,7 +8,7 @@
 import apm from 'elastic-apm-node';
 import { omit } from 'lodash';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { Logger } from '@kbn/core/server';
 import { ConcreteTaskInstance, throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import { nanosToMillis } from '@kbn/event-log-plugin/server';
@@ -141,7 +141,7 @@ export class TaskRunner<
     this.ruleTypeRegistry = context.ruleTypeRegistry;
     this.searchAbortController = new AbortController();
     this.cancelled = false;
-    this.executionId = uuid.v4();
+    this.executionId = uuidv4();
     this.inMemoryMetrics = inMemoryMetrics;
     this.maxAlerts = context.maxAlerts;
     this.timer = new TaskRunnerTimer({ logger: this.logger });

@@ -15,7 +15,7 @@ import {
 import { searchAfterAndBulkCreate } from './search_after_bulk_create';
 import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { listMock } from '@kbn/lists-plugin/server/mocks';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import type { BulkCreate, BulkResponse, RuleRangeTuple, WrapHits } from './types';
@@ -55,7 +55,7 @@ describe('searchAfterAndBulkCreate', () => {
   let inputIndexPattern: string[] = [];
   let listClient = listMock.getListClient();
   const ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
-  const someGuids = Array.from({ length: 13 }).map(() => uuid.v4());
+  const someGuids = Array.from({ length: 13 }).map(() => uuidv4());
   const sampleParams = getQueryRuleParams();
   const queryCompleteRule = getCompleteRuleMock<QueryRuleParams>(sampleParams);
   const defaultFilter = {

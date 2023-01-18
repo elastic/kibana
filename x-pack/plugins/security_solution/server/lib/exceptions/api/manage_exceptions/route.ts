@@ -5,7 +5,7 @@
  * 2.0.
  */
 import * as t from 'io-ts';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import { SHARED_EXCEPTION_LIST_URL } from '../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
@@ -57,7 +57,7 @@ export const createSharedExceptionListRoute = (router: SecuritySolutionPluginRou
         const createdSharedList = await listsClient?.createExceptionList({
           description,
           immutable: false,
-          listId: uuid.v4(),
+          listId: uuidv4(),
           meta: undefined,
           name,
           namespaceType: 'single',

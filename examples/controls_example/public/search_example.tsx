@@ -7,7 +7,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { lastValueFrom } from 'rxjs';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';

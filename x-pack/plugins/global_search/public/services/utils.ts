@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 const defaultPrefStorageKey = 'globalSearch:defaultPref';
 
@@ -19,7 +19,7 @@ export const getDefaultPreference = (storage: Storage = window.sessionStorage): 
   if (pref) {
     return pref;
   }
-  pref = uuid.v4();
+  pref = uuidv4();
   storage.setItem(defaultPrefStorageKey, pref);
   return pref;
 };

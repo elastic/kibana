@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { State } from './processors_reducer';
 import { ProcessorInternal, ProcessorSelector } from '../types';
 import { DropSpecialLocations } from '../constants';
@@ -31,7 +31,7 @@ export const duplicateProcessor = (sourceProcessor: ProcessorInternal): Processo
   return {
     ...sourceProcessor,
     onFailure,
-    id: uuid.v4(),
+    id: uuidv4(),
     options: {
       ...sourceProcessor.options,
     },
