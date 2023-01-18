@@ -1,0 +1,95 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import React, { useState } from 'react';
+import {
+  EuiBasicTable,
+  EuiButtonIcon,
+  EuiPanel,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiCode,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+
+interface SyntaxExample {
+  label: string;
+  example: string;
+}
+
+export interface SyntaxExamples {
+  title: string;
+  items: SyntaxExample[];
+}
+
+export interface SyntaxSuggestionsPopoverProps {
+  title: string;
+  items: SyntaxExample[];
+}
+
+export const SyntaxSuggestionsPopover: React.FC<SyntaxSuggestionsPopoverProps> = ({
+  title,
+  items,
+}) => {
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+
+  const helpButton = (
+    <EuiButtonIcon
+      onClick={() => setIsOpen((prev) => !prev)}
+      iconType="documentation"
+      aria-label={title}
+    />
+  );
+
+  const columns = [
+    {
+      field: 'label',
+      name: i18n.translate('discover.noResults.suggestion.syntaxPopoverDescriptionHeader', {
+        defaultMessage: 'Description',
+      }),
+      width: '200px',
+    },
+    {
+      field: 'example',
+      name: i18n.translate('discover.noResults.suggestion.syntaxPopoverExampleHeader', {
+        defaultMessage: 'Example',
+      }),
+      render: (example: string) => <EuiCode>{example}</EuiCode>,
+    },
+  ];
+
+  return (
+    <EuiPopover
+      button={helpButton}
+      isOpen={isOpen}
+      display="inlineBlock"
+      panelPaddingSize="none"
+      closePopover={() => setIsOpen(false)}
+      initialFocus="#querySyntaxBasicTableId"
+    >
+      <EuiPopoverTitle paddingSize="s">{title}</EuiPopoverTitle>
+      <EuiPanel
+        className="eui-yScroll"
+        style={{ maxHeight: '40vh' }}
+        color="transparent"
+        paddingSize="s"
+      >
+        <EuiBasicTable<SyntaxExample>
+          id="querySyntaxBasicTableId"
+          style={{ width: 500 }}
+          tableCaption={title}
+          items={items}
+          compressed={true}
+          rowHeader="label"
+          columns={columns}
+          responsive={false}
+        />
+      </EuiPanel>
+    </EuiPopover>
+  );
+};

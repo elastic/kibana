@@ -8,7 +8,7 @@
 
 import React from 'react';
 import dateMath from '@kbn/datemath';
-import { EuiEmptyPrompt, EuiButton, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiButton, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { isOfQueryType, isOfAggregateQueryType } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -73,6 +73,7 @@ export const NoResultsSuggestions: React.FC<NoResultsSuggestionProps> = React.me
           id="discover.noResults.suggestion.tryText"
           defaultMessage="Here are some things to try:"
         />
+        <EuiSpacer size="xs" />
         <ul>
           {isTimeBased && (
             <li>

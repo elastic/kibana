@@ -6,27 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiCode,
-  EuiHorizontalRule,
-  EuiFlexGrid,
-  EuiFlexItem,
-  EuiModal,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiModalBody,
-  EuiText,
-  EuiLink,
-} from '@elastic/eui';
-
-interface SyntaxExamples {
-  title: string;
-  items: Array<{ label: string; example: string }>;
-}
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { SyntaxExamples, SyntaxSuggestionsPopover } from './syntax_suggestions_popover';
 
 const EXAMPLES: Record<string, SyntaxExamples> = {
   lucene: {
@@ -66,73 +50,32 @@ export interface NoResultsSuggestionWhenQueryProps {
 export const NoResultsSuggestionWhenQuery: React.FC<NoResultsSuggestionWhenQueryProps> = ({
   querySyntax,
 }) => {
-  const [isModalOpen, setIsOpenOpen] = useState<boolean>(false);
   const examplesMeta = querySyntax ? EXAMPLES[querySyntax] : null;
 
   return (
     <>
-      <EuiText data-test-subj="discoverNoResultsAdjustSearch">
-        {examplesMeta ? (
-          <FormattedMessage
-            id="discover.noResults.suggestion.adjustYourQueryWithExamplesText"
-            defaultMessage="Adjust your query, {seeExamplesLink}"
-            values={{
-              seeExamplesLink: (
-                <EuiLink
-                  data-test-subj="discoverNoResultsSeeQueryExamples"
-                  onClick={() => setIsOpenOpen(true)}
-                >
-                  <FormattedMessage
-                    id="discover.noResults.suggestion.seeQueryExamplesLinkText"
-                    defaultMessage="see examples"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
-        ) : (
-          <FormattedMessage
-            id="discover.noResults.suggestion.adjustYourQueryText"
-            defaultMessage="Adjust your query"
-          />
+      <EuiFlexGroup direction="row" alignItems="center" gutterSize="xs" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiText data-test-subj="discoverNoResultsAdjustSearch">
+            {examplesMeta ? (
+              <FormattedMessage
+                id="discover.noResults.suggestion.adjustYourQueryWithExamplesText"
+                defaultMessage="Adjust your query, try a different syntax"
+              />
+            ) : (
+              <FormattedMessage
+                id="discover.noResults.suggestion.adjustYourQueryText"
+                defaultMessage="Adjust your query"
+              />
+            )}
+          </EuiText>
+        </EuiFlexItem>
+        {!!examplesMeta && (
+          <EuiFlexItem grow={false}>
+            <SyntaxSuggestionsPopover title={examplesMeta.title} items={examplesMeta.items} />
+          </EuiFlexItem>
         )}
-      </EuiText>
-      {isModalOpen && !!examplesMeta && (
-        <EuiModal
-          onClose={() => {
-            setIsOpenOpen(false);
-          }}
-        >
-          <EuiModalHeader>
-            <EuiModalHeaderTitle>
-              <h1>{examplesMeta.title}</h1>
-            </EuiModalHeaderTitle>
-          </EuiModalHeader>
-
-          <EuiModalBody>
-            <EuiFlexGrid columns={2} gutterSize="s">
-              {examplesMeta.items.flatMap((item, index) => [
-                <EuiFlexItem key={`${index}-label`}>
-                  <EuiText size="s">{item.label}</EuiText>
-                </EuiFlexItem>,
-                <EuiFlexItem key={`${index}-example`}>
-                  <EuiText size="s">
-                    <EuiCode>{item.example}</EuiCode>
-                  </EuiText>
-                </EuiFlexItem>,
-                <EuiFlexItem
-                  key={`${index}-divider`}
-                  css={css`
-                    grid-column: span 2;
-                  `}
-                >
-                  <EuiHorizontalRule margin="s" />
-                </EuiFlexItem>,
-              ])}
-            </EuiFlexGrid>
-          </EuiModalBody>
-        </EuiModal>
-      )}
+      </EuiFlexGroup>
     </>
   );
 };
