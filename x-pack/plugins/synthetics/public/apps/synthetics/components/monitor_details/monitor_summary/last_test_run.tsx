@@ -22,6 +22,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { useParams } from 'react-router-dom';
+import { getTestRunDetailLink } from '../../common/links/test_details_link';
 import { useSelectedLocation } from '../hooks/use_selected_location';
 import { getErrorDetailsUrl } from '../monitor_errors/errors_list';
 import {
@@ -147,6 +148,8 @@ const PanelHeader = ({
 
   const { basePath } = useSyntheticsSettingsContext();
 
+  const selectedLocation = useSelectedLocation();
+
   const { monitorId } = useParams<{ monitorId: string }>();
 
   const lastRunTimestamp = useFormatTestRunAt(latestPing?.timestamp);
@@ -202,7 +205,12 @@ const PanelHeader = ({
               size="xs"
               iconType="inspect"
               iconSide="left"
-              href={`${basePath}/app/synthetics/monitor/${monitorId}/test-run/${latestPing?.monitor.check_group}`}
+              href={getTestRunDetailLink({
+                basePath,
+                monitorId,
+                checkGroup: latestPing?.monitor.check_group,
+                locationId: selectedLocation?.id,
+              })}
             >
               {i18n.translate('xpack.synthetics.monitorDetails.summary.viewTestRun', {
                 defaultMessage: 'View test run',

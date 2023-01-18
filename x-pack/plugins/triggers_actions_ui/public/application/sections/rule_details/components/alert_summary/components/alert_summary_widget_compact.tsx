@@ -18,14 +18,14 @@ import {
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED, AlertStatus } from '@kbn/rule-data-utils';
 import { AlertStateInfo } from './alert_state_info';
 import { ACTIVE_ALERT_LABEL, ALL_ALERT_LABEL, RECOVERED_ALERT_LABEL } from './constants';
-import { Alert } from '../../../../../hooks/use_load_alert_summary';
+import { Alert } from '../types';
 
 export interface AlertsSummaryWidgetCompactProps {
   activeAlertCount: number;
   activeAlerts: Alert[];
   recoveredAlertCount: number;
   recoveredAlerts: Alert[];
-  timeRangeTitle: JSX.Element | string;
+  timeRangeTitle?: JSX.Element | string;
   onClick: (status?: AlertStatus) => void;
 }
 
