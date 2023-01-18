@@ -28,9 +28,11 @@ const mockRouteContext = {
 const workpad = workpads[0];
 const now = new Date();
 
-jest.mock('uuid', () => jest.fn().mockReturnValue({
-  v4: () => '123abc'
-}));
+jest.mock('uuid', () =>
+  jest.fn().mockReturnValue({
+    v4: () => '123abc',
+  })
+);
 
 describe('PUT workpad', () => {
   let routeHandler: RequestHandler<any, any, any>;

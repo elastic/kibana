@@ -21,9 +21,11 @@ let mockRouteContext = {
   canvas: workpadRouteContextMock.create(),
 } as unknown as AwaitedProperties<MockWorkpadRouteContext>;
 
-jest.mock('uuid', () => jest.fn().mockReturnValue({
-  v4: () => '123abc'
-}));
+jest.mock('uuid', () =>
+  jest.fn().mockReturnValue({
+    v4: () => '123abc',
+  })
+);
 
 describe('POST workpad', () => {
   let routeHandler: RequestHandler<any, any, any>;

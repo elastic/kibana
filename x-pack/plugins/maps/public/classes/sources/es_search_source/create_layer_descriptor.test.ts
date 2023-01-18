@@ -22,9 +22,11 @@ jest.mock('../../../licensed_features', () => {
     },
   };
 });
-jest.mock('uuid', () => jest.fn().mockReturnValue({
-  v4: () => '12345'
-}));
+jest.mock('uuid', () =>
+  jest.fn().mockReturnValue({
+    v4: () => '12345',
+  })
+);
 
 test('Should create layer descriptor', () => {
   const layerDescriptor = createLayerDescriptor({
