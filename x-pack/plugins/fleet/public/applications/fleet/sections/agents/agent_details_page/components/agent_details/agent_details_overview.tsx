@@ -28,7 +28,7 @@ import {
   isAgentUpgradeable,
 } from '../../../../../services';
 import { AgentPolicySummaryLine } from '../../../../../components';
-import { AgentHealth } from '../../../components';
+import { AgentHealth, MetricNonAvailable } from '../../../components';
 import { Tags } from '../../../components/tags';
 
 // Allows child text to be truncated
@@ -55,17 +55,21 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                       defaultMessage: 'CPU',
                     }),
                     description:
-                      agent.metrics?.cpu_avg && agent.metrics?.cpu_avg !== 0
-                        ? agent.metrics?.cpu_avg
-                        : 'N/A',
+                      agent.metrics?.cpu_avg && agent.metrics?.cpu_avg !== 0 ? (
+                        `${agent.metrics?.cpu_avg} %`
+                      ) : (
+                        <MetricNonAvailable agentPolicy={agentPolicy} />
+                      ),
                   },
                   {
                     title: i18n.translate('xpack.fleet.agentDetails.memoryLabel', {
                       defaultMessage: 'Memory',
                     }),
-                    description: agent.metrics?.memory_size_byte_avg
-                      ? formatBytes(agent.metrics?.memory_size_byte_avg)
-                      : 'N/A',
+                    description: agent.metrics?.memory_size_byte_avg ? (
+                      formatBytes(agent.metrics?.memory_size_byte_avg)
+                    ) : (
+                      <MetricNonAvailable agentPolicy={agentPolicy} />
+                    ),
                   },
                 ]
               : []),

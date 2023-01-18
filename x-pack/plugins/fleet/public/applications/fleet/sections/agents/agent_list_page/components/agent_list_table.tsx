@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import type { CriteriaWithPagination } from '@elastic/eui';
+import { type CriteriaWithPagination, EuiIconTip } from '@elastic/eui';
 import {
   EuiBasicTable,
   EuiFlexGroup,
@@ -16,11 +16,11 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
+import { FormattedMessage, FormattedRelative, FormattedNumber } from '@kbn/i18n-react';
 
 import type { Agent, AgentPolicy } from '../../../../types';
 import { isAgentUpgradeable, ExperimentalFeaturesService, formatBytes } from '../../../../services';
-import { AgentHealth } from '../../components';
+import { AgentHealth, MetricNonAvailable } from '../../components';
 
 import type { Pagination } from '../../../../hooks';
 import { useLink, useKibanaVersion } from '../../../../hooks';
@@ -162,7 +162,14 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
             field: 'metrics',
             sortable: true,
             name: (
-              <EuiToolTip content="Their mascot is the Octokitty">
+              <EuiToolTip
+                content={
+                  <FormattedMessage
+                    id="xpack.fleet.agentList.cpuTooltip"
+                    defaultMessage="Average CPU usage in the last 5 minutes"
+                  />
+                }
+              >
                 <span>
                   <FormattedMessage id="xpack.fleet.agentList.cpuTitle" defaultMessage="CPU" />
                   &nbsp;
@@ -171,14 +178,29 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
               </EuiToolTip>
             ),
             width: '75px',
-            render: (metrics: AgentMetrics, agent: any) =>
-              metrics.cpu_avg && metrics.cpu_avg !== 0 ? metrics.cpu_avg * 100 : 'N/A',
+            render: (metrics: AgentMetrics | undefined, agent: Agent) =>
+              metrics?.cpu_avg && metrics?.cpu_avg !== 0 ? (
+                `${metrics.cpu_avg} %`
+              ) : (
+                <MetricNonAvailable
+                  agentPolicy={
+                    agent.policy_id ? agentPoliciesIndexedById[agent.policy_id] : undefined
+                  }
+                />
+              ),
           },
           {
             field: 'metrics',
             sortable: true,
             name: (
-              <EuiToolTip content="Their mascot is the Octokitty">
+              <EuiToolTip
+                content={
+                  <FormattedMessage
+                    id="xpack.fleet.agentList.memoryTooltip"
+                    defaultMessage="Average memory usage in the last 5 minutes"
+                  />
+                }
+              >
                 <span>
                   <FormattedMessage
                     id="xpack.fleet.agentList.memoryTitle"
@@ -190,10 +212,16 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
               </EuiToolTip>
             ),
             width: '90px',
-            render: (metrics: AgentMetrics, agent: any) =>
-              metrics.memory_size_byte_avg && metrics.memory_size_byte_avg !== 0
-                ? formatBytes(metrics.memory_size_byte_avg)
-                : 'N/A',
+            render: (metrics: AgentMetrics | undefined, agent: Agent) =>
+              metrics?.memory_size_byte_avg && metrics?.memory_size_byte_avg !== 0 ? (
+                formatBytes(metrics.memory_size_byte_avg)
+              ) : (
+                <MetricNonAvailable
+                  agentPolicy={
+                    agent.policy_id ? agentPoliciesIndexedById[agent.policy_id] : undefined
+                  }
+                />
+              ),
           },
         ]
       : []),

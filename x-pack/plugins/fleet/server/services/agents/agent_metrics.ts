@@ -42,8 +42,10 @@ export async function fetchAndAssignAgentMetrics(esClient: ElasticsearchClient, 
     return {
       ...agent,
       metrics: {
-        cpu_avg: results?.sum_cpu ?? undefined,
-        memory_size_byte_avg: Math.trunc(results?.sum_memory_size) ?? undefined,
+        cpu_avg: results?.sum_cpu ? Math.trunc(results.sum_cpu * 10000) / 100 : undefined,
+        memory_size_byte_avg: results?.sum_memory_size
+          ? Math.trunc(results?.sum_memory_size)
+          : undefined,
       },
     };
   });
