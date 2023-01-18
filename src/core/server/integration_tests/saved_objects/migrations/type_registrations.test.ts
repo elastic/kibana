@@ -92,6 +92,7 @@ const previouslyRegisteredTypes = [
   'osquery-usage-metric',
   'osquery-manager-usage-metric',
   'query',
+  'rules-settings',
   'sample-data-telemetry',
   'search',
   'search-session',

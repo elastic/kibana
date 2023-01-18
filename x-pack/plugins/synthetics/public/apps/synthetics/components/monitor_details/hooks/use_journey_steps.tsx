@@ -29,7 +29,9 @@ export const useJourneySteps = (checkGroup?: string, lastRefresh?: number) => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(fetchJourneyAction.get({ checkGroup: checkGroupId }));
+    if (checkGroupId) {
+      dispatch(fetchJourneyAction.get({ checkGroup: checkGroupId }));
+    }
   }, [checkGroupId, dispatch, lastRefresh]);
 
   const isFailed =
@@ -43,7 +45,7 @@ export const useJourneySteps = (checkGroup?: string, lastRefresh?: number) => {
   const stepLabels = stepEnds.map((stepEnd) => stepEnd?.synthetics?.step?.name ?? '');
 
   const currentStep = stepIndex
-    ? journeyData?.steps.find((step) => step.synthetics?.step?.index === Number(stepIndex))
+    ? stepEnds.find((step) => step.synthetics?.step?.index === Number(stepIndex))
     : undefined;
 
   return {
