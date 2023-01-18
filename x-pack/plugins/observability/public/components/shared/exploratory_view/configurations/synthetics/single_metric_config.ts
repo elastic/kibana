@@ -103,7 +103,7 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
           titlePosition: 'bottom',
         },
         columnType: FORMULA_COLUMN,
-        formula: 'unique_count(monitor.check_group)',
+        formula: "unique_count(monitor.check_group, kql='summary: *')",
         format: 'number',
       },
       {
