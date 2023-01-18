@@ -8,7 +8,7 @@
 
 import { orderBy } from 'lodash/fp';
 import React, { createContext, FC, useCallback, useContext } from 'react';
-import type { CellActionsProviderProps, GetActions } from '../types';
+import type { CellAction, CellActionsProviderProps, GetActions } from '../types';
 
 const CellActionsContext = createContext<{ getActions: GetActions } | null>(null);
 
@@ -20,7 +20,7 @@ export const CellActionsProvider: FC<CellActionsProviderProps> = ({
     (context) =>
       getTriggerCompatibleActions(context.trigger.id, context).then((actions) =>
         orderBy(['order', 'id'], ['asc', 'asc'], actions)
-      ),
+      ) as Promise<CellAction[]>,
     [getTriggerCompatibleActions]
   );
 

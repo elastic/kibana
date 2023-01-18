@@ -9,14 +9,14 @@
 import React, { useMemo } from 'react';
 
 import { EuiButtonIcon, EuiToolTip, IconType } from '@elastic/eui';
-import type { Action, CellActionExecutionContext } from '../types';
+import type { CellAction, CellActionExecutionContext } from '../types';
 
 export const ActionItem = ({
   action,
   actionContext,
   showTooltip,
 }: {
-  action: Action;
+  action: CellAction;
   actionContext: CellActionExecutionContext;
   showTooltip: boolean;
 }) => {

@@ -11,7 +11,8 @@ import type {
   ActionExecutionContext,
   UiActionsService,
 } from '@kbn/ui-actions-plugin/public';
-export type { Action, ActionExecutionContext };
+
+export type CellAction = Action<CellActionExecutionContext>;
 
 export interface CellActionsProviderProps {
   /**
@@ -21,7 +22,7 @@ export interface CellActionsProviderProps {
   getTriggerCompatibleActions: UiActionsService['getTriggerCompatibleActions'];
 }
 
-export type GetActions = (context: CellActionExecutionContext) => Promise<Action[]>;
+export type GetActions = (context: CellActionExecutionContext) => Promise<CellAction[]>;
 
 export interface CellActionField {
   /**
@@ -42,8 +43,8 @@ export interface CellActionField {
 }
 
 export interface PartitionedActions {
-  extraActions: Array<Action<object>>;
-  visibleActions: Array<Action<object>>;
+  extraActions: CellAction[];
+  visibleActions: CellAction[];
 }
 
 export interface CellActionExecutionContext extends ActionExecutionContext {
