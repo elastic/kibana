@@ -92,11 +92,6 @@ export interface InfraDatabaseMultiResponse<Hit, Aggregation> extends InfraDatab
   responses: Array<InfraDatabaseSearchResponse<Hit, Aggregation>>;
 }
 
-export interface InfraDatabaseFieldCapsResponse extends InfraDatabaseResponse {
-  indices: string[];
-  fields: InfraFieldsResponse;
-}
-
 export interface InfraDatabaseGetIndicesAliasResponse {
   [indexName: string]: {
     aliases: {
