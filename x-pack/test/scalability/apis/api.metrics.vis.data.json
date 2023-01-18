@@ -17,8 +17,8 @@
       {
         "action": "rampUsersPerSec",
         "minUsersCount": 10,
-        "maxUsersCount": 200,
-        "duration": "190s"
+        "maxUsersCount": 150,
+        "duration": "140s"
       }
     ],
     "maxDuration": "5m"
