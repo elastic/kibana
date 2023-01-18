@@ -21,3 +21,4 @@ export * from './alert_rules/default_status_alert.journey';
 export * from './test_now_mode.journey';
 export * from './data_retention.journey';
 export * from './monitor_details_page/monitor_summary.journey';
+export * from './test_run_details.journey';

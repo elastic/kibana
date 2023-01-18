@@ -1,0 +1,5 @@
+summary: Update an index connector.
+value:
+  name: updated-connector
+  config:
+    index: updated-index
