@@ -10,7 +10,7 @@ import React from 'react';
 import { Subscription } from 'rxjs';
 import { identity } from 'lodash';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { getSavedObjectFinder, showSaveModal } from '@kbn/saved-objects-plugin/public';
+import { getSavedObjectFinder } from '@kbn/saved-objects-plugin/public';
 import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 import {
@@ -213,8 +213,6 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       getAttributeService: (type: string, options) =>
         new AttributeService(
           type,
-          showSaveModal,
-          core.i18n.Context,
           core.notifications.toasts,
           options,
           this.getEmbeddableFactory
