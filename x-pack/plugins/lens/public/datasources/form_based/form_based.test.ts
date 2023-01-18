@@ -50,6 +50,7 @@ import { createMockedFullReference } from './operations/mocks';
 import { cloneDeep } from 'lodash';
 import { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { createMockFramePublicAPI } from '../../mocks';
+import { filterUserMessages } from '../../app_plugin/get_application_user_messages';
 
 jest.mock('./loader');
 jest.mock('../../id_generator');
@@ -3264,12 +3265,14 @@ describe('IndexPattern Data Source', () => {
         } as unknown as FramePublicAPI;
       });
 
-      const extractTranslationIdsFromWarnings = (warnings: UserMessage[]) =>
-        warnings?.map(({ longMessage }) =>
+      const extractTranslationIdsFromWarnings = (warnings: UserMessage[]) => {
+        const onlyWarnings = filterUserMessages(warnings, undefined, { severity: 'warning' });
+        return onlyWarnings.map(({ longMessage }) =>
           isFragment(longMessage)
             ? (longMessage as ReactElement).props.children[0].props.id
             : (longMessage as ReactElement).props.id
         );
+      };
 
       it('should return mismatched time shifts', () => {
         const warnings = FormBasedDatasource.getUserMessages!(state, {

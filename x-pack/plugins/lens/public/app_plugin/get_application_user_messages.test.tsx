@@ -13,8 +13,8 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { shallow } from 'enzyme';
 import { Visualization } from '..';
 import { DataViewsState } from '../state_management';
-import { Datasource } from '../types';
-import { getApplicationUserMessages } from './get_application_user_messages';
+import { Datasource, UserMessage } from '../types';
+import { filterUserMessages, getApplicationUserMessages } from './get_application_user_messages';
 
 describe('application-level user messages', () => {
   it('should generate error if vis type is not provided', () => {
@@ -198,5 +198,176 @@ describe('application-level user messages', () => {
         ).exists(RedirectAppLinks)
       ).toBeFalsy();
     });
+  });
+});
+
+describe('filtering user messages', () => {
+  const dimensionId1 = 'foo';
+  const dimensionId2 = 'baz';
+  const layerId = 'bar';
+
+  const userMessages: UserMessage[] = [
+    {
+      severity: 'error',
+      fixableInEditor: true,
+      displayLocations: [{ id: 'dimensionTrigger', dimensionId: dimensionId1, layerId }],
+      shortMessage: 'Warning on dimension 1!',
+      longMessage: '',
+    },
+    {
+      severity: 'warning',
+      fixableInEditor: true,
+      displayLocations: [{ id: 'dimensionTrigger', dimensionId: dimensionId2, layerId }],
+      shortMessage: 'Warning on dimension 2!',
+      longMessage: '',
+    },
+    {
+      severity: 'warning',
+      fixableInEditor: true,
+      displayLocations: [{ id: 'banner' }],
+      shortMessage: 'Deprecation notice!',
+      longMessage: '',
+    },
+    {
+      severity: 'error',
+      fixableInEditor: true,
+      displayLocations: [{ id: 'visualization' }],
+      shortMessage: 'Visualization error!',
+      longMessage: '',
+    },
+    {
+      severity: 'error',
+      fixableInEditor: true,
+      displayLocations: [{ id: 'visualizationInEditor' }],
+      shortMessage: 'Visualization editor error!',
+      longMessage: '',
+    },
+    {
+      severity: 'warning',
+      fixableInEditor: true,
+      displayLocations: [{ id: 'visualizationOnEmbeddable' }],
+      shortMessage: 'Visualization embeddable warning!',
+      longMessage: '',
+    },
+  ];
+
+  it('filters by location', () => {
+    expect(filterUserMessages(userMessages, 'banner', {})).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "displayLocations": Array [
+            Object {
+              "id": "banner",
+            },
+          ],
+          "fixableInEditor": true,
+          "longMessage": "",
+          "severity": "warning",
+          "shortMessage": "Deprecation notice!",
+        },
+      ]
+    `);
+    expect(
+      filterUserMessages(userMessages, 'dimensionTrigger', {
+        dimensionId: dimensionId1,
+        layerId,
+      })
+    ).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "displayLocations": Array [
+            Object {
+              "dimensionId": "foo",
+              "id": "dimensionTrigger",
+              "layerId": "bar",
+            },
+          ],
+          "fixableInEditor": true,
+          "longMessage": "",
+          "severity": "error",
+          "shortMessage": "Warning on dimension 1!",
+        },
+      ]
+    `);
+    expect(
+      filterUserMessages(userMessages, 'dimensionTrigger', {
+        dimensionId: dimensionId2,
+        layerId,
+      })
+    ).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "displayLocations": Array [
+            Object {
+              "dimensionId": "baz",
+              "id": "dimensionTrigger",
+              "layerId": "bar",
+            },
+          ],
+          "fixableInEditor": true,
+          "longMessage": "",
+          "severity": "warning",
+          "shortMessage": "Warning on dimension 2!",
+        },
+      ]
+    `);
+    expect(filterUserMessages(userMessages, ['visualization', 'visualizationInEditor'], {}))
+      .toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "displayLocations": Array [
+            Object {
+              "id": "visualization",
+            },
+          ],
+          "fixableInEditor": true,
+          "longMessage": "",
+          "severity": "error",
+          "shortMessage": "Visualization error!",
+        },
+        Object {
+          "displayLocations": Array [
+            Object {
+              "id": "visualizationInEditor",
+            },
+          ],
+          "fixableInEditor": true,
+          "longMessage": "",
+          "severity": "error",
+          "shortMessage": "Visualization editor error!",
+        },
+      ]
+    `);
+  });
+
+  it('filters by severity', () => {
+    const warnings = filterUserMessages(userMessages, undefined, { severity: 'warning' });
+    const errors = filterUserMessages(userMessages, undefined, { severity: 'error' });
+
+    expect(warnings.length + errors.length).toBe(userMessages.length);
+    expect(warnings.every((message) => message.severity === 'warning'));
+    expect(errors.every((message) => message.severity === 'error'));
+  });
+
+  it('filters by both', () => {
+    expect(
+      filterUserMessages(userMessages, ['visualization', 'visualizationOnEmbeddable'], {
+        severity: 'warning',
+      })
+    ).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "displayLocations": Array [
+            Object {
+              "id": "visualizationOnEmbeddable",
+            },
+          ],
+          "fixableInEditor": true,
+          "longMessage": "",
+          "severity": "warning",
+          "shortMessage": "Visualization embeddable warning!",
+        },
+      ]
+    `);
   });
 });

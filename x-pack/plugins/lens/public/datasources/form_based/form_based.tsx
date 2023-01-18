@@ -51,12 +51,7 @@ import {
   triggerActionOnIndexPatternChange,
 } from './loader';
 import { toExpression } from './to_expression';
-import {
-  FormBasedDimensionTrigger,
-  FormBasedDimensionEditor,
-  getDropProps,
-  onDrop,
-} from './dimension_panel';
+import { FormBasedDimensionEditor, getDropProps, onDrop } from './dimension_panel';
 import { FormBasedDataPanel } from './datapanel';
 import {
   getDatasourceSuggestionsForField,
@@ -103,8 +98,16 @@ import { DOCUMENT_FIELD_NAME } from '../../../common/constants';
 import { isColumnOfType } from './operations/definitions/helpers';
 import { LayerSettingsPanel } from './layer_settings';
 import { FormBasedLayer } from '../..';
+import { DimensionTrigger } from '../../shared_components/dimension_trigger';
 export type { OperationType, GenericIndexPatternColumn } from './operations';
 export { deleteColumn } from './operations';
+
+function wrapOnDot(str?: string) {
+  // u200B is a non-width white-space character, which allows
+  // the browser to efficiently word-wrap right after the dot
+  // without us having to draw a lot of extra DOM elements, etc
+  return str ? str.replace(/\./g, '.\u200B') : '';
+}
 
 export function columnToOperation(
   column: GenericIndexPatternColumn,
@@ -528,6 +531,8 @@ export function getFormBasedDatasource({
       props: DatasourceDimensionTriggerProps<FormBasedPrivateState>
     ) => {
       const columnLabelMap = formBasedDatasource.uniqueLabels(props.state);
+      const uniqueLabel = columnLabelMap[props.columnId];
+      const formattedLabel = wrapOnDot(uniqueLabel);
 
       render(
         <KibanaThemeProvider theme$={core.theme.theme$}>
@@ -544,7 +549,13 @@ export function getFormBasedDatasource({
                 unifiedSearch,
               }}
             >
-              <FormBasedDimensionTrigger uniqueLabel={columnLabelMap[props.columnId]} {...props} />
+              <DimensionTrigger
+                id={props.columnId}
+                label={formattedLabel}
+                isInvalid={props.invalid}
+                hideTooltip={props.hideTooltip}
+                invalidMessage={props.invalidMessage}
+              />
             </KibanaContextProvider>
           </I18nProvider>
         </KibanaThemeProvider>,
@@ -903,6 +914,36 @@ export function getFormBasedDatasource({
         });
       }
 
+      // generate messages for invalid columns
+      const columnErrorMessages: UserMessage[] = Object.keys(state.layers)
+        .map((layerId) => {
+          const messages: UserMessage[] = [];
+          for (const columnId of Object.keys(state.layers[layerId].columns)) {
+            if (!this.isValidColumn(state, indexPatterns, layerId, columnId)) {
+              messages.push({
+                severity: 'error',
+                displayLocations: [{ id: 'dimensionTrigger', dimensionId: columnId, layerId }],
+                fixableInEditor: true,
+                shortMessage: '',
+                longMessage: (
+                  <p>
+                    {i18n.translate('xpack.lens.configure.invalidConfigTooltip', {
+                      defaultMessage: 'Invalid configuration.',
+                    })}
+                    <br />
+                    {i18n.translate('xpack.lens.configure.invalidConfigTooltipClick', {
+                      defaultMessage: 'Click for more details.',
+                    })}
+                  </p>
+                ),
+              });
+            }
+          }
+
+          return messages;
+        })
+        .flat();
+
       const warningMessages = [
         ...[
           ...(getStateTimeShiftWarningMessages(
@@ -931,7 +972,7 @@ export function getFormBasedDatasource({
         ...getDeprecatedSamplingWarningMessage(core),
       ];
 
-      return [...errorMessages, ...warningMessages];
+      return [...errorMessages, ...columnErrorMessages, ...warningMessages];
     },
 
     getSearchWarningMessages: (state, warning, request, response) => {

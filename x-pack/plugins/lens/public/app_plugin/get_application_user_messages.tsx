@@ -191,17 +191,32 @@ export const filterUserMessages = (
     ? [locationId]
     : [];
 
-  return userMessages.filter(
-    (message) =>
-      Boolean(
-        message.displayLocations.find(
-          (location) =>
-            locationIds.includes(location.id) &&
-            (location.id === 'dimensionTrigger' && dimensionId
-              ? dimensionId === location.dimensionId
-              : true) &&
-            (location.id === 'dimensionTrigger' && layerId ? layerId === location.layerId : true)
-        )
-      ) && (severity ? message.severity === severity : true)
-  );
+  return userMessages.filter((message) => {
+    if (locationIds.length) {
+      const locationMatch = message.displayLocations.find((location) => {
+        if (!locationIds.includes(location.id)) {
+          return false;
+        }
+
+        if (
+          location.id === 'dimensionTrigger' &&
+          (location.dimensionId !== dimensionId || location.layerId !== layerId)
+        ) {
+          return false;
+        }
+
+        return true;
+      });
+
+      if (!locationMatch) {
+        return false;
+      }
+    }
+
+    if (severity && message.severity !== severity) {
+      return false;
+    }
+
+    return true;
+  });
 };

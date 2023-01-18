@@ -520,7 +520,9 @@ export function LayerPanel(
                         });
 
                         const hasMessages = Boolean(messages.length);
-                        const messageToDisplay = hasMessages ? messages[0].shortMessage : undefined;
+                        const messageToDisplay = hasMessages
+                          ? messages[0].shortMessage || messages[0].longMessage
+                          : undefined;
 
                         return (
                           <DraggableDimensionButton
