@@ -28,7 +28,7 @@ export const getFormattedEntry = (
   threatIndexPatterns: DataViewBase,
   item: Entry,
   itemIndex: number,
-  uuidGen: () => string = uuid.v4
+  uuidGen: () => string = uuidv4
 ): FormattedEntry => {
   const { fields } = indexPattern;
   const { fields: threatFields } = threatIndexPatterns;
