@@ -74,7 +74,6 @@ describe('getAlertsForNotification', () => {
         Object {
           "event": Object {
             "event.action": "active",
-            "kibana.alert.end": Object {},
             "kibana.alert.status": "active",
           },
           "flapping": true,

@@ -25,7 +25,7 @@ export function getAlertsForNotification(trackedEventsToIndex: any[]) {
         if (trackedEvent.pendingRecoveredCount < MAX_FLAP_COUNT) {
           trackedEvent.event[ALERT_STATUS] = ALERT_STATUS_ACTIVE;
           trackedEvent.event[EVENT_ACTION] = 'active';
-          trackedEvent.event[ALERT_END] = {};
+          delete trackedEvent.event[ALERT_END];
         } else {
           trackedEvent.pendingRecoveredCount = 0;
         }
