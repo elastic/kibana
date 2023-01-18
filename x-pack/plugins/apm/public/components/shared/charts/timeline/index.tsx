@@ -7,7 +7,7 @@
 
 import PropTypes from 'prop-types';
 import React, { PureComponent, ReactNode } from 'react';
-import { makeWidthFlexible } from 'react-vis';
+import { makeWidthFlexible } from 'react-vis/dist/dist.min.js';
 import { AgentMark } from '../../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_agent_marks';
 import { ErrorMark } from '../../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_error_marks';
 import { getPlotValues } from './plot_utils';

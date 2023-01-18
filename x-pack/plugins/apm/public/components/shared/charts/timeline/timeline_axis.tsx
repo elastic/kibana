@@ -7,7 +7,7 @@
 
 import { inRange } from 'lodash';
 import React, { ReactNode } from 'react';
-import { XAxis, XYPlot } from 'react-vis';
+import { XAxis, XYPlot } from 'react-vis/dist/dist.min.js';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { useTheme } from '../../../../hooks/use_theme';
 import { Mark } from '.';
