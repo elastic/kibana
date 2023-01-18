@@ -68,7 +68,7 @@ const FindingsTableComponent = ({
       createColumnWithFilters(baseFindingsColumns['resource.id'], { onAddFilter }),
       createColumnWithFilters(baseFindingsColumns['resource.name'], { onAddFilter }),
       createColumnWithFilters(baseFindingsColumns['resource.sub_type'], { onAddFilter }),
-      createColumnWithFilters(baseFindingsColumns['rule.rule_number'], { onAddFilter }),
+      createColumnWithFilters(baseFindingsColumns['rule.benchmark.rule_number'], { onAddFilter }),
       createColumnWithFilters(baseFindingsColumns['rule.name'], { onAddFilter }),
       baseFindingsColumns['rule.section'],
       baseFindingsColumns['@timestamp'],

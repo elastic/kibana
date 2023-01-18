@@ -144,7 +144,7 @@ describe('<FindingsTable />', () => {
       'resource.id',
       'resource.name',
       'resource.sub_type',
-      'rule.rule_number',
+      'rule.benchmark.rule_number',
       'rule.name',
     ];
 

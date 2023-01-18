@@ -135,7 +135,7 @@ const baseColumns = [
     ),
   },
   {
-    field: 'rule.rule_number',
+    field: 'rule.benchmark.rule_number',
     name: i18n.translate(
       'xpack.csp.findings.findingsTable.findingsTableColumn.ruleNumberColumnLabel',
       {
