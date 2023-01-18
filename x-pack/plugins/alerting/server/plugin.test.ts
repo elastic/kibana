@@ -86,6 +86,7 @@ describe('Alerting Plugin', () => {
       statusService: statusServiceMock.createSetupContract(),
       monitoringCollection: monitoringCollectionMock.createSetup(),
       data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
+      features: featuresPluginMock.createSetup(),
     };
 
     let plugin: AlertingPlugin;
@@ -243,6 +244,7 @@ describe('Alerting Plugin', () => {
           statusService: statusServiceMock.createSetupContract(),
           monitoringCollection: monitoringCollectionMock.createSetup(),
           data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
+          features: featuresPluginMock.createSetup(),
         });
 
         const startContract = plugin.start(coreMock.createStart(), {
@@ -289,6 +291,7 @@ describe('Alerting Plugin', () => {
           statusService: statusServiceMock.createSetupContract(),
           monitoringCollection: monitoringCollectionMock.createSetup(),
           data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
+          features: featuresPluginMock.createSetup(),
         });
 
         const startContract = plugin.start(coreMock.createStart(), {
@@ -346,6 +349,7 @@ describe('Alerting Plugin', () => {
         statusService: statusServiceMock.createSetupContract(),
         monitoringCollection: monitoringCollectionMock.createSetup(),
         data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
+        features: featuresPluginMock.createSetup(),
       });
 
       const startContract = plugin.start(coreMock.createStart(), {
