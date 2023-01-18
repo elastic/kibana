@@ -121,7 +121,7 @@ export interface LensTopNavMenuProps {
   theme$: Observable<CoreTheme>;
   indexPatternService: IndexPatternServiceAPI;
   onTextBasedSavedAndExit: ({ onSave }: { onSave: () => void }) => Promise<void>;
-  shortUrlService?: (params: LensAppLocatorParams) => Promise<string>;
+  shortUrlService: (params: LensAppLocatorParams) => Promise<string>;
   isCurrentStateDirty: boolean;
 }
 

@@ -178,7 +178,6 @@ function getStateFromParams(params: LensAppLocatorParams): MainHistoryLocationSt
 export class LensAppLocatorDefinition implements LocatorDefinition<LensAppLocatorParams> {
   public readonly id = LENS_APP_LOCATOR;
 
-  constructor() {}
 
   public readonly getLocation = async (params: LensAppLocatorParams) => {
     const { filters, query, savedObjectId, resolvedDateRange, searchSessionId } = params;
