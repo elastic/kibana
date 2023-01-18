@@ -89,3 +89,10 @@ export {
   SECURITY_EXTENSION_ID,
   SPACES_EXTENSION_ID,
 } from './src/extensions/extensions';
+
+export type {
+  SavedObject,
+  SavedObjectAttribute,
+  SavedObjectAttributeSingle,
+  SavedObjectReference,
+} from '@kbn/core-saved-objects-common/src/server_types';
