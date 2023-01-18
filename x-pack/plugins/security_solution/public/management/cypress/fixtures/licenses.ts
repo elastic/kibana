@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+// dev licenses for testing only
+// from wiki internal license page
+// similar to x-pack/test/licensing_plugin/scenario.ts
 export const gold = {
   license: {
     uid: '16783a1f-1e4b-471c-9a8b-a2b297b87a47',
