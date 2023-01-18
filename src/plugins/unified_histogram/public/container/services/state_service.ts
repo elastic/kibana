@@ -10,7 +10,7 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { isEqual } from 'lodash';
-import { BehaviorSubject, distinctUntilChanged } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, map, Observable } from 'rxjs';
 import { UnifiedHistogramFetchStatus } from '../..';
 import type { UnifiedHistogramServices } from '../../types';
 import {
@@ -85,36 +85,42 @@ export class UnifiedHistogramStateService {
     this.state$ = new BehaviorSubject(this.state);
   }
 
-  public getState$() {
-    return this.state$.pipe(distinctUntilChanged((prev, curr) => isEqual(prev, curr)));
+  public getState$<T = UnifiedHistogramState>(
+    selector?: (state: UnifiedHistogramState) => T
+  ): Observable<T> {
+    if (selector) {
+      return this.state$.pipe(map(selector), distinctUntilChanged(isEqual));
+    }
+
+    return this.state$.pipe(distinctUntilChanged(isEqual));
   }
 
-  public updateState(newState: Partial<UnifiedHistogramState>) {
+  public updateState(stateUpdate: Partial<UnifiedHistogramState>) {
     if (this.localStorageKeyPrefix) {
-      if ('chartHidden' in newState) {
-        setChartHidden(this.services.storage, this.localStorageKeyPrefix, newState.chartHidden);
+      if ('chartHidden' in stateUpdate) {
+        setChartHidden(this.services.storage, this.localStorageKeyPrefix, stateUpdate.chartHidden);
       }
 
-      if ('topPanelHeight' in newState) {
+      if ('topPanelHeight' in stateUpdate) {
         setTopPanelHeight(
           this.services.storage,
           this.localStorageKeyPrefix,
-          newState.topPanelHeight
+          stateUpdate.topPanelHeight
         );
       }
 
-      if ('breakdownField' in newState) {
+      if ('breakdownField' in stateUpdate) {
         setBreakdownField(
           this.services.storage,
           this.localStorageKeyPrefix,
-          newState.breakdownField?.name
+          stateUpdate.breakdownField?.name
         );
       }
     }
 
     this.state = {
       ...this.state,
-      ...newState,
+      ...stateUpdate,
     };
 
     this.state$.next(this.state);

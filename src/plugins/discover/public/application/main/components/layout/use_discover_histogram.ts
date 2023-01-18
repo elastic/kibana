@@ -13,10 +13,8 @@ import {
   UnifiedHistogramFetchStatus,
 } from '@kbn/unified-histogram-plugin/public';
 import { UnifiedHistogramState } from '@kbn/unified-histogram-plugin/public/container/services/state_service';
-import { isEqual } from 'lodash';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { distinctUntilChanged, map } from 'rxjs';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { getUiActions } from '../../../../kibana_services';
 import { FetchStatus } from '../../../types';
@@ -138,15 +136,22 @@ export const useDiscoverHistogram = ({
       return;
     }
 
-    const subscription = unifiedHistogram.getState$().subscribe((state) => {
-      inspectorAdapters.lensRequests = state.lensRequestAdapter;
+    const subscription = unifiedHistogram
+      .getState$(({ lensRequestAdapter, chartHidden, timeInterval, breakdownField }) => ({
+        lensRequestAdapter,
+        chartHidden,
+        timeInterval,
+        breakdownField,
+      }))
+      .subscribe((state) => {
+        inspectorAdapters.lensRequests = state.lensRequestAdapter;
 
-      stateContainer.appState.set({
-        hideChart: state.chartHidden,
-        interval: state.timeInterval,
-        breakdownField: state.breakdownField?.name,
+        stateContainer.appState.set({
+          hideChart: state.chartHidden,
+          interval: state.timeInterval,
+          breakdownField: state.breakdownField?.name,
+        });
       });
-    });
 
     return () => {
       subscription.unsubscribe();
@@ -198,11 +203,7 @@ export const useDiscoverHistogram = ({
     }
 
     const subscription = unifiedHistogram
-      .getState$()
-      .pipe(
-        map((state) => ({ status: state.totalHitsStatus, result: state.totalHitsResult })),
-        distinctUntilChanged((prev, curr) => isEqual(prev, curr))
-      )
+      .getState$((state) => ({ status: state.totalHitsStatus, result: state.totalHitsResult }))
       .subscribe(({ status, result }) => {
         if (result instanceof Error) {
           // Display the error and set totalHits$ to an error state

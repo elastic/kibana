@@ -67,12 +67,12 @@ export const UnifiedHistogramContainer = forwardRef<
         setStateService(new UnifiedHistogramStateService(options));
         setInitialized(true);
       },
-      getState$: () => {
+      getState$: (selector) => {
         if (!stateService) {
           throw Error('Unified Histogram must be initialized before calling getState$.');
         }
 
-        return stateService.getState$();
+        return stateService.getState$(selector);
       },
       updateState: (stateUpdate) => {
         if (!stateService) {
