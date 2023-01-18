@@ -257,7 +257,10 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
         ),
         vega: Path.resolve(worker.repoRoot, 'node_modules/vega/build-es5/vega.js'),
         'react-vis': Path.resolve(worker.repoRoot, 'node_modules/react-vis/dist/dist.min.js'),
-        'react-vis/dist/style.css': Path.resolve(worker.repoRoot, 'node_modules/react-vis/dist/style.css'),
+        'react-vis/dist/style.css': Path.resolve(
+          worker.repoRoot,
+          'node_modules/react-vis/dist/style.css'
+        ),
       },
       symlinks: false,
     },
