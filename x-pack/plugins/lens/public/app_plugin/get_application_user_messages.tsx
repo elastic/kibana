@@ -9,7 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import type { CoreStart } from '@kbn/core/public';
 import type { DataViewsState, VisualizationState } from '../state_management';
 import type {
   Datasource,
@@ -193,7 +193,7 @@ export const filterUserMessages = (
 
   return userMessages.filter((message) => {
     if (locationIds.length) {
-      const locationMatch = message.displayLocations.find((location) => {
+      const hasMatch = message.displayLocations.some((location) => {
         if (!locationIds.includes(location.id)) {
           return false;
         }
@@ -208,7 +208,7 @@ export const filterUserMessages = (
         return true;
       });
 
-      if (!locationMatch) {
+      if (!hasMatch) {
         return false;
       }
     }

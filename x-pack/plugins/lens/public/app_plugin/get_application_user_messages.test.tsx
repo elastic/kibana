@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { CoreStart } from '@kbn/core-lifecycle-browser';
+import { CoreStart } from '@kbn/core/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { shallow } from 'enzyme';

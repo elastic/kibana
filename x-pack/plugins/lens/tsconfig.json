@@ -61,7 +61,6 @@
     "@kbn/monaco",
     "@kbn/language-documentation-popover",
     "@kbn/core-saved-objects-common",
-    "@kbn/core-lifecycle-browser",
   ],
   "exclude": [
     "target/**/*",
