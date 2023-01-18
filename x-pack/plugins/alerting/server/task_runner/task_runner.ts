@@ -448,7 +448,7 @@ export class TaskRunner<
         eventLogger: this.alertingEventLogger,
         ruleLabel,
         ruleRunMetricsStore,
-        shouldLogAndScheduleActionsForAlerts: this.shouldLogAndScheduleActionsForAlerts(),
+        shouldLogAlerts: this.shouldLogAndScheduleActionsForAlerts(),
       });
       // await this.alertsClient?.processAndLogAlerts();
     });
