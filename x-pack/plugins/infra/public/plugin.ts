@@ -90,7 +90,7 @@ export class Plugin implements InfraClientPluginClass {
       { label: 'Inventory', app: 'metrics', path: '/inventory' },
       { label: 'Metrics Explorer', app: 'metrics', path: '/explorer' },
     ];
-    const hostInfraEntry = { label: 'Hosts', app: 'metrics', path: '/hosts' };
+    const hostInfraEntry = { label: 'Hosts', isBeta: true, app: 'metrics', path: '/hosts' };
     pluginsSetup.observability.navigation.registerSections(
       startDep$AndHostViewFlag$.pipe(
         map(
