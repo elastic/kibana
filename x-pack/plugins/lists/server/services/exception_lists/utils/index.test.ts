@@ -7,7 +7,7 @@
 
 import sinon from 'sinon';
 import moment from 'moment';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import { transformCreateCommentsToComments, transformUpdateCommentsToComments } from '.';
 
@@ -20,7 +20,7 @@ describe('utils', () => {
   let clock: sinon.SinonFakeTimers;
 
   beforeEach(() => {
-    (uuid as unknown as jest.Mock)
+    (uuidv4 as unknown as jest.Mock)
       .mockImplementationOnce(() => '123')
       .mockImplementationOnce(() => '456');
 
