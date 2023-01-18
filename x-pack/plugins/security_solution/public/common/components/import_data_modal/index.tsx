@@ -82,12 +82,23 @@ export const ImportDataModalComponent = ({
   const { http } = useKibana().services;
 
   const cleanupAndCloseModal = useCallback(() => {
-    setIsImporting(false);
-    setSelectedFiles(null);
     closeModal();
     setOverwrite(false);
     setOverwriteExceptions(false);
-  }, [setIsImporting, setSelectedFiles, closeModal, setOverwrite, setOverwriteExceptions]);
+  }, [closeModal, setOverwrite, setOverwriteExceptions]);
+
+  const onImportComplete = useCallback(
+    (callCleanup: boolean) => {
+      setIsImporting(false);
+      setSelectedFiles(null);
+
+      if (callCleanup) {
+        importComplete();
+        cleanupAndCloseModal();
+      }
+    },
+    [cleanupAndCloseModal, importComplete]
+  );
 
   const importDataCallback = useCallback(async () => {
     if (selectedFiles != null) {
@@ -101,7 +112,6 @@ export const ImportDataModalComponent = ({
           overwriteExceptions,
           signal: abortCtrl.signal,
         });
-        const showWarnings = !!warnings?.length;
         setActionConnectorsWarnings(warnings as WarningSchema[]);
 
         showToasterMessage({
@@ -113,31 +123,24 @@ export const ImportDataModalComponent = ({
           addError,
           addSuccess,
         });
-
-        if (!showWarnings) {
-          importComplete();
-          return cleanupAndCloseModal();
-        }
-
-        setIsImporting(false);
-        setSelectedFiles(null);
+        onImportComplete(!warnings?.length);
       } catch (error) {
         cleanupAndCloseModal();
         addError(error, { title: errorMessage(1) });
       }
     }
   }, [
-    showExceptionsCheckBox,
     selectedFiles,
+    importData,
     overwrite,
     overwriteExceptions,
-    importData,
+    showExceptionsCheckBox,
     successMessage,
     errorMessage,
     failedDetailed,
     addError,
     addSuccess,
-    importComplete,
+    onImportComplete,
     cleanupAndCloseModal,
   ]);
 
@@ -180,14 +183,15 @@ export const ImportDataModalComponent = ({
               isLoading={isImporting}
             />
             <EuiSpacer size="s" />
-            {!!actionConnectorsWarnings?.length &&
-              actionConnectorsWarnings.map(({ message, actionPath, buttonLabel }) => (
-                <EuiCallOut
-                  title={`${actionConnectorsWarnings.length} connector imported`} // TODO about title
-                  color="warning"
-                  iconType="alert"
-                >
-                  <EuiFlexGroup direction="column">
+            {!!actionConnectorsWarnings?.length && (
+              <EuiCallOut
+                data-test-subj="actionConnectorsWarningsCallOut"
+                title={`${actionConnectorsWarnings.length} connector imported`} // TODO about title
+                color="warning"
+                iconType="alert"
+              >
+                {actionConnectorsWarnings.map(({ message, actionPath, buttonLabel }, index) => (
+                  <EuiFlexGroup key={index} direction="column">
                     <EuiFlexItem>
                       <EuiText size="s">{message}</EuiText>
                     </EuiFlexItem>
@@ -204,8 +208,9 @@ export const ImportDataModalComponent = ({
                       </EuiFlexItem>
                     )}
                   </EuiFlexGroup>
-                </EuiCallOut>
-              ))}
+                ))}
+              </EuiCallOut>
+            )}
             <EuiSpacer size="s" />
 
             {showCheckBox && (
