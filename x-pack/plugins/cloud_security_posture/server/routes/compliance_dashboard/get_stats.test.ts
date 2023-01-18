@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import {
-  FindingsEvaluationsQueryResult,
-  getStatsFromFindingsEvaluationsAggs,
-  roundScore,
-} from './get_stats';
-import { calculatePostureScore } from '../../../common/utils/helpers';
+import { FindingsEvaluationsQueryResult, getStatsFromFindingsEvaluationsAggs } from './get_stats';
+import { calculatePostureScore, roundScore } from '../../../common/utils/helpers';
 
 const standardQueryResult: FindingsEvaluationsQueryResult = {
   resources_evaluated: {
