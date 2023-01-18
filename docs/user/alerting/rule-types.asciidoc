@@ -16,7 +16,8 @@ see {subscriptions}[the subscription page].
 [[stack-rules]]
 === Stack rules
 
-<<create-and-manage-rules, Stack rules>> are built into {kib}. To access the *Stack Rules* feature and create and edit rules, users require the `all` privilege. See <<kibana-feature-privileges, feature privileges>> for more information.
+Stack rules are built into {kib}. To create and edit rules, you must have the
+appropriate {kib} feature privileges. Refer to <<alerting-security>>.
 
 [cols="2*<"]
 |===

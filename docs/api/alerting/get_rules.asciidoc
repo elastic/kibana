@@ -23,7 +23,7 @@ For the most up-to-date API details, refer to the
 
 You must have `read` privileges for the appropriate {kib} features, depending on
 the `consumer` and `rule_type_id` of the rules you're seeking. For example, the
-*Management* > *Stack Rules* feature, *Analytics* > *Discover* and *{ml-app}*
+*Management* > *{stack-rules-feature}* feature, *Analytics* > *Discover* and *{ml-app}*
 features, *{observability}*, and *Security* features. To get rules associated
 with the *{stack-monitor-app}* feature, use the `monitoring_user` built-in role.
 

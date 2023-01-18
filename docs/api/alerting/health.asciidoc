@@ -21,8 +21,8 @@ For the most up-to-date API details, refer to the
 
 === {api-prereq-title}
 
-You must have `read` privileges for the *Management* > *Stack Rules* feature or
-for at least one of the *Analytics* > *Discover*, *Analytics* > *{ml-app}*,
+You must have `read` privileges for the *Management* > *{stack-rules-feature}*
+feature or for at least one of the *Analytics* > *Discover*, *Analytics* > *{ml-app}*,
 *{observability}*, or *Security* features.
 
 [[get-alerting-framework-health-api-params]]

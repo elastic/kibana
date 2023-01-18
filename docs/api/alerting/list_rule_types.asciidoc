@@ -24,7 +24,7 @@ For the most up-to-date API details, refer to the
 
 If you have `read` privileges for one or more {kib} features, the API response
 contains information about the appropriate rule types. For example, there are
-rule types associated with the *Management* > *Stack Rules* feature,
+rule types associated with the *Management* > *{stack-rules-feature}* feature,
 *Analytics* > *Discover* and *{ml-app}* features, *{observability}*, and
 *Security* features. To get rule types associated with the
 *{stack-monitor-app}* feature, use the `monitoring_user` built-in role.
