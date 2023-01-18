@@ -62,7 +62,7 @@ export const AlertStateInfo = ({
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={1} style={{ minWidth: '70px' }}>
         <EuiText color={euiTheme.colors.text}>
-          <h3 data-test-subj={dataTestSubj}>{count}</h3>
+          <h3 data-test-subj={`${dataTestSubj}Count`}>{count}</h3>
         </EuiText>
         <EuiText size="s" color="subdued">
           {title}

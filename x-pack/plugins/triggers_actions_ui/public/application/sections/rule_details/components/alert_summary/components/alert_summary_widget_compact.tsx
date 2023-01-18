@@ -88,11 +88,12 @@ export const AlertsSummaryWidgetCompact = ({
                 onClick={(event: React.MouseEvent<HTMLAnchorElement>) =>
                   handleClick(event, ALERT_STATUS_ACTIVE)
                 }
+                data-test-subj="activeAlerts"
               >
                 <AlertStateInfo
                   count={activeAlertCount}
                   data={activeAlerts}
-                  dataTestSubj="activeAlertsCount"
+                  dataTestSubj="activeAlerts"
                   domain={domain}
                   id="active"
                   stroke="#E7664C"
@@ -106,11 +107,12 @@ export const AlertsSummaryWidgetCompact = ({
                 onClick={(event: React.MouseEvent<HTMLAnchorElement>) =>
                   handleClick(event, ALERT_STATUS_RECOVERED)
                 }
+                data-test-subj="recoveredAlerts"
               >
                 <AlertStateInfo
                   count={recoveredAlertCount}
                   data={recoveredAlerts}
-                  dataTestSubj="recoveredAlertsCount"
+                  dataTestSubj="recoveredAlerts"
                   domain={domain}
                   id="recovered"
                   stroke="#54B399"
