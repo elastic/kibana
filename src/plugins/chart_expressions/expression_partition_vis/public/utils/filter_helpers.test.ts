@@ -277,17 +277,20 @@ describe('getFilterPopoverTitle', () => {
       ...visParams,
       buckets: [],
     };
-    const title = getFilterPopoverTitle(newVisParams, visData, 0, fieldFormatsMock, series.key);
+    const defaultFormatter = jest.fn((...args) => fieldFormatsMock.deserialize(...args));
+
+    const title = getFilterPopoverTitle(newVisParams, visData, 0, defaultFormatter, series.key);
     expect(title).toBe('Kibana Airlines');
   });
 
-  it('returns the corrent title if buckets given', () => {
+  it('calls the formatter if buckets given', () => {
     const series = {
       key: '0',
       specId: 'pie',
     };
+    const defaultFormatter = jest.fn((...args) => fieldFormatsMock.deserialize(...args));
 
-    const title = getFilterPopoverTitle(visParams, visData, 2, fieldFormatsMock, series.key);
-    expect(title).toBe('0');
+    getFilterPopoverTitle(visParams, visData, 1, defaultFormatter, series.key);
+    expect(defaultFormatter).toHaveBeenCalled();
   });
 });

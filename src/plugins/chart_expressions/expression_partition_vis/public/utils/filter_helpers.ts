@@ -9,10 +9,9 @@
 import { LayerValue, SeriesIdentifier } from '@elastic/charts';
 import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { ValueClickContext } from '@kbn/embeddable-plugin/public';
 import { getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
-import type { FieldFormat } from '@kbn/field-formats-plugin/common';
+import type { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/common';
 import { BucketColumns, PartitionVisParams } from '../../common/types';
 import { FilterEvent } from '../types';
 
@@ -136,16 +135,15 @@ export const getFilterPopoverTitle = (
   visParams: PartitionVisParams,
   visData: Datatable,
   columnIndex: number,
-  formatter: FieldFormatsStart,
+  formatter: FormatFactory,
   seriesKey: string
 ) => {
   let formattedTitle = '';
   if (visParams.dimensions.buckets) {
     const accessor = visParams.dimensions.buckets[columnIndex];
-    formattedTitle =
-      formatter
-        .deserialize(accessor ? getFormatByAccessor(accessor, visData.columns) : undefined)
-        .convert(seriesKey) ?? '';
+    formattedTitle = accessor
+      ? formatter(getFormatByAccessor(accessor, visData.columns)).convert(seriesKey)
+      : '';
   }
   return formattedTitle || seriesKey;
 };

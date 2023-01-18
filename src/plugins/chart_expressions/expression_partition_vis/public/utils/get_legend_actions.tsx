@@ -49,7 +49,13 @@ export const getLegendActions = (
       return null;
     }
 
-    const title = getFilterPopoverTitle(visParams, visData, columnIndex, formatter, pieSeries.key);
+    const title = getFilterPopoverTitle(
+      visParams,
+      visData,
+      columnIndex,
+      formatter.deserialize,
+      pieSeries.key
+    );
 
     const panelItems: EuiContextMenuPanelDescriptor['items'] = [];
 
