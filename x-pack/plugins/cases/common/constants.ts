@@ -89,6 +89,7 @@ export const INTERNAL_BULK_CREATE_ATTACHMENTS_URL =
   `${CASES_INTERNAL_URL}/{case_id}/attachments/_bulk_create` as const;
 export const INTERNAL_SUGGEST_USER_PROFILES_URL =
   `${CASES_INTERNAL_URL}/_suggest_user_profiles` as const;
+export const INTERNAL_CONNECTORS_URL = `${CASES_INTERNAL_URL}/{case_id}/_connectors` as const;
 export const INTERNAL_BULK_GET_CASES_URL = `${CASES_INTERNAL_URL}/_bulk_get` as const;
 
 /**
