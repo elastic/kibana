@@ -278,6 +278,22 @@ export const useCasesColumns = ({
     });
   }
 
+  columns.push({
+    field: 'updatedAt',
+    name: i18n.UPDATED_ON,
+    sortable: true,
+    render: (updatedAt: Case['updatedAt']) => {
+      if (updatedAt != null) {
+        return (
+          <span data-test-subj={`case-table-column-updatedAt`}>
+            <FormattedRelativePreferenceDate value={updatedAt} stripMs={true} />
+          </span>
+        );
+      }
+      return getEmptyTagValue();
+    },
+  });
+
   columns.push(
     {
       name: i18n.EXTERNAL_INCIDENT,

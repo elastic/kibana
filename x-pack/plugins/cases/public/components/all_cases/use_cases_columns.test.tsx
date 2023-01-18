@@ -93,6 +93,12 @@ describe('useCasesColumns ', () => {
             "sortable": true,
           },
           Object {
+            "field": "updatedAt",
+            "name": "Updated on",
+            "render": [Function],
+            "sortable": true,
+          },
+          Object {
             "name": "External Incident",
             "render": [Function],
           },
@@ -180,6 +186,12 @@ describe('useCasesColumns ', () => {
             "sortable": true,
           },
           Object {
+            "field": "updatedAt",
+            "name": "Updated on",
+            "render": [Function],
+            "sortable": true,
+          },
+          Object {
             "name": "External Incident",
             "render": [Function],
           },
@@ -256,6 +268,12 @@ describe('useCasesColumns ', () => {
           Object {
             "field": "createdAt",
             "name": "Created on",
+            "render": [Function],
+            "sortable": true,
+          },
+          Object {
+            "field": "updatedAt",
+            "name": "Updated on",
             "render": [Function],
             "sortable": true,
           },
@@ -337,6 +355,12 @@ describe('useCasesColumns ', () => {
             "sortable": true,
           },
           Object {
+            "field": "updatedAt",
+            "name": "Updated on",
+            "render": [Function],
+            "sortable": true,
+          },
+          Object {
             "name": "External Incident",
             "render": [Function],
           },
@@ -405,6 +429,12 @@ describe('useCasesColumns ', () => {
           Object {
             "field": "createdAt",
             "name": "Created on",
+            "render": [Function],
+            "sortable": true,
+          },
+          Object {
+            "field": "updatedAt",
+            "name": "Updated on",
             "render": [Function],
             "sortable": true,
           },
@@ -486,6 +516,12 @@ describe('useCasesColumns ', () => {
             "sortable": true,
           },
           Object {
+            "field": "updatedAt",
+            "name": "Updated on",
+            "render": [Function],
+            "sortable": true,
+          },
+          Object {
             "name": "External Incident",
             "render": [Function],
           },
@@ -557,6 +593,12 @@ describe('useCasesColumns ', () => {
           Object {
             "field": "createdAt",
             "name": "Created on",
+            "render": [Function],
+            "sortable": true,
+          },
+          Object {
+            "field": "updatedAt",
+            "name": "Updated on",
             "render": [Function],
             "sortable": true,
           },
@@ -635,6 +677,12 @@ describe('useCasesColumns ', () => {
             "sortable": true,
           },
           Object {
+            "field": "updatedAt",
+            "name": "Updated on",
+            "render": [Function],
+            "sortable": true,
+          },
+          Object {
             "name": "External Incident",
             "render": [Function],
           },
@@ -704,6 +752,12 @@ describe('useCasesColumns ', () => {
           Object {
             "field": "createdAt",
             "name": "Created on",
+            "render": [Function],
+            "sortable": true,
+          },
+          Object {
+            "field": "updatedAt",
+            "name": "Updated on",
             "render": [Function],
             "sortable": true,
           },
