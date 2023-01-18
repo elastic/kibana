@@ -71,7 +71,6 @@ export const getTestRunDetailRelativeLink = ({
 }: {
   monitorId: string;
   checkGroup: string;
-  basePath?: string;
   locationId?: string;
 }) => {
   return `/monitor/${monitorId}/test-run/${checkGroup}?locationId=${locationId}`;
