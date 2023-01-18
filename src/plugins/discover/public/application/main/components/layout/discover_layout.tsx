@@ -84,7 +84,7 @@ export function DiscoverLayout({
     inspector,
   } = useDiscoverServices();
   const { main$ } = savedSearchData$;
-  const [query, savedQuery, filters, columns, sort] = useAppStateSelector((state) => [
+  const [query, savedQuery, columns, sort] = useAppStateSelector((state) => [
     state.query,
     state.savedQuery,
     state.filters,
@@ -254,7 +254,6 @@ export function DiscoverLayout({
     dataState.error,
     dataView,
     expandedDoc,
-    filters,
     inspectorAdapters,
     isPlainRecord,
     isTimeBased,
@@ -262,7 +261,6 @@ export function DiscoverLayout({
     onAddFilter,
     onDisableFilters,
     onFieldEdited,
-    query,
     resetSavedSearch,
     resultState,
     savedSearch,
