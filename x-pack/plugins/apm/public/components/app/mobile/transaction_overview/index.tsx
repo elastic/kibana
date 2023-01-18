@@ -18,13 +18,14 @@ import { useApmServiceContext } from '../../../../context/apm_service/use_apm_se
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transactions_badge';
-import { MobileTransactionCharts } from '../../../shared/charts/transaction_charts/mobile_transaction_charts';
 import { TransactionsTable } from '../../../shared/transactions_table';
 import { replace } from '../../../shared/links/url_helpers';
 import { getKueryWithMobileFilters } from '../../../../../common/utils/get_kuery_with_mobile_filters';
+import { MobileTransactionCharts } from './transaction_charts';
 
 export function MobileTransactionOverview() {
   const {
+    path: { serviceName },
     query: {
       environment,
       rangeFrom,
@@ -35,10 +36,12 @@ export function MobileTransactionOverview() {
       appVersion,
       netConnectionType,
       kuery,
+      offset,
+      comparisonEnabled,
     },
   } = useApmParams('/mobile-services/{serviceName}/transactions');
 
-  const kueryWithFilters = getKueryWithMobileFilters({
+  const kueryWithMobileFilters = getKueryWithMobileFilters({
     device,
     osVersion,
     appVersion,
@@ -73,10 +76,14 @@ export function MobileTransactionOverview() {
         </>
       )}
       <MobileTransactionCharts
-        kuery={kueryWithFilters}
+        transactionType={transactionType}
+        serviceName={serviceName}
+        kuery={kueryWithMobileFilters}
         environment={environment}
         start={start}
         end={end}
+        offset={offset}
+        comparisonEnabled={comparisonEnabled}
       />
       <EuiSpacer size="s" />
       <EuiPanel hasBorder={true}>
@@ -85,7 +92,7 @@ export function MobileTransactionOverview() {
           numberOfTransactionsPerPage={25}
           showAggregationAccurateCallout
           environment={environment}
-          kuery={kueryWithFilters}
+          kuery={kueryWithMobileFilters}
           start={start}
           end={end}
           saveTableOptionsToUrl
