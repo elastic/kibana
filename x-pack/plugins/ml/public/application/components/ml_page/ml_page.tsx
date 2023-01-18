@@ -13,7 +13,7 @@ import { Subscription } from 'rxjs';
 import { EuiPageSection } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import type { AppMountParameters } from '@kbn/core/public';
+import { type AppMountParameters } from '@kbn/core/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { DatePickerWrapper } from '@kbn/ml-date-picker';
@@ -28,6 +28,8 @@ import { useDocTitle } from '../../routing/use_doc_title';
 import { MlPageHeaderRenderer } from '../page_header/page_header';
 
 import { useSideNavItems } from './side_nav';
+
+const ML_APP_SELECTOR = '[data-test-subj="mlApp"]';
 
 export const MlPageControlsContext = createContext<{
   headerPortal: HtmlPortalNode;
@@ -94,6 +96,21 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
 
   useDocTitle(activeRoute);
 
+  // The deprecated `KibanaPageTemplate` from`'@kbn/kibana-react-plugin/public'`
+  // had a `pageBodyProps` prop where we could pass in the `data-test-subj` for
+  // the `main` element. This is no longer available in the update template
+  // imported from `'@kbn/shared-ux-page-kibana-template'`. The following is a
+  // workaround to add the `data-test-subj` on the `main` element again.
+  useEffect(() => {
+    const mlApp = document.querySelector(ML_APP_SELECTOR) as HTMLElement;
+    if (mlApp && typeof activeRoute?.['data-test-subj'] === 'string') {
+      const mlAppMain = mlApp.querySelector('main') as HTMLElement;
+      if (mlAppMain) {
+        mlAppMain.setAttribute('data-test-subj', activeRoute?.['data-test-subj']);
+      }
+    }
+  }, [activeRoute]);
+
   return (
     <MlPageControlsContext.Provider
       value={{
@@ -107,11 +124,6 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
         className={'ml-app'}
         data-test-subj={'mlApp'}
         restrictWidth={false}
-        // EUI TODO
-        // The different template options need to be manually recreated by the individual pages.
-        // These classes help enforce the layouts.
-        // pageContentProps={{ className: 'kbnAppWrapper' }}
-        // pageContentBodyProps={{ className: 'kbnAppWrapper' }}
         solutionNav={{
           name: i18n.translate('xpack.ml.plugin.title', {
             defaultMessage: 'Machine Learning',
@@ -124,9 +136,6 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
           rightSideItems,
           restrictWidth: false,
         }}
-        // pageBodyProps={{
-        //   'data-test-subj': activeRoute?.['data-test-subj'],
-        // }}
       >
         <CommonPageWrapper
           headerPortal={headerPortalNode}
