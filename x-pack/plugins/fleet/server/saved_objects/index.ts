@@ -292,6 +292,8 @@ const getSavedObjectTypes = (
               properties: {
                 synthetic_source: { type: 'boolean' },
                 tsdb: { type: 'boolean' },
+                doc_value_only_numeric: { type: 'boolean' },
+                doc_value_only_other: { type: 'boolean' },
               },
             },
           },
