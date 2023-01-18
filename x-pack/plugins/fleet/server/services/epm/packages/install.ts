@@ -13,13 +13,14 @@ import type {
   ElasticsearchClient,
   SavedObject,
   SavedObjectsClientContract,
+  Logger,
 } from '@kbn/core/server';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
 import pRetry from 'p-retry';
 
-import { isPackagePrerelease } from '../../../../common/services';
+import { isPackagePrerelease, getNormalizedDataStreams } from '../../../../common/services';
 
 import { FLEET_INSTALL_FORMAT_VERSION } from '../../../constants/fleet_es_assets';
 
@@ -35,12 +36,15 @@ import type {
   InstallSource,
   InstallType,
   KibanaAssetType,
+  NewPackagePolicy,
+  PackageInfo,
   PackageVerificationResult,
+  RegistryDataStream,
 } from '../../../types';
 import { AUTO_UPGRADE_POLICIES_PACKAGES } from '../../../../common/constants';
-import { FleetError, PackageOutdatedError } from '../../../errors';
+import { FleetError, PackageOutdatedError, PackagePolicyValidationError } from '../../../errors';
 import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../constants';
-import { licenseService } from '../..';
+import { dataStreamService, licenseService } from '../..';
 import { appContextService } from '../../app_context';
 import * as Registry from '../registry';
 import {
@@ -48,12 +52,17 @@ import {
   generatePackageInfoFromArchiveBuffer,
   unpackBufferToCache,
   deleteVerificationResult,
+  getArchiveFilelist,
 } from '../archive';
 import { toAssetReference } from '../kibana/assets/install';
 import type { ArchiveAsset } from '../kibana/assets/install';
 
 import type { PackageUpdateEvent } from '../../upgrade_sender';
 import { sendTelemetryEvents, UpdateEventType } from '../../upgrade_sender';
+
+import { prepareToInstallPipelines } from '../elasticsearch/ingest_pipeline';
+
+import { prepareToInstallTemplates } from '../elasticsearch/template/install';
 
 import { formatVerificationResultForSO } from './package_verification';
 
@@ -63,6 +72,7 @@ import { getPackageSavedObjects } from './get';
 import { _installPackage } from './_install_package';
 import { removeOldAssets } from './cleanup';
 import { getBundledPackages } from './bundled_packages';
+import { withPackageSpan } from './utils';
 
 export async function isPackageInstalled(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -841,6 +851,165 @@ export async function ensurePackagesCompletedInstall(
   );
   await Promise.all(installingPromises);
   return installingPackages;
+}
+
+export async function installIndexTemplatesAndPipelines({
+  installedPkg,
+  paths,
+  packageInfo,
+  esReferences,
+  savedObjectsClient,
+  esClient,
+  logger,
+  onlyForDataStreams,
+}: {
+  installedPkg?: Installation;
+  paths: string[];
+  packageInfo: PackageInfo | InstallablePackage;
+  esReferences: EsAssetReference[];
+  savedObjectsClient: SavedObjectsClientContract;
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  onlyForDataStreams?: RegistryDataStream[];
+}) {
+  /**
+   * In order to install assets in parallel, we need to split the preparation step from the installation step. This
+   * allows us to know which asset references are going to be installed so that we can save them on the packages
+   * SO before installation begins. In the case of a failure during installing any individual asset, we'll have the
+   * references necessary to remove any assets in that were successfully installed during the rollback phase.
+   *
+   * This split of prepare/install could be extended to all asset types. Besides performance, it also allows us to
+   * more easily write unit tests against the asset generation code without needing to mock ES responses.
+   */
+  const experimentalDataStreamFeatures = installedPkg?.experimental_data_stream_features ?? [];
+
+  const preparedIngestPipelines = prepareToInstallPipelines(packageInfo, paths, onlyForDataStreams);
+  const preparedIndexTemplates = prepareToInstallTemplates(
+    packageInfo,
+    paths,
+    esReferences,
+    experimentalDataStreamFeatures,
+    onlyForDataStreams
+  );
+
+  // Update the references for the templates and ingest pipelines together. Need to be done together to avoid race
+  // conditions on updating the installed_es field at the same time
+  // These must be saved before we actually attempt to install the templates or pipelines so that we know what to
+  // cleanup in the case that a single asset fails to install.
+  const newEsReferences = await updateEsAssetReferences(
+    savedObjectsClient,
+    packageInfo.name,
+    esReferences,
+    {
+      assetsToRemove: onlyForDataStreams ? [] : preparedIndexTemplates.assetsToRemove,
+      assetsToAdd: [...preparedIngestPipelines.assetsToAdd, ...preparedIndexTemplates.assetsToAdd],
+    }
+  );
+
+  // Install index templates and ingest pipelines in parallel since they typically take the longest
+  const [installedTemplates] = await Promise.all([
+    withPackageSpan('Install index templates', () =>
+      preparedIndexTemplates.install(esClient, logger)
+    ),
+    // installs versionized pipelines without removing currently installed ones
+    withPackageSpan('Install ingest pipelines', () =>
+      preparedIngestPipelines.install(esClient, logger)
+    ),
+  ]);
+
+  return {
+    esReferences: newEsReferences,
+    installedTemplates,
+  };
+}
+
+export async function installAssetsForInputPackagePolicy(opts: {
+  pkgInfo: PackageInfo;
+  logger: Logger;
+  packagePolicy: NewPackagePolicy;
+  esClient: ElasticsearchClient;
+  soClient: SavedObjectsClientContract;
+  force: boolean;
+}) {
+  const { pkgInfo, logger, packagePolicy, esClient, soClient, force } = opts;
+
+  if (pkgInfo.type !== 'input') return;
+
+  const paths = await getArchiveFilelist(pkgInfo);
+  if (!paths) throw new Error('No paths found for ');
+
+  const datasetName = packagePolicy.inputs[0].streams[0].vars?.['data_stream.dataset']?.value;
+  const [dataStream] = getNormalizedDataStreams(pkgInfo, datasetName);
+  const existingDataStreams = await dataStreamService.getMatchingDataStreams(esClient, {
+    type: dataStream.type,
+    dataset: datasetName,
+  });
+
+  if (existingDataStreams.length) {
+    const existingDataStreamsAreFromDifferentPackage = existingDataStreams.some(
+      (ds) => ds._meta?.package?.name !== pkgInfo.name
+    );
+    if (existingDataStreamsAreFromDifferentPackage && !force) {
+      // user has opted to send data to an existing data stream which is managed by another
+      // package. This means certain custom setting such as elasticsearch settings
+      // defined by the package will not have been applied which could lead
+      // to unforeseen circumstances, so force flag must be used.
+      const streamIndexPattern = dataStreamService.streamPartsToIndexPattern({
+        type: dataStream.type,
+        dataset: datasetName,
+      });
+
+      throw new PackagePolicyValidationError(
+        `Datastreams matching "${streamIndexPattern}" already exist and are not managed by this package, force flag is required`
+      );
+    } else {
+      logger.info(
+        `Data stream ${dataStream.name} already exists, skipping index template creation for ${packagePolicy.id}`
+      );
+      return;
+    }
+  }
+
+  const existingIndexTemplate = await dataStreamService.getMatchingIndexTemplate(esClient, {
+    type: dataStream.type,
+    dataset: datasetName,
+  });
+
+  if (existingIndexTemplate) {
+    const indexTemplateOwnnedByDifferentPackage =
+      existingIndexTemplate._meta?.package?.name !== pkgInfo.name;
+    if (indexTemplateOwnnedByDifferentPackage && !force) {
+      // index template already exists but there is no data stream yet
+      // we do not want to override the index template
+
+      throw new PackagePolicyValidationError(
+        `Index template "${dataStream.type}-${datasetName}" already exist and is not managed by this package, force flag is required`
+      );
+    } else {
+      logger.info(
+        `Index template "${dataStream.type}-${datasetName}" already exists, skipping index template creation for ${packagePolicy.id}`
+      );
+      return;
+    }
+  }
+
+  const installedPkg = await getInstallation({
+    savedObjectsClient: soClient,
+    pkgName: pkgInfo.name,
+    logger,
+  });
+  if (!installedPkg)
+    throw new Error('Unable to find installed package while creating index templates');
+  await installIndexTemplatesAndPipelines({
+    installedPkg,
+    paths,
+    packageInfo: pkgInfo,
+    esReferences: installedPkg.installed_es || [],
+    savedObjectsClient: soClient,
+    esClient,
+    logger,
+    onlyForDataStreams: [dataStream],
+  });
 }
 
 interface NoPkgArgs {

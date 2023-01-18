@@ -18,6 +18,7 @@ import {
   LazySavedObjectSaveModalDashboard,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
+import { ScopedHistory } from '@kbn/core/public';
 import {
   getNavigateToApp,
   getMapsCapabilities,
@@ -42,6 +43,7 @@ export function getTopNavConfig({
   enableFullScreen,
   openMapSettings,
   inspectorAdapters,
+  history,
 }: {
   savedMap: SavedMap;
   isOpenSettingsDisabled: boolean;
@@ -49,6 +51,7 @@ export function getTopNavConfig({
   enableFullScreen: () => void;
   openMapSettings: () => void;
   inspectorAdapters: Adapters;
+  history: ScopedHistory;
 }) {
   const topNavConfigs = [];
 
@@ -197,6 +200,7 @@ export function getTopNavConfig({
               ...props,
               newTags: selectedTags,
               saveByReference: props.addToLibrary,
+              history,
             });
             // showSaveModal wrapper requires onSave to return an object with an id to close the modal after successful save
             return { id: 'id' };
@@ -266,6 +270,7 @@ export function getTopNavConfig({
             returnToOrigin: true,
             onTitleDuplicate: () => {},
             saveByReference: !savedMap.isByValue(),
+            history,
           });
         },
         testId: 'mapSaveAndReturnButton',
