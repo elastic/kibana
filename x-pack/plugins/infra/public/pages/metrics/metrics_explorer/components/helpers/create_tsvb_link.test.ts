@@ -12,8 +12,7 @@ import {
   timeRange,
   chartOptions,
 } from '../../../../../utils/fixtures/metrics_explorer';
-import { v4 as uuidv4 } from 'uuid';
-import { OutputBuffer } from 'uuid/interfaces';
+import uuid from 'uuid';
 import {
   MetricsExplorerYAxisMode,
   MetricsExplorerChartType,
@@ -22,7 +21,7 @@ import { MetricsExplorerOptions } from '../../hooks/use_metrics_explorer_options
 
 jest.mock('uuid');
 const mockedUuid = uuid as jest.Mocked<typeof uuid>;
-mockedUuid.v1.mockReturnValue('test-id' as unknown as OutputBuffer);
+mockedUuid.v1.mockReturnValue('test-id');
 const series = { id: 'example-01', rows: [], columns: [] };
 
 describe('createTSVBLink()', () => {

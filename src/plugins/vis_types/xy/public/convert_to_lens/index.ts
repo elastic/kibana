@@ -161,7 +161,7 @@ export const convertToLens: ConvertXYToLensVisualization = async (vis, timefilte
 
   const indexPatternId = dataView.id!;
 
-  const uuid = await import('uuid');
+  const { v4: uuidv4 } = await import('uuid');
 
   const layers = dataLayers.map<Layer>((l) => {
     const layerId = uuidv4();
