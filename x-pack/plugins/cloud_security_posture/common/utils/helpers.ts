@@ -64,7 +64,8 @@ const getInputType = (inputType: string): string => {
   // Get the last part of the input type, input type structure: cloudbeat/<benchmark_id>
   return inputType.split('/')[1];
 };
-export const getCSPKuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${CLOUD_SECURITY_POSTURE_PACKAGE_NAME}`;
+
+export const CSP_FLEET_PACKAGE_KUERY = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${CLOUD_SECURITY_POSTURE_PACKAGE_NAME}`;
 
 export function assert(condition: any, msg?: string): asserts condition {
   if (!condition) {

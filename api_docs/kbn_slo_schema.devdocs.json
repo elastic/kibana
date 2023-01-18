@@ -84,6 +84,59 @@
           },
           {
             "parentPluginId": "@kbn/slo-schema",
+            "id": "def-common.Duration.add",
+            "type": "Function",
+            "tags": [],
+            "label": "add",
+            "description": [],
+            "signature": [
+              "(other: ",
+              {
+                "pluginId": "@kbn/slo-schema",
+                "scope": "common",
+                "docId": "kibKbnSloSchemaPluginApi",
+                "section": "def-common.Duration",
+                "text": "Duration"
+              },
+              ") => ",
+              {
+                "pluginId": "@kbn/slo-schema",
+                "scope": "common",
+                "docId": "kibKbnSloSchemaPluginApi",
+                "section": "def-common.Duration",
+                "text": "Duration"
+              }
+            ],
+            "path": "packages/kbn-slo-schema/src/models/duration.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/slo-schema",
+                "id": "def-common.Duration.add.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "other",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/slo-schema",
+                    "scope": "common",
+                    "docId": "kibKbnSloSchemaPluginApi",
+                    "section": "def-common.Duration",
+                    "text": "Duration"
+                  }
+                ],
+                "path": "packages/kbn-slo-schema/src/models/duration.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/slo-schema",
             "id": "def-common.Duration.isShorterThan",
             "type": "Function",
             "tags": [],
@@ -331,6 +384,21 @@
       },
       {
         "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.CreateSLOInput",
+        "type": "Type",
+        "tags": [],
+        "label": "CreateSLOInput",
+        "description": [],
+        "signature": [
+          "{ name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; 'threshold.us': number; } & { index?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; index?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; } & { settings?: { timestampField?: string | undefined; syncDelay?: string | undefined; frequency?: string | undefined; } | undefined; }"
+        ],
+        "path": "packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
         "id": "def-common.CreateSLOParams",
         "type": "Type",
         "tags": [],
@@ -476,6 +544,21 @@
       },
       {
         "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.UpdateSLOInput",
+        "type": "Type",
+        "tags": [],
+        "label": "UpdateSLOInput",
+        "description": [],
+        "signature": [
+          "{ name?: string | undefined; description?: string | undefined; indicator?: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; 'threshold.us': number; } & { index?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; index?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; } | undefined; timeWindow?: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; } | undefined; budgetingMethod?: \"occurrences\" | \"timeslices\" | undefined; objective?: ({ target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }) | undefined; settings?: { timestampField?: string | undefined; syncDelay?: string | undefined; frequency?: string | undefined; } | undefined; }"
+        ],
+        "path": "packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
         "id": "def-common.UpdateSLOParams",
         "type": "Type",
         "tags": [],
@@ -506,7 +589,7 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          " | undefined; }) | undefined; settings?: { timestampField: string; syncDelay: ",
+          " | undefined; }) | undefined; settings?: { timestampField?: string | undefined; syncDelay?: ",
           {
             "pluginId": "@kbn/slo-schema",
             "scope": "common",
@@ -514,7 +597,7 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          "; frequency: ",
+          " | undefined; frequency?: ",
           {
             "pluginId": "@kbn/slo-schema",
             "scope": "common",
@@ -522,7 +605,7 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          "; } | undefined; }"
+          " | undefined; } | undefined; }"
         ],
         "path": "packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
@@ -3210,7 +3293,7 @@
             "text": "Duration"
           },
           ", string, unknown>; }>]>; settings: ",
-          "TypeC",
+          "PartialC",
           "<{ timestampField: ",
           "StringC",
           "; syncDelay: ",

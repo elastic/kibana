@@ -5,29 +5,23 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiPanel,
-  EuiLoadingSpinner,
-  EuiSpacer,
-} from '@elastic/eui';
-import { BreakdownLegend } from './components/timings_breakdown/breakdown_legend';
-import { WaterfallChartContainer } from './components/network_waterfall/step_detail/waterfall/waterfall_chart_container';
-import { ObjectWeightList } from './components/object_weight_list';
-import { NetworkTimingsDonut } from './components/network_timings_donut';
-import { StepMetrics } from './components/step_metrics';
-import { NetworkTimingsBreakdown } from './network_timings_breakdown';
-import { ObjectCountList } from './components/object_count_list';
-import { StepImage } from './components/step_image';
-import { useJourneySteps } from '../monitor_details/hooks/use_journey_steps';
-import { MonitorDetailsLinkPortal } from '../monitor_add_edit/monitor_details_portal';
-
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { useDispatch } from 'react-redux';
 import { useStepDetailsBreadcrumbs } from './hooks/use_step_details_breadcrumbs';
+import { WaterfallChartContainer } from './step_waterfall_chart/waterfall/waterfall_chart_container';
+import { NetworkTimingsDonut } from './step_timing_breakdown/network_timings_donut';
+import { useJourneySteps } from '../monitor_details/hooks/use_journey_steps';
+import { getNetworkEvents } from '../../state/network_events/actions';
+import { ObjectWeightList } from './step_objects/object_weight_list';
+import { StepMetrics } from './step_metrics/step_metrics';
+import { ObjectCountList } from './step_objects/object_count_list';
+import { MonitorDetailsLinkPortal } from '../monitor_add_edit/monitor_details_portal';
+import { StepImage } from './step_screenshot/step_image';
+import { BreakdownLegend } from './step_timing_breakdown/breakdown_legend';
+import { NetworkTimingsBreakdown } from './network_timings_breakdown';
 
 export const StepDetailPage = () => {
   const { checkGroupId, stepIndex } = useParams<{ checkGroupId: string; stepIndex: string }>();
@@ -35,21 +29,24 @@ export const StepDetailPage = () => {
   useTrackPageview({ app: 'synthetics', path: 'stepDetail' });
   useTrackPageview({ app: 'synthetics', path: 'stepDetail', delay: 15000 });
 
-  const { data, loading, isFailed, currentStep, stepLabels } = useJourneySteps(checkGroupId);
+  const { data, isFailed, currentStep } = useJourneySteps();
+
+  useStepDetailsBreadcrumbs();
 
   const activeStep = data?.steps?.find(
     (step) => step.synthetics?.step?.index === Number(stepIndex)
   );
 
-  useStepDetailsBreadcrumbs([{ text: data?.details?.journey.monitor.name ?? '' }]);
+  const dispatch = useDispatch();
 
-  if (loading) {
-    return (
-      <div className="eui-textCenter">
-        <EuiLoadingSpinner size="xxl" />
-      </div>
+  useEffect(() => {
+    dispatch(
+      getNetworkEvents.get({
+        checkGroup: checkGroupId,
+        stepIndex: Number(stepIndex),
+      })
     );
-  }
+  }, [dispatch, stepIndex, checkGroupId]);
 
   return (
     <>
@@ -63,12 +60,7 @@ export const StepDetailPage = () => {
         <EuiFlexItem grow={1}>
           <EuiPanel hasShadow={false} hasBorder>
             {data?.details?.journey && currentStep && (
-              <StepImage
-                ping={data?.details?.journey}
-                step={currentStep}
-                isFailed={isFailed}
-                stepLabels={stepLabels}
-              />
+              <StepImage ping={data?.details?.journey} step={currentStep} isFailed={isFailed} />
             )}
           </EuiPanel>
         </EuiFlexItem>
@@ -91,7 +83,7 @@ export const StepDetailPage = () => {
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="m">
         <EuiFlexItem grow={1}>
-          <EuiPanel>
+          <EuiPanel hasShadow={false} hasBorder>
             <StepMetrics />
           </EuiPanel>
         </EuiFlexItem>
@@ -108,15 +100,15 @@ export const StepDetailPage = () => {
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiHorizontalRule margin="s" />
+
+      <EuiSpacer size="l" />
+
       {data && (
-        <div>
-          <WaterfallChartContainer
-            checkGroup={checkGroupId}
-            stepIndex={Number(stepIndex)}
-            activeStep={activeStep}
-          />
-        </div>
+        <WaterfallChartContainer
+          checkGroup={checkGroupId}
+          stepIndex={Number(stepIndex)}
+          activeStep={activeStep}
+        />
       )}
     </>
   );

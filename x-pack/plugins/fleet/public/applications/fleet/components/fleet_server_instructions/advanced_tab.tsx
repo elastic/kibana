@@ -20,10 +20,14 @@ import {
 } from './steps';
 
 interface AdvancedTabProps {
+  onClose: () => void;
   selectedPolicyId?: string;
 }
 
-export const AdvancedTab: React.FunctionComponent<AdvancedTabProps> = ({ selectedPolicyId }) => {
+export const AdvancedTab: React.FunctionComponent<AdvancedTabProps> = ({
+  selectedPolicyId,
+  onClose,
+}) => {
   const {
     isSelectFleetServerPolicyLoading,
     eligibleFleetServerPolicies,
@@ -56,6 +60,7 @@ export const AdvancedTab: React.FunctionComponent<AdvancedTabProps> = ({ selecte
     getAddFleetServerHostStep({
       fleetServerHostForm,
       disabled: !Boolean(fleetServerPolicyId || selectedPolicyId),
+      onClose,
     }),
     getGenerateServiceTokenStep({
       serviceToken,

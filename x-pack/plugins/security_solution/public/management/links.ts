@@ -13,7 +13,6 @@ import { checkArtifactHasData } from './services/exceptions_list/check_artifact_
 import {
   calculateEndpointAuthz,
   getEndpointAuthzInitialState,
-  calculatePermissionsFromCapabilities,
 } from '../../common/endpoint/service/authz';
 import {
   BLOCKLIST_PATH,
@@ -243,7 +242,6 @@ export const getManagementFilteredLinks = async (
 
   const { endpointRbacEnabled, endpointRbacV1Enabled } = ExperimentalFeaturesService.get();
   const isEndpointRbacEnabled = endpointRbacEnabled || endpointRbacV1Enabled;
-  const endpointPermissions = calculatePermissionsFromCapabilities(core.application.capabilities);
 
   const linksToExclude: SecurityPageName[] = [];
 
@@ -287,7 +285,6 @@ export const getManagementFilteredLinks = async (
         fleetAuthz,
         currentUser.roles,
         isEndpointRbacEnabled,
-        endpointPermissions,
         hasHostIsolationExceptions
       )
     : getEndpointAuthzInitialState();

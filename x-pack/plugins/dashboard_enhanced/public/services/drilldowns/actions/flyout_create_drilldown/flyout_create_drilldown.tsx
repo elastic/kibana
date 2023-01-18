@@ -106,7 +106,8 @@ export class FlyoutCreateDrilldownAction implements Action<EmbeddableContext> {
           placeContext={{ embeddable }}
           templates={templates}
           onClose={close}
-        />
+        />,
+        { theme$: core.theme.theme$ }
       ),
       {
         ownFocus: true,

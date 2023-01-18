@@ -24,10 +24,6 @@
 import './commands';
 import 'cypress-pipe';
 
-Cypress.Cookies.defaults({
-  preserve: 'sid',
-});
-
 Cypress.on('uncaught:exception', () => {
   return false;
 });

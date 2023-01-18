@@ -10,6 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, EuiSelectProps } from '@elastic/eui';
 import { debounce } from 'lodash';
 import { lastValueFrom } from 'rxjs';
+import { useStorage } from '@kbn/ml-local-storage';
 import { EntityControl } from '../entity_control';
 import { mlJobService } from '../../../services/job_service';
 import { Detector, JobId } from '../../../../../common/types/anomaly_detection_jobs';
@@ -23,10 +24,11 @@ import {
 import { getControlsForDetector } from '../../get_controls_for_detector';
 import {
   ML_ENTITY_FIELDS_CONFIG,
-  PartitionFieldConfig,
-  PartitionFieldsConfig,
+  type PartitionFieldConfig,
+  type PartitionFieldsConfig,
+  type MlStorageKey,
+  type TMlStorageMapped,
 } from '../../../../../common/types/storage';
-import { useStorage } from '../../../contexts/storage';
 import { EntityFieldType } from '../../../../../common/types/anomalies';
 import { FieldDefinition } from '../../../services/results_service/result_service_rx';
 import { getViewableDetectors } from '../../timeseriesexplorer_utils/get_viewable_detectors';
@@ -113,7 +115,10 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
     return getControlsForDetector(selectedDetectorIndex, selectedEntities, selectedJobId);
   }, [selectedDetectorIndex, selectedEntities, selectedJobId]);
 
-  const [storageFieldsConfig, setStorageFieldsConfig] = useStorage(ML_ENTITY_FIELDS_CONFIG);
+  const [storageFieldsConfig, setStorageFieldsConfig] = useStorage<
+    MlStorageKey,
+    TMlStorageMapped<typeof ML_ENTITY_FIELDS_CONFIG>
+  >(ML_ENTITY_FIELDS_CONFIG);
 
   // Merge the default config with the one from the local storage
   const resultFieldsConfig = useMemo(() => {

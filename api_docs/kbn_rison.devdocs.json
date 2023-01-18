@@ -206,6 +206,48 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rison",
+        "id": "def-common.safeDecode",
+        "type": "Function",
+        "tags": [],
+        "label": "safeDecode",
+        "description": [
+          "\nsafely parse a rison string into a javascript structure, never throws"
+        ],
+        "signature": [
+          "(rison: string) => ",
+          {
+            "pluginId": "@kbn/rison",
+            "scope": "common",
+            "docId": "kibKbnRisonPluginApi",
+            "section": "def-common.RisonValue",
+            "text": "RisonValue"
+          }
+        ],
+        "path": "packages/kbn-rison/kbn_rison.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/rison",
+            "id": "def-common.safeDecode.$1",
+            "type": "string",
+            "tags": [],
+            "label": "rison",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-rison/kbn_rison.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [],

@@ -34,7 +34,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     '../security_api_integration/fixtures/saml/saml_provider'
   );
 
-  const testEndpointsPlugin = resolve(__dirname, './fixtures/common/test_endpoints');
+  const testEndpointsPlugin = resolve(__dirname, './plugins/test_endpoints');
 
   return {
     testFiles: [resolve(__dirname, './tests/login_selector')],

@@ -41,11 +41,7 @@ import type {
 } from './services/fleet/endpoint_fleet_services_factory';
 import { registerListsPluginEndpointExtensionPoints } from '../lists_integration';
 import type { EndpointAuthz } from '../../common/endpoint/types/authz';
-import {
-  calculateEndpointAuthz,
-  calculatePermissionsFromPrivileges,
-  defaultEndpointPermissions,
-} from '../../common/endpoint/service/authz';
+import { calculateEndpointAuthz } from '../../common/endpoint/service/authz';
 import type { FeatureUsageService } from './services/feature_usage/service';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
 import { doesArtifactHaveData } from './services';
@@ -144,7 +140,7 @@ export class EndpointAppContextService {
       );
 
       registerIngestCallback(
-        'postPackagePolicyDelete',
+        'packagePolicyPostDelete',
         getPackagePolicyDeleteCallback(exceptionListsClient)
       );
     }
@@ -173,18 +169,6 @@ export class EndpointAppContextService {
     const isPlatinumPlus = this.getLicenseService().isPlatinumPlus();
     const listClient = this.getExceptionListsClient();
 
-    let endpointPermissions = defaultEndpointPermissions();
-    if (this.security) {
-      const checkPrivileges = this.security.authz.checkPrivilegesDynamicallyWithRequest(request);
-      const { privileges } = await checkPrivileges({
-        kibana: [
-          this.security.authz.actions.ui.get('siem', 'crud'),
-          this.security.authz.actions.ui.get('siem', 'show'),
-        ],
-      });
-      endpointPermissions = calculatePermissionsFromPrivileges(privileges.kibana);
-    }
-
     const hasExceptionsListItems = !isPlatinumPlus
       ? await doesArtifactHaveData(listClient, ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID)
       : true;
@@ -194,7 +178,6 @@ export class EndpointAppContextService {
       fleetAuthz,
       userRoles,
       endpointRbacEnabled || endpointRbacV1Enabled,
-      endpointPermissions,
       hasExceptionsListItems
     );
   }
