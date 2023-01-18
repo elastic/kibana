@@ -9,7 +9,7 @@ import uuid from 'uuid';
 import { taskStoreMock } from './task_store.mock';
 import { BufferedTaskStore } from './buffered_task_store';
 import { asErr, asOk } from './lib/result_type';
-import { TaskStatus } from './task';
+import { TaskStatus, ConcreteTaskInstance } from './task';
 
 describe('Buffered Task Store', () => {
   test('proxies the TaskStore for `maxAttempts` and `remove`', async () => {
@@ -38,11 +38,26 @@ describe('Buffered Task Store', () => {
       const taskStore = taskStoreMock.create();
       const bufferedStore = new BufferedTaskStore(taskStore, {});
 
-      const tasks = [mockTask(), mockTask(), mockTask()];
+      const tasks = [
+        mockTask(),
+        mockTask({ id: 'task_7c149afd-6250-4ca5-a314-20af1348d5e9' }),
+        mockTask(),
+      ];
 
       taskStore.bulkUpdate.mockResolvedValueOnce([
         asOk(tasks[0]),
-        asErr({ entity: tasks[1], error: new Error('Oh no, something went terribly wrong') }),
+        asErr({
+          entity: tasks[1],
+          error: {
+            type: 'task',
+            id: tasks[1].id,
+            error: {
+              statusCode: 400,
+              error: 'Oh no, something went terribly wrong',
+              message: 'Oh no, something went terribly wrong',
+            },
+          },
+        }),
         asOk(tasks[2]),
       ]);
 
@@ -52,9 +67,17 @@ describe('Buffered Task Store', () => {
         bufferedStore.update(tasks[2]),
       ];
       expect(await results[0]).toMatchObject(tasks[0]);
-      expect(results[1]).rejects.toMatchInlineSnapshot(
-        `[Error: Oh no, something went terribly wrong]`
-      );
+      expect(results[1]).rejects.toMatchInlineSnapshot(`
+        Object {
+          "error": Object {
+            "error": "Oh no, something went terribly wrong",
+            "message": "Oh no, something went terribly wrong",
+            "statusCode": 400,
+          },
+          "id": "task_7c149afd-6250-4ca5-a314-20af1348d5e9",
+          "type": "task",
+        }
+      `);
       expect(await results[2]).toMatchObject(tasks[2]);
     });
 
@@ -65,14 +88,25 @@ describe('Buffered Task Store', () => {
       const duplicateIdTask = mockTask();
       const tasks = [
         duplicateIdTask,
-        mockTask(),
+        mockTask({ id: 'task_16748083-bc28-4599-893b-c8ec16e55c10' }),
         mockTask(),
         { ...mockTask(), id: duplicateIdTask.id },
       ];
 
       taskStore.bulkUpdate.mockResolvedValueOnce([
         asOk(tasks[0]),
-        asErr({ entity: tasks[1], error: new Error('Oh no, something went terribly wrong') }),
+        asErr({
+          entity: tasks[1],
+          error: {
+            type: 'task',
+            id: tasks[1].id,
+            error: {
+              statusCode: 400,
+              error: 'Oh no, something went terribly wrong',
+              message: 'Oh no, something went terribly wrong',
+            },
+          },
+        }),
         asOk(tasks[2]),
         asOk(tasks[3]),
       ]);
@@ -84,16 +118,24 @@ describe('Buffered Task Store', () => {
         bufferedStore.update(tasks[3]),
       ];
       expect(await results[0]).toMatchObject(tasks[0]);
-      expect(results[1]).rejects.toMatchInlineSnapshot(
-        `[Error: Oh no, something went terribly wrong]`
-      );
+      expect(results[1]).rejects.toMatchInlineSnapshot(`
+        Object {
+          "error": Object {
+            "error": "Oh no, something went terribly wrong",
+            "message": "Oh no, something went terribly wrong",
+            "statusCode": 400,
+          },
+          "id": "task_16748083-bc28-4599-893b-c8ec16e55c10",
+          "type": "task",
+        }
+      `);
       expect(await results[2]).toMatchObject(tasks[2]);
       expect(await results[3]).toMatchObject(tasks[3]);
     });
   });
 });
 
-function mockTask() {
+function mockTask(overrides: Partial<ConcreteTaskInstance> = {}): ConcreteTaskInstance {
   return {
     id: `task_${uuid.v4()}`,
     attempts: 0,
@@ -110,5 +152,6 @@ function mockTask() {
     user: undefined,
     version: '123',
     ownerId: '123',
+    ...overrides,
   };
 }
