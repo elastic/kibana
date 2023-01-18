@@ -61,6 +61,36 @@ const existsSchema = s.object({
     })
   ),
 });
+
+const rangeSchema = s.object({
+  range: s.recordOf(
+    s.string(),
+    s.object({
+      lt: s.maybe(s.string()),
+      lte: s.maybe(s.string()),
+      gt: s.maybe(s.string()),
+      gte: s.maybe(s.string()),
+    })
+  ),
+});
+
+const termValueSchema = s.object({
+  term: s.recordOf(s.string(), s.object({ value: s.string() })),
+});
+
+const nestedSchema = s.object({
+  nested: s.object({
+    path: s.string(),
+    query: s.object({
+      bool: s.object({
+        filter: s.arrayOf(termValueSchema),
+      }),
+    }),
+  }),
+});
+
+const arraySchema = s.arrayOf(s.oneOf([nestedSchema, rangeSchema]));
+
 // TODO: it would be great if we could recursively build the schema since the aggregation have be nested
 // For more details see how the types are defined in the elasticsearch javascript client:
 // https://github.com/elastic/elasticsearch-js/blob/4ad5daeaf401ce8ebb28b940075e0a67e56ff9ce/src/api/typesWithBodyKey.ts#L5295
@@ -70,7 +100,7 @@ const boolSchema = s.object({
       must_not: s.oneOf([termSchema, existsSchema]),
     }),
     s.object({
-      filter: s.oneOf([termSchema, existsSchema]),
+      filter: s.oneOf([termSchema, existsSchema, arraySchema]),
     }),
   ]),
 });
