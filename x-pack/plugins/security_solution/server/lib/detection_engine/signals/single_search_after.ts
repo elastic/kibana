@@ -34,7 +34,7 @@ interface SingleSearchAfterParams {
   trackTotalHits?: boolean;
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
   additionalFilters?: estypes.QueryDslQueryContainer[];
-  overrideBody?: OverrideBodyQuery,
+  overrideBody?: OverrideBodyQuery;
 }
 
 // utilize search_after for paging results into bulk.
@@ -56,7 +56,7 @@ export const singleSearchAfter = async <
   secondaryTimestamp,
   trackTotalHits,
   additionalFilters,
-  overrideBody
+  overrideBody,
 }: SingleSearchAfterParams): Promise<{
   searchResult: SignalSearchResponse<TAggregations>;
   searchDuration: string;
@@ -78,7 +78,7 @@ export const singleSearchAfter = async <
         secondaryTimestamp,
         trackTotalHits,
         additionalFilters,
-        overrideBody
+        overrideBody,
       });
 
       const start = performance.now();

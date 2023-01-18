@@ -27,7 +27,7 @@ export const getEventList = async ({
   secondaryTimestamp,
   runtimeMappings,
   exceptionFilter,
-  eventListConfig
+  eventListConfig,
 }: EventsOptions): Promise<estypes.SearchResponse<EventDoc>> => {
   const calculatedPerPage = perPage ?? MAX_PER_PAGE;
   if (calculatedPerPage > 10000) {

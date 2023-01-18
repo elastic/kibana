@@ -202,7 +202,7 @@ export const createThreatSignals = async ({
           primaryTimestamp,
           secondaryTimestamp,
           exceptionFilter,
-          eventListConfig
+          eventListConfig,
         }),
 
       createSignal: (slicedChunk) =>

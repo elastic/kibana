@@ -34,7 +34,7 @@ import type {
   SearchAfterAndBulkCreateReturnType,
   SignalsEnrichment,
   WrapHits,
-  OverrideBodyQuery
+  OverrideBodyQuery,
 } from '../types';
 import type { CompleteRule, ThreatRuleParams } from '../../rule_schema';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
@@ -266,7 +266,7 @@ export interface EventsOptions {
   tuple: RuleRangeTuple;
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
   exceptionFilter: Filter | undefined;
-  eventListConfig?: OverrideBodyQuery
+  eventListConfig?: OverrideBodyQuery;
 }
 
 export interface EventDoc {

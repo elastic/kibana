@@ -344,6 +344,6 @@ export type EventGroupingMultiBucketAggregationResult = ESSearchResponse<
 >;
 
 export interface OverrideBodyQuery {
-  _source: estypes.SearchSourceConfig,
-  fields: estypes.Fields
+  _source: estypes.SearchSourceConfig;
+  fields: estypes.Fields;
 }

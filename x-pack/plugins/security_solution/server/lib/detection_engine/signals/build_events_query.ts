@@ -5,9 +5,9 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {OverrideBodyQuery} from './types';
 import { isEmpty } from 'lodash';
 import type { Filter } from '@kbn/es-query';
+import type { OverrideBodyQuery } from './types';
 import type {
   RuleFilterArray,
   TimestampOverride,
@@ -28,7 +28,7 @@ interface BuildEventsSearchQuery {
   secondaryTimestamp: TimestampOverride | undefined;
   trackTotalHits?: boolean;
   additionalFilters?: estypes.QueryDslQueryContainer[];
-  overrideBody?: OverrideBodyQuery
+  overrideBody?: OverrideBodyQuery;
 }
 
 interface BuildEqlSearchRequestParams {
@@ -134,7 +134,7 @@ export const buildEventsSearchQuery = ({
   secondaryTimestamp,
   trackTotalHits,
   additionalFilters,
-  overrideBody
+  overrideBody,
 }: BuildEventsSearchQuery) => {
   const timestamps = secondaryTimestamp
     ? [primaryTimestamp, secondaryTimestamp]
