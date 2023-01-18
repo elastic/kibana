@@ -597,12 +597,7 @@ export const getTopNavConfig = (
                 );
               }
 
-              showSaveModal(
-                saveModal,
-                I18nContext,
-                theme.theme$, 
-                presentationUtil.ContextProvider,
-              );
+              showSaveModal(saveModal, I18nContext, theme.theme$, presentationUtil.ContextProvider);
             },
           },
         ]

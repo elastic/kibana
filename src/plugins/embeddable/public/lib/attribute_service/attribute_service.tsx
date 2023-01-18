@@ -11,7 +11,12 @@ import { i18n } from '@kbn/i18n';
 import { get, omit } from 'lodash';
 import { Observable } from 'rxjs';
 import { type CoreTheme, I18nStart, NotificationsStart } from '@kbn/core/public';
-import { SavedObjectSaveModal, OnSaveProps, SaveResult, showSaveModal } from '@kbn/saved-objects-plugin/public';
+import {
+  SavedObjectSaveModal,
+  OnSaveProps,
+  SaveResult,
+  showSaveModal,
+} from '@kbn/saved-objects-plugin/public';
 import {
   EmbeddableInput,
   SavedObjectEmbeddableInput,
@@ -190,7 +195,7 @@ export class AttributeService<
             showDescription={false}
           />,
           this.i18nContext,
-          this.theme$,
+          this.theme$
         );
       }
     });
