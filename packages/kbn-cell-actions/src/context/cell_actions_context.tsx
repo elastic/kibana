@@ -8,28 +8,15 @@
 
 import { orderBy } from 'lodash/fp';
 import React, { createContext, FC, useCallback, useContext } from 'react';
-import type { Action, CellActionExecutionContext } from '../types';
+import type { CellActionsProviderProps, GetActions } from '../types';
 
-// It must to match `UiActionsService.getTriggerCompatibleActions`
-type GetTriggerCompatibleActionsType = (triggerId: string, context: object) => Promise<Action[]>;
-
-type GetActionsType = (context: CellActionExecutionContext) => Promise<Action[]>;
-
-const CellActionsContext = createContext<{ getActions: GetActionsType } | null>(null);
-
-interface CellActionsProviderProps {
-  /**
-   * Please assign `uiActions.getTriggerCompatibleActions` function.
-   * This function should return a list of actions for a triggerId that are compatible with the provided context.
-   */
-  getTriggerCompatibleActions: GetTriggerCompatibleActionsType;
-}
+const CellActionsContext = createContext<{ getActions: GetActions } | null>(null);
 
 export const CellActionsProvider: FC<CellActionsProviderProps> = ({
   children,
   getTriggerCompatibleActions,
 }) => {
-  const getSortedCompatibleActions = useCallback<GetActionsType>(
+  const getActions = useCallback<GetActions>(
     (context) =>
       getTriggerCompatibleActions(context.trigger.id, context).then((actions) =>
         orderBy(['order', 'id'], ['asc', 'asc'], actions)
@@ -38,9 +25,7 @@ export const CellActionsProvider: FC<CellActionsProviderProps> = ({
   );
 
   return (
-    <CellActionsContext.Provider value={{ getActions: getSortedCompatibleActions }}>
-      {children}
-    </CellActionsContext.Provider>
+    <CellActionsContext.Provider value={{ getActions }}>{children}</CellActionsContext.Provider>
   );
 };
 
@@ -51,6 +36,5 @@ export const useCellActionsContext = () => {
       'No CellActionsContext found. Please wrap the application with CellActionsProvider'
     );
   }
-
   return context;
 };

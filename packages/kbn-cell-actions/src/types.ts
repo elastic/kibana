@@ -6,8 +6,22 @@
  * Side Public License, v 1.
  */
 
-import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import type {
+  Action,
+  ActionExecutionContext,
+  UiActionsService,
+} from '@kbn/ui-actions-plugin/public';
 export type { Action, ActionExecutionContext };
+
+export interface CellActionsProviderProps {
+  /**
+   * Please assign `uiActions.getTriggerCompatibleActions` function.
+   * This function should return a list of actions for a triggerId that are compatible with the provided context.
+   */
+  getTriggerCompatibleActions: UiActionsService['getTriggerCompatibleActions'];
+}
+
+export type GetActions = (context: CellActionExecutionContext) => Promise<Action[]>;
 
 export interface CellActionField {
   /**

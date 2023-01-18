@@ -17,7 +17,7 @@ import { useBulkLoadActions } from './use_load_actions';
 
 interface BulkField extends Pick<CellActionField, 'name' | 'type'> {
   /**
-   * Array containing all the values of the field for that page, indexed by rowIndex
+   * Array containing all the values of the field in the visible page, indexed by rowIndex
    */
   values: Array<string | string[] | null | undefined>;
 }
@@ -25,12 +25,10 @@ interface BulkField extends Pick<CellActionField, 'name' | 'type'> {
 export interface UseDataGridColumnsCellActionsProps
   extends Pick<CellActionsProps, 'triggerId' | 'metadata'> {
   fields: BulkField[];
-  pageSize: number;
 }
 export const useDataGridColumnsCellActions = ({
   fields,
   triggerId,
-  pageSize,
   metadata,
 }: UseDataGridColumnsCellActionsProps): EuiDataGridColumnCellAction[][] => {
   const bulkContexts: CellActionExecutionContext[] = useMemo(
@@ -47,7 +45,9 @@ export const useDataGridColumnsCellActions = ({
 
   const columnsCellActions = useMemo<EuiDataGridColumnCellAction[][]>(() => {
     if (loading) {
-      return fields.map(() => [() => <EuiLoadingSpinner size="s" />]);
+      return fields.map(() => [
+        () => <EuiLoadingSpinner size="s" data-test-subj="dataGridColumnCellAction-loading" />,
+      ]);
     }
     if (!columnsActions) {
       return [];
@@ -63,12 +63,13 @@ export const useDataGridColumnsCellActions = ({
             const nodeRef = useRef<HTMLElement | null>(null);
             const extraContentNodeRef = useRef<HTMLDivElement | null>(null);
 
+            const { name, type } = fields[columnIndex];
             // rowIndex refers to all pages, the row index relative to the page is needed in order to get the value
-            const pageRowIndex = rowIndex % pageSize;
+            const pageRowIndex = rowIndex % fields[columnIndex].values.length;
             const value = fields[columnIndex].values[pageRowIndex];
 
             const actionContext: CellActionExecutionContext = {
-              field: { ...fields[columnIndex], value },
+              field: { name, type, value },
               trigger: { id: triggerId },
               extraContentNodeRef,
               nodeRef,
@@ -93,7 +94,7 @@ export const useDataGridColumnsCellActions = ({
           }
       )
     );
-  }, [columnsActions, fields, loading, metadata, pageSize, triggerId]);
+  }, [columnsActions, fields, loading, metadata, triggerId]);
 
   return columnsCellActions;
 };
