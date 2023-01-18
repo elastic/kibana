@@ -8,8 +8,20 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 import type { Agent } from '../../types';
+import { appContextService } from '../app_context';
 
 export async function fetchAndAssignAgentMetrics(esClient: ElasticsearchClient, agents: Agent[]) {
+  try {
+    return await _fetchAndAssignAgentMetrics(esClient, agents);
+  } catch (err) {
+    //  Do not throw if we are not able to fetch metrics, as it could occur if the user is missing some permissions
+    appContextService.getLogger().warn(err);
+
+    return agents;
+  }
+}
+
+async function _fetchAndAssignAgentMetrics(esClient: ElasticsearchClient, agents: Agent[]) {
   const res = await esClient.search<
     unknown,
     Record<
