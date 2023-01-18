@@ -48,6 +48,7 @@ export async function getStatus(
   const { query } = params;
   const enabledIds: string[] = [];
   let disabledCount = 0;
+  let disabledMonitorsCount = 0;
   let maxPeriod = 0;
   let listOfLocationsSet = new Set<string>();
   const monitorLocationMap: Record<string, string[]> = {};
@@ -89,6 +90,7 @@ export async function getStatus(
     const attrs = monitor.attributes;
     if (attrs[ConfigKey.ENABLED] === false) {
       disabledCount += attrs[ConfigKey.LOCATIONS].length;
+      disabledMonitorsCount += 1;
     } else {
       const missingLabels = new Set<string>();
 
@@ -127,6 +129,8 @@ export async function getStatus(
   );
 
   return {
+    allMonitorsCount: allMonitors.length,
+    disabledMonitorsCount,
     enabledIds,
     disabledCount,
     up,

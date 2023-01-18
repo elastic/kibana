@@ -12,6 +12,7 @@ import {
   useGeneratedHtmlId,
   useResizeObserver,
 } from '@elastic/eui';
+import type { ResizeTrigger } from '@elastic/eui/src/components/resizable_container/types';
 import { css } from '@emotion/react';
 import { isEqual, round } from 'lodash';
 import type { ReactElement, RefObject } from 'react';
@@ -51,24 +52,23 @@ export const PanelsResizable = ({
   // end to toggle the rendering of a transparent overlay which prevents the cancellation.
   // EUI issue: https://github.com/elastic/eui/issues/6199
   const [resizeWithPortalsHackIsResizing, setResizeWithPortalsHackIsResizing] = useState(false);
-  const enableResizeWithPortalsHack = () => setResizeWithPortalsHackIsResizing(true);
-  const disableResizeWithPortalsHack = () => setResizeWithPortalsHackIsResizing(false);
-  const resizeWithPortalsHackFillCss = css`
+  const enableResizeWithPortalsHack = useCallback(
+    () => setResizeWithPortalsHackIsResizing(true),
+    []
+  );
+  const disableResizeWithPortalsHack = useCallback(
+    () => setResizeWithPortalsHackIsResizing(false),
+    []
+  );
+  const resizeWithPortalsHackButtonCss = css`
+    z-index: 3;
+  `;
+  const resizeWithPortalsHackOverlayCss = css`
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-  `;
-  const resizeWithPortalsHackButtonCss = css`
-    z-index: 3;
-  `;
-  const resizeWithPortalsHackButtonInnerCss = css`
-    ${resizeWithPortalsHackFillCss}
-    z-index: 1;
-  `;
-  const resizeWithPortalsHackOverlayCss = css`
-    ${resizeWithPortalsHackFillCss}
     z-index: 2;
   `;
 
@@ -133,11 +133,26 @@ export const PanelsResizable = ({
     }
   }, [containerHeight, minMainPanelHeight, minTopPanelHeight, panelSizes, topPanelHeight]);
 
-  const onResizeEnd = () => {
+  const onResizeStart = useCallback(
+    (trigger: ResizeTrigger) => {
+      if (trigger !== 'pointer') {
+        return;
+      }
+
+      enableResizeWithPortalsHack();
+    },
+    [enableResizeWithPortalsHack]
+  );
+
+  const onResizeEnd = useCallback(() => {
+    if (!resizeWithPortalsHackIsResizing) {
+      return;
+    }
+
     // We don't want the resize button to retain focus after the resize is complete,
     // but EuiResizableContainer will force focus it onClick. To work around this we
     // use setTimeout to wait until after onClick has been called before blurring.
-    if (resizeWithPortalsHackIsResizing && document.activeElement instanceof HTMLElement) {
+    if (document.activeElement instanceof HTMLElement) {
       const button = document.activeElement;
       setTimeout(() => {
         button.blur();
@@ -145,7 +160,7 @@ export const PanelsResizable = ({
     }
 
     disableResizeWithPortalsHack();
-  };
+  }, [disableResizeWithPortalsHack, resizeWithPortalsHackIsResizing]);
 
   const { euiTheme } = useEuiTheme();
   const buttonCss = css`
@@ -156,57 +171,40 @@ export const PanelsResizable = ({
   `;
 
   return (
-    <div
-      className="eui-fullHeight"
-      onMouseUp={onResizeEnd}
-      onMouseLeave={onResizeEnd}
-      onTouchEnd={onResizeEnd}
-      data-test-subj="unifiedHistogramResizableContainerWrapper"
+    <EuiResizableContainer
+      className={className}
+      direction="vertical"
+      onPanelWidthChange={onPanelSizeChange}
+      onResizeStart={onResizeStart}
+      onResizeEnd={onResizeEnd}
+      data-test-subj="unifiedHistogramResizableContainer"
     >
-      <EuiResizableContainer
-        className={className}
-        direction="vertical"
-        onPanelWidthChange={onPanelSizeChange}
-        data-test-subj="unifiedHistogramResizableContainer"
-      >
-        {(EuiResizablePanel, EuiResizableButton) => (
-          <>
-            <EuiResizablePanel
-              id={topPanelId}
-              minSize={`${minTopPanelHeight}px`}
-              size={panelSizes.topPanelSize}
-              paddingSize="none"
-              data-test-subj="unifiedHistogramResizablePanelTop"
-            >
-              {topPanel}
-            </EuiResizablePanel>
-            <EuiResizableButton
-              css={[resizeWithPortalsHackButtonCss, buttonCss]}
-              data-test-subj="unifiedHistogramResizableButton"
-            >
-              <span
-                onMouseDown={enableResizeWithPortalsHack}
-                onTouchStart={enableResizeWithPortalsHack}
-                css={resizeWithPortalsHackButtonInnerCss}
-                data-test-subj="unifiedHistogramResizableButtonInner"
-              />
-            </EuiResizableButton>
-            <EuiResizablePanel
-              minSize={`${minMainPanelHeight}px`}
-              size={panelSizes.mainPanelSize}
-              paddingSize="none"
-              data-test-subj="unifiedHistogramResizablePanelMain"
-            >
-              {mainPanel}
-            </EuiResizablePanel>
-            {resizeWithPortalsHackIsResizing ? (
-              <div css={resizeWithPortalsHackOverlayCss} />
-            ) : (
-              <></>
-            )}
-          </>
-        )}
-      </EuiResizableContainer>
-    </div>
+      {(EuiResizablePanel, EuiResizableButton) => (
+        <>
+          <EuiResizablePanel
+            id={topPanelId}
+            minSize={`${minTopPanelHeight}px`}
+            size={panelSizes.topPanelSize}
+            paddingSize="none"
+            data-test-subj="unifiedHistogramResizablePanelTop"
+          >
+            {topPanel}
+          </EuiResizablePanel>
+          <EuiResizableButton
+            css={[resizeWithPortalsHackButtonCss, buttonCss]}
+            data-test-subj="unifiedHistogramResizableButton"
+          />
+          <EuiResizablePanel
+            minSize={`${minMainPanelHeight}px`}
+            size={panelSizes.mainPanelSize}
+            paddingSize="none"
+            data-test-subj="unifiedHistogramResizablePanelMain"
+          >
+            {mainPanel}
+          </EuiResizablePanel>
+          {resizeWithPortalsHackIsResizing ? <div css={resizeWithPortalsHackOverlayCss} /> : <></>}
+        </>
+      )}
+    </EuiResizableContainer>
   );
 };

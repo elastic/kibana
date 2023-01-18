@@ -116,6 +116,15 @@ export const CaseConnectorRt = rt.intersection([
   CaseUserActionConnectorRt,
 ]);
 
+export const GetCaseConnectorsResponseRt = rt.record(
+  rt.string,
+  rt.intersection([
+    rt.type({ needsToBePushed: rt.boolean, hasBeenPushed: rt.boolean }),
+    rt.partial(rt.type({ latestPushDate: rt.string }).props),
+    CaseConnectorRt,
+  ])
+);
+
 export type CaseUserActionConnector = rt.TypeOf<typeof CaseUserActionConnectorRt>;
 export type CaseConnector = rt.TypeOf<typeof CaseConnectorRt>;
 export type ConnectorTypeFields = rt.TypeOf<typeof ConnectorTypeFieldsRt>;
@@ -130,3 +139,5 @@ export type ConnectorServiceNowSIRTypeFields = rt.TypeOf<typeof ConnectorService
 
 // we need to change these types back and forth for storing in ES (arrays overwrite, objects merge)
 export type ConnectorFields = rt.TypeOf<typeof ConnectorFieldsRt>;
+
+export type GetCaseConnectorsResponse = rt.TypeOf<typeof GetCaseConnectorsResponseRt>;
