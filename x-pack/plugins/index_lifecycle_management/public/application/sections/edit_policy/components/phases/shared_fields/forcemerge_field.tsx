@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { EuiCheckbox, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import { NumericField, useKibana } from '../../../../../../shared_imports';
 import { i18nTexts } from '../../../i18n_texts';
@@ -80,7 +80,7 @@ export const ForcemergeField: React.FunctionComponent<Props> = ({ phase }) => {
                 checked={field.value as boolean}
                 onChange={field.onChange}
                 data-test-subj={`${phase}-bestCompression`}
-                id={uuid()}
+                id={uuidv4()}
               />
             </EuiFlexItem>
 

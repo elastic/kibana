@@ -8,7 +8,7 @@
 
 import './_dashboard_container.scss';
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import classNames from 'classnames';
 import { EuiLoadingElastic } from '@elastic/eui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
@@ -57,7 +57,7 @@ export const DashboardContainerRenderer = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [savedObjectId]);
 
-  const id = useMemo(() => uuid(), []);
+  const id = useMemo(() => uuidv4(), []);
 
   useEffect(() => {
     let canceled = false;

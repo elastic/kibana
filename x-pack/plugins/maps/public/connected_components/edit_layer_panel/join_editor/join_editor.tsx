@@ -6,7 +6,7 @@
  */
 
 import React, { Fragment } from 'react';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import { EuiTitle, EuiSpacer, EuiTextAlign, EuiCallOut } from '@elastic/eui';
 
@@ -69,7 +69,7 @@ export function JoinEditor({ joins, layer, onChange, leftJoinFields, layerDispla
       ...joins,
       {
         right: {
-          id: uuid(),
+          id: uuidv4(),
           applyGlobalQuery: true,
           applyGlobalTime: true,
         },

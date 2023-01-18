@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import type { FilterSpecification, Map as MbMap, LayerSpecification } from '@kbn/mapbox-gl';
 import type { Query } from '@kbn/data-plugin/common';
 import { Feature, GeoJsonProperties, Geometry, Position } from 'geojson';
@@ -183,7 +183,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
         const originalJoinId = joinDescriptor.right.id!;
 
         // right.id is uuid used to track requests in inspector
-        joinDescriptor.right.id = uuid();
+        joinDescriptor.right.id = uuidv4();
 
         // Update all data driven styling properties using join fields
         if (clonedDescriptor.style && 'properties' in clonedDescriptor.style) {

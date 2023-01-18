@@ -6,7 +6,7 @@
  */
 
 import * as React from 'react';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { mount, ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 
@@ -71,9 +71,9 @@ function waitForUseEffect() {
 
 function mockRule(overloads: Partial<Rule> = {}): Rule {
   return {
-    id: uuid(),
+    id: uuidv4(),
     enabled: true,
-    name: `rule-${uuid()}`,
+    name: `rule-${uuidv4()}`,
     tags: [],
     ruleTypeId: '.noop',
     consumer: 'consumer',

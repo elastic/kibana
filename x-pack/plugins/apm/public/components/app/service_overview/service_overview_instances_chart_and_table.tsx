@@ -8,7 +8,7 @@
 import { EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { orderBy } from 'lodash';
 import React, { useState } from 'react';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
@@ -124,7 +124,7 @@ export function ServiceOverviewInstancesChartAndTable({
       ).then((response) => {
         return {
           // Everytime the main statistics is refetched, updates the requestId making the detailed API to be refetched.
-          requestId: uuid(),
+          requestId: uuidv4(),
           currentPeriodItems: response.currentPeriod,
           currentPeriodItemsCount: response.currentPeriod.length,
           previousPeriodItems: response.previousPeriod,

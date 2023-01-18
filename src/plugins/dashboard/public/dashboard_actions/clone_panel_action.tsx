@@ -7,7 +7,7 @@
  */
 
 import _ from 'lodash';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import { SavedObjectsStart } from '@kbn/core/public';
 import {
@@ -178,7 +178,7 @@ export class ClonePanelAction implements Action<ClonePanelActionContext> {
         type: embeddable.type,
         explicitInput: {
           ...(await embeddable.getInputAsValueType()),
-          id: uuid(),
+          id: uuidv4(),
           title: newTitle,
           hidePanelTitles: panelToClone.explicitInput.hidePanelTitles,
         },
@@ -188,7 +188,7 @@ export class ClonePanelAction implements Action<ClonePanelActionContext> {
         type: embeddable.type,
         explicitInput: {
           ...panelToClone.explicitInput,
-          id: uuid(),
+          id: uuidv4(),
         },
       };
       if (panelToClone.explicitInput.savedObjectId) {

@@ -7,7 +7,7 @@
 
 import * as React from 'react';
 import { shallow, mount } from 'enzyme';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { withBulkRuleOperations, ComponentOpts } from './with_bulk_rule_api_operations';
 import * as ruleApi from '../../../lib/rule_api';
 import { SortField } from '../../../lib/rule_api/load_execution_log_aggregations';
@@ -210,7 +210,7 @@ describe('with_bulk_rule_api_operations', () => {
     };
 
     const ExtendedComponent = withBulkRuleOperations(ComponentToExtend);
-    const ruleId = uuid();
+    const ruleId = uuidv4();
     const component = mount(<ExtendedComponent ruleId={ruleId} />);
     component.find('button').simulate('click');
 
@@ -225,7 +225,7 @@ describe('with_bulk_rule_api_operations', () => {
     };
 
     const ExtendedComponent = withBulkRuleOperations(ComponentToExtend);
-    const ruleId = uuid();
+    const ruleId = uuidv4();
     const component = mount(<ExtendedComponent ruleId={ruleId} />);
     component.find('button').simulate('click');
 
@@ -317,9 +317,9 @@ describe('with_bulk_rule_api_operations', () => {
 
 function mockRule(overloads: Partial<Rule> = {}): Rule {
   return {
-    id: uuid(),
+    id: uuidv4(),
     enabled: true,
-    name: `rule-${uuid()}`,
+    name: `rule-${uuidv4()}`,
     tags: [],
     ruleTypeId: '.noop',
     consumer: 'consumer',

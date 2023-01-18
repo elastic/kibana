@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useState, useCallback, memo } from 'react';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -74,8 +74,8 @@ function DragAndDropTextListComponent({
   textDeserializer,
   textSerializer,
 }: Props): JSX.Element {
-  const [droppableId] = useState(() => uuid());
-  const [firstItemId] = useState(() => uuid());
+  const [droppableId] = useState(() => uuidv4());
+  const [firstItemId] = useState(() => uuidv4());
 
   const onDragEnd = useCallback(
     ({ source, destination }) => {

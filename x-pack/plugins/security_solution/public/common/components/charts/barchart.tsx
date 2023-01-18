@@ -10,7 +10,7 @@ import React, { useMemo } from 'react';
 import { Chart, BarSeries, Axis, Position, ScaleType, Settings } from '@elastic/charts';
 import { getOr, get, isNumber } from 'lodash/fp';
 import deepmerge from 'deepmerge';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
@@ -189,7 +189,7 @@ export const BarChartComponent: React.FC<BarChartComponentProps> = ({
         ? barChart.map((d, i) => ({
             color: d.color ?? (i < defaultLegendColors.length ? defaultLegendColors[i] : undefined),
             dataProviderId: escapeDataProviderId(
-              `draggable-legend-item-${uuid()}-${stackByField}-${d.key}`
+              `draggable-legend-item-${uuidv4()}-${stackByField}-${d.key}`
             ),
             scopeId,
             field: stackByField,

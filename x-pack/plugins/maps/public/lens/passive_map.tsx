@@ -6,7 +6,7 @@
  */
 
 import React, { Component, RefObject } from 'react';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { EuiLoadingChart } from '@elastic/eui';
 import { EmbeddableFactory, ViewMode } from '@kbn/embeddable-plugin/public';
 import type { LayerDescriptor } from '../../common/descriptor_types';
@@ -60,7 +60,7 @@ export class PassiveMap extends Component<Props, State> {
     const basemapLayerDescriptor = createBasemapLayerDescriptor();
     const intialLayers = basemapLayerDescriptor ? [basemapLayerDescriptor] : [];
     const mapEmbeddable = await this.props.factory.create({
-      id: uuid(),
+      id: uuidv4(),
       attributes: {
         title: '',
         layerListJSON: JSON.stringify([...intialLayers, this.props.passiveLayer]),

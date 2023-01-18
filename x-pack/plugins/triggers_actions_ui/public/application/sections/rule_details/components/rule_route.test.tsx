@@ -6,7 +6,7 @@
  */
 
 import * as React from 'react';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { shallow } from 'enzyme';
 import { ToastsApi } from '@kbn/core/public';
 import { RuleRoute, getRuleSummary } from './rule_route';
@@ -63,7 +63,7 @@ describe('getRuleState useEffect handler', () => {
       actions: [
         {
           group: '',
-          id: uuid(),
+          id: uuidv4(),
           actionTypeId: connectorType.id,
           params: {},
         },
@@ -103,9 +103,9 @@ function mockStateSetter() {
 
 function mockRule(overloads: Partial<Rule> = {}): Rule {
   return {
-    id: uuid(),
+    id: uuidv4(),
     enabled: true,
-    name: `rule-${uuid()}`,
+    name: `rule-${uuidv4()}`,
     tags: [],
     ruleTypeId: '.noop',
     consumer: 'consumer',

@@ -7,7 +7,7 @@
 
 import React, { CSSProperties } from 'react';
 import xml2js from 'xml2js';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { Canvg } from 'canvg';
 // @ts-expect-error
 import calcSDF from 'bitmap-sdf';
@@ -109,7 +109,7 @@ export function getMakiSymbolAnchor(symbolId: string) {
 }
 
 export function getCustomIconId() {
-  return `${CUSTOM_ICON_PREFIX_SDF}${uuid()}`;
+  return `${CUSTOM_ICON_PREFIX_SDF}${uuidv4()}`;
 }
 
 export function buildSrcUrl(svgString: string) {

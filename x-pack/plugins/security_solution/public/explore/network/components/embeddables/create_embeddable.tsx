@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import React from 'react';
 import type { HtmlPortalNode } from 'react-reverse-portal';
 import { OutPortal } from 'react-reverse-portal';
@@ -65,7 +65,7 @@ export const createEmbeddable = async (
   const input: MapEmbeddableInput = {
     title: i18n.MAP_TITLE,
     attributes: { title: '' },
-    id: uuid(),
+    id: uuidv4(),
     filters,
     hidePanelTitles: true,
     query,

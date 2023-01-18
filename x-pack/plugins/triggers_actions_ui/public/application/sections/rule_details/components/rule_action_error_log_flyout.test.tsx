@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { RuleActionErrorLogFlyout } from './rule_action_error_log_flyout';
@@ -43,8 +43,8 @@ const mockErrorLogResponse = {
 };
 
 const mockExecution: any = {
-  id: uuid(),
-  rule_id: uuid(),
+  id: uuidv4(),
+  rule_id: uuidv4(),
   timestamp: '2022-03-20T07:40:44-07:00',
   duration: 5000000,
   status: 'success',

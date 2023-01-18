@@ -9,7 +9,7 @@ import type { CSSProperties, HTMLAttributes } from 'react';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import type { CommonProps, EuiContextMenuPanelProps, EuiPopoverProps } from '@elastic/eui';
 import { EuiContextMenuPanel, EuiPopover, EuiPopoverTitle, EuiLoadingContent } from '@elastic/eui';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import type { ContextMenuItemNavByRouterProps } from './context_menu_item_nav_by_router';
 import { ContextMenuItemNavByRouter } from './context_menu_item_nav_by_router';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
@@ -78,7 +78,7 @@ export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportPro
           return (
             <EuiLoadingContent
               lines={1}
-              key={uuid()}
+              key={uuidv4()}
               data-test-subj={itemProps['data-test-subj'] ?? getTestId(`item-loading-${index}`)}
             />
           );
@@ -87,7 +87,7 @@ export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportPro
           <ContextMenuItemNavByRouter
             {...itemProps}
             isNavigationDisabled={isNavigationDisabled}
-            key={uuid()}
+            key={uuidv4()}
             data-test-subj={itemProps['data-test-subj'] ?? getTestId(`item-${index}`)}
             textTruncate={Boolean(maxWidth) || itemProps.textTruncate}
             hoverInfo={hoverInfo}

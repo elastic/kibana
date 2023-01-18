@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import React, { Fragment } from 'react';
 import {
   validateBaseProperties,
@@ -244,9 +244,9 @@ function mockRuleTypeModel(overloads: Partial<RuleTypeModel> = {}): RuleTypeMode
 
 function mockRule(overloads: Partial<Rule> = {}): Rule {
   return {
-    id: uuid(),
+    id: uuidv4(),
     enabled: true,
-    name: `rule-${uuid()}`,
+    name: `rule-${uuidv4()}`,
     tags: [],
     ruleTypeId: '.noop',
     consumer: 'consumer',
