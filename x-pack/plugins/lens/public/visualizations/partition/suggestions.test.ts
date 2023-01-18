@@ -1106,7 +1106,7 @@ describe('suggestions', () => {
       ).toHaveLength(0);
     });
 
-    it('waffle type should not be hidden from the suggestion list', () => {
+    it('waffle type should be shown in the suggestion list', () => {
       expect(
         suggestions({
           table: {
