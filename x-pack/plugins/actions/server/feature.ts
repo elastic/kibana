@@ -22,7 +22,7 @@ const FEATURE_ORDER = 3000;
 export const ACTIONS_FEATURE = {
   id: 'actions',
   name: i18n.translate('xpack.actions.featureRegistry.actionsFeatureName', {
-    defaultMessage: 'Actions and Connectors',
+    defaultMessage: 'Actions and connectors',
   }),
   category: DEFAULT_APP_CATEGORIES.management,
   app: [],

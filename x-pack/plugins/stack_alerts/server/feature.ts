@@ -19,7 +19,7 @@ const TransformHealth = TRANSFORM_RULE_TYPE.TRANSFORM_HEALTH;
 export const BUILT_IN_ALERTS_FEATURE: KibanaFeatureConfig = {
   id: STACK_ALERTS_FEATURE_ID,
   name: i18n.translate('xpack.stackAlerts.featureRegistry.actionsFeatureName', {
-    defaultMessage: 'Stack Rules',
+    defaultMessage: 'Stack rules',
   }),
   app: [],
   category: DEFAULT_APP_CATEGORIES.management,
