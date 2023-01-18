@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { BehaviorSubject, filter, share, Subject, tap } from 'rxjs';
+import { BehaviorSubject, filter, map, Observable, share, Subject, tap } from 'rxjs';
 import type { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
 import { ISearchSource } from '@kbn/data-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
@@ -38,7 +38,10 @@ export type DataMain$ = BehaviorSubject<DataMainMsg>;
 export type DataDocuments$ = BehaviorSubject<DataDocumentsMsg>;
 export type DataTotalHits$ = BehaviorSubject<DataTotalHitsMsg>;
 export type AvailableFields$ = BehaviorSubject<DataAvailableFieldsMsg>;
-export type DataFetch$ = ReturnType<typeof getFetch$>;
+export type DataFetch$ = Observable<{
+  reset: boolean;
+  searchSessionId: string;
+}>;
 export type DataRefetch$ = Subject<DataRefetchMsg>;
 
 export interface UseSavedSearch {
@@ -174,6 +177,10 @@ export const useSavedSearch = ({
       }).pipe(
         filter(() => validateTimeRange(timefilter.getTime(), services.toastNotifications)),
         tap(() => inspectorAdapters.requests.reset()),
+        map((val) => ({
+          reset: val === 'reset',
+          searchSessionId: searchSessionManager.getNextSearchSessionId(),
+        })),
         share()
       ),
     [
@@ -197,20 +204,20 @@ export const useSavedSearch = ({
   useEffect(() => {
     let abortController: AbortController;
 
-    const subscription = fetch$.subscribe(async (val) => {
+    const subscription = fetch$.subscribe(async ({ reset, searchSessionId }) => {
       abortController?.abort();
       abortController = new AbortController();
 
       const autoRefreshDone = refs.current.autoRefreshDone;
 
-      await fetchAll(dataSubjects, searchSource, val === 'reset', {
+      await fetchAll(dataSubjects, searchSource, reset, {
         abortController,
         appStateContainer: stateContainer.appState,
         data,
         initialFetchStatus,
         inspectorAdapters,
         savedSearch,
-        searchSessionId: searchSessionManager.getNextSearchSessionId(),
+        searchSessionId,
         services,
         useNewFieldsApi,
       });
