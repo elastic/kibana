@@ -13,17 +13,19 @@ import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { defaultUser, getPostCaseRequest } from '../../../../../common/lib/mock';
 import {
   createCase,
-  createCaseWithConnector,
   deleteCasesByESQuery,
   deleteCasesUserActions,
   deleteComments,
   deleteConfiguration,
   getCaseUserActions,
-  getServiceNowSimulationServer,
   pushCase,
   updateCase,
   updateConfiguration,
 } from '../../../../../common/lib/utils';
+import {
+  createCaseWithConnector,
+  getServiceNowSimulationServer,
+} from '../../../../../common/lib/connectors';
 
 import { ObjectRemover as ActionsRemover } from '../../../../../../alerting_api_integration/common/lib';
 import { setupSuperUserProfile } from '../../../../../common/lib/user_profiles';
