@@ -134,7 +134,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
     disableBulkClose: true,
     bulkCloseIndex: undefined,
     entryErrorExists: false,
-    expireTime: moment(itemToEdit.expire_time),
+    expireTime: itemToEdit.expire_time !== undefined ? moment(itemToEdit.expire_time) : undefined,
     expireErrorExists: false,
   });
 
