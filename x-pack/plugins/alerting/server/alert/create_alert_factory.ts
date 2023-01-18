@@ -7,9 +7,9 @@
 
 import { Logger } from '@kbn/core/server';
 import { cloneDeep } from 'lodash';
-import { type CategorizeAlertTypes, categorizeAlerts } from '../lib';
 import { AlertInstanceContext, AlertInstanceState } from '../types';
 import { Alert, PublicAlert } from './alert';
+import { processAlerts } from '../lib';
 
 export interface AlertFactory<
   State extends AlertInstanceState,
@@ -128,16 +128,18 @@ export function createAlertFactory<
             );
             return [];
           }
-
-          const { recovered } = categorizeAlerts<
-            Alert<State, Context, ActionGroupIds, ActionGroupIds>
-          >({
+          const { currentRecoveredAlerts } = processAlerts<Alert<State, Context, ActionGroupIds>>({
             reportedAlerts: splitAlerts<State, Context>(alerts, originalAlerts),
-            trackedAlerts: originalAlerts,
+            trackedAlerts: {
+              active: originalAlerts,
+              recovered: {},
+            },
             hasReachedAlertLimit,
             alertLimit: maxAlerts,
           });
-          return Object.keys(recovered ?? {}).map((alertId: string) => recovered[alertId]);
+          return Object.keys(currentRecoveredAlerts ?? {}).map(
+            (alertId: string) => currentRecoveredAlerts[alertId]
+          );
         },
       };
     },
@@ -152,8 +154,14 @@ export function createAlertFactory<
 export function splitAlerts<State extends AlertInstanceState, Context extends AlertInstanceContext>(
   reportedAlerts: Record<string, Alert<State, Context>>,
   trackedActiveAlerts: Record<string, Alert<State, Context>>
-): CategorizeAlertTypes<Alert<State, Context>> {
-  const alerts: CategorizeAlertTypes<Alert<State, Context>> = {
+): {
+  active: Record<string, Alert<State, Context>>;
+  recovered: Record<string, Alert<State, Context>>;
+} {
+  const alerts: {
+    active: Record<string, Alert<State, Context>>;
+    recovered: Record<string, Alert<State, Context>>;
+  } = {
     active: {},
     recovered: {},
   };

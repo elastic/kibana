@@ -541,7 +541,7 @@ export class TaskRunner<
 
     this.alertingEventLogger.start();
 
-    const result = await loadRule<Params>({
+    return await loadRule<Params>({
       paramValidator: this.ruleType.validate?.params,
       ruleId,
       spaceId,
@@ -549,8 +549,6 @@ export class TaskRunner<
       ruleTypeRegistry: this.ruleTypeRegistry,
       alertingEventLogger: this.alertingEventLogger,
     });
-
-    return result;
   }
 
   private async processRunResults({

@@ -32,7 +32,7 @@ export {
   convertMonitoringFromRawAndVerify,
 } from './monitoring';
 export { getNextRun } from './next_run';
-export { categorizeAlerts, type CategorizeAlertTypes } from './categorize_alerts';
+export { processAlerts } from './process_alerts';
 export { createWrappedScopedClusterClientFactory } from './wrap_scoped_cluster_client';
 export { isRuleSnoozed, getRuleSnoozeEndTime } from './is_rule_snoozed';
 export { convertRuleIdsToKueryNode } from './convert_rule_ids_to_kuery_node';
