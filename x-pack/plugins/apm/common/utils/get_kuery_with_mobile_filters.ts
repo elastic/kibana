@@ -7,7 +7,7 @@
 
 import {
   HOST_OS_VERSION,
-  DEVICE_MODEL_NAME,
+  DEVICE_MODEL_IDENTIFIER,
   NETWORK_CONNECTION_TYPE,
   SERVICE_VERSION,
 } from '../es_fields/apm';
@@ -28,7 +28,7 @@ export function getKueryWithMobileFilters({
 }) {
   const kueryWithFilters = [
     kuery,
-    ...fieldValuePairToKql(DEVICE_MODEL_NAME, device),
+    ...fieldValuePairToKql(DEVICE_MODEL_IDENTIFIER, device),
     ...fieldValuePairToKql(HOST_OS_VERSION, osVersion),
     ...fieldValuePairToKql(SERVICE_VERSION, appVersion),
     ...fieldValuePairToKql(NETWORK_CONNECTION_TYPE, netConnectionType),
