@@ -15,7 +15,7 @@ export default function ({ getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
 
   describe('_bulk_delete', () => {
-    const endpoint = '/api/kibana/management/saved_objects/_bulk_delete';
+    const endpoint = '/internal/kibana/management/saved_objects/_bulk_delete';
     const validObject = { type: 'visualization', id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab' };
     const invalidObject = { type: 'wigwags', id: 'foo' };
 

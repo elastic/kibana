@@ -34,7 +34,7 @@ describe('registerRoutes', () => {
     );
     expect(router.post).toHaveBeenCalledWith(
       expect.objectContaining({
-        path: '/api/kibana/management/saved_objects/_bulk_delete',
+        path: '/internal/kibana/management/saved_objects/_bulk_delete',
       }),
       expect.any(Function)
     );

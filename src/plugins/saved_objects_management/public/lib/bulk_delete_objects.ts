@@ -25,7 +25,10 @@ export function bulkDeleteObjects(
   http: HttpStart,
   objects: SavedObjectDeleteRequest[]
 ): Promise<SavedObjectDeleteStatus[]> {
-  return http.post<SavedObjectDeleteStatus[]>('/api/kibana/management/saved_objects/_bulk_delete', {
-    body: JSON.stringify(objects),
-  });
+  return http.post<SavedObjectDeleteStatus[]>(
+    '/internal/kibana/management/saved_objects/_bulk_delete',
+    {
+      body: JSON.stringify(objects),
+    }
+  );
 }

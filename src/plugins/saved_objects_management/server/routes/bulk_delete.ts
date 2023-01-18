@@ -12,7 +12,7 @@ import { IRouter } from '@kbn/core/server';
 export const registerBulkDeleteRoute = (router: IRouter) => {
   router.post(
     {
-      path: '/api/kibana/management/saved_objects/_bulk_delete',
+      path: '/internal/kibana/management/saved_objects/_bulk_delete',
       validate: {
         body: schema.arrayOf(
           schema.object({
