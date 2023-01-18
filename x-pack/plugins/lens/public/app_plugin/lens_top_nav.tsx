@@ -544,9 +544,7 @@ export const LensTopNavMenu = ({
 
     const hasData = Boolean(activeData && Object.keys(activeData).length);
     const csvEnabled = Boolean(isSaveable && hasData);
-    const shareUrlEnabled = Boolean(
-      shortUrlService && application.capabilities.visualize.createShortUrl && hasData
-    );
+    const shareUrlEnabled = Boolean(application.capabilities.visualize.createShortUrl && hasData);
 
     const showShareMenu = csvEnabled || shareUrlEnabled;
     const baseMenuEntries = getLensTopNavConfig({
