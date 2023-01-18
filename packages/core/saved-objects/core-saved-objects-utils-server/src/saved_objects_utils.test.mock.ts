@@ -12,7 +12,7 @@ Object.defineProperty(mockUuidv5, 'DNS', { value: 'DNSUUID', writable: false });
 
 jest.mock('uuid', () => ({
   v1: mockUuidv1,
-  v5: mockUuidv5
+  v5: mockUuidv5,
 }));
 
 export { mockUuidv1, mockUuidv5 };
