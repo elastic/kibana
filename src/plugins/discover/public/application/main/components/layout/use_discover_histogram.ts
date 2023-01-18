@@ -8,20 +8,22 @@
 
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { getVisualizeInformation } from '@kbn/unified-field-list-plugin/public';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { getVisualizeInformation, useQuerySubscriber } from '@kbn/unified-field-list-plugin/public';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   UnifiedHistogramFetchStatus,
   UnifiedHistogramHitsContext,
+  UnifiedHistogramInputMessage,
 } from '@kbn/unified-histogram-plugin/public';
 import type { UnifiedHistogramChartLoadEvent } from '@kbn/unified-histogram-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import { Subject } from 'rxjs';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { getUiActions } from '../../../../kibana_services';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useDataState } from '../../hooks/use_data_state';
-import type { SavedSearchData } from '../../hooks/use_saved_search';
+import type { DataFetch$, SavedSearchData } from '../../hooks/use_saved_search';
 import type { DiscoverStateContainer } from '../../services/discover_state';
 import { FetchStatus } from '../../../types';
 import type { DiscoverSearchSessionManager } from '../../services/discover_search_session';
@@ -41,6 +43,7 @@ export interface UseDiscoverHistogramProps {
   isPlainRecord: boolean;
   inspectorAdapters: InspectorAdapters;
   searchSessionManager: DiscoverSearchSessionManager;
+  savedSearchFetch$: DataFetch$;
 }
 
 export const useDiscoverHistogram = ({
@@ -52,6 +55,7 @@ export const useDiscoverHistogram = ({
   isPlainRecord,
   inspectorAdapters,
   searchSessionManager,
+  savedSearchFetch$,
 }: UseDiscoverHistogramProps) => {
   const { storage, data, lens } = useDiscoverServices();
   const [hideChart, interval, breakdownField] = useAppStateSelector((state) => [
@@ -122,21 +126,6 @@ export const useDiscoverHistogram = ({
       stateContainer.setAppState({ interval: newInterval });
     },
     [stateContainer]
-  );
-
-  /**
-   * Request
-   */
-
-  // The searchSessionId will be updated whenever a new search
-  // is started and will trigger a unified histogram refetch
-  const searchSessionId = useObservable(searchSessionManager.searchSessionId$);
-  const request = useMemo(
-    () => ({
-      searchSessionId,
-      adapter: inspectorAdapters.requests,
-    }),
-    [inspectorAdapters.requests, searchSessionId]
   );
 
   /**
@@ -216,32 +205,23 @@ export const useDiscoverHistogram = ({
     [inspectorAdapters]
   );
 
-  const [chartHidden, setChartHidden] = useState(hideChart);
   const chart = useMemo(
     () =>
       isPlainRecord || !isTimeBased
         ? undefined
         : {
-            hidden: chartHidden,
+            hidden: hideChart,
             timeInterval: interval,
           },
-    [chartHidden, interval, isPlainRecord, isTimeBased]
+    [hideChart, interval, isPlainRecord, isTimeBased]
   );
 
   // Clear the Lens request adapter when the chart is hidden
   useEffect(() => {
-    if (chartHidden || !chart) {
+    if (hideChart || !chart) {
       inspectorAdapters.lensRequests = undefined;
     }
-  }, [chart, chartHidden, inspectorAdapters]);
-
-  // state.chartHidden is updated before searchSessionId, which can trigger duplicate
-  // requests, so instead of using state.chartHidden directly, we update chartHidden
-  // when searchSessionId changes
-  useEffect(() => {
-    setChartHidden(hideChart);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchSessionId]);
+  }, [chart, hideChart, inspectorAdapters]);
 
   /**
    * Breakdown
@@ -264,18 +244,78 @@ export const useDiscoverHistogram = ({
     [field, isPlainRecord, isTimeBased]
   );
 
+  /**
+   * Search params
+   */
+
+  const { query, filters, fromDate: from, toDate: to } = useQuerySubscriber({ data });
+  const timeRange = useMemo(
+    () => (from && to ? { from, to } : data.query.timefilter.timefilter.getTimeDefaults()),
+    [data.query.timefilter.timefilter, from, to]
+  );
+
+  /**
+   * Request
+   */
+
+  // The searchSessionId will be updated whenever a new search is started
+  const searchSessionId = useObservable(searchSessionManager.searchSessionId$);
+  const request = useMemo(
+    () => ({
+      searchSessionId,
+      adapter: inspectorAdapters.requests,
+    }),
+    [inspectorAdapters.requests, searchSessionId]
+  );
+
+  /**
+   * Data fetching
+   */
+
+  const input$ = useMemo(() => new Subject<UnifiedHistogramInputMessage>(), []);
+
   // Initialized when the first search has been requested or
   // when in SQL mode since search sessions are not supported
   const isInitialized = Boolean(searchSessionId) || isPlainRecord;
+  const skipRefetch = useRef<boolean>();
+
+  // Skip refetching when showing the chart since Lens will
+  // automatically fetch when the chart is shown
+  useEffect(() => {
+    if (skipRefetch.current === undefined) {
+      skipRefetch.current = false;
+    } else {
+      skipRefetch.current = !hideChart;
+    }
+  }, [hideChart]);
+
+  // Trigger a unified histogram refetch when savedSearchFetch$ is triggered
+  useEffect(() => {
+    const subscription = savedSearchFetch$.subscribe(() => {
+      if (isInitialized && !skipRefetch.current) {
+        input$.next({ type: 'refetch' });
+      }
+      skipRefetch.current = false;
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [input$, isInitialized, savedSearchFetch$]);
 
   // Don't render the unified histogram layout until initialized
   return isInitialized
     ? {
+        query,
+        filters,
+        timeRange,
         topPanelHeight,
         request,
         hits,
         chart,
         breakdown,
+        disableAutoFetching: true,
+        input$,
         onEditVisualization: canVisualize ? onEditVisualization : undefined,
         onTopPanelHeightChange,
         onChartHiddenChange,
