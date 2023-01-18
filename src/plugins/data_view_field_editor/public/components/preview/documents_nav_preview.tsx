@@ -23,7 +23,7 @@ import { useFieldPreviewContext } from './field_preview_context';
 const docIdSelector = (state: PreviewState) => {
   const doc = state.documents[state.currentIdx];
   return {
-    documentId: doc ? (doc.id as string) : undefined,
+    documentId: doc ? (doc._id as string) : undefined,
     customId: state.customId,
   };
 };
