@@ -27,6 +27,7 @@ export const getEventList = async ({
   secondaryTimestamp,
   runtimeMappings,
   exceptionFilter,
+  eventListConfig
 }: EventsOptions): Promise<estypes.SearchResponse<EventDoc>> => {
   const calculatedPerPage = perPage ?? MAX_PER_PAGE;
   if (calculatedPerPage > 10000) {
@@ -59,6 +60,7 @@ export const getEventList = async ({
     sortOrder: 'desc',
     trackTotalHits: false,
     runtimeMappings,
+    overrideBody: eventListConfig,
   });
 
   ruleExecutionLogger.debug(`Retrieved events items of size: ${searchResult.hits.hits.length}`);
