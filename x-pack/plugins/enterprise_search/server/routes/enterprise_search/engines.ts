@@ -62,6 +62,9 @@ export function registerEnginesRoutes({
         }),
       },
     },
-    enterpriseSearchRequestHandler.createRequest({ path: '/api/engines/:engine_name' })
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/engines/:engine_name',
+      hasJsonResponse: false,
+    })
   );
 }
