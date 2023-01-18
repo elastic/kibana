@@ -35,14 +35,15 @@ import { AvailablePackages } from './available_packages';
 
 export interface CategoryParams {
   category?: ExtendedIntegrationCategory;
+  subcategory?: string;
 }
 
 export const getParams = (params: CategoryParams, search: string) => {
-  const { category } = params;
+  const { category, subcategory } = params;
   const selectedCategory: ExtendedIntegrationCategory = category || '';
   const queryParams = new URLSearchParams(search);
   const searchParam = queryParams.get(INTEGRATIONS_SEARCH_QUERYPARAM) || '';
-  return { selectedCategory, searchParam };
+  return { selectedCategory, searchParam, selectedSubcategory: subcategory };
 };
 
 export const categoryExists = (category: string, categories: CategoryFacet[]) => {

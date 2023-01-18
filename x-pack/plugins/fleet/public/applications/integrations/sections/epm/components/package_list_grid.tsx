@@ -64,8 +64,8 @@ export interface Props {
   showCardLabels?: boolean;
   title?: string;
   availableSubCategories?: CategoryFacet[];
-  selectedSubCategory?: CategoryFacet;
-  setSelectedSubCategory?: (c: CategoryFacet | undefined) => void;
+  selectedSubCategory?: string;
+  setSelectedSubCategory?: (c: string | undefined) => void;
   showMissingIntegrationMessage?: boolean;
 }
 
@@ -111,7 +111,7 @@ export const PackageListGrid: FunctionComponent<Props> = ({
     setUrlandReplaceHistory({
       searchString: queryText,
       categoryId: selectedCategory,
-      subCategoryId: selectedSubCategory?.id,
+      subCategoryId: selectedSubCategory,
     });
   };
 
@@ -121,11 +121,11 @@ export const PackageListGrid: FunctionComponent<Props> = ({
   };
 
   const onSubCategoryClick = useCallback(
-    (subCategory: CategoryFacet) => {
+    (subCategory: string) => {
       if (setSelectedSubCategory) setSelectedSubCategory(subCategory);
       setUrlandPushHistory({
         categoryId: selectedCategory,
-        subCategoryId: subCategory.id,
+        subCategoryId: subCategory,
       });
     },
     [selectedCategory, setSelectedSubCategory, setUrlandPushHistory]
@@ -171,7 +171,7 @@ export const PackageListGrid: FunctionComponent<Props> = ({
         <EuiContextMenuItem
           key={subCategory.id}
           onClick={() => {
-            onSubCategoryClick(subCategory);
+            onSubCategoryClick(subCategory.id);
             closePopover();
           }}
         >
@@ -194,7 +194,7 @@ export const PackageListGrid: FunctionComponent<Props> = ({
       >
         <ControlsColumn controls={controls} title={title} />
       </EuiFlexItem>
-      <EuiFlexItem grow={5}>
+      <EuiFlexItem grow={5} data-test-subj="epmList.mainColumn">
         <EuiFieldSearch
           data-test-subj="epmList.searchBar"
           placeholder={i18n.translate('xpack.fleet.epmList.searchPackagesPlaceholder', {
@@ -269,7 +269,7 @@ export const PackageListGrid: FunctionComponent<Props> = ({
                 <EuiButton
                   color="text"
                   aria-label={subCategory?.title}
-                  onClick={() => onSubCategoryClick(subCategory)}
+                  onClick={() => onSubCategoryClick(subCategory.id)}
                 >
                   <FormattedMessage
                     id="xpack.fleet.epmList.subcategoriesButton"

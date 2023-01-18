@@ -91,7 +91,7 @@ export const FLEET_ROUTING_PATHS = {
 export const INTEGRATIONS_SEARCH_QUERYPARAM = 'q';
 export const INTEGRATIONS_ROUTING_PATHS = {
   integrations: '/:tabId',
-  integrations_all: '/browse/:category?',
+  integrations_all: '/browse/:category?/:subcategory?',
   integrations_installed: '/installed/:category?',
   integrations_installed_updates_available: '/installed/updates_available/:category?',
   integration_details: '/detail/:pkgkey/:panel?',

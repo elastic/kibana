@@ -114,12 +114,16 @@ export const useAvailablePackages = () => {
   const { http } = useStartServices();
   const addBasePath = http.basePath.prepend;
 
-  const { selectedCategory: initialSelectedCategory, searchParam } = getParams(
-    useParams<CategoryParams>(),
-    useLocation().search
-  );
+  const {
+    selectedCategory: initialSelectedCategory,
+    selectedSubcategory: initialSubcategory,
+    searchParam,
+  } = getParams(useParams<CategoryParams>(), useLocation().search);
+
   const [selectedCategory, setCategory] = useState(initialSelectedCategory);
-  const [selectedSubCategory, setSelectedSubCategory] = useState<CategoryFacet | undefined>();
+  const [selectedSubCategory, setSelectedSubCategory] = useState<string | undefined>(
+    initialSubcategory
+  );
   const [searchTerm, setSearchTerm] = useState(searchParam || '');
 
   const { getHref, getAbsolutePath } = useLink();
@@ -211,7 +215,7 @@ export const useAvailablePackages = () => {
         }
         if (!selectedSubCategory) return c.categories.includes(selectedCategory);
 
-        return c.categories.includes(selectedSubCategory.id);
+        return c.categories.includes(selectedSubCategory);
       }),
     [cards, selectedCategory, selectedSubCategory]
   );
