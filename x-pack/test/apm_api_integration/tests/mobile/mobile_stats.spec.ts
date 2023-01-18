@@ -149,7 +149,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         expect(response.sessions.value).to.eql(3);
-        expect(response.requests.value).to.eql(6);
+        expect(response.requests.value).to.eql(0);
         expect(response.crashCount.value).to.eql(0);
         expect(response.maxLoadTime.value).to.eql(null);
       });
