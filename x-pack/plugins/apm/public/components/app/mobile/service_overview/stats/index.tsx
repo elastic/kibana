@@ -47,6 +47,8 @@ export function MobileStats({
     query: { environment, transactionType, offset, comparisonEnabled },
   } = useAnyOfApmParams('/mobile-services/{serviceName}/overview');
 
+  const previousPeriodLabel = usePreviousPeriodLabel();
+
   const { data, status } = useFetcher(
     (callApmApi) => {
       return callApmApi(
@@ -71,7 +73,6 @@ export function MobileStats({
 
   const getComparisonValueFormatter = useCallback(
     (value) => {
-      const previousPeriodLabel = usePreviousPeriodLabel();
       return (
         <span>
           {value && comparisonEnabled
