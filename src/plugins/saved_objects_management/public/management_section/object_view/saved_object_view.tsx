@@ -144,7 +144,7 @@ export class SavedObjectEdition extends Component<
         title: i18n.translate('savedObjectsManagement.deleteConfirm.modalTitle', {
           defaultMessage: `Delete '{title}'?`,
           values: {
-            title: object?.attributes?.title || 'saved Kibana object',
+            title: object?.meta?.title || 'saved Kibana object',
           },
         }),
         buttonColor: 'danger',
@@ -155,7 +155,6 @@ export class SavedObjectEdition extends Component<
     }
 
     const [{ success, error }] = await bulkDeleteObjects(http, [{ id, type }]);
-
     if (!success) {
       notifications.toasts.addDanger({
         title: i18n.translate(
@@ -164,7 +163,7 @@ export class SavedObjectEdition extends Component<
             defaultMessage: `Failed to delete '{title}' {type} object`,
             values: {
               type,
-              title: object!.attributes.title,
+              title: object?.meta?.title,
             },
           }
         ),
@@ -174,7 +173,7 @@ export class SavedObjectEdition extends Component<
       return;
     }
 
-    notifications.toasts.addSuccess(`Deleted '${object!.attributes.title}' ${type} object`);
+    notifications.toasts.addSuccess(`Deleted '${object?.meta?.title}' ${type} object`);
     this.redirectToListing();
   }
 
