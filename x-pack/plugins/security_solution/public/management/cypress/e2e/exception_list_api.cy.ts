@@ -12,7 +12,7 @@ import {
 } from '@kbn/securitysolution-list-constants';
 import { login, loginWithRole, ROLE } from '../tasks/login';
 import { setupLicense } from '../tasks/license';
-import { loadEndpointIfNoneExist } from '../tasks/common/load_endpoint_data';
+import { loadEndpointIfNoneExist } from '../tasks/load_endpoint_data';
 import { getPackagePolicyId } from '../tasks/package_policy';
 import { platinum, gold } from '../fixtures/licenses';
 import { testExceptionListItems } from '../fixtures/exception_list_entries';

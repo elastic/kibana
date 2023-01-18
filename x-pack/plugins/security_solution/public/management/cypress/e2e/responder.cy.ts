@@ -8,7 +8,7 @@
 import { login, loginWithRole, ROLE } from '../tasks/login';
 import { setupLicense } from '../tasks/license';
 import { enterprise, platinum } from '../fixtures/licenses';
-import { loadEndpointIfNoneExist } from '../tasks/common/load_endpoint_data';
+import { loadEndpointIfNoneExist } from '../tasks/load_endpoint_data';
 
 const loginWithWriteAccess = (url: string) => {
   loginWithRole(ROLE.analyst_hunter);

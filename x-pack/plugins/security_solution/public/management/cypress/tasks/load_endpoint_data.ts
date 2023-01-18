@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { BASE_ENDPOINT_ROUTE } from '../../../../../common/endpoint/constants';
-import { runEndpointLoaderScript } from '../run_endpoint_loader';
+import { BASE_ENDPOINT_ROUTE } from '../../../../common/endpoint/constants';
+import { runEndpointLoaderScript } from './run_endpoint_loader';
 
 export const loadEndpointIfNoneExist = () => {
   cy.request({
