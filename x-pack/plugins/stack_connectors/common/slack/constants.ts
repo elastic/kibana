@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const SLACK_CONNECTOR_ID = '.new_slack';
+export const SLACK_CONNECTOR_ID = '.slack_v2';

@@ -7,12 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SLACK_CONNECTOR_NAME = i18n.translate('xpack.stackConnectors.new_slack.title', {
+export const SLACK_CONNECTOR_NAME = i18n.translate('xpack.stackConnectors.slack.v2.title', {
   defaultMessage: 'New Slack',
 });
 
 export const ALLOWED_HOSTS_ERROR = (message: string) =>
-  i18n.translate('xpack.stackConnectors.new_slack.configuration.apiAllowedHostsError', {
+  i18n.translate('xpack.stackConnectors.slack.v2.configuration.apiAllowedHostsError', {
     defaultMessage: 'error configuring connector action: {message}',
     values: {
       message,

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getConnectorType as getNewSlackConnectorType } from './slack';
+export { getConnectorType as getSlackV2ConnectorType } from './slack';
