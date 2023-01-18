@@ -11,7 +11,7 @@ import { Stackframe } from '../../../../../typings/es_schemas/raw/fields/stackfr
 export interface FrameHeadingRendererProps {
   fileDetailComponent: ComponentType;
   stackframe: Stackframe;
-  idx: string;
+  idx?: string;
 }
 
 export { CSharpFrameHeadingRenderer } from './c_sharp_frame_heading_renderer';
