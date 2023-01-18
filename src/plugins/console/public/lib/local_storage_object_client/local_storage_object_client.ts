@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { ObjectStorage, IdObject } from '../../../common/types';
 import { Storage } from '../../services';
 
@@ -18,7 +18,7 @@ export class LocalObjectStorage<O extends IdObject> implements ObjectStorage<O> 
   }
 
   async create(obj: Omit<O, 'id'>): Promise<O> {
-    const id = uuid();
+    const id = uuidv4();
     const newObj = { id, ...obj } as O;
     this.client.set(`${this.prefix}_${id}`, newObj);
     return newObj;

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { Filter } from '@kbn/es-query';
 import { SavedObjectReference } from '@kbn/core/types';
 import { MigrateFunctionsObject, VersionedState } from '@kbn/kibana-utils-plugin/common';
@@ -16,7 +16,7 @@ export const extract = (filters: Filter[]) => {
   const references: SavedObjectReference[] = [];
   const updatedFilters = filters.map((filter) => {
     if (filter.meta?.index) {
-      const id = uuid();
+      const id = uuidv4();
       references.push({
         type: DATA_VIEW_SAVED_OBJECT_TYPE,
         name: id,

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import type { GetLensAttributes } from '../../../types';
 
 export const getRiskScoreDonutAttributes: GetLensAttributes = (
   stackByField,
   extraOptions = { spaceId: 'default' }
 ) => {
-  const layerId = uuid();
-  const internalReferenceId = uuid();
+  const layerId = uuidv4();
+  const internalReferenceId = uuidv4();
   return {
     title: `${stackByField} risk donut`,
     description: '',

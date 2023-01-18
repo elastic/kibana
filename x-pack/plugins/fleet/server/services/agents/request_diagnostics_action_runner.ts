@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 import type { Agent } from '../../types';
@@ -38,7 +38,7 @@ export async function requestDiagnosticsBatch(
 ): Promise<{ actionId: string }> {
   const now = new Date().toISOString();
 
-  const actionId = options.actionId ?? uuid();
+  const actionId = options.actionId ?? uuidv4();
   const total = options.total ?? givenAgents.length;
 
   const agentIds = givenAgents.map((agent) => agent.id);

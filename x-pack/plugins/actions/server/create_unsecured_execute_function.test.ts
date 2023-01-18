@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { createBulkUnsecuredExecutionEnqueuerFunction } from './create_unsecured_execute_function';
@@ -118,7 +118,7 @@ describe('bulkExecute()', () => {
   });
 
   test('schedules the actions with all given parameters with a preconfigured connector and source specified', async () => {
-    const sourceUuid = uuid();
+    const sourceUuid = uuidv4();
     const source = { type: 'alert', id: sourceUuid };
     const executeFn = createBulkUnsecuredExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
@@ -232,7 +232,7 @@ describe('bulkExecute()', () => {
   });
 
   test('schedules the actions with all given parameters with a preconfigured connector and relatedSavedObjects specified', async () => {
-    const sourceUuid = uuid();
+    const sourceUuid = uuidv4();
     const source = { type: 'alert', id: sourceUuid };
     const executeFn = createBulkUnsecuredExecutionEnqueuerFunction({
       taskManager: mockTaskManager,

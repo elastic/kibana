@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { SavedObjectsBulkCreateObject, SavedObjectsBulkUpdateObject } from '@kbn/core/server';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 import {
@@ -79,7 +79,7 @@ export const sortExceptionListsToUpdateOrCreate = ({
             name,
             os_types: [],
             tags,
-            tie_breaker_id: uuid(),
+            tie_breaker_id: uuidv4(),
             type,
             updated_by: user,
             version,
@@ -115,7 +115,7 @@ export const sortExceptionListsToUpdateOrCreate = ({
         immutable: false,
         item_id: undefined,
         list_type: 'list',
-        tie_breaker_id: uuid(),
+        tie_breaker_id: uuidv4(),
         updated_by: user,
       };
       results.listsToCreate = [

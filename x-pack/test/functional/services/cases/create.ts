@@ -6,7 +6,7 @@
  */
 
 import { CaseSeverity } from '@kbn/cases-plugin/common/api';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import type { CasesCommon } from './common';
 
@@ -50,8 +50,8 @@ export function CasesCreateViewServiceProvider(
      * Doesn't do navigation. Only works if you are already inside a cases app page.
      */
     async createCase({
-      title = 'test-' + uuid(),
-      description = 'desc' + uuid(),
+      title = 'test-' + uuidv4(),
+      description = 'desc' + uuidv4(),
       tag = 'tagme',
       severity = CaseSeverity.LOW,
       owner,

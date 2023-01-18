@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { SuperTest, Test } from 'supertest';
 import { chunk, omit } from 'lodash';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { UserAtSpaceScenarios } from '../../../scenarios';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -329,7 +329,7 @@ const findTestUtils = (
         });
 
         it('should handle find alert request with fields appropriately', async () => {
-          const myTag = uuid();
+          const myTag = uuidv4();
           const { body: createdAlert } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
@@ -418,7 +418,7 @@ const findTestUtils = (
         });
 
         it('should handle find alert request with executionStatus field appropriately', async () => {
-          const myTag = uuid();
+          const myTag = uuidv4();
           const { body: createdAlert } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')

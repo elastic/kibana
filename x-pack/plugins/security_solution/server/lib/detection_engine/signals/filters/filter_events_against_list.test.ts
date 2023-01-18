@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import { getSearchListItemResponseMock } from '@kbn/lists-plugin/common/schemas/response/search_list_item_schema.mock';
@@ -15,7 +15,7 @@ import { filterEventsAgainstList } from './filter_events_against_list';
 import { repeatedHitsWithSortId } from '../__mocks__/es_results';
 import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 
-const someGuids = Array.from({ length: 13 }).map((x) => uuid());
+const someGuids = Array.from({ length: 13 }).map((x) => uuidv4());
 
 describe('filterEventsAgainstList', () => {
   let listClient = listMock.getListClient();

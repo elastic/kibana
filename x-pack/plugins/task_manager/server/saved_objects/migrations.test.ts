@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { getMigrations } from './migrations';
 import { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { migrationMocks } from '@kbn/core/server/mocks';
@@ -322,7 +322,7 @@ function getMockData(
       ...overwrites,
     },
     updated_at: getUpdatedAt(),
-    id: uuid(),
+    id: uuidv4(),
     type: 'task',
   };
 }

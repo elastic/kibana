@@ -7,13 +7,13 @@
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { resolveRule } from './resolve_rule';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 const http = httpServiceMock.createStartContract();
 
 describe('resolveRule', () => {
   test('should call get API with base parameters', async () => {
-    const ruleId = `${uuid()}/`;
+    const ruleId = `${uuidv4()}/`;
     const ruleIdEncoded = encodeURIComponent(ruleId);
     const resolvedValue = {
       id: '1/',

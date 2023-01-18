@@ -6,7 +6,7 @@
  */
 import fetch from 'node-fetch';
 import { ToolingLog } from '@kbn/tooling-log';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import yargs from 'yargs';
 
 import type { AgentStatus } from '../../common';
@@ -147,7 +147,7 @@ function createAgentWithStatus({
           version,
         },
       },
-      host: { hostname: uuid() },
+      host: { hostname: uuidv4() },
     },
     user_provided_metadata: {},
     enrolled_at: new Date().toISOString(),
@@ -316,7 +316,7 @@ export async function run() {
 
   logger.info('Creating agent policy');
 
-  const agentPolicyId = 'script-create-agent-' + uuid();
+  const agentPolicyId = 'script-create-agent-' + uuidv4();
   const agentPolicy = await createAgentPolicy(agentPolicyId);
   logger.info(`Created agent policy ${agentPolicy.item.id}`);
 

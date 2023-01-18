@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import type { Writable } from '@kbn/utility-types';
 import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import {
@@ -691,7 +691,7 @@ async function invokeExecutor({
   state?: EsQueryRuleState;
 }) {
   return await ruleType.executor({
-    executionId: uuid(),
+    executionId: uuidv4(),
     startedAt: new Date(),
     previousStartedAt: new Date(),
     services: ruleServices as unknown as RuleExecutorServices<
@@ -704,10 +704,10 @@ async function invokeExecutor({
       latestTimestamp: undefined,
       ...state,
     },
-    spaceId: uuid(),
+    spaceId: uuidv4(),
     rule: {
-      id: uuid(),
-      name: uuid(),
+      id: uuidv4(),
+      name: uuidv4(),
       tags: [],
       consumer: '',
       producer: '',

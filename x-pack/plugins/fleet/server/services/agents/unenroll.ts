@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import type { Agent } from '../../types';
 import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
@@ -119,5 +119,5 @@ export async function forceUnenrollAgent(
     active: false,
     unenrolled_at: new Date().toISOString(),
   });
-  await updateActionsForForceUnenroll(esClient, [agent.id], uuid(), 1);
+  await updateActionsForForceUnenroll(esClient, [agent.id], uuidv4(), 1);
 }

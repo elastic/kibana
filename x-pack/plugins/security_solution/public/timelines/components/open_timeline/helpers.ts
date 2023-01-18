@@ -8,7 +8,7 @@
 import { set } from '@kbn/safer-lodash-set/fp';
 import { getOr, isEmpty } from 'lodash/fp';
 import type { Action } from 'typescript-fsa';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import type { Dispatch } from 'redux';
 import deepMerge from 'deepmerge';
 
@@ -201,7 +201,7 @@ const getTemplateTimelineId = (
 
   return duplicate && timeline.timelineType === TimelineType.template
     ? // TODO: MOVE TO THE BACKEND
-      uuid()
+      uuidv4()
     : timeline.templateTimelineId;
 };
 

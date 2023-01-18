@@ -6,7 +6,7 @@
  */
 
 import _ from 'lodash';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
 import { IEvent } from '@kbn/event-log-plugin/server';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -232,8 +232,8 @@ export default function ({ getService }: FtrProviderContext) {
   }
 
   async function getTestProviderAction() {
-    const provider = `provider-${uuid()}`;
-    const action = `action-${uuid()}`;
+    const provider = `provider-${uuidv4()}`;
+    const action = `action-${uuidv4()}`;
 
     const response = await isProviderActionRegistered(provider, action);
     if (!response.body.isProviderActionRegistered) {
@@ -244,7 +244,7 @@ export default function ({ getService }: FtrProviderContext) {
   }
 
   function getTestSavedObject() {
-    return { type: 'event_log_test', id: uuid(), rel: 'primary' };
+    return { type: 'event_log_test', id: uuidv4(), rel: 'primary' };
   }
 
   async function logEvent(event: IEvent, savedObjectId: string) {

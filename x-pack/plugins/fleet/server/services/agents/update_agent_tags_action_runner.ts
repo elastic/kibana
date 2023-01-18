@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { uniq } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
@@ -166,7 +166,7 @@ export async function updateTagsBatch(
 
   appContextService.getLogger().debug(JSON.stringify(res).slice(0, 1000));
 
-  const actionId = options.actionId ?? uuid();
+  const actionId = options.actionId ?? uuidv4();
 
   if (options.retryCount === undefined) {
     // creating an action doc so that update tags  shows up in activity
@@ -180,7 +180,7 @@ export async function updateTagsBatch(
   }
 
   // creating unique ids to use as agentId, as we don't have all agent ids in case of action by kuery
-  const getUuidArray = (count: number) => Array.from({ length: count }, () => uuid());
+  const getUuidArray = (count: number) => Array.from({ length: count }, () => uuidv4());
 
   // writing successful action results
   if (res.updated ?? 0 > 0) {

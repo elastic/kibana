@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { Spaces } from '../../scenarios';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
@@ -261,7 +261,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
         .send({
           snooze_schedule: {
             ...SNOOZE_SCHEDULE,
-            id: uuid(),
+            id: uuidv4(),
           },
         })
         .expect(204);
@@ -270,7 +270,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
         .send({
           snooze_schedule: {
             ...SNOOZE_SCHEDULE,
-            id: uuid(),
+            id: uuidv4(),
           },
         })
         .expect(204);
@@ -279,17 +279,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
         .send({
           snooze_schedule: {
             ...SNOOZE_SCHEDULE,
-            id: uuid(),
-          },
-        })
-        .expect(204);
-
-      await alertUtils
-        .getSnoozeRequest(createdRule.id)
-        .send({
-          snooze_schedule: {
-            ...SNOOZE_SCHEDULE,
-            id: uuid(),
+            id: uuidv4(),
           },
         })
         .expect(204);
@@ -299,7 +289,17 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
         .send({
           snooze_schedule: {
             ...SNOOZE_SCHEDULE,
-            id: uuid(),
+            id: uuidv4(),
+          },
+        })
+        .expect(204);
+
+      await alertUtils
+        .getSnoozeRequest(createdRule.id)
+        .send({
+          snooze_schedule: {
+            ...SNOOZE_SCHEDULE,
+            id: uuidv4(),
           },
         })
         .expect(204);
@@ -308,7 +308,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
       const response = await alertUtils.getSnoozeRequest(createdRule.id).send({
         snooze_schedule: {
           ...SNOOZE_SCHEDULE,
-          id: uuid(),
+          id: uuidv4(),
         },
       });
       expect(response.statusCode).to.eql(400);

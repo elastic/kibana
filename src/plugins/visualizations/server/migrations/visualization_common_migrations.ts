@@ -7,7 +7,7 @@
  */
 
 import { get, last } from 'lodash';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 export const commonAddSupportOfDualIndexSelectionModeInTSVB = (visState: any) => {
   if (visState && visState.type === 'metrics') {
@@ -93,7 +93,7 @@ export const commonAddEmptyValueColorRule = (visState: any) => {
 
     const convertRuleToEmpty = (rule: any = {}) => ({
       ...rule,
-      id: uuid(),
+      id: uuidv4(),
       operator: 'empty',
       value: null,
     });

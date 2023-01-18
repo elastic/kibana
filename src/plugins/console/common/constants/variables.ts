@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 export const DEFAULT_VARIABLES = [
-  { id: uuid(), name: 'exampleVariable1', value: '_search' },
-  { id: uuid(), name: 'exampleVariable2', value: 'match_all' },
+  { id: uuidv4(), name: 'exampleVariable1', value: '_search' },
+  { id: uuidv4(), name: 'exampleVariable2', value: 'match_all' },
 ];

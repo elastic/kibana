@@ -18,7 +18,7 @@ import {
 import { createPromiseFromStreams } from '@kbn/utils';
 import { SavedObjectsClientContract } from '@kbn/core/server';
 import { chunk } from 'lodash/fp';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import { importExceptionLists } from './utils/import/import_exception_lists';
 import { importExceptionListItems } from './utils/import/import_exception_list_items';
@@ -115,7 +115,7 @@ export const importExceptions = async ({
         if (exceptionList instanceof Error) {
           return { items: [...acc.items], lists: [...acc.lists] };
         }
-        const newListId = uuid();
+        const newListId = uuidv4();
 
         return {
           items: [

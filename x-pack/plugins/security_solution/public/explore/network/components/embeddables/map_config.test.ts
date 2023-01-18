@@ -24,7 +24,7 @@ import {
 jest.mock('uuid', () => {
   return {
     v1: jest.fn(() => 'uuid.v1()'),
-    v4: jest.fn(() => 'uuid()'),
+    v4: jest.fn(() => 'uuidv4()'),
   };
 });
 

@@ -6,7 +6,7 @@
  */
 
 import { SavedObjectsClientContract } from '@kbn/core/server';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import type {
   CreateCommentsArray,
   Description,
@@ -83,7 +83,7 @@ export const createExceptionListItem = async ({
     name,
     os_types: osTypes as OsTypeArray,
     tags,
-    tie_breaker_id: tieBreaker ?? uuid(),
+    tie_breaker_id: tieBreaker ?? uuidv4(),
     type,
     updated_by: user,
     version: undefined,

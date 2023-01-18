@@ -8,7 +8,7 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { Logger } from '@kbn/core/server';
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import * as savedObjectsToCreate from '../saved_object';
@@ -66,7 +66,7 @@ export const bulkCreateSavedObjects = async <T = SavedObjectTemplate>({
   const idReplaceMappings: Record<string, string> = {};
   mySavedObjects.forEach((so) => {
     if (so.id.startsWith('<REPLACE-WITH-ID')) {
-      idReplaceMappings[so.id] = uuid();
+      idReplaceMappings[so.id] = uuidv4();
     }
   });
   const mySavedObjectsWithRef = mySavedObjects.map((so) => {

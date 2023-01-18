@@ -12,7 +12,7 @@
  */
 
 import apm from 'elastic-apm-node';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { withSpan } from '@kbn/apm-utils';
 import { identity } from 'lodash';
 import { Logger, ExecutionContextStart } from '@kbn/core/server';
@@ -107,7 +107,7 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
     this.beforeMarkRunning = beforeMarkRunning;
     this.onTaskEvent = onTaskEvent;
     this.executionContext = executionContext;
-    this.uuid = uuid();
+    this.uuid = uuidv4();
   }
 
   /**

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { HTTPFields, MonitorFields } from '@kbn/synthetics-plugin/common/runtime_types';
 import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
@@ -102,7 +102,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('handles private location errors and does not delete the monitor if integration policy is unable to be deleted', async () => {
-      const name = `Monitor with a private location ${uuid()}`;
+      const name = `Monitor with a private location ${uuidv4()}`;
       const newMonitor = {
         name,
         type: 'http',
@@ -119,8 +119,8 @@ export default function ({ getService }: FtrProviderContext) {
       const username = 'admin';
       const roleName = `synthetics_admin`;
       const password = `${username}-password`;
-      const SPACE_ID = `test-space-${uuid()}`;
-      const SPACE_NAME = `test-space-name ${uuid()}`;
+      const SPACE_ID = `test-space-${uuidv4()}`;
+      const SPACE_NAME = `test-space-name ${uuidv4()}`;
       let monitorId = '';
 
       try {

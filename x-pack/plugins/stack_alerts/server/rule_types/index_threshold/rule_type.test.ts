@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import sinon from 'sinon';
 import type { Writable } from '@kbn/utility-types';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -183,7 +183,7 @@ describe('ruleType', () => {
     };
 
     await ruleType.executor({
-      executionId: uuid(),
+      executionId: uuidv4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
       services: alertServices as unknown as RuleExecutorServices<
@@ -195,10 +195,10 @@ describe('ruleType', () => {
       state: {
         latestTimestamp: undefined,
       },
-      spaceId: uuid(),
+      spaceId: uuidv4(),
       rule: {
-        id: uuid(),
-        name: uuid(),
+        id: uuidv4(),
+        name: uuidv4(),
         tags: [],
         consumer: '',
         producer: '',
@@ -246,7 +246,7 @@ describe('ruleType', () => {
     };
 
     await ruleType.executor({
-      executionId: uuid(),
+      executionId: uuidv4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
       services: customAlertServices as unknown as RuleExecutorServices<
@@ -258,10 +258,10 @@ describe('ruleType', () => {
       state: {
         latestTimestamp: undefined,
       },
-      spaceId: uuid(),
+      spaceId: uuidv4(),
       rule: {
-        id: uuid(),
-        name: uuid(),
+        id: uuidv4(),
+        name: uuidv4(),
         tags: [],
         consumer: '',
         producer: '',
@@ -309,7 +309,7 @@ describe('ruleType', () => {
     };
 
     await ruleType.executor({
-      executionId: uuid(),
+      executionId: uuidv4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
       services: customAlertServices as unknown as RuleExecutorServices<
@@ -321,10 +321,10 @@ describe('ruleType', () => {
       state: {
         latestTimestamp: undefined,
       },
-      spaceId: uuid(),
+      spaceId: uuidv4(),
       rule: {
-        id: uuid(),
-        name: uuid(),
+        id: uuidv4(),
+        name: uuidv4(),
         tags: [],
         consumer: '',
         producer: '',
@@ -371,7 +371,7 @@ describe('ruleType', () => {
     };
 
     await ruleType.executor({
-      executionId: uuid(),
+      executionId: uuidv4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
       services: alertServices as unknown as RuleExecutorServices<
@@ -383,10 +383,10 @@ describe('ruleType', () => {
       state: {
         latestTimestamp: undefined,
       },
-      spaceId: uuid(),
+      spaceId: uuidv4(),
       rule: {
-        id: uuid(),
-        name: uuid(),
+        id: uuidv4(),
+        name: uuidv4(),
         tags: [],
         consumer: '',
         producer: '',

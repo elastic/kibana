@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import {
   Column,
   ColumnWithMeta,
@@ -84,7 +84,7 @@ export const convertToLens: ConvertGoalVisToLensVisualization = async (vis, time
   const maxColumn = createStaticValueColumn(isPercentageMode ? 1 : max);
 
   const columns = [...layerConfig.columns, maxColumn];
-  const layerId = uuid();
+  const layerId = uuidv4();
   const indexPatternId = dataView.id!;
 
   return {

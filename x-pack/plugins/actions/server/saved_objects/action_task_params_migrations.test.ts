@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import {
   getActionTaskParamsMigrations,
   isPreconfiguredAction,
@@ -415,12 +415,12 @@ function getMockData(
 ): SavedObjectUnsanitizedDoc<ActionTaskParams> {
   return {
     attributes: {
-      actionId: uuid(),
+      actionId: uuidv4(),
       params: {},
       ...overwrites,
     },
     references: [...referencesOverwrites],
-    id: uuid(),
+    id: uuidv4(),
     type: 'action_task_param',
   };
 }

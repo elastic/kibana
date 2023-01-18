@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import {
   CoreSetup,
   RequestHandlerContext,
@@ -326,14 +326,14 @@ export function defineRoutes(
         const createAPIKeyResult =
           security &&
           (await security.authc.apiKeys.grantAsInternalUser(req, {
-            name: `alerts_fixture:enqueue_action:${uuid()}`,
+            name: `alerts_fixture:enqueue_action:${uuidv4()}`,
             role_descriptors: {},
           }));
 
         await actionsClient.enqueueExecution({
           id: req.params.id,
           spaceId: spaces ? spaces.spacesService.getSpaceId(req) : 'default',
-          executionId: uuid(),
+          executionId: uuidv4(),
           apiKey: createAPIKeyResult
             ? Buffer.from(`${createAPIKeyResult.id}:${createAPIKeyResult.api_key}`).toString(
                 'base64'

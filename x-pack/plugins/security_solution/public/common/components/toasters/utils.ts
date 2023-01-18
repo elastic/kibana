@@ -6,7 +6,7 @@
  */
 
 import type React from 'react';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { isError } from 'lodash/fp';
 import { isAppError } from '@kbn/securitysolution-t-grid';
 
@@ -24,7 +24,7 @@ export const displayErrorToast = (
   errorTitle: string,
   errorMessages: string[],
   dispatchToaster: React.Dispatch<ActionToaster>,
-  id: string = uuid()
+  id: string = uuidv4()
 ): void => {
   const toast: AppToast = {
     id,
@@ -48,7 +48,7 @@ export const displayErrorToast = (
 export const displaySuccessToast = (
   title: string,
   dispatchToaster: React.Dispatch<ActionToaster>,
-  id: string = uuid()
+  id: string = uuidv4()
 ): void => {
   const toast: AppToast = {
     id,
@@ -83,7 +83,7 @@ export type ErrorToToasterArgs = Partial<AppToast> & {
  * @param dispatchToaster provided by useStateToaster()
  */
 export const errorToToaster = ({
-  id = uuid(),
+  id = uuidv4(),
   title,
   error,
   color = 'danger',

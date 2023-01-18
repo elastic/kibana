@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import type {
   KibanaRequest,
@@ -143,7 +143,7 @@ describe('upgrade agent policy schema version', () => {
         // up-to-date schema_version
         {
           type: AGENT_POLICY_SAVED_OBJECT_TYPE,
-          id: uuid(),
+          id: uuidv4(),
           attributes: {
             schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
             revision: 1,
@@ -152,7 +152,7 @@ describe('upgrade agent policy schema version', () => {
         // out-of-date schema_version
         {
           type: AGENT_POLICY_SAVED_OBJECT_TYPE,
-          id: uuid(),
+          id: uuidv4(),
           attributes: {
             schema_version: '0.0.1',
             revision: 1,
@@ -161,7 +161,7 @@ describe('upgrade agent policy schema version', () => {
         // missing schema_version
         {
           type: AGENT_POLICY_SAVED_OBJECT_TYPE,
-          id: uuid(),
+          id: uuidv4(),
           attributes: {
             revision: 1,
           },

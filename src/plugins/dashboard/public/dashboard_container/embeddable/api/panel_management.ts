@@ -12,7 +12,7 @@ import {
   IEmbeddable,
   PanelState,
 } from '@kbn/embeddable-plugin/public';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import {
   IPanelPlacementArgs,
@@ -52,7 +52,7 @@ export async function replacePanel(
     // replace panel can be called with generateNewId in order to totally destroy and recreate the embeddable
     panels = { ...this.input.panels };
     delete panels[previousPanelState.explicitInput.id];
-    const newId = uuid();
+    const newId = uuidv4();
     panels[newId] = {
       ...previousPanelState,
       ...newPanelState,
@@ -98,7 +98,7 @@ export function showPlaceholderUntil<TPlacementMethodArgs extends IPanelPlacemen
   const originalPanelState = {
     type: PLACEHOLDER_EMBEDDABLE,
     explicitInput: {
-      id: uuid(),
+      id: uuidv4(),
       disabledActions: [
         'ACTION_CUSTOMIZE_PANEL',
         'CUSTOM_TIME_RANGE',

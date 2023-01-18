@@ -6,7 +6,7 @@
  */
 
 import sinon from 'sinon';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { getMigrations } from '.';
 import { RawRule } from '../../types';
 import { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
@@ -2892,7 +2892,7 @@ function getMockData(
       ...overwrites,
     },
     updated_at: withSavedObjectUpdatedAt ? getUpdatedAt() : undefined,
-    id: uuid(),
+    id: uuidv4(),
     type: 'alert',
   };
 }

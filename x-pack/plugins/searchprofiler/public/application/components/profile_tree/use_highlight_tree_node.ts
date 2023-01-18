@@ -6,12 +6,12 @@
  */
 
 import { useRef } from 'react';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import { useHighlightContext, OnHighlightChangeArgs } from './highlight_context';
 
 export const useHighlightTreeNode = () => {
-  const idRef = useRef<string>(uuid());
+  const idRef = useRef<string>(uuidv4());
   const { selectedRow, setStore } = useHighlightContext();
 
   const highlight = (value: OnHighlightChangeArgs) => {

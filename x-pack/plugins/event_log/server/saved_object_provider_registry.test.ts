@@ -6,7 +6,7 @@
  */
 
 import { SavedObjectProviderRegistry } from './saved_object_provider_registry';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { KibanaRequest } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
@@ -41,7 +41,7 @@ describe('SavedObjectProviderRegistry', () => {
 
       const request = fakeRequest();
       const alert = {
-        id: uuid(),
+        id: uuidv4(),
       };
 
       getter.mockResolvedValue(alert);
@@ -61,7 +61,7 @@ describe('SavedObjectProviderRegistry', () => {
 
       const request = fakeRequest();
       const action = {
-        id: uuid(),
+        id: uuidv4(),
         type: 'action',
         attributes: {},
         references: [],

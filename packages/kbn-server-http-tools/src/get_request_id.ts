@@ -7,7 +7,7 @@
  */
 
 import { Request } from '@hapi/hapi';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 export function getRequestId(
   request: Request,
@@ -17,6 +17,6 @@ export function getRequestId(
   return allowFromAnyIp ||
     // socket may be undefined in integration tests that connect via the http listener directly
     (remoteAddress && ipAllowlist.includes(remoteAddress))
-    ? request.headers['x-opaque-id'] ?? uuid()
-    : uuid();
+    ? request.headers['x-opaque-id'] ?? uuidv4()
+    : uuidv4();
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { appContextService } from '../app_context';
@@ -32,7 +32,7 @@ export async function createAgentAction(
   esClient: ElasticsearchClient,
   newAgentAction: NewAgentAction
 ): Promise<AgentAction> {
-  const actionId = newAgentAction.id ?? uuid();
+  const actionId = newAgentAction.id ?? uuidv4();
   const timestamp = new Date().toISOString();
   const body: FleetServerAgentAction = {
     '@timestamp': timestamp,
@@ -52,7 +52,7 @@ export async function createAgentAction(
 
   await esClient.create({
     index: AGENT_ACTIONS_INDEX,
-    id: uuid(),
+    id: uuidv4(),
     body,
     refresh: 'wait_for',
   });
@@ -69,7 +69,7 @@ export async function bulkCreateAgentActions(
   newAgentActions: NewAgentAction[]
 ): Promise<AgentAction[]> {
   const actions = newAgentActions.map((newAgentAction) => {
-    const id = newAgentAction.id ?? uuid();
+    const id = newAgentAction.id ?? uuidv4();
     return {
       id,
       ...newAgentAction,
@@ -157,7 +157,7 @@ export async function bulkCreateAgentActionResults(
     return [
       {
         create: {
-          _id: uuid(),
+          _id: uuidv4(),
         },
       },
       body,
@@ -254,7 +254,7 @@ export async function cancelAgentAction(esClient: ElasticsearchClient, actionId:
     throw new AgentActionNotFoundError('Action not found');
   }
 
-  const cancelActionId = uuid();
+  const cancelActionId = uuidv4();
   const now = new Date().toISOString();
   for (const hit of res.hits.hits) {
     if (!hit._source || !hit._source.agents || !hit._source.action_id) {

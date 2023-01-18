@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import {
   BulkErrorSchema,
   ImportExceptionListItemSchemaDecoded,
@@ -22,7 +22,7 @@ export const getTupleErrorsAndUniqueExceptionListItems = (
   const { errors, itemsAcc } = items.reduce(
     (acc, parsedExceptionItem) => {
       if (parsedExceptionItem instanceof Error) {
-        acc.errors.set(uuid(), {
+        acc.errors.set(uuidv4(), {
           error: {
             message: `Error found importing exception list item: ${parsedExceptionItem.message}`,
             status_code: 400,
@@ -32,7 +32,7 @@ export const getTupleErrorsAndUniqueExceptionListItems = (
       } else {
         const { item_id: itemId, list_id: listId } = parsedExceptionItem;
         if (acc.itemsAcc.has(`${itemId}${listId}`)) {
-          acc.errors.set(uuid(), {
+          acc.errors.set(uuidv4(), {
             error: {
               message: `More than one exception list item with item_id: "${itemId}" found in imports. The last item will be used.`,
               status_code: 400,

@@ -15,7 +15,7 @@ import type {
   EmailActionParams,
 } from '@kbn/stack-connectors-plugin/server/connector_types';
 import { RuleAction as RuleActionOrig } from '@kbn/alerting-plugin/common';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import { ActionConnector, ActionTypeId } from './types';
 import { DefaultEmail } from '../runtime_types';
@@ -67,7 +67,7 @@ export function populateAlertActions({
 
     switch (aId.actionTypeId) {
       case PAGER_DUTY_ACTION_ID:
-        const dedupKey = uuid();
+        const dedupKey = uuidv4();
         action.params = getPagerDutyActionParams(translations, dedupKey);
         recoveredAction.params = getPagerDutyActionParams(translations, dedupKey, true);
         actions.push(recoveredAction);

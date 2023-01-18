@@ -6,7 +6,7 @@
  */
 
 import { merge, omit, chunk, isEmpty } from 'lodash';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
 import moment from 'moment';
 import { IEvent } from '@kbn/event-log-plugin/server';
@@ -41,7 +41,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       describe(`namespace: ${namespaceName}`, () => {
         it('should allow querying for events by Saved Object', async () => {
-          const id = uuid();
+          const id = uuidv4();
 
           const expectedEvents = [fakeEvent(namespace, id), fakeEvent(namespace, id)];
 
@@ -61,7 +61,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('should support pagination for events', async () => {
-          const id = uuid();
+          const id = uuidv4();
 
           const expectedEvents = await logFakeEvents(namespace, id, 6);
 
@@ -91,7 +91,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('should support sorting by event end', async () => {
-          const id = uuid();
+          const id = uuidv4();
 
           const expectedEvents = await logFakeEvents(namespace, id, 6);
 
@@ -108,7 +108,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('should support date ranges for events', async () => {
-          const id = uuid();
+          const id = uuidv4();
 
           // write a document that shouldn't be found in the inclusive date range search
           const firstEvent = fakeEvent(namespace, id);

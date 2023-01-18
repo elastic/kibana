@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { format as formatUrl } from 'url';
 import { ConfigKey, ProjectMonitorsRequest } from '@kbn/synthetics-plugin/common/runtime_types';
 import { INSUFFICIENT_FLEET_PERMISSIONS } from '@kbn/synthetics-plugin/server/synthetics_service/project_monitor/project_monitor_formatter';
@@ -38,7 +38,7 @@ export default function ({ getService }: FtrProviderContext) {
     const setUniqueIds = (request: ProjectMonitorsRequest) => {
       return {
         ...request,
-        monitors: request.monitors.map((monitor) => ({ ...monitor, id: uuid() })),
+        monitors: request.monitors.map((monitor) => ({ ...monitor, id: uuidv4() })),
       };
     };
 
@@ -268,8 +268,8 @@ export default function ({ getService }: FtrProviderContext) {
     it('does not delete monitors from the same project in a different space project', async () => {
       const monitors = [...projectMonitors.monitors];
       const project = 'test-brower-suite';
-      const SPACE_ID = `test-space-${uuid()}`;
-      const SPACE_NAME = `test-space-name ${uuid()}`;
+      const SPACE_ID = `test-space-${uuidv4()}`;
+      const SPACE_NAME = `test-space-name ${uuidv4()}`;
       const secondSpaceProjectMonitorApiRoute = `${kibanaServerUrl}/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS_PROJECT_LEGACY}`;
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
 

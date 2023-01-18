@@ -8,7 +8,7 @@
 
 import { AggParamsDateHistogram } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { DataType, DateHistogramParams } from '../../types';
 import { getFieldNameFromField } from '../utils';
 import { DateHistogramColumn } from './types';
@@ -50,7 +50,7 @@ export const convertToDateHistogramColumn = (
   const label = getLabel(aggParams, dateFieldName);
 
   return {
-    columnId: uuid(),
+    columnId: uuidv4(),
     label,
     operationType: 'date_histogram',
     dataType: dateField.type as DataType,
