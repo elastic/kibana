@@ -29,7 +29,18 @@ export const EngineViewHeaderActions: React.FC = () => {
     <>
       <EuiPopover
         anchorPosition="downRight"
-        button={<EuiButtonIcon onClick={toggleActionsPopover} iconType="boxesVertical" />}
+        button={
+          <EuiButtonIcon
+            aria-label={i18n.translate(
+              'xpack.entepriseSearch.content.engine.headerActions.actionsButton.ariaLabel',
+              {
+                defaultMessage: 'Engine actions menu button',
+              }
+            )}
+            onClick={toggleActionsPopover}
+            iconType="boxesVertical"
+          />
+        }
         isOpen={isActionsPopoverOpen}
         panelPaddingSize="xs"
         closePopover={closePopover}
