@@ -10,10 +10,13 @@ import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiLink, EuiButton } 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { isIntegrationPolicyTemplate } from '../../../../../../../../common/services';
+import {
+  isIntegrationPolicyTemplate,
+  isPackagePrerelease,
+} from '../../../../../../../../common/services';
 
 import { useFleetStatus, useLink, useStartServices } from '../../../../../../../hooks';
-import { isPackagePrerelease, isPackageUnverified } from '../../../../../../../services';
+import { isPackageUnverified } from '../../../../../../../services';
 import type { PackageInfo, RegistryPolicyTemplate } from '../../../../../types';
 
 import { Screenshots } from './screenshots';
