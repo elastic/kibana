@@ -173,12 +173,12 @@ export class KibanaFramework {
       case 'transport.request':
         apiResult = elasticsearch.client.asCurrentUser.transport.request({
           ...params,
-        } as unknown as TransportRequestParams); // TODO: Fix type failure introduced by elasticsearch-js 8.6.0-canary.3
+        } as TransportRequestParams);
         break;
       case 'ml.getBuckets':
         apiResult = elasticsearch.client.asCurrentUser.ml.getBuckets({
           ...params,
-        } as unknown as estypes.MlGetBucketsRequest); // TODO: Fix type failure introduced by elasticsearch-js 8.6.0-canary.3
+        } as estypes.MlGetBucketsRequest);
         break;
     }
     return apiResult ? await apiResult : undefined;
