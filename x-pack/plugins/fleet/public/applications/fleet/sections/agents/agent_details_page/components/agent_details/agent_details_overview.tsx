@@ -56,7 +56,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                     }),
                     description:
                       agent.metrics?.cpu_avg && agent.metrics?.cpu_avg !== 0 ? (
-                        `${agent.metrics?.cpu_avg} %`
+                        `${agent.metrics?.cpu_avg * 100} %`
                       ) : (
                         <MetricNonAvailable agentPolicy={agentPolicy} />
                       ),

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { type CriteriaWithPagination, EuiIconTip } from '@elastic/eui';
+import { type CriteriaWithPagination } from '@elastic/eui';
 import {
   EuiBasicTable,
   EuiFlexGroup,
@@ -16,7 +16,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, FormattedRelative, FormattedNumber } from '@kbn/i18n-react';
+import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 
 import type { Agent, AgentPolicy } from '../../../../types';
 import { isAgentUpgradeable, ExperimentalFeaturesService, formatBytes } from '../../../../services';
@@ -180,7 +180,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
             width: '75px',
             render: (metrics: AgentMetrics | undefined, agent: Agent) =>
               metrics?.cpu_avg && metrics?.cpu_avg !== 0 ? (
-                `${metrics.cpu_avg} %`
+                `${metrics.cpu_avg * 100} %`
               ) : (
                 <MetricNonAvailable
                   agentPolicy={
