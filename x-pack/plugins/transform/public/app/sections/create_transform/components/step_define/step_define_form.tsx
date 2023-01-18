@@ -284,7 +284,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
               ? i18n.translate('xpack.transform.stepDefineForm.savedSearchLabel', {
                   defaultMessage: 'Saved search',
                 })
-              : i18n.translate('xpack.transform.stepDefineForm.savedSearchLabel', {
+              : i18n.translate('xpack.transform.stepDefineForm.searchFilterLabel', {
                   defaultMessage: 'Search filter',
                 })
           }

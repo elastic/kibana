@@ -21,12 +21,9 @@ export const DatePickerApplySwitch: FC<StepDefineFormHook> = ({
 }) => {
   return (
     <EuiSwitch
-      label={i18n.translate(
-        'xpack.transform.stepDefineForm.advancedEditorSourceConfigSwitchLabel',
-        {
-          defaultMessage: 'Apply time range',
-        }
-      )}
+      label={i18n.translate('xpack.transform.stepDefineForm.datePickerApplySwitchLabel', {
+        defaultMessage: 'Apply time range',
+      })}
       checked={isDatePickerApplyEnabled}
       onChange={() => {
         setDatePickerApplyEnabled(!isDatePickerApplyEnabled);
