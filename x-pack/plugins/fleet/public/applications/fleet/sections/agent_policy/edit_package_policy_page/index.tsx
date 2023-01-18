@@ -278,7 +278,7 @@ export const EditPackagePolicyForm = memo<{
     () =>
       agentPolicy && packageInfo ? (
         <>
-          {selectedTab === 0 && (
+          {selectedTab === 0 && packageInfo.name !== 'cloud_security_posture' && (
             <StepDefinePackagePolicy
               agentPolicy={agentPolicy}
               packageInfo={packageInfo}
