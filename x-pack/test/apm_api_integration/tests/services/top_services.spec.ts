@@ -51,6 +51,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.status).to.be(200);
         expect(response.body.items.length).to.be(0);
+        expect(response.body.maxServiceGroupsExceeded).to.be(false);
       });
     }
   );
