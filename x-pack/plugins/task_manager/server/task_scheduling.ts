@@ -62,7 +62,10 @@ export interface BulkUpdateTaskResult {
   /**
    * list of failed tasks and errors caused failure
    */
-  errors: Array<{ task: ConcreteTaskInstance; error: Error }>;
+  errors: Array<{
+    task: ConcreteTaskInstance;
+    error: { type: string; id: string; error: Payload };
+  }>;
 }
 export interface RunSoonResult {
   id: ConcreteTaskInstance['id'];

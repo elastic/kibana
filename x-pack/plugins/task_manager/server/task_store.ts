@@ -10,6 +10,7 @@
  */
 import { Subject } from 'rxjs';
 import { omit, defaults, get } from 'lodash';
+import type { Payload } from '@hapi/boom';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SavedObjectsBulkDeleteResponse } from '@kbn/core/server';
@@ -75,7 +76,7 @@ export interface FetchResult {
 
 export type BulkUpdateResult = Result<
   ConcreteTaskInstance,
-  { entity: ConcreteTaskInstance; error: Error }
+  { entity: ConcreteTaskInstance; error: { type: string; id: string; error: Payload } }
 >;
 
 export interface UpdateByQueryResult {
@@ -252,7 +253,7 @@ export class TaskStore {
       return attrsById;
     }, new Map());
 
-    let updatedSavedObjects: Array<SavedObjectsUpdateResponse | Error>;
+    let updatedSavedObjects: Array<SavedObjectsUpdateResponse<SerializedConcreteTaskInstance>>;
     try {
       ({ saved_objects: updatedSavedObjects } =
         await this.savedObjectsRepository.bulkUpdate<SerializedConcreteTaskInstance>(
@@ -271,9 +272,14 @@ export class TaskStore {
       throw e;
     }
 
-    return updatedSavedObjects.map<BulkUpdateResult>((updatedSavedObject, index) =>
-      isSavedObjectsUpdateResponse(updatedSavedObject)
-        ? asOk(
+    return updatedSavedObjects.map((updatedSavedObject) => {
+      const doc = docs.find((d) => d.id === updatedSavedObject.id);
+      return updatedSavedObject.error !== undefined
+        ? asErr({
+            entity: doc,
+            error: updatedSavedObject,
+          })
+        : asOk(
             savedObjectToConcreteTaskInstance({
               ...updatedSavedObject,
               attributes: defaults(
@@ -281,15 +287,8 @@ export class TaskStore {
                 attributesByDocId.get(updatedSavedObject.id)!
               ),
             })
-          )
-        : asErr({
-            // The SavedObjectsRepository maintains the order of the docs
-            // so we can rely on the index in the `docs` to match an error
-            // on the same index in the `bulkUpdate` result
-            entity: docs[index],
-            error: updatedSavedObject,
-          })
-    );
+          );
+    }) as BulkUpdateResult[];
   }
 
   /**
@@ -553,10 +552,4 @@ function ensureAggregationOnlyReturnsTaskObjects(opts: AggregationOpts): Aggrega
     ...opts,
     query,
   };
-}
-
-function isSavedObjectsUpdateResponse(
-  result: SavedObjectsUpdateResponse | Error
-): result is SavedObjectsUpdateResponse {
-  return result && typeof (result as SavedObjectsUpdateResponse).id === 'string';
 }
