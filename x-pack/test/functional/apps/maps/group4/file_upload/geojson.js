@@ -45,7 +45,7 @@ export default function ({ getPageObjects, getService }) {
     });
 
     it('should import geojson', async () => {
-      indexName = uuid();
+      indexName = uuidv4();
       await PageObjects.geoFileUpload.setIndexName(indexName);
       await PageObjects.geoFileUpload.uploadFile();
 
