@@ -62,7 +62,14 @@ export const ColorPalette = ({
     });
   };
 
-  const hasDelta = Math.abs(delta) > 5;
+  const getColor = () => {
+    if (Math.abs(delta) < 5) {
+      return 'default';
+    }
+    return delta > 5 ? 'danger' : 'success';
+  };
+
+  const hasDelta = Math.abs(delta) > 0;
 
   return (
     <EuiFlexGroup gutterSize="s">
@@ -81,7 +88,7 @@ export const ColorPalette = ({
           size="s"
           style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}
           className="eui-textRight"
-          color={!hasDelta ? 'default' : delta > 5 ? 'danger' : 'success'}
+          color={getColor()}
         >
           {value}
         </EuiText>
@@ -90,11 +97,7 @@ export const ColorPalette = ({
         <EuiFlexItem grow={false} style={{ width: 40 }}>
           <EuiToolTip content={getToolTipContent()}>
             {hasDelta ? (
-              <EuiIcon
-                type={delta > 5 ? 'sortUp' : 'sortDown'}
-                size="m"
-                color={delta > 5 ? 'danger' : 'success'}
-              />
+              <EuiIcon type={delta > 0 ? 'sortUp' : 'sortDown'} size="m" color={getColor()} />
             ) : (
               <EuiIcon type="minus" size="m" color="subdued" />
             )}
