@@ -8,12 +8,7 @@
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { QueryDslQueryContainer, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { calculatePostureScore } from '../../../common/utils/helpers';
-import type { ComplianceDashboardData, Score } from '../../../common/types';
-
-/**
- * @param value value is [0, 1] range
- */
-export const roundScore = (value: number): Score => Number((value * 100).toFixed(1));
+import type { ComplianceDashboardData } from '../../../common/types';
 
 export interface FindingsEvaluationsQueryResult {
   failed_findings: {
