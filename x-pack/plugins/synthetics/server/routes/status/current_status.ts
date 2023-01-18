@@ -17,7 +17,7 @@ import { UMServerLibs } from '../../legacy_uptime/uptime_server';
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes';
 import { UptimeEsClient } from '../../legacy_uptime/lib/lib';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
-import { ConfigKey, ServiceLocation } from '../../../common/runtime_types';
+import { ConfigKey, ServiceLocation, SourceType } from '../../../common/runtime_types';
 import { QuerySchema, MonitorsQuery } from '../common';
 
 /**
@@ -46,9 +46,12 @@ export async function getStatus(
   params: MonitorsQuery
 ) {
   const { query } = params;
+
   const enabledIds: string[] = [];
   let disabledCount = 0;
   let disabledMonitorsCount = 0;
+  let projectMonitorsCount = 0;
+
   let maxPeriod = 0;
   let listOfLocationsSet = new Set<string>();
   const monitorLocationMap: Record<string, string[]> = {};
@@ -67,6 +70,7 @@ export async function getStatus(
       ConfigKey.LOCATIONS,
       ConfigKey.MONITOR_QUERY_ID,
       ConfigKey.SCHEDULE,
+      ConfigKey.MONITOR_SOURCE_TYPE,
     ],
   });
 
@@ -88,6 +92,8 @@ export async function getStatus(
 
   for (const monitor of allMonitors) {
     const attrs = monitor.attributes;
+    projectMonitorsCount += attrs?.[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT ? 1 : 0;
+
     if (attrs[ConfigKey.ENABLED] === false) {
       disabledCount += attrs[ConfigKey.LOCATIONS].length;
       disabledMonitorsCount += 1;
@@ -131,6 +137,7 @@ export async function getStatus(
   return {
     allMonitorsCount: allMonitors.length,
     disabledMonitorsCount,
+    projectMonitorsCount,
     enabledIds,
     disabledCount,
     up,

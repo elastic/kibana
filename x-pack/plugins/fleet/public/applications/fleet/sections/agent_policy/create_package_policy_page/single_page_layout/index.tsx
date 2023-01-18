@@ -25,7 +25,7 @@ import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import { useCancelAddPackagePolicy } from '../hooks';
 
 import { splitPkgKey } from '../../../../../../../common/services';
-import { dataTypes } from '../../../../../../../common/constants';
+import { generateNewAgentPolicyWithDefaults } from '../../../../services';
 import type { NewAgentPolicy } from '../../../../types';
 import { useConfig, sendGetAgentStatus, useGetPackageInfoByKey } from '../../../../hooks';
 import {
@@ -80,12 +80,9 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   } = useConfig();
   const { params } = useRouteMatch<AddToPolicyParams>();
 
-  const [newAgentPolicy, setNewAgentPolicy] = useState<NewAgentPolicy>({
-    name: 'Agent policy 1',
-    description: '',
-    namespace: 'default',
-    monitoring_enabled: Object.values(dataTypes),
-  });
+  const [newAgentPolicy, setNewAgentPolicy] = useState<NewAgentPolicy>(
+    generateNewAgentPolicyWithDefaults({ name: 'Agent policy 1' })
+  );
 
   const [withSysMonitoring, setWithSysMonitoring] = useState<boolean>(true);
   const validation = agentPolicyFormValidation(newAgentPolicy);
