@@ -6,6 +6,7 @@
  */
 
 import { EuiButtonIcon, EuiButton } from '@elastic/eui';
+import { ReactWrapper } from 'enzyme';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import moment from 'moment';
@@ -178,5 +179,82 @@ describe('RulesListNotifyBadge', () => {
     expect(unsnoozeRule).toHaveBeenCalled();
     expect(onLoading).toHaveBeenCalledWith(false);
     expect(onClose).toHaveBeenCalled();
+  });
+
+  it('should correctly show recurring schedules relative to the current time', async () => {
+    jest.useFakeTimers('modern').setSystemTime(moment('1990-01-01T05:00:00.000Z').toDate());
+    const ONE_HOUR = 60 * 60 * 1000;
+
+    // Create a rule with a snooze schedule that
+    // starts on a tuesday, repeats weekly on thursday for 1 hr, for 5 weeks
+    const getWrapper = () => {
+      return mountWithIntl(
+        <RulesListNotifyBadge
+          rule={getRule({
+            snoozeSchedule: [
+              {
+                duration: ONE_HOUR,
+                id: '123',
+                rRule: {
+                  byweekday: ['WE'],
+                  freq: 2,
+                  count: 5,
+                  dtstart: '1990-01-02T05:00:00.000Z',
+                  tzid: 'America/New_York',
+                },
+              },
+            ],
+          })}
+          isLoading={false}
+          isOpen={true}
+          onLoading={onLoading}
+          onClick={onClick}
+          onClose={onClose}
+          onRuleChanged={onRuleChanged}
+          snoozeRule={snoozeRule}
+          unsnoozeRule={unsnoozeRule}
+        />
+      );
+    };
+
+    const getButtonText = (wrapper: ReactWrapper) => {
+      return wrapper.find('[data-test-subj="rulesListNotifyBadge-scheduled"]').first().text();
+    };
+
+    // On monday, before the dtstart date, should show dtstart
+    let wrapper = getWrapper();
+    expect(getButtonText(wrapper)).toEqual('Jan 2');
+
+    // Advance timer by 1 day
+    jest.advanceTimersByTime(1 * 24 * ONE_HOUR);
+
+    // On tuesday, rule should be snoozed for 1 hr. Should show current occurrence inclusive
+    wrapper = getWrapper();
+    expect(getButtonText(wrapper)).toEqual('Jan 2');
+
+    // Advance timer by 1 day
+    jest.advanceTimersByTime(1 * 24 * ONE_HOUR);
+
+    // On wednesday, first occurrence over, show next occurrence.
+    wrapper = getWrapper();
+    expect(getButtonText(wrapper)).toEqual('Jan 9');
+
+    // Advance timer by 1 day
+    jest.advanceTimersByTime(1 * 24 * ONE_HOUR);
+
+    // On thursday, first occurrence over, show next occurrence.
+    wrapper = getWrapper();
+    expect(getButtonText(wrapper)).toEqual('Jan 9');
+
+    // Advance timer by 60 days
+    jest.advanceTimersByTime(60 * 24 * ONE_HOUR);
+
+    // All occurrences over, show last occurrence.
+    wrapper = getWrapper();
+    expect(getButtonText(wrapper)).toEqual('Jan 30');
+
+    await act(async () => {
+      jest.runOnlyPendingTimers();
+    });
   });
 });

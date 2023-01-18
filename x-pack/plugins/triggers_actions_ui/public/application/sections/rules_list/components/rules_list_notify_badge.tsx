@@ -17,7 +17,12 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { RuleSnooze, RuleSnoozeSchedule } from '@kbn/alerting-plugin/common';
+import {
+  RuleSnooze,
+  RuleSnoozeSchedule,
+  SnoozeRRule,
+  getRRuleFromSnooze,
+} from '@kbn/alerting-plugin/common';
 import { i18nAbbrMonthDayDate, i18nMonthDayDate } from '../../../lib/i18n_month_day_date';
 import { RuleTableItem, SnoozeSchedule } from '../../../../types';
 import { SnoozePanel, futureTimeToInterval } from './rule_snooze';
@@ -79,6 +84,26 @@ const getNextRuleSnoozeSchedule = (rule: { snoozeSchedule?: RuleSnooze }) => {
   return nextSchedule;
 };
 
+// Gets the next occurrence date string relative to the current date
+// Falls back to dtstart in case there is no more next occurrence
+const getNextOccurrenceDateString = (rRule: SnoozeRRule) => {
+  if (moment().isBefore(rRule.dtstart)) {
+    return rRule.dtstart;
+  }
+  try {
+    const recurrenceRule = getRRuleFromSnooze(rRule);
+    const recurrenceDate = recurrenceRule.after(new Date(), true);
+    // If no next occurrence, presumably there are no more occurrences,
+    // therefore, show last occurrence. Falling back to dtstart
+    if (!recurrenceDate) {
+      return recurrenceRule.before(new Date(), true)?.toISOString() || rRule.dtstart;
+    }
+    return recurrenceDate.toISOString();
+  } catch (e) {
+    return rRule.dtstart;
+  }
+};
+
 export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeProps> = (props) => {
   const {
     isLoading = false,
@@ -113,12 +138,17 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
   }, [nextScheduledSnooze, isSnoozed]);
 
   const formattedSnoozeText = useMemo(() => {
-    if (!isSnoozedUntil) {
-      if (nextScheduledSnooze)
-        return i18nAbbrMonthDayDate(moment(nextScheduledSnooze.rRule.dtstart));
-      return '';
+    // If the rule is currently snoozed, use that date as display
+    if (isSnoozedUntil) {
+      return i18nAbbrMonthDayDate(moment(isSnoozedUntil));
     }
-    return i18nAbbrMonthDayDate(moment(isSnoozedUntil));
+    // If the rule is scheduled, find the next occurrence relative to NOW
+    if (nextScheduledSnooze) {
+      const { rRule } = nextScheduledSnooze;
+      const nextOccurrenceString = getNextOccurrenceDateString(rRule);
+      return i18nAbbrMonthDayDate(moment(nextOccurrenceString));
+    }
+    return '';
   }, [isSnoozedUntil, nextScheduledSnooze]);
 
   const snoozeTooltipText = useMemo(() => {
