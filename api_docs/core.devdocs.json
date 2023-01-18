@@ -2441,6 +2441,22 @@
             "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.ChromeHelpExtensionMenuCustomLink.external",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "external",
+            "description": [
+              "\nOpens link in new tab"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RegistryPolicyTemplate, RegistryVarsEntry } from './epm';
+import type { RegistryElasticsearch, RegistryPolicyTemplate, RegistryVarsEntry } from './epm';
 
 // Based on https://github.com/elastic/package-spec/blob/master/versions/1/manifest.spec.yml#L8
 export interface PackageSpecManifest {
@@ -27,6 +27,10 @@ export interface PackageSpecManifest {
   policy_templates?: RegistryPolicyTemplate[];
   vars?: RegistryVarsEntry[];
   owner: { github: string };
+  elasticsearch?: Pick<
+    RegistryElasticsearch,
+    'index_template.settings' | 'index_template.mappings'
+  >;
 }
 
 export type PackageSpecPackageType = 'integration' | 'input';

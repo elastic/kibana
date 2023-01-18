@@ -40,6 +40,7 @@ export interface OptionsListSuggestions {
  * The Options list response is returned from the serverside Options List route.
  */
 export interface OptionsListResponse {
+  rejected: boolean;
   suggestions: OptionsListSuggestions;
   totalCardinality: number;
   invalidSelections?: string[];

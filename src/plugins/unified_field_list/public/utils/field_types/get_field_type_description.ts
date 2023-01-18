@@ -34,7 +34,7 @@ export function getFieldTypeDescription(type?: string) {
   switch (knownType) {
     case KNOWN_FIELD_TYPES.DOCUMENT:
       return i18n.translate('unifiedFieldList.fieldNameDescription.recordField', {
-        defaultMessage: 'Number of records.', // TODO: add a better description
+        defaultMessage: 'Count of records.',
       });
     case KNOWN_FIELD_TYPES.BOOLEAN:
       return i18n.translate('unifiedFieldList.fieldNameDescription.booleanField', {
@@ -46,7 +46,8 @@ export function getFieldTypeDescription(type?: string) {
       });
     case KNOWN_FIELD_TYPES.COUNTER:
       return i18n.translate('unifiedFieldList.fieldNameDescription.counterField', {
-        defaultMessage: 'Counter metric.', // TODO: add a better description
+        defaultMessage:
+          'A number that only increases or resets to 0 (zero). Available only for numeric and aggregate_metric_double fields.',
       });
     case KNOWN_FIELD_TYPES.DATE:
       return i18n.translate('unifiedFieldList.fieldNameDescription.dateField', {
@@ -58,7 +59,8 @@ export function getFieldTypeDescription(type?: string) {
       });
     case KNOWN_FIELD_TYPES.GAUGE:
       return i18n.translate('unifiedFieldList.fieldNameDescription.gaugeField', {
-        defaultMessage: 'Gauge metric.', // TODO: add a better description
+        defaultMessage:
+          'A number that can increase or decrease. Available only for numeric and aggregate_metric_double fields.',
       });
     case KNOWN_FIELD_TYPES.GEO_POINT:
       return i18n.translate('unifiedFieldList.fieldNameDescription.geoPointField', {

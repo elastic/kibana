@@ -129,20 +129,26 @@ export function indexToViewIndex(index: ElasticsearchIndex): ApiViewIndex {
 }
 
 export function ingestionMethodToText(ingestionMethod: IngestionMethod) {
-  if (ingestionMethod === IngestionMethod.CONNECTOR) {
-    return i18n.translate(
-      'xpack.enterpriseSearch.content.searchIndices.ingestionMethod.connector',
-      {
-        defaultMessage: 'Connector',
-      }
-    );
+  switch (ingestionMethod) {
+    case IngestionMethod.CONNECTOR:
+      return i18n.translate(
+        'xpack.enterpriseSearch.content.searchIndices.ingestionMethod.connector',
+        {
+          defaultMessage: 'Connector',
+        }
+      );
+    case IngestionMethod.CRAWLER:
+      return i18n.translate(
+        'xpack.enterpriseSearch.content.searchIndices.ingestionMethod.crawler',
+        {
+          defaultMessage: 'Crawler',
+        }
+      );
+    case IngestionMethod.API:
+      return i18n.translate('xpack.enterpriseSearch.content.searchIndices.ingestionMethod.api', {
+        defaultMessage: 'API',
+      });
+    default:
+      return ingestionMethod;
   }
-  if (ingestionMethod === IngestionMethod.CRAWLER) {
-    return i18n.translate('xpack.enterpriseSearch.content.searchIndices.ingestionMethod.crawler', {
-      defaultMessage: 'Crawler',
-    });
-  }
-  return i18n.translate('xpack.enterpriseSearch.content.searchIndices.ingestionMethod.api', {
-    defaultMessage: 'API',
-  });
 }
