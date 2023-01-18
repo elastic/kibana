@@ -25,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import semverLt from 'semver/functions/lt';
 
-import { getPackageReleaseLabel } from '../../../../../../services/package_prerelease';
+import { getPackageReleaseLabel } from '../../../../../../../common/services/package_prerelease';
 
 import { splitPkgKey } from '../../../../../../../common/services';
 import { HIDDEN_API_REFERENCE_PACKAGES } from '../../../../../../../common/constants';
@@ -42,7 +42,7 @@ import {
   useGetSettings,
 } from '../../../../hooks';
 import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
-import { ExperimentalFeaturesService, isPackagePrerelease } from '../../../../services';
+import { ExperimentalFeaturesService } from '../../../../services';
 import {
   useGetPackageInfoByKey,
   useLink,
