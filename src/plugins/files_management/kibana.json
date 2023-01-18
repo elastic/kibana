@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "kibanaVersion": "kibana",
   "owner": {
-    "name": "@elastic/kibana-global-experience",
-    "githubTeam": "@elastic/kibana-global-experience"
+    "name": "@elastic/appex-sharedux",
+    "githubTeam": "@elastic/appex-sharedux"
   },
   "description": "Simple UI for managing files in Kibana",
   "server": false,

@@ -53,6 +53,7 @@ const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternal
             {
               iconType: 'trash',
               label: i18n.DELETE_CASE(),
+              color: 'danger' as const,
               onClick: openModal,
             },
           ]

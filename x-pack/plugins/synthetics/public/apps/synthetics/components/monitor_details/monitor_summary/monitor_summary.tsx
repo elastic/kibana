@@ -58,19 +58,19 @@ export const MonitorSummary = () => {
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <AvailabilityPanel from={from} to={to} />
               </EuiFlexItem>
               <EuiFlexItem>
                 <AvailabilitySparklines from={from} to={to} />
               </EuiFlexItem>
-              <EuiFlexItem>
+              <EuiFlexItem grow={false} style={{ marginLeft: 40 }}>
                 <DurationPanel from={from} to={to} />
               </EuiFlexItem>
               <EuiFlexItem>
                 <DurationSparklines from={from} to={to} />
               </EuiFlexItem>
-              <EuiFlexItem>
+              <EuiFlexItem grow={false} style={{ marginLeft: 40 }}>
                 {monitorId && <MonitorErrorsCount from={from} to={to} monitorId={[monitorId]} />}
               </EuiFlexItem>
               <EuiFlexItem>
