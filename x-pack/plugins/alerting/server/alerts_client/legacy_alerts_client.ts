@@ -13,12 +13,7 @@ import {
   getPublicAlertFactory,
   splitAlerts,
 } from '../alert/create_alert_factory';
-import {
-  determineAlertsToReturn,
-  processAlerts,
-  setFlappingLegacy,
-  updateFlappingHistory,
-} from '../lib';
+import { determineAlertsToReturn, isFlapping, processAlerts } from '../lib';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
@@ -26,6 +21,7 @@ import { logAlerts } from '../task_runner/log_alerts';
 import {
   AlertInstanceContext,
   AlertInstanceState,
+  LastScheduledActions,
   RawAlertInstance,
   WithoutReservedActionGroups,
 } from '../types';
@@ -112,11 +108,11 @@ export class LegacyAlertsClient<
     eventLogger,
     ruleLabel,
     ruleRunMetricsStore,
-    shouldLogAndScheduleActionsForAlerts,
+    shouldLogAlerts,
   }: {
     eventLogger: AlertingEventLogger;
     ruleLabel: string;
-    shouldLogAndScheduleActionsForAlerts: boolean;
+    shouldLogAlerts: boolean;
     ruleRunMetricsStore: RuleRunMetricsStore;
   }) {
     const updateAlertValues = ({
@@ -140,6 +136,7 @@ export class LegacyAlertsClient<
         ...(duration !== undefined ? { duration } : {}),
       });
       alert.setFlappingHistory(flappingHistory);
+      alert.setFlapping(isAlertFlapping(alert));
     };
 
     const {
@@ -162,11 +159,6 @@ export class LegacyAlertsClient<
       },
     });
 
-    setFlappingLegacy<State, Context, ActionGroupIds, RecoveryActionGroupId>(
-      processedAlertsActive as Record<string, Alert<State, Context, ActionGroupIds>>,
-      processedAlertsRecovered as Record<string, Alert<State, Context, RecoveryActionGroupId>>
-    );
-
     this.processedAlerts.new = processedAlertsNew as Record<
       string,
       Alert<State, Context, ActionGroupIds>
@@ -184,7 +176,7 @@ export class LegacyAlertsClient<
       Alert<State, Context, RecoveryActionGroupId>
     >;
 
-    logAlerts({
+    logAlerts<Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>>({
       logger: this.options.logger,
       alertingEventLogger: eventLogger,
       newAlerts: processedAlertsNew,
@@ -193,7 +185,16 @@ export class LegacyAlertsClient<
       ruleLogPrefix: ruleLabel,
       ruleRunMetricsStore,
       canSetRecoveryContext: this.options.ruleType.doesSetRecoveryContext ?? false,
-      shouldPersistAlerts: shouldLogAndScheduleActionsForAlerts,
+      shouldPersistAlerts: shouldLogAlerts,
+      getAlertData: (alert: Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>) => {
+        return {
+          actionGroup: alert.getScheduledActionOptions()?.actionGroup,
+          hasContext: alert.hasContext(),
+          lastScheduledActions: alert.getLastScheduledActions() as LastScheduledActions,
+          state: alert.getState(),
+          flapping: alert.getFlapping(),
+        };
+      },
     });
   }
 
@@ -225,10 +226,12 @@ export class LegacyAlertsClient<
   }
 }
 
-export function updateAlertFlappingHistory<
+function isAlertFlapping<
   State extends AlertInstanceState,
-  Context extends AlertInstanceContext
->(alert: Alert<State, Context>, state: boolean) {
-  const updatedFlappingHistory = updateFlappingHistory(alert.getFlappingHistory() || [], state);
-  alert.setFlappingHistory(updatedFlappingHistory);
+  Context extends AlertInstanceContext,
+  ActionGroupIds extends string
+>(alert: Alert<State, Context, ActionGroupIds>): boolean {
+  const flappingHistory: boolean[] = alert.getFlappingHistory() || [];
+  const isCurrentlyFlapping = alert.getFlapping();
+  return isFlapping(flappingHistory, isCurrentlyFlapping);
 }

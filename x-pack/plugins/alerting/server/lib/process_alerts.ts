@@ -53,13 +53,7 @@ interface ProcessAlertsOpts<Alert> {
     /**
      * Callback function to set values for Alert
      */
-    updateAlertValues: ({
-      alert,
-      start,
-      duration,
-      end,
-      flappingHistory,
-    }: {
+    updateAlertValues: (opts: {
       alert: Alert;
       start?: string;
       duration?: string;
@@ -71,26 +65,28 @@ interface ProcessAlertsOpts<Alert> {
 
 interface ProcessAlertsResult<Alert> {
   /**
-   * Alerts that are new in this execution cycle. Start time and initial duration are
-   * set for these alerts. Flapping history is updated if setFlapping = true
+   * Alerts that are new in this execution cycle.
+   * If callback functions are defined, start time, initial duration and flapping history
+   * are calculated and set using the callback.
    */
   newAlerts: Record<string, Alert>;
 
   /**
-   * Alerts that are new or ongoing in this execution cycle. Duration is updated for
-   * ongoing alerts. Flapping history is updated if setFlapping = true
+   * Alerts that are new or ongoing in this execution cycle.
+   * If callback functions are defined, duration is updated and flapping history
+   * is calculated and set using the callback.
    */
   activeAlerts: Record<string, Alert>;
-  // recovered alerts in the current rule run that were previously active
 
   /**
-   * Alerts that are recovered in this execution cycle. Duration is updated and end
-   * time is set for these alerts. Flapping history is updated if setFlapping = true
+   * Alerts that are recovered in this execution cycle.
+   * If callback functions are defined, duration is updated, end time is set and
+   * flapping history is calculated and set using the callback.
    */
   currentRecoveredAlerts: Record<string, Alert>;
 
   /**
-   * All recovered alerts, including those that have recovered during this execution
+   * All recovered alerts, including those that recovered during this execution
    * cycle and any recovered alerts that were previously tracked.
    */
   recoveredAlerts: Record<string, Alert>;
@@ -201,7 +197,7 @@ function processAlertsHelper<Alert>({
     }
   }
 
-  // alerts are still recovered
+  // Process alerts that were previously reported as recovered
   for (const id of previouslyRecoveredAlertIds) {
     recoveredAlerts[id] = trackedAlerts.recovered[id];
 

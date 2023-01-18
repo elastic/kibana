@@ -6,12 +6,13 @@
  */
 
 import uuid from 'uuid';
-import { cloneDeep, isEmpty, mapValues, omit } from 'lodash';
+import { cloneDeep, isEmpty, omit } from 'lodash';
 import { Logger, ElasticsearchClient } from '@kbn/core/server';
 import {
   ALERT_ACTION_GROUP,
   ALERT_DURATION,
   ALERT_END,
+  ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
   ALERT_ID,
   ALERT_RULE_CATEGORY,
@@ -32,19 +33,15 @@ import {
 } from '@kbn/rule-data-utils';
 import { SearchHit, SearchTotalHits } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { millisToNanos } from '@kbn/event-log-plugin/server';
-import { type Alert } from '../../common';
+import { LastScheduledActions, type Alert } from '../../common';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { getIndexTemplateAndPattern } from '../alerts_service/types';
 import { AlertLimitService, IAlertLimitService } from './alert_limit_service';
 import { ReportedAlert } from './types';
-import { categorizeAlerts } from '../lib/categorize_alerts';
-import { updateFlappingHistory, setFlapping } from '../lib';
-import {
-  prepareNewAlerts,
-  prepareOngoingAlerts,
-  prepareRecoveredAlerts,
-  UpdateValuesOpts,
-} from '../lib/prepare_alerts';
+import { isFlapping, processAlerts } from '../lib';
+import { logAlerts } from '../task_runner/log_alerts';
+import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
+import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 
 const QUERY_SIZE = 1000;
 
@@ -158,7 +155,20 @@ export class AlertsClient implements IAlertsClient {
   private numAlertsReported: number = 0;
   private reportedAlerts: Record<string, Alert> = {};
 
+  private processedAlerts: {
+    new: Record<string, Alert>;
+    active: Record<string, Alert>;
+    recovered: Record<string, Alert>;
+    recoveredCurrent: Record<string, Alert>;
+  };
+
   constructor(private readonly options: AlertsClientParams) {
+    this.processedAlerts = {
+      new: {},
+      active: {},
+      recovered: {},
+      recoveredCurrent: {},
+    };
     this.ruleLogPrefix = `${this.options.ruleType.id}`;
     this.alertLimitServices = new AlertLimitService({ maxAlerts: options.maxAlerts });
   }
@@ -297,105 +307,83 @@ export class AlertsClient implements IAlertsClient {
     this.reportedAlerts[alertId] = augmentedAlert;
   }
 
-  public processAndLogAlerts() {
-    const trackedRecoveredAlertIds = new Set(Object.keys(this.trackedAlerts.recovered));
-
-    const activeAlerts: Record<string, Alert> = {};
-    // recovered alerts from current execution + the ones being tracked
-    const allRecoveredAlerts: Record<string, Alert> = {};
-
-    const categorized = categorizeAlerts<Alert>({
-      reportedAlerts: {
-        active: this.reportedAlerts,
-        // todo is there a way to report a recovered alert?
-        recovered: {},
-      },
-      trackedAlerts: this.trackedAlerts.active,
-      hasReachedAlertLimit: this.hasReachedAlertLimit(),
-      alertLimit: this.options.maxAlerts,
-    });
-
-    const updateAlertValues = (
-      {
-        start,
-        duration,
-        end,
-        flappingHistory,
-      }: {
-        start?: string;
-        duration?: string;
-        end?: string;
-        flappingHistory: boolean[];
-      },
-      alert: Alert
-    ) => {
+  public processAndLogAlerts({
+    eventLogger,
+    ruleLabel,
+    ruleRunMetricsStore,
+    shouldLogAndScheduleActionsForAlerts,
+  }: {
+    eventLogger: AlertingEventLogger;
+    ruleLabel: string;
+    shouldLogAndScheduleActionsForAlerts: boolean;
+    ruleRunMetricsStore: RuleRunMetricsStore;
+  }) {
+    const updateAlertValues = ({
+      alert,
+      start,
+      duration,
+      end,
+      flappingHistory,
+    }: {
+      alert: Alert;
+      start?: string;
+      duration?: string;
+      end?: string;
+      flappingHistory: boolean[];
+    }) => {
       alert = {
         ...alert,
         ...(start ? { [ALERT_START]: start } : {}),
         ...(end ? { [ALERT_END]: end } : {}),
         ...(duration !== undefined ? { [ALERT_DURATION]: duration } : {}),
         [ALERT_FLAPPING_HISTORY]: flappingHistory,
+        [ALERT_FLAPPING]: isAlertFlapping(alert),
       };
     };
 
-    const getFlappingHistories = (alerts: Record<string, Alert>) =>
-      mapValues(alerts, (alert) => alert[ALERT_FLAPPING_HISTORY] ?? []);
+    const {
+      newAlerts: processedAlertsNew,
+      activeAlerts: processedAlertsActive,
+      currentRecoveredAlerts: processedAlertsRecoveredCurrent,
+      recoveredAlerts: processedAlertsRecovered,
+    } = processAlerts<Alert>({
+      // todo - a way to report recovered alerts?
+      reportedAlerts: { active: this.reportedAlerts, recovered: {} },
+      trackedAlerts: this.trackedAlerts,
+      hasReachedAlertLimit: this.hasReachedAlertLimit(),
+      alertLimit: this.options.maxAlerts,
+      callbacks: {
+        getFlappingHistory: (alert) => alert[ALERT_FLAPPING_HISTORY] ?? [],
+        getStartTime: (alert) => alert[ALERT_START],
+        updateAlertValues,
+      },
+    });
 
-    const getStartTimes = (alerts: Record<string, Alert>) =>
-      mapValues(alerts, (alert) => alert[ALERT_START]);
+    this.processedAlerts.new = processedAlertsNew;
+    this.processedAlerts.active = processedAlertsActive;
+    this.processedAlerts.recovered = processedAlertsRecovered;
+    this.processedAlerts.recoveredCurrent = processedAlertsRecoveredCurrent;
 
-    // For alerts categorized as new, set the start time and duration
-    // and check to see if it's a flapping alert
-    prepareNewAlerts(
-      Object.keys(categorized.new),
-      // For new alerts we look at the tracked recovered alerts
-      // to see if that alert has previously recovered and if so,
-      // carry over the flapping history
-      getFlappingHistories(this.trackedAlerts.recovered),
-      (opts: UpdateValuesOpts) => {
-        updateAlertValues(opts, categorized.new[opts.id]);
-        activeAlerts[opts.id] = categorized.new[opts.id];
-      }
-    );
-
-    // For alerts categorized as ongoing, update the duration
-    prepareOngoingAlerts(
-      Object.keys(categorized.ongoing),
-      getStartTimes(categorized.ongoing),
-      getFlappingHistories(categorized.ongoing),
-      // Callback function for each ongoing alert to set duration
-      (opts: UpdateValuesOpts) => {
-        updateAlertValues(opts, categorized.ongoing[opts.id]);
-        activeAlerts[opts.id] = categorized.ongoing[opts.id];
-      }
-    );
-
-    // For alerts categorized as recovered, update the duration and set end time
-    prepareRecoveredAlerts(
-      Object.keys(categorized.recovered),
-      getStartTimes(categorized.recovered),
-      getFlappingHistories(categorized.recovered),
-      // Callback function for each recovered alert to set duration and end time
-      (opts: UpdateValuesOpts) => {
-        updateAlertValues(opts, categorized.recovered[opts.id]);
-        allRecoveredAlerts[opts.id] = categorized.recovered[opts.id];
-      }
-    );
-
-    // alerts are still recovered
-    for (const id of trackedRecoveredAlertIds) {
-      allRecoveredAlerts[id] = this.trackedAlerts.recovered[id];
-      const updatedFlappingHistory = updateFlappingHistory(
-        allRecoveredAlerts[id][ALERT_FLAPPING_HISTORY] ?? [],
-        false
-      );
-      allRecoveredAlerts[id] = {
-        ...allRecoveredAlerts[id],
-        [ALERT_FLAPPING_HISTORY]: updatedFlappingHistory,
-      };
-    }
-
-    setFlapping(activeAlerts, allRecoveredAlerts);
+    logAlerts<Alert>({
+      logger: this.options.logger,
+      alertingEventLogger: eventLogger,
+      newAlerts: processedAlertsNew,
+      activeAlerts: processedAlertsActive,
+      recoveredAlerts: processedAlertsRecoveredCurrent,
+      ruleLogPrefix: ruleLabel,
+      ruleRunMetricsStore,
+      canSetRecoveryContext: this.options.ruleType.doesSetRecoveryContext ?? false,
+      shouldPersistAlerts: shouldLogAndScheduleActionsForAlerts,
+      getAlertData: (alert: Alert) => {
+        return {
+          actionGroup: alert[ALERT_ACTION_GROUP],
+          hasContext: false, // no recovery context yet
+          lastScheduledActions: {} as LastScheduledActions, // no last scheduled actions yet
+          state: {}, // no state yet
+          flapping: alert[ALERT_FLAPPING] as boolean,
+        };
+      },
+    });
   }
 
   public getRecoveredAlerts(): Alert[] {
@@ -744,4 +732,10 @@ export class AlertsClient implements IAlertsClient {
   //     }
   //   }
   // }
+}
+
+function isAlertFlapping(alert: Alert): boolean {
+  const flappingHistory: boolean[] = alert[ALERT_FLAPPING_HISTORY] ?? [];
+  const isCurrentlyFlapping = alert[ALERT_FLAPPING] ?? false;
+  return isFlapping(flappingHistory, isCurrentlyFlapping);
 }
