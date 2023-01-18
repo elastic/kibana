@@ -223,7 +223,9 @@ export const useAvailablePackages = () => {
   } = useCategories(prereleaseIntegrationsEnabled);
 
   // Subcategories
-  const subCategories = eprCategories?.items.filter((item) => item.parent_id !== undefined);
+  const subCategories = useMemo(() => {
+    return eprCategories?.items.filter((item) => item.parent_id !== undefined);
+  }, [eprCategories?.items]);
 
   const allCategories: CategoryFacet[] = useMemo(() => {
     const eprAndCustomCategories: CategoryFacet[] = isLoadingCategories

@@ -134,13 +134,16 @@ export const PackageListGrid: FunctionComponent<Props> = ({
     setUrlandReplaceHistory({ searchString: '', categoryId: '', subCategoryId: '' });
   };
 
-  const onSubCategoryClick = (subCategory: CategoryFacet) => {
-    if (setSelectedSubCategory) setSelectedSubCategory(subCategory);
-    setUrlandPushHistory({
-      categoryId: selectedCategory,
-      subCategoryId: subCategory.id,
-    });
-  };
+  const onSubCategoryClick = useCallback(
+    (subCategory: CategoryFacet) => {
+      if (setSelectedSubCategory) setSelectedSubCategory(subCategory);
+      setUrlandPushHistory({
+        categoryId: selectedCategory,
+        subCategoryId: subCategory.id,
+      });
+    },
+    [selectedCategory, setSelectedSubCategory, setUrlandPushHistory]
+  );
 
   const selectedCategoryTitle = selectedCategory
     ? categories.find((category) => category.id === selectedCategory)?.title
@@ -159,29 +162,38 @@ export const PackageListGrid: FunctionComponent<Props> = ({
     return promoteFeaturedIntegrations(filteredList, selectedCategory);
   }, [isLoading, list, localSearchRef, searchTerm, selectedCategory]);
 
-  let visibleSubCategories;
-  let hiddenSubCategoriesItems;
-  if (availableSubCategories && availableSubCategories?.length < MAX_SUBCATEGORIES_NUMBER) {
-    visibleSubCategories = availableSubCategories;
-  } else if (availableSubCategories && availableSubCategories?.length >= MAX_SUBCATEGORIES_NUMBER) {
-    visibleSubCategories = availableSubCategories.slice(0, MAX_SUBCATEGORIES_NUMBER);
+  const splitSubcategories = (
+    subcategories: CategoryFacet[] | undefined
+  ): { visibleSubCategories?: CategoryFacet[]; hiddenSubCategories?: CategoryFacet[] } => {
+    if (!subcategories) return {};
+    else if (subcategories && subcategories?.length < MAX_SUBCATEGORIES_NUMBER) {
+      return { visibleSubCategories: subcategories, hiddenSubCategories: [] };
+    } else if (subcategories && subcategories?.length >= MAX_SUBCATEGORIES_NUMBER) {
+      return {
+        visibleSubCategories: subcategories.slice(0, MAX_SUBCATEGORIES_NUMBER),
+        hiddenSubCategories: subcategories.slice(MAX_SUBCATEGORIES_NUMBER),
+      };
+    }
+    return {};
+  };
 
-    hiddenSubCategoriesItems = availableSubCategories
-      .slice(MAX_SUBCATEGORIES_NUMBER)
-      .map((subCategory) => {
-        return (
-          <EuiContextMenuItem
-            key={subCategory.id}
-            onClick={() => {
-              onSubCategoryClick(subCategory);
-              closePopover();
-            }}
-          >
-            {subCategory.title}
-          </EuiContextMenuItem>
-        );
-      });
-  }
+  const splitSubcat = splitSubcategories(availableSubCategories);
+  const { visibleSubCategories } = splitSubcat;
+  const hiddenSubCategoriesItems = useMemo(() => {
+    return splitSubcat?.hiddenSubCategories?.map((subCategory) => {
+      return (
+        <EuiContextMenuItem
+          key={subCategory.id}
+          onClick={() => {
+            onSubCategoryClick(subCategory);
+            closePopover();
+          }}
+        >
+          {subCategory.title}
+        </EuiContextMenuItem>
+      );
+    });
+  }, [onSubCategoryClick, splitSubcat.hiddenSubCategories]);
 
   return (
     <>
@@ -285,7 +297,7 @@ export const PackageListGrid: FunctionComponent<Props> = ({
                     </EuiButton>
                   </EuiFlexItem>
                 ))}
-                {hiddenSubCategoriesItems ? (
+                {hiddenSubCategoriesItems?.length ? (
                   <EuiFlexItem grow={false}>
                     <EuiPopover
                       data-test-subj="epmList.showMoreSubCategoriesButton"

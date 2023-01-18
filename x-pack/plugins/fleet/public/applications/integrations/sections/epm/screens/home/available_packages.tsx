@@ -141,7 +141,7 @@ export const AvailablePackages: React.FC<{}> = ({}) => {
       />
     </EuiFlexItem>,
   ];
-  // Add a feature flag?
+
   if (mainCategories) {
     controls = [
       <EuiFlexItem className="eui-yScrollWithShadows">
