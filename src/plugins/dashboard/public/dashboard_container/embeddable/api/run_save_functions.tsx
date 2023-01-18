@@ -11,7 +11,7 @@ import { batch } from 'react-redux';
 import { showSaveModal } from '@kbn/saved-objects-plugin/public';
 
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import { DASHBOARD_SAVED_OBJECT_TYPE, SAVED_OBJECT_ADD_TIME } from '../../../dashboard_constants';
+import { DASHBOARD_SAVED_OBJECT_TYPE, SAVED_OBJECT_POST_TIME } from '../../../dashboard_constants';
 import { DashboardSaveOptions, DashboardStateFromSaveModal } from '../../types';
 import { DashboardSaveModal } from './overlays/save_modal';
 import { DashboardContainer } from '../dashboard_container';
@@ -94,7 +94,7 @@ export function runSaveAs(this: DashboardContainer) {
       });
       const addDuration = window.performance.now() - beforeAddTime;
       reportPerformanceMetricEvent(pluginServices.getServices().analytics, {
-        eventName: SAVED_OBJECT_ADD_TIME,
+        eventName: SAVED_OBJECT_POST_TIME,
         duration: addDuration,
         meta: {
           saved_object_type: DASHBOARD_SAVED_OBJECT_TYPE,
