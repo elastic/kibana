@@ -129,13 +129,16 @@ export class StatusRuleExecutor {
   async getDownChecks(
     prevDownConfigs: OverviewStatus['downConfigs'] = {}
   ): Promise<AlertOverviewStatus> {
-    const { listOfLocations, enabledIds } = await this.getMonitors();
+    const { listOfLocations, allIds, enabledIds } = await this.getMonitors();
 
     if (enabledIds.length > 0) {
       const currentStatus = await queryMonitorStatus(
         this.esClient,
         [...listOfLocations],
-        { to: 'now', from: this.previousStartedAt?.toISOString() ?? 'now-1m' },
+        {
+          to: 'now',
+          from: this.previousStartedAt?.toISOString() ?? 'now-1m',
+        },
         enabledIds
       );
 
@@ -150,7 +153,12 @@ export class StatusRuleExecutor {
 
       const staleDownConfigs = this.markDeletedConfigs(downConfigs);
 
-      return { ...currentStatus, staleDownConfigs };
+      return {
+        ...currentStatus,
+        staleDownConfigs,
+        allMonitorsCount: allIds.length,
+        disabledMonitorsCount: allIds.length - enabledIds.length,
+      };
     }
     const staleDownConfigs = this.markDeletedConfigs(prevDownConfigs);
     return {
@@ -160,6 +168,8 @@ export class StatusRuleExecutor {
       down: 0,
       up: 0,
       enabledIds,
+      allMonitorsCount: allIds.length,
+      disabledMonitorsCount: allIds.length,
     };
   }
 

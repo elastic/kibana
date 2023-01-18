@@ -44,7 +44,7 @@ import {
   PACKAGES_SAVED_OBJECT_TYPE,
 } from '../../common/constants';
 import type {
-  DeletePackagePoliciesResponse,
+  PostDeletePackagePoliciesResponse,
   UpgradePackagePolicyResponse,
   PackagePolicyInput,
   NewPackagePolicyInput,
@@ -58,6 +58,7 @@ import type {
   PackagePolicyPackage,
   Installation,
   ExperimentalDataStreamFeature,
+  DeletePackagePoliciesResponse,
 } from '../../common/types';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 import {
@@ -518,7 +519,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         pkgVersion: packagePolicy.package.version,
         prerelease: true,
       });
-
+      _validateRestrictedFieldsNotModifiedOrThrow({
+        pkgInfo,
+        oldPackagePolicy,
+        packagePolicyUpdate,
+      });
       validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
 
       inputs = await _compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs);
@@ -691,8 +696,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     esClient: ElasticsearchClient,
     ids: string[],
     options?: { user?: AuthenticatedUser; skipUnassignFromAgentPolicies?: boolean; force?: boolean }
-  ): Promise<DeletePackagePoliciesResponse> {
-    const result: DeletePackagePoliciesResponse = [];
+  ): Promise<PostDeletePackagePoliciesResponse> {
+    const result: PostDeletePackagePoliciesResponse = [];
 
     const packagePolicies = await this.getByIDs(soClient, ids, { ignoreMissing: true });
     if (!packagePolicies) {
@@ -1205,15 +1210,19 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
   public async runExternalCallbacks<A extends ExternalCallback[0]>(
     externalCallbackType: A,
-    packagePolicy: A extends 'postPackagePolicyDelete'
+    packagePolicy: A extends 'packagePolicyDelete'
       ? DeletePackagePoliciesResponse
+      : A extends 'packagePolicyPostDelete'
+      ? PostDeletePackagePoliciesResponse
       : A extends 'packagePolicyPostCreate'
       ? PackagePolicy
       : NewPackagePolicy,
     context: RequestHandlerContext,
     request: KibanaRequest
   ): Promise<
-    A extends 'postPackagePolicyDelete'
+    A extends 'packagePolicyDelete'
+      ? void
+      : A extends 'packagePolicyPostDelete'
       ? void
       : A extends 'packagePolicyPostCreate'
       ? PackagePolicy
@@ -1221,11 +1230,19 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
   >;
   public async runExternalCallbacks(
     externalCallbackType: ExternalCallback[0],
-    packagePolicy: PackagePolicy | NewPackagePolicy | DeletePackagePoliciesResponse,
+    packagePolicy:
+      | PackagePolicy
+      | NewPackagePolicy
+      | PostDeletePackagePoliciesResponse
+      | DeletePackagePoliciesResponse,
     context: RequestHandlerContext,
     request: KibanaRequest
   ): Promise<PackagePolicy | NewPackagePolicy | void> {
-    if (externalCallbackType === 'postPackagePolicyDelete') {
+    if (externalCallbackType === 'packagePolicyPostDelete') {
+      return await this.runPostDeleteExternalCallbacks(
+        packagePolicy as PostDeletePackagePoliciesResponse
+      );
+    } else if (externalCallbackType === 'packagePolicyDelete') {
       return await this.runDeleteExternalCallbacks(packagePolicy as DeletePackagePoliciesResponse);
     } else {
       if (!Array.isArray(packagePolicy)) {
@@ -1263,10 +1280,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     }
   }
 
-  public async runDeleteExternalCallbacks(
-    deletedPackagePolicies: DeletePackagePoliciesResponse
+  public async runPostDeleteExternalCallbacks(
+    deletedPackagePolicies: PostDeletePackagePoliciesResponse
   ): Promise<void> {
-    const externalCallbacks = appContextService.getExternalCallbacks('postPackagePolicyDelete');
+    const externalCallbacks = appContextService.getExternalCallbacks('packagePolicyPostDelete');
     const errorsThrown: Error[] = [];
 
     if (externalCallbacks && externalCallbacks.size > 0) {
@@ -1275,6 +1292,32 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         // executed. Errors (if any) will be collected and `throw`n after processing the entire set
         try {
           await callback(deletedPackagePolicies);
+        } catch (error) {
+          errorsThrown.push(error);
+        }
+      }
+
+      if (errorsThrown.length > 0) {
+        throw new FleetError(
+          `${errorsThrown.length} encountered while executing package post delete external callbacks`,
+          errorsThrown
+        );
+      }
+    }
+  }
+
+  public async runDeleteExternalCallbacks(
+    deletedPackagePolices: DeletePackagePoliciesResponse
+  ): Promise<void> {
+    const externalCallbacks = appContextService.getExternalCallbacks('packagePolicyDelete');
+    const errorsThrown: Error[] = [];
+
+    if (externalCallbacks && externalCallbacks.size > 0) {
+      for (const callback of externalCallbacks) {
+        // Failures from an external callback should not prevent other external callbacks from being
+        // executed. Errors (if any) will be collected and `throw`n after processing the entire set
+        try {
+          await callback(deletedPackagePolices);
         } catch (error) {
           errorsThrown.push(error);
         }
@@ -1909,6 +1952,52 @@ export function preconfigurePackageInputs(
   validatePackagePolicyOrThrow(resultingPackagePolicy, packageInfo);
 
   return resultingPackagePolicy;
+}
+
+// input only packages cannot have their namespace or dataset modified
+export function _validateRestrictedFieldsNotModifiedOrThrow(opts: {
+  pkgInfo: PackageInfo;
+  oldPackagePolicy: PackagePolicy;
+  packagePolicyUpdate: UpdatePackagePolicy;
+}) {
+  const { pkgInfo, oldPackagePolicy, packagePolicyUpdate } = opts;
+
+  if (pkgInfo.type !== 'input') return;
+
+  const { namespace, inputs } = packagePolicyUpdate;
+  if (namespace && namespace !== oldPackagePolicy.namespace) {
+    throw new PackagePolicyValidationError(
+      i18n.translate('xpack.fleet.updatePackagePolicy.namespaceCannotBeModified', {
+        defaultMessage:
+          'Package policy namespace cannot be modified for input only packages, please create a new package policy.',
+      })
+    );
+  }
+
+  if (inputs) {
+    for (const input of inputs) {
+      const oldInput = oldPackagePolicy.inputs.find((i) => i.id === input.id);
+      if (oldInput) {
+        for (const stream of input.streams || []) {
+          const oldStream = oldInput.streams.find(
+            (s) => s.data_stream.dataset === stream.data_stream.dataset
+          );
+          if (
+            oldStream &&
+            oldStream?.vars?.['data_stream.dataset'] &&
+            oldStream?.vars['data_stream.dataset'] !== stream?.vars?.['data_stream.dataset']
+          ) {
+            throw new PackagePolicyValidationError(
+              i18n.translate('xpack.fleet.updatePackagePolicy.datasetCannotBeModified', {
+                defaultMessage:
+                  'Package policy dataset cannot be modified for input only packages, please create a new package policy.',
+              })
+            );
+          }
+        }
+      }
+    }
+  }
 }
 
 async function validateIsNotHostedPolicy(

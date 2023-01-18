@@ -17,7 +17,6 @@ steps:
       LIMIT_CONFIG_TYPE: 'unit,integration'
       JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/code_coverage/jest.sh'
       JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/code_coverage/jest_integration.sh'
-      FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/code_coverage/ftr_configs.sh'
 
   - command: .buildkite/scripts/steps/code_coverage/ingest.sh
     label: 'Merge and Ingest'

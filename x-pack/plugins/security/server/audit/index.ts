@@ -11,7 +11,9 @@ export type { AuditEvent, AuditHttp, AuditKibana, AuditRequest } from './audit_e
 export {
   userLoginEvent,
   userLogoutEvent,
+  userSessionConcurrentLimitLogoutEvent,
   sessionCleanupEvent,
+  sessionCleanupConcurrentLimitEvent,
   accessAgreementAcknowledgedEvent,
   httpRequestEvent,
   savedObjectEvent,
