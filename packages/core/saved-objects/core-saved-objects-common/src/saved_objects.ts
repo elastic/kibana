@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import * as serverTypes from './will_move_to_server';
+import * as serverTypes from './server_types';
 
 /**
  * Information about the migrations that have been applied to this SavedObject.

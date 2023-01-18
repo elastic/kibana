@@ -6,6 +6,14 @@
  * Side Public License, v 1.
  */
 
+/**
+ * Note: this file contains types that are intended for use by server-side code
+ * only. Once the Saved Objects client is removed from browser code we will
+ * remove these types as well.
+ *
+ * See https://github.com/elastic/kibana/issues/149098.
+ */
+
 import type { SavedObjectsMigrationVersion, SavedObjectError } from './saved_objects';
 
 /**

@@ -95,4 +95,4 @@ export type {
   SavedObjectAttribute,
   SavedObjectAttributeSingle,
   SavedObjectReference,
-} from '@kbn/core-saved-objects-common/src/will_move_to_server';
+} from '@kbn/core-saved-objects-common/src/server_types';
