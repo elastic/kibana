@@ -16,6 +16,7 @@ import {
   EuiPanel,
   EuiIcon,
   EuiToolTip,
+  EuiLoadingContent
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
@@ -78,7 +79,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
               description: agentPolicy ? (
                 <AgentPolicySummaryLine policy={agentPolicy} agent={agent} />
               ) : (
-                <I>Loading...</i>
+                <EuiLoadingContent lines={1} />
               ),
             },
             {
@@ -163,7 +164,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                   />
                 )
               ) : (
-                <I>Loading...</i>
+                <EuiLoadingContent lines={1} />
               ),
             },
             {
@@ -183,7 +184,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                   />
                 )
               ) : (
-                <I>Loading...</i>
+                <EuiLoadingContent lines={1} />
               ),
             },
             {
