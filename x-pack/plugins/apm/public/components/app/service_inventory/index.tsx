@@ -311,8 +311,7 @@ export function ServiceInventory() {
         title={i18n.translate(
           'xpack.apm.serviceList.ui.limit.warning.calloutTitle',
           {
-            defaultMessage:
-              'The performance limit to the number of services reached',
+            defaultMessage: 'Too many unique service names',
           }
         )}
         color="danger"
@@ -320,7 +319,7 @@ export function ServiceInventory() {
       >
         <EuiText size="s">
           <FormattedMessage
-            defaultMessage="The number of unique service names limit was exceeded. Try narrowing down your results using the search bar"
+            defaultMessage="Service name limit exceeded. Try narrowing down your results using the query bar"
             id="xpack.apm.serviceList.ui.limit.warning.calloutDescription"
           />
         </EuiText>

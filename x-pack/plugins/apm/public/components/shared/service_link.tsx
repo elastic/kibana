@@ -66,7 +66,7 @@ export function ServiceLink({
         <EuiFlexItem>
           <PopoverTooltip
             ariaLabel={i18n.translate('xpack.apm.serviceLink.tooltip', {
-              defaultMessage: 'Max service groups reached tooltip',
+              defaultMessage: 'Max service groups reached',
             })}
             iconType="alert"
           >
