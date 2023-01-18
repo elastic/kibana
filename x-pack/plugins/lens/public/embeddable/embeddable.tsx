@@ -1059,13 +1059,10 @@ export class Embeddable
       !this.savedVis ||
       !this.activeData ||
       !this.activeDatasource ||
+      !this.activeDatasourceState ||
       !this.activeVisualization ||
       !this.activeVisualizationState
     ) {
-      return false;
-    }
-
-    if (!this.activeDatasourceState) {
       return false;
     }
 
