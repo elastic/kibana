@@ -15,6 +15,7 @@ import {
   SERVICE_NAME,
   TRANSACTION_NAME,
   SERVICE_TARGET_TYPE,
+  METRICSET_NAME,
 } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
@@ -69,6 +70,7 @@ async function getHttpRequestsTimeseries({
         bool: {
           filter: [
             { exists: { field: SERVICE_TARGET_TYPE } },
+            ...termQuery(METRICSET_NAME, 'service_destination'),
             ...termQuery(SERVICE_NAME, serviceName),
             ...termQuery(TRANSACTION_NAME, transactionName),
             ...rangeQuery(startWithOffset, endWithOffset),
