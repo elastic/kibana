@@ -18,7 +18,7 @@ import { WithoutReservedActionGroups } from '@kbn/alerting-plugin/common';
 import { IRuleDataClient } from '../rule_data_client';
 import { BulkResponseErrorAggregation } from './utils';
 import { AlertWithCommonFieldsLatest } from '../../common/schemas';
-import { SuppressionFields } from '../../common/schemas/8.7.0';
+import { SuppressionFieldsLatest } from '../../common/schemas';
 
 export type PersistenceAlertService = <T>(
   alerts: Array<{
@@ -41,7 +41,7 @@ export type PersistenceAlertService = <T>(
   >
 ) => Promise<PersistenceAlertServiceResult<T>>;
 
-export type SuppressedAlertService = <T extends SuppressionFields>(
+export type SuppressedAlertService = <T extends SuppressionFieldsLatest>(
   alerts: Array<{
     _id: string;
     _source: T;

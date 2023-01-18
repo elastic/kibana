@@ -21,7 +21,7 @@ import { getCommonAlertFields } from './get_common_alert_fields';
 import { CreatePersistenceRuleTypeWrapper } from './persistence_types';
 import { errorAggregator } from './utils';
 import { createGetSummarizedAlertsFn } from './create_get_summarized_alerts_fn';
-import { SuppressionFields } from '../../common/schemas/8.7.0';
+import { AlertWithSuppressionFields870 } from '../../common/schemas/8.7.0';
 
 export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper =
   ({ logger, ruleDataClient }) =>
@@ -221,14 +221,17 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   },
                 };
 
+                // We use AlertWithSuppressionFields870 explicitly here as the type instead of
+                // AlertWithSuppressionFieldsLatest since we're reading alerts rather than writing,
+                // so future versions of Kibana may read 8.7.0 version alerts and need to update them
                 const response = await ruleDataClient
                   .getReader({ namespace: options.spaceId })
-                  .search<typeof suppressionAlertSearchRequest, SuppressionFields>(
+                  .search<typeof suppressionAlertSearchRequest, AlertWithSuppressionFields870<{}>>(
                     suppressionAlertSearchRequest
                   );
 
                 const existingAlertsByInstanceId = response.hits.hits.reduce<
-                  Record<string, estypes.SearchHit<SuppressionFields>>
+                  Record<string, estypes.SearchHit<AlertWithSuppressionFields870<{}>>>
                 >((acc, hit) => {
                   acc[hit._source['kibana.alert.instance.id']] = hit;
                   return acc;

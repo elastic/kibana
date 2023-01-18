@@ -9,12 +9,14 @@ import { performance } from 'perf_hooks';
 import { isEmpty } from 'lodash';
 
 import type { SuppressedAlertService } from '@kbn/rule-registry-plugin/server';
-import type { AlertWithCommonFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
+import type {
+  AlertWithCommonFieldsLatest,
+  SuppressionFieldsLatest,
+} from '@kbn/rule-registry-plugin/common/schemas';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { makeFloatString } from '../../signals/utils';
 import type {
   BaseFieldsLatest,
-  SuppressionFieldsLatest,
   WrappedFieldsLatest,
 } from '../../../../../common/detection_engine/schemas/alerts';
 import type { RuleServices } from '../../signals/types';
@@ -29,7 +31,9 @@ export interface GenericBulkCreateResponse<T extends BaseFieldsLatest> {
   errors: string[];
 }
 
-export const bulkCreateWithSuppression = async <T extends SuppressionFieldsLatest>({
+export const bulkCreateWithSuppression = async <
+  T extends SuppressionFieldsLatest & BaseFieldsLatest
+>({
   alertWithSuppression,
   ruleExecutionLogger,
   wrappedDocs,

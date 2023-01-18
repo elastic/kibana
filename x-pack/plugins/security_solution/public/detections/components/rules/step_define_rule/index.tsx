@@ -149,7 +149,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
   const { form } = useForm<DefineStepRule>({
     defaultValue: initialState,
-    options: { stripEmptyFields: true },
+    options: { stripEmptyFields: false },
     schema,
   });
 

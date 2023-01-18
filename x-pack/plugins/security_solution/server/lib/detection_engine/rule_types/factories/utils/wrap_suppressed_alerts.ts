@@ -15,9 +15,9 @@ import {
   ALERT_SUPPRESSION_START,
   ALERT_INSTANCE_ID,
 } from '@kbn/rule-data-utils';
+import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import type {
   BaseFieldsLatest,
-  SuppressionFieldsLatest,
   WrappedFieldsLatest,
 } from '../../../../../../common/detection_engine/schemas/alerts';
 import type { ConfigType } from '../../../../../config';
@@ -65,7 +65,7 @@ export const wrapSuppressedAlerts = ({
   buildReasonMessage: BuildReasonMessage;
   alertTimestampOverride: Date | undefined;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
-}): Array<WrappedFieldsLatest<SuppressionFieldsLatest>> => {
+}): Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>> => {
   return suppressionBuckets.map((bucket) => {
     const id = objectHash([
       bucket.event._index,
