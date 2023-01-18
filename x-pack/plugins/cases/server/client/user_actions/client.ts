@@ -20,15 +20,15 @@ import { find } from './find';
  * API for interacting the actions performed by a user when interacting with the cases entities.
  */
 export interface UserActionsSubClient {
-  find(clientArgs: UserActionFind): Promise<UserActionFindResponse>;
+  find(params: UserActionFind): Promise<UserActionFindResponse>;
   /**
    * Retrieves all user actions for a particular case.
    */
-  getAll(clientArgs: UserActionGet): Promise<CaseUserActionsResponse>;
+  getAll(params: UserActionGet): Promise<CaseUserActionsResponse>;
   /**
    * Retrieves all the connectors used within a given case
    */
-  getConnectors(clientArgs: GetConnectorsRequest): Promise<GetCaseConnectorsResponse>;
+  getConnectors(params: GetConnectorsRequest): Promise<GetCaseConnectorsResponse>;
 }
 
 /**
@@ -37,8 +37,8 @@ export interface UserActionsSubClient {
 export const createUserActionsSubClient = (clientArgs: CasesClientArgs): UserActionsSubClient => {
   const attachmentSubClient: UserActionsSubClient = {
     find: (params) => find(params, clientArgs),
-    getAll: (params: UserActionGet) => get(params, clientArgs),
-    getConnectors: (params: GetConnectorsRequest) => getConnectors(params, clientArgs),
+    getAll: (params) => get(params, clientArgs),
+    getConnectors: (params) => getConnectors(params, clientArgs),
   };
 
   return Object.freeze(attachmentSubClient);

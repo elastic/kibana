@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { transformFindResponseToExternalModel } from './transform';
+import {
+  legacyTransformFindResponseToExternalModel,
+  transformFindResponseToExternalModel,
+} from './transform';
 import { createSOFindResponse } from '../test_utils';
 import {
   createUserActionFindSO,
@@ -24,17 +27,50 @@ import type { ConnectorUserAction } from '../../../common/api';
 import { Actions } from '../../../common/api';
 
 describe('transform', () => {
-  describe('transformFindResponseToExternalModel', () => {
+  describe('action_id', () => {
+    it('legacyTransformFindResponseToExternalModel sets action_id correctly to the saved object id', () => {
+      const persistableStateAttachmentTypeRegistry =
+        createPersistableStateAttachmentTypeRegistryMock();
+
+      const userAction = {
+        ...createUserActionSO({ action: Actions.create, commentId: '5' }),
+      };
+
+      const transformed = legacyTransformFindResponseToExternalModel(
+        createSOFindResponse([createUserActionFindSO(userAction)]),
+        persistableStateAttachmentTypeRegistry
+      );
+
+      expect(transformed.saved_objects[0].attributes.action_id).toEqual('100');
+    });
+
+    it('transformFindResponseToExternalModel does not set action_id', () => {
+      const persistableStateAttachmentTypeRegistry =
+        createPersistableStateAttachmentTypeRegistryMock();
+
+      const userAction = {
+        ...createUserActionSO({ action: Actions.create, commentId: '5' }),
+      };
+
+      const transformed = transformFindResponseToExternalModel(
+        createSOFindResponse([createUserActionFindSO(userAction)]),
+        persistableStateAttachmentTypeRegistry
+      );
+
+      expect(transformed.saved_objects[0].attributes).not.toHaveProperty('action_id');
+    });
+  });
+
+  describe.each([
+    [transformFindResponseToExternalModel.name, transformFindResponseToExternalModel],
+    [legacyTransformFindResponseToExternalModel.name, legacyTransformFindResponseToExternalModel],
+  ])('%s', (functionName, transformer) => {
     const persistableStateAttachmentTypeRegistry =
       createPersistableStateAttachmentTypeRegistryMock();
 
     it('does not populate the ids when the response is an empty array', () => {
-      expect(
-        transformFindResponseToExternalModel(
-          createSOFindResponse([]),
-          persistableStateAttachmentTypeRegistry
-        )
-      ).toMatchInlineSnapshot(`
+      expect(transformer(createSOFindResponse([]), persistableStateAttachmentTypeRegistry))
+        .toMatchInlineSnapshot(`
         Object {
           "page": 1,
           "per_page": 0,
@@ -45,67 +81,16 @@ describe('transform', () => {
     });
 
     it('preserves the saved object fields and attributes when inject the ids', () => {
-      const transformed = transformFindResponseToExternalModel(
+      const transformed = transformer(
         createSOFindResponse([createUserActionFindSO(createConnectorUserAction())]),
         persistableStateAttachmentTypeRegistry
       );
 
-      expect(transformed).toMatchInlineSnapshot(`
-        Object {
-          "page": 1,
-          "per_page": 1,
-          "saved_objects": Array [
-            Object {
-              "attributes": Object {
-                "action": "create",
-                "action_id": "100",
-                "case_id": "1",
-                "comment_id": null,
-                "created_at": "abc",
-                "created_by": Object {
-                  "email": "a",
-                  "full_name": "abc",
-                  "username": "b",
-                },
-                "owner": "securitySolution",
-                "payload": Object {
-                  "connector": Object {
-                    "fields": Object {
-                      "issueType": "bug",
-                      "parent": "2",
-                      "priority": "high",
-                    },
-                    "id": "1",
-                    "name": ".jira",
-                    "type": ".jira",
-                  },
-                },
-                "type": "connector",
-              },
-              "id": "100",
-              "references": Array [
-                Object {
-                  "id": "1",
-                  "name": "associated-cases",
-                  "type": "cases",
-                },
-                Object {
-                  "id": "1",
-                  "name": "connectorId",
-                  "type": "action",
-                },
-              ],
-              "score": 0,
-              "type": "cases-user-actions",
-            },
-          ],
-          "total": 1,
-        }
-      `);
+      expect(transformed).toMatchSnapshot();
     });
 
     it('populates the payload.connector.id for multiple user actions', () => {
-      const transformed = transformFindResponseToExternalModel(
+      const transformed = transformer(
         createSOFindResponse([
           createUserActionFindSO(createConnectorUserAction()),
           createUserActionFindSO(createConnectorUserAction()),
@@ -123,7 +108,7 @@ describe('transform', () => {
           ...createConnectorUserAction(),
           references: [],
         };
-        const transformed = transformFindResponseToExternalModel(
+        const transformed = transformer(
           createSOFindResponse([createUserActionFindSO(userAction)]),
           persistableStateAttachmentTypeRegistry
         );
@@ -136,7 +121,7 @@ describe('transform', () => {
           ...createUserActionSO({ action: Actions.create, commentId: '5' }),
           references: [],
         };
-        const transformed = transformFindResponseToExternalModel(
+        const transformed = transformer(
           createSOFindResponse([createUserActionFindSO(userAction)]),
           persistableStateAttachmentTypeRegistry
         );
@@ -147,7 +132,7 @@ describe('transform', () => {
       it('sets case_id correctly when it finds the reference', () => {
         const userAction = createConnectorUserAction();
 
-        const transformed = transformFindResponseToExternalModel(
+        const transformed = transformer(
           createSOFindResponse([createUserActionFindSO(userAction)]),
           persistableStateAttachmentTypeRegistry
         );
@@ -161,25 +146,12 @@ describe('transform', () => {
           commentId: '5',
         });
 
-        const transformed = transformFindResponseToExternalModel(
+        const transformed = transformer(
           createSOFindResponse([createUserActionFindSO(userAction)]),
           persistableStateAttachmentTypeRegistry
         );
 
         expect(transformed.saved_objects[0].attributes.comment_id).toEqual('5');
-      });
-
-      it('sets action_id correctly to the saved object id', () => {
-        const userAction = {
-          ...createUserActionSO({ action: Actions.create, commentId: '5' }),
-        };
-
-        const transformed = transformFindResponseToExternalModel(
-          createSOFindResponse([createUserActionFindSO(userAction)]),
-          persistableStateAttachmentTypeRegistry
-        );
-
-        expect(transformed.saved_objects[0].attributes.action_id).toEqual('100');
       });
     });
 
@@ -210,135 +182,23 @@ describe('transform', () => {
 
     describe('persistable state attachments', () => {
       it('populates the persistable state', () => {
-        const transformed = transformFindResponseToExternalModel(
+        const transformed = transformer(
           createSOFindResponse([createUserActionFindSO(createPersistableStateUserAction())]),
           persistableStateAttachmentTypeRegistry
         ) as SavedObjectsFindResponse<ConnectorUserAction>;
 
-        expect(transformed).toMatchInlineSnapshot(`
-          Object {
-            "page": 1,
-            "per_page": 1,
-            "saved_objects": Array [
-              Object {
-                "attributes": Object {
-                  "action": "create",
-                  "action_id": "100",
-                  "case_id": "1",
-                  "comment_id": "persistable-state-test-id",
-                  "created_at": "abc",
-                  "created_by": Object {
-                    "email": "a",
-                    "full_name": "abc",
-                    "username": "b",
-                  },
-                  "owner": "securitySolution",
-                  "payload": Object {
-                    "comment": Object {
-                      "owner": "securitySolutionFixture",
-                      "persistableStateAttachmentState": Object {
-                        "foo": "foo",
-                        "injectedId": "testRef",
-                      },
-                      "persistableStateAttachmentTypeId": ".test",
-                      "type": "persistableState",
-                    },
-                  },
-                  "type": "comment",
-                },
-                "id": "100",
-                "references": Array [
-                  Object {
-                    "id": "testRef",
-                    "name": "myTestReference",
-                    "type": "test-so",
-                  },
-                  Object {
-                    "id": "1",
-                    "name": "associated-cases",
-                    "type": "cases",
-                  },
-                  Object {
-                    "id": "persistable-state-test-id",
-                    "name": "associated-cases-comments",
-                    "type": "cases-comments",
-                  },
-                ],
-                "score": 0,
-                "type": "cases-user-actions",
-              },
-            ],
-            "total": 1,
-          }
-        `);
+        expect(transformed).toMatchSnapshot();
       });
     });
 
     describe('external references', () => {
       it('populates the external references attributes', () => {
-        const transformed = transformFindResponseToExternalModel(
+        const transformed = transformer(
           createSOFindResponse([createUserActionFindSO(createExternalReferenceUserAction())]),
           persistableStateAttachmentTypeRegistry
         ) as SavedObjectsFindResponse<ConnectorUserAction>;
 
-        expect(transformed).toMatchInlineSnapshot(`
-          Object {
-            "page": 1,
-            "per_page": 1,
-            "saved_objects": Array [
-              Object {
-                "attributes": Object {
-                  "action": "create",
-                  "action_id": "100",
-                  "case_id": "1",
-                  "comment_id": "external-reference-test-id",
-                  "created_at": "abc",
-                  "created_by": Object {
-                    "email": "a",
-                    "full_name": "abc",
-                    "username": "b",
-                  },
-                  "owner": "securitySolution",
-                  "payload": Object {
-                    "comment": Object {
-                      "externalReferenceAttachmentTypeId": ".test",
-                      "externalReferenceId": "my-id",
-                      "externalReferenceMetadata": null,
-                      "externalReferenceStorage": Object {
-                        "soType": "test-so",
-                        "type": "savedObject",
-                      },
-                      "owner": "securitySolution",
-                      "type": "externalReference",
-                    },
-                  },
-                  "type": "comment",
-                },
-                "id": "100",
-                "references": Array [
-                  Object {
-                    "id": "my-id",
-                    "name": "externalReferenceId",
-                    "type": "test-so",
-                  },
-                  Object {
-                    "id": "1",
-                    "name": "associated-cases",
-                    "type": "cases",
-                  },
-                  Object {
-                    "id": "external-reference-test-id",
-                    "name": "associated-cases-comments",
-                    "type": "cases-comments",
-                  },
-                ],
-                "score": 0,
-                "type": "cases-user-actions",
-              },
-            ],
-            "total": 1,
-          }
-        `);
+        expect(transformed).toMatchSnapshot();
       });
     });
   });

@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { CaseUserActionsResponseRt } from '../response';
+import { CaseUserActionsResponseWithoutActionIdRt } from '../response';
 import { ActionTypes } from '../common';
 import { NumberFromString } from '../../../saved_object';
 
@@ -26,18 +26,17 @@ const FindTypeFieldRt = rt.keyof(FindTypes);
 
 export type FindTypeField = rt.TypeOf<typeof FindTypeFieldRt>;
 
-export const UserActionFindRequestRt = rt.intersection([
-  rt.type({
-    types: rt.array(FindTypeFieldRt),
-    sortOrder: rt.union([rt.literal('desc'), rt.literal('asc')]),
-  }),
-  rt.partial({ page: NumberFromString, perPage: NumberFromString }),
-]);
+export const UserActionFindRequestRt = rt.partial({
+  types: rt.array(FindTypeFieldRt),
+  sortOrder: rt.union([rt.literal('desc'), rt.literal('asc')]),
+  page: NumberFromString,
+  perPage: NumberFromString,
+});
 
 export type UserActionFindRequest = rt.TypeOf<typeof UserActionFindRequestRt>;
 
 export const UserActionFindResponseRt = rt.type({
-  userActions: CaseUserActionsResponseRt,
+  userActions: CaseUserActionsResponseWithoutActionIdRt,
   page: rt.number,
   perPage: rt.number,
   total: rt.number,

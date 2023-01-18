@@ -50,13 +50,13 @@ export const getCaseUserActions = async ({
 export const findCaseUserActions = async ({
   supertest,
   caseID,
-  options,
+  options = {},
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
   supertest: SuperTest.SuperTest<SuperTest.Test>;
   caseID: string;
-  options: UserActionFindRequest;
+  options?: UserActionFindRequest;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
 }): Promise<UserActionFindResponse> => {

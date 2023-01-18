@@ -20,12 +20,12 @@ import {
 import type { CasesClientArgs } from '../types';
 import type { UserActionFind } from './types';
 import { Operations } from '../../authorization';
-import { extractAttributes } from './utils';
+import { formatSavedObjects } from './utils';
 import { createCaseError } from '../../common/error';
 import { asArray } from '../../common/utils';
 
 export const find = async (
-  { caseId, queryOptions }: UserActionFind,
+  { caseId, params }: UserActionFind,
   clientArgs: CasesClientArgs
 ): Promise<UserActionFindResponse> => {
   const {
@@ -36,10 +36,10 @@ export const find = async (
 
   try {
     // supertest and query-string encode a single entry in an array as just a string so make sure we have an array
-    const types = asArray(queryOptions.types);
+    const types = asArray(params.types);
 
     const queryParams = pipe(
-      excess(UserActionFindRequestRt).decode({ ...queryOptions, types }),
+      excess(UserActionFindRequestRt).decode({ ...params, types }),
       fold(throwErrors(Boom.badRequest), identity)
     );
 
@@ -57,7 +57,7 @@ export const find = async (
     );
 
     return UserActionFindResponseRt.encode({
-      userActions: extractAttributes(userActions),
+      userActions: formatSavedObjects(userActions),
       page: userActions.page,
       perPage: userActions.per_page,
       total: userActions.total,

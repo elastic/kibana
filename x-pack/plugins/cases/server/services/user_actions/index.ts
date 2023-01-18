@@ -16,6 +16,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { KueryNode } from '@kbn/es-query';
 import type {
   CaseUserActionAttributesWithoutConnectorId,
+  CaseUserActionInjectedAttributesWithoutActionId,
   CaseUserActionResponse,
 } from '../../../common/api';
 import { ActionTypes } from '../../../common/api';
@@ -29,7 +30,7 @@ import type { CaseConnectorActivity, CaseConnectorFields, PushInfo, ServiceConte
 import { defaultSortField } from '../../common/utils';
 import { UserActionPersister } from './operations/create';
 import { UserActionFinder } from './operations/find';
-import { transformToExternalModel, transformFindResponseToExternalModel } from './transform';
+import { transformToExternalModel, legacyTransformFindResponseToExternalModel } from './transform';
 
 export interface UserActionItem {
   attributes: CaseUserActionAttributesWithoutConnectorId;
@@ -260,7 +261,7 @@ export class CaseUserActionService {
 
   public async getMostRecentUserAction(
     caseId: string
-  ): Promise<SavedObject<CaseUserActionResponse> | undefined> {
+  ): Promise<SavedObject<CaseUserActionInjectedAttributesWithoutActionId> | undefined> {
     try {
       this.context.log.debug(
         `Attempting to retrieve the most recent user action for case id: ${caseId}`
@@ -367,7 +368,7 @@ export class CaseUserActionService {
         rawFieldsDoc = createCase.mostRecent.hits.hits[0];
       }
 
-      let fieldsDoc: SavedObject<CaseUserActionResponse> | undefined;
+      let fieldsDoc: SavedObject<CaseUserActionInjectedAttributesWithoutActionId> | undefined;
       if (rawFieldsDoc != null) {
         const doc =
           this.context.savedObjectsSerializer.rawToSavedObject<CaseUserActionAttributesWithoutConnectorId>(
@@ -381,7 +382,7 @@ export class CaseUserActionService {
       }
 
       const pushInfo = connectorInfo.reverse.connectorActivity.buckets.pushInfo;
-      let pushDoc: SavedObject<CaseUserActionResponse> | undefined;
+      let pushDoc: SavedObject<CaseUserActionInjectedAttributesWithoutActionId> | undefined;
 
       if (pushInfo.mostRecent.hits.hits.length > 0) {
         const rawPushDoc = pushInfo.mostRecent.hits.hits[0];
@@ -509,7 +510,7 @@ export class CaseUserActionService {
           }
         );
 
-      return transformFindResponseToExternalModel(
+      return legacyTransformFindResponseToExternalModel(
         userActions,
         this.context.persistableStateAttachmentTypeRegistry
       );

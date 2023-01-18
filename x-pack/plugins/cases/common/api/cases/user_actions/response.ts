@@ -8,7 +8,11 @@
 import * as rt from 'io-ts';
 
 import type { ActionsRt, ActionTypeValues } from './common';
-import { UserActionCommonAttributesRt, CaseUserActionSavedObjectIdsRt } from './common';
+import {
+  CaseUserActionInjectedIdsRt,
+  CaseUserActionSavedObjectIdsRt,
+  UserActionCommonAttributesRt,
+} from './common';
 import { CreateCaseUserActionRt } from './create_case';
 import { DescriptionUserActionRt } from './description';
 import { CommentUserActionRt } from './comment';
@@ -60,8 +64,30 @@ const CaseUserActionResponseRt = rt.intersection([
   CaseUserActionSavedObjectIdsRt,
 ]);
 
+/**
+ * This includes the case_id and comment_id but not the action_id
+ */
+const CaseUserActionInjectedAttributesWithoutActionIdRt = rt.intersection([
+  CaseUserActionBasicRt,
+  CaseUserActionInjectedIdsRt,
+]);
+
+/**
+ * Rename to CaseUserActionResponseRt when the UI is switching to the new user action _find API
+ */
+const CaseUserActionResponseWithoutActionIdRt = rt.intersection([
+  CaseUserActionInjectedAttributesWithoutActionIdRt,
+  rt.type({
+    id: rt.string,
+    version: rt.string,
+  }),
+]);
+
 export const CaseUserActionAttributesRt = CaseUserActionBasicRt;
 export const CaseUserActionsResponseRt = rt.array(CaseUserActionResponseRt);
+export const CaseUserActionsResponseWithoutActionIdRt = rt.array(
+  CaseUserActionResponseWithoutActionIdRt
+);
 
 export type CaseUserActionAttributes = rt.TypeOf<typeof CaseUserActionAttributesRt>;
 export type CaseUserActionAttributesWithoutConnectorId = rt.TypeOf<
@@ -69,6 +95,12 @@ export type CaseUserActionAttributesWithoutConnectorId = rt.TypeOf<
 >;
 export type CaseUserActionsResponse = rt.TypeOf<typeof CaseUserActionsResponseRt>;
 export type CaseUserActionResponse = rt.TypeOf<typeof CaseUserActionResponseRt>;
+export type CaseUserActionInjectedAttributesWithoutActionId = rt.TypeOf<
+  typeof CaseUserActionInjectedAttributesWithoutActionIdRt
+>;
+export type CaseUserActionsResponseWithoutActionId = rt.TypeOf<
+  typeof CaseUserActionsResponseWithoutActionIdRt
+>;
 
 export type UserAction = rt.TypeOf<typeof ActionsRt>;
 export type UserActionTypes = ActionTypeValues;

@@ -9,14 +9,14 @@ import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression } from '@kbn/es-query';
 import type { SavedObjectsFindResponse } from '@kbn/core-saved-objects-api-server';
 import type { SavedObject } from '@kbn/core-saved-objects-common';
+import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../../routes/api';
 import { defaultSortField } from '../../../common/utils';
 import type {
   CaseUserActionAttributesWithoutConnectorId,
-  CaseUserActionResponse,
-  FindTypes,
   UserActionFindRequest,
   ActionTypeValues,
   FindTypeField,
+  CaseUserActionInjectedAttributesWithoutActionId,
 } from '../../../../common/api';
 import { Actions, ActionTypes, CommentType } from '../../../../common/api';
 import {
@@ -44,7 +44,9 @@ export class UserActionFinder {
     page,
     perPage,
     filter,
-  }: FindOptions): Promise<SavedObjectsFindResponse<CaseUserActionResponse>> {
+  }: FindOptions): Promise<
+    SavedObjectsFindResponse<CaseUserActionInjectedAttributesWithoutActionId>
+  > {
     try {
       this.context.log.debug(`Attempting to find user actions for case id: ${caseId}`);
 
@@ -55,10 +57,10 @@ export class UserActionFinder {
           {
             type: CASE_USER_ACTION_SAVED_OBJECT,
             hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
-            page,
-            perPage,
+            page: page ?? DEFAULT_PAGE,
+            perPage: perPage ?? DEFAULT_PER_PAGE,
             sortField: 'created_at',
-            sortOrder,
+            sortOrder: sortOrder ?? 'asc',
             filter: finalFilter,
           }
         );
@@ -73,17 +75,9 @@ export class UserActionFinder {
     }
   }
 
-  private static buildFilter(types: FindOptions['types']) {
-    let typeFilter: KueryNode | undefined;
-
-    for (const type of types) {
-      typeFilter = combineFilters(
-        [typeFilter, UserActionFinder.buildFilterType(type)],
-        NodeBuilderOperators.or
-      );
-    }
-
-    return typeFilter;
+  private static buildFilter(types: FindOptions['types'] = []) {
+    const filters = types.map((type) => UserActionFinder.buildFilterType(type));
+    return combineFilters(filters, NodeBuilderOperators.or);
   }
 
   private static buildFilterType(type: FindTypeField): KueryNode | undefined {
@@ -91,8 +85,9 @@ export class UserActionFinder {
       case 'action':
         return UserActionFinder.buildActionFilter();
       case 'user':
+        return UserActionFinder.buildCommentTypeFilter();
       case 'alert':
-        return UserActionFinder.buildUserAndAlertFilter(type);
+        return UserActionFinder.buildAlertCommentTypeFilter();
       case 'attachment':
         return UserActionFinder.buildAttachmentsFilter();
       default:
@@ -108,9 +103,7 @@ export class UserActionFinder {
     return filterForUserActionsExcludingComment;
   }
 
-  private static buildUserAndAlertFilter(
-    type: typeof FindTypes.alert | typeof FindTypes.user
-  ): KueryNode | undefined {
+  private static buildCommentTypeFilter(): KueryNode | undefined {
     return combineFilters(
       [
         buildFilter({
@@ -120,7 +113,27 @@ export class UserActionFinder {
           type: CASE_USER_ACTION_SAVED_OBJECT,
         }),
         buildFilter({
-          filters: [type],
+          filters: [CommentType.user, CommentType.actions],
+          field: 'payload.comment.type',
+          operator: 'or',
+          type: CASE_USER_ACTION_SAVED_OBJECT,
+        }),
+      ],
+      NodeBuilderOperators.and
+    );
+  }
+
+  private static buildAlertCommentTypeFilter(): KueryNode | undefined {
+    return combineFilters(
+      [
+        buildFilter({
+          filters: [ActionTypes.comment],
+          field: 'type',
+          operator: 'or',
+          type: CASE_USER_ACTION_SAVED_OBJECT,
+        }),
+        buildFilter({
+          filters: [CommentType.alert],
           field: 'payload.comment.type',
           operator: 'or',
           type: CASE_USER_ACTION_SAVED_OBJECT,
@@ -140,11 +153,7 @@ export class UserActionFinder {
           type: CASE_USER_ACTION_SAVED_OBJECT,
         }),
         buildFilter({
-          filters: [
-            CommentType.persistableState,
-            CommentType.externalReference,
-            CommentType.actions,
-          ],
+          filters: [CommentType.persistableState, CommentType.externalReference],
           field: 'payload.comment.type',
           operator: 'or',
           type: CASE_USER_ACTION_SAVED_OBJECT,
@@ -169,7 +178,7 @@ export class UserActionFinder {
   }: {
     caseId: string;
     filter?: KueryNode;
-  }): Promise<Array<SavedObject<CaseUserActionResponse>>> {
+  }): Promise<Array<SavedObject<CaseUserActionInjectedAttributesWithoutActionId>>> {
     try {
       this.context.log.debug('Attempting to find status changes');
 
@@ -201,7 +210,7 @@ export class UserActionFinder {
           }
         );
 
-      let userActions: Array<SavedObject<CaseUserActionResponse>> = [];
+      let userActions: Array<SavedObject<CaseUserActionInjectedAttributesWithoutActionId>> = [];
       for await (const findResults of finder.find()) {
         userActions = userActions.concat(
           findResults.saved_objects.map((so) =>

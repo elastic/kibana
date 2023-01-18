@@ -12,10 +12,12 @@ import {
   deleteAllCaseItems,
   createCase,
   updateCase,
-  createCaseWithConnector,
-  getServiceNowSimulationServer,
   pushCase,
 } from '../../../../../common/lib/utils';
+import {
+  createCaseWithConnector,
+  getServiceNowSimulationServer,
+} from '../../../../../common/lib/connectors';
 import { findCaseUserActions } from '../../../../../common/lib/user_actions';
 
 import { ObjectRemover as ActionsRemover } from '../../../../../../alerting_api_integration/common/lib';

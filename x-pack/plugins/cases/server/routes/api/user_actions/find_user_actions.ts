@@ -28,7 +28,7 @@ export const findUserActionsRoute = createCasesRoute({
       const options = request.query as UserActionFindRequest;
 
       return response.ok({
-        body: await casesClient.userActions.find({ caseId, queryOptions: options }),
+        body: await casesClient.userActions.find({ caseId, params: options }),
       });
     } catch (error) {
       throw createCaseError({

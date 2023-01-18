@@ -20,6 +20,6 @@ export interface UserActionGet {
 export type GetConnectorsRequest = UserActionGet;
 
 export interface UserActionFind {
-  queryOptions: UserActionFindRequest;
+  params: UserActionFindRequest;
   caseId: string;
 }

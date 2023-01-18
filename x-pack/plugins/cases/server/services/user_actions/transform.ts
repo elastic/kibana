@@ -17,6 +17,7 @@ import {
 import type {
   CaseUserActionAttributes,
   CaseUserActionAttributesWithoutConnectorId,
+  CaseUserActionInjectedAttributesWithoutActionId,
   CaseUserActionResponse,
 } from '../../../common/api';
 import { NONE_CONNECTOR_ID } from '../../../common/api';
@@ -36,7 +37,7 @@ import { injectPersistableReferencesToSO } from '../../attachment_framework/so_r
 export function transformFindResponseToExternalModel(
   userActions: SavedObjectsFindResponse<CaseUserActionAttributesWithoutConnectorId>,
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
-): SavedObjectsFindResponse<CaseUserActionResponse> {
+): SavedObjectsFindResponse<CaseUserActionInjectedAttributesWithoutActionId> {
   return {
     ...userActions,
     saved_objects: userActions.saved_objects.map((so) => ({
@@ -47,6 +48,50 @@ export function transformFindResponseToExternalModel(
 }
 
 export function transformToExternalModel(
+  userAction: SavedObject<CaseUserActionAttributesWithoutConnectorId>,
+  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
+): SavedObject<CaseUserActionInjectedAttributesWithoutActionId> {
+  const { references } = userAction;
+
+  const caseId = findReferenceId(CASE_REF_NAME, CASE_SAVED_OBJECT, references) ?? '';
+  const commentId =
+    findReferenceId(COMMENT_REF_NAME, CASE_COMMENT_SAVED_OBJECT, references) ?? null;
+  const payload = addReferenceIdToPayload(userAction, persistableStateAttachmentTypeRegistry);
+
+  return {
+    ...userAction,
+    attributes: {
+      ...userAction.attributes,
+      case_id: caseId,
+      comment_id: commentId,
+      payload,
+    } as CaseUserActionInjectedAttributesWithoutActionId,
+  };
+}
+
+/**
+ * This function should only be used in the getAll user actions and it is deprecated. It should be removed when the
+ * getAll route is removed.
+ *
+ * @deprecated remove when the getAllRoute is removed
+ */
+export function legacyTransformFindResponseToExternalModel(
+  userActions: SavedObjectsFindResponse<CaseUserActionAttributesWithoutConnectorId>,
+  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
+): SavedObjectsFindResponse<CaseUserActionResponse> {
+  return {
+    ...userActions,
+    saved_objects: userActions.saved_objects.map((so) => ({
+      ...so,
+      ...legacyTransformToExternalModel(so, persistableStateAttachmentTypeRegistry),
+    })),
+  };
+}
+
+/**
+ * @deprecated remove when the getAll route is removed
+ */
+function legacyTransformToExternalModel(
   userAction: SavedObject<CaseUserActionAttributesWithoutConnectorId>,
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
 ): SavedObject<CaseUserActionResponse> {
