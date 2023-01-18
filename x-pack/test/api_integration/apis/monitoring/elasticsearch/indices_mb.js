@@ -18,7 +18,8 @@ export default function ({ getService }) {
 
   // Failing: See https://github.com/elastic/kibana/issues/146068
   // Failing: See https://github.com/elastic/kibana/issues/146067
-  describe('indices - metricbeat and package', () => {
+  // eslint-disable-next-line mocha/no-exclusive-tests
+  describe.only('indices - metricbeat and package', () => {
     ['mb', 'package'].forEach((source) => {
       describe(`indices ${source}`, () => {
         describe('shard-relocation', () => {
