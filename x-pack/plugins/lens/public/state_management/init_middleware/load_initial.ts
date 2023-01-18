@@ -10,7 +10,7 @@ import { MiddlewareAPI } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
 import { setState, initEmpty, LensStoreDeps } from '..';
-import { disableAutoApply, getPreloadedState } from '../lens_slice';
+import { disableAutoApply, getPreloadedState, initialState } from '../lens_slice';
 import { SharingSavedObjectProps } from '../../types';
 import { LensEmbeddableInput, LensByReferenceInput } from '../../embeddable/embeddable';
 import { getInitialDatasourceId, getInitialDataViewsObject } from '../../utils';
@@ -126,15 +126,20 @@ export function loadInitial(
     const locatorReferences =
       'references' in initialStateFromLocator ? initialStateFromLocator.references : undefined;
 
-    const newFilters =
-      initialStateFromLocator &&
-      'filters' in initialStateFromLocator &&
-      initialStateFromLocator.filters
-        ? cloneDeep(initialStateFromLocator.filters)
-        : undefined;
+    const newFilters = initialStateFromLocator.filters
+      ? cloneDeep(initialStateFromLocator.filters)
+      : undefined;
 
     if (newFilters) {
       data.query.filterManager.setAppFilters(newFilters);
+    }
+
+    if (initialStateFromLocator.resolvedDateRange) {
+      const newTimeRange = {
+        from: initialStateFromLocator.resolvedDateRange.fromDate,
+        to: initialStateFromLocator.resolvedDateRange.toDate,
+      };
+      data.query.timefilter.timefilter.setTime(newTimeRange);
     }
 
     return initializeSources(
