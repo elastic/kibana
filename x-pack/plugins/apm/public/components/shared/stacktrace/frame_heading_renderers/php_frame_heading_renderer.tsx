@@ -15,13 +15,11 @@ export function PhpFrameHeadingRenderer({
 }: FrameHeadingRendererProps) {
   const { filename, function: fn } = stackframe;
   const lineNumber = stackframe.line?.number ?? 0;
-  const formattedIndex = idx.split('-')[0];
+  const formattedIndex = idx?.split('-')[0];
 
   return (
     <>
-      <FileDetail>
-        #{formattedIndex} {'  '}
-      </FileDetail>
+      <FileDetail>{formattedIndex && `#${formattedIndex}   `}</FileDetail>
       <FileDetail>{fn && `${fn}`}</FileDetail>
       {' called at '}
       <FileDetail>
