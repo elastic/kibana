@@ -804,7 +804,8 @@ export class ActionsClient {
             sort,
           }),
         },
-        namespaces
+        namespaces,
+        true
       );
 
       return formatExecutionLogResult(aggResult);
@@ -860,7 +861,8 @@ export class ActionsClient {
             filter ? `${filter} AND (${ACTION_FILTER})` : ACTION_FILTER
           ),
         },
-        namespaces
+        namespaces,
+        true
       );
 
       return formatExecutionKPIResult(aggResult);

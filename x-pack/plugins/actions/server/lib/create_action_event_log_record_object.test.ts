@@ -291,4 +291,60 @@ describe('createActionEventLogRecordObject', () => {
       message: 'action execution start',
     });
   });
+
+  test('created action event "execute" for preconfigured connector with space_agnostic true', async () => {
+    expect(
+      createActionEventLogRecordObject({
+        actionId: '1',
+        name: 'test name',
+        action: 'execute',
+        message: 'action execution start',
+        namespace: 'default',
+        executionId: '123abc',
+        consumer: 'test-consumer',
+        savedObjects: [
+          {
+            id: '2',
+            type: 'action',
+            typeId: '.email',
+            relation: 'primary',
+          },
+        ],
+        actionExecutionId: '123abc',
+        isPreconfigured: true,
+      })
+    ).toStrictEqual({
+      event: {
+        action: 'execute',
+        kind: 'action',
+      },
+      kibana: {
+        alert: {
+          rule: {
+            consumer: 'test-consumer',
+            execution: {
+              uuid: '123abc',
+            },
+          },
+        },
+        saved_objects: [
+          {
+            id: '2',
+            namespace: 'default',
+            rel: 'primary',
+            type: 'action',
+            type_id: '.email',
+            space_agnostic: true,
+          },
+        ],
+        action: {
+          name: 'test name',
+          execution: {
+            uuid: '123abc',
+          },
+        },
+      },
+      message: 'action execution start',
+    });
+  });
 });

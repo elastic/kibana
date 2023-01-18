@@ -178,6 +178,9 @@ exports.EcsCustomPropertyMappings = {
             type: 'keyword',
             ignore_above: 1024,
           },
+          space_agnostic: {
+            type: 'boolean',
+          },
         },
       },
       space_ids: {

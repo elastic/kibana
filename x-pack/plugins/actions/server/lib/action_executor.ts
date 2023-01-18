@@ -364,6 +364,7 @@ export class ActionExecutor {
       ],
       relatedSavedObjects,
       actionExecutionId,
+      isPreconfigured: this.actionInfo.isPreconfigured,
     });
 
     eventLogger.logEvent(event);
@@ -376,6 +377,7 @@ interface ActionInfo {
   config: unknown;
   secrets: unknown;
   actionId: string;
+  isPreconfigured?: boolean;
 }
 
 async function getActionInfoInternal<Source = unknown>(
@@ -402,6 +404,7 @@ async function getActionInfoInternal<Source = unknown>(
       config: pcAction.config,
       secrets: pcAction.secrets,
       actionId,
+      isPreconfigured: true,
     };
   }
 
