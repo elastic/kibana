@@ -6,14 +6,16 @@
  * Side Public License, v 1.
  */
 import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
-import { getFilterClickData, getFilterEventData } from './filter_helpers';
-import { createMockBucketColumns, createMockVisData } from '../mocks';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
+import { getFilterClickData, getFilterEventData, getFilterPopoverTitle } from './filter_helpers';
+import { createMockBucketColumns, createMockVisData, createMockPieParams } from '../mocks';
 import { consolidateMetricColumns } from '../../common/utils';
 import { LayerValue } from '@elastic/charts';
 import faker from 'faker';
 
 const bucketColumns = createMockBucketColumns();
 const visData = createMockVisData();
+const visParams = createMockPieParams();
 
 describe('getFilterClickData', () => {
   it('returns the correct filter data for the specific layer', () => {
@@ -262,5 +264,30 @@ describe('getFilterEventData', () => {
     expect(data[0].value).toEqual('JetBeats');
     expect(data[0].row).toEqual(2);
     expect(data[0].column).toEqual(0);
+  });
+});
+
+describe('getFilterPopoverTitle', () => {
+  it('returns the series key if no buckets', () => {
+    const series = {
+      key: 'Kibana Airlines',
+      specId: 'pie',
+    };
+    const newVisParams = {
+      ...visParams,
+      buckets: [],
+    };
+    const title = getFilterPopoverTitle(newVisParams, visData, 0, fieldFormatsMock, series.key);
+    expect(title).toBe('Kibana Airlines');
+  });
+
+  it('returns the corrent title if buckets given', () => {
+    const series = {
+      key: '0',
+      specId: 'pie',
+    };
+
+    const title = getFilterPopoverTitle(visParams, visData, 2, fieldFormatsMock, series.key);
+    expect(title).toBe('0');
   });
 });

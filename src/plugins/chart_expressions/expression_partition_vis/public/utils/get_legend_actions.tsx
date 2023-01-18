@@ -13,11 +13,10 @@ import { EuiContextMenuPanelDescriptor, EuiIcon, EuiPopover, EuiContextMenu } fr
 import { LegendAction, SeriesIdentifier, useLegendAction } from '@elastic/charts';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { Datatable } from '@kbn/expressions-plugin/public';
-import { getFormatByAccessor, getAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { PartitionVisParams } from '../../common/types';
 import { ColumnCellValueActions, FilterEvent } from '../types';
-import { getSeriesValueColumnIndex } from './filter_helpers';
+import { getSeriesValueColumnIndex, getFilterPopoverTitle } from './filter_helpers';
 
 export const getLegendActions = (
   canFilter: (
@@ -50,17 +49,7 @@ export const getLegendActions = (
       return null;
     }
 
-    let formattedTitle = '';
-    if (visParams.dimensions.buckets) {
-      const accessor = visParams.dimensions.buckets.find(
-        (bucket) => getAccessor(bucket) === columnIndex
-      );
-      formattedTitle =
-        formatter
-          .deserialize(accessor ? getFormatByAccessor(accessor, visData.columns) : undefined)
-          .convert(pieSeries.key) ?? '';
-    }
-    const title = formattedTitle || pieSeries.key;
+    const title = getFilterPopoverTitle(visParams, visData, columnIndex, formatter, pieSeries.key);
 
     const panelItems: EuiContextMenuPanelDescriptor['items'] = [];
 
