@@ -162,11 +162,10 @@ export function LatencyAlertsHistoryChart({
             <EuiText>
               <EuiTitle size="s">
                 <h3>
-                  {triggeredAlertsData?.avgTimeToRecoverMS
+                  {triggeredAlertsData?.avgTimeToRecoverUS
                     ? convertTo({
                         unit: 'minutes',
-                        microseconds:
-                          triggeredAlertsData?.avgTimeToRecoverMS * 1000,
+                        microseconds: triggeredAlertsData?.avgTimeToRecoverUS,
                         extended: true,
                       }).formatted
                     : '-'}

@@ -8,8 +8,10 @@
 import { AsApiContract } from '@kbn/actions-plugin/common';
 import { HttpSetup } from '@kbn/core/public';
 import {
+  ALERT_DURATION,
   ALERT_RULE_UUID,
   ALERT_START,
+  ALERT_STATUS,
   ALERT_TIME_RANGE,
 } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
@@ -28,7 +30,7 @@ interface FetchTriggeredAlertsHistory {
     doc_count: number;
   }>;
   error?: string;
-  avgTimeToRecoverMS: number;
+  avgTimeToRecoverUS: number;
 }
 
 interface TriggeredAlertsHistory {
@@ -64,7 +66,7 @@ export function useFetchTriggeredAlertsHistory({
         totalTriggeredAlerts,
         histogramTriggeredAlerts,
         error,
-        avgTimeToRecoverMS,
+        avgTimeToRecoverUS,
       } = await fetchTriggeredAlertsHistory({
         http,
         index,
@@ -79,7 +81,7 @@ export function useFetchTriggeredAlertsHistory({
           triggeredAlertsData: {
             totalTriggeredAlerts,
             histogramTriggeredAlerts,
-            avgTimeToRecoverMS,
+            avgTimeToRecoverUS,
           },
           isLoadingRuleAlertsAggs: false,
         }));
@@ -175,11 +177,17 @@ export async function fetchTriggeredAlertsHistory({
                 },
               },
             },
-            avgTimeToRecoverMS: {
-              avg: {
-                script: {
-                  source:
-                    "if (!doc['kibana.alert.end'].empty){return(doc['kibana.alert.end'].value.millis) - (doc['kibana.alert.start'].value.millis)}",
+            avgTimeToRecoverUS: {
+              filter: {
+                term: {
+                  [ALERT_STATUS]: 'recovered',
+                },
+              },
+              aggs: {
+                recoveryTime: {
+                  avg: {
+                    field: ALERT_DURATION,
+                  },
                 },
               },
             },
@@ -190,11 +198,12 @@ export async function fetchTriggeredAlertsHistory({
     const totalTriggeredAlerts = res?.hits.total.value;
     const histogramTriggeredAlerts =
       res?.aggregations?.histogramTriggeredAlerts.buckets;
-    const avgTimeToRecoverMS = res?.aggregations?.avgTimeToRecoverMS.value;
+    const avgTimeToRecoverUS =
+      res?.aggregations?.avgTimeToRecoverUS.recoveryTime.value;
     return {
       totalTriggeredAlerts,
       histogramTriggeredAlerts,
-      avgTimeToRecoverMS,
+      avgTimeToRecoverUS,
     };
   } catch (error) {
     console.error(error);
@@ -202,7 +211,7 @@ export async function fetchTriggeredAlertsHistory({
       error,
       totalTriggeredAlerts: 0,
       histogramTriggeredAlerts: [],
-      avgTimeToRecoverMS: 0,
+      avgTimeToRecoverUS: 0,
     };
   }
 }

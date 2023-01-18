@@ -184,6 +184,36 @@ const bucketAggsTempsSchemas: t.Type<BucketAggsSchemas> = t.exact(
     ),
   })
 );
+
+/**
+ * Schemas for the metrics Aggregations
+ *
+ * Currently supported:
+ * - avg
+ * - cardinality
+ * - min
+ * - max
+ * - sum
+ * - top_hits
+ * - weighted_avg
+ *
+ * Not implemented:
+ * - boxplot
+ * - extended_stats
+ * - geo_bounds
+ * - geo_centroid
+ * - geo_line
+ * - matrix_stats
+ * - median_absolute_deviation
+ * - percentile_ranks
+ * - percentiles
+ * - rate
+ * - scripted_metric
+ * - stats
+ * - string_stats
+ * - t_test
+ * - value_count
+ */
 export const metricsAggsSchemas = t.exact(
   t.partial({
     avg: t.exact(
@@ -256,49 +286,16 @@ export const metricsAggsSchemas = t.exact(
 
 export const bucketAggsSchemas = t.intersection([
   bucketAggsTempsSchemas,
-  t.partial({
-    aggs: t.union([
-      t.record(t.string, bucketAggsTempsSchemas),
-      t.record(t.string, metricsAggsSchemas),
-      t.undefined,
-    ]),
-    aggregations: t.union([
-      t.record(t.string, bucketAggsTempsSchemas),
-      t.record(t.string, metricsAggsSchemas),
-      t.undefined,
-    ]),
-  }),
+  t.exact(
+    t.partial({
+      aggs: t.record(t.string, t.intersection([metricsAggsSchemas, bucketAggsTempsSchemas])),
+      aggregations: t.record(
+        t.string,
+        t.intersection([metricsAggsSchemas, bucketAggsTempsSchemas])
+      ),
+    })
+  ),
 ]);
-
-/**
- * Schemas for the metrics Aggregations
- *
- * Currently supported:
- * - avg
- * - cardinality
- * - min
- * - max
- * - sum
- * - top_hits
- * - weighted_avg
- *
- * Not implemented:
- * - boxplot
- * - extended_stats
- * - geo_bounds
- * - geo_centroid
- * - geo_line
- * - matrix_stats
- * - median_absolute_deviation
- * - percentile_ranks
- * - percentiles
- * - rate
- * - scripted_metric
- * - stats
- * - string_stats
- * - t_test
- * - value_count
- */
 
 export type PutIndexTemplateRequest = estypes.IndicesPutIndexTemplateRequest & {
   body?: { composed_of?: string[] };
