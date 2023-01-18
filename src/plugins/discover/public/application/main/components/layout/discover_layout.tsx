@@ -87,7 +87,6 @@ export function DiscoverLayout({
   const [query, savedQuery, columns, sort] = useAppStateSelector((state) => [
     state.query,
     state.savedQuery,
-    state.filters,
     state.columns,
     state.sort,
   ]);
