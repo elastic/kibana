@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
+import { get, getOr } from 'lodash/fp';
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
@@ -23,9 +23,9 @@ import { IndicatorDetails } from './indicator_details';
 export interface ThreatMatchRowProps {
   contextId: string;
   eventId: string;
-  feedName: string | undefined;
-  indicatorReference: string | undefined;
-  indicatorType: string | undefined;
+  feedName?: string;
+  indicatorReference?: string;
+  indicatorType?: string;
   isDraggable?: boolean;
   sourceField: string;
   sourceValue: string;
@@ -42,21 +42,15 @@ export const ThreatMatchRow = ({
   eventId: string;
   isDraggable?: boolean;
 }) => {
-  const normalizeData = {
-    [REFERENCE]: [],
-    [FEED_NAME]: [],
-    [MATCHED_TYPE]: [],
-    ...data,
-  };
   const props = {
     contextId,
     eventId,
-    indicatorReference: get(normalizeData, REFERENCE)[0] as string | undefined,
-    feedName: get(normalizeData, FEED_NAME)[0] as string | undefined,
-    indicatorType: get(normalizeData, MATCHED_TYPE)[0] as string | undefined,
+    indicatorReference: getOr([], REFERENCE, data)[0] as string | undefined,
+    feedName: getOr([], FEED_NAME, data)[0] as string | undefined,
+    indicatorType: getOr([], MATCHED_TYPE, data)[0] as string | undefined,
     isDraggable,
-    sourceField: get(normalizeData, MATCHED_FIELD)[0] as string,
-    sourceValue: get(normalizeData, MATCHED_ATOMIC)[0] as string,
+    sourceField: get(MATCHED_FIELD, data)[0] as string,
+    sourceValue: get(MATCHED_ATOMIC, data)[0] as string,
   };
 
   return <ThreatMatchRowView {...props} />;
