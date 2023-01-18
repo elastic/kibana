@@ -43,7 +43,7 @@ const flappingDescription = i18n.translate(
   'xpack.triggersActionsUI.rulesSettings.modal.flappingDetectionDescription',
   {
     defaultMessage:
-      'Alerts that go quickly go between active and recovered are considered flapping. Detecting these changes and minimizing new alert generation can help reduce unwanted noise in your alerting system.',
+      'Detect alerts that switch quickly between active and recovered states and reduce unwanted noise for these flapping alerts.',
   }
 );
 
@@ -129,7 +129,7 @@ export const RulesSettingsModalFormRight = memo((props: RulesSettingsModalFormRi
           <EuiText size="s">
             <FormattedMessage
               id="xpack.triggersActionsUI.rulesSettings.flapping.flappingSettingsOffDescription"
-              defaultMessage="Alert flapping detection is off. Alerts will be generated based on the rule interval. This may result in higher alert volume."
+              defaultMessage="Alert flapping detection is off. Alerts will be generated based on the rule interval, which may result in higher alert volumes."
             />
           </EuiText>
         </EuiPanel>
@@ -258,7 +258,7 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
           <h3>
             <FormattedMessage
               id="xpack.triggersActionsUI.rulesSettings.modal.title"
-              defaultMessage="Rule Settings"
+              defaultMessage="Rule settings"
             />
           </h3>
         </EuiModalHeaderTitle>
@@ -267,7 +267,7 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
         <EuiCallOut
           size="s"
           title={i18n.translate('xpack.triggersActionsUI.rulesSettings.modal.calloutMessage', {
-            defaultMessage: 'Applies to all rules within the current space',
+            defaultMessage: 'Apply to all rules within the current space.',
           })}
         />
         <EuiHorizontalRule />
