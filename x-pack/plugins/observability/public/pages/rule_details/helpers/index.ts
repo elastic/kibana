@@ -5,4 +5,7 @@
  * 2.0.
  */
 
-export { getAlertSummaryWidgetTimeRange } from './get_alert_summary_time_range';
+export {
+  getDefaultAlertSummaryTimeRange,
+  getAlertSummaryTimeRange,
+} from './get_alert_summary_time_range';

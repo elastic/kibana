@@ -102,7 +102,7 @@ export function useDiscoverState({
   /**
    * Data fetching logic
    */
-  const { data$, refetch$, reset, inspectorAdapters, initialFetchStatus } =
+  const { data$, fetch$, refetch$, reset, inspectorAdapters, initialFetchStatus } =
     stateContainer.dataState;
   /**
    * State changes (data view, columns), when a text base query result is returned
@@ -312,6 +312,7 @@ export function useDiscoverState({
   return {
     data$,
     inspectorAdapters,
+    fetch$,
     refetch$,
     resetSavedSearch,
     onChangeDataView,

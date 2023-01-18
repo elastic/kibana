@@ -23,6 +23,7 @@ import {
   EncryptedSyntheticsMonitor,
   OverviewStatus,
   OverviewStatusMetaData,
+  SourceType,
 } from '../../../common/runtime_types';
 import { statusCheckTranslations } from '../../legacy_uptime/lib/alerts/translations';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
@@ -94,10 +95,13 @@ export class StatusRuleExecutor {
     const enabledIds: string[] = [];
     let listOfLocationsSet = new Set<string>();
     const missingLabelLocations = new Set<string>();
+    let projectMonitorsCount = 0;
 
     this.monitors.forEach((monitor) => {
       const attrs = monitor.attributes;
+      projectMonitorsCount += attrs?.[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT ? 1 : 0;
       allIds.push(attrs[ConfigKey.MONITOR_QUERY_ID]);
+
       if (attrs[ConfigKey.ENABLED] === true) {
         enabledIds.push(attrs[ConfigKey.MONITOR_QUERY_ID]);
       }
@@ -123,13 +127,13 @@ export class StatusRuleExecutor {
       missingLabelLocations
     );
 
-    return { enabledIds, listOfLocations, allIds };
+    return { enabledIds, listOfLocations, allIds, projectMonitorsCount };
   }
 
   async getDownChecks(
     prevDownConfigs: OverviewStatus['downConfigs'] = {}
   ): Promise<AlertOverviewStatus> {
-    const { listOfLocations, enabledIds } = await this.getMonitors();
+    const { listOfLocations, allIds, enabledIds, projectMonitorsCount } = await this.getMonitors();
 
     if (enabledIds.length > 0) {
       const currentStatus = await queryMonitorStatus(
@@ -153,7 +157,13 @@ export class StatusRuleExecutor {
 
       const staleDownConfigs = this.markDeletedConfigs(downConfigs);
 
-      return { ...currentStatus, staleDownConfigs };
+      return {
+        ...currentStatus,
+        staleDownConfigs,
+        allMonitorsCount: allIds.length,
+        disabledMonitorsCount: allIds.length - enabledIds.length,
+        projectMonitorsCount,
+      };
     }
     const staleDownConfigs = this.markDeletedConfigs(prevDownConfigs);
     return {
@@ -163,6 +173,9 @@ export class StatusRuleExecutor {
       down: 0,
       up: 0,
       enabledIds,
+      allMonitorsCount: allIds.length,
+      disabledMonitorsCount: allIds.length,
+      projectMonitorsCount,
     };
   }
 

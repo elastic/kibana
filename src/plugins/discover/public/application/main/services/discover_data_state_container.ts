@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, filter, map, Observable, share, Subject, tap } from 'rxjs';
 import { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
@@ -35,6 +35,10 @@ export type DataMain$ = BehaviorSubject<DataMainMsg>;
 export type DataDocuments$ = BehaviorSubject<DataDocumentsMsg>;
 export type DataTotalHits$ = BehaviorSubject<DataTotalHitsMsg>;
 export type AvailableFields$ = BehaviorSubject<DataAvailableFieldsMsg>;
+export type DataFetch$ = Observable<{
+  reset: boolean;
+  searchSessionId: string;
+}>;
 
 export type DataRefetch$ = Subject<DataRefetchMsg>;
 
@@ -83,6 +87,10 @@ export interface DataStateContainer {
    * Implicitly starting fetching data from ES
    */
   fetch: () => void;
+  /**
+   * Observable emitting when a next fetch is triggered
+   */
+  fetch$: DataFetch$;
   /**
    * Container of data observables (orchestration, data table, total hits, available fields)
    */
@@ -174,28 +182,31 @@ export function getDataStateContainer({
     refetch$,
     searchSource: getSavedSearch().searchSource,
     searchSessionManager,
-  });
+  }).pipe(
+    filter(() =>
+      validateTimeRange(data.query.timefilter.timefilter.getTime(), services.toastNotifications)
+    ),
+    tap(() => inspectorAdapters.requests.reset()),
+    map((val) => ({
+      reset: val === 'reset',
+      searchSessionId: searchSessionManager.getNextSearchSessionId(),
+    })),
+    share()
+  );
   let abortController: AbortController;
 
   function subscribe() {
-    const subscription = fetch$.subscribe(async (val) => {
-      if (
-        !validateTimeRange(data.query.timefilter.timefilter.getTime(), services.toastNotifications)
-      ) {
-        return;
-      }
-      inspectorAdapters.requests.reset();
-
+    const subscription = fetch$.subscribe(async ({ reset, searchSessionId }) => {
       abortController?.abort();
       abortController = new AbortController();
       const prevAutoRefreshDone = autoRefreshDone;
 
-      await fetchAll(dataSubjects, getSavedSearch().searchSource, val === 'reset', {
+      await fetchAll(dataSubjects, getSavedSearch().searchSource, reset, {
         abortController,
         data,
         initialFetchStatus,
         inspectorAdapters,
-        searchSessionId: searchSessionManager.getNextSearchSessionId(),
+        searchSessionId,
         services,
         appStateContainer,
         savedSearch: getSavedSearch(),
@@ -231,6 +242,7 @@ export function getDataStateContainer({
 
   return {
     fetch: fetchQuery,
+    fetch$,
     data$: dataSubjects,
     refetch$,
     subscribe,

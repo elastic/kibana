@@ -15,6 +15,7 @@ import type { DiscoverSearchSessionManager } from '../../services/discover_searc
 import type { InspectorAdapters } from '../../hooks/use_inspector';
 import { type DiscoverMainContentProps, DiscoverMainContent } from './discover_main_content';
 import { ResetSearchButton } from './reset_search_button';
+import { DataFetch$ } from '../../services/discover_data_state_container';
 
 export interface DiscoverHistogramLayoutProps extends DiscoverMainContentProps {
   resetSavedSearch: () => void;
@@ -22,6 +23,7 @@ export interface DiscoverHistogramLayoutProps extends DiscoverMainContentProps {
   resizeRef: RefObject<HTMLDivElement>;
   inspectorAdapters: InspectorAdapters;
   searchSessionManager: DiscoverSearchSessionManager;
+  savedSearchFetch$: DataFetch$;
 }
 
 export const DiscoverHistogramLayout = ({
@@ -30,6 +32,7 @@ export const DiscoverHistogramLayout = ({
   resetSavedSearch,
   savedSearch,
   savedSearchData$,
+  savedSearchFetch$,
   stateContainer,
   isTimeBased,
   resizeRef,
@@ -51,6 +54,7 @@ export const DiscoverHistogramLayout = ({
     isTimeBased,
     inspectorAdapters,
     searchSessionManager,
+    savedSearchFetch$,
     ...commonProps,
   });
 
