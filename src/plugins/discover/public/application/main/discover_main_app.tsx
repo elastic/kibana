@@ -55,6 +55,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     onUpdateQuery,
     persistDataView,
     updateAdHocDataViewId,
+    fetch$,
     refetch$,
     resetSavedSearch,
     searchSource,
@@ -118,6 +119,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
         navigateTo={navigateTo}
         savedSearch={savedSearch}
         savedSearchData$={data$}
+        savedSearchFetch$={fetch$}
         savedSearchRefetch$={refetch$}
         searchSource={searchSource}
         stateContainer={stateContainer}
