@@ -23,7 +23,7 @@ export const getSourcererDataView = async (
 
   return {
     id: dataViewData.id ?? '',
-    title: dataViewData.title,
+    title: dataViewData.getIndexPattern(),
     patternList,
   };
 };
