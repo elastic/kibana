@@ -9,7 +9,6 @@
 import Path from 'path';
 import Os from 'os';
 
-import { v4 as uuid } from 'uuid';
 import type { ProcRunner } from '@kbn/dev-proc-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
 

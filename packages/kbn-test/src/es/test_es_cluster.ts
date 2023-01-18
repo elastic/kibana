@@ -9,7 +9,6 @@
 import Path from 'path';
 import { format } from 'url';
 import del from 'del';
-import { v4 as uuid } from 'uuid';
 import globby from 'globby';
 import createArchiver from 'archiver';
 import Fs from 'fs';
