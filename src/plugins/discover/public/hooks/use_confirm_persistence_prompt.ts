@@ -25,7 +25,7 @@ export const useConfirmPersistencePrompt = (stateContainer: DiscoverStateContain
       try {
         const persistedDataView = await services.dataViews.createAndSave({
           ...adHocDataView.toSpec(),
-          id: uuid(),
+          id: uuidv4(),
         });
         services.dataViews.clearInstanceCache(adHocDataView.id);
 

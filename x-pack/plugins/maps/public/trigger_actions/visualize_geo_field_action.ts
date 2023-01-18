@@ -69,11 +69,11 @@ const getMapsLink = async (context: VisualizeFieldContext) => {
     context?.contextualFields?.length && context?.contextualFields[0] !== '_source';
   const initialLayers = [
     {
-      id: uuid(),
+      id: uuidv4(),
       visible: true,
       type: LAYER_TYPE.MVT_VECTOR,
       sourceDescriptor: {
-        id: uuid(),
+        id: uuidv4(),
         type: SOURCE_TYPES.ES_SEARCH,
         tooltipProperties: hasTooltips ? context.contextualFields : [],
         label: dataView.getIndexPattern(),

@@ -83,7 +83,7 @@ function useServicesMainStatisticsFetcher() {
           },
         }).then((mainStatisticsData) => {
           return {
-            requestId: uuid(),
+            requestId: uuidv4(),
             ...mainStatisticsData,
           };
         });

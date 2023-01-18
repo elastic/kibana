@@ -113,7 +113,7 @@ async function createEsDocument(
   };
 
   const response = await es.index({
-    id: uuid(),
+    id: uuidv4(),
     index: indexName,
     refresh: 'wait_for',
     op_type: 'create',

@@ -111,11 +111,11 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should return a 200 and create a CANCEL action if the action exists', async () => {
-        const actionId = uuid();
+        const actionId = uuidv4();
         await es.create({
           index: '.fleet-actions',
           refresh: 'wait_for',
-          id: uuid(),
+          id: uuidv4(),
           body: {
             '@timestamp': new Date().toISOString(),
             expiration: new Date().toISOString(),

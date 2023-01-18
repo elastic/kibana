@@ -50,7 +50,7 @@ export const convertToDateHistogramColumn = (
   const label = getLabel(aggParams, dateFieldName);
 
   return {
-    columnId: uuid(),
+    columnId: uuidv4(),
     label,
     operationType: 'date_histogram',
     dataType: dateField.type as DataType,

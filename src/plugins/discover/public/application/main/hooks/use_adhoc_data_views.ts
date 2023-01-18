@@ -57,7 +57,7 @@ export const useAdHocDataViews = ({
    */
   const updateAdHocDataViewId = useCallback(
     async (prevDataView: DataView) => {
-      const newDataView = await dataViews.create({ ...prevDataView.toSpec(), id: uuid() });
+      const newDataView = await dataViews.create({ ...prevDataView.toSpec(), id: uuidv4() });
       dataViews.clearInstanceCache(prevDataView.id);
 
       updateFiltersReferences(prevDataView, newDataView);

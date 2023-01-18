@@ -89,7 +89,7 @@ export const convertToLens: ConvertTableToLensVisualization = async (vis, timefi
     layerConfig.columnsWithoutReferenced.push(percentageColumn);
   }
 
-  const layerId = uuid();
+  const layerId = uuidv4();
   const indexPatternId = dataView.id!;
   return {
     type: 'lnsDatatable',

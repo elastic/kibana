@@ -25,7 +25,7 @@ export const ActionList: FC<{
 
   useEffect(() => {
     const actionListener = (newAction: RecordedPayload) => {
-      const id = uuid();
+      const id = uuidv4();
       setRecordedActions({ ...recordedActions, [id]: { ...newAction, id } });
     };
 

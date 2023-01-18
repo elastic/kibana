@@ -158,7 +158,7 @@ export function createLayerDescriptor({
   const metricsDescriptor = createAggDescriptor(metric);
 
   if (display === DISPLAY.CHOROPLETH) {
-    const joinId = uuid();
+    const joinId = uuidv4();
     const joinKey = getJoinAggKey({
       aggType: metricsDescriptor.type,
       aggFieldName: 'field' in metricsDescriptor ? metricsDescriptor.field : '',

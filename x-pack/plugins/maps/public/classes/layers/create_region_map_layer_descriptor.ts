@@ -72,7 +72,7 @@ export function createRegionMapLayerDescriptor({
   }
 
   const metricsDescriptor = createAggDescriptor(metricAgg, metricFieldName);
-  const joinId = uuid();
+  const joinId = uuidv4();
   const joinKey = getJoinAggKey({
     aggType: metricsDescriptor.type,
     aggFieldName: 'field' in metricsDescriptor ? metricsDescriptor.field : '',

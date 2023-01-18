@@ -59,7 +59,7 @@ export abstract class ActionRunner {
   ) {
     this.esClient = esClient;
     this.soClient = soClient;
-    this.actionParams = { ...actionParams, actionId: actionParams.actionId ?? uuid() };
+    this.actionParams = { ...actionParams, actionId: actionParams.actionId ?? uuidv4() };
     this.retryParams = retryParams;
   }
 

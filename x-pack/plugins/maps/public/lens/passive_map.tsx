@@ -60,7 +60,7 @@ export class PassiveMap extends Component<Props, State> {
     const basemapLayerDescriptor = createBasemapLayerDescriptor();
     const intialLayers = basemapLayerDescriptor ? [basemapLayerDescriptor] : [];
     const mapEmbeddable = await this.props.factory.create({
-      id: uuid(),
+      id: uuidv4(),
       attributes: {
         title: '',
         layerListJSON: JSON.stringify([...intialLayers, this.props.passiveLayer]),

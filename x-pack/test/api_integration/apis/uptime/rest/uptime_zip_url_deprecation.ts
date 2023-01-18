@@ -73,7 +73,7 @@ export default function (providerContext: FtrProviderContext) {
         .post(`/api/fleet/agent_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
-          name: `Test policy ${uuid()}`,
+          name: `Test policy ${uuidv4()}`,
           namespace: 'default',
         })
         .expect(200);
@@ -84,7 +84,7 @@ export default function (providerContext: FtrProviderContext) {
         .post(`/api/fleet/package_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
-          name: `synthetics-test ${uuid()}`,
+          name: `synthetics-test ${uuidv4()}`,
           description: '',
           namespace: 'default',
           policy_id: agentPolicyId,
@@ -121,7 +121,7 @@ export default function (providerContext: FtrProviderContext) {
         .post(`/api/fleet/package_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
-          name: `synthetics-test ${uuid()}`,
+          name: `synthetics-test ${uuidv4()}`,
           description: '',
           namespace: 'default',
           policy_id: agentPolicyId,

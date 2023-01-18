@@ -35,7 +35,7 @@ export const CheckBoxField = ({ field, euiFieldProps = {}, idAria, ...rest }: Pr
         label={field.label}
         checked={field.value as boolean}
         onChange={field.onChange}
-        id={euiFieldProps.id || uuid()}
+        id={euiFieldProps.id || uuidv4()}
         data-test-subj="input"
         {...euiFieldProps}
       />

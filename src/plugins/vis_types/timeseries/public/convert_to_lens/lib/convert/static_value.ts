@@ -47,7 +47,7 @@ export const convertToStaticValueColumn = (
 };
 
 export const createStaticValueColumn = (staticValue: number): BaseStaticValueColumn => ({
-  columnId: uuid(),
+  columnId: uuidv4(),
   operationType: 'static_value',
   references: [],
   dataType: 'number',

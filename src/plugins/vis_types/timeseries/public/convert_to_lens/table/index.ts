@@ -166,7 +166,7 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (
 
     const extendedLayer: ExtendedLayer = {
       indexPatternId: indexPatternId as string,
-      layerId: uuid(),
+      layerId: uuidv4(),
       columns: [...metrics, ...commonBucketsColumns, ...bucketsColumns],
       columnOrder: [],
     };

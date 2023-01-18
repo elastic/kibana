@@ -27,7 +27,7 @@ function createMockAnomalyTimeseries({
     anomalies: [],
     bounds: [],
     environment,
-    jobId: uuid(),
+    jobId: uuidv4(),
     type,
     serviceName: 'opbeans-java',
     transactionType: 'request',

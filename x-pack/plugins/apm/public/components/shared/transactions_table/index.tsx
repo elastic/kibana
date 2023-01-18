@@ -160,7 +160,7 @@ export function TransactionsTable({
 
         return {
           // Everytime the main statistics is refetched, updates the requestId making the detailed API to be refetched.
-          requestId: uuid(),
+          requestId: uuidv4(),
           mainStatisticsData: {
             ...response,
             transactionGroups: currentPageTransactionGroups,

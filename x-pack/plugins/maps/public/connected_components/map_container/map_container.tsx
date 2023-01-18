@@ -70,7 +70,7 @@ export class MapContainer extends Component<Props, State> {
 
   state: State = {
     isInitialLoadRenderTimeoutComplete: false,
-    domId: uuid(),
+    domId: uuidv4(),
     showFitToBoundsButton: false,
     showTimesliderButton: false,
   };

@@ -16,7 +16,7 @@ export const extract = (filters: Filter[]) => {
   const references: SavedObjectReference[] = [];
   const updatedFilters = filters.map((filter) => {
     if (filter.meta?.index) {
-      const id = uuid();
+      const id = uuidv4();
       references.push({
         type: DATA_VIEW_SAVED_OBJECT_TYPE,
         name: id,

@@ -49,7 +49,7 @@ export const convertToDateHistogramColumn = (
   const params = convertToDateHistogramParams(model, series, includeEmptyRows);
 
   return {
-    columnId: uuid(),
+    columnId: uuidv4(),
     operationType: 'date_histogram',
     dataType: dateField.type as DataType,
     isBucketed: true,

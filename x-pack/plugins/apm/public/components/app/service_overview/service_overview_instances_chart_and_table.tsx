@@ -124,7 +124,7 @@ export function ServiceOverviewInstancesChartAndTable({
       ).then((response) => {
         return {
           // Everytime the main statistics is refetched, updates the requestId making the detailed API to be refetched.
-          requestId: uuid(),
+          requestId: uuidv4(),
           currentPeriodItems: response.currentPeriod,
           currentPeriodItemsCount: response.currentPeriod.length,
           previousPeriodItems: response.previousPeriod,

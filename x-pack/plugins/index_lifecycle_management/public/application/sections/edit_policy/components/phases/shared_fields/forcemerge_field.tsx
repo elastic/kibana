@@ -80,7 +80,7 @@ export const ForcemergeField: React.FunctionComponent<Props> = ({ phase }) => {
                 checked={field.value as boolean}
                 onChange={field.onChange}
                 data-test-subj={`${phase}-bestCompression`}
-                id={uuid()}
+                id={uuidv4()}
               />
             </EuiFlexItem>
 

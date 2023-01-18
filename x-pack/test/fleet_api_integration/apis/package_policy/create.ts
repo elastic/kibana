@@ -44,7 +44,7 @@ export default function (providerContext: FtrProviderContext) {
         .post(`/api/fleet/agent_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
-          name: `Test policy ${uuid()}`,
+          name: `Test policy ${uuidv4()}`,
           namespace: 'default',
         })
         .expect(200);
@@ -287,7 +287,7 @@ export default function (providerContext: FtrProviderContext) {
         .post(`/api/fleet/agent_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
-          name: `Test policy ${uuid()}`,
+          name: `Test policy ${uuidv4()}`,
           namespace: 'default',
         });
       const otherAgentPolicyId = agentPolicyResponse.item.id;

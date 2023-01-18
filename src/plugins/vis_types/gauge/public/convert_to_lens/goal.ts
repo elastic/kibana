@@ -84,7 +84,7 @@ export const convertToLens: ConvertGoalVisToLensVisualization = async (vis, time
   const maxColumn = createStaticValueColumn(isPercentageMode ? 1 : max);
 
   const columns = [...layerConfig.columns, maxColumn];
-  const layerId = uuid();
+  const layerId = uuidv4();
   const indexPatternId = dataView.id!;
 
   return {

@@ -17,7 +17,7 @@ export const fibonacciStrategyProvider = (): ISearchStrategy<
   const responseMap = new Map<string, [number[], number, number]>();
   return {
     search: (request: FibonacciRequest) => {
-      const id = request.id ?? uuid();
+      const id = request.id ?? uuidv4();
       const [sequence, total, started] = responseMap.get(id) ?? [
         [],
         request.params?.n ?? 0,

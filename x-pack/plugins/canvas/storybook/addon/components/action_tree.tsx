@@ -20,17 +20,17 @@ const actionToTree = (recordedAction: RecordedAction) => {
   return [
     {
       label: 'Action',
-      id: uuid(),
+      id: uuidv4(),
       children: jsonToTree(action),
     },
     {
       label: 'Previous State',
-      id: uuid(),
+      id: uuidv4(),
       children: jsonToTree(previousState),
     },
     {
       label: 'Current State',
-      id: uuid(),
+      id: uuidv4(),
       children: jsonToTree(newState),
     },
   ];
@@ -46,7 +46,7 @@ const jsonToTree: (obj: Record<string, any>) => Node[] = (obj) => {
       return null;
     }
 
-    const id = uuid();
+    const id = uuidv4();
 
     if (isDate(value)) {
       return { label: `${label}: ${(value as Date).toDateString()}` };

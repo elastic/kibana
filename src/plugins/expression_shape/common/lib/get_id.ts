@@ -9,5 +9,5 @@
 import { v4 as uuidv4 } from 'uuid';
 
 export function getId(type: string): string {
-  return `${type}-${uuid()}`;
+  return `${type}-${uuidv4()}`;
 }

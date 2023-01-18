@@ -425,7 +425,7 @@ export function autoFitToBounds() {
   return async (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
     // Method can be triggered before async actions complete
     // Use localSetQueryCallId to only continue execution path if method has not been re-triggered.
-    const localSetQueryCallId = uuid();
+    const localSetQueryCallId = uuidv4();
     lastSetQueryCallId = localSetQueryCallId;
 
     // Joins are performed on the client.

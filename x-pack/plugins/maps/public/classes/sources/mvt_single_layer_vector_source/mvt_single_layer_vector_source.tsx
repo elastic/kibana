@@ -53,7 +53,7 @@ export class MVTSingleLayerVectorSource extends AbstractSource implements IMvtVe
   }: Partial<TiledSingleLayerVectorSourceDescriptor>) {
     return {
       type: SOURCE_TYPES.MVT_SINGLE_LAYER,
-      id: uuid(),
+      id: uuidv4(),
       urlTemplate: urlTemplate ? urlTemplate : '',
       layerName: layerName ? layerName : '',
       minSourceZoom:

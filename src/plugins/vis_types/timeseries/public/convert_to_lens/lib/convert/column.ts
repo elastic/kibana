@@ -65,7 +65,7 @@ export const createColumn = (
     isAssignTimeScale = true,
   }: ExtraColumnFields = {}
 ): GeneralColumnWithMeta => ({
-  columnId: uuid(),
+  columnId: uuidv4(),
   dataType: (field?.type as DataType) ?? undefined,
   label: series.label,
   isBucketed,

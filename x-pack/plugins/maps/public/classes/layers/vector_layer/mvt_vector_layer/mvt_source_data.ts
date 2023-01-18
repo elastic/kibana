@@ -75,7 +75,7 @@ export async function syncMvtSourceData({
       !prevData ||
       syncContext.forceRefreshDueToDrawing ||
       (requestMeta.isForceRefresh && requestMeta.applyForceRefresh)
-        ? uuid()
+        ? uuidv4()
         : prevData.refreshToken;
 
     const tileUrl = await source.getTileUrl(requestMeta, refreshToken, hasLabels);

@@ -110,7 +110,7 @@ export function ErrorGroupOverview() {
 
             return {
               // Everytime the main statistics is refetched, updates the requestId making the comparison API to be refetched.
-              requestId: uuid(),
+              requestId: uuidv4(),
               errorGroupMainStatistics: response.errorGroups,
               currentPageGroupIds,
             };

@@ -62,7 +62,7 @@ export const convertToLens: ConvertPieToLensVisualization = async (vis, timefilt
     return null;
   }
 
-  const layerId = uuid();
+  const layerId = uuidv4();
 
   const indexPatternId = dataView.id!;
   return {

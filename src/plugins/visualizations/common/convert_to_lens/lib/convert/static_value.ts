@@ -11,7 +11,7 @@ import { StaticValueColumn } from '../../types';
 
 export const createStaticValueColumn = (value: number): StaticValueColumn => ({
   operationType: 'static_value',
-  columnId: uuid(),
+  columnId: uuidv4(),
   isBucketed: false,
   isSplit: false,
   dataType: 'number',

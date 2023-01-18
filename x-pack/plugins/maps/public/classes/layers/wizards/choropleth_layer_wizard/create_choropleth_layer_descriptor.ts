@@ -48,7 +48,7 @@ function createChoroplethLayerDescriptor({
   layerType: LAYER_TYPE.GEOJSON_VECTOR | LAYER_TYPE.MVT_VECTOR;
 }) {
   const metricsDescriptor: CountAggDescriptor = { type: AGG_TYPE.COUNT };
-  const joinId = uuid();
+  const joinId = uuidv4();
   const joinKey = getJoinAggKey({
     aggType: metricsDescriptor.type,
     aggFieldName: '',

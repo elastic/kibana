@@ -28,7 +28,7 @@ const getOrderByWithAgg = (series: TermsSeries, columns: Column[]): OrderByWithA
       orderAgg: {
         operationType: 'count',
         sourceField: 'document',
-        columnId: uuid(),
+        columnId: uuidv4(),
         isBucketed: true,
         isSplit: false,
         dataType: 'number',
@@ -102,7 +102,7 @@ export const convertToTermsColumn = (
   }
 
   return {
-    columnId: uuid(),
+    columnId: uuidv4(),
     operationType: 'terms',
     dataType: (field.type as DataType) ?? undefined,
     sourceField: field.name,

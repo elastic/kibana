@@ -104,7 +104,7 @@ async function createAnomalyDetectionJob({
   apmMetricIndex: string;
 }) {
   return withApmSpan('create_anomaly_detection_job', async () => {
-    const randomToken = uuid().substr(-4);
+    const randomToken = uuidv4().substr(-4);
 
     const anomalyDetectionJob = mlClient.modules.setup({
       moduleId: ML_MODULE_ID_APM_TRANSACTION,

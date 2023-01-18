@@ -83,7 +83,7 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (
         throw invalidModelError();
       }
 
-      const layerId = uuid();
+      const layerId = uuidv4();
       extendedLayers[layerIdx] = {
         indexPatternId,
         layerId,

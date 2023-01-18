@@ -109,7 +109,7 @@ export function getMakiSymbolAnchor(symbolId: string) {
 }
 
 export function getCustomIconId() {
-  return `${CUSTOM_ICON_PREFIX_SDF}${uuid()}`;
+  return `${CUSTOM_ICON_PREFIX_SDF}${uuidv4()}`;
 }
 
 export function buildSrcUrl(svgString: string) {

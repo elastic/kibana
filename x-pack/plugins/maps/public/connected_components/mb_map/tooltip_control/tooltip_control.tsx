@@ -251,7 +251,7 @@ export class TooltipControl extends Component<Props, {}> {
     const popupAnchorLocation = justifyAnchorLocation(e.lngLat, targetMbFeataure);
 
     const isLocked = true;
-    const tooltipId = uuid();
+    const tooltipId = uuidv4();
     const features = this._getTooltipFeatures(mbFeatures, isLocked, tooltipId);
     if (features.length === 0) {
       return;
@@ -293,7 +293,7 @@ export class TooltipControl extends Component<Props, {}> {
     const popupAnchorLocation = justifyAnchorLocation(e.lngLat, targetMbFeature);
 
     const isLocked = false;
-    const tooltipId = uuid();
+    const tooltipId = uuidv4();
     const features = this._getTooltipFeatures(mbFeatures, isLocked, tooltipId);
     if (features.length === 0) {
       return;

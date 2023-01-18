@@ -84,7 +84,7 @@ export async function reassignBatch(
     errors
   );
 
-  const actionId = options.actionId ?? uuid();
+  const actionId = options.actionId ?? uuidv4();
   const total = options.total ?? givenAgents.length;
 
   const now = new Date().toISOString();

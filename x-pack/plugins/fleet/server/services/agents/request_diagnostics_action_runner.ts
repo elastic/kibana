@@ -38,7 +38,7 @@ export async function requestDiagnosticsBatch(
 ): Promise<{ actionId: string }> {
   const now = new Date().toISOString();
 
-  const actionId = options.actionId ?? uuid();
+  const actionId = options.actionId ?? uuidv4();
   const total = options.total ?? givenAgents.length;
 
   const agentIds = givenAgents.map((agent) => agent.id);

@@ -119,5 +119,5 @@ export async function forceUnenrollAgent(
     active: false,
     unenrolled_at: new Date().toISOString(),
   });
-  await updateActionsForForceUnenroll(esClient, [agent.id], uuid(), 1);
+  await updateActionsForForceUnenroll(esClient, [agent.id], uuidv4(), 1);
 }

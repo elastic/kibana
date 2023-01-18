@@ -38,7 +38,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
       __rows: descriptor.__rows || [],
       __columns: descriptor.__columns || [],
       term: descriptor.term || '',
-      id: descriptor.id || uuid(),
+      id: descriptor.id || uuidv4(),
     };
   }
 
@@ -52,7 +52,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
 
   async getDisplayName(): Promise<string> {
     // no need to localize. this is never rendered.
-    return `table source ${uuid()}`;
+    return `table source ${uuidv4()}`;
   }
 
   getSyncMeta(): null {

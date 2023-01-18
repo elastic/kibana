@@ -29,7 +29,7 @@ const queryClient = new QueryClient();
 
 const handler = (type: string, ...rest: any[]) => {
   action(`${type} Toast`)(rest);
-  return { id: uuid() };
+  return { id: uuidv4() };
 };
 
 const notifications: NotificationsStart = {

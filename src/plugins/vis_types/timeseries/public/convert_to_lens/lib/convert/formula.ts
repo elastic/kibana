@@ -46,7 +46,7 @@ export const createFormulaColumn = (
 export const createFormulaColumnWithoutMeta = (formula: string): BaseFormulaColumn => {
   const params = convertToFormulaParams(formula);
   return {
-    columnId: uuid(),
+    columnId: uuidv4(),
     operationType: 'formula',
     references: [],
     dataType: 'string',

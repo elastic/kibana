@@ -24,7 +24,7 @@ export const createColumn = (
   field?: DataViewField,
   { isBucketed = false, isSplit = false, reducedTimeRange }: ExtraColumnFields = {}
 ): GeneralColumnWithMeta => ({
-  columnId: uuid(),
+  columnId: uuidv4(),
   dataType: (field?.type as DataType) ?? 'number',
   label: getLabel(agg),
   isBucketed,

@@ -137,7 +137,7 @@ export const convertToTermsColumn = (
   }
 
   return {
-    columnId: uuid(),
+    columnId: uuidv4(),
     operationType: 'terms',
     label,
     dataType: (field.type as DataType) ?? undefined,

@@ -80,7 +80,7 @@ export class MapComponent extends Component<Props, State> {
         editable: false,
       },
       {
-        id: uuid(),
+        id: uuidv4(),
         attributes: {
           title: this.props.title,
           layerListJSON: JSON.stringify([

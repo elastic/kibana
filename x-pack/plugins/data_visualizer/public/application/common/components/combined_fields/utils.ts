@@ -164,7 +164,7 @@ function getGeoPointField(results: FindFileStructureResponse) {
     'location',
     'point_location',
     `${latField}_${lonField}`,
-    `location_${uuid()}`,
+    `location_${uuidv4()}`,
   ];
   // Use first combinedFieldNames that does not have a naming collision
   const geoPointField = combinedFieldNames.find((name) => {

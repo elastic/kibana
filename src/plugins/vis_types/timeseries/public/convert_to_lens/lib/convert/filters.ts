@@ -44,7 +44,7 @@ export const convertToFiltersColumn = (
   }
 
   return {
-    columnId: uuid(),
+    columnId: uuidv4(),
     operationType: 'filters',
     dataType: 'string',
     isBucketed: true,

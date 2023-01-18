@@ -74,7 +74,7 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
       const { rawResponse: resp } = await lastValueFrom(
         searchSource.fetch$({
           abortSignal: abortController.signal,
-          sessionId: uuid(),
+          sessionId: uuidv4(),
           legacyHitsTotal: false,
         })
       );

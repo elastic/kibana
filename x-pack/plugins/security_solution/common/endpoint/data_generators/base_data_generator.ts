@@ -159,7 +159,7 @@ export class BaseDataGenerator<GeneratedDoc extends {} = {}> {
   }
 
   /** generate a UUID (v4) */
-  protected randomUUID(): string {
+  protected randomuuidv4(): string {
     return uuidv4();
   }
 

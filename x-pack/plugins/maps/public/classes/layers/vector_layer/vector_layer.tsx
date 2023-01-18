@@ -183,7 +183,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
         const originalJoinId = joinDescriptor.right.id!;
 
         // right.id is uuid used to track requests in inspector
-        joinDescriptor.right.id = uuid();
+        joinDescriptor.right.id = uuidv4();
 
         // Update all data driven styling properties using join fields
         if (clonedDescriptor.style && 'properties' in clonedDescriptor.style) {

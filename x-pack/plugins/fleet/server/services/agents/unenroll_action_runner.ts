@@ -95,7 +95,7 @@ export async function unenrollBatch(
     outgoingErrors
   );
 
-  const actionId = options.actionId ?? uuid();
+  const actionId = options.actionId ?? uuidv4();
   const total = options.total ?? givenAgents.length;
 
   const agentIds = agentsToUpdate.map((agent) => agent.id);

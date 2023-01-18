@@ -257,7 +257,7 @@ describe('BurnRateRuleExecutor', () => {
 
 function someRuleParams(params: Partial<BurnRateRuleParams> = {}): BurnRateRuleParams {
   return {
-    sloId: uuid(),
+    sloId: uuidv4(),
     burnRateThreshold: 2,
     maxBurnRateThreshold: 720,
     longWindow: { value: 1, unit: 'h' },

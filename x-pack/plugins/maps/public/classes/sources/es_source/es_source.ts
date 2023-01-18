@@ -89,7 +89,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     }
     return {
       ...descriptor,
-      id: isValidStringConfig(descriptor.id) ? descriptor.id! : uuid(),
+      id: isValidStringConfig(descriptor.id) ? descriptor.id! : uuidv4(),
       type: isValidStringConfig(descriptor.type) ? descriptor.type! : '',
       indexPatternId: descriptor.indexPatternId!,
       applyGlobalQuery:
@@ -148,7 +148,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
   cloneDescriptor(): AbstractSourceDescriptor {
     const clonedDescriptor = copyPersistentState(this._descriptor);
     // id used as uuid to track requests in inspector
-    clonedDescriptor.id = uuid();
+    clonedDescriptor.id = uuidv4();
     return clonedDescriptor;
   }
 

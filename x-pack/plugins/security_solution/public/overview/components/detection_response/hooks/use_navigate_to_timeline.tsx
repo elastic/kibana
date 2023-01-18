@@ -83,14 +83,14 @@ export const useNavigateToTimeline = () => {
         if (mainFilter) {
           const dataProvider = getDataProvider(
             mainFilter.field,
-            uuid(),
+            uuidv4(),
             mainFilter.value,
             mainFilter.operator
           );
 
           for (const filter of orFilterGroup.slice(1)) {
             dataProvider.and.push(
-              getDataProvider(filter.field, uuid(), filter.value, filter.operator)
+              getDataProvider(filter.field, uuidv4(), filter.value, filter.operator)
             );
           }
           dataProviders.push(dataProvider);

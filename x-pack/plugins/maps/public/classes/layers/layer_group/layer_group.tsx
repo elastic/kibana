@@ -48,7 +48,7 @@ export class LayerGroup implements ILayer {
     return {
       ...options,
       type: LAYER_TYPE.LAYER_GROUP,
-      id: typeof options.id === 'string' && options.id.length ? options.id : uuid(),
+      id: typeof options.id === 'string' && options.id.length ? options.id : uuidv4(),
       label:
         typeof options.label === 'string' && options.label.length
           ? options.label
@@ -86,7 +86,7 @@ export class LayerGroup implements ILayer {
 
   async cloneDescriptor(): Promise<LayerDescriptor[]> {
     const clonedDescriptor = copyPersistentState(this._descriptor);
-    clonedDescriptor.id = uuid();
+    clonedDescriptor.id = uuidv4();
     const displayName = await this.getDisplayName();
     clonedDescriptor.label = `Clone of ${displayName}`;
 

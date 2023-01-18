@@ -69,7 +69,7 @@ export function JoinEditor({ joins, layer, onChange, leftJoinFields, layerDispla
       ...joins,
       {
         right: {
-          id: uuid(),
+          id: uuidv4(),
           applyGlobalQuery: true,
           applyGlobalTime: true,
         },
