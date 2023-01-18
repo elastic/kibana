@@ -149,7 +149,7 @@ describe('SavedObjectTypeRegistry', () => {
           })
         );
       }).toThrowErrorMatchingInlineSnapshot(
-        `"Type typeHiddenA: 'hiddenFromHttpApis' cannot be 'false' when specifying 'hidden:true'"`
+        `"Type typeHiddenA: 'hiddenFromHttpApis' cannot be 'false' when specifying 'hidden' as 'true'"`
       );
 
       expect(() => {
