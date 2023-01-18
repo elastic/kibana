@@ -1054,7 +1054,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.host_isolation.allowed',
       {
-        defaultMessage: 'Message TBD. Default: true',
+        defaultMessage: 'A value of false disallows host isolation activity on Linux endpoints, regardless of whether host isolation is supported. Note that if a host is currently not isolated, it will refuse to isolate, and likewise, a host will refuse to release if it is currently isolated. A value of true will allow Linux endpoints to isolate if supported. Default: true',
       }
     ),
   },
