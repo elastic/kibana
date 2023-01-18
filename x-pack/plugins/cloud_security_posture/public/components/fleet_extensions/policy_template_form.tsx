@@ -10,6 +10,7 @@ import type {
   NewPackagePolicy,
   PackagePolicyCreateExtensionComponentProps,
 } from '@kbn/fleet-plugin/public';
+
 import type { PostureInput } from '../../../common/types';
 import { CLOUDBEAT_AWS, CLOUDBEAT_VANILLA } from '../../../common/constants';
 import {
@@ -20,6 +21,7 @@ import {
 } from './utils';
 import { AwsCredentialsForm, type AwsCredentialsType } from './aws_credentials_form';
 import { PolicyInputSelector } from './policy_template_input_selector';
+import { IntegrationSettingsInfo, IntegrationSettings } from './integration_settings';
 
 const DEFAULT_INPUT_TYPE = {
   kspm: CLOUDBEAT_VANILLA,
@@ -83,7 +85,13 @@ export const CspPolicyTemplateForm = memo<Props>(({ newPolicy, onChange, edit })
 
   return (
     <div>
+      <IntegrationSettingsInfo type={input.policy_template} showStepTitle={!!edit} />
       <PolicyInputSelector input={input} setInput={setEnabledPolicyInput} disabled={!!edit} />
+      <IntegrationSettings
+        name={newPolicy.name}
+        description={newPolicy.description || ''}
+        onChange={(field, value) => updatePolicy({ ...newPolicy, [field]: value })}
+      />
       <PolicyVarsForm input={input} newPolicy={newPolicy} updatePolicy={updatePolicy} />
       <EuiSpacer />
     </div>

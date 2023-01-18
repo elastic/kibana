@@ -7,7 +7,7 @@
 import React from 'react';
 import { EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { PostureInput, PosturePolicyTemplate } from '../../../common/types';
+import type { PostureInput } from '../../../common/types';
 import { getPolicyTemplateInputOptions, type NewPackagePolicyPostureInput } from './utils';
 import { RadioGroup } from './csp_boxed_radio_group';
 
@@ -28,7 +28,6 @@ export const PolicyInputSelector = ({ input, disabled, setInput }: Props) => {
 
   return (
     <div>
-      <ConfigureIntegrationInfo type={input.policy_template} />
       <RadioGroup
         disabled={disabled}
         idSelected={input.type}
@@ -71,34 +70,5 @@ const AWSSetupInfoContent = () => (
     step-by-step instructions to generate the necessary credentials."
       />
     </EuiText>
-  </>
-);
-
-const ConfigureIntegrationInfo = ({ type }: { type: PosturePolicyTemplate }) => (
-  <>
-    <EuiTitle size="xs">
-      <h2>
-        <FormattedMessage
-          id="xpack.csp.awsIntegration.configureIntegrationLabel"
-          defaultMessage="Configure your integration"
-        />
-      </h2>
-    </EuiTitle>
-    <EuiSpacer />
-    <EuiText color={'subdued'} size="s">
-      {type === 'kspm' && (
-        <FormattedMessage
-          id="xpack.csp.awsIntegration.configureKspmIntegrationDescription"
-          defaultMessage="Select the Kuberentes cluster type you want to monitor"
-        />
-      )}
-      {type === 'cspm' && (
-        <FormattedMessage
-          id="xpack.csp.awsIntegration.configureCspmIntegrationDescription"
-          defaultMessage="Select the cloud service provider (CSP) you want to monitor"
-        />
-      )}
-    </EuiText>
-    <EuiSpacer />
   </>
 );
