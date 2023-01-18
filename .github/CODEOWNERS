@@ -912,7 +912,6 @@ packages/kbn-config-schema @elastic/kibana-core
 packages/kbn-crypto @elastic/kibana-security
 packages/kbn-crypto-browser @elastic/kibana-core
 packages/kbn-cypress-config @elastic/kibana-operations
-packages/kbn-datemath @elastic/kibana-app-services
 packages/kbn-dev-cli-errors @elastic/kibana-operations
 packages/kbn-dev-cli-runner @elastic/kibana-operations
 packages/kbn-dev-proc-runner @elastic/kibana-operations
@@ -924,7 +923,6 @@ packages/kbn-ecs @elastic/kibana-core
 packages/kbn-es @elastic/kibana-operations
 packages/kbn-es-archiver @elastic/kibana-operations
 packages/kbn-es-errors @elastic/kibana-core
-packages/kbn-es-query @elastic/kibana-app-services
 packages/kbn-es-types @elastic/kibana-core @elastic/apm-ui
 packages/kbn-eslint-config @elastic/kibana-operations
 packages/kbn-eslint-plugin-disable @elastic/kibana-operations
@@ -932,7 +930,6 @@ packages/kbn-eslint-plugin-eslint @elastic/kibana-operations
 packages/kbn-eslint-plugin-imports @elastic/kibana-operations
 packages/kbn-expect @elastic/kibana-operations
 packages/kbn-failed-test-reporter-cli @elastic/kibana-operations
-packages/kbn-field-types @elastic/kibana-app-services
 packages/kbn-find-used-node-modules @elastic/kibana-operations
 packages/kbn-flot-charts @elastic/kibana-operations
 packages/kbn-ftr-common-functional-services @elastic/kibana-operations
@@ -972,7 +969,6 @@ packages/kbn-picomatcher @elastic/kibana-operations
 packages/kbn-plugin-discovery @elastic/kibana-operations
 packages/kbn-plugin-generator @elastic/kibana-operations
 packages/kbn-plugin-helpers @elastic/kibana-operations
-packages/kbn-react-field @elastic/kibana-app-services
 packages/kbn-repo-file-maps @elastic/kibana-operations
 packages/kbn-repo-info @elastic/kibana-operations
 packages/kbn-repo-linter @elastic/kibana-operations
