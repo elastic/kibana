@@ -285,7 +285,7 @@ export const useCasesColumns = ({
     render: (updatedAt: Case['updatedAt']) => {
       if (updatedAt != null) {
         return (
-          <span data-test-subj={`case-table-column-updatedAt`}>
+          <span data-test-subj="case-table-column-updatedAt">
             <FormattedRelativePreferenceDate value={updatedAt} stripMs={true} />
           </span>
         );
