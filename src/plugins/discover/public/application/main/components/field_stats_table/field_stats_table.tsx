@@ -23,11 +23,7 @@ import { css } from '@emotion/react';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FIELD_STATISTICS_LOADED } from './constants';
 import type { DiscoverStateContainer } from '../../services/discover_state';
-import {
-  AvailableFields$,
-  DataRefetch$,
-  DataTotalHits$,
-} from '../../services/discover_data_state_container';
+import { DataTotalHits$ } from '../../services/discover_data_state_container';
 export interface RandomSamplingOption {
   mode: 'random_sampling';
   seed: string;
@@ -110,15 +106,12 @@ export interface FieldStatisticsTableProps {
    * @param eventName
    */
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
-  savedSearchRefetch$?: DataRefetch$;
-  availableFields$?: AvailableFields$;
   searchSessionId?: string;
   savedSearchDataTotalHits$?: DataTotalHits$;
 }
 
 export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
   const {
-    availableFields$,
     dataView,
     savedSearch,
     query,
@@ -127,10 +120,9 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     stateContainer,
     onAddFilter,
     trackUiMetric,
-    savedSearchRefetch$,
     searchSessionId,
-    savedSearchDataTotalHits$,
   } = props;
+  const totalHits$ = stateContainer?.dataState.data$.totalHits$;
   const services = useDiscoverServices();
   const [embeddable, setEmbeddable] = useState<
     | ErrorEmbeddable
@@ -145,13 +137,14 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
   );
 
   useEffect(() => {
+    const availableFields$ = stateContainer?.dataState.data$.availableFields$;
     const sub = embeddable?.getOutput$().subscribe((output: DataVisualizerGridEmbeddableOutput) => {
       if (output.showDistributions !== undefined && stateContainer) {
         stateContainer.setAppState({ hideAggregatedPreview: !output.showDistributions });
       }
     });
 
-    const refetch = savedSearchRefetch$?.subscribe(() => {
+    const refetch = stateContainer?.dataState.refetch$.subscribe(() => {
       if (embeddable && !isErrorEmbeddable(embeddable)) {
         embeddable.updateInput({ lastReloadRequestTime: Date.now() });
       }
@@ -168,7 +161,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
       refetch?.unsubscribe();
       fields?.unsubscribe();
     };
-  }, [embeddable, stateContainer, savedSearchRefetch$, availableFields$]);
+  }, [embeddable, stateContainer]);
 
   useEffect(() => {
     if (embeddable && !isErrorEmbeddable(embeddable)) {
@@ -181,10 +174,8 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
         visibleFieldNames: columns,
         onAddFilter,
         sessionId: searchSessionId,
-        fieldsToFetch: availableFields$?.getValue().fields,
-        totalDocuments: savedSearchDataTotalHits$
-          ? savedSearchDataTotalHits$.getValue()?.result
-          : undefined,
+        fieldsToFetch: stateContainer?.dataState.data$.availableFields$?.getValue().fields,
+        totalDocuments: totalHits$ ? totalHits$.getValue()?.result : undefined,
         samplingOption: {
           mode: 'normal_sampling',
           shardSize: 5000,
@@ -202,8 +193,8 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     filters,
     onAddFilter,
     searchSessionId,
-    availableFields$,
-    savedSearchDataTotalHits$,
+    totalHits$,
+    stateContainer,
   ]);
 
   useEffect(() => {

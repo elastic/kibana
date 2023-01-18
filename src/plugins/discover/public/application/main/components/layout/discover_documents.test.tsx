@@ -39,14 +39,14 @@ function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
   }) as DataDocuments$;
   const stateContainer = getDiscoverStateMock({});
   stateContainer.setAppState({ index: dataViewMock.id });
+  stateContainer.dataState.data$.documents$ = documents$;
 
   const props = {
     expandedDoc: undefined,
     dataView: dataViewMock,
     onAddFilter: jest.fn(),
     savedSearch: savedSearchMock,
-    documents$,
-    searchSource: documents$,
+    searchSource: savedSearchMock.searchSource,
     setExpandedDoc: jest.fn(),
     state: { columns: [] },
     stateContainer,

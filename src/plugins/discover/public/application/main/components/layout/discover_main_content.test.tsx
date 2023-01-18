@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { Subject, BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { esHits } from '../../../../__mocks__/es_hits';
 import { dataViewMock } from '../../../../__mocks__/data_view';
@@ -89,6 +89,7 @@ const mountComponent = ({
     availableFields$,
   };
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+  stateContainer.dataState.data$ = savedSearchData$;
   stateContainer.setAppState({
     interval: 'auto',
     hideChart,
@@ -101,8 +102,6 @@ const mountComponent = ({
     navigateTo: jest.fn(),
     setExpandedDoc: jest.fn(),
     savedSearch,
-    savedSearchData$,
-    savedSearchRefetch$: new Subject(),
     stateContainer,
     onFieldEdited: jest.fn(),
     columns: [],

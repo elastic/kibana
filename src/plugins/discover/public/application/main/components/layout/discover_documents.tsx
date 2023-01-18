@@ -29,7 +29,7 @@ import {
   HIDE_ANNOUNCEMENTS,
 } from '../../../../../common';
 import { useColumns } from '../../../../hooks/use_data_grid_columns';
-import { DataDocuments$, RecordRawType } from '../../services/discover_data_state_container';
+import { RecordRawType } from '../../services/discover_data_state_container';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { useDataState } from '../../hooks/use_data_state';
 import { DocTableInfinite } from '../../../../components/doc_table/doc_table_infinite';
@@ -59,7 +59,6 @@ export const onResize = (
 };
 
 function DiscoverDocumentsComponent({
-  documents$,
   expandedDoc,
   dataView,
   onAddFilter,
@@ -68,7 +67,6 @@ function DiscoverDocumentsComponent({
   stateContainer,
   onFieldEdited,
 }: {
-  documents$: DataDocuments$;
   expandedDoc?: DataTableRecord;
   dataView: DataView;
   navigateTo: (url: string) => void;
@@ -79,6 +77,7 @@ function DiscoverDocumentsComponent({
   onFieldEdited?: () => void;
 }) {
   const services = useDiscoverServices();
+  const documents$ = stateContainer.dataState.data$.documents$;
   const { dataViews, capabilities, uiSettings } = services;
   const [query, sort, rowHeight, rowsPerPage, grid, columns, index] = useAppStateSelector(
     (state) => {

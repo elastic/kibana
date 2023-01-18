@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { Subject, BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { esHits } from '../../../../__mocks__/es_hits';
 import { dataViewMock } from '../../../../__mocks__/data_view';
@@ -117,6 +117,7 @@ const mountComponent = ({
   session.getSession$.mockReturnValue(new BehaviorSubject('123'));
 
   const stateContainer = getStateContainer();
+  stateContainer.dataState.data$ = savedSearchData$;
 
   const props: DiscoverHistogramLayoutProps = {
     isPlainRecord,
@@ -124,9 +125,6 @@ const mountComponent = ({
     navigateTo: jest.fn(),
     setExpandedDoc: jest.fn(),
     savedSearch,
-    savedSearchData$,
-    savedSearchFetch$: new Subject(),
-    savedSearchRefetch$: new Subject(),
     stateContainer,
     onFieldEdited: jest.fn(),
     columns: [],
