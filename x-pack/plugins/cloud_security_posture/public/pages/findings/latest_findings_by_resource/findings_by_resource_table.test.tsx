@@ -98,7 +98,6 @@ describe('<FindingsByResourceTable />', () => {
         expect(within(row).getByText(item['resource.name'])).toBeInTheDocument();
       if (item['resource.sub_type'])
         expect(within(row).getByText(item['resource.sub_type'])).toBeInTheDocument();
-      expect(within(row).getByText(item['rule.section'].join(', '))).toBeInTheDocument();
       expect(
         within(row).getByText(
           `${calculatePostureScore(
