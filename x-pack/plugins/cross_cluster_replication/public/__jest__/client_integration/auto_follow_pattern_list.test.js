@@ -269,7 +269,10 @@ describe('<AutoFollowPatternList />', () => {
       test('should have a "settings" section', () => {
         actions.clickAutoFollowPatternAt(0);
         expect(find('settingsSection').find('h3').text()).toEqual('Settings');
-        expect(exists('settingsValues', 4)).toBe(true);
+
+        // The number of different settings of an auto-follower pattern
+        const AVAILABLE_SETTINGS = 4;
+        expect(find('settingsValues').length).toBe(AVAILABLE_SETTINGS);
       });
 
       test('should set the correct auto-follow pattern settings values', () => {
