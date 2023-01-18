@@ -802,10 +802,12 @@ export const getGroupedESQuery = (
   }
 };
 
-const getContextAggregation = (params: any) => {
+const getContextAggregation = (
+  params: Pick<RuleParams, 'timeSize' | 'timeUnit' | 'groupBy'> & { criteria: CountCriteria }
+) => {
   const validPrefixForContext = ['host', 'cloud', 'orchestrator', 'container', 'labels', 'tags'];
   const positiveComparators = getPositiveComparators();
-  const positiveCriteria = params.criteria.filter((criterion: any) =>
+  const positiveCriteria = params.criteria.filter((criterion: Criterion) =>
     positiveComparators.includes(criterion.comparator)
   );
 
@@ -813,7 +815,7 @@ const getContextAggregation = (params: any) => {
     ? getIncludeSet(params.groupBy, validPrefixForContext)
     : new Set<string>();
   const includesFromCriteria = getIncludeSet(
-    positiveCriteria.map((criterion: any) => criterion.field),
+    positiveCriteria.map((criterion: Criterion) => criterion.field),
     validPrefixForContext
   );
   const includesList = Array.from(
@@ -1093,13 +1095,11 @@ export const FIRED_ACTIONS: ActionGroup<'logs.threshold.fired'> = {
 };
 
 export const getIncludeSet = (
-  groupBy: string | string[] | undefined,
+  groupBy: string[] | undefined,
   validPrefix: string[]
 ): Set<string> => {
   return new Set<string>(
-    [groupBy ?? []]
-      .flat()
-      .map((currentGroupBy) => currentGroupBy.split('.')[0])
+    groupBy?.map((currentGroupBy) => currentGroupBy.split('.')[0])
       .filter((groupByPrefix) => validPrefix.includes(groupByPrefix))
   );
 };
