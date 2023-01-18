@@ -92,6 +92,7 @@ function EmbeddedMapComponent({
         ),
         filters,
         viewMode: ViewMode.VIEW,
+        mapCenter: { lat: 20.43425, lon: 0, zoom: 1.25 },
         isLayerTOCOpen: false,
         query: {
           query: kuery,
@@ -157,7 +158,7 @@ function EmbeddedMapComponent({
           data-test-subj="serviceOverviewEmbeddedMap"
           css={css`
             width: 100%;
-            height: 400px;
+            height: 460px;
             display: flex;
             flex: 1 1 100%;
             z-index: 1;

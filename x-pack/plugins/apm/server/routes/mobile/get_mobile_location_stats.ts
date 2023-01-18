@@ -134,12 +134,10 @@ export async function getMobileLocationStats({
     },
   });
 
-  const durationAsMinutes = (end - start) / 1000 / 60;
-
   return {
     mostSessions: {
       location: response.aggregations?.sessions?.buckets[0]?.key,
-      value: response.aggregations?.sessions?.buckets[0]?.sessions.value,
+      value: response.aggregations?.sessions?.buckets[0]?.sessions.value ?? 0,
       timeseries:
         response.aggregations?.timeseries?.buckets.map((bucket) => ({
           x: bucket.key,
@@ -151,7 +149,7 @@ export async function getMobileLocationStats({
         response.aggregations?.requests?.requestsByLocation?.buckets[0]?.key,
       value:
         response.aggregations?.requests?.requestsByLocation?.buckets[0]
-          ?.doc_count,
+          ?.doc_count ?? 0,
       timeseries:
         response.aggregations?.timeseries?.buckets.map((bucket) => ({
           x: bucket.key,
@@ -165,7 +163,7 @@ export async function getMobileLocationStats({
         response.aggregations?.crashCount?.crashesByLocation?.buckets[0]?.key,
       value:
         response.aggregations?.crashCount?.crashesByLocation?.buckets[0]
-          ?.doc_count ?? 0 / durationAsMinutes,
+          ?.doc_count ?? 0,
       timeseries:
         response.aggregations?.timeseries?.buckets.map((bucket) => ({
           x: bucket.key,

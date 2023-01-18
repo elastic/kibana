@@ -117,7 +117,7 @@ export function MobileStats({
   return (
     <EuiFlexGroup>
       {metrics.map((metric, key) => (
-        <EuiFlexItem>
+        <EuiFlexItem key={key}>
           <MetricItem
             id={key}
             data={[metric]}
