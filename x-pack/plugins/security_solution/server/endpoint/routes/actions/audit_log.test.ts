@@ -53,7 +53,7 @@ describe('Action Log API', () => {
 
     it('should accept a single agent ID', () => {
       expect(() => {
-        EndpointActionLogRequestSchema.params.validate({ agent_id: uuid.v4() });
+        EndpointActionLogRequestSchema.params.validate({ agent_id: uuid() });
       }).not.toThrow();
     });
 

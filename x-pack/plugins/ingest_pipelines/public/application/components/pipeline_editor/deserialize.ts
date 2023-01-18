@@ -44,7 +44,7 @@ const convertToPipelineInternalProcessor = (processor: Processor): ProcessorInte
     ? convertProcessors(originalOnFailure)
     : (originalOnFailure as ProcessorInternal[] | undefined);
   return {
-    id: uuid.v4(),
+    id: uuid(),
     type,
     onFailure,
     options,

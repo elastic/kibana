@@ -39,7 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
     const setUniqueIds = (request: LegacyProjectMonitorsRequest) => {
       return {
         ...request,
-        monitors: request.monitors.map((monitor) => ({ ...monitor, id: uuid.v4() })),
+        monitors: request.monitors.map((monitor) => ({ ...monitor, id: uuid() })),
       };
     };
 

@@ -210,7 +210,7 @@ describe('with_bulk_rule_api_operations', () => {
     };
 
     const ExtendedComponent = withBulkRuleOperations(ComponentToExtend);
-    const ruleId = uuid.v4();
+    const ruleId = uuid();
     const component = mount(<ExtendedComponent ruleId={ruleId} />);
     component.find('button').simulate('click');
 
@@ -225,7 +225,7 @@ describe('with_bulk_rule_api_operations', () => {
     };
 
     const ExtendedComponent = withBulkRuleOperations(ComponentToExtend);
-    const ruleId = uuid.v4();
+    const ruleId = uuid();
     const component = mount(<ExtendedComponent ruleId={ruleId} />);
     component.find('button').simulate('click');
 
@@ -317,9 +317,9 @@ describe('with_bulk_rule_api_operations', () => {
 
 function mockRule(overloads: Partial<Rule> = {}): Rule {
   return {
-    id: uuid.v4(),
+    id: uuid(),
     enabled: true,
-    name: `rule-${uuid.v4()}`,
+    name: `rule-${uuid()}`,
     tags: [],
     ruleTypeId: '.noop',
     consumer: 'consumer',

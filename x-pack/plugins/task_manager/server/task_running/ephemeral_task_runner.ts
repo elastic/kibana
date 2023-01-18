@@ -107,7 +107,7 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
     this.beforeMarkRunning = beforeMarkRunning;
     this.onTaskEvent = onTaskEvent;
     this.executionContext = executionContext;
-    this.uuid = uuid.v4();
+    this.uuid = uuid();
   }
 
   /**

@@ -63,7 +63,7 @@ export const loadDashboardStateFromSavedObject = async ({
   } = data;
 
   const savedObjectId = id;
-  const embeddableId = uuid.v4();
+  const embeddableId = uuid();
 
   const newDashboardState = { ...DEFAULT_DASHBOARD_INPUT, id: embeddableId };
 

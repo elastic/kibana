@@ -73,7 +73,7 @@ NotesCount.displayName = 'NotesCount';
 /** Creates a new instance of a `note` */
 export const createNote = ({ newNote, user }: { newNote: string; user: string }): Note => ({
   created: moment.utc().toDate(),
-  id: uuid.v4(),
+  id: uuid(),
   lastEdit: null,
   note: newNote,
   saveObjectId: null,

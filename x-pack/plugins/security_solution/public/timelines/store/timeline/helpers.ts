@@ -173,7 +173,7 @@ export const addNewTimeline = ({
   const templateTimelineInfo =
     timelineType === TimelineType.template
       ? {
-          templateTimelineId: uuid.v4(),
+          templateTimelineId: uuid(),
           templateTimelineVersion: 1,
         }
       : {};

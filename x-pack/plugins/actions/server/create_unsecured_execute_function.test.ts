@@ -118,7 +118,7 @@ describe('bulkExecute()', () => {
   });
 
   test('schedules the actions with all given parameters with a preconfigured connector and source specified', async () => {
-    const sourceUuid = uuid.v4();
+    const sourceUuid = uuid();
     const source = { type: 'alert', id: sourceUuid };
     const executeFn = createBulkUnsecuredExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
@@ -232,7 +232,7 @@ describe('bulkExecute()', () => {
   });
 
   test('schedules the actions with all given parameters with a preconfigured connector and relatedSavedObjects specified', async () => {
-    const sourceUuid = uuid.v4();
+    const sourceUuid = uuid();
     const source = { type: 'alert', id: sourceUuid };
     const executeFn = createBulkUnsecuredExecutionEnqueuerFunction({
       taskManager: mockTaskManager,

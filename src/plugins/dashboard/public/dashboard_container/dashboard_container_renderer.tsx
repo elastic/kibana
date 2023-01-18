@@ -57,7 +57,7 @@ export const DashboardContainerRenderer = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [savedObjectId]);
 
-  const id = useMemo(() => uuid.v4(), []);
+  const id = useMemo(() => uuid(), []);
 
   useEffect(() => {
     let canceled = false;

@@ -591,7 +591,7 @@ describe('bulkEdit()', () => {
 
     const getSnoozeSchedule = (useId: boolean = true) => {
       return {
-        ...(useId && { id: uuid.v4() }),
+        ...(useId && { id: uuid() }),
         duration: 28800000,
         rRule: {
           dtstart: '2010-09-19T11:49:59.329Z',

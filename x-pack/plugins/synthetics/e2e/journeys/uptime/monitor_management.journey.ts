@@ -18,10 +18,10 @@ const basicMonitorDetails = {
   location: customLocation || 'US Central',
   schedule: '3',
 };
-const httpName = `http monitor ${uuid.v4()}`;
-const icmpName = `icmp monitor ${uuid.v4()}`;
-const tcpName = `tcp monitor ${uuid.v4()}`;
-const browserName = `browser monitor ${uuid.v4()}`;
+const httpName = `http monitor ${uuid()}`;
+const icmpName = `icmp monitor ${uuid()}`;
+const tcpName = `tcp monitor ${uuid()}`;
+const browserName = `browser monitor ${uuid()}`;
 
 const configuration = {
   [DataStream.HTTP]: {
@@ -154,7 +154,7 @@ journey('Monitor Management breadcrumbs', async ({ page, params }: { page: Page;
   recordVideo(page);
   const uptime = monitorManagementPageProvider({ page, kibanaUrl: params.kibanaUrl });
   const defaultMonitorDetails = {
-    name: `Sample monitor ${uuid.v4()}`,
+    name: `Sample monitor ${uuid()}`,
     location: 'US Central',
     schedule: '3',
     apmServiceName: 'service',
@@ -218,13 +218,13 @@ journey(
 
     const sortedMonitors = [
       Object.assign({}, configuration[DataStream.ICMP].monitorConfig, {
-        name: `A ${uuid.v4()}`,
+        name: `A ${uuid()}`,
       }),
       Object.assign({}, configuration[DataStream.ICMP].monitorConfig, {
-        name: `B ${uuid.v4()}`,
+        name: `B ${uuid()}`,
       }),
       Object.assign({}, configuration[DataStream.ICMP].monitorConfig, {
-        name: `aa ${uuid.v4()}`,
+        name: `aa ${uuid()}`,
       }),
     ];
 

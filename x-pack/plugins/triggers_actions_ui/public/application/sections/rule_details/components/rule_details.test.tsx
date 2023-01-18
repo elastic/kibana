@@ -193,7 +193,7 @@ describe('rule_details', () => {
           actions: [
             {
               group: 'default',
-              id: uuid.v4(),
+              id: uuid(),
               params: {},
               actionTypeId: '.server-log',
             },
@@ -231,13 +231,13 @@ describe('rule_details', () => {
           actions: [
             {
               group: 'default',
-              id: uuid.v4(),
+              id: uuid(),
               params: {},
               actionTypeId: '.server-log',
             },
             {
               group: 'default',
-              id: uuid.v4(),
+              id: uuid(),
               params: {},
               actionTypeId: '.email',
             },
@@ -355,7 +355,7 @@ describe('rule_details', () => {
         actions: [
           {
             group: 'default',
-            id: uuid.v4(),
+            id: uuid(),
             params: {},
             actionTypeId: '.server-log',
           },
@@ -395,7 +395,7 @@ describe('rule_details', () => {
         actions: [
           {
             group: 'default',
-            id: uuid.v4(),
+            id: uuid(),
             params: {},
             actionTypeId: '.server-log',
           },
@@ -796,9 +796,9 @@ describe('rule_details', () => {
 
   function mockRule(overloads: Partial<Rule> = {}): Rule {
     return {
-      id: uuid.v4(),
+      id: uuid(),
       enabled: true,
-      name: `rule-${uuid.v4()}`,
+      name: `rule-${uuid()}`,
       tags: [],
       ruleTypeId: '.noop',
       consumer: ALERTS_FEATURE_ID,

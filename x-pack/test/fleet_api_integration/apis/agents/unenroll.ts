@@ -32,13 +32,13 @@ export default function (providerContext: FtrProviderContext) {
       await getService('supertest').post(`/api/fleet/setup`).set('kbn-xsrf', 'xxx').send();
       const accessAPIKeyBody = await esClient.security.createApiKey({
         body: {
-          name: `test access api key: ${uuid.v4()}`,
+          name: `test access api key: ${uuid()}`,
         },
       });
       accessAPIKeyId = accessAPIKeyBody.id;
       const outputAPIKeyBody = await esClient.security.createApiKey({
         body: {
-          name: `test output api key: ${uuid.v4()}`,
+          name: `test output api key: ${uuid()}`,
         },
       });
       outputAPIKeyId = outputAPIKeyBody.id;

@@ -91,13 +91,9 @@ export const reducer: Reducer<State, Action> = (state, action) => {
       );
     }
     if (Array.isArray(targetProcessor)) {
-      return setValue(
-        targetSelector,
-        state,
-        targetProcessor.concat({ ...processor, id: uuid.v4() })
-      );
+      return setValue(targetSelector, state, targetProcessor.concat({ ...processor, id: uuid() }));
     } else {
-      const processorWithId = { ...processor, id: uuid.v4() };
+      const processorWithId = { ...processor, id: uuid() };
       targetProcessor.onFailure = targetProcessor.onFailure
         ? targetProcessor.onFailure.concat(processorWithId)
         : [processorWithId];

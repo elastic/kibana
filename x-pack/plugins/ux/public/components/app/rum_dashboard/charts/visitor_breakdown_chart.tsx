@@ -58,7 +58,7 @@ export function VisitorBreakdownChart({
 }: Props) {
   const kibana = useKibanaServices();
   const LensEmbeddableComponent = kibana.lens.EmbeddableComponent;
-  const [localDataViewId] = useState<string>(uuid.v4());
+  const [localDataViewId] = useState<string>(uuid());
 
   const lensAttributes = useMemo(
     () =>

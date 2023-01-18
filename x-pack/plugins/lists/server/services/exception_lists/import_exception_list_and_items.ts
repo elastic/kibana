@@ -115,7 +115,7 @@ export const importExceptions = async ({
         if (exceptionList instanceof Error) {
           return { items: [...acc.items], lists: [...acc.lists] };
         }
-        const newListId = uuid.v4();
+        const newListId = uuid();
 
         return {
           items: [

@@ -53,7 +53,7 @@ export const AlertsSummaryChartsPanel: React.FC<Props> = ({
   title = i18n.CHARTS_TITLE,
 }: Props) => {
   // create a unique, but stable (across re-renders) query id
-  const uniqueQueryId = useMemo(() => `${DETECTIONS_ALERTS_CHARTS_ID}-${uuid.v4()}`, []);
+  const uniqueQueryId = useMemo(() => `${DETECTIONS_ALERTS_CHARTS_ID}-${uuid()}`, []);
 
   const { toggleStatus, setToggleStatus } = useQueryToggle(DETECTIONS_ALERTS_CHARTS_ID);
   const [querySkip, setQuerySkip] = useState(!toggleStatus);

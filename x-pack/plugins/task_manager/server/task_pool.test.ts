@@ -375,7 +375,7 @@ describe('TaskPool', () => {
     const shouldRun = mockRun();
     const shouldNotRun = mockRun();
 
-    const taskId = uuid.v4();
+    const taskId = uuid();
     const task1 = mockTask({ id: taskId, run: shouldRun });
     const task2 = mockTask({
       id: taskId,
@@ -402,8 +402,8 @@ describe('TaskPool', () => {
   function mockTask(overrides = {}) {
     return {
       isExpired: false,
-      taskExecutionId: uuid.v4(),
-      id: uuid.v4(),
+      taskExecutionId: uuid(),
+      id: uuid(),
       cancel: async () => undefined,
       markTaskAsRunning: jest.fn(async () => true),
       run: mockRun(),

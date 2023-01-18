@@ -79,7 +79,7 @@ export const sortExceptionListsToUpdateOrCreate = ({
             name,
             os_types: [],
             tags,
-            tie_breaker_id: uuid.v4(),
+            tie_breaker_id: uuid(),
             type,
             updated_by: user,
             version,
@@ -115,7 +115,7 @@ export const sortExceptionListsToUpdateOrCreate = ({
         immutable: false,
         item_id: undefined,
         list_type: 'list',
-        tie_breaker_id: uuid.v4(),
+        tie_breaker_id: uuid(),
         updated_by: user,
       };
       results.listsToCreate = [

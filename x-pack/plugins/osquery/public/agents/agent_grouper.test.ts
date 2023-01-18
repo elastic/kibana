@@ -17,7 +17,7 @@ type GroupData = {
 export function genGroup(name: string) {
   return {
     name,
-    id: uuid.v4(),
+    id: uuid(),
     size: 5,
   };
 }
@@ -119,10 +119,10 @@ describe('AgentGrouper', () => {
   describe('agents', () => {
     it('should generate agent options', () => {
       const agentGrouper = new AgentGrouper();
-      const policyId = uuid.v4();
+      const policyId = uuid();
       const agentData: GroupedAgent[] = [
-        genAgent(policyId, `agent host 1`, uuid.v4()),
-        genAgent(policyId, `agent host 2`, uuid.v4()),
+        genAgent(policyId, `agent host 1`, uuid()),
+        genAgent(policyId, `agent host 2`, uuid()),
       ];
       agentGrouper.updateGroup(AGENT_GROUP_KEY.Agent, agentData);
 

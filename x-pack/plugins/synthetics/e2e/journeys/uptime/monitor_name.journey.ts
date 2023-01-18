@@ -13,7 +13,7 @@ import { monitorManagementPageProvider } from '../../page_objects/uptime/monitor
 journey(`MonitorName`, async ({ page, params }: { page: Page; params: any }) => {
   recordVideo(page);
 
-  const name = `Test monitor ${uuid.v4()}`;
+  const name = `Test monitor ${uuid()}`;
   const uptime = monitorManagementPageProvider({ page, kibanaUrl: params.kibanaUrl });
 
   const createBasicMonitor = async () => {

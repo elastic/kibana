@@ -66,7 +66,7 @@ export const createList = async ({
     meta,
     name,
     serializer,
-    tie_breaker_id: tieBreaker ?? uuid.v4(),
+    tie_breaker_id: tieBreaker ?? uuid(),
     type,
     updated_at: createdAt,
     updated_by: user,

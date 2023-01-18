@@ -57,7 +57,7 @@ export const createSharedExceptionListRoute = (router: SecuritySolutionPluginRou
         const createdSharedList = await listsClient?.createExceptionList({
           description,
           immutable: false,
-          listId: uuid.v4(),
+          listId: uuid(),
           meta: undefined,
           name,
           namespaceType: 'single',

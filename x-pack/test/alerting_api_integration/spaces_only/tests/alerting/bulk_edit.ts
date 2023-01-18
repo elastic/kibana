@@ -20,7 +20,7 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 const getSnoozeSchedule = () => {
   return {
-    id: uuid.v4(),
+    id: uuid(),
     duration: 28800000,
     rRule: {
       dtstart: '2022-09-19T11:49:59.329Z',

@@ -159,7 +159,7 @@ export const getNewExceptionItem = ({
     item_id: undefined,
     list_id: listId,
     meta: {
-      temporaryUuid: uuid.v4(),
+      temporaryUuid: uuid(),
     },
     name,
     namespace_type: namespaceType,
@@ -897,7 +897,7 @@ export const getFormattedBuilderEntries = (
 
 export const getDefaultEmptyEntry = (): EmptyEntry => ({
   field: '',
-  id: uuid.v4(),
+  id: uuid(),
   operator: OperatorEnum.INCLUDED,
   type: OperatorTypeEnum.MATCH,
   value: '',
@@ -906,7 +906,7 @@ export const getDefaultEmptyEntry = (): EmptyEntry => ({
 export const getDefaultNestedEmptyEntry = (): EmptyNestedEntry => ({
   entries: [],
   field: '',
-  id: uuid.v4(),
+  id: uuid(),
   type: OperatorTypeEnum.NESTED,
 });
 

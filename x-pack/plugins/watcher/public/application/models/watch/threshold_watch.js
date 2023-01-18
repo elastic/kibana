@@ -31,7 +31,7 @@ const DEFAULT_VALUES = {
  */
 export class ThresholdWatch extends BaseWatch {
   constructor(props = {}) {
-    props.id = props.id || uuid.v4();
+    props.id = props.id || uuid();
     props.type = WATCH_TYPES.THRESHOLD;
     super(props);
 

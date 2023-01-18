@@ -188,7 +188,7 @@ export const sessionPureTransitions: SessionPureTransitions = {
     (state) =>
     ({ appName }) => ({
       ...createSessionDefaultState(),
-      sessionId: uuid.v4(),
+      sessionId: uuid(),
       startTime: new Date(),
       appName,
     }),

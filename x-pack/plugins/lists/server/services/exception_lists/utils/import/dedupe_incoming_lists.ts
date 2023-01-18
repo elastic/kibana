@@ -22,7 +22,7 @@ export const getTupleErrorsAndUniqueExceptionLists = (
   const { errors, listsAcc } = lists.reduce(
     (acc, parsedExceptionList) => {
       if (parsedExceptionList instanceof Error) {
-        acc.errors.set(uuid.v4(), {
+        acc.errors.set(uuid(), {
           error: {
             message: `Error found importing exception list: ${parsedExceptionList.message}`,
             status_code: 400,
@@ -32,7 +32,7 @@ export const getTupleErrorsAndUniqueExceptionLists = (
       } else {
         const { list_id: listId } = parsedExceptionList;
         if (acc.listsAcc.has(listId)) {
-          acc.errors.set(uuid.v4(), {
+          acc.errors.set(uuid(), {
             error: {
               message: `More than one exception list with list_id: "${listId}" found in imports. The last list will be used.`,
               status_code: 400,

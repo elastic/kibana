@@ -229,7 +229,7 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
     caseIDs = [...new Set(caseIDs)];
 
     // create an Action ID and dispatch it to ES & Fleet Server
-    const actionID = uuid.v4();
+    const actionID = uuid();
 
     let fleetActionIndexResult;
     let logsEndpointActionsResult;

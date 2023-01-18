@@ -201,7 +201,7 @@ const getTemplateTimelineId = (
 
   return duplicate && timeline.timelineType === TimelineType.template
     ? // TODO: MOVE TO THE BACKEND
-      uuid.v4()
+      uuid()
     : timeline.templateTimelineId;
 };
 

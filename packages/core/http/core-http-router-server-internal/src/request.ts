@@ -131,8 +131,8 @@ export class CoreKibanaRequest<
     // KibanaRequest in conjunction with scoped Elasticsearch and SavedObjectsClient in order to pass credentials.
     // In these cases, the ids default to a newly generated UUID.
     const appState = request.app as KibanaRequestState | undefined;
-    this.id = appState?.requestId ?? uuid.v4();
-    this.uuid = appState?.requestUuid ?? uuid.v4();
+    this.id = appState?.requestId ?? uuid();
+    this.uuid = appState?.requestUuid ?? uuid();
     this.rewrittenUrl = appState?.rewrittenUrl;
 
     this.url = request.url ?? new URL('https://fake-request/url');

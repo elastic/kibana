@@ -1211,7 +1211,7 @@ if (doc['task.runAt'].size()!=0) {
     }
 
     function instantiateStoreWithMockedApiResponses({
-      taskManagerId = uuid.v4(),
+      taskManagerId = uuid(),
       definitions = taskDefinitions,
       getCapacity = () => 10,
       tasksClaimed,
@@ -1305,7 +1305,7 @@ function generateFakeTasks(count: number = 1) {
 function mockInstance(instance: Partial<ConcreteTaskInstance> = {}) {
   return Object.assign(
     {
-      id: uuid.v4(),
+      id: uuid(),
       taskType: 'bar',
       sequenceNumber: 32,
       primaryTerm: 32,

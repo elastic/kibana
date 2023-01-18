@@ -141,7 +141,7 @@ export class SampleTaskManagerFixturePlugin
         if (taskInstance.params && taskInstance.params.trackExecutionTimeline) {
           modifiedInstance.state = modifiedInstance.state || {};
           modifiedInstance.state.perf = modifiedInstance.state.perf || {};
-          modifiedInstance.state.perf.id = uuid.v4().replace(/-/gi, '_');
+          modifiedInstance.state.perf.id = uuid().replace(/-/gi, '_');
           performance.mark(`perfTask_schedule_${modifiedInstance.state.perf.id}`);
         }
 

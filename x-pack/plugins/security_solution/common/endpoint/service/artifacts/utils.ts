@@ -43,7 +43,7 @@ export const createExceptionListItemForCreate = (listId: string): CreateExceptio
     item_id: undefined,
     list_id: listId,
     meta: {
-      temporaryUuid: uuid.v4(),
+      temporaryUuid: uuid(),
     },
     name: '',
     namespace_type: 'agnostic',

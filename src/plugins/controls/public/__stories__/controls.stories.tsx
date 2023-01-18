@@ -98,7 +98,7 @@ export const ControlGroupStoryComponent: FC<{
         controlStyle: 'oneLine',
         chainingSystem: 'NONE', // a chaining system doesn't make sense in storybook since the controls aren't backed by elasticsearch
         panels: panels ?? {},
-        id: uuid.v4(),
+        id: uuid(),
         viewMode,
       });
 

@@ -121,7 +121,7 @@ export const previewRulesRoute = async (
         await listsContext?.getExceptionListClient().createEndpointList();
 
         const spaceId = siemClient.getSpaceId();
-        const previewId = uuid.v4();
+        const previewId = uuid();
         const username = security?.authc.getCurrentUser(request)?.username;
         const loggedStatusChanges: Array<RuleExecutionContext & StatusChangeArgs> = [];
         const previewRuleExecutionLogger = createPreviewRuleExecutionLogger(loggedStatusChanges);
@@ -238,7 +238,7 @@ export const previewRulesRoute = async (
             invocationStartTime = moment();
 
             ({ state: statePreview } = (await executor({
-              executionId: uuid.v4(),
+              executionId: uuid(),
               params,
               previousStartedAt,
               rule,

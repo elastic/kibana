@@ -14,7 +14,7 @@ journey('MonitorDetails', async ({ page, params }: { page: Page; params: any }) 
   recordVideo(page);
 
   const uptime = monitorManagementPageProvider({ page, kibanaUrl: params.kibanaUrl });
-  const name = `Test monitor ${uuid.v4()}`;
+  const name = `Test monitor ${uuid()}`;
 
   after(async () => {
     await uptime.enableMonitorManagement(false);

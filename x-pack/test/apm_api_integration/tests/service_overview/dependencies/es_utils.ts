@@ -42,7 +42,7 @@ export function createServiceDependencyDocs({
     agentName: string;
   };
 }) {
-  const spanId = uuid.v4();
+  const spanId = uuid();
 
   return [
     {

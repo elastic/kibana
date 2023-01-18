@@ -341,7 +341,7 @@ function getMockDataForWebhook(
       secrets,
       ...overwrites,
     },
-    id: uuid.v4(),
+    id: uuid(),
     type: 'action',
   };
 }
@@ -357,7 +357,7 @@ function getMockDataForEmail(
       secrets: { user: 'test', password: '123' },
       ...overwrites,
     },
-    id: uuid.v4(),
+    id: uuid(),
     type: 'action',
   };
 }
@@ -373,7 +373,7 @@ function getCasesMockData(
       secrets: {},
       ...overwrites,
     },
-    id: uuid.v4(),
+    id: uuid(),
     type: 'action',
   };
 }
@@ -389,7 +389,7 @@ function getMockData(
       secrets: {},
       ...overwrites,
     },
-    id: uuid.v4(),
+    id: uuid(),
     type: 'action',
   };
 }
@@ -405,7 +405,7 @@ function getMockDataForServiceNow716(
       secrets: { user: 'test', password: '123' },
       ...overwrites,
     },
-    id: uuid.v4(),
+    id: uuid(),
     type: 'action',
   };
 }

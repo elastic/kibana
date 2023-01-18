@@ -50,8 +50,8 @@ export function CasesCreateViewServiceProvider(
      * Doesn't do navigation. Only works if you are already inside a cases app page.
      */
     async createCase({
-      title = 'test-' + uuid.v4(),
-      description = 'desc' + uuid.v4(),
+      title = 'test-' + uuid(),
+      description = 'desc' + uuid(),
       tag = 'tagme',
       severity = CaseSeverity.LOW,
       owner,

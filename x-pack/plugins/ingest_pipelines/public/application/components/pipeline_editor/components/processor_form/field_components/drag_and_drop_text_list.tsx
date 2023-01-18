@@ -74,8 +74,8 @@ function DragAndDropTextListComponent({
   textDeserializer,
   textSerializer,
 }: Props): JSX.Element {
-  const [droppableId] = useState(() => uuid.v4());
-  const [firstItemId] = useState(() => uuid.v4());
+  const [droppableId] = useState(() => uuid());
+  const [firstItemId] = useState(() => uuid());
 
   const onDragEnd = useCallback(
     ({ source, destination }) => {

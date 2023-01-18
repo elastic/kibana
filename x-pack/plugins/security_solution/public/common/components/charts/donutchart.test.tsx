@@ -75,7 +75,7 @@ describe('DonutChart', () => {
     totalCount: parsedMockAlertsData?.open?.total,
     legendItems: (['critical', 'high', 'medium', 'low'] as Severity[]).map((d) => ({
       color: testColors[d],
-      dataProviderId: escapeDataProviderId(`draggable-legend-item-${uuid.v4()}-${d}`),
+      dataProviderId: escapeDataProviderId(`draggable-legend-item-${uuid()}-${d}`),
       timelineId: undefined,
       field: 'kibana.alert.severity',
       value: d,

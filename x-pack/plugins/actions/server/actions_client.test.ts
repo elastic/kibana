@@ -2193,7 +2193,7 @@ describe('execute()', () => {
   });
 
   test('calls the actionExecutor with the appropriate parameters', async () => {
-    const actionId = uuid.v4();
+    const actionId = uuid();
     actionExecutor.execute.mockResolvedValue({ status: 'ok', actionId });
     await expect(
       actionsClient.execute({
@@ -2285,7 +2285,7 @@ describe('enqueueExecution()', () => {
         return AuthorizationMode.RBAC;
       });
       await actionsClient.enqueueExecution({
-        id: uuid.v4(),
+        id: uuid(),
         params: {},
         spaceId: 'default',
         executionId: '123abc',
@@ -2304,7 +2304,7 @@ describe('enqueueExecution()', () => {
 
       await expect(
         actionsClient.enqueueExecution({
-          id: uuid.v4(),
+          id: uuid(),
           params: {},
           spaceId: 'default',
           executionId: '123abc',
@@ -2321,7 +2321,7 @@ describe('enqueueExecution()', () => {
       });
 
       await actionsClient.enqueueExecution({
-        id: uuid.v4(),
+        id: uuid(),
         params: {},
         spaceId: 'default',
         executionId: '123abc',
@@ -2337,7 +2337,7 @@ describe('enqueueExecution()', () => {
 
   test('calls the executionEnqueuer with the appropriate parameters', async () => {
     const opts = {
-      id: uuid.v4(),
+      id: uuid(),
       params: { baz: false },
       spaceId: 'default',
       executionId: '123abc',
@@ -2357,14 +2357,14 @@ describe('bulkEnqueueExecution()', () => {
       });
       await actionsClient.bulkEnqueueExecution([
         {
-          id: uuid.v4(),
+          id: uuid(),
           params: {},
           spaceId: 'default',
           executionId: '123abc',
           apiKey: null,
         },
         {
-          id: uuid.v4(),
+          id: uuid(),
           params: {},
           spaceId: 'default',
           executionId: '456def',
@@ -2385,14 +2385,14 @@ describe('bulkEnqueueExecution()', () => {
       await expect(
         actionsClient.bulkEnqueueExecution([
           {
-            id: uuid.v4(),
+            id: uuid(),
             params: {},
             spaceId: 'default',
             executionId: '123abc',
             apiKey: null,
           },
           {
-            id: uuid.v4(),
+            id: uuid(),
             params: {},
             spaceId: 'default',
             executionId: '456def',
@@ -2411,14 +2411,14 @@ describe('bulkEnqueueExecution()', () => {
 
       await actionsClient.bulkEnqueueExecution([
         {
-          id: uuid.v4(),
+          id: uuid(),
           params: {},
           spaceId: 'default',
           executionId: '123abc',
           apiKey: null,
         },
         {
-          id: uuid.v4(),
+          id: uuid(),
           params: {},
           spaceId: 'default',
           executionId: '456def',
@@ -2440,14 +2440,14 @@ describe('bulkEnqueueExecution()', () => {
     });
     const opts = [
       {
-        id: uuid.v4(),
+        id: uuid(),
         params: {},
         spaceId: 'default',
         executionId: '123abc',
         apiKey: null,
       },
       {
-        id: uuid.v4(),
+        id: uuid(),
         params: {},
         spaceId: 'default',
         executionId: '456def',
@@ -2565,6 +2565,6 @@ describe('isPreconfigured()', () => {
       }),
     });
 
-    expect(actionsClient.isPreconfigured(uuid.v4())).toEqual(false);
+    expect(actionsClient.isPreconfigured(uuid())).toEqual(false);
   });
 });

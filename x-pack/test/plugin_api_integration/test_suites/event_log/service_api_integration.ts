@@ -232,8 +232,8 @@ export default function ({ getService }: FtrProviderContext) {
   }
 
   async function getTestProviderAction() {
-    const provider = `provider-${uuid.v4()}`;
-    const action = `action-${uuid.v4()}`;
+    const provider = `provider-${uuid()}`;
+    const action = `action-${uuid()}`;
 
     const response = await isProviderActionRegistered(provider, action);
     if (!response.body.isProviderActionRegistered) {
@@ -244,7 +244,7 @@ export default function ({ getService }: FtrProviderContext) {
   }
 
   function getTestSavedObject() {
-    return { type: 'event_log_test', id: uuid.v4(), rel: 'primary' };
+    return { type: 'event_log_test', id: uuid(), rel: 'primary' };
   }
 
   async function logEvent(event: IEvent, savedObjectId: string) {

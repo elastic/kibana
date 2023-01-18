@@ -65,7 +65,7 @@ export const createEmbeddable = async (
   const input: MapEmbeddableInput = {
     title: i18n.MAP_TITLE,
     attributes: { title: '' },
-    id: uuid.v4(),
+    id: uuid(),
     filters,
     hidePanelTitles: true,
     query,

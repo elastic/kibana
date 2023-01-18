@@ -178,7 +178,7 @@ export class ClonePanelAction implements Action<ClonePanelActionContext> {
         type: embeddable.type,
         explicitInput: {
           ...(await embeddable.getInputAsValueType()),
-          id: uuid.v4(),
+          id: uuid(),
           title: newTitle,
           hidePanelTitles: panelToClone.explicitInput.hidePanelTitles,
         },
@@ -188,7 +188,7 @@ export class ClonePanelAction implements Action<ClonePanelActionContext> {
         type: embeddable.type,
         explicitInput: {
           ...panelToClone.explicitInput,
-          id: uuid.v4(),
+          id: uuid(),
         },
       };
       if (panelToClone.explicitInput.savedObjectId) {

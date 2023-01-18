@@ -52,7 +52,7 @@ export async function resolveInstanceUuid({
     }
   }
   if (uuidFromFile === undefined) {
-    const newUuid = uuid.v4();
+    const newUuid = uuid();
     // no uuid either in config or file, we need to generate and write it.
     logger.debug(`Setting new Kibana instance UUID: ${newUuid}`);
     await writeUuidToFile(uuidFilePath, newUuid);

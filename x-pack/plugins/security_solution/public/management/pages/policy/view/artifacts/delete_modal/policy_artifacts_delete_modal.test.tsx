@@ -41,7 +41,7 @@ describe.each(listType)('Policy details %s artifact delete modal', (type) => {
   let onCloseMock: () => jest.Mock;
 
   beforeEach(() => {
-    policyId = uuid.v4();
+    policyId = uuid();
     mockedContext = createAppRootMockRenderer();
     exception = getExceptionListItemSchemaMock();
     onCloseMock = jest.fn();

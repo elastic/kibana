@@ -224,7 +224,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
             count: 1,
           };
     onSaveSchedule({
-      id: initialSchedule?.id ?? uuid.v4(),
+      id: initialSchedule?.id ?? uuid(),
       rRule: {
         dtstart: startDT.toISOString(),
         tzid: selectedTimezone[0].label ?? defaultTz,

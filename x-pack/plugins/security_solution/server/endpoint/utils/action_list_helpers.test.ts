@@ -337,7 +337,7 @@ describe('action helpers', () => {
       );
     });
     it('should query with actionIds and elasticAgentIds when provided', async () => {
-      const actionIds = [uuid.v4(), uuid.v4()];
+      const actionIds = [uuid(), uuid()];
       const elasticAgentIds = ['123', '456'];
       const esClient = mockScopedEsClient.asInternalUser;
       applyActionListEsSearchMock(esClient);

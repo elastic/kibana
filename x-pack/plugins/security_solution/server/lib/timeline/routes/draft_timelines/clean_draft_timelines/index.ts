@@ -74,7 +74,7 @@ export const cleanDraftTimelinesRoute = (
           request.body.timelineType === TimelineType.template
             ? {
                 timelineType: request.body.timelineType,
-                templateTimelineId: uuid.v4(),
+                templateTimelineId: uuid(),
                 templateTimelineVersion: 1,
               }
             : {};

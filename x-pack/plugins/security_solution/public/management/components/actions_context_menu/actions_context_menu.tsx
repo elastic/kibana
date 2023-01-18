@@ -41,7 +41,7 @@ export const ActionsContextMenu = memo<ActionsContextMenuProps>(
         return (
           <ContextMenuItemNavByRouter
             {...itemProps}
-            key={uuid.v4()}
+            key={uuid()}
             onClick={(ev) => {
               handleCloseMenu();
               if (itemProps.onClick) {

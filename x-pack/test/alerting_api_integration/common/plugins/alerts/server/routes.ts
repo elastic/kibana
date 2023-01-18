@@ -326,14 +326,14 @@ export function defineRoutes(
         const createAPIKeyResult =
           security &&
           (await security.authc.apiKeys.grantAsInternalUser(req, {
-            name: `alerts_fixture:enqueue_action:${uuid.v4()}`,
+            name: `alerts_fixture:enqueue_action:${uuid()}`,
             role_descriptors: {},
           }));
 
         await actionsClient.enqueueExecution({
           id: req.params.id,
           spaceId: spaces ? spaces.spacesService.getSpaceId(req) : 'default',
-          executionId: uuid.v4(),
+          executionId: uuid(),
           apiKey: createAPIKeyResult
             ? Buffer.from(`${createAPIKeyResult.id}:${createAPIKeyResult.api_key}`).toString(
                 'base64'

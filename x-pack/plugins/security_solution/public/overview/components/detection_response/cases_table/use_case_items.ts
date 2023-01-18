@@ -46,7 +46,7 @@ export const useCaseItems: UseCaseItems = ({ skip }) => {
   const [updatedAt, setUpdatedAt] = useState(Date.now());
   const [items, setItems] = useState<CaseItem[]>([]);
   // create a unique, but stable (across re-renders) query id
-  const uniqueQueryId = useMemo(() => `useCaseItems-${uuid.v4()}`, []);
+  const uniqueQueryId = useMemo(() => `useCaseItems-${uuid()}`, []);
 
   useEffect(() => {
     let isSubscribed = true;

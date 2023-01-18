@@ -293,7 +293,7 @@ function getExceedsAlertLimitRuleType() {
       const alertsToCreate = limit ? limit : 25;
 
       range(alertsToCreate)
-        .map(() => uuid.v4())
+        .map(() => uuid())
         .forEach((id: string) => {
           services.alertFactory.create(id).scheduleActions('default');
         });

@@ -13,7 +13,7 @@ import { taskStoreMock } from '../task_store.mock';
 describe('removeIfExists', () => {
   test('removes the task by its ID', async () => {
     const ts = taskStoreMock.create({});
-    const id = uuid.v4();
+    const id = uuid();
 
     expect(await removeIfExists(ts, id)).toBe(undefined);
 
@@ -22,7 +22,7 @@ describe('removeIfExists', () => {
 
   test('handles 404 errors caused by the task not existing', async () => {
     const ts = taskStoreMock.create({});
-    const id = uuid.v4();
+    const id = uuid();
 
     ts.remove.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError('task', id));
 
@@ -33,9 +33,9 @@ describe('removeIfExists', () => {
 
   test('throws if any other errro is caused by task removal', async () => {
     const ts = taskStoreMock.create({});
-    const id = uuid.v4();
+    const id = uuid();
 
-    const error = SavedObjectsErrorHelpers.createInvalidVersionError(uuid.v4());
+    const error = SavedObjectsErrorHelpers.createInvalidVersionError(uuid());
     ts.remove.mockRejectedValue(error);
 
     expect(removeIfExists(ts, id)).rejects.toBe(error);

@@ -140,7 +140,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     const { to, from, deleteQuery, setQuery } = useGlobalTime(false);
 
     // create a unique, but stable (across re-renders) query id
-    const uniqueQueryId = useMemo(() => `${DETECTIONS_HISTOGRAM_ID}-${uuid.v4()}`, []);
+    const uniqueQueryId = useMemo(() => `${DETECTIONS_HISTOGRAM_ID}-${uuid()}`, []);
     const [isInitialLoading, setIsInitialLoading] = useState(true);
     const [isInspectDisabled, setIsInspectDisabled] = useState(false);
     const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
@@ -229,7 +229,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
               color: i < defaultLegendColors.length ? defaultLegendColors[i] : undefined,
               count: showCountsInLegend ? bucket.doc_count : undefined,
               dataProviderId: escapeDataProviderId(
-                `draggable-legend-item-${uuid.v4()}-${selectedStackByOption}-${bucket.key}`
+                `draggable-legend-item-${uuid()}-${selectedStackByOption}-${bucket.key}`
               ),
               field: selectedStackByOption,
               timelineId,

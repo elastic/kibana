@@ -48,7 +48,7 @@ export const getInitialExceptionFromEvent = (data?: Ecs): CreateExceptionListIte
   item_id: undefined,
   list_id: ENDPOINT_EVENT_FILTERS_LIST_ID,
   meta: {
-    temporaryUuid: uuid.v4(),
+    temporaryUuid: uuid(),
   },
   name: '',
   namespace_type: 'agnostic',

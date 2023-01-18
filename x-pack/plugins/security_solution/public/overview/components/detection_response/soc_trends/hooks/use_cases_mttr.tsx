@@ -37,7 +37,7 @@ export const useCasesMttr = ({
   const {
     services: { cases },
   } = useKibana();
-  const uniqueQueryId = useMemo(() => `useCasesMttr-${uuid.v4()}`, []);
+  const uniqueQueryId = useMemo(() => `useCasesMttr-${uuid()}`, []);
   const [state, dispatch] = useReducer(statReducer, {
     description: i18n.CASES_MTTR_DESCRIPTION,
     isLoading: true,

@@ -178,8 +178,8 @@ describe('Policy details artifacts flyout', () => {
   });
 
   describe('when submitting the form', () => {
-    const FIRST_ONE_NAME = uuid.v4();
-    const SECOND_ONE_NAME = uuid.v4();
+    const FIRST_ONE_NAME = uuid();
+    const SECOND_ONE_NAME = uuid();
     const testTags = ['policy:1234', 'non-policy-tag', 'policy:4321'];
     let exceptions: FoundExceptionListItemSchema;
 
@@ -190,12 +190,12 @@ describe('Policy details artifacts flyout', () => {
         data: [
           getExceptionListItemSchemaMock({
             name: FIRST_ONE_NAME,
-            id: uuid.v4(),
+            id: uuid(),
             tags: testTags,
           }),
           getExceptionListItemSchemaMock({
             name: SECOND_ONE_NAME,
-            id: uuid.v4(),
+            id: uuid(),
             tags: testTags,
           }),
         ],

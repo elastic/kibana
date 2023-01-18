@@ -33,7 +33,7 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
     });
 
     it('creates a case from the stack management page', async () => {
-      const caseTitle = 'test-' + uuid.v4();
+      const caseTitle = 'test-' + uuid();
       await cases.create.openCreateCasePage();
       await cases.create.createCase({
         title: caseTitle,
@@ -73,7 +73,7 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
       });
 
       it('creates a case with assignees', async () => {
-        const caseTitle = 'test-' + uuid.v4();
+        const caseTitle = 'test-' + uuid();
         await cases.create.openCreateCasePage();
 
         await cases.create.setTitle(caseTitle);

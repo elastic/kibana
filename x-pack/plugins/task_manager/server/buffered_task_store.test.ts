@@ -95,7 +95,7 @@ describe('Buffered Task Store', () => {
 
 function mockTask() {
   return {
-    id: `task_${uuid.v4()}`,
+    id: `task_${uuid()}`,
     attempts: 0,
     schedule: undefined,
     params: { hello: 'world' },

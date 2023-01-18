@@ -179,7 +179,7 @@ describe.skip('Response actions history', () => {
 
     mockUseGetEndpointsList.mockReturnValue({
       data: Array.from({ length: 50 }).map(() => {
-        const id = uuid.v4();
+        const id = uuid();
         return {
           id,
           name: `Host-${id.slice(0, 8)}`,

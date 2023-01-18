@@ -30,7 +30,7 @@ const DEFAULT_EXCEPTION_LIST_SO: ExceptionListSoSchema = {
   name: 'name',
   os_types: [],
   tags: [],
-  tie_breaker_id: uuid.v4(),
+  tie_breaker_id: uuid(),
   type: 'endpoint',
   updated_by: 'user',
   version: undefined,

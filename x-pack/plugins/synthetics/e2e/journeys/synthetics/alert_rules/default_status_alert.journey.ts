@@ -143,7 +143,7 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
   });
 
   step('Adds another down monitor and it auto adds the alert', async () => {
-    const monitorId = uuid.v4();
+    const monitorId = uuid();
     const name = `Test Monitor 2`;
     configId2 = await services.addTestMonitor(name, {
       type: 'http',

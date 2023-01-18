@@ -79,7 +79,7 @@ export const setTimeline = (
     templateTimelineVersion: isTemplateTimeline
       ? parsedTimeline.templateTimelineVersion ?? 1
       : null,
-    templateTimelineId: isTemplateTimeline ? parsedTimeline.templateTimelineId ?? uuid.v4() : null,
+    templateTimelineId: isTemplateTimeline ? parsedTimeline.templateTimelineId ?? uuid() : null,
   };
 };
 

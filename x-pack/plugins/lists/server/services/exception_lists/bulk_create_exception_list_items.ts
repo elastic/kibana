@@ -49,7 +49,7 @@ export const bulkCreateExceptionListItems = async ({
         name: item.name,
         os_types: item.os_types,
         tags: item.tags,
-        tie_breaker_id: tieBreaker ?? uuid.v4(),
+        tie_breaker_id: tieBreaker ?? uuid(),
         type: item.type,
         updated_by: user,
         version: undefined,

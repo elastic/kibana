@@ -10,9 +10,9 @@ import { v4 as uuid } from 'uuid';
 
 export function generateRandomCaseWithoutConnector(): CasePostRequest {
   return {
-    title: 'random-' + uuid.v4(),
-    tags: ['test', uuid.v4()],
-    description: 'This is a description with id: ' + uuid.v4(),
+    title: 'random-' + uuid(),
+    tags: ['test', uuid()],
+    description: 'This is a description with id: ' + uuid(),
     connector: {
       id: 'none',
       name: 'none',

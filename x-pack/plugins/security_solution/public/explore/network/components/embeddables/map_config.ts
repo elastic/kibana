@@ -117,7 +117,7 @@ export const getLayerList = (indexPatternIds: IndexPatternMapping[]) => {
   return [
     {
       sourceDescriptor: { type: SOURCE_TYPES.EMS_TMS, isAutoSelect: true },
-      id: uuid.v4(),
+      id: uuid(),
       label: null,
       minZoom: 0,
       maxZoom: 24,
@@ -128,7 +128,7 @@ export const getLayerList = (indexPatternIds: IndexPatternMapping[]) => {
     },
     ...indexPatternIds.reduce((acc: object[], { title, id }) => {
       const layerGroupDescriptor = {
-        id: uuid.v4(),
+        id: uuid(),
         label: title,
         sourceDescriptor: null,
         type: LAYER_TYPE.LAYER_GROUP,
@@ -171,7 +171,7 @@ export const getSourceLayer = (
   layerDetails: LayerMappingDetails
 ) => ({
   sourceDescriptor: {
-    id: uuid.v4(),
+    id: uuid(),
     type: 'ES_SEARCH',
     applyGlobalQuery: true,
     geoField: layerDetails.geoField,
@@ -208,7 +208,7 @@ export const getSourceLayer = (
       },
     },
   },
-  id: uuid.v4(),
+  id: uuid(),
   parent: parentId,
   label: `${indexPatternTitle} | ${layerDetails.label}`,
   minZoom: 0,
@@ -237,7 +237,7 @@ export const getDestinationLayer = (
   layerDetails: LayerMappingDetails
 ) => ({
   sourceDescriptor: {
-    id: uuid.v4(),
+    id: uuid(),
     type: 'ES_SEARCH',
     scalingType: SCALING_TYPES.LIMIT,
     applyGlobalQuery: true,
@@ -275,7 +275,7 @@ export const getDestinationLayer = (
       },
     },
   },
-  id: uuid.v4(),
+  id: uuid(),
   parent: parentId,
   label: `${indexPatternTitle} | ${layerDetails.label}`,
   minZoom: 0,
@@ -304,7 +304,7 @@ export const getLineLayer = (
   sourceDescriptor: {
     type: SOURCE_TYPES.ES_PEW_PEW,
     applyGlobalQuery: true,
-    id: uuid.v4(),
+    id: uuid(),
     indexPatternId,
     sourceGeoField: layerDetails.source.geoField,
     destGeoField: layerDetails.destination.geoField,
@@ -362,7 +362,7 @@ export const getLineLayer = (
       },
     },
   },
-  id: uuid.v4(),
+  id: uuid(),
   parent: parentId,
   label: `${indexPatternTitle} | ${i18n.LINE_LAYER}`,
   minZoom: 0,

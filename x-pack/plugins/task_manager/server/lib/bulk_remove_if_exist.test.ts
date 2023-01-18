@@ -11,7 +11,7 @@ import { bulkRemoveIfExist } from './bulk_remove_if_exist';
 import { taskStoreMock } from '../task_store.mock';
 
 describe('removeIfExists', () => {
-  const ids = [uuid.v4(), uuid.v4()];
+  const ids = [uuid(), uuid()];
 
   test('removes the tasks by its IDs', async () => {
     const ts = taskStoreMock.create({});
@@ -34,7 +34,7 @@ describe('removeIfExists', () => {
   test('throws if any other error is caused by task removal', async () => {
     const ts = taskStoreMock.create({});
 
-    const error = SavedObjectsErrorHelpers.createInvalidVersionError(uuid.v4());
+    const error = SavedObjectsErrorHelpers.createInvalidVersionError(uuid());
     ts.bulkRemove.mockRejectedValue(error);
 
     expect(bulkRemoveIfExist(ts, ids)).rejects.toBe(error);

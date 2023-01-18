@@ -48,7 +48,7 @@ export const ControlGroupRenderer = ({
 }: ControlGroupRendererProps) => {
   const controlGroupRef = useRef(null);
   const [controlGroup, setControlGroup] = useState<ControlGroupContainer>();
-  const id = useMemo(() => uuid.v4(), []);
+  const id = useMemo(() => uuid(), []);
   /**
    * Use Lifecycles to load initial control group container
    */

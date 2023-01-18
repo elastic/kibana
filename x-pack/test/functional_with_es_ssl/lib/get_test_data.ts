@@ -8,7 +8,7 @@
 import { v4 as uuid } from 'uuid';
 
 export function generateUniqueKey() {
-  return uuid.v4().replace(/-/g, '');
+  return uuid().replace(/-/g, '');
 }
 
 export function getTestAlertData(overwrites = {}) {

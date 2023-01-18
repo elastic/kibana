@@ -11,7 +11,7 @@ import { v4 as uuid } from 'uuid';
 
 describe('isTaskSavedObjectNotFoundError', () => {
   test('identifies SavedObjects Not Found errors', () => {
-    const id = uuid.v4();
+    const id = uuid();
     // ensure the error created by SO parses as a string with the format we expect
     expect(
       `${SavedObjectsErrorHelpers.createGenericNotFoundError('task', id)}`.includes(`task/${id}`)
@@ -26,7 +26,7 @@ describe('isTaskSavedObjectNotFoundError', () => {
   });
 
   test('identifies generic errors', () => {
-    const id = uuid.v4();
+    const id = uuid();
     expect(isTaskSavedObjectNotFoundError(new Error(`not found`), id)).toBe(false);
   });
 });

@@ -11,17 +11,17 @@ import { unwrapPromise, asOk, asErr } from './result_type';
 describe(`Result`, () => {
   describe(`unwrapPromise`, () => {
     test(`unwraps OKs from the result`, async () => {
-      const uniqueId = uuid.v4();
+      const uniqueId = uuid();
       expect(await unwrapPromise(Promise.resolve(asOk(uniqueId)))).toEqual(uniqueId);
     });
 
     test(`unwraps Errs from the result`, async () => {
-      const uniqueId = uuid.v4();
+      const uniqueId = uuid();
       expect(unwrapPromise(Promise.resolve(asErr(uniqueId)))).rejects.toEqual(uniqueId);
     });
 
     test(`unwraps Errs from the result when promise rejects`, async () => {
-      const uniqueId = uuid.v4();
+      const uniqueId = uuid();
       expect(unwrapPromise(Promise.reject(asErr(uniqueId)))).rejects.toEqual(uniqueId);
     });
   });

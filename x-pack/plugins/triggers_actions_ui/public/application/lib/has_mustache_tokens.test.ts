@@ -15,7 +15,7 @@ describe('hasMustacheTokens', () => {
   });
 
   test('returns false for string without tokens', () => {
-    expect(hasMustacheTokens(`some random string ${uuid.v4()}`)).toBe(false);
+    expect(hasMustacheTokens(`some random string ${uuid()}`)).toBe(false);
   });
 
   test('returns true when a template token is present', () => {

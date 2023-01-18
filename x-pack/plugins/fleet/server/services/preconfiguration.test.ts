@@ -108,7 +108,7 @@ function getPutPreconfiguredPackagesMock() {
     const { id } = options!;
     mockConfiguredPolicies.set(id, attributes);
     return {
-      id: id || uuid.v4(),
+      id: id || uuid(),
       attributes,
       type,
       references: [],

@@ -322,7 +322,7 @@ export class TaskScheduling {
         task
       );
     }
-    const id = uuid.v4();
+    const id = uuid();
     const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
       ...options,
       taskInstance: task,

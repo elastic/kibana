@@ -43,8 +43,8 @@ const mockErrorLogResponse = {
 };
 
 const mockExecution: any = {
-  id: uuid.v4(),
-  rule_id: uuid.v4(),
+  id: uuid(),
+  rule_id: uuid(),
   timestamp: '2022-03-20T07:40:44-07:00',
   duration: 5000000,
   status: 'success',

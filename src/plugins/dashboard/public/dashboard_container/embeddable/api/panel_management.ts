@@ -52,7 +52,7 @@ export async function replacePanel(
     // replace panel can be called with generateNewId in order to totally destroy and recreate the embeddable
     panels = { ...this.input.panels };
     delete panels[previousPanelState.explicitInput.id];
-    const newId = uuid.v4();
+    const newId = uuid();
     panels[newId] = {
       ...previousPanelState,
       ...newPanelState,
@@ -98,7 +98,7 @@ export function showPlaceholderUntil<TPlacementMethodArgs extends IPanelPlacemen
   const originalPanelState = {
     type: PLACEHOLDER_EMBEDDABLE,
     explicitInput: {
-      id: uuid.v4(),
+      id: uuid(),
       disabledActions: [
         'ACTION_CUSTOMIZE_PANEL',
         'CUSTOM_TIME_RANGE',

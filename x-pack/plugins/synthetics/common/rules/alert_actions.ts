@@ -67,7 +67,7 @@ export function populateAlertActions({
 
     switch (aId.actionTypeId) {
       case PAGER_DUTY_ACTION_ID:
-        const dedupKey = uuid.v4();
+        const dedupKey = uuid();
         action.params = getPagerDutyActionParams(translations, dedupKey);
         recoveredAction.params = getPagerDutyActionParams(translations, dedupKey, true);
         actions.push(recoveredAction);

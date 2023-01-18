@@ -21,7 +21,7 @@ import { ProcessImpl } from './hooks';
 // This is used to ensure we always have a record for a session leader, as well as
 // a parent record for potentially orphaned processes
 export function inferProcessFromLeaderInfo(sourceEvent?: ProcessEvent, leader?: ProcessFields) {
-  const entityId = leader?.entity_id || uuid.v4();
+  const entityId = leader?.entity_id || uuid();
   const process = new ProcessImpl(entityId);
 
   if (sourceEvent && leader) {

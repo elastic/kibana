@@ -140,7 +140,7 @@ export const KibanaDeprecations = withRouter(({ history }: RouteComponentProps) 
         // Only show deprecations in the table that fetched successfully
         filteredDeprecations.push({
           ...deprecation,
-          id: uuid.v4(), // Associate an unique ID with each deprecation to track resolution state
+          id: uuid(), // Associate an unique ID with each deprecation to track resolution state
           filterType: deprecation.deprecationType ?? 'uncategorized', // deprecationType is currently optional, in order to correctly handle sort/filter, we default any undefined types to "uncategorized"
         });
       });

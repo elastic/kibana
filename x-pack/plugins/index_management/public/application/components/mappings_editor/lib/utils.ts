@@ -37,7 +37,7 @@ import {
 import { FieldConfig } from '../shared_imports';
 import { TreeItem } from '../components/tree';
 
-export const getUniqueId = () => uuid.v4();
+export const getUniqueId = () => uuid();
 
 export const getChildFieldsName = (dataType: DataType): ChildFieldName | undefined => {
   if (dataType === 'text' || dataType === 'keyword' || dataType === 'ip') {

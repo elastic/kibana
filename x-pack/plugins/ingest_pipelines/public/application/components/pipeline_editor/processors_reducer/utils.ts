@@ -31,7 +31,7 @@ export const duplicateProcessor = (sourceProcessor: ProcessorInternal): Processo
   return {
     ...sourceProcessor,
     onFailure,
-    id: uuid.v4(),
+    id: uuid(),
     options: {
       ...sourceProcessor.options,
     },

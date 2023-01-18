@@ -32,7 +32,7 @@ export async function createAgentAction(
   esClient: ElasticsearchClient,
   newAgentAction: NewAgentAction
 ): Promise<AgentAction> {
-  const actionId = newAgentAction.id ?? uuid.v4();
+  const actionId = newAgentAction.id ?? uuid();
   const timestamp = new Date().toISOString();
   const body: FleetServerAgentAction = {
     '@timestamp': timestamp,
@@ -52,7 +52,7 @@ export async function createAgentAction(
 
   await esClient.create({
     index: AGENT_ACTIONS_INDEX,
-    id: uuid.v4(),
+    id: uuid(),
     body,
     refresh: 'wait_for',
   });
@@ -69,7 +69,7 @@ export async function bulkCreateAgentActions(
   newAgentActions: NewAgentAction[]
 ): Promise<AgentAction[]> {
   const actions = newAgentActions.map((newAgentAction) => {
-    const id = newAgentAction.id ?? uuid.v4();
+    const id = newAgentAction.id ?? uuid();
     return {
       id,
       ...newAgentAction,
@@ -157,7 +157,7 @@ export async function bulkCreateAgentActionResults(
     return [
       {
         create: {
-          _id: uuid.v4(),
+          _id: uuid(),
         },
       },
       body,
@@ -254,7 +254,7 @@ export async function cancelAgentAction(esClient: ElasticsearchClient, actionId:
     throw new AgentActionNotFoundError('Action not found');
   }
 
-  const cancelActionId = uuid.v4();
+  const cancelActionId = uuid();
   const now = new Date().toISOString();
   for (const hit of res.hits.hits) {
     if (!hit._source || !hit._source.agents || !hit._source.action_id) {

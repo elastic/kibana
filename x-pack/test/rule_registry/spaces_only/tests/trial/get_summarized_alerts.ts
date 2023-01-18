@@ -186,7 +186,7 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
 
       // Execute the rule the first time - this creates a new alert
       const preExecution1Start = new Date();
-      const execution1Uuid = uuid.v4();
+      const execution1Uuid = uuid();
       const execution1Result = await executor({
         ...options,
         startedAt: new Date(),
@@ -206,7 +206,7 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
 
       // Execute again to update the existing alert
       const preExecution2Start = new Date();
-      const execution2Uuid = uuid.v4();
+      const execution2Uuid = uuid();
       const execution2Result = await executor({
         ...options,
         startedAt: new Date(),
@@ -225,7 +225,7 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
       expect(execution2SummarizedAlerts.recovered.count).to.eql(0);
 
       // Execute again to recover the alert
-      const execution3Uuid = uuid.v4();
+      const execution3Uuid = uuid();
       await executor({
         ...options,
         startedAt: new Date(),
@@ -273,7 +273,7 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
     });
 
     it(`shouldn't return muted alerts`, async () => {
-      const ruleId = uuid.v4();
+      const ruleId = uuid();
       const id1 = 'host-01';
       const id2 = 'host-02';
 
@@ -343,7 +343,7 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
       ) => ({ wrapped: { shouldTriggerAlert }, trackedAlerts: alerts, trackedAlertsRecovered: {} });
 
       // Execute the rule the first time - this creates a new alert
-      const execution1Uuid = uuid.v4();
+      const execution1Uuid = uuid();
       await executor({
         ...options,
         startedAt: new Date(),

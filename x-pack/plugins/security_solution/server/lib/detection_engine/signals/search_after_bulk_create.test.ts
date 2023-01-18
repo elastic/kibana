@@ -55,7 +55,7 @@ describe('searchAfterAndBulkCreate', () => {
   let inputIndexPattern: string[] = [];
   let listClient = listMock.getListClient();
   const ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
-  const someGuids = Array.from({ length: 13 }).map(() => uuid.v4());
+  const someGuids = Array.from({ length: 13 }).map(() => uuid());
   const sampleParams = getQueryRuleParams();
   const queryCompleteRule = getCompleteRuleMock<QueryRuleParams>(sampleParams);
   const defaultFilter = {

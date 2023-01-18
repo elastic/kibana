@@ -159,7 +159,7 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
       let agentPolicy: CreateAgentPolicyResponse['item'];
       try {
         const newAgentPolicyData: CreateAgentPolicyRequest['body'] = {
-          name: `East Coast ${uuid.v4()}`,
+          name: `East Coast ${uuid()}`,
           description: 'East Coast call center',
           namespace: 'default',
         };
@@ -180,7 +180,7 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
       let packagePolicy: CreatePackagePolicyResponse['item'];
       try {
         const newPackagePolicyData: CreatePackagePolicyRequest['body'] = {
-          name: `Protect East Coast ${uuid.v4()}`,
+          name: `Protect East Coast ${uuid()}`,
           description: 'Protect the worlds data - but in the East Coast',
           policy_id: agentPolicy!.id,
           enabled: true,

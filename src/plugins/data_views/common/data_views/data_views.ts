@@ -916,7 +916,7 @@ export class DataViewsService {
     const metaFields = await this.config.get<string[] | undefined>(META_FIELDS);
 
     const spec = {
-      id: id ?? uuid.v4(),
+      id: id ?? uuid(),
       title,
       name: name || title,
       ...restOfSpec,

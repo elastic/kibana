@@ -52,7 +52,7 @@ export const createEndpointList = async ({
         name: ENDPOINT_LIST_NAME,
         os_types: [],
         tags: [],
-        tie_breaker_id: tieBreaker ?? uuid.v4(),
+        tie_breaker_id: tieBreaker ?? uuid(),
         type: 'endpoint',
         updated_by: user,
         version,

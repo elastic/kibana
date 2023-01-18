@@ -277,7 +277,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('handles private location errors and immediately deletes monitor if integration policy is unable to be saved', async () => {
-      const name = `Monitor with private location ${uuid.v4()}`;
+      const name = `Monitor with private location ${uuid()}`;
       const newMonitor = {
         name,
         type: 'http',
@@ -294,8 +294,8 @@ export default function ({ getService }: FtrProviderContext) {
       const username = 'admin';
       const roleName = `synthetics_admin`;
       const password = `${username}-password`;
-      const SPACE_ID = `test-space-${uuid.v4()}`;
-      const SPACE_NAME = `test-space-name ${uuid.v4()}`;
+      const SPACE_ID = `test-space-${uuid()}`;
+      const SPACE_NAME = `test-space-name ${uuid()}`;
 
       try {
         await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
@@ -343,8 +343,8 @@ export default function ({ getService }: FtrProviderContext) {
       const username = 'admin';
       const password = `${username}-password`;
       const roleName = 'uptime-role';
-      const SPACE_ID = `test-space-${uuid.v4()}`;
-      const SPACE_NAME = `test-space-name ${uuid.v4()}`;
+      const SPACE_ID = `test-space-${uuid()}`;
+      const SPACE_NAME = `test-space-name ${uuid()}`;
       const EXPECTED_NAMESPACE = formatKibanaNamespace(SPACE_ID);
       const monitor = {
         ...httpMonitorJson,
@@ -391,8 +391,8 @@ export default function ({ getService }: FtrProviderContext) {
       const username = 'admin';
       const password = `${username}-password`;
       const roleName = 'uptime-role';
-      const SPACE_ID = `test-space-${uuid.v4()}`;
-      const SPACE_NAME = `test-space-name ${uuid.v4()}`;
+      const SPACE_ID = `test-space-${uuid()}`;
+      const SPACE_NAME = `test-space-name ${uuid()}`;
       const monitor = {
         ...httpMonitorJson,
         [ConfigKey.NAMESPACE]: 'default',
@@ -439,8 +439,8 @@ export default function ({ getService }: FtrProviderContext) {
       const username = 'admin';
       const password = `${username}-password`;
       const roleName = 'uptime-role';
-      const SPACE_ID = `test-space-${uuid.v4()}`;
-      const SPACE_NAME = `test-space-name ${uuid.v4()}`;
+      const SPACE_ID = `test-space-${uuid()}`;
+      const SPACE_NAME = `test-space-name ${uuid()}`;
       const monitor = httpMonitorJson;
       let monitorId = '';
 

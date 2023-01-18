@@ -210,8 +210,8 @@ describe('AlertingAuthorization', () => {
   describe('constructor', () => {
     test(`fetches the user's current space`, async () => {
       const space = {
-        id: uuid.v4(),
-        name: uuid.v4(),
+        id: uuid(),
+        name: uuid(),
         disabledFeatures: [],
       };
       getSpace.mockResolvedValue(space);

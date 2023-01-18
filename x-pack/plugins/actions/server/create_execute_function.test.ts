@@ -256,7 +256,7 @@ describe('execute()', () => {
         },
       ],
     });
-    const source = { type: 'alert', id: uuid.v4() };
+    const source = { type: 'alert', id: uuid() };
 
     savedObjectsClient.get.mockResolvedValueOnce({
       id: '123',
@@ -334,7 +334,7 @@ describe('execute()', () => {
         },
       ],
     });
-    const source = { type: 'alert', id: uuid.v4() };
+    const source = { type: 'alert', id: uuid() };
 
     savedObjectsClient.get.mockResolvedValueOnce({
       id: '123',
@@ -822,7 +822,7 @@ describe('bulkExecute()', () => {
         },
       ],
     });
-    const source = { type: 'alert', id: uuid.v4() };
+    const source = { type: 'alert', id: uuid() };
 
     savedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
@@ -917,7 +917,7 @@ describe('bulkExecute()', () => {
         },
       ],
     });
-    const source = { type: 'alert', id: uuid.v4() };
+    const source = { type: 'alert', id: uuid() };
 
     savedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [

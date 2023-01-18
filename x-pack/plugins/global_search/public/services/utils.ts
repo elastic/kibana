@@ -19,7 +19,7 @@ export const getDefaultPreference = (storage: Storage = window.sessionStorage): 
   if (pref) {
     return pref;
   }
-  pref = uuid.v4();
+  pref = uuid();
   storage.setItem(defaultPrefStorageKey, pref);
   return pref;
 };

@@ -89,7 +89,7 @@ export const makePing = async (
       },
       ip: '127.0.0.1',
       id: monitorId,
-      check_group: uuid.v4(),
+      check_group: uuid(),
       type: 'http',
       status: 'up',
       timespan: {

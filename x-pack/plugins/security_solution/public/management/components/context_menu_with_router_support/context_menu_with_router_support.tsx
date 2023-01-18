@@ -78,7 +78,7 @@ export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportPro
           return (
             <EuiLoadingContent
               lines={1}
-              key={uuid.v4()}
+              key={uuid()}
               data-test-subj={itemProps['data-test-subj'] ?? getTestId(`item-loading-${index}`)}
             />
           );
@@ -87,7 +87,7 @@ export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportPro
           <ContextMenuItemNavByRouter
             {...itemProps}
             isNavigationDisabled={isNavigationDisabled}
-            key={uuid.v4()}
+            key={uuid()}
             data-test-subj={itemProps['data-test-subj'] ?? getTestId(`item-${index}`)}
             textTruncate={Boolean(maxWidth) || itemProps.textTruncate}
             hoverInfo={hoverInfo}

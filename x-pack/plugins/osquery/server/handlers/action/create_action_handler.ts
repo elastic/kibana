@@ -67,7 +67,7 @@ export const createActionHandler = async (
   }
 
   const osqueryAction = {
-    action_id: uuid.v4(),
+    action_id: uuid(),
     '@timestamp': moment().toISOString(),
     expiration: moment().add(5, 'minutes').toISOString(),
     type: 'INPUT_ACTION',
@@ -91,7 +91,7 @@ export const createActionHandler = async (
       ? map(convertSOQueriesToPack(packSO.attributes.queries), (packQuery, packQueryId) =>
           pickBy(
             {
-              action_id: uuid.v4(),
+              action_id: uuid(),
               id: packQueryId,
               query: packQuery.query,
               ecs_mapping: packQuery.ecs_mapping,

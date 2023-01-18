@@ -2892,7 +2892,7 @@ function getMockData(
       ...overwrites,
     },
     updated_at: withSavedObjectUpdatedAt ? getUpdatedAt() : undefined,
-    id: uuid.v4(),
+    id: uuid(),
     type: 'alert',
   };
 }

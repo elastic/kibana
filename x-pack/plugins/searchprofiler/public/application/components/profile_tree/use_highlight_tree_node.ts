@@ -11,7 +11,7 @@ import { v4 as uuid } from 'uuid';
 import { useHighlightContext, OnHighlightChangeArgs } from './highlight_context';
 
 export const useHighlightTreeNode = () => {
-  const idRef = useRef<string>(uuid.v4());
+  const idRef = useRef<string>(uuid());
   const { selectedRow, setStore } = useHighlightContext();
 
   const highlight = (value: OnHighlightChangeArgs) => {

@@ -41,7 +41,7 @@ describe('SavedObjectProviderRegistry', () => {
 
       const request = fakeRequest();
       const alert = {
-        id: uuid.v4(),
+        id: uuid(),
       };
 
       getter.mockResolvedValue(alert);
@@ -61,7 +61,7 @@ describe('SavedObjectProviderRegistry', () => {
 
       const request = fakeRequest();
       const action = {
-        id: uuid.v4(),
+        id: uuid(),
         type: 'action',
         attributes: {},
         references: [],

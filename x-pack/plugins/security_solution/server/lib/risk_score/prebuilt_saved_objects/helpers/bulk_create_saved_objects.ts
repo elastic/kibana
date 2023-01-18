@@ -66,7 +66,7 @@ export const bulkCreateSavedObjects = async <T = SavedObjectTemplate>({
   const idReplaceMappings: Record<string, string> = {};
   mySavedObjects.forEach((so) => {
     if (so.id.startsWith('<REPLACE-WITH-ID')) {
-      idReplaceMappings[so.id] = uuid.v4();
+      idReplaceMappings[so.id] = uuid();
     }
   });
   const mySavedObjectsWithRef = mySavedObjects.map((so) => {

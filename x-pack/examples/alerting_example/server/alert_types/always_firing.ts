@@ -63,7 +63,7 @@ export const alertType: RuleType<
     const count = (state.count ?? 0) + 1;
 
     range(instances)
-      .map(() => uuid.v4())
+      .map(() => uuid())
       .forEach((id: string) => {
         services.alertFactory
           .create(id)

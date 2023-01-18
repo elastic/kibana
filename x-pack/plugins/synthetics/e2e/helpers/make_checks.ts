@@ -37,7 +37,7 @@ export const makeCheck = async ({
 }: CheckProps): Promise<{ monitorId: string; docs: any }> => {
   const cgFields = {
     monitor: {
-      check_group: uuid.v4(),
+      check_group: uuid(),
     },
   };
 

@@ -245,7 +245,7 @@ describe('publicBaseUrl', () => {
 
 test('accepts only valid uuids for server.uuid', () => {
   const httpSchema = config.schema;
-  expect(() => httpSchema.validate({ uuid: uuid.v4() })).not.toThrow();
+  expect(() => httpSchema.validate({ uuid: uuid() })).not.toThrow();
   expect(() => httpSchema.validate({ uuid: 'not an uuid' })).toThrowErrorMatchingInlineSnapshot(
     `"[uuid]: must be a valid uuid"`
   );

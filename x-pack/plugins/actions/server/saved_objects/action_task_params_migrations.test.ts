@@ -415,12 +415,12 @@ function getMockData(
 ): SavedObjectUnsanitizedDoc<ActionTaskParams> {
   return {
     attributes: {
-      actionId: uuid.v4(),
+      actionId: uuid(),
       params: {},
       ...overwrites,
     },
     references: [...referencesOverwrites],
-    id: uuid.v4(),
+    id: uuid(),
     type: 'action_task_param',
   };
 }

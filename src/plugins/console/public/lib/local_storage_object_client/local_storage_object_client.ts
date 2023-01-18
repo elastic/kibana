@@ -18,7 +18,7 @@ export class LocalObjectStorage<O extends IdObject> implements ObjectStorage<O> 
   }
 
   async create(obj: Omit<O, 'id'>): Promise<O> {
-    const id = uuid.v4();
+    const id = uuid();
     const newObj = { id, ...obj } as O;
     this.client.set(`${this.prefix}_${id}`, newObj);
     return newObj;

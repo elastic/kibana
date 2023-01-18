@@ -63,7 +63,7 @@ describe('getRuleState useEffect handler', () => {
       actions: [
         {
           group: '',
-          id: uuid.v4(),
+          id: uuid(),
           actionTypeId: connectorType.id,
           params: {},
         },
@@ -103,9 +103,9 @@ function mockStateSetter() {
 
 function mockRule(overloads: Partial<Rule> = {}): Rule {
   return {
-    id: uuid.v4(),
+    id: uuid(),
     enabled: true,
-    name: `rule-${uuid.v4()}`,
+    name: `rule-${uuid()}`,
     tags: [],
     ruleTypeId: '.noop',
     consumer: 'consumer',

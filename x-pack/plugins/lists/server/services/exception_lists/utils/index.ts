@@ -303,7 +303,7 @@ export const transformCreateCommentsToComments = ({
     comment: comment.comment,
     created_at: dateNow,
     created_by: user,
-    id: uuid.v4(),
+    id: uuid(),
   }));
 };
 

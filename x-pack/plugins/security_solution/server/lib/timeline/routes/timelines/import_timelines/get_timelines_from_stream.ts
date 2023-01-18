@@ -17,13 +17,13 @@ export const getTupleDuplicateErrorsAndUniqueTimeline = (
   const { errors, timelinesAcc } = timelines.reduce(
     (acc, parsedTimeline) => {
       if (parsedTimeline instanceof Error) {
-        acc.timelinesAcc.set(uuid.v4(), parsedTimeline);
+        acc.timelinesAcc.set(uuid(), parsedTimeline);
       } else {
         const { savedObjectId } = parsedTimeline;
         if (savedObjectId != null) {
           if (acc.timelinesAcc.has(savedObjectId) && !isOverwrite) {
             acc.errors.set(
-              uuid.v4(),
+              uuid(),
               createBulkErrorObject({
                 id: savedObjectId,
                 statusCode: 400,
@@ -33,7 +33,7 @@ export const getTupleDuplicateErrorsAndUniqueTimeline = (
           }
           acc.timelinesAcc.set(savedObjectId, parsedTimeline);
         } else {
-          acc.timelinesAcc.set(uuid.v4(), parsedTimeline);
+          acc.timelinesAcc.set(uuid(), parsedTimeline);
         }
       }
 

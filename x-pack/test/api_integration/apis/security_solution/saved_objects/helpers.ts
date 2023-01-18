@@ -36,7 +36,7 @@ export const createBasicTimelineTemplate = async (
       version: null,
       timeline: {
         title: titleToSaved,
-        templateTimelineId: uuid.v4(),
+        templateTimelineId: uuid(),
         templateTimelineVersion: 1,
         timelineType: TimelineType.template,
       },

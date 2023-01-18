@@ -366,7 +366,7 @@ const mockTaskRunEvent = (
 };
 
 const mockTaskInstance = (overrides: Partial<ConcreteTaskInstance> = {}): ConcreteTaskInstance => ({
-  id: uuid.v4(),
+  id: uuid(),
   attempts: 0,
   status: TaskStatus.Running,
   version: '123',

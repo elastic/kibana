@@ -15,7 +15,7 @@ import { filterEventsAgainstList } from './filter_events_against_list';
 import { repeatedHitsWithSortId } from '../__mocks__/es_results';
 import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 
-const someGuids = Array.from({ length: 13 }).map((x) => uuid.v4());
+const someGuids = Array.from({ length: 13 }).map((x) => uuid());
 
 describe('filterEventsAgainstList', () => {
   let listClient = listMock.getListClient();

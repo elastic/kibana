@@ -94,7 +94,7 @@ export const createNonInteractiveSessionEventFilter = (
           value: 'false',
         },
       ],
-      itemId: uuid.v4(),
+      itemId: uuid(),
       meta: [],
       comments: [],
     });

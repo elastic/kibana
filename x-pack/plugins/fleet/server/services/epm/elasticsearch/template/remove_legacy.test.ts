@@ -39,7 +39,7 @@ const createMockDataStream = ({
 }) => {
   return {
     type: type || pickRandomType(),
-    dataset: dataset || uuid.v4(),
+    dataset: dataset || uuid(),
     title: packageName,
     package: packageName,
     path: 'some_path',

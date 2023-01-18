@@ -15,7 +15,7 @@ describe('loadRuleState', () => {
   beforeEach(() => jest.resetAllMocks());
 
   test('should call get API with base parameters', async () => {
-    const ruleId = uuid.v4();
+    const ruleId = uuid();
     const resolvedValue = {
       alertTypeState: {
         some: 'value',
@@ -40,7 +40,7 @@ describe('loadRuleState', () => {
   });
 
   test('should parse RuleInstances', async () => {
-    const ruleId = uuid.v4();
+    const ruleId = uuid();
     const resolvedValue = {
       alertTypeState: {
         some: 'value',
@@ -92,7 +92,7 @@ describe('loadRuleState', () => {
   });
 
   test('should handle empty response from api', async () => {
-    const ruleId = uuid.v4();
+    const ruleId = uuid();
     http.get.mockResolvedValueOnce('');
 
     expect(await loadRuleState({ http, ruleId })).toEqual({});

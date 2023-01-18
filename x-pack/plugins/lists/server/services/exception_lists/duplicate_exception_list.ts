@@ -40,7 +40,7 @@ export const duplicateExceptionListAndItems = async ({
   user,
 }: CreateExceptionListOptions): Promise<ExceptionListSchema> => {
   // Generate a new static listId
-  const newListId = uuid.v4();
+  const newListId = uuid();
 
   // fetch list container
   const listToDuplicate = await getExceptionList({
@@ -77,7 +77,7 @@ export const duplicateExceptionListAndItems = async ({
   const executeFunctionOnStream = (response: FoundExceptionListItemSchema): void => {
     const transformedItems = response.data.map((item) => {
       // Generate a new static listId
-      const newItemId = uuid.v4();
+      const newItemId = uuid();
 
       return {
         comments: [],

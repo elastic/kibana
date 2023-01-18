@@ -183,7 +183,7 @@ export class TaskManagerRunner implements TaskRunner {
     this.defaultMaxAttempts = defaultMaxAttempts;
     this.executionContext = executionContext;
     this.usageCounter = usageCounter;
-    this.uuid = uuid.v4();
+    this.uuid = uuid();
     this.eventLoopDelayConfig = eventLoopDelayConfig;
   }
 

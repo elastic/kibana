@@ -485,7 +485,7 @@ export const convertCreateAPIToInternalSchema = (
   defaultEnabled = true
 ): InternalRuleCreate => {
   const typeSpecificParams = typeSpecificSnakeToCamel(input);
-  const newRuleId = input.rule_id ?? uuid.v4();
+  const newRuleId = input.rule_id ?? uuid();
   return {
     name: input.name,
     tags: input.tags ?? [],

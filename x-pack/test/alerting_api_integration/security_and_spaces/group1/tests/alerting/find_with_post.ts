@@ -329,7 +329,7 @@ const findTestUtils = (
         });
 
         it('should handle find alert request with fields appropriately', async () => {
-          const myTag = uuid.v4();
+          const myTag = uuid();
           const { body: createdAlert } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
@@ -418,7 +418,7 @@ const findTestUtils = (
         });
 
         it('should handle find alert request with executionStatus field appropriately', async () => {
-          const myTag = uuid.v4();
+          const myTag = uuid();
           const { body: createdAlert } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')

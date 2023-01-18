@@ -97,7 +97,7 @@ export const sortExceptionItemsToUpdateOrCreate = ({
             name,
             os_types: osTypes,
             tags,
-            tie_breaker_id: uuid.v4(),
+            tie_breaker_id: uuid(),
             type,
             updated_by: user,
             version: undefined,

@@ -183,7 +183,7 @@ describe('ruleType', () => {
     };
 
     await ruleType.executor({
-      executionId: uuid.v4(),
+      executionId: uuid(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
       services: alertServices as unknown as RuleExecutorServices<
@@ -195,10 +195,10 @@ describe('ruleType', () => {
       state: {
         latestTimestamp: undefined,
       },
-      spaceId: uuid.v4(),
+      spaceId: uuid(),
       rule: {
-        id: uuid.v4(),
-        name: uuid.v4(),
+        id: uuid(),
+        name: uuid(),
         tags: [],
         consumer: '',
         producer: '',
@@ -246,7 +246,7 @@ describe('ruleType', () => {
     };
 
     await ruleType.executor({
-      executionId: uuid.v4(),
+      executionId: uuid(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
       services: customAlertServices as unknown as RuleExecutorServices<
@@ -258,10 +258,10 @@ describe('ruleType', () => {
       state: {
         latestTimestamp: undefined,
       },
-      spaceId: uuid.v4(),
+      spaceId: uuid(),
       rule: {
-        id: uuid.v4(),
-        name: uuid.v4(),
+        id: uuid(),
+        name: uuid(),
         tags: [],
         consumer: '',
         producer: '',
@@ -309,7 +309,7 @@ describe('ruleType', () => {
     };
 
     await ruleType.executor({
-      executionId: uuid.v4(),
+      executionId: uuid(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
       services: customAlertServices as unknown as RuleExecutorServices<
@@ -321,10 +321,10 @@ describe('ruleType', () => {
       state: {
         latestTimestamp: undefined,
       },
-      spaceId: uuid.v4(),
+      spaceId: uuid(),
       rule: {
-        id: uuid.v4(),
-        name: uuid.v4(),
+        id: uuid(),
+        name: uuid(),
         tags: [],
         consumer: '',
         producer: '',
@@ -371,7 +371,7 @@ describe('ruleType', () => {
     };
 
     await ruleType.executor({
-      executionId: uuid.v4(),
+      executionId: uuid(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
       services: alertServices as unknown as RuleExecutorServices<
@@ -383,10 +383,10 @@ describe('ruleType', () => {
       state: {
         latestTimestamp: undefined,
       },
-      spaceId: uuid.v4(),
+      spaceId: uuid(),
       rule: {
-        id: uuid.v4(),
-        name: uuid.v4(),
+        id: uuid(),
+        name: uuid(),
         tags: [],
         consumer: '',
         producer: '',

@@ -171,7 +171,7 @@ export const firstDownHit = ({
     ip: '142.250.181.196',
     name: name ?? 'Test Monitor',
     fleet_managed: true,
-    check_group: uuid.v4(),
+    check_group: uuid(),
     timespan: {
       lt: '2022-12-18T09:52:50.128Z',
       gte: '2022-12-18T09:49:50.128Z',

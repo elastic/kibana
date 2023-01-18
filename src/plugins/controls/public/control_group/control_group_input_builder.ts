@@ -89,7 +89,7 @@ export async function getDataControlPanelState(
     type: await getCompatibleControlType({ dataViewId, fieldName }),
     ...getPanelState(input, controlProps),
     explicitInput: {
-      id: controlId ? controlId : uuid.v4(),
+      id: controlId ? controlId : uuid(),
       dataViewId,
       fieldName,
       title: title ?? fieldName,
@@ -106,7 +106,7 @@ export function getOptionsListPanelState(
     type: OPTIONS_LIST_CONTROL,
     ...getPanelState(input, controlProps),
     explicitInput: {
-      id: controlId ? controlId : uuid.v4(),
+      id: controlId ? controlId : uuid(),
       dataViewId,
       fieldName,
       title: title ?? fieldName,
@@ -124,7 +124,7 @@ export function getRangeSliderPanelState(
     type: RANGE_SLIDER_CONTROL,
     ...getPanelState(input, controlProps),
     explicitInput: {
-      id: controlId ? controlId : uuid.v4(),
+      id: controlId ? controlId : uuid(),
       dataViewId,
       fieldName,
       title: title ?? fieldName,
@@ -140,7 +140,7 @@ export function getTimeSliderPanelState(input: Partial<ControlGroupInput>) {
     grow: true,
     width: 'large',
     explicitInput: {
-      id: uuid.v4(),
+      id: uuid(),
       title: i18n.translate('controls.controlGroup.timeSlider.title', {
         defaultMessage: 'Time slider',
       }),

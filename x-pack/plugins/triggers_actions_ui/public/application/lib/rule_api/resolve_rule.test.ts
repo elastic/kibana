@@ -13,7 +13,7 @@ const http = httpServiceMock.createStartContract();
 
 describe('resolveRule', () => {
   test('should call get API with base parameters', async () => {
-    const ruleId = `${uuid.v4()}/`;
+    const ruleId = `${uuid()}/`;
     const ruleIdEncoded = encodeURIComponent(ruleId);
     const resolvedValue = {
       id: '1/',

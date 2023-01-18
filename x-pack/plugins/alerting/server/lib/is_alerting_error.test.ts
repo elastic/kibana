@@ -12,7 +12,7 @@ import { v4 as uuid } from 'uuid';
 import { RuleExecutionStatusErrorReasons } from '../types';
 
 describe('isAlertSavedObjectNotFoundError', () => {
-  const id = uuid.v4();
+  const id = uuid();
   const errorSONF = SavedObjectsErrorHelpers.createGenericNotFoundError('alert', id);
 
   test('identifies SavedObjects Not Found errors', () => {
@@ -33,7 +33,7 @@ describe('isAlertSavedObjectNotFoundError', () => {
 });
 
 describe('isEsUnavailableError', () => {
-  const id = uuid.v4();
+  const id = uuid();
   const errorSONF = SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError('alert', id);
 
   test('identifies es unavailable errors', () => {

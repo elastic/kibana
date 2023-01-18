@@ -15,7 +15,7 @@ import {
 } from '../../public/application/sections/rule_details/components/test_helpers';
 
 const getMockRule = () => {
-  const id = uuid.v4();
+  const id = uuid();
   return {
     id,
     name: `test rule - ${id}`,

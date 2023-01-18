@@ -173,7 +173,7 @@ describe('EphemeralTaskLifecycle', () => {
 
       lifecycleEvent$.next(
         asTaskRunEvent(
-          uuid.v4(),
+          uuid(),
           asOk({
             task: mockTask(),
             result: TaskRunResult.Success,
@@ -386,7 +386,7 @@ describe('EphemeralTaskLifecycle', () => {
 
 function mockTask(overrides: Partial<ConcreteTaskInstance> = {}): ConcreteTaskInstance {
   return {
-    id: uuid.v4(),
+    id: uuid(),
     runAt: new Date(),
     taskType: 'foo',
     schedule: undefined,

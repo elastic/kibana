@@ -125,7 +125,7 @@ function getProducerConsumer({
   producerExternalOnlySpanBLink: SpanLink;
   producerExternalOnlyTransactionBLink: SpanLink;
 }) {
-  const externalTraceId = uuid.v4();
+  const externalTraceId = uuid();
 
   const producerConsumerInstance = apm
     .service({ name: 'producer-consumer', environment: 'production', agentName: 'ruby' })

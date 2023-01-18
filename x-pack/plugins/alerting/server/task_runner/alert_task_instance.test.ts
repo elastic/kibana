@@ -43,7 +43,7 @@ describe('Alert Task Instance', () => {
   test(`validates that a TaskInstance has valid Alert Task State`, () => {
     const lastScheduledActionsDate = new Date();
     const taskInstance: ConcreteTaskInstance = {
-      id: uuid.v4(),
+      id: uuid(),
       attempts: 0,
       status: TaskStatus.Running,
       version: '123',
@@ -165,7 +165,7 @@ describe('Alert Task Instance', () => {
 
   test(`allows an initial empty state`, () => {
     const taskInstance: ConcreteTaskInstance = {
-      id: uuid.v4(),
+      id: uuid(),
       attempts: 0,
       status: TaskStatus.Running,
       version: '123',
@@ -188,7 +188,7 @@ describe('Alert Task Instance', () => {
 
   test(`validates that a TaskInstance has valid Params`, () => {
     const taskInstance: ConcreteTaskInstance = {
-      id: uuid.v4(),
+      id: uuid(),
       attempts: 0,
       status: TaskStatus.Running,
       version: '123',

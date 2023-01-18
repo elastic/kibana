@@ -230,7 +230,7 @@ describe('When using Actions service utilities', () => {
       let endpointResponseAtError: EndpointActivityLogActionResponse;
 
       beforeEach(() => {
-        const actionId = uuid.v4();
+        const actionId = uuid();
         fleetResponseAtError = fleetActionGenerator.generateActivityLogActionResponse({
           item: {
             data: { agent_id: '123', action_id: actionId, error: 'agent failed to deliver' },
@@ -326,7 +326,7 @@ describe('When using Actions service utilities', () => {
 
       beforeEach(() => {
         agentIds = ['123', '456', '789'];
-        actionId = uuid.v4();
+        actionId = uuid();
         action123Responses = [
           fleetActionGenerator.generateActivityLogActionResponse({
             item: { data: { agent_id: '123', error: '', action_id: actionId } },
@@ -599,8 +599,8 @@ describe('When using Actions service utilities', () => {
     let errorResponses: Array<ActivityLogActionResponse | EndpointActivityLogActionResponse>;
 
     beforeEach(() => {
-      const actionId0 = uuid.v4();
-      const actionId1 = uuid.v4();
+      const actionId0 = uuid();
+      const actionId1 = uuid();
       actionRequests123 = [
         fleetActionGenerator.generateActivityLogAction({
           item: {
@@ -723,7 +723,7 @@ describe('When using Actions service utilities', () => {
 
     beforeEach(() => {
       const agents = ['agent-id'];
-      const actionIds = [uuid.v4(), uuid.v4()];
+      const actionIds = [uuid(), uuid()];
 
       fleetActions = actionIds.map((id) => {
         return {

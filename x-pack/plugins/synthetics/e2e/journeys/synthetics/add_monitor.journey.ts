@@ -16,11 +16,11 @@ const basicMonitorDetails = {
   location: customLocation || 'US Central',
   schedule: '3',
 };
-const httpName = `http monitor ${uuid.v4()}`;
-const icmpName = `icmp monitor ${uuid.v4()}`;
-const tcpName = `tcp monitor ${uuid.v4()}`;
-const browserName = `browser monitor ${uuid.v4()}`;
-const browserRecorderName = `browser monitor recorder ${uuid.v4()}`;
+const httpName = `http monitor ${uuid()}`;
+const icmpName = `icmp monitor ${uuid()}`;
+const tcpName = `tcp monitor ${uuid()}`;
+const browserName = `browser monitor ${uuid()}`;
+const browserRecorderName = `browser monitor recorder ${uuid()}`;
 const apmServiceName = 'apmServiceName';
 
 const configuration = {

@@ -491,8 +491,8 @@ describe(`POST ${URL}`, () => {
       const mockUuid = jest.requireMock('uuid');
       mockUuid.v4 = jest
         .fn()
-        .mockReturnValueOnce('foo') // a uuid.v4() is generated for the request.id
-        .mockReturnValueOnce('foo') // another uuid.v4() is used for the request.uuid
+        .mockReturnValueOnce('foo') // a uuid() is generated for the request.id
+        .mockReturnValueOnce('foo') // another uuid() is used for the request.uuid
         .mockReturnValueOnce('new-id-1')
         .mockReturnValueOnce('new-id-2');
       savedObjectsClient.bulkGet.mockResolvedValueOnce({ saved_objects: [mockIndexPattern] });

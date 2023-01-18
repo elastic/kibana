@@ -102,7 +102,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('handles private location errors and does not delete the monitor if integration policy is unable to be deleted', async () => {
-      const name = `Monitor with a private location ${uuid.v4()}`;
+      const name = `Monitor with a private location ${uuid()}`;
       const newMonitor = {
         name,
         type: 'http',
@@ -119,8 +119,8 @@ export default function ({ getService }: FtrProviderContext) {
       const username = 'admin';
       const roleName = `synthetics_admin`;
       const password = `${username}-password`;
-      const SPACE_ID = `test-space-${uuid.v4()}`;
-      const SPACE_NAME = `test-space-name ${uuid.v4()}`;
+      const SPACE_ID = `test-space-${uuid()}`;
+      const SPACE_NAME = `test-space-name ${uuid()}`;
       let monitorId = '';
 
       try {

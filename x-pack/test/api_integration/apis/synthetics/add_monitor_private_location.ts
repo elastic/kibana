@@ -242,12 +242,12 @@ export default function ({ getService }: FtrProviderContext) {
       const username = 'admin';
       const password = `${username}-password`;
       const roleName = 'uptime-role';
-      const SPACE_ID = `test-space-${uuid.v4()}`;
-      const SPACE_NAME = `test-space-name ${uuid.v4()}`;
+      const SPACE_ID = `test-space-${uuid()}`;
+      const SPACE_NAME = `test-space-name ${uuid()}`;
       let monitorId = '';
       const monitor = {
         ...httpMonitorJson,
-        name: `Test monitor ${uuid.v4()}`,
+        name: `Test monitor ${uuid()}`,
         [ConfigKey.NAMESPACE]: 'default',
         locations: [
           {
@@ -335,7 +335,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const monitor = {
         ...httpMonitorJson,
-        name: `Test monitor ${uuid.v4()}`,
+        name: `Test monitor ${uuid()}`,
         [ConfigKey.NAMESPACE]: 'default',
         locations: [
           {

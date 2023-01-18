@@ -29,7 +29,7 @@ describe('calculateRunningAverage', () => {
 
 describe('calculateFrequency', () => {
   test('calculates the frequency of each terms in the list as a percentage', async () => {
-    const [term1, term2, term3] = [uuid.v4(), uuid.v4(), uuid.v4()];
+    const [term1, term2, term3] = [uuid(), uuid(), uuid()];
     expect(
       calculateFrequency([term1, term2, term2, term3, term1, term1, term2, term1, term3])
     ).toEqual({
@@ -53,7 +53,7 @@ describe('createRunningAveragedStat', () => {
 
 describe('createMapOfRunningAveragedStats', () => {
   test('create a function which tracks multiple window of values by key', async () => {
-    const [term1, term2, term3] = [uuid.v4(), uuid.v4(), uuid.v4()];
+    const [term1, term2, term3] = [uuid(), uuid(), uuid()];
     const mappedQueues = createMapOfRunningAveragedStats(3);
     expect(mappedQueues(term1, 1)).toEqual({ [term1]: [1] });
     expect(mappedQueues(term1, 2)).toEqual({ [term1]: [1, 2] });

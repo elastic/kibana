@@ -126,7 +126,7 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
             timelineId={timelineId}
             value=""
             type={DataProviderType.default}
-            providerId={`${timelineId}-${uuid.v4()}`}
+            providerId={`${timelineId}-${uuid()}`}
           />
         ),
       },
@@ -144,7 +144,7 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
             timelineId={timelineId}
             value=""
             type={DataProviderType.template}
-            providerId={`${timelineId}-${uuid.v4()}`}
+            providerId={`${timelineId}-${uuid()}`}
           />
         ),
       },
@@ -195,7 +195,7 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
         timelineId={timelineId}
         value=""
         type={DataProviderType.default}
-        providerId={`${timelineId}-${uuid.v4()}`}
+        providerId={`${timelineId}-${uuid()}`}
       />
     );
   }, [browserFields, handleDataProviderEdited, panels, timelineId, timelineType]);

@@ -322,7 +322,7 @@ function getMockData(
       ...overwrites,
     },
     updated_at: getUpdatedAt(),
-    id: uuid.v4(),
+    id: uuid(),
     type: 'task',
   };
 }

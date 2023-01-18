@@ -25,7 +25,7 @@ interface DuplicateRuleParams {
 
 export const duplicateRule = async ({ rule }: DuplicateRuleParams): Promise<InternalRuleCreate> => {
   // Generate a new static ruleId
-  const ruleId = uuid.v4();
+  const ruleId = uuid();
 
   // If it's a prebuilt rule, reset Related Integrations, Required Fields and Setup Guide.
   // We do this because for now we don't allow the users to edit these fields for custom rules.

@@ -59,7 +59,7 @@ export default function ({ getService }: FtrProviderContext) {
             // metadata list api filters down to endpoint policies only
             const policy = await indexFleetEndpointPolicy(
               getService('kibanaServer'),
-              `Default ${uuid.v4()}`,
+              `Default ${uuid()}`,
               '1.1.1'
             );
             const policyId = policy.integrationPolicies[0].policy_id;

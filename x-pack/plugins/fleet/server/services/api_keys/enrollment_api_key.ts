@@ -161,7 +161,7 @@ export async function generateEnrollmentAPIKey(
     forceRecreate?: boolean;
   }
 ): Promise<EnrollmentAPIKey> {
-  const id = uuid.v4();
+  const id = uuid();
   const { name: providedKeyName, forceRecreate } = data;
   if (data.agentPolicyId) {
     await validateAgentPolicyId(soClient, data.agentPolicyId);

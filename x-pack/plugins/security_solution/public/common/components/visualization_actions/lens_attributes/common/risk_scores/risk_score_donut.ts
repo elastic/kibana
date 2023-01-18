@@ -12,8 +12,8 @@ export const getRiskScoreDonutAttributes: GetLensAttributes = (
   stackByField,
   extraOptions = { spaceId: 'default' }
 ) => {
-  const layerId = uuid.v4();
-  const internalReferenceId = uuid.v4();
+  const layerId = uuid();
+  const internalReferenceId = uuid();
   return {
     title: `${stackByField} risk donut`,
     description: '',

@@ -22,7 +22,7 @@ export type ActiveTrace = (endTime?: number) => TracingSpan;
 export const startTracingSpan = (name: string): ActiveTrace => {
   const initialState: TracingSpan = {
     duration: Number.POSITIVE_INFINITY,
-    id: uuid.v4(),
+    id: uuid(),
     name,
     start: Date.now(),
   };

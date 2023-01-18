@@ -151,7 +151,7 @@ export class EventLogger {
   private timings: Partial<Record<Actions | Transactions, Date>> = {};
 
   constructor(private readonly logger: Logger, private readonly config: ConfigType) {
-    this.sessionId = uuid.v4();
+    this.sessionId = uuid();
     this.logEvent = logAdapter(logger.get('events'), this.sessionId);
   }
 

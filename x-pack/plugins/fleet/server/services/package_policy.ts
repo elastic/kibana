@@ -162,7 +162,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     let elasticsearch: PackagePolicy['elasticsearch'];
     // Add ids to stream
-    const packagePolicyId = options?.id || uuid.v4();
+    const packagePolicyId = options?.id || uuid();
     let inputs: PackagePolicyInput[] = packagePolicy.inputs.map((input) =>
       assignStreamIdToInput(packagePolicyId, input)
     );
@@ -263,7 +263,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const { saved_objects } = await soClient.bulkCreate<PackagePolicySOAttributes>(
       await pMap(packagePolicies, async (packagePolicy) => {
-        const packagePolicyId = packagePolicy.id ?? uuid.v4();
+        const packagePolicyId = packagePolicy.id ?? uuid();
         const agentPolicyId = packagePolicy.policy_id;
 
         let inputs = packagePolicy.inputs.map((input) =>

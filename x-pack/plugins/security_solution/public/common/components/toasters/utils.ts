@@ -24,7 +24,7 @@ export const displayErrorToast = (
   errorTitle: string,
   errorMessages: string[],
   dispatchToaster: React.Dispatch<ActionToaster>,
-  id: string = uuid.v4()
+  id: string = uuid()
 ): void => {
   const toast: AppToast = {
     id,
@@ -48,7 +48,7 @@ export const displayErrorToast = (
 export const displaySuccessToast = (
   title: string,
   dispatchToaster: React.Dispatch<ActionToaster>,
-  id: string = uuid.v4()
+  id: string = uuid()
 ): void => {
   const toast: AppToast = {
     id,
@@ -83,7 +83,7 @@ export type ErrorToToasterArgs = Partial<AppToast> & {
  * @param dispatchToaster provided by useStateToaster()
  */
 export const errorToToaster = ({
-  id = uuid.v4(),
+  id = uuid(),
   title,
   error,
   color = 'danger',

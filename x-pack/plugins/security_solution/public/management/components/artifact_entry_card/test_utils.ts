@@ -57,7 +57,7 @@ export const getExceptionProviderMock = (): ExceptionListItemSchema => {
       tags: ['policy:all'],
       comments: [
         {
-          id: uuid.v4(),
+          id: uuid(),
           comment: 'test',
           created_at: new Date().toISOString(),
           created_by: 'Justa',

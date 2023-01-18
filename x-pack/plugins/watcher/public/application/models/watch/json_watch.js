@@ -19,7 +19,7 @@ import { defaultWatch } from './default_watch';
 export class JsonWatch extends BaseWatch {
   constructor(props = {}) {
     props.type = WATCH_TYPES.JSON;
-    props.id = typeof props.id === 'undefined' ? uuid.v4() : props.id;
+    props.id = typeof props.id === 'undefined' ? uuid() : props.id;
     super(props);
     const existingWatch = get(props, 'watch');
     this.watch = existingWatch ? existingWatch : defaultWatch;

@@ -33,7 +33,7 @@ export const deleteVariable = (variables: DevToolsVariable[], id: string) => {
 };
 
 export const generateEmptyVariableField = (): DevToolsVariable => ({
-  id: uuid.v4(),
+  id: uuid(),
   name: '',
   value: '',
 });

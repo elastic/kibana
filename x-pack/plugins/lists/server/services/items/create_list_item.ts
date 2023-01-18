@@ -50,7 +50,7 @@ export const createListItem = async ({
   tieBreaker,
 }: CreateListItemOptions): Promise<ListItemSchema | null> => {
   const createdAt = dateNow ?? new Date().toISOString();
-  const tieBreakerId = tieBreaker ?? uuid.v4();
+  const tieBreakerId = tieBreaker ?? uuid();
   const baseBody = {
     created_at: createdAt,
     created_by: user,

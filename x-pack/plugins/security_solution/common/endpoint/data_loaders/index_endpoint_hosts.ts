@@ -133,7 +133,7 @@ export async function indexEndpointHostDocs({
 
     if (enrollFleet) {
       const { id: appliedPolicyId, name: appliedPolicyName } = hostMetadata.Endpoint.policy.applied;
-      const uniqueAppliedPolicyName = `${appliedPolicyName}-${uuid.v4()}`;
+      const uniqueAppliedPolicyName = `${appliedPolicyName}-${uuid()}`;
 
       // If we don't yet have a "real" policy record, then create it now in ingest (package config)
       if (!realPolicies[appliedPolicyId]) {

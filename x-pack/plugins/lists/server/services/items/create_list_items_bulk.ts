@@ -52,7 +52,7 @@ export const createListItemsBulk = async ({
     (accum, singleValue, index) => {
       const createdAt = dateNow ?? new Date().toISOString();
       const tieBreakerId =
-        tieBreaker != null && tieBreaker[index] != null ? tieBreaker[index] : uuid.v4();
+        tieBreaker != null && tieBreaker[index] != null ? tieBreaker[index] : uuid();
       const elasticQuery = transformListItemToElasticQuery({
         serializer,
         type,

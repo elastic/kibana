@@ -336,7 +336,7 @@ export abstract class Container<
     factory: EmbeddableFactory<TEmbeddableInput, any, TEmbeddable>,
     partial: Partial<TEmbeddableInput> = {}
   ): PanelState<TEmbeddableInput> {
-    const embeddableId = partial.id || uuid.v4();
+    const embeddableId = partial.id || uuid();
 
     const explicitInput = this.createNewExplicitEmbeddableInput<TEmbeddableInput>(
       embeddableId,

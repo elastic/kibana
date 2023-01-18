@@ -128,7 +128,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should return execution events for a rule that has executed in a failure state with a gap', async () => {
-      const rule = getRuleForSignalTesting(['auditbeat-*'], uuid.v4(), false);
+      const rule = getRuleForSignalTesting(['auditbeat-*'], uuid(), false);
       const { id } = await createRule(supertest, log, rule);
 
       const start = dateMath.parse('now')?.utc().toISOString();
@@ -176,7 +176,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     // For details, see: https://github.com/elastic/kibana/issues/131382
     it('should return execution events ordered by @timestamp desc when a status filter is active and there are more than 1000 executions', async () => {
-      const rule = getRuleForSignalTesting(['auditbeat-*'], uuid.v4(), false);
+      const rule = getRuleForSignalTesting(['auditbeat-*'], uuid(), false);
       const { id } = await createRule(supertest, log, rule);
 
       // Daterange for which we'll generate execution events between
@@ -193,7 +193,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       // Create 1000 successful executions
       const events = dateTimes.slice(0, 1000).flatMap((dateTime) => {
-        const executionId = uuid.v4();
+        const executionId = uuid();
         return cloneDeep(successfulExecution).map((e, i) => {
           set(e, '@timestamp', dateTime);
           set(e, 'event.start', dateTime);
@@ -209,7 +209,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       // Create 2 failed executions
       const failedEvents = dateTimes.slice(1000).flatMap((dateTime) => {
-        const executionId = uuid.v4();
+        const executionId = uuid();
         return cloneDeep(failedRanAfterDisabled).map((e, i) => {
           set(e, '@timestamp', dateTime);
           set(e, 'event.start', dateTime);

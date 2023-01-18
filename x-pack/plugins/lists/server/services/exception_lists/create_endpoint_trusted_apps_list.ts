@@ -60,7 +60,7 @@ export const createEndpointTrustedAppsList = async ({
         name: ENDPOINT_TRUSTED_APPS_LIST_NAME,
         os_types: [],
         tags: [],
-        tie_breaker_id: tieBreaker ?? uuid.v4(),
+        tie_breaker_id: tieBreaker ?? uuid(),
         type: 'endpoint',
         updated_by: user,
         version,

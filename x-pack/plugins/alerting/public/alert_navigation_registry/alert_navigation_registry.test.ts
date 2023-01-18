@@ -37,7 +37,7 @@ describe('AlertNavigationRegistry', () => {
   describe('has()', () => {
     test('returns false for unregistered consumer  handlers', () => {
       const registry = new AlertNavigationRegistry();
-      expect(registry.has('siem', mockRuleType(uuid.v4()))).toEqual(false);
+      expect(registry.has('siem', mockRuleType(uuid()))).toEqual(false);
     });
 
     test('returns false for unregistered rule types handlers', () => {

@@ -9,6 +9,6 @@
 import { v4 as uuid } from 'uuid';
 
 export const DEFAULT_VARIABLES = [
-  { id: uuid.v4(), name: 'exampleVariable1', value: '_search' },
-  { id: uuid.v4(), name: 'exampleVariable2', value: 'match_all' },
+  { id: uuid(), name: 'exampleVariable1', value: '_search' },
+  { id: uuid(), name: 'exampleVariable2', value: 'match_all' },
 ];

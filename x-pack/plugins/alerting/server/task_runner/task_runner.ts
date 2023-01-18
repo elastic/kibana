@@ -141,7 +141,7 @@ export class TaskRunner<
     this.ruleTypeRegistry = context.ruleTypeRegistry;
     this.searchAbortController = new AbortController();
     this.cancelled = false;
-    this.executionId = uuid.v4();
+    this.executionId = uuid();
     this.inMemoryMetrics = inMemoryMetrics;
     this.maxAlerts = context.maxAlerts;
     this.timer = new TaskRunnerTimer({ logger: this.logger });

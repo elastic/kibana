@@ -93,7 +93,7 @@ export const commonAddEmptyValueColorRule = (visState: any) => {
 
     const convertRuleToEmpty = (rule: any = {}) => ({
       ...rule,
-      id: uuid.v4(),
+      id: uuid(),
       operator: 'empty',
       value: null,
     });

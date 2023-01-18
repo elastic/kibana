@@ -23,7 +23,7 @@ export const addIdToItem = <T>(item: NotArray<T>): T => {
   if (maybeId.id != null) {
     return item;
   } else {
-    return { ...item, id: uuid.v4() };
+    return { ...item, id: uuid() };
   }
 };
 
