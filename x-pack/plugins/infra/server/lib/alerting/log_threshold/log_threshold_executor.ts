@@ -213,7 +213,7 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
 
       const { getRecoveredAlerts } = services.alertFactory.done();
       const recoveredAlerts = getRecoveredAlerts();
-      processRecoveredAlerts({
+      await processRecoveredAlerts({
         basePath,
         getAlertStartedDate,
         getAlertUuid,
