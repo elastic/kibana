@@ -25,7 +25,7 @@ export const fetchEngines = async ({
   const query = {
     from: meta.from,
     size: meta.size,
-    ...(searchQuery && searchQuery !== '' ? { q: searchQuery } : {}),
+    ...(searchQuery && searchQuery.trim() !== '' ? { q: searchQuery } : {}),
   };
   return await HttpLogic.values.http.get<EnterpriseSearchEnginesResponse>(route, {
     query,
