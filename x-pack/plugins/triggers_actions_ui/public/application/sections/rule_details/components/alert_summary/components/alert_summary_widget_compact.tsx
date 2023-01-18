@@ -18,14 +18,14 @@ import {
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED, AlertStatus } from '@kbn/rule-data-utils';
 import { AlertStateInfo } from './alert_state_info';
 import { ACTIVE_ALERT_LABEL, ALL_ALERT_LABEL, RECOVERED_ALERT_LABEL } from './constants';
-import { Alert } from '../../../../../hooks/use_load_alert_summary';
+import { Alert } from '../types';
 
 export interface AlertsSummaryWidgetCompactProps {
   activeAlertCount: number;
   activeAlerts: Alert[];
   recoveredAlertCount: number;
   recoveredAlerts: Alert[];
-  timeRangeTitle: JSX.Element | string;
+  timeRangeTitle?: JSX.Element | string;
   onClick: (status?: AlertStatus) => void;
 }
 
@@ -88,11 +88,12 @@ export const AlertsSummaryWidgetCompact = ({
                 onClick={(event: React.MouseEvent<HTMLAnchorElement>) =>
                   handleClick(event, ALERT_STATUS_ACTIVE)
                 }
+                data-test-subj="activeAlerts"
               >
                 <AlertStateInfo
                   count={activeAlertCount}
                   data={activeAlerts}
-                  dataTestSubj="activeAlertsCount"
+                  dataTestSubj="activeAlerts"
                   domain={domain}
                   id="active"
                   stroke="#E7664C"
@@ -106,11 +107,12 @@ export const AlertsSummaryWidgetCompact = ({
                 onClick={(event: React.MouseEvent<HTMLAnchorElement>) =>
                   handleClick(event, ALERT_STATUS_RECOVERED)
                 }
+                data-test-subj="recoveredAlerts"
               >
                 <AlertStateInfo
                   count={recoveredAlertCount}
                   data={recoveredAlerts}
-                  dataTestSubj="recoveredAlertsCount"
+                  dataTestSubj="recoveredAlerts"
                   domain={domain}
                   id="recovered"
                   stroke="#54B399"
