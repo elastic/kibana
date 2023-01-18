@@ -19,7 +19,6 @@ import type {
 import {
   calculateEndpointAuthz,
   getEndpointAuthzInitialState,
-  calculatePermissionsFromCapabilities,
 } from '../../../../../common/endpoint/service/authz';
 import { useSecuritySolutionStartDependencies } from './security_solution_start_dependencies';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
@@ -57,11 +56,6 @@ export const useEndpointPrivileges = (): Immutable<EndpointPrivileges> => {
   const [hasHostIsolationExceptionsItems, setHasHostIsolationExceptionsItems] =
     useState<boolean>(false);
 
-  const securitySolutionPermissions = useMemo(
-    () => calculatePermissionsFromCapabilities(kibanaServices.application.capabilities),
-    [kibanaServices.application.capabilities]
-  );
-
   const privileges = useMemo(() => {
     const loading = !userRolesCheckDone || !user || !checkHostIsolationExceptionsDone;
 
@@ -73,7 +67,6 @@ export const useEndpointPrivileges = (): Immutable<EndpointPrivileges> => {
             fleetAuthz,
             userRoles,
             isEndpointRbacEnabled || isEndpointRbacV1Enabled,
-            securitySolutionPermissions,
             hasHostIsolationExceptionsItems
           )
         : getEndpointAuthzInitialState()),
@@ -89,7 +82,6 @@ export const useEndpointPrivileges = (): Immutable<EndpointPrivileges> => {
     userRoles,
     isEndpointRbacEnabled,
     isEndpointRbacV1Enabled,
-    securitySolutionPermissions,
     hasHostIsolationExceptionsItems,
   ]);
 

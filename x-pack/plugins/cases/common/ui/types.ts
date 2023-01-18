@@ -91,21 +91,28 @@ export interface ResolvedCase {
   aliasPurpose?: ResolvedSimpleSavedObject['alias_purpose'];
 }
 
-export interface QueryParams {
-  page: number;
-  perPage: number;
+export interface SortingParams {
   sortField: SortFieldCase;
   sortOrder: 'asc' | 'desc';
 }
-export type UrlQueryParams = Partial<QueryParams>;
 
-export type ParsedUrlQueryParams = Partial<Omit<QueryParams, 'page' | 'perPage'>> & {
-  page?: string;
-  perPage?: string;
+export interface QueryParams extends SortingParams {
+  page: number;
+  perPage: number;
+}
+export type PartialQueryParams = Partial<QueryParams>;
+
+export interface UrlQueryParams extends SortingParams {
+  page: string;
+  perPage: string;
+}
+
+export interface ParsedUrlQueryParams extends Partial<UrlQueryParams> {
   [index: string]: string | string[] | undefined | null;
-};
+}
 
 export type LocalStorageQueryParams = Partial<Omit<QueryParams, 'page'>>;
+
 export interface FilterOptions {
   search: string;
   searchFields: string[];
@@ -116,6 +123,7 @@ export interface FilterOptions {
   reporters: User[];
   owner: string[];
 }
+export type PartialFilterOptions = Partial<FilterOptions>;
 
 export type SingleCaseMetrics = SingleCaseMetricsResponse;
 export type SingleCaseMetricsFeature =
@@ -127,8 +135,11 @@ export type SingleCaseMetricsFeature =
   | 'lifespan';
 
 export enum SortFieldCase {
-  createdAt = 'createdAt',
   closedAt = 'closedAt',
+  createdAt = 'createdAt',
+  severity = 'severity',
+  status = 'status',
+  title = 'title',
 }
 
 export type ElasticUser = SnakeToCamelCase<User>;

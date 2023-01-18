@@ -10,6 +10,7 @@ import { Adapters } from '@kbn/inspector-plugin/common';
 import { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import { BehaviorSubject, filter, firstValueFrom, map, merge, scan } from 'rxjs';
+import { AppState } from '../services/discover_app_state_container';
 import { getRawRecordType } from './get_raw_record_type';
 import {
   checkHitCount,
@@ -21,7 +22,6 @@ import {
 } from '../hooks/use_saved_search_messages';
 import { updateSearchSource } from './update_search_source';
 import { fetchDocuments } from './fetch_documents';
-import { AppState } from '../services/discover_state';
 import { FetchStatus } from '../../types';
 import { DataMsg, RecordRawType, SavedSearchData } from '../hooks/use_saved_search';
 import { DiscoverServices } from '../../../build_services';

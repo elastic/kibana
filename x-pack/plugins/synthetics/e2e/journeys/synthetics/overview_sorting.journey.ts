@@ -6,6 +6,7 @@
  */
 
 import { before, expect, journey, step } from '@elastic/synthetics';
+import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
 import {
   addTestMonitor,
   cleanTestMonitors,
@@ -14,6 +15,8 @@ import {
 import { syntheticsAppPageProvider } from '../../page_objects/synthetics/synthetics_app';
 
 journey('OverviewSorting', async ({ page, params }) => {
+  recordVideo(page);
+
   const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });
   const testMonitor1 = 'acb'; // second alpha, first created
   const testMonitor2 = 'aCd'; // third alpha, second created

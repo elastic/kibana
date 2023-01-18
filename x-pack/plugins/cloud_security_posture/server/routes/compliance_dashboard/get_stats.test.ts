@@ -38,7 +38,7 @@ const oneIsZeroQueryResult: FindingsEvaluationsQueryResult = {
 
 const bothAreZeroQueryResult: FindingsEvaluationsQueryResult = {
   resources_evaluated: {
-    value: 30,
+    value: 0,
   },
   failed_findings: {
     doc_count: 0,
@@ -90,8 +90,13 @@ describe('getStatsFromFindingsEvaluationsAggs', () => {
     });
   });
 
-  it('should throw error if both evaluations are zero', async () => {
-    // const stats = getStatsFromFindingsEvaluationsAggs(bothAreZeroQueryResult);
-    expect(() => getStatsFromFindingsEvaluationsAggs(bothAreZeroQueryResult)).toThrow();
+  it('should return zero on all stats if there are no failed or passed findings', async () => {
+    const stats = getStatsFromFindingsEvaluationsAggs(bothAreZeroQueryResult);
+    expect(stats).toEqual({
+      totalFailed: 0,
+      totalPassed: 0,
+      totalFindings: 0,
+      postureScore: 0,
+    });
   });
 });

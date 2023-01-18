@@ -17,8 +17,8 @@ import type {
 } from '@kbn/data-plugin/common';
 import type { ISearchStart } from '@kbn/data-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { isDefined } from '@kbn/ml-is-defined';
 import { processTopValues } from './utils';
-import { isDefined } from '../../../common/util/is_defined';
 import { buildAggregationWithSamplingOption } from './build_random_sampler_agg';
 import { MAX_PERCENT, PERCENTILE_SPACING, SAMPLER_TOP_TERMS_THRESHOLD } from './constants';
 import type {

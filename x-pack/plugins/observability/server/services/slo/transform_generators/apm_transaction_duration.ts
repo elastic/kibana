@@ -6,7 +6,11 @@
  */
 
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
-import { ALL_VALUE, apmTransactionDurationIndicatorSchema } from '@kbn/slo-schema';
+import {
+  ALL_VALUE,
+  apmTransactionDurationIndicatorSchema,
+  timeslicesBudgetingMethodSchema,
+} from '@kbn/slo-schema';
 import { InvalidTransformError } from '../../../errors';
 import {
   SLO_DESTINATION_INDEX_NAME,
@@ -17,6 +21,7 @@ import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo
 import { SLO, APMTransactionDurationIndicator } from '../../../domain/models';
 import { TransformGenerator } from '.';
 import { DEFAULT_APM_INDEX } from './constants';
+import { Query } from './types';
 
 export class ApmTransactionDurationTransformGenerator extends TransformGenerator {
   public getTransformParams(slo: SLO): TransformPutTransformRequest {
@@ -29,7 +34,7 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
       this.buildSource(slo, slo.indicator),
       this.buildDestination(),
       this.buildCommonGroupBy(slo),
-      this.buildAggregations(slo.indicator),
+      this.buildAggregations(slo, slo.indicator),
       this.buildSettings(slo)
     );
   }
@@ -39,7 +44,15 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
   }
 
   private buildSource(slo: SLO, indicator: APMTransactionDurationIndicator) {
-    const queryFilter = [];
+    const queryFilter: Query[] = [
+      {
+        range: {
+          [slo.settings.timestampField]: {
+            gte: `now-${slo.timeWindow.duration.format()}`,
+          },
+        },
+      },
+    ];
     if (indicator.params.service !== ALL_VALUE) {
       queryFilter.push({
         match: {
@@ -97,7 +110,7 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
     };
   }
 
-  private buildAggregations(indicator: APMTransactionDurationIndicator) {
+  private buildAggregations(slo: SLO, indicator: APMTransactionDurationIndicator) {
     const truncatedThreshold = Math.trunc(indicator.params['threshold.us']);
 
     return {
@@ -124,6 +137,17 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
           field: 'transaction.duration.histogram',
         },
       },
+      ...(timeslicesBudgetingMethodSchema.is(slo.budgetingMethod) && {
+        'slo.isGoodSlice': {
+          bucket_script: {
+            buckets_path: {
+              goodEvents: 'slo.numerator.value',
+              totalEvents: 'slo.denominator.value',
+            },
+            script: `params.goodEvents / params.totalEvents >= ${slo.objective.timesliceTarget} ? 1 : 0`,
+          },
+        },
+      }),
     };
   }
 }

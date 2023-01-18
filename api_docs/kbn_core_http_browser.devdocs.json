@@ -2001,68 +2001,6 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.IHttpFetchError.req",
-            "type": "Object",
-            "tags": [
-              "deprecated"
-            ],
-            "label": "req",
-            "description": [],
-            "signature": [
-              "Request"
-            ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
-            "deprecated": true,
-            "removeBy": "8.8.0\n\nNote to maintainers: when looking at usages, mind that typical use could be inside a `catch` block,\nso TS and code-reference navigation might not highlight them.",
-            "trackAdoption": false,
-            "references": [
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/common/util/errors/errors.test.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/common/util/errors/errors.test.ts"
-              },
-              {
-                "plugin": "@kbn/core-http-browser-internal",
-                "path": "packages/core/http/core-http-browser-internal/src/http_fetch_error.ts"
-              },
-              {
-                "plugin": "@kbn/core-http-browser-internal",
-                "path": "packages/core/http/core-http-browser-internal/src/http_fetch_error.ts"
-              }
-            ]
-          },
-          {
-            "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.IHttpFetchError.res",
-            "type": "Object",
-            "tags": [
-              "deprecated"
-            ],
-            "label": "res",
-            "description": [],
-            "signature": [
-              "Response | undefined"
-            ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
-            "deprecated": true,
-            "removeBy": "8.8.0\n\nNote to maintainers: when looking at usages, mind that typical use could be inside a `catch` block,\nso TS and code-reference navigation might not highlight them.",
-            "trackAdoption": false,
-            "references": [
-              {
-                "plugin": "@kbn/core-http-browser-internal",
-                "path": "packages/core/http/core-http-browser-internal/src/http_fetch_error.ts"
-              },
-              {
-                "plugin": "@kbn/core-http-browser-internal",
-                "path": "packages/core/http/core-http-browser-internal/src/http_fetch_error.ts"
-              }
-            ]
-          },
-          {
-            "parentPluginId": "@kbn/core-http-browser",
             "id": "def-common.IHttpFetchError.body",
             "type": "Uncategorized",
             "tags": [],

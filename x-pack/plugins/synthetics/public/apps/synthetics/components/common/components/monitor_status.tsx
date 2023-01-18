@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiBadge, EuiDescriptionList, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiBadge, EuiDescriptionList, EuiLoadingContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EncryptedSyntheticsMonitor } from '../../../../../../common/runtime_types';
 
@@ -22,15 +22,22 @@ export const MonitorStatus = ({
 }) => {
   const isBrowserType = monitor.type === 'browser';
 
-  const badge = loading ? (
-    <EuiLoadingSpinner size="s" />
-  ) : !status ? (
-    <EuiBadge color="default">{PENDING_LABEL}</EuiBadge>
-  ) : status === 'up' ? (
-    <EuiBadge color="success">{isBrowserType ? SUCCESS_LABEL : UP_LABEL}</EuiBadge>
-  ) : (
-    <EuiBadge color="danger">{isBrowserType ? FAILED_LABEL : DOWN_LABEL}</EuiBadge>
-  );
+  const badge =
+    loading && !monitor ? (
+      <EuiLoadingContent lines={1} />
+    ) : !status || status === 'unknown' ? (
+      <EuiBadge color="default" data-test-subj="monitorLatestStatusPending">
+        {PENDING_LABEL}
+      </EuiBadge>
+    ) : status === 'up' ? (
+      <EuiBadge color="success" data-test-subj="monitorLatestStatusUp">
+        {isBrowserType ? SUCCESS_LABEL : UP_LABEL}
+      </EuiBadge>
+    ) : (
+      <EuiBadge color="danger" data-test-subj="monitorLatestStatusDown">
+        {isBrowserType ? FAILED_LABEL : DOWN_LABEL}
+      </EuiBadge>
+    );
 
   return (
     <EuiDescriptionList
@@ -41,7 +48,7 @@ export const MonitorStatus = ({
   );
 };
 
-const STATUS_LABEL = i18n.translate('xpack.synthetics.monitorStatus.statusLabel', {
+export const STATUS_LABEL = i18n.translate('xpack.synthetics.monitorStatus.statusLabel', {
   defaultMessage: 'Status',
 });
 

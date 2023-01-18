@@ -117,11 +117,16 @@ const getEntity = (path: string, config: Config) => {
       try {
         const req = client.request(options, (res) => {
           const chunks: Buffer[] = [];
+
+          let currentLength = 0;
+
           res.on('data', (chunk) => {
+            currentLength += Buffer.byteLength(chunk);
+
             chunks.push(chunk);
 
             // Destroy the request if the response is too large
-            if (Buffer.byteLength(Buffer.concat(chunks)) > MAX_RESPONSE_SIZE) {
+            if (currentLength > MAX_RESPONSE_SIZE) {
               req.destroy();
               reject(Boom.badRequest(`Response size is too large for ${path}`));
             }

@@ -118,7 +118,7 @@ async function getComponent({
       },
     },
   };
-  const appStateContainer = getDiscoverStateMock({ isTimeBased: true }).appStateContainer;
+  const appStateContainer = getDiscoverStateMock({ isTimeBased: true }).appState;
   appStateContainer.set({
     query: { query: '', language: 'lucene' },
     filters: [],

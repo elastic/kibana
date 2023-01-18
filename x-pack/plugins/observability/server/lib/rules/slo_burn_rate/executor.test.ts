@@ -27,12 +27,14 @@ import {
 import { FIRED_ACTION, getRuleExecutor } from './executor';
 import { aStoredSLO, createSLO } from '../../../services/slo/fixtures/slo';
 import { SLO } from '../../../domain/models';
+import { SharePluginStart } from '@kbn/share-plugin/server';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import {
-  AlertStates,
-  BurnRateAlertContext,
   BurnRateAlertState,
+  BurnRateAlertContext,
   BurnRateAllowedActionGroups,
   BurnRateRuleParams,
+  AlertStates,
 } from './types';
 
 const commonEsResponse = {
@@ -92,6 +94,8 @@ describe('BurnRateRuleExecutor', () => {
       getAlertStartedDate: jest.fn(),
       getAlertUuid: jest.fn(),
       getAlertByAlertUuid: jest.fn(),
+      share: {} as SharePluginStart,
+      dataViews: dataViewPluginMocks.createStartContract(),
     };
   });
 

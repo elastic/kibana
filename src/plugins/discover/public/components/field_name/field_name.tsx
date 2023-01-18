@@ -8,7 +8,7 @@
 
 import React, { Fragment } from 'react';
 import './field_name.scss';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiHighlight } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { FieldIcon, FieldIconProps } from '@kbn/react-field';
@@ -22,6 +22,7 @@ interface Props {
   fieldMapping?: DataViewField;
   fieldIconProps?: Omit<FieldIconProps, 'type'>;
   scripted?: boolean;
+  highlight?: string;
 }
 
 export function FieldName({
@@ -30,6 +31,7 @@ export function FieldName({
   fieldType,
   fieldIconProps,
   scripted = false,
+  highlight = '',
 }: Props) {
   const typeName = getFieldTypeName(fieldType);
   const displayName =
@@ -52,7 +54,7 @@ export function FieldName({
             delay="long"
             anchorClassName="eui-textBreakAll"
           >
-            <span>{displayName}</span>
+            <EuiHighlight search={highlight}>{displayName}</EuiHighlight>
           </EuiToolTip>
         </EuiFlexItem>
 

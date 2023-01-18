@@ -6,8 +6,9 @@
  */
 import * as t from 'io-ts';
 
-import { dateRangeSchema } from '@kbn/slo-schema';
+import { dateRangeSchema, statusSchema } from '@kbn/slo-schema';
 
+type Status = t.TypeOf<typeof statusSchema>;
 type DateRange = t.TypeOf<typeof dateRangeSchema>;
 
-export type { DateRange };
+export type { DateRange, Status };

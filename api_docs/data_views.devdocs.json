@@ -481,10 +481,6 @@
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/components/full_time_range_selector/full_time_range_selector_service.ts"
-              },
-              {
-                "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/jobs/new_job/pages/components/pick_fields_step/components/bucket_span_estimator/estimate_bucket_span.ts"
               },
               {
@@ -850,10 +846,6 @@
               {
                 "plugin": "data",
                 "path": "src/plugins/data/public/query/filter_manager/lib/get_display_value.test.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/hooks/use_adhoc_data_views.test.ts"
               },
               {
                 "plugin": "visTypeTimeseries",
@@ -8705,10 +8697,6 @@
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/components/full_time_range_selector/full_time_range_selector_service.ts"
-              },
-              {
-                "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/jobs/new_job/pages/components/pick_fields_step/components/bucket_span_estimator/estimate_bucket_span.ts"
               },
               {
@@ -9074,10 +9062,6 @@
               {
                 "plugin": "data",
                 "path": "src/plugins/data/public/query/filter_manager/lib/get_display_value.test.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/hooks/use_adhoc_data_views.test.ts"
               },
               {
                 "plugin": "visTypeTimeseries",
@@ -16024,10 +16008,6 @@
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/components/full_time_range_selector/full_time_range_selector_service.ts"
-              },
-              {
-                "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/jobs/new_job/pages/components/pick_fields_step/components/bucket_span_estimator/estimate_bucket_span.ts"
               },
               {
@@ -16393,10 +16373,6 @@
               {
                 "plugin": "data",
                 "path": "src/plugins/data/public/query/filter_manager/lib/get_display_value.test.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/hooks/use_adhoc_data_views.test.ts"
               },
               {
                 "plugin": "visTypeTimeseries",

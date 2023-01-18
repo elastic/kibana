@@ -53,7 +53,7 @@ import {
 } from '../../services/epm/packages';
 import type { BulkInstallResponse } from '../../services/epm/packages';
 import { defaultFleetErrorHandler, fleetErrorToResponseOptions, FleetError } from '../../errors';
-import { licenseService } from '../../services';
+import { checkAllowedPackages, licenseService } from '../../services';
 import { getArchiveEntry } from '../../services/epm/archive/cache';
 import { getAsset } from '../../services/epm/archive/storage';
 import { getPackageUsageStats } from '../../services/epm/packages/get';
@@ -91,6 +91,7 @@ export const getListHandler: FleetRequestHandler<
       savedObjectsClient,
       ...request.query,
     });
+
     const body: GetPackagesResponse = {
       items: res,
       response: res,
@@ -209,7 +210,11 @@ export const getInfoHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   try {
     const savedObjectsClient = (await context.fleet).internalSoClient;
+    const { limitedToPackages } = await context.fleet;
     const { pkgName, pkgVersion } = request.params;
+
+    checkAllowedPackages([pkgName], limitedToPackages);
+
     const { ignoreUnverified = false, full = false, prerelease } = request.query;
     if (pkgVersion && !semverValid(pkgVersion)) {
       throw new FleetError('Package version is not a valid semver');

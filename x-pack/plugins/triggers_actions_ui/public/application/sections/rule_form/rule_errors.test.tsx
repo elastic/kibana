@@ -151,26 +151,25 @@ describe('rule_errors', () => {
         })),
       }));
       const result = await getRuleActionErrors(
-        mockRule({
-          actions: [
-            {
-              id: '1234',
-              actionTypeId: 'myActionType',
-              group: '',
-              params: {
-                name: 'yes',
-              },
+        [
+          {
+            id: '1234',
+            actionTypeId: 'myActionType',
+            group: '',
+            params: {
+              name: 'yes',
             },
-            {
-              id: '5678',
-              actionTypeId: 'myActionType2',
-              group: '',
-              params: {
-                name: 'yes',
-              },
+          },
+          {
+            id: '5678',
+            actionTypeId: 'myActionType2',
+            group: '',
+            params: {
+              name: 'yes',
             },
-          ],
-        }),
+          },
+        ],
+
         actionTypeRegistry
       );
       expect(result).toStrictEqual([

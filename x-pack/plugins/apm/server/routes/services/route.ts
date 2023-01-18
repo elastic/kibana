@@ -57,6 +57,7 @@ import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
 import { createInfraMetricsClient } from '../../lib/helpers/create_es_client/create_infra_metrics_client/create_infra_metrics_client';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { getApmAlertsClient } from '../../lib/helpers/get_apm_alerts_client';
+import { getServicesAlerts } from './get_services/get_service_alerts';
 
 const servicesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services',
@@ -1213,6 +1214,36 @@ const sortedAndFilteredServicesRoute = createApmServerRoute({
   },
 });
 
+const serviceAlertsRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/services/{serviceName}/alerts_count',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async (
+    resources
+  ): Promise<{
+    serviceName: string;
+    alertsCount: number;
+  }> => {
+    const { params } = resources;
+
+    const { serviceName } = params.path;
+
+    const apmAlertsClient = await getApmAlertsClient(resources);
+    const servicesAlerts = await getServicesAlerts({
+      serviceName,
+      apmAlertsClient,
+    });
+
+    return servicesAlerts.length > 0
+      ? servicesAlerts[0]
+      : { serviceName, alertsCount: 0 };
+  },
+});
+
 export const serviceRouteRepository = {
   ...servicesRoute,
   ...servicesDetailedStatisticsRoute,
@@ -1231,4 +1262,5 @@ export const serviceRouteRepository = {
   ...serviceDependenciesBreakdownRoute,
   ...serviceAnomalyChartsRoute,
   ...sortedAndFilteredServicesRoute,
+  ...serviceAlertsRoute,
 };

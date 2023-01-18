@@ -8,11 +8,27 @@
 import React from 'react';
 import { EuiPageTemplate, EuiButton, EuiTitle, EuiLink, EuiImage } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
+import { paths } from '../../../config';
+import { useKibana } from '../../../utils/kibana_react';
 import illustration from './assets/illustration.svg';
 
 export function SloListWelcomePrompt() {
+  const {
+    application: { navigateToUrl },
+    http: { basePath },
+  } = useKibana().services;
+
+  const handleClickCreateSlo = () => {
+    navigateToUrl(basePath.prepend(paths.observability.sloCreate));
+  };
+
   return (
-    <EuiPageTemplate minHeight="0" data-test-subj="slosPageWelcomePrompt">
+    <EuiPageTemplate
+      minHeight="0"
+      data-test-subj="slosPageWelcomePrompt"
+      style={{ paddingBlockStart: 0 }}
+    >
       <EuiPageTemplate.EmptyPrompt
         title={
           <EuiTitle size="l">
@@ -51,7 +67,7 @@ export function SloListWelcomePrompt() {
           </>
         }
         actions={
-          <EuiButton color="primary" fill>
+          <EuiButton color="primary" fill onClick={handleClickCreateSlo}>
             {i18n.translate('xpack.observability.slos.sloList.welcomePrompt.buttonLabel', {
               defaultMessage: 'Create first SLO',
             })}

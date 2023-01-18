@@ -20,6 +20,8 @@ import { RuleDataClient } from '../rule_data_client';
 import { createRuleDataClientMock } from '../rule_data_client/rule_data_client.mock';
 import { createLifecycleRuleTypeFactory } from './create_lifecycle_rule_type_factory';
 import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
+import { SharePluginStart } from '@kbn/share-plugin/server';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 
 type RuleTestHelpers = ReturnType<typeof createRule>;
 
@@ -51,6 +53,7 @@ function createRule(shouldWriteAlerts: boolean = true) {
         services.alertWithLifecycle(alert);
       });
       nextAlerts = [];
+      return { state: {} };
     },
     id: 'ruleTypeId',
     isExportable: true,
@@ -94,7 +97,7 @@ function createRule(shouldWriteAlerts: boolean = true) {
 
       scheduleActions.mockClear();
 
-      state = ((await type.executor({
+      ({ state } = ((await type.executor({
         executionId: 'b33f65d7-6e8b-4aae-8d20-c93613dec9f9',
         logger: loggerMock.create(),
         namespace: 'namespace',
@@ -129,11 +132,13 @@ function createRule(shouldWriteAlerts: boolean = true) {
           shouldStopExecution: () => false,
           shouldWriteAlerts: () => shouldWriteAlerts,
           uiSettingsClient: {} as any,
+          share: {} as SharePluginStart,
+          dataViews: dataViewPluginMocks.createStartContract(),
         },
         spaceId: 'spaceId',
         startedAt,
         state,
-      })) ?? {}) as Record<string, any>;
+      })) ?? {}) as Record<string, any>);
 
       previousStartedAt = startedAt;
     },

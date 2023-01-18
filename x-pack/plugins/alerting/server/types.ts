@@ -11,6 +11,7 @@ import type {
   SavedObjectReference,
   IUiSettingsClient,
 } from '@kbn/core/server';
+import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { LicenseType } from '@kbn/licensing-plugin/server';
 import {
@@ -20,9 +21,11 @@ import {
   Logger,
 } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import { SharePluginStart } from '@kbn/share-plugin/server';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { RulesClient } from './rules_client';
+import { RulesSettingsClient, RulesSettingsFlappingClient } from './rules_settings_client';
 export * from '../common';
 import {
   Rule,
@@ -55,6 +58,7 @@ export type { RuleTypeParams };
  */
 export interface AlertingApiRequestHandlerContext {
   getRulesClient: () => RulesClient;
+  getRulesSettingsClient: () => RulesSettingsClient;
   listTypes: RuleTypeRegistry['list'];
   getFrameworkHealth: () => Promise<AlertsHealth>;
   areApiKeysEnabled: () => Promise<boolean>;
@@ -84,6 +88,8 @@ export interface RuleExecutorServices<
   shouldWriteAlerts: () => boolean;
   shouldStopExecution: () => boolean;
   ruleMonitoringService?: PublicRuleMonitoringService;
+  share: SharePluginStart;
+  dataViews: DataViewsContract;
   ruleResultService?: PublicRuleResultService;
 }
 
@@ -119,7 +125,7 @@ export type ExecutorType<
   ActionGroupIds extends string = never
 > = (
   options: RuleExecutorOptions<Params, State, InstanceState, InstanceContext, ActionGroupIds>
-) => Promise<State | void>;
+) => Promise<{ state: State }>;
 
 export interface RuleTypeParamsValidator<Params extends RuleTypeParams> {
   validate: (object: unknown) => Params;
@@ -286,6 +292,7 @@ export interface RawRule extends SavedObjectAttributes {
   isSnoozedUntil?: string | null;
   lastRun?: RawRuleLastRun | null;
   nextRun?: string | null;
+  running?: boolean | null;
 }
 
 export interface AlertingPlugin {
@@ -314,6 +321,9 @@ export interface InvalidatePendingApiKey {
 export type RuleTypeRegistry = PublicMethodsOf<OrigruleTypeRegistry>;
 
 export type RulesClientApi = PublicMethodsOf<RulesClient>;
+
+export type RulesSettingsClientApi = PublicMethodsOf<RulesSettingsClient>;
+export type RulesSettingsFlappingClientApi = PublicMethodsOf<RulesSettingsFlappingClient>;
 
 export interface PublicMetricsSetters {
   setLastRunMetricsTotalSearchDurationMs: (totalSearchDurationMs: number) => void;

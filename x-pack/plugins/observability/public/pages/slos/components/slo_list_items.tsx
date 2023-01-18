@@ -7,13 +7,13 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { SloListItem } from './slo_list_item';
 import { SloListEmpty } from './slo_list_empty';
 import { SloListError } from './slo_list_error';
-import { SLO } from '../../../typings';
 
 export interface SloListItemsProps {
-  slos: SLO[];
+  slos: SLOWithSummaryResponse[];
   loading: boolean;
   error: boolean;
   onDeleted: () => void;

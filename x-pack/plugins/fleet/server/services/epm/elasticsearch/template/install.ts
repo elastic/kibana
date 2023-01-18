@@ -281,10 +281,15 @@ export function buildComponentTemplates(params: {
     (dynampingTemplate) => Object.keys(dynampingTemplate)[0]
   );
 
+  const isTimeSeriesEnabledByDefault = registryElasticsearch?.index_mode === 'time_series';
+  const isSyntheticSourceEnabledByDefault = registryElasticsearch?.source_mode === 'synthetic';
+
   const sourceModeSynthetic =
     params.experimentalDataStreamFeature?.features.synthetic_source !== false &&
     (params.experimentalDataStreamFeature?.features.synthetic_source === true ||
-      registryElasticsearch?.source_mode === 'synthetic');
+      isSyntheticSourceEnabledByDefault ||
+      isTimeSeriesEnabledByDefault);
+
   templatesMap[packageTemplateName] = {
     template: {
       settings: {
@@ -486,7 +491,12 @@ export function prepareTemplate({
   const { name: packageName, version: packageVersion } = pkg;
   const fields = loadFieldsFromYaml(pkg, dataStream.path);
   const validFields = processFields(fields);
-  const mappings = generateMappings(validFields);
+
+  const isIndexModeTimeSeries =
+    dataStream.elasticsearch?.index_mode === 'time_series' ||
+    experimentalDataStreamFeature?.features.tsdb;
+
+  const mappings = generateMappings(validFields, { isIndexModeTimeSeries });
   const templateName = generateTemplateName(dataStream);
   const templateIndexPattern = generateTemplateIndexPattern(dataStream);
   const templatePriority = getTemplatePriority(dataStream);
@@ -517,6 +527,9 @@ export function prepareTemplate({
     composedOfTemplates: Object.keys(componentTemplates),
     templatePriority,
     hidden: dataStream.hidden,
+    registryElasticsearch: dataStream.elasticsearch,
+    mappings,
+    isIndexModeTimeSeries,
   });
 
   return {

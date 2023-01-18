@@ -43,6 +43,7 @@ export function createDashboardListingFilterUrl(filter: string | undefined) {
 // ------------------------------------------------------------------
 export const DASHBOARD_LOADED_EVENT = 'dashboard_loaded';
 export const SAVED_OBJECT_LOADED_TIME = 'saved_object_loaded_time';
+export const SAVED_OBJECT_DELETE_TIME = 'saved_object_delete_time';
 export const DASHBOARD_UI_METRIC_ID = 'dashboard';
 
 // ------------------------------------------------------------------

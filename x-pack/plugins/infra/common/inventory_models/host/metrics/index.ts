@@ -38,14 +38,14 @@ import { InventoryMetrics } from '../../types';
 
 const exposedHostSnapshotMetrics = {
   cpu,
+  cpuCores,
+  diskLatency,
   load,
   logRate,
   memory,
+  memoryTotal,
   rx,
   tx,
-  cpuCores,
-  memoryTotal,
-  diskLatency,
 };
 // not sure why this is the only model with "count"
 const hostSnapshotMetrics = { count, ...exposedHostSnapshotMetrics };

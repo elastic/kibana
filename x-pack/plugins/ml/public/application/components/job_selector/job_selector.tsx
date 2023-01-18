@@ -19,6 +19,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useUrlState } from '@kbn/ml-url-state';
 import './_index.scss';
 
+import { useStorage } from '@kbn/ml-local-storage';
 import { Dictionary } from '../../../../common/types/common';
 import { IdBadges } from './id_badges';
 import {
@@ -27,7 +28,6 @@ import {
   JobSelectorFlyoutProps,
 } from './job_selector_flyout';
 import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
-import { useStorage } from '../../contexts/storage';
 import { ML_APPLY_TIME_RANGE_CONFIG } from '../../../../common/types/storage';
 
 interface GroupObj {

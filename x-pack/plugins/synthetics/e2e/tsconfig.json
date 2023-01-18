@@ -6,14 +6,4 @@
     "outDir": "target/types",
     "types": [ "node"],
   },
-  "kbn_references": [
-    "@kbn/apm-plugin",
-    {
-      "path": "../../observability/e2e/tsconfig.json"
-    },
-    "@kbn/test",
-    "@kbn/dev-utils",
-    "@kbn/observability-plugin",
-    "@kbn/ux-plugin",
-  ]
 }

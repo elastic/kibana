@@ -13,7 +13,7 @@ import { ALERT_END, ALERT_STATUS, ALERT_STATUS_ACTIVE, ALERT_REASON } from '@kbn
 import { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
 import { AlertTypeInitializer } from '.';
 import { getMonitorRouteFromMonitorId } from '../../../../common/utils/get_monitor_url';
-import { CLIENT_ALERT_TYPES } from '../../../../common/constants/alerts';
+import { CLIENT_ALERT_TYPES } from '../../../../common/constants/uptime_alerts';
 import { DurationAnomalyTranslations } from '../../../../common/translations';
 
 const { defaultActionMessage, defaultRecoveryMessage, description } = DurationAnomalyTranslations;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LogicMounter, mockFlashMessageHelpers } from '../../../../__mocks__/kea_logic';
+import { LogicMounter } from '../../../../__mocks__/kea_logic';
 import { connectorIndex } from '../../../__mocks__/view_index.mock';
 
 import { ConnectorStatus } from '../../../../../../common/types/connectors';
@@ -33,7 +33,6 @@ describe('ConnectorConfigurationLogic', () => {
   const { mount: mountIndexNameLogic } = new LogicMounter(IndexNameLogic);
   const { mount: mountFetchIndexApiWrapperLogic } = new LogicMounter(CachedFetchIndexApiLogic);
   const { mount: mountIndexViewLogic } = new LogicMounter(IndexViewLogic);
-  const { clearFlashMessages, flashAPIErrors, flashSuccessToast } = mockFlashMessageHelpers;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -68,31 +67,6 @@ describe('ConnectorConfigurationLogic', () => {
         ...DEFAULT_VALUES,
         configState: { foo: { label: 'thirdBar', value: 'fourthBar' } },
         configView: [{ key: 'foo', label: 'thirdBar', value: 'fourthBar' }],
-      });
-    });
-    describe('makeRequest', () => {
-      it('should call clearFlashMessages', () => {
-        ConnectorConfigurationLogic.actions.makeRequest({
-          configuration: {},
-          connectorId: 'id',
-          indexName: 'name',
-        });
-        expect(clearFlashMessages).toHaveBeenCalled();
-      });
-    });
-    describe('apiError', () => {
-      it('should call flashAPIError', () => {
-        ConnectorConfigurationLogic.actions.apiError('error' as any);
-        expect(flashAPIErrors).toHaveBeenCalledWith('error');
-      });
-    });
-    describe('apiSuccess', () => {
-      it('should call flashAPIError', () => {
-        ConnectorConfigurationLogic.actions.apiSuccess({
-          configuration: {},
-          indexName: 'name',
-        });
-        expect(flashSuccessToast).toHaveBeenCalledWith('Configuration successfully updated');
       });
     });
     describe('setLocalConfigEntry', () => {

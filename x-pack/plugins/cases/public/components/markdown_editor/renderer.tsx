@@ -42,7 +42,7 @@ const MarkdownRendererComponent: React.FC<Props> = ({ children, disableLinks, te
     <EuiMarkdownFormat
       parsingPluginList={parsingPlugins}
       processingPluginList={processingPluginList}
-      grow={false}
+      grow={true}
       textSize={textSize}
     >
       {children}

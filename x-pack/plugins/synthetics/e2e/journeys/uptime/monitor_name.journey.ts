@@ -7,9 +7,12 @@
 import uuid from 'uuid';
 import { journey, step, expect, Page } from '@elastic/synthetics';
 import { byTestId } from '@kbn/observability-plugin/e2e/utils';
+import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
 import { monitorManagementPageProvider } from '../../page_objects/uptime/monitor_management';
 
 journey(`MonitorName`, async ({ page, params }: { page: Page; params: any }) => {
+  recordVideo(page);
+
   const name = `Test monitor ${uuid.v4()}`;
   const uptime = monitorManagementPageProvider({ page, kibanaUrl: params.kibanaUrl });
 

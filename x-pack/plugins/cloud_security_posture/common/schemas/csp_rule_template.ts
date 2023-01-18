@@ -33,6 +33,12 @@ export const cspRuleTemplateSchemaV840 = rt.object({
   muted: rt.boolean(),
 });
 
+export const cspRuleTemplateSchemaV870 = rt.object({
+  metadata: cspRuleMetadataSchema,
+});
+
 export type CspRuleTemplateV830 = TypeOf<typeof cspRuleTemplateSchemaV830>;
 export type CspRuleTemplateV840 = TypeOf<typeof cspRuleTemplateSchemaV840>;
-export type CspRuleTemplate = CspRuleTemplateV840;
+export type CspRuleTemplateV870 = TypeOf<typeof cspRuleTemplateSchemaV870>;
+
+export type CspRuleTemplate = CspRuleTemplateV870;

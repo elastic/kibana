@@ -119,8 +119,6 @@ export const TIMELINE_FIELD = (field: string) => {
 export const removeExternalLinkText = (str: string) =>
   str.replace(/\(opens in a new tab or window\)/g, '');
 
-export const BACK_TO_RULES = '[data-test-subj="ruleDetailsBackToAllRules"]';
-
 export const DEFINE_RULE_PANEL_PROGRESS =
   '[data-test-subj="defineRule"] [data-test-subj="stepPanelProgress"]';
 
@@ -131,3 +129,5 @@ export const THREAT_TACTIC = '[data-test-subj="threatTacticLink"]';
 export const THREAT_TECHNIQUE = '[data-test-subj="threatTechniqueLink"]';
 
 export const THREAT_SUBTECHNIQUE = '[data-test-subj="threatSubtechniqueLink"]';
+
+export const BACK_TO_RULES_TABLE = '[data-test-subj="breadcrumb"][title="Rules"]';

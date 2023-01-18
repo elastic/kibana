@@ -16,7 +16,7 @@ import { render } from '../../utils/test_helper';
 import { SloDetailsPage } from '.';
 import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
 import { useParams } from 'react-router-dom';
-import { anSLO } from '../../../common/data/slo';
+import { anSLO } from '../../data/slo';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
