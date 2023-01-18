@@ -81,8 +81,8 @@ const getDisabledLabelTooltipTexts = (fields: ComboBoxFields) => {
   return disabledLabelTooltipTexts;
 };
 
-const getMappingConflictTooltipTexts = (fields: ComboBoxFields) => {
-  const mappingConflictTooltipTexts = fields.availableFields.reduce(
+const getMappingConflictsTooltipInfo = (fields: ComboBoxFields) => {
+  const mappingConflictsTooltipInfo = fields.availableFields.reduce(
     (acc: { [label: string]: FieldConflictsInfo[] }, field: DataViewField) => {
       const conflictsInfo = getMappingConflictsInfo(field);
       if (!conflictsInfo) {
@@ -93,7 +93,7 @@ const getMappingConflictTooltipTexts = (fields: ComboBoxFields) => {
     },
     {}
   );
-  return mappingConflictTooltipTexts;
+  return mappingConflictsTooltipInfo;
 };
 
 const getComboBoxProps = (fields: ComboBoxFields): GetFieldComboBoxPropsReturn => {
@@ -105,11 +105,11 @@ const getComboBoxProps = (fields: ComboBoxFields): GetFieldComboBoxPropsReturn =
     selectedOptions: selectedFields,
   });
   const disabledLabelTooltipTexts = getDisabledLabelTooltipTexts(fields);
-  const mappingConflictTooltipTexts = getMappingConflictTooltipTexts(fields);
+  const mappingConflictsTooltipInfo = getMappingConflictsTooltipInfo(fields);
   return {
     ...genericProps,
     disabledLabelTooltipTexts,
-    mappingConflictTooltipTexts,
+    mappingConflictsTooltipInfo,
   };
 };
 
@@ -140,7 +140,7 @@ export const useField = ({
     labels,
     selectedComboOptions,
     disabledLabelTooltipTexts,
-    mappingConflictTooltipTexts,
+    mappingConflictsTooltipInfo,
   } = useMemo(
     () => getComboBoxProps({ availableFields, selectedFields }),
     [availableFields, selectedFields]
@@ -203,7 +203,7 @@ export const useField = ({
       );
     }
 
-    const conflictsInfo = mappingConflictTooltipTexts[label];
+    const conflictsInfo = mappingConflictsTooltipInfo[label];
     if (showMappingConflicts && conflictsInfo) {
       const tooltipContent = (
         <>

@@ -35,7 +35,7 @@ export interface ComboBoxFields {
 
 export interface GetFieldComboBoxPropsReturn extends GetGenericComboBoxPropsReturn {
   disabledLabelTooltipTexts: { [label: string]: string };
-  mappingConflictTooltipTexts: { [label: string]: FieldConflictsInfo[] };
+  mappingConflictsTooltipInfo: { [label: string]: FieldConflictsInfo[] };
 }
 
 export interface DataViewField extends DataViewFieldBase {
