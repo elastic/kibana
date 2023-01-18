@@ -661,6 +661,39 @@ describe('TaskStore', () => {
     });
   });
 
+  describe('bulkGet', () => {
+    let store: TaskStore;
+
+    beforeAll(() => {
+      store = new TaskStore({
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+        adHocTaskCounter,
+      });
+    });
+
+    test('gets a task specified by id', async () => {
+      await store.bulkGet(['1', '2']);
+      expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith([
+        { type: 'task', id: '1' },
+        { type: 'task', id: '2' },
+      ]);
+    });
+
+    test('pushes error from saved objects client to errors$', async () => {
+      const firstErrorPromise = store.errors$.pipe(first()).toPromise();
+      savedObjectsClient.bulkGet.mockRejectedValue(new Error('Failure'));
+      await expect(store.bulkGet([randomId()])).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failure"`
+      );
+      expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
+    });
+  });
+
   describe('getLifecycle', () => {
     test('returns the task status if the task exists ', async () => {
       expect.assertions(5);
