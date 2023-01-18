@@ -6,7 +6,7 @@
  */
 import { MetricDatum, MetricTrendShape } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
+import { EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { useTheme } from '@kbn/observability-plugin/public';
 import { useAnyOfApmParams } from '../../../../../hooks/use_apm_params';
