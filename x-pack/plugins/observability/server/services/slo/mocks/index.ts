@@ -6,8 +6,9 @@
  */
 
 import { ResourceInstaller } from '../resource_installer';
-import { SummaryClient } from '../sli_client';
+import { SLIClient } from '../sli_client';
 import { SLORepository } from '../slo_repository';
+import { SummaryClient } from '../summary_client';
 import { TransformManager } from '../transform_manager';
 
 const createResourceInstallerMock = (): jest.Mocked<ResourceInstaller> => {
@@ -38,6 +39,11 @@ const createSLORepositoryMock = (): jest.Mocked<SLORepository> => {
 const createSummaryClientMock = (): jest.Mocked<SummaryClient> => {
   return {
     fetchSummary: jest.fn(),
+  };
+};
+
+const createSLIClientMock = (): jest.Mocked<SLIClient> => {
+  return {
     fetchSLIDataFrom: jest.fn(),
   };
 };
@@ -47,4 +53,5 @@ export {
   createTransformManagerMock,
   createSLORepositoryMock,
   createSummaryClientMock,
+  createSLIClientMock,
 };

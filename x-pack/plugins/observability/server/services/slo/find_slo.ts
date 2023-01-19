@@ -7,7 +7,6 @@
 
 import { FindSLOParams, FindSLOResponse, findSLOResponseSchema } from '@kbn/slo-schema';
 import { SLO, SLOId, SLOWithSummary, Summary } from '../../domain/models';
-import { SummaryClient } from './sli_client';
 import {
   Criteria,
   Paginated,
@@ -17,6 +16,7 @@ import {
   SortField,
   SortDirection,
 } from './slo_repository';
+import { SummaryClient } from './summary_client';
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_PER_PAGE = 25;

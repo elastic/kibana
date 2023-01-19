@@ -16,7 +16,7 @@ import { LifecycleRuleExecutor } from '@kbn/rule-registry-plugin/server';
 import { ExecutorType } from '@kbn/alerting-plugin/server';
 
 import { Duration, toDurationUnit } from '../../../domain/models';
-import { DefaultSummaryClient, KibanaSavedObjectsSLORepository } from '../../../services/slo';
+import { DefaultSLIClient, KibanaSavedObjectsSLORepository } from '../../../services/slo';
 import { computeBurnRate } from '../../../domain/services';
 import {
   AlertStates,
@@ -58,7 +58,7 @@ export const getRuleExecutor = (): LifecycleRuleExecutor<
     } = services;
 
     const sloRepository = new KibanaSavedObjectsSLORepository(soClient);
-    const summaryClient = new DefaultSummaryClient(esClient.asCurrentUser);
+    const summaryClient = new DefaultSLIClient(esClient.asCurrentUser);
     const slo = await sloRepository.findById(params.sloId);
 
     const longWindowDuration = new Duration(

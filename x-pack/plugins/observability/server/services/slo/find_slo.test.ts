@@ -9,8 +9,8 @@ import { SLO, SLOId, Summary } from '../../domain/models';
 import { FindSLO } from './find_slo';
 import { createSLO, createPaginatedSLO } from './fixtures/slo';
 import { createSummaryClientMock, createSLORepositoryMock } from './mocks';
-import { SummaryClient } from './sli_client';
 import { SLORepository, SortField, SortDirection } from './slo_repository';
+import { SummaryClient } from './summary_client';
 
 describe('FindSLO', () => {
   let mockRepository: jest.Mocked<SLORepository>;

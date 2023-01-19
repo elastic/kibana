@@ -8,8 +8,8 @@
 import { createAPMTransactionErrorRateIndicator, createSLO } from './fixtures/slo';
 import { GetSLO } from './get_slo';
 import { createSummaryClientMock, createSLORepositoryMock } from './mocks';
-import { SummaryClient } from './sli_client';
 import { SLORepository } from './slo_repository';
+import { SummaryClient } from './summary_client';
 
 describe('GetSLO', () => {
   let mockRepository: jest.Mocked<SLORepository>;
