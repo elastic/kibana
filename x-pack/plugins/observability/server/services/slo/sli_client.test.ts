@@ -9,7 +9,6 @@ import { ElasticsearchClientMock, elasticsearchServiceMock } from '@kbn/core/ser
 import moment from 'moment';
 
 import { SLO_DESTINATION_INDEX_NAME } from '../../assets/constants';
-import { toDateRange } from '../../domain/services';
 import { Duration, DurationUnit } from '../../domain/models';
 import { createSLO } from './fixtures/slo';
 import { DefaultSummaryClient } from './sli_client';
@@ -29,7 +28,7 @@ const commonEsResponse = {
   },
 };
 
-const getMsearchResponse = (good: number = 90, total: number = 100) => ({
+const createEsResponse = (good: number = 90, total: number = 100) => ({
   ...commonEsResponse,
   responses: [
     {
@@ -50,206 +49,186 @@ describe('SummaryClient', () => {
   });
 
   describe('fetchSummary', () => {
-    describe('with occurrences budgeting method', () => {
-      describe('with a rolling time window', () => {
-        it('returns the aggregated good and total values', async () => {
-          const slo = createSLO({ timeWindow: sevenDaysRolling() });
-          esClientMock.msearch.mockResolvedValueOnce(getMsearchResponse());
-          const summaryClient = new DefaultSummaryClient(esClientMock);
+    describe('with rolling and occurrences SLO', () => {
+      it('returns the summary', async () => {
+        const slo = createSLO({ timeWindow: sevenDaysRolling() });
+        esClientMock.msearch.mockResolvedValueOnce(createEsResponse());
+        const summaryClient = new DefaultSummaryClient(esClientMock);
 
-          const result = await summaryClient.fetchSummary([slo]);
+        const result = await summaryClient.fetchSummary([slo]);
 
-          const expectedDateRange = toDateRange(slo.timeWindow);
-          expect(result[slo.id]).toMatchObject({
-            good: 90,
-            total: 100,
-          });
-          expect(result[slo.id].dateRange.from).toBeClose(expectedDateRange.from);
-          expect(result[slo.id].dateRange.to).toBeClose(expectedDateRange.to);
-          // @ts-ignore searches not typed properly
-          expect(esClientMock.msearch.mock.calls[0][0].searches).toEqual([
-            { index: `${SLO_DESTINATION_INDEX_NAME}*` },
-            {
-              size: 0,
-              query: {
-                bool: {
-                  filter: [
-                    { term: { 'slo.id': slo.id } },
-                    { term: { 'slo.revision': slo.revision } },
-                    {
-                      range: {
-                        '@timestamp': { gte: expect.anything(), lt: expect.anything() },
-                      },
+        expect(result[slo.id]).toMatchSnapshot();
+        // @ts-ignore
+        expect(esClientMock.msearch.mock.calls[0][0].searches).toEqual([
+          { index: `${SLO_DESTINATION_INDEX_NAME}*` },
+          {
+            size: 0,
+            query: {
+              bool: {
+                filter: [
+                  { term: { 'slo.id': slo.id } },
+                  { term: { 'slo.revision': slo.revision } },
+                  {
+                    range: {
+                      '@timestamp': { gte: expect.anything(), lt: expect.anything() },
                     },
-                  ],
-                },
-              },
-              aggs: {
-                good: { sum: { field: 'slo.numerator' } },
-                total: { sum: { field: 'slo.denominator' } },
+                  },
+                ],
               },
             },
-          ]);
-        });
-      });
-
-      describe('with a calendar aligned time window', () => {
-        it('returns the aggregated good and total values', async () => {
-          const slo = createSLO({
-            timeWindow: weeklyCalendarAligned(new Date('2022-09-01T00:00:00.000Z')),
-          });
-          esClientMock.msearch.mockResolvedValueOnce(getMsearchResponse());
-          const summaryClient = new DefaultSummaryClient(esClientMock);
-
-          const result = await summaryClient.fetchSummary([slo]);
-
-          const expectedDateRange = toDateRange(slo.timeWindow);
-          expect(result[slo.id]).toMatchObject({ good: 90, total: 100 });
-          expect(result[slo.id].dateRange.from).toBeClose(expectedDateRange.from);
-          expect(result[slo.id].dateRange.to).toBeClose(expectedDateRange.to);
-          // @ts-ignore searches not typed properly
-          expect(esClientMock.msearch.mock.calls[0][0].searches).toEqual([
-            { index: `${SLO_DESTINATION_INDEX_NAME}*` },
-            {
-              size: 0,
-              query: {
-                bool: {
-                  filter: [
-                    { term: { 'slo.id': slo.id } },
-                    { term: { 'slo.revision': slo.revision } },
-                    {
-                      range: {
-                        '@timestamp': {
-                          gte: expectedDateRange.from.toISOString(),
-                          lt: expectedDateRange.to.toISOString(),
-                        },
-                      },
-                    },
-                  ],
-                },
-              },
-              aggs: {
-                good: { sum: { field: 'slo.numerator' } },
-                total: { sum: { field: 'slo.denominator' } },
-              },
+            aggs: {
+              good: { sum: { field: 'slo.numerator' } },
+              total: { sum: { field: 'slo.denominator' } },
             },
-          ]);
-        });
+          },
+        ]);
       });
     });
 
-    describe('with timeslices budgeting method', () => {
-      describe('with a calendar aligned time window', () => {
-        it('returns the aggregated good and total values', async () => {
-          const slo = createSLO({
-            budgetingMethod: 'timeslices',
-            objective: {
-              target: 0.95,
-              timesliceTarget: 0.9,
-              timesliceWindow: new Duration(10, DurationUnit.Minute),
-            },
-            timeWindow: weeklyCalendarAligned(new Date('2022-09-01T00:00:00.000Z')),
-          });
-          esClientMock.msearch.mockResolvedValueOnce(getMsearchResponse());
-          const summaryClient = new DefaultSummaryClient(esClientMock);
+    describe('with calendar aligned and occurrences SLO', () => {
+      it('returns the summary', async () => {
+        const slo = createSLO({
+          timeWindow: weeklyCalendarAligned(new Date('2022-09-01T00:00:00.000Z')),
+        });
+        esClientMock.msearch.mockResolvedValueOnce(createEsResponse());
+        const summaryClient = new DefaultSummaryClient(esClientMock);
 
-          const result = await summaryClient.fetchSummary([slo]);
+        const result = await summaryClient.fetchSummary([slo]);
 
-          const expectedDateRange = toDateRange(slo.timeWindow);
-          expect(result[slo.id]).toMatchObject({ good: 90, total: 100 });
-          expect(result[slo.id].dateRange.from).toBeClose(expectedDateRange.from);
-          expect(result[slo.id].dateRange.to).toBeClose(expectedDateRange.to);
-          // @ts-ignore searches not typed properly
-          expect(esClientMock.msearch.mock.calls[0][0].searches).toEqual([
-            { index: `${SLO_DESTINATION_INDEX_NAME}*` },
-            {
-              size: 0,
-              query: {
-                bool: {
-                  filter: [
-                    { term: { 'slo.id': slo.id } },
-                    { term: { 'slo.revision': slo.revision } },
-                    {
-                      range: {
-                        '@timestamp': {
-                          gte: expectedDateRange.from.toISOString(),
-                          lt: expectedDateRange.to.toISOString(),
-                        },
+        // @ts-ignore
+        expect(esClientMock.msearch.mock.calls[0][0].searches).toEqual([
+          { index: `${SLO_DESTINATION_INDEX_NAME}*` },
+          {
+            size: 0,
+            query: {
+              bool: {
+                filter: [
+                  { term: { 'slo.id': slo.id } },
+                  { term: { 'slo.revision': slo.revision } },
+                  {
+                    range: {
+                      '@timestamp': {
+                        gte: expect.anything(),
+                        lt: expect.anything(),
                       },
                     },
-                  ],
-                },
-              },
-              aggs: {
-                good: {
-                  sum: {
-                    field: 'slo.isGoodSlice',
                   },
-                },
-                total: {
-                  value_count: {
-                    field: 'slo.isGoodSlice',
-                  },
-                },
+                ],
               },
             },
-          ]);
-        });
+            aggs: {
+              good: { sum: { field: 'slo.numerator' } },
+              total: { sum: { field: 'slo.denominator' } },
+            },
+          },
+        ]);
       });
+    });
 
-      describe('with a rolling time window', () => {
-        it('returns the aggregated good and total values', async () => {
-          const slo = createSLO({
-            budgetingMethod: 'timeslices',
-            objective: {
-              target: 0.95,
-              timesliceTarget: 0.9,
-              timesliceWindow: new Duration(10, DurationUnit.Minute),
+    describe('with rolling and timeslices SLO', () => {
+      it('returns the summary', async () => {
+        const slo = createSLO({
+          budgetingMethod: 'timeslices',
+          objective: {
+            target: 0.95,
+            timesliceTarget: 0.9,
+            timesliceWindow: new Duration(10, DurationUnit.Minute),
+          },
+          timeWindow: sevenDaysRolling(),
+        });
+        esClientMock.msearch.mockResolvedValueOnce(createEsResponse());
+        const summaryClient = new DefaultSummaryClient(esClientMock);
+
+        const result = await summaryClient.fetchSummary([slo]);
+
+        expect(result[slo.id]).toMatchSnapshot();
+        // @ts-ignore searches not typed properly
+        expect(esClientMock.msearch.mock.calls[0][0].searches).toEqual([
+          { index: `${SLO_DESTINATION_INDEX_NAME}*` },
+          {
+            size: 0,
+            query: {
+              bool: {
+                filter: [
+                  { term: { 'slo.id': slo.id } },
+                  { term: { 'slo.revision': slo.revision } },
+                  {
+                    range: {
+                      '@timestamp': { gte: expect.anything(), lt: expect.anything() },
+                    },
+                  },
+                ],
+              },
             },
-            timeWindow: sevenDaysRolling(),
-          });
-          esClientMock.msearch.mockResolvedValueOnce(getMsearchResponse());
-          const summaryClient = new DefaultSummaryClient(esClientMock);
+            aggs: {
+              good: {
+                sum: {
+                  field: 'slo.isGoodSlice',
+                },
+              },
+              total: {
+                value_count: {
+                  field: 'slo.isGoodSlice',
+                },
+              },
+            },
+          },
+        ]);
+      });
+    });
 
-          const result = await summaryClient.fetchSummary([slo]);
+    describe('with calendar aligned and timeslices SLO', () => {
+      it('returns the summary', async () => {
+        const slo = createSLO({
+          budgetingMethod: 'timeslices',
+          objective: {
+            target: 0.95,
+            timesliceTarget: 0.9,
+            timesliceWindow: new Duration(10, DurationUnit.Minute),
+          },
+          timeWindow: weeklyCalendarAligned(new Date('2022-09-01T00:00:00.000Z')),
+        });
+        esClientMock.msearch.mockResolvedValueOnce(createEsResponse());
+        const summaryClient = new DefaultSummaryClient(esClientMock);
 
-          const expectedDateRange = toDateRange(slo.timeWindow);
-          expect(result[slo.id]).toMatchObject({ good: 90, total: 100 });
-          expect(result[slo.id].dateRange.from).toBeClose(expectedDateRange.from);
-          expect(result[slo.id].dateRange.to).toBeClose(expectedDateRange.to);
-          // @ts-ignore searches not typed properly
-          expect(esClientMock.msearch.mock.calls[0][0].searches).toEqual([
-            { index: `${SLO_DESTINATION_INDEX_NAME}*` },
-            {
-              size: 0,
-              query: {
-                bool: {
-                  filter: [
-                    { term: { 'slo.id': slo.id } },
-                    { term: { 'slo.revision': slo.revision } },
-                    {
-                      range: {
-                        '@timestamp': { gte: expect.anything(), lt: expect.anything() },
+        const result = await summaryClient.fetchSummary([slo]);
+
+        expect(result[slo.id]).toMatchSnapshot();
+        // @ts-ignore searches not typed properly
+        expect(esClientMock.msearch.mock.calls[0][0].searches).toEqual([
+          { index: `${SLO_DESTINATION_INDEX_NAME}*` },
+          {
+            size: 0,
+            query: {
+              bool: {
+                filter: [
+                  { term: { 'slo.id': slo.id } },
+                  { term: { 'slo.revision': slo.revision } },
+                  {
+                    range: {
+                      '@timestamp': {
+                        gte: expect.anything(),
+                        lt: expect.anything(),
                       },
                     },
-                  ],
+                  },
+                ],
+              },
+            },
+            aggs: {
+              good: {
+                sum: {
+                  field: 'slo.isGoodSlice',
                 },
               },
-              aggs: {
-                good: {
-                  sum: {
-                    field: 'slo.isGoodSlice',
-                  },
-                },
-                total: {
-                  value_count: {
-                    field: 'slo.isGoodSlice',
-                  },
+              total: {
+                value_count: {
+                  field: 'slo.isGoodSlice',
                 },
               },
             },
-          ]);
-        });
+          },
+        ]);
       });
     });
   });

@@ -17,10 +17,11 @@ import { occurrencesBudgetingMethodSchema, timeslicesBudgetingMethodSchema } fro
 import { SLO_DESTINATION_INDEX_NAME } from '../../assets/constants';
 import { toDateRange } from '../../domain/services/date_range';
 import { InternalQueryError } from '../../errors';
-import { DateRange, Duration, IndicatorData, SLO, SLOId } from '../../domain/models';
+import { DateRange, Duration, IndicatorData, SLO, SLOId, Summary } from '../../domain/models';
+import { computeErrorBudget, computeSLI, computeSummaryStatus } from '../../domain/services';
 
 export interface SummaryClient {
-  fetchSummary(sloList: SLO[]): Promise<Record<SLOId, IndicatorData>>;
+  fetchSummary(sloList: SLO[]): Promise<Record<SLOId, Summary>>;
   fetchSLIDataFrom(
     slo: SLO,
     lookbackWindows: LookbackWindow[]
@@ -39,7 +40,7 @@ type EsAggregations = Record<WindowName, AggregationsDateRangeAggregate>;
 export class DefaultSummaryClient implements SummaryClient {
   constructor(private esClient: ElasticsearchClient) {}
 
-  async fetchSummary(sloList: SLO[]): Promise<Record<SLOId, IndicatorData>> {
+  async fetchSummary(sloList: SLO[]): Promise<Record<SLOId, Summary>> {
     const dateRangeBySlo: Record<SLOId, DateRange> = sloList.reduce(
       (acc, slo) => ({ [slo.id]: toDateRange(slo.timeWindow), ...acc }),
       {}
@@ -49,9 +50,9 @@ export class DefaultSummaryClient implements SummaryClient {
       generateSearchQuery(slo, dateRangeBySlo[slo.id]),
     ]);
 
-    const indicatorDataBySlo: Record<SLOId, IndicatorData> = {};
+    const summaryBySlo: Record<SLOId, Summary> = {};
     if (searches.length === 0) {
-      return indicatorDataBySlo;
+      return summaryBySlo;
     }
 
     const result = await this.esClient.msearch({ searches });
@@ -59,19 +60,39 @@ export class DefaultSummaryClient implements SummaryClient {
     for (let i = 0; i < result.responses.length; i++) {
       const slo = sloList[i];
       if ('error' in result.responses[i]) {
-        // handle errorneous responses with default zero values, and keep going
-        indicatorDataBySlo[slo.id] = { dateRange: dateRangeBySlo[slo.id], good: 0, total: 0 };
+        const sliValue = computeSLI({ good: 0, total: 0 });
+        const errorBudget = computeErrorBudget(slo, {
+          dateRange: dateRangeBySlo[slo.id],
+          good: 0,
+          total: 0,
+        });
+        summaryBySlo[slo.id] = {
+          sliValue,
+          errorBudget,
+          status: computeSummaryStatus(slo, sliValue, errorBudget),
+        };
         continue;
       }
 
       // @ts-ignore
       const { aggregations } = result.responses[i];
-      const good = aggregations?.good?.value || 0;
-      const total = aggregations?.total?.value || 0;
-      indicatorDataBySlo[slo.id] = { dateRange: dateRangeBySlo[slo.id], good, total };
+      const good = aggregations?.good?.value ?? 0;
+      const total = aggregations?.total?.value ?? 0;
+
+      const sliValue = computeSLI({ good, total });
+      const errorBudget = computeErrorBudget(slo, {
+        dateRange: dateRangeBySlo[slo.id],
+        good,
+        total,
+      });
+      summaryBySlo[slo.id] = {
+        sliValue,
+        errorBudget,
+        status: computeSummaryStatus(slo, sliValue, errorBudget),
+      };
     }
 
-    return indicatorDataBySlo;
+    return summaryBySlo;
   }
 
   async fetchSLIDataFrom(

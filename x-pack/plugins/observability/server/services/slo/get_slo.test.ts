@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { toDateRange } from '../../domain/services';
 import { createAPMTransactionErrorRateIndicator, createSLO } from './fixtures/slo';
 import { GetSLO } from './get_slo';
 import { createSummaryClientMock, createSLORepositoryMock } from './mocks';
@@ -29,9 +28,14 @@ describe('GetSLO', () => {
       mockRepository.findById.mockResolvedValueOnce(slo);
       mockSummaryClient.fetchSummary.mockResolvedValueOnce({
         [slo.id]: {
-          good: 9999,
-          total: 10000,
-          dateRange: toDateRange(slo.timeWindow),
+          status: 'HEALTHY',
+          sliValue: 0.9999,
+          errorBudget: {
+            initial: 0.001,
+            consumed: 0.1,
+            remaining: 0.9,
+            isEstimated: false,
+          },
         },
       });
 
