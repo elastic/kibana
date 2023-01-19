@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { Logger } from '@kbn/core/server';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, mapValues } from 'lodash';
 import { Alert } from '../alert/alert';
 import {
   AlertFactory,
@@ -176,25 +176,26 @@ export class LegacyAlertsClient<
       Alert<State, Context, RecoveryActionGroupId>
     >;
 
-    logAlerts<Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>>({
+    const getAlertData = (
+      alert: Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>
+    ) => ({
+      actionGroup: alert.getScheduledActionOptions()?.actionGroup,
+      hasContext: alert.hasContext(),
+      lastScheduledActions: alert.getLastScheduledActions() as LastScheduledActions,
+      state: alert.getState(),
+      flapping: alert.getFlapping(),
+    });
+
+    logAlerts({
       logger: this.options.logger,
       alertingEventLogger: eventLogger,
-      newAlerts: processedAlertsNew,
-      activeAlerts: processedAlertsActive,
-      recoveredAlerts: processedAlertsRecoveredCurrent,
+      newAlerts: mapValues(processedAlertsNew, (alert) => getAlertData(alert)),
+      activeAlerts: mapValues(processedAlertsActive, (alert) => getAlertData(alert)),
+      recoveredAlerts: mapValues(processedAlertsRecoveredCurrent, (alert) => getAlertData(alert)),
       ruleLogPrefix: ruleLabel,
       ruleRunMetricsStore,
       canSetRecoveryContext: this.options.ruleType.doesSetRecoveryContext ?? false,
       shouldPersistAlerts: shouldLogAlerts,
-      getAlertData: (alert: Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>) => {
-        return {
-          actionGroup: alert.getScheduledActionOptions()?.actionGroup,
-          hasContext: alert.hasContext(),
-          lastScheduledActions: alert.getLastScheduledActions() as LastScheduledActions,
-          state: alert.getState(),
-          flapping: alert.getFlapping(),
-        };
-      },
     });
   }
 
