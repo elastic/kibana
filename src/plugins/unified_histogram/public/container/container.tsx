@@ -105,13 +105,6 @@ export const UnifiedHistogramContainer = forwardRef<
     };
   }, [stateService]);
 
-  // Clear the Lens request adapter when the chart is hidden
-  useEffect(() => {
-    if (state?.chartHidden || !stateProps.chart) {
-      stateService?.updateState({ lensRequestAdapter: undefined });
-    }
-  }, [state?.chartHidden, stateProps.chart, stateService]);
-
   // Don't render anything until the container is initialized
   if (!layoutProps || !state) {
     return null;

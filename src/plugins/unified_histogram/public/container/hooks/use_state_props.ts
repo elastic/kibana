@@ -8,8 +8,8 @@
 
 import { DataViewField, DataViewType } from '@kbn/data-views-plugin/common';
 import { getAggregateQueryMode, isOfAggregateQueryType } from '@kbn/es-query';
-import { useCallback, useMemo } from 'react';
 import type { UnifiedHistogramChartLoadEvent, UnifiedHistogramFetchStatus } from '../../types';
+import { useCallback, useEffect, useMemo } from 'react';
 import type {
   UnifiedHistogramState,
   UnifiedHistogramStateService,
@@ -127,6 +127,17 @@ export const useStateProps = ({
     },
     [stateService]
   );
+
+  /**
+   * Effects
+   */
+
+  // Clear the Lens request adapter when the chart is hidden
+  useEffect(() => {
+    if (state?.chartHidden || !chart) {
+      stateService?.updateState({ lensRequestAdapter: undefined });
+    }
+  }, [chart, state?.chartHidden, stateService]);
 
   return {
     hits,
