@@ -383,6 +383,7 @@ describe('when on the package policy create page', () => {
           monitoring_enabled: ['logs', 'metrics'],
           name: 'Agent policy 2',
           namespace: 'default',
+          inactivity_timeout: 1209600,
         },
         { withSysMonitoring: false }
       );
@@ -413,6 +414,7 @@ describe('when on the package policy create page', () => {
             monitoring_enabled: ['logs', 'metrics'],
             name: 'Agent policy 2',
             namespace: 'default',
+            inactivity_timeout: 1209600,
           },
           { withSysMonitoring: true }
         );

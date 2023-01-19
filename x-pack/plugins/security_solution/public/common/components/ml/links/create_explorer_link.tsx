@@ -48,7 +48,7 @@ export const ExplorerLink: React.FC<ExplorerLinkProps> = ({
   if (!explorerUrl) return null;
 
   return (
-    <EuiLink href={explorerUrl} target="_blank">
+    <EuiLink href={explorerUrl} target="_blank" data-test-subj={`explorer-link-${score.jobId}`}>
       {linkName}
     </EuiLink>
   );

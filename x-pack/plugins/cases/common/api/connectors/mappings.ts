@@ -16,6 +16,7 @@ const CaseFieldRT = rt.union([
   rt.literal('title'),
   rt.literal('description'),
   rt.literal('comments'),
+  rt.literal('tags'),
 ]);
 
 const ThirdPartyFieldRT = rt.union([rt.string, rt.literal('not_mapped')]);
