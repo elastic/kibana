@@ -37,6 +37,7 @@ export class LegacyAlertsClient<
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string
 > {
+  private ruleLogPrefix: string;
   // Alerts that were reported as active or recovered in the previous rule execution
   private trackedAlerts: {
     active: Record<string, Alert<State, Context>>;
@@ -66,12 +67,19 @@ export class LegacyAlertsClient<
       recovered: {},
       recoveredCurrent: {},
     };
+    this.ruleLogPrefix = `${this.options.ruleType.id}`;
   }
 
-  public initialize(
-    activeAlertsFromState: Record<string, RawAlertInstance>,
-    recoveredAlertsFromState: Record<string, RawAlertInstance>
-  ) {
+  public initialize({
+    ruleLabel,
+    activeAlertsFromState,
+    recoveredAlertsFromState,
+  }: {
+    ruleLabel: string;
+    activeAlertsFromState: Record<string, RawAlertInstance>;
+    recoveredAlertsFromState: Record<string, RawAlertInstance>;
+  }) {
+    this.ruleLogPrefix = ruleLabel;
     for (const id in activeAlertsFromState) {
       if (activeAlertsFromState.hasOwnProperty(id)) {
         this.trackedAlerts.active[id] = new Alert<State, Context>(id, activeAlertsFromState[id]);
@@ -106,12 +114,10 @@ export class LegacyAlertsClient<
 
   public processAndLogAlerts({
     eventLogger,
-    ruleLabel,
     ruleRunMetricsStore,
     shouldLogAlerts,
   }: {
     eventLogger: AlertingEventLogger;
-    ruleLabel: string;
     shouldLogAlerts: boolean;
     ruleRunMetricsStore: RuleRunMetricsStore;
   }) {
@@ -192,7 +198,7 @@ export class LegacyAlertsClient<
       newAlerts: mapValues(processedAlertsNew, (alert) => getAlertData(alert)),
       activeAlerts: mapValues(processedAlertsActive, (alert) => getAlertData(alert)),
       recoveredAlerts: mapValues(processedAlertsRecoveredCurrent, (alert) => getAlertData(alert)),
-      ruleLogPrefix: ruleLabel,
+      ruleLogPrefix: this.ruleLogPrefix,
       ruleRunMetricsStore,
       canSetRecoveryContext: this.options.ruleType.doesSetRecoveryContext ?? false,
       shouldPersistAlerts: shouldLogAlerts,

@@ -160,7 +160,8 @@ export class TaskRunner<
     // this.alertsClient = context.alertsService
     //   ? context.alertsService.createAlertsClient(
     //       ruleType as UntypedNormalizedRuleType,
-    //       this.maxAlerts
+    //       this.maxAlerts,
+    //       this.alertingEventLogger
     //     )
     //   : null;
     this.legacyAlertsClient = new LegacyAlertsClient({
@@ -308,7 +309,11 @@ export class TaskRunner<
     const { updatedRuleTypeState } = await this.timer.runWithTimer(
       TaskRunnerTimerSpan.RuleTypeRun,
       async () => {
-        this.legacyAlertsClient.initialize(alertRawInstances, alertRecoveredRawInstances);
+        this.legacyAlertsClient.initialize({
+          ruleLabel,
+          activeAlertsFromState: alertRawInstances,
+          recoveredAlertsFromState: alertRecoveredRawInstances,
+        });
         // this.alertsClient?.initialize({
         //   previousRuleExecutionUuid: previousExecutionUuid,
         //   rule: {
@@ -446,7 +451,6 @@ export class TaskRunner<
     await this.timer.runWithTimer(TaskRunnerTimerSpan.ProcessAlerts, async () => {
       this.legacyAlertsClient.processAndLogAlerts({
         eventLogger: this.alertingEventLogger,
-        ruleLabel,
         ruleRunMetricsStore,
         shouldLogAlerts: this.shouldLogAndScheduleActionsForAlerts(),
       });

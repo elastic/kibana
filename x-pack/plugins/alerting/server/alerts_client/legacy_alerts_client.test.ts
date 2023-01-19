@@ -106,7 +106,11 @@ describe('Legacy Alerts Client', () => {
           ruleType,
         });
         // Initialize with no tracked alerts so all reported alerts are new
-        alertsClient.initialize({}, {});
+        alertsClient.initialize({
+          ruleLabel: `test:abc: 'test rule'`,
+          activeAlertsFromState: {},
+          recoveredAlertsFromState: {},
+        });
 
         const alertFactory = alertsClient.getExecutorServices();
 
@@ -115,7 +119,6 @@ describe('Legacy Alerts Client', () => {
 
         alertsClient.processAndLogAlerts({
           eventLogger: alertingEventLogger,
-          ruleLabel: `test:abc: 'test rule'`,
           shouldLogAlerts,
           ruleRunMetricsStore,
         });
@@ -190,10 +193,13 @@ describe('Legacy Alerts Client', () => {
         });
         // Initialize with a tracked recovered alert so reported alerts
         // are new but there is a tracked recovered alert that matches a reported alert
-        alertsClient.initialize(
-          {},
-          { '1': { meta: { flappingHistory: [true, true, false, false] } } }
-        );
+        alertsClient.initialize({
+          ruleLabel: `test:abc: 'test rule'`,
+          activeAlertsFromState: {},
+          recoveredAlertsFromState: {
+            '1': { meta: { flappingHistory: [true, true, false, false] } },
+          },
+        });
 
         const alertFactory = alertsClient.getExecutorServices();
 
@@ -202,7 +208,6 @@ describe('Legacy Alerts Client', () => {
 
         alertsClient.processAndLogAlerts({
           eventLogger: alertingEventLogger,
-          ruleLabel: `test:abc: 'test rule'`,
           shouldLogAlerts,
           ruleRunMetricsStore,
         });
@@ -276,8 +281,9 @@ describe('Legacy Alerts Client', () => {
           ruleType,
         });
         // Initialize with tracked active alerts
-        alertsClient.initialize(
-          {
+        alertsClient.initialize({
+          ruleLabel: `test:abc: 'test rule'`,
+          activeAlertsFromState: {
             '1': {
               state: { start: '1969-12-30T00:00:00.000Z', duration: 33000 },
               meta: { flappingHistory: [true, true, false, false] },
@@ -286,8 +292,8 @@ describe('Legacy Alerts Client', () => {
               state: { start: '1969-12-31T07:34:00.000Z', duration: 23532 },
             },
           },
-          {}
-        );
+          recoveredAlertsFromState: {},
+        });
 
         const alertFactory = alertsClient.getExecutorServices();
 
@@ -298,7 +304,6 @@ describe('Legacy Alerts Client', () => {
 
         alertsClient.processAndLogAlerts({
           eventLogger: alertingEventLogger,
-          ruleLabel: `test:abc: 'test rule'`,
           shouldLogAlerts,
           ruleRunMetricsStore,
         });
@@ -412,8 +417,9 @@ describe('Legacy Alerts Client', () => {
           ruleType: { ...ruleType, doesSetRecoveryContext: true },
         });
         // Initialize with tracked active alerts
-        alertsClient.initialize(
-          {
+        alertsClient.initialize({
+          ruleLabel: `test:abc: 'test rule'`,
+          activeAlertsFromState: {
             '1': {
               state: { start: '1969-12-30T00:00:00.000Z', duration: 33000 },
               meta: { flappingHistory: [true, true, false, false] },
@@ -422,8 +428,8 @@ describe('Legacy Alerts Client', () => {
               state: { start: '1969-12-31T07:34:00.000Z', duration: 23532 },
             },
           },
-          {}
-        );
+          recoveredAlertsFromState: {},
+        });
 
         const alertFactory = alertsClient.getExecutorServices();
 
@@ -435,7 +441,6 @@ describe('Legacy Alerts Client', () => {
 
         alertsClient.processAndLogAlerts({
           eventLogger: alertingEventLogger,
-          ruleLabel: `test:abc: 'test rule'`,
           shouldLogAlerts,
           ruleRunMetricsStore,
         });
@@ -532,8 +537,9 @@ describe('Legacy Alerts Client', () => {
           ruleType: { ...ruleType, doesSetRecoveryContext: true },
         });
         // Initialize with tracked active and recovered alerts
-        alertsClient.initialize(
-          {
+        alertsClient.initialize({
+          ruleLabel: `test:abc: 'test rule'`,
+          activeAlertsFromState: {
             '1': {
               state: { start: '1969-12-30T00:00:00.000Z', duration: 33000 },
               meta: { flappingHistory: [true, true, false, false] },
@@ -542,7 +548,7 @@ describe('Legacy Alerts Client', () => {
               state: { start: '1969-12-31T07:34:00.000Z', duration: 23532 },
             },
           },
-          {
+          recoveredAlertsFromState: {
             '3': {
               state: {
                 start: '1969-12-31T07:34:00.000Z',
@@ -551,8 +557,8 @@ describe('Legacy Alerts Client', () => {
               },
               meta: { flappingHistory: [false, false] },
             },
-          }
-        );
+          },
+        });
 
         const alertFactory = alertsClient.getExecutorServices();
 
@@ -564,7 +570,6 @@ describe('Legacy Alerts Client', () => {
 
         alertsClient.processAndLogAlerts({
           eventLogger: alertingEventLogger,
-          ruleLabel: `test:abc: 'test rule'`,
           shouldLogAlerts,
           ruleRunMetricsStore,
         });
@@ -664,8 +669,9 @@ describe('Legacy Alerts Client', () => {
           ruleType: { ...ruleType, doesSetRecoveryContext: true },
         });
         // Initialize with tracked active and recovered alerts
-        alertsClient.initialize(
-          {
+        alertsClient.initialize({
+          ruleLabel: `test:abc: 'test rule'`,
+          activeAlertsFromState: {
             '1': {
               state: { start: '1969-12-30T00:00:00.000Z', duration: 33000 },
               meta: { flappingHistory: [true, true, false, false] },
@@ -678,7 +684,7 @@ describe('Legacy Alerts Client', () => {
               meta: { flappingHistory: [false] },
             },
           },
-          {
+          recoveredAlertsFromState: {
             '4': {
               state: {
                 start: '1969-12-31T07:34:00.000Z',
@@ -687,8 +693,8 @@ describe('Legacy Alerts Client', () => {
               },
               meta: { flappingHistory: [false, false] },
             },
-          }
-        );
+          },
+        });
 
         const alertFactory = alertsClient.getExecutorServices();
 
@@ -698,13 +704,14 @@ describe('Legacy Alerts Client', () => {
         alertFactory.create('5').scheduleActions('default' as never, { foo: 'pandas' });
         alertFactory.create('6').scheduleActions('default' as never, { foo: 'emus' });
         alertFactory.create('7').scheduleActions('default' as never, { foo: 'ocelots' });
-        alertFactory.alertLimit.setLimitReached(true);
+        expect(() => {
+          alertFactory.create('7').scheduleActions('default' as never, { foo: 'kangaroos' });
+        }).toThrowErrorMatchingInlineSnapshot(`"Rule reported more than 5 alerts."`);
 
         expect(alertsClient.hasReachedAlertLimit()).toEqual(true);
 
         alertsClient.processAndLogAlerts({
           eventLogger: alertingEventLogger,
-          ruleLabel: `test:abc: 'test rule'`,
           shouldLogAlerts,
           ruleRunMetricsStore,
         });

@@ -6,7 +6,8 @@
  */
 
 import uuid from 'uuid';
-import { cloneDeep, isEmpty, omit } from 'lodash';
+import * as rt from 'io-ts';
+import { isEmpty, mapValues } from 'lodash';
 import { Logger, ElasticsearchClient } from '@kbn/core/server';
 import {
   ALERT_ACTION_GROUP,
@@ -32,7 +33,6 @@ import {
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { SearchHit, SearchTotalHits } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { millisToNanos } from '@kbn/event-log-plugin/server';
 import { LastScheduledActions, type Alert } from '../../common';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { getIndexTemplateAndPattern } from '../alerts_service/types';
@@ -43,9 +43,12 @@ import { logAlerts } from '../task_runner/log_alerts';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 
+const contextSchema = rt.record(rt.string, rt.unknown);
+export type ContextAlert = rt.TypeOf<typeof contextSchema>;
+
 const QUERY_SIZE = 1000;
 
-export interface IAlertsClient {
+export interface IAlertsClient<Context> {
   /**
    * Initialize the client with alerts that were created or updated
    * during the previous execution.
@@ -61,25 +64,20 @@ export interface IAlertsClient {
   /**
    * Creates new alert document
    */
-  create(alert: Alert): void;
+  create(alert: ReportedAlert & Context): void;
 
-  processAndLogAlerts(): void;
+  processAndLogAlerts(ruleRunMetricsStore: RuleRunMetricsStore, shouldLogAlerts: boolean): void;
 
-  //   /**
-  //    * Returns alerts from previous rule execution
-  //    * - Returns a copy so the original list cannot be corrupted
-  //    */
-  //   get existingAlerts(): Alert[];
-  //   /**
-  //    * Returns list of recovered alerts, as determined by framework
-  //    */
-  //   getRecoveredAlerts(): Alert[];
+  /**
+   * Returns list of recovered alert IDs, as determined by framework
+   */
+  getRecoveredAlertIds(): string[];
   //   /**
   //    * Partially update an alert document
   //    * - Can use this for recovery alerts
   //    * - Control which fields can be updated?
   //    */
-  //   update(id: string, updatedAlert: Partial<Alert>): void;
+  //   update(id: string, updatedAlert: Partial<Context>): void;
   //   // /**
   //   //  * Triggers auto-recovery detection unless rule type has opted out
   //   //  * Writes all alerts to default index.
@@ -94,13 +92,14 @@ export interface IAlertsClient {
    * Returns subset of functions available to rule executors
    * Don't expose any functions with direct read or write access to the alerts index
    */
-  getExecutorServices(): PublicAlertsClient;
+  getExecutorServices(): PublicAlertsClient<Context>;
 }
 
-export type PublicAlertsClient = Pick<IAlertsClient, 'create'> &
-  Pick<IAlertLimitService, 'getAlertLimitValue' | 'setAlertLimitReached'> /* & {
-  getExistingAlerts(): Alert[];
-}*/;
+export type PublicAlertsClient<Context> = Pick<
+  IAlertsClient<Context>,
+  'create' | 'getRecoveredAlertIds'
+> &
+  Pick<IAlertLimitService, 'getAlertLimitValue' | 'setAlertLimitReached'>;
 
 // todo would be nice to infer this from AlertSchema
 export interface AlertRuleSchema {
@@ -121,6 +120,7 @@ export interface AlertsClientParams {
   maxAlerts: number;
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
   resourceInstallationPromise: Promise<boolean>;
+  eventLogger: AlertingEventLogger;
 }
 
 interface InitializeOpts {
@@ -135,7 +135,7 @@ interface InitializeOpts {
   previousRuleExecutionUuid?: string;
 }
 
-export class AlertsClient implements IAlertsClient {
+export class AlertsClient<Context extends ContextAlert> implements IAlertsClient<Context> {
   private alertLimitServices: AlertLimitService;
   private rule: AlertRuleSchema | null = null;
   private ruleLogPrefix: string;
@@ -270,7 +270,7 @@ export class AlertsClient implements IAlertsClient {
     }
   }
 
-  public create(alert: ReportedAlert) {
+  public create(alert: ReportedAlert & Context) {
     const currentTime = new Date().toISOString();
     const alertId = alert[ALERT_ID];
 
@@ -283,21 +283,27 @@ export class AlertsClient implements IAlertsClient {
     }
 
     if (this.alertHasBeenReported(alertId)) {
-      throw new Error(`Can't report alert with id ${alertId} multiple times!`);
+      throw new Error(`Can't create alert with id ${alertId} multiple times!`);
     }
 
     if (this.numAlertsReported++ >= this.options.maxAlerts) {
       this.alertLimitServices.setAlertLimitReached(true);
       throw new Error(
-        `Can't report more than ${this.options.maxAlerts} alerts in a single rule run!`
+        `Can't create more than ${this.options.maxAlerts} alerts in a single rule run!`
       );
     }
+
+    const trackedAlert = this.trackedAlerts.active[alertId]
+      ? this.trackedAlerts.active[alertId]
+      : {};
 
     // Augment the reported alert with framework required fields
     // - alert status
     // - timestamp
     // - required rule metadata, including current execution UUID
+    // - tracked alert data, if it exists
     const augmentedAlert: Alert = {
+      ...trackedAlert,
       ...alert,
       ...this.rule,
       [ALERT_STATUS]: 'active',
@@ -307,17 +313,7 @@ export class AlertsClient implements IAlertsClient {
     this.reportedAlerts[alertId] = augmentedAlert;
   }
 
-  public processAndLogAlerts({
-    eventLogger,
-    ruleLabel,
-    ruleRunMetricsStore,
-    shouldLogAndScheduleActionsForAlerts,
-  }: {
-    eventLogger: AlertingEventLogger;
-    ruleLabel: string;
-    shouldLogAndScheduleActionsForAlerts: boolean;
-    ruleRunMetricsStore: RuleRunMetricsStore;
-  }) {
+  public processAndLogAlerts(ruleRunMetricsStore: RuleRunMetricsStore, shouldLogAlerts: boolean) {
     const updateAlertValues = ({
       alert,
       start,
@@ -331,14 +327,16 @@ export class AlertsClient implements IAlertsClient {
       end?: string;
       flappingHistory: boolean[];
     }) => {
-      alert = {
+      Object.assign(alert, {
         ...alert,
+        ...this.rule,
         ...(start ? { [ALERT_START]: start } : {}),
         ...(end ? { [ALERT_END]: end } : {}),
         ...(duration !== undefined ? { [ALERT_DURATION]: duration } : {}),
+        [ALERT_UUID]: alert[ALERT_UUID] ? alert[ALERT_UUID] : uuid.v4(),
         [ALERT_FLAPPING_HISTORY]: flappingHistory,
         [ALERT_FLAPPING]: isAlertFlapping(alert),
-      };
+      });
     };
 
     const {
@@ -347,8 +345,7 @@ export class AlertsClient implements IAlertsClient {
       currentRecoveredAlerts: processedAlertsRecoveredCurrent,
       recoveredAlerts: processedAlertsRecovered,
     } = processAlerts<Alert>({
-      // todo - a way to report recovered alerts?
-      reportedAlerts: { active: this.reportedAlerts, recovered: {} },
+      reportedAlerts: { active: this.reportedAlerts, recovered: this.getRecoveredAlertsHelper() },
       trackedAlerts: this.trackedAlerts,
       hasReachedAlertLimit: this.hasReachedAlertLimit(),
       alertLimit: this.options.maxAlerts,
@@ -364,98 +361,87 @@ export class AlertsClient implements IAlertsClient {
     this.processedAlerts.recovered = processedAlertsRecovered;
     this.processedAlerts.recoveredCurrent = processedAlertsRecoveredCurrent;
 
-    logAlerts<Alert>({
+    const getAlertData = (alert: Alert) => ({
+      actionGroup: alert[ALERT_ACTION_GROUP],
+      flapping: alert[ALERT_FLAPPING] as boolean,
+      hasContext: false, // no recovery context yet
+      lastScheduledActions: {} as LastScheduledActions, // no last scheduled actions yet
+      state: {}, // no state yet
+    });
+
+    logAlerts({
       logger: this.options.logger,
-      alertingEventLogger: eventLogger,
-      newAlerts: processedAlertsNew,
-      activeAlerts: processedAlertsActive,
-      recoveredAlerts: processedAlertsRecoveredCurrent,
-      ruleLogPrefix: ruleLabel,
+      alertingEventLogger: this.options.eventLogger,
+      newAlerts: mapValues(processedAlertsNew, (alert) => getAlertData(alert)),
+      activeAlerts: mapValues(processedAlertsActive, (alert) => getAlertData(alert)),
+      recoveredAlerts: mapValues(processedAlertsRecoveredCurrent, (alert) => getAlertData(alert)),
+      ruleLogPrefix: this.ruleLogPrefix,
       ruleRunMetricsStore,
       canSetRecoveryContext: this.options.ruleType.doesSetRecoveryContext ?? false,
-      shouldPersistAlerts: shouldLogAndScheduleActionsForAlerts,
-      getAlertData: (alert: Alert) => {
-        return {
-          actionGroup: alert[ALERT_ACTION_GROUP],
-          hasContext: false, // no recovery context yet
-          lastScheduledActions: {} as LastScheduledActions, // no last scheduled actions yet
-          state: {}, // no state yet
-          flapping: alert[ALERT_FLAPPING] as boolean,
-        };
-      },
+      shouldPersistAlerts: shouldLogAlerts,
     });
   }
 
-  public getRecoveredAlerts(): Alert[] {
+  public getProcessedAlerts(type: 'new' | 'active' | 'recovered' | 'recoveredCurrent') {
+    if (this.processedAlerts.hasOwnProperty(type)) {
+      return this.processedAlerts[type];
+    }
+
+    return {};
+  }
+
+  public getRecoveredAlertIds(): string[] {
     this.hasCalledGetRecoveredAlerts = true;
-    if (
-      /* !this.options.ruleType.autoRecoverAlerts ||*/ !this.options.ruleType.doesSetRecoveryContext
-    ) {
+    if (!this.options.ruleType.doesSetRecoveryContext) {
       this.options.logger.debug(
         `Set doesSetRecoveryContext to true on rule type to get access to recovered alerts.`
       );
       return [];
     }
 
-    // TODO ADD PROCESSING FOR ALERT LIMIT AND FLAPPING :(
-
-    // Look for alerts from the previous execution that have not been
-    // reported during the current execution. Return a copy so existing
-    // alerts cannot be accidentally mutated
-    return this.existingAlerts.filter(
-      (previousAlert: Alert) =>
-        !this.reportedAlerts.some(
-          (alert: Alert) => get(alert, ALERT_ID) === get(previousAlert, ALERT_ID)
-        )
-    );
+    const recoveredAlerts = this.getRecoveredAlertsHelper();
+    return Object.keys(recoveredAlerts ?? {});
   }
 
-  public update(id: string, updatedAlert: Partial<Alert>) {
-    this.options.logger.info(`updating alert ${id}`);
-    // Make sure we're updating something that exists
-    const existingAlert = this.existingAlerts.find((alert: Alert) => id === get(alert, ALERT_ID));
-    if (existingAlert) {
-      // Make sure we're not allowing updates to fields that shouldn't be updated
-      // by the rule type
-      const alert = omit(updatedAlert, [
-        ALERT_ID,
-        ALERT_UUID,
-        ALERT_STATUS,
-        ALERT_START,
-        ALERT_DURATION,
-        ALERT_END,
-        ALERT_ACTION_GROUP,
-        // ALERT_LAST_NOTIFIED_DATE,
-        ALERT_RULE_CATEGORY,
-        ALERT_RULE_CONSUMER,
-        ALERT_RULE_EXECUTION_UUID,
-        ALERT_RULE_NAME,
-        ALERT_RULE_PRODUCER,
-        ALERT_RULE_TAGS,
-        ALERT_RULE_TYPE_ID,
-        ALERT_RULE_UUID,
-      ]);
+  // public update(id: string, updatedAlert: Partial<Alert>) {
+  //   this.options.logger.info(`updating alert ${id}`);
+  //   // Make sure we're updating something that exists
+  //   const existingAlert = this.existingAlerts.find((alert: Alert) => id === get(alert, ALERT_ID));
+  //   if (existingAlert) {
+  //     // Make sure we're not allowing updates to fields that shouldn't be updated
+  //     // by the rule type
+  //     const alert = omit(updatedAlert, [
+  //       ALERT_ID,
+  //       ALERT_UUID,
+  //       ALERT_STATUS,
+  //       ALERT_START,
+  //       ALERT_DURATION,
+  //       ALERT_END,
+  //       ALERT_ACTION_GROUP,
+  //       // ALERT_LAST_NOTIFIED_DATE,
+  //       ALERT_RULE_CATEGORY,
+  //       ALERT_RULE_CONSUMER,
+  //       ALERT_RULE_EXECUTION_UUID,
+  //       ALERT_RULE_NAME,
+  //       ALERT_RULE_PRODUCER,
+  //       ALERT_RULE_TAGS,
+  //       ALERT_RULE_TYPE_ID,
+  //       ALERT_RULE_UUID,
+  //     ]);
 
-      this.updatedAlerts.push({
-        ...existingAlert,
-        ...alert,
-        [TIMESTAMP]: new Date().toISOString(),
-      });
-    } else {
-      this.options.logger.warn(`trying to update alert with ${id} which does not exist`);
-      // need to throw error?
-    }
-  }
+  //     this.updatedAlerts.push({
+  //       ...existingAlert,
+  //       ...alert,
+  //       [TIMESTAMP]: new Date().toISOString(),
+  //     });
+  //   } else {
+  //     this.options.logger.warn(`trying to update alert with ${id} which does not exist`);
+  //     // need to throw error?
+  //   }
+  // }
 
-  // public async writeAlerts(params?: WriteAlertParams) {
-  //   this.options.logger.info(`writeAlerts`);
-  //   this.options.logger.info(`${this.existingAlerts.length} existing alerts`);
-  //   this.options.logger.info(`${this.createdAlerts.length} created alerts`);
-  //   // Update alert with status and prepare for writing
+  // public async write(params?: WriteAlertParams) {
   //   // TODO - Lifecycle alerts set some other fields based on alert status
-  //   // Do we need to move those to the framework? Otherwise we would need to
-  //   // allow rule types to set these fields but they won't know the status
-  //   // of the alert beforehand
   //   // Example: workflow status - default to 'open' if not set
   //   // event action: new alert = 'new', active alert: 'active', otherwise 'close'
   //   this.prepareAlerts(this.options.ruleType.autoRecoverAlerts ?? true);
@@ -476,7 +462,7 @@ export class AlertsClient implements IAlertsClient {
   //   }
   // }
 
-  // // TODO
+  // TODO
   // public scheduleActions(params: ScheduleActionsParams) {
   //   const { metricsStore, throttle, notifyWhen, mutedAlertIds } = params;
   //   // const throttleMills = throttle ? parseDuration(throttle) : 0;
@@ -512,18 +498,41 @@ export class AlertsClient implements IAlertsClient {
   //   // }
   // }
 
-  public getExecutorServices(): PublicAlertsClient {
+  public getExecutorServices(): PublicAlertsClient<Context> {
     return {
       create: (...args) => this.create(...args),
       getAlertLimitValue: () => this.alertLimitServices.getAlertLimitValue(),
       setAlertLimitReached: (...args) => this.alertLimitServices.setAlertLimitReached(...args),
-      // getExistingAlerts: () => this.existingAlerts,
-      // getRecoveredAlerts: () => this.getRecoveredAlerts(),
+      getRecoveredAlertIds: () => this.getRecoveredAlertIds(),
     };
   }
 
+  private getRecoveredAlertsHelper(): Record<string, Alert & Context> {
+    const currentTime = new Date().toISOString();
+    // Look for active alerts from the previous execution that have not been
+    // reported during the current execution. Return a copy so existing
+    // alerts cannot be accidentally mutated
+    const recoveredAlerts: Record<string, Alert & Context> = {};
+    for (const id in this.trackedAlerts.active) {
+      if (this.trackedAlerts.active.hasOwnProperty(id)) {
+        if (!this.reportedAlerts[id]) {
+          recoveredAlerts[id] = {
+            ...this.trackedAlerts.active[id],
+            // get latest copy of rule and updated execution UUID
+            ...this.rule,
+            // set status to "recovered"
+            [ALERT_STATUS]: 'recovered',
+            // update timestamp to current time
+            [TIMESTAMP]: currentTime,
+          } as Alert & Context;
+        }
+      }
+    }
+    return recoveredAlerts;
+  }
+
   private alertHasBeenReported(alertId: string) {
-    return !!this.reportedAlerts.active[alertId] || !!this.reportedAlerts.new[alertId];
+    return !!this.reportedAlerts[alertId];
   }
 
   private setRuleData(rule: {
@@ -547,191 +556,6 @@ export class AlertsClient implements IAlertsClient {
     };
     this.ruleLogPrefix = `${this.options.ruleType.id}:${rule.id}: '${rule.name}'`;
   }
-
-  // private prepareAlerts(shouldRecover: boolean) {
-  //   const currentTime = new Date().toISOString();
-
-  //   // Active alerts
-  //   for (const alert of this.createdAlerts) {
-  //     // Look for this alert in existing alerts
-  //     const existingAlert = this.existingAlerts.find(
-  //       ({ [ALERT_INSTANCE_ID]: id }) => id === alert[ALERT_INSTANCE_ID]
-  //     );
-  //     if (existingAlert) {
-  //       // Copy over start time and update duration
-  //       const durationInMs =
-  //         new Date(currentTime).valueOf() -
-  //         new Date(existingAlert[ALERT_START] as string).valueOf();
-  //       const duration = existingAlert[ALERT_START] ? millisToNanos(durationInMs) : undefined;
-
-  //       this.preparedAlerts.push({
-  //         ...alert,
-  //         ...(existingAlert[ALERT_START] ? { [ALERT_START]: existingAlert[ALERT_START] } : {}),
-  //         ...(duration !== undefined ? { [ALERT_DURATION]: duration } : {}),
-  //         ...(existingAlert[ALERT_UUID] ? { [ALERT_UUID]: existingAlert[ALERT_UUID] } : {}),
-  //         [ALERT_WORKFLOW_STATUS]: existingAlert[ALERT_WORKFLOW_STATUS] ?? 'open',
-  //         [EVENT_ACTION]: 'active',
-  //       });
-
-  //       // If action group action subgroup has changed, may want to schedule actions
-  //       if (
-  //         existingAlert[ALERT_ACTION_GROUP] !== alert[ALERT_ACTION_GROUP] ||
-  //         existingAlert[ALERT_ACTION_SUBGROUP] !== alert[ALERT_ACTION_SUBGROUP]
-  //       ) {
-  //         this.alertIdsWithActionGroupChanges.push(alert[ALERT_INSTANCE_ID]);
-  //       }
-  //     } else {
-  //       // Add current time as start time, seed duration with '0' and generate uuid
-  //       this.preparedAlerts.push({
-  //         ...alert,
-  //         [ALERT_START]: currentTime,
-  //         [ALERT_DURATION]: '0',
-  //         [ALERT_UUID]: uuid.v4(),
-
-  //         // adding these because lifecycle executor adds these
-  //         [ALERT_WORKFLOW_STATUS]: 'open',
-  //         [EVENT_ACTION]: 'new',
-  //       });
-  //       this.alertIdsWithActionGroupChanges.push(alert[ALERT_INSTANCE_ID]);
-  //     }
-  //   }
-
-  //   if (this.createdAlerts.length > 0) {
-  //     this.options.logger.debug(
-  //       `rule ${this.ruleLogPrefix} has ${
-  //         this.createdAlerts.length
-  //       } active alerts: ${JSON.stringify(
-  //         this.createdAlerts.map(({ id, actionGroup }) => ({
-  //           instanceId: id,
-  //           actionGroup,
-  //         }))
-  //       )}`
-  //     );
-  //   }
-
-  //   // Recovered alerts
-  //   if (shouldRecover) {
-  //     this.options.logger.info('calculating recovery alerts');
-  //     const recoveredAlerts = this.existingAlerts.filter(
-  //       ({ [ALERT_INSTANCE_ID]: id1 }) =>
-  //         !this.createdAlerts.some(({ [ALERT_INSTANCE_ID]: id2 }) => id2 === id1)
-  //     );
-
-  //     if (recoveredAlerts.length > 0) {
-  //       this.options.logger.debug(
-  //         `rule ${this.ruleLogPrefix} has ${
-  //           recoveredAlerts.length
-  //         } recovered alerts: ${JSON.stringify(
-  //           recoveredAlerts.map(({ id }) => ({ instanceId: id }))
-  //         )}`
-  //       );
-  //     }
-
-  //     this.options.logger.info(`recoveredAlerts ${recoveredAlerts.length}`);
-
-  //     for (const alert of recoveredAlerts) {
-  //       // Look for updates to this alert
-  //       const updatedAlert = this.updatedAlerts.find(
-  //         ({ [ALERT_INSTANCE_ID]: id }) => id === alert[ALERT_INSTANCE_ID]
-  //       );
-
-  //       const durationInMs =
-  //         new Date(currentTime).valueOf() - new Date(alert[ALERT_START] as string).valueOf();
-  //       const duration = alert[ALERT_START] ? millisToNanos(durationInMs) : undefined;
-
-  //       if (updatedAlert) {
-  //         this.preparedAlerts.push({
-  //           ...alert,
-  //           ...updatedAlert,
-  //           [ALERT_ACTION_GROUP]: this.options.ruleType.recoveryActionGroup.id,
-  //           [ALERT_STATUS]: 'recovered',
-  //           [ALERT_DURATION]: duration,
-  //           [ALERT_END]: currentTime,
-  //           [EVENT_ACTION]: 'recovered',
-  //         });
-  //       } else {
-  //         // TODO - This alert has recovered but there are no updates to it
-  //         // What should we do here?
-  //         //  - 1. Strip out previous information and write it with the bare minimum of information?
-  //         //  - 2. Persist information from previous run? This could include context and state
-  //         //         fields that might not be relevant anymore
-  //         this.preparedAlerts.push({
-  //           ...alert,
-  //           [ALERT_ACTION_GROUP]: this.options.ruleType.recoveryActionGroup.id,
-  //           [ALERT_STATUS]: 'recovered',
-  //           [ALERT_DURATION]: duration,
-  //           [ALERT_END]: currentTime,
-  //           [EVENT_ACTION]: 'recovered',
-  //         });
-
-  //         if (this.options.ruleType.doesSetRecoveryContext) {
-  //           this.options.logger.debug(
-  //             `rule ${this.ruleLogPrefix} has no recovery context specified for recovered alert ${alert[ALERT_UUID]}`
-  //           );
-  //         }
-  //       }
-  //     }
-  //   }
-  // }
-
-  // private logAlerts(eventLogger: AlertingEventLogger, metricsStore: RuleRunMetricsStore) {
-  //   const activeAlerts = this.preparedAlerts.filter(
-  //     ({ [ALERT_STATUS]: status }) => status === 'active'
-  //   );
-  //   const newAlerts = this.preparedAlerts.filter(
-  //     ({ [ALERT_STATUS]: status, [ALERT_DURATION]: duration }) =>
-  //       status === 'active' && duration === '0'
-  //   );
-  //   const recoveredAlerts = this.preparedAlerts.filter(
-  //     ({ [ALERT_STATUS]: status }) => status === 'recovered'
-  //   );
-
-  //   metricsStore.setNumberOfNewAlerts(newAlerts.length);
-  //   metricsStore.setNumberOfActiveAlerts(activeAlerts.length);
-  //   metricsStore.setNumberOfRecoveredAlerts(recoveredAlerts.length);
-
-  //   for (const alert of this.preparedAlerts) {
-  //     const eventLogMessagesAndActions: Array<{ message: string; action: string }> = [];
-
-  //     if (alert[ALERT_STATUS] === 'recovered') {
-  //       eventLogMessagesAndActions.push({
-  //         action: EVENT_LOG_ACTIONS.recoveredInstance,
-  //         message: `${this.ruleLogPrefix} alert '${alert[ALERT_INSTANCE_ID]}' has recovered`,
-  //       });
-  //     } else if (alert[ALERT_STATUS] === 'active') {
-  //       if (alert[ALERT_DURATION] === '0') {
-  //         eventLogMessagesAndActions.push({
-  //           action: EVENT_LOG_ACTIONS.newInstance,
-  //           message: `${this.ruleLogPrefix} created new alert: '${alert[ALERT_INSTANCE_ID]}'`,
-  //         });
-  //       }
-
-  //       eventLogMessagesAndActions.push({
-  //         action: EVENT_LOG_ACTIONS.activeInstance,
-  //         message: `${this.ruleLogPrefix} active alert: '${alert[ALERT_INSTANCE_ID]}' in ${
-  //           alert[ALERT_ACTION_SUBGROUP]
-  //             ? `actionGroup(subgroup): '${alert[ALERT_ACTION_GROUP]}(${alert[ALERT_ACTION_SUBGROUP]})'`
-  //             : `actionGroup: '${alert[ALERT_ACTION_GROUP]}'`
-  //         }`,
-  //       });
-  //     }
-
-  //     for (const { action, message } of eventLogMessagesAndActions) {
-  //       eventLogger.logAlert({
-  //         action,
-  //         id: alert[ALERT_INSTANCE_ID],
-  //         group: alert[ALERT_ACTION_GROUP],
-  //         subgroup: alert[ALERT_ACTION_SUBGROUP],
-  //         message,
-  //         state: {
-  //           start: alert[ALERT_START],
-  //           end: alert[ALERT_END],
-  //           duration: alert[ALERT_DURATION],
-  //         },
-  //       });
-  //     }
-  //   }
-  // }
 }
 
 function isAlertFlapping(alert: Alert): boolean {
