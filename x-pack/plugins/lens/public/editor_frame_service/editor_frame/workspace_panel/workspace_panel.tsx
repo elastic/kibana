@@ -104,7 +104,7 @@ const dropProps = {
     id: 'lnsWorkspace',
     humanData: {
       label: i18n.translate('xpack.lens.editorFrame.workspaceLabel', {
-        defaultMessage: 'visualization',
+        defaultMessage: 'Workspace',
       }),
     },
   },
@@ -283,9 +283,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
   // if the expression is undefined, it means we hit an error that should be displayed to the user
   const unappliedExpression = useMemo(() => {
-    if (
-      workspaceErrors.filter((error) => error.uniqueId !== EXPRESSION_BUILD_ERROR_ID).length === 0
-    ) {
+    if (workspaceErrors.every((error) => error.uniqueId !== EXPRESSION_BUILD_ERROR_ID)) {
       try {
         const ast = buildExpression({
           visualization: activeVisualization,

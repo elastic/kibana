@@ -435,9 +435,8 @@ export class Embeddable
   }
 
   private get activeVisualization() {
-    const activeVisualizationId = getActiveVisualizationIdFromDoc(this.savedVis);
-    if (!activeVisualizationId) return;
-    return this.deps.visualizationMap[activeVisualizationId];
+    if (!this.activeVisualizationId) return;
+    return this.deps.visualizationMap[this.activeVisualizationId];
   }
 
   private get activeVisualizationState() {
@@ -695,7 +694,7 @@ export class Embeddable
       }
     );
 
-    return [...requestWarnings];
+    return requestWarnings;
   }
 
   private removeActiveDataWarningMessages: () => void = () => {};
