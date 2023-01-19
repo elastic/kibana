@@ -15,9 +15,13 @@ import { handleExperimentalDatastreamFeatureOptIn } from './experimental_datastr
 function getNewTestPackagePolicy({
   isSyntheticSourceEnabled,
   isTSDBEnabled,
+  isDocValueOnlyNumeric,
+  isDocValueOnlyOther,
 }: {
   isSyntheticSourceEnabled: boolean;
   isTSDBEnabled: boolean;
+  isDocValueOnlyNumeric: boolean;
+  isDocValueOnlyOther: boolean;
 }): NewPackagePolicy {
   const packagePolicy: NewPackagePolicy = {
     name: 'Test policy',
@@ -36,6 +40,8 @@ function getNewTestPackagePolicy({
           features: {
             synthetic_source: isSyntheticSourceEnabled,
             tsdb: isTSDBEnabled,
+            doc_value_only_numeric: isDocValueOnlyNumeric,
+            doc_value_only_other: isDocValueOnlyOther,
           },
         },
       ],
@@ -48,9 +54,13 @@ function getNewTestPackagePolicy({
 function getExistingTestPackagePolicy({
   isSyntheticSourceEnabled,
   isTSDBEnabled,
+  isDocValueOnlyNumeric,
+  isDocValueOnlyOther,
 }: {
   isSyntheticSourceEnabled: boolean;
   isTSDBEnabled: boolean;
+  isDocValueOnlyNumeric: boolean;
+  isDocValueOnlyOther: boolean;
 }): PackagePolicy {
   const packagePolicy: PackagePolicy = {
     id: 'test-policy',
@@ -70,6 +80,8 @@ function getExistingTestPackagePolicy({
           features: {
             synthetic_source: isSyntheticSourceEnabled,
             tsdb: isTSDBEnabled,
+            doc_value_only_numeric: isDocValueOnlyNumeric,
+            doc_value_only_other: isDocValueOnlyOther,
           },
         },
       ],
@@ -123,7 +135,12 @@ describe('experimental_datastream_features', () => {
           experimental_data_stream_features: [
             {
               data_stream: 'metrics-test.test',
-              features: { synthetic_source: false, tsdb: false },
+              features: {
+                synthetic_source: false,
+                tsdb: false,
+                doc_value_only_numeric: false,
+                doc_value_only_other: false,
+              },
             },
           ],
         },
@@ -136,6 +153,8 @@ describe('experimental_datastream_features', () => {
       const packagePolicy = getNewTestPackagePolicy({
         isSyntheticSourceEnabled: true,
         isTSDBEnabled: false,
+        isDocValueOnlyNumeric: false,
+        isDocValueOnlyOther: false,
       });
 
       await handleExperimentalDatastreamFeatureOptIn({ soClient, esClient, packagePolicy });
@@ -156,6 +175,8 @@ describe('experimental_datastream_features', () => {
       const packagePolicy = getNewTestPackagePolicy({
         isSyntheticSourceEnabled: false,
         isTSDBEnabled: true,
+        isDocValueOnlyNumeric: false,
+        isDocValueOnlyOther: false,
       });
 
       esClient.indices.getIndexTemplate.mockResolvedValueOnce({
@@ -197,6 +218,8 @@ describe('experimental_datastream_features', () => {
         const packagePolicy = getExistingTestPackagePolicy({
           isSyntheticSourceEnabled: true,
           isTSDBEnabled: false,
+          isDocValueOnlyNumeric: false,
+          isDocValueOnlyOther: false,
         });
 
         soClient.get.mockResolvedValueOnce({
@@ -204,7 +227,12 @@ describe('experimental_datastream_features', () => {
             experimental_data_stream_features: [
               {
                 data_stream: 'metrics-test.test',
-                features: { synthetic_source: true, tsdb: false },
+                features: {
+                  synthetic_source: true,
+                  tsdb: false,
+                  doc_value_only_numeric: false,
+                  doc_value_only_other: false,
+                },
               },
             ],
           },
@@ -227,7 +255,12 @@ describe('experimental_datastream_features', () => {
             experimental_data_stream_features: [
               {
                 data_stream: 'metrics-test.test',
-                features: { synthetic_source: false, tsdb: false },
+                features: {
+                  synthetic_source: false,
+                  tsdb: false,
+                  doc_value_only_numeric: false,
+                  doc_value_only_other: false,
+                },
               },
             ],
           },
@@ -240,6 +273,8 @@ describe('experimental_datastream_features', () => {
         const packagePolicy = getExistingTestPackagePolicy({
           isSyntheticSourceEnabled: true,
           isTSDBEnabled: false,
+          isDocValueOnlyNumeric: false,
+          isDocValueOnlyOther: false,
         });
 
         await handleExperimentalDatastreamFeatureOptIn({ soClient, esClient, packagePolicy });
@@ -260,6 +295,8 @@ describe('experimental_datastream_features', () => {
         const packagePolicy = getExistingTestPackagePolicy({
           isSyntheticSourceEnabled: false,
           isTSDBEnabled: true,
+          isDocValueOnlyNumeric: false,
+          isDocValueOnlyOther: false,
         });
 
         esClient.indices.getIndexTemplate.mockResolvedValueOnce({
