@@ -30,6 +30,7 @@ instead be:
 "@kbn/i18n": "link:../../kibana/packages/kbn-i18n"
 ```
 
+then run `yarn kbn bootstrap` from the plugin directory.
 
 ## Creating a new package
 
