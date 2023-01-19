@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   EuiButton,
   EuiFilterButton,
@@ -15,11 +15,9 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
-  EuiNotificationBadge,
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
 
@@ -32,45 +30,7 @@ import { MAX_TAG_DISPLAY_LENGTH, truncateTag } from '../utils';
 import { AgentBulkActions } from './bulk_actions';
 import type { SelectionMode } from './types';
 import { AgentActivityButton } from './agent_activity_button';
-
-const statusFilters = [
-  {
-    status: 'healthy',
-    label: i18n.translate('xpack.fleet.agentList.statusHealthyFilterText', {
-      defaultMessage: 'Healthy',
-    }),
-  },
-  {
-    status: 'unhealthy',
-    label: i18n.translate('xpack.fleet.agentList.statusUnhealthyFilterText', {
-      defaultMessage: 'Unhealthy',
-    }),
-  },
-  {
-    status: 'updating',
-    label: i18n.translate('xpack.fleet.agentList.statusUpdatingFilterText', {
-      defaultMessage: 'Updating',
-    }),
-  },
-  {
-    status: 'offline',
-    label: i18n.translate('xpack.fleet.agentList.statusOfflineFilterText', {
-      defaultMessage: 'Offline',
-    }),
-  },
-  {
-    status: 'inactive',
-    label: i18n.translate('xpack.fleet.agentList.statusInactiveFilterText', {
-      defaultMessage: 'Inactive',
-    }),
-  },
-  {
-    status: 'unenrolled',
-    label: i18n.translate('xpack.fleet.agentList.statusUnenrolledFilterText', {
-      defaultMessage: 'Unenrolled',
-    }),
-  },
-];
+import { AgentStatusFilter } from './agent_status_filter';
 
 const ClearAllTagsFilterItem = styled(EuiFilterSelectItem)`
   padding: ${(props) => props.theme.eui.euiSizeS};
@@ -78,10 +38,6 @@ const ClearAllTagsFilterItem = styled(EuiFilterSelectItem)`
 
 const FlexEndEuiFlexItem = styled(EuiFlexItem)`
   align-self: flex-end;
-`;
-
-const LeftpaddedNotificationBadge = styled(EuiNotificationBadge)`
-  margin-left: 10px;
 `;
 
 export const SearchAndFilterBar: React.FunctionComponent<{
@@ -109,8 +65,6 @@ export const SearchAndFilterBar: React.FunctionComponent<{
   visibleAgents: Agent[];
   onClickAgentActivity: () => void;
   showAgentActivityTour: { isOpen: boolean };
-  newlyInactiveAgentsCount: number;
-  onInactiveAgentsViewed: () => void;
 }> = ({
   agentPolicies,
   draftKuery,
@@ -136,14 +90,9 @@ export const SearchAndFilterBar: React.FunctionComponent<{
   visibleAgents,
   onClickAgentActivity,
   showAgentActivityTour,
-  newlyInactiveAgentsCount,
-  onInactiveAgentsViewed,
 }) => {
   // Policies state for filtering
   const [isAgentPoliciesFilterOpen, setIsAgentPoliciesFilterOpen] = useState<boolean>(false);
-
-  // Status for filtering
-  const [isStatusFilterOpen, setIsStatusFilterOpen] = useState<boolean>(false);
 
   const [isTagsFilterOpen, setIsTagsFilterOpen] = useState<boolean>(false);
 
@@ -166,12 +115,6 @@ export const SearchAndFilterBar: React.FunctionComponent<{
   const removeTagsFilter = (tag: string) => {
     onSelectedTagsChange(selectedTags.filter((t) => t !== tag));
   };
-
-  useEffect(() => {
-    if (selectedStatus.length && selectedStatus.includes('inactive') && newlyInactiveAgentsCount) {
-      onInactiveAgentsViewed();
-    }
-  }, [selectedStatus, newlyInactiveAgentsCount, onInactiveAgentsViewed]);
 
   return (
     <>
@@ -238,54 +181,12 @@ export const SearchAndFilterBar: React.FunctionComponent<{
             </EuiFlexItem>
             <EuiFlexItem grow={2}>
               <EuiFilterGroup>
-                <EuiPopover
-                  ownFocus
-                  button={
-                    <EuiFilterButton
-                      iconType="arrowDown"
-                      onClick={() => setIsStatusFilterOpen(!isStatusFilterOpen)}
-                      isSelected={isStatusFilterOpen}
-                      hasActiveFilters={selectedStatus.length > 0}
-                      numActiveFilters={selectedStatus.length}
-                      numFilters={statusFilters.length}
-                      disabled={agentPolicies.length === 0}
-                      data-test-subj="agentList.statusFilter"
-                    >
-                      <FormattedMessage
-                        id="xpack.fleet.agentList.statusFilterText"
-                        defaultMessage="Status"
-                      />
-                    </EuiFilterButton>
-                  }
-                  isOpen={isStatusFilterOpen}
-                  closePopover={() => setIsStatusFilterOpen(false)}
-                  panelPaddingSize="none"
-                >
-                  <div className="euiFilterSelect__items">
-                    {statusFilters.map(({ label, status }, idx) => (
-                      <EuiFilterSelectItem
-                        key={idx}
-                        checked={selectedStatus.includes(status) ? 'on' : undefined}
-                        onClick={() => {
-                          if (selectedStatus.includes(status)) {
-                            onSelectedStatusChange([...selectedStatus.filter((s) => s !== status)]);
-                          } else {
-                            onSelectedStatusChange([...selectedStatus, status]);
-                          }
-                        }}
-                      >
-                        <span>
-                          {label}
-                          {status === 'inactive' && newlyInactiveAgentsCount > 0 && (
-                            <LeftpaddedNotificationBadge>
-                              {newlyInactiveAgentsCount}
-                            </LeftpaddedNotificationBadge>
-                          )}
-                        </span>
-                      </EuiFilterSelectItem>
-                    ))}
-                  </div>
-                </EuiPopover>
+                <AgentStatusFilter
+                  selectedStatus={selectedStatus}
+                  onSelectedStatusChange={onSelectedStatusChange}
+                  totalInactiveAgents={totalInactiveAgents}
+                  disabled={agentPolicies.length === 0}
+                />
                 <EuiPopover
                   ownFocus
                   button={
