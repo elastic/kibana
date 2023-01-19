@@ -36,9 +36,13 @@ export default function ({ getService }: FtrProviderContext) {
     });
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
-      return supertest
+      await supertest
         .delete(`/api/fleet/epm/packages/${FLEET_ELASTIC_AGENT_PACKAGE}/${elasticAgentpkgVersion}`)
         .set('kbn-xsrf', 'xxxx');
+      await es.transport.request({
+        method: 'DELETE',
+        path: `/_data_stream/metrics-elastic_agent.elastic_agent-default`,
+      });
     });
 
     it.skip('should return a 200 if a user with the fleet all try to access the list', async () => {
