@@ -30,6 +30,7 @@ describe('createAlertFactory()', () => {
       alerts: {},
       logger,
       maxAlerts: 1000,
+      autoRecoverAlerts: true,
     });
     const result = alertFactory.create('1');
     expect(result).toMatchInlineSnapshot(`
@@ -55,6 +56,7 @@ describe('createAlertFactory()', () => {
       },
       logger,
       maxAlerts: 1000,
+      autoRecoverAlerts: true,
     });
     const result = alertFactory.create('1');
     expect(result).toMatchInlineSnapshot(`
@@ -79,6 +81,7 @@ describe('createAlertFactory()', () => {
       alerts,
       logger,
       maxAlerts: 1000,
+      autoRecoverAlerts: true,
     });
     alertFactory.create('1');
     expect(alerts).toMatchInlineSnapshot(`
@@ -98,6 +101,7 @@ describe('createAlertFactory()', () => {
       alerts: {},
       logger,
       maxAlerts: 3,
+      autoRecoverAlerts: true,
     });
 
     expect(alertFactory.hasReachedAlertLimit()).toBe(false);
@@ -117,6 +121,7 @@ describe('createAlertFactory()', () => {
       alerts: {},
       logger,
       maxAlerts: 1000,
+      autoRecoverAlerts: true,
     });
     const result = alertFactory.create('1');
     expect(result).toEqual({
@@ -158,6 +163,7 @@ describe('createAlertFactory()', () => {
       logger,
       canSetRecoveryContext: true,
       maxAlerts: 1000,
+      autoRecoverAlerts: true,
     });
     const result = alertFactory.create('1');
     expect(result).toEqual({
@@ -184,6 +190,7 @@ describe('createAlertFactory()', () => {
       logger,
       maxAlerts: 1000,
       canSetRecoveryContext: true,
+      autoRecoverAlerts: true,
     });
     const result = alertFactory.create('1');
     expect(result).toEqual({
@@ -209,6 +216,7 @@ describe('createAlertFactory()', () => {
       logger,
       maxAlerts: 1000,
       canSetRecoveryContext: true,
+      autoRecoverAlerts: true,
     });
     const result = alertFactory.create('1');
     expect(result).toEqual({
@@ -233,6 +241,7 @@ describe('createAlertFactory()', () => {
       logger,
       maxAlerts: 1000,
       canSetRecoveryContext: false,
+      autoRecoverAlerts: true,
     });
     const result = alertFactory.create('1');
     expect(result).toEqual({
@@ -259,6 +268,7 @@ describe('createAlertFactory()', () => {
       alerts: {},
       logger,
       maxAlerts: 1000,
+      autoRecoverAlerts: true,
     });
 
     const limit = alertFactory.alertLimit.getValue();
@@ -276,6 +286,7 @@ describe('createAlertFactory()', () => {
       alerts: {},
       logger,
       maxAlerts: 1000,
+      autoRecoverAlerts: true,
     });
 
     const limit = alertFactory.alertLimit.getValue();
@@ -290,6 +301,7 @@ describe('createAlertFactory()', () => {
       alerts: {},
       logger,
       maxAlerts: 1000,
+      autoRecoverAlerts: true,
     });
 
     const limit = alertFactory.alertLimit.getValue();
@@ -306,6 +318,7 @@ describe('getPublicAlertFactory', () => {
       alerts: {},
       logger,
       maxAlerts: 1000,
+      autoRecoverAlerts: true,
     });
 
     expect(alertFactory.create).toBeDefined();

@@ -95,6 +95,7 @@ export class LegacyAlertsClient<
       alerts: this.alerts,
       logger: this.options.logger,
       maxAlerts: this.options.maxAlerts,
+      autoRecoverAlerts: this.options.ruleType.autoRecoverAlerts ?? true,
       canSetRecoveryContext: this.options.ruleType.doesSetRecoveryContext ?? false,
     });
   }
