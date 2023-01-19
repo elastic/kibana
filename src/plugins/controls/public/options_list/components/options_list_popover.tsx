@@ -73,22 +73,7 @@ export const OptionsListPopover = ({
           data-option-count={isLoading ? 0 : Object.keys(availableOptions ?? {}).length}
           style={{ width: '100%', height: '100%' }}
         >
-          <div
-            hidden={!isLoading}
-            style={{
-              position: 'fixed',
-              top: 0,
-              width: '100%',
-              height: '100%',
-              pointerEvents: 'none',
-              zIndex: 1,
-              textAlign: 'center',
-            }}
-          >
-            <EuiLoadingSpinner style={{ top: '50%', position: 'fixed' }} size="l" />
-          </div>
           <OptionsListPopoverSuggestions
-            isLoading={isLoading}
             clickLoadMore={clickLoadMore}
             showOnlySelected={showOnlySelected}
           />
@@ -96,9 +81,9 @@ export const OptionsListPopover = ({
             <OptionsListPopoverInvalidSelections />
           )}
         </div>
-
         {!hideExclude && (
           <OptionsListPopoverFooter
+            isLoading={isLoading}
             showOnlySelected={showOnlySelected}
             setShowOnlySelected={setShowOnlySelected}
           />

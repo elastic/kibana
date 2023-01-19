@@ -16,6 +16,8 @@ import {
   EuiButtonIcon,
   EuiBadge,
   EuiToolTip,
+  EuiProgress,
+  useEuiPaddingSize,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
@@ -36,9 +38,11 @@ const aggregationToggleButtons = [
 ];
 
 export const OptionsListPopoverFooter = ({
+  isLoading,
   showOnlySelected,
   setShowOnlySelected,
 }: {
+  isLoading: boolean;
   showOnlySelected: boolean;
   setShowOnlySelected: (value: boolean) => void;
 }) => {
@@ -55,12 +59,24 @@ export const OptionsListPopoverFooter = ({
   return (
     <>
       <EuiPopoverFooter
-        paddingSize="s"
+        paddingSize="none"
         css={css`
           background-color: ${useEuiBackgroundColor('subdued')};
         `}
       >
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
+        {isLoading && (
+          <div style={{ position: 'absolute', width: '100%' }}>
+            <EuiProgress size="xs" color="accent" />
+          </div>
+        )}
+        <EuiFlexGroup
+          justifyContent="spaceBetween"
+          alignItems="center"
+          responsive={false}
+          css={css`
+            padding: ${useEuiPaddingSize('s')};
+          `}
+        >
           <EuiFlexItem grow={false}>
             <EuiButtonGroup
               legend={OptionsListStrings.popover.getIncludeExcludeLegend()}

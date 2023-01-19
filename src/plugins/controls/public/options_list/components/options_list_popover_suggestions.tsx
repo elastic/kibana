@@ -20,13 +20,11 @@ import { OptionsListPopoverEmptyMessage } from './options_list_popover_empty_mes
 import { OptionsListPopoverSuggestionBadge } from './options_list_popover_suggestion_badge';
 
 interface OptionsListPopoverSuggestionsProps {
-  isLoading: boolean;
   showOnlySelected: boolean;
   clickLoadMore: (cardinality: number) => void;
 }
 
 export const OptionsListPopoverSuggestions = ({
-  isLoading,
   clickLoadMore,
   showOnlySelected,
 }: OptionsListPopoverSuggestionsProps) => {
@@ -101,6 +99,15 @@ export const OptionsListPopoverSuggestions = ({
       };
     });
 
+    if (canLoadMoreSuggestions) {
+      options.push({
+        key: 'loading-option',
+        className: 'loading-option-class',
+        label: 'Loading more options...',
+        isGroupLabel: true,
+      });
+    }
+
     setSelectableOptions(existsSelectableOption ? [existsSelectableOption, ...options] : options);
   }, [
     suggestions,
@@ -108,6 +115,7 @@ export const OptionsListPopoverSuggestions = ({
     showOnlySelected,
     selectedOptionsSet,
     invalidSelectionsSet,
+    canLoadMoreSuggestions,
     existsSelectableOption,
   ]);
 
@@ -116,7 +124,7 @@ export const OptionsListPopoverSuggestions = ({
     if (!canLoadMoreSuggestions || !listbox) return;
 
     const { scrollTop, scrollHeight, clientHeight } = listbox;
-    if (scrollTop + clientHeight === scrollHeight) {
+    if (scrollTop + clientHeight >= scrollHeight - 31) {
       // reached the bottom of the list
       console.log('---> reached the bottom, fire event');
       clickLoadMore(totalCardinality);
@@ -126,7 +134,7 @@ export const OptionsListPopoverSuggestions = ({
   const debouncedLoadMoreOptions = useMemo(() => {
     return debounce(() => {
       loadMoreOptions();
-    }, 1000);
+    }, 600);
   }, [loadMoreOptions]);
 
   useEffect(() => {

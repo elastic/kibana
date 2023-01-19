@@ -90,3 +90,10 @@
 .optionsList--sortPopover {
   width: $euiSizeXL * 7;
 }
+
+.loading-option-class {
+  text-align: center;
+  padding-top: $euiSizeM;
+  font-style: italic;
+  height: 40px !important;
+}
