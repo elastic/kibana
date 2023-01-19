@@ -32,7 +32,7 @@ export const EngineViewHeaderActions: React.FC = () => {
         button={
           <EuiButtonIcon
             aria-label={i18n.translate(
-              'xpack.entepriseSearch.content.engine.headerActions.actionsButton.ariaLabel',
+              'xpack.enterpriseSearch.content.engine.headerActions.actionsButton.ariaLabel',
               {
                 defaultMessage: 'Engine actions menu button',
               }
