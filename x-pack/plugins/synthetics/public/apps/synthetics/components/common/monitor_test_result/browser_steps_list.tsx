@@ -32,6 +32,7 @@ interface Props {
   showStepNumber: boolean;
   screenshotImageSize?: ScreenshotImageSize;
   compressed?: boolean;
+  showExpand?: boolean;
 }
 
 export function isStepEnd(step: JourneyStep) {
@@ -45,6 +46,7 @@ export const BrowserStepsList = ({
   screenshotImageSize = THUMBNAIL_SCREENSHOT_SIZE,
   showStepNumber = false,
   compressed = true,
+  showExpand = true,
 }: Props) => {
   const { euiTheme } = useEuiTheme();
   const stepEnds: JourneyStep[] = steps.filter(isStepEnd);
@@ -63,18 +65,22 @@ export const BrowserStepsList = ({
   };
 
   const columns: Array<EuiBasicTableColumn<JourneyStep>> = [
-    {
-      align: 'left',
-      width: '40px',
-      isExpander: true,
-      render: (item: JourneyStep) => (
-        <EuiButtonIcon
-          onClick={() => toggleDetails(item)}
-          aria-label={itemIdToExpandedRowMap[item._id] ? 'Collapse' : 'Expand'}
-          iconType={itemIdToExpandedRowMap[item._id] ? 'arrowDown' : 'arrowRight'}
-        />
-      ),
-    },
+    ...(showExpand
+      ? [
+          {
+            align: 'left' as const,
+            width: '40px',
+            isExpander: true,
+            render: (item: JourneyStep) => (
+              <EuiButtonIcon
+                onClick={() => toggleDetails(item)}
+                aria-label={itemIdToExpandedRowMap[item._id] ? 'Collapse' : 'Expand'}
+                iconType={itemIdToExpandedRowMap[item._id] ? 'arrowDown' : 'arrowRight'}
+              />
+            ),
+          },
+        ]
+      : []),
     ...(showStepNumber
       ? [
           {

@@ -53,7 +53,7 @@ export const useNetworkTimingsPrevious24Hours = (stepIndexArg?: number) => {
     {}
   );
 
-  const { data } = useReduxEsSearch(
+  const { data, loading } = useReduxEsSearch(
     {
       index: SYNTHETICS_INDEX_PATTERN,
       body: {
@@ -174,6 +174,7 @@ export const useNetworkTimingsPrevious24Hours = (stepIndexArg?: number) => {
   };
 
   return {
+    loading,
     timings,
     timingsWithLabels: [
       {

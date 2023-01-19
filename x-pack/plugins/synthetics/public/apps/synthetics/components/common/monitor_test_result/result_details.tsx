@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiDescriptionList, EuiSpacer } from '@elastic/eui';
+import { EuiDescriptionList, EuiLoadingContent, EuiSpacer } from '@elastic/eui';
 import { ThresholdIndicator } from '../components/thershold_indicator';
 import { useNetworkTimings } from '../../step_details_page/hooks/use_network_timings';
 import { useNetworkTimingsPrevious24Hours } from '../../step_details_page/hooks/use_network_timings_prev';
@@ -41,14 +41,18 @@ export const TimingDetails = ({ step }: { step: JourneyStep }) => {
     step.synthetics.step?.index
   );
 
-  const prevTimings = useNetworkTimingsPrevious24Hours(step.synthetics.step?.index);
+  const { timingsWithLabels: prevTimingsWithLabels, loading } = useNetworkTimingsPrevious24Hours(
+    step.synthetics.step?.index
+  );
 
   const items = timingsWithLabels?.map((item) => {
-    const prevValueItem = prevTimings?.timingsWithLabels.find((prev) => prev.label === item.label);
+    const prevValueItem = prevTimingsWithLabels?.find((prev) => prev.label === item.label);
     const prevValue = prevValueItem?.value ?? 0;
     return {
       title: item.label,
-      description: (
+      description: loading ? (
+        <EuiLoadingContent lines={1} />
+      ) : (
         <ThresholdIndicator
           currentFormatted={formatMillisecond(item.value, 1)}
           current={Number(item.value.toFixed(1))}
