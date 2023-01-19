@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui/dist/eui_charts_theme';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
-import { Alert } from '../../../../../hooks/use_load_alert_summary';
+import { Alert } from '../types';
 
 interface AlertStateInfoProps {
   count: number;

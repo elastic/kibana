@@ -31,6 +31,14 @@ describe('utils', () => {
       expect(convertSortField('created_at')).toBe('created_at');
     });
 
+    it('transforms updated_at correctly', () => {
+      expect(convertSortField('updated_at')).toBe('updated_at');
+    });
+
+    it('transforms updatedAt correctly', () => {
+      expect(convertSortField('updatedAt')).toBe('updated_at');
+    });
+
     it('transforms closedAt correctly', () => {
       expect(convertSortField('closedAt')).toBe('closed_at');
     });
