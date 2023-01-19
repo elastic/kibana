@@ -447,6 +447,7 @@
     "@kbn/timelion-grammar": "link:packages/kbn-timelion-grammar",
     "@kbn/tinymath": "link:packages/kbn-tinymath",
     "@kbn/typed-react-router-config": "link:packages/kbn-typed-react-router-config",
+    "@kbn/ui-actions-browser": "link:packages/kbn-ui-actions-browser",
     "@kbn/ui-framework": "link:packages/kbn-ui-framework",
     "@kbn/ui-shared-deps-npm": "link:packages/kbn-ui-shared-deps-npm",
     "@kbn/ui-shared-deps-src": "link:packages/kbn-ui-shared-deps-src",
