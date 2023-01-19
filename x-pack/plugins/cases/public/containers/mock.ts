@@ -29,6 +29,7 @@ import type {
   UserActionTypes,
   UserActionWithResponse,
   CommentUserAction,
+  GetCaseConnectorsResponse,
 } from '../../common/api';
 import {
   Actions,
@@ -946,3 +947,33 @@ export const getPersistableStateAttachment = (
     ...viewObject,
   }),
 });
+
+export const getCaseConnectorsMockResponse = (): GetCaseConnectorsResponse => {
+  return {
+    '13c7d3d0-964b-11ed-92c7-bf5c2f911d31': {
+      name: '04_jira_connector',
+      type: ConnectorTypes.jira,
+      fields: {
+        issueType: '10024',
+        parent: null,
+        priority: 'High',
+      },
+      id: '13c7d3d0-964b-11ed-92c7-bf5c2f911d31',
+      needsToBePushed: false,
+      latestPushDate: '2023-01-17T09:46:29.813Z',
+      hasBeenPushed: true,
+    },
+    '17001b70-964b-11ed-92c7-bf5c2f911d31': {
+      name: '11_ibm_resilient',
+      type: ConnectorTypes.resilient,
+      fields: {
+        incidentTypes: ['17', '7'],
+        severityCode: '5',
+      },
+      id: '17001b70-964b-11ed-92c7-bf5c2f911d31',
+      needsToBePushed: false,
+      latestPushDate: '2023-01-17T09:46:54.064Z',
+      hasBeenPushed: true,
+    },
+  };
+};

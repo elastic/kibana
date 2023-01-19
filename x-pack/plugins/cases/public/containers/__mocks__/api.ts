@@ -26,6 +26,7 @@ import {
   caseUserActions,
   pushedCase,
   tags,
+  getCaseConnectorsMockResponse,
 } from '../mock';
 import type { CaseUpdateRequest, ResolvedCase } from '../../../common/ui/types';
 import { SeverityAll } from '../../../common/ui/types';
@@ -33,6 +34,7 @@ import type {
   CasePatchRequest,
   CasePostRequest,
   CommentRequest,
+  GetCaseConnectorsResponse,
   SingleCaseMetricsResponse,
 } from '../../../common/api';
 import { CaseStatuses } from '../../../common/api';
@@ -140,3 +142,8 @@ export const getFeatureIds = async (
   _query: { registrationContext: string[] },
   _signal: AbortSignal
 ): Promise<ValidFeatureId[]> => Promise.resolve(['siem', 'observability']);
+
+export const getCaseConnectors = async (
+  caseId: string,
+  signal: AbortSignal
+): Promise<GetCaseConnectorsResponse> => Promise.resolve(getCaseConnectorsMockResponse());

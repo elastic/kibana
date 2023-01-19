@@ -26,6 +26,7 @@ import type {
   User,
   SingleCaseMetricsResponse,
   CasesFindResponse,
+  GetCaseConnectorsResponse,
 } from '../../common/api';
 import {
   CommentType,
@@ -35,6 +36,7 @@ import {
   getCasePushUrl,
   getCaseUserActionUrl,
   getCaseCommentDeleteUrl,
+  getCaseConnectorsUrl,
 } from '../../common/api';
 import {
   CASE_REPORTERS_URL,
@@ -369,4 +371,14 @@ export const getFeatureIds = async (
       query,
     }
   );
+};
+
+export const getCaseConnectors = async (
+  caseId: string,
+  signal: AbortSignal
+): Promise<GetCaseConnectorsResponse> => {
+  return KibanaServices.get().http.fetch<GetCaseConnectorsResponse>(getCaseConnectorsUrl(caseId), {
+    method: 'GET',
+    signal,
+  });
 };
