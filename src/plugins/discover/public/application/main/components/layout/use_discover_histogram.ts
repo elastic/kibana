@@ -144,7 +144,7 @@ export const useDiscoverHistogram = ({
       .subscribe((state) => {
         inspectorAdapters.lensRequests = state.lensRequestAdapter;
 
-        stateContainer.appState.set({
+        stateContainer.setAppState({
           hideChart: state.chartHidden,
           interval: state.timeInterval,
           breakdownField: state.breakdownField?.name,
@@ -154,7 +154,7 @@ export const useDiscoverHistogram = ({
     return () => {
       subscription.unsubscribe();
     };
-  }, [inspectorAdapters, stateContainer.appState, unifiedHistogram]);
+  }, [inspectorAdapters, stateContainer, unifiedHistogram]);
 
   useEffect(() => {
     if (!unifiedHistogram?.initialized) {
