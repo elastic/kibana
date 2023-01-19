@@ -67,9 +67,10 @@ export const ComplianceScoreBar = ({
         </EuiToolTip>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiText size="xs" style={{ fontWeight: euiTheme.font.weight.bold }}>{`${
-          complianceScore?.toFixed(0) || 0
-        }%`}</EuiText>
+        <EuiText
+          size="xs"
+          style={{ fontWeight: euiTheme.font.weight.bold }}
+        >{`${complianceScore.toFixed(0)}%`}</EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
