@@ -258,7 +258,7 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
                 <EuiFormRow
                   label={
                     <FormattedMessage
-                      id="uiActionsEnhanced.customizePanel.flyout.optionsMenuForm.panelTimeRangeFormRowLabel"
+                      id="embeddableApi.customizePanel.flyout.optionsMenuForm.panelTimeRangeFormRowLabel"
                       defaultMessage="Panel time range"
                     />
                   }
