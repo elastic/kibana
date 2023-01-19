@@ -49,14 +49,14 @@ export const registerBulkUpdateRoute = (
 
       const { savedObjects } = await context.core;
 
-      const typesToThrowOn = [...new Set(req.body.map(({ type }) => type))].filter((tname) => {
+      const unsupportedTypes = [...new Set(req.body.map(({ type }) => type))].filter((tname) => {
         const fullType = savedObjects.typeRegistry.getType(tname);
         if (!fullType?.hidden && fullType?.hiddenFromHttpApis) {
           return fullType.name;
         }
       });
-      if (typesToThrowOn.length > 0) {
-        throwOnHttpHiddenTypes(typesToThrowOn);
+      if (unsupportedTypes.length > 0) {
+        throwOnHttpHiddenTypes(unsupportedTypes);
       }
       const savedObject = await savedObjects.client.bulkUpdate(req.body);
       return res.ok({ body: savedObject });

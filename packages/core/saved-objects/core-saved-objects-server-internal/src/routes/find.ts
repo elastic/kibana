@@ -85,15 +85,15 @@ export const registerFindRoute = (
       // check if registered type(s)are exposed to the global SO Http API's.
       const findForTypes = Array.isArray(query.type) ? query.type : [query.type];
 
-      const typesToThrowOn = [...new Set(findForTypes)].filter((tname) => {
+      const unsupportedTypes = [...new Set(findForTypes)].filter((tname) => {
         const fullType = savedObjects.typeRegistry.getType(tname);
         // pass unknown types through to the registry to handle
         if (!fullType?.hidden && fullType?.hiddenFromHttpApis) {
           return fullType.name;
         }
       });
-      if (typesToThrowOn.length > 0) {
-        throwOnHttpHiddenTypes(typesToThrowOn);
+      if (unsupportedTypes.length > 0) {
+        throwOnHttpHiddenTypes(unsupportedTypes);
       }
 
       const result = await savedObjects.client.find({

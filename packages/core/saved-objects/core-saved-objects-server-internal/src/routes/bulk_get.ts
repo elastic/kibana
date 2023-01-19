@@ -39,14 +39,14 @@ export const registerBulkGetRoute = (
 
       const { savedObjects } = await context.core;
       // throw if request body contains any types hidden from the HTTP APIs
-      const typesToThrowOn = [...new Set(req.body.map(({ type }) => type))].filter((tname) => {
+      const unsupportedTypes = [...new Set(req.body.map(({ type }) => type))].filter((tname) => {
         const fullType = savedObjects.typeRegistry.getType(tname);
         if (!fullType?.hidden && fullType?.hiddenFromHttpApis) {
           return fullType.name;
         }
       });
-      if (typesToThrowOn.length > 0) {
-        throwOnHttpHiddenTypes(typesToThrowOn);
+      if (unsupportedTypes.length > 0) {
+        throwOnHttpHiddenTypes(unsupportedTypes);
       }
       const result = await savedObjects.client.bulkGet(req.body);
       return res.ok({ body: result });
