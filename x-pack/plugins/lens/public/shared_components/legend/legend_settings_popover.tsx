@@ -19,7 +19,7 @@ import { ToolbarButtonProps } from '@kbn/kibana-react-plugin/public';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { ToolbarPopover } from '.';
 import { LegendLocationSettings } from './legend_location_settings';
-import { ColumnsNumberSetting } from './columns_number_setting';
+import { ColumnsNumberSetting } from './legend/layout/columns_number_setting';
 import { LegendSizeSettings } from './legend_size_settings';
 import { useDebouncedValue } from './debounced_value';
 

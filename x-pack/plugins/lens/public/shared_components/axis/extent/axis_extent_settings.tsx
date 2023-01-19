@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiFormRow, EuiButtonGroup, htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { RangeInputField } from '../range_input_field';
+import { RangeInputField } from '../../range_input_field';
 import { validateAxisDomain } from './helpers';
 import { UnifiedAxisExtentConfig } from './types';
 
