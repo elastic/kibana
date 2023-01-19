@@ -124,7 +124,8 @@ export class QuickGeoJobCreator extends QuickJobCreatorBase {
     embeddableQuery: Query,
     embeddableFilters: Filter[],
     geoField: string,
-    splitField: string | null = null
+    splitField: string | null = null,
+    layerLevelQuery?: Query
   ) {
     try {
       const { jobConfig, datafeedConfig, start, end, includeTimeRange } = await this.createGeoJob({
@@ -137,6 +138,7 @@ export class QuickGeoJobCreator extends QuickJobCreatorBase {
         embeddableFilters,
         geoField,
         splitField,
+        layerLevelQuery,
       });
 
       // add job config and start and end dates to the

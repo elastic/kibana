@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { Query } from '@kbn/es-query';
 import type { MapEmbeddable } from '@kbn/maps-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { ML_PAGES, ML_APP_LOCATOR } from '../../../../../common/constants/locator';
@@ -14,6 +15,7 @@ export async function redirectToGeoJobWizard(
   embeddable: MapEmbeddable,
   dataViewId: string,
   geoField: string,
+  layerQuery: Query | null,
   splitField: string | null,
   share: SharePluginStart
 ) {
@@ -30,6 +32,7 @@ export async function redirectToGeoJobWizard(
     splitField,
     from,
     to,
+    ...(layerQuery ? { layer: { query: layerQuery } } : {}),
   };
 
   const url = await locator?.getUrl({
