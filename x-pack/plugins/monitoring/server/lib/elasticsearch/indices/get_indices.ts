@@ -167,7 +167,7 @@ export function buildGetIndicesQuery(
           sort: [{ timestamp: { order: 'asc', unmapped_type: 'long' } }],
         },
       },
-      sort: [{ 'index_stats.index': { order: 'asc' } }],
+      sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
     },
   };
 }
