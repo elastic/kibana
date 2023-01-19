@@ -3846,19 +3846,37 @@
         "children": [
           {
             "parentPluginId": "observability",
-            "id": "def-public.ObservabilityPublicPluginsStart.usageCollection",
+            "id": "def-public.ObservabilityPublicPluginsStart.actionTypeRegistry",
             "type": "Object",
             "tags": [],
-            "label": "usageCollection",
+            "label": "actionTypeRegistry",
             "description": [],
             "signature": [
+              "{ get: (id: string) => ",
               {
-                "pluginId": "usageCollection",
+                "pluginId": "triggersActionsUi",
                 "scope": "public",
-                "docId": "kibUsageCollectionPluginApi",
-                "section": "def-public.UsageCollectionSetup",
-                "text": "UsageCollectionSetup"
-              }
+                "docId": "kibTriggersActionsUiPluginApi",
+                "section": "def-public.ActionTypeModel",
+                "text": "ActionTypeModel"
+              },
+              "<unknown, unknown, any>; list: () => ",
+              {
+                "pluginId": "triggersActionsUi",
+                "scope": "public",
+                "docId": "kibTriggersActionsUiPluginApi",
+                "section": "def-public.ActionTypeModel",
+                "text": "ActionTypeModel"
+              },
+              "<unknown, unknown, any>[]; has: (id: string) => boolean; register: (objectType: ",
+              {
+                "pluginId": "triggersActionsUi",
+                "scope": "public",
+                "docId": "kibTriggersActionsUiPluginApi",
+                "section": "def-public.ActionTypeModel",
+                "text": "ActionTypeModel"
+              },
+              "<unknown, unknown, any>) => void; }"
             ],
             "path": "x-pack/plugins/observability/public/plugin.ts",
             "deprecated": false,
@@ -3878,107 +3896,6 @@
                 "docId": "kibCasesPluginApi",
                 "section": "def-public.CasesUiStart",
                 "text": "CasesUiStart"
-              }
-            ],
-            "path": "x-pack/plugins/observability/public/plugin.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.ObservabilityPublicPluginsStart.embeddable",
-            "type": "Object",
-            "tags": [],
-            "label": "embeddable",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "embeddable",
-                "scope": "public",
-                "docId": "kibEmbeddablePluginApi",
-                "section": "def-public.EmbeddableStart",
-                "text": "EmbeddableStart"
-              }
-            ],
-            "path": "x-pack/plugins/observability/public/plugin.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.ObservabilityPublicPluginsStart.home",
-            "type": "Object",
-            "tags": [],
-            "label": "home",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "home",
-                "scope": "public",
-                "docId": "kibHomePluginApi",
-                "section": "def-public.HomePublicPluginStart",
-                "text": "HomePublicPluginStart"
-              },
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/plugin.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.ObservabilityPublicPluginsStart.share",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "share",
-            "description": [],
-            "signature": [
-              "{ toggleShareContextMenu: (options: ",
-              {
-                "pluginId": "share",
-                "scope": "public",
-                "docId": "kibSharePluginApi",
-                "section": "def-public.ShowShareMenuOptions",
-                "text": "ShowShareMenuOptions"
-              },
-              ") => void; } & { url: ",
-              {
-                "pluginId": "share",
-                "scope": "public",
-                "docId": "kibSharePluginApi",
-                "section": "def-public.BrowserUrlService",
-                "text": "BrowserUrlService"
-              },
-              "; navigate(options: ",
-              "RedirectOptions",
-              "<",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
-              ">): void; }"
-            ],
-            "path": "x-pack/plugins/observability/public/plugin.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.ObservabilityPublicPluginsStart.triggersActionsUi",
-            "type": "Object",
-            "tags": [],
-            "label": "triggersActionsUi",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "triggersActionsUi",
-                "scope": "public",
-                "docId": "kibTriggersActionsUiPluginApi",
-                "section": "def-public.TriggersAndActionsUIPublicPluginStart",
-                "text": "TriggersAndActionsUIPublicPluginStart"
               }
             ],
             "path": "x-pack/plugins/observability/public/plugin.ts",
@@ -4027,6 +3944,66 @@
           },
           {
             "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.discover",
+            "type": "Object",
+            "tags": [],
+            "label": "discover",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "discover",
+                "scope": "public",
+                "docId": "kibDiscoverPluginApi",
+                "section": "def-public.DiscoverStart",
+                "text": "DiscoverStart"
+              }
+            ],
+            "path": "x-pack/plugins/observability/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.embeddable",
+            "type": "Object",
+            "tags": [],
+            "label": "embeddable",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.EmbeddableStart",
+                "text": "EmbeddableStart"
+              }
+            ],
+            "path": "x-pack/plugins/observability/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.guidedOnboarding",
+            "type": "Object",
+            "tags": [],
+            "label": "guidedOnboarding",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "guidedOnboarding",
+                "scope": "public",
+                "docId": "kibGuidedOnboardingPluginApi",
+                "section": "def-public.GuidedOnboardingPluginStart",
+                "text": "GuidedOnboardingPluginStart"
+              }
+            ],
+            "path": "x-pack/plugins/observability/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
             "id": "def-public.ObservabilityPublicPluginsStart.lens",
             "type": "Object",
             "tags": [],
@@ -4047,18 +4024,18 @@
           },
           {
             "parentPluginId": "observability",
-            "id": "def-public.ObservabilityPublicPluginsStart.discover",
+            "id": "def-public.ObservabilityPublicPluginsStart.licensing",
             "type": "Object",
             "tags": [],
-            "label": "discover",
+            "label": "licensing",
             "description": [],
             "signature": [
               {
-                "pluginId": "discover",
+                "pluginId": "licensing",
                 "scope": "public",
-                "docId": "kibDiscoverPluginApi",
-                "section": "def-public.DiscoverStart",
-                "text": "DiscoverStart"
+                "docId": "kibLicensingPluginApi",
+                "section": "def-public.LicensingPluginStart",
+                "text": "LicensingPluginStart"
               }
             ],
             "path": "x-pack/plugins/observability/public/plugin.ts",
@@ -4129,44 +4106,6 @@
           },
           {
             "parentPluginId": "observability",
-            "id": "def-public.ObservabilityPublicPluginsStart.actionTypeRegistry",
-            "type": "Object",
-            "tags": [],
-            "label": "actionTypeRegistry",
-            "description": [],
-            "signature": [
-              "{ get: (id: string) => ",
-              {
-                "pluginId": "triggersActionsUi",
-                "scope": "public",
-                "docId": "kibTriggersActionsUiPluginApi",
-                "section": "def-public.ActionTypeModel",
-                "text": "ActionTypeModel"
-              },
-              "<unknown, unknown, any>; list: () => ",
-              {
-                "pluginId": "triggersActionsUi",
-                "scope": "public",
-                "docId": "kibTriggersActionsUiPluginApi",
-                "section": "def-public.ActionTypeModel",
-                "text": "ActionTypeModel"
-              },
-              "<unknown, unknown, any>[]; has: (id: string) => boolean; register: (objectType: ",
-              {
-                "pluginId": "triggersActionsUi",
-                "scope": "public",
-                "docId": "kibTriggersActionsUiPluginApi",
-                "section": "def-public.ActionTypeModel",
-                "text": "ActionTypeModel"
-              },
-              "<unknown, unknown, any>) => void; }"
-            ],
-            "path": "x-pack/plugins/observability/public/plugin.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
             "id": "def-public.ObservabilityPublicPluginsStart.security",
             "type": "Object",
             "tags": [],
@@ -4187,19 +4126,39 @@
           },
           {
             "parentPluginId": "observability",
-            "id": "def-public.ObservabilityPublicPluginsStart.guidedOnboarding",
-            "type": "Object",
+            "id": "def-public.ObservabilityPublicPluginsStart.share",
+            "type": "CompoundType",
             "tags": [],
-            "label": "guidedOnboarding",
+            "label": "share",
             "description": [],
             "signature": [
+              "{ toggleShareContextMenu: (options: ",
               {
-                "pluginId": "guidedOnboarding",
+                "pluginId": "share",
                 "scope": "public",
-                "docId": "kibGuidedOnboardingPluginApi",
-                "section": "def-public.GuidedOnboardingPluginStart",
-                "text": "GuidedOnboardingPluginStart"
-              }
+                "docId": "kibSharePluginApi",
+                "section": "def-public.ShowShareMenuOptions",
+                "text": "ShowShareMenuOptions"
+              },
+              ") => void; } & { url: ",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.BrowserUrlService",
+                "text": "BrowserUrlService"
+              },
+              "; navigate(options: ",
+              "RedirectOptions",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ">): void; }"
             ],
             "path": "x-pack/plugins/observability/public/plugin.ts",
             "deprecated": false,
@@ -4220,6 +4179,67 @@
                 "section": "def-public.SpacesApi",
                 "text": "SpacesApi"
               }
+            ],
+            "path": "x-pack/plugins/observability/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.triggersActionsUi",
+            "type": "Object",
+            "tags": [],
+            "label": "triggersActionsUi",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "triggersActionsUi",
+                "scope": "public",
+                "docId": "kibTriggersActionsUiPluginApi",
+                "section": "def-public.TriggersAndActionsUIPublicPluginStart",
+                "text": "TriggersAndActionsUIPublicPluginStart"
+              }
+            ],
+            "path": "x-pack/plugins/observability/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.usageCollection",
+            "type": "Object",
+            "tags": [],
+            "label": "usageCollection",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "usageCollection",
+                "scope": "public",
+                "docId": "kibUsageCollectionPluginApi",
+                "section": "def-public.UsageCollectionSetup",
+                "text": "UsageCollectionSetup"
+              }
+            ],
+            "path": "x-pack/plugins/observability/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.home",
+            "type": "Object",
+            "tags": [],
+            "label": "home",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "home",
+                "scope": "public",
+                "docId": "kibHomePluginApi",
+                "section": "def-public.HomePublicPluginStart",
+                "text": "HomePublicPluginStart"
+              },
+              " | undefined"
             ],
             "path": "x-pack/plugins/observability/public/plugin.ts",
             "deprecated": false,

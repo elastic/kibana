@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export const sourcererSchema = t.type({
-  patternList: t.array(t.string),
-});
-
-export const sourcererDataViewSchema = t.type({
-  dataViewId: t.string,
-});
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('security APIs - Cloud SAML', function () {
+    loadTestFile(require.resolve('./saml_login'));
+  });
+}
