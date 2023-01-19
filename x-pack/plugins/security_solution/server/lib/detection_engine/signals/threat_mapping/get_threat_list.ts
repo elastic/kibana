@@ -85,7 +85,7 @@ export const getSortForThreatList = ({
   listItemIndex,
 }: GetSortForThreatList): estypes.Sort => {
   const defaultSort = ['_shard_doc'];
-  if (index.length === 1 && index[0] === listItemIndex) {
+  if (index.length === 0 && index[0] === listItemIndex) {
     return defaultSort;
   }
 
