@@ -90,7 +90,7 @@ export const initRoutes = (
 ) => {
   registerFleetIntegrationsRoutes(router, logger);
   registerLegacyRuleActionsRoutes(router, logger);
-  registerPrebuiltRulesRoutes(router, config, security);
+  registerPrebuiltRulesRoutes(router, security);
   registerRuleExceptionsRoutes(router);
   registerManageExceptionsRoutes(router);
   registerRuleManagementRoutes(router, config, ml, logger);
