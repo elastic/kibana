@@ -156,6 +156,8 @@ export const useDiscoverHistogram = ({
     };
   }, [inspectorAdapters, stateContainer, unifiedHistogram]);
 
+  const firstLoadComplete = useRef(false);
+
   useEffect(() => {
     if (!unifiedHistogram?.initialized) {
       return;
@@ -170,7 +172,10 @@ export const useDiscoverHistogram = ({
       requestAdapter: inspectorAdapters.requests,
     };
 
-    if (true) {
+    // We only want to show the partial results on the first load,
+    // or there will be a flickering effect as the loading spinner
+    // is quickly shown and hidden again on fetches
+    if (!firstLoadComplete.current) {
       newState = {
         ...newState,
         totalHitsStatus: totalHitsStatus.toString() as UnifiedHistogramFetchStatus,
@@ -209,15 +214,7 @@ export const useDiscoverHistogram = ({
           return;
         }
 
-        const { fetchStatus, recordRawType } = savedSearchData$.totalHits$.getValue();
-
-        // If we have a partial result already, we don't want to update the total hits back to loading
-        if (fetchStatus === FetchStatus.PARTIAL && status === UnifiedHistogramFetchStatus.loading) {
-          return;
-        }
-
-        // Set a local copy of the hits context to pass to unified histogram
-        // setLocalHitsContext({ status, total: result });
+        const { recordRawType } = savedSearchData$.totalHits$.getValue();
 
         // Sync the totalHits$ observable with the unified histogram state
         savedSearchData$.totalHits$.next({
@@ -229,6 +226,12 @@ export const useDiscoverHistogram = ({
         // Check the hits count to set a partial or no results state
         if (status === UnifiedHistogramFetchStatus.complete && typeof result === 'number') {
           checkHitCount(savedSearchData$.main$, result);
+
+          // Indicate the first load has completed so we don't show
+          // partial results on subsequent fetches
+          if (!firstLoadComplete.current) {
+            firstLoadComplete.current = true;
+          }
         }
       });
 

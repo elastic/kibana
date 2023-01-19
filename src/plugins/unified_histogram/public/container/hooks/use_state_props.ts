@@ -8,8 +8,8 @@
 
 import { DataViewField, DataViewType } from '@kbn/data-views-plugin/common';
 import { getAggregateQueryMode, isOfAggregateQueryType } from '@kbn/es-query';
-import type { UnifiedHistogramChartLoadEvent, UnifiedHistogramFetchStatus } from '../../types';
 import { useCallback, useEffect, useMemo } from 'react';
+import { UnifiedHistogramChartLoadEvent, UnifiedHistogramFetchStatus } from '../../types';
 import type {
   UnifiedHistogramState,
   UnifiedHistogramStateService,
@@ -101,9 +101,18 @@ export const useStateProps = ({
 
   const onTotalHitsChange = useCallback(
     (totalHitsStatus: UnifiedHistogramFetchStatus, totalHitsResult?: number | Error) => {
+      // If we have a partial result already, we don't
+      // want to update the total hits back to loading
+      if (
+        state?.totalHitsStatus === UnifiedHistogramFetchStatus.partial &&
+        totalHitsStatus === UnifiedHistogramFetchStatus.loading
+      ) {
+        return;
+      }
+
       stateService?.updateState({ totalHitsStatus, totalHitsResult });
     },
-    [stateService]
+    [state?.totalHitsStatus, stateService]
   );
 
   const onChartHiddenChange = useCallback(
