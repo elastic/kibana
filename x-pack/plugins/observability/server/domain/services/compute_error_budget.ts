@@ -8,11 +8,13 @@
 import moment from 'moment';
 import {
   calendarAlignedTimeWindowSchema,
+  Duration,
   occurrencesBudgetingMethodSchema,
   rollingTimeWindowSchema,
   timeslicesBudgetingMethodSchema,
 } from '@kbn/slo-schema';
-import { ErrorBudget, IndicatorData, SLO, toMomentUnitOfTime } from '../models';
+
+import { DateRange, ErrorBudget, IndicatorData, SLO, toMomentUnitOfTime } from '../models';
 import { toHighPrecision } from '../../utils/number';
 
 // More details about calculus: https://github.com/elastic/kibana/issues/143980
@@ -48,7 +50,7 @@ function computeForRolling(slo: SLO, sliData: IndicatorData) {
 }
 
 function computeForCalendarAlignedWithOccurrences(slo: SLO, sliData: IndicatorData) {
-  const { good, total, dateRange: dateRange } = sliData;
+  const { good, total, dateRange } = sliData;
   const initialErrorBudget = 1 - slo.objective.target;
   const now = moment();
 
@@ -67,20 +69,25 @@ function computeForCalendarAlignedWithOccurrences(slo: SLO, sliData: IndicatorDa
 }
 
 function computeForCalendarAlignedWithTimeslices(slo: SLO, sliData: IndicatorData) {
-  const { good, total, dateRange: dateRange } = sliData;
+  const { good, total, dateRange } = sliData;
   const initialErrorBudget = 1 - slo.objective.target;
 
-  const dateRangeDurationInUnit = moment(dateRange.to).diff(
-    dateRange.from,
-    toMomentUnitOfTime(slo.objective.timesliceWindow!.unit)
-  );
-  const totalSlices = Math.ceil(dateRangeDurationInUnit / slo.objective.timesliceWindow!.value);
+  const totalSlices = computeTotalSlicesFromDateRange(dateRange, slo.objective.timesliceWindow!);
   const consumedErrorBudget = (total - good) / (totalSlices * initialErrorBudget);
 
   return toErrorBudget(initialErrorBudget, consumedErrorBudget);
 }
 
-function toErrorBudget(
+export function computeTotalSlicesFromDateRange(dateRange: DateRange, timesliceWindow: Duration) {
+  const dateRangeDurationInUnit = moment(dateRange.to).diff(
+    dateRange.from,
+    toMomentUnitOfTime(timesliceWindow.unit)
+  );
+  const totalSlices = Math.ceil(dateRangeDurationInUnit / timesliceWindow!.value);
+  return totalSlices;
+}
+
+export function toErrorBudget(
   initial: number,
   consumed: number,
   isEstimated: boolean = false
