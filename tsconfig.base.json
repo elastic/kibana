@@ -698,6 +698,8 @@
       "@kbn/ftr-common-functional-services/*": ["packages/kbn-ftr-common-functional-services/*"],
       "@kbn/ftr-screenshot-filename": ["packages/kbn-ftr-screenshot-filename"],
       "@kbn/ftr-screenshot-filename/*": ["packages/kbn-ftr-screenshot-filename/*"],
+      "@kbn/ftr-so-apis-plugin": ["test/common/plugins/ftr_so_apis"],
+      "@kbn/ftr-so-apis-plugin/*": ["test/common/plugins/ftr_so_apis/*"],
       "@kbn/generate": ["packages/kbn-generate"],
       "@kbn/generate/*": ["packages/kbn-generate/*"],
       "@kbn/get-repo-files": ["packages/kbn-get-repo-files"],
