@@ -32,6 +32,7 @@ import {
   getMaxY,
   getResponseTimeTickFormatter,
 } from '../../../shared/charts/transaction_charts/helper';
+import { CHART_ANNOTATION_RED_COLOR } from './constants';
 
 interface LatencyAlertsHistoryChartProps {
   serviceName: string;
@@ -207,12 +208,16 @@ export function LatencyAlertsHistoryChart({
                 }) || []
             }
             style={{
-              line: { strokeWidth: 3, stroke: 'red', opacity: 1 },
+              line: {
+                strokeWidth: 3,
+                stroke: CHART_ANNOTATION_RED_COLOR,
+                opacity: 1,
+              },
             }}
-            marker={<EuiIcon type="alert" color={'red'} />}
+            marker={<EuiIcon type="alert" color={CHART_ANNOTATION_RED_COLOR} />}
             markerBody={(annotationData) => (
               <>
-                <EuiBadge color="#BD271E">
+                <EuiBadge color={CHART_ANNOTATION_RED_COLOR}>
                   <EuiText size="xs" color="white">
                     {annotationData.header}
                   </EuiText>
