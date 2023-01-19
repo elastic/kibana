@@ -27,7 +27,7 @@ describe('Response actions history', () => {
 
     it('should show response actions history nav link', () => {
       loginWithReadAccess('/app/security/manage');
-      cy.contains('Response actions history').should('exist');
+      cy.getBySel('nav-link-response_actions_history').should('exist');
     });
 
     it('should show response actions history page', () => {
@@ -43,12 +43,12 @@ describe('Response actions history', () => {
 
     it('should not show response actions history nav link', () => {
       loginWithReadAccess('/app/security/manage');
-      cy.contains('Response actions history').should('not.exist');
+      cy.getBySel('nav-link-response_actions_history').should('not.exist');
     });
 
     it('shows the privilege required callout while accessing response actions history page', () => {
       loginWithReadAccess('/app/security/administration/response_actions_history');
-      cy.get("[data-test-subj='noPrivilegesPage']").should('exist');
+      cy.getBySel('noPrivilegesPage').should('exist');
     });
 
     it('should display response action history for an endpoint', () => {

@@ -53,7 +53,7 @@ export const LandingLinksIcons: React.FC<LandingLinksImagesProps> = ({ items }) 
             <StyledEuiTitle size="xxs">
               <EuiFlexGroup gutterSize="none">
                 <EuiFlexItem grow={false}>
-                  <SecuritySolutionLinkAnchor deepLinkId={id}>
+                  <SecuritySolutionLinkAnchor deepLinkId={id} data-test-subj={`nav-link-${id}`}>
                     <h2>{title}</h2>
                   </SecuritySolutionLinkAnchor>
                 </EuiFlexItem>

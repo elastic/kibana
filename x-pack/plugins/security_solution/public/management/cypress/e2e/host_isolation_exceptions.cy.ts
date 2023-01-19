@@ -47,7 +47,7 @@ describe('Host isolation exceptions', () => {
 
     it('should show host isolation exception nav link', () => {
       loginWithReadAccess('/app/security/manage');
-      cy.contains('Host isolation exceptions').should('exist');
+      cy.getBySel('nav-link-host_isolation_exceptions').should('exist');
     });
 
     it('should show host isolation exceptions page', () => {
@@ -57,42 +57,43 @@ describe('Host isolation exceptions', () => {
     });
   });
 
-  describe('Below platinum license without any HIE entries', () => {
+  describe('Gold license', () => {
     beforeEach(() => {
       setupLicense(gold);
     });
 
-    it('should not show host isolation exceptions nav link', () => {
-      loginWithReadAccess('/app/security/manage');
-      cy.contains('Host isolation exceptions').should('not.exist');
+    describe('Without any HIE entries', () => {
+      it('should not show host isolation exceptions nav link', () => {
+        loginWithReadAccess('/app/security/manage');
+        cy.getBySel('nav-link-host_isolation_exceptions').should('not.exist');
+      });
+
+      it('shows the privilege required callout while accessing host isolation exceptions page', () => {
+        loginWithReadAccess('/app/security/administration/host_isolation_exceptions');
+        cy.getBySel('noPrivilegesPage').should('exist');
+      });
     });
 
-    it('shows the privilege required callout while accessing host isolation exceptions page', () => {
-      loginWithReadAccess('/app/security/administration/host_isolation_exceptions');
-      cy.get("[data-test-subj='noPrivilegesPage']").should('exist');
-    });
-  });
+    describe('With an HIE entry', () => {
+      beforeEach(() => {
+        stubHIEResponse();
+      });
 
-  describe('Below platinum license with an HIE entry', () => {
-    beforeEach(() => {
-      stubHIEResponse();
-      setupLicense(gold);
-    });
+      it('should show host isolation exception page if an entry exists', () => {
+        loginWithReadAccess('/app/security/administration/host_isolation_exceptions');
+        cy.getBySel(`${hiePagePrefix}-card`).should('exist');
+      });
 
-    it('should show host isolation exception page if an entry exists', () => {
-      loginWithReadAccess('/app/security/administration/host_isolation_exceptions');
-      cy.getBySel(`${hiePagePrefix}-card`).should('exist');
-    });
-
-    it('should allow only delete action on HIE entry', () => {
-      loginWithWriteAccess('/app/security/administration/host_isolation_exceptions');
-      cy.getBySel(`${hiePagePrefix}-card`).should('exist');
-      cy.getBySel(`${hiePagePrefix}-card-header-actions-button`).click();
-      const actions = cy
-        .getBySel(`${hiePagePrefix}-card-header-actions-contextMenuPanel`)
-        .find('button');
-      actions.should('have.length', 1);
-      actions.contains('Delete exception');
+      it('should allow only delete action on HIE entry', () => {
+        loginWithWriteAccess('/app/security/administration/host_isolation_exceptions');
+        cy.getBySel(`${hiePagePrefix}-card`).should('exist');
+        cy.getBySel(`${hiePagePrefix}-card-header-actions-button`).click();
+        const actions = cy
+          .getBySel(`${hiePagePrefix}-card-header-actions-contextMenuPanel`)
+          .find('button');
+        actions.should('have.length', 1);
+        actions.contains('Delete exception');
+      });
     });
   });
 });
