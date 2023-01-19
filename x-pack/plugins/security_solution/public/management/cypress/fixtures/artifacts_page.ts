@@ -5,20 +5,6 @@
  * 2.0.
  */
 
-import type { ArtifactElasticsearchProperties } from '@kbn/fleet-plugin/server/services';
-import type { TranslatedExceptionListItem } from '../../../../server/endpoint/schemas';
-
-export interface ArtifactResponseType {
-  _index: string;
-  _id: string;
-  _score: number;
-  _source: ArtifactElasticsearchProperties;
-}
-
-export interface ArtifactBodyType {
-  entries: TranslatedExceptionListItem[];
-}
-
 export interface FormAction {
   type: string;
   selector?: string;
