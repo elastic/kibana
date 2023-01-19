@@ -120,6 +120,6 @@ export const MetricsChart = ({
 
 const ChartStyled = styled(Chart)`
   .echMetric {
-    border-radius: 5px;
+    border-radius: ${(p) => p.theme.eui.euiBorderRadius};
   }
 `;
