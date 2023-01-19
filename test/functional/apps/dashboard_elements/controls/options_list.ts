@@ -444,6 +444,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await dashboardControls.optionsListOpenPopover(controlId);
           await dashboardControls.optionsListPopoverSelectOption('B');
           await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
+          await dashboard.waitForRenderComplete();
+
           expect(await pieChart.getPieChartLabels()).to.eql(['bark', 'bow ow ow']);
         });
 

@@ -1,8 +1,6 @@
 [[whats-new]]
 == What's new in {minor-version}
 
-coming::[8.6.0]
-
 Here are the highlights of what's new and improved in {minor-version}.
 For detailed information about this release,
 check the <<release-notes, release notes>>.
@@ -96,10 +94,32 @@ These views are for
 users with the newly introduced `read_security` cluster privilege in {es}.
 
 [discrete]
-=== Email notifications for case assignments
+=== Cases
 
-Enhancing the case assignment capability, this release
-adds email notifications when a user is assigned a case.
-This draws users' attention to the assignment, and enables them to act more quickly on the assignment.
-Email notifications include the case title, status, severity,
-and tags, and a link to the case in {kib}.
+These features are all available for cases in {stack-manage-app},
+{observability}, and the {security-app}.
+
+[discrete]
+==== Email notifications for case assignments
+
+Enhancing the case assignment capability, this release adds email notifications
+when a user is assigned a case. Email notifications include the case title,
+status, severity, tags, and a link to the case in {kib}. For more information,
+check <<add-case-notifications>>.
+
+[discrete]
+==== Update multiple cases with bulk actions
+
+New actions are now supported in order to streamline case management: delete
+cases or change their status, tags, or severity.
+
+[role="screenshot"]
+image::images/highlights-case-bulk-actions.png[Bulk actions menu in Cases]
+
+[discrete]
+=== {opsgenie} connector
+
+Create rules that trigger an action when an alert is detected and create an
+associated {opsgenie} alert. The connector supports {opsgenie} fields like
+message, description, priority, responder, alias, and details. For more
+information, check <<opsgenie-action-type>>.

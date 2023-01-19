@@ -302,7 +302,7 @@ export default function ({ getService }: FtrProviderContext) {
         urls: 'https://elastic.co',
         locations: [
           {
-            id: 'us_central_west',
+            id: 'us_central',
             label: 'Europe West',
             isServiceManaged: true,
           },
@@ -365,6 +365,81 @@ export default function ({ getService }: FtrProviderContext) {
         await security.role.delete(roleName);
         await supertest
           .delete(API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+      }
+    });
+
+    it('handles spaces', async () => {
+      const name = 'Monitor with private location';
+      const newMonitor = {
+        name,
+        type: 'http',
+        urls: 'https://elastic.co',
+        locations: [
+          {
+            id: 'us_central_west',
+            label: 'Europe West',
+            isServiceManaged: true,
+          },
+        ],
+      };
+
+      const SPACE_ID = `test-space-${uuid.v4()}`;
+      const SPACE_NAME = `test-space-name ${uuid.v4()}`;
+      let monitorId = '';
+
+      try {
+        await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
+
+        const response = await supertest
+          .post(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}`)
+          .set('kbn-xsrf', 'true')
+          .send(newMonitor)
+          .expect(200);
+
+        const { id, attributes: savedMonitor } = response.body;
+        monitorId = id;
+        const toUpdate = {
+          ...savedMonitor,
+          urls: 'https://google.com',
+        };
+        await supertest
+          .put(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}/${monitorId}`)
+          .set('kbn-xsrf', 'true')
+          .send(toUpdate)
+          .expect(200);
+
+        const updatedResponse = await supertest
+          .get(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}/${monitorId}`)
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+
+        // ensure monitor was updated
+        expect(updatedResponse.body.attributes.urls).eql(toUpdate.urls);
+
+        // update a second time, ensures AAD was not corrupted
+        const toUpdate2 = {
+          ...savedMonitor,
+          urls: 'https://google.com',
+        };
+
+        await supertest
+          .put(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}/${monitorId}`)
+          .set('kbn-xsrf', 'true')
+          .send(toUpdate2)
+          .expect(200);
+
+        const updatedResponse2 = await supertest
+          .get(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}/${monitorId}`)
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+
+        // ensure monitor was updated
+        expect(updatedResponse2.body.attributes.urls).eql(toUpdate2.urls);
+      } finally {
+        await supertest
+          .delete(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}/${monitorId}`)
           .set('kbn-xsrf', 'true')
           .expect(200);
       }

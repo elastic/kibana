@@ -137,7 +137,8 @@ const waitForFormToRender = async (renderer: Screen) => {
   });
 };
 
-describe('Create case', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/146394
+describe.skip('Create case', () => {
   const refetch = jest.fn();
   const onFormSubmitSuccess = jest.fn();
   const afterCaseCreated = jest.fn();

@@ -135,3 +135,76 @@ Array [
   </div>,
 ]
 `;
+
+exports[`FieldName renders when mapping is provided 1`] = `
+Array [
+  <div
+    class="euiFlexItem euiFlexItem--flexGrowZero kbnDocViewer__fieldIcon"
+  >
+    <span
+      class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis0"
+    >
+      <span
+        data-euiicon-type="tokenNumber"
+        title="Number field"
+      >
+        Number field
+      </span>
+    </span>
+  </div>,
+  <div
+    class="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--wrap"
+  >
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero kbnDocViewer__fieldName eui-textBreakAll"
+    >
+      <span
+        class="euiToolTipAnchor eui-textBreakAll emotion-euiToolTipAnchor-inlineBlock"
+      >
+        <span>
+          bytes
+        </span>
+      </span>
+    </div>
+  </div>,
+]
+`;
+
+exports[`FieldName renders with a search highlight 1`] = `
+Array [
+  <div
+    class="euiFlexItem euiFlexItem--flexGrowZero kbnDocViewer__fieldIcon"
+  >
+    <span
+      class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis0"
+    >
+      <span
+        data-euiicon-type="tokenNumber"
+        title="Number field"
+      >
+        Number field
+      </span>
+    </span>
+  </div>,
+  <div
+    class="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--wrap"
+  >
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero kbnDocViewer__fieldName eui-textBreakAll"
+    >
+      <span
+        class="euiToolTipAnchor eui-textBreakAll emotion-euiToolTipAnchor-inlineBlock"
+      >
+        <span>
+          <mark
+            class="euiMark emotion-euiMarkStyles-EuiMark"
+          >
+            te
+          </mark>
+          st.test.test
+        </span>
+      </span>
+    </div>
+  </div>,
+]
+`;

@@ -43,13 +43,13 @@ Any modifications made to this file will be overwritten.
     <div class="field-items">
       <div class="param">simulate (optional)</div>
 
-      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; When true, simulates the synchronization by returning only the list actions that would be performed. default: null </div>
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; When true, simulates the synchronization by returning only the list of actions that would be performed. default: null </div>
     </div>  <!-- field-items -->
 
 
     <h3 class="field-label">Return type</h3>
     <div class="return-type">
-      <a href="#mlSyncResponse">mlSyncResponse</a>
+      <a href="#mlSync200Response">mlSync200Response</a>
       
     </div>
 
@@ -114,7 +114,10 @@ Any modifications made to this file will be overwritten.
     <h3 class="field-label">Responses</h3>
     <h4 class="field-label">200</h4>
     Indicates a successful call
-        <a href="#mlSyncResponse">mlSyncResponse</a>
+        <a href="#mlSync200Response">mlSync200Response</a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#mlSync4xxResponse">mlSync4xxResponse</a>
   </div> <!-- method -->
   <hr/>
 
@@ -123,7 +126,8 @@ Any modifications made to this file will be overwritten.
 
   <h3>Table of Contents</h3>
   <ol>
-    <li><a href="#mlSyncResponse"><code>mlSyncResponse</code> - Sync API response</a></li>
+    <li><a href="#mlSync200Response"><code>mlSync200Response</code> - Successful sync API response</a></li>
+    <li><a href="#mlSync4xxResponse"><code>mlSync4xxResponse</code> - Unsuccessful sync API response</a></li>
     <li><a href="#mlSyncResponseAnomalyDetectors"><code>mlSyncResponseAnomalyDetectors</code> - Sync API response for anomaly detection jobs</a></li>
     <li><a href="#mlSyncResponseDataFrameAnalytics"><code>mlSyncResponseDataFrameAnalytics</code> - Sync API response for data frame analytics jobs</a></li>
     <li><a href="#mlSyncResponseDatafeeds"><code>mlSyncResponseDatafeeds</code> - Sync API response for datafeeds</a></li>
@@ -133,13 +137,22 @@ Any modifications made to this file will be overwritten.
   </ol>
 
   <div class="model">
-    <h3><a name="mlSyncResponse"><code>mlSyncResponse</code> - Sync API response</a> <a class="up" href="#__Models">Up</a></h3>
+    <h3><a name="mlSync200Response"><code>mlSync200Response</code> - Successful sync API response</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
       <div class="param">datafeedsAdded (optional)</div><div class="param-desc"><span class="param-type"><a href="#mlSyncResponseDatafeeds">map[String, mlSyncResponseDatafeeds]</a></span> If a saved object for an anomaly detection job is missing a datafeed identifier, it is added when you run the sync machine learning saved objects API. </div>
 <div class="param">datafeedsRemoved (optional)</div><div class="param-desc"><span class="param-type"><a href="#mlSyncResponseDatafeeds">map[String, mlSyncResponseDatafeeds]</a></span> If a saved object for an anomaly detection job references a datafeed that no longer exists, it is deleted when you run the sync machine learning saved objects API. </div>
 <div class="param">savedObjectsCreated (optional)</div><div class="param-desc"><span class="param-type"><a href="#mlSyncResponseSavedObjectsCreated">mlSyncResponseSavedObjectsCreated</a></span>  </div>
 <div class="param">savedObjectsDeleted (optional)</div><div class="param-desc"><span class="param-type"><a href="#mlSyncResponseSavedObjectsDeleted">mlSyncResponseSavedObjectsDeleted</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="mlSync4xxResponse"><code>mlSync4xxResponse</code> - Unsuccessful sync API response</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">error (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">message (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">statusCode (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">

@@ -8,11 +8,14 @@
 import * as t from 'io-ts';
 import { ScreenshotOptionCodec } from './monitor_configs';
 
-export const ProjectMonitorThrottlingConfigCodec = t.interface({
-  download: t.number,
-  upload: t.number,
-  latency: t.number,
-});
+export const ProjectMonitorThrottlingConfigCodec = t.union([
+  t.interface({
+    download: t.number,
+    upload: t.number,
+    latency: t.number,
+  }),
+  t.boolean,
+]);
 
 export const ProjectMonitorCodec = t.intersection([
   t.interface({

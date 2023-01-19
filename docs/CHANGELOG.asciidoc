@@ -43,8 +43,6 @@ Review important information about the {kib} 8.6.0 release.
 [[release-notes-8.6.0]]
 == {kib} 8.6.0
 
-coming::[8.6.0]
-
 Review the following information about the {kib} 8.6.0 release.
 
 [float]
@@ -112,10 +110,9 @@ Enterprise Search::
 For the Elastic Enterprise Search 8.6.0 release information, refer to {enterprise-search-ref}/changelog.html[_Elastic Enterprise Search Documentation Release notes_].
 
 Fleet::
-* Differentiate kubernetes integration multi page experience {kibana-pull}145224[#145224]
-* Prerelease toggle {kibana-pull}143853[#143853]
-* Adds link to skip multi step add integration workflow {kibana-pull}143279[#143279]
-* Request diagnostics {kibana-pull}142369[#142369]
+* Differentiate kubernetes integration multipage experience {kibana-pull}145224[#145224]
+* Adds prerelease toggle to Integrations list {kibana-pull}143853[#143853]
+* Adds link to allow users to skip multistep add integration workflow {kibana-pull}143279[#143279]
 
 Infrastructure::
 Adds support for the the Unified Search Bar for Query input {kibana-pull}143222[#143222]
@@ -138,6 +135,10 @@ Observability::
 * Adds new contextual attributes to Infrastructure - Metric threshold rule {kibana-pull}143001[#143001]
 * Adds alert details page feature flag by App {kibana-pull}142839[#142839]
 * Adds new contextual attributes to Infrastructure - Inventory Rule {kibana-pull}140598[#140598]
+
+Osquery::
+
+Allows users to deploy Osquery across all {agent} policies or on specified policies only {kibana-pull}143948[#143948]
 
 Platform::
 Adds notifications plugin, offering basic email service {kibana-pull}143303[#143303]

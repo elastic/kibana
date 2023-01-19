@@ -138,7 +138,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await find.clickByCssSelector('[data-test-subj="testConnectorTab"]');
 
-        expect(await (await testSubjects.find('executeActionButton')).isEnabled()).to.be(false);
+        expect(await testSubjects.isEnabled('executeActionButton')).to.be(false);
       });
 
       describe('test page', () => {

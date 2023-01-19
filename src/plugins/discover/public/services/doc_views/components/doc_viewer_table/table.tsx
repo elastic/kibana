@@ -238,7 +238,7 @@ export const DocViewerTable = ({
         } else {
           const fieldMapping = mapping(curFieldName);
           const displayName = fieldMapping?.displayName ?? curFieldName;
-          if (displayName.includes(searchText)) {
+          if (displayName.toLowerCase().includes(searchText.toLowerCase())) {
             // filter only unpinned fields
             acc.restItems.push(fieldToItem(curFieldName));
           }
@@ -270,6 +270,7 @@ export const DocViewerTable = ({
   const headers = [
     !isSingleDocView && (
       <EuiTableHeaderCell
+        key="header-cell-actions"
         align="left"
         width={showActionsInsideTableCell ? 150 : 62}
         isSorted={false}
@@ -284,14 +285,14 @@ export const DocViewerTable = ({
         </EuiText>
       </EuiTableHeaderCell>
     ),
-    <EuiTableHeaderCell align="left" width="30%" isSorted={false}>
+    <EuiTableHeaderCell key="header-cell-name" align="left" width="30%" isSorted={false}>
       <EuiText size="xs">
         <strong>
           <FormattedMessage id="discover.fieldChooser.discoverField.name" defaultMessage="Field" />
         </strong>
       </EuiText>
     </EuiTableHeaderCell>,
-    <EuiTableHeaderCell align="left" isSorted={false}>
+    <EuiTableHeaderCell key="header-cell-value" align="left" isSorted={false}>
       <EuiText size="xs">
         <strong>
           <FormattedMessage id="discover.fieldChooser.discoverField.value" defaultMessage="Value" />
@@ -302,10 +303,11 @@ export const DocViewerTable = ({
 
   const renderRows = useCallback(
     (items: FieldRecord[]) => {
+      const highlight = searchText?.toLowerCase();
       return items.map(
         ({
           action: { flattenedField, onFilter },
-          field: { field, fieldMapping, displayName, fieldType, scripted, pinned },
+          field: { field, fieldMapping, fieldType, scripted, pinned },
           value: { formattedValue, ignored },
         }: FieldRecord) => {
           return (
@@ -341,10 +343,11 @@ export const DocViewerTable = ({
                 mobileOptions={MOBILE_OPTIONS}
               >
                 <FieldName
-                  fieldName={displayName}
+                  fieldName={field}
                   fieldType={fieldType}
                   fieldMapping={fieldMapping}
                   scripted={scripted}
+                  highlight={highlight}
                 />
               </EuiTableRowCell>
               <EuiTableRowCell
@@ -366,7 +369,7 @@ export const DocViewerTable = ({
         }
       );
     },
-    [onToggleColumn, onTogglePinned, isSingleDocView, showActionsInsideTableCell]
+    [onToggleColumn, onTogglePinned, isSingleDocView, showActionsInsideTableCell, searchText]
   );
 
   const rowElements = [

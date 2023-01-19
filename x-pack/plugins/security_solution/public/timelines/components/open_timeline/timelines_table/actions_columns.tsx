@@ -26,12 +26,14 @@ export const getActionsColumns = ({
   enableExportTimelineDownloader,
   onOpenDeleteTimelineModal,
   onOpenTimeline,
+  hasCrudAccess,
 }: {
   actionTimelineToShow: ActionTimelineToShow[];
   deleteTimelines?: DeleteTimelines;
   enableExportTimelineDownloader?: EnableExportTimelineDownloader;
   onOpenDeleteTimelineModal?: OnOpenDeleteTimelineModal;
   onOpenTimeline: OnOpenTimeline;
+  hasCrudAccess: boolean;
 }): [TimelineActionsOverflowColumns] => {
   const createTimelineFromTemplate = {
     name: i18n.CREATE_TIMELINE_FROM_TEMPLATE,
@@ -134,7 +136,7 @@ export const getActionsColumns = ({
 
   return [
     {
-      width: '80px',
+      width: hasCrudAccess ? '80px' : '150px',
       actions: [
         createTimelineFromTemplate,
         createTemplateFromTimeline,
