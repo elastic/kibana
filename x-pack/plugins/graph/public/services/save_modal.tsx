@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { ReactElement } from 'react';
-import { I18nStart, OverlayStart, SavedObjectsClientContract } from '@kbn/core/public';
+import React from 'react';
+import { OverlayStart, SavedObjectsClientContract } from '@kbn/core/public';
 import { SaveResult } from '@kbn/saved-objects-plugin/public';
+import { showSaveModal } from '@kbn/saved-objects-plugin/public';
 import { GraphWorkspaceSavedObject, GraphSavePolicy } from '../types';
 import { SaveModal, OnSaveGraphProps } from '../components/save_modal';
 
@@ -31,16 +32,12 @@ export function openSaveModal({
   hasData,
   workspace,
   saveWorkspace,
-  showSaveModal,
-  I18nContext,
   services,
 }: {
   savePolicy: GraphSavePolicy;
   hasData: boolean;
   workspace: GraphWorkspaceSavedObject;
   saveWorkspace: SaveWorkspaceHandler;
-  showSaveModal: (el: ReactElement, I18nContext: I18nStart['Context']) => void;
-  I18nContext: I18nStart['Context'];
   services: SaveWorkspaceServices;
 }) {
   const currentTitle = workspace.title;
@@ -79,7 +76,6 @@ export function openSaveModal({
       title={workspace.title}
       description={workspace.description}
       showCopyOnSave={Boolean(workspace.id)}
-    />,
-    I18nContext
+    />
   );
 }
