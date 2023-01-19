@@ -2825,6 +2825,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/cell-actions@link:packages/kbn-cell-actions":
+  version "0.0.0"
+  uid ""
+
 "@kbn/chart-expressions-common@link:src/plugins/chart_expressions/common":
   version "0.0.0"
   uid ""
