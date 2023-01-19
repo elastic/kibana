@@ -25,6 +25,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
+import type { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { CasesDeepLinkId, CasesUiStart, getCasesDeepLinks } from '@kbn/cases-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import {
@@ -81,6 +82,7 @@ export interface ConfigSchema {
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
 
 export interface ObservabilityPublicPluginsSetup {
+  charts: ChartsPluginSetup;
   data: DataPublicPluginSetup;
   share: SharePluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
@@ -91,6 +93,7 @@ export interface ObservabilityPublicPluginsSetup {
 export interface ObservabilityPublicPluginsStart {
   usageCollection: UsageCollectionSetup;
   cases: CasesUiStart;
+  charts: ChartsPluginStart;
   embeddable: EmbeddableStart;
   home?: HomePublicPluginStart;
   share: SharePluginStart;

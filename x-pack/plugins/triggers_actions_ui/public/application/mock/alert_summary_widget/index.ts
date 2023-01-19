@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import { AlertSummaryTimeRange } from '../../sections/rule_details/components/alert_summary/types';
+import { LIGHT_THEME } from '@elastic/charts';
+import { euiLightVars } from '@kbn/ui-theme';
+import {
+  AlertSummaryTimeRange,
+  ChartTheme,
+} from '../../sections/rule_details/components/alert_summary/types';
 
-export const mockAlertSummaryResponse = {
+export const mockedAlertSummaryResponse = {
   activeAlertCount: 2,
   activeAlerts: [
     { key: 1671108000000, doc_count: 0 },
@@ -48,9 +53,14 @@ export const mockAlertSummaryResponse = {
   ],
 };
 
-export const mockAlertSummaryTimeRange: AlertSummaryTimeRange = {
+export const mockedAlertSummaryTimeRange: AlertSummaryTimeRange = {
   utcFrom: 'mockedUtcFrom',
   utcTo: 'mockedUtcTo',
   fixedInterval: 'mockedFixedInterval',
   title: 'mockedTitle',
+};
+
+export const mockedChartThemes: ChartTheme = {
+  theme: euiLightVars,
+  baseTheme: LIGHT_THEME,
 };

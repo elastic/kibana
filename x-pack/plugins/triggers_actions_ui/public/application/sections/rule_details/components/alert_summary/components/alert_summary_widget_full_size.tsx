@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-import {
-  EUI_CHARTS_THEME_DARK,
-  EUI_CHARTS_THEME_LIGHT,
-  EUI_SPARKLINE_THEME_PARTIAL,
-} from '@elastic/eui/dist/eui_charts_theme';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import moment from 'moment';
 import React from 'react';
 import { Axis, Chart, CurveType, LineSeries, Position, ScaleType, Settings } from '@elastic/charts';
@@ -23,11 +17,12 @@ import {
   RECOVERED_COLOR,
   TOOLTIP_DATE_FORMAT,
 } from './constants';
-import { Alert } from '../types';
+import { Alert, ChartTheme } from '../types';
 
 export interface AlertsSummaryWidgetFullSizeProps {
   activeAlertCount: number;
   activeAlerts: Alert[];
+  chartThemes: ChartTheme;
   recoveredAlertCount: number;
   recoveredAlerts: Alert[];
   dateFormat?: string;
@@ -36,21 +31,17 @@ export interface AlertsSummaryWidgetFullSizeProps {
 export const AlertsSummaryWidgetFullSize = ({
   activeAlertCount,
   activeAlerts,
+  chartThemes: { theme, baseTheme },
+  dateFormat,
   recoveredAlertCount,
   recoveredAlerts,
-  dateFormat,
 }: AlertsSummaryWidgetFullSizeProps) => {
-  const isDarkMode = useUiSetting<boolean>('theme:darkMode');
   const { euiTheme } = useEuiTheme();
   const chartTheme = [
-    EUI_SPARKLINE_THEME_PARTIAL,
+    theme,
     {
-      ...(isDarkMode ? EUI_CHARTS_THEME_DARK.theme : EUI_CHARTS_THEME_LIGHT.theme),
-      chartMargins: {
-        left: 10,
-        right: 10,
-        top: 10,
-        bottom: 10,
+      chartPaddings: {
+        top: 7,
       },
     },
   ];
@@ -105,8 +96,8 @@ export const AlertsSummaryWidgetFullSize = ({
         <Settings
           showLegend
           legendPosition={Position.Right}
-          // TODO Use the EUI charts theme https://github.com/elastic/kibana/issues/148297
           theme={chartTheme}
+          baseTheme={baseTheme}
           tooltip={{
             headerFormatter: (tooltip) =>
               moment(tooltip.value).format(dateFormat || TOOLTIP_DATE_FORMAT),
