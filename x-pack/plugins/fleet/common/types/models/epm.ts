@@ -289,6 +289,8 @@ export interface CategorySummaryItem {
   id: CategoryId;
   title: string;
   count: number;
+  parent_id?: string;
+  parent_title?: string;
 }
 
 export type RequirementsByServiceName = PackageSpecManifest['conditions'];
