@@ -80,8 +80,13 @@ export const OptionsListStrings = {
       }),
     getTotalCardinalityPlaceholder: (totalOptions: number) =>
       i18n.translate('controls.optionsList.popover.cardinalityPlaceholder', {
+        defaultMessage: 'Search',
+        values: { totalOptions },
+      }),
+    getCardinalityTooltip: (totalOptions: number) =>
+      i18n.translate('controls.optionsList.popover.cardinalityTooltip', {
         defaultMessage:
-          'Search {totalOptions} available {totalOptions, plural, one {option} other {options}}',
+          'There {totalOptions, plural, one {is} other {are}} {totalOptions, number} {totalOptions, plural, one {option} other {options}} available.',
         values: { totalOptions },
       }),
     getInvalidSelectionsSectionAriaLabel: (fieldName: string, invalidSelectionCount: number) =>
@@ -141,12 +146,6 @@ export const OptionsListStrings = {
         defaultMessage:
           'Appears in {documentCount, number} {documentCount, plural, one {document} other {documents}}',
         values: { documentCount },
-      }),
-    getCardinalityBadge: (start: number, end: number, cardinality: number) =>
-      i18n.translate('controls.optionsList.popover.cardinalityBadge', {
-        defaultMessage:
-          '{cardinality, plural, one {1 of 1} other {{start}-{end} of {cardinality}}}',
-        values: { start, end, cardinality },
       }),
   },
   controlAndPopover: {

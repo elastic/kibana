@@ -74,9 +74,13 @@ export const OptionsListPopoverActionBar = ({
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiBadge className="optionsList__cardinalityBadge">
-              {totalCardinality.toLocaleString()}
-            </EuiBadge>
+            <EuiToolTip
+              content={OptionsListStrings.popover.getCardinalityTooltip(totalCardinality)}
+            >
+              <EuiBadge className="optionsList__cardinalityBadge">
+                {totalCardinality.toLocaleString()}
+              </EuiBadge>
+            </EuiToolTip>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             {(invalidSelections?.length ?? 0) > 0 && (
