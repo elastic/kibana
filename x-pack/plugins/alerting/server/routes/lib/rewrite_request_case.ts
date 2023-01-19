@@ -24,7 +24,7 @@ type RenameAlertToRule<K extends string> = K extends `alertTypeId`
 
 export type AsApiContract<
   T,
-  ComplexPropertyKeys = `actions` | `executionStatus` | 'lastRun' | `frequency`,
+  ComplexPropertyKeys = 'actions' | 'executionStatus' | 'lastRun' | 'frequency',
   OpaquePropertyKeys = `params`
 > = T extends Array<infer I>
   ? Array<AsApiContract<I>>
