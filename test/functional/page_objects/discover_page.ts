@@ -458,6 +458,9 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async expandTimeRangeAsSuggestedInNoResultsMessage() {
+    await this.retry.waitFor('the button before pressing it', async () => {
+      return await this.testSubjects.exists('discoverNoResultsViewRecentMatches');
+    });
     return await this.testSubjects.click('discoverNoResultsViewRecentMatches');
   }
 
