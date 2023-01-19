@@ -239,11 +239,7 @@ export type { PluginName, DiscoveredPlugin } from '@kbn/core-base-common';
 
 export type { SavedObjectsStart } from '@kbn/core-saved-objects-browser';
 export type {
-  SavedObject,
-  SavedObjectAttribute,
   SavedObjectAttributes,
-  SavedObjectAttributeSingle,
-  SavedObjectReference,
   SavedObjectsMigrationVersion,
   SavedObjectsImportConflictError,
   SavedObjectsImportAmbiguousConflictError,
@@ -312,6 +308,10 @@ export type {
   SavedObjectsBulkDeleteStatus,
 } from '@kbn/core-saved-objects-api-server';
 export type {
+  SavedObject,
+  SavedObjectAttribute,
+  SavedObjectAttributeSingle,
+  SavedObjectReference,
   SavedObjectsServiceSetup,
   SavedObjectsServiceStart,
   SavedObjectsClientProviderOptions,
