@@ -7,7 +7,7 @@
 
 import { useState, useEffect } from 'react';
 
-const LOCAL_STORAGE_KEY = 'fleet_lastSeenInactiveAgentsCount';
+const LOCAL_STORAGE_KEY = 'fleet.lastSeenInactiveAgentsCount';
 
 export const useLastSeenInactiveAgentsCount = (): [number, (val: number) => void] => {
   const [lastSeenInactiveAgentsCount, setLastSeenInactiveAgentsCount] = useState(0);

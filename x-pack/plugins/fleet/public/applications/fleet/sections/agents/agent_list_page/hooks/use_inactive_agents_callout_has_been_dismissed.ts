@@ -7,7 +7,7 @@
 
 import { useState, useEffect } from 'react';
 
-const LOCAL_STORAGE_KEY = 'fleet_inactiveAgentsCalloutHasBeenDismissed';
+const LOCAL_STORAGE_KEY = 'fleet.inactiveAgentsCalloutHasBeenDismissed';
 
 export const useInactiveAgentsCalloutHasBeenDismissed = (): [boolean, (val: boolean) => void] => {
   const [inactiveAgentsCalloutHasBeenDismissed, setInactiveAgentsCalloutHasBeenDismissed] =
