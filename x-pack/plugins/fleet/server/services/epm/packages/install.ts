@@ -810,7 +810,7 @@ export const updateEsAssetReferences = async (
         ),
       // Use a lower number of retries for ES assets since they're installed in serial and can only conflict with
       // the single Kibana update call.
-      { retries: 10 }
+      { retries: 5 }
     );
 
   return updatedAssets ?? [];
