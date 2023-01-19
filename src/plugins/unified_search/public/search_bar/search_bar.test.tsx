@@ -89,6 +89,9 @@ function wrapSearchBarInContext(testProps: any) {
 
   const services = {
     uiSettings: startMock.uiSettings,
+    usageCollection: {
+      reportUiCounter: jest.fn(),
+    },
     savedObjects: startMock.savedObjects,
     notifications: startMock.notifications,
     http: startMock.http,
@@ -126,7 +129,7 @@ function wrapSearchBarInContext(testProps: any) {
     <EuiThemeProvider>
       <I18nProvider>
         <KibanaContextProvider services={services}>
-          <SearchBar.WrappedComponent {...defaultOptions} {...testProps} />
+          <SearchBar {...defaultOptions} {...testProps} />
         </KibanaContextProvider>
       </I18nProvider>
     </EuiThemeProvider>

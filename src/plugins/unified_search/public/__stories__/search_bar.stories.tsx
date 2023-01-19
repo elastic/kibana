@@ -79,24 +79,10 @@ const createMockStorage = () => ({
 });
 
 const services = {
-  uiSettings: {
-    get: () => {},
+  autocomplete: {
+    hasQuerySuggestions: () => Promise.resolve(false),
+    getQuerySuggestions: () => [],
   },
-  savedObjects: action('savedObjects'),
-  notifications: action('notifications'),
-  http: {
-    basePath: {
-      prepend: () => 'http://test',
-    },
-  },
-  docLinks: {
-    links: {
-      query: {
-        kueryQuerySyntax: '',
-      },
-    },
-  },
-  storage: createMockStorage(),
   data: {
     query: {
       savedQueries: {
@@ -153,9 +139,10 @@ const services = {
           }),
       },
     },
-    autocomplete: {
-      hasQuerySuggestions: () => Promise.resolve(false),
-      getQuerySuggestions: () => [],
+    dataViewEditor: {
+      userPermissions: {
+        editDataView: action('editDataView'),
+      },
     },
     dataViews: {
       getIdsWithTitle: () => [
@@ -164,10 +151,26 @@ const services = {
       ],
     },
   },
-  dataViewEditor: {
-    userPermissions: {
-      editDataView: action('editDataView'),
+  docLinks: {
+    links: {
+      query: {
+        kueryQuerySyntax: '',
+      },
     },
+  },
+  http: {
+    basePath: {
+      prepend: () => 'http://test',
+    },
+  },
+  notifications: action('notifications'),
+  savedObjects: action('savedObjects'),
+  storage: createMockStorage(),
+  uiSettings: {
+    get: () => {},
+  },
+  usageCollection: {
+    reportUiCounter: () => {},
   },
 };
 
