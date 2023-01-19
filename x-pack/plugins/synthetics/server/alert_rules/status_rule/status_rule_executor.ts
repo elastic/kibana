@@ -25,6 +25,7 @@ import {
   EncryptedSyntheticsMonitor,
   OverviewStatus,
   OverviewStatusMetaData,
+  SourceType,
 } from '../../../common/runtime_types';
 import { statusCheckTranslations } from '../../legacy_uptime/lib/alerts/translations';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
@@ -149,6 +150,7 @@ export class StatusRuleExecutor {
       enabledIds,
       allMonitorsCount: allIds.length,
       disabledMonitorsCount: allIds.length,
+      projectMonitorsCount,
     };
   }
 

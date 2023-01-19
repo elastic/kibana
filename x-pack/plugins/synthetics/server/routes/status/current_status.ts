@@ -18,7 +18,7 @@ import { UMServerLibs } from '../../legacy_uptime/uptime_server';
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes';
 import { UptimeEsClient } from '../../legacy_uptime/lib/lib';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
-import { ConfigKey } from '../../../common/runtime_types';
+import { ConfigKey, ServiceLocation, SourceType } from '../../../common/runtime_types';
 import { QuerySchema, MonitorsQuery } from '../common';
 
 /**
@@ -62,6 +62,7 @@ export async function getStatus(
       ConfigKey.LOCATIONS,
       ConfigKey.MONITOR_QUERY_ID,
       ConfigKey.SCHEDULE,
+      ConfigKey.MONITOR_SOURCE_TYPE,
     ],
   });
 
@@ -72,6 +73,7 @@ export async function getStatus(
     listOfLocations,
     monitorLocationMap,
     disabledMonitorsCount,
+    projectMonitorsCount,
   } = await processMonitors(allMonitors, server, soClient, syntheticsMonitorClient);
 
   const { up, down, pending, upConfigs, downConfigs } = await queryMonitorStatus(
@@ -85,6 +87,7 @@ export async function getStatus(
   return {
     allMonitorsCount: allMonitors.length,
     disabledMonitorsCount,
+    projectMonitorsCount,
     enabledIds,
     disabledCount,
     up,

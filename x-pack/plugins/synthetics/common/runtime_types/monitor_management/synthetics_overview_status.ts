@@ -20,6 +20,7 @@ export const OverviewStatusMetaDataCodec = t.interface({
 export const OverviewStatusCodec = t.interface({
   allMonitorsCount: t.number,
   disabledMonitorsCount: t.number,
+  projectMonitorsCount: t.number,
   up: t.number,
   down: t.number,
   pending: t.number,

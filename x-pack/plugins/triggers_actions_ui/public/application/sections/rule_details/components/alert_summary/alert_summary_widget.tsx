@@ -41,6 +41,7 @@ export const AlertSummaryWidget = ({
       activeAlerts={activeAlerts}
       recoveredAlertCount={recoveredAlertCount}
       recoveredAlerts={recoveredAlerts}
+      dateFormat={timeRange.dateFormat}
     />
   ) : (
     <AlertsSummaryWidgetCompact
