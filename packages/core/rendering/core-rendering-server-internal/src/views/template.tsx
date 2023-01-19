@@ -77,7 +77,8 @@ export const Template: FunctionComponent<Props> = ({
               className="kbnWelcomeText"
               data-error-message={i18n('core.ui.welcomeErrorMessage', {
                 defaultMessage:
-                  'Elastic did not load properly. Check the server output for more information.',
+                  '{title} did not load properly. Check the server output for more information.',
+                values: { title },
               })}
             >
               {i18n('core.ui.welcomeMessage', {

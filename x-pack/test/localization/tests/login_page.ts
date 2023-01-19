@@ -60,7 +60,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.security.forceLogout();
     });
 
-    it('login page meets i18n requirements', async () => {
+    // disabled until new translations are in place
+    // https://github.com/elastic/kibana/issues/149255
+    xit('login page meets i18n requirements', async () => {
       await PageObjects.common.navigateToApp('login');
       const serverArgs: string[] = config.get('kbnTestServer.serverArgs');
       const kbnServerLocale = getI18nLocaleFromServerArgs(serverArgs);
