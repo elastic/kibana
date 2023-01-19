@@ -93,7 +93,7 @@ async function concurrently<T>(maxConcurrency: number, arr: T[], fn: (item: T) =
 /**
  * SO client for FTR.
  *
- * @remarks: Can only function when the FtrSoClient test plugin is enabled
+ * @remarks: Can only function when the ftrSoApis test plugin is enabled
  */
 export class KbnClientSavedObjects {
   constructor(private readonly log: ToolingLog, private readonly requester: KbnClientRequester) {}
