@@ -40,7 +40,6 @@ import { getDefaultComponentState, optionsListReducers } from '../options_list_r
 import { OptionsListControl } from '../components/options_list_control';
 import { ControlsDataViewsService } from '../../services/data_views/types';
 import { ControlsOptionsListService } from '../../services/options_list/types';
-import { OptionsListField } from '../../../common/options_list/types';
 
 const diffDataFetchProps = (
   last?: OptionsListDataFetchProps,
@@ -76,7 +75,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
   // Internal data fetching state for this input control.
   private typeaheadSubject: Subject<string> = new Subject<string>();
-  private sizeSubject: Subject<number> = new Subject<number>();
+  private loadMoreSubject: Subject<number> = new Subject<number>();
   private abortController?: AbortController;
   private dataView?: DataView;
   private field?: OptionsListField;
@@ -99,7 +98,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       pluginServices.getServices());
 
     this.typeaheadSubject = new Subject<string>();
-    this.sizeSubject = new Subject<number>();
+    this.loadMoreSubject = new Subject<number>();
 
     // build redux embeddable tools
     this.reduxEmbeddableTools = reduxEmbeddablePackage.createTools<
@@ -146,12 +145,20 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
     // debounce typeahead pipe to slow down search string related queries
     const typeaheadPipe = this.typeaheadSubject.pipe(debounceTime(100));
+    const loadMorePipe = this.loadMoreSubject.pipe(debounceTime(1000));
 
     // fetch available options when input changes or when search string has changed
     this.subscriptions.add(
-      merge(dataFetchPipe, typeaheadPipe, this.sizeSubject)
+      merge(dataFetchPipe, typeaheadPipe)
         .pipe(skip(1)) // Skip the first input update because options list query will be run by initialize.
-        .subscribe(this.runOptionsListQuery)
+        .subscribe(() => this.runOptionsListQuery())
+    );
+    // fetch more options when reaching the bottom of the available options
+    this.subscriptions.add(
+      loadMorePipe.subscribe((size) => {
+        console.log('FETCH MORE');
+        this.runOptionsListQuery(size);
+      })
     );
 
     /**
@@ -256,7 +263,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     return { dataView: this.dataView, field: this.field! };
   };
 
-  private runOptionsListQuery = async () => {
+  private runOptionsListQuery = async (size: number = 10) => {
     const {
       dispatch,
       getState,
@@ -272,7 +279,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     }
 
     const {
-      componentState: { searchString, size },
+      componentState: { searchString },
       explicitInput: { selectedOptions, runPastTimeout, existsSelected, sort },
     } = getState();
     dispatch(setLoading(true));
@@ -418,7 +425,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
         <OptionsListReduxWrapper>
           <OptionsListControl
             typeaheadSubject={this.typeaheadSubject}
-            sizeSubject={this.sizeSubject}
+            sizeSubject={this.loadMoreSubject}
           />
         </OptionsListReduxWrapper>
       </KibanaThemeProvider>,

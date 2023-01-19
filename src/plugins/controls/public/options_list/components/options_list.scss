@@ -93,17 +93,17 @@
 
 .optionslist--loadingMoreGroupLabel {
   text-align: center;
-  padding-top: $euiSizeM;
+  padding: $euiSizeM;
   font-style: italic;
-  height: 40px !important;
+  height:  $euiSizeXXL !important;
 }
 
 .optionslist--endOfOptionsGroupLabel {
   text-align: center;
-  padding-top: $euiSizeM;
   font-size: $euiSizeM;
-  height: 50px !important;
+  height:  auto !important;
   color: $euiTextSubduedColor;
+  padding: $euiSizeM;
 }
 
 

@@ -83,13 +83,11 @@ export const OptionsListControl = ({
     [typeaheadSubject, dispatch, setSearchString]
   );
 
-  const clickLoadMore = useCallback(
+  const loadMoreSuggestions = useCallback(
     (cardinality: number) => {
-      sizeSubject.next(cardinality);
-      // console.log('CLICK LOAD MORE', cardinality);
-      dispatch(setSize(cardinality));
+      sizeSubject.next(Math.min(cardinality, 1000));
     },
-    [sizeSubject, dispatch, setSize]
+    [sizeSubject]
   );
 
   const { hasSelections, selectionDisplayNode, validSelectionsCount } = useMemo(() => {
@@ -171,7 +169,7 @@ export const OptionsListControl = ({
         <OptionsListPopover
           width={dimensions.width}
           isLoading={debouncedLoading}
-          clickLoadMore={clickLoadMore}
+          loadMoreSuggestions={loadMoreSuggestions}
           updateSearchString={updateSearchString}
         />
       </EuiPopover>

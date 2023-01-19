@@ -18,14 +18,17 @@ import { OptionsListStrings } from './options_list_strings';
 import { optionsListReducers } from '../options_list_reducers';
 import { OptionsListPopoverEmptyMessage } from './options_list_popover_empty_message';
 import { OptionsListPopoverSuggestionBadge } from './options_list_popover_suggestion_badge';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 interface OptionsListPopoverSuggestionsProps {
+  isLoading: boolean;
   showOnlySelected: boolean;
-  clickLoadMore: (cardinality: number) => void;
+  loadMoreSuggestions: (cardinality: number) => void;
 }
 
 export const OptionsListPopoverSuggestions = ({
-  clickLoadMore,
+  isLoading,
+  loadMoreSuggestions,
   showOnlySelected,
 }: OptionsListPopoverSuggestionsProps) => {
   // Redux embeddable container Context
@@ -40,15 +43,21 @@ export const OptionsListPopoverSuggestions = ({
   const invalidSelections = select((state) => state.componentState.invalidSelections);
   const availableOptions = select((state) => state.componentState.availableOptions);
   const totalCardinality = select((state) => state.componentState.totalCardinality) ?? 0;
-  const size = select((state) => state.componentState.size) ?? 0;
+  const searchString = select((state) => state.componentState.searchString);
 
   const selectedOptions = select((state) => state.explicitInput.selectedOptions);
   const existsSelected = select((state) => state.explicitInput.existsSelected);
   const singleSelect = select((state) => state.explicitInput.singleSelect);
   const hideExists = select((state) => state.explicitInput.hideExists);
   const fieldName = select((state) => state.explicitInput.fieldName);
+  const sort = select((state) => state.explicitInput.sort);
 
   const listRef = useRef<HTMLDivElement>(null);
+
+  const canLoadMoreSuggestions = useMemo(
+    () => Object.keys(availableOptions ?? {}).length < Math.min(totalCardinality, 1000),
+    [availableOptions, totalCardinality]
+  );
 
   // track selectedOptions and invalidSelections in sets for more efficient lookup
   const selectedOptionsSet = useMemo(() => new Set<string>(selectedOptions), [selectedOptions]);
@@ -56,16 +65,9 @@ export const OptionsListPopoverSuggestions = ({
     () => new Set<string>(invalidSelections),
     [invalidSelections]
   );
-
   const suggestions = useMemo(() => {
     return showOnlySelected ? selectedOptions : Object.keys(availableOptions ?? {});
   }, [availableOptions, selectedOptions, showOnlySelected]);
-
-  const canLoadMoreSuggestions = useMemo(() => {
-    const canLoadMore =
-      Object.keys(availableOptions ?? {}).length < Math.min(totalCardinality, 1000);
-    return canLoadMore;
-  }, [availableOptions, totalCardinality]);
 
   const existsSelectableOption = useMemo<EuiSelectableOption | undefined>(() => {
     if (hideExists || (!existsSelected && (showOnlySelected || suggestions?.length === 0))) return;
@@ -115,7 +117,6 @@ export const OptionsListPopoverSuggestions = ({
         isGroupLabel: true,
       });
     }
-
     setSelectableOptions(existsSelectableOption ? [existsSelectableOption, ...options] : options);
   }, [
     suggestions,
@@ -123,42 +124,40 @@ export const OptionsListPopoverSuggestions = ({
     showOnlySelected,
     selectedOptionsSet,
     invalidSelectionsSet,
-    canLoadMoreSuggestions,
     existsSelectableOption,
+    canLoadMoreSuggestions,
   ]);
 
   const loadMoreOptions = useCallback(() => {
     const listbox = listRef.current?.querySelector('.euiSelectableList__list');
-    if (!canLoadMoreSuggestions || !listbox) return;
+    if (!listbox) return;
 
     const { scrollTop, scrollHeight, clientHeight } = listbox;
-    if (scrollTop + clientHeight >= scrollHeight - 31) {
+    if (scrollTop + clientHeight >= scrollHeight - parseInt(euiThemeVars.euiSizeXXL, 10)) {
       // reached the bottom of the list
       console.log('---> reached the bottom, fire event');
-      clickLoadMore(totalCardinality);
+      loadMoreSuggestions(totalCardinality);
     }
-  }, [clickLoadMore, totalCardinality, canLoadMoreSuggestions]);
-
-  const debouncedLoadMoreOptions = useMemo(() => {
-    return debounce(() => {
-      loadMoreOptions();
-    }, 600);
-  }, [loadMoreOptions]);
+  }, [loadMoreSuggestions, totalCardinality]);
 
   useEffect(() => {
     const container = listRef.current;
-    container?.addEventListener('scroll', debouncedLoadMoreOptions, true);
-    return () => container?.removeEventListener('scroll', debouncedLoadMoreOptions, true);
-  }, [debouncedLoadMoreOptions]);
+    if (canLoadMoreSuggestions) {
+      console.log('add');
+
+      container?.addEventListener('scroll', loadMoreOptions, true);
+      return () => {
+        console.log('destroy');
+        container?.removeEventListener('scroll', loadMoreOptions, true);
+      };
+    }
+  }, [loadMoreOptions, canLoadMoreSuggestions]);
 
   useEffect(() => {
-    // scroll back to the top when the size is reset back to 10, because this means either sort or search changed
-    if (size === 10) {
-      console.log('scroll back to top');
-      const listbox = listRef.current?.querySelector('.euiSelectableList__list');
-      listbox?.scrollTo({ top: 0 });
-    }
-  }, [size]);
+    // scroll back to the top when changing the sorting or the search string
+    const listbox = listRef.current?.querySelector('.euiSelectableList__list');
+    listbox?.scrollTo({ top: 0 });
+  }, [sort, searchString]);
 
   return (
     <>

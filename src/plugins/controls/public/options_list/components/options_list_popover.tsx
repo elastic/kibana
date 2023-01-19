@@ -23,14 +23,14 @@ import { OptionsListPopoverInvalidSelections } from './options_list_popover_inva
 export interface OptionsListPopoverProps {
   width: number;
   isLoading: boolean;
-  clickLoadMore: (cardinality: number) => void;
+  loadMoreSuggestions: (cardinality: number) => void;
   updateSearchString: (newSearchString: string) => void;
 }
 
 export const OptionsListPopover = ({
   width,
   isLoading,
-  clickLoadMore,
+  loadMoreSuggestions,
   updateSearchString,
 }: OptionsListPopoverProps) => {
   // Redux embeddable container Context
@@ -74,7 +74,8 @@ export const OptionsListPopover = ({
           style={{ width: '100%', height: '100%' }}
         >
           <OptionsListPopoverSuggestions
-            clickLoadMore={clickLoadMore}
+            isLoading={isLoading}
+            loadMoreSuggestions={loadMoreSuggestions}
             showOnlySelected={showOnlySelected}
           />
           {!showOnlySelected && invalidSelections && !isEmpty(invalidSelections) && (

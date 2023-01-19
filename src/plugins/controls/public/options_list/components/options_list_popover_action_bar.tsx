@@ -65,11 +65,7 @@ export const OptionsListPopoverActionBar = ({
               onChange={(event) => updateSearchString(event.target.value)}
               value={searchString.value}
               data-test-subj="optionsList-control-search-input"
-              placeholder={
-                totalCardinality
-                  ? OptionsListStrings.popover.getTotalCardinalityPlaceholder(totalCardinality)
-                  : undefined
-              }
+              placeholder={OptionsListStrings.popover.getSearchPlaceholder()}
               autoFocus={true}
             />
           </EuiFlexItem>

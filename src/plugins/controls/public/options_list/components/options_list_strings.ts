@@ -78,10 +78,9 @@ export const OptionsListStrings = {
       i18n.translate('controls.optionsList.popover.clearAllSelectionsTitle', {
         defaultMessage: 'Clear selections',
       }),
-    getTotalCardinalityPlaceholder: (totalOptions: number) =>
-      i18n.translate('controls.optionsList.popover.cardinalityPlaceholder', {
+    getSearchPlaceholder: () =>
+      i18n.translate('controls.optionsList.popover.searchPlaceholder', {
         defaultMessage: 'Search',
-        values: { totalOptions },
       }),
     getCardinalityTooltip: (totalOptions: number) =>
       i18n.translate('controls.optionsList.popover.cardinalityTooltip', {
