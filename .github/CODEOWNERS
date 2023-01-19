@@ -67,65 +67,65 @@
 
 # Global Experience
 
-/src/plugins/bfetch/ @elastic/kibana-global-experience
-/src/plugins/files @elastic/kibana-global-experience
-/src/plugins/screenshot_mode @elastic/kibana-global-experience
-/src/plugins/share/ @elastic/kibana-global-experience
-/src/plugins/ui_actions/ @elastic/kibana-global-experience
-/src/plugins/ui_actions_enhanced/ @elastic/kibana-global-experience
-/src/plugins/navigation/ @elastic/kibana-global-experience
-/src/plugins/image_embeddable/ @elastic/kibana-global-experience
-/x-pack/plugins/notifications/ @elastic/kibana-global-experience
+/src/plugins/bfetch/ @elastic/appex-sharedux
+/src/plugins/files @elastic/appex-sharedux
+/src/plugins/screenshot_mode @elastic/appex-sharedux
+/src/plugins/share/ @elastic/appex-sharedux
+/src/plugins/ui_actions/ @elastic/appex-sharedux
+/src/plugins/ui_actions_enhanced/ @elastic/appex-sharedux
+/src/plugins/navigation/ @elastic/appex-sharedux
+/src/plugins/image_embeddable/ @elastic/appex-sharedux
+/x-pack/plugins/notifications/ @elastic/appex-sharedux
 
 ## Examples
-/examples/bfetch_explorer/ @elastic/kibana-global-experience
-/examples/files_example @elastic/kibana-global-experience
-/examples/state_containers_examples/ @elastic/kibana-global-experience
-/examples/ui_action_examples/ @elastic/kibana-global-experience
-/examples/ui_actions_explorer/ @elastic/kibana-global-experience
-/examples/developer_examples/ @elastic/kibana-global-experience
-/x-pack/examples/ui_actions_enhanced_examples/ @elastic/kibana-global-experience
+/examples/bfetch_explorer/ @elastic/appex-sharedux
+/examples/files_example @elastic/appex-sharedux
+/examples/state_containers_examples/ @elastic/appex-sharedux
+/examples/ui_action_examples/ @elastic/appex-sharedux
+/examples/ui_actions_explorer/ @elastic/appex-sharedux
+/examples/developer_examples/ @elastic/appex-sharedux
+/x-pack/examples/ui_actions_enhanced_examples/ @elastic/appex-sharedux
 
 ### Overview Plugin and Packages
-/src/plugins/kibana_overview/ @elastic/kibana-global-experience
+/src/plugins/kibana_overview/ @elastic/appex-sharedux
 
 ### Global Experience Reporting
-/x-pack/examples/reporting_example/ @elastic/kibana-global-experience
-/x-pack/examples/screenshotting_example/ @elastic/kibana-global-experience
-/x-pack/plugins/reporting/ @elastic/kibana-global-experience
-/x-pack/test/functional/apps/dashboard/reporting/ @elastic/kibana-global-experience
-/x-pack/test/functional/apps/reporting/ @elastic/kibana-global-experience
-/x-pack/test/functional/apps/reporting_management/ @elastic/kibana-global-experience
-/x-pack/test/examples/screenshotting/ @elastic/kibana-global-experience
-/x-pack/test/functional/es_archives/lens/reporting/ @elastic/kibana-global-experience
-/x-pack/test/functional/es_archives/reporting/ @elastic/kibana-global-experience
-/x-pack/test/functional/fixtures/kbn_archiver/reporting/ @elastic/kibana-global-experience
-/x-pack/test/reporting_api_integration/ @elastic/kibana-global-experience
-/x-pack/test/reporting_functional/ @elastic/kibana-global-experience
-/x-pack/test/stack_functional_integration/apps/reporting/ @elastic/kibana-global-experience
-/docs/user/reporting @elastic/kibana-global-experience
-/docs/settings/reporting-settings.asciidoc @elastic/kibana-global-experience
-/docs/setup/configuring-reporting.asciidoc @elastic/kibana-global-experience
+/x-pack/examples/reporting_example/ @elastic/appex-sharedux
+/x-pack/examples/screenshotting_example/ @elastic/appex-sharedux
+/x-pack/plugins/reporting/ @elastic/appex-sharedux
+/x-pack/test/functional/apps/dashboard/reporting/ @elastic/appex-sharedux
+/x-pack/test/functional/apps/reporting/ @elastic/appex-sharedux
+/x-pack/test/functional/apps/reporting_management/ @elastic/appex-sharedux
+/x-pack/test/examples/screenshotting/ @elastic/appex-sharedux
+/x-pack/test/functional/es_archives/lens/reporting/ @elastic/appex-sharedux
+/x-pack/test/functional/es_archives/reporting/ @elastic/appex-sharedux
+/x-pack/test/functional/fixtures/kbn_archiver/reporting/ @elastic/appex-sharedux
+/x-pack/test/reporting_api_integration/ @elastic/appex-sharedux
+/x-pack/test/reporting_functional/ @elastic/appex-sharedux
+/x-pack/test/stack_functional_integration/apps/reporting/ @elastic/appex-sharedux
+/docs/user/reporting @elastic/appex-sharedux
+/docs/settings/reporting-settings.asciidoc @elastic/appex-sharedux
+/docs/setup/configuring-reporting.asciidoc @elastic/appex-sharedux
 
 ### Global Experience Tagging
-/src/plugins/saved_objects_tagging_oss @elastic/kibana-global-experience
-/x-pack/plugins/saved_objects_tagging/ @elastic/kibana-global-experience
-/x-pack/test/saved_object_tagging/ @elastic/kibana-global-experience
+/src/plugins/saved_objects_tagging_oss @elastic/appex-sharedux
+/x-pack/plugins/saved_objects_tagging/ @elastic/appex-sharedux
+/x-pack/test/saved_object_tagging/ @elastic/appex-sharedux
 
 ### Kibana React (to be deprecated)
-/src/plugins/kibana_react/ @elastic/kibana-global-experience
-/src/plugins/kibana_react/public/code_editor @elastic/kibana-global-experience @elastic/kibana-presentation
+/src/plugins/kibana_react/ @elastic/appex-sharedux
+/src/plugins/kibana_react/public/code_editor @elastic/appex-sharedux @elastic/kibana-presentation
 
 ### Home Plugin and Packages
-/src/plugins/home/public @elastic/kibana-global-experience
-/src/plugins/home/server/*.ts @elastic/kibana-global-experience
-/src/plugins/home/server/services/ @elastic/kibana-global-experience
+/src/plugins/home/public @elastic/appex-sharedux
+/src/plugins/home/server/*.ts @elastic/appex-sharedux
+/src/plugins/home/server/services/ @elastic/appex-sharedux
 
 ### Code Coverage
-#CC# /src/plugins/home/public @elastic/kibana-global-experience
-#CC# /src/plugins/home/server/services/ @elastic/kibana-global-experience
-#CC# /src/plugins/home/ @elastic/kibana-global-experience
-#CC# /x-pack/plugins/reporting/ @elastic/kibana-global-experience
+#CC# /src/plugins/home/public @elastic/appex-sharedux
+#CC# /src/plugins/home/server/services/ @elastic/appex-sharedux
+#CC# /src/plugins/home/ @elastic/appex-sharedux
+#CC# /x-pack/plugins/reporting/ @elastic/appex-sharedux
 
 ### Observability Plugins
 
@@ -674,7 +674,7 @@ x-pack/test/threat_intelligence_cypress @elastic/protections-experience
 #CC# /x-pack/plugins/logstash/ @elastic/logstash
 
 # EUI design
-/src/plugins/kibana_react/public/page_template/ @elastic/eui-design @elastic/kibana-global-experience
+/src/plugins/kibana_react/public/page_template/ @elastic/eui-design @elastic/appex-sharedux
 
 # Application Experience
 
@@ -694,8 +694,8 @@ packages/analytics/shippers/elastic_v3/common @elastic/kibana-core
 packages/analytics/shippers/elastic_v3/server @elastic/kibana-core
 packages/analytics/shippers/fullstory @elastic/kibana-core
 packages/analytics/shippers/gainsight @elastic/kibana-core
-packages/content-management/content_editor @elastic/kibana-global-experience
-packages/content-management/table_list @elastic/kibana-global-experience
+packages/content-management/content_editor @elastic/appex-sharedux
+packages/content-management/table_list @elastic/appex-sharedux
 packages/core/analytics/core-analytics-browser @elastic/kibana-core
 packages/core/analytics/core-analytics-browser-internal @elastic/kibana-core
 packages/core/analytics/core-analytics-browser-mocks @elastic/kibana-core
@@ -725,13 +725,13 @@ packages/core/chrome/core-chrome-browser @elastic/kibana-core
 packages/core/chrome/core-chrome-browser-internal @elastic/kibana-core
 packages/core/chrome/core-chrome-browser-mocks @elastic/kibana-core
 packages/core/config/core-config-server-internal @elastic/kibana-core
-packages/core/custom-branding/core-custom-branding-browser @elastic/kibana-global-experience
-packages/core/custom-branding/core-custom-branding-browser-internal @elastic/kibana-global-experience
-packages/core/custom-branding/core-custom-branding-browser-mocks @elastic/kibana-global-experience
-packages/core/custom-branding/core-custom-branding-common @elastic/kibana-global-experience
-packages/core/custom-branding/core-custom-branding-server @elastic/kibana-global-experience
-packages/core/custom-branding/core-custom-branding-server-internal @elastic/kibana-global-experience
-packages/core/custom-branding/core-custom-branding-server-mocks @elastic/kibana-global-experience
+packages/core/custom-branding/core-custom-branding-browser @elastic/appex-sharedux
+packages/core/custom-branding/core-custom-branding-browser-internal @elastic/appex-sharedux
+packages/core/custom-branding/core-custom-branding-browser-mocks @elastic/appex-sharedux
+packages/core/custom-branding/core-custom-branding-common @elastic/appex-sharedux
+packages/core/custom-branding/core-custom-branding-server @elastic/appex-sharedux
+packages/core/custom-branding/core-custom-branding-server-internal @elastic/appex-sharedux
+packages/core/custom-branding/core-custom-branding-server-mocks @elastic/appex-sharedux
 packages/core/deprecations/core-deprecations-browser @elastic/kibana-core
 packages/core/deprecations/core-deprecations-browser-internal @elastic/kibana-core
 packages/core/deprecations/core-deprecations-browser-mocks @elastic/kibana-core
@@ -875,9 +875,9 @@ packages/core/usage-data/core-usage-data-base-server-internal @elastic/kibana-co
 packages/core/usage-data/core-usage-data-server @elastic/kibana-core
 packages/core/usage-data/core-usage-data-server-internal @elastic/kibana-core
 packages/core/usage-data/core-usage-data-server-mocks @elastic/kibana-core
-packages/home/sample_data_card @elastic/kibana-global-experience
-packages/home/sample_data_tab @elastic/kibana-global-experience
-packages/home/sample_data_types @elastic/kibana-global-experience
+packages/home/sample_data_card @elastic/appex-sharedux
+packages/home/sample_data_tab @elastic/appex-sharedux
+packages/home/sample_data_types @elastic/appex-sharedux
 packages/kbn-ace @elastic/platform-deployment-management
 packages/kbn-alerts @elastic/security-solution
 packages/kbn-ambient-common-types @elastic/kibana-operations
@@ -896,6 +896,7 @@ packages/kbn-babel-register @elastic/kibana-operations
 packages/kbn-babel-transform @elastic/kibana-operations
 packages/kbn-bazel-runner @elastic/kibana-operations
 packages/kbn-cases-components @elastic/response-ops
+packages/kbn-cell-actions @elastic/security-threat-hunting-explore
 packages/kbn-chart-icons @elastic/kibana-visualizations
 packages/kbn-check-mappings-update-cli @elastic/kibana-core
 packages/kbn-ci-stats-core @elastic/kibana-operations
@@ -909,7 +910,7 @@ packages/kbn-config-schema @elastic/kibana-core
 packages/kbn-crypto @elastic/kibana-security
 packages/kbn-crypto-browser @elastic/kibana-core
 packages/kbn-cypress-config @elastic/kibana-operations
-packages/kbn-datemath @elastic/kibana-app-services
+packages/kbn-datemath @elastic/kibana-data-discovery
 packages/kbn-dev-cli-errors @elastic/kibana-operations
 packages/kbn-dev-cli-runner @elastic/kibana-operations
 packages/kbn-dev-proc-runner @elastic/kibana-operations
@@ -921,7 +922,7 @@ packages/kbn-ecs @elastic/kibana-core
 packages/kbn-es @elastic/kibana-operations
 packages/kbn-es-archiver @elastic/kibana-operations
 packages/kbn-es-errors @elastic/kibana-core
-packages/kbn-es-query @elastic/kibana-app-services
+packages/kbn-es-query @elastic/kibana-data-discovery
 packages/kbn-es-types @elastic/kibana-core @elastic/apm-ui
 packages/kbn-eslint-config @elastic/kibana-operations
 packages/kbn-eslint-plugin-disable @elastic/kibana-operations
@@ -929,7 +930,7 @@ packages/kbn-eslint-plugin-eslint @elastic/kibana-operations
 packages/kbn-eslint-plugin-imports @elastic/kibana-operations
 packages/kbn-expect @elastic/kibana-operations
 packages/kbn-failed-test-reporter-cli @elastic/kibana-operations
-packages/kbn-field-types @elastic/kibana-app-services
+packages/kbn-field-types @elastic/kibana-data-discovery
 packages/kbn-find-used-node-modules @elastic/kibana-operations
 packages/kbn-flot-charts @elastic/kibana-operations
 packages/kbn-ftr-common-functional-services @elastic/kibana-operations
@@ -958,7 +959,7 @@ packages/kbn-logging-mocks @elastic/kibana-core
 packages/kbn-managed-vscode-config @elastic/kibana-operations
 packages/kbn-managed-vscode-config-cli @elastic/kibana-operations
 packages/kbn-mapbox-gl @elastic/kibana-gis
-packages/kbn-monaco @elastic/kibana-global-experience
+packages/kbn-monaco @elastic/appex-sharedux
 packages/kbn-optimizer @elastic/kibana-operations
 packages/kbn-optimizer-webpack-helpers @elastic/kibana-operations
 packages/kbn-osquery-io-ts-types @elastic/security-asset-management
@@ -969,7 +970,7 @@ packages/kbn-picomatcher @elastic/kibana-operations
 packages/kbn-plugin-discovery @elastic/kibana-operations
 packages/kbn-plugin-generator @elastic/kibana-operations
 packages/kbn-plugin-helpers @elastic/kibana-operations
-packages/kbn-react-field @elastic/kibana-app-services
+packages/kbn-react-field @elastic/kibana-data-discovery
 packages/kbn-repo-file-maps @elastic/kibana-operations
 packages/kbn-repo-info @elastic/kibana-operations
 packages/kbn-repo-linter @elastic/kibana-operations
@@ -999,7 +1000,7 @@ packages/kbn-server-http-tools @elastic/kibana-core
 packages/kbn-server-route-repository @elastic/apm-ui
 packages/kbn-set-map @elastic/kibana-operations
 packages/kbn-shared-svg @elastic/apm-ui
-packages/kbn-shared-ux-utility @elastic/kibana-global-experience
+packages/kbn-shared-ux-utility @elastic/appex-sharedux
 packages/kbn-slo-schema @elastic/actionable-observability
 packages/kbn-some-dev-log @elastic/kibana-operations
 packages/kbn-sort-package-json @elastic/kibana-operations
@@ -1028,54 +1029,54 @@ packages/kbn-utils @elastic/kibana-operations
 packages/kbn-web-worker-stub @elastic/kibana-operations
 packages/kbn-whereis-pkg-cli @elastic/kibana-operations
 packages/kbn-yarn-lock-validator @elastic/kibana-operations
-packages/shared-ux/avatar/solution @elastic/kibana-global-experience
-packages/shared-ux/avatar/user_profile/impl @elastic/kibana-global-experience
-packages/shared-ux/button_toolbar @elastic/kibana-global-experience
-packages/shared-ux/button/exit_full_screen/impl @elastic/kibana-global-experience
-packages/shared-ux/button/exit_full_screen/mocks @elastic/kibana-global-experience
-packages/shared-ux/button/exit_full_screen/types @elastic/kibana-global-experience
-packages/shared-ux/card/no_data/impl @elastic/kibana-global-experience
-packages/shared-ux/card/no_data/mocks @elastic/kibana-global-experience
-packages/shared-ux/card/no_data/types @elastic/kibana-global-experience
-packages/shared-ux/file/context @elastic/kibana-global-experience
-packages/shared-ux/file/file_picker/impl @elastic/kibana-global-experience
-packages/shared-ux/file/file_upload/impl @elastic/kibana-global-experience
-packages/shared-ux/file/image/impl @elastic/kibana-global-experience
-packages/shared-ux/file/image/mocks @elastic/kibana-global-experience
-packages/shared-ux/file/mocks @elastic/kibana-global-experience
-packages/shared-ux/file/types @elastic/kibana-global-experience
-packages/shared-ux/file/util @elastic/kibana-global-experience
-packages/shared-ux/link/redirect_app/impl @elastic/kibana-global-experience
-packages/shared-ux/link/redirect_app/mocks @elastic/kibana-global-experience
-packages/shared-ux/link/redirect_app/types @elastic/kibana-global-experience
-packages/shared-ux/markdown/impl @elastic/kibana-global-experience
-packages/shared-ux/markdown/mocks @elastic/kibana-global-experience
-packages/shared-ux/markdown/types @elastic/kibana-global-experience
-packages/shared-ux/page/analytics_no_data/impl @elastic/kibana-global-experience
-packages/shared-ux/page/analytics_no_data/mocks @elastic/kibana-global-experience
-packages/shared-ux/page/analytics_no_data/types @elastic/kibana-global-experience
-packages/shared-ux/page/kibana_no_data/impl @elastic/kibana-global-experience
-packages/shared-ux/page/kibana_no_data/mocks @elastic/kibana-global-experience
-packages/shared-ux/page/kibana_no_data/types @elastic/kibana-global-experience
-packages/shared-ux/page/kibana_template/impl @elastic/kibana-global-experience
-packages/shared-ux/page/kibana_template/mocks @elastic/kibana-global-experience
-packages/shared-ux/page/kibana_template/types @elastic/kibana-global-experience
-packages/shared-ux/page/no_data_config/impl @elastic/kibana-global-experience
-packages/shared-ux/page/no_data_config/mocks @elastic/kibana-global-experience
-packages/shared-ux/page/no_data_config/types @elastic/kibana-global-experience
-packages/shared-ux/page/no_data/impl @elastic/kibana-global-experience
-packages/shared-ux/page/no_data/mocks @elastic/kibana-global-experience
-packages/shared-ux/page/no_data/types @elastic/kibana-global-experience
-packages/shared-ux/page/solution_nav @elastic/kibana-global-experience
-packages/shared-ux/prompt/no_data_views/impl @elastic/kibana-global-experience
-packages/shared-ux/prompt/no_data_views/mocks @elastic/kibana-global-experience
-packages/shared-ux/prompt/no_data_views/types @elastic/kibana-global-experience
-packages/shared-ux/prompt/not_found @elastic/kibana-global-experience
-packages/shared-ux/router/impl @elastic/kibana-global-experience
-packages/shared-ux/router/mocks @elastic/kibana-global-experience
-packages/shared-ux/router/types @elastic/kibana-global-experience
-packages/shared-ux/storybook/config @elastic/kibana-global-experience
-packages/shared-ux/storybook/mock @elastic/kibana-global-experience
+packages/shared-ux/avatar/solution @elastic/appex-sharedux
+packages/shared-ux/avatar/user_profile/impl @elastic/appex-sharedux
+packages/shared-ux/button_toolbar @elastic/appex-sharedux
+packages/shared-ux/button/exit_full_screen/impl @elastic/appex-sharedux
+packages/shared-ux/button/exit_full_screen/mocks @elastic/appex-sharedux
+packages/shared-ux/button/exit_full_screen/types @elastic/appex-sharedux
+packages/shared-ux/card/no_data/impl @elastic/appex-sharedux
+packages/shared-ux/card/no_data/mocks @elastic/appex-sharedux
+packages/shared-ux/card/no_data/types @elastic/appex-sharedux
+packages/shared-ux/file/context @elastic/appex-sharedux
+packages/shared-ux/file/file_picker/impl @elastic/appex-sharedux
+packages/shared-ux/file/file_upload/impl @elastic/appex-sharedux
+packages/shared-ux/file/image/impl @elastic/appex-sharedux
+packages/shared-ux/file/image/mocks @elastic/appex-sharedux
+packages/shared-ux/file/mocks @elastic/appex-sharedux
+packages/shared-ux/file/types @elastic/appex-sharedux
+packages/shared-ux/file/util @elastic/appex-sharedux
+packages/shared-ux/link/redirect_app/impl @elastic/appex-sharedux
+packages/shared-ux/link/redirect_app/mocks @elastic/appex-sharedux
+packages/shared-ux/link/redirect_app/types @elastic/appex-sharedux
+packages/shared-ux/markdown/impl @elastic/appex-sharedux
+packages/shared-ux/markdown/mocks @elastic/appex-sharedux
+packages/shared-ux/markdown/types @elastic/appex-sharedux
+packages/shared-ux/page/analytics_no_data/impl @elastic/appex-sharedux
+packages/shared-ux/page/analytics_no_data/mocks @elastic/appex-sharedux
+packages/shared-ux/page/analytics_no_data/types @elastic/appex-sharedux
+packages/shared-ux/page/kibana_no_data/impl @elastic/appex-sharedux
+packages/shared-ux/page/kibana_no_data/mocks @elastic/appex-sharedux
+packages/shared-ux/page/kibana_no_data/types @elastic/appex-sharedux
+packages/shared-ux/page/kibana_template/impl @elastic/appex-sharedux
+packages/shared-ux/page/kibana_template/mocks @elastic/appex-sharedux
+packages/shared-ux/page/kibana_template/types @elastic/appex-sharedux
+packages/shared-ux/page/no_data_config/impl @elastic/appex-sharedux
+packages/shared-ux/page/no_data_config/mocks @elastic/appex-sharedux
+packages/shared-ux/page/no_data_config/types @elastic/appex-sharedux
+packages/shared-ux/page/no_data/impl @elastic/appex-sharedux
+packages/shared-ux/page/no_data/mocks @elastic/appex-sharedux
+packages/shared-ux/page/no_data/types @elastic/appex-sharedux
+packages/shared-ux/page/solution_nav @elastic/appex-sharedux
+packages/shared-ux/prompt/no_data_views/impl @elastic/appex-sharedux
+packages/shared-ux/prompt/no_data_views/mocks @elastic/appex-sharedux
+packages/shared-ux/prompt/no_data_views/types @elastic/appex-sharedux
+packages/shared-ux/prompt/not_found @elastic/appex-sharedux
+packages/shared-ux/router/impl @elastic/appex-sharedux
+packages/shared-ux/router/mocks @elastic/appex-sharedux
+packages/shared-ux/router/types @elastic/appex-sharedux
+packages/shared-ux/storybook/config @elastic/appex-sharedux
+packages/shared-ux/storybook/mock @elastic/appex-sharedux
 src/plugins/chart_expressions/common @elastic/kibana-visualizations
 x-pack/packages/ml/agg_utils @elastic/ml-ui
 x-pack/packages/ml/aiops_components @elastic/ml-ui
