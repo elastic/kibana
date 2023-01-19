@@ -15,8 +15,8 @@ import { EuiButton, EuiFieldSearch, EuiLink, EuiSpacer, EuiText } from '@elastic
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
 
-import { INPUT_THROTTLE_DELAY_MS } from '../../../shared/constants/timers';
 import { Status } from '../../../../../common/types/api';
+import { INPUT_THROTTLE_DELAY_MS } from '../../../shared/constants/timers';
 
 import { DataPanel } from '../../../shared/data_panel/data_panel';
 
@@ -24,9 +24,9 @@ import { EngineError } from '../engine/engine_error';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
 import { EnginesListTable } from './components/tables/engines_table';
+import { DeleteEngineModal } from './delete_engine_modal';
 import { EngineListIndicesFlyout } from './engines_list_indices_flyout';
 import { EnginesListLogic } from './engines_list_logic';
-import { DeleteEngineModal } from './delete_engine_modal';
 
 export const EnginesList: React.FC = () => {
   const { fetchEngines, onPaginate, openDeleteEngineModal, openFetchEngineFlyout } =
