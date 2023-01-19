@@ -6,13 +6,13 @@
  */
 
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIconTip,
   EuiFormRow,
   EuiFieldNumber,
   EuiSelect,
@@ -20,6 +20,10 @@ import {
   EuiSpacer,
   EuiSuperSelect,
   EuiSuperSelectOption,
+  EuiPopover,
+  EuiButtonEmpty,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
 } from '@elastic/eui';
 import { some, filter, map } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -116,12 +120,13 @@ export const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<RuleNotifyWhenType>
   },
 ];
 
-interface RuleNotifyWhenProps {
+interface ActionNotifyWhenProps {
   frequency: RuleAction['frequency'];
   throttle: number | null;
   throttleUnit: string;
   onNotifyWhenChange: (notifyWhen: RuleNotifyWhenType) => void;
   onThrottleChange: (throttle: number | null, throttleUnit: string) => void;
+  onSummaryChange: (summary: boolean) => void;
 }
 
 export const ActionNotifyWhen = ({
@@ -130,10 +135,36 @@ export const ActionNotifyWhen = ({
   throttleUnit,
   onNotifyWhenChange,
   onThrottleChange,
-}: RuleNotifyWhenProps) => {
+  onSummaryChange,
+}: ActionNotifyWhenProps) => {
   const [showCustomThrottleOpts, setShowCustomThrottleOpts] = useState<boolean>(false);
   const [notifyWhenValue, setNotifyWhenValue] =
     useState<RuleNotifyWhenType>(DEFAULT_NOTIFY_WHEN_VALUE);
+
+  // Track whether the user has changed the notify when value from default. This is necessary because the
+  // "default" notifyWhen value for summary: true is the second menu item for summary: false. We want the UX to be:
+  // Case A
+  // - User opens the form with summary: false, notifyWhen: CHANGE
+  // - User switches to summary: true, necessitating a switch to notifyWhen: ACTIVE
+  // - User doesn't touch notifyWhen: ACTIVE, switches back to summary: false. notifyWhen should switch to CHANGE, the 1st menu option
+  // Case B
+  // - User opens the form with summary: false, notifyWhen: ACTIVE (not the "default")
+  // - User switches to summary: true
+  // - User switches back to summary: false. notifyWhen stays ACTIVE
+  // Case C
+  // - User opens the form with summary: true, notifyWhen: ACTIVE (the "default")
+  // - User doesn't change notifyWhen, just sets summary: false. notifyWhen should switch to CHANGE
+  // Case D
+  // - User opens the form with summary: true, notifyWhen: THROTTLE, or summary: false, notifyWhen: !CHANGE
+  // - When user changes summary, leave notifyWhen unchanged
+  const [notifyWhenValueChangedFromDefault, setNotifyWhenValueChangedFromDefault] = useState(
+    // Check if the initial notifyWhen value is different from the default value for its summary type
+    frequency.summary
+      ? frequency.notifyWhen !== RuleNotifyWhen.ACTIVE
+      : frequency.notifyWhen !== DEFAULT_FREQUENCY.notifyWhen
+  );
+
+  const [summaryMenuOpen, setSummaryMenuOpen] = useState(false);
 
   useEffect(() => {
     if (frequency.notifyWhen) {
@@ -145,95 +176,187 @@ export const ActionNotifyWhen = ({
   }, [frequency]);
 
   useEffect(() => {
-    setShowCustomThrottleOpts(notifyWhenValue === 'onThrottleInterval');
+    setShowCustomThrottleOpts(notifyWhenValue === RuleNotifyWhen.THROTTLE);
   }, [notifyWhenValue]);
 
   const onNotifyWhenValueChange = useCallback(
     (newValue: RuleNotifyWhenType) => {
       onNotifyWhenChange(newValue);
       setNotifyWhenValue(newValue);
+      setNotifyWhenValueChangedFromDefault(true);
       // Calling onNotifyWhenChange and onThrottleChange at the same time interferes with the React state lifecycle
       // so wait for onNotifyWhenChange to process before calling onThrottleChange
       setTimeout(
         () =>
-          onThrottleChange(newValue === 'onThrottleInterval' ? throttle ?? 1 : null, throttleUnit),
+          onThrottleChange(
+            newValue === RuleNotifyWhen.THROTTLE ? throttle ?? 1 : null,
+            throttleUnit
+          ),
         100
       );
     },
-    [onNotifyWhenChange, setNotifyWhenValue, onThrottleChange, throttle, throttleUnit]
+    [onNotifyWhenChange, onThrottleChange, throttle, throttleUnit]
   );
 
-  const labelForRuleRenotify = [
-    i18n.translate('xpack.triggersActionsUI.sections.ruleForm.renotifyFieldLabel', {
-      defaultMessage: 'Notify',
-    }),
-    <EuiIconTip
-      position="right"
-      type="questionInCircle"
-      content={i18n.translate('xpack.triggersActionsUI.sections.ruleForm.renotifyWithTooltip', {
-        defaultMessage: 'Define how often alerts generate actions.',
-      })}
-    />,
-  ];
+  const selectSummaryOption = useCallback(
+    (summary: boolean) => {
+      onSummaryChange(summary);
+      setSummaryMenuOpen(false);
+      if (summary && frequency.notifyWhen === RuleNotifyWhen.CHANGE) {
+        // Call onNotifyWhenChange DIRECTLY to bypass setNotifyWhenValueChangedFromDefault
+        onNotifyWhenChange(RuleNotifyWhen.ACTIVE);
+        // In cases like this:
+        // 1. User opens form with notifyWhen: THROTTLE
+        // 2. User sets notifyWhen: CHANGE, notifyWhenValueChangedFromDefault is now true
+        // 3. User sets summary: true, notifyWhen gets set to CHANGE
+        // 4. User sets summary: false, notifyWhen should probably get set back to CHANGE
+        // To make step 4 possible, we have to reset notifyWhenValueChangedFromDefault:
+        setNotifyWhenValueChangedFromDefault(false);
+      } else if (
+        !summary &&
+        frequency.notifyWhen === RuleNotifyWhen.ACTIVE &&
+        !notifyWhenValueChangedFromDefault
+      ) {
+        onNotifyWhenChange(RuleNotifyWhen.CHANGE);
+      }
+    },
+    [onSummaryChange, frequency.notifyWhen, onNotifyWhenChange, notifyWhenValueChangedFromDefault]
+  );
+
+  const summaryOptions = useMemo(
+    () => [
+      <SummaryContextMenuOption
+        className="euiSuperSelect__item"
+        key="summary"
+        onClick={() => selectSummaryOption(true)}
+        icon={frequency.summary ? 'check' : 'empty'}
+        id="actionNotifyWhen-option-summary"
+      >
+        {SUMMARY_OF_ALERTS}
+      </SummaryContextMenuOption>,
+      <SummaryContextMenuOption
+        className="euiSuperSelect__item"
+        key="for_each"
+        onClick={() => selectSummaryOption(false)}
+        icon={!frequency.summary ? 'check' : 'empty'}
+        id="actionNotifyWhen-option-for_each"
+      >
+        {FOR_EACH_ALERT}
+      </SummaryContextMenuOption>,
+    ],
+    [frequency.summary, selectSummaryOption]
+  );
+
+  const summaryOrPerRuleSelect = (
+    <EuiPopover
+      initialFocus={`#actionNotifyWhen-option-${frequency.summary ? 'summary' : 'for_each'}`}
+      isOpen={summaryMenuOpen}
+      closePopover={useCallback(() => setSummaryMenuOpen(false), [setSummaryMenuOpen])}
+      panelPaddingSize="none"
+      anchorPosition="downLeft"
+      button={
+        <EuiButtonEmpty
+          size="xs"
+          iconType="arrowDown"
+          iconSide="right"
+          onClick={useCallback(() => setSummaryMenuOpen(!summaryMenuOpen), [summaryMenuOpen])}
+        >
+          {frequency.summary ? SUMMARY_OF_ALERTS : FOR_EACH_ALERT}
+        </EuiButtonEmpty>
+      }
+    >
+      <EuiContextMenuPanel items={summaryOptions} />
+    </EuiPopover>
+  );
+
+  const notifyWhenOptions = useMemo(
+    () =>
+      frequency.summary
+        ? NOTIFY_WHEN_OPTIONS.filter((o) => o.value !== RuleNotifyWhen.CHANGE)
+        : NOTIFY_WHEN_OPTIONS,
+    [frequency.summary]
+  );
 
   return (
     <>
-      <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem>
-          <EuiSuperSelect
-            fullWidth
-            prepend={labelForRuleRenotify}
-            data-test-subj="notifyWhenSelect"
-            options={NOTIFY_WHEN_OPTIONS}
-            valueOfSelected={notifyWhenValue}
-            onChange={onNotifyWhenValueChange}
-          />
-          {showCustomThrottleOpts && (
-            <>
-              <EuiSpacer size="xs" />
-              <EuiFormRow fullWidth>
-                <EuiFlexGroup gutterSize="s">
-                  <EuiFlexItem grow={2}>
-                    <EuiFieldNumber
-                      min={1}
-                      value={throttle ?? 1}
-                      name="throttle"
-                      data-test-subj="throttleInput"
-                      prepend={i18n.translate(
-                        'xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.label',
-                        {
-                          defaultMessage: 'Every',
-                        }
-                      )}
-                      onChange={(e) => {
-                        pipe(
-                          some(e.target.value.trim()),
-                          filter((value) => value !== ''),
-                          map((value) => parseInt(value, 10)),
-                          filter((value) => !isNaN(value)),
-                          map((value) => {
-                            onThrottleChange(value, throttleUnit);
-                          })
-                        );
-                      }}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={3}>
-                    <EuiSelect
-                      data-test-subj="throttleUnitInput"
-                      value={throttleUnit}
-                      options={getTimeOptions(throttle ?? 1)}
-                      onChange={(e) => {
-                        onThrottleChange(throttle, e.target.value);
-                      }}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFormRow>
-            </>
-          )}
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiFormRow
+        fullWidth
+        label={i18n.translate(
+          'xpack.triggersActionsUI.sections.ruleForm.actionNotifyWhen.actionFrequencyLabel',
+          { defaultMessage: 'Action frequency' }
+        )}
+      >
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem>
+            <EuiSuperSelect
+              fullWidth
+              prepend={summaryOrPerRuleSelect}
+              data-test-subj="notifyWhenSelect"
+              options={notifyWhenOptions}
+              valueOfSelected={notifyWhenValue}
+              onChange={onNotifyWhenValueChange}
+            />
+            {showCustomThrottleOpts && (
+              <>
+                <EuiSpacer size="xs" />
+                <EuiFormRow fullWidth>
+                  <EuiFlexGroup gutterSize="s">
+                    <EuiFlexItem grow={2}>
+                      <EuiFieldNumber
+                        min={1}
+                        value={throttle ?? 1}
+                        name="throttle"
+                        data-test-subj="throttleInput"
+                        prepend={i18n.translate(
+                          'xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.label',
+                          {
+                            defaultMessage: 'Every',
+                          }
+                        )}
+                        onChange={(e) => {
+                          pipe(
+                            some(e.target.value.trim()),
+                            filter((value) => value !== ''),
+                            map((value) => parseInt(value, 10)),
+                            filter((value) => !isNaN(value)),
+                            map((value) => {
+                              onThrottleChange(value, throttleUnit);
+                            })
+                          );
+                        }}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={3}>
+                      <EuiSelect
+                        data-test-subj="throttleUnitInput"
+                        value={throttleUnit}
+                        options={getTimeOptions(throttle ?? 1)}
+                        onChange={(e) => {
+                          onThrottleChange(throttle, e.target.value);
+                        }}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFormRow>
+              </>
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFormRow>
+      <EuiSpacer size="s" />
     </>
   );
 };
+
+const FOR_EACH_ALERT = i18n.translate(
+  'xpack.triggersActionsUI.sections.ruleForm.actionNotifyWhen.forEachOption',
+  { defaultMessage: 'For each alert' }
+);
+const SUMMARY_OF_ALERTS = i18n.translate(
+  'xpack.triggersActionsUI.sections.ruleForm.actionNotifyWhen.summaryOption',
+  { defaultMessage: 'Summary of alerts' }
+);
+
+const SummaryContextMenuOption = euiStyled(EuiContextMenuItem)`
+  min-width: 300px;
+`;
