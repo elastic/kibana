@@ -177,18 +177,4 @@ export const fleetUsagesSchema: RootSchema<any> = {
       },
     },
   },
-  agent_logs_top_errors: {
-    type: 'array',
-    items: {
-      type: 'text',
-      _meta: { description: 'Top messages from agent error logs' },
-    },
-  },
-  fleet_server_logs_top_errors: {
-    type: 'array',
-    items: {
-      type: 'text',
-      _meta: { description: 'Top messages from fleet server error logs' },
-    },
-  },
 };
