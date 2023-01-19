@@ -178,7 +178,7 @@ describe('singleSearchAfter', () => {
       primaryTimestamp: '@timestamp',
       secondaryTimestamp: undefined,
       runtimeMappings: undefined,
-      ovverideBody: {
+      overrideBody: {
         _source: false,
         fields: ['@timestamp'],
       },
@@ -190,7 +190,6 @@ describe('singleSearchAfter', () => {
       filter: {},
       from: 'now-360s',
       index: [],
-      overrideBody: undefined,
       primaryTimestamp: '@timestamp',
       runtimeMappings: undefined,
       searchAfterSortIds: undefined,
@@ -199,7 +198,7 @@ describe('singleSearchAfter', () => {
       sortOrder: undefined,
       to: 'now',
       trackTotalHits: undefined,
-      ovverideBody: {
+      overrideBody: {
         _source: false,
         fields: ['@timestamp'],
       },
