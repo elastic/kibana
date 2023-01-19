@@ -15,12 +15,12 @@
     "tslib": "*"
   },
   "devDependencies": {
-    "@types/chai": "^4.2.10",
+    "@types/chai": "^4.3.3",
     "@types/js-yaml": "^4.0.5",
     "@types/minimatch": "^3.0.5",
     "@types/mocha": "^10.0.1",
     "@types/node": "^15.12.2",
-    "chai": "^4.2.0",
+    "chai": "^4.3.6",
     "mocha": "^10.2.0",
     "nock": "^12.0.2",
     "ts-node": "^10.7.0",
