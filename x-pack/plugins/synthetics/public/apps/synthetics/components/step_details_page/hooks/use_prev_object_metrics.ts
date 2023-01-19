@@ -6,6 +6,8 @@
  */
 
 import { useParams } from 'react-router-dom';
+import moment from 'moment';
+import { useJourneySteps } from '../../monitor_details/hooks/use_journey_steps';
 import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 
@@ -26,6 +28,10 @@ export const usePreviousObjectMetrics = () => {
     stepIndex: string;
     checkGroupId: string;
   }>();
+
+  const { data } = useJourneySteps();
+
+  const timestamp = data?.details?.timestamp;
 
   const { data: prevObjectMetrics } = useReduxEsSearch(
     {
@@ -48,6 +54,14 @@ export const usePreviousObjectMetrics = () => {
         query: {
           bool: {
             filter: [
+              {
+                range: {
+                  '@timestamp': {
+                    lte: timestamp ?? 'now',
+                    gte: moment(timestamp).subtract(1, 'day').toISOString(),
+                  },
+                },
+              },
               {
                 term: {
                   config_id: monitorId,
@@ -107,7 +121,8 @@ export const usePreviousObjectMetrics = () => {
     },
     [stepIndex, monitorId, checkGroupId],
     {
-      name: 'previousObjectMetrics',
+      name: `previousObjectMetrics/${monitorId}/${checkGroupId}/${stepIndex}/`,
+      isRequestReady: !!timestamp,
     }
   );
 

@@ -23,9 +23,9 @@ export const useReduxEsSearch = <
 >(
   params: TParams,
   fnDeps: any[],
-  options: { inspector?: IInspectorInfo; name: string }
+  options: { inspector?: IInspectorInfo; name: string; isRequestReady?: boolean }
 ) => {
-  const { name } = options ?? {};
+  const { name, isRequestReady = true } = options ?? {};
 
   const { addInspectorRequest } = useInspectorContext();
 
@@ -35,11 +35,11 @@ export const useReduxEsSearch = <
   const results = useSelector(selectEsQueryResult);
 
   useEffect(() => {
-    if (params.index) {
+    if (params.index && isRequestReady) {
       dispatch(executeEsQueryAction.get({ params, name, addInspectorRequest }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [addInspectorRequest, dispatch, name, JSON.stringify(params)]);
+  }, [addInspectorRequest, dispatch, name, JSON.stringify(params), isRequestReady]);
 
   return useMemo(() => {
     return {
