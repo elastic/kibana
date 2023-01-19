@@ -5,9 +5,11 @@
  * 2.0.
  */
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
-export const hieListResponse = {
-  data: [
-    {
+export const getHieListResponse = (isEmpty = true) => {
+  const data: Array<Record<string, unknown>> = [];
+
+  if (!isEmpty) {
+    data.push({
       _version: 'WzI1MjAsMV0=',
       comments: [],
       created_at: '2023-01-12T10:14:28.385Z',
@@ -32,11 +34,15 @@ export const hieListResponse = {
       type: 'simple',
       updated_at: '2023-01-12T10:14:28.385Z',
       updated_by: 'elastic',
-    },
-  ],
-  page: 1,
-  per_page: 10,
-  total: 1,
+    });
+  }
+
+  return {
+    data,
+    page: 1,
+    per_page: 10,
+    total: data.length,
+  };
 };
 
 export const testExceptionListItems = [

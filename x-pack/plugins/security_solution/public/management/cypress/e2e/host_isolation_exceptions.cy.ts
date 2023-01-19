@@ -14,7 +14,7 @@
 import { login, loginWithRole, ROLE } from '../tasks/login';
 import { setupLicense } from '../tasks/license';
 import { platinum, gold } from '../fixtures/licenses';
-import { hieListResponse } from '../fixtures/exception_list_entries';
+import { getHieListResponse } from '../fixtures/exception_list_entries';
 
 const loginWithReadAccess = (url: string) => {
   loginWithRole(ROLE.t2_analyst);
@@ -26,10 +26,10 @@ const loginWithWriteAccess = (url: string) => {
   cy.visit(url);
 };
 
-const stubHIEResponse = () => {
+const stubHIEResponse = ({ isEmpty }: { isEmpty: boolean }) => {
   cy.intercept('GET', `/api/exception_lists/items/_find?*`, {
     statusCode: 200,
-    body: hieListResponse,
+    body: getHieListResponse(isEmpty),
   }).as('getHIEEntry');
 };
 
@@ -43,6 +43,7 @@ describe('Host isolation exceptions', () => {
   describe('Platinum license', () => {
     beforeEach(() => {
       setupLicense(platinum);
+      stubHIEResponse({ isEmpty: true });
     });
 
     it('should show host isolation exception nav link', () => {
@@ -63,6 +64,10 @@ describe('Host isolation exceptions', () => {
     });
 
     describe('Without any HIE entries', () => {
+      beforeEach(() => {
+        stubHIEResponse({ isEmpty: true });
+      });
+
       it('should not show host isolation exceptions nav link', () => {
         loginWithReadAccess('/app/security/manage');
         cy.getBySel('nav-link-host_isolation_exceptions').should('not.exist');
@@ -76,7 +81,7 @@ describe('Host isolation exceptions', () => {
 
     describe('With an HIE entry', () => {
       beforeEach(() => {
-        stubHIEResponse();
+        stubHIEResponse({ isEmpty: false });
       });
 
       it('should show host isolation exception page if an entry exists', () => {
