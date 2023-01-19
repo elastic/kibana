@@ -14,6 +14,8 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiCode,
+  EuiText,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -24,19 +26,17 @@ interface SyntaxExample {
 
 export interface SyntaxExamples {
   title: string;
+  footer: React.ReactElement;
   items: SyntaxExample[];
 }
 
 export interface SyntaxSuggestionsPopoverProps {
-  title: string;
-  items: SyntaxExample[];
+  meta: SyntaxExamples;
 }
 
-export const SyntaxSuggestionsPopover: React.FC<SyntaxSuggestionsPopoverProps> = ({
-  title,
-  items,
-}) => {
+export const SyntaxSuggestionsPopover: React.FC<SyntaxSuggestionsPopoverProps> = ({ meta }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const { title, items, footer } = meta;
 
   const helpButton = (
     <EuiButtonIcon
@@ -89,6 +89,10 @@ export const SyntaxSuggestionsPopover: React.FC<SyntaxSuggestionsPopoverProps> =
           columns={columns}
           responsive={false}
         />
+      </EuiPanel>
+      <EuiPanel color="transparent" paddingSize="s">
+        <EuiText size="s">{footer}</EuiText>
+        <EuiSpacer size="xs" />
       </EuiPanel>
     </EuiPopover>
   );
