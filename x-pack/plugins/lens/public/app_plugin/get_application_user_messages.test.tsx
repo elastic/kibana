@@ -204,20 +204,19 @@ describe('application-level user messages', () => {
 describe('filtering user messages', () => {
   const dimensionId1 = 'foo';
   const dimensionId2 = 'baz';
-  const layerId = 'bar';
 
   const userMessages: UserMessage[] = [
     {
       severity: 'error',
       fixableInEditor: true,
-      displayLocations: [{ id: 'dimensionTrigger', dimensionId: dimensionId1, layerId }],
+      displayLocations: [{ id: 'dimensionTrigger', dimensionId: dimensionId1 }],
       shortMessage: 'Warning on dimension 1!',
       longMessage: '',
     },
     {
       severity: 'warning',
       fixableInEditor: true,
-      displayLocations: [{ id: 'dimensionTrigger', dimensionId: dimensionId2, layerId }],
+      displayLocations: [{ id: 'dimensionTrigger', dimensionId: dimensionId2 }],
       shortMessage: 'Warning on dimension 2!',
       longMessage: '',
     },
@@ -270,7 +269,6 @@ describe('filtering user messages', () => {
     expect(
       filterUserMessages(userMessages, 'dimensionTrigger', {
         dimensionId: dimensionId1,
-        layerId,
       })
     ).toMatchInlineSnapshot(`
       Array [
@@ -279,7 +277,6 @@ describe('filtering user messages', () => {
             Object {
               "dimensionId": "foo",
               "id": "dimensionTrigger",
-              "layerId": "bar",
             },
           ],
           "fixableInEditor": true,
@@ -292,7 +289,6 @@ describe('filtering user messages', () => {
     expect(
       filterUserMessages(userMessages, 'dimensionTrigger', {
         dimensionId: dimensionId2,
-        layerId,
       })
     ).toMatchInlineSnapshot(`
       Array [
@@ -301,7 +297,6 @@ describe('filtering user messages', () => {
             Object {
               "dimensionId": "baz",
               "id": "dimensionTrigger",
-              "layerId": "bar",
             },
           ],
           "fixableInEditor": true,

@@ -516,7 +516,6 @@ export function LayerPanel(
                           // TODO - support warnings
                           severity: 'error',
                           dimensionId: columnId,
-                          layerId,
                         });
 
                         const hasMessages = Boolean(messages.length);

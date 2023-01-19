@@ -183,7 +183,7 @@ function getMissingIndexPatternsErrors(
 export const filterUserMessages = (
   userMessages: UserMessage[],
   locationId: UserMessagesDisplayLocationId | UserMessagesDisplayLocationId[] | undefined,
-  { dimensionId, layerId, severity }: UserMessageFilters
+  { dimensionId, severity }: UserMessageFilters
 ) => {
   const locationIds = Array.isArray(locationId)
     ? locationId
@@ -198,10 +198,7 @@ export const filterUserMessages = (
           return false;
         }
 
-        if (
-          location.id === 'dimensionTrigger' &&
-          (location.dimensionId !== dimensionId || location.layerId !== layerId)
-        ) {
+        if (location.id === 'dimensionTrigger' && location.dimensionId !== dimensionId) {
           return false;
         }
 
