@@ -32,7 +32,6 @@ export function createStatusChangeSavedObject(
         status,
       },
       type: 'status',
-      case_id: '',
       comment_id: null,
     },
   };
