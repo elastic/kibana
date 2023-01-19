@@ -125,18 +125,6 @@ export const fleetUsagesSchema: RootSchema<any> = {
           description: 'The number of Fleet Server hosts configured in Fleet settings.',
         },
       },
-      inactive: {
-        type: 'long',
-        _meta: {
-          description: 'The total number of enrolled agents currently inactive',
-        },
-      },
-      unenrolled: {
-        type: 'long',
-        _meta: {
-          description: 'The total number of unenrolled agents',
-        },
-      },
     },
   },
   packages: {
@@ -201,18 +189,18 @@ export const fleetUsagesSchema: RootSchema<any> = {
       },
     },
   },
-  agent_logs_top_errors: {
-    type: 'array',
-    items: {
-      type: 'text',
-      _meta: { description: 'Top messages from agent error logs' },
-    },
-  },
-  fleet_server_logs_top_errors: {
-    type: 'array',
-    items: {
-      type: 'text',
-      _meta: { description: 'Top messages from fleet server error logs' },
-    },
-  },
+  // agent_logs_top_errors: {
+  //   type: 'array',
+  //   items: {
+  //     type: 'text',
+  //     _meta: { description: 'Top messages from agent error logs' },
+  //   },
+  // },
+  // fleet_server_logs_top_errors: {
+  //   type: 'array',
+  //   items: {
+  //     type: 'text',
+  //     _meta: { description: 'Top messages from fleet server error logs' },
+  //   },
+  // },
 };
