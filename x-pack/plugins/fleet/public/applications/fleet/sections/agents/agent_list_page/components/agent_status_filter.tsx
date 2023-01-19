@@ -10,6 +10,8 @@ import {
   EuiFilterSelectItem,
   EuiNotificationBadge,
   EuiPopover,
+  EuiText,
+  EuiTourStep,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -60,6 +62,38 @@ const statusFilters = [
 const LeftpaddedNotificationBadge = styled(EuiNotificationBadge)`
   margin-left: 10px;
 `;
+
+const TourStepNoHeaderFooter = styled(EuiTourStep)`
+  .euiTourFooter {
+    display: none;
+  }
+  .euiTourHeader {
+    display: none;
+  }
+`;
+
+const InactiveAgentsTourStep: React.FC<{ isOpen: boolean }> = ({ children, isOpen }) => (
+  <TourStepNoHeaderFooter
+    content={
+      <EuiText size="s">
+        <FormattedMessage
+          id="xpack.fleet.agentList.inactiveAgentsTourStepContent"
+          defaultMessage="Some agents have become inactive and have been hidden. Use status filters to show inactive or unenrolled agents."
+        />
+      </EuiText>
+    }
+    isStepOpen={isOpen}
+    minWidth={300}
+    step={1}
+    stepsTotal={0}
+    title=""
+    onFinish={() => {}}
+    anchorPosition="upCenter"
+    maxWidth={280}
+  >
+    {children as React.ReactElement}
+  </TourStepNoHeaderFooter>
+);
 
 export const AgentStatusFilter: React.FC<{
   selectedStatus: string[];
@@ -112,52 +146,57 @@ export const AgentStatusFilter: React.FC<{
 
     setIsStatusFilterOpen(isOpen);
   };
-
+  console.log('newlyInactiveAgentsCount', newlyInactiveAgentsCount);
+  console.log('inactiveAgentsCalloutHasBeenDismissed', inactiveAgentsCalloutHasBeenDismissed);
   return (
-    <EuiPopover
-      ownFocus
-      button={
-        <EuiFilterButton
-          iconType="arrowDown"
-          onClick={() => updateIsStatusFilterOpen(!isStatusFilterOpen)}
-          isSelected={isStatusFilterOpen}
-          hasActiveFilters={selectedStatus.length > 0}
-          numActiveFilters={selectedStatus.length}
-          numFilters={statusFilters.length}
-          disabled={disabled}
-          data-test-subj="agentList.statusFilter"
-        >
-          <FormattedMessage id="xpack.fleet.agentList.statusFilterText" defaultMessage="Status" />
-        </EuiFilterButton>
-      }
-      isOpen={isStatusFilterOpen}
-      closePopover={() => updateIsStatusFilterOpen(false)}
-      panelPaddingSize="none"
+    <InactiveAgentsTourStep
+      isOpen={newlyInactiveAgentsCount > 0 && !inactiveAgentsCalloutHasBeenDismissed}
     >
-      <div className="euiFilterSelect__items">
-        {statusFilters.map(({ label, status }, idx) => (
-          <EuiFilterSelectItem
-            key={idx}
-            checked={selectedStatus.includes(status) ? 'on' : undefined}
-            onClick={() => {
-              if (selectedStatus.includes(status)) {
-                onSelectedStatusChange([...selectedStatus.filter((s) => s !== status)]);
-              } else {
-                onSelectedStatusChange([...selectedStatus, status]);
-              }
-            }}
+      <EuiPopover
+        ownFocus
+        button={
+          <EuiFilterButton
+            iconType="arrowDown"
+            onClick={() => updateIsStatusFilterOpen(!isStatusFilterOpen)}
+            isSelected={isStatusFilterOpen}
+            hasActiveFilters={selectedStatus.length > 0}
+            numActiveFilters={selectedStatus.length}
+            numFilters={statusFilters.length}
+            disabled={disabled}
+            data-test-subj="agentList.statusFilter"
           >
-            <span>
-              {label}
-              {status === 'inactive' && newlyInactiveAgentsCount > 0 && (
-                <LeftpaddedNotificationBadge>
-                  {newlyInactiveAgentsCount}
-                </LeftpaddedNotificationBadge>
-              )}
-            </span>
-          </EuiFilterSelectItem>
-        ))}
-      </div>
-    </EuiPopover>
+            <FormattedMessage id="xpack.fleet.agentList.statusFilterText" defaultMessage="Status" />
+          </EuiFilterButton>
+        }
+        isOpen={isStatusFilterOpen}
+        closePopover={() => updateIsStatusFilterOpen(false)}
+        panelPaddingSize="none"
+      >
+        <div className="euiFilterSelect__items">
+          {statusFilters.map(({ label, status }, idx) => (
+            <EuiFilterSelectItem
+              key={idx}
+              checked={selectedStatus.includes(status) ? 'on' : undefined}
+              onClick={() => {
+                if (selectedStatus.includes(status)) {
+                  onSelectedStatusChange([...selectedStatus.filter((s) => s !== status)]);
+                } else {
+                  onSelectedStatusChange([...selectedStatus, status]);
+                }
+              }}
+            >
+              <span>
+                {label}
+                {status === 'inactive' && newlyInactiveAgentsCount > 0 && (
+                  <LeftpaddedNotificationBadge>
+                    {newlyInactiveAgentsCount}
+                  </LeftpaddedNotificationBadge>
+                )}
+              </span>
+            </EuiFilterSelectItem>
+          ))}
+        </div>
+      </EuiPopover>
+    </InactiveAgentsTourStep>
   );
 };
