@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 import useThrottle from 'react-use/lib/useThrottle';
@@ -18,21 +18,23 @@ import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
 import { INPUT_THROTTLE_DELAY_MS } from '../../../shared/constants/timers';
 import { DataPanel } from '../../../shared/data_panel/data_panel';
 
-import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
+import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_template';
 
 import { EmptyEnginesPrompt } from './components/empty_engines_prompt';
 import { EnginesListTable } from './components/tables/engines_table';
+import { CreateEngineFlyout } from './create_engine_flyout';
 import { DeleteEngineModal } from './delete_engine_modal';
 import { EnginesListLogic } from './engines_list_logic';
 
 const CreateButton: React.FC = () => {
+  const { openEngineCreate } = useActions(EnginesListLogic);
   return (
     <EuiButton
       fill
       iconType="plusInCircle"
       data-test-subj="enterprise-search-content-engines-creation-button"
       data-telemetry-id="entSearchContent-engines-list-createEngine"
-      href={'TODO'}
+      onClick={openEngineCreate}
     >
       {i18n.translate('xpack.enterpriseSearch.content.engines.createEngineButtonLabel', {
         defaultMessage: 'Create engine',
@@ -42,22 +44,22 @@ const CreateButton: React.FC = () => {
 };
 
 export const EnginesList: React.FC = () => {
-  const { fetchEngines, onPaginate, openDeleteEngineModal } = useActions(EnginesListLogic);
-  const { meta, results, isLoading } = useValues(EnginesListLogic);
-  const [searchQuery, setSearchValue] = useState('');
+  const { closeEngineCreate, fetchEngines, onPaginate, openDeleteEngineModal, setSearchQuery } =
+    useActions(EnginesListLogic);
+  const { isLoading, meta, results, createEngineFlyoutOpen, searchQuery } =
+    useValues(EnginesListLogic);
+
   const throttledSearchQuery = useThrottle(searchQuery, INPUT_THROTTLE_DELAY_MS);
 
   useEffect(() => {
-    fetchEngines({
-      meta,
-      searchQuery: throttledSearchQuery,
-    });
+    fetchEngines();
   }, [meta.from, meta.size, throttledSearchQuery]);
 
   return (
     <>
       <DeleteEngineModal />
-      <EnterpriseSearchContentPageTemplate
+      {createEngineFlyoutOpen && <CreateEngineFlyout onClose={closeEngineCreate} />}
+      <EnterpriseSearchEnginesPageTemplate
         pageChrome={[
           i18n.translate('xpack.enterpriseSearch.content.engines.breadcrumb', {
             defaultMessage: 'Engines',
@@ -114,7 +116,7 @@ export const EnginesList: React.FC = () => {
                 )}
                 fullWidth
                 onChange={(event) => {
-                  setSearchValue(event.currentTarget.value);
+                  setSearchQuery(event.currentTarget.value);
                 }}
               />
             </div>
@@ -174,7 +176,7 @@ export const EnginesList: React.FC = () => {
 
         <EuiSpacer size="xxl" />
         <div />
-      </EnterpriseSearchContentPageTemplate>
+      </EnterpriseSearchEnginesPageTemplate>
     </>
   );
 };

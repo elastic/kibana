@@ -18,6 +18,7 @@ import { EnginesListLogic } from './engines_list_logic';
 import { DEFAULT_META } from './types';
 
 const DEFAULT_VALUES = {
+  createEngineFlyoutOpen: false,
   data: undefined,
   deleteModalEngine: null,
   deleteModalEngineName: '',
@@ -28,6 +29,7 @@ const DEFAULT_VALUES = {
   meta: DEFAULT_META,
   parameters: { meta: DEFAULT_META },
   results: [],
+  searchQuery: '',
   status: Status.IDLE,
 };
 
@@ -196,15 +198,13 @@ describe('EnginesListLogic', () => {
       EnginesListLogic.actions.deleteSuccess({ engineName: results[0].name });
 
       expect(mockFlashMessageHelpers.flashSuccessToast).toHaveBeenCalledTimes(1);
-      expect(EnginesListLogic.actions.fetchEngines).toHaveBeenCalledWith(
-        EnginesListLogic.values.parameters
-      );
+      expect(EnginesListLogic.actions.fetchEngines).toHaveBeenCalledWith();
       expect(EnginesListLogic.actions.closeDeleteEngineModal).toHaveBeenCalled();
     });
     it('call makeRequest on fetchEngines', async () => {
       jest.useFakeTimers({ legacyFakeTimers: true });
       EnginesListLogic.actions.makeRequest = jest.fn();
-      EnginesListLogic.actions.fetchEngines({ meta: DEFAULT_META });
+      EnginesListLogic.actions.fetchEngines();
       await nextTick();
       expect(EnginesListLogic.actions.makeRequest).toHaveBeenCalledWith({
         meta: DEFAULT_META,
