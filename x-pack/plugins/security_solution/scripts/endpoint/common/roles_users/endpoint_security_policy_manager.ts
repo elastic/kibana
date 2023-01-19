@@ -17,7 +17,15 @@ export const getEndpointSecurityPolicyManager: () => Omit<Role, 'name'> = () => 
         ...noResponseActionsRole.kibana[0],
         feature: {
           ...noResponseActionsRole.kibana[0].feature,
-          siem: ['minimal_all'],
+          siem: [
+            'blocklist_all',
+            'endpoint_list_all',
+            'event_filters_all',
+            'host_isolation_exceptions_all',
+            'minimal_all',
+            'policy_management_all',
+            'trusted_applications_all',
+          ],
         },
       },
     ],
