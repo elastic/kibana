@@ -86,7 +86,7 @@ export const useDiscoverHistogram = ({
           timeRange,
           chartHidden,
           timeInterval,
-          breakdownField: breakdownField ? dataView.getFieldByName(breakdownField) : undefined,
+          breakdownField,
           searchSessionId,
           totalHitsStatus: totalHitsStatus.toString() as UnifiedHistogramFetchStatus,
           totalHitsResult,
@@ -140,7 +140,7 @@ export const useDiscoverHistogram = ({
         stateContainer.setAppState({
           hideChart: state.chartHidden,
           interval: state.timeInterval,
-          breakdownField: state.breakdownField?.name,
+          breakdownField: state.breakdownField,
         });
       });
 

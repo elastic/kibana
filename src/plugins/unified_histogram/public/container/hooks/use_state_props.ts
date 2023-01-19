@@ -67,7 +67,9 @@ export const useStateProps = ({
       return undefined;
     }
 
-    return { field: state.breakdownField };
+    return {
+      field: state.breakdownField ? state.dataView.getFieldByName(state.breakdownField) : undefined,
+    };
   }, [isPlainRecord, isTimeBased, state]);
 
   const request = useMemo(() => {
@@ -132,7 +134,7 @@ export const useStateProps = ({
 
   const onBreakdownFieldChange = useCallback(
     (breakdownField: DataViewField | undefined) => {
-      stateService?.updateState({ breakdownField });
+      stateService?.updateState({ breakdownField: breakdownField?.name });
     },
     [stateService]
   );

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { isEqual } from 'lodash';
@@ -23,7 +23,7 @@ import {
 } from '../utils/local_storage_utils';
 
 export interface UnifiedHistogramState {
-  breakdownField: DataViewField | undefined;
+  breakdownField: string | undefined;
   chartHidden: boolean;
   dataView: DataView;
   filters: Filter[];
@@ -66,9 +66,7 @@ export class UnifiedHistogramStateService {
 
     this.services = services;
     this.state = {
-      breakdownField: breakdownField
-        ? initialState.dataView.getFieldByName(breakdownField)
-        : undefined,
+      breakdownField,
       chartHidden,
       filters: [],
       lensRequestAdapter: undefined,
@@ -113,7 +111,7 @@ export class UnifiedHistogramStateService {
         setBreakdownField(
           this.services.storage,
           this.localStorageKeyPrefix,
-          stateUpdate.breakdownField?.name
+          stateUpdate.breakdownField
         );
       }
     }
