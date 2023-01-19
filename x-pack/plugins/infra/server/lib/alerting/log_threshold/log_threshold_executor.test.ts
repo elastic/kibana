@@ -6,8 +6,8 @@
  */
 
 import {
-  getPositiveComparators,
-  getNegativeComparators,
+  positiveComparators,
+  negativeComparators,
   queryMappings,
   buildFiltersFromCriteria,
   getUngroupedESQuery,
@@ -151,15 +151,15 @@ const runtimeMappings: estypes.MappingRuntimeFields = {
 describe('Log threshold executor', () => {
   describe('Comparators', () => {
     test('Correctly categorises positive comparators', () => {
-      expect(getPositiveComparators().length).toBe(7);
+      expect(positiveComparators.length).toBe(7);
     });
 
     test('Correctly categorises negative comparators', () => {
-      expect(getNegativeComparators().length).toBe(3);
+      expect(negativeComparators.length).toBe(3);
     });
 
     test('There is a query mapping for every comparator', () => {
-      const comparators = [...getPositiveComparators(), ...getNegativeComparators()];
+      const comparators = [...positiveComparators, ...negativeComparators];
       expect(Object.keys(queryMappings).length).toBe(comparators.length);
     });
   });

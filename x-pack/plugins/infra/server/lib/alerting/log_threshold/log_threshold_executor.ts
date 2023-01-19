@@ -647,8 +647,6 @@ export const buildFiltersFromCriteria = (
   const to = executionTimestamp;
   const from = to - intervalAsMs;
 
-  const positiveComparators = getPositiveComparators();
-  const negativeComparators = getNegativeComparators();
   const positiveCriteria = criteria.filter((criterion) =>
     positiveComparators.includes(criterion.comparator)
   );
@@ -808,7 +806,6 @@ const getContextAggregation = (
   params: Pick<RuleParams, 'timeSize' | 'timeUnit' | 'groupBy'> & { criteria: CountCriteria }
 ) => {
   const validPrefixForContext = ['host', 'cloud', 'orchestrator', 'container', 'labels', 'tags'];
-  const positiveComparators = getPositiveComparators();
   const positiveCriteria = params.criteria.filter((criterion: Criterion) =>
     positiveComparators.includes(criterion.comparator)
   );
@@ -949,21 +946,21 @@ const buildCriterionQuery = (criterion: Criterion): estypes.QueryDslQueryContain
   }
 };
 
-export const getPositiveComparators = () => {
-  return [
-    Comparator.GT,
-    Comparator.GT_OR_EQ,
-    Comparator.LT,
-    Comparator.LT_OR_EQ,
-    Comparator.EQ,
-    Comparator.MATCH,
-    Comparator.MATCH_PHRASE,
-  ];
-};
+export const positiveComparators = [
+  Comparator.GT,
+  Comparator.GT_OR_EQ,
+  Comparator.LT,
+  Comparator.LT_OR_EQ,
+  Comparator.EQ,
+  Comparator.MATCH,
+  Comparator.MATCH_PHRASE,
+];
 
-export const getNegativeComparators = () => {
-  return [Comparator.NOT_EQ, Comparator.NOT_MATCH, Comparator.NOT_MATCH_PHRASE];
-};
+export const negativeComparators = [
+  Comparator.NOT_EQ,
+  Comparator.NOT_MATCH,
+  Comparator.NOT_MATCH_PHRASE,
+];
 
 export const queryMappings: {
   [key: string]: string;
