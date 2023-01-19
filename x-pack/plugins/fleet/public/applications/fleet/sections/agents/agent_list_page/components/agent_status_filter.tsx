@@ -100,8 +100,15 @@ export const AgentStatusFilter: React.FC<{
   onSelectedStatusChange: (status: string[]) => void;
   disabled?: boolean;
   totalInactiveAgents: number;
+  isOpenByDefault?: boolean;
 }> = (props) => {
-  const { selectedStatus, onSelectedStatusChange, disabled, totalInactiveAgents } = props;
+  const {
+    selectedStatus,
+    onSelectedStatusChange,
+    disabled,
+    totalInactiveAgents,
+    isOpenByDefault = false,
+  } = props;
   const [lastSeenInactiveAgentsCount, setLastSeenInactiveAgentsCount] =
     useLastSeenInactiveAgentsCount();
   const [inactiveAgentsCalloutHasBeenDismissed, setInactiveAgentsCalloutHasBeenDismissed] =
@@ -137,7 +144,7 @@ export const AgentStatusFilter: React.FC<{
   }, [lastSeenInactiveAgentsCount, totalInactiveAgents, setLastSeenInactiveAgentsCount]);
 
   // Status for filtering
-  const [isStatusFilterOpen, setIsStatusFilterOpen] = useState<boolean>(false);
+  const [isStatusFilterOpen, setIsStatusFilterOpen] = useState<boolean>(isOpenByDefault);
 
   const updateIsStatusFilterOpen = (isOpen: boolean) => {
     if (isOpen && newlyInactiveAgentsCount > 0 && !inactiveAgentsCalloutHasBeenDismissed) {
