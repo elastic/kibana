@@ -35,7 +35,7 @@ export type RawBucket = GenericBuckets & {
   };
 };
 
-/** Defines the shape of the aggregation returned by Elasticsearch to visualize the treemap */
+/** Defines the shape of the aggregation returned by Elasticsearch */
 export interface GroupingTableAggregation {
   stackByMupltipleFields0?: {
     buckets?: RawBucket[];

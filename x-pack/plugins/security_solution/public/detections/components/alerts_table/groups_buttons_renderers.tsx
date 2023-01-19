@@ -19,7 +19,7 @@ import {
 import type { FunctionComponent } from 'react';
 import React from 'react';
 import type { GenericBuckets } from '../../../../common/search_strategy';
-import type { RawBucket } from '../../../common/components/grouping_table/types';
+import type { RawBucket } from '../../../common/components/grouping_accordion';
 import { PopoverItems } from '../../../common/components/popover_items';
 import { COLUMN_TAGS } from '../../pages/detection_engine/rules/translations';
 // icon ip
@@ -55,7 +55,7 @@ const RuleNameGroupContent: FunctionComponent<{
   return (
     <div>
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiTitle size="xs" className="euiAccordionForm__title">
             <h4>{ruleName.trim()}</h4>
           </EuiTitle>

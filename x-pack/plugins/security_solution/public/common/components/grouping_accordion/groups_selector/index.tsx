@@ -50,6 +50,7 @@ const GroupsSelectorComponent = ({
 }: GroupSelectorProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
+  // add local storage group value
   const onButtonClick = useCallback(() => setIsPopoverOpen((currentVal) => !currentVal), []);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const onChangeSelectable = useCallback(

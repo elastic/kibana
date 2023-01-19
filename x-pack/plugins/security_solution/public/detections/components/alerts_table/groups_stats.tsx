@@ -5,10 +5,17 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React from 'react';
+import {
+  EuiBadge,
+  EuiButtonEmpty,
+  EuiContextMenuPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+} from '@elastic/eui';
+import React, { useState } from 'react';
 import styled from 'styled-components';
-import type { RawBucket } from '../../../common/components/grouping_table/types';
+import type { RawBucket } from '../../../common/components/grouping_accordion';
 import * as i18n from './translations';
 
 export const StatsContainer = styled.span`
@@ -19,8 +26,30 @@ export const StatsContainer = styled.span`
   padding-right: ${({ theme }) => theme.eui.euiSizeM};
 `;
 
-export const getExtraActions = (bucket: RawBucket) => {
-  const defaultActions = (
+export const GroupRightPanel = React.memo<{
+  bucket: RawBucket;
+  actionItems: JSX.Element[];
+  onClickOpen?: () => void;
+}>(({ bucket, actionItems, onClickOpen }) => {
+  const [isPopoverOpen, setPopover] = useState(false);
+
+  const onButtonClick = () => {
+    if (!isPopoverOpen && onClickOpen) {
+      onClickOpen();
+    }
+    setPopover(!isPopoverOpen);
+  };
+
+  const closePopover = () => {
+    setPopover(false);
+  };
+
+  const takeActionsButton = (
+    <EuiButtonEmpty onClick={onButtonClick} iconType="arrowDown" iconSide="right">
+      {i18n.TAKE_ACTION}
+    </EuiButtonEmpty>
+  );
+  return (
     <EuiFlexGroup key={`stats-${bucket.key[0]}`} gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>
         <StatsContainer>
@@ -47,21 +76,25 @@ export const getExtraActions = (bucket: RawBucket) => {
           <>
             {i18n.STATS_GROUP_ALERTS}
             <EuiBadge style={{ marginLeft: 10 }} color="#a83632">
-              {bucket.alertsCount?.value}
+              {bucket.doc_count}
             </EuiBadge>
           </>
         </StatsContainer>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          onClick={() => window.alert('Button clicked')}
-          iconType="arrowDown"
-          iconSide="right"
+        <EuiPopover
+          id="contextMenuExample"
+          button={takeActionsButton}
+          isOpen={isPopoverOpen}
+          closePopover={closePopover}
+          panelPaddingSize="none"
+          anchorPosition="downLeft"
         >
-          {i18n.TAKE_ACTION}
-        </EuiButtonEmpty>
+          <EuiContextMenuPanel items={actionItems} />
+        </EuiPopover>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-  return defaultActions;
-};
+});
+
+GroupRightPanel.displayName = 'GroupRightPanel';

@@ -34,6 +34,7 @@ interface TermsSubAggregation {
   [category: string]: {
     terms: {
       field: string;
+      exclude?: string[];
     };
   };
 }
@@ -42,11 +43,13 @@ export const getOptionalSubAggregation = ({
   stackByMupltipleFields1,
   stackByMupltipleFields1Size,
   stackByMupltipleFields1From = 0,
+  stackByMupltipleFields1Sort,
   additionalStatsAggregationsFields1,
 }: {
   stackByMupltipleFields1: string[] | undefined;
   stackByMupltipleFields1Size: number;
   stackByMupltipleFields1From?: number;
+  stackByMupltipleFields1Sort?: Array<{ [category: string]: { order: 'asc' | 'desc' } }>;
   additionalStatsAggregationsFields1: Array<CardinalitySubAggregation | TermsSubAggregation>;
 }): OptionalSubAggregation | {} =>
   stackByMupltipleFields1 != null && !isEmpty(stackByMupltipleFields1)
@@ -60,12 +63,15 @@ export const getOptionalSubAggregation = ({
           aggs: {
             bucket_truncate: {
               bucket_sort: {
-                // sort: [{ subAlertsCount: { order: 'desc' } }],
+                sort: stackByMupltipleFields1Sort,
                 from: stackByMupltipleFields1From,
                 size: stackByMupltipleFields1Size,
               },
             },
-            ...additionalStatsAggregationsFields1,
+            ...additionalStatsAggregationsFields1.reduce(
+              (aggObj, subAgg) => Object.assign(aggObj, subAgg),
+              {}
+            ),
           },
         },
       }
@@ -73,6 +79,7 @@ export const getOptionalSubAggregation = ({
 
 export const getGroupingQuery = ({
   additionalFilters = [],
+  additionalAggregationsRoot,
   additionalStatsAggregationsFields0,
   additionalStatsAggregationsFields1,
   from,
@@ -80,9 +87,11 @@ export const getGroupingQuery = ({
   stackByMupltipleFields0,
   stackByMupltipleFields0Size = DEFAULT_STACK_BY_FIELD0_SIZE,
   stackByMupltipleFields0From,
+  stackByMupltipleFields0Sort,
   stackByMupltipleFields1,
   stackByMupltipleFields1Size = DEFAULT_STACK_BY_FIELD1_SIZE,
   stackByMupltipleFields1From,
+  stackByMupltipleFields1Sort,
   to,
 }: {
   additionalFilters: Array<{
@@ -90,13 +99,16 @@ export const getGroupingQuery = ({
   }>;
   from: string;
   runtimeMappings?: MappingRuntimeFields;
+  additionalAggregationsRoot?: Array<CardinalitySubAggregation | TermsSubAggregation>;
   stackByMupltipleFields0: string[];
   stackByMupltipleFields0Size?: number;
   stackByMupltipleFields0From?: number;
+  stackByMupltipleFields0Sort?: Array<{ [category: string]: { order: 'asc' | 'desc' } }>;
   additionalStatsAggregationsFields0: Array<CardinalitySubAggregation | TermsSubAggregation>;
   stackByMupltipleFields1: string[] | undefined;
   stackByMupltipleFields1Size?: number;
   stackByMupltipleFields1From?: number;
+  stackByMupltipleFields1Sort?: Array<{ [category: string]: { order: 'asc' | 'desc' } }>;
   additionalStatsAggregationsFields1: Array<CardinalitySubAggregation | TermsSubAggregation>;
   to: string;
 }) => ({
@@ -121,11 +133,12 @@ export const getGroupingQuery = ({
           stackByMupltipleFields1,
           stackByMupltipleFields1Size,
           stackByMupltipleFields1From,
+          stackByMupltipleFields1Sort,
           additionalStatsAggregationsFields1,
         }),
         bucket_truncate: {
           bucket_sort: {
-            // sort: [{ subAlertsCount: { order: 'desc' } }],
+            sort: stackByMupltipleFields0Sort,
             from: stackByMupltipleFields0From,
             size: stackByMupltipleFields0Size,
           },
@@ -136,6 +149,9 @@ export const getGroupingQuery = ({
         ),
       },
     },
+    ...(additionalAggregationsRoot
+      ? additionalAggregationsRoot.reduce((aggObj, subAgg) => Object.assign(aggObj, subAgg), {})
+      : {}),
   },
   query: {
     bool: {

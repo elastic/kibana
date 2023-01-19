@@ -12,3 +12,9 @@ export const ALERTS_UNIT = (totalCount: number) =>
     values: { totalCount },
     defaultMessage: `{totalCount, plural, =1 {alert} other {alerts}}`,
   });
+
+export const GROUPS_UNIT = (totalCount: number) =>
+  i18n.translate('xpack.securitySolution.grouping.total.unit', {
+    values: { totalCount },
+    defaultMessage: `{totalCount, plural, =1 {group} other {groups}}`,
+  });

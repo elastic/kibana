@@ -14,15 +14,31 @@ import uuid from 'uuid';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import { EuiAccordion } from '@elastic/eui';
-import type { GroupingTableAggregation } from '../../../common/components/grouping_table/types';
-import { getGroupingQuery } from '../../../common/components/grouping_table/query';
+import {
+  EuiAccordion,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiTablePagination,
+} from '@elastic/eui';
+import { GROUPS_UNIT } from '../../../common/components/toolbar/unit/translations';
+import { defaultUnit, UnitCount } from '../../../common/components/toolbar/unit';
+import { useBulkActionItems } from '../../../common/components/toolbar/bulk_actions/use_bulk_action_items';
+import type {
+  GroupingTableAggregation,
+  GroupSelection,
+  RawBucket,
+} from '../../../common/components/grouping_accordion';
+import { getGroupingQuery, GroupsSelector } from '../../../common/components/grouping_accordion';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
-import type { GroupSelection } from '../../../common/components/grouping_table/select_group';
-import { GroupsSelector } from '../../../common/components/grouping_table/select_group';
 import { combineQueries } from '../../../common/lib/kuery';
 import type { AlertWorkflowStatus } from '../../../common/types';
-import type { TableIdLiteral } from '../../../../common/types';
+import type {
+  CustomBulkActionProp,
+  SetEventsDeleted,
+  SetEventsLoading,
+  TableIdLiteral,
+} from '../../../../common/types';
 import { tableDefaults } from '../../../common/store/data_table/defaults';
 import { dataTableActions, dataTableSelectors } from '../../../common/store/data_table';
 import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
@@ -55,7 +71,8 @@ import { useAddBulkToTimelineAction } from './timeline_actions/use_add_bulk_to_t
 import { useQueryAlerts } from '../../containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../containers/detection_engine/alerts/constants';
 import { getSelectedGroupButtonContent } from './groups_buttons_renderers';
-import { getExtraActions } from './groups_stats';
+import { GroupRightPanel } from './groups_stats';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 
 /** This local storage key stores the `Grid / Event rendered view` selection */
 export const ALERTS_TABLE_GROUPS_SELECTION_KEY = 'securitySolution.alerts.table.group-selection';
@@ -102,6 +119,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   filterGroup,
   runtimeMappings,
   signalIndexName,
+  selectedEventIds,
 }) => {
   const dispatch = useDispatch();
   const [selectedGroup, setSelectedGroup] = useState<GroupSelection | undefined>();
@@ -240,20 +258,6 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   // create a unique, but stable (across re-renders) query id
   const uniqueQueryId = useMemo(() => `${ALERTS_GROUPING_ID}-${uuid.v4()}`, []);
 
-  const additionalFilters = useMemo(() => {
-    try {
-      return [
-        buildEsQuery(
-          undefined,
-          globalQuery != null ? [globalQuery] : [],
-          globalFilters?.filter((f) => f.meta.disabled === false) ?? []
-        ),
-      ];
-    } catch (e) {
-      return [];
-    }
-  }, [globalQuery, globalFilters]);
-
   const getGroupFields = (groupValue: string) => {
     if (groupValue === 'kibana.alert.rule.name') {
       return [groupValue, 'kibana.alert.rule.description'];
@@ -262,10 +266,48 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     }
   };
 
+  const additionalFilters = useMemo(() => {
+    try {
+      return [
+        buildEsQuery(undefined, globalQuery != null ? [globalQuery] : [], [
+          ...(globalFilters?.filter((f) => f.meta.disabled === false) ?? []),
+          ...(defaultFiltersMemo ?? []),
+        ]),
+      ];
+    } catch (e) {
+      return [];
+    }
+  }, [defaultFiltersMemo, globalFilters, globalQuery]);
+
+  const [activePage, setActivePage] = useState<number>(0);
+  const [groupsPageSize, setShowPerPageOptions] = useState<number>(5);
+  const [groupsPagesCount, setGroupsPagesCount] = useState<number>(0);
+
   const queryGroups = useMemo(
     () =>
       getGroupingQuery({
         additionalFilters,
+        additionalAggregationsRoot: [
+          {
+            alertsCount: {
+              terms: {
+                field: 'kibana.alert.rule.producer',
+                exclude: ['alerts'],
+              },
+            },
+          },
+          ...(selectedGroup
+            ? [
+                {
+                  groupsNumber: {
+                    cardinality: {
+                      field: selectedGroup,
+                    },
+                  },
+                },
+              ]
+            : []),
+        ],
         from,
         runtimeMappings,
         stackByMupltipleFields0: selectedGroup ? getGroupFields(selectedGroup) : [],
@@ -314,13 +356,16 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
             },
           },
         ],
+        stackByMupltipleFields0Size: groupsPageSize,
+        stackByMupltipleFields0From: activePage * groupsPageSize,
         additionalStatsAggregationsFields1: [],
         stackByMupltipleFields1: [],
       }),
-    [additionalFilters, from, runtimeMappings, selectedGroup, to]
+    [additionalFilters, selectedGroup, from, runtimeMappings, to, groupsPageSize, activePage]
   );
 
   const [trigger, setTrigger] = useState<{ [id: string]: 'open' | 'closed' | undefined }>({});
+  const [selectedBucket, setSelectedBucket] = useState<RawBucket>();
 
   const {
     data: alertsGroupsData,
@@ -329,7 +374,11 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     request,
     response,
     setQuery: setAlertsQuery,
-  } = useQueryAlerts<{}, GroupingTableAggregation>({
+  } = useQueryAlerts<
+    {},
+    GroupingTableAggregation &
+      Record<string, { value?: number | null; buckets?: Array<{ doc_count?: number | null }> }>
+  >({
     query: queryGroups,
     indexName: signalIndexName,
     queryName: ALERTS_QUERY_NAMES.ALERTS_GROUPING,
@@ -364,89 +413,211 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     [selectedGroup]
   );
 
+  const getGlobalQuerySelector = inputsSelectors.globalQuery();
+  const globalQueries = useDeepEqualSelector(getGlobalQuerySelector);
+  const refetchQuery = useCallback(() => {
+    globalQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
+  }, [globalQueries]);
+
+  const onUpdateSuccess = useCallback(
+    (updated: number, conflicts: number, newStatus: AlertWorkflowStatus) => {
+      refetchQuery();
+    },
+    [refetchQuery]
+  );
+
+  const onUpdateFailure = useCallback(
+    (newStatus: AlertWorkflowStatus, error: Error) => {
+      refetchQuery();
+    },
+    [refetchQuery]
+  );
+
+  const setEventsLoading = useCallback<SetEventsLoading>(
+    ({ eventIds, isLoading }) => {
+      dispatch(dataTableActions.setEventsLoading({ id: tableId, eventIds, isLoading }));
+    },
+    [dispatch, tableId]
+  );
+
+  const setEventsDeleted = useCallback<SetEventsDeleted>(
+    ({ eventIds, isDeleted }) => {
+      dispatch(dataTableActions.setEventsDeleted({ id: tableId, eventIds, isDeleted }));
+    },
+    [dispatch, tableId]
+  );
+
+  const groupFiltersMemo = useMemo(() => {
+    const groupFilters = [];
+    if (selectedBucket && selectedGroup) {
+      groupFilters.push({
+        meta: {
+          alias: null,
+          negate: false,
+          disabled: false,
+          type: 'phrase',
+          key: selectedGroup,
+          params: {
+            query: isArray(selectedBucket.key) ? selectedBucket.key[0] : selectedBucket.key,
+          },
+        },
+        query: {
+          match_phrase: {
+            [selectedGroup]: {
+              query: isArray(selectedBucket.key) ? selectedBucket.key[0] : selectedBucket.key,
+            },
+          },
+        },
+      });
+    }
+    return groupFilters;
+  }, [selectedBucket, selectedGroup]);
+
+  const globalQueryWithGroup = useMemo(
+    () => getGlobalQuery([...(defaultFiltersMemo ?? []), ...groupFiltersMemo]),
+    [defaultFiltersMemo, getGlobalQuery, groupFiltersMemo]
+  );
+
+  const bulkActionItems = useBulkActionItems({
+    indexName: indexPatterns.title,
+    eventIds: Object.keys(selectedEventIds),
+    currentStatus: filterGroup as AlertWorkflowStatus,
+    setEventsLoading,
+    setEventsDeleted,
+    query: globalQueryWithGroup?.filterQuery,
+    showAlertStatusActions: hasIndexWrite && hasIndexMaintenance,
+    onUpdateSuccess,
+    onUpdateFailure,
+    customBulkActions: bulkActions.customBulkActions as unknown as CustomBulkActionProp[],
+  });
+
+  const onOpenGroupAction = useCallback(
+    (bucket: RawBucket) => {
+      setSelectedBucket(bucket);
+      dispatch(dataTableActions.setDataTableSelectAll({ id: tableId, selectAll: true }));
+    },
+    [tableId, dispatch]
+  );
+
+  const unitCountText = useMemo(() => {
+    const countBuckets = alertsGroupsData?.aggregations?.alertsCount?.buckets;
+    return `${(countBuckets && countBuckets.length > 0
+      ? countBuckets[0].doc_count ?? 0
+      : 0
+    ).toLocaleString()} ${defaultUnit(
+      countBuckets && countBuckets.length > 0 ? countBuckets[0].doc_count ?? 0 : 0
+    )}`;
+  }, [alertsGroupsData?.aggregations?.alertsCount?.buckets]);
+
+  const unitGroupsCountText = useMemo(() => {
+    return `${(
+      alertsGroupsData?.aggregations?.groupsNumber?.value ?? 0
+    ).toLocaleString()} ${GROUPS_UNIT(alertsGroupsData?.aggregations?.groupsNumber?.value ?? 0)}`;
+  }, [alertsGroupsData?.aggregations?.groupsNumber?.value]);
+
+  const goToPage = (pageNumber: number) => {
+    setActivePage(pageNumber);
+  };
+
   if (loading || isLoadingGroups || isEmpty(selectedPatterns)) {
     return null;
   }
 
+  const dataTable = (
+    <StatefulEventsViewer
+      additionalFilters={additionalFiltersComponent}
+      currentFilter={filterGroup as AlertWorkflowStatus}
+      defaultCellActions={defaultCellActions}
+      defaultModel={getAlertsDefaultModel(license)}
+      end={to}
+      bulkActions={selectedGroup ? false : bulkActions}
+      hasCrudPermissions={hasIndexWrite && hasIndexMaintenance}
+      tableId={tableId}
+      leadingControlColumns={leadingControlColumns}
+      onRuleChange={onRuleChange}
+      pageFilters={[...(defaultFiltersMemo ?? []), ...groupFiltersMemo]}
+      renderCellValue={RenderCellValue}
+      rowRenderers={defaultRowRenderers}
+      sourcererScope={SourcererScopeName.detections}
+      start={from}
+      additionalRightMenuOptions={!selectedGroup ? [groupsSelector] : []}
+    />
+  );
+
   return (
     <>
-      {selectedGroup ? groupsSelector : null}
+      {selectedGroup ? (
+        <EuiFlexGroup
+          justifyContent="spaceBetween"
+          alignItems="center"
+          style={{ paddingBottom: 20, paddingTop: 20 }}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="none">
+              <EuiFlexItem grow={false}>
+                <UnitCount data-test-subj="alert-count">{unitCountText}</UnitCount>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <UnitCount data-test-subj="groups-count" style={{ borderRight: 'none' }}>
+                  {unitGroupsCountText}
+                </UnitCount>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{groupsSelector}</EuiFlexItem>
+        </EuiFlexGroup>
+      ) : null}
       {!selectedGroup ? (
-        <StatefulEventsViewer
-          additionalFilters={additionalFiltersComponent}
-          currentFilter={filterGroup as AlertWorkflowStatus}
-          defaultCellActions={defaultCellActions}
-          defaultModel={getAlertsDefaultModel(license)}
-          end={to}
-          bulkActions={bulkActions}
-          hasCrudPermissions={hasIndexWrite && hasIndexMaintenance}
-          tableId={tableId}
-          leadingControlColumns={leadingControlColumns}
-          onRuleChange={onRuleChange}
-          pageFilters={defaultFiltersMemo}
-          renderCellValue={RenderCellValue}
-          rowRenderers={defaultRowRenderers}
-          sourcererScope={SourcererScopeName.detections}
-          start={from}
-          additionalRightMenuOptions={!selectedGroup ? [groupsSelector] : []}
-        />
+        dataTable
       ) : (
-        alertsGroupsData?.aggregations?.stackByMupltipleFields0?.buckets?.map((field0Bucket) => (
-          <>
+        <>
+          {alertsGroupsData?.aggregations?.stackByMupltipleFields0?.buckets?.map((field0Bucket) => (
             <EuiAccordion
               id={`group0-${field0Bucket.key[0]}`}
               className="euiAccordionForm"
               buttonClassName="euiAccordionForm__button"
               buttonContent={getSelectedGroupButtonContent(selectedGroup, field0Bucket)}
-              extraAction={getExtraActions(field0Bucket)}
+              extraAction={
+                <GroupRightPanel
+                  bucket={field0Bucket}
+                  actionItems={bulkActionItems}
+                  onClickOpen={() => onOpenGroupAction(field0Bucket)}
+                />
+              }
               paddingSize="l"
               forceState={trigger[`group0-${field0Bucket.key[0]}`] ?? 'closed'}
-              onToggle={(isOpen) =>
-                setTrigger({ [`group0-${field0Bucket.key[0]}`]: isOpen ? 'open' : 'closed' })
-              }
+              onToggle={(isOpen) => {
+                setTrigger({ [`group0-${field0Bucket.key[0]}`]: isOpen ? 'open' : 'closed' });
+                if (isOpen) {
+                  setSelectedBucket(field0Bucket);
+                }
+              }}
             >
-              <StatefulEventsViewer
-                additionalFilters={additionalFiltersComponent}
-                currentFilter={filterGroup as AlertWorkflowStatus}
-                defaultCellActions={defaultCellActions}
-                defaultModel={getAlertsDefaultModel(license)}
-                end={to}
-                bulkActions={false}
-                hasCrudPermissions={hasIndexWrite && hasIndexMaintenance}
-                tableId={tableId}
-                leadingControlColumns={leadingControlColumns}
-                onRuleChange={onRuleChange}
-                pageFilters={[
-                  ...(defaultFiltersMemo ?? []),
-                  {
-                    meta: {
-                      alias: null,
-                      negate: false,
-                      disabled: false,
-                      type: 'phrase',
-                      key: selectedGroup,
-                      params: {
-                        query: isArray(field0Bucket.key) ? field0Bucket.key[0] : field0Bucket.key,
-                      },
-                    },
-                    query: {
-                      match_phrase: {
-                        [selectedGroup]: {
-                          query: isArray(field0Bucket.key) ? field0Bucket.key[0] : field0Bucket.key,
-                        },
-                      },
-                    },
-                  },
-                ]}
-                renderCellValue={RenderCellValue}
-                rowRenderers={defaultRowRenderers}
-                sourcererScope={SourcererScopeName.detections}
-                start={from}
-                additionalRightMenuOptions={!selectedGroup ? [groupsSelector] : []}
-              />
+              {trigger[`group0-${field0Bucket.key[0]}`] === 'open' ? dataTable : null}
             </EuiAccordion>
-          </>
-        ))
+          ))}
+          <EuiSpacer size="m" />
+          {(alertsGroupsData?.aggregations?.groupsNumber?.value && groupsPageSize
+            ? Math.ceil(alertsGroupsData?.aggregations?.groupsNumber?.value / groupsPageSize)
+            : 0) > 1 && (
+            <EuiTablePagination
+              data-test-subj="hostTablePaginator"
+              activePage={activePage}
+              showPerPageOptions={true}
+              itemsPerPage={groupsPageSize}
+              onChangeItemsPerPage={(pageSize) => {
+                setShowPerPageOptions(pageSize);
+              }}
+              pageCount={
+                alertsGroupsData?.aggregations?.groupsNumber?.value && groupsPageSize
+                  ? Math.ceil(alertsGroupsData?.aggregations?.groupsNumber?.value / groupsPageSize)
+                  : 0
+              }
+              onChangePage={goToPage}
+              itemsPerPageOptions={[5, 10, 20, 50]}
+            />
+          )}
+        </>
       )}
     </>
   );
@@ -458,7 +629,7 @@ const makeMapStateToProps = () => {
   const mapStateToProps = (state: State, ownProps: OwnProps) => {
     const { tableId } = ownProps;
     const table = getDataTable(state, tableId) ?? tableDefaults;
-    const { isSelectAllChecked, loadingEventIds } = table;
+    const { isSelectAllChecked, loadingEventIds, selectedEventIds } = table;
 
     const globalInputs: inputsModel.InputsRange = getGlobalInputs(state);
     const { query, filters } = globalInputs;
@@ -467,6 +638,7 @@ const makeMapStateToProps = () => {
       globalFilters: filters,
       isSelectAllChecked,
       loadingEventIds,
+      selectedEventIds,
     };
   };
   return mapStateToProps;
