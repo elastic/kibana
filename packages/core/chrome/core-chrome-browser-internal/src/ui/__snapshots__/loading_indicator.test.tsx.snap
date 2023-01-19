@@ -37,3 +37,12 @@ exports[`kbnLoadingIndicator shows EuiLoadingSpinner when showPlainSpinner is tr
   size="l"
 />
 `;
+
+exports[`kbnLoadingIndicator shows logo image when customLogo is set 1`] = `
+<img
+  alt="logo"
+  height="24"
+  src="customLogo"
+  width="24"
+/>
+`;

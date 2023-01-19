@@ -28,7 +28,7 @@ describe('kbnLoadingIndicator', () => {
     expect(wrapper).toMatchSnapshot();
   });
 
-  it('shows EuiLoadingSpinner when customLogo is true', () => {
+  it('shows logo image when customLogo is set', () => {
     const wrapper = shallow(
       <LoadingIndicator loadingCount$={new BehaviorSubject(1)} customLogo={'customLogo'} />
     );
