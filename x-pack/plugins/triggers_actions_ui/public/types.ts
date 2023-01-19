@@ -51,6 +51,7 @@ import {
 } from '@kbn/alerting-plugin/common';
 import type { BulkOperationError } from '@kbn/alerting-plugin/server';
 import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
+import { AlertStatus as AlertLifecycleStatus } from '@kbn/rule-data-utils';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 import { SortCombinations } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React from 'react';
@@ -485,11 +486,17 @@ export interface AlertsTableProps {
   controls?: EuiDataGridToolBarAdditionalControlsOptions;
 }
 
+export type RenderAlertLifecycleStatus = (
+  alertStatus: AlertLifecycleStatus,
+  flapping?: boolean
+) => JSX.Element;
 // TODO We need to create generic type between our plugin, right now we have different one because of the old alerts table
 export type GetRenderCellValue = ({
   setFlyoutAlert,
+  renderAlertLifecycleStatus,
 }: {
   setFlyoutAlert?: (data: unknown) => void;
+  renderAlertLifecycleStatus?: RenderAlertLifecycleStatus;
 }) => (props: unknown) => React.ReactNode;
 
 export type AlertTableFlyoutComponent =

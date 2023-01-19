@@ -86,9 +86,9 @@ describe('rules', () => {
 
     const rules: AlertListItem[] = [
       // active first
-      alertToListItem(fakeNow.getTime(), ruleType, 'second_rule', ruleSummary.alerts.second_rule),
+      alertToListItem(fakeNow.getTime(), 'second_rule', ruleSummary.alerts.second_rule),
       // ok second
-      alertToListItem(fakeNow.getTime(), ruleType, 'first_rule', ruleSummary.alerts.first_rule),
+      alertToListItem(fakeNow.getTime(), 'first_rule', ruleSummary.alerts.first_rule),
     ];
 
     const wrapper = mountWithIntl(
@@ -164,8 +164,8 @@ describe('rules', () => {
     });
 
     expect(wrapper.find(RuleAlertList).prop('items')).toEqual([
-      alertToListItem(fakeNow.getTime(), ruleType, 'us-central', alerts['us-central']),
-      alertToListItem(fakeNow.getTime(), ruleType, 'us-east', alerts['us-east']),
+      alertToListItem(fakeNow.getTime(), 'us-central', alerts['us-central']),
+      alertToListItem(fakeNow.getTime(), 'us-east', alerts['us-east']),
     ]);
   });
 
@@ -206,20 +206,14 @@ describe('rules', () => {
     });
 
     expect(wrapper.find(RuleAlertList).prop('items')).toEqual([
-      alertToListItem(fakeNow.getTime(), ruleType, 'us-west', ruleUsWest),
-      alertToListItem(fakeNow.getTime(), ruleType, 'us-east', ruleUsEast),
+      alertToListItem(fakeNow.getTime(), 'us-west', ruleUsWest),
+      alertToListItem(fakeNow.getTime(), 'us-east', ruleUsEast),
     ]);
   });
 });
 
 describe('alertToListItem', () => {
   it('handles active rules', () => {
-    const ruleType = mockRuleType({
-      actionGroups: [
-        { id: 'default', name: 'Default Action Group' },
-        { id: 'testing', name: 'Test Action Group' },
-      ],
-    });
     const start = fake2MinutesAgo;
     const alert: AlertStatus = {
       status: 'Active',
@@ -229,9 +223,10 @@ describe('alertToListItem', () => {
       flapping: false,
     };
 
-    expect(alertToListItem(fakeNow.getTime(), ruleType, 'id', alert)).toEqual({
+    expect(alertToListItem(fakeNow.getTime(), 'id', alert)).toEqual({
       alert: 'id',
-      status: { label: 'Active', actionGroup: 'Test Action Group', healthColor: 'primary' },
+      status: 'Active',
+      flapping: false,
       start,
       sortPriority: 0,
       duration: fakeNow.getTime() - fake2MinutesAgo.getTime(),
@@ -240,7 +235,6 @@ describe('alertToListItem', () => {
   });
 
   it('handles active rules with no action group id', () => {
-    const ruleType = mockRuleType();
     const start = fake2MinutesAgo;
     const alert: AlertStatus = {
       status: 'Active',
@@ -249,9 +243,10 @@ describe('alertToListItem', () => {
       flapping: false,
     };
 
-    expect(alertToListItem(fakeNow.getTime(), ruleType, 'id', alert)).toEqual({
+    expect(alertToListItem(fakeNow.getTime(), 'id', alert)).toEqual({
       alert: 'id',
-      status: { label: 'Active', actionGroup: 'Default Action Group', healthColor: 'primary' },
+      status: 'Active',
+      flapping: false,
       start,
       sortPriority: 0,
       duration: fakeNow.getTime() - fake2MinutesAgo.getTime(),
@@ -260,7 +255,6 @@ describe('alertToListItem', () => {
   });
 
   it('handles active muted rules', () => {
-    const ruleType = mockRuleType();
     const start = fake2MinutesAgo;
     const alert: AlertStatus = {
       status: 'Active',
@@ -270,9 +264,10 @@ describe('alertToListItem', () => {
       flapping: false,
     };
 
-    expect(alertToListItem(fakeNow.getTime(), ruleType, 'id', alert)).toEqual({
+    expect(alertToListItem(fakeNow.getTime(), 'id', alert)).toEqual({
       alert: 'id',
-      status: { label: 'Active', actionGroup: 'Default Action Group', healthColor: 'primary' },
+      status: 'Active',
+      flapping: false,
       start,
       sortPriority: 0,
       duration: fakeNow.getTime() - fake2MinutesAgo.getTime(),
@@ -281,7 +276,6 @@ describe('alertToListItem', () => {
   });
 
   it('handles active rules with start date', () => {
-    const ruleType = mockRuleType();
     const alert: AlertStatus = {
       status: 'Active',
       muted: false,
@@ -289,9 +283,10 @@ describe('alertToListItem', () => {
       flapping: false,
     };
 
-    expect(alertToListItem(fakeNow.getTime(), ruleType, 'id', alert)).toEqual({
+    expect(alertToListItem(fakeNow.getTime(), 'id', alert)).toEqual({
       alert: 'id',
-      status: { label: 'Active', actionGroup: 'Default Action Group', healthColor: 'primary' },
+      status: 'Active',
+      flapping: false,
       start: undefined,
       duration: 0,
       sortPriority: 0,
@@ -300,16 +295,16 @@ describe('alertToListItem', () => {
   });
 
   it('handles muted inactive rules', () => {
-    const ruleType = mockRuleType();
     const alert: AlertStatus = {
       status: 'OK',
       muted: true,
       actionGroupId: 'default',
       flapping: false,
     };
-    expect(alertToListItem(fakeNow.getTime(), ruleType, 'id', alert)).toEqual({
+    expect(alertToListItem(fakeNow.getTime(), 'id', alert)).toEqual({
       alert: 'id',
-      status: { label: 'Recovered', healthColor: 'subdued' },
+      status: 'OK',
+      flapping: false,
       start: undefined,
       duration: 0,
       sortPriority: 1,

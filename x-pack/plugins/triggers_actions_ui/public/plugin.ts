@@ -73,6 +73,8 @@ import { TriggersActionsUiConfigType } from '../common/types';
 import { registerAlertsTableConfiguration } from './application/sections/alerts_table/alerts_page/register_alerts_table_configuration';
 import { PLUGIN_ID, CONNECTORS_PLUGIN_ID } from './common/constants';
 import type { AlertsTableStateProps } from './application/sections/alerts_table/alerts_table_state';
+import type { AlertLifecycleStatusBadgeProps } from './application/components/alert_lifecycle_status_badge';
+import { getAlertLifecycleStatusBadgeLazy } from './common/get_alert_lifecycle_status_badge';
 import { getAlertsTableStateLazy } from './common/get_alerts_table_state';
 import { getAlertsSearchBarLazy } from './common/get_alerts_search_bar';
 import { ActionAccordionFormProps } from './application/sections/action_connector_form/action_form';
@@ -109,6 +111,9 @@ export interface TriggersAndActionsUIPublicPluginStart {
   getEditAlertFlyout: (
     props: Omit<RuleEditProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>
   ) => ReactElement<RuleEditProps>;
+  getAlertLifecycleStatusBadge: (
+    props: AlertLifecycleStatusBadgeProps
+  ) => ReactElement<AlertLifecycleStatusBadgeProps>;
   getAlertsTable: (props: AlertsTableProps) => ReactElement<AlertsTableProps>;
   getAlertsStateTable: (props: AlertsTableStateProps) => ReactElement<AlertsTableStateProps>;
   getAlertsSearchBar: (props: AlertsSearchBarProps) => ReactElement<AlertsSearchBarProps>;
@@ -378,6 +383,9 @@ export class Plugin
           ruleTypeRegistry: this.ruleTypeRegistry,
           connectorServices: this.connectorServices!,
         });
+      },
+      getAlertLifecycleStatusBadge: (props: AlertLifecycleStatusBadgeProps) => {
+        return getAlertLifecycleStatusBadgeLazy(props);
       },
       getAlertsStateTable: (props: AlertsTableStateProps) => {
         return getAlertsTableStateLazy(props);

@@ -13,8 +13,10 @@ import {
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
   ALERT_REASON,
+  ALERT_FLAPPING,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
+import type { RenderAlertLifecycleStatus } from '@kbn/triggers-actions-ui-plugin/public';
 import type { CellValueElementProps, TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import { isEmpty } from 'lodash';
 import { AlertStatusIndicator } from '../../../../components/shared/alert_status_indicator';
@@ -61,9 +63,11 @@ const getRenderValue = (mappedNonEcsValue: any) => {
 
 export const getRenderCellValue = ({
   setFlyoutAlert,
+  renderAlertLifecycleStatus,
   observabilityRuleTypeRegistry,
 }: {
   setFlyoutAlert: (data: TopAlert) => void;
+  renderAlertLifecycleStatus?: RenderAlertLifecycleStatus;
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
 }) => {
   return ({ columnId, data }: CellValueElementProps) => {
@@ -82,7 +86,14 @@ export const getRenderCellValue = ({
           // Status should be either "active" or "recovered".
           return null;
         }
-        return <AlertStatusIndicator alertStatus={value} />;
+        if (!renderAlertLifecycleStatus) {
+          return <AlertStatusIndicator alertStatus={value} />;
+        }
+        const flapping = getMappedNonEcsValue({
+          data,
+          fieldName: ALERT_FLAPPING,
+        }) as boolean[] | undefined;
+        return renderAlertLifecycleStatus(value, Array.isArray(flapping) && flapping[0]);
       case TIMESTAMP:
         return <TimestampTooltip time={new Date(value ?? '').getTime()} timeUnit="milliseconds" />;
       case ALERT_DURATION:

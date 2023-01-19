@@ -6,6 +6,7 @@
  */
 
 import { ALERT_UUID } from '@kbn/rule-data-utils';
+import { AlertStatus } from '@kbn/rule-data-utils';
 import React, { useState, Suspense, lazy, useCallback, useMemo, useEffect } from 'react';
 import {
   EuiDataGrid,
@@ -23,6 +24,7 @@ import {
   ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL,
   ALERTS_TABLE_CONTROL_COLUMNS_VIEW_DETAILS_LABEL,
 } from './translations';
+import { AlertLifecycleStatusBadge } from '../../components/alert_lifecycle_status_badge';
 
 import './alerts_table.scss';
 import { getToolbarVisibility } from './toolbar';
@@ -98,6 +100,10 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     },
     [alerts, setFlyoutAlertIndex]
   );
+
+  const renderAlertLifecycleStatus = useCallback((alertStatus: AlertStatus, flapping?: boolean) => {
+    return <AlertLifecycleStatusBadge alertStatus={alertStatus} flapping={flapping} />;
+  }, []);
 
   const toolbarVisibility = useCallback(() => {
     const { rowSelection } = bulkActionsState;
@@ -235,9 +241,10 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       props.alertsTableConfiguration?.getRenderCellValue
         ? props.alertsTableConfiguration?.getRenderCellValue({
             setFlyoutAlert: handleFlyoutAlert,
+            renderAlertLifecycleStatus,
           })
         : basicRenderCellValue,
-    [handleFlyoutAlert, props.alertsTableConfiguration]
+    [handleFlyoutAlert, renderAlertLifecycleStatus, props.alertsTableConfiguration]
   )();
 
   const handleRenderCellValue = useCallback(
