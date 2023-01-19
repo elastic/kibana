@@ -29,23 +29,39 @@ const getExamples = (
       }),
       items: [
         {
-          label: 'Find requests that contain the number 200, in any field',
+          label: i18n.translate(
+            'discover.noResults.luceneExamples.findRequestsThatContain200Text',
+            {
+              defaultMessage: 'Find requests that contain the number 200, in any field',
+            }
+          ),
           example: '200',
         },
         {
-          label: 'Find 200 in the status field',
+          label: i18n.translate('discover.noResults.luceneExamples.find200InStatusFieldText', {
+            defaultMessage: 'Find 200 in the status field',
+          }),
           example: 'status:200',
         },
         {
-          label: 'Find all status codes between 400-499',
+          label: i18n.translate('discover.noResults.luceneExamples.findAllStatusCodesText', {
+            defaultMessage: 'Find all status codes between 400-499',
+          }),
           example: 'status:[400 TO 499]',
         },
         {
-          label: 'Find status codes 400-499 with the extension php',
+          label: i18n.translate('discover.noResults.luceneExamples.findStatusCodesWithPHPText', {
+            defaultMessage: 'Find status codes 400-499 with the extension php',
+          }),
           example: 'status:[400 TO 499] AND extension:PHP',
         },
         {
-          label: 'Find status codes 400-499 with the extension php or html',
+          label: i18n.translate(
+            'discover.noResults.luceneExamples.findStatusCodesWithPhpOrHtmlText',
+            {
+              defaultMessage: 'Find status codes 400-499 with the extension php or html',
+            }
+          ),
           example: 'status:[400 TO 499] AND (extension:php OR extension:html)',
         },
       ],
@@ -75,31 +91,45 @@ const getExamples = (
       }),
       items: [
         {
-          label: 'Filter for documents where a field exists',
+          label: i18n.translate('discover.noResults.kqlExamples.filterForExistingFieldsText', {
+            defaultMessage: 'Filter for documents where a field exists',
+          }),
           example: 'http.request.method: *',
         },
         {
-          label: 'Filter for documents that match a value',
+          label: i18n.translate('discover.noResults.kqlExamples.filterForDocsThatMatchValueText', {
+            defaultMessage: 'Filter for documents that match a value',
+          }),
           example: 'http.request.method: GET',
         },
         {
-          label: 'Filter for documents within a range',
+          label: i18n.translate('discover.noResults.kqlExamples.filterForDocsWithinRangeText', {
+            defaultMessage: 'Filter for documents within a range',
+          }),
           example: 'http.response.bytes > 10000 and http.response.bytes <= 20000',
         },
         {
-          label: 'Filter for documents using wildcards',
+          label: i18n.translate('discover.noResults.kqlExamples.filterForDocsWithWildcardsText', {
+            defaultMessage: 'Filter for documents using wildcards',
+          }),
           example: 'http.response.status_code: 4*',
         },
         {
-          label: 'Negating a query',
+          label: i18n.translate('discover.noResults.kqlExamples.negatingQueryText', {
+            defaultMessage: 'Negating a query',
+          }),
           example: 'NOT http.request.method: GET',
         },
         {
-          label: 'Combining multiple queries with AND/OR',
+          label: i18n.translate('discover.noResults.kqlExamples.combineMultipleText', {
+            defaultMessage: 'Combining multiple queries with AND/OR',
+          }),
           example: 'http.request.method: GET AND http.response.status_code: 400',
         },
         {
-          label: 'Querying multiple values for the same field',
+          label: i18n.translate('discover.noResults.kqlExamples.queryMultipleText', {
+            defaultMessage: 'Querying multiple values for the same field',
+          }),
           example: 'http.request.method: (GET OR POST OR DELETE)',
         },
       ],
