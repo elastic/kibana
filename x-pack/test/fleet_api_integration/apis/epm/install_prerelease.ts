@@ -69,7 +69,8 @@ export default function (providerContext: FtrProviderContext) {
       expect(response.body.items.find((item: any) => item.id.includes(gaVersion)));
     });
 
-    it('should install the beta package when no version is provided and prerelease is true', async function () {
+    // skipping in 8.6 branch as the 8.7 beta package is not available here
+    it.skip('should install the beta package when no version is provided and prerelease is true', async function () {
       const response = await supertest
         .post(`/api/fleet/epm/packages/${pkg}?prerelease=true`)
         .set('kbn-xsrf', 'xxxx')
@@ -79,7 +80,7 @@ export default function (providerContext: FtrProviderContext) {
       expect(response.body.items.find((item: any) => item.id.includes(betaVersion)));
     });
 
-    it('should bulk install the beta packages when prerelease is true', async function () {
+    it.skip('should bulk install the beta packages when prerelease is true', async function () {
       const response = await supertest
         .post(`/api/fleet/epm/packages/_bulk?prerelease=true`)
         .set('kbn-xsrf', 'xxxx')
