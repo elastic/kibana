@@ -5,81 +5,37 @@
  * 2.0.
  */
 
-import React, { useEffect, useCallback } from 'react';
-import { EuiPageTemplate, EuiButton, EuiImage } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { useEuiBackgroundColor } from '@elastic/eui';
-import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
-import { SourceLoadingPage } from '../../../components/source_loading_page';
-import { MetricsPageTemplate } from '../page_template';
-import hostsLandingBeta from './hosts_landing_beta.svg';
+import React, { useEffect, useState } from 'react';
+import { EuiButton, EuiCallOut } from '@elastic/eui';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { EuiLink } from '@elastic/eui';
 import { HostsPage } from '../hosts';
+import { EnableHostViewPage } from './enable_host_view_page';
 
-interface Props {
-  uiSettings: IUiSettingsClient | undefined;
-}
-
-export const HostsLandingPage = ({ uiSettings }: Props) => {
-  const [isHostViewEnabled, setIsHostViewEnabled] = React.useState<boolean | null>(null);
-  const backgroundColor = useEuiBackgroundColor('subdued');
-
-  const getIsHostViewEnabled = useCallback(async () => {
-    const getHostViewSettings = await uiSettings?.get(
-      'observability:enableInfrastructureHostsView'
-    );
-    setIsHostViewEnabled(getHostViewSettings);
-  }, [uiSettings]);
+export const HostsLandingPage = () => {
+  const kibana = useKibana();
+  const canEditAdvancedSettings = kibana.services.application?.capabilities.advancedSettings.save;
+  const [isHostViewEnabled, setIsHostViewEnabled] = useState<boolean | undefined>(undefined);
 
   useEffect(() => {
-    try {
-      getIsHostViewEnabled();
-    } catch (error) {
-      // TODO
-      // console.error(error);
-    }
-  }, [getIsHostViewEnabled, isHostViewEnabled]);
-
-  if (isHostViewEnabled === null) {
-    return <SourceLoadingPage />;
-  }
+    setIsHostViewEnabled(
+      kibana.services.uiSettings?.get('observability:enableInfrastructureHostsView')
+    );
+  }, [isHostViewEnabled, kibana.services.uiSettings]);
 
   if (isHostViewEnabled) {
     return <HostsPage />;
   }
 
-  return (
-    <MetricsPageTemplate isEmptyState>
-      <EuiPageTemplate.EmptyPrompt
-        title={<h2>Introducing: Host Analysis</h2>}
-        alignment="center"
-        icon={<EuiImage size="fullWidth" src={hostsLandingBeta} alt="" />}
-        color="plain"
-        layout="horizontal"
-        body={
-          <>
-            <p>
-              Introducing our new &apos;Hosts&apos; feature, now available in technical preview!
-              With this powerful tool, you can easily view and analyse your hosts and identify any
-              issues so you address them quickly. Get a detailed view of metrics for your hosts, see
-              which ones are triggering the most alerts and filter the hosts you want to analyse
-              using any KQL filter and easy breakdowns such as cloud provider and operating system.
-            </p>
-            <p>
-              This is an early version of the feature and we would love your feedback as we continue
-              to develop and improve it. To access the feature, simply enable below. Don&apos;t miss
-              out on this powerful new addition to our platform - try it out today!
-            </p>
-          </>
-        }
-        css={css`
-          background-color: ${backgroundColor};
-        `}
+  if (canEditAdvancedSettings) {
+    return (
+      <EnableHostViewPage
         actions={
           <EuiButton
             color="primary"
             data-test-subj="hostsView-enable-feature-button"
             onClick={() => {
-              uiSettings?.set('observability:enableInfrastructureHostsView', true);
+              kibana.services.uiSettings?.set('observability:enableInfrastructureHostsView', true);
               setIsHostViewEnabled(true);
             }}
           >
@@ -87,6 +43,23 @@ export const HostsLandingPage = ({ uiSettings }: Props) => {
           </EuiButton>
         }
       />
-    </MetricsPageTemplate>
+    );
+  }
+
+  return (
+    <EnableHostViewPage
+      actions={
+        <EuiCallOut size="s" color="warning">
+          <p>
+            Your user role doesn’t have sufficient privileges to enable this feature - please reach
+            out to your Kibana Administrator and ask them to visit this page to enable this feature.
+          </p>
+          <p>
+            They will need a <EuiLink href="#">role</EuiLink> with Kibana &gt; Management &gt;
+            Advanced Settings &gt; All permissions.
+          </p>
+        </EuiCallOut>
+      }
+    />
   );
 };
