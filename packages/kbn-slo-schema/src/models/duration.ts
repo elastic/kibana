@@ -29,6 +29,16 @@ class Duration {
     }
   }
 
+  add(other: Duration): Duration {
+    const currentDurationMoment = moment.duration(this.value, toMomentUnitOfTime(this.unit));
+    const otherDurationMoment = moment.duration(other.value, toMomentUnitOfTime(other.unit));
+
+    return new Duration(
+      currentDurationMoment.add(otherDurationMoment).asMinutes(),
+      DurationUnit.Minute
+    );
+  }
+
   isShorterThan(other: Duration): boolean {
     const otherDurationMoment = moment.duration(other.value, toMomentUnitOfTime(other.unit));
     const currentDurationMoment = moment.duration(this.value, toMomentUnitOfTime(this.unit));

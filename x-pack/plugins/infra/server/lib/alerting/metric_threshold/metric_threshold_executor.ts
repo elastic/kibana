@@ -152,10 +152,12 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         });
 
         return {
-          lastRunTimestamp: startedAt.valueOf(),
-          missingGroups: [],
-          groupBy: params.groupBy,
-          filterQuery: params.filterQuery,
+          state: {
+            lastRunTimestamp: startedAt.valueOf(),
+            missingGroups: [],
+            groupBy: params.groupBy,
+            filterQuery: params.filterQuery,
+          },
         };
       }
     }
@@ -345,10 +347,12 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
     const stopTime = Date.now();
     logger.debug(`Scheduled ${scheduledActionsCount} actions in ${stopTime - startTime}ms`);
     return {
-      lastRunTimestamp: startedAt.valueOf(),
-      missingGroups: [...nextMissingGroups],
-      groupBy: params.groupBy,
-      filterQuery: params.filterQuery,
+      state: {
+        lastRunTimestamp: startedAt.valueOf(),
+        missingGroups: [...nextMissingGroups],
+        groupBy: params.groupBy,
+        filterQuery: params.filterQuery,
+      },
     };
   });
 

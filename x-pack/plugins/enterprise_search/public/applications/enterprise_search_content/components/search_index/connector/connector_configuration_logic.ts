@@ -7,15 +7,8 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { i18n } from '@kbn/i18n';
-
 import { ConnectorConfiguration, ConnectorStatus } from '../../../../../../common/types/connectors';
 import { Actions } from '../../../../shared/api_logic/create_api_logic';
-import {
-  clearFlashMessages,
-  flashAPIErrors,
-  flashSuccessToast,
-} from '../../../../shared/flash_messages';
 
 import {
   ConnectorConfigurationApiLogic,
@@ -31,7 +24,7 @@ import { isConnectorIndex } from '../../../utils/indices';
 
 type ConnectorConfigurationActions = Pick<
   Actions<PostConnectorConfigurationArgs, PostConnectorConfigurationResponse>,
-  'apiError' | 'apiSuccess' | 'makeRequest'
+  'apiSuccess' | 'makeRequest'
 > & {
   fetchIndexApiSuccess: CachedFetchIndexApiLogicActions['apiSuccess'];
   saveConfig: () => void;
@@ -78,7 +71,7 @@ export const ConnectorConfigurationLogic = kea<
   connect: {
     actions: [
       ConnectorConfigurationApiLogic,
-      ['apiError', 'apiSuccess', 'makeRequest'],
+      ['apiSuccess'],
       CachedFetchIndexApiLogic,
       ['apiSuccess as fetchIndexApiSuccess'],
     ],
@@ -101,14 +94,7 @@ export const ConnectorConfigurationLogic = kea<
     },
   }),
   listeners: ({ actions, values }) => ({
-    apiError: (error) => flashAPIErrors(error),
     apiSuccess: ({ indexName }) => {
-      flashSuccessToast(
-        i18n.translate(
-          'xpack.enterpriseSearch.content.indices.configurationConnector.configuration.successToast.title',
-          { defaultMessage: 'Configuration successfully updated' }
-        )
-      );
       CachedFetchIndexApiLogic.actions.makeRequest({ indexName });
     },
     fetchIndexApiSuccess: (index) => {
@@ -127,7 +113,6 @@ export const ConnectorConfigurationLogic = kea<
         actions.setIsEditing(true);
       }
     },
-    makeRequest: () => clearFlashMessages(),
     saveConfig: () => {
       if (isConnectorIndex(values.index)) {
         actions.makeRequest({

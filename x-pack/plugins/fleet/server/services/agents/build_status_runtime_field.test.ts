@@ -24,7 +24,11 @@ describe('buildStatusRuntimeField', () => {
             "source": "
           long lastCheckinMillis = doc['last_checkin'].size() > 0 
             ? doc['last_checkin'].value.toInstant().toEpochMilli() 
-            : -1;
+            : (
+                doc['enrolled_at'].size() > 0 
+                ? doc['enrolled_at'].value.toInstant().toEpochMilli() 
+                : -1
+              );
           if (doc['active'].size() > 0 && doc['active'].value == false) {
             emit('unenrolled'); 
           } else if (lastCheckinMillis > 0 && doc['policy_id'].size() > 0 && false) {
@@ -76,7 +80,11 @@ describe('buildStatusRuntimeField', () => {
             "source": "
           long lastCheckinMillis = doc['my.prefix.last_checkin'].size() > 0 
             ? doc['my.prefix.last_checkin'].value.toInstant().toEpochMilli() 
-            : -1;
+            : (
+                doc['my.prefix.enrolled_at'].size() > 0 
+                ? doc['my.prefix.enrolled_at'].value.toInstant().toEpochMilli() 
+                : -1
+              );
           if (doc['my.prefix.active'].size() > 0 && doc['my.prefix.active'].value == false) {
             emit('unenrolled'); 
           } else if (lastCheckinMillis > 0 && doc['my.prefix.policy_id'].size() > 0 && false) {
@@ -133,7 +141,11 @@ describe('buildStatusRuntimeField', () => {
             "source": "
           long lastCheckinMillis = doc['last_checkin'].size() > 0 
             ? doc['last_checkin'].value.toInstant().toEpochMilli() 
-            : -1;
+            : (
+                doc['enrolled_at'].size() > 0 
+                ? doc['enrolled_at'].value.toInstant().toEpochMilli() 
+                : -1
+              );
           if (doc['active'].size() > 0 && doc['active'].value == false) {
             emit('unenrolled'); 
           } else if (lastCheckinMillis > 0 && doc['policy_id'].size() > 0 && (doc['policy_id'].value == 'policy-1') && lastCheckinMillis < 1234567590123L) {
@@ -190,7 +202,11 @@ describe('buildStatusRuntimeField', () => {
             "source": "
           long lastCheckinMillis = doc['last_checkin'].size() > 0 
             ? doc['last_checkin'].value.toInstant().toEpochMilli() 
-            : -1;
+            : (
+                doc['enrolled_at'].size() > 0 
+                ? doc['enrolled_at'].value.toInstant().toEpochMilli() 
+                : -1
+              );
           if (doc['active'].size() > 0 && doc['active'].value == false) {
             emit('unenrolled'); 
           } else if (lastCheckinMillis > 0 && doc['policy_id'].size() > 0 && (doc['policy_id'].value == 'policy-1' || doc['policy_id'].value == 'policy-2') && lastCheckinMillis < 1234567590123L) {
@@ -251,7 +267,11 @@ describe('buildStatusRuntimeField', () => {
             "source": "
           long lastCheckinMillis = doc['last_checkin'].size() > 0 
             ? doc['last_checkin'].value.toInstant().toEpochMilli() 
-            : -1;
+            : (
+                doc['enrolled_at'].size() > 0 
+                ? doc['enrolled_at'].value.toInstant().toEpochMilli() 
+                : -1
+              );
           if (doc['active'].size() > 0 && doc['active'].value == false) {
             emit('unenrolled'); 
           } else if (lastCheckinMillis > 0 && doc['policy_id'].size() > 0 && (doc['policy_id'].value == 'policy-1' || doc['policy_id'].value == 'policy-2') && lastCheckinMillis < 1234567590123L || (doc['policy_id'].value == 'policy-3') && lastCheckinMillis < 1234567490123L) {

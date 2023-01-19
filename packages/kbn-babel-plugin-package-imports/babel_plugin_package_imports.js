@@ -11,10 +11,10 @@ const Path = require('path');
 const T = require('@babel/types');
 const normalizePath = require('normalize-path');
 const { declare } = require('@babel/helper-plugin-utils');
-const KbnSyntheticPackageMap = require('@kbn/package-map');
+const { readPackageMap } = require('@kbn/repo-packages');
 const { REPO_ROOT } = require('@kbn/repo-info');
 
-const PKG_MAP = KbnSyntheticPackageMap.readPackageMap();
+const PKG_MAP = readPackageMap();
 
 /**
  * @param {unknown} v

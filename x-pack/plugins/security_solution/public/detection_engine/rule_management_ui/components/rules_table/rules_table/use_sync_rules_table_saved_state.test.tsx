@@ -55,12 +55,9 @@ describe('useSyncRulesTableSavedState', () => {
 
     renderHook(() => useSyncRulesTableSavedState());
 
-    expect(replaceUrlParams).toHaveBeenCalledWith([
-      {
-        key: URL_PARAM_KEY.rulesTable,
-        value: expectedUrlState,
-      },
-    ]);
+    expect(replaceUrlParams).toHaveBeenCalledWith({
+      [URL_PARAM_KEY.rulesTable]: expectedUrlState,
+    });
   };
 
   const expectStateToSyncWithStorage = (
@@ -96,7 +93,7 @@ describe('useSyncRulesTableSavedState', () => {
 
     renderHook(() => useSyncRulesTableSavedState());
 
-    expect(replaceUrlParams).toHaveBeenCalledWith([{ key: URL_PARAM_KEY.rulesTable, value: null }]);
+    expect(replaceUrlParams).toHaveBeenCalledWith({ [URL_PARAM_KEY.rulesTable]: null });
     expect(setStorage).not.toHaveBeenCalled();
     expect(removeStorage).toHaveBeenCalledWith(RULES_TABLE_STATE_STORAGE_KEY);
   });
@@ -136,9 +133,7 @@ describe('useSyncRulesTableSavedState', () => {
 
     renderHook(() => useSyncRulesTableSavedState());
 
-    expect(replaceUrlParams).toHaveBeenCalledWith([
-      { key: URL_PARAM_KEY.rulesTable, value: expectedUrlState },
-    ]);
+    expect(replaceUrlParams).toHaveBeenCalledWith({ [URL_PARAM_KEY.rulesTable]: expectedUrlState });
     expect(setStorage).toHaveBeenCalledWith(RULES_TABLE_STATE_STORAGE_KEY, expectedStorageState);
   });
 

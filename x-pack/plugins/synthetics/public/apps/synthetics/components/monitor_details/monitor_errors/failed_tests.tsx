@@ -7,6 +7,8 @@
 
 import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useParams } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
 import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 import { ClientPluginsStart } from '../../../../../plugin';
 
@@ -17,7 +19,9 @@ export const MonitorFailedTests = ({ time }: { time: { to: string; from: string 
 
   const monitorId = useMonitorQueryId();
 
-  if (!monitorId) {
+  const { errorStateId } = useParams<{ errorStateId: string }>();
+
+  if (!monitorId && !errorStateId) {
     return null;
   }
 
@@ -31,13 +35,20 @@ export const MonitorFailedTests = ({ time }: { time: { to: string; from: string 
         {
           time,
           reportDefinitions: {
-            'monitor.id': [monitorId],
+            ...(monitorId ? { 'monitor.id': [monitorId] } : { 'state.id': [errorStateId] }),
           },
           dataType: 'synthetics',
           selectedMetricField: 'failed_tests',
-          name: 'synthetics-series-1',
+          name: FAILED_TESTS_LABEL,
         },
       ]}
     />
   );
 };
+
+export const FAILED_TESTS_LABEL = i18n.translate(
+  'xpack.synthetics.monitorDetails.summary.failedTests',
+  {
+    defaultMessage: 'Failed tests',
+  }
+);

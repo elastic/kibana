@@ -149,3 +149,12 @@ steps:
     timeout_in_minutes: 10
     agents:
       queue: kibana-default
+
+  - wait
+
+  - trigger: kibana-artifacts-container-image
+    label: Trigger container image build
+    async: true
+    build:
+      commit: "${BUILDKITE_COMMIT}"
+      branch: "${BUILDKITE_BRANCH}"

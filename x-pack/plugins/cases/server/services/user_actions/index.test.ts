@@ -64,6 +64,7 @@ import {
   createPersistableStateAttachmentTypeRegistryMock,
   persistableStateAttachment,
 } from '../../attachment_framework/mocks';
+import { serializerMock } from '@kbn/core-saved-objects-base-server-mocks';
 
 const createConnectorUserAction = (
   overrides?: Partial<CaseUserActionAttributes>
@@ -661,6 +662,8 @@ describe('CaseUserActionService', () => {
     };
     const mockAuditLogger = auditLoggerMock.create();
 
+    const soSerializerMock = serializerMock.create();
+
     beforeEach(() => {
       jest.clearAllMocks();
       service = new CaseUserActionService({
@@ -668,13 +671,14 @@ describe('CaseUserActionService', () => {
         log: mockLogger,
         persistableStateAttachmentTypeRegistry,
         auditLogger: mockAuditLogger,
+        savedObjectsSerializer: soSerializerMock,
       });
     });
 
     describe('createUserAction', () => {
       describe('create case', () => {
         it('creates a create case user action', async () => {
-          await service.createUserAction({
+          await service.creator.createUserAction({
             ...commonArgs,
             payload: casePayload,
             type: ActionTypes.create_case,
@@ -726,7 +730,7 @@ describe('CaseUserActionService', () => {
         });
 
         it('logs a create case user action', async () => {
-          await service.createUserAction({
+          await service.creator.createUserAction({
             ...commonArgs,
             payload: casePayload,
             type: ActionTypes.create_case,
@@ -741,6 +745,7 @@ describe('CaseUserActionService', () => {
                   "category": Array [
                     "database",
                   ],
+                  "outcome": "success",
                   "type": Array [
                     "creation",
                   ],
@@ -759,7 +764,7 @@ describe('CaseUserActionService', () => {
 
         describe('status', () => {
           it('creates an update status user action', async () => {
-            await service.createUserAction({
+            await service.creator.createUserAction({
               ...commonArgs,
               payload: { status: CaseStatuses.closed },
               type: ActionTypes.status,
@@ -784,7 +789,7 @@ describe('CaseUserActionService', () => {
           });
 
           it('logs an update status user action', async () => {
-            await service.createUserAction({
+            await service.creator.createUserAction({
               ...commonArgs,
               payload: { status: CaseStatuses.closed },
               type: ActionTypes.status,
@@ -799,6 +804,7 @@ describe('CaseUserActionService', () => {
                     "category": Array [
                       "database",
                     ],
+                    "outcome": "success",
                     "type": Array [
                       "change",
                     ],
@@ -818,7 +824,7 @@ describe('CaseUserActionService', () => {
 
         describe('severity', () => {
           it('creates an update severity user action', async () => {
-            await service.createUserAction({
+            await service.creator.createUserAction({
               ...commonArgs,
               payload: { severity: CaseSeverity.MEDIUM },
               type: ActionTypes.severity,
@@ -843,7 +849,7 @@ describe('CaseUserActionService', () => {
           });
 
           it('logs an update severity user action', async () => {
-            await service.createUserAction({
+            await service.creator.createUserAction({
               ...commonArgs,
               payload: { severity: CaseSeverity.MEDIUM },
               type: ActionTypes.severity,
@@ -858,6 +864,7 @@ describe('CaseUserActionService', () => {
                     "category": Array [
                       "database",
                     ],
+                    "outcome": "success",
                     "type": Array [
                       "change",
                     ],
@@ -877,7 +884,7 @@ describe('CaseUserActionService', () => {
 
         describe('push', () => {
           it('creates a push user action', async () => {
-            await service.createUserAction({
+            await service.creator.createUserAction({
               ...commonArgs,
               payload: { externalService },
               type: ActionTypes.pushed,
@@ -921,7 +928,7 @@ describe('CaseUserActionService', () => {
           });
 
           it('logs a push user action', async () => {
-            await service.createUserAction({
+            await service.creator.createUserAction({
               ...commonArgs,
               payload: { externalService },
               type: ActionTypes.pushed,
@@ -936,8 +943,9 @@ describe('CaseUserActionService', () => {
                     "category": Array [
                       "database",
                     ],
+                    "outcome": "success",
                     "type": Array [
-                      "creation",
+                      "change",
                     ],
                   },
                   "kibana": Object {
@@ -957,7 +965,7 @@ describe('CaseUserActionService', () => {
           it.each([[Actions.create], [Actions.delete], [Actions.update]])(
             'creates a comment user action of action: %s',
             async (action) => {
-              await service.createUserAction({
+              await service.creator.createUserAction({
                 ...commonArgs,
                 type: ActionTypes.comment,
                 action,
@@ -998,7 +1006,7 @@ describe('CaseUserActionService', () => {
           it.each([[Actions.create], [Actions.delete], [Actions.update]])(
             'logs a comment user action of action: %s',
             async (action) => {
-              await service.createUserAction({
+              await service.creator.createUserAction({
                 ...commonArgs,
                 type: ActionTypes.comment,
                 action,
@@ -1016,7 +1024,7 @@ describe('CaseUserActionService', () => {
 
     describe('bulkAuditLogCaseDeletion', () => {
       it('logs a delete case audit log message', async () => {
-        await service.bulkAuditLogCaseDeletion(['1', '2']);
+        await service.creator.bulkAuditLogCaseDeletion(['1', '2']);
 
         expect(unsecuredSavedObjectsClient.bulkCreate).not.toHaveBeenCalled();
 
@@ -1030,6 +1038,7 @@ describe('CaseUserActionService', () => {
                   "category": Array [
                     "database",
                   ],
+                  "outcome": "success",
                   "type": Array [
                     "deletion",
                   ],
@@ -1050,6 +1059,7 @@ describe('CaseUserActionService', () => {
                   "category": Array [
                     "database",
                   ],
+                  "outcome": "success",
                   "type": Array [
                     "deletion",
                   ],
@@ -1070,7 +1080,7 @@ describe('CaseUserActionService', () => {
 
     describe('bulkCreateUpdateCase', () => {
       it('creates the correct user actions when bulk updating cases', async () => {
-        await service.bulkCreateUpdateCase({
+        await service.creator.bulkCreateUpdateCase({
           ...commonArgs,
           originalCases,
           updatedCases,
@@ -1238,7 +1248,7 @@ describe('CaseUserActionService', () => {
       });
 
       it('logs the correct user actions when bulk updating cases', async () => {
-        await service.bulkCreateUpdateCase({
+        await service.creator.bulkCreateUpdateCase({
           ...commonArgs,
           originalCases,
           updatedCases,
@@ -1255,6 +1265,7 @@ describe('CaseUserActionService', () => {
                   "category": Array [
                     "database",
                   ],
+                  "outcome": "success",
                   "type": Array [
                     "change",
                   ],
@@ -1275,6 +1286,7 @@ describe('CaseUserActionService', () => {
                   "category": Array [
                     "database",
                   ],
+                  "outcome": "success",
                   "type": Array [
                     "change",
                   ],
@@ -1295,6 +1307,7 @@ describe('CaseUserActionService', () => {
                   "category": Array [
                     "database",
                   ],
+                  "outcome": "success",
                   "type": Array [
                     "change",
                   ],
@@ -1315,6 +1328,7 @@ describe('CaseUserActionService', () => {
                   "category": Array [
                     "database",
                   ],
+                  "outcome": "success",
                   "type": Array [
                     "change",
                   ],
@@ -1335,6 +1349,7 @@ describe('CaseUserActionService', () => {
                   "category": Array [
                     "database",
                   ],
+                  "outcome": "success",
                   "type": Array [
                     "change",
                   ],
@@ -1355,6 +1370,7 @@ describe('CaseUserActionService', () => {
                   "category": Array [
                     "database",
                   ],
+                  "outcome": "success",
                   "type": Array [
                     "deletion",
                   ],
@@ -1375,6 +1391,7 @@ describe('CaseUserActionService', () => {
                   "category": Array [
                     "database",
                   ],
+                  "outcome": "success",
                   "type": Array [
                     "change",
                   ],
@@ -1395,6 +1412,7 @@ describe('CaseUserActionService', () => {
                   "category": Array [
                     "database",
                   ],
+                  "outcome": "success",
                   "type": Array [
                     "change",
                   ],
@@ -1413,7 +1431,7 @@ describe('CaseUserActionService', () => {
       });
 
       it('creates the correct user actions when an assignee is added', async () => {
-        await service.bulkCreateUpdateCase({
+        await service.creator.bulkCreateUpdateCase({
           ...commonArgs,
           originalCases,
           updatedCases: updatedAssigneesCases,
@@ -1460,7 +1478,7 @@ describe('CaseUserActionService', () => {
       });
 
       it('logs the correct user actions when an assignee is added', async () => {
-        await service.bulkCreateUpdateCase({
+        await service.creator.bulkCreateUpdateCase({
           ...commonArgs,
           originalCases,
           updatedCases: updatedAssigneesCases,
@@ -1477,6 +1495,7 @@ describe('CaseUserActionService', () => {
                   "category": Array [
                     "database",
                   ],
+                  "outcome": "success",
                   "type": Array [
                     "change",
                   ],
@@ -1505,7 +1524,7 @@ describe('CaseUserActionService', () => {
           },
         ];
 
-        await service.bulkCreateUpdateCase({
+        await service.creator.bulkCreateUpdateCase({
           ...commonArgs,
           originalCases: originalCasesWithAssignee,
           updatedCases: casesWithAssigneeRemoved,
@@ -1562,7 +1581,7 @@ describe('CaseUserActionService', () => {
           },
         ];
 
-        await service.bulkCreateUpdateCase({
+        await service.creator.bulkCreateUpdateCase({
           ...commonArgs,
           originalCases: originalCasesWithAssignee,
           updatedCases: casesWithAssigneeRemoved,
@@ -1579,6 +1598,7 @@ describe('CaseUserActionService', () => {
                   "category": Array [
                     "database",
                   ],
+                  "outcome": "success",
                   "type": Array [
                     "deletion",
                   ],
@@ -1607,7 +1627,7 @@ describe('CaseUserActionService', () => {
           },
         ];
 
-        await service.bulkCreateUpdateCase({
+        await service.creator.bulkCreateUpdateCase({
           ...commonArgs,
           originalCases: originalCasesWithAssignee,
           updatedCases: caseAssignees,
@@ -1692,7 +1712,7 @@ describe('CaseUserActionService', () => {
           },
         ];
 
-        await service.bulkCreateUpdateCase({
+        await service.creator.bulkCreateUpdateCase({
           ...commonArgs,
           originalCases: originalCasesWithAssignee,
           updatedCases: caseAssignees,
@@ -1709,6 +1729,7 @@ describe('CaseUserActionService', () => {
                   "category": Array [
                     "database",
                   ],
+                  "outcome": "success",
                   "type": Array [
                     "change",
                   ],
@@ -1729,6 +1750,7 @@ describe('CaseUserActionService', () => {
                   "category": Array [
                     "database",
                   ],
+                  "outcome": "success",
                   "type": Array [
                     "deletion",
                   ],
@@ -1747,7 +1769,7 @@ describe('CaseUserActionService', () => {
       });
 
       it('creates the correct user actions when tags are added and removed', async () => {
-        await service.bulkCreateUpdateCase({
+        await service.creator.bulkCreateUpdateCase({
           ...commonArgs,
           originalCases,
           updatedCases: updatedTagsCases,
@@ -1819,7 +1841,7 @@ describe('CaseUserActionService', () => {
       });
 
       it('logs the correct user actions when tags are added and removed', async () => {
-        await service.bulkCreateUpdateCase({
+        await service.creator.bulkCreateUpdateCase({
           ...commonArgs,
           originalCases,
           updatedCases: updatedTagsCases,
@@ -1836,6 +1858,7 @@ describe('CaseUserActionService', () => {
                   "category": Array [
                     "database",
                   ],
+                  "outcome": "success",
                   "type": Array [
                     "change",
                   ],
@@ -1856,6 +1879,7 @@ describe('CaseUserActionService', () => {
                   "category": Array [
                     "database",
                   ],
+                  "outcome": "success",
                   "type": Array [
                     "deletion",
                   ],
@@ -1876,7 +1900,7 @@ describe('CaseUserActionService', () => {
 
     describe('bulkCreateAttachmentDeletion', () => {
       it('creates delete comment user action', async () => {
-        await service.bulkCreateAttachmentDeletion({
+        await service.creator.bulkCreateAttachmentDeletion({
           ...commonArgs,
           attachments,
         });
@@ -1936,7 +1960,7 @@ describe('CaseUserActionService', () => {
       });
 
       it('logs delete comment user action', async () => {
-        await service.bulkCreateAttachmentDeletion({
+        await service.creator.bulkCreateAttachmentDeletion({
           ...commonArgs,
           attachments,
         });
@@ -1951,6 +1975,7 @@ describe('CaseUserActionService', () => {
                   "category": Array [
                     "database",
                   ],
+                  "outcome": "success",
                   "type": Array [
                     "deletion",
                   ],
@@ -1971,6 +1996,7 @@ describe('CaseUserActionService', () => {
                   "category": Array [
                     "database",
                   ],
+                  "outcome": "success",
                   "type": Array [
                     "deletion",
                   ],

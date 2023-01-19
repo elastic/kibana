@@ -8,6 +8,7 @@
 export type { AsDuration, AsPercent, TimeUnitChar } from './utils/formatters';
 
 export { formatDurationFromTimeUnitChar } from './utils/formatters';
+export { getInspectResponse } from './utils/get_inspect_response';
 
 export { ProcessorEvent } from './processor_event';
 
@@ -28,6 +29,7 @@ export {
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
   enableCriticalPath,
+  profilingElasticsearchPlugin,
 } from './ui_settings_keys';
 
 export {

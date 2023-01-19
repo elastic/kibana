@@ -36,6 +36,8 @@ export const KibanaServices = {
     };
   }),
   getKibanaVersion: jest.fn(() => '8.0.0'),
+  getKibanaBranch: jest.fn(() => 'main'),
+  getPrebuiltRulesPackageVersion: jest.fn(() => undefined),
 };
 export const useKibana = jest.fn().mockReturnValue({
   services: {
@@ -70,6 +72,7 @@ export const useKibana = jest.fn().mockReturnValue({
     },
     osquery: {
       OsqueryResults: jest.fn().mockReturnValue(null),
+      fetchAllLiveQueries: jest.fn().mockReturnValue({ data: { data: { items: [] } } }),
     },
     timelines: createTGridMocks(),
     savedObjectsTagging: {

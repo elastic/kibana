@@ -173,6 +173,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         expect(await browser.getCurrentUrl()).to.contain('app/management/security/api_keys');
 
+        await pageObjects.apiKeys.waitForSubmitButtonOnApiKeyFlyoutEnabled();
+
         expect(await pageObjects.apiKeys.getFlyoutTitleText()).to.be('Update API Key');
 
         // Verify name input box are disabled

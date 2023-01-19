@@ -42,6 +42,7 @@ const createCasesSubClientMock = (): CasesSubClientMock => {
     find: jest.fn(),
     resolve: jest.fn(),
     get: jest.fn(),
+    bulkGet: jest.fn(),
     push: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
@@ -82,6 +83,7 @@ type UserActionsSubClientMock = jest.Mocked<UserActionsSubClient>;
 const createUserActionsSubClientMock = (): UserActionsSubClientMock => {
   return {
     getAll: jest.fn(),
+    getConnectors: jest.fn(),
   };
 };
 

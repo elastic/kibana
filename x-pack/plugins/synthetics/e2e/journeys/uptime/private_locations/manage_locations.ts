@@ -4,16 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { journey, step, expect, before } from '@elastic/synthetics';
+import { journey, step, expect } from '@elastic/synthetics';
 import { byTestId, TIMEOUT_60_SEC } from '@kbn/observability-plugin/e2e/utils';
+import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
 import { monitorManagementPageProvider } from '../../../page_objects/uptime/monitor_management';
 
 journey('ManagePrivateLocation', async ({ page, params: { kibanaUrl } }) => {
-  const uptime = monitorManagementPageProvider({ page, kibanaUrl });
+  recordVideo(page);
 
-  before(async () => {
-    await uptime.waitForLoadingToFinish();
-  });
+  const uptime = monitorManagementPageProvider({ page, kibanaUrl });
 
   step('Go to monitor-management', async () => {
     await uptime.navigateToMonitorManagement();

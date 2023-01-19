@@ -39,20 +39,18 @@ async function mountComponent({
   dataView?: DataView;
   onEditVisualization?: null | (() => void);
 } = {}) {
-  const services = unifiedHistogramServicesMock;
-  services.data.query.timefilter.timefilter.getAbsoluteTime = () => {
-    return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
-  };
-  (services.data.query.queryString.getDefaultQuery as jest.Mock).mockReturnValue({
-    language: 'kuery',
-    query: '',
-  });
   (searchSourceInstanceMock.fetch$ as jest.Mock).mockImplementation(
     jest.fn().mockReturnValue(of({ rawResponse: { hits: { total: noHits ? 0 : 2 } } }))
   );
 
   const props = {
     dataView,
+    query: {
+      language: 'kuery',
+      query: '',
+    },
+    filters: [],
+    timeRange: { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' },
     services: unifiedHistogramServicesMock,
     hits: noHits
       ? undefined

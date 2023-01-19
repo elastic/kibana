@@ -21,8 +21,13 @@ import { eventLogMock } from '@kbn/event-log-plugin/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { monitoringCollectionMock } from '@kbn/monitoring-collection-plugin/server/mocks';
-import { PluginSetup as DataPluginSetup } from '@kbn/data-plugin/server';
+import {
+  DataViewsServerPluginStart,
+  PluginSetup as DataPluginSetup,
+} from '@kbn/data-plugin/server';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
+import { SharePluginStart } from '@kbn/share-plugin/server';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 
 const generateAlertingConfig = (): AlertingConfig => ({
   healthCheck: {
@@ -47,7 +52,7 @@ const generateAlertingConfig = (): AlertingConfig => ({
   },
 });
 
-const sampleRuleType: RuleType<never, never, never, never, never, 'default'> = {
+const sampleRuleType: RuleType<never, never, {}, never, never, 'default'> = {
   id: 'test',
   name: 'test',
   minimumLicenseRequired: 'basic',
@@ -55,7 +60,9 @@ const sampleRuleType: RuleType<never, never, never, never, never, 'default'> = {
   actionGroups: [],
   defaultActionGroupId: 'default',
   producer: 'test',
-  async executor() {},
+  async executor() {
+    return { state: {} };
+  },
 };
 
 describe('Alerting Plugin', () => {
@@ -71,6 +78,7 @@ describe('Alerting Plugin', () => {
       statusService: statusServiceMock.createSetupContract(),
       monitoringCollection: monitoringCollectionMock.createSetup(),
       data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
+      features: featuresPluginMock.createSetup(),
     };
 
     let plugin: AlertingPlugin;
@@ -160,7 +168,7 @@ describe('Alerting Plugin', () => {
         const ruleType = {
           ...sampleRuleType,
           minimumLicenseRequired: 'basic',
-        } as RuleType<never, never, never, never, never, 'default', never>;
+        } as RuleType<never, never, {}, never, never, 'default', never>;
         await setup.registerType(ruleType);
         expect(ruleType.ruleTaskTimeout).toBe('5m');
       });
@@ -170,7 +178,7 @@ describe('Alerting Plugin', () => {
           ...sampleRuleType,
           minimumLicenseRequired: 'basic',
           ruleTaskTimeout: '20h',
-        } as RuleType<never, never, never, never, never, 'default', never>;
+        } as RuleType<never, never, {}, never, never, 'default', never>;
         await setup.registerType(ruleType);
         expect(ruleType.ruleTaskTimeout).toBe('20h');
       });
@@ -179,7 +187,7 @@ describe('Alerting Plugin', () => {
         const ruleType = {
           ...sampleRuleType,
           minimumLicenseRequired: 'basic',
-        } as RuleType<never, never, never, never, never, 'default', never>;
+        } as RuleType<never, never, {}, never, never, 'default', never>;
         await setup.registerType(ruleType);
         expect(ruleType.cancelAlertsOnRuleTimeout).toBe(true);
       });
@@ -189,7 +197,7 @@ describe('Alerting Plugin', () => {
           ...sampleRuleType,
           minimumLicenseRequired: 'basic',
           cancelAlertsOnRuleTimeout: false,
-        } as RuleType<never, never, never, never, never, 'default', never>;
+        } as RuleType<never, never, {}, never, never, 'default', never>;
         await setup.registerType(ruleType);
         expect(ruleType.cancelAlertsOnRuleTimeout).toBe(false);
       });
@@ -214,6 +222,7 @@ describe('Alerting Plugin', () => {
           statusService: statusServiceMock.createSetupContract(),
           monitoringCollection: monitoringCollectionMock.createSetup(),
           data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
+          features: featuresPluginMock.createSetup(),
         });
 
         const startContract = plugin.start(coreMock.createStart(), {
@@ -225,6 +234,12 @@ describe('Alerting Plugin', () => {
           eventLog: eventLogMock.createStart(),
           taskManager: taskManagerMock.createStart(),
           data: dataPluginMock.createStartContract(),
+          share: {} as SharePluginStart,
+          dataViews: {
+            dataViewsServiceFactory: jest
+              .fn()
+              .mockResolvedValue(dataViewPluginMocks.createStartContract()),
+          } as DataViewsServerPluginStart,
         });
 
         expect(encryptedSavedObjectsSetup.canEncrypt).toEqual(false);
@@ -254,6 +269,7 @@ describe('Alerting Plugin', () => {
           statusService: statusServiceMock.createSetupContract(),
           monitoringCollection: monitoringCollectionMock.createSetup(),
           data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
+          features: featuresPluginMock.createSetup(),
         });
 
         const startContract = plugin.start(coreMock.createStart(), {
@@ -265,6 +281,12 @@ describe('Alerting Plugin', () => {
           eventLog: eventLogMock.createStart(),
           taskManager: taskManagerMock.createStart(),
           data: dataPluginMock.createStartContract(),
+          share: {} as SharePluginStart,
+          dataViews: {
+            dataViewsServiceFactory: jest
+              .fn()
+              .mockResolvedValue(dataViewPluginMocks.createStartContract()),
+          } as DataViewsServerPluginStart,
         });
 
         const fakeRequest = {
@@ -305,6 +327,7 @@ describe('Alerting Plugin', () => {
         statusService: statusServiceMock.createSetupContract(),
         monitoringCollection: monitoringCollectionMock.createSetup(),
         data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
+        features: featuresPluginMock.createSetup(),
       });
 
       const startContract = plugin.start(coreMock.createStart(), {
@@ -316,6 +339,12 @@ describe('Alerting Plugin', () => {
         eventLog: eventLogMock.createStart(),
         taskManager: taskManagerMock.createStart(),
         data: dataPluginMock.createStartContract(),
+        share: {} as SharePluginStart,
+        dataViews: {
+          dataViewsServiceFactory: jest
+            .fn()
+            .mockResolvedValue(dataViewPluginMocks.createStartContract()),
+        } as DataViewsServerPluginStart,
       });
 
       const fakeRequest = {

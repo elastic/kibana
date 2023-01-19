@@ -7,18 +7,12 @@
  */
 
 import React, { Component } from 'react';
-import { debounce } from 'lodash';
+import { debounce, matches } from 'lodash';
 // @ts-expect-error
 import { saveAs } from '@elastic/filesaver';
 import { EuiSpacer, Query, CriteriaWithPagination } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  SavedObjectsClientContract,
-  HttpStart,
-  OverlayStart,
-  NotificationsStart,
-  ApplicationStart,
-} from '@kbn/core/public';
+import { HttpStart, OverlayStart, NotificationsStart, ApplicationStart } from '@kbn/core/public';
 import type { SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
 import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
 import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
@@ -32,6 +26,7 @@ import {
   fetchExportObjects,
   fetchExportByTypeAndSearch,
   findObjects,
+  bulkDeleteObjects,
   bulkGetObjects,
   extractExportDetails,
   SavedObjectsExportResultDetails,
@@ -60,7 +55,6 @@ export interface SavedObjectsTableProps {
   allowedTypes: SavedObjectManagementTypeInfo[];
   actionRegistry: SavedObjectsManagementActionServiceStart;
   columnRegistry: SavedObjectsManagementColumnServiceStart;
-  savedObjectsClient: SavedObjectsClientContract;
   dataViews: DataViewsContract;
   taggingApi?: SavedObjectsTaggingApi;
   http: HttpStart;
@@ -507,7 +501,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   };
 
   delete = async () => {
-    const { savedObjectsClient } = this.props;
+    const { http, notifications } = this.props;
     const { selectedSavedObjects, isDeleting } = this.state;
 
     if (isDeleting) {
@@ -521,14 +515,27 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       await this.props.dataViews.clearCache();
     }
 
-    const deletes = selectedSavedObjects
-      .filter((object) => !object.meta.hiddenType)
-      .map((object) => savedObjectsClient.delete(object.type, object.id, { force: true }));
-    await Promise.all(deletes);
+    const deleteStatus = await bulkDeleteObjects(
+      http,
+      selectedSavedObjects
+        .filter((object) => !object.meta.hiddenType)
+        .map(({ id, type }) => ({ id, type }))
+    );
+
+    notifications.toasts.addInfo({
+      title: i18n.translate('savedObjectsManagement.objectsTable.delete.successNotification', {
+        defaultMessage: `Successfully deleted {count, plural, one {# object} other {# objects}}.`,
+        values: {
+          count: deleteStatus.filter(({ success }) => !!success).length,
+        },
+      }),
+    });
 
     // Unset this
     this.setState({
-      selectedSavedObjects: [],
+      selectedSavedObjects: selectedSavedObjects.filter(({ id, type }) =>
+        deleteStatus.some(matches({ id, type, success: false }))
+      ),
     });
 
     // Fetching all data

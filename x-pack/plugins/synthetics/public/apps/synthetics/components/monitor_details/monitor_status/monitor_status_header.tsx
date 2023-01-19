@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
-import { css } from '@emotion/css';
 import { useHistory } from 'react-router-dom';
 
 import { ConfigKey } from '../../../../../../common/runtime_types';
@@ -41,9 +40,9 @@ export const MonitorStatusHeader = ({
     <EuiFlexGroup
       direction="row"
       alignItems="baseline"
-      css={css`
-        margin-bottom: 0;
-      `}
+      css={{
+        marginBottom: 0,
+      }}
     >
       <EuiFlexItem grow={false}>
         <EuiTitle size="xs">

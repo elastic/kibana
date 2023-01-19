@@ -78,7 +78,8 @@ function DiscoverDocumentsComponent({
   stateContainer: DiscoverStateContainer;
   onFieldEdited?: () => void;
 }) {
-  const { capabilities, dataViews, uiSettings } = useDiscoverServices();
+  const services = useDiscoverServices();
+  const { dataViews, capabilities, uiSettings } = services;
   const [query, sort, rowHeight, rowsPerPage, grid, columns, index] = useAppStateSelector(
     (state) => {
       return [
@@ -241,6 +242,7 @@ function DiscoverDocumentsComponent({
               onFieldEdited={onFieldEdited}
               savedSearchId={savedSearch.id}
               DocumentView={DiscoverGridFlyout}
+              services={services}
             />
           </div>
         </>

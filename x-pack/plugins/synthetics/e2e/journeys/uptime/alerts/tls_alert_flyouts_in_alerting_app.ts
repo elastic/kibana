@@ -7,9 +7,12 @@
 
 import { journey, step, before } from '@elastic/synthetics';
 import { assertText, byTestId, waitForLoadingToFinish } from '@kbn/observability-plugin/e2e/utils';
+import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
 import { loginPageProvider } from '../../../page_objects/login';
 
 journey('TlsFlyoutInAlertingApp', async ({ page, params }) => {
+  recordVideo(page);
+
   const login = loginPageProvider({ page });
   before(async () => {
     await waitForLoadingToFinish({ page });

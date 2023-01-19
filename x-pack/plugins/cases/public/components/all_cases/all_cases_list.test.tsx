@@ -82,7 +82,8 @@ const mockKibana = () => {
   } as unknown as ReturnType<typeof useKibana>);
 };
 
-describe('AllCasesListGeneric', () => {
+// Flaky: https://github.com/elastic/kibana/issues/148486
+describe.skip('AllCasesListGeneric', () => {
   const refetchCases = jest.fn();
   const onRowClick = jest.fn();
   const updateCaseProperty = jest.fn();
@@ -207,6 +208,7 @@ describe('AllCasesListGeneric', () => {
             id: null,
             createdAt: null,
             createdBy: null,
+            updatedAt: null,
             status: null,
             severity: null,
             tags: null,
@@ -269,16 +271,22 @@ describe('AllCasesListGeneric', () => {
     expect(res.getByTestId('tableHeaderCell_title_0')).toBeInTheDocument();
   });
 
+  it('renders the updated on column', async () => {
+    const res = appMockRenderer.render(<AllCasesList />);
+
+    expect(res.getByTestId('tableHeaderCell_updatedAt_5')).toBeInTheDocument();
+  });
+
   it('renders the status column', async () => {
     const res = appMockRenderer.render(<AllCasesList />);
 
-    expect(res.getByTestId('tableHeaderCell_status_6')).toBeInTheDocument();
+    expect(res.getByTestId('tableHeaderCell_status_7')).toBeInTheDocument();
   });
 
   it('renders the severity column', async () => {
     const res = appMockRenderer.render(<AllCasesList />);
 
-    expect(res.getByTestId('tableHeaderCell_severity_7')).toBeInTheDocument();
+    expect(res.getByTestId('tableHeaderCell_severity_8')).toBeInTheDocument();
   });
 
   it('should render the case stats', () => {
@@ -402,7 +410,7 @@ describe('AllCasesListGeneric', () => {
     const result = appMockRenderer.render(<AllCasesList isSelectorView={false} />);
 
     userEvent.click(
-      within(result.getByTestId('tableHeaderCell_status_6')).getByTestId('tableHeaderSortButton')
+      within(result.getByTestId('tableHeaderCell_status_7')).getByTestId('tableHeaderSortButton')
     );
 
     await waitFor(() => {
@@ -422,7 +430,7 @@ describe('AllCasesListGeneric', () => {
     const result = appMockRenderer.render(<AllCasesList isSelectorView={false} />);
 
     userEvent.click(
-      within(result.getByTestId('tableHeaderCell_severity_7')).getByTestId('tableHeaderSortButton')
+      within(result.getByTestId('tableHeaderCell_severity_8')).getByTestId('tableHeaderSortButton')
     );
 
     await waitFor(() => {
@@ -451,6 +459,26 @@ describe('AllCasesListGeneric', () => {
           queryParams: {
             ...DEFAULT_QUERY_PARAMS,
             sortField: SortFieldCase.title,
+            sortOrder: 'asc',
+          },
+        })
+      );
+    });
+  });
+
+  it('should sort by updatedOn', async () => {
+    const result = appMockRenderer.render(<AllCasesList isSelectorView={false} />);
+
+    userEvent.click(
+      within(result.getByTestId('tableHeaderCell_updatedAt_5')).getByTestId('tableHeaderSortButton')
+    );
+
+    await waitFor(() => {
+      expect(useGetCasesMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          queryParams: {
+            ...DEFAULT_QUERY_PARAMS,
+            sortField: SortFieldCase.updatedAt,
             sortOrder: 'asc',
           },
         })
@@ -1085,7 +1113,8 @@ describe('AllCasesListGeneric', () => {
   });
 });
 
-describe('Assignees', () => {
+// Flaky: https://github.com/elastic/kibana/issues/148490
+describe.skip('Assignees', () => {
   it('should hide the assignees column on basic license', async () => {
     useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => false });
 
