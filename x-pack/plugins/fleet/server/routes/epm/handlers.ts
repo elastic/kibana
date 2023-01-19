@@ -33,7 +33,7 @@ import type {
   InstallPackageFromRegistryRequestSchema,
   InstallPackageByUploadRequestSchema,
   DeletePackageRequestSchema,
-  BulkUpgradePackagesFromRegistryRequestSchema,
+  BulkInstallPackagesFromRegistryRequestSchema,
   GetStatsRequestSchema,
   FleetRequestHandler,
   UpdatePackageRequestSchema,
@@ -268,7 +268,7 @@ export const getStatsHandler: FleetRequestHandler<
 
 export const installPackageFromRegistryHandler: FleetRequestHandler<
   TypeOf<typeof InstallPackageFromRegistryRequestSchema.params>,
-  undefined,
+  TypeOf<typeof InstallPackageFromRegistryRequestSchema.query>,
   TypeOf<typeof InstallPackageFromRegistryRequestSchema.body>
 > = async (context, request, response) => {
   const coreContext = await context.core;
@@ -286,6 +286,7 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
     spaceId,
     force: request.body?.force,
     ignoreConstraints: request.body?.ignore_constraints,
+    prerelease: request.query?.prerelease,
   });
 
   if (!res.error) {
@@ -318,8 +319,8 @@ const bulkInstallServiceResponseToHttpEntry = (
 
 export const bulkInstallPackagesFromRegistryHandler: FleetRequestHandler<
   undefined,
-  TypeOf<typeof BulkUpgradePackagesFromRegistryRequestSchema.query>,
-  TypeOf<typeof BulkUpgradePackagesFromRegistryRequestSchema.body>
+  TypeOf<typeof BulkInstallPackagesFromRegistryRequestSchema.query>,
+  TypeOf<typeof BulkInstallPackagesFromRegistryRequestSchema.body>
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const fleetContext = await context.fleet;
@@ -332,6 +333,7 @@ export const bulkInstallPackagesFromRegistryHandler: FleetRequestHandler<
     packagesToInstall: request.body.packages,
     spaceId,
     prerelease: request.query.prerelease,
+    force: request.body.force,
   });
   const payload = bulkInstalledResponses.map(bulkInstallServiceResponseToHttpEntry);
   const body: BulkInstallPackagesResponse = {
