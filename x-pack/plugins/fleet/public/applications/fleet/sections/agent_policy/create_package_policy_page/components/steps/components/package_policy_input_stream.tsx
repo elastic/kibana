@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { useRouteMatch } from 'react-router-dom';
 
-import { mapPackageReleaseToIntegrationCardRelease } from '../../../../../../../../services/package_prerelease';
+import { mapPackageReleaseToIntegrationCardRelease } from '../../../../../../../../../common/services';
 
 import { getRegistryDataStreamAssetBaseName } from '../../../../../../../../../common/services';
 import type { ExperimentalIndexingFeature } from '../../../../../../../../../common/types/models/epm';
