@@ -9,11 +9,13 @@ import {
   AggregationsAggregationContainer,
   AggregationsDateRangeAggregate,
   AggregationsSumAggregate,
+  AggregationsValueCountAggregate,
   MsearchMultisearchBody,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { assertNever } from '@kbn/std';
 import { occurrencesBudgetingMethodSchema, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
+
 import { SLO_DESTINATION_INDEX_NAME } from '../../assets/constants';
 import { toDateRange } from '../../domain/services/date_range';
 import { InternalQueryError } from '../../errors';
@@ -164,7 +166,7 @@ function handleWindowedResult(
     }
     const bucket = windowAggBuckets[0];
     const good = (bucket.good as AggregationsSumAggregate).value;
-    const total = (bucket.total as AggregationsSumAggregate).value;
+    const total = (bucket.total as AggregationsValueCountAggregate).value;
     if (good === null || total === null) {
       throw new InternalQueryError('Invalid aggregation sum bucket response');
     }

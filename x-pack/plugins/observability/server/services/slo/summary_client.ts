@@ -39,23 +39,9 @@ export class DefaultSummaryClient implements SummaryClient {
 
     for (let i = 0; i < result.responses.length; i++) {
       const slo = sloList[i];
-      if ('error' in result.responses[i]) {
-        const sliValue = computeSLI({ good: 0, total: 0 });
-        const errorBudget = computeErrorBudget(slo, {
-          dateRange: dateRangeBySlo[slo.id],
-          good: 0,
-          total: 0,
-        });
-        summaryBySlo[slo.id] = {
-          sliValue,
-          errorBudget,
-          status: computeSummaryStatus(slo, sliValue, errorBudget),
-        };
-        continue;
-      }
 
       // @ts-ignore
-      const { aggregations } = result.responses[i];
+      const { aggregations = {} } = result.responses[i];
       const good = aggregations?.good?.value ?? 0;
       const total = aggregations?.total?.value ?? 0;
 
