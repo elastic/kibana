@@ -12,7 +12,7 @@ import {
 } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
-  DEVICE_MODEL_NAME,
+  DEVICE_MODEL_IDENTIFIER,
   HOST_OS_VERSION,
   NETWORK_CONNECTION_TYPE,
   SERVICE_NAME,
@@ -76,7 +76,7 @@ export async function getMobileFilters({
       aggs: {
         devices: {
           terms: {
-            field: DEVICE_MODEL_NAME,
+            field: DEVICE_MODEL_IDENTIFIER,
             size: 10,
           },
         },

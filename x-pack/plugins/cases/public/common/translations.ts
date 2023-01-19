@@ -37,6 +37,10 @@ export const CREATED_ON = i18n.translate('xpack.cases.caseView.createdOn', {
   defaultMessage: 'Created on',
 });
 
+export const UPDATED_ON = i18n.translate('xpack.cases.caseView.updatedOn', {
+  defaultMessage: 'Updated on',
+});
+
 export const CLOSED_ON = i18n.translate('xpack.cases.caseView.closedOn', {
   defaultMessage: 'Closed on',
 });
@@ -166,7 +170,7 @@ export const NO_TAGS = i18n.translate('xpack.cases.caseView.noTags', {
 });
 
 export const TITLE_REQUIRED = i18n.translate('xpack.cases.createCase.titleFieldRequiredError', {
-  defaultMessage: 'A title is required.',
+  defaultMessage: 'A name is required.',
 });
 
 export const CONFIGURE_CASES_PAGE_TITLE = i18n.translate('xpack.cases.configureCases.headerTitle', {
