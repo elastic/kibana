@@ -110,7 +110,7 @@ export const InstallPackageFromRegistryRequestSchemaDeprecated = {
   ),
 };
 
-export const BulkUpgradePackagesFromRegistryRequestSchema = {
+export const BulkInstallPackagesFromRegistryRequestSchema = {
   query: schema.object({
     prerelease: schema.maybe(schema.boolean()),
   }),

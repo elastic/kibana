@@ -33,7 +33,7 @@ import type {
   InstallPackageFromRegistryRequestSchema,
   InstallPackageByUploadRequestSchema,
   DeletePackageRequestSchema,
-  BulkUpgradePackagesFromRegistryRequestSchema,
+  BulkInstallPackagesFromRegistryRequestSchema,
   GetStatsRequestSchema,
   FleetRequestHandler,
   UpdatePackageRequestSchema,
@@ -323,8 +323,8 @@ const bulkInstallServiceResponseToHttpEntry = (
 
 export const bulkInstallPackagesFromRegistryHandler: FleetRequestHandler<
   undefined,
-  TypeOf<typeof BulkUpgradePackagesFromRegistryRequestSchema.query>,
-  TypeOf<typeof BulkUpgradePackagesFromRegistryRequestSchema.body>
+  TypeOf<typeof BulkInstallPackagesFromRegistryRequestSchema.query>,
+  TypeOf<typeof BulkInstallPackagesFromRegistryRequestSchema.body>
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const fleetContext = await context.fleet;

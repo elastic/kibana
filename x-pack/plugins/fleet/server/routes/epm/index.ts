@@ -35,7 +35,7 @@ import {
   InstallPackageByUploadRequestSchema,
   DeletePackageRequestSchema,
   DeletePackageRequestSchemaDeprecated,
-  BulkUpgradePackagesFromRegistryRequestSchema,
+  BulkInstallPackagesFromRegistryRequestSchema,
   GetStatsRequestSchema,
   UpdatePackageRequestSchema,
   UpdatePackageRequestSchemaDeprecated,
@@ -149,7 +149,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.post(
     {
       path: EPM_API_ROUTES.BULK_INSTALL_PATTERN,
-      validate: BulkUpgradePackagesFromRegistryRequestSchema,
+      validate: BulkInstallPackagesFromRegistryRequestSchema,
       fleetAuthz: {
         integrations: { installPackages: true, upgradePackages: true },
       },

@@ -380,9 +380,40 @@
             }
           }
         },
-        "operationId": "bulk-install-packages"
-      },
-      "parameters": []
+        "operationId": "bulk-install-packages",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "prerelease",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            },
+            "description": "Whether to return prerelease versions of packages (e.g. beta, rc, preview) "
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "packages": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "list of package names to install"
+                  }
+                },
+                "required": [
+                  "packages"
+                ]
+              }
+            }
+          }
+        }
+      }
     },
     "/epm/packages/{pkgkey}": {
       "get": {
