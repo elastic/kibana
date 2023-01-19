@@ -37,6 +37,10 @@ export const CREATED_ON = i18n.translate('xpack.cases.caseView.createdOn', {
   defaultMessage: 'Created on',
 });
 
+export const UPDATED_ON = i18n.translate('xpack.cases.caseView.updatedOn', {
+  defaultMessage: 'Updated on',
+});
+
 export const CLOSED_ON = i18n.translate('xpack.cases.caseView.closedOn', {
   defaultMessage: 'Closed on',
 });

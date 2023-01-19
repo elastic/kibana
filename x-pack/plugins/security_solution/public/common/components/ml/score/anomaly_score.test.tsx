@@ -40,6 +40,7 @@ describe('anomaly_scores', () => {
         score={anomalies.anomalies[0]}
         interval="day"
         narrowDateRange={narrowDateRange}
+        jobName={'job-1'}
       />
     );
     expect(wrapper).toMatchSnapshot();
@@ -55,6 +56,7 @@ describe('anomaly_scores', () => {
           score={anomalies.anomalies[0]}
           interval="day"
           narrowDateRange={narrowDateRange}
+          jobName={'job-1'}
         />
       </TestProviders>
     );
@@ -71,6 +73,7 @@ describe('anomaly_scores', () => {
           score={anomalies.anomalies[0]}
           interval="day"
           narrowDateRange={narrowDateRange}
+          jobName={'job-1'}
         />
       </TestProviders>
     );
