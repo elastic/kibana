@@ -15,7 +15,7 @@ describe('openOnClickTooltip', () => {
       {
         id: 'feature1',
         layerId: 'layer1',
-      }
+      },
     ],
     id: 'tooltip1',
     isLocked: true,
@@ -28,7 +28,7 @@ describe('openOnClickTooltip', () => {
         {
           id: 'feature2',
           layerId: 'layer1',
-        }
+        },
       ],
       id: 'tooltip2',
       isLocked: true,
@@ -39,8 +39,8 @@ describe('openOnClickTooltip', () => {
     action(dispatchMock, () => {
       return {
         map: {
-          openTooltips: [openTooltip]
-        }
+          openTooltips: [openTooltip],
+        },
       } as unknown as MapStoreState;
     });
     expect(dispatchMock.mock.calls[0][0]).toEqual({
@@ -61,14 +61,14 @@ describe('openOnClickTooltip', () => {
                 {
                   id: 'feature2',
                   layerId: 'layer1',
-                }
+                },
               ],
               id: 'tooltip2',
               isLocked: false, // mouseover tooltip
               location: [1, 1],
-            }
-          ]
-        }
+            },
+          ],
+        },
       } as unknown as MapStoreState;
     });
     expect(dispatchMock.mock.calls[0][0]).toEqual({
@@ -89,14 +89,14 @@ describe('openOnClickTooltip', () => {
                 {
                   id: 'feature2',
                   layerId: 'layer1',
-                }
+                },
               ],
               id: 'tooltip2',
               isLocked: true,
               location: [0, 0], // same location as newTooltip
-            }
-          ]
-        }
+            },
+          ],
+        },
       } as unknown as MapStoreState;
     });
     expect(dispatchMock.mock.calls[0][0]).toEqual({
@@ -119,14 +119,14 @@ describe('openOnClickTooltip', () => {
                   layerId: 'layer1',
                   // ensure new props do not break equality check
                   newProp: 'someValue',
-                }
+                },
               ],
               id: 'tooltip2',
               isLocked: true,
               location: [1, 1],
-            }
-          ]
-        }
+            },
+          ],
+        },
       } as unknown as MapStoreState;
     });
     expect(dispatchMock.mock.calls[0][0]).toEqual({
