@@ -38,7 +38,7 @@ describe('cloneRule', () => {
           message: 'alert ',
         },
         frequency: {
-          notifyWhen: 'onActionGroupChange',
+          notify_when: 'onActionGroupChange',
           throttle: null,
           summary: false,
         },
@@ -64,7 +64,7 @@ describe('cloneRule', () => {
           Object {
             "actionTypeId": ".server-log",
             "frequency": Object {
-              "notifyWhen": undefined,
+              "notifyWhen": "onActionGroupChange",
               "summary": false,
               "throttle": null,
             },
