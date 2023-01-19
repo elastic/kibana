@@ -102,7 +102,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
     // only during 1st component render (thus why the eslint disabled rule below).
     // Default values for config are endpoint + NGAV
     useEffect(() => {
-      if (initialRender.current) {
+      if (newPolicy.inputs.length === 0) {
         onChange({
           isValid: false,
           updatedPolicy: {
@@ -127,13 +127,6 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
             ],
           },
         });
-      }
-    }, [onChange, newPolicy]);
-
-    useEffect(() => {
-      // Skip triggering this onChange on the initial render
-      if (initialRender.current) {
-        initialRender.current = false;
       } else {
         onChange({
           isValid: true,
