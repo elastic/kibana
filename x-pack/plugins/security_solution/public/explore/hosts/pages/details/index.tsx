@@ -231,7 +231,6 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                   <EuiFlexGroup>
                     <EuiFlexItem>
                       <AlertsByStatus
-                        applyGlobalQueriesAndFilters
                         signalIndexName={signalIndexName}
                         entityFilter={entityFilter}
                         additionalFilters={rawFilteredQuery ? [rawFilteredQuery] : []}

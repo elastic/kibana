@@ -99,7 +99,7 @@ const closedDonutOptions = { status: 'closed' as Status };
 
 export const AlertsByStatus = ({
   additionalFilters,
-  applyGlobalQueriesAndFilters,
+  applyGlobalQueriesAndFilters = true,
   signalIndexName,
   entityFilter,
 }: AlertsByStatusProps) => {
