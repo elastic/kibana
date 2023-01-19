@@ -160,7 +160,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
       ? [
           {
             field: 'metrics',
-            sortable: true,
+            sortable: false,
             name: (
               <EuiToolTip
                 content={
@@ -191,7 +191,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
           },
           {
             field: 'metrics',
-            sortable: true,
+            sortable: false,
             name: (
               <EuiToolTip
                 content={
