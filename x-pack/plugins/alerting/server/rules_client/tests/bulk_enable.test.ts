@@ -389,13 +389,14 @@ describe('bulkEnableRules', () => {
             tasks: [{ id: 'id1' }],
             errors: [
               {
-                task: {
-                  id: 'id2',
-                },
                 error: {
-                  error: '',
-                  message: 'UPS',
-                  statusCode: 500,
+                  type: 'task',
+                  id: 'id2',
+                  error: {
+                    error: '',
+                    message: 'UPS',
+                    statusCode: 500,
+                  },
                 },
               },
             ],
