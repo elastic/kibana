@@ -5,17 +5,25 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 
 import { useActions, useValues } from 'kea';
 
 import {
   EuiBasicTableColumn,
   EuiButton,
+  EuiButtonEmpty,
   EuiConfirmModal,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
   EuiIcon,
   EuiInMemoryTable,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -34,12 +42,62 @@ import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_temp
 import { EngineIndicesLogic } from './engine_indices_logic';
 import { EngineViewLogic } from './engine_view_logic';
 
+export const AddNewIndicesFlyout: React.FC = ({ onClose }) => {
+  return (
+    <EuiFlyout onClose={onClose}>
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle>
+          <h2>
+            {i18n.translate(
+              'xpack.enterpriseSearch.content.engine.indices.addIndicesFlyout.title',
+              { defaultMessage: 'Add new indices' }
+            )}
+          </h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <pre>AddNewIndicesFlyout</pre>
+      </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="spaceBetween" direction="rowReverse">
+          <EuiFlexItem grow={false}>
+            <EuiButton fill iconType="plusInCircle">
+              {i18n.translate(
+                'xpack.enterpriseSearch.content.engine.indices.addIndicesFlyout.submitButton',
+                { defaultMessage: 'Add selected' }
+              )}
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty flush="left">
+              {i18n.translate(
+                'xpack.enterpriseSearch.content.engine.indices.addIndicesFlyout.cancelButton',
+                { defaultMessage: 'Cancel' }
+              )}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
+    </EuiFlyout>
+  );
+};
+
 export const EngineIndices: React.FC = () => {
   const { engineName, isLoadingEngine } = useValues(EngineViewLogic);
   const { engineData } = useValues(EngineIndicesLogic);
   const { removeIndexFromEngine } = useActions(EngineIndicesLogic);
   const { navigateToUrl } = useValues(KibanaLogic);
   const [removeIndexConfirm, setConfirmRemoveIndex] = useState<string | null>(null);
+  const [addIndicesFlyoutOpen, setAddIndicesFlyoutOpen] = useState<boolean>(false);
+  const openAddIndicesFlyoutOpen = useCallback(
+    () => setAddIndicesFlyoutOpen(true),
+    [setAddIndicesFlyoutOpen]
+  );
+  const closeAddIndicesFlyoutOpen = useCallback(
+    () => setAddIndicesFlyoutOpen(false),
+    [setAddIndicesFlyoutOpen]
+  );
+
   if (!engineData) return null;
   const { indices } = engineData;
 
@@ -170,7 +228,12 @@ export const EngineIndices: React.FC = () => {
           defaultMessage: 'Indices',
         }),
         rightSideItems: [
-          <EuiButton data-test-subj="engine-add-new-indices-btn" iconType="plusInCircle" fill>
+          <EuiButton
+            data-test-subj="engine-add-new-indices-btn"
+            iconType="plusInCircle"
+            fill
+            onClick={openAddIndicesFlyoutOpen}
+          >
             {i18n.translate('xpack.enterpriseSearch.content.engine.indices.addNewIndicesButton', {
               defaultMessage: 'Add new indices',
             })}
@@ -231,6 +294,7 @@ export const EngineIndices: React.FC = () => {
             </EuiText>
           </EuiConfirmModal>
         )}
+        {addIndicesFlyoutOpen && <AddNewIndicesFlyout onClose={closeAddIndicesFlyoutOpen} />}
       </>
     </EnterpriseSearchEnginesPageTemplate>
   );
