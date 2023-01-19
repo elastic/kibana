@@ -19,6 +19,8 @@ import { getMappedNonEcsValue } from '../../../../timelines/components/timeline/
 import type { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
 import type { ColumnHeaderOptions, OnRowSelected } from '../../../../../common/types/timeline';
 import { dataTableActions } from '../../../store/data_table';
+import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
+import { openSecurityFlyout } from '../../../store/flyout/reducers';
 
 type Props = EuiDataGridCellValueElementProps & {
   columnHeaders: ColumnHeaderOptions[];
@@ -71,6 +73,7 @@ const RowActionComponent = ({
   }, [data, pageRowIndex]);
 
   const dispatch = useDispatch();
+  const isSecurityFlyoutEnabled = useIsExperimentalFeatureEnabled('securityFlyoutEnabled');
 
   const columnValues = useMemo(
     () =>
@@ -96,14 +99,22 @@ const RowActionComponent = ({
       },
     };
 
-    dispatch(
-      dataTableActions.toggleDetailPanel({
-        ...updatedExpandedDetail,
-        tabType,
-        id: tableId,
-      })
-    );
-  }, [dispatch, eventId, indexName, tabType, tableId]);
+    if (isSecurityFlyoutEnabled) {
+      dispatch(
+        openSecurityFlyout({
+          scope: 'global',
+        })
+      );
+    } else {
+      dispatch(
+        dataTableActions.toggleDetailPanel({
+          ...updatedExpandedDetail,
+          tabType,
+          id: tableId,
+        })
+      );
+    }
+  }, [dispatch, eventId, indexName, isSecurityFlyoutEnabled, tabType, tableId]);
 
   const Action = controlColumn.rowCellRender;
 

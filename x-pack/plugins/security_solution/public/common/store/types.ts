@@ -22,15 +22,16 @@ import type { ManagementPluginState } from '../../management';
 import type { UsersPluginState } from '../../explore/users/store';
 import type { GlobalUrlParam } from './global_url_param';
 import type { DataTableState } from './data_table/types';
+import type { SecurityFlyoutState } from './flyout/reducers';
 
 export type State = HostsPluginState &
   UsersPluginState &
   NetworkPluginState &
-  UsersPluginState &
   TimelinePluginState &
   ManagementPluginState & {
     app: AppState;
     dragAndDrop: DragAndDropState;
+    flyout: SecurityFlyoutState;
     inputs: InputsState;
     sourcerer: SourcererState;
     globalUrlParam: GlobalUrlParam;

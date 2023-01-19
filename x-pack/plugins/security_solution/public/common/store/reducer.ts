@@ -29,6 +29,7 @@ import { getScopePatternListSelection } from './sourcerer/helpers';
 import { globalUrlParamReducer, initialGlobalUrlParam } from './global_url_param';
 import type { DataTableState } from './data_table/types';
 import { dataTableReducer } from './data_table/reducer';
+import { flyoutReducer, initialFlyoutState } from './flyout/reducers';
 
 export type SubPluginsInitReducer = HostsPluginReducer &
   UsersPluginReducer &
@@ -81,6 +82,7 @@ export const createInitialState = (
     ...pluginsInitState,
     app: { ...initialAppState, enableExperimental },
     dragAndDrop: initialDragAndDropState,
+    flyout: initialFlyoutState,
     inputs: createInitialInputsState(enableExperimental.socTrendsEnabled),
     sourcerer: {
       ...sourcererModel.initialSourcererState,
@@ -122,6 +124,7 @@ export const createReducer: (
   combineReducers({
     app: appReducer,
     dragAndDrop: dragAndDropReducer,
+    flyout: flyoutReducer,
     inputs: inputsReducer,
     sourcerer: sourcererReducer,
     globalUrlParam: globalUrlParamReducer,

@@ -11,6 +11,7 @@ import { EuiThemeProvider, useEuiTheme } from '@elastic/eui';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
+import { SecurityFlyout } from '../../../flyout';
 import { useSecuritySolutionNavigation } from '../../../common/components/navigation/use_security_solution_navigation';
 import { TimelineId } from '../../../../common/types/timeline';
 import { getTimelineShowStatusByIdSelector } from '../../../timelines/components/flyout/selectors';
@@ -107,6 +108,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplatePr
             </EuiThemeProvider>
           </KibanaPageTemplate.BottomBar>
         )}
+        <SecurityFlyout scope={'global'} />
       </StyledKibanaPageTemplate>
     );
   });
