@@ -25,7 +25,6 @@ import {
   EncryptedSyntheticsMonitor,
   OverviewStatus,
   OverviewStatusMetaData,
-  SourceType,
 } from '../../../common/runtime_types';
 import { statusCheckTranslations } from '../../legacy_uptime/lib/alerts/translations';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
@@ -94,20 +93,22 @@ export class StatusRuleExecutor {
       search: `attributes.${AlertConfigKey.STATUS_ENABLED}: true`,
     });
 
-    const { allIds, enabledIds, listOfLocations, monitorLocationMap } = await processMonitors(
-      this.monitors,
-      this.server,
-      this.soClient,
-      this.syntheticsMonitorClient
-    );
+    const { allIds, enabledIds, listOfLocations, monitorLocationMap, projectMonitorsCount } =
+      await processMonitors(
+        this.monitors,
+        this.server,
+        this.soClient,
+        this.syntheticsMonitorClient
+      );
 
-    return { enabledIds, listOfLocations, allIds, monitorLocationMap };
+    return { enabledIds, listOfLocations, allIds, monitorLocationMap, projectMonitorsCount };
   }
 
   async getDownChecks(
     prevDownConfigs: OverviewStatus['downConfigs'] = {}
   ): Promise<AlertOverviewStatus> {
-    const { listOfLocations, enabledIds, allIds, monitorLocationMap } = await this.getMonitors();
+    const { listOfLocations, enabledIds, allIds, monitorLocationMap, projectMonitorsCount } =
+      await this.getMonitors();
 
     if (enabledIds.length > 0) {
       const currentStatus = await queryMonitorStatus(
@@ -135,6 +136,7 @@ export class StatusRuleExecutor {
       return {
         ...currentStatus,
         staleDownConfigs,
+        projectMonitorsCount,
         allMonitorsCount: allIds.length,
         disabledMonitorsCount: allIds.length - enabledIds.length,
       };
