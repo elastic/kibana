@@ -36,10 +36,13 @@ function addGroupByToEsQueryRule(
   return doc;
 }
 
-function addLogViewToLogThresholdRule(
+function addLogViewRefToLogThresholdRule(
   doc: SavedObjectUnsanitizedDoc<RawRule>
 ): SavedObjectUnsanitizedDoc<RawRule> {
   if (isLogThresholdRuleType(doc)) {
+    const references = doc.references ?? [];
+    const logViewId = 'log-view-reference-0';
+
     return {
       ...doc,
       attributes: {
@@ -47,11 +50,19 @@ function addLogViewToLogThresholdRule(
         params: {
           ...doc.attributes.params,
           logView: {
-            logViewId: 'log-view-reference-0',
+            logViewId,
             type: 'log-view-reference',
           },
         },
       },
+      references: [
+        ...references,
+        {
+          name: `param:${logViewId}`,
+          type: 'infrastructure-monitoring-log-view',
+          id: 'default',
+        },
+      ],
     };
   }
 
@@ -62,5 +73,5 @@ export const getMigrations870 = (encryptedSavedObjects: EncryptedSavedObjectsPlu
   createEsoMigration(
     encryptedSavedObjects,
     (doc: SavedObjectUnsanitizedDoc<RawRule>): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
-    pipeMigrations(addGroupByToEsQueryRule, addLogViewToLogThresholdRule)
+    pipeMigrations(addGroupByToEsQueryRule, addLogViewRefToLogThresholdRule)
   );

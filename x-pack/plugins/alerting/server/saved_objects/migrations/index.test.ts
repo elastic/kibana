@@ -2550,6 +2550,7 @@ describe('successful migrations', () => {
 
     describe('log threshold rule', () => {
       const logThresholdAlertTypeId = 'logs.alert.document.count';
+      const logViewId = 'log-view-reference-0';
 
       const params = {
         timeSize: 5,
@@ -2568,11 +2569,19 @@ describe('successful migrations', () => {
       };
 
       const logView = {
-        logViewId: 'log-view-reference-0',
+        logViewId,
         type: 'log-view-reference',
       };
 
-      test('should migrate and add the logView param', () => {
+      const references = [
+        {
+          name: `param:${logViewId}`,
+          type: 'infrastructure-monitoring-log-view',
+          id: 'default',
+        },
+      ];
+
+      test('should migrate and add the logView param and its reference', () => {
         const migration870 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
           '8.7.0'
         ];
@@ -2583,6 +2592,7 @@ describe('successful migrations', () => {
           ...params,
           logView,
         });
+        expect(migratedAlert870.references).toEqual(references);
       });
 
       test('should not migrate the rule if is not of type logs.alert.document.count', () => {
@@ -2593,6 +2603,7 @@ describe('successful migrations', () => {
         const migratedAlert870 = migration870(rule, migrationContext);
 
         expect(migratedAlert870.attributes.params).toEqual(params);
+        expect(migratedAlert870.references).toEqual([]);
       });
     });
   });
@@ -2945,6 +2956,7 @@ function getMockData(
       ],
       ...overwrites,
     },
+    references: [],
     updated_at: withSavedObjectUpdatedAt ? getUpdatedAt() : undefined,
     id: uuid.v4(),
     type: 'alert',
