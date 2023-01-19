@@ -39,11 +39,11 @@ export const rewriteActionsRes = (actions?: RuleAction[]) => {
     } as ReqRuleAction['frequency']);
   if (!actions) return [];
   return actions.map(
-    ({ actionTypeId, ...action }) =>
+    ({ actionTypeId, frequency, ...action }) =>
       ({
         ...action,
         connector_type_id: actionTypeId,
-        ...(action.frequency ? { frequency: rewriteFrequency(action.frequency) } : {}),
+        ...(frequency ? { frequency: rewriteFrequency(frequency) } : {}),
       } as ReqRuleAction & { connector_type_id: RuleAction['actionTypeId'] })
   );
 };
