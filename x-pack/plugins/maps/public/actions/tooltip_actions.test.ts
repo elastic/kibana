@@ -49,7 +49,7 @@ describe('openOnClickTooltip', () => {
     });
   });
 
-  test('should remove existing tooltip if its mouseover tooltip', () => {
+  test('should remove existing mouseover tooltips when adding locked tooltips', () => {
     const action = openOnClickTooltip(newTooltip);
     const dispatchMock = jest.fn();
     action(dispatchMock, () => {
@@ -64,7 +64,7 @@ describe('openOnClickTooltip', () => {
                 }
               ],
               id: 'tooltip2',
-              isLocked: false,
+              isLocked: false, // mouseover tooltip
               location: [1, 1],
             }
           ]
@@ -93,7 +93,7 @@ describe('openOnClickTooltip', () => {
               ],
               id: 'tooltip2',
               isLocked: true,
-              location: [0, 0],
+              location: [0, 0], // same location as newTooltip
             }
           ]
         }
@@ -118,7 +118,7 @@ describe('openOnClickTooltip', () => {
                   id: 'feature1',
                   layerId: 'layer1',
                   // ensure new props do not break equality check
-                  newProps: 'someValue',
+                  newProp: 'someValue',
                 }
               ],
               id: 'tooltip2',
