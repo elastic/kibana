@@ -124,6 +124,7 @@ describe('Legacy Alerts Client', () => {
       logger,
       maxAlerts: 1000,
       canSetRecoveryContext: false,
+      autoRecoverAlerts: true,
     });
   });
 
