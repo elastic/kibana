@@ -61,6 +61,9 @@ export const getKibanaDependenciesMock = (
             },
           },
         },
+        customBranding: {
+          hasCustomBranding: false,
+        },
       },
     },
     getRedirectAppLinksKibanaDependenciesMock(),

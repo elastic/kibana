@@ -24,6 +24,7 @@ export const applicationServiceFactory: ApplicationServiceFactory = ({ coreStart
       getUrlForApp,
       capabilities: { advancedSettings, maps, navLinks, visualize },
     },
+    customBranding,
   } = coreStart;
 
   return {
@@ -37,5 +38,6 @@ export const applicationServiceFactory: ApplicationServiceFactory = ({ coreStart
       navLinks,
       visualize,
     },
+    customBranding,
   };
 };
