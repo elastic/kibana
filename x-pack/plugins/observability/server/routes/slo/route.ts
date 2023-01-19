@@ -9,6 +9,7 @@ import { badRequest } from '@hapi/boom';
 import {
   createSLOParamsSchema,
   deleteSLOParamsSchema,
+  fetchHistoricalSummaryParamsSchema,
   findSLOParamsSchema,
   getSLOParamsSchema,
   updateSLOParamsSchema,
@@ -31,6 +32,8 @@ import {
   TransformGenerator,
 } from '../../services/slo/transform_generators';
 import { createObservabilityServerRoute } from '../create_observability_server_route';
+import { DefaultHistoricalSummaryClient } from '../../services/slo/historical_summary_client';
+import { FetchHistoricalSummary } from '../../services/slo/fetch_historical_summary';
 import type { IndicatorTypes } from '../../domain/models';
 import type { ObservabilityRequestHandlerContext } from '../../types';
 
@@ -162,10 +165,34 @@ const findSLORoute = createObservabilityServerRoute({
   },
 });
 
+const fetchHistoricalSummary = createObservabilityServerRoute({
+  endpoint: 'POST /internal/observability/slos/_historical_summary',
+  options: {
+    tags: [],
+  },
+  params: fetchHistoricalSummaryParamsSchema,
+  handler: async ({ context, params }) => {
+    if (!isLicenseAtLeastPlatinum(context)) {
+      throw badRequest('Platinum license or higher is needed to make use of this feature.');
+    }
+    const soClient = (await context.core).savedObjects.client;
+    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+    const repository = new KibanaSavedObjectsSLORepository(soClient);
+    const historicalSummaryClient = new DefaultHistoricalSummaryClient(esClient);
+
+    const fetchSummaryData = new FetchHistoricalSummary(repository, historicalSummaryClient);
+
+    const response = await fetchSummaryData.execute(params.body);
+
+    return response;
+  },
+});
+
 export const slosRouteRepository = {
   ...createSLORoute,
-  ...updateSLORoute,
-  ...getSLORoute,
   ...deleteSLORoute,
   ...findSLORoute,
+  ...getSLORoute,
+  ...fetchHistoricalSummary,
+  ...updateSLORoute,
 };
