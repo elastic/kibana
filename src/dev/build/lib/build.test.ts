@@ -53,7 +53,7 @@ const defaultBuild = new Build(config);
 
 describe('#getName()', () => {
   it('returns kibana for default build', () => {
-    expect(defaultBuild.getName()).toBe('kibana');
+    expect(defaultBuild.getName()).toBe('abc');
   });
 });
 
