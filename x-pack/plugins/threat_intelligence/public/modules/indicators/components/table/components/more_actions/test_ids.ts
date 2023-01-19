@@ -8,3 +8,4 @@
 export const MORE_ACTIONS_TEST_ID = 'tiIndicatorTableMoreActionsButton';
 export const ADD_TO_EXISTING_TEST_ID = 'tiIndicatorTableAddToExistingCaseContextMenu';
 export const ADD_TO_NEW_CASE_TEST_ID = 'tiIndicatorTableAddToNewCaseContextMenu';
+export const ADD_TO_BLOCK_LIST_TEST_ID = 'tiIndicatorsTableAddToBlockListContextMenu';

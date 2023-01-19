@@ -17,6 +17,7 @@ export const allowedExperimentalValues = Object.freeze({
   showDevtoolsRequest: true,
   diagnosticFileUploadEnabled: false,
   experimentalDataStreamSettings: false,
+  showIntegrationsSubcategories: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

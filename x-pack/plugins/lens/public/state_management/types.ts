@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
-import { EmbeddableEditorState } from '@kbn/embeddable-plugin/public';
+import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import type { EmbeddableEditorState } from '@kbn/embeddable-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
-import { SavedQuery } from '@kbn/data-plugin/public';
-import { Document } from '../persistence';
+import type { SavedQuery } from '@kbn/data-plugin/public';
+import type { MainHistoryLocationState } from '../../common/locator/locator';
+import type { Document } from '../persistence';
 
 import type { TableInspectorAdapter } from '../editor_frame_service/types';
-import { DateRange } from '../../common';
-import { LensAppServices } from '../app_plugin/types';
-import {
+import type { DateRange } from '../../common';
+import type { LensAppServices } from '../app_plugin/types';
+import type {
   DatasourceMap,
   VisualizationMap,
   SharingSavedObjectProps,
@@ -79,5 +80,6 @@ export interface LensStoreDeps {
   datasourceMap: DatasourceMap;
   visualizationMap: VisualizationMap;
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
+  initialStateFromLocator?: MainHistoryLocationState['payload'];
   embeddableEditorIncomingState?: EmbeddableEditorState;
 }
