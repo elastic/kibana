@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { css } from '@emotion/react';
 import React, { FC } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
@@ -18,10 +17,7 @@ import { JobSelector } from '../components/job_selector';
 import { HelpMenu } from '../components/help_menu';
 import { useMlKibana } from '../contexts/kibana';
 import { MlPageHeader } from '../components/page_header';
-
-const singleMetricViewerTitle = css({
-  minWidth: '350px',
-});
+import { PageTitle } from '../components/page_title';
 
 interface TimeSeriesExplorerPageProps {
   dateFormatTz?: string;
@@ -51,10 +47,11 @@ export const TimeSeriesExplorerPage: FC<TimeSeriesExplorerPageProps> = ({
             <EuiFlexItem grow={false}>
               <AnomalyResultsViewSelector viewId="timeseriesexplorer" />
             </EuiFlexItem>
-            <EuiFlexItem grow={false} css={singleMetricViewerTitle}>
-              <FormattedMessage
-                id="xpack.ml.timeSeriesExplorer.pageTitle"
-                defaultMessage="Single Metric Viewer"
+            <EuiFlexItem grow={false}>
+              <PageTitle
+                title={i18n.translate('xpack.ml.timeSeriesExplorer.pageTitle', {
+                  defaultMessage: 'Single Metric Viewer',
+                })}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
