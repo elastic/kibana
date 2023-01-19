@@ -180,7 +180,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
             width: '75px',
             render: (metrics: AgentMetrics | undefined, agent: Agent) =>
               metrics?.cpu_avg && metrics?.cpu_avg !== 0 ? (
-                `${metrics.cpu_avg * 100} %`
+                `${(metrics.cpu_avg * 100).toFixed(2)} %`
               ) : (
                 <MetricNonAvailable
                   agentPolicy={
