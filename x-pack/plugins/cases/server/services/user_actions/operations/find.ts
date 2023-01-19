@@ -97,7 +97,7 @@ export class UserActionFinder {
 
   private static buildActionFilter(): KueryNode | undefined {
     const filterForUserActionsExcludingComment = fromKueryExpression(
-      `not ${CASE_USER_ACTION_SAVED_OBJECT}.attributes.type: ${ActionTypes.comment}`
+      `not ${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.comment.type: ${CommentType.user}`
     );
 
     return filterForUserActionsExcludingComment;
@@ -113,7 +113,7 @@ export class UserActionFinder {
           type: CASE_USER_ACTION_SAVED_OBJECT,
         }),
         buildFilter({
-          filters: [CommentType.user, CommentType.actions],
+          filters: [CommentType.user],
           field: 'payload.comment.type',
           operator: 'or',
           type: CASE_USER_ACTION_SAVED_OBJECT,

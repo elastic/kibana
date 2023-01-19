@@ -38,6 +38,7 @@ import {
   createCase,
   updateCase,
   createComment,
+  bulkCreateAttachments,
 } from '../../../../common/lib/utils';
 
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -67,6 +68,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(response.userActions[0].id).to.eql(allUserActions[0].action_id);
       expect(response.userActions[0].version).not.to.be(undefined);
       expect(response.userActions[0]).not.to.have.property('action_id');
+      expect(response.userActions[0]).not.to.have.property('case_id');
     });
 
     describe('default parameters', () => {
@@ -128,15 +130,19 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('pagination', () => {
-      it('retrieves only 1 user action when perPage is 1', async () => {
-        const theCase = await createCase(supertest, getPostCaseRequest());
+      let theCase: CaseResponse;
 
-        await createComment({
+      beforeEach(async () => {
+        theCase = await createCase(supertest, getPostCaseRequest());
+
+        await bulkCreateAttachments({
           supertest,
           caseId: theCase.id,
-          params: postCommentUserReq,
+          params: [postCommentUserReq, postCommentUserReq],
         });
+      });
 
+      it('retrieves only 1 user action when perPage is 1', async () => {
         const response = await findCaseUserActions({
           caseID: theCase.id,
           supertest,
@@ -155,20 +161,6 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('retrieves 2 user action when perPage is 2 and there are 3 user actions', async () => {
-        const theCase = await createCase(supertest, getPostCaseRequest());
-
-        await createComment({
-          supertest,
-          caseId: theCase.id,
-          params: postCommentUserReq,
-        });
-
-        await createComment({
-          supertest,
-          caseId: theCase.id,
-          params: postCommentUserReq,
-        });
-
         const response = await findCaseUserActions({
           caseID: theCase.id,
           supertest,
@@ -192,20 +184,6 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('retrieves the second page of results', async () => {
-        const theCase = await createCase(supertest, getPostCaseRequest());
-
-        await createComment({
-          supertest,
-          caseId: theCase.id,
-          params: postCommentUserReq,
-        });
-
-        await createComment({
-          supertest,
-          caseId: theCase.id,
-          params: postCommentUserReq,
-        });
-
         const response = await findCaseUserActions({
           caseID: theCase.id,
           supertest,
@@ -224,20 +202,6 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('retrieves the third page of results', async () => {
-        const theCase = await createCase(supertest, getPostCaseRequest());
-
-        await createComment({
-          supertest,
-          caseId: theCase.id,
-          params: postCommentUserReq,
-        });
-
-        await createComment({
-          supertest,
-          caseId: theCase.id,
-          params: postCommentUserReq,
-        });
-
         const response = await findCaseUserActions({
           caseID: theCase.id,
           supertest,
@@ -256,20 +220,6 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('retrieves all the results with a perPage larger than the total', async () => {
-        const theCase = await createCase(supertest, getPostCaseRequest());
-
-        await createComment({
-          supertest,
-          caseId: theCase.id,
-          params: postCommentUserReq,
-        });
-
-        await createComment({
-          supertest,
-          caseId: theCase.id,
-          params: postCommentUserReq,
-        });
-
         const response = await findCaseUserActions({
           caseID: theCase.id,
           supertest,
@@ -317,7 +267,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(response.userActions.length).to.be(0);
       });
 
-      it('retrieves only the comment and action user actions', async () => {
+      it('retrieves only the comment user actions', async () => {
         const theCase = await createCase(supertest, getPostCaseRequest());
 
         await createComment({
@@ -628,14 +578,18 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(createCaseUserAction.action).to.eql('create');
       });
 
-      it('retrieves any non-comment user actions using the action filter', async () => {
+      it('retrieves any non user comment user actions using the action filter', async () => {
         const theCase = await createCase(supertest, getPostCaseRequest());
 
-        // The comment user action should not be returned
-        const updatedCase = await createComment({
+        const updatedCase = await bulkCreateAttachments({
           supertest,
           caseId: theCase.id,
-          params: postCommentUserReq,
+          params: [
+            postCommentUserReq,
+            postExternalReferenceESReq,
+            persistableStateAttachment,
+            postCommentActionsReq,
+          ],
         });
 
         await updateCase({
@@ -660,32 +614,42 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         });
 
-        expect(response.userActions.length).to.be(2);
+        expect(response.userActions.length).to.be(5);
 
         const createCaseUserAction = response.userActions[0];
 
         expect(createCaseUserAction.type).to.eql('create_case');
         expect(createCaseUserAction.action).to.eql('create');
 
-        const severityUserAction = response.userActions[1];
+        const externalRef = response.userActions[1] as CommentUserAction;
 
-        expect(severityUserAction.type).to.eql('severity');
-        expect(severityUserAction.action).to.eql('update');
+        expect(externalRef.type).to.eql('comment');
+        expect(externalRef.payload.comment.type).to.eql('externalReference');
+        expect(externalRef.action).to.eql('create');
+
+        const persistableState = response.userActions[2] as CommentUserAction;
+
+        expect(persistableState.type).to.eql('comment');
+        expect(persistableState.payload.comment.type).to.eql('persistableState');
+        expect(persistableState.action).to.eql('create');
+
+        const actions = response.userActions[3] as CommentUserAction;
+
+        expect(actions.type).to.eql('comment');
+        expect(actions.payload.comment.type).to.eql('actions');
+        expect(actions.action).to.eql('create');
+
+        expect(response.userActions[4].type).to.eql('severity');
+        expect(response.userActions[4].action).to.eql('update');
       });
 
       it('retrieves only alert user actions', async () => {
         const theCase = await createCase(supertest, getPostCaseRequest());
 
-        await createComment({
+        await bulkCreateAttachments({
           supertest,
           caseId: theCase.id,
-          params: postCommentUserReq,
-        });
-
-        await createComment({
-          supertest,
-          caseId: theCase.id,
-          params: postCommentAlertReq,
+          params: [postCommentUserReq, postCommentAlertReq],
         });
 
         const response = await findCaseUserActions({
@@ -709,22 +673,10 @@ export default ({ getService }: FtrProviderContext): void => {
       it('retrieves only user comment user actions', async () => {
         const theCase = await createCase(supertest, getPostCaseRequest());
 
-        await createComment({
+        await bulkCreateAttachments({
           supertest,
           caseId: theCase.id,
-          params: postCommentUserReq,
-        });
-
-        await createComment({
-          supertest,
-          caseId: theCase.id,
-          params: postCommentActionsReq,
-        });
-
-        await createComment({
-          supertest,
-          caseId: theCase.id,
-          params: postCommentAlertReq,
+          params: [postCommentUserReq, postCommentActionsReq, postCommentAlertReq],
         });
 
         const response = await findCaseUserActions({
@@ -736,48 +688,29 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         });
 
-        expect(response.userActions.length).to.be(2);
+        expect(response.userActions.length).to.be(1);
 
         const userCommentUserAction = response.userActions[0] as CommentUserAction;
 
         expect(userCommentUserAction.type).to.eql('comment');
         expect(userCommentUserAction.action).to.eql('create');
         expect(userCommentUserAction.payload.comment.type).to.eql('user');
-
-        const actionCommentUserAction = response.userActions[1] as CommentUserAction;
-
-        expect(actionCommentUserAction.type).to.eql('comment');
-        expect(actionCommentUserAction.action).to.eql('create');
-        expect(actionCommentUserAction.payload.comment.type).to.eql('actions');
       });
 
       it('retrieves attachment user actions', async () => {
         const theCase = await createCase(supertest, getPostCaseRequest());
 
-        // This one should not show up in the filter for attachments
-        await createComment({
+        await bulkCreateAttachments({
           supertest,
           caseId: theCase.id,
-          params: postCommentUserReq,
-        });
-
-        await createComment({
-          supertest,
-          caseId: theCase.id,
-          params: postExternalReferenceESReq,
-        });
-
-        await createComment({
-          supertest,
-          caseId: theCase.id,
-          params: persistableStateAttachment,
-        });
-
-        // This one should not show up in the filter for attachments
-        await createComment({
-          supertest,
-          caseId: theCase.id,
-          params: postCommentActionsReq,
+          params: [
+            // This one should not show up in the filter for attachments
+            postCommentUserReq,
+            postExternalReferenceESReq,
+            persistableStateAttachment,
+            // This one should not show up in the filter for attachments
+            postCommentActionsReq,
+          ],
         });
 
         const response = await findCaseUserActions({
@@ -861,7 +794,7 @@ export default ({ getService }: FtrProviderContext): void => {
         let obsCase: CaseResponse;
         let secCaseSpace2: CaseResponse;
 
-        before(async () => {
+        beforeEach(async () => {
           [secCase, obsCase, secCaseSpace2] = await Promise.all([
             createCase(
               supertestWithoutAuth,
@@ -946,30 +879,28 @@ export default ({ getService }: FtrProviderContext): void => {
               user: secOnlyRead,
               id: obsCase.id,
               space: 'space1',
-              expectedCode: 200,
+              expectedCode: 403,
             },
             {
               user: obsOnlyRead,
               id: secCase.id,
               space: 'space1',
-              expectedCode: 200,
+              expectedCode: 403,
             },
             {
               user: noKibanaPrivileges,
               id: secCase.id,
               space: 'space1',
-              // this one returns a 403 because the user does not have access to any owners
               expectedCode: 403,
             },
             {
               user: secOnlyRead,
               id: secCaseSpace2.id,
               space: 'space2',
-              // this one returns a 403 because the user does not have access to any owners in this space
               expectedCode: 403,
             },
           ]) {
-            const res = await findCaseUserActions({
+            await findCaseUserActions({
               caseID: scenario.id,
               supertest: supertestWithoutAuth,
               expectedHttpCode: scenario.expectedCode,
@@ -979,10 +910,6 @@ export default ({ getService }: FtrProviderContext): void => {
               },
               auth: { user: scenario.user, space: scenario.space },
             });
-
-            if (scenario.expectedCode === 200) {
-              expect(res.userActions.length).to.be(0);
-            }
           }
         });
       });

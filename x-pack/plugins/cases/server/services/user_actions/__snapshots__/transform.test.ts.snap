@@ -177,7 +177,6 @@ Object {
     Object {
       "attributes": Object {
         "action": "create",
-        "case_id": "1",
         "comment_id": "external-reference-test-id",
         "created_at": "abc",
         "created_by": Object {
@@ -235,7 +234,6 @@ Object {
     Object {
       "attributes": Object {
         "action": "create",
-        "case_id": "1",
         "comment_id": "persistable-state-test-id",
         "created_at": "abc",
         "created_by": Object {
@@ -291,7 +289,6 @@ Object {
     Object {
       "attributes": Object {
         "action": "create",
-        "case_id": "1",
         "comment_id": null,
         "created_at": "abc",
         "created_by": Object {

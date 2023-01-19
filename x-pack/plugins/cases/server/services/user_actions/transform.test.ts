@@ -27,11 +27,10 @@ import type { ConnectorUserAction } from '../../../common/api';
 import { Actions } from '../../../common/api';
 
 describe('transform', () => {
+  const persistableStateAttachmentTypeRegistry = createPersistableStateAttachmentTypeRegistryMock();
+
   describe('action_id', () => {
     it('legacyTransformFindResponseToExternalModel sets action_id correctly to the saved object id', () => {
-      const persistableStateAttachmentTypeRegistry =
-        createPersistableStateAttachmentTypeRegistryMock();
-
       const userAction = {
         ...createUserActionSO({ action: Actions.create, commentId: '5' }),
       };
@@ -45,9 +44,6 @@ describe('transform', () => {
     });
 
     it('transformFindResponseToExternalModel does not set action_id', () => {
-      const persistableStateAttachmentTypeRegistry =
-        createPersistableStateAttachmentTypeRegistryMock();
-
       const userAction = {
         ...createUserActionSO({ action: Actions.create, commentId: '5' }),
       };
@@ -61,13 +57,65 @@ describe('transform', () => {
     });
   });
 
+  describe('case_id', () => {
+    describe('legacyTransformFindResponseToExternalModel', () => {
+      it('sets case_id correctly when it finds the reference', () => {
+        const userAction = createConnectorUserAction();
+
+        const transformed = legacyTransformFindResponseToExternalModel(
+          createSOFindResponse([createUserActionFindSO(userAction)]),
+          persistableStateAttachmentTypeRegistry
+        );
+
+        expect(transformed.saved_objects[0].attributes.case_id).toEqual('1');
+      });
+
+      it('sets case_id to an empty string when it cannot find the reference', () => {
+        const userAction = {
+          ...createConnectorUserAction(),
+          references: [],
+        };
+        const transformed = legacyTransformFindResponseToExternalModel(
+          createSOFindResponse([createUserActionFindSO(userAction)]),
+          persistableStateAttachmentTypeRegistry
+        );
+
+        expect(transformed.saved_objects[0].attributes.case_id).toEqual('');
+      });
+    });
+
+    describe('transformFindResponseToExternalModel', () => {
+      it('does not set the case_id when the reference exists', () => {
+        const userAction = createConnectorUserAction();
+
+        const transformed = transformFindResponseToExternalModel(
+          createSOFindResponse([createUserActionFindSO(userAction)]),
+          persistableStateAttachmentTypeRegistry
+        );
+
+        expect(transformed.saved_objects[0].attributes).not.toHaveProperty('case_id');
+      });
+
+      it('does not set the case_id when the reference does not exist', () => {
+        const userAction = {
+          ...createConnectorUserAction(),
+          references: [],
+        };
+
+        const transformed = transformFindResponseToExternalModel(
+          createSOFindResponse([createUserActionFindSO(userAction)]),
+          persistableStateAttachmentTypeRegistry
+        );
+
+        expect(transformed.saved_objects[0].attributes).not.toHaveProperty('case_id');
+      });
+    });
+  });
+
   describe.each([
     [transformFindResponseToExternalModel.name, transformFindResponseToExternalModel],
     [legacyTransformFindResponseToExternalModel.name, legacyTransformFindResponseToExternalModel],
   ])('%s', (functionName, transformer) => {
-    const persistableStateAttachmentTypeRegistry =
-      createPersistableStateAttachmentTypeRegistryMock();
-
     it('does not populate the ids when the response is an empty array', () => {
       expect(transformer(createSOFindResponse([]), persistableStateAttachmentTypeRegistry))
         .toMatchInlineSnapshot(`
@@ -103,19 +151,6 @@ describe('transform', () => {
     });
 
     describe('reference ids', () => {
-      it('sets case_id to an empty string when it cannot find the reference', () => {
-        const userAction = {
-          ...createConnectorUserAction(),
-          references: [],
-        };
-        const transformed = transformer(
-          createSOFindResponse([createUserActionFindSO(userAction)]),
-          persistableStateAttachmentTypeRegistry
-        );
-
-        expect(transformed.saved_objects[0].attributes.case_id).toEqual('');
-      });
-
       it('sets comment_id to null when it cannot find the reference', () => {
         const userAction = {
           ...createUserActionSO({ action: Actions.create, commentId: '5' }),
@@ -127,17 +162,6 @@ describe('transform', () => {
         );
 
         expect(transformed.saved_objects[0].attributes.comment_id).toBeNull();
-      });
-
-      it('sets case_id correctly when it finds the reference', () => {
-        const userAction = createConnectorUserAction();
-
-        const transformed = transformer(
-          createSOFindResponse([createUserActionFindSO(userAction)]),
-          persistableStateAttachmentTypeRegistry
-        );
-
-        expect(transformed.saved_objects[0].attributes.case_id).toEqual('1');
       });
 
       it('sets comment_id correctly when it finds the reference', () => {

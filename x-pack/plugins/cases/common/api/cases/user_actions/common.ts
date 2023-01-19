@@ -65,7 +65,6 @@ export type UserActionWithResponse<T> = T & rt.TypeOf<typeof CaseUserActionSaved
  * Once the UI is switched to using the new user actions _find API
  */
 export const CaseUserActionInjectedIdsRt = rt.type({
-  case_id: rt.string,
   comment_id: rt.union([rt.string, rt.null]),
 });
 

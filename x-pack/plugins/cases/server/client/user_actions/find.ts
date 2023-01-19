@@ -23,9 +23,11 @@ import { Operations } from '../../authorization';
 import { formatSavedObjects } from './utils';
 import { createCaseError } from '../../common/error';
 import { asArray } from '../../common/utils';
+import type { CasesClient } from '../client';
 
 export const find = async (
   { caseId, params }: UserActionFind,
+  casesClient: CasesClient,
   clientArgs: CasesClientArgs
 ): Promise<UserActionFindResponse> => {
   const {
@@ -43,8 +45,13 @@ export const find = async (
       fold(throwErrors(Boom.badRequest), identity)
     );
 
-    const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
-      await authorization.getAuthorizationFilter(Operations.findUserActions);
+    const [authorizationFilterRes] = await Promise.all([
+      authorization.getAuthorizationFilter(Operations.findUserActions),
+      // ensure that we have authorization for reading the case
+      casesClient.cases.get({ id: caseId, includeComments: false }),
+    ]);
+
+    const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } = authorizationFilterRes;
 
     const userActions = await userActionService.finder.find({
       caseId,

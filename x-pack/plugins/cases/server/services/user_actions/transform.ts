@@ -53,7 +53,6 @@ export function transformToExternalModel(
 ): SavedObject<CaseUserActionInjectedAttributesWithoutActionId> {
   const { references } = userAction;
 
-  const caseId = findReferenceId(CASE_REF_NAME, CASE_SAVED_OBJECT, references) ?? '';
   const commentId =
     findReferenceId(COMMENT_REF_NAME, CASE_COMMENT_SAVED_OBJECT, references) ?? null;
   const payload = addReferenceIdToPayload(userAction, persistableStateAttachmentTypeRegistry);
@@ -62,7 +61,6 @@ export function transformToExternalModel(
     ...userAction,
     attributes: {
       ...userAction.attributes,
-      case_id: caseId,
       comment_id: commentId,
       payload,
     } as CaseUserActionInjectedAttributesWithoutActionId,

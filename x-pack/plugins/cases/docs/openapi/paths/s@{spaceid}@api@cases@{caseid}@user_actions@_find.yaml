@@ -1,0 +1,92 @@
+get:
+  summary: Finds user activity for a case.
+  description: >
+    You must have `read` privileges for the **Cases** feature in the
+    **Management**, **Observability**, or **Security** section of the Kibana
+    feature privileges, depending on the owner of the case you're seeking.
+  operationId: findCaseActivity
+  tags:
+    - cases
+  parameters:
+    - $ref: '../components/parameters/case_id.yaml'
+    - $ref: '../components/parameters/space_id.yaml'
+    - name: page
+      in: query
+      description: The page number to return.
+      schema:
+        type: string
+        default: 1
+      example: 1
+    - name: perPage
+      in: query
+      description: The number of user actions to return per page.
+      schema:
+        type: string
+        default: 20
+      example: 20
+    - name: sortOrder
+      in: query
+      description: Determines the sort order.
+      schema:
+        type: string
+        enum:
+          - asc
+          - desc
+        default: asc
+      example: asc
+    - name: types
+      in: query
+      description: Determines the types of user actions to return.
+      schema:
+        type: array
+        items:
+          type: string
+          enum:
+            - action
+            - alert
+            - assignees
+            - attachment
+            - comment
+            - connector
+            - create_case
+            - delete_case
+            - description
+            - pushed
+            - settings
+            - severity
+            - status
+            - tags
+            - title
+            - user
+      example: create_case
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              page:
+                type: integer
+              perPage:
+                type: integer
+              total:
+                type: integer
+              userActions:
+                type: array
+                items:
+                  $ref: '../components/schemas/user_actions_find_response_properties.yaml'
+          examples:
+            findCaseActivityResponse:
+              $ref: '../components/examples/find_case_activity_response.yaml'
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/4xx_response.yaml'
+  servers:
+    - url: https://localhost:5601
+servers:
+  - url: https://localhost:5601

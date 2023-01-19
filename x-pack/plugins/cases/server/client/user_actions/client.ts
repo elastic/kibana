@@ -15,6 +15,7 @@ import { get } from './get';
 import { getConnectors } from './connectors';
 import type { GetConnectorsRequest, UserActionFind, UserActionGet } from './types';
 import { find } from './find';
+import type { CasesClient } from '../client';
 
 /**
  * API for interacting the actions performed by a user when interacting with the cases entities.
@@ -34,9 +35,12 @@ export interface UserActionsSubClient {
 /**
  * Creates an API object for interacting with the user action entities
  */
-export const createUserActionsSubClient = (clientArgs: CasesClientArgs): UserActionsSubClient => {
+export const createUserActionsSubClient = (
+  clientArgs: CasesClientArgs,
+  casesClient: CasesClient
+): UserActionsSubClient => {
   const attachmentSubClient: UserActionsSubClient = {
-    find: (params) => find(params, clientArgs),
+    find: (params) => find(params, casesClient, clientArgs),
     getAll: (params) => get(params, clientArgs),
     getConnectors: (params) => getConnectors(params, clientArgs),
   };
