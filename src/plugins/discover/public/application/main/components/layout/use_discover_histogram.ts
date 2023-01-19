@@ -46,7 +46,6 @@ export const useDiscoverHistogram = ({
   savedSearchFetch$,
 }: UseDiscoverHistogramProps) => {
   const services = useDiscoverServices();
-  const { query, filters, timeRange } = useQuerySubscriber({ data: services.data });
   // The searchSessionId will be updated whenever a new search is started
   const searchSessionId = useObservable(searchSessionManager.searchSessionId$);
   // Initialized when the first search has been requested or
@@ -59,13 +58,6 @@ export const useDiscoverHistogram = ({
 
   const [unifiedHistogram, setUnifiedHistogram] = useState<UnifiedHistogramApi>();
 
-  // We only rely on the totalHits$ observable if we don't have a local hits context yet,
-  // since we only want to show the partial results on the first load, or there will be
-  // a flickering effect as the loading spinner is quickly shown and hidden again on fetches
-  const { fetchStatus: totalHitsStatus, result: totalHitsResult } = useDataState(
-    savedSearchData$.totalHits$
-  );
-
   const initializeUnifiedHistogram = useCallback(
     (api?: UnifiedHistogramApi) => {
       if (!api || api.initialized || !isInitialized) {
@@ -77,6 +69,11 @@ export const useDiscoverHistogram = ({
         interval: timeInterval,
         breakdownField,
       } = stateContainer.appState.getState();
+
+      const { fetchStatus: totalHitsStatus, result: totalHitsResult } =
+        savedSearchData$.totalHits$.getValue();
+
+      const { query, filters, time: timeRange } = services.data.query.getState();
 
       api.initialize({
         services: { ...services, uiActions: getUiActions() },
@@ -99,16 +96,12 @@ export const useDiscoverHistogram = ({
     },
     [
       dataView,
-      filters,
-      totalHitsStatus,
-      totalHitsResult,
       inspectorAdapters.requests,
       isInitialized,
-      query,
+      savedSearchData$.totalHits$,
       searchSessionId,
       services,
       stateContainer.appState,
-      timeRange,
     ]
   );
 
@@ -157,6 +150,10 @@ export const useDiscoverHistogram = ({
   }, [inspectorAdapters, stateContainer, unifiedHistogram]);
 
   const firstLoadComplete = useRef(false);
+  const { query, filters, timeRange } = useQuerySubscriber({ data: services.data });
+  const { fetchStatus: totalHitsStatus, result: totalHitsResult } = useDataState(
+    savedSearchData$.totalHits$
+  );
 
   useEffect(() => {
     if (!unifiedHistogram?.initialized) {
@@ -223,16 +220,16 @@ export const useDiscoverHistogram = ({
           recordRawType,
         });
 
-        // Check the hits count to set a partial or no results state
-        if (status === UnifiedHistogramFetchStatus.complete && typeof result === 'number') {
-          checkHitCount(savedSearchData$.main$, result);
-
-          // Indicate the first load has completed so we don't show
-          // partial results on subsequent fetches
-          if (!firstLoadComplete.current) {
-            firstLoadComplete.current = true;
-          }
+        if (status !== UnifiedHistogramFetchStatus.complete || typeof result !== 'number') {
+          return;
         }
+
+        // Check the hits count to set a partial or no results state
+        checkHitCount(savedSearchData$.main$, result);
+
+        // Indicate the first load has completed so we don't show
+        // partial results on subsequent fetches
+        firstLoadComplete.current = true;
       });
 
     return () => {
