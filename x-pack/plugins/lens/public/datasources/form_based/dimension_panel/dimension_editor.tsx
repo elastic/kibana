@@ -341,8 +341,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
   });
 
   const currentFieldIsInvalid = useMemo(
-    () => fieldIsInvalid(selectedColumn, currentIndexPattern),
-    [selectedColumn, currentIndexPattern]
+    () => fieldIsInvalid(state.layers[layerId], columnId, currentIndexPattern),
+    [state.layers, layerId, columnId, currentIndexPattern]
   );
 
   const shouldDisplayDots =

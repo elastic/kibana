@@ -21,12 +21,15 @@ import type { FormBasedLayer } from '../../types';
 import { hasField } from '../../pure_utils';
 
 export function getInvalidFieldMessage(
-  column: FieldBasedIndexPatternColumn,
+  layer: FormBasedLayer,
+  columnId: string,
   indexPattern?: IndexPattern
 ): FieldBasedOperationErrorMessage[] | undefined {
   if (!indexPattern) {
     return;
   }
+
+  const column = layer.columns[columnId] as FieldBasedIndexPatternColumn;
   const { operationType } = column;
   const operationDefinition = operationType ? operationDefinitionMap[operationType] : undefined;
   const fieldNames =
@@ -71,7 +74,7 @@ export function getInvalidFieldMessage(
               missingFields: missingFields.join(', '),
             },
           }),
-          displayLocations: [{ id: 'toolbar' }],
+          displayLocations: [{ id: 'toolbar' }, { id: 'dimensionTrigger', dimensionId: columnId }],
         },
       ];
     }

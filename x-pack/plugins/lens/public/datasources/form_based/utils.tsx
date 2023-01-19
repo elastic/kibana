@@ -107,13 +107,16 @@ function getReferencesErrors(
 }
 
 export function fieldIsInvalid(
-  column: GenericIndexPatternColumn | undefined,
+  layer: FormBasedLayer,
+  columnId: string,
   indexPattern: IndexPattern
 ) {
+  const column = layer.columns[columnId];
+
   if (!column || !hasField(column)) {
     return false;
   }
-  return !!getInvalidFieldMessage(column, indexPattern)?.length;
+  return !!getInvalidFieldMessage(layer, columnId, indexPattern)?.length;
 }
 
 const accuracyModeDisabledWarning = (

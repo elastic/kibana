@@ -92,7 +92,7 @@ export const cardinalityOperation: OperationDefinition<
   },
   getErrorMessage: (layer, columnId, indexPattern) =>
     combineErrorMessages([
-      getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
+      getInvalidFieldMessage(layer, columnId, indexPattern),
       getDisallowedPreviousShiftMessage(layer, columnId),
       getColumnReducedTimeRangeError(layer, columnId, indexPattern),
     ]),

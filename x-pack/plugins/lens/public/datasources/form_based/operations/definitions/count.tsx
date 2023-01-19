@@ -91,7 +91,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
   input: 'field',
   getErrorMessage: (layer, columnId, indexPattern) =>
     combineErrorMessages([
-      getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
+      getInvalidFieldMessage(layer, columnId, indexPattern),
       getDisallowedPreviousShiftMessage(layer, columnId),
       getColumnReducedTimeRangeError(layer, columnId, indexPattern),
     ]),

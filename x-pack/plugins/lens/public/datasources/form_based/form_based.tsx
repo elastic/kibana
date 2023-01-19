@@ -101,6 +101,7 @@ import { isColumnOfType } from './operations/definitions/helpers';
 import { LayerSettingsPanel } from './layer_settings';
 import { FormBasedLayer } from '../..';
 import { DimensionTrigger } from '../../shared_components/dimension_trigger';
+import { filterUserMessages } from '../../app_plugin/get_application_user_messages';
 export type { OperationType, GenericIndexPatternColumn } from './operations';
 export { deleteColumn } from './operations';
 
@@ -843,8 +844,11 @@ export function getFormBasedDatasource({
         data
       );
 
-      const dimensionErrorMessages = getDimensionErrorMessages(state, (layerId, columnId) =>
-        this.isValidColumn(state, frameDatasourceAPI.dataViews.indexPatterns, layerId, columnId)
+      const dimensionErrorMessages = getInvalidDimensionErrorMessages(
+        state,
+        layerErrorMessages,
+        (layerId, columnId) =>
+          this.isValidColumn(state, frameDatasourceAPI.dataViews.indexPatterns, layerId, columnId)
       );
 
       const warningMessages = [
@@ -1067,8 +1071,9 @@ function getLayerErrorMessages(
   return errorMessages;
 }
 
-function getDimensionErrorMessages(
+function getInvalidDimensionErrorMessages(
   state: FormBasedPrivateState,
+  currentErrorMessages: UserMessage[],
   isValidColumn: (layerId: string, columnId: string) => boolean
 ) {
   // generate messages for invalid columns
@@ -1076,6 +1081,15 @@ function getDimensionErrorMessages(
     .map((layerId) => {
       const messages: UserMessage[] = [];
       for (const columnId of Object.keys(state.layers[layerId].columns)) {
+        if (
+          filterUserMessages(currentErrorMessages, 'dimensionTrigger', { dimensionId: columnId })
+            .length > 0
+        ) {
+          // there is already a more specific user message assigned to this column, so no need
+          // to add the default "is invalid" messaging
+          continue;
+        }
+
         if (!isValidColumn(layerId, columnId)) {
           messages.push({
             severity: 'error',

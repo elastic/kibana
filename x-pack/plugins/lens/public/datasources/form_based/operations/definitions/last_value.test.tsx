@@ -919,7 +919,7 @@ describe('last_value', () => {
       };
       expect(lastValueOperation.getErrorMessage!(errorLayer, 'col1', indexPattern)).toEqual([
         {
-          displayLocations: [{ id: 'toolbar' }],
+          displayLocations: [{ id: 'toolbar' }, { id: 'dimensionTrigger', dimensionId: 'col1' }],
           message: 'Field notExisting was not found',
         },
       ]);

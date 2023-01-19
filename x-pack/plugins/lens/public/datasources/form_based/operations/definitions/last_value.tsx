@@ -203,7 +203,7 @@ export const lastValueOperation: OperationDefinition<
   getErrorMessage(layer, columnId, indexPattern) {
     const column = layer.columns[columnId] as LastValueIndexPatternColumn;
     let errorMessages: FieldBasedOperationErrorMessage[] = [];
-    const invalidSourceFieldMessage = getInvalidFieldMessage(column, indexPattern);
+    const invalidSourceFieldMessage = getInvalidFieldMessage(layer, columnId, indexPattern);
     const invalidSortFieldMessage = getInvalidSortFieldMessage(
       column.params.sortField,
       indexPattern

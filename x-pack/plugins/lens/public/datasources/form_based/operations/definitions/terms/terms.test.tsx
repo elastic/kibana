@@ -2638,7 +2638,7 @@ describe('terms', () => {
       };
       expect(termsOperation.getErrorMessage!(layer, 'col1', indexPattern)).toEqual([
         {
-          displayLocations: [{ id: 'toolbar' }],
+          displayLocations: [{ id: 'toolbar' }, { id: 'dimensionTrigger', dimensionId: 'col1' }],
           message: 'Field notExisting was not found',
         },
       ]);
