@@ -12,9 +12,17 @@ import type {
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
-import type { ExperimentalIndexingFeature } from '../../../common/types';
+import { merge } from 'lodash';
+
+import { getRegistryDataStreamAssetBaseName } from '../../../common/services';
+
+import type {
+  ExperimentalIndexingFeature,
+  ExperimentalDataStreamFeature,
+} from '../../../common/types';
 import type { NewPackagePolicy, PackagePolicy } from '../../types';
-import { getInstallation } from '../epm/packages';
+import { prepareTemplate } from '../epm/elasticsearch/template/install';
+import { getInstallation, getPackageInfo } from '../epm/packages';
 import { updateDatastreamExperimentalFeatures } from '../epm/packages/update';
 
 export async function handleExperimentalDatastreamFeatureOptIn({
@@ -34,11 +42,35 @@ export async function handleExperimentalDatastreamFeatureOptIn({
   // an update to the component templates for the package. So we fetch the saved object
   // for the package policy here to compare later.
   let installation;
+  const templateMappings: { [key: string]: any } = {};
 
   if (packagePolicy.package) {
     installation = await getInstallation({
       savedObjectsClient: soClient,
       pkgName: packagePolicy.package.name,
+    });
+
+    const packageInfo = await getPackageInfo({
+      savedObjectsClient: soClient,
+      pkgName: packagePolicy.package.name,
+      pkgVersion: packagePolicy.package.version,
+    });
+
+    // prepare template from package spec to find original index:false values
+    const templates = packageInfo.data_streams?.map((dataStream: any) => {
+      const experimentalDataStreamFeature =
+        packagePolicy.package?.experimental_data_stream_features?.find(
+          (datastreamFeature) =>
+            datastreamFeature.data_stream === getRegistryDataStreamAssetBaseName(dataStream)
+        );
+      return prepareTemplate({ pkg: packageInfo, dataStream, experimentalDataStreamFeature });
+    });
+
+    templates?.forEach((template) => {
+      Object.keys(template.componentTemplates).forEach((templateName) => {
+        templateMappings[templateName] =
+          (template.componentTemplates[templateName].template as any).mappings ?? {};
+      });
     });
   }
 
@@ -78,65 +110,21 @@ export async function handleExperimentalDatastreamFeatureOptIn({
     const componentTemplateChanged =
       isDocValueOnlyNumericChanged || isDocValueOnlyOtherChanged || isSyntheticSourceOptInChanged;
 
-    const forEachMappings = (
-      mappingProperties: Record<PropertyName, MappingProperty>,
-      process: Function
-    ) => {
-      Object.keys(mappingProperties).forEach((mapping) => {
-        const property = mappingProperties[mapping] as any;
-        if (property.properties) {
-          forEachMappings(property.properties, process);
-        } else {
-          process(property);
-        }
-      });
-    };
-
-    // TODO update mappings in getBaseTemplate (template.ts) too
+    let mappingsProperties = componentTemplate.template.mappings?.properties;
     if (isDocValueOnlyNumericChanged || isDocValueOnlyOtherChanged) {
-      forEachMappings(mappings?.properties ?? {}, (mappingProp: MappingProperty) => {
-        const mapping = mappingProp as any;
+      forEachMappings(mappings?.properties ?? {}, (mappingProp) =>
+        applyDocOnlyValueToMapping(
+          mappingProp,
+          featureMapEntry,
+          isDocValueOnlyNumericChanged,
+          isDocValueOnlyOtherChanged
+        )
+      );
 
-        // TODO is there a built in way to do check if numeric type?
-        const numericTypes = [
-          'long',
-          'integer',
-          'short',
-          'byte',
-          'double',
-          'float',
-          'half_float',
-          'scaled_float',
-          'unsigned_long',
-        ];
-        if (isDocValueOnlyNumericChanged && numericTypes.includes(mapping.type ?? '')) {
-          // TODO check for package spec value
-          if (
-            featureMapEntry.features.doc_value_only_numeric === false &&
-            mapping.index === false
-          ) {
-            delete mapping.index;
-          }
-          if (featureMapEntry.features.doc_value_only_numeric && !mapping.index) {
-            mapping.index = false;
-          }
-        }
-
-        // is this all or only wildcard not supported?
-        const otherSupportedTypes = ['date', 'boolean', 'ip', 'geo_point', 'keyword']; // date_nanos
-        if (isDocValueOnlyOtherChanged && otherSupportedTypes.includes(mapping.type ?? '')) {
-          // TODO check for package spec value
-          if (featureMapEntry.features.doc_value_only_other === false && mapping.index === false) {
-            delete mapping.index;
-          }
-          if (featureMapEntry.features.doc_value_only_other && !mapping.index) {
-            mapping.index = false;
-          }
-        }
-      });
+      const templateProperties = (templateMappings[componentTemplateName] ?? {}).properties ?? {};
+      // merge package spec mappings with generated mappings, so that index:false from package spec is not overwritten
+      mappingsProperties = merge(templateProperties, mappings?.properties ?? {});
     }
-
-    // console.log(JSON.stringify(mappings, null, 2))
 
     let sourceModeSettings = {};
 
@@ -154,6 +142,7 @@ export async function handleExperimentalDatastreamFeatureOptIn({
           ...componentTemplate.template,
           mappings: {
             ...mappings,
+            properties: mappingsProperties ?? {},
             ...sourceModeSettings,
           },
         },
@@ -201,3 +190,57 @@ export async function handleExperimentalDatastreamFeatureOptIn({
   // Delete the experimental features map from the package policy so it doesn't get persisted
   delete packagePolicy.package.experimental_data_stream_features;
 }
+
+const forEachMappings = (
+  mappingProperties: Record<PropertyName, MappingProperty>,
+  process: (prop: MappingProperty) => void
+) => {
+  Object.keys(mappingProperties).forEach((mapping) => {
+    const property = mappingProperties[mapping] as any;
+    if (property.properties) {
+      forEachMappings(property.properties, process);
+    } else {
+      process(property);
+    }
+  });
+};
+
+const applyDocOnlyValueToMapping = (
+  mappingProp: MappingProperty,
+  featureMap: ExperimentalDataStreamFeature,
+  isDocValueOnlyNumericChanged: boolean,
+  isDocValueOnlyOtherChanged: boolean
+) => {
+  const mapping = mappingProp as any;
+
+  // TODO is there a built in way to do check if numeric type?
+  const numericTypes = [
+    'long',
+    'integer',
+    'short',
+    'byte',
+    'double',
+    'float',
+    'half_float',
+    'scaled_float',
+    'unsigned_long',
+  ];
+  if (isDocValueOnlyNumericChanged && numericTypes.includes(mapping.type ?? '')) {
+    updateMapping(mapping, featureMap.features.doc_value_only_numeric);
+  }
+
+  // is this all or only wildcard not supported?
+  const otherSupportedTypes = ['date', 'boolean', 'ip', 'geo_point', 'keyword']; // date_nanos
+  if (isDocValueOnlyOtherChanged && otherSupportedTypes.includes(mapping.type ?? '')) {
+    updateMapping(mapping, featureMap.features.doc_value_only_other);
+  }
+};
+
+const updateMapping = (mapping: { index?: boolean }, featureValue: boolean) => {
+  if (featureValue === false && mapping.index === false) {
+    delete mapping.index;
+  }
+  if (featureValue && !mapping.index) {
+    mapping.index = false;
+  }
+};
