@@ -15,6 +15,7 @@ import type {
   SavedObjectsClientContract,
   Logger,
 } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
@@ -824,7 +825,7 @@ export const optimisticallyAddEsAssetReferences = async (
   pkgName: string,
   assetsToAdd: EsAssetReference[]
 ): Promise<EsAssetReference[]> => {
-  const addEsAsstes = async () => {
+  const addEsAssets = async () => {
     const so = await savedObjectsClient.get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName);
 
     const installedEs = so.attributes.installed_es ?? [];
@@ -850,7 +851,13 @@ export const optimisticallyAddEsAssetReferences = async (
     return updatedAssets ?? [];
   };
 
-  return pRetry(addEsAsstes, { retries: 10 });
+  const onlyRetryConflictErrors = (err: Error) => {
+    if (!SavedObjectsErrorHelpers.isConflictError(err)) {
+      throw err;
+    }
+  };
+
+  return pRetry(addEsAssets, { retries: 10, onFailedAttempt: onlyRetryConflictErrors });
 };
 
 export async function ensurePackagesCompletedInstall(
