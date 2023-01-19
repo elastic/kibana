@@ -31,7 +31,7 @@ export const HostViewIntroPanel = () => {
         <EuiBetaBadge
           color={'accent'}
           href={link.href ?? ''}
-          data-test-subj="inventory-hostsView-button"
+          data-test-subj="inventory-hostsView-badge"
           label={i18n.translate('xpack.infra.layout.tryIt', {
             defaultMessage: 'Try it',
           })}
@@ -41,7 +41,7 @@ export const HostViewIntroPanel = () => {
         <EuiIcon type="beaker" />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiLink data-test-subj="inventory-hostsView-button" {...link}>
+        <EuiLink data-test-subj="inventory-hostsView-link" {...link}>
           Introducing a new Hosts analysis experience
         </EuiLink>
       </EuiFlexItem>

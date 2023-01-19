@@ -49,11 +49,12 @@ export const HostsLandingPage = () => {
   return (
     <EnableHostViewPage
       actions={
-        <EuiCallOut size="s" color="warning">
+        <EuiCallOut data-test-subj="hostView-no-enable-access" size="s" color="warning">
           <p>
             Your user role doesn’t have sufficient privileges to enable this feature - please reach
             out to your Kibana Administrator and ask them to visit this page to enable this feature.
           </p>
+          {/* TODO link & link test */}
           <p>
             They will need a <EuiLink href="#">role</EuiLink> with Kibana &gt; Management &gt;
             Advanced Settings &gt; All permissions.

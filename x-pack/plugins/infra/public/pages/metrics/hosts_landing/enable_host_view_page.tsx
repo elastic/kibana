@@ -23,6 +23,7 @@ export const EnableHostViewPage = ({ actions }: Props) => {
   return (
     <MetricsPageTemplate isEmptyState>
       <EuiPageTemplate.EmptyPrompt
+        data-test-subj="hostsLandingPage"
         title={<h2>Introducing: Host Analysis</h2>}
         alignment="center"
         icon={<EuiImage size="fullWidth" src={hostsLandingBeta} alt="" />}
