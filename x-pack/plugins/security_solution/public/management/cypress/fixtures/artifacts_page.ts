@@ -5,13 +5,6 @@
  * 2.0.
  */
 
-export interface FormAction {
-  type: string;
-  selector?: string;
-  customSelector?: string;
-  value?: string;
-}
-
 export const getArtifactsListTestsData = () => [
   {
     title: 'Trusted applications',

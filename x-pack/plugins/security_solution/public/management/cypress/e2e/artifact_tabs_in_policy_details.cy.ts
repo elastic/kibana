@@ -5,30 +5,13 @@
  * 2.0.
  */
 
-import type { FormAction } from '../fixtures/artifacts_page';
 import { getArtifactsListTestsData } from '../fixtures/artifacts_page';
 import {
   loadEndpointDataForEventFiltersIfNeeded,
   removeAllArtifacts,
 } from '../tasks/artifact_helpers';
 import { login, loginWithRole, ROLE } from '../tasks/login';
-
-const runAction = (action: FormAction) => {
-  let element;
-  if (action.customSelector) {
-    element = cy.get(action.customSelector);
-  } else {
-    element = cy.getBySel(action.selector || '');
-  }
-
-  if (action.type === 'click') {
-    element.click();
-  } else if (action.type === 'input') {
-    element.type(action.value || '');
-  } else if (action.type === 'clear') {
-    element.clear();
-  }
-};
+import { performUserActions } from '../tasks/perform_user_actions';
 
 const visitArtifactTab = (tabId: string) => {
   loginWithWriteAccess(`/app/security/administration/policy`);
@@ -62,9 +45,7 @@ describe('Artifact tabs in Policy Details', () => {
 
         const { formActions, checkResults } = getArtifactsListTestsData()[0].create;
 
-        for (const action of formActions) {
-          runAction(action);
-        }
+        performUserActions(formActions);
 
         // Add a per policy artifact - but not assign it to any policy
         cy.getBySel('trustedApps-form-effectedPolicies-perPolicy').click();

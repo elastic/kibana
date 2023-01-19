@@ -7,11 +7,12 @@
 
 import { login, loginWithRole, ROLE } from '../tasks/login';
 
-import { type FormAction, getArtifactsListTestsData } from '../fixtures/artifacts_page';
+import { getArtifactsListTestsData } from '../fixtures/artifacts_page';
 import {
   loadEndpointDataForEventFiltersIfNeeded,
   removeAllArtifacts,
 } from '../tasks/artifact_helpers';
+import { performUserActions } from '../tasks/perform_user_actions';
 
 const loginWithWriteAccess = (url: string) => {
   loginWithRole(ROLE.analyst_hunter);
@@ -26,23 +27,6 @@ const loginWithReadAccess = (url: string) => {
 const loginWithoutAccess = (url: string) => {
   loginWithRole(ROLE.t1_analyst);
   cy.visit(url);
-};
-
-const runAction = (action: FormAction) => {
-  let element;
-  if (action.customSelector) {
-    element = cy.get(action.customSelector);
-  } else {
-    element = cy.getBySel(action.selector || '');
-  }
-
-  if (action.type === 'click') {
-    element.click();
-  } else if (action.type === 'input') {
-    element.type(action.value || '');
-  } else if (action.type === 'clear') {
-    element.clear();
-  }
 };
 
 describe('Artifacts pages', () => {
@@ -85,9 +69,7 @@ describe('Artifacts pages', () => {
         // Opens add flyout
         cy.getBySel(`${testData.pagePrefix}-emptyState-addButton`).click();
 
-        for (const formAction of testData.create.formActions) {
-          runAction(formAction);
-        }
+        performUserActions(testData.create.formActions);
 
         // Submit create artifact form
         cy.getBySel(`${testData.pagePrefix}-flyout-submitButton`).click();
@@ -121,9 +103,7 @@ describe('Artifacts pages', () => {
         cy.getBySel(`${testData.pagePrefix}-card-header-actions-button`).click();
         cy.getBySel(`${testData.pagePrefix}-card-cardEditAction`).click();
 
-        for (const formAction of testData.update.formActions) {
-          runAction(formAction);
-        }
+        performUserActions(testData.update.formActions);
 
         // Submit edit artifact form
         cy.getBySel(`${testData.pagePrefix}-flyout-submitButton`).click();
