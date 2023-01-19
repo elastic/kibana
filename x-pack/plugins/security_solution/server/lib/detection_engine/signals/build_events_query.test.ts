@@ -555,6 +555,61 @@ describe('create_signals', () => {
     });
   });
 
+  test('it respects overriderBody params', () => {
+    const query = buildEventsSearchQuery({
+      index: ['auditbeat-*'],
+      from: 'now-5m',
+      to: 'today',
+      filter: {},
+      size: 100,
+      searchAfterSortIds: undefined,
+      primaryTimestamp: '@timestamp',
+      secondaryTimestamp: undefined,
+      runtimeMappings: undefined,
+      overrideBody: {
+        _source: false,
+        fields: ['@timestamp'],
+      },
+    });
+    expect(query).toEqual({
+      allow_no_indices: true,
+      index: ['auditbeat-*'],
+      size: 100,
+      ignore_unavailable: true,
+      body: {
+        query: {
+          bool: {
+            filter: [
+              {},
+              {
+                range: {
+                  '@timestamp': {
+                    gte: 'now-5m',
+                    lte: 'today',
+                    format: 'strict_date_optional_time',
+                  },
+                },
+              },
+              {
+                match_all: {},
+              },
+            ],
+          },
+        },
+        _source: false,
+        fields: ['@timestamp'],
+        sort: [
+          {
+            '@timestamp': {
+              order: 'asc',
+              unmapped_type: 'date',
+            },
+          },
+        ],
+      },
+    });
+  });
+
   describe('buildEqlSearchRequest', () => {
     test('should build a basic request with time range', () => {
       const request = buildEqlSearchRequest({
