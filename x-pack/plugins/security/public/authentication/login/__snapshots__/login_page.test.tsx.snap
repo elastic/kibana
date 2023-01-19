@@ -186,7 +186,7 @@ exports[`LoginPage disabled form states renders warning when cookies are disable
   }
   title={
     <FormattedMessage
-      defaultMessage="Cookies are required to log in to {{pageTitle}}"
+      defaultMessage="Cookies are required to log in to {pageTitle}"
       id="xpack.security.loginPage.requiresCookiesTitle"
       values={
         Object {
