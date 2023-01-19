@@ -182,7 +182,6 @@ const getSavedObjectTypes = (
         },
         vars: { type: 'flattened' },
         inputs: {
-          type: 'nested', // TODO Review: If we're not searching `nested` isn't necessary but it's not possible to change the type later
           dynamic: false,
           properties: {},
         },
