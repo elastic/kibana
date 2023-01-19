@@ -20,8 +20,8 @@ import type { Query, Filter, TimeRange, AggregateQuery } from '@kbn/es-query';
 import type { TimeHistoryContract, SavedQuery } from '@kbn/data-plugin/public';
 import type { SavedQueryAttributes } from '@kbn/data-plugin/common';
 
-import { QueryBarMenu } from '../query_string_input/query_bar_menu';
 import QueryBarTopRow from '../query_string_input/query_bar_top_row';
+import { QueryBarMenu } from '../query_string_input/query_bar_menu';
 import { FilterBar, FilterItems } from '../filter_bar';
 import { searchBarStyles } from './search_bar.styles';
 import { MemoizedSavedQueryManagement } from './memoized_saved_query_management';
@@ -165,12 +165,28 @@ function SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query>({
     [`uniSearchBar--${displayStyle}`]: displayStyle,
   });
 
-  const [stateQuery, setStateQuery] = useState<QT | Query | undefined>(
-    query ? { ...query } : undefined
-  );
+  const [stateQuery, setStateQuery] = useState(query ? { ...query } : undefined);
   const [stateDateRangeFrom, setStateDateRangeFrom] = useState<string>(dateRangeFrom ?? 'now-15m');
   const [stateDateRangeTo, setStateDateRangeTo] = useState<string>(dateRangeTo ?? 'now');
   const [stateOpenQueryBarMenu, setStateOpenQueryBarMenu] = useState(false);
+
+  const timeRangeForSuggestionsOverride = showDatePicker ? undefined : false;
+
+  const shouldRenderFilterBar =
+    showFilterBar && filters && indexPatterns && compact(indexPatterns).length > 0;
+
+  const shouldShowDatePickerAsBadge = shouldRenderFilterBar && !showQueryInput;
+
+  const shouldRenderTimeFilterInSavedQueryForm = () => {
+    if (!showDatePicker && dateRangeFrom !== undefined && dateRangeTo !== undefined) {
+      return false;
+    }
+    if (indexPatterns?.length) {
+      // return true if at least one of the DateView has timeFieldName
+      return indexPatterns.some((dataView) => Boolean(dataView.timeFieldName));
+    }
+    return true;
+  };
 
   const isDirty = () => {
     if (!showDatePicker && stateQuery && query) {
@@ -182,22 +198,6 @@ function SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query>({
       stateDateRangeFrom !== dateRangeFrom ||
       stateDateRangeTo !== dateRangeTo
     );
-  };
-
-  const shouldRenderFilterBar = () =>
-    showFilterBar && filters && indexPatterns && compact(indexPatterns).length > 0;
-
-  const shouldShowDatePickerAsBadge = () => shouldRenderFilterBar() && !showQueryInput;
-
-  const shouldRenderTimeFilterInSavedQueryForm = () => {
-    if (!showDatePicker && dateRangeFrom !== undefined && dateRangeTo !== undefined) {
-      return false;
-    }
-    if (indexPatterns?.length) {
-      // return true if at least one of the DateView has timeFieldName
-      return indexPatterns.some((dataView) => Boolean(dataView.timeFieldName));
-    }
-    return true;
   };
 
   const handleLoadSavedQuery = (newSavedQuery: SavedQuery) => {
@@ -269,7 +269,7 @@ function SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query>({
       );
     } catch (error) {
       notifications.toasts.addDanger(
-        i18n.translate('unifiedSearch.searchBar.querySavedSuccessfully', {
+        i18n.translate('unifiedSearch.searchBar.querySavedError', {
           defaultMessage: 'An error occured while saving your query: {errorMessage}',
           values: { errorMessage: error.message },
         })
@@ -305,31 +305,32 @@ function SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query>({
     });
   };
 
-  const handleQueryBarSubmit = (queryAndDateRange: {
+  const handleQueryBarSubmit = ({
+    dateRange: newDateRange,
+    query: newQuery,
+  }: {
     dateRange?: TimeRange;
     query?: QT | Query;
   }) => {
-    setStateQuery(queryAndDateRange.query);
-    setStateDateRangeFrom(queryAndDateRange.dateRange?.from || stateDateRangeFrom);
-    setStateDateRangeTo(queryAndDateRange.dateRange?.to || stateDateRangeTo);
+    setStateQuery(newQuery);
+    setStateDateRangeFrom(newDateRange?.from || stateDateRangeFrom);
+    setStateDateRangeTo(newDateRange?.to || stateDateRangeTo);
 
     onQuerySubmit?.({
-      query: stateQuery as Query,
+      query: newQuery as Query,
       dateRange: {
-        from: stateDateRangeFrom,
-        to: stateDateRangeTo,
+        from: newDateRange?.from || stateDateRangeFrom,
+        to: newDateRange?.to || stateDateRangeTo,
       },
     });
 
-    reportUiCounter(appName, METRIC_TYPE.CLICK, 'query_submitted');
+    reportUiCounter?.(appName, METRIC_TYPE.CLICK, 'query_submitted');
   };
 
   const handleCloseQueryBarMenu = () => setStateOpenQueryBarMenu(false);
 
   const toggleFilterBarMenuPopover = (openQueryBarMenu: boolean) =>
     setStateOpenQueryBarMenu(openQueryBarMenu);
-
-  const timeRangeForSuggestionsOverride = showDatePicker ? undefined : false;
 
   return (
     <div className={classes} css={cssStyles} data-test-subj="globalQueryBar">
@@ -341,8 +342,8 @@ function SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query>({
         dateRangeTo={stateDateRangeTo}
         fillSubmitButton={fillSubmitButton || false}
         filterBar={
-          shouldRenderFilterBar() ? (
-            shouldShowDatePickerAsBadge() ? (
+          shouldRenderFilterBar ? (
+            shouldShowDatePickerAsBadge ? (
               <FilterItems
                 filters={filters!}
                 hiddenPanelOptions={hiddenFilterPanelOptions}
@@ -380,7 +381,7 @@ function SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query>({
         prepend={
           (showFilterBar || showQueryInput) && showQueryMenu ? (
             <QueryBarMenu
-              buttonProps={{ size: shouldShowDatePickerAsBadge() ? 's' : 'm' }}
+              buttonProps={{ size: shouldShowDatePickerAsBadge ? 's' : 'm' }}
               dateRangeFrom={stateDateRangeFrom}
               dateRangeTo={stateDateRangeTo}
               filters={filters}
@@ -443,7 +444,7 @@ function SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query>({
         showAddFilter={showFilterBar}
         showAutoRefreshOnly={showAutoRefreshOnly}
         showDatePicker={showDatePicker}
-        showDatePickerAsBadge={shouldShowDatePickerAsBadge()}
+        showDatePickerAsBadge={shouldShowDatePickerAsBadge}
         showQueryInput={showQueryInput}
         showSubmitButton={showSubmitButton}
         submitButtonStyle={submitButtonStyle}

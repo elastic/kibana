@@ -89,5 +89,5 @@ export interface IUnifiedSearchPluginServices extends Partial<CoreStart> {
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   dataViewEditor: DataViewEditorStart;
-  usageCollection: UsageCollectionStart;
+  usageCollection?: UsageCollectionStart;
 }
