@@ -14,6 +14,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useEffect, useState } from 'react';
 import { isEmpty } from 'lodash/fp';
+import uuid from 'uuid';
 import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ShapeTreeNode, ElementClickListener } from '@elastic/charts';
@@ -28,30 +29,49 @@ import { getSeverityTableColumns } from '../columns';
 import { getSeverityColor } from '../helpers';
 import { TOTAL_COUNT_OF_ALERTS } from '../../../alerts_table/translations';
 import { showInitialLoadingSpinner } from '../../alerts_histogram_panel/helpers';
+import { useSummaryChartData } from '../use_summary_chart_data';
+import { severityAggregations } from '../use_summary_chart_data/aggregations';
 import * as i18n from '../translations';
 
 const DONUT_HEIGHT = 150;
+const SEVERITY_DONUT_CHART_ID = 'alerts-summary-severity-donut';
 
 export const SeverityLevelChart: React.FC<ChartsPanelProps> = ({
-  data,
-  isLoading,
-  uniqueQueryId,
+  filters,
+  query,
+  signalIndexName,
+  runtimeMappings,
   addFilter,
+  skip,
 }) => {
   const [isInitialLoading, setIsInitialLoading] = useState(true);
-  const fillColor: FillColor = useCallback((d: ShapeTreeNode) => {
-    return getSeverityColor(d.dataName);
-  }, []);
-
+  const uniqueQueryId = useMemo(() => `${SEVERITY_DONUT_CHART_ID}-${uuid.v4()}`, []);
   const columns = useMemo(() => getSeverityTableColumns(), []);
-  const items = useMemo(() => (data as SeverityData[]) ?? [], [data]);
+
+  const { items, isLoading } = useSummaryChartData({
+    aggregationType: 'Severity',
+    aggregations: severityAggregations,
+    filters,
+    query,
+    signalIndexName,
+    runtimeMappings,
+    skip,
+    uniqueQueryId,
+  });
+
+  const data = useMemo(() => (items as SeverityData[]) ?? [], [items]);
+
   const count = useMemo(() => {
-    return items
-      ? items.reduce(function (prev, cur) {
+    return data
+      ? data.reduce(function (prev, cur) {
           return prev + cur.value;
         }, 0)
       : 0;
-  }, [items]);
+  }, [data]);
+
+  const fillColor: FillColor = useCallback((d: ShapeTreeNode) => {
+    return getSeverityColor(d.dataName);
+  }, []);
 
   const sorting: { sort: { field: keyof SeverityData; direction: SortOrder } } = {
     sort: {
@@ -78,18 +98,14 @@ export const SeverityLevelChart: React.FC<ChartsPanelProps> = ({
   );
 
   useEffect(() => {
-    let canceled = false;
-    if (!canceled && !showInitialLoadingSpinner({ isInitialLoading, isLoadingAlerts: isLoading })) {
+    if (!showInitialLoadingSpinner({ isInitialLoading, isLoadingAlerts: isLoading })) {
       setIsInitialLoading(false);
     }
-    return () => {
-      canceled = true; // prevent long running data fetches from updating state after unmounting
-    };
   }, [isInitialLoading, isLoading, setIsInitialLoading]);
 
   return (
     <InspectButtonContainer>
-      <EuiPanel hasBorder hasShadow={false}>
+      <EuiPanel hasBorder hasShadow={false} data-test-subj="severty-level-chart">
         <HeaderSection
           id={uniqueQueryId}
           inspectTitle={i18n.SEVERITY_LEVELS_TITLE}
@@ -98,12 +114,12 @@ export const SeverityLevelChart: React.FC<ChartsPanelProps> = ({
           titleSize="xs"
           hideSubtitle
         />
-        <EuiFlexGroup data-test-subj="severty-chart" gutterSize="s">
+        <EuiFlexGroup gutterSize="s">
           <EuiFlexItem>
             <EuiInMemoryTable
-              data-test-subj="severity-level-alerts-table"
+              data-test-subj="severity-level-table"
               columns={columns}
-              items={items}
+              items={data}
               loading={isLoading}
               sorting={sorting}
             />
@@ -114,7 +130,7 @@ export const SeverityLevelChart: React.FC<ChartsPanelProps> = ({
             ) : (
               <DonutChart
                 data-test-subj="severity-level-donut"
-                data={items}
+                data={data}
                 fillColor={fillColor}
                 height={DONUT_HEIGHT}
                 label={TOTAL_COUNT_OF_ALERTS}

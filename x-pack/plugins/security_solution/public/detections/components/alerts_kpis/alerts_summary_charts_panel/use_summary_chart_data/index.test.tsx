@@ -13,8 +13,8 @@ import type { UseAlertsQueryProps } from '../types';
 import { useSummaryChartData, getAlertsQuery } from '.';
 import * as aggregations from './aggregations';
 import * as severityMock from '../mocks/mock_severity_response';
-import * as detectionMock from '../mocks/mock_detections_response';
-import * as hostMock from '../mocks/mock_host_response';
+import * as alertTypeMock from '../mocks/mock_alerts_type_response';
+import * as alertsGroupingMock from '../mocks/mock_alerts_grouping_response';
 
 const from = '2022-04-05T12:00:00.000Z';
 const to = '2022-04-08T12:00:00.000Z';
@@ -55,31 +55,31 @@ describe('getAlertsQuery', () => {
         from,
         to,
         additionalFilters,
-        aggregations: aggregations.severityAgg,
+        aggregations: aggregations.severityAggregations,
       })
-    ).toEqual(severityMock.severityQuery);
+    ).toEqual(severityMock.query);
   });
 
-  test('it returns the expected detections query', () => {
+  test('it returns the expected alerts by type query', () => {
     expect(
       getAlertsQuery({
         from,
         to,
         additionalFilters,
-        aggregations: aggregations.detectionsAgg,
+        aggregations: aggregations.alertTypeAggregations,
       })
-    ).toEqual(detectionMock.detectionsQuery);
+    ).toEqual(alertTypeMock.query);
   });
 
-  test('it returns the expected host query', () => {
+  test('it returns the expected alerts by grouping query', () => {
     expect(
       getAlertsQuery({
         from,
         to,
         additionalFilters,
-        aggregations: aggregations.hostAgg,
+        aggregations: aggregations.alertsGroupingAggregations('host.name'),
       })
-    ).toEqual(hostMock.hostQuery);
+    ).toEqual(alertsGroupingMock.query);
   });
 });
 
@@ -89,7 +89,7 @@ const renderUseSummaryChartData = (props: Partial<UseAlertsQueryProps> = {}) =>
     () =>
       useSummaryChartData({
         aggregationType: 'Severity',
-        aggregations: aggregations.severityAgg,
+        aggregations: aggregations.severityAggregations,
         uniqueQueryId: 'test',
         signalIndexName: 'signal-alerts',
         ...props,
@@ -116,7 +116,7 @@ describe('get severity chart data', () => {
     });
 
     expect(mockUseQueryAlerts).toBeCalledWith({
-      query: severityMock.severityQuery,
+      query: severityMock.query,
       indexName: 'signal-alerts',
       skip: false,
       queryName: ALERTS_QUERY_NAMES.COUNT,
@@ -161,7 +161,7 @@ describe('get severity chart data', () => {
     const { result } = renderUseSummaryChartData({ skip: true });
 
     expect(mockUseQueryAlerts).toBeCalledWith({
-      query: severityMock.severityQuery,
+      query: severityMock.query,
       indexName: 'signal-alerts',
       skip: true,
       queryName: ALERTS_QUERY_NAMES.COUNT,
@@ -174,7 +174,7 @@ describe('get severity chart data', () => {
     });
   });
 
-  describe('get detections chart data', () => {
+  describe('get alerts by type data', () => {
     beforeEach(() => {
       jest.clearAllMocks();
       mockDateNow.mockReturnValue(dateNow);
@@ -182,8 +182,8 @@ describe('get severity chart data', () => {
     });
     it('should return default values', () => {
       const { result } = renderUseSummaryChartData({
-        aggregations: aggregations.detectionsAgg,
-        aggregationType: 'Detections',
+        aggregations: aggregations.alertTypeAggregations,
+        aggregationType: 'Type',
       });
 
       expect(result.current).toEqual({
@@ -193,32 +193,32 @@ describe('get severity chart data', () => {
       });
 
       expect(mockUseQueryAlerts).toBeCalledWith({
-        query: detectionMock.detectionsQuery,
+        query: alertTypeMock.query,
         indexName: 'signal-alerts',
         skip: false,
         queryName: ALERTS_QUERY_NAMES.COUNT,
       });
     });
 
-    it('should return parsed detections items', () => {
+    it('should return parsed alerts by type items', () => {
       mockUseQueryAlerts.mockReturnValue({
         ...defaultUseQueryAlertsReturn,
-        data: detectionMock.mockAlertsData,
+        data: alertTypeMock.mockAlertsData,
       });
 
       const { result } = renderUseSummaryChartData({
-        aggregations: aggregations.detectionsAgg,
-        aggregationType: 'Detections',
+        aggregations: aggregations.alertTypeAggregations,
+        aggregationType: 'Type',
       });
       expect(result.current).toEqual({
-        items: detectionMock.parsedAlerts,
+        items: alertTypeMock.parsedAlerts,
         isLoading: false,
         updatedAt: dateNow,
       });
     });
   });
 
-  describe('get host chart data', () => {
+  describe('get top alerts data', () => {
     beforeEach(() => {
       jest.clearAllMocks();
       mockDateNow.mockReturnValue(dateNow);
@@ -226,8 +226,8 @@ describe('get severity chart data', () => {
     });
     it('should return default values', () => {
       const { result } = renderUseSummaryChartData({
-        aggregations: aggregations.hostAgg,
-        aggregationType: 'Host',
+        aggregations: aggregations.alertsGroupingAggregations('host.name'),
+        aggregationType: 'Top',
       });
 
       expect(result.current).toEqual({
@@ -237,25 +237,25 @@ describe('get severity chart data', () => {
       });
 
       expect(mockUseQueryAlerts).toBeCalledWith({
-        query: hostMock.hostQuery,
+        query: alertsGroupingMock.query,
         indexName: 'signal-alerts',
         skip: false,
         queryName: ALERTS_QUERY_NAMES.COUNT,
       });
     });
 
-    it('should return parsed host items', () => {
+    it('should return parsed top alert items', () => {
       mockUseQueryAlerts.mockReturnValue({
         ...defaultUseQueryAlertsReturn,
-        data: hostMock.mockAlertsData,
+        data: alertsGroupingMock.mockAlertsData,
       });
 
       const { result } = renderUseSummaryChartData({
-        aggregations: aggregations.hostAgg,
-        aggregationType: 'Host',
+        aggregations: aggregations.alertsGroupingAggregations('host.name'),
+        aggregationType: 'Top',
       });
       expect(result.current).toEqual({
-        items: hostMock.parsedAlerts,
+        items: alertsGroupingMock.parsedAlerts,
         isLoading: false,
         updatedAt: dateNow,
       });

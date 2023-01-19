@@ -8,7 +8,7 @@ import { ALERT_SEVERITY, ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 
 const DEFAULT_QUERY_SIZE = 1000;
 
-export const severityAgg = {
+export const severityAggregations = {
   statusBySeverity: {
     terms: {
       field: ALERT_SEVERITY,
@@ -16,24 +16,7 @@ export const severityAgg = {
   },
 };
 
-export const hostAgg = {
-  alertsByHost: {
-    terms: {
-      field: 'host.name',
-      size: 10,
-    },
-  },
-};
-export const hostAggFive = {
-  alertsByHost: {
-    terms: {
-      field: 'host.name',
-      size: 5,
-    },
-  },
-};
-
-export const detectionsAgg = {
+export const alertTypeAggregations = {
   alertsByRule: {
     terms: {
       field: ALERT_RULE_NAME,
@@ -50,9 +33,13 @@ export const detectionsAgg = {
   },
 };
 
-export const aggregations = {
-  detections: detectionsAgg,
-  severity: severityAgg,
-  host: hostAgg,
-  hostFive: hostAggFive,
+export const alertsGroupingAggregations = (stackByField: string) => {
+  return {
+    alertsByGrouping: {
+      terms: {
+        field: stackByField,
+        size: 10,
+      },
+    },
+  };
 };

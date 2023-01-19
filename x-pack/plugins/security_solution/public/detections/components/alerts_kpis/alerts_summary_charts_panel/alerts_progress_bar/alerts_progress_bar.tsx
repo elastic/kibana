@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   EuiPanel,
   EuiProgress,
@@ -13,56 +12,96 @@ import {
   EuiHorizontalRule,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import type { ChartsPanelProps, HostData } from '../types';
+import uuid from 'uuid';
+import type { ChartsPanelProps, AlertsProgressBarData } from '../types';
 import { HeaderSection } from '../../../../../common/components/header_section';
 import { InspectButtonContainer } from '../../../../../common/components/inspect';
+import { StackByComboBox } from '../../common/components';
+// import { useEuiComboBoxReset } from '../../../../../common/components/use_combo_box_reset';
 import { DefaultDraggable } from '../../../../../common/components/draggables';
-import { HOST_NAME } from '../../../../../common/components/ml/tables/translations';
 import { showInitialLoadingSpinner } from '../../alerts_histogram_panel/helpers';
+import { useSummaryChartData } from '../use_summary_chart_data';
+import { alertsGroupingAggregations } from '../use_summary_chart_data/aggregations';
 import * as i18n from '../translations';
 
+const TOP_ALERTS_CHART_ID = 'alerts-summary-top-alerts';
+const DEFAULT_COMBOBOX_WIDTH = 150;
+const DEFAULT_OPTIONS = ['host.name', 'user.name', 'source.ip', 'destination.ip'];
+
 const ProgressWrapper = styled.div`
-  height: 173px;
+  height: 160px;
 `;
 
 const StyledEuiText = styled(EuiText)`
   margin-top: -${({ theme }) => theme.eui.euiSizeM};
 `;
 
-export const AlertsByHost: React.FC<ChartsPanelProps> = ({ data, isLoading, uniqueQueryId }) => {
+export const AlertsProgressBar: React.FC<ChartsPanelProps> = ({
+  filters,
+  query,
+  signalIndexName,
+  runtimeMappings,
+  skip,
+}) => {
   const [isInitialLoading, setIsInitialLoading] = useState(true);
-  const items = (data as HostData[]) ?? [];
+  const [stackByField, setStackByField] = useState('host.name');
+  const uniqueQueryId = useMemo(() => `${TOP_ALERTS_CHART_ID}-${uuid.v4()}`, []);
+  const dropDownOptions = DEFAULT_OPTIONS.map((field) => {
+    return { value: field, label: field };
+  });
+  const aggregations = useMemo(() => alertsGroupingAggregations(stackByField), [stackByField]);
+  const onSelect = useCallback((field: string) => {
+    setStackByField(field);
+  }, []);
+
+  const { items, isLoading } = useSummaryChartData({
+    aggregationType: 'Top',
+    aggregations,
+    filters,
+    query,
+    signalIndexName,
+    runtimeMappings,
+    skip,
+    uniqueQueryId,
+  });
+
+  const data = useMemo(() => (items as AlertsProgressBarData[]) ?? [], [items]);
 
   useEffect(() => {
-    let canceled = false;
-    if (!canceled && !showInitialLoadingSpinner({ isInitialLoading, isLoadingAlerts: isLoading })) {
+    if (!showInitialLoadingSpinner({ isInitialLoading, isLoadingAlerts: isLoading })) {
       setIsInitialLoading(false);
     }
-    return () => {
-      canceled = true; // prevent long running data fetches from updating state after unmounting
-    };
   }, [isInitialLoading, isLoading, setIsInitialLoading]);
 
   return (
     <InspectButtonContainer>
-      <EuiPanel hasBorder hasShadow={false}>
+      <EuiPanel hasBorder hasShadow={false} data-test-subj="top-alerts">
         <HeaderSection
           id={uniqueQueryId}
-          inspectTitle={i18n.ALERT_BY_HOST_TITLE}
+          inspectTitle={`${i18n.ALERT_BY_TITLE} ${stackByField}`}
           outerDirection="row"
-          title={i18n.ALERT_BY_HOST_TITLE}
+          title={i18n.ALERT_BY_TITLE}
           titleSize="xs"
           hideSubtitle
-        />
+        >
+          <StackByComboBox
+            data-test-subj="stackByComboBox"
+            selected={stackByField}
+            onSelect={onSelect}
+            prepend={''}
+            width={DEFAULT_COMBOBOX_WIDTH}
+            dropDownoptions={dropDownOptions}
+          />
+        </HeaderSection>
         <StyledEuiText size="s">
-          <h5>{HOST_NAME}</h5>
+          <h5>{stackByField}</h5>
         </StyledEuiText>
         <EuiHorizontalRule margin="xs" />
         {!isLoading && data === null && (
           <>
-            <EuiText size="s" textAlign="center">
+            <EuiText size="s" textAlign="center" data-test-subj="empty-proress-bar">
               {'No items found'}
             </EuiText>
             <EuiHorizontalRule margin="xs" />
@@ -71,8 +110,8 @@ export const AlertsByHost: React.FC<ChartsPanelProps> = ({ data, isLoading, uniq
         {isInitialLoading ? (
           <EuiLoadingSpinner size="l" />
         ) : (
-          <ProgressWrapper data-test-subj="alert-by-host-chart" className="eui-yScroll">
-            {items.map((item) => (
+          <ProgressWrapper data-test-subj="alerts-progress-bar" className="eui-yScroll">
+            {data.map((item) => (
               <>
                 <EuiProgress
                   valueText={
@@ -90,9 +129,9 @@ export const AlertsByHost: React.FC<ChartsPanelProps> = ({ data, isLoading, uniq
                     ) : (
                       <DefaultDraggable
                         isDraggable={false}
-                        field={'host.name'}
+                        field={stackByField}
                         hideTopN={true}
-                        id={`alert-by-host-chart-${item.key}`}
+                        id={`top-alerts-${item.key}`}
                         value={item.key}
                         queryValue={item.key}
                         tooltipContent={null}
@@ -114,4 +153,4 @@ export const AlertsByHost: React.FC<ChartsPanelProps> = ({ data, isLoading, uniq
   );
 };
 
-AlertsByHost.displayName = 'AlertsByHost';
+AlertsProgressBar.displayName = 'AlertsProgressBar';

@@ -25,7 +25,7 @@ export const mockAlertsData = {
     hits: [],
   },
   aggregations: {
-    alertsByHost: {
+    alertsByGrouping: {
       doc_count_error_upper_bound: 0,
       sum_other_doc_count: 0,
       buckets: [
@@ -64,7 +64,7 @@ export const mockAlertsEmptyData = {
     hits: [],
   },
   aggregations: {
-    alertsByHost: {
+    alertsByGrouping: {
       doc_count_error_upper_bound: 0,
       sum_other_doc_count: 0,
       buckets: [],
@@ -72,7 +72,7 @@ export const mockAlertsEmptyData = {
   },
 };
 
-export const hostQuery = {
+export const query = {
   size: 0,
   query: {
     bool: {
@@ -83,10 +83,10 @@ export const hostQuery = {
     },
   },
   aggs: {
-    alertsByHost: {
+    alertsByGrouping: {
       terms: {
         field: 'host.name',
-        size: 1000,
+        size: 10,
       },
     },
   },
@@ -94,7 +94,8 @@ export const hostQuery = {
 };
 
 export const parsedAlerts = [
-  { key: 'Host-v5biklvcy8', value: 234, label: 'Host-v5biklvcy8', color: '#54B399' },
-  { key: 'Host-5y1uprxfv2', value: 186, label: 'Host-5y1uprxfv2', color: '#6092C0' },
-  { key: 'Host-ssf1mhgy5c', value: 150, label: 'Host-ssf1mhgy5c', color: '#9170B8' },
+  { key: 'Host-v5biklvcy8', value: 234, label: 'Host-v5biklvcy8', percentage: 41.1 },
+  { key: 'Host-5y1uprxfv2', value: 186, label: 'Host-5y1uprxfv2', percentage: 32.6 },
+  { key: 'Host-ssf1mhgy5c', value: 150, label: 'Host-ssf1mhgy5c', percentage: 26.3 },
+  { key: 'Other', value: 0, label: 'Other', percentage: 0 },
 ];

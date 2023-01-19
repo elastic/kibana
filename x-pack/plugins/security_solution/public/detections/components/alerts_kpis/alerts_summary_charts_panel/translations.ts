@@ -60,9 +60,9 @@ export const DETECTIONS = i18n.translate(
   }
 );
 
-export const ALERT_BY_HOST_TITLE = i18n.translate(
+export const ALERT_BY_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.alertsByHost.hostChartTitle',
   {
-    defaultMessage: 'Top alerts by host',
+    defaultMessage: 'Top alerts by',
   }
 );

@@ -7,7 +7,7 @@
 import { act, render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../../common/mock';
-import { AlertsByType } from './alerts_by_type';
+import { AlertsProgressBar } from './alerts_progress_bar';
 
 jest.mock('../../../../../common/lib/kibana');
 
@@ -16,25 +16,26 @@ jest.mock('react-router-dom', () => {
   return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
 });
 
-describe('Alert by type chart', () => {
+describe('Alert by grouping', () => {
   const defaultProps = {
-    uniqueQueryId: 'test-query-id',
     signalIndexName: 'signalIndexName',
   };
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    act(() => {
+      jest.clearAllMocks();
+      jest.restoreAllMocks();
+    });
   });
 
   test('renders correctly', async () => {
     await act(async () => {
       const { container } = render(
         <TestProviders>
-          <AlertsByType {...defaultProps} />
+          <AlertsProgressBar {...defaultProps} />
         </TestProviders>
       );
-      expect(container.querySelector('[data-test-subj="alert-by-type"]')).toBeInTheDocument();
+      expect(container.querySelector('[data-test-subj="top-alerts"]')).toBeInTheDocument();
     });
   });
 
@@ -42,7 +43,7 @@ describe('Alert by type chart', () => {
     await act(async () => {
       const { container } = render(
         <TestProviders>
-          <AlertsByType {...defaultProps} />
+          <AlertsProgressBar {...defaultProps} />
         </TestProviders>
       );
       expect(container.querySelector(`[data-test-subj="header-section"]`)).toBeInTheDocument();
@@ -53,34 +54,21 @@ describe('Alert by type chart', () => {
     await act(async () => {
       const { container } = render(
         <TestProviders>
-          <AlertsByType {...defaultProps} />
+          <AlertsProgressBar {...defaultProps} />
         </TestProviders>
       );
       expect(container.querySelector('[data-test-subj="inspect-icon-button"]')).toBeInTheDocument();
     });
   });
 
-  test('health and pallette display renders correctly', async () => {
+  test('progress bars renders correctly', async () => {
     await act(async () => {
       const { container } = render(
         <TestProviders>
-          <AlertsByType {...defaultProps} />
+          <AlertsProgressBar {...defaultProps} />
         </TestProviders>
       );
-      expect(
-        container.querySelector('[data-test-subj="alert-by-type-palette-display"]')
-      ).toBeInTheDocument();
-    });
-  });
-
-  test('table renders correctly', async () => {
-    await act(async () => {
-      const { container } = render(
-        <TestProviders>
-          <AlertsByType {...defaultProps} />
-        </TestProviders>
-      );
-      expect(container.querySelector('[data-test-subj="alert-by-type-table"]')).toBeInTheDocument();
+      expect(container.querySelector(`[data-test-subj="top-alerts"]`)).toBeInTheDocument();
     });
   });
 });

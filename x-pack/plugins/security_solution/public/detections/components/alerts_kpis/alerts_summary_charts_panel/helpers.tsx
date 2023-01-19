@@ -6,23 +6,23 @@
  */
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import type {
-  AlertsBySeverityAgg,
-  AlertsByRuleAgg,
-  AlertsByHostAgg,
-  DetectionsData,
-  HostData,
   AggregationType,
   AlertType,
+  AlertsBySeverityAgg,
+  AlertsByTypeAgg,
+  AlertsByGroupingAgg,
+  AlertsTypeData,
+  AlertsProgressBarData,
 } from './types';
 import type { AlertSearchResponse } from '../../../containers/detection_engine/alerts/types';
 import type { SeverityBuckets as SeverityData } from '../../../../overview/components/detection_response/alerts_by_status/types';
 import type { BucketItem } from '../../../../../common/search_strategy/security_solution/cti';
-import * as i18n from './translations';
 import { severityLabels } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 import { emptyDonutColor } from '../../../../common/components/charts/donutchart_empty';
 import { SEVERITY_COLOR } from '../../../../overview/components/detection_response/utils';
+import * as i18n from './translations';
 
-export const DETECTION_COLOR = {
+export const ALERT_TYPE_COLOR = {
   Detection: '#D36086',
   Prevention: '#54B399',
 };
@@ -30,7 +30,6 @@ export const DETECTION_COLOR = {
 export const getSeverityColor = (severity: string) => {
   return SEVERITY_COLOR[severity.toLocaleLowerCase() as Severity] ?? emptyDonutColor;
 };
-
 
 export const parseSeverityData = (
   response: AlertSearchResponse<{}, AlertsBySeverityAgg>
@@ -48,22 +47,22 @@ export const parseSeverityData = (
       });
 };
 
-export const parseDetectionsData = (
-  response: AlertSearchResponse<{}, AlertsByRuleAgg>
-): DetectionsData[] | null => {
+export const parseAlertsTypeData = (
+  response: AlertSearchResponse<{}, AlertsByTypeAgg>
+): AlertsTypeData[] | null => {
   const rulesBuckets = response?.aggregations?.alertsByRule?.buckets ?? [];
   return rulesBuckets.length === 0
     ? null
     : rulesBuckets.flatMap((rule) => {
         const events = rule.ruleByEventType?.buckets ?? [];
-        return getAggregateDetections(rule.key, events);
+        return getAggregateAlerts(rule.key, events);
       });
 };
 
-const getAggregateDetections = (
+const getAggregateAlerts = (
   ruleName: string,
   ruleEvents: Array<{ key: string; doc_count: number }>
-): DetectionsData[] => {
+): AlertsTypeData[] => {
   let preventions = 0;
   let detections = 0;
 
@@ -79,7 +78,7 @@ const getAggregateDetections = (
       rule: ruleName,
       type: 'Prevention' as AlertType,
       value: preventions,
-      color: DETECTION_COLOR.Prevention,
+      color: ALERT_TYPE_COLOR.Prevention,
     });
   }
   if (detections > 0) {
@@ -87,38 +86,37 @@ const getAggregateDetections = (
       rule: ruleName,
       type: 'Detection' as AlertType,
       value: detections,
-      color: DETECTION_COLOR.Detection,
+      color: ALERT_TYPE_COLOR.Detection,
     });
   }
   return ret;
 };
 
-export const parseHostData = (
-  response: AlertSearchResponse<{}, AlertsByHostAgg>
-): HostData[] | null => {
-  const hostsBuckets = response?.aggregations?.alertsByHost?.buckets ?? [];
-  if (hostsBuckets.length === 0) {
+export const parseAlertsGroupingData = (
+  response: AlertSearchResponse<{}, AlertsByGroupingAgg>
+): AlertsProgressBarData[] | null => {
+  const buckets = response?.aggregations?.alertsByGrouping?.buckets ?? [];
+  if (buckets.length === 0) {
     return null;
   }
 
-  const other = response?.aggregations?.alertsByHost?.sum_other_doc_count ?? 0;
-  const total = hostsBuckets.reduce((acc:number , host: BucketItem)=> 
-    acc+= host.doc_count
-  ,0) + other;
+  const other = response?.aggregations?.alertsByGrouping?.sum_other_doc_count ?? 0;
+  const total =
+    buckets.reduce((acc: number, group: BucketItem) => acc + group.doc_count, 0) + other;
 
-  const topHosts = hostsBuckets.map((host, i) => {
+  const topHosts = buckets.map((group) => {
     return {
-      key: host.key,
-      value: host.doc_count,
-      percentage: Math.round((host.doc_count / total) * 1000) / 10,
-      label: host.key,
+      key: group.key,
+      value: group.doc_count,
+      percentage: Math.round((group.doc_count / total) * 1000) / 10,
+      label: group.key,
     };
   });
 
   topHosts.push({
     key: 'Other',
     value: other,
-    percentage: Math.round((other / total) * 100),
+    percentage: Math.round((other / total) * 1000) / 10,
     label: 'Other',
   });
 
@@ -129,9 +127,9 @@ export const parseData = (aggregationType: AggregationType, data: AlertSearchRes
   switch (aggregationType) {
     case 'Severity':
       return parseSeverityData(data as AlertSearchResponse<{}, AlertsBySeverityAgg>);
-    case 'Detections':
-      return parseDetectionsData(data as AlertSearchResponse<{}, AlertsByRuleAgg>);
-    case 'Host':
-      return parseHostData(data as AlertSearchResponse<{}, AlertsByHostAgg>);
+    case 'Type':
+      return parseAlertsTypeData(data as AlertSearchResponse<{}, AlertsByTypeAgg>);
+    case 'Top':
+      return parseAlertsGroupingData(data as AlertSearchResponse<{}, AlertsByGroupingAgg>);
   }
 };

@@ -13,13 +13,15 @@ import type {
 } from '../../../../overview/components/detection_response/alerts_by_status/types';
 import type { BucketItem } from '../../../../../common/search_strategy/security_solution/cti';
 
-export type AggregationType = 'Severity' | 'Detections' | 'Host';
+export type AggregationType = 'Severity' | 'Type' | 'Top';
 export type AlertType = 'Detection' | 'Prevention';
 
 export interface ChartsPanelProps {
-  data: SummaryChartsData[] | null;
-  isLoading: boolean;
-  uniqueQueryId: string;
+  filters?: Filter[];
+  query?: Query;
+  signalIndexName: string | null;
+  runtimeMappings?: MappingRuntimeFields;
+  skip?: boolean;
   addFilter?: ({ field, value }: { field: string; value: string | number }) => void;
 }
 export interface UseAlertsQueryProps {
@@ -34,7 +36,14 @@ export interface UseAlertsQueryProps {
   runtimeMappings?: MappingRuntimeFields;
 }
 
-export interface AlertsByRuleAgg {
+export interface AlertsBySeverityAgg {
+  statusBySeverity: {
+    doc_count_error_upper_bound: number;
+    sum_other_doc_count: number;
+    buckets: SeverityBucket[];
+  };
+}
+export interface AlertsByTypeAgg {
   alertsByRule: {
     doc_count_error_upper_bound: number;
     sum_other_doc_count: number;
@@ -54,33 +63,26 @@ interface RuleByEventType {
   buckets: BucketItem[];
 }
 
-export interface DetectionsData {
+export interface AlertsTypeData {
   rule: string;
   type: AlertType;
   value: number;
   color: string;
 }
 
-export interface AlertsBySeverityAgg {
-  statusBySeverity: {
-    doc_count_error_upper_bound: number;
-    sum_other_doc_count: number;
-    buckets: SeverityBucket[];
-  };
-}
-export interface AlertsByHostAgg {
-  alertsByHost: {
+export interface AlertsByGroupingAgg {
+  alertsByGrouping: {
     doc_count_error_upper_bound: number;
     sum_other_doc_count: number;
     buckets: BucketItem[];
   };
 }
-export interface HostData {
+export interface AlertsProgressBarData {
   key: string;
   value: number;
   percentage: number;
   label: string;
 }
 
-export type SummaryChartsAgg = Partial<AlertsByHostAgg | AlertsBySeverityAgg | AlertsByRuleAgg>;
-export type SummaryChartsData = Partial<HostData | DetectionsData | SeverityData>;
+export type SummaryChartsAgg = Partial<AlertsBySeverityAgg | AlertsByTypeAgg | AlertsByGroupingAgg>;
+export type SummaryChartsData = Partial<SeverityData | AlertsTypeData | AlertsProgressBarData>;

@@ -17,14 +17,19 @@ import {
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
+import uuid from 'uuid';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ChartsPanelProps, DetectionsData, AlertType } from '../types';
+import type { ChartsPanelProps, AlertsTypeData, AlertType } from '../types';
 import { HeaderSection } from '../../../../../common/components/header_section';
 import { InspectButtonContainer } from '../../../../../common/components/inspect';
-import { getDetectionsTableColumns } from '../columns';
+import { getAlertsTypeTableColumns } from '../columns';
 import * as i18n from '../translations';
-import { DETECTION_COLOR } from '../helpers';
+import { ALERT_TYPE_COLOR } from '../helpers';
 import { FormattedCount } from '../../../../../common/components/formatted_number';
+import { useSummaryChartData } from '../use_summary_chart_data';
+import { alertTypeAggregations } from '../use_summary_chart_data/aggregations';
+
+const ALERTS_BY_TYPE_CHART_ID = 'alerts-summary-alert_by_type';
 
 const ColorPaletteWrapper = styled.div`
   margin-top: -${({ theme }) => theme.eui.euiSizeM};
@@ -41,13 +46,32 @@ interface PalletteObject {
   color: string;
 }
 
-export const AlertsByType: React.FC<ChartsPanelProps> = ({ data, isLoading, uniqueQueryId }) => {
-  const columns = useMemo(() => getDetectionsTableColumns(), []);
-  const items = useMemo(() => (data as DetectionsData[]) ?? [], [data]);
+export const AlertsByType: React.FC<ChartsPanelProps> = ({
+  filters,
+  query,
+  signalIndexName,
+  runtimeMappings,
+  skip,
+}) => {
+  const uniqueQueryId = useMemo(() => `${ALERTS_BY_TYPE_CHART_ID}-${uuid.v4()}`, []);
+  const columns = useMemo(() => getAlertsTypeTableColumns(), []);
+
+  const { items, isLoading } = useSummaryChartData({
+    aggregationType: 'Type',
+    aggregations: alertTypeAggregations,
+    filters,
+    query,
+    signalIndexName,
+    runtimeMappings,
+    skip,
+    uniqueQueryId,
+  });
+
+  const data = useMemo(() => (items as AlertsTypeData[]) ?? [], [items]);
   const subtotals = useMemo(
     () =>
-      items.reduce(
-        (acc: { Detection: number; Prevention: number }, item: DetectionsData) => {
+      data.reduce(
+        (acc: { Detection: number; Prevention: number }, item: AlertsTypeData) => {
           if (item.type === 'Detection') {
             acc.Detection += item.value;
           }
@@ -58,7 +82,7 @@ export const AlertsByType: React.FC<ChartsPanelProps> = ({ data, isLoading, uniq
         },
         { Detection: 0, Prevention: 0 }
       ),
-    [items]
+    [data]
   );
 
   const palette: PalletteObject[] = useMemo(
@@ -68,7 +92,7 @@ export const AlertsByType: React.FC<ChartsPanelProps> = ({ data, isLoading, uniq
         if (subtotals[type]) {
           const newEntry: PalletteObject = {
             stop: previousStop + (subtotals[type] || 0),
-            color: DETECTION_COLOR[type],
+            color: ALERT_TYPE_COLOR[type],
           };
           acc.push(newEntry);
         }
@@ -77,7 +101,7 @@ export const AlertsByType: React.FC<ChartsPanelProps> = ({ data, isLoading, uniq
     [subtotals]
   );
 
-  const sorting: { sort: { field: keyof DetectionsData; direction: SortOrder } } = {
+  const sorting: { sort: { field: keyof AlertsTypeData; direction: SortOrder } } = {
     sort: {
       field: 'value',
       direction: 'desc',
@@ -91,7 +115,7 @@ export const AlertsByType: React.FC<ChartsPanelProps> = ({ data, isLoading, uniq
 
   return (
     <InspectButtonContainer>
-      <EuiPanel hasBorder hasShadow={false}>
+      <EuiPanel hasBorder hasShadow={false} data-test-subj="alert-by-type">
         <HeaderSection
           id={uniqueQueryId}
           inspectTitle={i18n.ALERTS_TYPE_TITLE}
@@ -100,13 +124,13 @@ export const AlertsByType: React.FC<ChartsPanelProps> = ({ data, isLoading, uniq
           titleSize="xs"
           hideSubtitle
         />
-        <ColorPaletteWrapper>
-          <EuiFlexGroup gutterSize="xs" data-test-subj="alert-detections-health">
+        <ColorPaletteWrapper data-test-subj="alert-by-type-palette-display">
+          <EuiFlexGroup gutterSize="xs">
             {(Object.keys(subtotals) as AlertType[]).map((type) => (
               <EuiFlexItem key={type} grow={false}>
                 <EuiFlexGroup alignItems="center" gutterSize="xs">
                   <EuiFlexItem grow={false}>
-                    <EuiHealth className="eui-alignMiddle" color={DETECTION_COLOR[type]}>
+                    <EuiHealth className="eui-alignMiddle" color={ALERT_TYPE_COLOR[type]}>
                       <EuiText size="xs">
                         <h4>{`${type}:`}</h4>
                       </EuiText>
@@ -123,19 +147,14 @@ export const AlertsByType: React.FC<ChartsPanelProps> = ({ data, isLoading, uniq
             <EuiSpacer size="xs" />
           </EuiFlexGroup>
           <EuiSpacer size="xs" />
-          <StyledEuiColorPaletteDisplay
-            className="alert-detections-bar"
-            data-test-subj="alert-detections-bar"
-            size="xs"
-            palette={palette}
-          />
+          <StyledEuiColorPaletteDisplay size="xs" palette={palette} />
         </ColorPaletteWrapper>
         <EuiSpacer size="xs" />
         <TableWrapper className="eui-yScroll">
           <EuiInMemoryTable
-            data-test-subj="alert-detections-table"
+            data-test-subj="alert-by-type-table"
             columns={columns}
-            items={items}
+            items={data}
             loading={isLoading}
             sorting={sorting}
             pagination={pagination}

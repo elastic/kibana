@@ -26,12 +26,16 @@ describe('AlertsSummaryChartsPanel', () => {
   const mockSetToggle = jest.fn();
   const mockUseQueryToggle = useQueryToggle as jest.Mock;
   beforeEach(() => {
-    mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: mockSetToggle });
+    act(() => {
+      mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: mockSetToggle });
+    });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    act(() => {
+      jest.clearAllMocks();
+      jest.restoreAllMocks();
+    });
   });
 
   test('renders correctly', async () => {
@@ -72,7 +76,9 @@ describe('AlertsSummaryChartsPanel', () => {
             <AlertsSummaryChartsPanel {...props} />
           </TestProviders>
         );
-        expect(container.querySelector('[data-test-subj="severty-chart"]')).toBeInTheDocument();
+        expect(
+          container.querySelector('[data-test-subj="severty-level-chart"]')
+        ).toBeInTheDocument();
       });
     });
   });

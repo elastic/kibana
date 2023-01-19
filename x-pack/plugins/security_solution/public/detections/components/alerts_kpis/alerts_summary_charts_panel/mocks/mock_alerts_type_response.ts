@@ -114,7 +114,7 @@ export const mockAlertsEmptyData = {
   },
 };
 
-export const detectionsQuery = {
+export const query = {
   size: 0,
   query: {
     bool: {
@@ -151,8 +151,8 @@ export const detectionsQuery = {
 };
 
 export const parsedAlerts = [
-  { rule: 'Test rule 1', type: 'Detections', value: 537 },
-  { rule: 'Test rule 2', type: 'Detections', value: 27 },
-  { rule: 'Test rule 3', type: 'Preventions', value: 6 },
-  { rule: 'Test rule 3', type: 'Detections', value: 19 },
+  { rule: 'Test rule 1', type: 'Detection', value: 537, color: '#D36086' },
+  { rule: 'Test rule 2', type: 'Detection', value: 27, color: '#D36086' },
+  { rule: 'Test rule 3', type: 'Prevention', value: 6, color: '#54B399' },
+  { rule: 'Test rule 3', type: 'Detection', value: 19, color: '#D36086' },
 ];

@@ -76,7 +76,7 @@ export const mockAlertsEmptyData = {
   },
 };
 
-export const severityQuery = {
+export const query = {
   size: 0,
   query: {
     bool: {
