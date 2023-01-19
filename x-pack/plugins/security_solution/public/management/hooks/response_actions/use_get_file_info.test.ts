@@ -61,7 +61,7 @@ describe('When using the `useGetFileInfo()` hook', () => {
     expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalledWith({
       path: resolvePathVariables(ACTION_AGENT_FILE_INFO_ROUTE, {
         action_id: '123',
-        agent_id: 'agent-a',
+        file_id: '123.agent-a',
       }),
     });
   });
@@ -72,7 +72,7 @@ describe('When using the `useGetFileInfo()` hook', () => {
     expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalledWith({
       path: resolvePathVariables(ACTION_AGENT_FILE_INFO_ROUTE, {
         action_id: '123',
-        agent_id: 'abc',
+        file_id: '123.abc',
       }),
     });
   });
