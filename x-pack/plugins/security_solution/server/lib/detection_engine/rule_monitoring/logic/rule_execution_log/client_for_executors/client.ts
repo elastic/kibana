@@ -188,11 +188,9 @@ export const createClientForExecutors = (
     }
 
     if (newStatus === RuleExecutionStatus.failed) {
-      ruleResultService?.addLastRunError(`ERROR: ${message}`);
+      ruleResultService?.addLastRunError(message);
     } else if (newStatus === RuleExecutionStatus['partial failure']) {
-      ruleResultService?.addLastRunWarning(`WARNING: ${message}`);
-    } else {
-      ruleResultService?.setLastRunOutcomeMessage(`INFO: ${message}`);
+      ruleResultService?.addLastRunWarning(message);
     }
 
     ruleResultService?.setLastRunOutcomeMessage(message);
