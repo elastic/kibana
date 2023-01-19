@@ -352,21 +352,19 @@ describe('bulkDisableRules', () => {
       });
 
       taskManager.bulkDisable.mockResolvedValue({
-        tasks: [{ id: 'id1' }],
+        tasks: [taskManagerMock.createTask({ id: 'id1' })],
         errors: [
           {
+            type: 'task',
+            id: 'id2',
             error: {
-              type: 'task',
-              id: 'id2',
-              error: {
-                error: '',
-                message: 'UPS',
-                statusCode: 500,
-              },
+              error: '',
+              message: 'UPS',
+              statusCode: 500,
             },
           },
         ],
-      } as unknown as BulkUpdateTaskResult);
+      });
 
       await rulesClient.bulkDisableRules({ filter: 'fake_filter' });
 

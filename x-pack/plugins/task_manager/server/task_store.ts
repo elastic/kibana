@@ -10,7 +10,6 @@
  */
 import { Subject } from 'rxjs';
 import { omit, defaults, get } from 'lodash';
-import type { Payload } from '@hapi/boom';
 import { SavedObjectError } from '@kbn/core-saved-objects-common';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -77,7 +76,7 @@ export interface FetchResult {
 
 export type BulkUpdateResult = Result<
   ConcreteTaskInstance,
-  { entity?: ConcreteTaskInstance; error: { type: string; id: string; error: Payload } }
+  { type: string; id: string; error: SavedObjectError }
 >;
 
 export type BulkGetResult = Array<
@@ -278,11 +277,11 @@ export class TaskStore {
     }
 
     return updatedSavedObjects.map((updatedSavedObject) => {
-      const doc = docs.find((d) => d.id === updatedSavedObject.id);
       return updatedSavedObject.error !== undefined
         ? asErr({
-            entity: doc,
-            error: updatedSavedObject,
+            type: 'task',
+            id: updatedSavedObject.id,
+            error: updatedSavedObject.error,
           })
         : asOk(
             savedObjectToConcreteTaskInstance({
@@ -293,7 +292,7 @@ export class TaskStore {
               ),
             })
           );
-    }) as BulkUpdateResult[];
+    });
   }
 
   /**

@@ -13,13 +13,14 @@ import { asTaskRunEvent, TaskPersistence } from './task_events';
 import { TaskLifecycleEvent } from './polling_lifecycle';
 import { TaskScheduling } from './task_scheduling';
 import { asErr, asOk } from './lib/result_type';
-import { ConcreteTaskInstance, TaskStatus } from './task';
+import { TaskStatus } from './task';
 import { createInitialMiddleware } from './lib/middleware';
 import { taskStoreMock } from './task_store.mock';
 import { TaskRunResult } from './task_running';
 import { mockLogger } from './test_utils';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { ephemeralTaskLifecycleMock } from './ephemeral_task_lifecycle.mock';
+import { taskManagerMock } from './mocks';
 
 let fakeTimer: sinon.SinonFakeTimers;
 jest.mock('uuid', () => ({
@@ -155,7 +156,7 @@ describe('TaskScheduling', () => {
     const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
     beforeEach(() => {
       mockTaskStore.bulkUpdate.mockImplementation(() =>
-        Promise.resolve([{ tag: 'ok', value: mockTask() }])
+        Promise.resolve([{ tag: 'ok', value: taskManagerMock.createTask() }])
       );
     });
 
@@ -169,12 +170,12 @@ describe('TaskScheduling', () => {
     });
 
     test('should transform response into correct format', async () => {
-      const successfulTask = mockTask({
+      const successfulTask = taskManagerMock.createTask({
         id: 'task-1',
         enabled: false,
         schedule: { interval: '1h' },
       });
-      const failedToUpdateTask = mockTask({
+      const failedToUpdateTask = taskManagerMock.createTask({
         id: 'task-2',
         enabled: false,
         schedule: { interval: '1h' },
@@ -185,15 +186,12 @@ describe('TaskScheduling', () => {
           {
             tag: 'err',
             error: {
-              entity: failedToUpdateTask,
+              type: 'task',
+              id: failedToUpdateTask.id,
               error: {
-                type: 'task',
-                id: failedToUpdateTask.id,
-                error: {
-                  statusCode: 400,
-                  error: 'fail',
-                  message: 'fail',
-                },
+                statusCode: 400,
+                error: 'fail',
+                message: 'fail',
               },
             },
           },
@@ -208,15 +206,12 @@ describe('TaskScheduling', () => {
         tasks: [successfulTask],
         errors: [
           {
-            task: failedToUpdateTask,
+            type: 'task',
+            id: failedToUpdateTask.id,
             error: {
-              type: 'task',
-              id: failedToUpdateTask.id,
-              error: {
-                statusCode: 400,
-                error: 'fail',
-                message: 'fail',
-              },
+              statusCode: 400,
+              error: 'fail',
+              message: 'fail',
             },
           },
         ],
@@ -224,7 +219,7 @@ describe('TaskScheduling', () => {
     });
 
     test('should not enable task if it is already enabled', async () => {
-      const task = mockTask({ id, enabled: true, schedule: { interval: '3h' } });
+      const task = taskManagerMock.createTask({ id, enabled: true, schedule: { interval: '3h' } });
 
       mockTaskStore.bulkGet.mockResolvedValue([asOk(task)]);
 
@@ -237,7 +232,7 @@ describe('TaskScheduling', () => {
     });
 
     test('should set runAt and scheduledAt if runSoon is true', async () => {
-      const task = mockTask({
+      const task = taskManagerMock.createTask({
         id,
         enabled: false,
         schedule: { interval: '3h' },
@@ -265,7 +260,7 @@ describe('TaskScheduling', () => {
     });
 
     test('should not set runAt and scheduledAt if runSoon is false', async () => {
-      const task = mockTask({
+      const task = taskManagerMock.createTask({
         id,
         enabled: false,
         schedule: { interval: '3h' },
@@ -295,7 +290,7 @@ describe('TaskScheduling', () => {
     const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
     beforeEach(() => {
       mockTaskStore.bulkUpdate.mockImplementation(() =>
-        Promise.resolve([{ tag: 'ok', value: mockTask() }])
+        Promise.resolve([{ tag: 'ok', value: taskManagerMock.createTask() }])
       );
     });
 
@@ -309,12 +304,12 @@ describe('TaskScheduling', () => {
     });
 
     test('should transform response into correct format', async () => {
-      const successfulTask = mockTask({
+      const successfulTask = taskManagerMock.createTask({
         id: 'task-1',
         enabled: false,
         schedule: { interval: '1h' },
       });
-      const failedToUpdateTask = mockTask({
+      const failedToUpdateTask = taskManagerMock.createTask({
         id: 'task-2',
         enabled: true,
         schedule: { interval: '1h' },
@@ -325,15 +320,12 @@ describe('TaskScheduling', () => {
           {
             tag: 'err',
             error: {
-              entity: failedToUpdateTask,
+              type: 'task',
+              id: failedToUpdateTask.id,
               error: {
-                type: 'task',
-                id: failedToUpdateTask.id,
-                error: {
-                  statusCode: 400,
-                  error: 'fail',
-                  message: 'fail',
-                },
+                statusCode: 400,
+                error: 'fail',
+                message: 'fail',
               },
             },
           },
@@ -348,15 +340,12 @@ describe('TaskScheduling', () => {
         tasks: [successfulTask],
         errors: [
           {
-            task: failedToUpdateTask,
+            type: 'task',
+            id: failedToUpdateTask.id,
             error: {
-              type: 'task',
-              id: failedToUpdateTask.id,
-              error: {
-                statusCode: 400,
-                error: 'fail',
-                message: 'fail',
-              },
+              statusCode: 400,
+              error: 'fail',
+              message: 'fail',
             },
           },
         ],
@@ -364,7 +353,7 @@ describe('TaskScheduling', () => {
     });
 
     test('should not disable task if it is already disabled', async () => {
-      const task = mockTask({ id, enabled: false, schedule: { interval: '3h' } });
+      const task = taskManagerMock.createTask({ id, enabled: false, schedule: { interval: '3h' } });
 
       mockTaskStore.bulkGet.mockResolvedValue([asOk(task)]);
 
@@ -381,7 +370,7 @@ describe('TaskScheduling', () => {
     const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
     beforeEach(() => {
       mockTaskStore.bulkUpdate.mockImplementation(() =>
-        Promise.resolve([{ tag: 'ok', value: mockTask() }])
+        Promise.resolve([{ tag: 'ok', value: taskManagerMock.createTask() }])
       );
     });
 
@@ -395,23 +384,26 @@ describe('TaskScheduling', () => {
     });
 
     test('should transform response into correct format', async () => {
-      const successfulTask = mockTask({ id: 'task-1', schedule: { interval: '1h' } });
-      const failedToUpdateTask = mockTask({ id: 'task-2', schedule: { interval: '1h' } });
+      const successfulTask = taskManagerMock.createTask({
+        id: 'task-1',
+        schedule: { interval: '1h' },
+      });
+      const failedToUpdateTask = taskManagerMock.createTask({
+        id: 'task-2',
+        schedule: { interval: '1h' },
+      });
       mockTaskStore.bulkUpdate.mockImplementation(() =>
         Promise.resolve([
           { tag: 'ok', value: successfulTask },
           {
             tag: 'err',
             error: {
-              entity: failedToUpdateTask,
+              type: 'task',
+              id: failedToUpdateTask.id,
               error: {
-                type: 'task',
-                id: failedToUpdateTask.id,
-                error: {
-                  statusCode: 400,
-                  error: 'fail',
-                  message: 'fail',
-                },
+                statusCode: 400,
+                error: 'fail',
+                message: 'fail',
               },
             },
           },
@@ -429,15 +421,12 @@ describe('TaskScheduling', () => {
         tasks: [successfulTask],
         errors: [
           {
-            task: failedToUpdateTask,
+            type: 'task',
+            id: failedToUpdateTask.id,
             error: {
-              type: 'task',
-              id: failedToUpdateTask.id,
-              error: {
-                statusCode: 400,
-                error: 'fail',
-                message: 'fail',
-              },
+              statusCode: 400,
+              error: 'fail',
+              message: 'fail',
             },
           },
         ],
@@ -445,7 +434,7 @@ describe('TaskScheduling', () => {
     });
 
     test('should not update task if new interval is equal to previous', async () => {
-      const task = mockTask({ id, schedule: { interval: '3h' } });
+      const task = taskManagerMock.createTask({ id, schedule: { interval: '3h' } });
 
       mockTaskStore.bulkGet.mockResolvedValue([asOk(task)]);
 
@@ -460,7 +449,11 @@ describe('TaskScheduling', () => {
     test('should postpone task run if new interval is greater than previous', async () => {
       // task set to be run in 2 hrs from now
       const runInTwoHrs = new Date(Date.now() + moment.duration(2, 'hours').asMilliseconds());
-      const task = mockTask({ id, schedule: { interval: '3h' }, runAt: runInTwoHrs });
+      const task = taskManagerMock.createTask({
+        id,
+        schedule: { interval: '3h' },
+        runAt: runInTwoHrs,
+      });
 
       mockTaskStore.bulkGet.mockResolvedValue([asOk(task)]);
 
@@ -480,7 +473,11 @@ describe('TaskScheduling', () => {
     test('should set task run sooner if new interval is lesser than previous', async () => {
       // task set to be run in one 2hrs from now
       const runInTwoHrs = new Date(Date.now() + moment.duration(2, 'hours').asMilliseconds());
-      const task = mockTask({ id, schedule: { interval: '3h' }, runAt: runInTwoHrs });
+      const task = taskManagerMock.createTask({
+        id,
+        schedule: { interval: '3h' },
+        runAt: runInTwoHrs,
+      });
 
       mockTaskStore.bulkGet.mockResolvedValue([asOk(task)]);
 
@@ -499,7 +496,11 @@ describe('TaskScheduling', () => {
     test('should set task run to now if time that passed from last run is greater than new interval', async () => {
       // task set to be run in one 1hr from now. With interval of '2h', it means last run happened 1 hour ago
       const runInOneHr = new Date(Date.now() + moment.duration(1, 'hour').asMilliseconds());
-      const task = mockTask({ id, schedule: { interval: '2h' }, runAt: runInOneHr });
+      const task = taskManagerMock.createTask({
+        id,
+        schedule: { interval: '2h' },
+        runAt: runInOneHr,
+      });
 
       mockTaskStore.bulkGet.mockResolvedValue([asOk(task)]);
 
@@ -520,13 +521,15 @@ describe('TaskScheduling', () => {
       const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
       const taskScheduling = new TaskScheduling(taskSchedulingOpts);
 
-      mockTaskStore.get.mockResolvedValueOnce(mockTask({ id, status: TaskStatus.Idle }));
-      mockTaskStore.update.mockResolvedValueOnce(mockTask({ id }));
+      mockTaskStore.get.mockResolvedValueOnce(
+        taskManagerMock.createTask({ id, status: TaskStatus.Idle })
+      );
+      mockTaskStore.update.mockResolvedValueOnce(taskManagerMock.createTask({ id }));
 
       const result = await taskScheduling.runSoon(id);
 
       expect(mockTaskStore.update).toHaveBeenCalledWith(
-        mockTask({
+        taskManagerMock.createTask({
           id,
           status: TaskStatus.Idle,
           runAt: expect.any(Date),
@@ -541,12 +544,14 @@ describe('TaskScheduling', () => {
       const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
       const taskScheduling = new TaskScheduling(taskSchedulingOpts);
 
-      mockTaskStore.get.mockResolvedValueOnce(mockTask({ id, status: TaskStatus.Failed }));
-      mockTaskStore.update.mockResolvedValueOnce(mockTask({ id }));
+      mockTaskStore.get.mockResolvedValueOnce(
+        taskManagerMock.createTask({ id, status: TaskStatus.Failed })
+      );
+      mockTaskStore.update.mockResolvedValueOnce(taskManagerMock.createTask({ id }));
 
       const result = await taskScheduling.runSoon(id);
       expect(mockTaskStore.update).toHaveBeenCalledWith(
-        mockTask({
+        taskManagerMock.createTask({
           id,
           status: TaskStatus.Idle,
           runAt: expect.any(Date),
@@ -561,7 +566,9 @@ describe('TaskScheduling', () => {
       const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
       const taskScheduling = new TaskScheduling(taskSchedulingOpts);
 
-      mockTaskStore.get.mockResolvedValueOnce(mockTask({ id, status: TaskStatus.Idle }));
+      mockTaskStore.get.mockResolvedValueOnce(
+        taskManagerMock.createTask({ id, status: TaskStatus.Idle })
+      );
       mockTaskStore.update.mockRejectedValueOnce(500);
 
       const result = taskScheduling.runSoon(id);
@@ -575,7 +582,9 @@ describe('TaskScheduling', () => {
       const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
       const taskScheduling = new TaskScheduling(taskSchedulingOpts);
 
-      mockTaskStore.get.mockResolvedValueOnce(mockTask({ id, status: TaskStatus.Idle }));
+      mockTaskStore.get.mockResolvedValueOnce(
+        taskManagerMock.createTask({ id, status: TaskStatus.Idle })
+      );
       mockTaskStore.update.mockRejectedValueOnce({ statusCode: 409 });
 
       const result = await taskScheduling.runSoon(id);
@@ -589,7 +598,9 @@ describe('TaskScheduling', () => {
       const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
       const taskScheduling = new TaskScheduling(taskSchedulingOpts);
 
-      mockTaskStore.get.mockResolvedValueOnce(mockTask({ id, status: TaskStatus.Claiming }));
+      mockTaskStore.get.mockResolvedValueOnce(
+        taskManagerMock.createTask({ id, status: TaskStatus.Claiming })
+      );
       mockTaskStore.update.mockRejectedValueOnce(409);
 
       const result = taskScheduling.runSoon(id);
@@ -604,7 +615,9 @@ describe('TaskScheduling', () => {
       const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
       const taskScheduling = new TaskScheduling(taskSchedulingOpts);
 
-      mockTaskStore.get.mockResolvedValueOnce(mockTask({ id, status: TaskStatus.Running }));
+      mockTaskStore.get.mockResolvedValueOnce(
+        taskManagerMock.createTask({ id, status: TaskStatus.Running })
+      );
       mockTaskStore.update.mockRejectedValueOnce(409);
 
       const result = taskScheduling.runSoon(id);
@@ -619,7 +632,9 @@ describe('TaskScheduling', () => {
       const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
       const taskScheduling = new TaskScheduling(taskSchedulingOpts);
 
-      mockTaskStore.get.mockResolvedValueOnce(mockTask({ id, status: TaskStatus.Unrecognized }));
+      mockTaskStore.get.mockResolvedValueOnce(
+        taskManagerMock.createTask({ id, status: TaskStatus.Unrecognized })
+      );
       mockTaskStore.update.mockRejectedValueOnce(409);
 
       const result = taskScheduling.runSoon(id);
@@ -642,7 +657,7 @@ describe('TaskScheduling', () => {
   describe('ephemeralRunNow', () => {
     test('runs a task ephemerally', async () => {
       const ephemeralEvents$ = new Subject<TaskLifecycleEvent>();
-      const ephemeralTask = mockTask({
+      const ephemeralTask = taskManagerMock.createTask({
         state: {
           foo: 'bar',
         },
@@ -688,7 +703,7 @@ describe('TaskScheduling', () => {
 
     test('rejects ephemeral task if lifecycle returns an error', async () => {
       const ephemeralEvents$ = new Subject<TaskLifecycleEvent>();
-      const ephemeralTask = mockTask({
+      const ephemeralTask = taskManagerMock.createTask({
         state: {
           foo: 'bar',
         },
@@ -732,7 +747,7 @@ describe('TaskScheduling', () => {
     });
 
     test('rejects ephemeral task if ephemeralTaskLifecycle is not defined', async () => {
-      const ephemeralTask = mockTask({
+      const ephemeralTask = taskManagerMock.createTask({
         state: {
           foo: 'bar',
         },
@@ -829,25 +844,3 @@ describe('TaskScheduling', () => {
     });
   });
 });
-
-function mockTask(overrides: Partial<ConcreteTaskInstance> = {}): ConcreteTaskInstance {
-  return {
-    id: 'claimed-by-id',
-    runAt: new Date(),
-    taskType: 'foo',
-    schedule: undefined,
-    attempts: 0,
-    enabled: true,
-    status: TaskStatus.Idle,
-    params: { hello: 'world' },
-    state: { baby: 'Henhen' },
-    user: 'jimbo',
-    scope: ['reporting'],
-    ownerId: '',
-    startedAt: null,
-    retryAt: null,
-    scheduledAt: new Date(),
-    traceparent: 'taskTraceparent',
-    ...overrides,
-  };
-}

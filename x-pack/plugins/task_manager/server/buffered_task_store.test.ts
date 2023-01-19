@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
 import { taskStoreMock } from './task_store.mock';
 import { BufferedTaskStore } from './buffered_task_store';
 import { asErr, asOk } from './lib/result_type';
-import { TaskStatus, ConcreteTaskInstance } from './task';
+import { taskManagerMock } from './mocks';
 
 describe('Buffered Task Store', () => {
   test('proxies the TaskStore for `maxAttempts` and `remove`', async () => {
@@ -26,7 +25,7 @@ describe('Buffered Task Store', () => {
       const taskStore = taskStoreMock.create();
       const bufferedStore = new BufferedTaskStore(taskStore, {});
 
-      const task = mockTask();
+      const task = taskManagerMock.createTask();
 
       taskStore.bulkUpdate.mockResolvedValue([asOk(task)]);
 
@@ -39,23 +38,20 @@ describe('Buffered Task Store', () => {
       const bufferedStore = new BufferedTaskStore(taskStore, {});
 
       const tasks = [
-        mockTask(),
-        mockTask({ id: 'task_7c149afd-6250-4ca5-a314-20af1348d5e9' }),
-        mockTask(),
+        taskManagerMock.createTask(),
+        taskManagerMock.createTask({ id: 'task_7c149afd-6250-4ca5-a314-20af1348d5e9' }),
+        taskManagerMock.createTask(),
       ];
 
       taskStore.bulkUpdate.mockResolvedValueOnce([
         asOk(tasks[0]),
         asErr({
-          entity: tasks[1],
+          type: 'task',
+          id: tasks[1].id,
           error: {
-            type: 'task',
-            id: tasks[1].id,
-            error: {
-              statusCode: 400,
-              error: 'Oh no, something went terribly wrong',
-              message: 'Oh no, something went terribly wrong',
-            },
+            statusCode: 400,
+            error: 'Oh no, something went terribly wrong',
+            message: 'Oh no, something went terribly wrong',
           },
         }),
         asOk(tasks[2]),
@@ -85,26 +81,23 @@ describe('Buffered Task Store', () => {
       const taskStore = taskStoreMock.create();
       const bufferedStore = new BufferedTaskStore(taskStore, {});
 
-      const duplicateIdTask = mockTask();
+      const duplicateIdTask = taskManagerMock.createTask();
       const tasks = [
         duplicateIdTask,
-        mockTask({ id: 'task_16748083-bc28-4599-893b-c8ec16e55c10' }),
-        mockTask(),
-        { ...mockTask(), id: duplicateIdTask.id },
+        taskManagerMock.createTask({ id: 'task_16748083-bc28-4599-893b-c8ec16e55c10' }),
+        taskManagerMock.createTask(),
+        taskManagerMock.createTask({ id: duplicateIdTask.id }),
       ];
 
       taskStore.bulkUpdate.mockResolvedValueOnce([
         asOk(tasks[0]),
         asErr({
-          entity: tasks[1],
+          type: 'task',
+          id: tasks[1].id,
           error: {
-            type: 'task',
-            id: tasks[1].id,
-            error: {
-              statusCode: 400,
-              error: 'Oh no, something went terribly wrong',
-              message: 'Oh no, something went terribly wrong',
-            },
+            statusCode: 400,
+            error: 'Oh no, something went terribly wrong',
+            message: 'Oh no, something went terribly wrong',
           },
         }),
         asOk(tasks[2]),
@@ -134,24 +127,3 @@ describe('Buffered Task Store', () => {
     });
   });
 });
-
-function mockTask(overrides: Partial<ConcreteTaskInstance> = {}): ConcreteTaskInstance {
-  return {
-    id: `task_${uuid.v4()}`,
-    attempts: 0,
-    schedule: undefined,
-    params: { hello: 'world' },
-    retryAt: null,
-    runAt: new Date(),
-    scheduledAt: new Date(),
-    scope: undefined,
-    startedAt: null,
-    state: { foo: 'bar' },
-    status: TaskStatus.Idle,
-    taskType: 'report',
-    user: undefined,
-    version: '123',
-    ownerId: '123',
-    ...overrides,
-  };
-}

@@ -72,7 +72,7 @@ export async function retryableBulkUpdate({
       if (isOk(result)) {
         acc.tasks.push(result.value);
       } else {
-        acc.errors.push({ error: result.error.error, task: result.error.entity });
+        acc.errors.push(result.error);
       }
       return acc;
     },
@@ -81,26 +81,24 @@ export async function retryableBulkUpdate({
 }
 
 function getId(bulkUpdateResult: BulkUpdateResult): string {
-  return isOk(bulkUpdateResult) ? bulkUpdateResult.value.id : bulkUpdateResult.error.error.id;
+  return isOk(bulkUpdateResult) ? bulkUpdateResult.value.id : bulkUpdateResult.error.id;
 }
 
 function getRetriableTaskIds(resultMap: Record<string, BulkUpdateResult>) {
   return Object.values(resultMap)
-    .filter((result) => isErr(result) && result.error.error.error.statusCode === 409)
+    .filter((result) => isErr(result) && result.error.error.statusCode === 409)
     .map((result) => getId(result));
 }
 
 function buildBulkUpdateErr(error: { type: string; id: string; error: SavedObjectError }) {
   return asErr({
+    id: error.id,
+    type: error.type,
     error: {
-      id: error.id,
-      type: error.type,
-      error: {
-        error: error.error.error,
-        statusCode: error.error.statusCode,
-        message: error.error.message,
-        ...(error.error.metadata ? error.error.metadata : {}),
-      },
+      error: error.error.error,
+      statusCode: error.error.statusCode,
+      message: error.error.message,
+      ...(error.error.metadata ? error.error.metadata : {}),
     },
   });
 }

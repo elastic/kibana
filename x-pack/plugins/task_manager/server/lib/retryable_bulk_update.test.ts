@@ -5,15 +5,19 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
 import { asErr, asOk } from './result_type';
 import { retryableBulkUpdate } from './retryable_bulk_update';
 import { taskStoreMock } from '../task_store.mock';
-import { TaskStatus, ConcreteTaskInstance } from '../task';
+import { TaskStatus } from '../task';
+import { taskManagerMock } from '../mocks';
 
 describe('retryableBulkUpdate()', () => {
   const taskIds = ['1', '2', '3'];
-  const tasks = [mockTask({ id: '1' }), mockTask({ id: '2' }), mockTask({ id: '3' })];
+  const tasks = [
+    taskManagerMock.createTask({ id: '1' }),
+    taskManagerMock.createTask({ id: '2' }),
+    taskManagerMock.createTask({ id: '3' }),
+  ];
   const getTasks = jest.fn();
   const filter = jest.fn();
   const map = jest.fn();
@@ -54,15 +58,12 @@ describe('retryableBulkUpdate()', () => {
     getTasks.mockResolvedValueOnce(tasks.map((task) => asOk(task)));
     store.bulkUpdate.mockResolvedValueOnce([
       asErr({
-        entity: tasks[0],
+        type: 'task',
+        id: tasks[0].id,
         error: {
-          type: 'task',
-          id: tasks[0].id,
-          error: {
-            statusCode: 409,
-            error: 'Conflict',
-            message: 'Conflict',
-          },
+          statusCode: 409,
+          error: 'Conflict',
+          message: 'Conflict',
         },
       }),
       asOk(tasks[1]),
@@ -89,24 +90,3 @@ describe('retryableBulkUpdate()', () => {
     expect(store.bulkUpdate).toHaveBeenCalledWith([tasks[0], tasks[2]]);
   });
 });
-
-function mockTask(overrides: Partial<ConcreteTaskInstance> = {}): ConcreteTaskInstance {
-  return {
-    id: `task_${uuid.v4()}`,
-    attempts: 0,
-    schedule: undefined,
-    params: { hello: 'world' },
-    retryAt: null,
-    runAt: new Date(),
-    scheduledAt: new Date(),
-    scope: undefined,
-    startedAt: null,
-    state: { foo: 'bar' },
-    status: TaskStatus.Idle,
-    taskType: 'report',
-    user: undefined,
-    version: '123',
-    ownerId: '123',
-    ...overrides,
-  };
-}

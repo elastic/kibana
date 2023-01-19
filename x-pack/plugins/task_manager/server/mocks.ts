@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import uuid from 'uuid';
 import { TaskManagerSetupContract, TaskManagerStartContract } from './plugin';
+import { ConcreteTaskInstance, TaskStatus } from './task';
 
 const createSetupMock = () => {
   const mock: jest.Mocked<TaskManagerSetupContract> = {
@@ -38,7 +40,29 @@ const createStartMock = () => {
   return mock;
 };
 
+const createTaskMock = (overrides: Partial<ConcreteTaskInstance> = {}): ConcreteTaskInstance => {
+  return {
+    id: `task_${uuid.v4()}`,
+    attempts: 0,
+    schedule: undefined,
+    params: { hello: 'world' },
+    retryAt: null,
+    runAt: new Date(),
+    scheduledAt: new Date(),
+    scope: undefined,
+    startedAt: null,
+    state: { foo: 'bar' },
+    status: TaskStatus.Idle,
+    taskType: 'foo',
+    user: undefined,
+    version: '123',
+    ownerId: '123',
+    ...overrides,
+  };
+};
+
 export const taskManagerMock = {
   createSetup: createSetupMock,
   createStart: createStartMock,
+  createTask: createTaskMock,
 };

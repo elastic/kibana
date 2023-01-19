@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { Payload } from '@hapi/boom';
 import { filter, take } from 'rxjs/operators';
 import pMap from 'p-map';
+import { SavedObjectError } from '@kbn/core-saved-objects-common';
 
 import uuid from 'uuid';
 import { chunk, flatten, pick } from 'lodash';
@@ -63,10 +63,7 @@ export interface BulkUpdateTaskResult {
   /**
    * list of failed tasks and errors caused failure
    */
-  errors: Array<{
-    task?: ConcreteTaskInstance;
-    error: { type: string; id: string; error: Payload };
-  }>;
+  errors: Array<{ type: string; id: string; error: SavedObjectError }>;
 }
 export interface RunSoonResult {
   id: ConcreteTaskInstance['id'];
