@@ -146,8 +146,6 @@ export const AgentStatusFilter: React.FC<{
 
     setIsStatusFilterOpen(isOpen);
   };
-  console.log('newlyInactiveAgentsCount', newlyInactiveAgentsCount);
-  console.log('inactiveAgentsCalloutHasBeenDismissed', inactiveAgentsCalloutHasBeenDismissed);
   return (
     <InactiveAgentsTourStep
       isOpen={newlyInactiveAgentsCount > 0 && !inactiveAgentsCalloutHasBeenDismissed}
