@@ -301,50 +301,6 @@ export class DashboardPanelActionsService extends FtrService {
     return await this.testSubjects.find(`embeddablePanelHeading-${title.replace(/\s/g, '')}`);
   }
 
-  async clickHidePanelTitleToggle() {
-    await this.testSubjects.click('customizePanelHideTitle');
-  }
-
-  async toggleHidePanelTitle(originalTitle?: string) {
-    this.log.debug(`hidePanelTitle(${originalTitle})`);
-    if (originalTitle) {
-      const panelOptions = await this.getPanelHeading(originalTitle);
-      await this.customizePanel(panelOptions);
-    } else {
-      await this.customizePanel();
-    }
-    await this.clickHidePanelTitleToggle();
-    await this.testSubjects.click('saveNewTitleButton');
-  }
-
-  /**
-   *
-   * @param customTitle
-   * @param originalTitle - optional to specify which panel to change the title on.
-   * @return {Promise<void>}
-   */
-  async setCustomPanelTitle(customTitle: string, originalTitle?: string) {
-    this.log.debug(`setCustomPanelTitle(${customTitle}, ${originalTitle})`);
-    if (originalTitle) {
-      const panelOptions = await this.getPanelHeading(originalTitle);
-      await this.customizePanel(panelOptions);
-    } else {
-      await this.customizePanel();
-    }
-    await this.testSubjects.setValue('customEmbeddablePanelTitleInput', customTitle, {
-      clearWithKeyboard: customTitle === '', // if clearing the title using the empty string as the new value, 'clearWithKeyboard' must be true; otherwise, false
-    });
-    await this.testSubjects.click('saveNewTitleButton');
-  }
-
-  async resetCustomPanelTitle(panel?: WebElementWrapper) {
-    this.log.debug('resetCustomPanelTitle');
-    await this.customizePanel(panel);
-    await this.testSubjects.click('resetCustomEmbeddablePanelTitle');
-    await this.testSubjects.click('saveNewTitleButton');
-    await this.toggleContextMenu(panel);
-  }
-
   async getActionWebElementByText(text: string): Promise<WebElementWrapper> {
     this.log.debug(`getActionWebElement: "${text}"`);
     const menu = await this.testSubjects.find('multipleActionsContextMenu');

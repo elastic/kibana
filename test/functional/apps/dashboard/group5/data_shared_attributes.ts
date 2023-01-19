@@ -14,6 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
   const dashboardPanelActions = getService('dashboardPanelActions');
+  const dashboardCustomizePanel = getService('dashboardCustomizePanel');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'dashboard', 'timePicker']);
 
@@ -74,7 +75,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('data-shared-item title should update a viz when using a custom panel title', async () => {
       await PageObjects.dashboard.switchToEditMode();
       const CUSTOM_VIS_TITLE = 'ima custom title for a vis!';
-      await dashboardPanelActions.setCustomPanelTitle(CUSTOM_VIS_TITLE);
+      await dashboardPanelActions.customizePanel();
+      await dashboardCustomizePanel.expectCustomizePanelSettingsFlyoutOpen();
+      await dashboardCustomizePanel.setCustomPanelTitle(CUSTOM_VIS_TITLE);
+      await dashboardCustomizePanel.clickFlyoutPrimaryButton();
+      await dashboardCustomizePanel.expectCustomizePanelSettingsFlyoutClosed();
+
       await retry.try(async () => {
         const sharedData = await PageObjects.dashboard.getPanelSharedItemData();
         const foundSharedItemTitle = !!sharedData.find((item) => {
@@ -85,7 +91,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('data-shared-item title is cleared with an empty panel title string', async () => {
-      await dashboardPanelActions.toggleHidePanelTitle();
+      const toggleHideTitle = async () => {
+        await dashboardPanelActions.customizePanel();
+        await dashboardCustomizePanel.expectCustomizePanelSettingsFlyoutOpen();
+        await dashboardCustomizePanel.clickToggleHidePanelTitle();
+        await dashboardCustomizePanel.clickFlyoutPrimaryButton();
+        await dashboardCustomizePanel.expectCustomizePanelSettingsFlyoutClosed();
+      };
+      await toggleHideTitle();
+
       await retry.try(async () => {
         const sharedData = await PageObjects.dashboard.getPanelSharedItemData();
         const foundSharedItemTitle = !!sharedData.find((item) => {
@@ -93,11 +107,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         expect(foundSharedItemTitle).to.be(true);
       });
-      await dashboardPanelActions.toggleHidePanelTitle();
+      await toggleHideTitle();
     });
 
     it('data-shared-item title can be reset', async () => {
-      await dashboardPanelActions.resetCustomPanelTitle();
+      await PageObjects.dashboard.switchToEditMode();
+      await dashboardPanelActions.customizePanel();
+      await dashboardCustomizePanel.resetCustomPanelTitle();
+      await dashboardCustomizePanel.clickFlyoutPrimaryButton();
+      await dashboardCustomizePanel.expectCustomizePanelSettingsFlyoutClosed();
+
       await retry.try(async () => {
         const sharedData = await PageObjects.dashboard.getPanelSharedItemData();
         const foundOriginalSharedItemTitle = !!sharedData.find((item) => {
@@ -107,12 +126,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    it('data-shared-item title should update a saved search when using a custom panel title', async () => {
+    // TODO re-enable when https://github.com/elastic/kibana/pull/149078 has merged
+    it.skip('data-shared-item title should update a saved search when using a custom panel title', async () => {
+      await PageObjects.dashboard.switchToEditMode();
       const CUSTOM_SEARCH_TITLE = 'ima custom title for a search!';
-      await dashboardPanelActions.setCustomPanelTitle(
-        CUSTOM_SEARCH_TITLE,
-        'Rendering Test: saved search'
-      );
+      const el = await dashboardPanelActions.getPanelHeading('Rendering Test: saved search');
+      await dashboardPanelActions.customizePanel(el);
+      await dashboardCustomizePanel.expectCustomizePanelSettingsFlyoutOpen();
+      await dashboardCustomizePanel.setCustomPanelTitle(CUSTOM_SEARCH_TITLE);
+      await dashboardCustomizePanel.clickFlyoutPrimaryButton();
+      await dashboardCustomizePanel.expectCustomizePanelSettingsFlyoutClosed();
+
       await retry.try(async () => {
         const sharedData = await PageObjects.dashboard.getPanelSharedItemData();
         const foundSharedItemTitle = !!sharedData.find((item) => {
