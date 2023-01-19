@@ -90,8 +90,6 @@ async function concurrently<T>(maxConcurrency: number, arr: T[], fn: (item: T) =
   }
 }
 
-const KBN_CLIENT_API_PREFIX = '/internal/ftr/kbn_client_so';
-
 /**
  * SO client for FTR.
  *
@@ -124,8 +122,8 @@ export class KbnClientSavedObjects {
     const { data } = await this.requester.request<SavedObjectResponse<Attributes>>({
       description: 'get saved object',
       path: options.space
-        ? uriencode`/s/${options.space}${KBN_CLIENT_API_PREFIX}/${options.type}/${options.id}`
-        : uriencode`${KBN_CLIENT_API_PREFIX}/${options.type}/${options.id}`,
+        ? uriencode`/s/${options.space}/internal/ftr/kbn_client_so/${options.type}/${options.id}`
+        : uriencode`/internal/ftr/kbn_client_so/${options.type}/${options.id}`,
       method: 'GET',
     });
     return data;
@@ -140,8 +138,8 @@ export class KbnClientSavedObjects {
     const { data } = await this.requester.request<SavedObjectResponse<Attributes>>({
       description: 'update saved object',
       path: options.id
-        ? uriencode`${KBN_CLIENT_API_PREFIX}/${options.type}/${options.id}`
-        : uriencode`${KBN_CLIENT_API_PREFIX}/${options.type}`,
+        ? uriencode`/internal/ftr/kbn_client_so/${options.type}/${options.id}`
+        : uriencode`/internal/ftr/kbn_client_so/${options.type}`,
       query: {
         overwrite: options.overwrite,
       },
@@ -163,7 +161,7 @@ export class KbnClientSavedObjects {
 
     const { data } = await this.requester.request<SavedObjectResponse<Attributes>>({
       description: 'update saved object',
-      path: uriencode`${KBN_CLIENT_API_PREFIX}/${options.type}/${options.id}`,
+      path: uriencode`/internal/ftr/kbn_client_so/${options.type}/${options.id}`,
       query: {
         overwrite: options.overwrite,
       },
@@ -186,8 +184,8 @@ export class KbnClientSavedObjects {
     const { data } = await this.requester.request({
       description: 'delete saved object',
       path: options.space
-        ? uriencode`/s/${options.space}${KBN_CLIENT_API_PREFIX}/${options.type}/${options.id}`
-        : uriencode`${KBN_CLIENT_API_PREFIX}/${options.type}/${options.id}`,
+        ? uriencode`/s/${options.space}/internal/ftr/kbn_client_so/${options.type}/${options.id}`
+        : uriencode`/internal/ftr/kbn_client_so/${options.type}/${options.id}`,
       method: 'DELETE',
     });
 
@@ -203,8 +201,8 @@ export class KbnClientSavedObjects {
       const resp = await this.requester.request<FindApiResponse>({
         method: 'GET',
         path: options.space
-          ? uriencode`/s/${options.space}${KBN_CLIENT_API_PREFIX}/_find`
-          : uriencode`${KBN_CLIENT_API_PREFIX}/_find`,
+          ? uriencode`/s/${options.space}/internal/ftr/kbn_client_so/_find`
+          : `/internal/ftr/kbn_client_so/_find`,
         query: {
           per_page: 1000,
           type: options.types,
@@ -277,8 +275,8 @@ export class KbnClientSavedObjects {
         await this.requester.request({
           method: 'DELETE',
           path: options.space
-            ? uriencode`/s/${options.space}${KBN_CLIENT_API_PREFIX}/${obj.type}/${obj.id}`
-            : uriencode`${KBN_CLIENT_API_PREFIX}/${obj.type}/${obj.id}`,
+            ? uriencode`/s/${options.space}/internal/ftr/kbn_client_so/${obj.type}/${obj.id}`
+            : uriencode`/internal/ftr/kbn_client_so/${obj.type}/${obj.id}`,
         });
         deleted++;
       } catch (error) {
