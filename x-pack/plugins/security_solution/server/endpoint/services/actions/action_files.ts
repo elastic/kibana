@@ -138,3 +138,25 @@ const doesFileHaveChunks = async (
 
   return Boolean((chunks.hits?.total as SearchTotalHits)?.value);
 };
+
+/**
+ * Validates that a given `fileId` is valid for the provided action
+ * @param esClient
+ * @param logger
+ * @param fileId
+ * @param actionId
+ */
+export const validateActionFileId = async (
+  esClient: ElasticsearchClient,
+  logger: Logger,
+  fileId: string,
+  actionId: string
+): Promise<void> => {
+  const fileInfo = await getFileInfo(esClient, logger, fileId);
+
+  // FIXME: PT match the "action id" found in the file info to the actionID provided on input
+  //        Need to gain access to a system where `get-file` is working and see where the `action_id` is stored
+  if (!fileInfo || !actionId) {
+    throw new EndpointError(`Invalid file id [${fileId}] for action [${actionId}]`);
+  }
+};
