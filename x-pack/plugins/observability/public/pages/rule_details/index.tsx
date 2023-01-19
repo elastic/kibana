@@ -42,7 +42,7 @@ import { fromQuery, toQuery } from '../../utils/url';
 import { ObservabilityAlertSearchbarWithUrlSync } from '../../components/shared/alert_search_bar';
 import { DeleteModalConfirmation } from './components/delete_modal_confirmation';
 import { CenterJustifiedSpinner } from './components/center_justified_spinner';
-import { getAlertSummaryWidgetTimeRange } from './helpers';
+import { getDefaultAlertSummaryTimeRange } from './helpers';
 
 import {
   EXECUTION_TAB,
@@ -112,7 +112,7 @@ export function RuleDetailsPage() {
   const [isRuleEditPopoverOpen, setIsRuleEditPopoverOpen] = useState(false);
   const [esQuery, setEsQuery] = useState<{ bool: BoolQuery }>();
   const [alertSummaryWidgetTimeRange, setAlertSummaryWidgetTimeRange] = useState(
-    getAlertSummaryWidgetTimeRange
+    getDefaultAlertSummaryTimeRange
   );
   const ruleQuery = useRef<Query[]>([
     { query: `kibana.alert.rule.uuid: ${ruleId}`, language: 'kuery' },
@@ -125,7 +125,7 @@ export function RuleDetailsPage() {
   const tabsRef = useRef<HTMLDivElement>(null);
 
   const onAlertSummaryWidgetClick = async (status: AlertStatus = ALERT_STATUS_ALL) => {
-    const timeRange = getAlertSummaryWidgetTimeRange();
+    const timeRange = getDefaultAlertSummaryTimeRange();
     setAlertSummaryWidgetTimeRange(timeRange);
     await locators.get(ruleDetailsLocatorID)?.navigate(
       {

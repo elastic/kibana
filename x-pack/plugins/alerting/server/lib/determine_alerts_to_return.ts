@@ -12,10 +12,12 @@ import { AlertInstanceState, AlertInstanceContext, RawAlertInstance } from '../t
 // determines which alerts to return in the state
 export function determineAlertsToReturn<
   State extends AlertInstanceState,
-  Context extends AlertInstanceContext
+  Context extends AlertInstanceContext,
+  ActionGroupIds extends string,
+  RecoveryActionGroupId extends string
 >(
-  activeAlerts: Record<string, Alert<State, Context>> = {},
-  recoveredAlerts: Record<string, Alert<State, Context>> = {}
+  activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {},
+  recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>> = {}
 ): {
   alertsToReturn: Record<string, RawAlertInstance>;
   recoveredAlertsToReturn: Record<string, RawAlertInstance>;
