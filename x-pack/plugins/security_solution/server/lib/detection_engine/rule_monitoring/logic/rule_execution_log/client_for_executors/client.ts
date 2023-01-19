@@ -194,6 +194,8 @@ export const createClientForExecutors = (
     } else {
       ruleResultService?.setLastRunOutcomeMessage(`INFO: ${message}`);
     }
+
+    ruleResultService?.setLastRunOutcomeMessage(message);
   };
 
   const writeStatusChangeToEventLog = (args: NormalizedStatusChangeArgs): void => {
