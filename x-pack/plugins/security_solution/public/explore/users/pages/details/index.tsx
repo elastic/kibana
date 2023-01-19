@@ -221,6 +221,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
                 <EuiFlexGroup>
                   <EuiFlexItem>
                     <AlertsByStatus
+                      applyGlobalQueriesAndFilters
                       signalIndexName={signalIndexName}
                       entityFilter={entityFilter}
                       additionalFilters={rawFilteredQuery ? [rawFilteredQuery] : []}
