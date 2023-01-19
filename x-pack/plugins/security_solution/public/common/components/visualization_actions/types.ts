@@ -106,7 +106,8 @@ export interface ExtraOptions {
 }
 
 export interface VisualizationEmbeddableProps extends LensEmbeddableComponentProps {
+  donutTextWrapperClassName?: string;
+  inputId?: InputsModelId.global | InputsModelId.timeline;
   isDonut?: boolean;
   label?: string;
-  inputId?: InputsModelId.global | InputsModelId.timeline;
 }

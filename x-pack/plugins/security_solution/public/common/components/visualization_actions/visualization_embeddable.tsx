@@ -20,7 +20,15 @@ import type { EmbeddableData, VisualizationEmbeddableProps } from './types';
 
 const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> = (props) => {
   const dispatch = useDispatch();
-  const { inputId = InputsModelId.global, id, isDonut, label, onLoad, ...lensPorps } = props;
+  const {
+    inputId = InputsModelId.global,
+    id,
+    isDonut,
+    label,
+    donutTextWrapperClassName,
+    onLoad,
+    ...lensPorps
+  } = props;
   const { session, refetchByRestartingSession } = useRefetchByRestartingSession({
     inputId,
     queryId: id,
@@ -78,6 +86,7 @@ const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> =
         dataExists={dataExists}
         label={label}
         title={dataExists ? <ChartLabel count={visualizationData[0]?.hits.total} /> : null}
+        donutTextWrapperClassName={donutTextWrapperClassName}
       >
         <LensEmbeddable {...lensPorps} id={id} onLoad={onEmbeddableLoad} />
       </DonutChartWrapper>
