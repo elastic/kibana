@@ -17,7 +17,7 @@ import { selectServiceLocationsState } from '../../../../state';
 export interface FilterItem {
   label: string;
   values: Array<{ label: string; count: number }>;
-  field: 'tags' | 'status' | 'locations' | 'monitorType';
+  field: 'tags' | 'status' | 'locations' | 'monitorType' | 'projects';
 }
 
 export const findLocationItem = (query: string, locations: ServiceLocations) => {
@@ -50,6 +50,14 @@ export const FilterGroup = () => {
     },
   ];
 
+  if (data.projects.length > 0) {
+    filters.push({
+      label: PROJECT_LABEL,
+      field: 'projects',
+      values: data.projects,
+    });
+  }
+
   return (
     <EuiFilterGroup>
       {filters.map((filter, index) => (
@@ -61,6 +69,10 @@ export const FilterGroup = () => {
 
 const TYPE_LABEL = i18n.translate('xpack.synthetics.monitorManagement.filter.typeLabel', {
   defaultMessage: `Type`,
+});
+
+const PROJECT_LABEL = i18n.translate('xpack.synthetics.monitorManagement.filter.projectLabel', {
+  defaultMessage: `Project`,
 });
 
 const LOCATION_LABEL = i18n.translate('xpack.synthetics.monitorManagement.filter.locationLabel', {

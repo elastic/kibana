@@ -6,14 +6,21 @@
  */
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { getAllMonitors } from '../../saved_objects/synthetics_monitor/get_all_monitors';
 import { isStatusEnabled } from '../../../common/runtime_types/monitor_management/alert_config';
-import { ConfigKey, MonitorOverviewItem, SyntheticsMonitor } from '../../../common/runtime_types';
+import { ConfigKey, MonitorOverviewItem } from '../../../common/runtime_types';
 import { UMServerLibs } from '../../legacy_uptime/lib/lib';
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS, SYNTHETICS_API_URLS } from '../../../common/constants';
 import { syntheticsMonitorType } from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { getMonitorNotFoundResponse } from '../synthetics_service/service_errors';
-import { getMonitors, isMonitorsQueryFiltered, QuerySchema, SEARCH_FIELDS } from '../common';
+import {
+  getMonitorFilters,
+  getMonitors,
+  isMonitorsQueryFiltered,
+  QuerySchema,
+  SEARCH_FIELDS,
+} from '../common';
 
 export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
@@ -89,13 +96,19 @@ export const getSyntheticsMonitorOverviewRoute: SyntheticsRestApiRouteFactory = 
   validate: {
     query: QuerySchema,
   },
-  handler: async ({ request, savedObjectsClient }): Promise<any> => {
+  handler: async ({ request, savedObjectsClient, syntheticsMonitorClient }): Promise<any> => {
     const { sortField, sortOrder, query } = request.query;
-    const finder = savedObjectsClient.createPointInTimeFinder<SyntheticsMonitor>({
-      type: syntheticsMonitorType,
-      sortField: sortField === 'status' ? `${ConfigKey.NAME}.keyword` : sortField,
+
+    const filtersStr = getMonitorFilters({
+      ...request.query,
+      serviceLocations: syntheticsMonitorClient.syntheticsService.locations,
+    });
+
+    const allMonitorConfigs = await getAllMonitors({
       sortOrder,
-      perPage: 1000,
+      filter: filtersStr,
+      soClient: savedObjectsClient,
+      sortField: sortField === 'status' ? `${ConfigKey.NAME}.keyword` : sortField,
       search: query ? `${query}*` : undefined,
       searchFields: SEARCH_FIELDS,
     });
@@ -104,28 +117,24 @@ export const getSyntheticsMonitorOverviewRoute: SyntheticsRestApiRouteFactory = 
     let total = 0;
     const allMonitors: MonitorOverviewItem[] = [];
 
-    for await (const result of finder.find()) {
-      /* collect all monitor ids for use
-       * in filtering overview requests */
-      result.saved_objects.forEach((monitor) => {
-        const id = monitor.attributes[ConfigKey.MONITOR_QUERY_ID];
-        const configId = monitor.attributes[ConfigKey.CONFIG_ID];
-        allMonitorIds.push(configId);
+    for (const { attributes } of allMonitorConfigs) {
+      const id = attributes[ConfigKey.MONITOR_QUERY_ID];
+      const configId = attributes[ConfigKey.CONFIG_ID];
+      allMonitorIds.push(configId);
 
-        /* for each location, add a config item */
-        const locations = monitor.attributes[ConfigKey.LOCATIONS];
-        locations.forEach((location) => {
-          const config = {
-            id,
-            configId,
-            name: monitor.attributes[ConfigKey.NAME],
-            location,
-            isEnabled: monitor.attributes[ConfigKey.ENABLED],
-            isStatusAlertEnabled: isStatusEnabled(monitor.attributes[ConfigKey.ALERT_CONFIG]),
-          };
-          allMonitors.push(config);
-          total++;
-        });
+      /* for each location, add a config item */
+      const locations = attributes[ConfigKey.LOCATIONS];
+      locations.forEach((location) => {
+        const config = {
+          id,
+          configId,
+          name: attributes[ConfigKey.NAME],
+          location,
+          isEnabled: attributes[ConfigKey.ENABLED],
+          isStatusAlertEnabled: isStatusEnabled(attributes[ConfigKey.ALERT_CONFIG]),
+        };
+        allMonitors.push(config);
+        total++;
       });
     }
 

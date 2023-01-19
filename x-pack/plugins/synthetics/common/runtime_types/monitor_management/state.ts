@@ -28,6 +28,7 @@ export const FetchMonitorOverviewQueryArgsCodec = t.partial({
   searchFields: t.array(t.string),
   tags: t.array(t.string),
   locations: t.array(t.string),
+  projects: t.array(t.string),
   monitorType: t.array(t.string),
   sortField: t.string,
   sortOrder: t.string,

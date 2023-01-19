@@ -14,6 +14,7 @@ export interface MonitorOverviewPageState {
   tags?: string[];
   monitorType?: string[];
   locations?: string[];
+  projects?: string[];
   sortOrder: 'asc' | 'desc';
   sortField: string;
 }

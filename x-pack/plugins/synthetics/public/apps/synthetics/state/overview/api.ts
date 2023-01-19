@@ -32,6 +32,7 @@ function toMonitorOverviewQueryArgs(
     query: pageState.query,
     tags: pageState.tags,
     locations: pageState.locations,
+    projects: pageState.projects,
     monitorType: pageState.monitorType,
     sortField: pageState.sortField,
     sortOrder: pageState.sortOrder,

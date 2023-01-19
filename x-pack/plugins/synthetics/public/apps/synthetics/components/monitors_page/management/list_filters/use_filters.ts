@@ -29,6 +29,12 @@ const aggs = {
       size: 10000,
     },
   },
+  projects: {
+    terms: {
+      field: `${syntheticsMonitorType}.attributes.project_id`,
+      size: 10000,
+    },
+  },
 };
 
 type Buckets = Array<{
@@ -46,6 +52,9 @@ interface AggsResponse {
   tags: {
     buckets: Buckets;
   };
+  projects: {
+    buckets: Buckets;
+  };
 }
 
 export const useFilters = () => {
@@ -60,7 +69,7 @@ export const useFilters = () => {
   }, []);
 
   return useMemo(() => {
-    const { types, tags, locations } = (data?.aggregations as AggsResponse) ?? {};
+    const { types, tags, locations, projects } = (data?.aggregations as AggsResponse) ?? {};
     return {
       types:
         types?.buckets?.map(({ key, doc_count: count }) => ({
@@ -77,6 +86,13 @@ export const useFilters = () => {
           label: key,
           count,
         })) ?? [],
+      projects:
+        projects?.buckets
+          ?.filter(({ key }) => key)
+          .map(({ key, doc_count: count }) => ({
+            label: key,
+            count,
+          })) ?? [],
     };
   }, [data]);
 };

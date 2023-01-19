@@ -64,7 +64,7 @@ export async function getStatus(
 
   const allMonitors = await getAllMonitors({
     soClient,
-    search: `${query}*`,
+    search: query ? `${query}*` : undefined,
     fields: [
       ConfigKey.ENABLED,
       ConfigKey.LOCATIONS,

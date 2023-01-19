@@ -30,6 +30,7 @@ export interface SyntheticsUrlParams {
   monitorType?: string[];
   status?: string[];
   locationId?: string;
+  projects?: string[];
 }
 
 const {
@@ -89,6 +90,7 @@ export const getSupportedUrlParams = (params: {
     monitorType,
     locations,
     locationId,
+    projects,
   } = filteredParams;
 
   return {
@@ -115,6 +117,7 @@ export const getSupportedUrlParams = (params: {
     tags: tags ? JSON.parse(tags) : [],
     monitorType: monitorType ? JSON.parse(monitorType) : [],
     locations: locations ? JSON.parse(locations) : [],
+    projects: projects ? JSON.parse(projects) : [],
     locationId: locationId || undefined,
   };
 };

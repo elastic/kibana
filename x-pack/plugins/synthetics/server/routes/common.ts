@@ -22,6 +22,7 @@ export const QuerySchema = schema.object({
   tags: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
   monitorType: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
   locations: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
+  projects: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
   status: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
   fields: schema.maybe(schema.arrayOf(schema.string())),
   searchAfter: schema.maybe(schema.arrayOf(schema.string())),
@@ -85,6 +86,7 @@ export const getMonitorFilters = ({
   ports,
   filter,
   locations,
+  projects,
   monitorTypes,
   serviceLocations,
 }: {
@@ -92,6 +94,7 @@ export const getMonitorFilters = ({
   tags?: string | string[];
   monitorTypes?: string | string[];
   locations?: string | string[];
+  projects?: string | string[];
   ports?: string | string[];
   serviceLocations: ServiceLocations;
 }) => {
@@ -100,6 +103,7 @@ export const getMonitorFilters = ({
   return [
     filter,
     getKqlFilter({ field: 'tags', values: tags }),
+    getKqlFilter({ field: 'project_id', values: projects }),
     getKqlFilter({ field: 'type', values: monitorTypes }),
     getKqlFilter({ field: 'locations.id', values: locationFilter }),
   ]
