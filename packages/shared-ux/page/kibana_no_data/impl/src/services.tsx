@@ -47,11 +47,11 @@ export const KibanaNoDataPageKibanaProvider: FC<KibanaNoDataPageKibanaDependenci
   children,
   ...dependencies
 }) => {
-  const { dataViews, customBranding } = dependencies;
+  const { dataViews, coreStart } = dependencies;
   const value: Services = {
     hasESData: dataViews.hasData.hasESData,
     hasUserDataView: dataViews.hasData.hasUserDataView,
-    hasCustomBranding: customBranding.hasCustomBranding,
+    hasCustomBranding: coreStart.customBranding.hasCustomBranding,
   };
 
   return (

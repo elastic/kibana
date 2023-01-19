@@ -88,6 +88,7 @@ export class StorybookMock extends AbstractStorybookMock<
       ...noDataViewsMock.getServices(params),
       hasESData: () => params.hasESData,
       hasUserDataView: () => params.hasUserDataView,
+      hasCustomBranding: false,
     };
   }
 }

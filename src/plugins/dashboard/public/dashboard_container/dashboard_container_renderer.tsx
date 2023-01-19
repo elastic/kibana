@@ -10,7 +10,7 @@ import './_dashboard_container.scss';
 
 import uuid from 'uuid';
 import classNames from 'classnames';
-import { EuiLoadingElastic } from '@elastic/eui';
+import { EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
@@ -31,12 +31,14 @@ export interface DashboardContainerRendererProps {
   savedObjectId?: string;
   getCreationOptions?: () => DashboardCreationOptions;
   onDashboardContainerLoaded?: (dashboardContainer: DashboardContainer) => void;
+  showPlainSpinner?: boolean;
 }
 
 export const DashboardContainerRenderer = ({
   savedObjectId,
   getCreationOptions,
   onDashboardContainerLoaded,
+  showPlainSpinner,
 }: DashboardContainerRendererProps) => {
   const {
     embeddable,
@@ -107,10 +109,14 @@ export const DashboardContainerRenderer = ({
     { 'dashboardViewport--screenshotMode': isScreenshotMode() },
     { 'dashboardViewport--loading': loading }
   );
+
+  const spinnerType = showPlainSpinner ? (
+    <EuiLoadingSpinner size="xxl" />
+  ) : (
+    <EuiLoadingElastic size="xxl" />
+  );
   return (
-    <div className={viewportClasses}>
-      {loading ? <EuiLoadingElastic size="xxl" /> : <div ref={dashboardRoot} />}
-    </div>
+    <div className={viewportClasses}>{loading ? spinnerType : <div ref={dashboardRoot} />}</div>
   );
 };
 
