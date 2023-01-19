@@ -40,10 +40,16 @@ export const ControlGeneralView = ({ policy, onChange, show }: ViewDeps) => {
   const configuration = input?.vars?.configuration?.value || '';
   const json = useMemo<{ selectors: ControlSelector[]; responses: ControlResponse[] }>(() => {
     try {
-      return yaml.load(configuration);
+      const result = yaml.load(configuration);
+
+      if (result) {
+        return result;
+      }
     } catch {
-      return { selectors: [], responses: [] };
+      // noop
     }
+
+    return { selectors: [], responses: [] };
   }, [configuration]);
 
   const { selectors, responses } = json;
