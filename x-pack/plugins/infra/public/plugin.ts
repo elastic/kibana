@@ -89,8 +89,8 @@ export class Plugin implements InfraClientPluginClass {
     const infraEntries = [
       { label: 'Inventory', app: 'metrics', path: '/inventory' },
       { label: 'Metrics Explorer', app: 'metrics', path: '/explorer' },
+      { label: 'Hosts', isBeta: true, app: 'metrics', path: '/hosts' },
     ];
-    const hostInfraEntry = { label: 'Hosts', isBeta: true, app: 'metrics', path: '/hosts' };
     pluginsSetup.observability.navigation.registerSections(
       startDep$AndHostViewFlag$.pipe(
         map(
@@ -100,7 +100,6 @@ export class Plugin implements InfraClientPluginClass {
                 application: { capabilities },
               },
             ],
-            isInfrastructureHostsViewEnabled,
           ]) => [
             ...(capabilities.logs.show
               ? [
@@ -120,9 +119,7 @@ export class Plugin implements InfraClientPluginClass {
                   {
                     label: 'Infrastructure',
                     sortKey: 300,
-                    entries: isInfrastructureHostsViewEnabled
-                      ? [hostInfraEntry, ...infraEntries]
-                      : infraEntries,
+                    entries: infraEntries,
                   },
                 ]
               : []),
@@ -195,6 +192,13 @@ export class Plugin implements InfraClientPluginClass {
         path: '/inventory',
       },
       {
+        id: 'metrics-hosts',
+        title: i18n.translate('xpack.infra.homePage.metricsHostsTabTitle', {
+          defaultMessage: 'Hosts',
+        }),
+        path: '/hosts',
+      },
+      {
         id: 'metrics-explorer',
         title: i18n.translate('xpack.infra.homePage.metricsExplorerTabTitle', {
           defaultMessage: 'Metrics Explorer',
@@ -209,13 +213,6 @@ export class Plugin implements InfraClientPluginClass {
         path: '/settings',
       },
     ];
-    const hostInfraDeepLink = {
-      id: 'metrics-hosts',
-      title: i18n.translate('xpack.infra.homePage.metricsHostsTabTitle', {
-        defaultMessage: 'Hosts',
-      }),
-      path: '/hosts',
-    };
     core.application.register({
       id: 'metrics',
       title: i18n.translate('xpack.infra.metrics.pluginTitle', {
@@ -226,9 +223,7 @@ export class Plugin implements InfraClientPluginClass {
       appRoute: '/app/metrics',
       category: DEFAULT_APP_CATEGORIES.observability,
       updater$: this.appUpdater$,
-      deepLinks: core.uiSettings.get<boolean>(enableInfrastructureHostsView)
-        ? [hostInfraDeepLink, ...infraDeepLinks]
-        : infraDeepLinks,
+      deepLinks: infraDeepLinks,
       mount: async (params: AppMountParameters) => {
         // mount callback should not use setup dependencies, get start dependencies instead
         const [coreStart, pluginsStart, pluginStart] = await core.getStartServices();
@@ -239,14 +234,9 @@ export class Plugin implements InfraClientPluginClass {
     });
 
     startDep$AndHostViewFlag$.subscribe(
-      ([_startServices, isInfrastructureHostsViewEnabled]: [
-        [CoreStart, InfraClientStartDeps, InfraClientStartExports],
-        boolean
-      ]) => {
+      ([_startServices]: [[CoreStart, InfraClientStartDeps, InfraClientStartExports], boolean]) => {
         this.appUpdater$.next(() => ({
-          deepLinks: isInfrastructureHostsViewEnabled
-            ? [hostInfraDeepLink, ...infraDeepLinks]
-            : infraDeepLinks,
+          deepLinks: infraDeepLinks,
         }));
       }
     );
