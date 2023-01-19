@@ -263,6 +263,10 @@ export class MapEmbeddable
     return getMapAttributeService().getInputAsValueType(this.getExplicitInput());
   }
 
+  public getLayerList() {
+    return getLayerList(this._savedMap.getStore().getState());
+  }
+
   public async getFilters() {
     const embeddableSearchContext = getEmbeddableSearchContext(
       this._savedMap.getStore().getState()

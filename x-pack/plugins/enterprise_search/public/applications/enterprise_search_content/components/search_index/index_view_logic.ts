@@ -197,12 +197,18 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
     hasAdvancedFilteringFeature: [
       () => [selectors.connector],
       (connector?: Connector) =>
-        connector?.features ? connector.features[FeatureName.FILTERING_ADVANCED_CONFIG] : false,
+        connector?.features
+          ? connector.features[FeatureName.SYNC_RULES]?.advanced?.enabled ??
+            connector.features[FeatureName.FILTERING_ADVANCED_CONFIG]
+          : false,
     ],
     hasBasicFilteringFeature: [
       () => [selectors.connector],
       (connector?: Connector) =>
-        connector?.features ? connector.features[FeatureName.FILTERING_RULES] : false,
+        connector?.features
+          ? connector.features[FeatureName.SYNC_RULES]?.basic?.enabled ??
+            connector.features[FeatureName.FILTERING_RULES]
+          : false,
     ],
     hasFilteringFeature: [
       () => [selectors.hasAdvancedFilteringFeature, selectors.hasBasicFilteringFeature],

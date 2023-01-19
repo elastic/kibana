@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { useEsSearch } from '@kbn/observability-plugin/public';
-import { useParams } from 'react-router-dom';
+import { useEsSearch, useTheme } from '@kbn/observability-plugin/public';
 import { useMemo } from 'react';
-import { Ping } from '../../../../common/runtime_types';
+import { useLocations } from './use_locations';
+import { EncryptedSyntheticsSavedMonitor, Ping } from '../../../../common/runtime_types';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
   SUMMARY_FILTER,
@@ -16,10 +16,20 @@ import {
 import { SYNTHETICS_INDEX_PATTERN, UNNAMED_LOCATION } from '../../../../common/constants';
 import { useSyntheticsRefreshContext } from '../contexts';
 
-export function useStatusByLocation(monitorIdArg?: string) {
+export type LocationsStatus = Array<{ status: string; id: string; label: string; color: string }>;
+
+export function useStatusByLocation({
+  configId,
+  monitorLocations,
+}: {
+  configId: string;
+  monitorLocations?: EncryptedSyntheticsSavedMonitor['locations'];
+}) {
+  const theme = useTheme();
+
   const { lastRefresh } = useSyntheticsRefreshContext();
 
-  const { monitorId } = useParams<{ monitorId: string }>();
+  const { locations: allLocations } = useLocations();
 
   const { data, loading } = useEsSearch(
     {
@@ -33,7 +43,7 @@ export function useStatusByLocation(monitorIdArg?: string) {
               EXCLUDE_RUN_ONCE_FILTER,
               {
                 term: {
-                  config_id: monitorIdArg ?? monitorId,
+                  config_id: configId,
                 },
               },
             ],
@@ -58,18 +68,51 @@ export function useStatusByLocation(monitorIdArg?: string) {
         },
       },
     },
-    [lastRefresh, monitorId, monitorIdArg],
+    [lastRefresh, configId],
     { name: 'getMonitorStatusByLocation' }
   );
 
   return useMemo(() => {
-    const locations = (data?.aggregations?.locations.buckets ?? []).map((loc) => {
+    const getColor = (status: string) => {
+      switch (status) {
+        case 'up':
+          return theme.eui.euiColorVis0;
+        case 'down':
+          return theme.eui.euiColorVis9;
+        default:
+          return 'subdued';
+      }
+    };
+
+    const locationPings = (data?.aggregations?.locations.buckets ?? []).map((loc) => {
       return loc.summary.hits.hits?.[0]._source as Ping;
     });
+    const locations = (monitorLocations ?? [])
+      .map((loc) => {
+        const fullLoc = allLocations.find((l) => l.id === loc.id);
+        if (fullLoc) {
+          const ping = locationPings.find((p) => p.observer?.geo?.name === fullLoc?.label);
+          const status = ping ? (ping.summary?.down ?? 0 > 0 ? 'down' : 'up') : 'unknown';
+          return {
+            status,
+            id: fullLoc?.id,
+            label: fullLoc?.label,
+            color: getColor(status),
+          };
+        }
+      })
+      .filter(Boolean) as LocationsStatus;
 
     return {
       locations,
       loading,
     };
-  }, [data, loading]);
+  }, [
+    allLocations,
+    data?.aggregations?.locations.buckets,
+    loading,
+    monitorLocations,
+    theme.eui.euiColorVis0,
+    theme.eui.euiColorVis9,
+  ]);
 }

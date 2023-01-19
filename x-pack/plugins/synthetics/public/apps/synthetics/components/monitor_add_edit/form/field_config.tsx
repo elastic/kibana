@@ -11,28 +11,36 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import { UseFormReturn, ControllerRenderProps, FormState } from 'react-hook-form';
 import {
-  EuiButtonGroup,
-  EuiCheckbox,
   EuiCode,
-  EuiComboBox,
   EuiComboBoxOptionOption,
   EuiComboBoxProps,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFieldText,
-  EuiFieldNumber,
-  EuiFieldPassword,
-  EuiSelect,
   EuiSuperSelect,
-  EuiSwitch,
   EuiText,
   EuiLink,
   EuiTextArea,
 } from '@elastic/eui';
+import {
+  FieldText,
+  FieldNumber,
+  FieldPassword,
+  Checkbox,
+  ComboBox,
+  Select,
+  Switch,
+  Source,
+  ButtonGroup,
+  FormattedComboBox,
+  JSONEditor,
+  MonitorTypeRadioGroup,
+  HeaderField,
+  RequestBodyField,
+  ResponseBodyIndexField,
+} from './field_wrappers';
 import { formatLocation } from '../../../../../../common/utils/location_formatter';
 import { getDocLinks } from '../../../../../kibana_services';
 import { useMonitorName } from '../hooks/use_monitor_name';
-import { MonitorTypeRadioGroup } from '../fields/monitor_type_radio_group';
 import {
   ConfigKey,
   DataStream,
@@ -48,14 +56,8 @@ import {
   FieldMeta,
 } from '../types';
 import { AlertConfigKey, DEFAULT_BROWSER_ADVANCED_FIELDS } from '../constants';
-import { HeaderField } from '../fields/header_field';
-import { RequestBodyField } from '../fields/request_body_field';
-import { ResponseBodyIndexField } from '../fields/index_response_body_field';
-import { ComboBox } from '../fields/combo_box';
-import { SourceField } from '../fields/source_field';
 import { getDefaultFormFields } from './defaults';
 import { validate, validateHeaders, WHOLE_NUMBERS_ONLY, FLOATS_ONLY } from './validation';
-import { JSONEditor } from '../fields/code_editor';
 
 const getScheduleContent = (value: number) => {
   if (value > 60) {
@@ -212,7 +214,7 @@ export const FIELD: Record<string, FieldMeta> = {
   [`${ConfigKey.URLS}__single`]: {
     fieldKey: ConfigKey.URLS,
     required: true,
-    component: EuiFieldText,
+    component: FieldText,
     label: i18n.translate('xpack.synthetics.monitorConfig.urlsSingle.label', {
       defaultMessage: 'Website URL',
     }),
@@ -240,7 +242,7 @@ export const FIELD: Record<string, FieldMeta> = {
   [`${ConfigKey.URLS}__http`]: {
     fieldKey: ConfigKey.URLS,
     required: true,
-    component: EuiFieldText,
+    component: FieldText,
     label: i18n.translate('xpack.synthetics.monitorConfig.urls.label', {
       defaultMessage: 'URL',
     }),
@@ -268,7 +270,7 @@ export const FIELD: Record<string, FieldMeta> = {
   [`${ConfigKey.HOSTS}__tcp`]: {
     fieldKey: ConfigKey.HOSTS,
     required: true,
-    component: EuiFieldText,
+    component: FieldText,
     label: i18n.translate('xpack.synthetics.monitorConfig.hostsTCP.label', {
       defaultMessage: 'Host:Port',
     }),
@@ -293,7 +295,7 @@ export const FIELD: Record<string, FieldMeta> = {
   [`${ConfigKey.HOSTS}__icmp`]: {
     fieldKey: ConfigKey.HOSTS,
     required: true,
-    component: EuiFieldText,
+    component: FieldText,
     label: i18n.translate('xpack.synthetics.monitorConfig.hostsICMP.label', {
       defaultMessage: 'Host',
     }),
@@ -318,7 +320,7 @@ export const FIELD: Record<string, FieldMeta> = {
   [ConfigKey.NAME]: {
     fieldKey: ConfigKey.NAME,
     required: true,
-    component: EuiFieldText,
+    component: FieldText,
     controlled: true,
     label: i18n.translate('xpack.synthetics.monitorConfig.name.label', {
       defaultMessage: 'Monitor name',
@@ -350,7 +352,7 @@ export const FIELD: Record<string, FieldMeta> = {
   [ConfigKey.SCHEDULE]: {
     fieldKey: `${ConfigKey.SCHEDULE}.number`,
     required: true,
-    component: EuiSelect,
+    component: Select,
     label: i18n.translate('xpack.synthetics.monitorConfig.frequency.label', {
       defaultMessage: 'Frequency',
     }),
@@ -371,7 +373,7 @@ export const FIELD: Record<string, FieldMeta> = {
     fieldKey: ConfigKey.LOCATIONS,
     required: true,
     controlled: true,
-    component: EuiComboBox as React.ComponentType<EuiComboBoxProps<string>>,
+    component: ComboBox as React.ComponentType<EuiComboBoxProps<string>>,
     label: i18n.translate('xpack.synthetics.monitorConfig.locations.label', {
       defaultMessage: 'Locations',
     }),
@@ -417,7 +419,7 @@ export const FIELD: Record<string, FieldMeta> = {
   },
   [ConfigKey.ENABLED]: {
     fieldKey: ConfigKey.ENABLED,
-    component: EuiSwitch,
+    component: Switch,
     label: i18n.translate('xpack.synthetics.monitorConfig.enabled.label', {
       defaultMessage: 'Enable Monitor',
     }),
@@ -439,7 +441,7 @@ export const FIELD: Record<string, FieldMeta> = {
   },
   [ConfigKey.ALERT_CONFIG]: {
     fieldKey: AlertConfigKey.STATUS_ENABLED,
-    component: EuiSwitch,
+    component: Switch,
     label: i18n.translate('xpack.synthetics.monitorConfig.enabledAlerting.label', {
       defaultMessage: 'Enable status alerts',
     }),
@@ -460,7 +462,7 @@ export const FIELD: Record<string, FieldMeta> = {
   },
   [ConfigKey.TAGS]: {
     fieldKey: ConfigKey.TAGS,
-    component: ComboBox,
+    component: FormattedComboBox,
     label: i18n.translate('xpack.synthetics.monitorConfig.tags.label', {
       defaultMessage: 'Tags',
     }),
@@ -475,7 +477,7 @@ export const FIELD: Record<string, FieldMeta> = {
   },
   [ConfigKey.TIMEOUT]: {
     fieldKey: ConfigKey.TIMEOUT,
-    component: EuiFieldNumber,
+    component: FieldNumber,
     label: i18n.translate('xpack.synthetics.monitorConfig.timeout.label', {
       defaultMessage: 'Timeout in seconds',
     }),
@@ -512,7 +514,7 @@ export const FIELD: Record<string, FieldMeta> = {
   },
   [ConfigKey.APM_SERVICE_NAME]: {
     fieldKey: ConfigKey.APM_SERVICE_NAME,
-    component: EuiFieldText,
+    component: FieldText,
     label: i18n.translate('xpack.synthetics.monitorConfig.apmServiceName.label', {
       defaultMessage: 'APM service name',
     }),
@@ -528,7 +530,7 @@ export const FIELD: Record<string, FieldMeta> = {
   },
   [ConfigKey.NAMESPACE]: {
     fieldKey: ConfigKey.NAMESPACE,
-    component: EuiFieldText,
+    component: FieldText,
     label: i18n.translate('xpack.synthetics.monitorConfig.namespace.label', {
       defaultMessage: 'Data stream namespace',
     }),
@@ -555,7 +557,7 @@ export const FIELD: Record<string, FieldMeta> = {
   },
   [ConfigKey.MAX_REDIRECTS]: {
     fieldKey: ConfigKey.MAX_REDIRECTS,
-    component: EuiFieldNumber,
+    component: FieldNumber,
     label: i18n.translate('xpack.synthetics.monitorConfig.maxRedirects.label', {
       defaultMessage: 'Max redirects',
     }),
@@ -577,7 +579,7 @@ export const FIELD: Record<string, FieldMeta> = {
   },
   [ConfigKey.WAIT]: {
     fieldKey: ConfigKey.WAIT,
-    component: EuiFieldNumber,
+    component: FieldNumber,
     label: i18n.translate('xpack.synthetics.monitorConfig.wait.label', {
       defaultMessage: 'Wait',
     }),
@@ -599,7 +601,7 @@ export const FIELD: Record<string, FieldMeta> = {
   },
   [ConfigKey.USERNAME]: {
     fieldKey: ConfigKey.USERNAME,
-    component: EuiFieldText,
+    component: FieldText,
     label: i18n.translate('xpack.synthetics.monitorConfig.username.label', {
       defaultMessage: 'Username',
     }),
@@ -609,7 +611,7 @@ export const FIELD: Record<string, FieldMeta> = {
   },
   [ConfigKey.PASSWORD]: {
     fieldKey: ConfigKey.PASSWORD,
-    component: EuiFieldPassword,
+    component: FieldPassword,
     label: i18n.translate('xpack.synthetics.monitorConfig.password.label', {
       defaultMessage: 'Password',
     }),
@@ -619,7 +621,7 @@ export const FIELD: Record<string, FieldMeta> = {
   },
   [ConfigKey.PROXY_URL]: {
     fieldKey: ConfigKey.PROXY_URL,
-    component: EuiFieldText,
+    component: FieldText,
     label: i18n.translate('xpack.synthetics.monitorConfig.proxyUrl.label', {
       defaultMessage: 'Proxy URL',
     }),
@@ -629,7 +631,7 @@ export const FIELD: Record<string, FieldMeta> = {
   },
   [ConfigKey.REQUEST_METHOD_CHECK]: {
     fieldKey: ConfigKey.REQUEST_METHOD_CHECK,
-    component: EuiSelect,
+    component: Select,
     label: i18n.translate('xpack.synthetics.monitorConfig.requestMethod.label', {
       defaultMessage: 'Request method',
     }),
@@ -674,7 +676,7 @@ export const FIELD: Record<string, FieldMeta> = {
   },
   [ConfigKey.RESPONSE_HEADERS_INDEX]: {
     fieldKey: ConfigKey.RESPONSE_HEADERS_INDEX,
-    component: EuiCheckbox,
+    component: Checkbox,
     helpText: (
       <>
         <FormattedMessage
@@ -713,7 +715,7 @@ export const FIELD: Record<string, FieldMeta> = {
   },
   [ConfigKey.RESPONSE_STATUS_CHECK]: {
     fieldKey: ConfigKey.RESPONSE_STATUS_CHECK,
-    component: ComboBox,
+    component: FormattedComboBox,
     label: i18n.translate('xpack.synthetics.monitorConfig.responseStatusCheck.label', {
       defaultMessage: 'Check response status equals',
     }),
@@ -758,7 +760,7 @@ export const FIELD: Record<string, FieldMeta> = {
   },
   [ConfigKey.RESPONSE_BODY_CHECK_POSITIVE]: {
     fieldKey: ConfigKey.RESPONSE_BODY_CHECK_POSITIVE,
-    component: ComboBox,
+    component: FormattedComboBox,
     label: i18n.translate('xpack.synthetics.monitorConfig.responseBodyCheck.label', {
       defaultMessage: 'Check response body contains',
     }),
@@ -773,7 +775,7 @@ export const FIELD: Record<string, FieldMeta> = {
   },
   [ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE]: {
     fieldKey: ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE,
-    component: ComboBox,
+    component: FormattedComboBox,
     label: i18n.translate('xpack.synthetics.monitorConfig.responseBodyCheckNegative.label', {
       defaultMessage: 'Check response body does not contain',
     }),
@@ -788,7 +790,7 @@ export const FIELD: Record<string, FieldMeta> = {
   },
   [ConfigKey.RESPONSE_RECEIVE_CHECK]: {
     fieldKey: ConfigKey.RESPONSE_RECEIVE_CHECK,
-    component: EuiFieldText,
+    component: FieldText,
     label: i18n.translate('xpack.synthetics.monitorConfig.responseReceiveCheck.label', {
       defaultMessage: 'Check response contains',
     }),
@@ -798,7 +800,7 @@ export const FIELD: Record<string, FieldMeta> = {
   },
   [`${ConfigKey.PROXY_URL}__tcp`]: {
     fieldKey: ConfigKey.PROXY_URL,
-    component: EuiFieldText,
+    component: FieldText,
     label: i18n.translate('xpack.synthetics.monitorConfig.proxyURLTCP.label', {
       defaultMessage: 'Proxy URL',
     }),
@@ -809,7 +811,7 @@ export const FIELD: Record<string, FieldMeta> = {
   },
   [ConfigKey.REQUEST_SEND_CHECK]: {
     fieldKey: ConfigKey.REQUEST_SEND_CHECK,
-    component: EuiFieldText,
+    component: FieldText,
     label: i18n.translate('xpack.synthetics.monitorConfig.requestSendCheck.label', {
       defaultMessage: 'Request payload',
     }),
@@ -820,7 +822,7 @@ export const FIELD: Record<string, FieldMeta> = {
   [ConfigKey.SOURCE_INLINE]: {
     fieldKey: 'source.inline',
     required: true,
-    component: SourceField,
+    component: Source,
     ariaLabel: i18n.translate('xpack.synthetics.monitorConfig.monitorScript.label', {
       defaultMessage: 'Monitor script',
     }),
@@ -873,7 +875,7 @@ export const FIELD: Record<string, FieldMeta> = {
   },
   isTLSEnabled: {
     fieldKey: 'isTLSEnabled',
-    component: EuiSwitch,
+    component: Switch,
     controlled: true,
     props: ({ setValue }) => {
       return {
@@ -889,7 +891,7 @@ export const FIELD: Record<string, FieldMeta> = {
   },
   [ConfigKey.TLS_VERIFICATION_MODE]: {
     fieldKey: ConfigKey.TLS_VERIFICATION_MODE,
-    component: EuiSelect,
+    component: Select,
     label: i18n.translate('xpack.synthetics.monitorConfig.verificationMode.label', {
       defaultMessage: 'Verification mode',
     }),
@@ -907,7 +909,7 @@ export const FIELD: Record<string, FieldMeta> = {
   },
   [ConfigKey.TLS_VERSION]: {
     fieldKey: ConfigKey.TLS_VERSION,
-    component: EuiComboBox as React.ComponentType<EuiComboBoxProps<string>>,
+    component: ComboBox as React.ComponentType<EuiComboBoxProps<string>>,
     label: i18n.translate('xpack.synthetics.monitorConfig.tlsVersion.label', {
       defaultMessage: 'Supported TLS protocols',
     }),
@@ -971,7 +973,7 @@ export const FIELD: Record<string, FieldMeta> = {
   },
   [ConfigKey.TLS_KEY_PASSPHRASE]: {
     fieldKey: ConfigKey.TLS_KEY_PASSPHRASE,
-    component: EuiFieldPassword,
+    component: FieldPassword,
     label: i18n.translate('xpack.synthetics.monitorConfig.clientKeyPassphrase.label', {
       defaultMessage: 'Client key passphrase',
     }),
@@ -982,7 +984,7 @@ export const FIELD: Record<string, FieldMeta> = {
   },
   [ConfigKey.SCREENSHOTS]: {
     fieldKey: ConfigKey.SCREENSHOTS,
-    component: EuiButtonGroup,
+    component: ButtonGroup,
     label: i18n.translate('xpack.synthetics.monitorConfig.screenshotOptions.label', {
       defaultMessage: 'Screenshot options',
     }),
@@ -1005,13 +1007,13 @@ export const FIELD: Record<string, FieldMeta> = {
         label: option.replace(/-/g, ' '),
       })),
       css: {
-        'text-transform': 'capitalize',
+        textTransform: 'capitalize',
       },
     }),
   },
   [ConfigKey.TEXT_ASSERTION]: {
     fieldKey: ConfigKey.TEXT_ASSERTION,
-    component: EuiFieldText,
+    component: FieldText,
     label: i18n.translate('xpack.synthetics.monitorConfig.textAssertion.label', {
       defaultMessage: 'Text assertion',
     }),
@@ -1117,7 +1119,7 @@ export const FIELD: Record<string, FieldMeta> = {
   },
   [ConfigKey.IGNORE_HTTPS_ERRORS]: {
     fieldKey: ConfigKey.IGNORE_HTTPS_ERRORS,
-    component: EuiSwitch,
+    component: Switch,
     controlled: true,
     helpText: (
       <span>
@@ -1139,7 +1141,7 @@ export const FIELD: Record<string, FieldMeta> = {
   },
   [ConfigKey.SYNTHETICS_ARGS]: {
     fieldKey: ConfigKey.SYNTHETICS_ARGS,
-    component: EuiFieldText,
+    component: FieldText,
     controlled: true,
     label: i18n.translate('xpack.synthetics.monitorConfig.syntheticsArgs.label', {
       defaultMessage: 'Synthetics args',

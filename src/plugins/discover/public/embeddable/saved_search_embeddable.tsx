@@ -462,6 +462,7 @@ export class SavedSearchEmbeddable
     );
 
     searchProps.sharedItemTitle = this.panelTitle;
+    searchProps.searchTitle = this.panelTitle;
     searchProps.rowHeightState = this.input.rowHeight || this.savedSearch.rowHeight;
     searchProps.rowsPerPageState = this.input.rowsPerPage || this.savedSearch.rowsPerPage;
     searchProps.filters = this.savedSearch.searchSource.getField('filter') as Filter[];

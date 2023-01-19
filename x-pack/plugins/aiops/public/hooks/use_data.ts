@@ -10,24 +10,22 @@ import { merge } from 'rxjs';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ChangePoint } from '@kbn/ml-agg-utils';
-
 import type { SavedSearch } from '@kbn/discover-plugin/public';
-
 import type { Dictionary } from '@kbn/ml-url-state';
-import { useTimeBuckets } from './use_time_buckets';
+import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
 
-import { useAiopsAppContext } from './use_aiops_app_context';
-import { aiopsRefresh$ } from '../application/services/timefilter_refresh_service';
 import type { DocumentStatsSearchStrategyParams } from '../get_document_stats';
 import type { AiOpsIndexBasedAppState } from '../components/explain_log_rate_spikes/explain_log_rate_spikes_app_state';
 import {
   getEsQueryFromSavedSearch,
   SavedSearchSavedObject,
 } from '../application/utils/search_utils';
-
-import { useTimefilter } from './use_time_filter';
-import { useDocumentCountStats } from './use_document_count_stats';
 import type { GroupTableItem } from '../components/spike_analysis_table/types';
+
+import { useTimeBuckets } from './use_time_buckets';
+import { useAiopsAppContext } from './use_aiops_app_context';
+
+import { useDocumentCountStats } from './use_document_count_stats';
 
 const DEFAULT_BAR_TARGET = 75;
 
@@ -153,7 +151,7 @@ export const useData = (
     const timeUpdateSubscription = merge(
       timefilter.getAutoRefreshFetch$(),
       timefilter.getTimeUpdate$(),
-      aiopsRefresh$
+      mlTimefilterRefresh$
     ).subscribe(() => {
       if (onUpdate) {
         onUpdate({

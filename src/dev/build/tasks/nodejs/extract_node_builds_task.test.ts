@@ -41,7 +41,9 @@ async function setup() {
     targetAllPlatforms: true,
     dockerContextUseLocalArtifact: false,
     dockerCrossCompile: false,
+    dockerNamespace: null,
     dockerPush: false,
+    dockerTag: '',
     dockerTagQualifier: '',
   });
 

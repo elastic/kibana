@@ -80,7 +80,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('dashboard panel- more options in view mode', async () => {
-      await dashboardPanelActions.toggleContextMenu(header);
       await dashboardPanelActions.openContextMenuMorePanel(header);
       await a11y.testAppSnapshot();
     });
@@ -89,7 +88,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardPanelActions.openContextMenuMorePanel(header);
       await dashboardPanelActions.clickExpandPanelToggle();
       await a11y.testAppSnapshot();
-      await dashboardPanelActions.toggleContextMenu(header);
       await dashboardPanelActions.openContextMenuMorePanel(header);
       await dashboardPanelActions.clickExpandPanelToggle();
     });

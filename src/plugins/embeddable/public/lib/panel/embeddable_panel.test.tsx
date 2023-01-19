@@ -13,12 +13,12 @@ import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { I18nProvider } from '@kbn/i18n-react';
 import { CONTEXT_MENU_TRIGGER } from '../triggers';
-import { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { Action, UiActionsStart, ActionInternal } from '@kbn/ui-actions-plugin/public';
 import { Trigger, ViewMode } from '../types';
 import { isErrorEmbeddable } from '../embeddables';
 import { EmbeddablePanel } from './embeddable_panel';
 import {
-  createEditModeAction,
+  createEditModeActionDefinition,
   ContactCardEmbeddable,
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
@@ -38,7 +38,7 @@ const triggerRegistry = new Map<string, Trigger>();
 
 const { setup, doStart } = embeddablePluginMock.createInstance();
 
-const editModeAction = createEditModeAction();
+const editModeAction = createEditModeActionDefinition();
 const trigger: Trigger = {
   id: CONTEXT_MENU_TRIGGER,
 };
@@ -50,7 +50,7 @@ const embeddableReactFactory = new ContactCardEmbeddableReactFactory(
 const applicationMock = applicationServiceMock.createStartContract();
 const theme = themeServiceMock.createStartContract();
 
-actionRegistry.set(editModeAction.id, editModeAction);
+actionRegistry.set(editModeAction.id, new ActionInternal(editModeAction));
 triggerRegistry.set(trigger.id, trigger);
 setup.registerEmbeddableFactory(embeddableFactory.type, embeddableFactory);
 setup.registerEmbeddableFactory(embeddableReactFactory.type, embeddableReactFactory);

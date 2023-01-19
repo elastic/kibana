@@ -230,7 +230,7 @@ export function MachineLearningJobTableProvider(
     ) {
       const testSubjStr =
         tableEnvironment === 'mlAnomalyDetection'
-          ? 'mlRefreshPageButton'
+          ? 'mlDatePickerRefreshPageButton'
           : 'mlRefreshJobListButton';
 
       await this.waitForRefreshButtonLoaded(testSubjStr);
