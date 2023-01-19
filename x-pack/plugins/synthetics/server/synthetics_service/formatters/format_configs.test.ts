@@ -15,6 +15,7 @@ import {
   ResponseBodyIndexPolicy,
   ScheduleUnit,
   SyntheticsMonitor,
+  VerificationMode,
 } from '../../../common/runtime_types';
 
 const testHTTPConfig: Partial<MonitorFields> = {
@@ -40,6 +41,7 @@ const testHTTPConfig: Partial<MonitorFields> = {
   'check.request.body': { type: 'text' as Mode, value: '' },
   'check.request.headers': {},
   'check.request.method': 'GET',
+  'ssl.verification_mode': VerificationMode.NONE,
   username: '',
 };
 
@@ -102,105 +104,131 @@ describe('formatMonitorConfig', () => {
         urls: 'https://www.google.com',
       });
     });
+
+    it.each([true, false])(
+      'omits ssl fields when tls is disabled and includes ssl fields when enabled',
+      (isTLSEnabled) => {
+        const yamlConfig = formatMonitorConfig(Object.keys(testHTTPConfig) as ConfigKey[], {
+          ...testHTTPConfig,
+          [ConfigKey.METADATA]: { is_tls_enabled: isTLSEnabled },
+        });
+
+        expect(yamlConfig).toEqual({
+          'check.request.method': 'GET',
+          enabled: true,
+          locations: [],
+          max_redirects: '0',
+          name: 'Test',
+          password: '3z9SBOQWW5F0UrdqLVFqlF6z',
+          'response.include_body': 'on_error',
+          'response.include_headers': true,
+          schedule: '@every 3m',
+          timeout: '16s',
+          type: 'http',
+          urls: 'https://www.google.com',
+          ...(isTLSEnabled ? { 'ssl.verification_mode': 'none' } : {}),
+        });
+      }
+    );
+  });
+});
+
+describe('browser fields', () => {
+  let formattedBrowserConfig: Record<string, FormattedValue>;
+
+  beforeEach(() => {
+    formattedBrowserConfig = {
+      enabled: true,
+      'filter_journeys.tags': ['dev'],
+      ignore_https_errors: false,
+      name: 'Test',
+      locations: [],
+      schedule: '@every 3m',
+      screenshots: 'on',
+      'source.inline.script':
+        "step('Go to https://www.google.com/', async () => {\n  await page.goto('https://www.google.com/');\n});",
+      throttling: {
+        download: 5,
+        latency: 20,
+        upload: 3,
+      },
+      timeout: '16s',
+      type: 'browser',
+      synthetics_args: ['--hasTouch true'],
+      params: {
+        a: 'param',
+      },
+      playwright_options: {
+        playwright: 'option',
+      },
+    };
   });
 
-  describe('browser fields', () => {
-    let formattedBrowserConfig: Record<string, FormattedValue>;
+  it('sets browser keys properly', () => {
+    const yamlConfig = formatMonitorConfig(
+      Object.keys(testBrowserConfig) as ConfigKey[],
+      testBrowserConfig
+    );
 
-    beforeEach(() => {
-      formattedBrowserConfig = {
-        enabled: true,
-        'filter_journeys.tags': ['dev'],
-        ignore_https_errors: false,
-        name: 'Test',
-        locations: [],
-        schedule: '@every 3m',
-        screenshots: 'on',
-        'source.inline.script':
-          "step('Go to https://www.google.com/', async () => {\n  await page.goto('https://www.google.com/');\n});",
-        throttling: {
-          download: 5,
-          latency: 20,
-          upload: 3,
-        },
-        timeout: '16s',
-        type: 'browser',
-        synthetics_args: ['--hasTouch true'],
-        params: {
-          a: 'param',
-        },
-        playwright_options: {
-          playwright: 'option',
-        },
-      };
+    expect(yamlConfig).toEqual(formattedBrowserConfig);
+  });
+
+  it('does not set empty strings or empty objects for params and playwright options', () => {
+    const yamlConfig = formatMonitorConfig(Object.keys(testBrowserConfig) as ConfigKey[], {
+      ...testBrowserConfig,
+      playwright_options: '{}',
+      params: '',
     });
 
-    it('sets browser keys properly', () => {
-      const yamlConfig = formatMonitorConfig(
-        Object.keys(testBrowserConfig) as ConfigKey[],
-        testBrowserConfig
-      );
+    expect(yamlConfig).toEqual(omit(formattedBrowserConfig, ['params', 'playwright_options']));
+  });
 
-      expect(yamlConfig).toEqual(formattedBrowserConfig);
-    });
+  it('excludes UI fields', () => {
+    testBrowserConfig['throttling.is_enabled'] = false;
+    testBrowserConfig['throttling.upload_speed'] = '3';
 
-    it('does not set empty strings or empty objects for params and playwright options', () => {
-      const yamlConfig = formatMonitorConfig(Object.keys(testBrowserConfig) as ConfigKey[], {
-        ...testBrowserConfig,
-        playwright_options: '{}',
-        params: '',
-      });
+    const formattedConfig = formatMonitorConfig(
+      Object.keys(testBrowserConfig) as ConfigKey[],
+      testBrowserConfig
+    );
 
-      expect(yamlConfig).toEqual(omit(formattedBrowserConfig, ['params', 'playwright_options']));
-    });
+    const expected = {
+      ...formattedConfig,
+      throttling: false,
+      'throttling.is_enabled': undefined,
+      'throttling.upload_speed': undefined,
+    };
 
-    it('excludes UI fields', () => {
-      testBrowserConfig['throttling.is_enabled'] = false;
-      testBrowserConfig['throttling.upload_speed'] = '3';
+    expect(formattedConfig).toEqual(expected);
+  });
 
-      const formattedConfig = formatMonitorConfig(
-        Object.keys(testBrowserConfig) as ConfigKey[],
-        testBrowserConfig
-      );
+  it('excludes empty array values', () => {
+    testBrowserConfig['filter_journeys.tags'] = [];
 
-      const expected = {
-        ...formattedConfig,
-        throttling: false,
-        'throttling.is_enabled': undefined,
-        'throttling.upload_speed': undefined,
-      };
+    const formattedConfig = formatMonitorConfig(
+      Object.keys(testBrowserConfig) as ConfigKey[],
+      testBrowserConfig
+    );
 
-      expect(formattedConfig).toEqual(expected);
-    });
+    const expected = {
+      ...formattedConfig,
+      'filter_journeys.tags': undefined,
+    };
 
-    it('excludes empty array values', () => {
-      testBrowserConfig['filter_journeys.tags'] = [];
+    expect(formattedConfig).toEqual(expected);
+  });
 
-      const formattedConfig = formatMonitorConfig(
-        Object.keys(testBrowserConfig) as ConfigKey[],
-        testBrowserConfig
-      );
+  it('does not exclude "false" fields', () => {
+    testBrowserConfig.enabled = false;
 
-      const expected = {
-        ...formattedConfig,
-        'filter_journeys.tags': undefined,
-      };
+    const formattedConfig = formatMonitorConfig(
+      Object.keys(testBrowserConfig) as ConfigKey[],
+      testBrowserConfig
+    );
 
-      expect(formattedConfig).toEqual(expected);
-    });
+    const expected = { ...formattedConfig, enabled: false };
 
-    it('does not exclude "false" fields', () => {
-      testBrowserConfig.enabled = false;
-
-      const formattedConfig = formatMonitorConfig(
-        Object.keys(testBrowserConfig) as ConfigKey[],
-        testBrowserConfig
-      );
-
-      const expected = { ...formattedConfig, enabled: false };
-
-      expect(formattedConfig).toEqual(expected);
-    });
+    expect(formattedConfig).toEqual(expected);
   });
 });
 
