@@ -193,6 +193,7 @@ export class ActionExecutor {
           relatedSavedObjects,
           name,
           actionExecutionId,
+          isPreconfigured: this.actionInfo.isPreconfigured,
         });
 
         eventLogger.startTiming(event);
