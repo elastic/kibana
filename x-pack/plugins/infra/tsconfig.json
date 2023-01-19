@@ -1,15 +1,9 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
-  "include": [
-    "../../../typings/**/*",
-    "common/**/*",
-    "public/**/*",
-    "server/**/*",
-    "types/**/*"
-  ],
+  "include": ["../../../typings/**/*", "common/**/*", "public/**/*", "server/**/*", "types/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/data-plugin",
@@ -56,9 +50,7 @@
     "@kbn/ui-actions-plugin",
     "@kbn/charts-plugin",
     "@kbn/lens-plugin",
-    "@kbn/core-saved-objects-common",
+    "@kbn/core-saved-objects-common"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

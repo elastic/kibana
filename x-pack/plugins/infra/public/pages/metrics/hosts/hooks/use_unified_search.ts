@@ -10,6 +10,7 @@ import { useCallback, useEffect } from 'react';
 import { buildEsQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import { debounce } from 'lodash';
+import deepEqual from 'fast-deep-equal';
 import type { InfraClientStartDeps } from '../../../../types';
 import { useMetricsDataViewContext } from './use_data_view';
 import { useSyncKibanaTimeFilterTime } from '../../../../hooks/use_kibana_timefilter_time';
@@ -30,6 +31,15 @@ export const useUnifiedSearch = () => {
 
   const { filterManager } = queryManager;
 
+  useEffect(() => {
+    const { filters } = state;
+    if (!deepEqual(filters, filterManager.getFilters())) {
+      filterManager.setFilters(filters);
+    }
+  }, [filterManager, state]);
+
+  // This will listen and react to all changes in filterManager and timefilter values,
+  // to allow other components in the page to communicate with the unified search
   useEffect(() => {
     const next = () => {
       const globalFilters = filterManager.getFilters();
@@ -62,22 +72,18 @@ export const useUnifiedSearch = () => {
       const { query, dateRange, filters, panelFilters } = data ?? {};
       const newDateRange = dateRange ?? getTime();
 
-      if (filters) {
-        filterManager.setFilters(filters);
-      }
-
       dispatch({
         type: 'setQuery',
         payload: {
           query,
-          filters: filters ? filterManager.getFilters() : undefined,
+          filters,
           dateRange: newDateRange,
           dateRangeTimestamp: getRangeInTimestamp(newDateRange),
           panelFilters,
         },
       });
     },
-    [getTime, dispatch, filterManager, getRangeInTimestamp]
+    [getTime, dispatch, getRangeInTimestamp]
   );
 
   // This won't prevent onSubmit from being fired twice when `clear filters` is clicked,

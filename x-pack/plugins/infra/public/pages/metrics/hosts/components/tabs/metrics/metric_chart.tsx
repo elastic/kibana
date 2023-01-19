@@ -17,9 +17,13 @@ import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
 import { HostLensAttributesTypes } from '../../../../../../common/visualizations';
 
 interface Props {
+  title: string;
   type: HostLensAttributesTypes;
+  breakdownSize: number;
 }
-export const MetricChart = ({ type }: Props) => {
+
+const HEIGHT = 300;
+export const MetricChart = ({ title, type, breakdownSize }: Props) => {
   const {
     unifiedSearchDateRange,
     unifiedSearchQuery,
@@ -37,11 +41,15 @@ export const MetricChart = ({ type }: Props) => {
   const { injectData, getExtraActions } = useLensAttributes({
     type,
     dataView: metricsDataView,
+    options: {
+      breakdownSize,
+    },
   });
 
   const injectedLensAttributes = injectData({
     filters: [...unifiedSearchFilters, ...controlPanelFilters],
     query: unifiedSearchQuery,
+    title,
   });
 
   const extraActionOptions = getExtraActions(injectedLensAttributes, unifiedSearchDateRange);
@@ -66,9 +74,10 @@ export const MetricChart = ({ type }: Props) => {
         hasBorder
         paddingSize="none"
         style={{ minHeight: 300 }}
+        data-test-subj={`hostsView-metricChart-${type}`}
       >
         <EmbeddableComponent
-          id={`changePointChart_1`}
+          id={`hostsViewsmetricsChart-${type}`}
           style={{ height: 300 }}
           attributes={injectedLensAttributes}
           viewMode={ViewMode.VIEW}
@@ -78,6 +87,7 @@ export const MetricChart = ({ type }: Props) => {
           extraActions={extraAction}
           executionContext={{
             type: 'infrastructure_observability_hosts_view',
+            name: `Hosts View ${type} Chart`,
           }}
           onBrushEnd={handleBrushEnd}
         />

@@ -26,16 +26,16 @@ export const KPICharts = () => {
           type="hostsCount"
           metricType="value"
           color="#6DCCB1"
-          title={i18n.translate('xpack.infra.hostsTable.metricTrend.hostCount.title', {
+          title={i18n.translate('xpack.infra.hostsViewPage.metricTrend.hostCount.title', {
             defaultMessage: 'Hosts',
           })}
           trendA11yTitle={i18n.translate(
-            'xpack.infra.hostsTable.metricTrend.hostCount.a11y.title',
+            'xpack.infra.hostsViewPage.metricTrend.hostCount.a11y.title',
             {
               defaultMessage: 'CPU usage over time.',
             }
           )}
-          toolTip={i18n.translate('xpack.infra.hostsTable.metricTrend.hostCount.tooltip', {
+          toolTip={i18n.translate('xpack.infra.hostsViewPage.metricTrend.hostCount.tooltip', {
             defaultMessage: 'The number of hosts returned by your current search criteria.',
           })}
           data-test-subj="hostsView-metricsTrend-hosts"
@@ -46,22 +46,22 @@ export const KPICharts = () => {
           type="cpu"
           metricType="avg"
           color="#F1D86F"
-          title={i18n.translate('xpack.infra.hostsTable.metricTrend.cpu.title', {
+          title={i18n.translate('xpack.infra.hostsViewPage.metricTrend.cpu.title', {
             defaultMessage: 'CPU usage',
           })}
-          subtitle={i18n.translate('xpack.infra.hostsTable.metricTrend.cpu.subtitle', {
+          subtitle={i18n.translate('xpack.infra.hostsViewPage.metricTrend.cpu.subtitle', {
             defaultMessage: 'Average',
           })}
-          trendA11yTitle={i18n.translate('xpack.infra.hostsTable.metricTrend.cpu.a11y.title', {
+          trendA11yTitle={i18n.translate('xpack.infra.hostsViewPage.metricTrend.cpu.a11y.title', {
             defaultMessage: 'CPU usage over time.',
           })}
           trendA11yDescription={i18n.translate(
-            'xpack.infra.hostsTable.metricTrend.cpu.a11y.description',
+            'xpack.infra.hostsViewPage.metricTrend.cpu.a11y.description',
             {
               defaultMessage: 'A line chart showing the trend of the primary metric over time.',
             }
           )}
-          toolTip={i18n.translate('xpack.infra.hostsTable.metricTrend.cpu.tooltip', {
+          toolTip={i18n.translate('xpack.infra.hostsViewPage.metricTrend.cpu.tooltip', {
             defaultMessage:
               'Average of percentage of CPU time spent in states other than Idle and IOWait, normalized by the number of CPU cores. Includes both time spent on user space and kernel space. 100% means all CPUs of the host are busy.',
           })}
@@ -73,22 +73,22 @@ export const KPICharts = () => {
           type="memory"
           metricType="avg"
           color="#A987D1"
-          title={i18n.translate('xpack.infra.hostsTable.metricTrend.memory.title', {
+          title={i18n.translate('xpack.infra.hostsViewPage.metricTrend.memory.title', {
             defaultMessage: 'Memory usage',
           })}
-          subtitle={i18n.translate('xpack.infra.hostsTable.metricTrend.memory.subtitle', {
+          subtitle={i18n.translate('xpack.infra.hostsViewPage.metricTrend.memory.subtitle', {
             defaultMessage: 'Average',
           })}
-          trendA11yTitle={i18n.translate('xpack.infra.hostsTable.metricTrend.memory.a11yTitle', {
+          trendA11yTitle={i18n.translate('xpack.infra.hostsViewPage.metricTrend.memory.a11yTitle', {
             defaultMessage: 'Memory usage over time.',
           })}
           trendA11yDescription={i18n.translate(
-            'xpack.infra.hostsTable.metricTrend.memory.a11yDescription',
+            'xpack.infra.hostsViewPage.metricTrend.memory.a11yDescription',
             {
               defaultMessage: 'A line chart showing the trend of the primary metric over time.',
             }
           )}
-          toolTip={i18n.translate('xpack.infra.hostsTable.metricTrend.memory.tooltip', {
+          toolTip={i18n.translate('xpack.infra.hostsViewPage.metricTrend.memory.tooltip', {
             defaultMessage:
               "Average of percentage of main memory usage excluding page cache. This includes resident memory for all processes plus memory used by the kernel structures and code apart the page cache. A high level indicates a situation of memory saturation for a host. 100% means the main memory is entirely filled with memory that can't be reclaimed, except by swapping out.",
           })}
@@ -100,22 +100,22 @@ export const KPICharts = () => {
           type="rx"
           metricType="avg"
           color="#79AAD9"
-          title={i18n.translate('xpack.infra.hostsTable.metricTrend.rx.title', {
+          title={i18n.translate('xpack.infra.hostsViewPage.metricTrend.rx.title', {
             defaultMessage: 'Network inbound (RX)',
           })}
-          subtitle={i18n.translate('xpack.infra.hostsTable.metricTrend.rx.subtitle', {
+          subtitle={i18n.translate('xpack.infra.hostsViewPage.metricTrend.rx.subtitle', {
             defaultMessage: 'Average',
           })}
-          trendA11yTitle={i18n.translate('xpack.infra.hostsTable.metricTrend.rx.a11y.title', {
+          trendA11yTitle={i18n.translate('xpack.infra.hostsViewPage.metricTrend.rx.a11y.title', {
             defaultMessage: 'Network inbound (RX) over time.',
           })}
           trendA11yDescription={i18n.translate(
-            'xpack.infra.hostsTable.metricTrend.rx.a11y.description',
+            'xpack.infra.hostsViewPage.metricTrend.rx.a11y.description',
             {
               defaultMessage: 'A line chart showing the trend of the primary metric over time.',
             }
           )}
-          toolTip={i18n.translate('xpack.infra.hostsTable.metricTrend.rx.tooltip', {
+          toolTip={i18n.translate('xpack.infra.hostsViewPage.metricTrend.rx.tooltip', {
             defaultMessage:
               'Number of bytes which have been received per second on the public interfaces of the hosts.',
           })}
@@ -127,22 +127,22 @@ export const KPICharts = () => {
           type="tx"
           metricType="avg"
           color="#F5A35C"
-          title={i18n.translate('xpack.infra.hostsTable.metricTrend.tx.title', {
+          title={i18n.translate('xpack.infra.hostsViewPage.metricTrend.tx.title', {
             defaultMessage: 'Network outbound (TX) usage',
           })}
-          subtitle={i18n.translate('xpack.infra.hostsTable.metricTrend.tx.subtitle', {
+          subtitle={i18n.translate('xpack.infra.hostsViewPage.metricTrend.tx.subtitle', {
             defaultMessage: 'Average',
           })}
-          trendA11yTitle={i18n.translate('xpack.infra.hostsTable.metricTrend.tx.a11.title', {
+          trendA11yTitle={i18n.translate('xpack.infra.hostsViewPage.metricTrend.tx.a11.title', {
             defaultMessage: 'Network outbound (TX) usage over time.',
           })}
           trendA11yDescription={i18n.translate(
-            'xpack.infra.hostsTable.metricTrend.tx.a11y.description',
+            'xpack.infra.hostsViewPage.metricTrend.tx.a11y.description',
             {
               defaultMessage: 'A line chart showing the trend of the primary metric over time.',
             }
           )}
-          toolTip={i18n.translate('xpack.infra.hostsTable.metricTrend.tx.tooltip', {
+          toolTip={i18n.translate('xpack.infra.hostsViewPage.metricTrend.tx.tooltip', {
             defaultMessage:
               'Number of bytes which have been sent per second on the public interfaces of the hosts',
           })}

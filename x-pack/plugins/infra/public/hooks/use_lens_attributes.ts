@@ -11,14 +11,13 @@ import { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FormulaPublicApi } from '@kbn/lens-plugin/public';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { InfraClientSetupDeps, LensAttributes, LensOptions } from '../types';
 import {
-  buildLensVisualization,
+  buildLensAttributes,
   HostLensAttributesTypes,
   hostMetricsLensAttributes,
 } from '../common/visualizations';
-
-const DEFAULT_BREAKDOWN_SIZE = 20;
 
 interface UseLensAttributesParams {
   type: HostLensAttributesTypes;
@@ -30,7 +29,7 @@ export const useLensAttributes = ({
   type,
   dataView,
   options = {
-    breakdownSize: DEFAULT_BREAKDOWN_SIZE,
+    breakdownSize: 10,
   },
 }: UseLensAttributesParams) => {
   const {
@@ -40,7 +39,6 @@ export const useLensAttributes = ({
   const [formulaAPI, setFormulaAPI] = useState<FormulaPublicApi>();
 
   useEffect(() => {
-    lens.getXyVisTypes();
     const getFormulaApi = async () => {
       const { formula } = await lens.stateHelperApi();
       return setFormulaAPI(formula);
@@ -53,7 +51,7 @@ export const useLensAttributes = ({
       return null;
     }
 
-    const visualizationAttributes = buildLensVisualization(
+    const visualizationAttributes = buildLensAttributes(
       hostMetricsLensAttributes[type].getAttributes(dataView, options, formulaAPI)
     );
 
@@ -86,7 +84,9 @@ export const useLensAttributes = ({
           id: 'openInLens',
 
           getDisplayName(_context: ActionExecutionContext): string {
-            return 'Open in Lens';
+            return i18n.translate('xpack.infra.hostsTable.tabs.metricsCharts.acitons.openInLines', {
+              defaultMessage: 'Open in Lens',
+            });
           },
           getIconType(_context: ActionExecutionContext): string | undefined {
             return 'visArea';

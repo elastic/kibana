@@ -1,63 +1,41 @@
 # For collecting metrics from Elasticearch and Kibana launched from a kibana clone on the docker host
 
 http.enabled: true
-http.host: '0.0.0.0'
+http.host: "0.0.0.0"
 
 metricbeat.modules:
-  - module: system
-    metricsets:
-      - cpu # CPU usage
-      - load # CPU load averages
-      - memory # Memory usage
-      - network # Network IO
-      - process # Per process metrics
-      - process_summary # Process summary
-      - uptime # System Uptime
-      - socket_summary # Socket summary
-      #- core           # Per CPU core usage
-      - diskio # Disk IO
-      #- filesystem     # File system usage for each mountpoint
-      #- fsstat         # File system summary metrics
-      #- raid           # Raid
-      #- socket         # Sockets and connection info (linux only)
-      #- service        # systemd service information
-    enabled: true
-    period: 10s
-    processes: ['.*']
   - module: elasticsearch
     xpack.enabled: true
     period: 10s
     hosts:
-      - 'host.docker.internal:9200'
-    username: 'elastic'
-    password: 'changeme'
+      - "host.docker.internal:9200"
+    username: "elastic"
+    password: "changeme"
 
   - module: kibana
     xpack.enabled: true
-    basepath: '/ftw'
+    basepath: "/ftw"
     period: 10s
-    hosts: ['host.docker.internal:5601']
-    username: 'elastic'
-    password: 'changeme'
+    hosts: [ "host.docker.internal:5601" ]
+    username: "elastic"
+    password: "changeme"
 
   - module: beat
     xpack.enabled: true
     period: 10s
     hosts:
       # metricbeat
-      - 'http://host.docker.internal:5066'
+      - "http://host.docker.internal:5066"
       # filebeat
-      - 'http://host.docker.internal:5067'
+      - "http://host.docker.internal:5067"
 
   - module: logstash
     xpack.enabled: true
     period: 10s
     hosts:
-      - 'host.docker.internal:9600'
+      - "host.docker.internal:9600"
 
-processors:
-  - add_host_metadata: ~
 output.elasticsearch:
-  hosts: ['host.docker.internal:9200']
-  username: 'elastic'
-  password: 'changeme'
+  hosts: [ "host.docker.internal:9200" ]
+  username: "elastic"
+  password: "changeme"

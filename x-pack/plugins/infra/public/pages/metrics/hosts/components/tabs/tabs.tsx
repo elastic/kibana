@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { EuiTabbedContent, EuiSpacer, type EuiTabbedContentTab } from '@elastic/eui';
 import React from 'react';
+import { EuiTabbedContent, EuiSpacer, type EuiTabbedContentTab } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { MetricsGrid } from './metrics/metrics_grid';
 
 interface WrapperProps {
@@ -24,8 +25,10 @@ export const Tabs = () => {
   const tabs: EuiTabbedContentTab[] = [
     {
       id: 'metrics',
-      name: 'Metrics',
-      'data-test-subj': 'hostsView_tabs_metrics',
+      name: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts', {
+        defaultMessage: 'Metrics',
+      }),
+      'data-test-subj': 'hostsView-tabs-metrics',
       content: (
         <Wrapper>
           <MetricsGrid />
