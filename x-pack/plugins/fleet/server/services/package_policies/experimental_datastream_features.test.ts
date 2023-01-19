@@ -100,7 +100,7 @@ describe('experimental_datastream_features', () => {
               mappings: {
                 _source: {
                   mode: 'stored',
-                } as any, // TODO: Fix type failure introduced by elasticsearch-js 8.6.0-canary.3
+                } as any, // Type removed in elasticsearch-js 8.6.0-canary.3
                 properties: {
                   test_dimension: {
                     type: 'keyword',
