@@ -61,4 +61,16 @@ describe('#setup', () => {
     expect(fetchFn).toHaveBeenCalledTimes(1);
     expect(customBranding).toEqual({ logo: 'myLogo' });
   });
+
+  it('calls fetchFn correctly when unauthenticated', async () => {
+    const service = new CustomBrandingService(coreContext);
+    const { register, getBrandingFor } = service.setup();
+    service.start();
+    const fetchFn = jest.fn();
+    fetchFn.mockImplementation(() => Promise.resolve({ logo: 'myLogo' }));
+    register('customBranding', fetchFn);
+    const kibanaRequest: jest.Mocked<KibanaRequest> = {} as unknown as jest.Mocked<KibanaRequest>;
+    await getBrandingFor(kibanaRequest, true);
+    expect(fetchFn).toHaveBeenCalledWith(kibanaRequest, true);
+  });
 });

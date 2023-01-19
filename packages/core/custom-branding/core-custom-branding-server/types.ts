@@ -13,7 +13,10 @@ import type { MaybePromise } from '@kbn/utility-types';
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CustomBrandingStart {}
 
-export type CustomBrandingFetchFn = (request: KibanaRequest) => MaybePromise<CustomBranding>;
+export type CustomBrandingFetchFn = (
+  request: KibanaRequest,
+  unauthenticated?: boolean
+) => MaybePromise<CustomBranding>;
 
 /** @public */
 export interface CustomBrandingSetup {

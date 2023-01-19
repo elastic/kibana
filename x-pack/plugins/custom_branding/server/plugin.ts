@@ -13,6 +13,7 @@ import {
   Logger,
   Plugin,
   PluginInitializerContext,
+  SECURITY_EXTENSION_ID,
 } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { License } from '@kbn/license-api-guard-plugin/server';
@@ -48,14 +49,22 @@ export class CustomBrandingPlugin implements Plugin {
     const router = core.http.createRouter<CustomBrandingRequestHandlerContext>();
     registerRoutes(router);
 
-    const fetchFn = async (request: KibanaRequest): Promise<CustomBranding> => {
+    const fetchFn = async (
+      request: KibanaRequest,
+      unathenticated?: boolean
+    ): Promise<CustomBranding> => {
       const [coreStart] = await core.getStartServices();
-      const soClient = coreStart.savedObjects.getScopedClient(request);
+      const soClient = unathenticated
+        ? coreStart.savedObjects.getScopedClient(request, {
+            excludedExtensions: [SECURITY_EXTENSION_ID],
+          })
+        : coreStart.savedObjects.getScopedClient(request);
       const uiSettings = coreStart.uiSettings.globalAsScopedToClient(soClient);
       return await this.getBrandingFrom(uiSettings);
     };
 
     core.customBranding.register(fetchFn);
+
     return {};
   }
 

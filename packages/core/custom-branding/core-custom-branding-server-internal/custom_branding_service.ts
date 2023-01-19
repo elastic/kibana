@@ -10,13 +10,12 @@ import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { Logger } from '@kbn/logging';
-
 /**
  * @internal
  */
 export interface InternalCustomBrandingSetup {
   register: (pluginName: string, fetchFn: CustomBrandingFetchFn) => void;
-  getBrandingFor: (request: KibanaRequest) => Promise<CustomBranding>;
+  getBrandingFor: (request: KibanaRequest, unauthenticated?: boolean) => Promise<CustomBranding>;
 }
 
 export class CustomBrandingService {
@@ -55,13 +54,16 @@ export class CustomBrandingService {
 
   public stop() {}
 
-  private getBrandingFor = async (request: KibanaRequest): Promise<CustomBranding> => {
+  private getBrandingFor = async (
+    request: KibanaRequest,
+    unauthenticated?: boolean
+  ): Promise<CustomBranding> => {
     if (!this.startCalled) {
       throw new Error('Cannot be called before #start');
     }
     if (!this.pluginName || this.pluginName !== 'customBranding' || !this.fetchFn) {
       return {};
     }
-    return this.fetchFn!(request);
+    return this.fetchFn!(request, unauthenticated);
   };
 }
