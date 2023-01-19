@@ -49,7 +49,6 @@ export const EnginesListTable: React.FC<EnginesListTableProps> = ({
   viewEngineIndices,
 }) => {
   const { navigateToUrl } = useValues(KibanaLogic);
-  // const { fetchEngineFlyout } = useActions(EnginesListLogic);
   const columns: Array<EuiBasicTableColumn<EnterpriseSearchEngine>> = [
     {
       field: 'name',
@@ -98,9 +97,9 @@ export const EnginesListTable: React.FC<EnginesListTableProps> = ({
         >
           <FormattedMessage
             id="xpack.enterpriseSearch.content.enginesList.table.column.view.indices"
-            defaultMessage="{indices_length} indices"
+            defaultMessage="{indicesLength} indices"
             values={{
-              indices_length: indices.length,
+              indicesLength: indices.length,
             }}
           />
         </EuiButtonEmpty>
