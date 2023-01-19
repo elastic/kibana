@@ -18,6 +18,8 @@ get:
       content:
         application/json:
           schema:
+            title: Get connector types response body properties
+            description: The properties vary for each connector type.
             type: array
             items:
               type: object
@@ -56,6 +58,21 @@ get:
           examples:
             getConnectorTypesResponse:
               $ref: '../components/examples/get_connector_types_response.yaml'
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: Unauthorized
+              message:
+                type: string
+              statusCode:
+                type: integer
+                example: 401
   servers:
     - url: https://localhost:5601
 servers:
