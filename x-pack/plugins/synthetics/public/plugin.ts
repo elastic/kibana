@@ -85,6 +85,7 @@ export interface ClientPluginsStart {
   cloud?: CloudStart;
   appName: string;
   storage: IStorageWrapper;
+  application: CoreStart['application'];
   notifications: CoreStart['notifications'];
   http: CoreStart['http'];
   docLinks: DocLinksStart;
