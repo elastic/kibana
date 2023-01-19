@@ -11,6 +11,7 @@ import * as t from 'io-ts';
 import {
   budgetingMethodSchema,
   dateType,
+  historicalSummarySchema,
   indicatorSchema,
   indicatorTypesArraySchema,
   objectiveSchema,
@@ -109,6 +110,9 @@ const findSLOResponseSchema = t.type({
   results: t.array(sloWithSummaryResponseSchema),
 });
 
+const fetchHistoricalSummaryParamsSchema = t.type({ body: t.type({ sloIds: t.array(t.string) }) });
+const fetchHistoricalSummaryResponseSchema = t.record(t.string, t.array(historicalSummarySchema));
+
 type SLOResponse = t.OutputOf<typeof sloResponseSchema>;
 type SLOWithSummaryResponse = t.OutputOf<typeof sloWithSummaryResponseSchema>;
 
@@ -125,6 +129,9 @@ type UpdateSLOResponse = t.OutputOf<typeof updateSLOResponseSchema>;
 type FindSLOParams = t.TypeOf<typeof findSLOParamsSchema.props.query>;
 type FindSLOResponse = t.OutputOf<typeof findSLOResponseSchema>;
 
+type FetchHistoricalSummaryParams = t.TypeOf<typeof fetchHistoricalSummaryParamsSchema.props.body>;
+type FetchHistoricalSummaryResponse = t.OutputOf<typeof fetchHistoricalSummaryResponseSchema>;
+
 type BudgetingMethod = t.TypeOf<typeof budgetingMethodSchema>;
 
 export {
@@ -134,6 +141,8 @@ export {
   findSLOResponseSchema,
   getSLOParamsSchema,
   getSLOResponseSchema,
+  fetchHistoricalSummaryParamsSchema,
+  fetchHistoricalSummaryResponseSchema,
   sloResponseSchema,
   sloWithSummaryResponseSchema,
   updateSLOParamsSchema,
@@ -147,6 +156,8 @@ export type {
   FindSLOParams,
   FindSLOResponse,
   GetSLOResponse,
+  FetchHistoricalSummaryParams,
+  FetchHistoricalSummaryResponse,
   SLOResponse,
   SLOWithSummaryResponse,
   UpdateSLOInput,
