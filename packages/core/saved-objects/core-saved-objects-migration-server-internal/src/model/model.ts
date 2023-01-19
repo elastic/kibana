@@ -159,47 +159,13 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           ],
         };
       } else if (
-        // source exists
-        Boolean(indices[source!]?.mappings?._meta?.migrationMappingPropertyHashes) &&
-        // ...and mappings are unchanged
-        !diffMappings(
-          /* actual */
-          indices[source!].mappings,
-          /* expected */
-          stateP.targetIndexMappings
-        )
-      ) {
-        const targetIndex = source!;
-        const sourceMappings = indices[source!].mappings;
-
-        return {
-          ...stateP,
-          controlState: 'PREPARE_COMPATIBLE_MIGRATION',
-          sourceIndex: Option.none,
-          targetIndex,
-          targetIndexRawMappings: sourceMappings,
-          targetIndexMappings: mergeMigrationMappingPropertyHashes(
-            stateP.targetIndexMappings,
-            sourceMappings
-          ),
-          preTransformDocsActions: [
-            // Point the version alias to the source index. This let's other Kibana
-            // instances know that a migration for the current version is "done"
-            // even though we may be waiting for document transformations to finish.
-            { add: { index: source!, alias: stateP.versionAlias } },
-            ...buildRemoveAliasActions(source!, Object.keys(aliases), [
-              stateP.currentAlias,
-              stateP.versionAlias,
-            ]),
-          ],
-          versionIndexReadyActions: Option.none,
-        };
-      } else if (
         // If the `.kibana` alias exists
         source != null
       ) {
+        // CHECKPOINT here we decide to go for yellow source
         return {
           ...stateP,
+          aliases,
           controlState: 'WAIT_FOR_YELLOW_SOURCE',
           sourceIndex: Option.some(source!) as Option.Some<string>,
           sourceIndexMappings: indices[source!].mappings,
@@ -481,10 +447,50 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'WAIT_FOR_YELLOW_SOURCE') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      return {
-        ...stateP,
-        controlState: 'CHECK_UNKNOWN_DOCUMENTS',
-      };
+      // check the existing mappings to see if we can avoid reindexing
+      if (
+        // source exists
+        Boolean(stateP.sourceIndexMappings._meta?.migrationMappingPropertyHashes) &&
+        // ...and mappings are unchanged
+        !diffMappings(
+          /* actual */
+          stateP.sourceIndexMappings,
+          /* expected */
+          stateP.targetIndexMappings
+        )
+      ) {
+        // The source index .kibana is pointing to. E.g: ".xx8.7.0_001"
+        const source = stateP.sourceIndex.value;
+
+        return {
+          ...stateP,
+          controlState: 'PREPARE_COMPATIBLE_MIGRATION',
+          sourceIndex: Option.none,
+          targetIndex: source!,
+          targetIndexRawMappings: stateP.sourceIndexMappings,
+          targetIndexMappings: mergeMigrationMappingPropertyHashes(
+            stateP.targetIndexMappings,
+            stateP.sourceIndexMappings
+          ),
+          preTransformDocsActions: [
+            // Point the version alias to the source index. This let's other Kibana
+            // instances know that a migration for the current version is "done"
+            // even though we may be waiting for document transformations to finish.
+            { add: { index: source!, alias: stateP.versionAlias } },
+            ...buildRemoveAliasActions(source!, Object.keys(stateP.aliases), [
+              stateP.currentAlias,
+              stateP.versionAlias,
+            ]),
+          ],
+          versionIndexReadyActions: Option.none,
+        };
+      } else {
+        // the mappings have changed, but changes might still be compatible
+        return {
+          ...stateP,
+          controlState: 'CHECK_UNKNOWN_DOCUMENTS',
+        };
+      }
     } else if (Either.isLeft(res)) {
       const left = res.left;
       if (isTypeof(left, 'index_not_yellow_timeout')) {
