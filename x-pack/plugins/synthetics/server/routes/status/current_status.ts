@@ -18,7 +18,7 @@ import { UMServerLibs } from '../../legacy_uptime/uptime_server';
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes';
 import { UptimeEsClient } from '../../legacy_uptime/lib/lib';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
-import { ConfigKey, ServiceLocation, SourceType } from '../../../common/runtime_types';
+import { ConfigKey } from '../../../common/runtime_types';
 import { QuerySchema, MonitorsQuery } from '../common';
 
 /**

@@ -19,6 +19,7 @@ import {
   ConfigKey,
   EncryptedSyntheticsMonitor,
   ServiceLocation,
+  SourceType,
 } from '../../../common/runtime_types';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 
@@ -71,6 +72,7 @@ export const processMonitors = async (
   let disabledCount = 0;
   let disabledMonitorsCount = 0;
   let maxPeriod = 0;
+  let projectMonitorsCount = 0;
   const allIds: string[] = [];
   let listOfLocationsSet = new Set<string>();
   const monitorLocationMap: Record<string, string[]> = {};
@@ -95,6 +97,8 @@ export const processMonitors = async (
     const attrs = monitor.attributes;
 
     allIds.push(attrs[ConfigKey.MONITOR_QUERY_ID]);
+
+    projectMonitorsCount += attrs?.[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT ? 1 : 0;
 
     if (attrs[ConfigKey.ENABLED] === false) {
       disabledCount += attrs[ConfigKey.LOCATIONS].length;
@@ -135,6 +139,7 @@ export const processMonitors = async (
     disabledCount,
     monitorLocationMap,
     disabledMonitorsCount,
+    projectMonitorsCount,
     listOfLocations: [...listOfLocationsSet],
   };
 };
