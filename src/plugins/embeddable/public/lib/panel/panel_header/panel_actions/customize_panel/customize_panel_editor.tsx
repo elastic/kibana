@@ -140,7 +140,7 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
           <EuiFormRow>
             <EuiSwitch
               checked={!hideTitle}
-              data-test-subj="customizePanelHideTitle"
+              data-test-subj="customEmbeddablePanelHideTitleSwitch"
               id="hideTitle"
               label={
                 <FormattedMessage
@@ -161,7 +161,7 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
             labelAppend={
               <EuiButtonEmpty
                 size="xs"
-                data-test-subj="resetCustomEmbeddablePanelTitle"
+                data-test-subj="resetCustomEmbeddablePanelTitleButton"
                 onClick={() => setTitle(embeddable.getOutput().defaultTitle ?? '')}
                 disabled={hideTitle}
                 aria-label={i18n.translate(
@@ -205,7 +205,7 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
             labelAppend={
               <EuiButtonEmpty
                 size="xs"
-                data-test-subj="resetCustomEmbeddablePanelDescription"
+                data-test-subj="resetCustomEmbeddablePanelDescriptionButton"
                 onClick={() => setDescription(embeddable.getOutput().defaultDescription)}
                 disabled={hideTitle}
                 aria-label={i18n.translate(

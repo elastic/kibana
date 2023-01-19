@@ -130,11 +130,11 @@ test('Reset updates the input values with the default properties when the embedd
   const event = { target: { value: 'another custom title' } };
   titleField.simulate('change', event);
 
-  findTestSubject(component, 'resetCustomEmbeddablePanelTitle').simulate('click');
+  findTestSubject(component, 'resetCustomEmbeddablePanelTitleButton').simulate('click');
   const titleAfter = findTestSubject(component, 'customEmbeddablePanelTitleInput').find('input');
   expect(titleAfter.props().value).toBe(embeddable.getOutput().defaultTitle);
 
-  findTestSubject(component, 'resetCustomEmbeddablePanelDescription').simulate('click');
+  findTestSubject(component, 'resetCustomEmbeddablePanelDescriptionButton').simulate('click');
   const descriptionAfter = findTestSubject(component, 'customEmbeddablePanelDescriptionInput').find(
     'textarea'
   );
@@ -156,8 +156,8 @@ test('Reset updates the input with the default properties when the embeddable ha
   const descriptionEvent = { target: { value: 'new description' } };
   titleField.simulate('change', descriptionEvent);
 
-  findTestSubject(component, 'resetCustomEmbeddablePanelTitle').simulate('click');
-  findTestSubject(component, 'resetCustomEmbeddablePanelDescription').simulate('click');
+  findTestSubject(component, 'resetCustomEmbeddablePanelTitleButton').simulate('click');
+  findTestSubject(component, 'resetCustomEmbeddablePanelDescriptionButton').simulate('click');
 
   await component.update();
   expect(titleField.props().value).toBe(embeddable.getOutput().defaultTitle);
@@ -174,7 +174,7 @@ test('Reset title calls updateInput with undefined', async () => {
   const event = { target: { value: 'new title' } };
   inputField.simulate('change', event);
 
-  findTestSubject(component, 'resetCustomEmbeddablePanelTitle').simulate('click');
+  findTestSubject(component, 'resetCustomEmbeddablePanelTitleButton').simulate('click');
   findTestSubject(component, 'saveCustomizePanelButton').simulate('click');
 
   expect(updateInput).toBeCalledWith({
