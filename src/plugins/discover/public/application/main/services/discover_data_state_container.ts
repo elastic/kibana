@@ -136,7 +136,8 @@ export function getDataStateContainer({
   getSavedSearch: () => SavedSearch;
   appStateContainer: ReduxLikeStateContainer<AppState>;
 }): DataStateContainer {
-  const { data } = services;
+  const { data, uiSettings, toastNotifications } = services;
+  const { timefilter } = data.query.timefilter;
   const inspectorAdapters = { requests: new RequestAdapter() };
   const appState = getAppState();
   const recordRawType = getRawRecordType(appState.query);
@@ -147,9 +148,9 @@ export function getDataStateContainer({
    */
   const refetch$ = new Subject<DataRefetchMsg>();
   const shouldSearchOnPageLoad =
-    services.uiSettings.get<boolean>(SEARCH_ON_PAGE_LOAD_SETTING) ||
+    uiSettings.get<boolean>(SEARCH_ON_PAGE_LOAD_SETTING) ||
     getSavedSearch().id !== undefined ||
-    !services.timefilter.getRefreshInterval().pause ||
+    !timefilter.getRefreshInterval().pause ||
     searchSessionManager.hasSearchSessionIdInURL();
   const initialFetchStatus = shouldSearchOnPageLoad
     ? FetchStatus.LOADING
@@ -183,9 +184,7 @@ export function getDataStateContainer({
     searchSource: getSavedSearch().searchSource,
     searchSessionManager,
   }).pipe(
-    filter(() =>
-      validateTimeRange(data.query.timefilter.timefilter.getTime(), services.toastNotifications)
-    ),
+    filter(() => validateTimeRange(timefilter.getTime(), toastNotifications)),
     tap(() => inspectorAdapters.requests.reset()),
     map((val) => ({
       reset: val === 'reset',
@@ -210,7 +209,7 @@ export function getDataStateContainer({
         services,
         appStateContainer,
         savedSearch: getSavedSearch(),
-        useNewFieldsApi: !services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE),
+        useNewFieldsApi: !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE),
       });
 
       // If the autoRefreshCallback is still the same as when we started i.e. there was no newer call

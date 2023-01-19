@@ -23,7 +23,6 @@ import { css } from '@emotion/react';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FIELD_STATISTICS_LOADED } from './constants';
 import type { DiscoverStateContainer } from '../../services/discover_state';
-import { DataTotalHits$ } from '../../services/discover_data_state_container';
 export interface RandomSamplingOption {
   mode: 'random_sampling';
   seed: string;
@@ -107,7 +106,6 @@ export interface FieldStatisticsTableProps {
    */
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   searchSessionId?: string;
-  savedSearchDataTotalHits$?: DataTotalHits$;
 }
 
 export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
