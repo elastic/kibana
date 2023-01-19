@@ -38,6 +38,9 @@ describe('test getDataStateContainer', () => {
 
     const unsubscribe = dataState.subscribe();
 
+    expect(dataState.data$.totalHits$.value.result).toBe(undefined);
+    expect(dataState.data$.documents$.value.result).toEqual(undefined);
+
     dataState.refetch$.next(undefined);
     await waitFor(() => {
       expect(dataState.data$.main$.value.fetchStatus).toBe('complete');
