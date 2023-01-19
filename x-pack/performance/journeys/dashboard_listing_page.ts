@@ -6,7 +6,7 @@
  */
 
 import { Journey } from '@kbn/journeys';
-import { v4 as uuidv4} from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 export const journey = new Journey({
   esArchives: ['x-pack/performance/es_archives/sample_data_flights'],
