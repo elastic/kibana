@@ -28,7 +28,11 @@ import { appContextService } from '../../app_context';
 
 import { getArchiveEntry, setArchiveEntry, setArchiveFilelist, setPackageInfo } from '.';
 import type { ArchiveEntry } from '.';
-import { parseAndVerifyPolicyTemplates, parseAndVerifyStreams } from './parse';
+import {
+  parseAndVerifyPolicyTemplates,
+  parseAndVerifyStreams,
+  parseTopLevelElasticsearchEntry,
+} from './parse';
 
 const ONE_BYTE = 1024 * 1024;
 // could be anything, picked this from https://github.com/elastic/elastic-agent-client/issues/17
@@ -230,7 +234,9 @@ export const getEsPackage = async (
     assetPathToObjectId(manifestPath)
   );
   const packageInfo = safeLoad(soResManifest.attributes.data_utf8);
-
+  if (packageInfo.elasticsearch) {
+    packageInfo.elasticsearch = parseTopLevelElasticsearchEntry(packageInfo.elasticsearch);
+  }
   try {
     const readmePath = `docs/README.md`;
     await savedObjectsClient.get<PackageAsset>(

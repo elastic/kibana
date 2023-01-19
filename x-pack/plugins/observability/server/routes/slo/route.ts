@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { badRequest } from '@hapi/boom';
 import {
   createSLOParamsSchema,
   deleteSLOParamsSchema,
@@ -29,13 +30,18 @@ import {
   KQLCustomTransformGenerator,
   TransformGenerator,
 } from '../../services/slo/transform_generators';
-import { IndicatorTypes } from '../../domain/models';
 import { createObservabilityServerRoute } from '../create_observability_server_route';
+import type { IndicatorTypes } from '../../domain/models';
+import type { ObservabilityRequestHandlerContext } from '../../types';
 
 const transformGenerators: Record<IndicatorTypes, TransformGenerator> = {
   'sli.apm.transactionDuration': new ApmTransactionDurationTransformGenerator(),
   'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(),
   'sli.kql.custom': new KQLCustomTransformGenerator(),
+};
+
+const isLicenseAtLeastPlatinum = async (context: ObservabilityRequestHandlerContext) => {
+  return (await context.licensing).license.hasAtLeast('platinum');
 };
 
 const createSLORoute = createObservabilityServerRoute({
@@ -45,6 +51,10 @@ const createSLORoute = createObservabilityServerRoute({
   },
   params: createSLOParamsSchema,
   handler: async ({ context, params, logger }) => {
+    if (!isLicenseAtLeastPlatinum(context)) {
+      throw badRequest('Platinum license or higher is needed to make use of this feature.');
+    }
+
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const soClient = (await context.core).savedObjects.client;
 
@@ -66,6 +76,10 @@ const updateSLORoute = createObservabilityServerRoute({
   },
   params: updateSLOParamsSchema,
   handler: async ({ context, params, logger }) => {
+    if (!isLicenseAtLeastPlatinum(context)) {
+      throw badRequest('Platinum license or higher is needed to make use of this feature.');
+    }
+
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const soClient = (await context.core).savedObjects.client;
 
@@ -86,6 +100,10 @@ const deleteSLORoute = createObservabilityServerRoute({
   },
   params: deleteSLOParamsSchema,
   handler: async ({ context, params, logger }) => {
+    if (!isLicenseAtLeastPlatinum(context)) {
+      throw badRequest('Platinum license or higher is needed to make use of this feature.');
+    }
+
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const soClient = (await context.core).savedObjects.client;
 
@@ -105,6 +123,10 @@ const getSLORoute = createObservabilityServerRoute({
   },
   params: getSLOParamsSchema,
   handler: async ({ context, params }) => {
+    if (!isLicenseAtLeastPlatinum(context)) {
+      throw badRequest('Platinum license or higher is needed to make use of this feature.');
+    }
+
     const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const repository = new KibanaSavedObjectsSLORepository(soClient);
@@ -124,6 +146,10 @@ const findSLORoute = createObservabilityServerRoute({
   },
   params: findSLOParamsSchema,
   handler: async ({ context, params }) => {
+    if (!isLicenseAtLeastPlatinum(context)) {
+      throw badRequest('Platinum license or higher is needed to make use of this feature.');
+    }
+
     const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const repository = new KibanaSavedObjectsSLORepository(soClient);

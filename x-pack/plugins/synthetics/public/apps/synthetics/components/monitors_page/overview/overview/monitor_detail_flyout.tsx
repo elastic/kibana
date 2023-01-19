@@ -51,7 +51,7 @@ import {
   MonitorOverviewItem,
   SyntheticsMonitor,
 } from '../types';
-import { useMonitorDetailLocator } from '../../hooks/use_monitor_detail_locator';
+import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_locator';
 import { fetchSyntheticsMonitor } from '../../../../state/overview/api';
 import { MonitorStatus } from '../../../common/components/monitor_status';
 import { MonitorLocationSelect } from '../../../common/components/monitor_location_select';
