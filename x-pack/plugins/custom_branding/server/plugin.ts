@@ -18,6 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { License } from '@kbn/license-api-guard-plugin/server';
 import { CustomBranding } from '@kbn/core-custom-branding-common';
+import { Subscription } from 'rxjs';
 import { PLUGIN } from '../common/constants';
 import type { CustomBrandingRequestHandlerContext } from './types';
 import { Dependencies } from './types';
@@ -34,6 +35,8 @@ const settingsKeys: Array<keyof CustomBranding> = [
 export class CustomBrandingPlugin implements Plugin {
   private readonly license: License;
   private readonly logger: Logger;
+  private licensingSubscription?: Subscription;
+  private isValidLicense: boolean = false;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -51,10 +54,13 @@ export class CustomBrandingPlugin implements Plugin {
 
     const fetchFn = async (
       request: KibanaRequest,
-      unathenticated?: boolean
+      unauthenticated?: boolean
     ): Promise<CustomBranding> => {
+      if (!this.isValidLicense) {
+        return {};
+      }
       const [coreStart] = await core.getStartServices();
-      const soClient = unathenticated
+      const soClient = unauthenticated
         ? coreStart.savedObjects.getScopedClient(request, {
             excludedExtensions: [SECURITY_EXTENSION_ID],
           })
@@ -75,10 +81,15 @@ export class CustomBrandingPlugin implements Plugin {
       minimumLicenseType: PLUGIN.MINIMUM_LICENSE_REQUIRED,
       licensing,
     });
+    this.licensingSubscription = licensing.license$.subscribe((next) => {
+      this.isValidLicense = next.hasAtLeast('enterprise');
+    });
     return {};
   }
 
-  public stop() {}
+  public stop() {
+    this.licensingSubscription?.unsubscribe();
+  }
 
   private getBrandingFrom = async (uiSettingsClient: IUiSettingsClient) => {
     const branding: CustomBranding = {};
