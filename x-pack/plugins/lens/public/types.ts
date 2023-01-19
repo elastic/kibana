@@ -285,7 +285,7 @@ type UserMessageDisplayLocation =
         | 'textBasedLanguagesQueryInput'
         | 'banner';
     }
-  | { id: 'dimensionTrigger'; layerId: string; dimensionId: string };
+  | { id: 'dimensionTrigger'; dimensionId: string };
 
 export type UserMessagesDisplayLocationId = UserMessageDisplayLocation['id'];
 
@@ -303,7 +303,6 @@ export type RemovableUserMessage = UserMessage & { uniqueId: string };
 export interface UserMessageFilters {
   severity?: UserMessage['severity'];
   dimensionId?: string;
-  layerId?: string;
 }
 
 export type UserMessagesGetter = (

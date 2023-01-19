@@ -555,12 +555,10 @@ describe('gauge', () => {
               Object {
                 "dimensionId": "min-accessor",
                 "id": "dimensionTrigger",
-                "layerId": "first",
               },
               Object {
                 "dimensionId": "max-accessor",
                 "id": "dimensionTrigger",
-                "layerId": "first",
               },
             ],
             "fixableInEditor": true,

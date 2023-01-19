@@ -712,9 +712,7 @@ export const getXyVisualization = ({
           errors.push({
             severity: 'error',
             fixableInEditor: true,
-            displayLocations: [
-              { id: 'dimensionTrigger', dimensionId: annotation.id, layerId: layer.layerId },
-            ],
+            displayLocations: [{ id: 'dimensionTrigger', dimensionId: annotation.id }],
             shortMessage: i18n.translate(
               'xpack.lens.xyChart.addAnnotationsLayerLabelDisabledHelp',
               {
@@ -734,7 +732,7 @@ export const getXyVisualization = ({
               fixableInEditor: true,
               displayLocations: [
                 { id: 'visualization' },
-                { id: 'dimensionTrigger', dimensionId: annotation.id, layerId: layer.layerId },
+                { id: 'dimensionTrigger', dimensionId: annotation.id },
               ],
               shortMessage: errorMessage,
               longMessage: (

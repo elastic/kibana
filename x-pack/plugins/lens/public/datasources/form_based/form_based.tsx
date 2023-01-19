@@ -1079,7 +1079,7 @@ function getDimensionErrorMessages(
         if (!isValidColumn(layerId, columnId)) {
           messages.push({
             severity: 'error',
-            displayLocations: [{ id: 'dimensionTrigger', dimensionId: columnId, layerId }],
+            displayLocations: [{ id: 'dimensionTrigger', dimensionId: columnId }],
             fixableInEditor: true,
             shortMessage: '',
             longMessage: (

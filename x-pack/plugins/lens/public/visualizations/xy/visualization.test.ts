@@ -2623,7 +2623,6 @@ describe('xy_visualization', () => {
                   Object {
                     "dimensionId": "an1",
                     "id": "dimensionTrigger",
-                    "layerId": "annotations",
                   },
                 ],
                 "fixableInEditor": true,
