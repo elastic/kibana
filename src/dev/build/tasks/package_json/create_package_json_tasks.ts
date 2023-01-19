@@ -24,17 +24,10 @@ import { read, write, Task } from '../../lib';
  */
 export function transformDependencies(dependencies: Record<string, string>) {
   return Object.fromEntries(
-    Object.entries(dependencies).map(([name, version]) => {
-      if (!version.startsWith('link:')) {
-        return [name, version];
-      }
-
-      if (version.startsWith('link:bazel-bin/')) {
-        return [name, version.replace('link:bazel-bin/', 'file:')];
-      }
-
-      return [name, version.replace('link:', 'file:')];
-    })
+    Object.entries(dependencies).map(([name, version]) => [
+      name,
+      version.replace(/^link:/, 'file:'),
+    ])
   );
 }
 
@@ -42,9 +35,9 @@ export const CreatePackageJson: Task = {
   description: 'Creating build-ready version of package.json',
 
   async run(config, log, build) {
+    const plugins = config.getDistPluginsFromRepo();
     const pkg = config.getKibanaPkg();
-    const transformedDeps = transformDependencies(pkg.dependencies as { [key: string]: string });
-    const foundPkgDeps = await findUsedDependencies(transformedDeps, build.resolvePath('.'));
+    const transformedDeps = transformDependencies({ ...pkg.dependencies, ...pkg.devDependencies });
 
     const newPkg = {
       name: pkg.name,
@@ -64,7 +57,14 @@ export const CreatePackageJson: Task = {
         node: pkg.engines?.node,
       },
       resolutions: pkg.resolutions,
-      dependencies: foundPkgDeps,
+      dependencies: {
+        // include dependencies which are explicitly used
+        ...(await findUsedDependencies(transformedDeps, build.resolvePath('.'), plugins)),
+        // also include all plugin packages
+        ...Object.fromEntries(
+          plugins.map((p) => [p.manifest.id, `file:${p.normalizedRepoRelativeDir}`])
+        ),
+      },
     };
 
     await write(build.resolvePath('package.json'), JSON.stringify(newPkg, null, '  '));

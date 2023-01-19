@@ -6,7 +6,7 @@
   "ui": true,
   "owner": {
     "name": "Stack Management",
-    "githubTeam": "kibana-stack-management"
+    "githubTeam": "platform-deployment-management"
   },
   "requiredPlugins": ["management", "features", "share", "fileUpload"],
   "optionalPlugins": ["security", "usageCollection"],

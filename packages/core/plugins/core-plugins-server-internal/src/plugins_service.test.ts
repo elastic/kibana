@@ -721,12 +721,7 @@ describe('PluginsService', () => {
         config: {
           additionalPluginPaths: [],
           initialize: true,
-          pluginSearchPaths: [
-            resolve(process.cwd(), 'src', 'plugins'),
-            resolve(process.cwd(), 'x-pack', 'plugins'),
-            resolve(process.cwd(), 'plugins'),
-            resolve(process.cwd(), '..', 'kibana-extra'),
-          ],
+          pluginSearchPaths: [resolve(REPO_ROOT, '..', 'kibana-extra')],
         },
         coreContext: { coreId, env, logger, configService },
         instanceInfo: { uuid: 'uuid' },

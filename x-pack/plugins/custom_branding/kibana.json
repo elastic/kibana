@@ -4,7 +4,7 @@
   "kibanaVersion": "kibana",
   "owner": {
     "name": "global-experience",
-    "githubTeam": "kibana-global-experience"
+    "githubTeam": "appex-sharedux"
   },
   "description": " Enables customization of Kibana",
   "server": true,

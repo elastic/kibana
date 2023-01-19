@@ -5,7 +5,7 @@
   "ui": true,
   "owner": {
     "name": "Stack Management",
-    "githubTeam": "kibana-stack-management"
+    "githubTeam": "platform-deployment-management"
   },
   "configPath": ["xpack", "upgrade_assistant"],
   "requiredPlugins": ["management", "data", "licensing", "features", "share"],

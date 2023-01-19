@@ -7,7 +7,7 @@
   "ui": true,
   "owner": {
     "name": "Stack Management",
-    "githubTeam": "kibana-stack-management"
+    "githubTeam": "platform-deployment-management"
   },
   "requiredPlugins": ["devTools", "home", "licensing", "share"],
   "requiredBundles": ["esUiShared", "kibanaReact"]

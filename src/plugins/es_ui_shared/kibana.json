@@ -5,7 +5,7 @@
   "server": true,
   "owner": {
     "name": "Stack Management",
-    "githubTeam": "kibana-stack-management"
+    "githubTeam": "platform-deployment-management"
   },
   "extraPublicDirs": [
     "static/validators/string",

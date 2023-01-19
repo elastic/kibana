@@ -1,5 +1,5 @@
 {
-  "id": "casesFixture",
+  "id": "casesApiIntegrationTestPlugin",
   "owner": {
     "githubTeam": "response-ops",
     "name": "ResponseOps"

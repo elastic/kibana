@@ -4,7 +4,7 @@
   "version": "kibana",
   "owner": {
     "name": "Stack Management",
-    "githubTeam": "kibana-stack-management"
+    "githubTeam": "platform-deployment-management"
   },
   "requiredPlugins": [
     "home",

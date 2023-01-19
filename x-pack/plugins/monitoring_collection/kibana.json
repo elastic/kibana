@@ -4,7 +4,7 @@
   "kibanaVersion": "kibana",
   "owner": {
     "name": "Stack Monitoring",
-    "githubTeam": "stack-monitoring-ui"
+    "githubTeam": "infra-monitoring-ui"
   },
   "configPath": ["monitoring_collection"],
   "requiredPlugins": [],

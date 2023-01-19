@@ -2,7 +2,7 @@
   "id": "indexManagement",
   "owner": {
     "name": "Stack Management",
-    "githubTeam": "kibana-stack-management"
+    "githubTeam": "platform-deployment-management"
   },
   "version": "kibana",
   "server": true,

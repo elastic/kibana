@@ -1,5 +1,5 @@
 {
-  "id": "alertsFixtures",
+  "id": "alertingApiIntegrationTestPlugin",
   "owner": {
     "name": "Response Ops",
     "githubTeam": "response-ops"

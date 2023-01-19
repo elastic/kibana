@@ -2,7 +2,7 @@
   "id": "openTelemetryInstrumentedPlugin",
   "owner": {
     "name": "Stack Monitoring",
-    "githubTeam": "stack-monitoring-ui"
+    "githubTeam": "infra-monitoring-ui"
   },
   "version": "1.0.0",
   "kibanaVersion": "kibana",

@@ -17,7 +17,7 @@
     "kibanaUtils"
   ],
   "extraPublicDirs": [
-    "common/index"
+    "common"
   ],
   "owner": {
     "name": "Vis Editors",

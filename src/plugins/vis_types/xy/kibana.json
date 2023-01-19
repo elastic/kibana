@@ -5,7 +5,7 @@
   "server": true,
   "requiredPlugins": ["charts", "visualizations", "data", "expressions", "dataViews"],
   "requiredBundles": ["kibanaUtils", "visDefaultEditor"],
-  "extraPublicDirs": ["common/index"],
+  "extraPublicDirs": ["common"],
   "owner": {
     "name": "Vis Editors",
     "githubTeam": "kibana-visualizations"

@@ -6,7 +6,7 @@
   "ui": true,
   "owner": {
     "name": "Stack Management",
-    "githubTeam": "kibana-stack-management"
+    "githubTeam": "platform-deployment-management"
   },
   "configPath": ["console"],
   "requiredPlugins": ["devTools", "share"],

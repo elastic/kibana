@@ -1,5 +1,5 @@
 {
-  "id": "casesFixture",
+  "id": "functionalWithEsSslCasesTestPlugin",
   "owner": { "name": "Response Ops", "githubTeam": "response-ops" },
   "version": "1.0.0",
   "kibanaVersion": "kibana",

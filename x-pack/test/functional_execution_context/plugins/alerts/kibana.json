@@ -1,5 +1,5 @@
 {
-  "id": "alertsFixtures",
+  "id": "fecAlertsTestPlugin",
   "owner": {
     "name": "Core team",
     "githubTeam": "kibana-core"

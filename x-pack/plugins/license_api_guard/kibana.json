@@ -4,7 +4,7 @@
   "kibanaVersion": "kibana",
   "owner": {
     "name": "Stack Management",
-    "githubTeam": "kibana-stack-management"
+    "githubTeam": "platform-deployment-management"
   },
   "configPath": ["xpack", "licenseApiGuard"],
   "server": true,
