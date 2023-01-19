@@ -279,8 +279,6 @@ export const metricsAggsSchemas = t.exact(
         }),
       })
     ),
-    aggs: t.undefined,
-    aggregations: t.undefined,
   })
 );
 
@@ -288,10 +286,10 @@ export const bucketAggsSchemas = t.intersection([
   bucketAggsTempsSchemas,
   t.exact(
     t.partial({
-      aggs: t.record(t.string, t.intersection([metricsAggsSchemas, bucketAggsTempsSchemas])),
+      aggs: t.record(t.string, t.intersection([bucketAggsTempsSchemas, metricsAggsSchemas])),
       aggregations: t.record(
         t.string,
-        t.intersection([metricsAggsSchemas, bucketAggsTempsSchemas])
+        t.intersection([bucketAggsTempsSchemas, metricsAggsSchemas])
       ),
     })
   ),
