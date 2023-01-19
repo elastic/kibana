@@ -52,7 +52,6 @@
     "@kbn/rison",
     "@kbn/config-schema",
     "@kbn/storybook",
-    "@kbn/core-doc-links-browser",
   ],
   "exclude": [
     "target/**/*",
