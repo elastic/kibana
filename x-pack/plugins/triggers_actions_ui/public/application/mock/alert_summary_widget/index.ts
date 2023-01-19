@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { LIGHT_THEME } from '@elastic/charts';
-import { euiLightVars } from '@kbn/ui-theme';
+import { LIGHT_THEME, PartialTheme } from '@elastic/charts';
 import {
   AlertSummaryTimeRange,
   ChartTheme,
@@ -61,6 +60,6 @@ export const mockedAlertSummaryTimeRange: AlertSummaryTimeRange = {
 };
 
 export const mockedChartThemes: ChartTheme = {
-  theme: euiLightVars,
+  theme: PartialTheme,
   baseTheme: LIGHT_THEME,
 };
