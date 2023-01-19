@@ -25,6 +25,7 @@ export interface ShareContextMenuProps {
   objectId?: string;
   objectType: string;
   shareableUrl?: string;
+  shareableUrlForSavedObject?: string;
   shareMenuItems: ShareMenuItem[];
   sharingData: any;
   onClose: () => void;
@@ -33,6 +34,8 @@ export interface ShareContextMenuProps {
   showPublicUrlSwitch?: (anonymousUserCapabilities: Capabilities) => boolean;
   urlService: BrowserUrlService;
   snapshotShareWarning?: string;
+  objectTypeTitle?: string;
+  disabledShareUrl?: boolean;
 }
 
 export class ShareContextMenu extends Component<ShareContextMenuProps> {
@@ -64,6 +67,7 @@ export class ShareContextMenu extends Component<ShareContextMenuProps> {
           objectId={this.props.objectId}
           objectType={this.props.objectType}
           shareableUrl={this.props.shareableUrl}
+          shareableUrlForSavedObject={this.props.shareableUrlForSavedObject}
           anonymousAccess={this.props.anonymousAccess}
           showPublicUrlSwitch={this.props.showPublicUrlSwitch}
           urlService={this.props.urlService}
@@ -78,6 +82,7 @@ export class ShareContextMenu extends Component<ShareContextMenuProps> {
       icon: 'link',
       panel: permalinkPanel.id,
       sortOrder: 0,
+      disabled: Boolean(this.props.disabledShareUrl),
     });
     panels.push(permalinkPanel);
 
@@ -94,6 +99,7 @@ export class ShareContextMenu extends Component<ShareContextMenuProps> {
             objectId={this.props.objectId}
             objectType={this.props.objectType}
             shareableUrl={this.props.shareableUrl}
+            shareableUrlForSavedObject={this.props.shareableUrlForSavedObject}
             urlParamExtensions={this.props.embedUrlParamExtensions}
             anonymousAccess={this.props.anonymousAccess}
             showPublicUrlSwitch={this.props.showPublicUrlSwitch}
@@ -131,7 +137,7 @@ export class ShareContextMenu extends Component<ShareContextMenuProps> {
         title: i18n.translate('share.contextMenuTitle', {
           defaultMessage: 'Share this {objectType}',
           values: {
-            objectType: this.props.objectType,
+            objectType: this.props.objectTypeTitle || this.props.objectType,
           },
         }),
         items: menuItems
