@@ -28,6 +28,8 @@
     "@kbn/usage-collection-plugin",
     "@kbn/analytics",
     "@kbn/data-plugin",
+    "@kbn/core-overlays-browser-mocks",
+    "@kbn/core-theme-browser-mocks",
   ],
   "exclude": [
     "target/**/*",
