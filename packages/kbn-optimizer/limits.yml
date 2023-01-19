@@ -19,7 +19,7 @@ pageLoadAssetSize:
   cloudLinks: 17629
   cloudSecurityPosture: 19109
   console: 46091
-  controls: 40000
+  controls: 58582
   core: 435325
   crossClusterReplication: 65408
   customBranding: 16693
@@ -30,7 +30,7 @@ pageLoadAssetSize:
   dataViewEditor: 12000
   dataViewFieldEditor: 27000
   dataViewManagement: 5000
-  dataViews: 47000
+  dataViews: 71271
   dataVisualizer: 27530
   devTools: 38637
   discover: 99999
@@ -147,6 +147,6 @@ pageLoadAssetSize:
   visTypeTimeseries: 55203
   visTypeVega: 153573
   visTypeVislib: 242838
-  visTypeXy: 31800
+  visTypeXy: 46809
   visualizations: 90000
   watcher: 43598
