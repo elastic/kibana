@@ -53,6 +53,7 @@ import {
 import {
   BuilderEntry,
   CreateExceptionListItemBuilderSchema,
+  DataViewField,
   EmptyEntry,
   EmptyNestedEntry,
   ExceptionsBuilderExceptionItem,
@@ -956,7 +957,7 @@ export interface FieldConflictsInfo {
   }>;
 }
 
-export const getMappingConflictsInfo = (field: DataViewFieldBase): FieldConflictsInfo[] | null => {
+export const getMappingConflictsInfo = (field: DataViewField): FieldConflictsInfo[] | null => {
   if (!field.conflictDescriptions) {
     return null;
   }

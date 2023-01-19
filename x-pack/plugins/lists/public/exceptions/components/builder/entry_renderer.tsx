@@ -226,43 +226,27 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
         );
       };
 
-      if (isFirst) {
-        return (
-          <EuiFormRow
-            fullWidth
-            label={i18n.FIELD}
-            helpText={
-              <>
-                {entry.field?.type === 'conflict' && getMappingConflictsWarning(entry.field)}
-                {entry.nested == null && allowCustomOptions
-                  ? i18n.CUSTOM_COMBOBOX_OPTION_TEXT
-                  : undefined}
-              </>
-            }
-            data-test-subj="exceptionBuilderEntryFieldFormRow"
-          >
-            {comboBox}
-          </EuiFormRow>
+      const customOptionText =
+        entry.nested == null && allowCustomOptions ? i18n.CUSTOM_COMBOBOX_OPTION_TEXT : undefined;
+      const helpText =
+        entry.field?.type !== 'conflict' ? (
+          customOptionText
+        ) : (
+          <>
+            {getMappingConflictsWarning(entry.field)}
+            {customOptionText}
+          </>
         );
-      } else {
-        return (
-          <EuiFormRow
-            fullWidth
-            label={''}
-            helpText={
-              <>
-                {entry.field?.type === 'conflict' && getMappingConflictsWarning(entry.field)}
-                {entry.nested == null && allowCustomOptions
-                  ? i18n.CUSTOM_COMBOBOX_OPTION_TEXT
-                  : undefined}
-              </>
-            }
-            data-test-subj="exceptionBuilderEntryFieldFormRow"
-          >
-            {comboBox}
-          </EuiFormRow>
-        );
-      }
+      return (
+        <EuiFormRow
+          fullWidth
+          label={isFirst ? i18n.FIELD : ''}
+          helpText={helpText}
+          data-test-subj="exceptionBuilderEntryFieldFormRow"
+        >
+          {comboBox}
+        </EuiFormRow>
+      );
     },
     [
       indexPattern,

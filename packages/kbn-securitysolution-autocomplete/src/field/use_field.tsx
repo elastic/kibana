@@ -209,16 +209,18 @@ export const useField = ({
         <>
           {i18n.FIELD_CONFLICT_INDICES_WARNING_DESCRIPTION}
           {conflictsInfo.map((info) => {
-            const groupDetails = info.groupedIndices.map(({ name: indexName, count }) =>
-              i18n.CONFLICT_INDEX_DESCRIPTION(indexName, count)
+            const groupDetails = info.groupedIndices.map(
+              ({ name, count }) =>
+                `${count > 1 ? i18n.CONFLICT_MULTIPLE_INDEX_DESCRIPTION(name, count) : name}`
             );
             return (
               <>
                 <EuiSpacer size="s" />
-                {`${i18n.CONFLICT_INDEX_DESCRIPTION(
-                  info.type,
-                  info.totalIndexCount
-                )}: ${groupDetails.join(', ')}`}
+                {`${
+                  info.totalIndexCount > 1
+                    ? i18n.CONFLICT_MULTIPLE_INDEX_DESCRIPTION(info.type, info.totalIndexCount)
+                    : info.type
+                }: ${groupDetails.join(', ')}`}
               </>
             );
           })}

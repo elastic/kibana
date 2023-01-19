@@ -57,9 +57,9 @@ export const FIELD_CONFLICT_INDICES_WARNING_DESCRIPTION = i18n.translate(
   }
 );
 
-export const CONFLICT_INDEX_DESCRIPTION = (name: string, count: number): string =>
+export const CONFLICT_MULTIPLE_INDEX_DESCRIPTION = (name: string, count: number): string =>
   i18n.translate('autocomplete.conflictIndicesWarning.index.description', {
-    defaultMessage: `{name}${count > 1 ? ' ({count} indices)' : ''}`,
+    defaultMessage: '{name} ({count} indices)',
     values: { count, name },
   });
 
