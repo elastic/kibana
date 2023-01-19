@@ -57,8 +57,11 @@ export const cspRuleTemplateSavedObjectMapping: SavedObjectsTypeMappingDefinitio
         benchmark: {
           type: 'object',
           properties: {
+            // Needed for filtering rule.benchmarks fields
             id: {
-              // Needed for filtering rule templates by benchmark.id
+              type: 'keyword',
+            },
+            rule_number: {
               type: 'keyword',
             },
           },

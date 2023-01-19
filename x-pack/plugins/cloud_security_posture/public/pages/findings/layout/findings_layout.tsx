@@ -143,7 +143,6 @@ const baseColumns = [
       }
     ),
     width: '120px',
-    sortable: true,
   },
   {
     field: 'rule.benchmark.name',
