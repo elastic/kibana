@@ -16,7 +16,7 @@ import {
   EuiPanel,
   EuiIcon,
   EuiToolTip,
-  EuiLoadingContent
+  EuiLoadingContent,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
