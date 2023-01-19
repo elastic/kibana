@@ -13,7 +13,15 @@ export type {
   UnifiedHistogramContainerProps,
   UnifiedHistogramInitializeOptions,
 } from './container';
-export { UnifiedHistogramContainer } from './container';
+export {
+  UnifiedHistogramContainer,
+  getChartHidden,
+  getTopPanelHeight,
+  getBreakdownField,
+  setChartHidden,
+  setTopPanelHeight,
+  setBreakdownField,
+} from './container';
 export type {
   UnifiedHistogramServices,
   UnifiedHistogramChartLoadEvent,
