@@ -144,6 +144,7 @@ test('successfully executes', async () => {
               "execution": Object {
                 "uuid": "2",
               },
+              "id": "1",
               "name": "1",
             },
             "alert": Object {
@@ -181,6 +182,7 @@ test('successfully executes', async () => {
               "execution": Object {
                 "uuid": "2",
               },
+              "id": "1",
               "name": "1",
             },
             "alert": Object {
@@ -257,6 +259,7 @@ test('successfully executes with preconfigured connector', async () => {
               "execution": Object {
                 "uuid": "2",
               },
+              "id": "preconfigured",
               "name": "Preconfigured",
             },
             "alert": Object {
@@ -295,6 +298,7 @@ test('successfully executes with preconfigured connector', async () => {
               "execution": Object {
                 "uuid": "2",
               },
+              "id": "preconfigured",
               "name": "Preconfigured",
             },
             "alert": Object {
@@ -723,6 +727,7 @@ test('should not throw error if action is preconfigured and isESOCanEncrypt is f
               "execution": Object {
                 "uuid": "2",
               },
+              "id": "preconfigured",
               "name": "Preconfigured",
             },
             "alert": Object {
@@ -761,6 +766,7 @@ test('should not throw error if action is preconfigured and isESOCanEncrypt is f
               "execution": Object {
                 "uuid": "2",
               },
+              "id": "preconfigured",
               "name": "Preconfigured",
             },
             "alert": Object {
@@ -870,6 +876,7 @@ test('writes to event log for execute timeout', async () => {
           uuid: '2',
         },
         name: undefined,
+        id: 'action1',
       },
       alert: {
         rule: {
@@ -914,6 +921,7 @@ test('writes to event log for execute and execute start', async () => {
           uuid: '2',
         },
         name: 'action-1',
+        id: '1',
       },
       alert: {
         rule: {
@@ -966,6 +974,7 @@ test('writes to event log for execute and execute start when consumer and relate
           uuid: '2',
         },
         name: 'action-1',
+        id: '1',
       },
       alert: {
         rule: {

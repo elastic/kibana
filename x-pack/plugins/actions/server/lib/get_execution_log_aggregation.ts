@@ -313,9 +313,9 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
     status === 'failure' ? `${outcomeMessage} - ${outcomeErrorMessage}` : outcomeMessage;
   const version = outcomeAndMessage.kibana?.version ?? '';
 
-  const spaceIds = outcomeAndMessage ? outcomeAndMessage?.kibana?.space_ids ?? [] : [];
-  const connectorName = outcomeAndMessage ? outcomeAndMessage?.kibana.action?.name ?? '' : '';
-  const connectorId = outcomeAndMessage ? outcomeAndMessage?.kibana.action?.id ?? '' : '';
+  const spaceIds = outcomeAndMessage?.kibana?.space_ids ?? [];
+  const connectorName = outcomeAndMessage?.kibana?.action?.name ?? '';
+  const connectorId = outcomeAndMessage?.kibana?.action?.id ?? '';
   const timedOut = (bucket?.timeoutMessage?.doc_count ?? 0) > 0;
   return {
     id: bucket?.key ?? '',
