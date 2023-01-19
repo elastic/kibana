@@ -17,12 +17,39 @@ import { TestProviders, TestProvidersComponent } from '../../mock';
 import { TimelineId } from '../../../../common/types';
 import { mockBrowserFields } from '../../containers/source/mock';
 import * as i18n from './translations';
+import { createAction } from '@kbn/ui-actions-plugin/public';
 
 jest.mock('../../lib/kibana');
 
 jest.mock('../../../detection_engine/rule_management/logic/use_rule_with_fallback', () => {
   return {
     useRuleWithFallback: jest.fn(),
+  };
+});
+
+jest.mock('../../../detection_engine/rule_management/logic/use_rule_with_fallback', () => {
+  return {
+    useRuleWithFallback: jest.fn(),
+  };
+});
+
+const mockAction = createAction({
+  id: 'test_action',
+  execute: async () => {},
+  getIconType: () => 'test-icon',
+});
+
+jest.mock('@kbn/ui-actions-plugin/public/cell_actions/components/cell_actions_context', () => {
+  const actual = jest.requireActual(
+    '@kbn/ui-actions-plugin/public/cell_actions/components/cell_actions_context'
+  );
+  return {
+    ...actual,
+    useLoadActions: jest.fn().mockImplementation(() => ({
+      value: [mockAction],
+      error: undefined,
+      loading: false,
+    })),
   };
 });
 
@@ -57,12 +84,11 @@ describe('AlertSummaryView', () => {
 
   test('it renders the action cell by default', async () => {
     await act(async () => {
-      const { getAllByTestId } = render(
-        <TestProviders>
-          <AlertSummaryView {...props} />
-        </TestProviders>
-      );
-      expect(getAllByTestId('hover-actions-filter-for').length).toBeGreaterThan(0);
+      const { getAllByTestId } = render(<AlertSummaryView {...props} />, {
+        wrapper: TestProviders,
+      });
+
+      expect(getAllByTestId('actionItem-test_action').length).toBeGreaterThan(0);
     });
   });
 
