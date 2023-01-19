@@ -5,45 +5,13 @@
  * 2.0.
  */
 
-import {
-  ENDPOINT_ARTIFACT_LIST_IDS,
-  EXCEPTION_LIST_URL,
-} from '@kbn/securitysolution-list-constants';
-import { isEmpty } from 'lodash';
-import { BASE_ENDPOINT_ROUTE } from '../../../../common/endpoint/constants';
 import type { FormAction } from '../fixtures/artifacts_page';
 import { getArtifactsListTestsData } from '../fixtures/artifacts_page';
+import {
+  loadEndpointDataForEventFiltersIfNeeded,
+  removeAllArtifacts,
+} from '../tasks/artifact_helpers';
 import { login, loginWithRole, ROLE } from '../tasks/login';
-import { runEndpointLoaderScript } from '../tasks/run_endpoint_loader';
-
-const removeAllArtifacts = () => {
-  for (const listId of ENDPOINT_ARTIFACT_LIST_IDS) {
-    cy.request({
-      method: 'DELETE',
-      url: `${EXCEPTION_LIST_URL}?list_id=${listId}&namespace_type=agnostic`,
-      headers: { 'kbn-xsrf': 'kibana' },
-      failOnStatusCode: false,
-    });
-  }
-};
-
-// Checks for Endpoint data and creates it if needed
-const loadEndpointDataForEventFiltersIfNeeded = () => {
-  cy.request({
-    method: 'POST',
-    url: `${BASE_ENDPOINT_ROUTE}/suggestions/eventFilters`,
-    body: {
-      field: 'agent.type',
-      query: '',
-    },
-    headers: { 'kbn-xsrf': 'kibana' },
-    failOnStatusCode: false,
-  }).then(({ body }) => {
-    if (isEmpty(body)) {
-      runEndpointLoaderScript();
-    }
-  });
-};
 
 const runAction = (action: FormAction) => {
   let element;
@@ -78,12 +46,10 @@ describe('Artifact tabs in Policy Details', () => {
   before(() => {
     login();
     loadEndpointDataForEventFiltersIfNeeded();
-    // Clean artifacts data
     removeAllArtifacts();
   });
 
   after(() => {
-    // Clean artifacts data
     removeAllArtifacts();
   });
 
