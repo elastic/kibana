@@ -543,7 +543,7 @@ function getBaseTemplate({
       },
     },
     data_stream: {
-      hidden: registryElasticsearch?.['index_template.data_stream']?.hidden ?? hidden,
+      hidden: registryElasticsearch?.['index_template.data_stream']?.hidden || hidden,
     },
     composed_of: composedOfTemplates,
     _meta,
