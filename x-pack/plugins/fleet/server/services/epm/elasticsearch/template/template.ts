@@ -542,7 +542,9 @@ function getBaseTemplate({
         _meta,
       },
     },
-    data_stream: { hidden },
+    data_stream: {
+      hidden: registryElasticsearch?.['index_template.data_stream']?.hidden ?? hidden,
+    },
     composed_of: composedOfTemplates,
     _meta,
   };
