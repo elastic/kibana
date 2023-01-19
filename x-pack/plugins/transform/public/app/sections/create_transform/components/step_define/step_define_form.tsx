@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect, useMemo, FC } from 'react';
+import { merge } from 'rxjs';
 
 import {
   EuiButton,
@@ -203,7 +204,6 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
     () => dataView.timeFieldName !== undefined && dataView.timeFieldName !== '',
     [dataView.timeFieldName]
   );
-  console.log('hasValidTimeField', hasValidTimeField);
 
   const timefilter = useTimefilter({
     timeRangeSelector: dataView?.timeFieldName !== undefined,
@@ -226,6 +226,24 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(globalState?.refreshInterval), timefilter]);
+
+  useEffect(() => {
+    const timeUpdateSubscription = merge(
+      timefilter.getAutoRefreshFetch$(),
+      timefilter.getTimeUpdate$(),
+      mlTimefilterRefresh$
+    ).subscribe(() => {
+      if (setGlobalState) {
+        setGlobalState({
+          time: timefilter.getTime(),
+          refreshInterval: timefilter.getRefreshInterval(),
+        });
+      }
+    });
+    return () => {
+      timeUpdateSubscription.unsubscribe();
+    };
+  });
 
   return (
     <div data-test-subj="transformStepDefineForm">

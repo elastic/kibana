@@ -13,6 +13,9 @@ import { EuiSteps, EuiStepStatus } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { DatePickerContextProvider } from '@kbn/ml-date-picker';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { StorageContextProvider } from '@kbn/ml-local-storage';
+import { UrlStateProvider } from '@kbn/ml-url-state';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 
@@ -38,6 +41,10 @@ import {
 } from '../step_details';
 import { WizardNav } from '../wizard_nav';
 import type { RuntimeMappings } from '../step_define/common/types';
+
+import { TRANSFORM_STORAGE_KEYS } from './storage';
+
+const localStorage = new Storage(window.localStorage);
 
 enum WIZARD_STEPS {
   DEFINE,
@@ -223,9 +230,13 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
     <CreateTransformWizardContext.Provider
       value={{ dataView, runtimeMappings: stepDefineState.runtimeMappings }}
     >
-      <DatePickerContextProvider {...datePickerDeps}>
-        <EuiSteps className="transform__steps" steps={stepsConfig} />
-      </DatePickerContextProvider>
+      <UrlStateProvider>
+        <StorageContextProvider storage={localStorage} storageKeys={TRANSFORM_STORAGE_KEYS}>
+          <DatePickerContextProvider {...datePickerDeps}>
+            <EuiSteps className="transform__steps" steps={stepsConfig} />
+          </DatePickerContextProvider>
+        </StorageContextProvider>
+      </UrlStateProvider>
     </CreateTransformWizardContext.Provider>
   );
 });
