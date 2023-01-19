@@ -20,24 +20,25 @@ import {
   SYNTHETICS_TOTAL_TIMINGS,
   SYNTHETICS_WAIT_TIMINGS,
 } from '@kbn/observability-plugin/common';
+import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 
-export const useStepFilters = (prevCheckGroupId?: string) => {
+export const useStepFilters = (checkGroupIdArg?: string, stepIndexArg?: number) => {
   const { checkGroupId, stepIndex } = useParams<{ checkGroupId: string; stepIndex: string }>();
   return [
     {
       term: {
-        'monitor.check_group': prevCheckGroupId ?? checkGroupId,
+        'monitor.check_group': checkGroupIdArg ?? checkGroupId,
       },
     },
     {
       term: {
-        'synthetics.step.index': Number(stepIndex),
+        'synthetics.step.index': stepIndexArg ?? Number(stepIndex),
       },
     },
   ];
 };
 
-export const useNetworkTimings = () => {
+export const useNetworkTimings = (checkGroupIdArg?: string, stepIndexArg?: number) => {
   const runTimeMappings = NETWORK_TIMINGS_FIELDS.reduce(
     (acc, field) => ({
       ...acc,
@@ -62,7 +63,7 @@ export const useNetworkTimings = () => {
 
   const { data } = useEsSearch(
     {
-      index: 'synthetics-*',
+      index: SYNTHETICS_INDEX_PATTERN,
       body: {
         size: 0,
         runtime_mappings: runTimeMappings,
@@ -74,7 +75,7 @@ export const useNetworkTimings = () => {
                   'synthetics.type': 'journey/network_info',
                 },
               },
-              ...useStepFilters(),
+              ...useStepFilters(checkGroupIdArg, stepIndexArg),
             ],
           },
         },
@@ -128,7 +129,7 @@ export const useNetworkTimings = () => {
         },
       },
     },
-    [],
+    [checkGroupIdArg, stepIndexArg],
     { name: 'networkTimings' }
   );
 
