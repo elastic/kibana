@@ -8,7 +8,7 @@
 
 import type { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { listHiddenTypes } from './utils';
+import { listHiddenTypes, catchAndReturnBoomErrors } from './utils';
 
 const KBN_CLIENT_API_PREFIX = '/internal/ftr/kbn_client_so';
 
@@ -24,7 +24,7 @@ export const registerRoutes = (router: IRouter) => {
         }),
       },
     },
-    async (ctx, req, res) => {
+    catchAndReturnBoomErrors(async (ctx, req, res) => {
       const { type, id } = req.params;
       const { savedObjects } = await ctx.core;
 
@@ -33,7 +33,7 @@ export const registerRoutes = (router: IRouter) => {
 
       const object = await soClient.get(type, id);
       return res.ok({ body: object });
-    }
+    })
   );
 
   // CREATE
@@ -63,7 +63,7 @@ export const registerRoutes = (router: IRouter) => {
         }),
       },
     },
-    async (ctx, req, res) => {
+    catchAndReturnBoomErrors(async (ctx, req, res) => {
       const { type, id } = req.params;
       const { overwrite } = req.query;
       const { attributes, migrationVersion, references } = req.body;
@@ -80,7 +80,7 @@ export const registerRoutes = (router: IRouter) => {
       };
       const result = await soClient.create(type, attributes, options);
       return res.ok({ body: result });
-    }
+    })
   );
 
   // UPDATE
@@ -107,7 +107,7 @@ export const registerRoutes = (router: IRouter) => {
         }),
       },
     },
-    async (ctx, req, res) => {
+    catchAndReturnBoomErrors(async (ctx, req, res) => {
       const { type, id } = req.params;
       const { attributes, migrationVersion, references } = req.body;
       const { savedObjects } = await ctx.core;
@@ -118,7 +118,7 @@ export const registerRoutes = (router: IRouter) => {
       const options = { version: migrationVersion, references };
       const result = await soClient.update(type, id, attributes, options);
       return res.ok({ body: result });
-    }
+    })
   );
 
   // DELETE
@@ -132,7 +132,7 @@ export const registerRoutes = (router: IRouter) => {
         }),
       },
     },
-    async (ctx, req, res) => {
+    catchAndReturnBoomErrors(async (ctx, req, res) => {
       const { type, id } = req.params;
       const { savedObjects } = await ctx.core;
 
@@ -141,7 +141,7 @@ export const registerRoutes = (router: IRouter) => {
 
       const result = await soClient.delete(type, id, { force: true });
       return res.ok({ body: result });
-    }
+    })
   );
 
   // BULK_DELETE
@@ -157,14 +157,14 @@ export const registerRoutes = (router: IRouter) => {
         ),
       },
     },
-    async (ctx, req, res) => {
+    catchAndReturnBoomErrors(async (ctx, req, res) => {
       const { savedObjects } = await ctx.core;
       const hiddenTypes = listHiddenTypes(savedObjects.typeRegistry);
       const soClient = savedObjects.getClient({ includedHiddenTypes: hiddenTypes });
 
       const statuses = await soClient.bulkDelete(req.body, { force: true });
       return res.ok({ body: statuses });
-    }
+    })
   );
 
   // FIND
@@ -181,7 +181,7 @@ export const registerRoutes = (router: IRouter) => {
         }),
       },
     },
-    async (ctx, req, res) => {
+    catchAndReturnBoomErrors(async (ctx, req, res) => {
       const query = req.query;
 
       const { savedObjects } = await ctx.core;
@@ -197,6 +197,6 @@ export const registerRoutes = (router: IRouter) => {
       });
 
       return res.ok({ body: result });
-    }
+    })
   );
 };
