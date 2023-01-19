@@ -49,6 +49,8 @@ export default function () {
         // These are *very* important to have them pointing to staging
         '--telemetry.sendUsageTo=staging',
         `--server.maxPayload=1679958`,
+        // SO client plugin for FTR / KbnClientSavedObjects
+        `--plugin-path=${path.join(__dirname, 'plugins', 'ftr_so_apis')}`,
         // newsfeed mock service
         `--plugin-path=${path.join(__dirname, 'plugins', 'newsfeed')}`,
         // otel mock service

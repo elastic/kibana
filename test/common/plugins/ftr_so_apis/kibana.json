@@ -1,0 +1,10 @@
+{
+  "id": "ftrSoApis",
+  "owner": {
+    "name": "Core",
+    "githubTeam": "kibana-core"
+  },
+  "version": "kibana",
+  "server": true,
+  "ui": false
+}
