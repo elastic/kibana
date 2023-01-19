@@ -68,7 +68,7 @@ export const MonitorEnabled = ({
           label={enabled ? labels.DISABLE_MONITOR_LABEL : labels.ENABLE_MONITOR_LABEL}
           title={enabled ? labels.DISABLE_MONITOR_LABEL : labels.ENABLE_MONITOR_LABEL}
           data-test-subj="syntheticsIsMonitorEnabled"
-          isSwitchable={isSwitchable}
+          data-is-switchable={isSwitchable}
           onChange={handleEnabledChange}
         />
       )}
@@ -76,8 +76,10 @@ export const MonitorEnabled = ({
   );
 };
 
-const SwitchWithCursor = euiStyled(EuiSwitch)<{ isSwitchable: boolean }>`
+// data-* is the DOM compatible prop format
+const SwitchWithCursor = euiStyled(EuiSwitch)<{ 'data-is-switchable': boolean }>`
   & > button {
-    cursor: ${({ isSwitchable }) => (isSwitchable ? undefined : 'not-allowed')};
+    cursor: ${({ 'data-is-switchable': isSwitchable }) =>
+      isSwitchable ? undefined : 'not-allowed'};
   }
 `;
