@@ -143,6 +143,7 @@
     "@kbn/apm-config-loader": "link:packages/kbn-apm-config-loader",
     "@kbn/apm-utils": "link:packages/kbn-apm-utils",
     "@kbn/cases-components": "link:packages/kbn-cases-components",
+    "@kbn/cell-actions": "link:packages/kbn-cell-actions",
     "@kbn/chart-expressions-common": "link:src/plugins/chart_expressions/common",
     "@kbn/chart-icons": "link:packages/kbn-chart-icons",
     "@kbn/coloring": "link:packages/kbn-coloring",
