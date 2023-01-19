@@ -13,7 +13,6 @@ import { EuiFlexItem } from '@elastic/eui';
 import { EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
-// import { useFetchTriggeredAlertsHistory } from '@kbn/observability-plugin/public';
 import {
   AnnotationDomainType,
   LineAnnotation,
