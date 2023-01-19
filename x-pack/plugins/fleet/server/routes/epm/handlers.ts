@@ -273,7 +273,7 @@ export const getStatsHandler: FleetRequestHandler<
 
 export const installPackageFromRegistryHandler: FleetRequestHandler<
   TypeOf<typeof InstallPackageFromRegistryRequestSchema.params>,
-  undefined,
+  TypeOf<typeof InstallPackageFromRegistryRequestSchema.query>,
   TypeOf<typeof InstallPackageFromRegistryRequestSchema.body>
 > = async (context, request, response) => {
   const coreContext = await context.core;
@@ -291,6 +291,7 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
     spaceId,
     force: request.body?.force,
     ignoreConstraints: request.body?.ignore_constraints,
+    prerelease: request.query?.prerelease,
   });
 
   if (!res.error) {

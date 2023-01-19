@@ -91,6 +91,9 @@ export const InstallPackageFromRegistryRequestSchema = {
     pkgName: schema.string(),
     pkgVersion: schema.maybe(schema.string()),
   }),
+  query: schema.object({
+    prerelease: schema.maybe(schema.boolean()),
+  }),
   body: schema.nullable(
     schema.object({
       force: schema.boolean({ defaultValue: false }),
@@ -102,6 +105,9 @@ export const InstallPackageFromRegistryRequestSchema = {
 export const InstallPackageFromRegistryRequestSchemaDeprecated = {
   params: schema.object({
     pkgkey: schema.string(),
+  }),
+  query: schema.object({
+    prerelease: schema.maybe(schema.boolean()),
   }),
   body: schema.nullable(
     schema.object({

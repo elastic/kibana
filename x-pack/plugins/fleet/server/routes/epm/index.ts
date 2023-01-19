@@ -244,7 +244,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
     },
     async (context, request, response) => {
-      const newRequest = { ...request, params: splitPkgKey(request.params.pkgkey) } as any;
+      const newRequest = {
+        ...request,
+        params: splitPkgKey(request.params.pkgkey),
+        query: request.query,
+      } as any;
       const resp: IKibanaResponse<InstallPackageResponse> = await installPackageFromRegistryHandler(
         context,
         newRequest,
