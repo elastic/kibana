@@ -14,4 +14,5 @@ export enum SYNTHETICS_API_URLS {
   PARAMS = `/synthetics/params`,
   SYNC_GLOBAL_PARAMS = `/synthetics/sync_global_params`,
   ENABLE_DEFAULT_ALERTING = `/synthetics/enable_default_alerting`,
+  JOURNEY = `/internal/synthetics/journey/{checkGroup}`,
 }

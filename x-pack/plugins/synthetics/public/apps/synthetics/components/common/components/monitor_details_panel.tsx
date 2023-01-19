@@ -9,7 +9,6 @@ import React from 'react';
 import {
   EuiLink,
   EuiText,
-  EuiBadge,
   EuiSpacer,
   EuiDescriptionList,
   EuiLoadingContent,
@@ -19,7 +18,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useDispatch } from 'react-redux';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { capitalize } from 'lodash';
 import { TagsBadges } from './tag_badges';
 import { useFormatTestRunAt } from '../../../utils/monitor_test_result/test_time_formats';
 import { PanelWithTitle } from './panel_with_title';
@@ -32,6 +30,7 @@ import {
   MonitorFields,
   Ping,
 } from '../../../../../../common/runtime_types';
+import { MonitorTypeBadge } from './monitor_type_badge';
 
 const TitleLabel = euiStyled(EuiDescriptionListTitle)`
   width: 40%;
@@ -113,11 +112,7 @@ export const MonitorDetailsPanel = ({
           <DescriptionLabel>{configId}</DescriptionLabel>
           <TitleLabel>{MONITOR_TYPE_LABEL}</TitleLabel>
           <DescriptionLabel>
-            <EuiBadge>
-              {monitor?.type === 'browser'
-                ? capitalize(monitor?.type)
-                : monitor?.type?.toUpperCase()}
-            </EuiBadge>
+            <MonitorTypeBadge monitor={monitor} />
           </DescriptionLabel>
           <TitleLabel>{FREQUENCY_LABEL}</TitleLabel>
           <DescriptionLabel>{frequencyStr(monitor[ConfigKey.SCHEDULE])}</DescriptionLabel>

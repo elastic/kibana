@@ -38,6 +38,7 @@ import type { PackagePolicyValidationResults } from '../../services';
 import type { PackagePolicyFormState } from '../../types';
 import { SelectedPolicyTab } from '../../components';
 import { useOnSaveNavigate } from '../../hooks';
+import { prepareInputPackagePolicyDataset } from '../../services/prepare_input_pkg_policy_dataset';
 
 async function createAgentPolicy({
   packagePolicy,
@@ -63,7 +64,11 @@ async function createAgentPolicy({
 }
 
 async function savePackagePolicy(pkgPolicy: CreatePackagePolicyRequest['body']) {
-  const result = await sendCreatePackagePolicy(pkgPolicy);
+  const { policy, forceCreateNeeded } = await prepareInputPackagePolicyDataset(pkgPolicy);
+  const result = await sendCreatePackagePolicy({
+    ...policy,
+    ...(forceCreateNeeded && { force: true }),
+  });
 
   return result;
 }

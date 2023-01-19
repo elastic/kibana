@@ -60,6 +60,7 @@ export function DiscoverLayout({
   onChangeDataView,
   onUpdateQuery,
   setExpandedDoc,
+  savedSearchFetch$,
   savedSearchRefetch$,
   resetSavedSearch,
   savedSearchData$,
@@ -233,6 +234,7 @@ export function DiscoverLayout({
           setExpandedDoc={setExpandedDoc}
           savedSearch={savedSearch}
           savedSearchData$={savedSearchData$}
+          savedSearchFetch$={savedSearchFetch$}
           savedSearchRefetch$={savedSearchRefetch$}
           stateContainer={stateContainer}
           isTimeBased={isTimeBased}
@@ -264,6 +266,7 @@ export function DiscoverLayout({
     resultState,
     savedSearch,
     savedSearchData$,
+    savedSearchFetch$,
     savedSearchRefetch$,
     searchSessionManager,
     setExpandedDoc,
