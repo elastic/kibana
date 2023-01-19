@@ -17,10 +17,10 @@ import {
 } from '@elastic/eui';
 import { EUI_SPARKLINE_THEME_PARTIAL } from '@elastic/eui/dist/eui_charts_theme';
 import React from 'react';
-import { Alert, ChartTheme } from '../types';
+import { Alert, ChartThemes } from '../types';
 
 interface AlertStateInfoProps {
-  chartThemes: ChartTheme;
+  chartThemes: ChartThemes;
   count: number;
   data: Alert[];
   dataTestSubj: string;

@@ -9,7 +9,7 @@ import { LIGHT_THEME } from '@elastic/charts';
 import { EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 import {
   AlertSummaryTimeRange,
-  ChartTheme,
+  ChartThemes,
 } from '../../sections/rule_details/components/alert_summary/types';
 
 export const mockedAlertSummaryResponse = {
@@ -60,7 +60,7 @@ export const mockedAlertSummaryTimeRange: AlertSummaryTimeRange = {
   title: 'mockedTitle',
 };
 
-export const mockedChartThemes: ChartTheme = {
+export const mockedChartThemes: ChartThemes = {
   theme: EUI_CHARTS_THEME_LIGHT.theme,
   baseTheme: LIGHT_THEME,
 };

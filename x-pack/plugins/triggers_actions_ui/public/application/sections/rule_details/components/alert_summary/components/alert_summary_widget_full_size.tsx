@@ -17,12 +17,12 @@ import {
   RECOVERED_COLOR,
   TOOLTIP_DATE_FORMAT,
 } from './constants';
-import { Alert, ChartTheme } from '../types';
+import { Alert, ChartThemes } from '../types';
 
 export interface AlertsSummaryWidgetFullSizeProps {
   activeAlertCount: number;
   activeAlerts: Alert[];
-  chartThemes: ChartTheme;
+  chartThemes: ChartThemes;
   recoveredAlertCount: number;
   recoveredAlerts: Alert[];
   dateFormat?: string;

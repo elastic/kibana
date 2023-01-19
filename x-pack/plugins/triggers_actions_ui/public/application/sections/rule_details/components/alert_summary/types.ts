@@ -23,7 +23,7 @@ export interface AlertSummaryTimeRange {
   dateFormat?: string;
 }
 
-export interface ChartTheme {
+export interface ChartThemes {
   theme: PartialTheme;
   baseTheme: Theme;
 }
@@ -34,5 +34,5 @@ export interface AlertSummaryWidgetProps {
   fullSize?: boolean;
   onClick?: (status?: AlertStatus) => void;
   timeRange: AlertSummaryTimeRange;
-  chartThemes: ChartTheme;
+  chartThemes: ChartThemes;
 }
