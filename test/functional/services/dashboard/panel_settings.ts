@@ -88,10 +88,9 @@ export function DashboardCustomizePanelProvider({ getService }: FtrProviderConte
       await testSubjects.click('saveCustomizePanelButton');
     }
 
-    // public async clickRemovePerPanelTimeRangeButton() {
-    //   log.debug('clickRemovePerPanelTimeRangeButton');
-    //   const button = await this.findFlyoutTestSubject('removePerPanelTimeRangeButton');
-    //   await button.click();
-    // }
+    public async clickToggleShowCustomTimeRange() {
+      log.debug('clickToggleShowCustomTimeRange');
+      await testSubjects.click('customizePanelShowCustomTimeRange');
+    }
   })();
 }

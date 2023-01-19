@@ -61,7 +61,6 @@ import { InfraSourceConfigurationFormProvider } from './infra_source_configurati
 import { LogsUiProvider } from './logs_ui';
 import { MachineLearningProvider } from './ml';
 import { TransformProvider } from './transform';
-import { DashboardPanelTimeRangeProvider } from './dashboard';
 import { SearchSessionsService } from './search_sessions';
 import { ObservabilityProvider } from './observability';
 import { CasesServiceProvider } from './cases';
@@ -121,7 +120,6 @@ export const services = {
   logsUi: LogsUiProvider,
   ml: MachineLearningProvider,
   transform: TransformProvider,
-  dashboardPanelTimeRange: DashboardPanelTimeRangeProvider,
   reporting: ReportingFunctionalProvider,
   searchSessions: SearchSessionsService,
   observability: ObservabilityProvider,

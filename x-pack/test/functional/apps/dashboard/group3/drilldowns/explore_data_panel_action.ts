@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
   ]);
   const panelActions = getService('dashboardPanelActions');
-  const panelActionsTimeRange = getService('dashboardPanelTimeRange');
+  const dashboardCustomizePanel = getService('dashboardCustomizePanel');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
 
@@ -44,9 +44,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after('clean-up custom time range on panel', async () => {
       await common.navigateToApp('dashboard');
       await dashboard.gotoDashboardEditMode(drilldowns.DASHBOARD_WITH_PIE_CHART_NAME);
-      await panelActions.openContextMenuMorePanel();
-      await panelActionsTimeRange.clickTimeRangeActionInContextMenu();
-      await panelActionsTimeRange.clickRemovePerPanelTimeRangeButton();
+
+      await panelActions.customizePanel();
+      await dashboardCustomizePanel.clickToggleShowCustomTimeRange();
+      await dashboardCustomizePanel.clickFlyoutPrimaryButton();
       await dashboard.saveDashboard('Dashboard with Pie Chart');
     });
 
@@ -78,11 +79,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dashboard.gotoDashboardEditMode(drilldowns.DASHBOARD_WITH_PIE_CHART_NAME);
 
-      await panelActions.openContextMenuMorePanel();
-      await panelActionsTimeRange.clickTimeRangeActionInContextMenu();
-      await panelActionsTimeRange.clickToggleQuickMenuButton();
-      await panelActionsTimeRange.clickCommonlyUsedTimeRange('Last_90 days');
-      await panelActionsTimeRange.clickModalPrimaryButton();
+      await panelActions.customizePanel();
+      await dashboardCustomizePanel.clickToggleShowCustomTimeRange();
+      await dashboardCustomizePanel.clickToggleQuickMenuButton();
+      await dashboardCustomizePanel.clickCommonlyUsedTimeRange('Last_90 days');
+      await dashboardCustomizePanel.clickFlyoutPrimaryButton();
 
       await dashboard.saveDashboard('Dashboard with Pie Chart');
 
