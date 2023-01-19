@@ -21,16 +21,19 @@ import {
 } from '@kbn/task-manager-plugin/server';
 import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
+import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { setupSavedObjects } from './saved_objects';
 import { setupExpressions } from './expressions';
 import { makeLensEmbeddableFactory } from './embeddable/make_lens_embeddable_factory';
 import type { CustomVisualizationMigrations } from './migrations/types';
+import { LensAppLocatorDefinition } from '../common/locator/locator';
 
 export interface PluginSetupContract {
   taskManager?: TaskManagerSetupContract;
   embeddable: EmbeddableSetup;
   expressions: ExpressionsServerSetup;
   data: DataPluginSetup;
+  share?: SharePluginSetup;
 }
 
 export interface PluginStartContract {
@@ -65,6 +68,10 @@ export class LensServerPlugin implements Plugin<LensServerPluginSetup, {}, {}, {
     );
     setupSavedObjects(core, getFilterMigrations, this.customVisualizationMigrations);
     setupExpressions(core, plugins.expressions);
+
+    if (plugins.share) {
+      plugins.share.url.locators.create(new LensAppLocatorDefinition());
+    }
 
     const lensEmbeddableFactory = makeLensEmbeddableFactory(
       getFilterMigrations,

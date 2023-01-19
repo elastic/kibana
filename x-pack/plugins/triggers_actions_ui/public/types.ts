@@ -69,6 +69,7 @@ import type {
   RuleEventLogListProps,
   RuleEventLogListOptions,
 } from './application/sections/rule_details/components/rule_event_log_list';
+import { AlertSummaryTimeRange } from './application/sections/rule_details/components/alert_summary/types';
 import type { CreateConnectorFlyoutProps } from './application/sections/action_connector_form/create_connector_flyout';
 import type { EditConnectorFlyoutProps } from './application/sections/action_connector_form/edit_connector_flyout';
 import type { RulesListNotifyBadgeProps } from './application/sections/rules_list/components/rules_list_notify_badge';
@@ -130,6 +131,7 @@ export type {
   GetFieldTableColumns,
   BrowserFieldItem,
   RulesListVisibleColumns,
+  AlertSummaryTimeRange,
 };
 export type { ActionType, AsApiContract };
 export {
