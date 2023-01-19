@@ -48,6 +48,7 @@ interface ImportDataModalProps {
   subtitle: string;
   successMessage: (totalCount: number) => string;
   title: string;
+  showActionConnectorsCheckBox?: boolean;
 }
 
 /**
@@ -64,6 +65,7 @@ export const ImportDataModalComponent = ({
   importData,
   showCheckBox = true,
   showExceptionsCheckBox = false,
+  showActionConnectorsCheckBox = false,
   showModal,
   submitBtnText,
   subtitle,
@@ -74,6 +76,7 @@ export const ImportDataModalComponent = ({
   const [isImporting, setIsImporting] = useState(false);
   const [overwrite, setOverwrite] = useState(false);
   const [overwriteExceptions, setOverwriteExceptions] = useState(false);
+  const [overwriteActionConnectors, setOverwriteActionConnectors] = useState(false);
   const { addError, addSuccess } = useAppToasts();
   // TODO Ask if we use schema on the FE
   const [actionConnectorsWarnings, setActionConnectorsWarnings] = useState<WarningSchema[] | []>(
@@ -85,6 +88,8 @@ export const ImportDataModalComponent = ({
     closeModal();
     setOverwrite(false);
     setOverwriteExceptions(false);
+    setOverwriteActionConnectors(false);
+    setActionConnectorsWarnings([]);
   }, [closeModal, setOverwrite, setOverwriteExceptions]);
 
   const onImportComplete = useCallback(
@@ -110,6 +115,7 @@ export const ImportDataModalComponent = ({
           fileToImport: selectedFiles[0],
           overwrite,
           overwriteExceptions,
+          overwriteActionConnectors,
           signal: abortCtrl.signal,
         });
         setActionConnectorsWarnings(warnings as WarningSchema[]);
@@ -134,6 +140,7 @@ export const ImportDataModalComponent = ({
     importData,
     overwrite,
     overwriteExceptions,
+    overwriteActionConnectors,
     showExceptionsCheckBox,
     successMessage,
     errorMessage,
@@ -156,6 +163,9 @@ export const ImportDataModalComponent = ({
     setOverwriteExceptions((shouldOverwrite) => !shouldOverwrite);
   }, []);
 
+  const handleActionConnectorsCheckboxClick = useCallback(() => {
+    setOverwriteActionConnectors((shouldOverwrite) => !shouldOverwrite);
+  }, []);
   return (
     <>
       {showModal && (
@@ -229,6 +239,15 @@ export const ImportDataModalComponent = ({
                     label={i18n.OVERWRITE_EXCEPTIONS_LABEL}
                     checked={overwriteExceptions}
                     onChange={handleExceptionsCheckboxClick}
+                  />
+                )}
+                {showActionConnectorsCheckBox && (
+                  <EuiCheckbox
+                    data-test-subj="importDataModalActionConnectorsCheckbox"
+                    id="importDataModalActionConnectorsCheckbox"
+                    label={i18n.OVERWRITE_ACTION_CONNECTORS_LABEL}
+                    checked={overwriteActionConnectors}
+                    onChange={handleActionConnectorsCheckboxClick}
                   />
                 )}
               </>

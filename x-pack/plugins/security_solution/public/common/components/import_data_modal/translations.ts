@@ -20,7 +20,12 @@ export const OVERWRITE_EXCEPTIONS_LABEL = i18n.translate(
     defaultMessage: 'Overwrite existing exception lists with conflicting "list_id"',
   }
 );
-
+export const OVERWRITE_ACTION_CONNECTORS_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.importRuleModal.overwriteActionConnectorsLabel',
+  {
+    defaultMessage: 'Overwrite existing action connectors with conflicting "id"',
+  }
+);
 export const SUCCESSFULLY_IMPORTED_EXCEPTIONS = (totalExceptions: number) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.components.importRuleModal.exceptionsSuccessLabel',

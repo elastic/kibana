@@ -16,6 +16,7 @@ export const importRuleActionConnectors = async ({
   actionConnectors,
   actionsClient,
   actionsImporter,
+  overwrite,
 }: ImportRuleActionConnectorsParams): Promise<ImportRuleActionConnectorsResult> => {
   const importResult: ImportRuleActionConnectorsResult = {
     success: true,
@@ -42,15 +43,14 @@ export const importRuleActionConnectors = async ({
       ({ id }) => !storedActionConnectors.find((stored) => stored.id === id)
     );
 
-  if (!actionConnectorsToImport.length) return importResult;
+  if (!actionConnectorsToImport.length && !overwrite) return importResult;
 
   const readStream = Readable.from(actionConnectors);
 
-  // TODO add overwrite & createNewCopies based on request query
   const { success, successCount, successResults, warnings, errors }: SavedObjectsImportResponse =
     await actionsImporter.import({
       readStream,
-      overwrite: false,
+      overwrite,
       createNewCopies: false,
     });
 

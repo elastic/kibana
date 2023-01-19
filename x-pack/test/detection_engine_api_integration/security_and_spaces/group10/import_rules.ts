@@ -135,6 +135,10 @@ export default ({ getService }: FtrProviderContext): void => {
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
+          action_connectors_success: true,
+          action_connectors_success_count: 0,
+          action_connectors_errors: [],
+          action_connectors_warnings: [],
         });
       });
       it('should successfully import rules with actions when user has "read" actions privileges', async () => {

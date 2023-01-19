@@ -267,6 +267,7 @@ export interface ImportDataProps {
   fileToImport: File;
   overwrite?: boolean;
   overwriteExceptions?: boolean;
+  overwriteActionConnectors?: boolean;
   signal: AbortSignal;
 }
 

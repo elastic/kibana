@@ -341,6 +341,7 @@ export const importRules = async ({
   fileToImport,
   overwrite = false,
   overwriteExceptions = false,
+  overwriteActionConnectors = false,
   signal,
 }: ImportDataProps): Promise<ImportDataResponse> => {
   const formData = new FormData();
@@ -351,7 +352,11 @@ export const importRules = async ({
     {
       method: 'POST',
       headers: { 'Content-Type': undefined },
-      query: { overwrite, overwrite_exceptions: overwriteExceptions },
+      query: {
+        overwrite,
+        overwrite_exceptions: overwriteExceptions,
+        overwrite_action_connectors: overwriteActionConnectors,
+      },
       body: formData,
       signal,
     }

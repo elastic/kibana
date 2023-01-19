@@ -131,6 +131,7 @@ export const importRulesRoute = (
           actionConnectors,
           actionsClient,
           actionsImporter,
+          overwrite: request.query.overwrite_action_connectors,
         });
 
         // report on duplicate rules
