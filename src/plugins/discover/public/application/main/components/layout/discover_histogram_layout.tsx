@@ -17,7 +17,6 @@ import { ResetSearchButton } from './reset_search_button';
 
 export interface DiscoverHistogramLayoutProps extends DiscoverMainContentProps {
   resetSavedSearch: () => void;
-  isTimeBased: boolean;
   resizeRef: RefObject<HTMLDivElement>;
   inspectorAdapters: InspectorAdapters;
   searchSessionManager: DiscoverSearchSessionManager;
@@ -29,7 +28,6 @@ export const DiscoverHistogramLayout = ({
   resetSavedSearch,
   savedSearch,
   stateContainer,
-  isTimeBased,
   resizeRef,
   inspectorAdapters,
   searchSessionManager,
@@ -43,7 +41,6 @@ export const DiscoverHistogramLayout = ({
   };
 
   const { hideChart, setUnifiedHistogramApi } = useDiscoverHistogram({
-    isTimeBased,
     inspectorAdapters,
     searchSessionManager,
     savedSearchFetch$: stateContainer.dataState.fetch$,

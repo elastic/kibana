@@ -30,7 +30,6 @@ export interface UseDiscoverHistogramProps {
   stateContainer: DiscoverStateContainer;
   savedSearchData$: SavedSearchData;
   dataView: DataView;
-  isTimeBased: boolean;
   isPlainRecord: boolean;
   inspectorAdapters: InspectorAdapters;
   searchSessionManager: DiscoverSearchSessionManager;
@@ -41,7 +40,6 @@ export const useDiscoverHistogram = ({
   stateContainer,
   savedSearchData$,
   dataView,
-  isTimeBased,
   isPlainRecord,
   inspectorAdapters,
   searchSessionManager,
