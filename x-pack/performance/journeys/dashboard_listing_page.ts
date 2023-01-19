@@ -6,7 +6,7 @@
  */
 
 import { Journey } from '@kbn/journeys';
-import uuid from 'uuid';
+import { v4 as uuidv4} from 'uuid';
 
 export const journey = new Journey({
   esArchives: ['x-pack/performance/es_archives/sample_data_flights'],
@@ -34,7 +34,7 @@ export const journey = new Journey({
   .step('Add  dashboard', async ({ page, inputDelays }) => {
     await page.click('[data-test-subj="newItemButton"]');
     await page.click('[data-test-subj="dashboardSaveMenuItem"]');
-    await page.type('[data-test-subj="savedObjectTitle"]', `foobar dashboard ${uuid.v4()}`, {
+    await page.type('[data-test-subj="savedObjectTitle"]', `foobar dashboard ${uuidv4()}`, {
       delay: inputDelays.TYPING,
     });
     await page.click('[data-test-subj="confirmSaveSavedObjectButton"]');
