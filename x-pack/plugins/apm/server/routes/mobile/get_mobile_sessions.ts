@@ -11,23 +11,24 @@ import {
   rangeQuery,
   termQuery,
 } from '@kbn/observability-plugin/server';
+import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
 import {
   SERVICE_NAME,
+  SESSION_ID,
   TRANSACTION_NAME,
-  SERVICE_TARGET_TYPE,
-  METRICSET_NAME,
 } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
-import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getBucketSize } from '../../lib/helpers/get_bucket_size';
 import { Coordinate } from '../../../typings/timeseries';
+import { Maybe } from '../../../typings/common';
 
-export interface HttpRequestsTimeseries {
-  currentPeriod: Coordinate[];
-  previousPeriod: Coordinate[];
+export interface SessionsTimeseries {
+  currentPeriod: { timeseries: Coordinate[]; value: Maybe<number> };
+  previousPeriod: { timeseries: Coordinate[]; value: Maybe<number> };
 }
+
 interface Props {
   apmEventClient: APMEventClient;
   serviceName: string;
@@ -39,14 +40,14 @@ interface Props {
   offset?: string;
 }
 
-async function getHttpRequestsTimeseries({
-  kuery,
+async function getSessionTimeseries({
   apmEventClient,
   serviceName,
   transactionName,
   environment,
   start,
   end,
+  kuery,
   offset,
 }: Props) {
   const { startWithOffset, endWithOffset } = getOffsetInMs({
@@ -61,16 +62,23 @@ async function getHttpRequestsTimeseries({
     minBucketSize: 60,
   });
 
-  const response = await apmEventClient.search('get_http_requests_chart', {
-    apm: { events: [ProcessorEvent.metric] },
+  const aggs = {
+    sessions: {
+      cardinality: { field: SESSION_ID },
+    },
+  };
+
+  const response = await apmEventClient.search('get_mobile_sessions', {
+    apm: {
+      events: [ProcessorEvent.transaction],
+    },
     body: {
       track_total_hits: false,
       size: 0,
       query: {
         bool: {
           filter: [
-            { exists: { field: SERVICE_TARGET_TYPE } },
-            ...termQuery(METRICSET_NAME, 'service_destination'),
+            { exists: { field: SESSION_ID } },
             ...termQuery(SERVICE_NAME, serviceName),
             ...termQuery(TRANSACTION_NAME, transactionName),
             ...rangeQuery(startWithOffset, endWithOffset),
@@ -87,27 +95,28 @@ async function getHttpRequestsTimeseries({
             min_doc_count: 0,
             extended_bounds: { min: startWithOffset, max: endWithOffset },
           },
-          aggs: {
-            requests: {
-              filter: { term: { [SERVICE_TARGET_TYPE]: 'http' } },
-            },
-          },
+          aggs,
         },
+        ...aggs,
       },
     },
   });
 
-  return (
+  const timeseries =
     response?.aggregations?.timeseries.buckets.map((bucket) => {
       return {
         x: bucket.key,
         y: bucket.doc_count ?? 0,
       };
-    }) ?? []
-  );
+    }) ?? [];
+
+  return {
+    timeseries,
+    value: response.aggregations?.sessions?.value,
+  };
 }
 
-export async function getHttpRequestsChart({
+export async function getMobileSessions({
   kuery,
   apmEventClient,
   serviceName,
@@ -116,7 +125,7 @@ export async function getHttpRequestsChart({
   start,
   end,
   offset,
-}: Props): Promise<HttpRequestsTimeseries> {
+}: Props): Promise<SessionsTimeseries> {
   const options = {
     serviceName,
     transactionName,
@@ -125,20 +134,20 @@ export async function getHttpRequestsChart({
     environment,
   };
 
-  const currentPeriodPromise = getHttpRequestsTimeseries({
+  const currentPeriodPromise = getSessionTimeseries({
     ...options,
     start,
     end,
   });
 
   const previousPeriodPromise = offset
-    ? getHttpRequestsTimeseries({
+    ? getSessionTimeseries({
         ...options,
         start,
         end,
         offset,
       })
-    : [];
+    : { timeseries: [], value: null };
 
   const [currentPeriod, previousPeriod] = await Promise.all([
     currentPeriodPromise,
@@ -147,9 +156,12 @@ export async function getHttpRequestsChart({
 
   return {
     currentPeriod,
-    previousPeriod: offsetPreviousPeriodCoordinates({
-      currentPeriodTimeseries: currentPeriod,
-      previousPeriodTimeseries: previousPeriod,
-    }),
+    previousPeriod: {
+      timeseries: offsetPreviousPeriodCoordinates({
+        currentPeriodTimeseries: currentPeriod.timeseries,
+        previousPeriodTimeseries: previousPeriod.timeseries,
+      }),
+      value: previousPeriod?.value,
+    },
   };
 }
