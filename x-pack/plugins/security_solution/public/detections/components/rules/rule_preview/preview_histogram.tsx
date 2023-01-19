@@ -83,7 +83,7 @@ export const PreviewHistogram = ({
   // thus the alerts which have timestamp equal to the end date value are not displayed in the table.
   // To fix that, we extend end date value by 1s to make sure all alerts are included in the table.
   const extendedEndDate = useMemo(
-    () => timeframeOptions.timeframeEnd.add('1', 's').toISOString(),
+    () => timeframeOptions.timeframeEnd.clone().add('1', 's').toISOString(),
     [timeframeOptions]
   );
   const isEqlRule = useMemo(() => ruleType === 'eql', [ruleType]);
