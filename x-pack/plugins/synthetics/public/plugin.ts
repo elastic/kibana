@@ -81,7 +81,7 @@ export interface ClientPluginsStart {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   cases: CasesUiStart;
   dataViews: DataViewsPublicPluginStart;
-  spaces: SpacesPluginStart;
+  spaces?: SpacesPluginStart;
   cloud?: CloudStart;
   appName: string;
   storage: IStorageWrapper;

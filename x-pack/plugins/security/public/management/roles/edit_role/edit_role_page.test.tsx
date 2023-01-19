@@ -15,6 +15,8 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { KibanaFeature } from '@kbn/features-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { Space } from '@kbn/spaces-plugin/public';
+import { spacesManagerMock } from '@kbn/spaces-plugin/public/spaces_manager/mocks';
+import { getUiApi } from '@kbn/spaces-plugin/public/ui_api';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 
 import { licenseMock } from '../../../../common/licensing/index.mock';
@@ -25,6 +27,10 @@ import { indicesAPIClientMock, privilegesAPIClientMock, rolesAPIClientMock } fro
 import { EditRolePage } from './edit_role_page';
 import { SpaceAwarePrivilegeSection } from './privileges/kibana/space_aware_privilege_section';
 import { TransformErrorSection } from './privileges/kibana/transform_error_section';
+
+const spacesManager = spacesManagerMock.create();
+const { getStartServices } = coreMock.createSetup();
+const spacesApiUi = getUiApi({ spacesManager, getStartServices });
 
 const buildFeatures = () => {
   return [
@@ -183,6 +189,7 @@ function getProps({
     fatalErrors,
     uiCapabilities: buildUICapabilities(canManageSpaces),
     history: scopedHistoryMock.create(),
+    spacesApiUi,
   };
 }
 

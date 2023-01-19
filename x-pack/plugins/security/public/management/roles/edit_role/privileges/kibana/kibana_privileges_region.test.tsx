@@ -8,12 +8,20 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
+import { coreMock } from '@kbn/core/public/mocks';
+import { spacesManagerMock } from '@kbn/spaces-plugin/public/spaces_manager/mocks';
+import { getUiApi } from '@kbn/spaces-plugin/public/ui_api';
+
 import type { Role } from '../../../../../../common/model';
 import { KibanaPrivileges } from '../../../model';
 import { RoleValidator } from '../../validate_role';
 import { KibanaPrivilegesRegion } from './kibana_privileges_region';
 import { SpaceAwarePrivilegeSection } from './space_aware_privilege_section';
 import { TransformErrorSection } from './transform_error_section';
+
+const spacesManager = spacesManagerMock.create();
+const { getStartServices } = coreMock.createSetup();
+const spacesApiUi = getUiApi({ spacesManager, getStartServices });
 
 const buildProps = () => {
   return {
@@ -62,6 +70,8 @@ const buildProps = () => {
     onChange: jest.fn(),
     validator: new RoleValidator(),
     canCustomizeSubFeaturePrivileges: true,
+    spacesEnabled: true,
+    spacesApiUi,
   };
 };
 

@@ -103,7 +103,7 @@ export interface ObservabilityPublicPluginsStart {
   actionTypeRegistry: ActionTypeRegistryContract;
   security: SecurityPluginStart;
   guidedOnboarding: GuidedOnboardingPluginStart;
-  spaces: SpacesPluginStart;
+  spaces?: SpacesPluginStart;
 }
 
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;

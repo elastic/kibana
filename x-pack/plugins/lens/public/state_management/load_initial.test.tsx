@@ -309,7 +309,7 @@ describe('Initializing the store', () => {
       expect(deps.lensServices.attributeService.unwrapAttributes).toHaveBeenCalledWith({
         savedObjectId: defaultSavedObjectId,
       });
-      expect(deps.lensServices.spaces.ui.redirectLegacyUrl).toHaveBeenCalledWith({
+      expect(deps.lensServices.spaces?.ui.redirectLegacyUrl).toHaveBeenCalledWith({
         path: '#/edit/id2?search',
         aliasPurpose: 'savedObjectConversion',
         objectNoun: 'Lens visualization',

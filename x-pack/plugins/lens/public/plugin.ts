@@ -144,7 +144,7 @@ export interface LensPluginStartDependencies {
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   dataViewEditor: DataViewEditorStart;
   inspector: InspectorStartContract;
-  spaces: SpacesPluginStart;
+  spaces?: SpacesPluginStart;
   usageCollection?: UsageCollectionStart;
   docLinks: DocLinksStart;
   share?: SharePluginStart;
