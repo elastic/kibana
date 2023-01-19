@@ -16,7 +16,9 @@ import {
   EuiPageBody,
   EuiPageContent_Deprecated as EuiPageContent,
   EuiSpacer,
+  EuiDragDropContext,
 } from '@elastic/eui';
+import { type DropResult } from 'react-beautiful-dnd';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { isOfQueryType } from '@kbn/es-query';
@@ -71,6 +73,7 @@ export function DiscoverLayout({
   searchSessionManager,
   updateDataViewList,
 }: DiscoverLayoutProps) {
+  const [isDraggingField, setIsDraggingField] = useState<boolean>(false);
   const {
     trackUiMetric,
     capabilities,
@@ -247,6 +250,7 @@ export function DiscoverLayout({
           resizeRef={resizeRef}
           inspectorAdapters={inspectorAdapters}
           searchSessionManager={searchSessionManager}
+          isDraggingField={isDraggingField}
         />
         {resultState === 'loading' && <LoadingSpinner />}
       </>
@@ -273,108 +277,128 @@ export function DiscoverLayout({
     setExpandedDoc,
     stateContainer,
     viewMode,
+    isDraggingField,
   ]);
 
+  const onDragUpdate = useCallback(() => {
+    setIsDraggingField(true);
+  }, [setIsDraggingField]);
+
+  const onDragEnd = useCallback(
+    (result: DropResult) => {
+      setIsDraggingField(false);
+
+      if (!result.destination || result.reason !== 'DROP') {
+        return;
+      }
+
+      onAddColumn(result.draggableId);
+    },
+    [setIsDraggingField, onAddColumn]
+  );
+
   return (
-    <EuiPage className="dscPage" data-fetch-counter={fetchCounter.current}>
-      <h1
-        id="savedSearchTitle"
-        className="euiScreenReaderOnly"
-        data-test-subj="discoverSavedSearchTitle"
-        tabIndex={-1}
-        ref={savedSearchTitle}
-      >
-        {savedSearch.title
-          ? i18n.translate('discover.pageTitleWithSavedSearch', {
-              defaultMessage: 'Discover - {savedSearchTitle}',
-              values: {
-                savedSearchTitle: savedSearch.title,
-              },
-            })
-          : i18n.translate('discover.pageTitleWithoutSavedSearch', {
-              defaultMessage: 'Discover - Search not yet saved',
-            })}
-      </h1>
-      <TopNavMemoized
-        onOpenInspector={onOpenInspector}
-        query={query}
-        navigateTo={navigateTo}
-        savedQuery={savedQuery}
-        savedSearch={savedSearch}
-        searchSource={searchSource}
-        stateContainer={stateContainer}
-        updateQuery={onUpdateQuery}
-        resetSavedSearch={resetSavedSearch}
-        onChangeDataView={onChangeDataView}
-        onDataViewCreated={onDataViewCreated}
-        isPlainRecord={isPlainRecord}
-        textBasedLanguageModeErrors={textBasedLanguageModeErrors}
-        onFieldEdited={onFieldEdited}
-        persistDataView={persistDataView}
-        updateAdHocDataViewId={updateAdHocDataViewId}
-        updateDataViewList={updateDataViewList}
-      />
-      <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
-        <SavedSearchURLConflictCallout
-          savedSearch={savedSearch}
-          spaces={spaces}
-          history={history}
-        />
-        <EuiFlexGroup className="dscPageBody__contents" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <SidebarMemoized
-              documents$={stateContainer.dataState.data$.documents$}
-              onAddField={onAddColumn}
-              columns={currentColumns}
-              onAddFilter={!isPlainRecord ? onAddFilter : undefined}
-              onRemoveField={onRemoveColumn}
-              onChangeDataView={onChangeDataView}
-              selectedDataView={dataView}
-              isClosed={isSidebarClosed}
-              trackUiMetric={trackUiMetric}
-              useNewFieldsApi={useNewFieldsApi}
-              onFieldEdited={onFieldEdited}
-              viewMode={viewMode}
-              onDataViewCreated={onDataViewCreated}
-              availableFields$={stateContainer.dataState.data$.availableFields$}
-            />
-          </EuiFlexItem>
-          <EuiHideFor sizes={['xs', 's']}>
-            <EuiFlexItem grow={false}>
-              <div>
-                <EuiSpacer size="s" />
-                <EuiButtonIcon
-                  iconType={isSidebarClosed ? 'menuRight' : 'menuLeft'}
-                  iconSize="m"
-                  size="xs"
-                  onClick={toggleSidebarCollapse}
-                  data-test-subj="collapseSideBarButton"
-                  aria-controls="discover-sidebar"
-                  aria-expanded={isSidebarClosed ? 'false' : 'true'}
-                  aria-label={i18n.translate('discover.toggleSidebarAriaLabel', {
-                    defaultMessage: 'Toggle sidebar',
-                  })}
-                />
-              </div>
-            </EuiFlexItem>
-          </EuiHideFor>
-          <EuiFlexItem className="dscPageContent__wrapper">
-            <EuiPageContent
-              panelRef={resizeRef}
-              verticalPosition={contentCentered ? 'center' : undefined}
-              horizontalPosition={contentCentered ? 'center' : undefined}
-              paddingSize="none"
-              hasShadow={false}
-              className={classNames('dscPageContent', {
-                'dscPageContent--centered': contentCentered,
-                'dscPageContent--emptyPrompt': resultState === 'none',
+    <EuiDragDropContext onDragEnd={onDragEnd} onDragUpdate={onDragUpdate}>
+      <EuiPage className="dscPage" data-fetch-counter={fetchCounter.current}>
+        <h1
+          id="savedSearchTitle"
+          className="euiScreenReaderOnly"
+          data-test-subj="discoverSavedSearchTitle"
+          tabIndex={-1}
+          ref={savedSearchTitle}
+        >
+          {savedSearch.title
+            ? i18n.translate('discover.pageTitleWithSavedSearch', {
+                defaultMessage: 'Discover - {savedSearchTitle}',
+                values: {
+                  savedSearchTitle: savedSearch.title,
+                },
+              })
+            : i18n.translate('discover.pageTitleWithoutSavedSearch', {
+                defaultMessage: 'Discover - Search not yet saved',
               })}
-            >
-              {mainDisplay}
-            </EuiPageContent>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPageBody>
-    </EuiPage>
+        </h1>
+        <TopNavMemoized
+          onOpenInspector={onOpenInspector}
+          query={query}
+          navigateTo={navigateTo}
+          savedQuery={savedQuery}
+          savedSearch={savedSearch}
+          searchSource={searchSource}
+          stateContainer={stateContainer}
+          updateQuery={onUpdateQuery}
+          resetSavedSearch={resetSavedSearch}
+          onChangeDataView={onChangeDataView}
+          onDataViewCreated={onDataViewCreated}
+          isPlainRecord={isPlainRecord}
+          textBasedLanguageModeErrors={textBasedLanguageModeErrors}
+          onFieldEdited={onFieldEdited}
+          persistDataView={persistDataView}
+          updateAdHocDataViewId={updateAdHocDataViewId}
+          updateDataViewList={updateDataViewList}
+        />
+        <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
+          <SavedSearchURLConflictCallout
+            savedSearch={savedSearch}
+            spaces={spaces}
+            history={history}
+          />
+          <EuiFlexGroup className="dscPageBody__contents" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <SidebarMemoized
+                documents$={stateContainer.dataState.data$.documents$}
+                onAddField={onAddColumn}
+                columns={currentColumns}
+                onAddFilter={!isPlainRecord ? onAddFilter : undefined}
+                onRemoveField={onRemoveColumn}
+                onChangeDataView={onChangeDataView}
+                selectedDataView={dataView}
+                isClosed={isSidebarClosed}
+                trackUiMetric={trackUiMetric}
+                useNewFieldsApi={useNewFieldsApi}
+                onFieldEdited={onFieldEdited}
+                viewMode={viewMode}
+                onDataViewCreated={onDataViewCreated}
+                availableFields$={stateContainer.dataState.data$.availableFields$}
+              />
+            </EuiFlexItem>
+            <EuiHideFor sizes={['xs', 's']}>
+              <EuiFlexItem grow={false}>
+                <div>
+                  <EuiSpacer size="s" />
+                  <EuiButtonIcon
+                    iconType={isSidebarClosed ? 'menuRight' : 'menuLeft'}
+                    iconSize="m"
+                    size="xs"
+                    onClick={toggleSidebarCollapse}
+                    data-test-subj="collapseSideBarButton"
+                    aria-controls="discover-sidebar"
+                    aria-expanded={isSidebarClosed ? 'false' : 'true'}
+                    aria-label={i18n.translate('discover.toggleSidebarAriaLabel', {
+                      defaultMessage: 'Toggle sidebar',
+                    })}
+                  />
+                </div>
+              </EuiFlexItem>
+            </EuiHideFor>
+            <EuiFlexItem className="dscPageContent__wrapper">
+              <EuiPageContent
+                panelRef={resizeRef}
+                verticalPosition={contentCentered ? 'center' : undefined}
+                horizontalPosition={contentCentered ? 'center' : undefined}
+                paddingSize="none"
+                hasShadow={false}
+                className={classNames('dscPageContent', {
+                  'dscPageContent--centered': contentCentered,
+                  'dscPageContent--emptyPrompt': resultState === 'none',
+                })}
+              >
+                {mainDisplay}
+              </EuiPageContent>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPageBody>
+      </EuiPage>
+    </EuiDragDropContext>
   );
 }

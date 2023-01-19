@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
+import { EuiDroppable, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import React, { useCallback } from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
@@ -33,6 +34,7 @@ export interface DiscoverMainContentProps {
   onAddFilter: DocViewFilterFn | undefined;
   onFieldEdited: () => Promise<void>;
   columns: string[];
+  isDraggingField: boolean;
 }
 
 export const DiscoverMainContent = ({
@@ -47,6 +49,7 @@ export const DiscoverMainContent = ({
   columns,
   stateContainer,
   savedSearch,
+  isDraggingField,
 }: DiscoverMainContentProps) => {
   const { trackUiMetric } = useDiscoverServices();
 
@@ -79,16 +82,30 @@ export const DiscoverMainContent = ({
         </EuiFlexItem>
       )}
       {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
-        <DiscoverDocuments
-          expandedDoc={expandedDoc}
-          dataView={dataView}
-          navigateTo={navigateTo}
-          onAddFilter={!isPlainRecord ? onAddFilter : undefined}
-          savedSearch={savedSearch}
-          setExpandedDoc={setExpandedDoc}
-          stateContainer={stateContainer}
-          onFieldEdited={!isPlainRecord ? onFieldEdited : undefined}
-        />
+        <EuiDroppable droppableId="droppable_discover_grid" spacing="none" grow withPanel>
+          {(provided, snapshot) => {
+            const isDraggingOver = isDraggingField || snapshot.isDraggingOver;
+            return (
+              <div
+                css={css`
+                  height: 100%;
+                  opacity: ${isDraggingOver ? 0 : 1};
+                `}
+              >
+                <DiscoverDocuments
+                  expandedDoc={expandedDoc}
+                  dataView={dataView}
+                  navigateTo={navigateTo}
+                  onAddFilter={!isPlainRecord ? onAddFilter : undefined}
+                  savedSearch={savedSearch}
+                  setExpandedDoc={setExpandedDoc}
+                  stateContainer={stateContainer}
+                  onFieldEdited={!isPlainRecord ? onFieldEdited : undefined}
+                />
+              </div>
+            );
+          }}
+        </EuiDroppable>
       ) : (
         <FieldStatisticsTab
           savedSearch={savedSearch}

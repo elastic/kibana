@@ -3,12 +3,13 @@
  */
 
 .unifiedFieldList__fieldListGrouped {
-  @include euiOverflowShadow;
+  //@include euiOverflowShadow;
   @include euiScrollBar;
   margin-left: -$euiSize; /* 1 */
   position: relative;
   flex-grow: 1;
   overflow: auto;
+  height: 100%;
 }
 
 .unifiedFieldList__fieldListGrouped__container {

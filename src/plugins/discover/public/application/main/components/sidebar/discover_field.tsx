@@ -16,7 +16,11 @@ import {
   EuiIcon,
   EuiSpacer,
   EuiHighlight,
+  EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
+import { DraggableProvided } from 'react-beautiful-dnd';
 import { i18n } from '@kbn/i18n';
 import { UiCounterMetricType } from '@kbn/analytics';
 import classNames from 'classnames';
@@ -62,107 +66,118 @@ const DiscoverFieldTypeIcon: React.FC<{ field: DataViewField }> = memo(({ field 
   return <FieldIcon {...getFieldIconProps(field)} />;
 });
 
-const FieldName: React.FC<{ field: DataViewField; highlight?: string }> = memo(
-  ({ field, highlight }) => {
-    const title =
-      field.displayName !== field.name
-        ? i18n.translate('discover.field.title', {
-            defaultMessage: '{fieldName} ({fieldDisplayName})',
-            values: {
-              fieldName: field.name,
-              fieldDisplayName: field.displayName,
-            },
-          })
-        : field.displayName;
+const FieldName: React.FC<{
+  field: DataViewField;
+  highlight?: string;
+}> = memo(({ field, highlight }) => {
+  const title =
+    field.displayName !== field.name
+      ? i18n.translate('discover.field.title', {
+          defaultMessage: '{fieldName} ({fieldDisplayName})',
+          values: {
+            fieldName: field.name,
+            fieldDisplayName: field.displayName,
+          },
+        })
+      : field.displayName;
 
-    return (
-      <EuiHighlight
-        search={wrapFieldNameOnDot(highlight)}
-        data-test-subj={`field-${field.name}`}
-        title={title}
-        className="dscSidebarField__name"
-      >
-        {wrapFieldNameOnDot(field.displayName)}
-      </EuiHighlight>
-    );
-  }
-);
+  return (
+    <EuiHighlight
+      search={wrapFieldNameOnDot(highlight)}
+      data-test-subj={`field-${field.name}`}
+      title={title}
+      className="dscSidebarField__name"
+    >
+      {wrapFieldNameOnDot(field.displayName)}
+    </EuiHighlight>
+  );
+});
 
 interface ActionButtonProps {
   field: DataViewField;
   isSelected?: boolean;
   alwaysShow: boolean;
   toggleDisplay: (field: DataViewField, isSelected?: boolean) => void;
+  provided: DraggableProvided;
 }
 
 const ActionButton: React.FC<ActionButtonProps> = memo(
-  ({ field, isSelected, alwaysShow, toggleDisplay }) => {
+  ({ field, isSelected, alwaysShow, toggleDisplay, provided }) => {
     const actionBtnClassName = classNames('dscSidebarItem__action', {
       ['dscSidebarItem__mobile']: alwaysShow,
     });
     if (field.name === '_source') {
       return null;
     }
-    if (!isSelected) {
-      return (
-        <EuiToolTip
-          delay="long"
-          content={i18n.translate('discover.fieldChooser.discoverField.addFieldTooltip', {
-            defaultMessage: 'Add field as column',
+    const tableAction = !isSelected ? (
+      <EuiToolTip
+        delay="long"
+        content={i18n.translate('discover.fieldChooser.discoverField.addFieldTooltip', {
+          defaultMessage: 'Add field as column',
+        })}
+      >
+        <EuiButtonIcon
+          iconType="plusInCircleFilled"
+          className={actionBtnClassName}
+          onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
+            if (ev.type === 'click') {
+              ev.currentTarget.focus();
+            }
+            ev.preventDefault();
+            ev.stopPropagation();
+            toggleDisplay(field, isSelected);
+          }}
+          data-test-subj={`fieldToggle-${field.name}`}
+          aria-label={i18n.translate('discover.fieldChooser.discoverField.addButtonAriaLabel', {
+            defaultMessage: 'Add {field} to table',
+            values: { field: field.name },
           })}
-        >
-          <EuiButtonIcon
-            iconType="plusInCircleFilled"
-            className={actionBtnClassName}
-            onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
-              if (ev.type === 'click') {
-                ev.currentTarget.focus();
-              }
-              ev.preventDefault();
-              ev.stopPropagation();
-              toggleDisplay(field, isSelected);
-            }}
-            data-test-subj={`fieldToggle-${field.name}`}
-            aria-label={i18n.translate('discover.fieldChooser.discoverField.addButtonAriaLabel', {
-              defaultMessage: 'Add {field} to table',
-              values: { field: field.name },
-            })}
-          />
-        </EuiToolTip>
-      );
-    } else {
-      return (
-        <EuiToolTip
-          key={`tooltip-${field.name}-${field.count || 0}-${isSelected}`}
-          delay="long"
-          content={i18n.translate('discover.fieldChooser.discoverField.removeFieldTooltip', {
-            defaultMessage: 'Remove field from table',
+        />
+      </EuiToolTip>
+    ) : (
+      <EuiToolTip
+        key={`tooltip-${field.name}-${field.count || 0}-${isSelected}`}
+        delay="long"
+        content={i18n.translate('discover.fieldChooser.discoverField.removeFieldTooltip', {
+          defaultMessage: 'Remove field from table',
+        })}
+      >
+        <EuiButtonIcon
+          color="danger"
+          iconType="cross"
+          className={actionBtnClassName}
+          onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
+            if (ev.type === 'click') {
+              ev.currentTarget.focus();
+            }
+            ev.preventDefault();
+            ev.stopPropagation();
+            toggleDisplay(field, isSelected);
+          }}
+          data-test-subj={`fieldToggle-${field.name}`}
+          aria-label={i18n.translate('discover.fieldChooser.discoverField.removeButtonAriaLabel', {
+            defaultMessage: 'Remove {field} from table',
+            values: { field: field.name },
           })}
-        >
-          <EuiButtonIcon
-            color="danger"
-            iconType="cross"
-            className={actionBtnClassName}
-            onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
-              if (ev.type === 'click') {
-                ev.currentTarget.focus();
-              }
-              ev.preventDefault();
-              ev.stopPropagation();
-              toggleDisplay(field, isSelected);
-            }}
-            data-test-subj={`fieldToggle-${field.name}`}
-            aria-label={i18n.translate(
-              'discover.fieldChooser.discoverField.removeButtonAriaLabel',
-              {
-                defaultMessage: 'Remove {field} from table',
-                values: { field: field.name },
-              }
-            )}
-          />
-        </EuiToolTip>
-      );
-    }
+        />
+      </EuiToolTip>
+    );
+
+    return (
+      <EuiFlexGroup direction="row" responsive={false} gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={false}>{tableAction}</EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiPanel
+            color="transparent"
+            paddingSize="s"
+            {...provided.dragHandleProps}
+            aria-label="Drag Handle"
+          >
+            <EuiIcon type="grab" />
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
   }
 );
 
@@ -170,10 +185,11 @@ interface MultiFieldsProps {
   multiFields: NonNullable<DiscoverFieldProps['multiFields']>;
   toggleDisplay: (field: DataViewField) => void;
   alwaysShowActionButton: boolean;
+  provided: DraggableProvided;
 }
 
 const MultiFields: React.FC<MultiFieldsProps> = memo(
-  ({ multiFields, toggleDisplay, alwaysShowActionButton }) => (
+  ({ multiFields, toggleDisplay, alwaysShowActionButton, provided }) => (
     <React.Fragment>
       <EuiTitle size="xxxs">
         <h5>
@@ -196,6 +212,7 @@ const MultiFields: React.FC<MultiFieldsProps> = memo(
               isSelected={entry.isSelected}
               alwaysShow={alwaysShowActionButton}
               toggleDisplay={toggleDisplay}
+              provided={provided}
             />
           }
           fieldName={<FieldName field={entry.field} />}
@@ -274,6 +291,8 @@ export interface DiscoverFieldProps {
    * Search by field name
    */
   highlight?: string;
+
+  provided: DraggableProvided;
 }
 
 function DiscoverFieldComponent({
@@ -292,6 +311,7 @@ function DiscoverFieldComponent({
   onDeleteField,
   showFieldStats,
   contextualFields,
+  provided,
 }: DiscoverFieldProps) {
   const services = useDiscoverServices();
   const [infoIsOpen, setOpen] = useState(false);
@@ -363,6 +383,7 @@ function DiscoverFieldComponent({
             isSelected={selected}
             alwaysShow={alwaysShowActionButton}
             toggleDisplay={toggleDisplay}
+            provided={provided}
           />
         }
         fieldName={<FieldName field={field} />}
@@ -384,6 +405,7 @@ function DiscoverFieldComponent({
           isSelected={selected}
           alwaysShow={alwaysShowActionButton}
           toggleDisplay={toggleDisplay}
+          provided={provided}
         />
       }
       fieldName={<FieldName field={field} highlight={highlight} />}
@@ -427,6 +449,7 @@ function DiscoverFieldComponent({
               multiFields={multiFields}
               alwaysShowActionButton={alwaysShowActionButton}
               toggleDisplay={toggleDisplay}
+              provided={provided}
             />
           </>
         )}

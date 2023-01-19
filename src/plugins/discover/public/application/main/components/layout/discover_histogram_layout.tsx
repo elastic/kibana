@@ -22,6 +22,7 @@ export interface DiscoverHistogramLayoutProps extends DiscoverMainContentProps {
   resizeRef: RefObject<HTMLDivElement>;
   inspectorAdapters: InspectorAdapters;
   searchSessionManager: DiscoverSearchSessionManager;
+  isDraggingField: boolean;
 }
 
 export const DiscoverHistogramLayout = ({
@@ -34,6 +35,7 @@ export const DiscoverHistogramLayout = ({
   resizeRef,
   inspectorAdapters,
   searchSessionManager,
+  isDraggingField,
   ...mainContentProps
 }: DiscoverHistogramLayoutProps) => {
   const services = useDiscoverServices();
@@ -79,6 +81,7 @@ export const DiscoverHistogramLayout = ({
         // The documents grid doesn't rerender when the chart visibility changes
         // which causes it to render blank space, so we need to force a rerender
         key={`docKey${histogramProps.chart?.hidden}`}
+        isDraggingField={isDraggingField}
       />
     </UnifiedHistogramLayout>
   );
