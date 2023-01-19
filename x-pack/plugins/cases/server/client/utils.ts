@@ -12,21 +12,21 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 
+import type { ISavedObjectsSerializer } from '@kbn/core-saved-objects-server';
 import type { KueryNode } from '@kbn/es-query';
-import { nodeBuilder, fromKueryExpression, escapeKuery } from '@kbn/es-query';
-import {
-  isCommentRequestTypeExternalReference,
-  isCommentRequestTypePersistableState,
-} from '../../common/utils/attachments';
-import { CASE_SAVED_OBJECT, NO_ASSIGNEES_FILTERING_KEYWORD } from '../../common/constants';
 
-import { SEVERITY_EXTERNAL_TO_ESMODEL, STATUS_EXTERNAL_TO_ESMODEL } from '../common/constants';
+import { nodeBuilder, fromKueryExpression, escapeKuery } from '@kbn/es-query';
+import { spaceIdToNamespace } from '@kbn/spaces-plugin/server/lib/utils/namespace';
+
 import type {
   CaseStatuses,
   CommentRequest,
   CaseSeverity,
   CommentRequestExternalReferenceType,
 } from '../../common/api';
+import type { SavedObjectFindOptionsKueryNode } from '../common/types';
+import type { CasesFindQueryParams } from './types';
+
 import {
   OWNER_FIELD,
   AlertCommentRequestRt,
@@ -39,7 +39,13 @@ import {
   ExternalReferenceNoSORt,
   PersistableStateAttachmentRt,
 } from '../../common/api';
+import { CASE_SAVED_OBJECT, NO_ASSIGNEES_FILTERING_KEYWORD } from '../../common/constants';
+import {
+  isCommentRequestTypeExternalReference,
+  isCommentRequestTypePersistableState,
+} from '../../common/utils/attachments';
 import { combineFilterWithAuthorizationFilter } from '../authorization/utils';
+import { SEVERITY_EXTERNAL_TO_ESMODEL, STATUS_EXTERNAL_TO_ESMODEL } from '../common/constants';
 import {
   getIDsAndIndicesAsArrays,
   isCommentRequestTypeAlert,
@@ -47,8 +53,6 @@ import {
   isCommentRequestTypeActions,
   assertUnreachable,
 } from '../common/utils';
-import type { SavedObjectFindOptionsKueryNode } from '../common/types';
-import type { CasesFindQueryParams } from './types';
 
 export const decodeCommentRequest = (comment: CommentRequest) => {
   if (isCommentRequestTypeUser(comment)) {
@@ -526,4 +530,28 @@ export const convertSortField = (sortField: string | undefined): SortFieldCase =
     default:
       return SortFieldCase.createdAt;
   }
+};
+
+export const constructSearchById = (
+  search: string,
+  spaceId: string,
+  savedObjectsSerializer: ISavedObjectsSerializer
+) => {
+  // import { version as uuidVersion, validate as uuidValidate } from 'uuid';
+  const uuidValidate = (foobar: string) => foobar.length === 36; // uuid length
+  const uuidVersion = (foobar: string) => 4;
+
+  if (search !== '' && uuidValidate(search) && uuidVersion(search) === 4) {
+    const rawId = savedObjectsSerializer.generateRawId(
+      spaceIdToNamespace(spaceId),
+      CASE_SAVED_OBJECT,
+      search
+    );
+
+    return {
+      search: `${search} ${rawId}`,
+      rootSearchFields: ['_id'],
+    };
+  }
+  return {};
 };

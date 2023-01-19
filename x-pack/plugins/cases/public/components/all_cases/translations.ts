@@ -64,7 +64,7 @@ export const INCIDENT_MANAGEMENT_SYSTEM = i18n.translate('xpack.cases.caseTable.
 });
 
 export const SEARCH_PLACEHOLDER = i18n.translate('xpack.cases.caseTable.searchPlaceholder', {
-  defaultMessage: 'e.g. case name',
+  defaultMessage: 'Search cases or case ID',
 });
 
 export const CLOSED = i18n.translate('xpack.cases.caseTable.closed', {

@@ -281,6 +281,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     describe('filtering', () => {
       const caseTitle = 'matchme';
+      const caseIds: string[] = [];
 
       before(async () => {
         await createUsersAndRoles(getService, users, roles);
@@ -288,14 +289,22 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         const profiles = await cases.api.suggestUserProfiles({ name: 'all', owners: ['cases'] });
 
-        await cases.api.createCase({
+        const case1 = await cases.api.createCase({
           title: caseTitle,
           tags: ['one'],
           description: 'lots of information about an incident',
         });
-        await cases.api.createCase({ title: 'test2', tags: ['two'] });
-        await cases.api.createCase({ title: 'test3', assignees: [{ uid: profiles[0].uid }] });
-        await cases.api.createCase({ title: 'test4', assignees: [{ uid: profiles[1].uid }] });
+        const case2 = await cases.api.createCase({ title: 'test2', tags: ['two'] });
+
+        await cases.api.createCase({ title: case2.id, assignees: [{ uid: profiles[0].uid }] });
+        await cases.api.createCase({
+          title: 'test4',
+          assignees: [{ uid: profiles[1].uid }],
+          description: case2.id,
+        });
+
+        caseIds.push(case1.id);
+        caseIds.push(case2.id);
 
         await header.waitUntilLoadingHasFinished();
         await cases.casesTable.waitForCasesToBeListed();
@@ -325,6 +334,30 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await input.pressKeys(browser.keys.ENTER);
 
         await cases.casesTable.validateCasesTableHasNthRows(1);
+        await testSubjects.click('clearSearchButton');
+        await cases.casesTable.validateCasesTableHasNthRows(4);
+      });
+
+      it('filters cases from the list using an id search', async () => {
+        await testSubjects.missingOrFail('cases-table-loading', { timeout: 5000 });
+
+        const input = await testSubjects.find('search-cases');
+        await input.type(caseIds[0]);
+        await input.pressKeys(browser.keys.ENTER);
+
+        await cases.casesTable.validateCasesTableHasNthRows(1);
+        await testSubjects.click('clearSearchButton');
+        await cases.casesTable.validateCasesTableHasNthRows(4);
+      });
+
+      it('id search also matches title and description', async () => {
+        await testSubjects.missingOrFail('cases-table-loading', { timeout: 5000 });
+
+        const input = await testSubjects.find('search-cases');
+        await input.type(caseIds[1]);
+        await input.pressKeys(browser.keys.ENTER);
+
+        await cases.casesTable.validateCasesTableHasNthRows(3);
         await testSubjects.click('clearSearchButton');
         await cases.casesTable.validateCasesTableHasNthRows(4);
       });

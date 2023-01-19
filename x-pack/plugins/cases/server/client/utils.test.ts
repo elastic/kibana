@@ -5,17 +5,21 @@
  * 2.0.
  */
 
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
+import { toElasticsearchQuery } from '@kbn/es-query';
+
+import { CaseStatuses } from '../../common';
+import { CaseSeverity } from '../../common/api';
+import { ESCaseSeverity, ESCaseStatus } from '../services/cases/types';
+import { createSavedObjectsSerializerMock } from './mocks';
 import {
   arraysDifference,
   buildNestedFilter,
   buildRangeFilter,
   constructQueryOptions,
+  constructSearchById,
   convertSortField,
 } from './utils';
-import { toElasticsearchQuery } from '@kbn/es-query';
-import { CaseStatuses } from '../../common';
-import { CaseSeverity } from '../../common/api';
-import { ESCaseSeverity, ESCaseStatus } from '../services/cases/types';
 
 describe('utils', () => {
   describe('convertSortField', () => {
@@ -914,6 +918,35 @@ describe('utils', () => {
           }
         `);
       });
+    });
+  });
+
+  describe('constructSearchById', () => {
+    const savedObjectsSerializer = createSavedObjectsSerializerMock();
+
+    it('handles uuid-v4 search terms correctly', () => {
+      const uuidv4 = '0d397548-30f7-4a7f-aa54-cfe1a38cb902';
+
+      expect(
+        constructSearchById(uuidv4, DEFAULT_NAMESPACE_STRING, savedObjectsSerializer)
+      ).toMatchInlineSnapshot(
+        `
+        Object {
+          "rootSearchFields": Array [
+            "_id",
+          ],
+          "search": "${uuidv4} cases:${uuidv4}",
+        }
+      `
+      );
+    });
+
+    it('handles non-uuid-v4 search terms correctly', () => {
+      const search = 'foobar';
+
+      expect(constructSearchById(search, DEFAULT_NAMESPACE_STRING, savedObjectsSerializer)).toEqual(
+        {}
+      );
     });
   });
 });

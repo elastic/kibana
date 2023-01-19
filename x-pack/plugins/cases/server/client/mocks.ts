@@ -7,11 +7,24 @@
 
 import type { PublicContract, PublicMethodsOf } from '@kbn/utility-types';
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { securityMock } from '@kbn/security-plugin/server/mocks';
+import type { ISavedObjectsSerializer } from '@kbn/core-saved-objects-server';
 
+import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client.mock';
 import { makeLensEmbeddableFactory } from '@kbn/lens-plugin/server/embeddable/make_lens_embeddable_factory';
+
 import type { CasesClient } from '.';
+import type { AttachmentsSubClient } from './attachments/client';
+import type { CasesSubClient } from './cases/client';
+import type { ConfigureSubClient } from './configure/client';
+import type { CasesClientFactory } from './factory';
+import type { MetricsSubClient } from './metrics/client';
+import type { UserActionsSubClient } from './user_actions/client';
+
+import {
+  createExternalReferenceAttachmentTypeRegistryMock,
+  createPersistableStateAttachmentTypeRegistryMock,
+} from '../attachment_framework/mocks';
 import { createAuthorizationMock } from '../authorization/mock';
 import {
   connectorMappingsServiceMock,
@@ -23,16 +36,6 @@ import {
   createUserActionServiceMock,
   createNotificationServiceMock,
 } from '../services/mocks';
-import type { AttachmentsSubClient } from './attachments/client';
-import type { CasesSubClient } from './cases/client';
-import type { ConfigureSubClient } from './configure/client';
-import type { CasesClientFactory } from './factory';
-import type { MetricsSubClient } from './metrics/client';
-import type { UserActionsSubClient } from './user_actions/client';
-import {
-  createExternalReferenceAttachmentTypeRegistryMock,
-  createPersistableStateAttachmentTypeRegistryMock,
-} from '../attachment_framework/mocks';
 
 type CasesSubClientMock = jest.Mocked<CasesSubClient>;
 
@@ -126,6 +129,23 @@ export const createCasesClientFactory = (): CasesClientFactoryMock => {
   return factory as unknown as CasesClientFactoryMock;
 };
 
+type SavedObjectsSerializerMock = jest.Mocked<ISavedObjectsSerializer>;
+
+export const createSavedObjectsSerializerMock = (): SavedObjectsSerializerMock => {
+  return {
+    isRawSavedObject: jest.fn(),
+    rawToSavedObject: jest.fn(),
+    savedObjectToRaw: jest.fn(),
+    generateRawId: jest
+      .fn()
+      .mockImplementation((namespace: string | undefined, type: string, id: string) => {
+        const namespacePrefix = namespace ? `${namespace}:` : '';
+        return `${namespacePrefix}${type}:${id}`;
+      }),
+    generateRawLegacyUrlAliasId: jest.fn(),
+  };
+};
+
 export const createCasesClientMockArgs = () => {
   return {
     services: {
@@ -159,5 +179,6 @@ export const createCasesClientMockArgs = () => {
         {}
       )
     ),
+    savedObjectsSerializer: createSavedObjectsSerializerMock(),
   };
 };

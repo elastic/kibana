@@ -214,6 +214,10 @@ export const CasesFindRequestRt = rt.partial({
    */
   searchFields: rt.union([rt.array(rt.string), rt.string]),
   /**
+   * The fields to perform the simple_query_string parsed query against
+   */
+  rootSearchFields: rt.array(rt.string),
+  /**
    * The field to use for sorting the found objects.
    *
    * This only supports, `create_at`, `closed_at`, and `status`
