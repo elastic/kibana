@@ -27,12 +27,76 @@
         "parentPluginId": "@kbn/core-saved-objects-browser-mocks",
         "id": "def-common.savedObjectsServiceMock",
         "type": "Object",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "savedObjectsServiceMock",
         "description": [],
         "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "@kbn/core-lifecycle-browser-mocks",
+            "path": "packages/core/lifecycle/core-lifecycle-browser-mocks/src/core_start.mock.ts"
+          },
+          {
+            "plugin": "@kbn/core-lifecycle-browser-mocks",
+            "path": "packages/core/lifecycle/core-lifecycle-browser-mocks/src/core_start.mock.ts"
+          },
+          {
+            "plugin": "core",
+            "path": "src/core/public/mocks.ts"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/application/services/dashboard_service.test.ts"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/application/services/dashboard_service.test.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/services/dashboard_saved_object/dashboard_saved_object.stub.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/services/dashboard_saved_object/dashboard_saved_object.stub.ts"
+          },
+          {
+            "plugin": "dataViews",
+            "path": "src/plugins/data_views/public/saved_objects_client_wrapper.test.ts"
+          },
+          {
+            "plugin": "dataViews",
+            "path": "src/plugins/data_views/public/saved_objects_client_wrapper.test.ts"
+          },
+          {
+            "plugin": "savedSearch",
+            "path": "src/plugins/saved_search/public/services/saved_searches/get_saved_searches.test.ts"
+          },
+          {
+            "plugin": "savedSearch",
+            "path": "src/plugins/saved_search/public/services/saved_searches/get_saved_searches.test.ts"
+          },
+          {
+            "plugin": "savedSearch",
+            "path": "src/plugins/saved_search/public/services/saved_searches/save_saved_searches.test.ts"
+          },
+          {
+            "plugin": "savedSearch",
+            "path": "src/plugins/saved_search/public/services/saved_searches/save_saved_searches.test.ts"
+          },
+          {
+            "plugin": "@kbn/core-plugins-browser-internal",
+            "path": "packages/core/plugins/core-plugins-browser-internal/src/plugins_service.test.ts"
+          },
+          {
+            "plugin": "@kbn/core-plugins-browser-internal",
+            "path": "packages/core/plugins/core-plugins-browser-internal/src/plugins_service.test.ts"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-browser-mocks",
@@ -81,12 +145,44 @@
         "parentPluginId": "@kbn/core-saved-objects-browser-mocks",
         "id": "def-common.simpleSavedObjectMock",
         "type": "Object",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "simpleSavedObjectMock",
         "description": [],
         "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "core",
+            "path": "src/core/public/mocks.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/persistence/saved_objects_utils/find_object_by_title.test.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/persistence/saved_objects_utils/find_object_by_title.test.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/find_object_by_title.test.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/find_object_by_title.test.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/utils/saved_objects_utils/find_object_by_title.test.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/utils/saved_objects_utils/find_object_by_title.test.ts"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-browser-mocks",
