@@ -5,19 +5,18 @@
  * 2.0.
  */
 
-import type { TimelineItem } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/bulk_actions/components/toolbar';
 import type { BulkActionsConfig } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { useCallback } from 'react';
+import type { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { APM_USER_INTERACTIONS } from '../../../common/lib/apm/constants';
+import { useUpdateAlertsStatus } from '../../../common/components/toolbar/bulk_actions/use_update_alerts';
+import { useSourcererDataView } from '../../../common/containers/sourcerer';
+import { useAppToasts } from '../../../common/hooks/use_app_toasts';
+import { useStartTransaction } from '../../../common/lib/apm/use_start_transaction';
+import type { AlertWorkflowStatus } from '../../../common/types';
 import { FILTER_CLOSED, FILTER_OPEN, FILTER_ACKNOWLEDGED } from '../../../../common/types';
-import { getUpdateAlertsQuery } from '../../components/toolbar/bulk_actions/use_bulk_action_items';
-import { useUpdateAlertsStatus } from '../../components/toolbar/bulk_actions/use_update_alerts';
-import { useSourcererDataView } from '../../containers/sourcerer';
-import { useAppToasts } from '../../hooks/use_app_toasts';
-import type { SourcererScopeName } from '../../store/sourcerer/model';
-import type { AlertWorkflowStatus } from '../../types';
-import { APM_USER_INTERACTIONS } from '../apm/constants';
-import { useStartTransaction } from '../apm/use_start_transaction';
-import * as i18n from './translations';
+import * as i18n from '../translations';
+import { getUpdateAlertsQuery } from '../../components/alerts_table/actions';
 
 interface UseBulkAlertActionItemsArgs {
   scopeId: SourcererScopeName;
@@ -80,8 +79,10 @@ export const useBulkAlertActionItems = ({ scopeId }: UseBulkAlertActionItemsArgs
   const getOnAction = useCallback(
     (status: AlertWorkflowStatus) => {
       const onActionClick: BulkActionsConfig['onClick'] = async (
-        items: TimelineItem[],
-        isSelectAllChecked: boolean,
+        items,
+        isSelectAllChecked,
+        setLoading,
+        clearSelection,
         refresh
       ) => {
         if (query) {
@@ -95,18 +96,16 @@ export const useBulkAlertActionItems = ({ scopeId }: UseBulkAlertActionItemsArgs
         const ids = items.map((item) => item._id);
 
         try {
-          // setEventsLoading({ eventIds, isLoading: true });
-
+          setLoading(true);
           const response = await updateAlertStatus({
             index: selectedPatterns.join(','),
             status,
             query: getUpdateAlertsQuery(ids),
           });
 
+          setLoading(false);
           refresh();
-
-          // TODO: Only delete those that were successfully updated from updatedRules
-          // setEventsDeleted({ eventIds, isDeleted: true });
+          clearSelection();
 
           if (response.version_conflicts && items.length === 1) {
             throw new Error(i18n.BULK_ACTION_FAILED_SINGLE_ALERT);

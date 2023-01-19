@@ -38,6 +38,7 @@ type Props = EuiDataGridCellValueElementProps & {
   setEventsLoading: SetEventsLoading;
   setEventsDeleted: SetEventsDeleted;
   pageRowIndex: number;
+  refetch?: () => void;
 };
 
 const RowActionComponent = ({
@@ -59,6 +60,7 @@ const RowActionComponent = ({
   setEventsLoading,
   setEventsDeleted,
   width,
+  refetch,
 }: Props) => {
   const { data: timelineNonEcsData, ecs: ecsData, _id: eventId, _index: indexName } = data;
 
@@ -134,6 +136,7 @@ const RowActionComponent = ({
           width={width}
           setEventsLoading={setEventsLoading}
           setEventsDeleted={setEventsDeleted}
+          refetch={refetch}
         />
       )}
     </>

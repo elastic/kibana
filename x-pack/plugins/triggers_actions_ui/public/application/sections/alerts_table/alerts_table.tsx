@@ -50,14 +50,15 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     isLoading,
     onPageChange,
     onSortChange,
-    refresh,
     sort: sortingFields,
+    refresh: alertsRefresh,
   } = alertsData;
   const { sortingColumns, onSort } = useSorting(onSortChange, sortingFields);
 
   const { renderCustomActionsRow, actionsColumnWidth, getSetIsActionLoadingCallback } =
     useActionsColumn({
       options: props.alertsTableConfiguration.useActionsColumn,
+      params: [ecsAlertsData, oldAlertsData],
     });
 
   const {
@@ -66,11 +67,17 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     bulkActionsState,
     bulkActions,
     setIsBulkActionsLoading,
+    clearSelection,
   } = useBulkActions({
     alerts,
     query: props.query,
     useBulkActionsConfig: props.alertsTableConfiguration.useBulkActions,
   });
+
+  const refresh = useCallback(() => {
+    alertsRefresh();
+    clearSelection();
+  }, [alertsRefresh, clearSelection]);
 
   const {
     pagination,
@@ -118,12 +125,12 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       onToggleColumn,
       onResetColumns,
       browserFields,
-      refresh,
       controls: props.controls,
       setIsBulkActionsLoading,
+      clearSelection,
+      refresh,
     });
   }, [
-    refresh,
     bulkActionsState,
     bulkActions,
     alertsCount,
@@ -136,6 +143,8 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     browserFields,
     props.controls,
     setIsBulkActionsLoading,
+    clearSelection,
+    refresh,
   ])();
 
   const leadingControlColumns = useMemo(() => {
@@ -189,6 +198,8 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
                     id: props.id,
                     cveProps,
                     setIsActionLoading: getSetIsActionLoadingCallback(visibleRowIndex),
+                    refresh,
+                    clearSelection,
                   })}
               </EuiFlexGroup>
             );
@@ -216,6 +227,8 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     renderCustomActionsRow,
     setFlyoutAlertIndex,
     getSetIsActionLoadingCallback,
+    refresh,
+    clearSelection,
   ]);
 
   useEffect(() => {

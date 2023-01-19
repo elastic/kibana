@@ -530,8 +530,9 @@ export interface BulkActionsConfig {
   onClick: (
     selectedIds: TimelineItem[],
     isAllSelected: boolean,
-    refresh: () => void,
-    setIsBulkActionsLoading: (isLoading: boolean) => void
+    setIsBulkActionsLoading: (isLoading: boolean) => void,
+    clearSelection: () => void,
+    refresh: () => void
   ) => void | Promise<void>;
 }
 
@@ -559,6 +560,8 @@ export interface RenderCustomActionsRowArgs {
   setFlyoutAlert: (data: unknown) => void;
   id?: string;
   setIsActionLoading?: (isLoading: boolean) => void;
+  refresh: () => void;
+  clearSelection: () => void;
 }
 
 export type UseActionsColumnRegistry = () => {

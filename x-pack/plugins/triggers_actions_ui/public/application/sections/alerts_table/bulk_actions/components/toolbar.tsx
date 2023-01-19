@@ -19,8 +19,9 @@ interface BulkActionsProps {
   totalItems: number;
   items: BulkActionsConfig[];
   alerts: EcsFieldsResponse[];
-  refresh: () => void;
   setIsBulkActionsLoading: (loading: boolean) => void;
+  clearSelection: () => void;
+  refresh: () => void;
 }
 
 // Duplicated just for legacy reasons. Timelines plugin will be removed but
@@ -64,8 +65,13 @@ const selectedIdsToTimelineItemMapper = (
 const useBulkActionsToMenuItemMapper = (
   items: BulkActionsConfig[],
   alerts: EcsFieldsResponse[],
-  refresh: () => void,
-  setIsBulkActionsLoading: (loading: boolean) => void
+  // in case the action takes time, client can set the alerts to a loading
+  // state and back when done
+  setIsBulkActionsLoading: BulkActionsProps['setIsBulkActionsLoading'],
+  // Once the bulk action has been completed, it can set the selection to false.
+  clearSelection: BulkActionsProps['clearSelection'],
+  // In case bulk item action changes the alert data and need to refresh table page.
+  refresh: BulkActionsProps['refresh']
 ) => {
   const [{ isAllSelected, rowSelection }] = useContext(BulkActionsContext);
 
@@ -80,14 +86,20 @@ const useBulkActionsToMenuItemMapper = (
             disabled={isDisabled}
             onClick={() => {
               const selectedAlertIds = selectedIdsToTimelineItemMapper(alerts, rowSelection);
-              item.onClick(selectedAlertIds, isAllSelected, refresh, setIsBulkActionsLoading);
+              item.onClick(
+                selectedAlertIds,
+                isAllSelected,
+                setIsBulkActionsLoading,
+                clearSelection,
+                refresh
+              );
             }}
           >
             {isDisabled && item.disabledLabel ? item.disabledLabel : item.label}
           </EuiContextMenuItem>
         );
       }),
-    [alerts, isAllSelected, items, rowSelection, refresh, setIsBulkActionsLoading]
+    [alerts, isAllSelected, items, rowSelection, setIsBulkActionsLoading, clearSelection, refresh]
   );
 
   return bulkActionsItems;
@@ -97,8 +109,9 @@ const BulkActionsComponent: React.FC<BulkActionsProps> = ({
   totalItems,
   items,
   alerts,
-  refresh,
   setIsBulkActionsLoading,
+  clearSelection,
+  refresh,
 }) => {
   const [{ rowSelection, isAllSelected }, updateSelectedRows] = useContext(BulkActionsContext);
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
@@ -107,8 +120,9 @@ const BulkActionsComponent: React.FC<BulkActionsProps> = ({
   const bulkActionItems = useBulkActionsToMenuItemMapper(
     items,
     alerts,
-    refresh,
-    setIsBulkActionsLoading
+    setIsBulkActionsLoading,
+    clearSelection,
+    refresh
   );
 
   useEffect(() => {

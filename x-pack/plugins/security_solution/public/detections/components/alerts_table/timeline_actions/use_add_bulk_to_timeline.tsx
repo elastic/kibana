@@ -10,7 +10,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import type { Filter } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
-import type { TableId } from '../../../../../common/types';
+import type { BulkActionsConfig } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { TableId } from '../../../../../common/types';
 import { combineQueries } from '../../../../common/lib/kuery';
 import { useKibana } from '../../../../common/lib/kibana';
 import { BULK_ADD_TO_TIMELINE_LIMIT } from '../../../../../common/constants';
@@ -181,52 +182,49 @@ export const useAddBulkToTimelineAction = ({
     [dispatch, createTimeline, selectedEventIds, tableId]
   );
 
-  const onResponseHandler = useCallback(
-    (localResponse: TimelineArgs) => {
-      sendBulkEventsToTimelineHandler(localResponse.events);
-      dispatch(
-        setEventsLoading({
-          id: tableId,
-          isLoading: false,
-          eventIds: Object.keys(selectedEventIds),
-        })
-      );
-    },
-    [dispatch, sendBulkEventsToTimelineHandler, tableId, selectedEventIds]
-  );
-
-  const onActionClick = useCallback(
-    (items: TimelineItem[] | undefined, isAllSelected?: boolean) => {
+  const onActionClick: BulkActionsConfig['onClick'] = useCallback(
+    (items: TimelineItem[] | undefined, isAllSelected: boolean, setLoading, clearSelection) => {
       if (!items) return;
       /*
        * Trigger actions table passed isAllSelected param
        *
        * and selectAll is used when using DataTable
        * */
+      const onResponseHandler = (localResponse: TimelineArgs) => {
+        sendBulkEventsToTimelineHandler(localResponse.events);
+        if (tableId === TableId.alertsOnAlertsPage) {
+          setLoading(false);
+          clearSelection();
+        } else {
+          dispatch(
+            setEventsLoading({
+              id: tableId,
+              isLoading: false,
+              eventIds: Object.keys(selectedEventIds),
+            })
+          );
+        }
+      };
 
       if (isAllSelected || selectAll) {
-        dispatch(
-          setEventsLoading({
-            id: tableId,
-            isLoading: true,
-            eventIds: Object.keys(selectedEventIds),
-          })
-        );
+        if (tableId === TableId.alertsOnAlertsPage) {
+          setLoading(true);
+        } else {
+          dispatch(
+            setEventsLoading({
+              id: tableId,
+              isLoading: true,
+              eventIds: Object.keys(selectedEventIds),
+            })
+          );
+        }
         searchhandler(onResponseHandler);
         return;
       }
-
       sendBulkEventsToTimelineHandler(items);
+      clearSelection();
     },
-    [
-      dispatch,
-      selectedEventIds,
-      tableId,
-      searchhandler,
-      selectAll,
-      onResponseHandler,
-      sendBulkEventsToTimelineHandler,
-    ]
+    [dispatch, selectedEventIds, tableId, searchhandler, selectAll, sendBulkEventsToTimelineHandler]
   );
 
   const investigateInTimelineTitle = useMemo(() => {

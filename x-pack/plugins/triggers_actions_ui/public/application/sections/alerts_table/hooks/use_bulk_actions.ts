@@ -31,6 +31,7 @@ export interface UseBulkActions {
   bulkActionsState: BulkActionsState;
   bulkActions: BulkActionsConfig[];
   setIsBulkActionsLoading: (isLoading: boolean) => void;
+  clearSelection: () => void;
 }
 
 export function useBulkActions({
@@ -51,11 +52,16 @@ export function useBulkActions({
     updateBulkActionsState({ action: BulkActionsVerbs.updateAllLoadingState, isLoading });
   };
 
+  const clearSelection = () => {
+    updateBulkActionsState({ action: BulkActionsVerbs.clear });
+  };
+
   return {
     isBulkActionsColumnActive,
     getBulkActionsLeadingControlColumn,
     bulkActionsState,
     bulkActions,
     setIsBulkActionsLoading,
+    clearSelection,
   };
 }

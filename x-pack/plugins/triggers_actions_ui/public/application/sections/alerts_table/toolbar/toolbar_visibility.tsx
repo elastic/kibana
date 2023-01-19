@@ -89,9 +89,10 @@ export const getToolbarVisibility = ({
   onToggleColumn,
   onResetColumns,
   browserFields,
-  refresh,
   setIsBulkActionsLoading,
+  clearSelection,
   controls,
+  refresh,
 }: {
   bulkActions: BulkActionsConfig[];
   alertsCount: number;
@@ -103,9 +104,10 @@ export const getToolbarVisibility = ({
   onToggleColumn: (columnId: string) => void;
   onResetColumns: () => void;
   browserFields: any;
-  refresh: () => void;
   setIsBulkActionsLoading: (isLoading: boolean) => void;
+  clearSelection: () => void;
   controls?: EuiDataGridToolBarAdditionalControlsOptions;
+  refresh: () => void;
 }): EuiDataGridToolBarVisibilityOptions => {
   const selectedRowsCount = rowSelection.size;
   const defaultVisibility = getDefaultVisibility({
@@ -136,8 +138,9 @@ export const getToolbarVisibility = ({
                 totalItems={alertsCount}
                 items={bulkActions}
                 alerts={alerts}
-                refresh={refresh}
                 setIsBulkActionsLoading={setIsBulkActionsLoading}
+                clearSelection={clearSelection}
+                refresh={refresh}
               />
             </Suspense>
           </>
