@@ -21,10 +21,14 @@ import {
   DeleteEnginesApiLogicActions,
 } from '../../api/engines/delete_engines_api_logic';
 
+import { FetchEngineApiLogic } from '../../api/engines/fetch_engine_api_logic';
 import {
   EnginesListAPIArguments,
   FetchEnginesAPILogic,
 } from '../../api/engines/fetch_engines_api_logic';
+import {} from '../engine/engine_indices_logic';
+
+import { EngineViewActions, EngineViewLogic, EngineViewValues } from '../engine/engine_view_logic';
 
 import { DEFAULT_META, Meta, updateMetaPageIndex } from './types';
 
@@ -48,6 +52,10 @@ type EnginesListActions = Pick<
 
   onPaginate(args: EuiBasicTableOnChange): { pageNumber: number };
   openDeleteEngineModal: (engine: EnterpriseSearchEngine) => { engine: EnterpriseSearchEngine };
+
+  closeFetchIndicesFlyout(): void;
+  openFetchEngineFlyout: (engineName: string) => { engineName: string };
+  fetchEngineData: EngineViewActions['fetchEngine'] | null;
 };
 interface EngineListValues {
   data: typeof FetchEnginesAPILogic.values.data;
@@ -61,6 +69,12 @@ interface EngineListValues {
   parameters: { meta: Meta; searchQuery?: string }; // Added this variable to store to the search Query value as well
   results: EnterpriseSearchEngine[]; // stores engine list value from data
   status: typeof FetchEnginesAPILogic.values.status;
+  isFetchEngineLoading: EngineViewValues['isLoadingEngine'];
+  isFetchEngineFlyoutVisible: boolean;
+  fetchEngineData: EngineViewValues['engineData']; // data from fetchEngineAPI
+  fetchEngineName: string | null;
+  fetchEngineApiError?: EngineViewValues['fetchEngineApiError'];
+  fetchEngineApiStatus: EngineViewValues['fetchEngineApiStatus'];
 }
 
 export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListActions>>({
@@ -70,12 +84,20 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
       ['makeRequest', 'apiSuccess', 'apiError'],
       DeleteEngineAPILogic,
       ['apiSuccess as deleteSuccess', 'makeRequest as deleteEngine', 'apiError as deleteError'],
+      EngineViewLogic,
+      ['fetchEngine as fetchEngine'],
     ],
     values: [
       FetchEnginesAPILogic,
       ['data', 'status'],
       DeleteEngineAPILogic,
       ['status as deleteStatus'],
+      EngineViewLogic,
+      [
+        'engineData as fetchEngineData',
+        'fetchEngineApiError as fetchEngineApiError',
+        'fetchEngineApiStatus as fetchEngineApiStatus',
+      ],
     ],
   },
   actions: {
@@ -86,6 +108,9 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
     }),
     onPaginate: (args: EuiBasicTableOnChange) => ({ pageNumber: args.page.index }),
     openDeleteEngineModal: (engine) => ({ engine }),
+
+    closeFetchIndicesFlyout: true,
+    openFetchEngineFlyout: (engineName) => ({ engineName }),
   },
   path: ['enterprise_search', 'content', 'engine_list_logic'],
   reducers: ({}) => ({
@@ -96,6 +121,13 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
         openDeleteEngineModal: (_, { engine }) => engine,
       },
     ],
+    fetchEngineName: [
+      null,
+      {
+        closeFetchIndicesFlyout: () => null,
+        openFetchEngineFlyout: (_, { engineName }) => engineName,
+      },
+    ],
     isDeleteModalVisible: [
       false,
       {
@@ -103,6 +135,14 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
         openDeleteEngineModal: () => true,
       },
     ],
+    isFetchEngineFlyoutVisible: [
+      false,
+      {
+        closeFetchIndicesFlyout: () => false,
+        openFetchEngineFlyout: () => true,
+      },
+    ],
+
     parameters: [
       { meta: DEFAULT_META },
       {
@@ -118,9 +158,14 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
   }),
   selectors: ({ selectors }) => ({
     deleteModalEngineName: [() => [selectors.deleteModalEngine], (engine) => engine?.name ?? ''],
+
     isDeleteLoading: [
       () => [selectors.deleteStatus],
       (status: EngineListValues['deleteStatus']) => [Status.LOADING].includes(status),
+    ],
+    isFetchEngineLoading: [
+      () => [selectors.fetchEngineApiStatus],
+      (status: EngineListValues['fetchEngineApiStatus']) => [Status.LOADING].includes(status),
     ],
     isLoading: [
       () => [selectors.status],
@@ -136,6 +181,9 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
     },
     fetchEngines: async (input) => {
       actions.makeRequest(input);
+    },
+    openFetchEngineFlyout: async (input) => {
+      FetchEngineApiLogic.actions.makeRequest(input);
     },
   }),
 });

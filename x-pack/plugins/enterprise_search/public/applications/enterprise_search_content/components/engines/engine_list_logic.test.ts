@@ -22,8 +22,14 @@ const DEFAULT_VALUES = {
   deleteModalEngine: null,
   deleteModalEngineName: '',
   deleteStatus: Status.IDLE,
+  fetchEngineData: undefined,
+  fetchEngineApiError: undefined,
+  fetchEngineApiStatus: Status.IDLE,
+  fetchEngineName: null,
   isDeleteLoading: false,
   isDeleteModalVisible: false,
+  isFetchEngineFlyoutVisible: false,
+  isFetchEngineLoading: false,
   isLoading: false,
   meta: DEFAULT_META,
   parameters: { meta: DEFAULT_META },
@@ -121,6 +127,24 @@ describe('EnginesListLogic', () => {
           deleteModalEngine: results[0],
           deleteModalEngineName: 'engine-name-1',
           isDeleteModalVisible: true,
+        });
+      });
+    });
+    describe('closeFetchEngineIndicesFlyout', () => {
+      it('set isFetchEngineFlyoutVisible to false and fetchEngineName to empty string', () => {
+        EnginesListLogic.actions.closeFetchIndicesFlyout();
+        expect(EnginesListLogic.values).toEqual(DEFAULT_VALUES);
+      });
+    });
+    describe('openFetchEngineIndicesFlyout', () => {
+      it('set isFetchEngineFlyoutVisible to true and sets fetchEngineName to engine name', () => {
+        EnginesListLogic.actions.openFetchEngineFlyout('engine-name');
+        expect(EnginesListLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          isFetchEngineFlyoutVisible: true,
+          fetchEngineName: 'engine-name',
+          isFetchEngineLoading: true,
+          fetchEngineApiStatus: Status.LOADING,
         });
       });
     });

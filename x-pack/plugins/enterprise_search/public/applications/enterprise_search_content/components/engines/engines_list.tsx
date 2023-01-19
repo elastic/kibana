@@ -16,17 +16,22 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
 
 import { INPUT_THROTTLE_DELAY_MS } from '../../../shared/constants/timers';
+import { Status } from '../../../../../common/types/api';
+
 import { DataPanel } from '../../../shared/data_panel/data_panel';
 
+import { EngineError } from '../engine/engine_error';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
 import { EnginesListTable } from './components/tables/engines_table';
-import { DeleteEngineModal } from './delete_engine_modal';
+import { EngineListIndicesFlyout } from './engines_list_indices_flyout';
 import { EnginesListLogic } from './engines_list_logic';
+import { DeleteEngineModal } from './delete_engine_modal';
 
 export const EnginesList: React.FC = () => {
-  const { fetchEngines, onPaginate, openDeleteEngineModal } = useActions(EnginesListLogic);
-  const { meta, results } = useValues(EnginesListLogic);
+  const { fetchEngines, onPaginate, openDeleteEngineModal, openFetchEngineFlyout } =
+    useActions(EnginesListLogic);
+  const { meta, results, fetchEngineApiError, fetchEngineApiStatus } = useValues(EnginesListLogic);
   const [searchQuery, setSearchValue] = useState('');
   const throttledSearchQuery = useThrottle(searchQuery, INPUT_THROTTLE_DELAY_MS);
 
@@ -37,9 +42,30 @@ export const EnginesList: React.FC = () => {
     });
   }, [meta.from, meta.size, throttledSearchQuery]);
 
+  if (fetchEngineApiStatus === Status.ERROR) {
+    return (
+      <EnterpriseSearchContentPageTemplate
+        isEmptyState
+        pageChrome={[
+          i18n.translate('xpack.enterpriseSearch.content.engines.breadcrumb', {
+            defaultMessage: 'Engines',
+          }),
+        ]}
+        pageHeader={{
+          pageTitle: i18n.translate('xpack.enterpriseSearch.content.engines.title', {
+            defaultMessage: 'Engines',
+          }),
+          rightSideItems: [],
+        }}
+        pageViewTelemetry="Engines"
+        emptyState={<EngineError error={fetchEngineApiError} />}
+      />
+    );
+  }
   return (
     <>
       <DeleteEngineModal />
+      <EngineListIndicesFlyout />
       <EnterpriseSearchContentPageTemplate
         pageChrome={[
           i18n.translate('xpack.enterpriseSearch.content.engines.breadcrumb', {
@@ -152,6 +178,7 @@ export const EnginesList: React.FC = () => {
             meta={meta}
             onChange={onPaginate}
             onDelete={openDeleteEngineModal}
+            viewEngineIndices={openFetchEngineFlyout}
             loading={false}
           />
         </DataPanel>
