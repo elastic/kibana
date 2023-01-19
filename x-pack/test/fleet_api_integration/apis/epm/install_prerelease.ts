@@ -40,20 +40,64 @@ export default function (providerContext: FtrProviderContext) {
         .expect(200);
     });
 
-    describe('installs GA package that has a prerelease version', async () => {
-      const pkg = 'endpoint';
-      const version = '8.6.1';
+    const pkg = 'endpoint';
+    const gaVersion = '8.6.1';
+    const betaVersion = '8.7.0-next';
 
-      it('should install the GA package correctly', async function () {
-        const response = await supertest
-          .post(`/api/fleet/epm/packages/${pkg}/${version}`)
-          .set('kbn-xsrf', 'xxxx')
-          .expect(200);
+    afterEach(async () => {
+      await deletePackage(pkg, gaVersion);
+      await deletePackage(pkg, betaVersion);
+    });
 
-        expect(response.body.items.find((item: any) => item.id.includes(version)));
+    it('should install the GA package correctly', async function () {
+      const response = await supertest
+        .post(`/api/fleet/epm/packages/${pkg}/${gaVersion}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ force: true })
+        .expect(200);
 
-        await deletePackage(pkg, version);
-      });
+      expect(response.body.items.find((item: any) => item.id.includes(gaVersion)));
+    });
+
+    it('should install the GA package when no version is provided', async function () {
+      const response = await supertest
+        .post(`/api/fleet/epm/packages/${pkg}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ force: true })
+        .expect(200);
+
+      expect(response.body.items.find((item: any) => item.id.includes(gaVersion)));
+    });
+
+    // skipping in 8.6 branch as the 8.7 beta package is not available here
+    it.skip('should install the beta package when no version is provided and prerelease is true', async function () {
+      const response = await supertest
+        .post(`/api/fleet/epm/packages/${pkg}?prerelease=true`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ force: true }) // using force to ignore package verification error
+        .expect(200);
+
+      expect(response.body.items.find((item: any) => item.id.includes(betaVersion)));
+    });
+
+    it.skip('should bulk install the beta packages when prerelease is true', async function () {
+      const response = await supertest
+        .post(`/api/fleet/epm/packages/_bulk?prerelease=true`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ packages: ['endpoint'], force: true })
+        .expect(200);
+
+      expect(response.body.items[0].version).equal(betaVersion);
+    });
+
+    it('should bulk install the GA packages when prerelease is not set', async function () {
+      const response = await supertest
+        .post(`/api/fleet/epm/packages/_bulk`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ packages: ['endpoint'], force: true })
+        .expect(200);
+
+      expect(response.body.items[0].version).equal(gaVersion);
     });
   });
 }

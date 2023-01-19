@@ -34,6 +34,13 @@ get:
       name: pkgkey
       in: path
       required: true
+    - in: query 
+      name: prerelease
+      schema:
+        type: boolean
+        default: false
+      description: >-
+        Whether to return prerelease versions of packages (e.g. beta, rc, preview) 
   deprecated: true
 post:
   summary: Packages - Install
