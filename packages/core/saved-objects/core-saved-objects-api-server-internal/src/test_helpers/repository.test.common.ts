@@ -52,7 +52,9 @@ import { DocumentMigrator } from '@kbn/core-saved-objects-migration-server-inter
 import {
   AuthorizeAndRedactInternalBulkResolveParams,
   AuthorizeBulkCreateParams,
+  AuthorizeBulkDeleteParams,
   AuthorizeBulkUpdateParams,
+  AuthorizeDeleteParams,
   AuthorizeUpdateSpacesParams,
 } from '@kbn/core-saved-objects-server/src/extensions/security';
 import { mockGetSearchDsl } from '../lib/repository.test.mock';
@@ -299,6 +301,30 @@ export const setupAuthorizeBulkUpdate = (
 ) => {
   mockSecurityExt.authorizeBulkUpdate.mockImplementation(
     (params: AuthorizeBulkUpdateParams): Promise<CheckAuthorizationResult<string>> => {
+      if (status === 'unauthorized') throw enforceError;
+      return Promise.resolve({ status, typeMap: authMap });
+    }
+  );
+};
+
+export const setupAuthorizeDelete = (
+  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>,
+  status: 'fully_authorized' | 'partially_authorized' | 'unauthorized'
+) => {
+  mockSecurityExt.authorizeDelete.mockImplementation(
+    (params: AuthorizeDeleteParams): Promise<CheckAuthorizationResult<string>> => {
+      if (status === 'unauthorized') throw enforceError;
+      return Promise.resolve({ status, typeMap: authMap });
+    }
+  );
+};
+
+export const setupAuthorizeBulkDelete = (
+  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>,
+  status: 'fully_authorized' | 'partially_authorized' | 'unauthorized'
+) => {
+  mockSecurityExt.authorizeBulkDelete.mockImplementation(
+    (params: AuthorizeBulkDeleteParams): Promise<CheckAuthorizationResult<string>> => {
       if (status === 'unauthorized') throw enforceError;
       return Promise.resolve({ status, typeMap: authMap });
     }

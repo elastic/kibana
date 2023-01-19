@@ -72,6 +72,8 @@ import {
   setupAuthorizeUpdate,
   setupAuthorizeBulkUpdate,
   setupAuthorizeBulkCreate,
+  setupAuthorizeDelete,
+  setupAuthorizeBulkDelete,
 } from '../test_helpers/repository.test.common';
 import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
 
@@ -256,7 +258,22 @@ describe('SavedObjectsRepository Security Extension', () => {
       expect(mockSecurityExt.authorizeUpdate).toHaveBeenCalledTimes(1);
     });
 
-    test(`returns result when authorized`, async () => {
+    test(`returns result when partially authorized`, async () => {
+      setupAuthorizeUpdate(mockSecurityExt, 'partially_authorized');
+      setupRedactPassthrough(mockSecurityExt);
+
+      const result = await updateSuccess(client, repository, registry, type, id, attributes, {
+        namespace,
+      });
+
+      expect(mockSecurityExt.authorizeUpdate).toHaveBeenCalledTimes(1);
+      expect(client.update).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(
+        expect.objectContaining({ id, type, attributes, namespaces: [namespace] })
+      );
+    });
+
+    test(`returns result when fully authorized`, async () => {
       setupAuthorizeUpdate(mockSecurityExt, 'fully_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
@@ -336,7 +353,27 @@ describe('SavedObjectsRepository Security Extension', () => {
       expect(mockSecurityExt.authorizeCreate).toHaveBeenCalledTimes(1);
     });
 
-    test(`returns result when authorized`, async () => {
+    test(`returns result when partially authorized`, async () => {
+      setupAuthorizeCreate(mockSecurityExt, 'partially_authorized');
+      setupRedactPassthrough(mockSecurityExt);
+
+      const result = await repository.create(type, attributes, {
+        namespace,
+      });
+
+      expect(mockSecurityExt.authorizeCreate).toHaveBeenCalledTimes(1);
+      expect(client.create).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(
+        expect.objectContaining({
+          id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
+          type,
+          attributes,
+          namespaces: [namespace],
+        })
+      );
+    });
+
+    test(`returns result when fully authorized`, async () => {
       setupAuthorizeCreate(mockSecurityExt, 'fully_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
@@ -429,98 +466,62 @@ describe('SavedObjectsRepository Security Extension', () => {
       mockDeleteLegacyUrlAliases.mockClear();
     });
 
-    test(`propagates decorated error when authorize rejects promise`, async () => {
-      mockSecurityExt.authorize.mockRejectedValueOnce(checkAuthError);
+    test(`propagates decorated error when authorizeDelete rejects promise`, async () => {
+      mockSecurityExt.authorizeDelete.mockRejectedValueOnce(checkAuthError);
       await expect(
         deleteSuccess(client, repository, registry, type, id, { namespace })
       ).rejects.toThrow(checkAuthError);
-      expect(mockSecurityExt.authorize).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeDelete).toHaveBeenCalledTimes(1);
     });
 
     test(`propagates decorated error when unauthorized`, async () => {
-      setupAuthorizeEnforceFailure(mockSecurityExt);
+      setupAuthorizeDelete(mockSecurityExt, 'unauthorized');
 
       await expect(
         deleteSuccess(client, repository, registry, type, id, { namespace })
       ).rejects.toThrow(enforceError);
 
-      expect(mockSecurityExt.authorize).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeDelete).toHaveBeenCalledTimes(1);
     });
 
-    test(`returns empty object result when authorized`, async () => {
-      setupAuthorizeFullyAuthorized(mockSecurityExt);
+    test(`returns empty object result when partially authorized`, async () => {
+      setupAuthorizeDelete(mockSecurityExt, 'partially_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const result = await deleteSuccess(client, repository, registry, type, id, {
         namespace,
       });
 
-      expect(mockSecurityExt.authorize).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeDelete).toHaveBeenCalledTimes(1);
       expect(client.delete).toHaveBeenCalledTimes(1);
       expect(result).toEqual({});
     });
 
-    test(`calls authorize with correct actions, types, spaces, and enforce map`, async () => {
-      await deleteSuccess(client, repository, registry, MULTI_NAMESPACE_CUSTOM_INDEX_TYPE, id, {
+    test(`returns empty object result when fully authorized`, async () => {
+      setupAuthorizeDelete(mockSecurityExt, 'fully_authorized');
+      setupRedactPassthrough(mockSecurityExt);
+
+      const result = await deleteSuccess(client, repository, registry, type, id, {
+        namespace,
+      });
+
+      expect(mockSecurityExt.authorizeDelete).toHaveBeenCalledTimes(1);
+      expect(client.delete).toHaveBeenCalledTimes(1);
+      expect(result).toEqual({});
+    });
+
+    test(`calls authorizeDelete with correct parameters`, async () => {
+      await deleteSuccess(client, repository, registry, type, id, {
         namespace,
         force: true,
       });
 
-      expect(mockSecurityExt.authorize).toHaveBeenCalledTimes(1);
-      const expectedActions = new Set([SecurityAction.DELETE]);
-      const expectedSpaces = new Set([namespace]);
-      const expectedTypes = new Set([MULTI_NAMESPACE_CUSTOM_INDEX_TYPE]);
-      const expectedEnforceMap = new Map<string, Set<string>>();
-      expectedEnforceMap.set(MULTI_NAMESPACE_CUSTOM_INDEX_TYPE, new Set([namespace]));
-
-      const {
-        actions: actualActions,
-        spaces: actualSpaces,
-        types: actualTypes,
-        enforceMap: actualEnforceMap,
-        options: actualOptions,
-        auditOptions: actualAuditOptions,
-      } = mockSecurityExt.authorize.mock.calls[0][0];
-
-      expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
-      expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
-      expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
-      expect(setMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
-      expect(actualOptions).toBeUndefined();
-      expect(actualAuditOptions).toEqual({
-        objects: [{ type: MULTI_NAMESPACE_CUSTOM_INDEX_TYPE, id }],
+      expect(mockSecurityExt.authorizeDelete).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeDelete).toHaveBeenCalledWith({
+        namespace,
+        object: { type, id },
       });
     });
-
-    // test(`adds audit event when successful`, async () => {
-    //   setupAuthorizeFullyAuthorized(mockSecurityExt);
-    //   setupRedactPassthrough(mockSecurityExt);
-
-    //   await deleteSuccess(client, repository, registry, type, id, { namespace });
-
-    //   expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(1);
-    //   expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledWith({
-    //     action: AuditAction.DELETE,
-    //     savedObject: { type, id },
-    //     error: undefined,
-    //     outcome: 'unknown',
-    //   });
-    // });
-
-    // test(`adds audit event when not successful`, async () => {
-    //   setupPerformAuthEnforceFailure(mockSecurityExt);
-
-    //   await expect(
-    //     deleteSuccess(client, repository, registry, type, id, { namespace })
-    //   ).rejects.toThrow(enforceError);
-
-    //   expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(1);
-    //   expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledWith({
-    //     action: AuditAction.DELETE,
-    //     savedObject: { type, id },
-    //     error: enforceError,
-    //   });
-    // });
   });
 
   describe('#removeReferencesTo', () => {
@@ -1235,7 +1236,21 @@ describe('SavedObjectsRepository Security Extension', () => {
       expect(mockSecurityExt.authorizeBulkCreate).toHaveBeenCalledTimes(1);
     });
 
-    test(`returns result when authorized`, async () => {
+    test(`returns result when partially authorized`, async () => {
+      setupAuthorizeBulkCreate(mockSecurityExt, 'partially_authorized');
+      setupRedactPassthrough(mockSecurityExt);
+
+      const objects = [obj1, obj2];
+      const result = await bulkCreateSuccess(client, repository, objects);
+
+      expect(mockSecurityExt.authorizeBulkCreate).toHaveBeenCalledTimes(1);
+      expect(client.bulk).toHaveBeenCalledTimes(1);
+      expect(result).toEqual({
+        saved_objects: objects.map((obj) => expectCreateResult(obj)),
+      });
+    });
+
+    test(`returns result when fully authorized`, async () => {
       setupAuthorizeBulkCreate(mockSecurityExt, 'fully_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
@@ -1421,7 +1436,21 @@ describe('SavedObjectsRepository Security Extension', () => {
       expect(mockSecurityExt.authorizeBulkUpdate).toHaveBeenCalledTimes(1);
     });
 
-    test(`returns result when authorized`, async () => {
+    test(`returns result when partially authorized`, async () => {
+      setupAuthorizeUpdate(mockSecurityExt, 'partially_authorized');
+      setupRedactPassthrough(mockSecurityExt);
+
+      const objects = [obj1, obj2];
+      const result = await bulkUpdateSuccess(client, repository, registry, objects);
+
+      expect(mockSecurityExt.authorizeBulkUpdate).toHaveBeenCalledTimes(1);
+      expect(client.bulk).toHaveBeenCalledTimes(1);
+      expect(result).toEqual({
+        saved_objects: objects.map((obj) => expectUpdateResult(obj)),
+      });
+    });
+
+    test(`returns result when fully authorized`, async () => {
       setupAuthorizeUpdate(mockSecurityExt, 'fully_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
@@ -1558,26 +1587,26 @@ describe('SavedObjectsRepository Security Extension', () => {
       ],
     };
 
-    test(`propagates decorated error when authorize rejects promise`, async () => {
-      mockSecurityExt.authorize.mockRejectedValueOnce(checkAuthError);
+    test(`propagates decorated error when authorizeBulkDelete rejects promise`, async () => {
+      mockSecurityExt.authorizeBulkDelete.mockRejectedValueOnce(checkAuthError);
       await expect(
         bulkDeleteSuccess(client, repository, registry, testObjs, options)
       ).rejects.toThrow(checkAuthError);
-      expect(mockSecurityExt.authorize).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeBulkDelete).toHaveBeenCalledTimes(1);
     });
 
     test(`propagates decorated error when unauthorized`, async () => {
-      setupAuthorizeEnforceFailure(mockSecurityExt);
+      setupAuthorizeBulkDelete(mockSecurityExt, 'unauthorized');
 
       await expect(
         bulkDeleteSuccess(client, repository, registry, testObjs, options)
       ).rejects.toThrow(enforceError);
 
-      expect(mockSecurityExt.authorize).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeBulkDelete).toHaveBeenCalledTimes(1);
     });
 
-    test(`returns result when authorized`, async () => {
-      setupAuthorizeFullyAuthorized(mockSecurityExt);
+    test(`returns result when partially authorized`, async () => {
+      setupAuthorizeBulkDelete(mockSecurityExt, 'partially_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const result = await bulkDeleteSuccess(
@@ -1589,71 +1618,45 @@ describe('SavedObjectsRepository Security Extension', () => {
         internalOptions
       );
 
-      expect(mockSecurityExt.authorize).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeBulkDelete).toHaveBeenCalledTimes(1);
       expect(client.bulk).toHaveBeenCalledTimes(1);
       expect(result).toEqual({
         statuses: testObjs.map((obj) => createBulkDeleteSuccessStatus(obj)),
       });
     });
 
-    test(`calls authorize with correct actions, types, spaces, and enforce map`, async () => {
-      setupAuthorizeFullyAuthorized(mockSecurityExt);
+    test(`returns result when fully authorized`, async () => {
+      setupAuthorizeBulkDelete(mockSecurityExt, 'fully_authorized');
+      setupRedactPassthrough(mockSecurityExt);
 
-      await bulkDeleteSuccess(client, repository, registry, testObjs, options, internalOptions);
+      const result = await bulkDeleteSuccess(
+        client,
+        repository,
+        registry,
+        testObjs,
+        options,
+        internalOptions
+      );
 
-      expect(mockSecurityExt.authorize).toHaveBeenCalledTimes(1);
-      const expectedActions = new Set([SecurityAction.BULK_DELETE]);
-      const exptectedSpaces = new Set(internalOptions.mockMGetResponseObjects[1].initialNamespaces);
-      const expectedTypes = new Set([obj1.type, obj2.type]);
-      const expectedEnforceMap = new Map<string, Set<string>>();
-      expectedEnforceMap.set(obj1.type, new Set([namespace]));
-      expectedEnforceMap.set(obj2.type, new Set([namespace]));
-
-      const {
-        actions: actualActions,
-        types: actualTypes,
-        spaces: actualSpaces,
-        enforceMap: actualEnforceMap,
-      } = mockSecurityExt.authorize.mock.calls[0][0];
-
-      expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
-      expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
-      expect(setsAreEqual(actualSpaces, exptectedSpaces)).toBeTruthy();
-      expect(setMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
+      expect(mockSecurityExt.authorizeBulkDelete).toHaveBeenCalledTimes(1);
+      expect(client.bulk).toHaveBeenCalledTimes(1);
+      expect(result).toEqual({
+        statuses: testObjs.map((obj) => createBulkDeleteSuccessStatus(obj)),
+      });
     });
 
-    // test(`adds audit event per object when successful`, async () => {
-    //   setupAuthorizeFullyAuthorized(mockSecurityExt);
+    test(`calls authorizeBulkDelete with correct actions, types, spaces, and enforce map`, async () => {
+      setupAuthorizeBulkDelete(mockSecurityExt, 'fully_authorized');
+      await bulkDeleteSuccess(client, repository, registry, testObjs, options, internalOptions);
 
-    //   const objects = [obj1, obj2];
-    //   await bulkDeleteSuccess(client, repository, registry, objects, options);
-
-    //   expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(objects.length);
-    //   objects.forEach((obj) => {
-    //     expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledWith({
-    //       action: AuditAction.DELETE,
-    //       savedObject: { type: obj.type, id: obj.id },
-    //       outcome: 'unknown',
-    //     });
-    //   });
-    // });
-
-    // test(`adds audit event per object when not successful`, async () => {
-    //   setupPerformAuthEnforceFailure(mockSecurityExt);
-
-    //   const objects = [obj1, obj2];
-    //   await expect(
-    //     bulkDeleteSuccess(client, repository, registry, objects, options)
-    //   ).rejects.toThrow(enforceError);
-
-    //   expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(objects.length);
-    //   objects.forEach((obj) => {
-    //     expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledWith({
-    //       action: AuditAction.DELETE,
-    //       savedObject: { type: obj.type, id: obj.id },
-    //       error: enforceError,
-    //     });
-    //   });
-    // });
+      expect(mockSecurityExt.authorizeBulkDelete).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeBulkDelete).toHaveBeenCalledWith({
+        namespace,
+        objects: [
+          { type: obj1.type, id: obj1.id, existingNamespaces: undefined },
+          { type: obj2.type, id: obj2.id, existingNamespaces: ['foo-namespace', 'NS-1', 'NS-2'] },
+        ],
+      });
+    });
   });
 });

@@ -34,7 +34,10 @@ import type {
 import type {
   AuthorizeAndRedactInternalBulkResolveParams,
   AuthorizeBulkCreateParams,
+  AuthorizeBulkDeleteParams,
   AuthorizeBulkUpdateParams,
+  AuthorizeDeleteParams,
+  AuthorizeObject,
   AuthorizeUpdateSpacesParams,
   InternalAuthorizeOptions,
 } from '@kbn/core-saved-objects-server/src/extensions/security';
@@ -132,6 +135,16 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         { authzAction: 'share_to_space', auditAction: AuditAction.UPDATE_OBJECTS_SPACES },
       ],
     ]);
+  }
+
+  private validateObjectsArray(objects: AuthorizeObject[], action: SecurityAction) {
+    if (objects.length === 0) {
+      throw new Error(
+        `No objects specified for ${
+          this.actionMap.get(action)?.authzAction ?? 'unknown'
+        } authorization`
+      );
+    }
   }
 
   private translateActions<A extends string>(
@@ -497,7 +510,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     return this.internalAuthorizeUpdate(params, { forceBulkAction: true });
   }
 
-  async internalAuthorizeUpdate(
+  private async internalAuthorizeUpdate(
     params: AuthorizeBulkUpdateParams,
     options?: InternalAuthorizeOptions
   ): Promise<CheckAuthorizationResult<string> | undefined> {
@@ -546,6 +559,61 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     });
 
     return authorizationResult;
+  }
+
+  async authorizeDelete(
+    params: AuthorizeDeleteParams
+  ): Promise<CheckAuthorizationResult<string> | undefined> {
+    return this.internalAuthorizeDelete({
+      namespace: params.namespace,
+      // force existing namespaces to be undefined because we do not want to
+      // check them in non-bulk delete
+      objects: [{ ...params.object, existingNamespaces: undefined }],
+    });
+  }
+
+  async authorizeBulkDelete(
+    params: AuthorizeBulkDeleteParams
+  ): Promise<CheckAuthorizationResult<string> | undefined> {
+    return this.internalAuthorizeDelete(params, { forceBulkAction: true });
+  }
+
+  private async internalAuthorizeDelete(
+    params: AuthorizeBulkDeleteParams,
+    options?: InternalAuthorizeOptions
+  ): Promise<CheckAuthorizationResult<string> | undefined> {
+    const namespaceString = SavedObjectsUtils.namespaceIdToString(params.namespace);
+    const { objects } = params;
+    const enforceMap = new Map<string, Set<string>>();
+    const spacesToAuthorize = new Set<string>([namespaceString]); // Always check authZ for the active space
+
+    const action =
+      options?.forceBulkAction || objects.length > 1
+        ? SecurityAction.BULK_DELETE
+        : SecurityAction.DELETE;
+
+    this.validateObjectsArray(objects, action);
+
+    for (const obj of objects) {
+      const { type } = obj;
+      const spacesToEnforce = enforceMap.get(type) ?? new Set([namespaceString]); // Always enforce authZ for the active space
+      enforceMap.set(type, spacesToEnforce);
+      if (action === SecurityAction.BULK_DELETE && obj.existingNamespaces) {
+        for (const space of obj.existingNamespaces) {
+          spacesToAuthorize.add(space); // existing namespaces are included when performing bulk delete only
+        }
+      }
+    }
+
+    return this.authorize({
+      actions: new Set([action]),
+      types: new Set(enforceMap.keys()),
+      spaces: spacesToAuthorize,
+      enforceMap,
+      auditOptions: {
+        objects,
+      },
+    });
   }
 
   /**

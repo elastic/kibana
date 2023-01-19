@@ -799,16 +799,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
 
     const { refresh = DEFAULT_REFRESH_SETTING, force } = options;
 
-    const namespaceString = SavedObjectsUtils.namespaceIdToString(namespace);
-    const typesAndSpaces = new Map<string, Set<string>>([[type, new Set([namespaceString])]]); // Always enforce authZ for the active space
-
-    await this._securityExtension?.authorize({
-      actions: new Set([SecurityAction.DELETE]),
-      types: new Set([type]),
-      spaces: new Set([namespaceString]), // Always check authZ for the active space
-      enforceMap: typesAndSpaces,
-      auditOptions: { objects: [{ type, id }] },
-    });
+    await this._securityExtension?.authorizeDelete({ namespace, object: { type, id } });
 
     const rawId = this._serializer.generateRawId(namespace, type, id);
     let preflightResult: PreflightCheckNamespacesResult | undefined;
@@ -1075,39 +1066,58 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       });
 
     // Perform Auth Check (on both L/R, we'll deal with that later)
-    const namespaceString = SavedObjectsUtils.namespaceIdToString(namespace);
-    const typesAndSpaces = new Map<string, Set<string>>();
-    const spacesToAuthorize = new Set<string>([namespaceString]); // Always check authZ for the active space
+    // const namespaceString = SavedObjectsUtils.namespaceIdToString(namespace);
+    // const typesAndSpaces = new Map<string, Set<string>>();
+    // const spacesToAuthorize = new Set<string>([namespaceString]); // Always check authZ for the active space
+    // if (this._securityExtension) {
+    //   for (const { value } of expectedBulkDeleteMultiNamespaceDocsResults) {
+    //     const index = (value as { esRequestIndex: number }).esRequestIndex;
+    //     const { type } = value;
+    //     const preflightResult =
+    //       index !== undefined ? multiNamespaceDocsResponse?.body.docs[index] : undefined;
+
+    //     const spacesToEnforce = typesAndSpaces.get(type) ?? new Set([namespaceString]); // Always enforce authZ for the active space
+    //     typesAndSpaces.set(type, spacesToEnforce);
+    //     // @ts-expect-error MultiGetHit._source is optional
+    //     for (const space of preflightResult?._source?.namespaces ?? []) {
+    //       spacesToAuthorize.add(space); // existing namespaces are included
+    //     }
+    //   }
+    // }
+
+    // await this._securityExtension?.authorize({
+    //   actions: new Set([SecurityAction.BULK_DELETE]),
+    //   types: new Set(typesAndSpaces.keys()),
+    //   spaces: spacesToAuthorize,
+    //   enforceMap: typesAndSpaces,
+    //   auditOptions: {
+    //     objects: expectedBulkDeleteMultiNamespaceDocsResults.map((element) => {
+    //       return {
+    //         type: element.value.type,
+    //         id: element.value.id,
+    //       };
+    //     }),
+    //   },
+    // });
+
     if (this._securityExtension) {
-      for (const { value } of expectedBulkDeleteMultiNamespaceDocsResults) {
-        const index = (value as { esRequestIndex: number }).esRequestIndex;
-        const { type } = value;
-        const preflightResult =
-          index !== undefined ? multiNamespaceDocsResponse?.body.docs[index] : undefined;
+      const authObjects: AuthorizeUpdateObject[] = expectedBulkDeleteMultiNamespaceDocsResults.map(
+        (element) => {
+          const index = (element.value as { esRequestIndex: number }).esRequestIndex;
+          const { type, id } = element.value;
+          const preflightResult =
+            index !== undefined ? multiNamespaceDocsResponse?.body.docs[index] : undefined;
 
-        const spacesToEnforce = typesAndSpaces.get(type) ?? new Set([namespaceString]); // Always enforce authZ for the active space
-        typesAndSpaces.set(type, spacesToEnforce);
-        // @ts-expect-error MultiGetHit._source is optional
-        for (const space of preflightResult?._source?.namespaces ?? []) {
-          spacesToAuthorize.add(space); // existing namespaces are included
-        }
-      }
-    }
-
-    await this._securityExtension?.authorize({
-      actions: new Set([SecurityAction.BULK_DELETE]),
-      types: new Set(typesAndSpaces.keys()),
-      spaces: spacesToAuthorize,
-      enforceMap: typesAndSpaces,
-      auditOptions: {
-        objects: expectedBulkDeleteMultiNamespaceDocsResults.map((element) => {
           return {
-            type: element.value.type,
-            id: element.value.id,
+            type,
+            id,
+            // @ts-expect-error MultiGetHit._source is optional
+            existingNamespaces: preflightResult?._source?.namespaces,
           };
-        }),
-      },
-    });
+        }
+      );
+      await this._securityExtension.authorizeBulkDelete({ namespace, objects: authObjects });
+    }
 
     // Filter valid objects
     const validObjects = expectedBulkDeleteMultiNamespaceDocsResults.filter(isRight);
