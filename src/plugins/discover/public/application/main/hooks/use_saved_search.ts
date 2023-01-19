@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, filter, map, Observable, share, Subject, tap } from 'rxjs';
 import type { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
 import { ISearchSource } from '@kbn/data-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
@@ -39,7 +39,10 @@ export type DataMain$ = BehaviorSubject<DataMainMsg>;
 export type DataDocuments$ = BehaviorSubject<DataDocumentsMsg>;
 export type DataTotalHits$ = BehaviorSubject<DataTotalHitsMsg>;
 export type AvailableFields$ = BehaviorSubject<DataAvailableFieldsMsg>;
-
+export type DataFetch$ = Observable<{
+  reset: boolean;
+  searchSessionId: string;
+}>;
 export type DataRefetch$ = Subject<DataRefetchMsg>;
 
 export interface UseSavedSearch {
@@ -153,46 +156,70 @@ export const useSavedSearch = ({
   }>({});
 
   /**
-   * This part takes care of triggering the data fetching by creating and subscribing
-   * to an observable of various possible changes in state
+   * handler emitted by `timefilter.getAutoRefreshFetch$()`
+   * to notify when data completed loading and to start a new autorefresh loop
    */
-  useEffect(() => {
-    /**
-     * handler emitted by `timefilter.getAutoRefreshFetch$()`
-     * to notify when data completed loading and to start a new autorefresh loop
-     */
-    const setAutoRefreshDone = (fn: AutoRefreshDoneFn | undefined) => {
-      refs.current.autoRefreshDone = fn;
-    };
-    const fetch$ = getFetch$({
-      setAutoRefreshDone,
+  const setAutoRefreshDone = useCallback((fn: AutoRefreshDoneFn | undefined) => {
+    refs.current.autoRefreshDone = fn;
+  }, []);
+
+  /**
+   * Observable that allows listening for when fetches are triggered
+   */
+  const fetch$ = useMemo(
+    () =>
+      getFetch$({
+        setAutoRefreshDone,
+        data,
+        main$,
+        refetch$,
+        searchSessionManager,
+        searchSource,
+        initialFetchStatus,
+      }).pipe(
+        filter(() => validateTimeRange(timefilter.getTime(), services.toastNotifications)),
+        tap(() => inspectorAdapters.requests.reset()),
+        map((val) => ({
+          reset: val === 'reset',
+          searchSessionId: searchSessionManager.getNextSearchSessionId(),
+        })),
+        share()
+      ),
+    [
       data,
+      initialFetchStatus,
+      inspectorAdapters.requests,
       main$,
       refetch$,
       searchSessionManager,
       searchSource,
-      initialFetchStatus,
-    });
+      services.toastNotifications,
+      setAutoRefreshDone,
+      timefilter,
+    ]
+  );
+
+  /**
+   * This part takes care of triggering the data fetching by creating and subscribing
+   * to an observable of various possible changes in state
+   */
+  useEffect(() => {
     let abortController: AbortController;
 
-    const subscription = fetch$.subscribe(async (val) => {
-      if (!validateTimeRange(timefilter.getTime(), services.toastNotifications)) {
-        return;
-      }
-      inspectorAdapters.requests.reset();
-
+    const subscription = fetch$.subscribe(async ({ reset, searchSessionId }) => {
       abortController?.abort();
       abortController = new AbortController();
+
       const autoRefreshDone = refs.current.autoRefreshDone;
 
-      await fetchAll(dataSubjects, searchSource, val === 'reset', {
+      await fetchAll(dataSubjects, searchSource, reset, {
         abortController,
         appStateContainer: stateContainer.appState,
         data,
         initialFetchStatus,
         inspectorAdapters,
         savedSearch,
-        searchSessionId: searchSessionManager.getNextSearchSessionId(),
+        searchSessionId,
         services,
         useNewFieldsApi,
       });
@@ -215,6 +242,7 @@ export const useSavedSearch = ({
     data,
     data.query.queryString,
     dataSubjects,
+    fetch$,
     filterManager,
     initialFetchStatus,
     inspectorAdapters,
@@ -237,6 +265,7 @@ export const useSavedSearch = ({
   );
 
   return {
+    fetch$,
     refetch$,
     data$: dataSubjects,
     reset,
