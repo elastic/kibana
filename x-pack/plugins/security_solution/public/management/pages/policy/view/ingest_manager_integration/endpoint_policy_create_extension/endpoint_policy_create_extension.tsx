@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useState, useEffect, useRef, useCallback } from 'react';
+import React, { memo, useState, useEffect, useCallback } from 'react';
 import {
   EuiForm,
   EuiRadio,
@@ -89,7 +89,6 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
     const [endpointPreset, setEndpointPreset] = useState<EndpointPreset>('NGAV');
     const [selectedCloudEvent, setSelectedCloudEvent] = useState<CloudEvent>('INTERACTIVE_ONLY');
     const [selectedEnvironment, setSelectedEnvironment] = useState<Environment>('endpoint');
-    const initialRender = useRef(true);
 
     // Show NGAV license note when Gold and below
     // Show other licenses note when Platinum and Below
