@@ -4273,6 +4273,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ui-actions-browser@link:packages/kbn-ui-actions-browser":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ui-framework@link:packages/kbn-ui-framework":
   version "0.0.0"
   uid ""
