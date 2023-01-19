@@ -35,8 +35,9 @@ import type { ExperimentalFeatures } from '../../common/experimental_features';
 import type {
   ExternalCallback,
   ExternalCallbacksStorage,
-  PostPackagePolicyCreateCallback,
   PostPackagePolicyDeleteCallback,
+  PostPackagePolicyCreateCallback,
+  PostPackagePolicyPostDeleteCallback,
   PostPackagePolicyPostCreateCallback,
   PutPackagePolicyUpdateCallback,
 } from '../types';
@@ -211,8 +212,10 @@ class AppContextService {
     | Set<
         T extends 'packagePolicyCreate'
           ? PostPackagePolicyCreateCallback
-          : T extends 'postPackagePolicyDelete'
+          : T extends 'packagePolicyDelete'
           ? PostPackagePolicyDeleteCallback
+          : T extends 'packagePolicyPostDelete'
+          ? PostPackagePolicyPostDeleteCallback
           : T extends 'packagePolicyPostCreate'
           ? PostPackagePolicyPostCreateCallback
           : PutPackagePolicyUpdateCallback
@@ -222,8 +225,10 @@ class AppContextService {
       return this.externalCallbacks.get(type) as Set<
         T extends 'packagePolicyCreate'
           ? PostPackagePolicyCreateCallback
-          : T extends 'postPackagePolicyDelete'
+          : T extends 'packagePolicyDelete'
           ? PostPackagePolicyDeleteCallback
+          : T extends 'packagePolicyPostDelete'
+          ? PostPackagePolicyPostDeleteCallback
           : T extends 'packagePolicyPostCreate'
           ? PostPackagePolicyPostCreateCallback
           : PutPackagePolicyUpdateCallback

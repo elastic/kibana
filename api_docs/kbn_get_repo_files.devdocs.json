@@ -80,6 +80,68 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/get-repo-files",
+        "id": "def-common.getRepoFilesSync",
+        "type": "Function",
+        "tags": [],
+        "label": "getRepoFilesSync",
+        "description": [
+          "\nSynchronously list the files in the repo, only including files which are manged by version\ncontrol or \"untracked\" (new, not committed, and not ignored)."
+        ],
+        "signature": [
+          "(include: string[] | undefined, exclude: string[] | undefined) => Set<",
+          {
+            "pluginId": "@kbn/repo-path",
+            "scope": "common",
+            "docId": "kibKbnRepoPathPluginApi",
+            "section": "def-common.RepoPath",
+            "text": "RepoPath"
+          },
+          ">"
+        ],
+        "path": "packages/kbn-get-repo-files/src/get_repo_files.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/get-repo-files",
+            "id": "def-common.getRepoFilesSync.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "include",
+            "description": [
+              "limit the list to specfic absolute paths"
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-get-repo-files/src/get_repo_files.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/get-repo-files",
+            "id": "def-common.getRepoFilesSync.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "exclude",
+            "description": [
+              "exclude specific absolute paths"
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-get-repo-files/src/get_repo_files.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [],

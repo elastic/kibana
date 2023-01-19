@@ -12,6 +12,10 @@ import { ModuleType } from './module_type';
 import { RANDOM_TEST_FILE_NAMES, TEST_DIR, TEST_TAG } from './config';
 import { RepoPath } from './repo_path';
 
+const STATIC_EXTS = new Set(
+  'json|woff|woff2|ttf|eot|svg|ico|png|jpg|gif|jpeg|html|md|txt|tmpl'.split('|').map((e) => `.${e}`)
+);
+
 export class RepoSourceClassifier {
   constructor(private readonly resolver: ImportResolver) {}
 
@@ -121,10 +125,21 @@ export class RepoSourceClassifier {
   }
 
   /**
+   * Apply screenshotting specific rules
+   * @param root the root dir within the screenshotting plugin
+   * @returns a type, or undefined if the file should be classified as a standard file
+   */
+  private classifyScreenshotting(root: string): ModuleType | undefined {
+    if (root === 'chromium') {
+      return 'non-package';
+    }
+  }
+
+  /**
    * Determine the "type" of a file
    */
   private getType(path: RepoPath): ModuleType {
-    if (path.getExtname() === '.json') {
+    if (STATIC_EXTS.has(path.getExtname())) {
       return 'static';
     }
 
@@ -191,6 +206,13 @@ export class RepoSourceClassifier {
       }
     }
 
+    if (pkgId === '@kbn/screenshotting-plugin') {
+      const type = this.classifyScreenshotting(root);
+      if (type) {
+        return type;
+      }
+    }
+
     if (root === 'public' || root === 'static') {
       return 'browser package';
     }
@@ -214,6 +236,7 @@ export class RepoSourceClassifier {
       type: this.getType(path),
       repoRel: path.getRepoRel(),
       pkgInfo: path.getPkgInfo() ?? undefined,
+      dirs: path.getSegs(),
     };
     this.ids.set(path, id);
     return id;

@@ -97,6 +97,16 @@ export const lmc: LayerMappingCollection = {
   'traces-apm*,logs-apm*,metrics-apm*,apm-*': APM_LAYER_FIELD_MAPPING,
 };
 
+export const getRequiredMapsFields = (title: string): string[] => {
+  const fieldMappings = lmc[title] ?? lmc.default;
+  return [
+    fieldMappings.source.metricField,
+    fieldMappings.source.geoField,
+    fieldMappings.destination.metricField,
+    fieldMappings.destination.geoField,
+  ];
+};
+
 /**
  * Returns `Source/Destination Point-to-point` Map LayerList configuration, with a source,
  * destination, and line layer for each of the provided indexPatterns

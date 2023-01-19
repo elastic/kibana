@@ -481,10 +481,6 @@
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/components/full_time_range_selector/full_time_range_selector_service.ts"
-              },
-              {
-                "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/jobs/new_job/pages/components/pick_fields_step/components/bucket_span_estimator/estimate_bucket_span.ts"
               },
               {
@@ -8701,10 +8697,6 @@
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/components/full_time_range_selector/full_time_range_selector_service.ts"
-              },
-              {
-                "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/jobs/new_job/pages/components/pick_fields_step/components/bucket_span_estimator/estimate_bucket_span.ts"
               },
               {
@@ -16013,10 +16005,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/jobs/new_job/pages/job_type/page.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/components/full_time_range_selector/full_time_range_selector_service.ts"
               },
               {
                 "plugin": "ml",

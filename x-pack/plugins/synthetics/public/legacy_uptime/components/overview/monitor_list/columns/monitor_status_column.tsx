@@ -31,7 +31,10 @@ import {
   SHORT_TS_LOCALE,
 } from '../../../../../../common/constants';
 
-import { STATUS_DOWN_LABEL, STATUS_UP_LABEL } from '../../../common/translations';
+import {
+  STATUS_DOWN_LABEL,
+  STATUS_UP_LABEL,
+} from '../../../../../../common/translations/translations';
 import { MonitorProgress } from './progress/monitor_progress';
 import { refreshedMonitorSelector } from '../../../../state/reducers/monitor_list';
 import { testNowRunSelector } from '../../../../state/reducers/test_now_runs';

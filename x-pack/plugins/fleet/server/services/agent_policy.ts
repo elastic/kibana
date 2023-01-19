@@ -51,7 +51,7 @@ import type {
   FleetServerPolicy,
   Installation,
   Output,
-  DeletePackagePoliciesResponse,
+  PostDeletePackagePoliciesResponse,
   PackageInfo,
 } from '../../common/types';
 import {
@@ -680,7 +680,10 @@ class AgentPolicyService {
           `Cannot delete agent policy ${id} that contains managed package policies`
         );
       }
-      const deletedPackagePolicies: DeletePackagePoliciesResponse =
+
+      await packagePolicyService.runDeleteExternalCallbacks(packagePolicies);
+
+      const deletedPackagePolicies: PostDeletePackagePoliciesResponse =
         await packagePolicyService.delete(
           soClient,
           esClient,
@@ -691,7 +694,7 @@ class AgentPolicyService {
           }
         );
       try {
-        await packagePolicyService.runDeleteExternalCallbacks(deletedPackagePolicies);
+        await packagePolicyService.runPostDeleteExternalCallbacks(deletedPackagePolicies);
       } catch (error) {
         const logger = appContextService.getLogger();
         logger.error(`An error occurred executing external callback: ${error}`);
@@ -1039,7 +1042,7 @@ class AgentPolicyService {
       type: SAVED_OBJECT_TYPE,
       page: 1,
       perPage: SO_SEARCH_LIMIT,
-      filter: `${SAVED_OBJECT_TYPE}.attributes.inactivity_timeout: *`,
+      filter: `${SAVED_OBJECT_TYPE}.attributes.inactivity_timeout > 0`,
       fields: [`inactivity_timeout`],
     });
 
