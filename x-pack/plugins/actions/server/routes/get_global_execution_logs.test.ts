@@ -28,6 +28,7 @@ describe('getRuleExecutionLogRoute', () => {
     data: [
       {
         connector_name: 'test connector',
+        connector_id: '1',
         duration_ms: 1,
         id: '8b3af07e-7593-4c40-b704-9c06d3b06e58',
         message:
