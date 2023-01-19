@@ -43,7 +43,7 @@ export const TestRunDetails = () => {
   return (
     <>
       <EuiFlexGroup gutterSize="m">
-        <EuiFlexItem grow={2}>
+        <EuiFlexItem grow={2} style={{ minWidth: 0 }}>
           <EuiPanel hasShadow={false} hasBorder>
             <EuiFlexGroup alignItems="center">
               <EuiFlexItem grow={true}>
