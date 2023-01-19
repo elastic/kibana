@@ -102,8 +102,16 @@ export const OptionsListPopoverSuggestions = ({
     if (canLoadMoreSuggestions) {
       options.push({
         key: 'loading-option',
-        className: 'loading-option-class',
+        className: 'optionslist--loadingMoreGroupLabel',
         label: 'Loading more options...',
+        isGroupLabel: true,
+      });
+    } else if (options.length === 1000) {
+      options.push({
+        key: 'no-more-option',
+        className: 'optionslist--endOfOptionsGroupLabel',
+        label:
+          "You've reached the end of the top 1,000 results. Try narrowing down the available options with a search.",
         isGroupLabel: true,
       });
     }

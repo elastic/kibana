@@ -91,9 +91,19 @@
   width: $euiSizeXL * 7;
 }
 
-.loading-option-class {
+.optionslist--loadingMoreGroupLabel {
   text-align: center;
   padding-top: $euiSizeM;
   font-style: italic;
   height: 40px !important;
 }
+
+.optionslist--endOfOptionsGroupLabel {
+  text-align: center;
+  padding-top: $euiSizeM;
+  font-size: $euiSizeM;
+  height: 50px !important;
+  color: $euiTextSubduedColor;
+}
+
+
