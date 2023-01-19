@@ -404,6 +404,10 @@
                       "type": "string"
                     },
                     "description": "list of package names to install"
+                  },
+                  "force": {
+                    "type": "boolean",
+                    "description": "force install to ignore package verification errors"
                   }
                 },
                 "required": [

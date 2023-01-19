@@ -338,6 +338,7 @@ export const bulkInstallPackagesFromRegistryHandler: FleetRequestHandler<
     packagesToInstall: request.body.packages,
     spaceId,
     prerelease: request.query.prerelease,
+    force: request.body.force,
   });
   const payload = bulkInstalledResponses.map(bulkInstallServiceResponseToHttpEntry);
   const body: BulkInstallPackagesResponse = {

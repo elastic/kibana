@@ -122,6 +122,7 @@ export const BulkInstallPackagesFromRegistryRequestSchema = {
   }),
   body: schema.object({
     packages: schema.arrayOf(schema.string(), { minSize: 1 }),
+    force: schema.boolean({ defaultValue: false }),
   }),
 };
 
