@@ -359,7 +359,7 @@ describe('Field Renderers', () => {
       );
 
       screen
-        .getAllByTestId('render-content-mock.attr')
+        .getAllByTestId('cellActions-renderContent-mock.attr')
         .forEach((element) => expect(element).toBeInTheDocument());
     });
 

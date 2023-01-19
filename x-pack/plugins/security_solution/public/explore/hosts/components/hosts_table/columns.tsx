@@ -7,7 +7,7 @@
 
 import { EuiIcon, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
 import React from 'react';
-import { CellActions, CellActionsMode } from '@kbn/ui-actions-plugin/public';
+import { CellActions, CellActionsMode } from '@kbn/cell-actions';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { HostDetailsLink } from '../../../../common/components/links';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
@@ -33,7 +33,7 @@ export const getHostsColumns = (
         if (hostName != null && hostName.length > 0) {
           return (
             <CellActions
-              mode={CellActionsMode.HOVER_POPOVER}
+              mode={CellActionsMode.HOVER}
               visibleCellActions={5}
               showActionTooltips
               triggerId={CELL_ACTIONS_DEFAULT_TRIGGER}
@@ -90,7 +90,7 @@ export const getHostsColumns = (
         if (hostOsName != null) {
           return (
             <CellActions
-              mode={CellActionsMode.HOVER_POPOVER}
+              mode={CellActionsMode.HOVER}
               visibleCellActions={5}
               showActionTooltips
               triggerId={CELL_ACTIONS_DEFAULT_TRIGGER}
@@ -117,7 +117,7 @@ export const getHostsColumns = (
         if (hostOsVersion != null) {
           return (
             <CellActions
-              mode={CellActionsMode.HOVER_POPOVER}
+              mode={CellActionsMode.HOVER}
               visibleCellActions={5}
               showActionTooltips
               triggerId={CELL_ACTIONS_DEFAULT_TRIGGER}

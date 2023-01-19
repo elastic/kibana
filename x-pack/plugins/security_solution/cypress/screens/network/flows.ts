@@ -21,7 +21,7 @@ export const COPY = '[data-test-subj="actionItem-security_copyToClipboard"]';
 
 export const TOP_N_CONTAINER = '[data-test-subj="topN-container"]';
 
-export const DESTINATION_DOMAIN = `[data-test-subj="more-container"] [data-test-subj="render-content-destination.domain"]`;
+export const DESTINATION_DOMAIN = `[data-test-subj="more-container"] [data-test-subj="cellActions-renderContent-destination.domain"]`;
 
 export const OVERFLOW_ITEM =
-  '[data-test-subj="more-container"] [data-test-subj="render-content-destination.domain"]';
+  '[data-test-subj="more-container"] [data-test-subj="cellActions-renderContent-destination.domain"]';

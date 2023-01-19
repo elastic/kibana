@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { CellActions, CellActionsMode } from '@kbn/ui-actions-plugin/public';
+import { CellActions, CellActionsMode } from '@kbn/cell-actions';
 import type { Anomaly } from '../types';
 import { Spacer } from '../../page';
 import { getScoreString } from './score_health';
@@ -23,7 +23,7 @@ export const ScoreComponent = ({
 
   return (
     <CellActions
-      mode={CellActionsMode.HOVER_POPOVER}
+      mode={CellActionsMode.HOVER}
       field={{
         name: score.entityName,
         value: score.entityValue,

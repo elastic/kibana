@@ -184,7 +184,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   };
   const [loading, { data, inspect, totalCount, refetch }] =
     useMatrixHistogramCombined(matrixHistogramRequest);
-  const onHostOrNetworkOrUserPage = isExplorePage(pathname);
+  const onExplorePage = isExplorePage(pathname);
 
   const titleWithStackByField = useMemo(
     () => (title != null && typeof title === 'function' ? title(selectedStackByOption) : title),
@@ -261,11 +261,11 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
             toggleQuery={hideQueryToggle ? undefined : toggleQuery}
             subtitle={subtitleWithCounts}
             inspectMultiple
-            showInspectButton={showInspectButton || !onHostOrNetworkOrUserPage}
+            showInspectButton={showInspectButton || !onExplorePage}
             isInspectDisabled={filterQuery === undefined}
           >
             <EuiFlexGroup alignItems="center" gutterSize="none">
-              {onHostOrNetworkOrUserPage && (getLensAttributes || lensAttributes) && timerange && (
+              {onExplorePage && (getLensAttributes || lensAttributes) && timerange && (
                 <EuiFlexItem grow={false}>
                   <VisualizationActions
                     className="histogram-viz-actions"

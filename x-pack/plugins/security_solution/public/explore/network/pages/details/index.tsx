@@ -13,7 +13,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elasti
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 
 import { buildEsQuery } from '@kbn/es-query';
-import { CellActions, CellActionsMode } from '@kbn/ui-actions-plugin/public';
+import { CellActions, CellActionsMode } from '@kbn/cell-actions';
 import { AlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
@@ -180,7 +180,7 @@ const NetworkDetailsComponent: React.FC = () => {
               title={
                 <CellActions
                   field={{ type: 'ip', value: ip, name: `${flowTarget}.ip` }}
-                  mode={CellActionsMode.HOVER_POPOVER}
+                  mode={CellActionsMode.HOVER}
                   visibleCellActions={5}
                   triggerId={CELL_ACTIONS_DEFAULT_TRIGGER}
                 >

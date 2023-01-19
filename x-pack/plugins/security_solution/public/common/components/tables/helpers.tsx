@@ -8,7 +8,7 @@ import React, { useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink, EuiPopover, EuiToolTip, EuiText, EuiTextColor } from '@elastic/eui';
 import styled from 'styled-components';
-import { CellActions, CellActionsMode } from '@kbn/ui-actions-plugin/public';
+import { CellActions, CellActionsMode } from '@kbn/cell-actions';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { defaultToEmptyTag, getEmptyTagValue } from '../empty_value';
 import { MoreRowItems } from '../page';
@@ -44,7 +44,7 @@ export const getRowItemsWithActions = ({
       return (
         <CellActions
           key={id}
-          mode={CellActionsMode.HOVER_POPOVER}
+          mode={CellActionsMode.HOVER}
           visibleCellActions={5}
           showActionTooltips
           triggerId={CELL_ACTIONS_DEFAULT_TRIGGER}

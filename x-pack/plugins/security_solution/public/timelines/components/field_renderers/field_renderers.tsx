@@ -11,7 +11,7 @@ import { getOr } from 'lodash/fp';
 import React, { useCallback, Fragment, useMemo, useState, useContext } from 'react';
 import styled from 'styled-components';
 
-import { CellActions, CellActionsMode } from '@kbn/ui-actions-plugin/public';
+import { CellActions, CellActionsMode } from '@kbn/cell-actions';
 import type { HostEcs } from '@kbn/securitysolution-ecs';
 import type {
   AutonomousSystem,
@@ -307,7 +307,7 @@ export const MoreContainer = React.memo<MoreContainerProps>(
               <EuiFlexItem key={id}>
                 <CellActions
                   key={id}
-                  mode={CellActionsMode.HOVER_POPOVER}
+                  mode={CellActionsMode.HOVER}
                   visibleCellActions={5}
                   showActionTooltips
                   triggerId={

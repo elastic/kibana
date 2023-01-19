@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { CellActions, CellActionsMode } from '@kbn/ui-actions-plugin/public';
+import { CellActions, CellActionsMode } from '@kbn/cell-actions';
 import { CELL_ACTIONS_DEFAULT_TRIGGER } from '../../../../common/constants';
 
 interface Props {
@@ -23,7 +23,7 @@ export const EntityComponent: React.FC<Props> = ({ entityName, entityValue }) =>
         type: 'keyword',
       }}
       triggerId={CELL_ACTIONS_DEFAULT_TRIGGER}
-      mode={CellActionsMode.HOVER_POPOVER}
+      mode={CellActionsMode.HOVER}
       visibleCellActions={5}
     >
       {`${entityName}: "${entityValue}"`}

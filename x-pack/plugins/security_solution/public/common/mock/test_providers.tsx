@@ -19,7 +19,7 @@ import type { Capabilities } from '@kbn/core/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import type { Action } from '@kbn/ui-actions-plugin/public';
-import { CellActionsContextProvider } from '@kbn/ui-actions-plugin/public';
+import { CellActionsProvider } from '@kbn/cell-actions';
 import { ConsoleManager } from '../../management/components/console';
 import type { State } from '../store';
 import { createStore } from '../store';
@@ -67,11 +67,11 @@ export const TestProvidersComponent: React.FC<Props> = ({
           <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
             <QueryClientProvider client={queryClient}>
               <ConsoleManager>
-                <CellActionsContextProvider
+                <CellActionsProvider
                   getTriggerCompatibleActions={() => Promise.resolve(cellActions)}
                 >
                   <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
-                </CellActionsContextProvider>
+                </CellActionsProvider>
               </ConsoleManager>
             </QueryClientProvider>
           </ThemeProvider>
@@ -103,11 +103,9 @@ const TestProvidersWithPrivilegesComponent: React.FC<Props> = ({
               } as unknown as Capabilities
             }
           >
-            <CellActionsContextProvider
-              getTriggerCompatibleActions={() => Promise.resolve(cellActions)}
-            >
+            <CellActionsProvider getTriggerCompatibleActions={() => Promise.resolve(cellActions)}>
               <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
-            </CellActionsContextProvider>
+            </CellActionsProvider>
           </UserPrivilegesProvider>
         </ThemeProvider>
       </ReduxStoreProvider>

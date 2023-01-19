@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiIcon, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
-import { CellActions, CellActionsMode } from '@kbn/ui-actions-plugin/public';
+import { CellActions, CellActionsMode } from '@kbn/cell-actions';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { HostDetailsLink } from '../../../../common/components/links';
 import type { HostRiskScoreColumns } from '.';
@@ -33,7 +33,7 @@ export const getHostRiskScoreColumns = ({
       if (hostName != null && hostName.length > 0) {
         return (
           <CellActions
-            mode={CellActionsMode.HOVER_POPOVER}
+            mode={CellActionsMode.HOVER}
             visibleCellActions={5}
             showActionTooltips
             triggerId={CELL_ACTIONS_DEFAULT_TRIGGER}

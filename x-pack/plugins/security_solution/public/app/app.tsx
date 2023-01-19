@@ -16,7 +16,7 @@ import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { AppLeaveHandler, AppMountParameters } from '@kbn/core/public';
 
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { CellActionsContextProvider } from '@kbn/ui-actions-plugin/public';
+import { CellActionsProvider } from '@kbn/cell-actions';
 import { ManageUserInfo } from '../detections/components/user_info';
 import { DEFAULT_DARK_MODE, APP_NAME } from '../../common/constants';
 import { ErrorToastDispatcher } from '../common/components/error_toast_dispatcher';
@@ -64,7 +64,7 @@ const StartAppComponent: FC<StartAppComponent> = ({
                   <UserPrivilegesProvider kibanaCapabilities={capabilities}>
                     <ManageUserInfo>
                       <ReactQueryClientProvider>
-                        <CellActionsContextProvider
+                        <CellActionsProvider
                           getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
                         >
                           <PageRouter
@@ -74,7 +74,7 @@ const StartAppComponent: FC<StartAppComponent> = ({
                           >
                             {children}
                           </PageRouter>
-                        </CellActionsContextProvider>
+                        </CellActionsProvider>
                       </ReactQueryClientProvider>
                     </ManageUserInfo>
                   </UserPrivilegesProvider>
