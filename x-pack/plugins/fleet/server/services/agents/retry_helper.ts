@@ -9,7 +9,7 @@ import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 
 import { BulkActionTaskType } from './bulk_action_types';
 
-export const MAX_RETRY_COUNT = 10;
+export const MAX_RETRY_COUNT = 20;
 
 export interface RetryParams {
   pitId?: string;
