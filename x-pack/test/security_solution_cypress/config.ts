@@ -53,7 +53,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--xpack.cloud.id=test',
         `--home.disableWelcomeScreen=true`,
         // Specify which version of the detection-rules package to install
-        `--xpack.securitySolution.prebuiltRulesPackageVersion=8.4.2-beta.1`,
+        // `--xpack.securitySolution.prebuiltRulesPackageVersion=8.3.1`,
       ],
     },
   };
