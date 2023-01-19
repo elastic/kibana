@@ -52,14 +52,14 @@ const hostsEntryClickedSchema: HostEntryClickedSchema = {
   hostname: {
     type: 'keyword',
     _meta: {
-      description: 'List of selected host control filters.',
+      description: 'Hostname for the clicked host.',
       optional: false,
     },
   },
   cloud_provider: {
     type: 'keyword',
     _meta: {
-      description: 'List of applied host search filters.',
+      description: 'Cloud provider for the clicked host.',
       optional: true,
     },
   },
