@@ -97,7 +97,8 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
     ...useIndexData(
       dataView,
       stepDefineForm.searchBar.state.pivotQuery,
-      stepDefineForm.runtimeMappingsEditor.state.runtimeMappings
+      stepDefineForm.runtimeMappingsEditor.state.runtimeMappings,
+      stepDefineForm.datePicker.state.timeRangeMs
     ),
     dataTestSubj: 'transformIndexPreview',
     toastNotifications,

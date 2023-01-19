@@ -10,6 +10,9 @@ import { useEffect, useMemo, useState } from 'react';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { EuiDataGridColumn } from '@elastic/eui';
 
+import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
+
+import type { TimeRangeMs } from '../../../common/types/date_picker';
 import {
   isEsSearchResponse,
   isFieldHistogramsResponseSchema,
@@ -19,21 +22,23 @@ import {
   isKeywordDuplicate,
   removeKeywordPostfix,
 } from '../../../common/utils/field_utils';
+import { getErrorMessage } from '../../../common/utils/errors';
+import { isRuntimeMappings } from '../../../common/shared_imports';
+
 import type { EsSorting, UseIndexDataReturnType } from '../../shared_imports';
 
-import { getErrorMessage } from '../../../common/utils/errors';
 import { isDefaultQuery, matchAllQuery, PivotQuery } from '../common';
-import { SearchItems } from './use_search_items';
-import { useApi } from './use_api';
-
 import { useAppDependencies, useToastNotifications } from '../app_dependencies';
 import type { StepDefineExposedState } from '../sections/create_transform/components/step_define/common';
-import { isRuntimeMappings } from '../../../common/shared_imports';
+
+import { SearchItems } from './use_search_items';
+import { useApi } from './use_api';
 
 export const useIndexData = (
   dataView: SearchItems['dataView'],
   query: PivotQuery,
-  combinedRuntimeMappings?: StepDefineExposedState['runtimeMappings']
+  combinedRuntimeMappings?: StepDefineExposedState['runtimeMappings'],
+  timeRangeMs?: TimeRangeMs
 ): UseIndexDataReturnType => {
   const indexPattern = useMemo(() => dataView.getIndexPattern(), [dataView]);
 
@@ -55,6 +60,24 @@ export const useIndexData = (
 
   const [dataViewFields, setDataViewFields] = useState<string[]>();
 
+  const baseFilterCriteria = buildBaseFilterCriteria(
+    dataView.timeFieldName,
+    timeRangeMs?.from,
+    timeRangeMs?.to,
+    query
+  );
+
+  const defaultQuery = useMemo(
+    () => (timeRangeMs && dataView.timeFieldName ? baseFilterCriteria[0] : matchAllQuery),
+    [baseFilterCriteria, dataView, timeRangeMs]
+  );
+
+  const queryWithBaseFilterCriteria = {
+    bool: {
+      filter: baseFilterCriteria,
+    },
+  };
+
   // Fetch 500 random documents to determine populated fields.
   // This is a workaround to avoid passing potentially thousands of unpopulated fields
   // (for example, as part of filebeat/metricbeat/ECS based indices)
@@ -70,7 +93,7 @@ export const useIndexData = (
         _source: false,
         query: {
           function_score: {
-            query: { match_all: {} },
+            query: defaultQuery,
             random_score: {},
           },
         },
@@ -106,7 +129,7 @@ export const useIndexData = (
   useEffect(() => {
     fetchDataGridSampleDocuments();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [timeRangeMs]);
 
   const columns: EuiDataGridColumn[] = useMemo(() => {
     if (typeof dataViewFields === 'undefined') {
@@ -165,7 +188,7 @@ export const useIndexData = (
     resetPagination();
     // custom comparison
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(query)]);
+  }, [JSON.stringify([query, timeRangeMs])]);
 
   const fetchDataGridData = async function () {
     setErrorMessage('');
@@ -181,8 +204,7 @@ export const useIndexData = (
       body: {
         fields: ['*'],
         _source: false,
-        // Instead of using the default query (`*`), fall back to a more efficient `match_all` query.
-        query: isDefaultQuery(query) ? matchAllQuery : query,
+        query: isDefaultQuery(query) ? defaultQuery : queryWithBaseFilterCriteria,
         from: pagination.pageIndex * pagination.pageSize,
         size: pagination.pageSize,
         ...(Object.keys(sort).length > 0 ? { sort } : {}),
@@ -236,7 +258,7 @@ export const useIndexData = (
                 type: getFieldType(cT.schema),
               };
         }),
-      isDefaultQuery(query) ? matchAllQuery : query,
+      isDefaultQuery(query) ? defaultQuery : queryWithBaseFilterCriteria,
       combinedRuntimeMappings
     );
 
@@ -263,7 +285,14 @@ export const useIndexData = (
   }, [
     indexPattern,
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    JSON.stringify([query, pagination, sortingColumns, dataViewFields, combinedRuntimeMappings]),
+    JSON.stringify([
+      query,
+      pagination,
+      sortingColumns,
+      dataViewFields,
+      combinedRuntimeMappings,
+      timeRangeMs,
+    ]),
   ]);
 
   useEffect(() => {
@@ -276,7 +305,7 @@ export const useIndexData = (
     chartsVisible,
     indexPattern,
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    JSON.stringify([query, dataGrid.visibleColumns, combinedRuntimeMappings]),
+    JSON.stringify([query, dataGrid.visibleColumns, combinedRuntimeMappings, timeRangeMs]),
   ]);
 
   const renderCellValue = useRenderCellValue(dataView, pagination, tableItems);

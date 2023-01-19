@@ -11,6 +11,8 @@ import { merge } from 'rxjs';
 import type { TimeRange } from '@kbn/es-query';
 import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
 
+import type { TimeRangeMs } from '../../../../../../../common/types/date_picker';
+
 import { StepDefineExposedState } from '../common';
 import { StepDefineFormProps } from '../step_define_form';
 
@@ -36,6 +38,7 @@ export const useDatePicker = (
   // The time range selected via the date picker
   const [timeRange, setTimeRange] = useState<TimeRange>();
 
+  // Set up subscriptions to date picker updates
   useEffect(() => {
     const updateTimeRange = () => setTimeRange(timefilter.getTime());
 
@@ -56,12 +59,17 @@ export const useDatePicker = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const timeRangeMs = useMemo(() => {
+  // Derive ms timestamps from timeRange updates.
+  const timeRangeMs: TimeRangeMs | undefined = useMemo(() => {
     const timefilterActiveBounds = timefilter.getActiveBounds();
-    if (timefilterActiveBounds !== undefined) {
+    if (
+      timefilterActiveBounds !== undefined &&
+      timefilterActiveBounds.min !== undefined &&
+      timefilterActiveBounds.max !== undefined
+    ) {
       return {
-        from: timefilterActiveBounds.min?.valueOf(),
-        to: timefilterActiveBounds.max?.valueOf(),
+        from: timefilterActiveBounds.min.valueOf(),
+        to: timefilterActiveBounds.max.valueOf(),
       };
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
