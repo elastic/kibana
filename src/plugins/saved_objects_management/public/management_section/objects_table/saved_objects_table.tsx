@@ -18,6 +18,8 @@ import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
 import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
+import { Subscription } from 'rxjs';
 import type { SavedObjectManagementTypeInfo } from '../../../common/types';
 import {
   parseQuery,
@@ -66,6 +68,7 @@ export interface SavedObjectsTableProps {
   goInspectObject: (obj: SavedObjectWithMetadata) => void;
   canGoInApp: (obj: SavedObjectWithMetadata) => boolean;
   initialQuery?: Query;
+  customBranding: CustomBrandingStart;
 }
 
 export interface SavedObjectsTableState {
@@ -88,6 +91,7 @@ export interface SavedObjectsTableState {
   exportAllOptions: ExportAllOption[];
   exportAllSelectedOptions: Record<string, boolean>;
   isIncludeReferencesDeepChecked: boolean;
+  hasCustomBranding?: boolean;
 }
 
 const unableFindSavedObjectsNotificationMessage = i18n.translate(
@@ -101,6 +105,7 @@ const unableFindSavedObjectNotificationMessage = i18n.translate(
 
 export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedObjectsTableState> {
   private _isMounted = false;
+  private hasCustomBrandingSubscription?: Subscription;
 
   constructor(props: SavedObjectsTableProps) {
     super(props);
@@ -138,12 +143,18 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     this._isMounted = true;
     this.fetchAllSavedObjects();
     this.fetchCounts();
+    this.hasCustomBrandingSubscription = this.props.customBranding.hasCustomBranding$.subscribe(
+      (next) => {
+        this.setState({ ...this.state, hasCustomBranding: next });
+      }
+    );
   }
 
   componentWillUnmount() {
     this._isMounted = false;
     this.debouncedFindObjects.cancel();
     this.debouncedBulkGetObjects.cancel();
+    this.hasCustomBrandingSubscription?.unsubscribe();
   }
 
   fetchCounts = async () => {
@@ -574,6 +585,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         basePath={this.props.http.basePath}
         search={this.props.search}
         allowedTypes={this.props.allowedTypes}
+        showPlainSpinner={this.state.hasCustomBranding}
       />
     );
   }
@@ -592,12 +604,14 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         goInspectObject={this.props.goInspectObject}
         canGoInApp={this.props.canGoInApp}
         allowedTypes={this.props.allowedTypes}
+        showPlainSpinner={this.state.hasCustomBranding}
       />
     );
   }
 
   renderDeleteConfirmModal() {
-    const { isShowingDeleteConfirmModal, isDeleting, selectedSavedObjects } = this.state;
+    const { isShowingDeleteConfirmModal, isDeleting, selectedSavedObjects, hasCustomBranding } =
+      this.state;
     const { allowedTypes } = this.props;
 
     if (!isShowingDeleteConfirmModal) {
@@ -615,6 +629,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         }}
         selectedObjects={selectedSavedObjects}
         allowedTypes={allowedTypes}
+        showPlainSpinner={hasCustomBranding}
       />
     );
   }
