@@ -518,7 +518,6 @@ export class CasesService {
             username,
             full_name: user.full_name ?? null,
             email: user.email ?? null,
-            // TODO: verify that adding a new field is ok, shouldn't be a breaking change
             profile_uid: user.profile_uid,
           };
         }) ?? []

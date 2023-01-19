@@ -1,0 +1,333 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import expect from '@kbn/expect';
+import { CaseResponse } from '@kbn/cases-plugin/common/api';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+
+import {
+  postCaseReq,
+  getPostCaseRequest,
+  postCommentUserReq,
+  postCommentAlertReq,
+} from '../../../../common/lib/mock';
+import {
+  deleteAllCaseItems,
+  createCase,
+  createComment,
+  bulkCreateAttachments,
+  ensureSavedObjectIsAuthorized,
+} from '../../../../common/lib/utils';
+import { bulkGetAttachments } from '../../../../common/lib/attachments';
+import {
+  globalRead,
+  noKibanaPrivileges,
+  obsOnly,
+  obsOnlyRead,
+  obsSec,
+  obsSecRead,
+  secOnly,
+  secOnlyRead,
+  superUser,
+} from '../../../../common/lib/authentication/users';
+
+// eslint-disable-next-line import/no-default-export
+export default ({ getService }: FtrProviderContext): void => {
+  const supertest = getService('supertest');
+  const es = getService('es');
+
+  describe('bulk_get_attachments', () => {
+    describe('setup using two comments', () => {
+      let updatedCase: CaseResponse;
+
+      before(async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        updatedCase = await bulkCreateAttachments({
+          caseId: postedCase.id,
+          params: [postCommentUserReq, postCommentAlertReq],
+          supertest,
+        });
+      });
+
+      after(async () => {
+        await deleteAllCaseItems(es);
+      });
+
+      it('should retrieve a single attachment', async () => {
+        const response = await bulkGetAttachments({
+          attachmentIds: [updatedCase.comments![0].id],
+          caseId: updatedCase.id,
+          supertest,
+        });
+
+        expect(response.attachments.length).to.be(1);
+        expect(response.errors.length).to.be(0);
+        expect(response.attachments[0].id).to.eql(updatedCase.comments![0].id);
+      });
+
+      it('should retrieve a multiple attachments', async () => {
+        const response = await bulkGetAttachments({
+          attachmentIds: [updatedCase.comments![0].id, updatedCase.comments![1].id],
+          caseId: updatedCase.id,
+          supertest,
+        });
+
+        expect(response.attachments.length).to.be(2);
+        expect(response.errors.length).to.be(0);
+        expect(response.attachments[0].id).to.eql(updatedCase.comments![0].id);
+        expect(response.attachments[1].id).to.eql(updatedCase.comments![1].id);
+      });
+
+      it('returns an empty array when no ids are requested', async () => {
+        const { attachments, errors } = await bulkGetAttachments({
+          attachmentIds: [],
+          caseId: updatedCase.id,
+          supertest,
+          expectedHttpCode: 200,
+        });
+
+        expect(attachments.length).to.be(0);
+        expect(errors.length).to.be(0);
+      });
+
+      it('returns a 400 when more than 10k ids are requested', async () => {
+        await bulkGetAttachments({
+          attachmentIds: Array.from(Array(10001).keys()).map((item) => item.toString()),
+          caseId: updatedCase.id,
+          supertest,
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('populates the errors field with attachments that could not be found', async () => {
+        const response = await bulkGetAttachments({
+          attachmentIds: [updatedCase.comments![0].id, 'does-not-exist'],
+          caseId: updatedCase.id,
+          supertest,
+          expectedHttpCode: 400,
+        });
+
+        expect(response.attachments.length).to.be(1);
+        expect(response.errors.length).to.be(1);
+        expect(response.errors[0]).to.eql({
+          error: 'Not Found',
+          message: 'Saved object [cases/does-not-exist] not found',
+          status: 404,
+          attachmentId: 'does-not-exist',
+        });
+      });
+    });
+
+    describe('rbac', () => {
+      const supertestWithoutAuth = getService('supertestWithoutAuth');
+
+      afterEach(async () => {
+        await deleteAllCaseItems(es);
+      });
+
+      it('should return the correct attachments', async () => {
+        const [secCase, obsCase] = await Promise.all([
+          // Create case owned by the security solution user
+          createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+            200,
+            {
+              user: superUser,
+              space: 'space1',
+            }
+          ),
+          // Create case owned by the observability user
+          createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest({ owner: 'observabilityFixture' }),
+            200,
+            {
+              user: superUser,
+              space: 'space1',
+            }
+          ),
+        ]);
+
+        const [patchedSecCase, patchedObsCase] = await Promise.all([
+          createComment({
+            supertest: supertestWithoutAuth,
+            caseId: secCase.id,
+            params: postCommentUserReq,
+            auth: { user: superUser, space: 'space1' },
+          }),
+          createComment({
+            supertest: supertestWithoutAuth,
+            caseId: obsCase.id,
+            params: postCommentUserReq,
+            auth: { user: superUser, space: 'space1' },
+          }),
+        ]);
+
+        const secAttachmentId = patchedSecCase.comments![0].id;
+        const obsAttachmentId = patchedObsCase.comments![0].id;
+        const attachmentIds = [secAttachmentId, obsAttachmentId];
+
+        for (const scenario of [
+          {
+            user: globalRead,
+            numberOfExpectedCases: 2,
+            owners: ['securitySolutionFixture', 'observabilityFixture'],
+            caseId: secCase.id,
+          },
+          {
+            user: superUser,
+            numberOfExpectedCases: 2,
+            owners: ['securitySolutionFixture', 'observabilityFixture'],
+            caseId: secCase.id,
+          },
+          {
+            user: secOnlyRead,
+            numberOfExpectedCases: 1,
+            owners: ['securitySolutionFixture'],
+            errors: { forAttachmentId: obsAttachmentId, forOwner: obsCase.owner },
+            caseId: secCase.id,
+          },
+          {
+            user: obsOnlyRead,
+            numberOfExpectedCases: 1,
+            owners: ['observabilityFixture'],
+            errors: { forAttachmentId: secAttachmentId, forOwner: secCase.owner },
+            caseId: obsCase.id,
+          },
+          {
+            user: obsSecRead,
+            numberOfExpectedCases: 2,
+            owners: ['securitySolutionFixture', 'observabilityFixture'],
+            caseId: obsCase.id,
+          },
+          {
+            user: obsSec,
+            numberOfExpectedCases: 2,
+            owners: ['securitySolutionFixture', 'observabilityFixture'],
+            caseId: obsCase.id,
+          },
+          {
+            user: secOnly,
+            numberOfExpectedCases: 1,
+            owners: ['securitySolutionFixture'],
+            errors: { forAttachmentId: obsAttachmentId, forOwner: obsCase.owner },
+            caseId: secCase.id,
+          },
+          {
+            user: obsOnly,
+            numberOfExpectedCases: 1,
+            owners: ['observabilityFixture'],
+            errors: { forAttachmentId: secAttachmentId, forOwner: secCase.owner },
+            caseId: obsCase.id,
+          },
+        ]) {
+          const { attachments, errors } = await bulkGetAttachments({
+            supertest: supertestWithoutAuth,
+            attachmentIds,
+            caseId: scenario.caseId,
+            auth: { user: scenario.user, space: 'space1' },
+          });
+
+          ensureSavedObjectIsAuthorized(
+            attachments,
+            scenario.numberOfExpectedCases,
+            scenario.owners
+          );
+
+          if (scenario.errors) {
+            expect(errors.length).to.eql(1);
+            expect(errors[0]).to.eql({
+              error: 'Forbidden',
+              message: `Unauthorized to access attachment with owner: "${scenario.errors.forOwner}"`,
+              status: 403,
+              attachmentId: scenario.errors.forAttachmentId,
+            });
+          } else {
+            expect(errors.length).to.eql(0);
+          }
+        }
+      });
+
+      for (const scenario of [
+        { user: noKibanaPrivileges, space: 'space1' },
+        { user: secOnly, space: 'space2' },
+      ]) {
+        it(`User ${scenario.user.username} with role(s) ${scenario.user.roles.join()} and space ${
+          scenario.space
+        } - should not bulk get attachments`, async () => {
+          // super user creates a case at the appropriate space
+          const newCase = await createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+            200,
+            {
+              user: superUser,
+              space: scenario.space,
+            }
+          );
+
+          const patchedCase = await createComment({
+            supertest: supertestWithoutAuth,
+            caseId: newCase.id,
+            params: postCommentUserReq,
+            auth: { user: superUser, space: scenario.space },
+          });
+
+          await bulkGetAttachments({
+            supertest: supertestWithoutAuth,
+            attachmentIds: [patchedCase.comments![0].id],
+            caseId: patchedCase.id,
+            auth: {
+              user: scenario.user,
+              space: scenario.space,
+            },
+            expectedHttpCode: 403,
+          });
+        });
+      }
+
+      it('should get an empty array when the user does not have access to owner', async () => {
+        const newCase = await createCase(
+          supertestWithoutAuth,
+          getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+          200,
+          {
+            user: superUser,
+            space: 'space1',
+          }
+        );
+
+        const patchedCase = await createComment({
+          supertest: supertestWithoutAuth,
+          caseId: newCase.id,
+          params: postCommentUserReq,
+          auth: { user: superUser, space: 'space1' },
+        });
+
+        for (const user of [obsOnly, obsOnlyRead]) {
+          const { attachments, errors } = await bulkGetAttachments({
+            supertest: supertestWithoutAuth,
+            attachmentIds: [patchedCase.comments![0].id],
+            caseId: patchedCase.id,
+            auth: { user, space: 'space1' },
+          });
+
+          expect(attachments.length).to.be(0);
+          expect(errors.length).to.be(1);
+
+          expect(errors[0]).to.eql({
+            error: 'Forbidden',
+            message: 'Unauthorized to access attachment with owner: "securitySolutionFixture"',
+            status: 403,
+            attachmentId: patchedCase.comments![0].id,
+          });
+        }
+      });
+    });
+  });
+};

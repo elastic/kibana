@@ -6,71 +6,47 @@
  */
 import type { SavedObject } from '@kbn/core/server';
 
+import Boom from '@hapi/boom';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/lib/Either';
+import { identity } from 'fp-ts/lib/function';
+
+import { partition } from 'lodash';
+import { MAX_BULK_GET_ATTACHMENTS } from '../../../common/constants';
 import type {
   AlertResponse,
   AllCommentsResponse,
   AttributesTypeAlerts,
+  BulkGetCommentsResponse,
+  CommentAttributes,
   CommentResponse,
   CommentsResponse,
-  FindQueryParams,
 } from '../../../common/api';
-import { AllCommentsResponseRt, CommentResponseRt, CommentsResponseRt } from '../../../common/api';
+import {
+  excess,
+  throwErrors,
+  BulkGetCommentsResponseRt,
+  AllCommentsResponseRt,
+  CommentResponseRt,
+  CommentsResponseRt,
+  BulkGetCommentsRequestRt,
+} from '../../../common/api';
 import {
   defaultSortField,
   transformComments,
   flattenCommentSavedObject,
   flattenCommentSavedObjects,
   getIDsAndIndicesAsArrays,
+  asArray,
 } from '../../common/utils';
 import { createCaseError } from '../../common/error';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
-import type { CasesClientArgs } from '../types';
+import type { CasesClientArgs, SOWithErrors } from '../types';
 import { combineFilters, stringToKueryNode } from '../utils';
 import { Operations } from '../../authorization';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 import type { CasesClient } from '../client';
-
-/**
- * Parameters for finding attachments of a case
- */
-export interface FindArgs {
-  /**
-   * The case ID for finding associated attachments
-   */
-  caseID: string;
-  /**
-   * Optional parameters for filtering the returned attachments
-   */
-  queryParams?: FindQueryParams;
-}
-
-/**
- * Parameters for retrieving all attachments of a case
- */
-export interface GetAllArgs {
-  /**
-   * The case ID to retrieve all attachments for
-   */
-  caseID: string;
-}
-
-export interface GetArgs {
-  /**
-   * The ID of the case to retrieve an attachment from
-   */
-  caseID: string;
-  /**
-   * The ID of the attachment to retrieve
-   */
-  attachmentID: string;
-}
-
-export interface GetAllAlertsAttachToCase {
-  /**
-   * The ID of the case to retrieve the alerts from
-   */
-  caseId: string;
-}
+import type { BulkGetArgs, FindArgs, GetAllAlertsAttachToCase, GetAllArgs, GetArgs } from './types';
 
 const normalizeAlertResponse = (alerts: Array<SavedObject<AttributesTypeAlerts>>): AlertResponse =>
   alerts.reduce((acc: AlertResponse, alert) => {
@@ -92,8 +68,6 @@ const normalizeAlertResponse = (alerts: Array<SavedObject<AttributesTypeAlerts>>
 
 /**
  * Retrieves all alerts attached to a specific case.
- *
- * @ignore
  */
 export const getAllAlertsAttachToCase = async (
   { caseId }: GetAllAlertsAttachToCase,
@@ -140,8 +114,6 @@ export const getAllAlertsAttachToCase = async (
 
 /**
  * Retrieves the attachments for a case entity. This support pagination.
- *
- * @ignore
  */
 export async function find(
   { caseID, queryParams }: FindArgs,
@@ -217,8 +189,6 @@ export async function find(
 
 /**
  * Retrieves a single attachment by its ID.
- *
- * @ignore
  */
 export async function get(
   { attachmentID, caseID }: GetArgs,
@@ -252,8 +222,6 @@ export async function get(
 
 /**
  * Retrieves all the attachments for a case.
- *
- * @ignore
  */
 export async function getAll(
   { caseID }: GetAllArgs,
@@ -291,3 +259,88 @@ export async function getAll(
     });
   }
 }
+
+type AttachmentSavedObjectWithErrors = SOWithErrors<CommentAttributes>;
+
+/**
+ * Retrieves multiple attachments by id.
+ */
+export async function bulkGet(
+  { attachmentIDs, caseID }: BulkGetArgs,
+  clientArgs: CasesClientArgs
+): Promise<BulkGetCommentsResponse> {
+  const {
+    services: { attachmentService },
+    logger,
+    authorization,
+  } = clientArgs;
+
+  try {
+    const request = pipe(
+      excess(BulkGetCommentsRequestRt).decode({ ids: attachmentIDs }),
+      fold(throwErrors(Boom.badRequest), identity)
+    );
+
+    const attachmentIdsArray = asArray(request.ids);
+
+    throwErrorIfIdsExceedTheLimit(attachmentIdsArray);
+
+    const attachments = await attachmentService.getter.bulkGet(attachmentIdsArray);
+
+    const [validAttachments, soBulkGetErrors] = partition(
+      attachments.saved_objects,
+      (attachment) => attachment.error === undefined
+    ) as [Array<SavedObject<CommentAttributes>>, AttachmentSavedObjectWithErrors];
+
+    const { authorized: authorizedCases, unauthorized: unauthorizedCases } =
+      await authorization.getAndEnsureAuthorizedEntities({ savedObjects: validAttachments });
+
+    const errors = constructErrors(soBulkGetErrors, unauthorizedCases);
+
+    return BulkGetCommentsResponseRt.encode({
+      attachments: flattenCommentSavedObjects(authorizedCases),
+      errors,
+    });
+  } catch (error) {
+    throw createCaseError({
+      message: `Failed to get attachments for case id: ${caseID}: ${error}`,
+      error,
+      logger,
+    });
+  }
+}
+
+const throwErrorIfIdsExceedTheLimit = (ids: string[]) => {
+  if (ids.length > MAX_BULK_GET_ATTACHMENTS) {
+    throw Boom.badRequest(
+      `Maximum request limit of ${MAX_BULK_GET_ATTACHMENTS} attachments reached`
+    );
+  }
+};
+
+const constructErrors = (
+  soBulkGetErrors: AttachmentSavedObjectWithErrors,
+  unauthorizedCases: Array<SavedObject<CommentAttributes>>
+): BulkGetCommentsResponse['errors'] => {
+  const errors: BulkGetCommentsResponse['errors'] = [];
+
+  for (const soError of soBulkGetErrors) {
+    errors.push({
+      error: soError.error.error,
+      message: soError.error.message,
+      status: soError.error.statusCode,
+      attachmentId: soError.id,
+    });
+  }
+
+  for (const theCase of unauthorizedCases) {
+    errors.push({
+      error: 'Forbidden',
+      message: `Unauthorized to access attachment with owner: "${theCase.attributes.owner}"`,
+      status: 403,
+      attachmentId: theCase.id,
+    });
+  }
+
+  return errors;
+};

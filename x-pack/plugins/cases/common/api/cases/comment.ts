@@ -279,6 +279,22 @@ export const FindQueryParamsRt = rt.partial({
 
 export const BulkCreateCommentRequestRt = rt.array(CommentRequestRt);
 
+export const BulkGetCommentsRequestRt = rt.type({
+  ids: rt.union([rt.array(rt.string), rt.string]),
+});
+
+export const BulkGetCommentsResponseRt = rt.type({
+  attachments: AllCommentsResponseRt,
+  errors: rt.array(
+    rt.type({
+      error: rt.string,
+      message: rt.string,
+      status: rt.union([rt.undefined, rt.number]),
+      attachmentId: rt.string,
+    })
+  ),
+});
+
 export type FindQueryParams = rt.TypeOf<typeof FindQueryParamsRt>;
 export type AttributesTypeActions = rt.TypeOf<typeof AttributesTypeActionsRt>;
 export type AttributesTypeAlerts = rt.TypeOf<typeof AttributesTypeAlertsRt>;
@@ -317,3 +333,5 @@ export type CommentRequestExternalReferenceType = rt.TypeOf<typeof ExternalRefer
 export type CommentRequestExternalReferenceSOType = rt.TypeOf<typeof ExternalReferenceSORt>;
 export type CommentRequestExternalReferenceNoSOType = rt.TypeOf<typeof ExternalReferenceNoSORt>;
 export type CommentRequestPersistableStateType = rt.TypeOf<typeof PersistableStateAttachmentRt>;
+export type BulkGetCommentsResponse = rt.TypeOf<typeof BulkGetCommentsResponseRt>;
+export type BulkGetCommentsRequest = rt.TypeOf<typeof BulkGetCommentsRequestRt>;

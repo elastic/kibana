@@ -12,7 +12,7 @@ import { identity } from 'fp-ts/lib/function';
 
 import { SavedObjectsUtils } from '@kbn/core/server';
 
-import type { BulkCreateCommentRequest, CaseResponse, CommentRequest } from '../../../common/api';
+import type { CaseResponse, CommentRequest } from '../../../common/api';
 import { BulkCreateCommentRequestRt, throwErrors } from '../../../common/api';
 
 import { CaseCommentModel } from '../../common/models';
@@ -22,11 +22,7 @@ import type { CasesClientArgs } from '..';
 import { decodeCommentRequest } from '../utils';
 import type { OwnerEntity } from '../../authorization';
 import { Operations } from '../../authorization';
-
-export interface BulkCreateArgs {
-  caseId: string;
-  attachments: BulkCreateCommentRequest;
-}
+import type { BulkCreateArgs } from './types';
 
 /**
  * Create an attachment to a case.

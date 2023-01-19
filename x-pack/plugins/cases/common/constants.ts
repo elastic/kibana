@@ -87,6 +87,8 @@ export const CASE_METRICS_DETAILS_URL = `${CASES_URL}/metrics/{case_id}` as cons
 export const CASES_INTERNAL_URL = '/internal/cases' as const;
 export const INTERNAL_BULK_CREATE_ATTACHMENTS_URL =
   `${CASES_INTERNAL_URL}/{case_id}/attachments/_bulk_create` as const;
+export const INTERNAL_BULK_GET_ATTACHMENTS_URL =
+  `${CASES_INTERNAL_URL}/{case_id}/attachments/_bulk_get` as const;
 export const INTERNAL_SUGGEST_USER_PROFILES_URL =
   `${CASES_INTERNAL_URL}/_suggest_user_profiles` as const;
 export const INTERNAL_CONNECTORS_URL = `${CASES_INTERNAL_URL}/{case_id}/_connectors` as const;
@@ -137,6 +139,7 @@ export const OWNER_INFO = {
  * Searching
  */
 export const MAX_DOCS_PER_PAGE = 10000 as const;
+export const MAX_BULK_GET_ATTACHMENTS = MAX_DOCS_PER_PAGE;
 export const MAX_CONCURRENT_SEARCHES = 10 as const;
 export const MAX_BULK_GET_CASES = 1000 as const;
 

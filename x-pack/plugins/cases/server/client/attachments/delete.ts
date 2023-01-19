@@ -15,30 +15,7 @@ import { CASE_SAVED_OBJECT, MAX_CONCURRENT_SEARCHES } from '../../../common/cons
 import type { CasesClientArgs } from '../types';
 import { createCaseError } from '../../common/error';
 import { Operations } from '../../authorization';
-
-/**
- * Parameters for deleting all comments of a case.
- */
-export interface DeleteAllArgs {
-  /**
-   * The case ID to delete all attachments for
-   */
-  caseID: string;
-}
-
-/**
- * Parameters for deleting a single attachment of a case.
- */
-export interface DeleteArgs {
-  /**
-   * The case ID to delete an attachment from
-   */
-  caseID: string;
-  /**
-   * The attachment ID to delete
-   */
-  attachmentID: string;
-}
+import type { DeleteAllArgs, DeleteArgs } from './types';
 
 /**
  * Delete all comments for a case.

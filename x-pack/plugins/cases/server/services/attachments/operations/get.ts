@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObject } from '@kbn/core/server';
+import type { SavedObject, SavedObjectsBulkResponse } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   CASE_COMMENT_SAVED_OBJECT,
@@ -18,6 +18,7 @@ import type {
   AttributesTypeAlerts,
   CommentAttributes as AttachmentAttributes,
   CommentAttributesWithoutRefs as AttachmentAttributesWithoutRefs,
+  CommentAttributes,
 } from '../../../../common/api';
 import { CommentType } from '../../../../common/api';
 import type { AttachedToCaseArgs, GetAttachmentArgs, ServiceContext } from '../types';
@@ -27,6 +28,35 @@ type GetAllAlertsAttachToCaseArgs = AttachedToCaseArgs;
 
 export class AttachmentGetter {
   constructor(private readonly context: ServiceContext) {}
+
+  public async bulkGet(
+    attachmentIds: string[]
+  ): Promise<SavedObjectsBulkResponse<CommentAttributes>> {
+    try {
+      this.context.log.debug(
+        `Attempting to retrieve attachments with ids: ${attachmentIds.join()}`
+      );
+
+      const response =
+        await this.context.unsecuredSavedObjectsClient.bulkGet<AttachmentAttributesWithoutRefs>(
+          attachmentIds.map((id) => ({ id, type: CASE_COMMENT_SAVED_OBJECT }))
+        );
+
+      return {
+        saved_objects: response.saved_objects.map((so) =>
+          injectAttachmentSOAttributesFromRefs(
+            so,
+            this.context.persistableStateAttachmentTypeRegistry
+          )
+        ),
+      };
+    } catch (error) {
+      this.context.log.error(
+        `Error retrieving attachments with ids ${attachmentIds.join()}: ${error}`
+      );
+      throw error;
+    }
+  }
 
   public async getAttachmentIdsForCases({ caseIds }: { caseIds: string[] }) {
     try {
