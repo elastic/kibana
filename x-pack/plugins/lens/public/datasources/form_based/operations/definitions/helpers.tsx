@@ -74,7 +74,11 @@ export function getInvalidFieldMessage(
               missingFields: missingFields.join(', '),
             },
           }),
-          displayLocations: [{ id: 'toolbar' }, { id: 'dimensionTrigger', dimensionId: columnId }],
+          displayLocations: [
+            { id: 'toolbar' },
+            { id: 'dimensionTrigger', dimensionId: columnId },
+            { id: 'embeddableBadge' },
+          ],
         },
       ];
     }

@@ -880,9 +880,7 @@ export class Embeddable
       domNode
     );
 
-    const warningsToDisplay = this.getUserMessages('embeddableBadge', {
-      severity: 'warning',
-    });
+    const warningsToDisplay = this.getUserMessages('embeddableBadge');
 
     if (warningsToDisplay.length && this.warningDomNode) {
       render(
