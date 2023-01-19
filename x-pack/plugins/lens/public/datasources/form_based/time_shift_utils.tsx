@@ -21,6 +21,7 @@ import {
 import type { DateRange } from '../../../common/types';
 import type { FormBasedLayer, FormBasedPrivateState } from './types';
 import type { FramePublicAPI, IndexPattern } from '../../types';
+import type { FieldBasedOperationErrorMessage } from './operations/definitions';
 
 export function parseTimeShiftWrapper(timeShiftString: string, dateRange: DateRange) {
   return isAbsoluteTimeShift(timeShiftString.trim())
@@ -174,7 +175,7 @@ export function getLayerTimeShiftChecks({
 export function getDisallowedPreviousShiftMessage(
   layer: FormBasedLayer,
   columnId: string
-): string[] | undefined {
+): FieldBasedOperationErrorMessage[] | undefined {
   const currentColumn = layer.columns[columnId];
   const hasPreviousShift =
     currentColumn.timeShift &&

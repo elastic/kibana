@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
-import { OperationDefinition } from '.';
+import type { FieldBasedOperationErrorMessage, OperationDefinition } from '.';
 import { FieldBasedIndexPatternColumn, ValueFormatConfig } from './column_types';
 import type { IndexPatternField, IndexPattern } from '../../../../types';
 import { DataType } from '../../../../types';
@@ -202,7 +202,7 @@ export const lastValueOperation: OperationDefinition<
   },
   getErrorMessage(layer, columnId, indexPattern) {
     const column = layer.columns[columnId] as LastValueIndexPatternColumn;
-    let errorMessages: string[] = [];
+    let errorMessages: FieldBasedOperationErrorMessage[] = [];
     const invalidSourceFieldMessage = getInvalidFieldMessage(column, indexPattern);
     const invalidSortFieldMessage = getInvalidSortFieldMessage(
       column.params.sortField,

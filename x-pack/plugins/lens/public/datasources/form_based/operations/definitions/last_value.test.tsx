@@ -918,7 +918,10 @@ describe('last_value', () => {
         },
       };
       expect(lastValueOperation.getErrorMessage!(errorLayer, 'col1', indexPattern)).toEqual([
-        'Field notExisting was not found',
+        {
+          displayLocations: [{ id: 'toolbar' }],
+          message: 'Field notExisting was not found',
+        },
       ]);
     });
 

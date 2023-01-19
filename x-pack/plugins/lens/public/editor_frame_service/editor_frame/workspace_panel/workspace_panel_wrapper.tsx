@@ -84,9 +84,7 @@ export function WorkspacePanelWrapper({
 
   const warningMessages: React.ReactNode[] = [];
 
-  warningMessages.push(
-    ...getUserMessages('toolbar', { severity: 'warning' }).map(({ longMessage }) => longMessage)
-  );
+  warningMessages.push(...getUserMessages('toolbar').map(({ longMessage }) => longMessage));
 
   if (requestWarnings) {
     warningMessages.push(...requestWarnings);

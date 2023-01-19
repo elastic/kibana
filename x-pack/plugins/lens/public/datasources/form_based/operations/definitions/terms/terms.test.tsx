@@ -2637,7 +2637,10 @@ describe('terms', () => {
         },
       };
       expect(termsOperation.getErrorMessage!(layer, 'col1', indexPattern)).toEqual([
-        'Field notExisting was not found',
+        {
+          displayLocations: [{ id: 'toolbar' }],
+          message: 'Field notExisting was not found',
+        },
       ]);
     });
 

@@ -23,7 +23,10 @@ describe('helpers', () => {
         createMockedIndexPattern()
       );
       expect(messages).toHaveLength(1);
-      expect(messages![0]).toEqual('Field NoBytes was not found');
+      expect(messages![0]).toEqual({
+        displayLocations: [{ id: 'toolbar' }],
+        message: 'Field NoBytes was not found',
+      });
     });
 
     it('returns an error if a field is the wrong type', () => {
@@ -56,7 +59,10 @@ describe('helpers', () => {
         createMockedIndexPattern()
       );
       expect(messages).toHaveLength(1);
-      expect(messages![0]).toEqual('Field NoBytes was not found');
+      expect(messages![0]).toEqual({
+        displayLocations: [{ id: 'toolbar' }],
+        message: 'Field NoBytes was not found',
+      });
     });
 
     it('returns an error if multiple fields do not exist', () => {
@@ -74,7 +80,10 @@ describe('helpers', () => {
         createMockedIndexPattern()
       );
       expect(messages).toHaveLength(1);
-      expect(messages![0]).toEqual('Fields NotExisting, NoBytes were not found');
+      expect(messages![0]).toEqual({
+        displayLocations: [{ id: 'toolbar' }],
+        message: 'Fields NotExisting, NoBytes were not found',
+      });
     });
 
     it('returns an error if one field amongst multiples has the wrong type', () => {

@@ -308,7 +308,7 @@ export interface UserMessageFilters {
 
 export type UserMessagesGetter = (
   locationId: UserMessagesDisplayLocationId | UserMessagesDisplayLocationId[] | undefined,
-  filters: UserMessageFilters
+  filters?: UserMessageFilters
 ) => UserMessage[];
 
 export type AddUserMessages = (messages: RemovableUserMessage[]) => () => void;

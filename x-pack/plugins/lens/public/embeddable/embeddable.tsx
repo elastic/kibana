@@ -467,7 +467,7 @@ export class Embeddable
     return filterUserMessages(
       [...this._userMessages, ...Object.values(this.additionalUserMessages)],
       locationId,
-      filters
+      filters ?? {}
     );
   };
 

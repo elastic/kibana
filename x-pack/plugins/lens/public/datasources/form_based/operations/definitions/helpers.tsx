@@ -7,7 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import type { IndexPattern, IndexPatternField } from '../../../../types';
-import { GenericIndexPatternColumn, operationDefinitionMap } from '.';
+import {
+  type FieldBasedOperationErrorMessage,
+  type GenericIndexPatternColumn,
+  operationDefinitionMap,
+} from '.';
 import {
   FieldBasedIndexPatternColumn,
   FormattedIndexPatternColumn,
@@ -19,7 +23,7 @@ import { hasField } from '../../pure_utils';
 export function getInvalidFieldMessage(
   column: FieldBasedIndexPatternColumn,
   indexPattern?: IndexPattern
-) {
+): FieldBasedOperationErrorMessage[] | undefined {
   if (!indexPattern) {
     return;
   }
@@ -58,14 +62,17 @@ export function getInvalidFieldMessage(
     const missingFields = fields.map((field, i) => (field ? null : fieldNames[i])).filter(Boolean);
     if (missingFields.length) {
       return [
-        i18n.translate('xpack.lens.indexPattern.fieldsNotFound', {
-          defaultMessage:
-            '{count, plural, one {Field} other {Fields}} {missingFields} {count, plural, one {was} other {were}} not found',
-          values: {
-            count: missingFields.length,
-            missingFields: missingFields.join(', '),
-          },
-        }),
+        {
+          message: i18n.translate('xpack.lens.indexPattern.fieldsNotFound', {
+            defaultMessage:
+              '{count, plural, one {Field} other {Fields}} {missingFields} {count, plural, one {was} other {were}} not found',
+            values: {
+              count: missingFields.length,
+              missingFields: missingFields.join(', '),
+            },
+          }),
+          displayLocations: [{ id: 'toolbar' }],
+        },
       ];
     }
     if (isWrongType) {
@@ -89,9 +96,9 @@ export function getInvalidFieldMessage(
 }
 
 export function combineErrorMessages(
-  errorMessages: Array<string[] | undefined>
-): string[] | undefined {
-  const messages = (errorMessages.filter(Boolean) as string[][]).flat();
+  errorMessages: Array<FieldBasedOperationErrorMessage[] | undefined>
+): FieldBasedOperationErrorMessage[] | undefined {
+  const messages = (errorMessages.filter(Boolean) as FieldBasedOperationErrorMessage[][]).flat();
   return messages.length ? messages : undefined;
 }
 

@@ -49,12 +49,13 @@ import { countOperation } from './count';
 import { mathOperation, formulaOperation } from './formula';
 import { staticValueOperation } from './static_value';
 import { lastValueOperation } from './last_value';
-import {
+import type {
   FrameDatasourceAPI,
   IndexPattern,
   IndexPatternField,
   OperationMetadata,
   ParamEditorCustomProps,
+  UserMessage,
 } from '../../../../types';
 import type {
   BaseIndexPatternColumn,
@@ -312,23 +313,7 @@ interface BaseOperationDefinitionProps<
     indexPattern: IndexPattern,
     dateRange?: DateRange,
     operationDefinitionMap?: Record<string, GenericOperationDefinition>
-  ) =>
-    | Array<
-        | string
-        | {
-            message: string;
-            fixAction?: {
-              label: string;
-              newState: (
-                data: DataPublicPluginStart,
-                core: CoreStart,
-                frame: FrameDatasourceAPI,
-                layerId: string
-              ) => Promise<FormBasedLayer>;
-            };
-          }
-      >
-    | undefined;
+  ) => FieldBasedOperationErrorMessage[] | undefined;
 
   /*
    * Flag whether this operation can be scaled by time unit if a date histogram is available.
@@ -468,6 +453,21 @@ interface FilterParams {
   lucene?: string;
 }
 
+export type FieldBasedOperationErrorMessage =
+  | {
+      message: string;
+      displayLocations?: UserMessage['displayLocations'];
+      fixAction?: {
+        label: string;
+        newState: (
+          data: DataPublicPluginStart,
+          core: CoreStart,
+          frame: FrameDatasourceAPI,
+          layerId: string
+        ) => Promise<FormBasedLayer>;
+      };
+    }
+  | string;
 interface FieldlessOperationDefinition<C extends BaseIndexPatternColumn, P = {}> {
   input: 'none';
 
@@ -571,23 +571,7 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn, P = {}
     columnId: string,
     indexPattern: IndexPattern,
     operationDefinitionMap?: Record<string, GenericOperationDefinition>
-  ) =>
-    | Array<
-        | string
-        | {
-            message: string;
-            fixAction?: {
-              label: string;
-              newState: (
-                data: DataPublicPluginStart,
-                core: CoreStart,
-                frame: FrameDatasourceAPI,
-                layerId: string
-              ) => Promise<FormBasedLayer>;
-            };
-          }
-      >
-    | undefined;
+  ) => FieldBasedOperationErrorMessage[] | undefined;
 }
 
 export interface RequiredReference {

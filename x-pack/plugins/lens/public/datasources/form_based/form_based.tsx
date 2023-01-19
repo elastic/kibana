@@ -998,7 +998,10 @@ function getLayerErrorMessages(
         const message: UserMessage = {
           severity: 'error',
           fixableInEditor: true,
-          displayLocations: [{ id: 'visualization' }],
+          displayLocations:
+            typeof error !== 'string' && error.displayLocations
+              ? error.displayLocations
+              : [{ id: 'visualization' }],
           shortMessage: '',
           longMessage:
             typeof error === 'string' ? (

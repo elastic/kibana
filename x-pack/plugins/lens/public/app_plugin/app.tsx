@@ -541,7 +541,7 @@ export function App({
     filterUserMessages(
       [...userMessages, ...Object.values(additionalUserMessages)],
       locationId,
-      filterArgs
+      filterArgs ?? {}
     );
 
   const addUserMessages: AddUserMessages = (messages) => {
