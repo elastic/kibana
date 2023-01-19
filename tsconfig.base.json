@@ -92,6 +92,8 @@
       "@kbn/cases-fixture-plugin/*": ["x-pack/test/functional_with_es_ssl/plugins/cases/*"],
       "@kbn/cases-plugin": ["x-pack/plugins/cases"],
       "@kbn/cases-plugin/*": ["x-pack/plugins/cases/*"],
+      "@kbn/cell-actions": ["packages/kbn-cell-actions"],
+      "@kbn/cell-actions/*": ["packages/kbn-cell-actions/*"],
       "@kbn/chart-expressions-common": ["src/plugins/chart_expressions/common"],
       "@kbn/chart-expressions-common/*": ["src/plugins/chart_expressions/common/*"],
       "@kbn/chart-icons": ["packages/kbn-chart-icons"],
@@ -1296,6 +1298,8 @@
       "@kbn/watcher-plugin/*": ["x-pack/plugins/watcher/*"],
       "@kbn/web-worker-stub": ["packages/kbn-web-worker-stub"],
       "@kbn/web-worker-stub/*": ["packages/kbn-web-worker-stub/*"],
+      "@kbn/whereis-pkg-cli": ["packages/kbn-whereis-pkg-cli"],
+      "@kbn/whereis-pkg-cli/*": ["packages/kbn-whereis-pkg-cli/*"],
       "@kbn/yarn-lock-validator": ["packages/kbn-yarn-lock-validator"],
       "@kbn/yarn-lock-validator/*": ["packages/kbn-yarn-lock-validator/*"],
       // END AUTOMATED PACKAGE LISTING
