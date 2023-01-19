@@ -81,7 +81,7 @@ export const errorDuplicateName = i18n.translate('xpack.cloudDefend.errorDuplica
 });
 
 export const errorInvalidName = i18n.translate('xpack.cloudDefend.errorInvalidName', {
-  defaultMessage: 'Selector names must be alpha numeric and contain no spaces.',
+  defaultMessage: 'Selector names must be alphanumeric and contain no spaces.',
 });
 
 export const errorValueRequired = i18n.translate('xpack.cloudDefend.errorValueRequired', {

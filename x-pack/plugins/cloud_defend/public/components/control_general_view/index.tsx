@@ -157,7 +157,7 @@ export const ControlGeneralView = ({ policy, onChange, show }: ViewDeps) => {
 
   const onRemoveResponse = useCallback(
     (index: number) => {
-      const newResponses = { ...responses };
+      const newResponses = [...responses];
       newResponses.splice(index, 1);
       onUpdateYaml(selectors, newResponses);
     },

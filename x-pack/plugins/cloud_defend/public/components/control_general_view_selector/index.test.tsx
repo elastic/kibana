@@ -135,7 +135,7 @@ describe('<ControlGeneralViewSelector />', () => {
     expect(onChange.mock.calls[0][0]).toHaveProperty('hasErrors');
   });
 
-  it('prevents conditions from having values that exceed MAX_CONDITION_VALUE_LENGTH', async () => {
+  it('prevents conditions from having values that exceed MAX_CONDITION_VALUE_LENGTH_BYTES', async () => {
     const { getByText, getByTestId, rerender } = render(<WrappedComponent />);
 
     const addConditionBtn = getByTestId('cloud-defend-btnaddselectorcondition');
@@ -152,10 +152,30 @@ describe('<ControlGeneralViewSelector />', () => {
     );
 
     if (el) {
-      userEvent.type(
-        el,
-        'really really really really really really really really long string{enter}'
-      );
+      userEvent.type(el, new Array(513).join('a') + '{enter}');
+    } else {
+      throw new Error("Can't find input");
+    }
+
+    expect(getByText(i18n.errorValueLengthExceeded)).toBeTruthy();
+  });
+
+  it('prevents targetFilePath conditions from having values that exceed MAX_FILE_PATH_VALUE_LENGTH_BYTES', async () => {
+    const { getByText, getByTestId, rerender } = render(<WrappedComponent />);
+
+    const addConditionBtn = getByTestId('cloud-defend-btnaddselectorcondition');
+    userEvent.click(addConditionBtn);
+
+    await waitFor(() => userEvent.click(getByText('Target file path')));
+
+    const updatedSelector: ControlSelector = onChange.mock.calls[0][0];
+
+    rerender(<WrappedComponent selector={updatedSelector} />);
+
+    const el = getByTestId('cloud-defend-selectorcondition-targetFilePath').querySelector('input');
+
+    if (el) {
+      userEvent.type(el, new Array(257).join('a') + '{enter}');
     } else {
       throw new Error("Can't find input");
     }

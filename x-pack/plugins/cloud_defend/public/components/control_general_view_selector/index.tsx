@@ -29,7 +29,12 @@ import {
   ControlSelector,
 } from '../../types';
 import * as i18n from '../control_general_view/translations';
-import { VALID_SELECTOR_NAME_REGEX, MAX_CONDITION_VALUE_LENGTH } from '../../common/constants';
+import {
+  VALID_SELECTOR_NAME_REGEX,
+  MAX_SELECTOR_NAME_LENGTH,
+  MAX_CONDITION_VALUE_LENGTH_BYTES,
+  MAX_FILE_PATH_VALUE_LENGTH_BYTES,
+} from '../../common/constants';
 
 export const ControlGeneralViewSelector = ({
   selector,
@@ -118,7 +123,13 @@ export const ControlGeneralViewSelector = ({
       }
 
       values.forEach((value) => {
-        if (value.length > MAX_CONDITION_VALUE_LENGTH) {
+        const bytes = new Blob([value]).size;
+
+        if (prop === ControlSelectorCondition.targetFilePath) {
+          if (bytes > MAX_FILE_PATH_VALUE_LENGTH_BYTES) {
+            errors.push(i18n.errorValueLengthExceeded);
+          }
+        } else if (bytes > MAX_CONDITION_VALUE_LENGTH_BYTES) {
           errors.push(i18n.errorValueLengthExceeded);
         }
       });
@@ -248,7 +259,7 @@ export const ControlGeneralViewSelector = ({
             onChange={onNameChange}
             isInvalid={errorMap.hasOwnProperty('name')}
             data-test-subj="cloud-defend-selectorcondition-name"
-            maxLength={MAX_CONDITION_VALUE_LENGTH}
+            maxLength={MAX_SELECTOR_NAME_LENGTH}
           />
         </EuiFormRow>
         {Object.keys(selector).map((prop: string) => {
