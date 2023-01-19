@@ -850,7 +850,7 @@ export const optimisticallyAddEsAssetReferences = async (
     return updatedAssets ?? [];
   };
 
-  return pRetry(addEsAsstes, { retries: 20 });
+  return pRetry(addEsAsstes, { retries: 10 });
 };
 
 export async function ensurePackagesCompletedInstall(
