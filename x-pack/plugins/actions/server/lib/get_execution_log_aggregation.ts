@@ -18,6 +18,7 @@ const DEFAULT_MAX_KPI_BUCKETS_LIMIT = 10000;
 
 const SPACE_ID_FIELD = 'kibana.space_ids';
 const ACTION_NAME_FIELD = 'kibana.action.name';
+const ACTION_ID_FIELD = 'kibana.action.id';
 const START_FIELD = 'event.start';
 const ACTION_FIELD = 'event.action';
 const OUTCOME_FIELD = 'event.outcome';
@@ -255,6 +256,7 @@ export function getExecutionLogAggregation({
                         VERSION_FIELD,
                         SPACE_ID_FIELD,
                         ACTION_NAME_FIELD,
+                        ACTION_ID_FIELD,
                       ],
                     },
                   },
@@ -312,7 +314,8 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
   const version = outcomeAndMessage.kibana?.version ?? '';
 
   const spaceIds = outcomeAndMessage ? outcomeAndMessage?.kibana?.space_ids ?? [] : [];
-  const actionName = outcomeAndMessage ? outcomeAndMessage?.kibana.action?.name ?? '' : '';
+  const connectorName = outcomeAndMessage ? outcomeAndMessage?.kibana.action?.name ?? '' : '';
+  const connectorId = outcomeAndMessage ? outcomeAndMessage?.kibana.action?.id ?? '' : '';
   const timedOut = (bucket?.timeoutMessage?.doc_count ?? 0) > 0;
   return {
     id: bucket?.key ?? '',
@@ -323,7 +326,8 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
     version,
     schedule_delay_ms: scheduleDelayUs / Millis2Nanos,
     space_ids: spaceIds,
-    connector_name: actionName,
+    connector_name: connectorName,
+    connector_id: connectorId,
     timed_out: timedOut,
   };
 }

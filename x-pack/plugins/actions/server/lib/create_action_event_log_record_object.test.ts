@@ -62,6 +62,7 @@ describe('createActionEventLogRecordObject', () => {
         },
         action: {
           name: 'test name',
+          id: '1',
           execution: {
             uuid: '123abc',
           },
@@ -115,6 +116,7 @@ describe('createActionEventLogRecordObject', () => {
         ],
         action: {
           name: 'test name',
+          id: '1',
           execution: {
             uuid: '123abc',
           },
@@ -159,6 +161,7 @@ describe('createActionEventLogRecordObject', () => {
         ],
         action: {
           name: 'test name',
+          id: '1',
           execution: {
             uuid: '123abc',
           },
@@ -215,6 +218,7 @@ describe('createActionEventLogRecordObject', () => {
         },
         action: {
           name: 'test name',
+          id: '1',
           execution: {
             uuid: '123abc',
           },
@@ -283,6 +287,7 @@ describe('createActionEventLogRecordObject', () => {
         ],
         action: {
           name: 'test name',
+          id: '1',
           execution: {
             uuid: '123abc',
           },
@@ -339,6 +344,7 @@ describe('createActionEventLogRecordObject', () => {
         ],
         action: {
           name: 'test name',
+          id: '1',
           execution: {
             uuid: '123abc',
           },

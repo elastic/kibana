@@ -49,6 +49,7 @@ export function createActionEventLogRecordObject(params: CreateActionEventLogRec
     name,
     actionExecutionId,
     isPreconfigured,
+    actionId,
   } = params;
 
   const kibanaAlertRule = {
@@ -83,6 +84,7 @@ export function createActionEventLogRecordObject(params: CreateActionEventLogRec
       ...(task ? { task: { scheduled: task.scheduled, schedule_delay: task.scheduleDelay } } : {}),
       action: {
         ...(name ? { name } : {}),
+        id: actionId,
         execution: {
           uuid: actionExecutionId,
         },

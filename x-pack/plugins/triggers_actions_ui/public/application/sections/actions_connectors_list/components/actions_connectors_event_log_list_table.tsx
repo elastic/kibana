@@ -303,6 +303,16 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
   const columns: EuiDataGridColumn[] = useMemo(
     () => [
       {
+        id: 'connector_id',
+        displayAsText: i18n.translate(
+          'xpack.triggersActionsUI.sections.connectorEventLogList.eventLogColumn.connectorId',
+          {
+            defaultMessage: 'Connector Id',
+          }
+        ),
+        isSortable: getIsColumnSortable('connector_id'),
+      },
+      {
         id: 'id',
         displayAsText: i18n.translate(
           'xpack.triggersActionsUI.sections.connectorEventLogList.eventLogColumn.id',

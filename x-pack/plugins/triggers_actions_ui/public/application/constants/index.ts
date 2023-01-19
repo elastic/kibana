@@ -94,7 +94,6 @@ export const CONNECTOR_EXECUTION_LOG_COLUMN_IDS = [
   'space_ids',
   'id',
   'timestamp',
-  'execution_duration',
   'status',
   'connector_name',
   'message',

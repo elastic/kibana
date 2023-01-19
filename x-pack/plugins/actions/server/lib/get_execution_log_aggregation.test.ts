@@ -95,6 +95,7 @@ describe('getExecutionLogAggregation', () => {
                           'kibana.version',
                           'kibana.space_ids',
                           'kibana.action.name',
+                          'kibana.action.id',
                         ],
                       },
                     },
@@ -223,6 +224,7 @@ describe('getExecutionLogAggregation', () => {
                           'kibana.version',
                           'kibana.space_ids',
                           'kibana.action.name',
+                          'kibana.action.id',
                         ],
                       },
                     },
@@ -367,6 +369,7 @@ describe('getExecutionLogAggregation', () => {
                           'kibana.version',
                           'kibana.space_ids',
                           'kibana.action.name',
+                          'kibana.action.id',
                         ],
                       },
                     },
@@ -523,7 +526,7 @@ describe('formatExecutionLogResult', () => {
                             kibana: {
                               space_ids: ['default'],
                               version: '8.7.0',
-                              action: { name: 'test connector' },
+                              action: { name: 'test connector', id: '1' },
                             },
                             message:
                               'action executed: .server-log:6709f660-8d11-11ed-bae5-bd32cbc9eaaa: test connector',
@@ -549,6 +552,7 @@ describe('formatExecutionLogResult', () => {
       data: [
         {
           connector_name: 'test connector',
+          connector_id: '1',
           duration_ms: 1,
           id: '8b3af07e-7593-4c40-b704-9c06d3b06e58',
           message:
@@ -594,7 +598,7 @@ describe('formatExecutionLogResult', () => {
                             kibana: {
                               space_ids: ['default'],
                               version: '8.7.0',
-                              action: { name: 'test' },
+                              action: { name: 'test', id: '1' },
                             },
                             message:
                               'action execution failure: .email:e020c620-8d14-11ed-bae5-bd32cbc9eaaa: test',
@@ -634,7 +638,7 @@ describe('formatExecutionLogResult', () => {
                             kibana: {
                               space_ids: ['default'],
                               version: '8.7.0',
-                              action: { name: 'test connector' },
+                              action: { name: 'test connector', id: '1' },
                             },
                             message:
                               'action executed: .server-log:6709f660-8d11-11ed-bae5-bd32cbc9eaaa: test connector',
@@ -660,6 +664,7 @@ describe('formatExecutionLogResult', () => {
       data: [
         {
           connector_name: 'test',
+          connector_id: '1',
           duration_ms: 441,
           id: 'fdf9cadb-4568-4d22-afd2-437e4efbe767',
           message:
@@ -673,6 +678,7 @@ describe('formatExecutionLogResult', () => {
         },
         {
           connector_name: 'test connector',
+          connector_id: '1',
           duration_ms: 1,
           id: '8b3af07e-7593-4c40-b704-9c06d3b06e58',
           message:

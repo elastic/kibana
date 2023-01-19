@@ -196,6 +196,10 @@ exports.EcsCustomPropertyMappings = {
             ignore_above: 1024,
             type: 'keyword',
           },
+          id: {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
           execution: {
             properties: {
               uuid: {
