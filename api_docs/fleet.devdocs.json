@@ -8883,32 +8883,6 @@
     "functions": [
       {
         "parentPluginId": "fleet",
-        "id": "def-common.createFleetAuthzMock",
-        "type": "Function",
-        "tags": [],
-        "label": "createFleetAuthzMock",
-        "description": [
-          "\nCreates mock `authz` object"
-        ],
-        "signature": [
-          "() => ",
-          {
-            "pluginId": "fleet",
-            "scope": "common",
-            "docId": "kibFleetPluginApi",
-            "section": "def-common.FleetAuthz",
-            "text": "FleetAuthz"
-          }
-        ],
-        "path": "x-pack/plugins/fleet/common/mocks.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "fleet",
         "id": "def-common.decodeCloudId",
         "type": "Function",
         "tags": [],

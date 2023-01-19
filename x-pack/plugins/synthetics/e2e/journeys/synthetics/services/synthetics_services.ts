@@ -35,7 +35,11 @@ export class SyntheticsServices {
     }
   }
 
-  async addTestMonitor(name: string, data: Record<string, any> = { type: 'browser' }) {
+  async addTestMonitor(
+    name: string,
+    data: Record<string, any> = { type: 'browser' },
+    configId?: string
+  ) {
     const testData = {
       alert: { status: { enabled: true } },
       locations: [{ id: 'us_central', isServiceManaged: true }],
@@ -44,10 +48,18 @@ export class SyntheticsServices {
       name,
     };
     try {
-      await axios.post(this.kibanaUrl + '/internal/uptime/service/monitors', testData, {
-        auth: { username: 'elastic', password: 'changeme' },
-        headers: { 'kbn-xsrf': 'true' },
-      });
+      const response = await axios.post(
+        this.kibanaUrl +
+          (configId
+            ? `/internal/uptime/service/monitors?id=${configId}`
+            : `/internal/uptime/service/monitors`),
+        testData,
+        {
+          auth: { username: 'elastic', password: 'changeme' },
+          headers: { 'kbn-xsrf': 'true' },
+        }
+      );
+      return response.data.id;
     } catch (e) {
       // eslint-disable-next-line no-console
       console.log(JSON.stringify(e));
@@ -105,6 +117,8 @@ export class SyntheticsServices {
     name,
     testRunId,
     stepIndex = 1,
+    locationName,
+    configId,
   }: {
     monitorId?: string;
     docType?: 'summaryUp' | 'summaryDown' | 'journeyStart' | 'journeyEnd' | 'stepEnd';
@@ -112,6 +126,8 @@ export class SyntheticsServices {
     name?: string;
     testRunId?: string;
     stepIndex?: number;
+    locationName?: string;
+    configId?: string;
   } = {}) {
     const getService = this.params.getService;
     const es: Client = getService('es');
@@ -122,33 +138,41 @@ export class SyntheticsServices {
 
     let index = 'synthetics-http-default';
 
+    const commonData = { timestamp, monitorId, name, testRunId, locationName, configId };
+
     switch (docType) {
       case 'stepEnd':
         index = 'synthetics-browser-default';
 
-        const stepDoc =
-          stepIndex === 1
-            ? step1({ timestamp, monitorId, name, testRunId })
-            : step2({ timestamp, monitorId, name, testRunId });
+        const stepDoc = stepIndex === 1 ? step1(commonData) : step2(commonData);
 
         document = { ...stepDoc, ...document };
         break;
       case 'journeyEnd':
         index = 'synthetics-browser-default';
-        document = { ...journeySummary({ timestamp, monitorId, name, testRunId }), ...document };
+        document = { ...journeySummary(commonData), ...document };
         break;
       case 'journeyStart':
         index = 'synthetics-browser-default';
-        document = { ...journeyStart({ timestamp, monitorId, name, testRunId }), ...document };
+        document = { ...journeyStart(commonData), ...document };
         break;
       case 'summaryDown':
-        document = { ...firstDownHit({ timestamp, monitorId, name, testRunId }), ...document };
+        document = {
+          ...firstDownHit(commonData),
+          ...document,
+        };
         break;
       case 'summaryUp':
-        document = { ...getUpHit({ timestamp, monitorId, name, testRunId }), ...document };
+        document = {
+          ...getUpHit(commonData),
+          ...document,
+        };
         break;
       default:
-        document = { ...getUpHit({ timestamp, monitorId, name, testRunId }), ...document };
+        document = {
+          ...getUpHit(commonData),
+          ...document,
+        };
     }
 
     await es.index({
