@@ -47,6 +47,7 @@ function InternalAlertsPage() {
   const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
   const {
     cases,
+    charts,
     data: {
       query: {
         timefilter: { timefilter: timeFilterService },
@@ -65,6 +66,10 @@ function InternalAlertsPage() {
   } = useKibana<ObservabilityAppServices>().services;
   const alertSearchBarStateProps = useAlertSearchBarStateContainer(URL_STORAGE_KEY);
 
+  const chartThemes = {
+    theme: charts.theme.useChartsTheme(),
+    baseTheme: charts.theme.useChartsBaseTheme(),
+  };
   const [ruleStatsLoading, setRuleStatsLoading] = useState<boolean>(false);
   const [ruleStats, setRuleStats] = useState<RuleStatsState>({
     total: 0,
@@ -182,6 +187,7 @@ function InternalAlertsPage() {
             filter={esQuery}
             fullSize
             timeRange={alertSummaryTimeRange}
+            chartThemes={chartThemes}
           />
         </EuiFlexItem>
         <EuiFlexItem>
