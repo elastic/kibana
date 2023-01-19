@@ -945,7 +945,6 @@
     "core.ui.recentlyViewed": "最近查看",
     "core.ui.recentlyViewedAriaLabel": "最近查看的链接",
     "core.ui.securityNavList.label": "安全",
-    "core.ui.welcomeErrorMessage": "Elastic 未正确加载。检查服务器输出以了解详情。",
     "customIntegrations.components.replacementAccordion.recommendationDescription": "建议使用 Elastic 代理集成，但也可以使用 Beats。有关更多详情，请访问 {link}。",
     "customIntegrations.languageClients.DotnetElasticsearch.readme.connectingText": "您可以使用 {api_key} 和 {cloud_id} 连接到 Elastic Cloud：",
     "customIntegrations.languageClients.GoElasticsearch.readme.addPackage": "将软件包添加到 {go_file} 文件：",
