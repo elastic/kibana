@@ -101,7 +101,7 @@ export function getInitialAnomaliesLayers(jobId: string) {
     if (ML_ANOMALY_LAYERS.hasOwnProperty(layer)) {
       initialLayers.push({
         id: htmlIdGenerator()(),
-        type: LAYER_TYPE.GEOJSON_VECTOR,
+        type: LAYER_TYPE.MVT_VECTOR,
         sourceDescriptor: AnomalySource.createDescriptor({
           jobId,
           typicalActual: ML_ANOMALY_LAYERS[layer as keyof typeof ML_ANOMALY_LAYERS],
@@ -127,7 +127,7 @@ export function getInitialSourceIndexFieldLayers(sourceIndexWithGeoFields: Sourc
 
         initialLayers.push({
           id: htmlIdGenerator()(),
-          type: LAYER_TYPE.GEOJSON_VECTOR,
+          type: LAYER_TYPE.MVT_VECTOR,
           style: {
             type: 'VECTOR',
             properties: {

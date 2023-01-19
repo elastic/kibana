@@ -78,7 +78,7 @@ export class AnomalyLayerWizardFactory {
 
         const anomalyLayerDescriptor: VectorLayerDescriptor = {
           id: htmlIdGenerator()(),
-          type: LAYER_TYPE.GEOJSON_VECTOR,
+          type: LAYER_TYPE.MVT_VECTOR,
           sourceDescriptor: AnomalySource.createDescriptor({
             jobId: sourceConfig.jobId,
             typicalActual: sourceConfig.typicalActual,
