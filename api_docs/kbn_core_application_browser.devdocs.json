@@ -1269,15 +1269,15 @@
               },
               {
                 "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/render_app.tsx"
-              },
-              {
-                "plugin": "maps",
                 "path": "x-pack/plugins/maps/public/routes/map_page/map_app/map_app.tsx"
               },
               {
                 "plugin": "maps",
                 "path": "x-pack/plugins/maps/public/routes/map_page/map_page.tsx"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/plugins/maps/public/render_app.tsx"
               },
               {
                 "plugin": "ml",
