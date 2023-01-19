@@ -97,6 +97,7 @@ export function Header({
       <>
         <LoadingIndicator loadingCount$={observables.loadingCount$} showAsBar />
         <HeaderTopBanner headerBanner$={observables.headerBanner$} />
+        <EuiHeader theme="dark" position="fixed" style={{ display: 'none' }} />
       </>
     );
   }

@@ -76,6 +76,8 @@ describe('Header', () => {
     const breadcrumbsAppendExtension$ = new BehaviorSubject<
       undefined | ChromeBreadcrumbsAppendExtension
     >(undefined);
+    const container = document.createElement('div');
+    document.body.append(container);
     const component = mountWithIntl(
       <Header
         {...mockProps()}
@@ -87,13 +89,16 @@ describe('Header', () => {
         customNavLink$={customNavLink$}
         breadcrumbsAppendExtension$={breadcrumbsAppendExtension$}
         headerBanner$={headerBanner$}
-      />
+      />,
+      { attachTo: container }
     );
-    expect(component.find('EuiHeader').exists()).toBeFalsy();
+    expect(component.find('EuiHeader').getDOMNode()).not.toBeVisible();
+    expect(document.body.className).toMatch(/euiBody--headerIsFixed/);
 
     act(() => isVisible$.next(true));
     component.update();
-    expect(component.find('EuiHeader').exists()).toBeTruthy();
+    expect(component.find('EuiHeader').at(0).getDOMNode()).toBeVisible();
+    expect(document.body.className).toMatch(/euiBody--headerIsFixed/);
     expect(component.find('nav[aria-label="Primary"]').exists()).toBeFalsy();
 
     act(() => isLocked$.next(true));
