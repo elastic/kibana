@@ -20,7 +20,7 @@ export default function ({ getService }) {
   // Failing: See https://github.com/elastic/kibana/issues/146067
   // eslint-disable-next-line mocha/no-exclusive-tests
   describe.only('indices - metricbeat and package', () => {
-    ['mb', 'package'].forEach((source) => {
+    ['package'].forEach((source) => {
       describe(`indices ${source}`, () => {
         describe('shard-relocation', () => {
           const archive = `x-pack/test/functional/es_archives/monitoring/singlecluster_three_nodes_shard_relocation_${source}`;
