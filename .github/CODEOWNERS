@@ -1037,9 +1037,9 @@ packages/shared-ux/button/exit_full_screen/types @elastic/appex-sharedux
 packages/shared-ux/card/no_data/impl @elastic/appex-sharedux
 packages/shared-ux/card/no_data/mocks @elastic/appex-sharedux
 packages/shared-ux/card/no_data/types @elastic/appex-sharedux
-packages/shared-ux/code_editor/impl @elastic/appex-sharedux
-packages/shared-ux/code_editor/mocks @elastic/appex-sharedux
-packages/shared-ux/code_editor/types @elastic/appex-sharedux
+packages/shared-ux/code_editor/impl @elastic/shared-ux
+packages/shared-ux/code_editor/mocks @elastic/shared-ux
+packages/shared-ux/code_editor/types @elastic/shared-ux
 packages/shared-ux/file/context @elastic/appex-sharedux
 packages/shared-ux/file/file_picker/impl @elastic/appex-sharedux
 packages/shared-ux/file/file_upload/impl @elastic/appex-sharedux
