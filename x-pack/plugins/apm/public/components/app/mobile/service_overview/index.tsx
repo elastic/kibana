@@ -29,7 +29,7 @@ import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { ServiceOverviewThroughputChart } from '../../service_overview/service_overview_throughput_chart';
 import { TransactionsTable } from '../../../shared/transactions_table';
 import {
-  DEVICE_MODEL_NAME,
+  DEVICE_MODEL_IDENTIFIER,
   HOST_OS_VERSION,
   NETWORK_CONNECTION_TYPE,
   SERVICE_VERSION,
@@ -191,7 +191,7 @@ export function MobileServiceOverview() {
                             defaultMessage: 'Devices',
                           }
                         )}
-                        metric={DEVICE_MODEL_NAME}
+                        metric={DEVICE_MODEL_IDENTIFIER}
                         start={start}
                         end={end}
                         kuery={kueryWithMobileFilters}
