@@ -4070,6 +4070,81 @@
       },
       {
         "parentPluginId": "triggersActionsUi",
+        "id": "def-public.AlertSummaryTimeRange",
+        "type": "Interface",
+        "tags": [],
+        "label": "AlertSummaryTimeRange",
+        "description": [],
+        "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_details/components/alert_summary/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.AlertSummaryTimeRange.utcFrom",
+            "type": "string",
+            "tags": [],
+            "label": "utcFrom",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_details/components/alert_summary/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.AlertSummaryTimeRange.utcTo",
+            "type": "string",
+            "tags": [],
+            "label": "utcTo",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_details/components/alert_summary/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.AlertSummaryTimeRange.fixedInterval",
+            "type": "string",
+            "tags": [],
+            "label": "fixedInterval",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_details/components/alert_summary/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.AlertSummaryTimeRange.title",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "signature": [
+              "string | JSX.Element | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_details/components/alert_summary/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.AlertSummaryTimeRange.dateFormat",
+            "type": "string",
+            "tags": [],
+            "label": "dateFormat",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_details/components/alert_summary/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
         "id": "def-public.BulkOperationResponse",
         "type": "Interface",
         "tags": [],
