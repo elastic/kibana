@@ -30,7 +30,6 @@ import type {
   FatalErrorsStart,
   HttpStart,
   NotificationsStart,
-  SavedObjectsStart,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -47,7 +46,6 @@ import type { LoginFormProps } from './components';
 import { DisabledLoginForm, LoginForm, LoginFormMessageType } from './components';
 
 interface Props {
-  savedObjects: SavedObjectsStart;
   http: HttpStart;
   notifications: NotificationsStart;
   fatalErrors: FatalErrorsStart;

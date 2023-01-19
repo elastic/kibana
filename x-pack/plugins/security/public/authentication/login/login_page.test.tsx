@@ -9,7 +9,9 @@ import { EuiFlexItem } from '@elastic/eui';
 import { act } from '@testing-library/react';
 import { shallow } from 'enzyme';
 import React from 'react';
+import { of } from 'rxjs';
 
+import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 import { nextTick } from '@kbn/test-jest-helpers';
 
@@ -27,6 +29,7 @@ const createLoginState = (options?: Partial<LoginState>) => {
       enabled: false,
       providers: [{ type: 'basic', name: 'basic1', usesLoginForm: true }],
     },
+    customBranding: {},
     ...options,
   } as LoginState;
 };
@@ -41,6 +44,7 @@ describe('LoginPage', () => {
     httpMock.get.mockReset();
     httpMock.addLoadingCountSource.mockReset();
   };
+  const customBrandingMock = customBrandingServiceMock.createStartContract();
 
   beforeEach(() => {
     Object.defineProperty(window, 'location', {
@@ -54,11 +58,37 @@ describe('LoginPage', () => {
   describe('page', () => {
     it('renders as expected', async () => {
       const coreStartMock = coreMock.createStart();
+      customBrandingMock.customBranding$ = of({});
       httpMock.get.mockResolvedValue(createLoginState());
 
       const wrapper = shallow(
         <LoginPage
           http={httpMock}
+          customBranding={customBrandingMock}
+          notifications={coreStartMock.notifications}
+          fatalErrors={coreStartMock.fatalErrors}
+          loginAssistanceMessage=""
+        />
+      );
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+        resetHttpMock(); // so the calls don't show in the BasicLoginForm snapshot
+      });
+
+      expect(wrapper).toMatchSnapshot();
+    });
+
+    it('renders with custom branding', async () => {
+      const coreStartMock = coreMock.createStart();
+      customBrandingMock.customBranding$ = of({ logo: 'logo', pageTitle: 'My App' });
+      httpMock.get.mockResolvedValue(createLoginState());
+
+      const wrapper = shallow(
+        <LoginPage
+          http={httpMock}
+          customBranding={customBrandingMock}
           notifications={coreStartMock.notifications}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage=""
@@ -100,6 +130,7 @@ describe('LoginPage', () => {
           notifications={coreStartMock.notifications}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage=""
+          customBranding={customBrandingMock}
         />
       );
 
@@ -121,6 +152,7 @@ describe('LoginPage', () => {
           notifications={coreStartMock.notifications}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage=""
+          customBranding={customBrandingMock}
         />
       );
 
@@ -142,6 +174,7 @@ describe('LoginPage', () => {
           notifications={coreStartMock.notifications}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage=""
+          customBranding={customBrandingMock}
         />
       );
 
@@ -165,6 +198,7 @@ describe('LoginPage', () => {
           notifications={coreStartMock.notifications}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage=""
+          customBranding={customBrandingMock}
         />
       );
 
@@ -188,6 +222,7 @@ describe('LoginPage', () => {
           notifications={coreStartMock.notifications}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage=""
+          customBranding={customBrandingMock}
         />
       );
 
@@ -219,6 +254,7 @@ describe('LoginPage', () => {
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage=""
           sameSiteCookies="Lax"
+          customBranding={customBrandingMock}
         />
       );
 
@@ -250,6 +286,7 @@ describe('LoginPage', () => {
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage=""
           sameSiteCookies="None"
+          customBranding={customBrandingMock}
         />
       );
 
@@ -276,6 +313,7 @@ describe('LoginPage', () => {
           notifications={coreStartMock.notifications}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage=""
+          customBranding={customBrandingMock}
         />
       );
 
@@ -299,6 +337,7 @@ describe('LoginPage', () => {
           notifications={coreStartMock.notifications}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage=""
+          customBranding={customBrandingMock}
         />
       );
 
@@ -322,6 +361,7 @@ describe('LoginPage', () => {
           notifications={coreStartMock.notifications}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage=""
+          customBranding={customBrandingMock}
         />
       );
 
@@ -349,6 +389,7 @@ describe('LoginPage', () => {
           notifications={coreStartMock.notifications}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage="This is an *important* message"
+          customBranding={customBrandingMock}
         />
       );
 
@@ -371,6 +412,7 @@ describe('LoginPage', () => {
           notifications={coreStartMock.notifications}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage=""
+          customBranding={customBrandingMock}
         />
       );
 
@@ -395,6 +437,7 @@ describe('LoginPage', () => {
           notifications={coreStartMock.notifications}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage=""
+          customBranding={customBrandingMock}
         />
       );
 
@@ -420,6 +463,7 @@ describe('LoginPage', () => {
           notifications={coreStartMock.notifications}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage=""
+          customBranding={customBrandingMock}
         />
       );
 

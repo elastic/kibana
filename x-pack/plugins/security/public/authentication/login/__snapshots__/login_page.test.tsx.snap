@@ -186,9 +186,13 @@ exports[`LoginPage disabled form states renders warning when cookies are disable
   }
   title={
     <FormattedMessage
-      defaultMessage="Cookies are required to log in to Elastic"
+      defaultMessage="Cookies are required to log in to {{pageTitle}}"
       id="xpack.security.loginPage.requiresCookiesTitle"
-      values={Object {}}
+      values={
+        Object {
+          "pageTitle": "My App",
+        }
+      }
     />
   }
 />
@@ -337,9 +341,106 @@ exports[`LoginPage page renders as expected 1`] = `
       >
         <h1>
           <FormattedMessage
-            defaultMessage="Welcome to Elastic"
+            defaultMessage="Welcome to {pageTitle}"
             id="xpack.security.loginPage.welcomeTitle"
-            values={Object {}}
+            values={
+              Object {
+                "pageTitle": "Elastic",
+              }
+            }
+          />
+        </h1>
+      </EuiTitle>
+      <EuiSpacer
+        size="xl"
+      />
+    </div>
+  </header>
+  <div
+    className="loginWelcome__content loginWelcome-body"
+  >
+    <EuiFlexGroup
+      gutterSize="l"
+    >
+      <EuiFlexItem>
+        <LoginForm
+          http={
+            Object {
+              "addLoadingCountSource": [MockFunction],
+              "get": [MockFunction],
+            }
+          }
+          loginAssistanceMessage=""
+          notifications={
+            Object {
+              "toasts": Object {
+                "add": [MockFunction],
+                "addDanger": [MockFunction],
+                "addError": [MockFunction],
+                "addInfo": [MockFunction],
+                "addSuccess": [MockFunction],
+                "addWarning": [MockFunction],
+                "get$": [MockFunction],
+                "remove": [MockFunction],
+              },
+            }
+          }
+          selector={
+            Object {
+              "enabled": false,
+              "providers": Array [
+                Object {
+                  "name": "basic1",
+                  "type": "basic",
+                  "usesLoginForm": true,
+                },
+              ],
+            }
+          }
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </div>
+</div>
+`;
+
+exports[`LoginPage page renders with custom branding 1`] = `
+<div
+  className="loginWelcome login-form"
+>
+  <header
+    className="loginWelcome__header"
+  >
+    <div
+      className="loginWelcome__content eui-textCenter"
+    >
+      <EuiSpacer
+        size="xxl"
+      />
+      <span
+        className="loginWelcome__logo"
+      >
+        <img
+          alt="logo"
+          height="40"
+          src="logo"
+          width="40"
+        />
+      </span>
+      <EuiTitle
+        className="loginWelcome__title"
+        data-test-subj="loginWelcomeTitle"
+        size="m"
+      >
+        <h1>
+          <FormattedMessage
+            defaultMessage="Welcome to {pageTitle}"
+            id="xpack.security.loginPage.welcomeTitle"
+            values={
+              Object {
+                "pageTitle": "My App",
+              }
+            }
           />
         </h1>
       </EuiTitle>
