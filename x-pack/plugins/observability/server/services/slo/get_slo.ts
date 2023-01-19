@@ -8,16 +8,16 @@
 import { GetSLOResponse, getSLOResponseSchema } from '@kbn/slo-schema';
 import { IndicatorData, SLO, SLOId, SLOWithSummary } from '../../domain/models';
 import { SLORepository } from './slo_repository';
-import { SLIClient } from './sli_client';
+import { SummaryClient } from './sli_client';
 import { computeSLI, computeErrorBudget, computeSummaryStatus } from '../../domain/services';
 
 export class GetSLO {
-  constructor(private repository: SLORepository, private sliClient: SLIClient) {}
+  constructor(private repository: SLORepository, private summaryClient: SummaryClient) {}
 
   public async execute(sloId: string): Promise<GetSLOResponse> {
     const slo = await this.repository.findById(sloId);
 
-    const indicatorDataBySlo = await this.sliClient.fetchCurrentSLIData([slo]);
+    const indicatorDataBySlo = await this.summaryClient.fetchSummary([slo]);
     const sloWithSummary = computeSloWithSummary(slo, indicatorDataBySlo);
 
     return this.toResponse(sloWithSummary);

@@ -19,8 +19,8 @@ import { toDateRange } from '../../domain/services/date_range';
 import { InternalQueryError } from '../../errors';
 import { DateRange, Duration, IndicatorData, SLO, SLOId } from '../../domain/models';
 
-export interface SLIClient {
-  fetchCurrentSLIData(sloList: SLO[]): Promise<Record<SLOId, IndicatorData>>;
+export interface SummaryClient {
+  fetchSummary(sloList: SLO[]): Promise<Record<SLOId, IndicatorData>>;
   fetchSLIDataFrom(
     slo: SLO,
     lookbackWindows: LookbackWindow[]
@@ -36,10 +36,10 @@ interface LookbackWindow {
 
 type EsAggregations = Record<WindowName, AggregationsDateRangeAggregate>;
 
-export class DefaultSLIClient implements SLIClient {
+export class DefaultSummaryClient implements SummaryClient {
   constructor(private esClient: ElasticsearchClient) {}
 
-  async fetchCurrentSLIData(sloList: SLO[]): Promise<Record<SLOId, IndicatorData>> {
+  async fetchSummary(sloList: SLO[]): Promise<Record<SLOId, IndicatorData>> {
     const dateRangeBySlo: Record<SLOId, DateRange> = sloList.reduce(
       (acc, slo) => ({ [slo.id]: toDateRange(slo.timeWindow), ...acc }),
       {}

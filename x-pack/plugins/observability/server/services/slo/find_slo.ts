@@ -8,7 +8,7 @@
 import { FindSLOParams, FindSLOResponse, findSLOResponseSchema } from '@kbn/slo-schema';
 import { IndicatorData, SLO, SLOId, SLOWithSummary } from '../../domain/models';
 import { computeErrorBudget, computeSLI, computeSummaryStatus } from '../../domain/services';
-import { SLIClient } from './sli_client';
+import { SummaryClient } from './sli_client';
 import {
   Criteria,
   Paginated,
@@ -23,7 +23,7 @@ const DEFAULT_PAGE = 1;
 const DEFAULT_PER_PAGE = 25;
 
 export class FindSLO {
-  constructor(private repository: SLORepository, private sliClient: SLIClient) {}
+  constructor(private repository: SLORepository, private summaryClient: SummaryClient) {}
 
   public async execute(params: FindSLOParams): Promise<FindSLOResponse> {
     const pagination: Pagination = toPagination(params);
@@ -35,7 +35,7 @@ export class FindSLO {
       sort,
       pagination
     );
-    const indicatorDataBySlo = await this.sliClient.fetchCurrentSLIData(sloList);
+    const indicatorDataBySlo = await this.summaryClient.fetchSummary(sloList);
     const sloListWithSummary = computeSloWithSummary(sloList, indicatorDataBySlo);
 
     return this.toResponse(sloListWithSummary, resultMeta);

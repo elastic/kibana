@@ -12,7 +12,7 @@ import { SLO_DESTINATION_INDEX_NAME } from '../../assets/constants';
 import { toDateRange } from '../../domain/services';
 import { Duration, DurationUnit } from '../../domain/models';
 import { createSLO } from './fixtures/slo';
-import { DefaultSLIClient } from './sli_client';
+import { DefaultSummaryClient } from './sli_client';
 import { sevenDaysRolling, weeklyCalendarAligned } from './fixtures/time_window';
 
 const commonEsResponse = {
@@ -42,22 +42,22 @@ const getMsearchResponse = (good: number = 90, total: number = 100) => ({
   ],
 });
 
-describe('SLIClient', () => {
+describe('SummaryClient', () => {
   let esClientMock: ElasticsearchClientMock;
 
   beforeEach(() => {
     esClientMock = elasticsearchServiceMock.createElasticsearchClient();
   });
 
-  describe('fetchCurrentSLIData', () => {
+  describe('fetchSummary', () => {
     describe('with occurrences budgeting method', () => {
       describe('with a rolling time window', () => {
         it('returns the aggregated good and total values', async () => {
           const slo = createSLO({ timeWindow: sevenDaysRolling() });
           esClientMock.msearch.mockResolvedValueOnce(getMsearchResponse());
-          const sliClient = new DefaultSLIClient(esClientMock);
+          const summaryClient = new DefaultSummaryClient(esClientMock);
 
-          const result = await sliClient.fetchCurrentSLIData([slo]);
+          const result = await summaryClient.fetchSummary([slo]);
 
           const expectedDateRange = toDateRange(slo.timeWindow);
           expect(result[slo.id]).toMatchObject({
@@ -99,9 +99,9 @@ describe('SLIClient', () => {
             timeWindow: weeklyCalendarAligned(new Date('2022-09-01T00:00:00.000Z')),
           });
           esClientMock.msearch.mockResolvedValueOnce(getMsearchResponse());
-          const sliClient = new DefaultSLIClient(esClientMock);
+          const summaryClient = new DefaultSummaryClient(esClientMock);
 
-          const result = await sliClient.fetchCurrentSLIData([slo]);
+          const result = await summaryClient.fetchSummary([slo]);
 
           const expectedDateRange = toDateRange(slo.timeWindow);
           expect(result[slo.id]).toMatchObject({ good: 90, total: 100 });
@@ -151,9 +151,9 @@ describe('SLIClient', () => {
             timeWindow: weeklyCalendarAligned(new Date('2022-09-01T00:00:00.000Z')),
           });
           esClientMock.msearch.mockResolvedValueOnce(getMsearchResponse());
-          const sliClient = new DefaultSLIClient(esClientMock);
+          const summaryClient = new DefaultSummaryClient(esClientMock);
 
-          const result = await sliClient.fetchCurrentSLIData([slo]);
+          const result = await summaryClient.fetchSummary([slo]);
 
           const expectedDateRange = toDateRange(slo.timeWindow);
           expect(result[slo.id]).toMatchObject({ good: 90, total: 100 });
@@ -209,9 +209,9 @@ describe('SLIClient', () => {
             timeWindow: sevenDaysRolling(),
           });
           esClientMock.msearch.mockResolvedValueOnce(getMsearchResponse());
-          const sliClient = new DefaultSLIClient(esClientMock);
+          const summaryClient = new DefaultSummaryClient(esClientMock);
 
-          const result = await sliClient.fetchCurrentSLIData([slo]);
+          const result = await summaryClient.fetchSummary([slo]);
 
           const expectedDateRange = toDateRange(slo.timeWindow);
           expect(result[slo.id]).toMatchObject({ good: 90, total: 100 });
@@ -306,9 +306,9 @@ describe('SLIClient', () => {
             },
           },
         });
-        const sliClient = new DefaultSLIClient(esClientMock);
+        const summaryClient = new DefaultSummaryClient(esClientMock);
 
-        const result = await sliClient.fetchSLIDataFrom(slo, lookbackWindows);
+        const result = await summaryClient.fetchSLIDataFrom(slo, lookbackWindows);
 
         expect(esClientMock?.search?.mock?.lastCall?.[0]).toMatchObject({
           aggs: {
@@ -396,9 +396,9 @@ describe('SLIClient', () => {
             },
           },
         });
-        const sliClient = new DefaultSLIClient(esClientMock);
+        const summaryClient = new DefaultSummaryClient(esClientMock);
 
-        const result = await sliClient.fetchSLIDataFrom(slo, lookbackWindows);
+        const result = await summaryClient.fetchSLIDataFrom(slo, lookbackWindows);
 
         expect(esClientMock?.search?.mock?.lastCall?.[0]).toMatchObject({
           aggs: {

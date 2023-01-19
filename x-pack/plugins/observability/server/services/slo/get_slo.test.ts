@@ -8,26 +8,26 @@
 import { toDateRange } from '../../domain/services';
 import { createAPMTransactionErrorRateIndicator, createSLO } from './fixtures/slo';
 import { GetSLO } from './get_slo';
-import { createSLIClientMock, createSLORepositoryMock } from './mocks';
-import { SLIClient } from './sli_client';
+import { createSummaryClientMock, createSLORepositoryMock } from './mocks';
+import { SummaryClient } from './sli_client';
 import { SLORepository } from './slo_repository';
 
 describe('GetSLO', () => {
   let mockRepository: jest.Mocked<SLORepository>;
-  let mockSLIClient: jest.Mocked<SLIClient>;
+  let mockSummaryClient: jest.Mocked<SummaryClient>;
   let getSLO: GetSLO;
 
   beforeEach(() => {
     mockRepository = createSLORepositoryMock();
-    mockSLIClient = createSLIClientMock();
-    getSLO = new GetSLO(mockRepository, mockSLIClient);
+    mockSummaryClient = createSummaryClientMock();
+    getSLO = new GetSLO(mockRepository, mockSummaryClient);
   });
 
   describe('happy path', () => {
     it('retrieves the SLO from the repository', async () => {
       const slo = createSLO({ indicator: createAPMTransactionErrorRateIndicator() });
       mockRepository.findById.mockResolvedValueOnce(slo);
-      mockSLIClient.fetchCurrentSLIData.mockResolvedValueOnce({
+      mockSummaryClient.fetchSummary.mockResolvedValueOnce({
         [slo.id]: {
           good: 9999,
           total: 10000,
