@@ -11,6 +11,7 @@
 import { Subject } from 'rxjs';
 import { omit, defaults, get } from 'lodash';
 import type { Payload } from '@hapi/boom';
+import { SavedObjectError } from '@kbn/core-saved-objects-common';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SavedObjectsBulkDeleteResponse } from '@kbn/core/server';
@@ -76,7 +77,11 @@ export interface FetchResult {
 
 export type BulkUpdateResult = Result<
   ConcreteTaskInstance,
-  { entity: ConcreteTaskInstance; error: { type: string; id: string; error: Payload } }
+  { entity?: ConcreteTaskInstance; error: { type: string; id: string; error: Payload } }
+>;
+
+export type BulkGetResult = Array<
+  Result<ConcreteTaskInstance, { type: string; id: string; error: SavedObjectError }>
 >;
 
 export interface UpdateByQueryResult {
@@ -345,7 +350,7 @@ export class TaskStore {
    * @param {Array<string>} ids
    * @returns {Promise<ConcreteTaskInstance[]>}
    */
-  public async bulkGet(ids: string[]): Promise<ConcreteTaskInstance[]> {
+  public async bulkGet(ids: string[]): Promise<BulkGetResult> {
     let result;
     try {
       result = await this.savedObjectsRepository.bulkGet<SerializedConcreteTaskInstance>(
@@ -355,7 +360,12 @@ export class TaskStore {
       this.errors$.next(e);
       throw e;
     }
-    return result && result.saved_objects.map((task) => savedObjectToConcreteTaskInstance(task));
+    return result.saved_objects.map((task) => {
+      if (task.error) {
+        return asErr({ id: task.id, type: task.type, error: task.error });
+      }
+      return asOk(savedObjectToConcreteTaskInstance(task));
+    });
   }
 
   /**

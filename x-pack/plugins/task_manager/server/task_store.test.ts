@@ -22,6 +22,7 @@ import { SavedObjectAttributes, SavedObjectsErrorHelpers } from '@kbn/core/serve
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { mockLogger } from './test_utils';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
+import { asErr } from './lib/result_type';
 
 const savedObjectsClient = savedObjectsRepositoryMock.create();
 const serializer = savedObjectsServiceMock.createSerializer();
@@ -677,10 +678,41 @@ describe('TaskStore', () => {
     });
 
     test('gets a task specified by id', async () => {
+      savedObjectsClient.bulkGet.mockResolvedValue({ saved_objects: [] });
       await store.bulkGet(['1', '2']);
       expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith([
         { type: 'task', id: '1' },
         { type: 'task', id: '2' },
+      ]);
+    });
+
+    test('returns error when task not found', async () => {
+      savedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            type: 'task',
+            id: '1',
+            attributes: {},
+            references: [],
+            error: {
+              error: 'Oh no',
+              message: 'Oh no',
+              statusCode: 404,
+            },
+          },
+        ],
+      });
+      const result = await store.bulkGet(['1']);
+      expect(result).toEqual([
+        asErr({
+          type: 'task',
+          id: '1',
+          error: {
+            error: 'Oh no',
+            message: 'Oh no',
+            statusCode: 404,
+          },
+        }),
       ]);
     });
 

@@ -229,7 +229,7 @@ const tryToDisableTasks = async ({
         if (resultFromDisablingTasks.errors.length) {
           logger.error(
             `Failure to disable schedules for underlying tasks: ${resultFromDisablingTasks.errors
-              .map((error) => error.task.id)
+              .map((error) => error.error.id)
               .join(', ')}`
           );
         }

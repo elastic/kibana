@@ -174,17 +174,21 @@ describe('TaskScheduling', () => {
         enabled: false,
         schedule: { interval: '1h' },
       });
-      const failedTask = mockTask({ id: 'task-2', enabled: false, schedule: { interval: '1h' } });
+      const failedToUpdateTask = mockTask({
+        id: 'task-2',
+        enabled: false,
+        schedule: { interval: '1h' },
+      });
       mockTaskStore.bulkUpdate.mockImplementation(() =>
         Promise.resolve([
           { tag: 'ok', value: successfulTask },
           {
             tag: 'err',
             error: {
-              entity: failedTask,
+              entity: failedToUpdateTask,
               error: {
                 type: 'task',
-                id: failedTask.id,
+                id: failedToUpdateTask.id,
                 error: {
                   statusCode: 400,
                   error: 'fail',
@@ -195,19 +199,19 @@ describe('TaskScheduling', () => {
           },
         ])
       );
-      mockTaskStore.bulkGet.mockResolvedValue([successfulTask, failedTask]);
+      mockTaskStore.bulkGet.mockResolvedValue([asOk(successfulTask), asOk(failedToUpdateTask)]);
 
       const taskScheduling = new TaskScheduling(taskSchedulingOpts);
-      const result = await taskScheduling.bulkEnable([successfulTask.id, failedTask.id]);
+      const result = await taskScheduling.bulkEnable([successfulTask.id, failedToUpdateTask.id]);
 
       expect(result).toEqual({
         tasks: [successfulTask],
         errors: [
           {
-            task: failedTask,
+            task: failedToUpdateTask,
             error: {
               type: 'task',
-              id: failedTask.id,
+              id: failedToUpdateTask.id,
               error: {
                 statusCode: 400,
                 error: 'fail',
@@ -222,7 +226,7 @@ describe('TaskScheduling', () => {
     test('should not enable task if it is already enabled', async () => {
       const task = mockTask({ id, enabled: true, schedule: { interval: '3h' } });
 
-      mockTaskStore.bulkGet.mockResolvedValue([task]);
+      mockTaskStore.bulkGet.mockResolvedValue([asOk(task)]);
 
       const taskScheduling = new TaskScheduling(taskSchedulingOpts);
       await taskScheduling.bulkEnable([id]);
@@ -243,7 +247,7 @@ describe('TaskScheduling', () => {
       mockTaskStore.bulkUpdate.mockImplementation(() =>
         Promise.resolve([{ tag: 'ok', value: task }])
       );
-      mockTaskStore.bulkGet.mockResolvedValue([task]);
+      mockTaskStore.bulkGet.mockResolvedValue([asOk(task)]);
 
       const taskScheduling = new TaskScheduling(taskSchedulingOpts);
       await taskScheduling.bulkEnable([id]);
@@ -271,7 +275,7 @@ describe('TaskScheduling', () => {
       mockTaskStore.bulkUpdate.mockImplementation(() =>
         Promise.resolve([{ tag: 'ok', value: task }])
       );
-      mockTaskStore.bulkGet.mockResolvedValue([task]);
+      mockTaskStore.bulkGet.mockResolvedValue([asOk(task)]);
 
       const taskScheduling = new TaskScheduling(taskSchedulingOpts);
       await taskScheduling.bulkEnable([id], false);
@@ -310,17 +314,21 @@ describe('TaskScheduling', () => {
         enabled: false,
         schedule: { interval: '1h' },
       });
-      const failedTask = mockTask({ id: 'task-2', enabled: true, schedule: { interval: '1h' } });
+      const failedToUpdateTask = mockTask({
+        id: 'task-2',
+        enabled: true,
+        schedule: { interval: '1h' },
+      });
       mockTaskStore.bulkUpdate.mockImplementation(() =>
         Promise.resolve([
           { tag: 'ok', value: successfulTask },
           {
             tag: 'err',
             error: {
-              entity: failedTask,
+              entity: failedToUpdateTask,
               error: {
                 type: 'task',
-                id: failedTask.id,
+                id: failedToUpdateTask.id,
                 error: {
                   statusCode: 400,
                   error: 'fail',
@@ -331,19 +339,19 @@ describe('TaskScheduling', () => {
           },
         ])
       );
-      mockTaskStore.bulkGet.mockResolvedValue([successfulTask, failedTask]);
+      mockTaskStore.bulkGet.mockResolvedValue([asOk(successfulTask), asOk(failedToUpdateTask)]);
 
       const taskScheduling = new TaskScheduling(taskSchedulingOpts);
-      const result = await taskScheduling.bulkDisable([successfulTask.id, failedTask.id]);
+      const result = await taskScheduling.bulkDisable([successfulTask.id, failedToUpdateTask.id]);
 
       expect(result).toEqual({
         tasks: [successfulTask],
         errors: [
           {
-            task: failedTask,
+            task: failedToUpdateTask,
             error: {
               type: 'task',
-              id: failedTask.id,
+              id: failedToUpdateTask.id,
               error: {
                 statusCode: 400,
                 error: 'fail',
@@ -358,7 +366,7 @@ describe('TaskScheduling', () => {
     test('should not disable task if it is already disabled', async () => {
       const task = mockTask({ id, enabled: false, schedule: { interval: '3h' } });
 
-      mockTaskStore.bulkGet.mockResolvedValue([task]);
+      mockTaskStore.bulkGet.mockResolvedValue([asOk(task)]);
 
       const taskScheduling = new TaskScheduling(taskSchedulingOpts);
       await taskScheduling.bulkDisable([id]);
@@ -388,17 +396,17 @@ describe('TaskScheduling', () => {
 
     test('should transform response into correct format', async () => {
       const successfulTask = mockTask({ id: 'task-1', schedule: { interval: '1h' } });
-      const failedTask = mockTask({ id: 'task-2', schedule: { interval: '1h' } });
+      const failedToUpdateTask = mockTask({ id: 'task-2', schedule: { interval: '1h' } });
       mockTaskStore.bulkUpdate.mockImplementation(() =>
         Promise.resolve([
           { tag: 'ok', value: successfulTask },
           {
             tag: 'err',
             error: {
-              entity: failedTask,
+              entity: failedToUpdateTask,
               error: {
                 type: 'task',
-                id: failedTask.id,
+                id: failedToUpdateTask.id,
                 error: {
                   statusCode: 400,
                   error: 'fail',
@@ -409,21 +417,22 @@ describe('TaskScheduling', () => {
           },
         ])
       );
-      mockTaskStore.bulkGet.mockResolvedValue([successfulTask, failedTask]);
+      mockTaskStore.bulkGet.mockResolvedValue([asOk(successfulTask), asOk(failedToUpdateTask)]);
 
       const taskScheduling = new TaskScheduling(taskSchedulingOpts);
-      const result = await taskScheduling.bulkUpdateSchedules([successfulTask.id, failedTask.id], {
-        interval: '1h',
-      });
+      const result = await taskScheduling.bulkUpdateSchedules(
+        [successfulTask.id, failedToUpdateTask.id],
+        { interval: '1h' }
+      );
 
       expect(result).toEqual({
         tasks: [successfulTask],
         errors: [
           {
-            task: failedTask,
+            task: failedToUpdateTask,
             error: {
               type: 'task',
-              id: failedTask.id,
+              id: failedToUpdateTask.id,
               error: {
                 statusCode: 400,
                 error: 'fail',
@@ -438,7 +447,7 @@ describe('TaskScheduling', () => {
     test('should not update task if new interval is equal to previous', async () => {
       const task = mockTask({ id, schedule: { interval: '3h' } });
 
-      mockTaskStore.bulkGet.mockResolvedValue([task]);
+      mockTaskStore.bulkGet.mockResolvedValue([asOk(task)]);
 
       const taskScheduling = new TaskScheduling(taskSchedulingOpts);
       await taskScheduling.bulkUpdateSchedules([id], { interval: '3h' });
@@ -453,7 +462,7 @@ describe('TaskScheduling', () => {
       const runInTwoHrs = new Date(Date.now() + moment.duration(2, 'hours').asMilliseconds());
       const task = mockTask({ id, schedule: { interval: '3h' }, runAt: runInTwoHrs });
 
-      mockTaskStore.bulkGet.mockResolvedValue([task]);
+      mockTaskStore.bulkGet.mockResolvedValue([asOk(task)]);
 
       const taskScheduling = new TaskScheduling(taskSchedulingOpts);
       await taskScheduling.bulkUpdateSchedules([id], { interval: '5h' });
@@ -473,7 +482,7 @@ describe('TaskScheduling', () => {
       const runInTwoHrs = new Date(Date.now() + moment.duration(2, 'hours').asMilliseconds());
       const task = mockTask({ id, schedule: { interval: '3h' }, runAt: runInTwoHrs });
 
-      mockTaskStore.bulkGet.mockResolvedValue([task]);
+      mockTaskStore.bulkGet.mockResolvedValue([asOk(task)]);
 
       const taskScheduling = new TaskScheduling(taskSchedulingOpts);
       await taskScheduling.bulkUpdateSchedules([id], { interval: '2h' });
@@ -492,7 +501,7 @@ describe('TaskScheduling', () => {
       const runInOneHr = new Date(Date.now() + moment.duration(1, 'hour').asMilliseconds());
       const task = mockTask({ id, schedule: { interval: '2h' }, runAt: runInOneHr });
 
-      mockTaskStore.bulkGet.mockResolvedValue([task]);
+      mockTaskStore.bulkGet.mockResolvedValue([asOk(task)]);
 
       const taskScheduling = new TaskScheduling(taskSchedulingOpts);
       await taskScheduling.bulkUpdateSchedules([id], { interval: '30m' });

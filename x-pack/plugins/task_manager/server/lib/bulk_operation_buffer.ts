@@ -22,7 +22,7 @@ export interface Entity {
 }
 
 export interface OperationError<Input, ErrorOutput> {
-  entity: Input;
+  entity?: Input;
   error: ErrorOutput;
 }
 
@@ -84,7 +84,7 @@ export function createBuffer<Input extends Entity, ErrorOutput, Output extends E
               },
               ({ entity, error }: OperationError<Input, ErrorOutput>) => {
                 either(
-                  pullFirstWhere(bufferedEntities, ({ entity: { id } }) => id === entity.id),
+                  pullFirstWhere(bufferedEntities, ({ entity: { id } }) => id === entity?.id),
                   ({ onFailure }) => {
                     onFailure(asErr(error));
                   },

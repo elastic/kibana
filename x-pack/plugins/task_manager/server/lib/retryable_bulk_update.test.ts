@@ -21,7 +21,7 @@ describe('retryableBulkUpdate()', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
-    getTasks.mockResolvedValue(tasks);
+    getTasks.mockResolvedValue(tasks.map((task) => asOk(task)));
     filter.mockImplementation(() => true);
     map.mockImplementation((task) => task);
     store.bulkUpdate.mockResolvedValue(tasks.map((task) => asOk(task)));
@@ -51,7 +51,7 @@ describe('retryableBulkUpdate()', () => {
   });
 
   it('should retry tasks that have a status code of 409', async () => {
-    getTasks.mockResolvedValueOnce(tasks);
+    getTasks.mockResolvedValueOnce(tasks.map((task) => asOk(task)));
     store.bulkUpdate.mockResolvedValueOnce([
       asErr({
         entity: tasks[0],
@@ -68,11 +68,25 @@ describe('retryableBulkUpdate()', () => {
       asOk(tasks[1]),
       asOk(tasks[2]),
     ]);
-    getTasks.mockResolvedValueOnce([tasks[0]]);
+    getTasks.mockResolvedValueOnce([tasks[0]].map((task) => asOk(task)));
     store.bulkUpdate.mockResolvedValueOnce(tasks.map((task) => asOk(task)));
     await retryableBulkUpdate({ taskIds, getTasks, filter, map, store });
     expect(store.bulkUpdate).toHaveBeenCalledTimes(2);
     expect(store.bulkUpdate).toHaveBeenNthCalledWith(2, [tasks[0]]);
+  });
+
+  it('should skip updating tasks that cannot be found', async () => {
+    getTasks.mockResolvedValue([
+      asOk(tasks[0]),
+      asErr({
+        id: tasks[1].id,
+        type: 'task',
+        error: { error: 'Oh no', message: 'Oh no', statusCode: 404 },
+      }),
+      asOk(tasks[2]),
+    ]);
+    await retryableBulkUpdate({ taskIds, getTasks, filter, map, store });
+    expect(store.bulkUpdate).toHaveBeenCalledWith([tasks[0], tasks[2]]);
   });
 });
 
