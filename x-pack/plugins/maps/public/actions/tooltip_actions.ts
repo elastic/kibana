@@ -32,7 +32,7 @@ export function openOnClickTooltip(tooltipState: TooltipState) {
         !_.isEqual(
           features.map(({ id, layerId }) => {
             return { id, layerId };
-          }), 
+          }),
           tooltipState.features.map(({ id, layerId }) => {
             return { id, layerId };
           })
