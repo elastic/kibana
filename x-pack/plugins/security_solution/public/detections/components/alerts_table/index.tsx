@@ -21,6 +21,7 @@ import {
   EuiSpacer,
   EuiTablePagination,
 } from '@elastic/eui';
+import styled from 'styled-components';
 import { GROUPS_UNIT } from '../../../common/components/toolbar/unit/translations';
 import { defaultUnit, UnitCount } from '../../../common/components/toolbar/unit';
 import { useBulkActionItems } from '../../../common/components/toolbar/bulk_actions/use_bulk_action_items';
@@ -76,6 +77,25 @@ import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 
 /** This local storage key stores the `Grid / Event rendered view` selection */
 export const ALERTS_TABLE_GROUPS_SELECTION_KEY = 'securitySolution.alerts.table.group-selection';
+
+export const GroupsContainer = styled.div`
+  .euiAccordion__childWrapper {
+    border-bottom: 1px solid #d3dae6;
+    border-radius: 5px;
+  }
+  .euiAccordion__triggerWrapper {
+    border-bottom: 1px solid #d3dae6;
+    border-radius: 5px;
+    min-height: 77px;
+  }
+  .euiAccordionForm {
+    border-top: 1px solid #d3dae6;
+    border-left: 1px solid #d3dae6;
+    border-right: 1px solid #d3dae6;
+    border-bottom: none;
+    border-radius: 5px;
+  }
+`;
 
 const ALERTS_GROUPING_ID = '';
 
@@ -321,7 +341,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
             },
           },
           {
-            maxSeveritySubAggregation: {
+            severitiesSubAggregation: {
               terms: {
                 field: 'kibana.alert.severity',
               },
@@ -570,31 +590,34 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       {!selectedGroup ? (
         dataTable
       ) : (
-        <>
+        <GroupsContainer>
           {alertsGroupsData?.aggregations?.stackByMupltipleFields0?.buckets?.map((field0Bucket) => (
-            <EuiAccordion
-              id={`group0-${field0Bucket.key[0]}`}
-              className="euiAccordionForm"
-              buttonClassName="euiAccordionForm__button"
-              buttonContent={getSelectedGroupButtonContent(selectedGroup, field0Bucket)}
-              extraAction={
-                <GroupRightPanel
-                  bucket={field0Bucket}
-                  actionItems={bulkActionItems}
-                  onClickOpen={() => onOpenGroupAction(field0Bucket)}
-                />
-              }
-              paddingSize="l"
-              forceState={trigger[`group0-${field0Bucket.key[0]}`] ?? 'closed'}
-              onToggle={(isOpen) => {
-                setTrigger({ [`group0-${field0Bucket.key[0]}`]: isOpen ? 'open' : 'closed' });
-                if (isOpen) {
-                  setSelectedBucket(field0Bucket);
+            <>
+              <EuiAccordion
+                id={`group0-${field0Bucket.key[0]}`}
+                className="euiAccordionForm"
+                buttonClassName="euiAccordionForm__button"
+                buttonContent={getSelectedGroupButtonContent(selectedGroup, field0Bucket)}
+                extraAction={
+                  <GroupRightPanel
+                    bucket={field0Bucket}
+                    actionItems={bulkActionItems}
+                    onClickOpen={() => onOpenGroupAction(field0Bucket)}
+                  />
                 }
-              }}
-            >
-              {trigger[`group0-${field0Bucket.key[0]}`] === 'open' ? dataTable : null}
-            </EuiAccordion>
+                paddingSize="l"
+                forceState={trigger[`group0-${field0Bucket.key[0]}`] ?? 'closed'}
+                onToggle={(isOpen) => {
+                  setTrigger({ [`group0-${field0Bucket.key[0]}`]: isOpen ? 'open' : 'closed' });
+                  if (isOpen) {
+                    setSelectedBucket(field0Bucket);
+                  }
+                }}
+              >
+                {trigger[`group0-${field0Bucket.key[0]}`] === 'open' ? dataTable : null}
+              </EuiAccordion>
+              <EuiSpacer size="s" />
+            </>
           ))}
           <EuiSpacer size="m" />
           {(alertsGroupsData?.aggregations?.groupsNumber?.value && groupsPageSize
@@ -617,7 +640,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
               itemsPerPageOptions={[5, 10, 20, 50]}
             />
           )}
-        </>
+        </GroupsContainer>
       )}
     </>
   );

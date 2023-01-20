@@ -11,8 +11,8 @@ export type RawBucket = GenericBuckets & {
   alertsCount?: {
     value?: number | null; // Elasticsearch returns `null` when a sub-aggregation cannot be computed
   };
-  maxSeveritySubAggregation?: {
-    value?: number | null; // Elasticsearch returns `null` when a sub-aggregation cannot be computed
+  severitiesSubAggregation?: {
+    buckets?: GenericBuckets[];
   };
   countSeveritySubAggregation?: {
     value?: number | null; // Elasticsearch returns `null` when a sub-aggregation cannot be computed

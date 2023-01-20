@@ -326,6 +326,41 @@ export const STATS_GROUP_USERS = i18n.translate(
 export const STATS_GROUP_SEVERITY = i18n.translate(
   'xpack.securitySolution.detectionEngine.groups.stats.severity',
   {
-    defaultMessage: 'Severity',
+    defaultMessage: 'Severity:',
+  }
+);
+
+export const STATS_GROUP_SEVERITY_MULTI = i18n.translate(
+  'xpack.securitySolution.detectionEngine.groups.stats.severity.multi',
+  {
+    defaultMessage: 'Multi',
+  }
+);
+
+export const STATS_GROUP_SEVERITY_LOW = i18n.translate(
+  'xpack.securitySolution.detectionEngine.groups.stats.severity.low',
+  {
+    defaultMessage: 'Low',
+  }
+);
+
+export const STATS_GROUP_SEVERITY_HIGH = i18n.translate(
+  'xpack.securitySolution.detectionEngine.groups.stats.severity.high',
+  {
+    defaultMessage: 'High',
+  }
+);
+
+export const STATS_GROUP_SEVERITY_CRITICAL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.groups.stats.severity.critical',
+  {
+    defaultMessage: 'Critical',
+  }
+);
+
+export const STATS_GROUP_SEVERITY_MEDIUM = i18n.translate(
+  'xpack.securitySolution.detectionEngine.groups.stats.severity.medium',
+  {
+    defaultMessage: 'Medium',
   }
 );

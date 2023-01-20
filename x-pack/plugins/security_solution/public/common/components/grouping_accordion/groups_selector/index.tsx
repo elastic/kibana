@@ -49,6 +49,41 @@ const GroupsSelectorComponent = ({
   localStorageGroupKey,
 }: GroupSelectorProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const options = useMemo(
+    () => [
+      {
+        label: ruleName,
+        key: 'kibana.alert.rule.name',
+        checked: (groupSelected === 'kibana.alert.rule.name'
+          ? 'on'
+          : undefined) as EuiSelectableOption['checked'],
+      },
+      {
+        label: userName,
+        key: 'user.name',
+        checked: (groupSelected === 'user.name'
+          ? 'on'
+          : undefined) as EuiSelectableOption['checked'],
+      },
+      {
+        label: hostName,
+        key: 'host.name',
+        checked: (groupSelected === 'host.name'
+          ? 'on'
+          : undefined) as EuiSelectableOption['checked'],
+      },
+      {
+        label: sourceIP,
+        key: 'source.ip',
+        checked: (groupSelected === 'source.ip'
+          ? 'on'
+          : undefined) as EuiSelectableOption['checked'],
+      },
+    ],
+    [groupSelected]
+  );
+
+  const selectedOption = options.filter((groupOption) => groupOption.key === groupSelected);
 
   // add local storage group value
   const onButtonClick = useCallback(() => setIsPopoverOpen((currentVal) => !currentVal), []);
@@ -85,44 +120,10 @@ const GroupsSelectorComponent = ({
           defaultMessage: 'Group alerts',
         })}
         {groupSelected ? ': ' : ''}
-        {groupSelected ? groupSelected : ''}
+        {groupSelected && selectedOption.length > 0 ? selectedOption[0].label : ''}
       </EuiButtonEmpty>
     ),
-    [groupSelected, onButtonClick]
-  );
-
-  const options = useMemo(
-    () => [
-      {
-        label: ruleName,
-        key: 'kibana.alert.rule.name',
-        checked: (groupSelected === 'kibana.alert.rule.name'
-          ? 'on'
-          : undefined) as EuiSelectableOption['checked'],
-      },
-      {
-        label: userName,
-        key: 'user.name',
-        checked: (groupSelected === 'user.name'
-          ? 'on'
-          : undefined) as EuiSelectableOption['checked'],
-      },
-      {
-        label: hostName,
-        key: 'host.name',
-        checked: (groupSelected === 'host.name'
-          ? 'on'
-          : undefined) as EuiSelectableOption['checked'],
-      },
-      {
-        label: sourceIP,
-        key: 'source.ip',
-        checked: (groupSelected === 'source.ip'
-          ? 'on'
-          : undefined) as EuiSelectableOption['checked'],
-      },
-    ],
-    [groupSelected]
+    [groupSelected, onButtonClick, selectedOption]
   );
 
   const renderOption = useCallback((option) => {
