@@ -32,7 +32,15 @@ export function getConnectorType(): ConnectorTypeModel<unknown, SlackSecrets, Sl
         message: new Array<string>(),
       };
       const validationResult = { errors };
-      if (!actionParams.message?.length) {
+      if (actionParams.subAction === 'postMessage') {
+        if (!actionParams.subActionParams.text) {
+          errors.message.push(translations.MESSAGE_REQUIRED);
+        }
+        if (!actionParams.subActionParams.channels?.length) {
+          errors.message.push(translations.CHANNEL_REQUIRED);
+        }
+      }
+      if (!actionParams.subAction && !actionParams.message) {
         errors.message.push(translations.MESSAGE_REQUIRED);
       }
       return validationResult;

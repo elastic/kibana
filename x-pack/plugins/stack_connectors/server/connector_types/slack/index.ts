@@ -67,12 +67,12 @@ export function getConnectorType(): SlackConnectorType {
         schema: ParamsSchema,
       },
     },
-    renderParameterTemplates,
+    // renderParameterTemplates,
     executor: (
       execOptions: { secrets: { token: string } } | { secrets: { webhookUrl: string } }
     ) => {
-      return execOptions.secrets.webhookUrl
-        ? slackWebhookExecutor(execOptions)
+      return execOptions.config.type === 'webhook'
+        ? slackWebhookExecutor(execOptions as SlackWebhookExecutorOptions)
         : slackWebApiExecutor(execOptions as SlackWebApiExecutorOptions);
     },
   };
@@ -120,7 +120,6 @@ function validateConnectorTypeConfig(
 const slackWebhookExecutor = async (
   execOptions: SlackWebhookExecutorOptions
 ): Promise<ConnectorTypeExecutorResult<unknown>> => {
-  console.log('START!!!');
   const { actionId, secrets, params, configurationUtilities, logger } = execOptions;
 
   let result: IncomingWebhookResult;

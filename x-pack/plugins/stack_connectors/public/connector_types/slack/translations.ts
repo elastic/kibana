@@ -21,6 +21,13 @@ export const MESSAGE_REQUIRED = i18n.translate(
   }
 );
 
+export const CHANNEL_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.components.slack..error.requiredSlackMessageText',
+  {
+    defaultMessage: 'At least one selected channel is required.',
+  }
+);
+
 export const WEBHOOK_URL_LABEL = i18n.translate(
   'xpack.stackConnectors.components.slack.webhookUrlTextFieldLabel',
   {

@@ -44,4 +44,4 @@ export const WebApiParamsSchema = schema.oneOf([
   ExecutorPostMessageParamsSchema,
 ]);
 
-export const ParamsSchema = schema.oneOf([WebApiParamsSchema, WebhookParamsSchema]);
+export const ParamsSchema = schema.oneOf([WebhookParamsSchema, WebApiParamsSchema]);
