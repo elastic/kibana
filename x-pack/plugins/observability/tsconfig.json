@@ -68,6 +68,7 @@
     "@kbn/core-notifications-browser",
     "@kbn/slo-schema",
     "@kbn/guided-onboarding",
+    "@kbn/charts-plugin",
   ],
   "exclude": [
     "target/**/*",

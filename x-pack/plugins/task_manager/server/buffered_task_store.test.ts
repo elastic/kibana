@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { taskStoreMock } from './task_store.mock';
 import { BufferedTaskStore } from './buffered_task_store';
 import { asErr, asOk } from './lib/result_type';
@@ -95,7 +95,7 @@ describe('Buffered Task Store', () => {
 
 function mockTask() {
   return {
-    id: `task_${uuid.v4()}`,
+    id: `task_${uuidv4()}`,
     attempts: 0,
     schedule: undefined,
     params: { hello: 'world' },

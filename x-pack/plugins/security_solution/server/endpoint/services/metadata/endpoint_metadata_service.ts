@@ -47,7 +47,6 @@ import {
   wrapErrorIfNeeded,
 } from '../../utils';
 import { createInternalReadonlySoClient } from '../../utils/create_internal_readonly_so_client';
-import { METADATA_UNITED_INDEX } from '../../../../common/endpoint/constants';
 import { getAllEndpointPackagePolicies } from '../../routes/metadata/support/endpoint_package_policies';
 import type { GetMetadataListRequestQuery } from '../../../../common/endpoint/schema/metadata';
 import { EndpointError } from '../../../../common/endpoint/errors';
@@ -358,33 +357,6 @@ export class EndpointMetadataService {
   }
 
   /**
-   * Returns whether the united metadata index exists
-   *
-   * @param esClient
-   *
-   * @throws
-   */
-  async doesUnitedIndexExist(esClient: ElasticsearchClient): Promise<boolean> {
-    try {
-      await esClient.search({
-        index: METADATA_UNITED_INDEX,
-        size: 1,
-      });
-      return true;
-    } catch (error) {
-      const errorType = error?.meta?.body?.error?.type ?? '';
-      // only index not found is expected
-      if (errorType !== 'index_not_found_exception') {
-        const err = wrapErrorIfNeeded(error);
-        this.logger?.error(err);
-        throw err;
-      }
-    }
-
-    return false;
-  }
-
-  /**
    * Retrieve list of host metadata. Only supports new united index.
    *
    * @param esClient
@@ -407,6 +379,14 @@ export class EndpointMetadataService {
     try {
       unitedMetadataQueryResponse = await esClient.search<UnitedAgentMetadata>(unitedIndexQuery);
     } catch (error) {
+      const errorType = error?.meta?.body?.error?.type ?? '';
+      if (errorType === 'index_not_found_exception') {
+        return {
+          data: [],
+          total: 0,
+        };
+      }
+
       const err = wrapErrorIfNeeded(error);
       this.logger?.error(err);
       throw err;
