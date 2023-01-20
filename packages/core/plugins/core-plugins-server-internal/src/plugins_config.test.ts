@@ -37,9 +37,7 @@ describe('PluginsConfig', () => {
     const rawConfig: any = {
       initialize: true,
       paths: ['some-path', 'another-path'],
-      __internal__: {
-        enableAllPlugins: true,
-      },
+      forceEnableAllPlugins: true,
     };
     const config = new PluginsConfig(rawConfig, env);
     expect(config.shouldEnableAllPlugins).toBe(true);

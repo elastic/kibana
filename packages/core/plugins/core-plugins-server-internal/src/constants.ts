@@ -9,7 +9,7 @@
 /**
  * @internal
  */
-export const ENABLE_ALL_PLUGINS_CONFIG_PATH = '__internal__.enableAllPlugins' as const;
+export const ENABLE_ALL_PLUGINS_CONFIG_PATH = 'forceEnableAllPlugins' as const;
 
 /**
  * Set this to true in the raw configuration passed to {@link Root} to force

@@ -24,9 +24,7 @@ const configSchema = schema.object({
    * Internal config, not intended to be used by end users. Only for specific
    * internal purposes.
    */
-  __internal__: schema.maybe(
-    schema.object({ enableAllPlugins: schema.boolean({ defaultValue: false }) })
-  ),
+  forceEnableAllPlugins: schema.maybe(schema.boolean({ defaultValue: false })),
 });
 
 type InternalPluginsConfigType = TypeOf<typeof configSchema>;
