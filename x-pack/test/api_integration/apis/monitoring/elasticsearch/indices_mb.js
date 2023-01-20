@@ -20,84 +20,83 @@ export default function ({ getService }) {
   // Failing: See https://github.com/elastic/kibana/issues/146067
   // eslint-disable-next-line mocha/no-exclusive-tests
   describe.only('indices - metricbeat and package', () => {
-    ['package'].forEach((source) => {
-      describe(`indices ${source}`, () => {
-        describe('shard-relocation', () => {
-          const archive = `x-pack/test/functional/es_archives/monitoring/singlecluster_three_nodes_shard_relocation_${source}`;
-          const timeRange = {
-            min: '2017-10-05T20:31:48.000Z',
-            max: '2017-10-05T20:35:12.000Z',
-          };
+    const source = 'mb';
+    describe(`indices ${source}`, () => {
+      describe('shard-relocation', () => {
+        const archive = `x-pack/test/functional/es_archives/monitoring/singlecluster_three_nodes_shard_relocation_${source}`;
+        const timeRange = {
+          min: '2017-10-05T20:31:48.000Z',
+          max: '2017-10-05T20:35:12.000Z',
+        };
 
-          before('load archive', () => {
-            return setup(archive);
-          });
-
-          after('unload archive', () => {
-            return tearDown(archive);
-          });
-
-          it('should summarize the non-system indices with stats', async () => {
-            const { body } = await supertest
-              .post(
-                '/api/monitoring/v1/clusters/YCxj-RAgSZCP6GuOQ8M1EQ/elasticsearch/indices?show_system_indices=false'
-              )
-              .set('kbn-xsrf', 'xxx')
-              .send({ timeRange })
-              .expect(200);
-            expect(body).to.eql(relocatingShardsFixture);
-          });
-
-          it('should summarize all indices with stats', async () => {
-            const { body } = await supertest
-              .post(
-                '/api/monitoring/v1/clusters/YCxj-RAgSZCP6GuOQ8M1EQ/elasticsearch/indices?show_system_indices=true'
-              )
-              .set('kbn-xsrf', 'xxx')
-              .send({ timeRange })
-              .expect(200);
-
-            expect(body).to.eql(relocationShardsAllFixture);
-          });
+        before('load archive', () => {
+          return setup(archive);
         });
 
-        describe('health-red', () => {
-          const archive = `x-pack/test/functional/es_archives/monitoring/singlecluster_red_platinum_${source}`;
-          const timeRange = {
-            min: '2017-10-06T19:53:06.000Z',
-            max: '2017-10-06T20:15:30.000Z',
-          };
+        after('unload archive', () => {
+          return tearDown(archive);
+        });
 
-          before('load clusters archive', () => {
-            return setup(archive);
-          });
+        it('should summarize the non-system indices with stats', async () => {
+          const { body } = await supertest
+            .post(
+              '/api/monitoring/v1/clusters/YCxj-RAgSZCP6GuOQ8M1EQ/elasticsearch/indices?show_system_indices=false'
+            )
+            .set('kbn-xsrf', 'xxx')
+            .send({ timeRange })
+            .expect(200);
+          expect(body).to.eql(relocatingShardsFixture);
+        });
 
-          after('unload clusters archive', () => {
-            return tearDown(archive);
-          });
+        it('should summarize all indices with stats', async () => {
+          const { body } = await supertest
+            .post(
+              '/api/monitoring/v1/clusters/YCxj-RAgSZCP6GuOQ8M1EQ/elasticsearch/indices?show_system_indices=true'
+            )
+            .set('kbn-xsrf', 'xxx')
+            .send({ timeRange })
+            .expect(200);
 
-          it('should summarize the non-system indices with stats', async () => {
-            const { body } = await supertest
-              .post(
-                '/api/monitoring/v1/clusters/1LYuyvCCQFS3FAO_h65PQw/elasticsearch/indices?show_system_indices=false'
-              )
-              .set('kbn-xsrf', 'xxx')
-              .send({ timeRange })
-              .expect(200);
-            expect(body).to.eql(indicesRedClusterFixture);
-          });
+          expect(body).to.eql(relocationShardsAllFixture);
+        });
+      });
 
-          it('should summarize all indices with stats', async () => {
-            const { body } = await supertest
-              .post(
-                '/api/monitoring/v1/clusters/1LYuyvCCQFS3FAO_h65PQw/elasticsearch/indices?show_system_indices=true'
-              )
-              .set('kbn-xsrf', 'xxx')
-              .send({ timeRange })
-              .expect(200);
+      describe('health-red', () => {
+        const archive = `x-pack/test/functional/es_archives/monitoring/singlecluster_red_platinum_${source}`;
+        const timeRange = {
+          min: '2017-10-06T19:53:06.000Z',
+          max: '2017-10-06T20:15:30.000Z',
+        };
 
-            expect(body).to.eql(indicesRedClusterAllFixture);
-          });
+        before('load clusters archive', () => {
+          return setup(archive);
+        });
+
+        after('unload clusters archive', () => {
+          return tearDown(archive);
+        });
+
+        it('should summarize the non-system indices with stats', async () => {
+          const { body } = await supertest
+            .post(
+              '/api/monitoring/v1/clusters/1LYuyvCCQFS3FAO_h65PQw/elasticsearch/indices?show_system_indices=false'
+            )
+            .set('kbn-xsrf', 'xxx')
+            .send({ timeRange })
+            .expect(200);
+          expect(body).to.eql(indicesRedClusterFixture);
+        });
+
+        it('should summarize all indices with stats', async () => {
+          const { body } = await supertest
+            .post(
+              '/api/monitoring/v1/clusters/1LYuyvCCQFS3FAO_h65PQw/elasticsearch/indices?show_system_indices=true'
+            )
+            .set('kbn-xsrf', 'xxx')
+            .send({ timeRange })
+            .expect(200);
+
+          expect(body).to.eql(indicesRedClusterAllFixture);
         });
       });
     });
