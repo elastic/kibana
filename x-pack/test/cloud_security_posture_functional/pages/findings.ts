@@ -24,8 +24,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       resource: { id: chance.guid(), name: `kubelet`, sub_type: 'lower case sub type' },
       result: { evaluation: chance.integer() % 2 === 0 ? 'passed' : 'failed' },
       rule: {
+        benchmark: {
+          id: 'cis_k8s',
+          name: 'CIS Kubernetes V1.23',
+          version: 'v1.0.0',
+        },
         name: 'Upper case rule name',
         section: 'Upper case section',
+        tags: ['Kubernetes'],
+        type: 'process',
       },
       cluster_id: 'Upper case cluster id',
     },
@@ -33,8 +40,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       resource: { id: chance.guid(), name: `Pod`, sub_type: 'Upper case sub type' },
       result: { evaluation: chance.integer() % 2 === 0 ? 'passed' : 'failed' },
       rule: {
+        benchmark: {
+          id: 'cis_k8s',
+          name: 'CIS Kubernetes V1.23',
+          version: 'v1.0.0',
+        },
         name: 'lower case rule name',
         section: 'Another upper case section',
+        tags: ['Kubernetes'],
+        type: 'process',
       },
       cluster_id: 'Another Upper case cluster id',
     },
@@ -42,8 +56,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       resource: { id: chance.guid(), name: `process`, sub_type: 'another lower case type' },
       result: { evaluation: 'passed' },
       rule: {
+        benchmark: {
+          id: 'cis_k8s',
+          name: 'CIS Kubernetes V1.23',
+          version: 'v1.0.0',
+        },
         name: 'Another upper case rule name',
         section: 'lower case section',
+        tags: ['Kubernetes'],
+        type: 'process',
       },
       cluster_id: 'lower case cluster id',
     },
@@ -51,8 +72,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       resource: { id: chance.guid(), name: `process`, sub_type: 'Upper case type again' },
       result: { evaluation: 'failed' },
       rule: {
+        benchmark: {
+          id: 'cis_k8s',
+          name: 'CIS Kubernetes V1.23',
+          version: 'v1.0.0',
+        },
         name: 'some lower case rule name',
         section: 'another lower case section',
+        tags: ['Kubernetes'],
+        type: 'process',
       },
       cluster_id: 'another lower case cluster id',
     },
@@ -64,11 +92,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('Findings Page', () => {
     let findings: typeof pageObjects.findings;
     let table: typeof pageObjects.findings.table;
+    let tableGroupBy: typeof pageObjects.findings.tableGroupBy;
     let distributionBar: typeof pageObjects.findings.distributionBar;
 
     before(async () => {
       findings = pageObjects.findings;
       table = pageObjects.findings.table;
+      tableGroupBy = pageObjects.findings.tableGroupBy;
       distributionBar = pageObjects.findings.distributionBar;
 
       await findings.index.add(data);
@@ -177,6 +207,43 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
           await filterBar.removeFilter('result.evaluation');
         });
+      });
+    });
+
+    describe('Group By', () => {
+      it('Group by Resource', async () => {
+        await table.toggleDropDownModal();
+        await table.selectGroupBy('Resource');
+        await table.clickOnRowValue(data[0].resource.id, data[0].rule.section);
+        expect(await tableGroupBy.hasColumnValue('Rule', data[0].rule.name)).to.be(true);
+        expect(await tableGroupBy.hasColumnValue('Rule', data[1].rule.name)).to.be(false);
+        expect(await tableGroupBy.hasColumnValue('Rule', data[2].rule.name)).to.be(false);
+        expect(await tableGroupBy.hasColumnValue('Rule', data[3].rule.name)).to.be(false);
+        await tableGroupBy.clickBasedOnText('Back to resources');
+        expect(await tableGroupBy.hasColumnValue('Resource Name', data[1].resource.name)).to.be(
+          true
+        );
+        await table.clickOnRowValue(data[1].resource.id, data[1].rule.section);
+        expect(await tableGroupBy.hasColumnValue('Rule', data[0].rule.name)).to.be(false);
+        expect(await tableGroupBy.hasColumnValue('Rule', data[1].rule.name)).to.be(true);
+        expect(await tableGroupBy.hasColumnValue('Rule', data[2].rule.name)).to.be(false);
+        expect(await tableGroupBy.hasColumnValue('Rule', data[3].rule.name)).to.be(false);
+        await tableGroupBy.clickBasedOnText('Back to resources');
+        expect(await tableGroupBy.hasColumnValue('Resource Name', data[1].resource.name)).to.be(
+          true
+        );
+        await table.clickOnRowValue(data[3].resource.id, data[3].rule.section);
+        expect(await tableGroupBy.hasColumnValue('Rule', data[0].rule.name)).to.be(false);
+        expect(await tableGroupBy.hasColumnValue('Rule', data[1].rule.name)).to.be(false);
+        expect(await tableGroupBy.hasColumnValue('Rule', data[2].rule.name)).to.be(false);
+        expect(await tableGroupBy.hasColumnValue('Rule', data[3].rule.name)).to.be(true);
+        await tableGroupBy.clickBasedOnText('Back to resources');
+
+        await queryBar.setQuery(data[1].rule.name);
+        await queryBar.submitQuery();
+        expect(await tableGroupBy.hasColumnValue('Resource Name', data[1].resource.name)).to.be(
+          true
+        );
       });
     });
   });
