@@ -19,7 +19,7 @@ import { EnginesListLogic } from './engines_list_logic';
 
 const NAME_VALIDATION = new RegExp(/^[a-z0-9\-]+$/);
 
-interface CreateEngineLogicActions {
+export interface CreateEngineLogicActions {
   closeEngineCreate: () => void;
   createEngine: () => void;
   createEngineRequest: CreateEngineApiLogicActions['makeRequest'];
@@ -32,9 +32,9 @@ interface CreateEngineLogicActions {
   };
 }
 
-interface CreateEngineLogicValues {
+export interface CreateEngineLogicValues {
   createDisabled: boolean;
-  createEngineError: typeof CreateEngineApiLogic.values.error;
+  createEngineError?: typeof CreateEngineApiLogic.values.error;
   createEngineStatus: typeof CreateEngineApiLogic.values.status;
   engineName: string;
   engineNameStatus: 'complete' | 'incomplete' | 'warning';
