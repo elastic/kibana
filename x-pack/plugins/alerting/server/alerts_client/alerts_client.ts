@@ -38,7 +38,7 @@ import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { getIndexTemplateAndPattern } from '../alerts_service/types';
 import { AlertLimitService, IAlertLimitService } from './alert_limit_service';
 import { ReportedAlert } from './types';
-import { isFlapping, processAlerts } from '../lib';
+import { determineAlertsToPersist, isFlapping, processAlerts } from '../lib';
 import { logAlerts } from '../task_runner/log_alerts';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
@@ -144,22 +144,26 @@ export class AlertsClient<Context extends ContextAlert> implements IAlertsClient
 
   // Alerts that were reported as active or recovered in the previous rule execution
   private trackedAlerts: {
-    active: Record<string, Alert>;
-    recovered: Record<string, Alert>;
+    active: Record<string, Alert & Context>;
+    recovered: Record<string, Alert & Context>;
   } = {
     active: {},
     recovered: {},
   };
 
+  // Keep track of the concrete indices for tracked alerts by alert UUID
+  // so if we update those alerts we target the correct index
+  private trackedAlertIndices: Record<string, string> = {};
+
   // Alerts reported by rule executor during the current rule execution
   private numAlertsReported: number = 0;
-  private reportedAlerts: Record<string, Alert> = {};
+  private reportedAlerts: Record<string, Alert & Context> = {};
 
   private processedAlerts: {
-    new: Record<string, Alert>;
-    active: Record<string, Alert>;
-    recovered: Record<string, Alert>;
-    recoveredCurrent: Record<string, Alert>;
+    new: Record<string, Alert & Context>;
+    active: Record<string, Alert & Context>;
+    recovered: Record<string, Alert & Context>;
+    recoveredCurrent: Record<string, Alert & Context>;
   };
 
   constructor(private readonly options: AlertsClientParams) {
@@ -207,10 +211,10 @@ export class AlertsClient<Context extends ContextAlert> implements IAlertsClient
     }
     const indexTemplateAndPattern = getIndexTemplateAndPattern(context!);
 
-    const query = async (results: Array<SearchHit<Alert>>, from: number = 0) => {
+    const query = async (results: Array<SearchHit<Alert & Context>>, from: number = 0) => {
       const {
         hits: { hits, total },
-      } = await esClient.search<Alert>({
+      } = await esClient.search<Alert & Context>({
         index: indexTemplateAndPattern.pattern,
         track_total_hits: true,
         body: {
@@ -247,12 +251,13 @@ export class AlertsClient<Context extends ContextAlert> implements IAlertsClient
 
     try {
       // Query for all alerts that were updated in the last execution
-      const results: Array<SearchHit<Alert>> = [];
+      const results: Array<SearchHit<Alert & Context>> = [];
       await query(results);
 
       for (const hit of results) {
-        const alertHit: Alert = hit._source as Alert;
+        const alertHit: Alert & Context = hit._source as Alert & Context;
         const alertStatus = alertHit[ALERT_STATUS];
+        const alertUuid = alertHit[ALERT_UUID];
         if (alertStatus === ALERT_STATUS_ACTIVE) {
           this.trackedAlerts.active[alertHit[ALERT_ID]] = alertHit;
         } else if (alertStatus === ALERT_STATUS_RECOVERED) {
@@ -262,6 +267,8 @@ export class AlertsClient<Context extends ContextAlert> implements IAlertsClient
             `${this.ruleLogPrefix}: Found alert with status ${alertStatus} which is not recognized.`
           );
         }
+
+        this.trackedAlertIndices[alertUuid] = hit._index;
       }
     } catch (err) {
       this.options.logger.error(
@@ -302,15 +309,13 @@ export class AlertsClient<Context extends ContextAlert> implements IAlertsClient
     // - timestamp
     // - required rule metadata, including current execution UUID
     // - tracked alert data, if it exists
-    const augmentedAlert: Alert = {
+    this.reportedAlerts[alertId] = {
       ...trackedAlert,
       ...alert,
       ...this.rule,
       [ALERT_STATUS]: 'active',
       [TIMESTAMP]: currentTime, // TODO - should this be task.startedAt?
-    } as Alert;
-
-    this.reportedAlerts[alertId] = augmentedAlert;
+    } as Alert & Context;
   }
 
   public processAndLogAlerts(ruleRunMetricsStore: RuleRunMetricsStore, shouldLogAlerts: boolean) {
@@ -344,7 +349,7 @@ export class AlertsClient<Context extends ContextAlert> implements IAlertsClient
       activeAlerts: processedAlertsActive,
       currentRecoveredAlerts: processedAlertsRecoveredCurrent,
       recoveredAlerts: processedAlertsRecovered,
-    } = processAlerts<Alert>({
+    } = processAlerts<Alert & Context>({
       reportedAlerts: { active: this.reportedAlerts, recovered: this.getRecoveredAlertsHelper() },
       trackedAlerts: this.trackedAlerts,
       hasReachedAlertLimit: this.hasReachedAlertLimit(),
@@ -440,27 +445,44 @@ export class AlertsClient<Context extends ContextAlert> implements IAlertsClient
   //   }
   // }
 
-  // public async write(params?: WriteAlertParams) {
-  //   // TODO - Lifecycle alerts set some other fields based on alert status
-  //   // Example: workflow status - default to 'open' if not set
-  //   // event action: new alert = 'new', active alert: 'active', otherwise 'close'
-  //   this.prepareAlerts(this.options.ruleType.autoRecoverAlerts ?? true);
+  public async write() {
+    const esClient = await this.options.elasticsearchClientPromise;
+    // TODO - Lifecycle alerts set some other fields based on alert status
+    // Example: workflow status - default to 'open' if not set
+    // event action: new alert = 'new', active alert: 'active', otherwise 'close'
 
-  //   this.options.logger.info(`preparedAlerts ${JSON.stringify(this.preparedAlerts)}`);
+    const getAlertData = (alerts: Record<string, Alert & Context>) =>
+      mapValues(alerts, (alert) => ({
+        flapping: alert[ALERT_FLAPPING] ?? false,
+        flappingHistory: alert[ALERT_FLAPPING_HISTORY] ?? [],
+      }));
 
-  //   // Bulk index alerts
-  //   const esClient = await this.options.elasticsearchClientPromise;
-  //   await esClient.bulk({
-  //     body: this.preparedAlerts.flatMap((alert) => [
-  //       { index: { _id: alert[ALERT_UUID], _index: DEFAULT_ALERTS_INDEX, require_alias: false } },
-  //       alert,
-  //     ]),
-  //   });
+    const { activeAlertIds, recoveredAlertIds } = determineAlertsToPersist(
+      getAlertData(this.processedAlerts.active),
+      getAlertData(this.processedAlerts.recovered)
+    );
 
-  //   if (params) {
-  //     this.logAlerts(params.eventLogger, params.metricsStore);
-  //   }
-  // }
+    const activeAlertsToIndex = activeAlertIds.map((id: string) => this.processedAlerts.active[id]);
+    const recoveredAlertsToIndex = recoveredAlertIds.map(
+      (id: string) => this.processedAlerts.recovered[id]
+    );
+
+    await esClient.bulk({
+      refresh: 'wait_for',
+      body: [...activeAlertsToIndex, ...recoveredAlertsToIndex].map((alert) => [
+        {
+          index: {
+            _id: alert[ALERT_UUID],
+            // If we know the concrete index for this alert, specify it
+            ...(this.trackedAlertIndices[alert[ALERT_UUID]]
+              ? { _index: this.trackedAlertIndices[alert[ALERT_UUID]], require_alias: false }
+              : {}),
+          },
+        },
+        alert,
+      ]),
+    });
+  }
 
   // TODO
   // public scheduleActions(params: ScheduleActionsParams) {

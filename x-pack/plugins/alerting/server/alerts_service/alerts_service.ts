@@ -31,7 +31,6 @@ import {
 } from './create_resource_installation_helper';
 import { AlertsClient } from '../alerts_client/alerts_client';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
-import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 
 const TOTAL_FIELDS_LIMIT = 2500;
 const INSTALLATION_TIMEOUT = 20 * 60 * 1000; // 20 minutes

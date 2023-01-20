@@ -13,7 +13,7 @@ import {
   getPublicAlertFactory,
   splitAlerts,
 } from '../alert/create_alert_factory';
-import { determineAlertsToReturn, isFlapping, processAlerts } from '../lib';
+import { determineAlertsToPersist, isFlapping, processAlerts } from '../lib';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
@@ -214,10 +214,32 @@ export class LegacyAlertsClient<
   }
 
   public getAlertsToSerialize() {
-    return determineAlertsToReturn<State, Context, ActionGroupIds, RecoveryActionGroupId>(
-      this.processedAlerts.active,
-      this.processedAlerts.recovered
+    const getAlertData = (
+      alerts: Record<string, Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>>
+    ) =>
+      mapValues(alerts, (alert) => ({
+        flapping: alert.getFlapping(),
+        flappingHistory: alert.getFlappingHistory() ?? [],
+      }));
+    const { activeAlertIds, recoveredAlertIds } = determineAlertsToPersist(
+      getAlertData(this.processedAlerts.active),
+      getAlertData(this.processedAlerts.recovered)
     );
+
+    return {
+      alertsToReturn: activeAlertIds.reduce((acc, id) => {
+        return {
+          ...acc,
+          [id]: this.processedAlerts.active[id].toRaw(),
+        };
+      }, {}),
+      recoveredAlertsToReturn: recoveredAlertIds.reduce((acc, id) => {
+        return {
+          ...acc,
+          [id]: this.processedAlerts.recovered[id].toRaw(true),
+        };
+      }, {}),
+    };
   }
 
   public hasReachedAlertLimit(): boolean {

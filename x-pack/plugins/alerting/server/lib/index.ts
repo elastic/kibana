@@ -38,5 +38,5 @@ export { isRuleSnoozed, getRuleSnoozeEndTime } from './is_rule_snoozed';
 export { convertRuleIdsToKueryNode } from './convert_rule_ids_to_kuery_node';
 export { convertEsSortToEventLogSort } from './convert_es_sort_to_event_log_sort';
 export * from './snooze';
-export { determineAlertsToReturn } from './determine_alerts_to_return';
+export { determineAlertsToPersist } from './determine_alerts_to_persist';
 export { updateFlappingHistory, isFlapping } from './flapping_utils';

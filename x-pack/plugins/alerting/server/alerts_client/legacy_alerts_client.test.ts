@@ -877,4 +877,148 @@ describe('Legacy Alerts Client', () => {
       }
     );
   });
+
+  describe('getAlertsToSerialize()', () => {
+    test('should return all active alerts to serialize', () => {
+      const alertsClient = new LegacyAlertsClient({
+        logger,
+        maxAlerts: 10,
+        ruleType,
+      });
+
+      // Initialize with tracked active alerts
+      alertsClient.initialize({
+        ruleLabel: `test:abc: 'test rule'`,
+        activeAlertsFromState: {
+          '1': {
+            state: { start: '1969-12-30T00:00:00.000Z', duration: 33000 },
+            meta: { flappingHistory: [true, true, false, false] },
+          },
+          '2': {
+            state: { start: '1969-12-31T07:34:00.000Z', duration: 23532 },
+          },
+        },
+        recoveredAlertsFromState: {},
+      });
+
+      const alertFactory = alertsClient.getExecutorServices();
+
+      // Report some alerts so we have 2 ongoing and 1 new
+      alertFactory.create('1').scheduleActions('default' as never, { foo: 'bar' });
+      alertFactory.create('2').scheduleActions('default' as never, { foo: 'cheese' });
+      alertFactory.create('3').scheduleActions('default' as never, { foo: 'lemon' });
+
+      alertsClient.processAndLogAlerts({
+        eventLogger: alertingEventLogger,
+        shouldLogAlerts: false,
+        ruleRunMetricsStore,
+      });
+
+      const activeAlerts = alertsClient.getProcessedAlerts('active');
+
+      const { alertsToReturn } = alertsClient.getAlertsToSerialize();
+      expect(Object.keys(activeAlerts)).toEqual(Object.keys(alertsToReturn));
+      expect(alertsToReturn).toEqual({
+        '1': {
+          meta: {
+            flapping: false,
+            flappingHistory: [true, true, false, false, false],
+          },
+          state: {
+            duration: '172800000000000',
+            start: '1969-12-30T00:00:00.000Z',
+          },
+        },
+        '2': {
+          meta: {
+            flapping: false,
+            flappingHistory: [false],
+          },
+          state: {
+            duration: '59160000000000',
+            start: '1969-12-31T07:34:00.000Z',
+          },
+        },
+        '3': {
+          meta: {
+            flapping: false,
+            flappingHistory: [true],
+          },
+          state: {
+            duration: '0',
+            start: '1970-01-01T00:00:00.000Z',
+          },
+        },
+      });
+    });
+
+    test('should return recovered alerts only if they are flapping or have flapped', () => {
+      const flapping = new Array(16).fill(false).concat([true, true, true, true]);
+      const notFlapping = new Array(20).fill(false);
+      const alertsClient = new LegacyAlertsClient({
+        logger,
+        maxAlerts: 10,
+        ruleType: { ...ruleType, doesSetRecoveryContext: true },
+      });
+
+      // Initialize with tracked active and recovered alerts
+      alertsClient.initialize({
+        ruleLabel: `test:abc: 'test rule'`,
+        activeAlertsFromState: {
+          '1': {
+            state: { start: '1969-12-30T00:00:00.000Z', duration: 33000 },
+            meta: { flappingHistory: flapping },
+          },
+          '2': {
+            state: { start: '1969-12-31T07:34:00.000Z', duration: 23532 },
+            meta: { flappingHistory: flapping },
+          },
+        },
+        recoveredAlertsFromState: {
+          '3': {
+            state: {
+              start: '1969-12-31T07:34:00.000Z',
+              duration: 33000,
+              end: '1969-12-31T14:34:00.000Z',
+            },
+            meta: { flappingHistory: notFlapping },
+          },
+        },
+      });
+
+      const alertFactory = alertsClient.getExecutorServices();
+
+      // Set context for recovered alerts
+      const { getRecoveredAlerts } = alertFactory.done();
+      for (const alert of getRecoveredAlerts()) {
+        alert.setContext({ foo: `alert${alert.getId()}` });
+      }
+
+      alertsClient.processAndLogAlerts({
+        eventLogger: alertingEventLogger,
+        shouldLogAlerts: false,
+        ruleRunMetricsStore,
+      });
+
+      const recoveredAlerts = alertsClient.getProcessedAlerts('recovered');
+      expect(Object.keys(recoveredAlerts)).toEqual(['1', '2', '3']);
+
+      const { recoveredAlertsToReturn } = alertsClient.getAlertsToSerialize();
+      expect(Object.keys(recoveredAlertsToReturn)).toEqual(['1', '2']);
+      expect(recoveredAlertsToReturn).toEqual({
+        '1': {
+          meta: {
+            flapping: true,
+            flappingHistory: [...flapping, true].slice(1),
+          },
+        },
+        '2': {
+          meta: {
+            flapping: true,
+            flappingHistory: [...flapping, true].slice(1),
+          },
+        },
+      });
+    });
+  });
 });
