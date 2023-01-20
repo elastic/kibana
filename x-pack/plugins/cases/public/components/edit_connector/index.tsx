@@ -4,7 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useEffect, useReducer, useState } from 'react';
+
+/* eslint-disable complexity */
+
+import React, { useCallback, useReducer } from 'react';
 import deepEqual from 'fast-deep-equal';
 import {
   EuiText,
@@ -21,27 +24,23 @@ import { isEmpty, noop } from 'lodash/fp';
 
 import type { FieldConfig } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Form, UseField, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import type { Case } from '../../../common/ui/types';
+import type { Case, CaseConnectors } from '../../../common/ui/types';
 import type { ActionConnector, ConnectorTypeFields } from '../../../common/api';
 import { NONE_CONNECTOR_ID } from '../../../common/api';
 import { ConnectorSelector } from '../connector_selector/form';
 import { ConnectorFieldsForm } from '../connectors/fields_form';
-import type { CaseUserActions } from '../../containers/types';
 import { schema } from './schema';
-import { getConnectorFieldsFromUserActions } from './helpers';
 import * as i18n from './translations';
 import { getConnectorById, getConnectorsFormValidators } from '../utils';
 import { usePushToService } from '../use_push_to_service';
-import type { CaseServices } from '../../containers/use_get_case_user_actions';
 import { useApplicationCapabilities } from '../../common/lib/kibana';
 import { useCasesContext } from '../cases_context/use_cases_context';
 
 export interface EditConnectorProps {
   caseData: Case;
-  caseServices: CaseServices;
+  caseConnectors: CaseConnectors;
   connectorName: string;
-  connectors: ActionConnector[];
-  hasDataToPush: boolean;
+  allAvailableConnectors: ActionConnector[];
   isLoading: boolean;
   isValidConnector: boolean;
   onSubmit: (
@@ -50,7 +49,6 @@ export interface EditConnectorProps {
     onError: () => void,
     onSuccess: () => void
   ) => void;
-  userActions: CaseUserActions[];
 }
 
 const MyFlexGroup = styled(EuiFlexGroup)`
@@ -81,6 +79,7 @@ type Action =
   | { type: 'SET_CURRENT_CONNECTOR'; payload: State['currentConnector'] }
   | { type: 'SET_FIELDS'; payload: State['fields'] }
   | { type: 'SET_EDIT_CONNECTOR'; payload: State['editConnector'] };
+
 const editConnectorReducer = (state: State, action: Action) => {
   switch (action.type) {
     case 'SET_CURRENT_CONNECTOR':
@@ -112,14 +111,12 @@ const initialState = {
 export const EditConnector = React.memo(
   ({
     caseData,
-    caseServices,
+    caseConnectors,
     connectorName,
-    connectors,
-    hasDataToPush,
+    allAvailableConnectors,
     isLoading,
     isValidConnector,
     onSubmit,
-    userActions,
   }: EditConnectorProps) => {
     const { permissions } = useCasesContext();
     const caseFields = caseData.connector.fields;
@@ -133,79 +130,44 @@ export const EditConnector = React.memo(
     const { actions } = useApplicationCapabilities();
     const actionsReadCapabilities = actions.read;
 
-    // by default save if disabled
-    const [enableSave, setEnableSave] = useState(false);
-
     const { setFieldValue, submit } = form;
 
     const [{ currentConnector, fields, editConnector }, dispatch] = useReducer(
       editConnectorReducer,
-      { ...initialState, fields: caseFields }
+      {
+        ...initialState,
+        fields: caseFields,
+        currentConnector: getConnectorById(caseData.connector.id, allAvailableConnectors),
+      }
     );
 
     // only enable the save button if changes were made to the previous selected
     // connector or its fields
-    useEffect(() => {
-      // null and none are equivalent to `no connector`.
-      // This makes sure we don't enable the button when the "no connector" option is selected
-      // by default. e.g. when a case is created without a selector
-      const isNoConnectorDeafultValue =
-        currentConnector === null && selectedConnector === NONE_CONNECTOR_ID;
-      const enable =
-        (!isNoConnectorDeafultValue && currentConnector?.id !== selectedConnector) ||
-        !deepEqual(fields, caseFields);
+    // null and none are equivalent to `no connector`.
+    // This makes sure we don't enable the button when the "no connector" option is selected
+    // by default. e.g. when a case is created without a selector
+    const isNoConnectorDefaultValue =
+      currentConnector === null && selectedConnector === NONE_CONNECTOR_ID;
 
-      setEnableSave(enable);
-    }, [caseFields, currentConnector, fields, selectedConnector]);
+    const enableSave =
+      (!isNoConnectorDefaultValue && currentConnector?.id !== selectedConnector) ||
+      !deepEqual(fields, caseFields);
 
-    useEffect(() => {
-      // Initialize the current connector with the connector information attached to the case if we can find that
-      // connector in the retrieved connectors from the API call
-      if (!isLoading) {
-        dispatch({
-          type: 'SET_CURRENT_CONNECTOR',
-          payload: getConnectorById(caseData.connector.id, connectors),
-        });
-
-        // Set the fields initially to whatever is present in the case, this should match with
-        // the latest user action for an update connector as well
-        dispatch({
-          type: 'SET_FIELDS',
-          payload: caseFields,
-        });
-      }
-    }, [caseData.connector.id, connectors, isLoading, caseFields]);
-
-    /**
-     * There is a race condition with this callback. At some point during the initial mounting of this component, this
-     * callback will be called. There are a couple problems with this:
-     *
-     * 1. If the call occurs before the above useEffect does its dispatches (aka while the connectors are still loading) this will
-     *  result in setting the current connector to null when in fact we might have a valid connector. It could also
-     *  cause issues when setting the fields because if there are no user actions then the getConnectorFieldsFromUserActions
-     *  will return null even when the caseData.connector.fields is valid and populated.
-     *
-     * 2. If the call occurs after the above useEffect then the currentConnector should === newConnectorId
-     *
-     * As far as I know dispatch is synchronous so if the useEffect runs first it should successfully set currentConnector. If
-     * onChangeConnector runs first and sets stuff to null, then when useEffect runs it'll switch everything back to what we need it to be
-     * initially.
-     */
     const onChangeConnector = useCallback(
       (newConnectorId) => {
         // change connector on dropdown action
         if (currentConnector?.id !== newConnectorId) {
           dispatch({
             type: 'SET_CURRENT_CONNECTOR',
-            payload: getConnectorById(newConnectorId, connectors),
+            payload: getConnectorById(newConnectorId, allAvailableConnectors),
           });
           dispatch({
             type: 'SET_FIELDS',
-            payload: getConnectorFieldsFromUserActions(newConnectorId, userActions ?? []),
+            payload: caseConnectors[newConnectorId]?.fields ?? null,
           });
         }
       },
-      [currentConnector, userActions, connectors]
+      [currentConnector, caseConnectors, allAvailableConnectors]
     );
 
     const onFieldsChange = useCallback(
@@ -260,7 +222,7 @@ export const EditConnector = React.memo(
 
     const connectorIdConfig = getConnectorsFormValidators({
       config: schema.connectorId as FieldConfig,
-      connectors,
+      connectors: allAvailableConnectors,
     });
 
     const { pushButton, pushCallouts } = usePushToService({
@@ -268,11 +230,10 @@ export const EditConnector = React.memo(
         ...caseData.connector,
         name: isEmpty(connectorName) ? caseData.connector.name : connectorName,
       },
-      caseServices,
+      caseConnectors,
       caseId: caseData.id,
       caseStatus: caseData.status,
-      connectors,
-      hasDataToPush,
+      allAvailableConnectors,
       onEditClick,
       isValidConnector,
     });
@@ -303,7 +264,7 @@ export const EditConnector = React.memo(
             )}
           </MyFlexGroup>
           <EuiHorizontalRule margin="xs" />
-          <MyFlexGroup data-test-subj="edit-connectors" direction="column">
+          <MyFlexGroup data-test-subj="edit-allAvailableConnectors" direction="column">
             {!isLoading && !editConnector && pushCallouts && actionsReadCapabilities && (
               <EuiFlexItem data-test-subj="push-callouts">{pushCallouts}</EuiFlexItem>
             )}
@@ -316,7 +277,7 @@ export const EditConnector = React.memo(
                       config={connectorIdConfig}
                       component={ConnectorSelector}
                       componentProps={{
-                        connectors,
+                        connectors: allAvailableConnectors,
                         dataTestSubj: 'caseConnectors',
                         defaultValue: selectedConnector,
                         disabled: !permissions.push,
@@ -350,7 +311,7 @@ export const EditConnector = React.memo(
                     <EuiButton
                       disabled={!enableSave}
                       color="success"
-                      data-test-subj="edit-connectors-submit"
+                      data-test-subj="edit-allAvailableConnectors-submit"
                       fill
                       iconType="save"
                       onClick={onSubmitConnector}
@@ -361,7 +322,7 @@ export const EditConnector = React.memo(
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty
-                      data-test-subj="edit-connectors-cancel"
+                      data-test-subj="edit-allAvailableConnectors-cancel"
                       iconType="cross"
                       onClick={onCancelConnector}
                       size="s"

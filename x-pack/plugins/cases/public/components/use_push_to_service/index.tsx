@@ -20,19 +20,18 @@ import {
 import * as i18n from './translations';
 import type { CaseConnector, ActionConnector } from '../../../common/api';
 import { CaseStatuses } from '../../../common/api';
-import type { CaseServices } from '../../containers/use_get_case_user_actions';
 import type { ErrorMessage } from './callout/types';
 import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { useCasesContext } from '../cases_context/use_cases_context';
+import type { CaseConnectors } from '../../containers/types';
 
 export interface UsePushToService {
+  caseConnectors: CaseConnectors;
   caseId: string;
-  caseServices: CaseServices;
   caseStatus: string;
   connector: CaseConnector;
-  connectors: ActionConnector[];
-  hasDataToPush: boolean;
+  allAvailableConnectors: ActionConnector[];
   isValidConnector: boolean;
   onEditClick: () => void;
 }
@@ -44,20 +43,21 @@ export interface ReturnUsePushToService {
 
 export const usePushToService = ({
   caseId,
-  caseServices,
   caseStatus,
+  caseConnectors,
   connector,
-  connectors,
-  hasDataToPush,
+  allAvailableConnectors,
   isValidConnector,
   onEditClick,
 }: UsePushToService): ReturnUsePushToService => {
   const { permissions } = useCasesContext();
   const { isLoading, pushCaseToExternalService } = usePostPushToService();
+  const refreshCaseViewPage = useRefreshCaseViewPage();
 
   const { isLoading: loadingLicense, data: actionLicense = null } = useGetActionLicense();
   const hasLicenseError = actionLicense != null && !actionLicense.enabledInLicense;
-  const refreshCaseViewPage = useRefreshCaseViewPage();
+  const needsToBePushed = caseConnectors[connector.id]?.needsToBePushed ?? false;
+  const hasBeenPushed = !!caseConnectors[connector.id]?.hasBeenPushed ?? false;
 
   const handlePushToService = useCallback(async () => {
     if (connector.id != null && connector.id !== 'none') {
@@ -88,7 +88,7 @@ export const usePushToService = ({
      * By priority of importance:
      * 1. Show license error.
      * 2. Show configuration error.
-     * 3. Show connector configuration error if the connector is set to none or no connectors have been created.
+     * 3. Show connector configuration error if the connector is set to none or no allAvailableConnectors have been created.
      * 4. Show an error message if the connector has been deleted or the user does not have access to it.
      * 5. Show case closed message.
      */
@@ -114,8 +114,15 @@ export const usePushToService = ({
     }
 
     return errors;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [actionLicense, caseStatus, connectors.length, connector, loadingLicense, permissions.update]);
+  }, [
+    actionLicense,
+    caseStatus,
+    connector.id,
+    hasLicenseError,
+    isValidConnector,
+    loadingLicense,
+    permissions.update,
+  ]);
 
   const pushToServiceButton = useMemo(
     () => (
@@ -129,31 +136,28 @@ export const usePushToService = ({
           errorsMsg.length > 0 ||
           !permissions.push ||
           !isValidConnector ||
-          !hasDataToPush
+          !needsToBePushed
         }
         isLoading={isLoading}
       >
-        {caseServices[connector.id]
-          ? i18n.UPDATE_THIRD(connector.name)
-          : i18n.PUSH_THIRD(connector.name)}
+        {hasBeenPushed ? i18n.UPDATE_THIRD(connector.name) : i18n.PUSH_THIRD(connector.name)}
       </EuiButtonEmpty>
     ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
-      connector,
-      connectors,
-      errorsMsg,
+      connector.name,
+      errorsMsg.length,
       handlePushToService,
-      hasDataToPush,
+      hasBeenPushed,
       isLoading,
-      loadingLicense,
-      permissions.push,
       isValidConnector,
+      loadingLicense,
+      needsToBePushed,
+      permissions.push,
     ]
   );
 
   const objToReturn = useMemo(() => {
-    const hidePushButton = errorsMsg.length > 0 || !hasDataToPush || !permissions.push;
+    const hidePushButton = errorsMsg.length > 0 || !needsToBePushed || !permissions.push;
 
     return {
       pushButton: hidePushButton ? (
@@ -170,7 +174,7 @@ export const usePushToService = ({
       pushCallouts:
         errorsMsg.length > 0 ? (
           <CaseCallOut
-            hasConnectors={connectors.length > 0}
+            hasConnectors={allAvailableConnectors.length > 0}
             hasLicenseError={hasLicenseError}
             messages={errorsMsg}
             onEditClick={onEditClick}
@@ -178,14 +182,14 @@ export const usePushToService = ({
         ) : null,
     };
   }, [
-    connector.name,
-    connectors.length,
     errorsMsg,
-    hasDataToPush,
+    needsToBePushed,
+    permissions.push,
+    connector.name,
+    pushToServiceButton,
+    allAvailableConnectors.length,
     hasLicenseError,
     onEditClick,
-    pushToServiceButton,
-    permissions.push,
   ]);
 
   return objToReturn;

@@ -132,16 +132,17 @@ export const CaseViewActivity = ({
     [assignees, onUpdateField]
   );
 
-  const { isLoading: isLoadingConnectors, data: connectors = [] } = useGetConnectors();
+  const { isLoading: isLoadingAllAvailableConnectors, data: allAvailableConnectors = [] } =
+    useGetConnectors();
 
   const [connectorName, isValidConnector] = useMemo(() => {
-    const connector = connectors.find((c) => c.id === caseData.connector.id);
+    const connector = allAvailableConnectors.find((c) => c.id === caseData.connector.id);
     return [connector?.name ?? '', !!connector];
-  }, [connectors, caseData.connector]);
+  }, [allAvailableConnectors, caseData.connector]);
 
   const onSubmitConnector = useCallback(
     (connectorId, connectorFields, onError, onSuccess) => {
-      const connector = getConnectorById(connectorId, connectors);
+      const connector = getConnectorById(connectorId, allAvailableConnectors);
       const connectorToUpdate = connector
         ? normalizeActionConnector(connector)
         : getNoneConnector();
@@ -153,7 +154,7 @@ export const CaseViewActivity = ({
         onError,
       });
     },
-    [onUpdateField, connectors]
+    [onUpdateField, allAvailableConnectors]
   );
 
   return (
@@ -238,17 +239,17 @@ export const CaseViewActivity = ({
             onSubmit={onSubmitTags}
             isLoading={isLoading && loadingKey === 'tags'}
           />
-          {pushToServiceAuthorized && userActionsData ? (
+          {pushToServiceAuthorized && userActionsData && caseConnectors ? (
             <EditConnector
               caseData={caseData}
-              caseServices={userActionsData.caseServices}
               connectorName={connectorName}
-              connectors={connectors}
-              hasDataToPush={userActionsData.hasDataToPush}
-              isLoading={isLoadingConnectors || (isLoading && loadingKey === 'connector')}
-              isValidConnector={isLoadingConnectors ? true : isValidConnector}
+              caseConnectors={caseConnectors}
+              allAvailableConnectors={allAvailableConnectors}
+              isLoading={
+                isLoadingAllAvailableConnectors || (isLoading && loadingKey === 'connector')
+              }
+              isValidConnector={isLoadingAllAvailableConnectors ? true : isValidConnector}
               onSubmit={onSubmitConnector}
-              userActions={userActionsData.caseUserActions}
             />
           ) : null}
         </EuiFlexGroup>
