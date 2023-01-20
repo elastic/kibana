@@ -2055,10 +2055,10 @@ describe('Package policy service', () => {
         { id: 'a', success: true },
         { id: 'a', success: true },
       ];
-      callbackOne = jest.fn(async (deletedPolicies) => {
+      callbackOne = jest.fn(async (deletedPolicies, soClient, esClient) => {
         callingOrder.push('one');
       });
-      callbackTwo = jest.fn(async (deletedPolicies) => {
+      callbackTwo = jest.fn(async (deletedPolicies, soClient, esClient) => {
         callingOrder.push('two');
       });
       appContextService.addExternalCallback('packagePolicyPostDelete', callbackOne);
@@ -2070,25 +2070,54 @@ describe('Package policy service', () => {
     });
 
     it('should execute external callbacks', async () => {
-      await packagePolicyService.runPostDeleteExternalCallbacks(deletedPackagePolicies);
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-      expect(callbackOne).toHaveBeenCalledWith(deletedPackagePolicies);
-      expect(callbackTwo).toHaveBeenCalledWith(deletedPackagePolicies);
+      await packagePolicyService.runPostDeleteExternalCallbacks(
+        deletedPackagePolicies,
+        soClient,
+        esClient
+      );
+
+      expect(callbackOne).toHaveBeenCalledWith(
+        deletedPackagePolicies,
+        expect.any(Object),
+        expect.any(Object),
+        undefined,
+        undefined
+      );
+      expect(callbackTwo).toHaveBeenCalledWith(
+        deletedPackagePolicies,
+        expect.any(Object),
+        expect.any(Object),
+        undefined,
+        undefined
+      );
       expect(callingOrder).toEqual(['one', 'two']);
     });
 
     it("should execute all external callbacks even if one throw's", async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
       callbackOne.mockImplementation(async (deletedPolicies) => {
         callingOrder.push('one');
         throw new Error('foo');
       });
       await expect(
-        packagePolicyService.runPostDeleteExternalCallbacks(deletedPackagePolicies)
+        packagePolicyService.runPostDeleteExternalCallbacks(
+          deletedPackagePolicies,
+          soClient,
+          esClient
+        )
       ).rejects.toThrow(FleetError);
       expect(callingOrder).toEqual(['one', 'two']);
     });
 
     it('should provide an array of errors encountered by running external callbacks', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
       let error: FleetError;
       const callbackOneError = new Error('foo 1');
       const callbackTwoError = new Error('foo 2');
@@ -2103,7 +2132,7 @@ describe('Package policy service', () => {
       });
 
       await packagePolicyService
-        .runPostDeleteExternalCallbacks(deletedPackagePolicies)
+        .runPostDeleteExternalCallbacks(deletedPackagePolicies, soClient, esClient)
         .catch((e) => {
           error = e;
         });
@@ -2126,10 +2155,10 @@ describe('Package policy service', () => {
       appContextService.start(createAppContextStartContractMock());
       callingOrder = [];
       packagePolicies = [{ id: 'a' }, { id: 'a' }] as DeletePackagePoliciesResponse;
-      callbackOne = jest.fn(async (deletedPolicies) => {
+      callbackOne = jest.fn(async (deletedPolicies, soClient, esClient) => {
         callingOrder.push('one');
       });
-      callbackTwo = jest.fn(async (deletedPolicies) => {
+      callbackTwo = jest.fn(async (deletedPolicies, soClient, esClient) => {
         callingOrder.push('two');
       });
       appContextService.addExternalCallback('packagePolicyDelete', callbackOne);
@@ -2141,25 +2170,31 @@ describe('Package policy service', () => {
     });
 
     it('should execute external callbacks', async () => {
-      await packagePolicyService.runDeleteExternalCallbacks(packagePolicies);
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      await packagePolicyService.runDeleteExternalCallbacks(packagePolicies, soClient, esClient);
 
-      expect(callbackOne).toHaveBeenCalledWith(packagePolicies);
-      expect(callbackTwo).toHaveBeenCalledWith(packagePolicies);
+      expect(callbackOne).toHaveBeenCalledWith(packagePolicies, soClient, esClient);
+      expect(callbackTwo).toHaveBeenCalledWith(packagePolicies, soClient, esClient);
       expect(callingOrder).toEqual(['one', 'two']);
     });
 
     it("should execute all external callbacks even if one throw's", async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       callbackOne.mockImplementation(async (deletedPolicies) => {
         callingOrder.push('one');
         throw new Error('foo');
       });
       await expect(
-        packagePolicyService.runDeleteExternalCallbacks(packagePolicies)
+        packagePolicyService.runDeleteExternalCallbacks(packagePolicies, soClient, esClient)
       ).rejects.toThrow(FleetError);
       expect(callingOrder).toEqual(['one', 'two']);
     });
 
     it('should provide an array of errors encountered by running external callbacks', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       let error: FleetError;
       const callbackOneError = new Error('foo 1');
       const callbackTwoError = new Error('foo 2');
@@ -2173,9 +2208,11 @@ describe('Package policy service', () => {
         throw callbackTwoError;
       });
 
-      await packagePolicyService.runDeleteExternalCallbacks(packagePolicies).catch((e) => {
-        error = e;
-      });
+      await packagePolicyService
+        .runDeleteExternalCallbacks(packagePolicies, soClient, esClient)
+        .catch((e) => {
+          error = e;
+        });
 
       expect(error!.message).toEqual(
         '2 encountered while executing package delete external callbacks'
@@ -2257,6 +2294,9 @@ describe('Package policy service', () => {
     });
 
     it('should call external callbacks in expected order', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
       const callbackA: CombinedExternalCallback = jest.fn(async (ds) => {
         callbackCallingOrder.push('a');
         return ds;
@@ -2273,6 +2313,8 @@ describe('Package policy service', () => {
       await packagePolicyService.runExternalCallbacks(
         'packagePolicyCreate',
         newPackagePolicy,
+        soClient,
+        esClient,
         coreMock.createCustomRequestHandlerContext(context),
         request
       );
@@ -2280,12 +2322,17 @@ describe('Package policy service', () => {
     });
 
     it('should feed package policy returned by last callback', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
       appContextService.addExternalCallback('packagePolicyCreate', callbackOne);
       appContextService.addExternalCallback('packagePolicyCreate', callbackTwo);
 
       await packagePolicyService.runExternalCallbacks(
         'packagePolicyCreate',
         newPackagePolicy,
+        soClient,
+        esClient,
         coreMock.createCustomRequestHandlerContext(context),
         request
       );
@@ -2329,10 +2376,15 @@ describe('Package policy service', () => {
       });
 
       it('should fail to execute remaining callbacks after a callback exception', async () => {
+        const soClient = savedObjectsClientMock.create();
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
         try {
           await packagePolicyService.runExternalCallbacks(
             'packagePolicyCreate',
             newPackagePolicy,
+            soClient,
+            esClient,
             coreMock.createCustomRequestHandlerContext(context),
             request
           );
@@ -2348,10 +2400,14 @@ describe('Package policy service', () => {
       });
 
       it('should fail to return the package policy', async () => {
+        const soClient = savedObjectsClientMock.create();
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
         expect(
           packagePolicyService.runExternalCallbacks(
             'packagePolicyCreate',
             newPackagePolicy,
+            soClient,
+            esClient,
             coreMock.createCustomRequestHandlerContext(context),
             request
           )
@@ -2427,6 +2483,9 @@ describe('Package policy service', () => {
     });
 
     it('should execute PostPackagePolicyPostCreateCallback external callbacks', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
       const callbackA: PostPackagePolicyPostCreateCallback = jest.fn(async (ds) => {
         callbackCallingOrder.push('a');
         return ds;
@@ -2444,12 +2503,26 @@ describe('Package policy service', () => {
       await packagePolicyService.runExternalCallbacks(
         'packagePolicyPostCreate',
         packagePolicy,
+        soClient,
+        esClient,
         requestContext,
         request
       );
 
-      expect(callbackA).toHaveBeenCalledWith(packagePolicy, requestContext, request);
-      expect(callbackB).toHaveBeenCalledWith(packagePolicy, requestContext, request);
+      expect(callbackA).toHaveBeenCalledWith(
+        packagePolicy,
+        soClient,
+        esClient,
+        requestContext,
+        request
+      );
+      expect(callbackB).toHaveBeenCalledWith(
+        packagePolicy,
+        soClient,
+        esClient,
+        requestContext,
+        request
+      );
       expect(callbackCallingOrder).toEqual(['a', 'b']);
     });
   });

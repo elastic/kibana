@@ -681,7 +681,7 @@ class AgentPolicyService {
         );
       }
 
-      await packagePolicyService.runDeleteExternalCallbacks(packagePolicies);
+      await packagePolicyService.runDeleteExternalCallbacks(packagePolicies, soClient, esClient);
 
       const deletedPackagePolicies: PostDeletePackagePoliciesResponse =
         await packagePolicyService.delete(
@@ -694,10 +694,14 @@ class AgentPolicyService {
           }
         );
       try {
-        await packagePolicyService.runPostDeleteExternalCallbacks(deletedPackagePolicies);
+        await packagePolicyService.runPostDeleteExternalCallbacks(
+          deletedPackagePolicies,
+          soClient,
+          esClient
+        );
       } catch (error) {
         const logger = appContextService.getLogger();
-        logger.error(`An error occurred executing external callback: ${error}`);
+        logger.error(`An error occurred executing "packagePolicyPostDelete" callback: ${error}`);
         logger.error(error);
       }
     }

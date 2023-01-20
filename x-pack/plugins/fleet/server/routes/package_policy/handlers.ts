@@ -247,33 +247,21 @@ export const createPackagePolicyHandler: FleetRequestHandler<
       } as NewPackagePolicy);
     }
 
-    const newData = await packagePolicyService.runExternalCallbacks(
-      'packagePolicyCreate',
-      newPackagePolicy,
-      context,
-      request
-    );
-
     // Create package policy
     const packagePolicy = await fleetContext.packagePolicyService.asCurrentUser.create(
       soClient,
       esClient,
-      newData,
+      newPackagePolicy,
       {
         user,
         force,
         spaceId,
-      }
-    );
-
-    const enrichedPackagePolicy = await packagePolicyService.runExternalCallbacks(
-      'packagePolicyPostCreate',
-      packagePolicy,
+      },
       context,
       request
     );
 
-    const body: CreatePackagePolicyResponse = { item: enrichedPackagePolicy };
+    const body: CreatePackagePolicyResponse = { item: packagePolicy };
 
     return response.ok({
       body,
@@ -368,12 +356,6 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
         vars: body.vars ?? packagePolicy.vars,
       } as NewPackagePolicy;
     }
-    newData = await packagePolicyService.runExternalCallbacks(
-      'packagePolicyUpdate',
-      newData,
-      context,
-      request
-    );
 
     const updatedPackagePolicy = await packagePolicyService.update(
       soClient,
@@ -400,46 +382,17 @@ export const deletePackagePolicyHandler: RequestHandler<
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
-  const logger = appContextService.getLogger();
 
   try {
-    try {
-      const packagePolicies = await packagePolicyService.getByIDs(
-        soClient,
-        request.body.packagePolicyIds,
-        { ignoreMissing: true }
-      );
-
-      if (packagePolicies) {
-        await packagePolicyService.runExternalCallbacks(
-          'packagePolicyDelete',
-          packagePolicies,
-          context,
-          request
-        );
-      }
-    } catch (error) {
-      logger.error(`An error occurred executing external callback: ${error}`);
-      logger.error(error);
-    }
-
     const body: PostDeletePackagePoliciesResponse = await packagePolicyService.delete(
       soClient,
       esClient,
       request.body.packagePolicyIds,
-      { user, force: request.body.force, skipUnassignFromAgentPolicies: request.body.force }
+      { user, force: request.body.force, skipUnassignFromAgentPolicies: request.body.force },
+      context,
+      request
     );
-    try {
-      await packagePolicyService.runExternalCallbacks(
-        'packagePolicyPostDelete',
-        body,
-        context,
-        request
-      );
-    } catch (error) {
-      logger.error(`An error occurred executing external callback: ${error}`);
-      logger.error(error);
-    }
+
     return response.ok({
       body,
     });
@@ -457,30 +410,15 @@ export const deleteOnePackagePolicyHandler: RequestHandler<
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
-  const logger = appContextService.getLogger();
 
   try {
-    try {
-      const packagePolicy = await packagePolicyService.get(
-        soClient,
-        request.params.packagePolicyId
-      );
-      await packagePolicyService.runExternalCallbacks(
-        'packagePolicyDelete',
-        packagePolicy ? [packagePolicy] : [],
-        context,
-        request
-      );
-    } catch (error) {
-      logger.error(`An error occurred executing external callback: ${error}`);
-      logger.error(error);
-    }
-
     const res = await packagePolicyService.delete(
       soClient,
       esClient,
       [request.params.packagePolicyId],
-      { user, force: request.query.force, skipUnassignFromAgentPolicies: request.query.force }
+      { user, force: request.query.force, skipUnassignFromAgentPolicies: request.query.force },
+      context,
+      request
     );
 
     if (
@@ -493,17 +431,7 @@ export const deleteOnePackagePolicyHandler: RequestHandler<
         body: res[0].body,
       });
     }
-    try {
-      await packagePolicyService.runExternalCallbacks(
-        'packagePolicyPostDelete',
-        res,
-        context,
-        request
-      );
-    } catch (error) {
-      logger.error(`An error occurred executing external callback: ${error}`);
-      logger.error(error);
-    }
+
     return response.ok({
       body: { id: request.params.packagePolicyId },
     });

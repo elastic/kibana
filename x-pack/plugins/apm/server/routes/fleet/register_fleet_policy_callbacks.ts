@@ -75,7 +75,6 @@ function onPackagePolicyDelete({
   logger: Logger;
 }): PostPackagePolicyDeleteCallback {
   return async (packagePolicies) => {
-    // console.log(`packagePolicyDelete:`, packagePolicies);
     const promises = packagePolicies.map(async (packagePolicy) => {
       if (packagePolicy.package?.name !== 'apm') {
         return packagePolicy;

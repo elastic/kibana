@@ -14,16 +14,8 @@ import type { FleetAuthzRouter } from '../../services/security';
 import { PACKAGE_POLICY_API_ROUTES } from '../../../common/constants';
 import { appContextService, packagePolicyService } from '../../services';
 import { createAppContextStartContractMock, xpackMocks } from '../../mocks';
-import type {
-  PackagePolicyClient,
-  PostPackagePolicyCreateCallback,
-  PutPackagePolicyUpdateCallback,
-  FleetRequestHandlerContext,
-} from '../..';
-import type {
-  CreatePackagePolicyRequestSchema,
-  UpdatePackagePolicyRequestSchema,
-} from '../../types/rest_spec';
+import type { PackagePolicyClient, FleetRequestHandlerContext } from '../..';
+import type { UpdatePackagePolicyRequestSchema } from '../../types/rest_spec';
 import type { FleetRequestHandler } from '../../types';
 import type { PackagePolicy } from '../../types';
 
@@ -125,7 +117,6 @@ describe('When calling package policy', () => {
   let routeConfig: RouteConfig<any, any, any, any>;
   let context: FleetRequestHandlerContext;
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
-  let packagePolicyServiceWithAuthzMock: jest.Mocked<PackagePolicyClient>;
 
   beforeEach(() => {
     routerMock = httpServiceMock.createRouter() as unknown as jest.Mocked<FleetAuthzRouter>;
@@ -135,194 +126,13 @@ describe('When calling package policy', () => {
   beforeEach(async () => {
     appContextService.start(createAppContextStartContractMock());
     context = xpackMocks.createRequestHandlerContext() as unknown as FleetRequestHandlerContext;
-    packagePolicyServiceWithAuthzMock = (await context.fleet).packagePolicyService
-      .asCurrentUser as jest.Mocked<PackagePolicyClient>;
+    (await context.fleet).packagePolicyService.asCurrentUser as jest.Mocked<PackagePolicyClient>;
     response = httpServerMock.createResponseFactory();
   });
 
   afterEach(() => {
     jest.clearAllMocks();
     appContextService.stop();
-  });
-
-  describe('create api handler', () => {
-    const getCreateKibanaRequest = (
-      newData?: typeof CreatePackagePolicyRequestSchema.body
-    ): KibanaRequest<undefined, undefined, typeof CreatePackagePolicyRequestSchema.body> => {
-      return httpServerMock.createKibanaRequest<
-        undefined,
-        undefined,
-        typeof CreatePackagePolicyRequestSchema.body
-      >({
-        path: routeConfig.path,
-        method: 'post',
-        body: newData || {
-          name: 'endpoint-1',
-          description: '',
-          policy_id: 'a5ca00c0-b30c-11ea-9732-1bb05811278c',
-          enabled: true,
-          inputs: [],
-          namespace: 'default',
-          package: { name: 'endpoint', title: 'Elastic Endpoint', version: '0.5.0' },
-        },
-      });
-    };
-
-    // Set the routeConfig and routeHandler to the Create API
-    beforeEach(() => {
-      [routeConfig, routeHandler] = routerMock.post.mock.calls.find(
-        ([{ path }]) => path === PACKAGE_POLICY_API_ROUTES.CREATE_PATTERN
-      )!;
-    });
-
-    describe('and external callbacks are registered', () => {
-      const callbackCallingOrder: string[] = [];
-
-      // Callback one adds an input that includes a `config` property
-      const callbackOne: PostPackagePolicyCreateCallback | PutPackagePolicyUpdateCallback = jest.fn(
-        async (ds) => {
-          callbackCallingOrder.push('one');
-          const newDs = {
-            ...ds,
-            inputs: [
-              {
-                type: 'endpoint',
-                enabled: true,
-                streams: [],
-                config: {
-                  one: {
-                    value: 'inserted by callbackOne',
-                  },
-                },
-              },
-            ],
-          };
-          return newDs;
-        }
-      );
-
-      // Callback two adds an additional `input[0].config` property
-      const callbackTwo: PostPackagePolicyCreateCallback | PutPackagePolicyUpdateCallback = jest.fn(
-        async (ds) => {
-          callbackCallingOrder.push('two');
-          const newDs = {
-            ...ds,
-            inputs: [
-              {
-                ...ds.inputs[0],
-                config: {
-                  ...ds.inputs[0].config,
-                  two: {
-                    value: 'inserted by callbackTwo',
-                  },
-                },
-              },
-            ],
-          };
-          return newDs;
-        }
-      );
-
-      beforeEach(() => {
-        appContextService.addExternalCallback('packagePolicyCreate', callbackOne);
-        appContextService.addExternalCallback('packagePolicyCreate', callbackTwo);
-      });
-
-      afterEach(() => (callbackCallingOrder.length = 0));
-
-      it('should create with data from callback', async () => {
-        const request = getCreateKibanaRequest();
-        packagePolicyServiceMock.runExternalCallbacks.mockImplementationOnce(() =>
-          Promise.resolve({
-            policy_id: 'a5ca00c0-b30c-11ea-9732-1bb05811278c',
-            description: '',
-            enabled: true,
-            inputs: [
-              {
-                config: {
-                  one: {
-                    value: 'inserted by callbackOne',
-                  },
-                  two: {
-                    value: 'inserted by callbackTwo',
-                  },
-                },
-                enabled: true,
-                streams: [],
-                type: 'endpoint',
-              },
-            ],
-            name: 'endpoint-1',
-            namespace: 'default',
-            package: {
-              name: 'endpoint',
-              title: 'Elastic Endpoint',
-              version: '0.5.0',
-            },
-          })
-        );
-        await routeHandler(context, request, response);
-        expect(response.ok).toHaveBeenCalled();
-
-        expect(packagePolicyServiceWithAuthzMock.create.mock.calls[0][2]).toEqual({
-          policy_id: 'a5ca00c0-b30c-11ea-9732-1bb05811278c',
-          description: '',
-          enabled: true,
-          inputs: [
-            {
-              config: {
-                one: {
-                  value: 'inserted by callbackOne',
-                },
-                two: {
-                  value: 'inserted by callbackTwo',
-                },
-              },
-              enabled: true,
-              streams: [],
-              type: 'endpoint',
-            },
-          ],
-          name: 'endpoint-1',
-          namespace: 'default',
-          package: {
-            name: 'endpoint',
-            title: 'Elastic Endpoint',
-            version: '0.5.0',
-          },
-        });
-      });
-    });
-
-    describe('postCreate callback registration', () => {
-      it('should call to packagePolicyCreate and packagePolicyPostCreate call backs', async () => {
-        const request = getCreateKibanaRequest();
-        await routeHandler(context, request, response);
-
-        expect(response.ok).toHaveBeenCalled();
-        expect(packagePolicyService.runExternalCallbacks).toBeCalledTimes(2);
-
-        const firstCB = packagePolicyServiceMock.runExternalCallbacks.mock.calls[0][0];
-        const secondCB = packagePolicyServiceMock.runExternalCallbacks.mock.calls[1][0];
-
-        expect(firstCB).toEqual('packagePolicyCreate');
-        expect(secondCB).toEqual('packagePolicyPostCreate');
-      });
-
-      it('should not call packagePolicyPostCreate call back in case of packagePolicy create failed', async () => {
-        const request = getCreateKibanaRequest();
-
-        packagePolicyServiceWithAuthzMock.create.mockImplementationOnce(() => {
-          throw new Error('foo');
-        });
-
-        await routeHandler(context, request, response);
-        const firstCB = packagePolicyServiceMock.runExternalCallbacks.mock.calls[0][0];
-
-        expect(firstCB).toEqual('packagePolicyCreate');
-        expect(packagePolicyService.runExternalCallbacks).toBeCalledTimes(1);
-      });
-    });
   });
 
   describe('update api handler', () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaRequest, Logger, RequestHandlerContext } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { PluginStartContract as AlertsStartContract } from '@kbn/alerting-plugin/server';
 import type {
@@ -55,10 +55,17 @@ export const getPackagePolicyCreateCallback = (
   exceptionsClient: ExceptionListClient | undefined
 ): PostPackagePolicyCreateCallback => {
   return async (
-    newPackagePolicy: NewPackagePolicy,
-    context: RequestHandlerContext,
-    request: KibanaRequest
+    newPackagePolicy,
+    soClient,
+    esClient,
+    context,
+    request
   ): Promise<NewPackagePolicy> => {
+    // callback is called outside request context
+    if (!context || !request) {
+      return newPackagePolicy;
+    }
+
     // We only care about Endpoint package policies
     if (!isEndpointPackagePolicy(newPackagePolicy)) {
       return newPackagePolicy;
@@ -140,11 +147,7 @@ export const getPackagePolicyUpdateCallback = (
   featureUsageService: FeatureUsageService,
   endpointMetadataService: EndpointMetadataService
 ): PutPackagePolicyUpdateCallback => {
-  return async (
-    newPackagePolicy: NewPackagePolicy
-    // context: RequestHandlerContext,
-    // request: KibanaRequest
-  ): Promise<UpdatePackagePolicy> => {
+  return async (newPackagePolicy: NewPackagePolicy): Promise<UpdatePackagePolicy> => {
     if (!isEndpointPackagePolicy(newPackagePolicy)) {
       return newPackagePolicy;
     }
