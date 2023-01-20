@@ -80,7 +80,7 @@ const MyEuiCommentList = styled(EuiCommentList)`
 
 export const UserActions = React.memo(
   ({
-    caseServices,
+    caseConnectors,
     caseUserActions,
     userProfiles,
     currentUserProfile,
@@ -190,12 +190,12 @@ export const UserActions = React.memo(
             const userActionBuilder = builder({
               appId,
               caseData,
+              caseConnectors,
               externalReferenceAttachmentTypeRegistry,
               persistableStateAttachmentTypeRegistry,
               userAction,
               userProfiles,
               currentUserProfile,
-              caseServices,
               comments: caseData.comments,
               index,
               commentRefs,
@@ -220,6 +220,7 @@ export const UserActions = React.memo(
         ),
       [
         appId,
+        caseConnectors,
         caseUserActions,
         userProfiles,
         currentUserProfile,
@@ -227,7 +228,6 @@ export const UserActions = React.memo(
         persistableStateAttachmentTypeRegistry,
         descriptionCommentListObj,
         caseData,
-        caseServices,
         commentRefs,
         manageMarkdownEditIds,
         selectedOutlineCommentId,

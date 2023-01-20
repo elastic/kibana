@@ -31,7 +31,7 @@ const updateCase = jest.fn();
 const onShowAlertDetails = jest.fn();
 
 const defaultProps = {
-  caseServices: {},
+  caseConnectors: {},
   caseUserActions: [],
   userProfiles: new Map(),
   currentUserProfile: undefined,

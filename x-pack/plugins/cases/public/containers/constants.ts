@@ -24,6 +24,7 @@ export const casesQueriesKeys = {
   case: (id: string) => [...casesQueriesKeys.caseView(), id] as const,
   caseMetrics: (id: string, features: SingleCaseMetricsFeature[]) =>
     [...casesQueriesKeys.case(id), 'metrics', features] as const,
+  caseConnectors: (id: string) => [...casesQueriesKeys.case(id), 'connectors'],
   userActions: (id: string, connectorId: string) =>
     [...casesQueriesKeys.case(id), 'user-actions', connectorId] as const,
   userProfiles: () => [...casesQueriesKeys.users, 'user-profiles'] as const,

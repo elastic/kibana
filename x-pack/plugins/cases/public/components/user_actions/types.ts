@@ -9,8 +9,13 @@ import type { EuiCommentProps } from '@elastic/eui';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type { SnakeToCamelCase } from '../../../common/types';
 import type { ActionTypes, UserActionWithResponse } from '../../../common/api';
-import type { Case, CaseUserActions, Comment, UseFetchAlertData } from '../../containers/types';
-import type { CaseServices } from '../../containers/use_get_case_user_actions';
+import type {
+  Case,
+  CaseConnectors,
+  CaseUserActions,
+  Comment,
+  UseFetchAlertData,
+} from '../../containers/types';
 import type { AddCommentRefObject } from '../add_comment';
 import type { UserActionMarkdownRefObject } from './markdown_form';
 import type { CasesNavigation } from '../links';
@@ -21,7 +26,7 @@ import type { PersistableStateAttachmentTypeRegistry } from '../../client/attach
 import type { CurrentUserProfile } from '../types';
 
 export interface UserActionTreeProps {
-  caseServices: CaseServices;
+  caseConnectors: CaseConnectors;
   caseUserActions: CaseUserActions[];
   userProfiles: Map<string, UserProfileWithAvatar>;
   currentUserProfile: CurrentUserProfile;
@@ -47,8 +52,8 @@ export interface UserActionBuilderArgs {
   currentUserProfile: CurrentUserProfile;
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
+  caseConnectors: CaseConnectors;
   userAction: CaseUserActions;
-  caseServices: CaseServices;
   comments: Comment[];
   index: number;
   commentRefs: React.MutableRefObject<

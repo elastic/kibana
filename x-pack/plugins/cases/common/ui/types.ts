@@ -17,7 +17,6 @@ import type {
   CaseStatuses,
   User,
   ActionConnector,
-  CaseExternalServiceBasic,
   CaseUserActionResponse,
   SingleCaseMetricsResponse,
   CommentResponse,
@@ -29,6 +28,7 @@ import type {
   CaseSeverity,
   CommentResponseExternalReferenceType,
   CommentResponseTypePersistableState,
+  GetCaseConnectorsResponse,
 } from '../api';
 import type { PUSH_CASES_CAPABILITY } from '../constants';
 import type { SnakeToCamelCase } from '../types';
@@ -77,12 +77,12 @@ export type AlertComment = SnakeToCamelCase<CommentResponseAlertsType>;
 export type ExternalReferenceComment = SnakeToCamelCase<CommentResponseExternalReferenceType>;
 export type PersistableComment = SnakeToCamelCase<CommentResponseTypePersistableState>;
 export type CaseUserActions = SnakeToCamelCase<CaseUserActionResponse>;
-export type CaseExternalService = SnakeToCamelCase<CaseExternalServiceBasic>;
 export type Case = Omit<SnakeToCamelCase<CaseResponse>, 'comments'> & { comments: Comment[] };
 export type Cases = Omit<SnakeToCamelCase<CasesFindResponse>, 'cases'> & { cases: Case[] };
 export type CasesStatus = SnakeToCamelCase<CasesStatusResponse>;
 export type CasesMetrics = SnakeToCamelCase<CasesMetricsResponse>;
 export type CaseUpdateRequest = SnakeToCamelCase<CasePatchRequest>;
+export type CaseConnectors = GetCaseConnectorsResponse;
 
 export interface ResolvedCase {
   case: Case;

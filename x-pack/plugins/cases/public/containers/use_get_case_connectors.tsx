@@ -16,7 +16,7 @@ import { casesQueriesKeys } from './constants';
 export const useGetCaseConnectors = (caseId: string) => {
   const toasts = useToasts();
   return useQuery<GetCaseConnectorsResponse, ServerError>(
-    casesQueriesKeys.case(caseId),
+    casesQueriesKeys.caseConnectors(caseId),
     () => {
       const abortCtrlRef = new AbortController();
       return getCaseConnectors(caseId, abortCtrlRef.signal);
