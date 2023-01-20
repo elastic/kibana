@@ -267,7 +267,7 @@ One of the main changes in architecture is refactoring the retrieval of autocomp
 Another change is using core http client instead of jquery to send requests to Elasticsearch and Kibana APIs. The core http client is used in the [`es.ts`](https://github.com/elastic/kibana/blob/main/src/plugins/console/public/lib/es/es.ts#L36) and [`autocomplete.ts`](https://github.com/elastic/kibana/blob/main/src/plugins/console/public/services/autocomplete.ts#L72) files.
 
 ### Outstanding issues
-#### Autocomplete suggestions for Kinaba API endpoints
+#### Autocomplete suggestions for Kibana API endpoints
 Console currently supports autocomplete suggestions for Elasticsearch API endpoints. The autocomplete suggestions for Kibana API endpoints are not supported yet.
 Related issue: [#130661](https://github.com/elastic/kibana/issues/130661)
 
