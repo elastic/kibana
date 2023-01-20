@@ -55,6 +55,98 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-public.convertTo",
+        "type": "Function",
+        "tags": [],
+        "label": "convertTo",
+        "description": [
+          "\nConverts a microseconds value into the unit defined."
+        ],
+        "signature": [
+          "({\n  unit,\n  microseconds,\n  defaultValue = NOT_AVAILABLE_LABEL,\n  extended,\n}: { unit: DurationTimeUnit; microseconds: ",
+          "Maybe",
+          "<number>; defaultValue?: string | undefined; extended?: boolean | undefined; }) => ConvertedDuration"
+        ],
+        "path": "x-pack/plugins/observability/common/utils/formatters/duration.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.convertTo.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  unit,\n  microseconds,\n  defaultValue = NOT_AVAILABLE_LABEL,\n  extended,\n}",
+            "description": [],
+            "path": "x-pack/plugins/observability/common/utils/formatters/duration.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-public.convertTo.$1.unit",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "unit",
+                "description": [],
+                "signature": [
+                  "\"microseconds\" | ",
+                  "TimeUnit"
+                ],
+                "path": "x-pack/plugins/observability/common/utils/formatters/duration.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-public.convertTo.$1.microseconds",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "microseconds",
+                "description": [],
+                "signature": [
+                  "number | null | undefined"
+                ],
+                "path": "x-pack/plugins/observability/common/utils/formatters/duration.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-public.convertTo.$1.defaultValue",
+                "type": "string",
+                "tags": [],
+                "label": "defaultValue",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/plugins/observability/common/utils/formatters/duration.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-public.convertTo.$1.extended",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "extended",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "x-pack/plugins/observability/common/utils/formatters/duration.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-public.createEsParams",
         "type": "Function",
         "tags": [],
@@ -3897,6 +3989,29 @@
                 "section": "def-public.CasesUiStart",
                 "text": "CasesUiStart"
               }
+            ],
+            "path": "x-pack/plugins/observability/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.charts",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "charts",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "charts",
+                "scope": "public",
+                "docId": "kibChartsPluginApi",
+                "section": "def-public.ChartsPluginSetup",
+                "text": "ChartsPluginSetup"
+              },
+              " & { activeCursor: ",
+              "ActiveCursor",
+              "; }"
             ],
             "path": "x-pack/plugins/observability/public/plugin.ts",
             "deprecated": false,
@@ -9661,115 +9776,7 @@
         "label": "ObservabilityAPIReturnType",
         "description": [],
         "signature": [
-          "{ \"GET /api/observability/slos\"?: ",
-          {
-            "pluginId": "@kbn/server-route-repository",
-            "scope": "public",
-            "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-public.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<\"GET /api/observability/slos\", ",
-          "PartialC",
-          "<{ query: ",
-          "PartialC",
-          "<{ name: ",
-          "StringC",
-          "; indicatorTypes: ",
-          "Type",
-          "<string[], string, unknown>; page: ",
-          "StringC",
-          "; perPage: ",
-          "StringC",
-          "; sortBy: ",
-          "UnionC",
-          "<[",
-          "LiteralC",
-          "<\"name\">, ",
-          "LiteralC",
-          "<\"indicatorType\">]>; sortDirection: ",
-          "UnionC",
-          "<[",
-          "LiteralC",
-          "<\"asc\">, ",
-          "LiteralC",
-          "<\"desc\">]>; }>; }>, ",
-          {
-            "pluginId": "observability",
-            "scope": "server",
-            "docId": "kibObservabilityPluginApi",
-            "section": "def-server.ObservabilityRouteHandlerResources",
-            "text": "ObservabilityRouteHandlerResources"
-          },
-          ", { page: number; perPage: number; total: number; results: ({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; 'threshold.us': number; } & { index?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; index?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { timestampField: string; syncDelay: string; frequency: string; }; createdAt: string; updatedAt: string; } & { summary: { status: \"NO_DATA\" | \"HEALTHY\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; })[]; }, ",
-          {
-            "pluginId": "observability",
-            "scope": "server",
-            "docId": "kibObservabilityPluginApi",
-            "section": "def-server.ObservabilityRouteCreateOptions",
-            "text": "ObservabilityRouteCreateOptions"
-          },
-          "> | undefined; \"DELETE /api/observability/slos/{id}\"?: ",
-          {
-            "pluginId": "@kbn/server-route-repository",
-            "scope": "public",
-            "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-public.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<\"DELETE /api/observability/slos/{id}\", ",
-          "TypeC",
-          "<{ path: ",
-          "TypeC",
-          "<{ id: ",
-          "StringC",
-          "; }>; }>, ",
-          {
-            "pluginId": "observability",
-            "scope": "server",
-            "docId": "kibObservabilityPluginApi",
-            "section": "def-server.ObservabilityRouteHandlerResources",
-            "text": "ObservabilityRouteHandlerResources"
-          },
-          ", void, ",
-          {
-            "pluginId": "observability",
-            "scope": "server",
-            "docId": "kibObservabilityPluginApi",
-            "section": "def-server.ObservabilityRouteCreateOptions",
-            "text": "ObservabilityRouteCreateOptions"
-          },
-          "> | undefined; \"GET /api/observability/slos/{id}\"?: ",
-          {
-            "pluginId": "@kbn/server-route-repository",
-            "scope": "public",
-            "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-public.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<\"GET /api/observability/slos/{id}\", ",
-          "TypeC",
-          "<{ path: ",
-          "TypeC",
-          "<{ id: ",
-          "StringC",
-          "; }>; }>, ",
-          {
-            "pluginId": "observability",
-            "scope": "server",
-            "docId": "kibObservabilityPluginApi",
-            "section": "def-server.ObservabilityRouteHandlerResources",
-            "text": "ObservabilityRouteHandlerResources"
-          },
-          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; 'threshold.us': number; } & { index?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; index?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { timestampField: string; syncDelay: string; frequency: string; }; createdAt: string; updatedAt: string; } & { summary: { status: \"NO_DATA\" | \"HEALTHY\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; }, ",
-          {
-            "pluginId": "observability",
-            "scope": "server",
-            "docId": "kibObservabilityPluginApi",
-            "section": "def-server.ObservabilityRouteCreateOptions",
-            "text": "ObservabilityRouteCreateOptions"
-          },
-          "> | undefined; \"PUT /api/observability/slos/{id}\"?: ",
+          "{ \"PUT /api/observability/slos/{id}\"?: ",
           {
             "pluginId": "@kbn/server-route-repository",
             "scope": "public",
@@ -9982,6 +9989,146 @@
             "text": "ObservabilityRouteHandlerResources"
           },
           ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; 'threshold.us': number; } & { index?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; index?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { timestampField: string; syncDelay: string; frequency: string; }; createdAt: string; updatedAt: string; }, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "> | undefined; \"POST /internal/observability/slos/_historical_summary\"?: ",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "public",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-public.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"POST /internal/observability/slos/_historical_summary\", ",
+          "TypeC",
+          "<{ body: ",
+          "TypeC",
+          "<{ sloIds: ",
+          "ArrayC",
+          "<",
+          "StringC",
+          ">; }>; }>, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          ", { [x: string]: { date: string; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; sliValue: number; status: \"NO_DATA\" | \"HEALTHY\" | \"DEGRADING\" | \"VIOLATED\"; }[]; }, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "> | undefined; \"GET /api/observability/slos/{id}\"?: ",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "public",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-public.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /api/observability/slos/{id}\", ",
+          "TypeC",
+          "<{ path: ",
+          "TypeC",
+          "<{ id: ",
+          "StringC",
+          "; }>; }>, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; 'threshold.us': number; } & { index?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; index?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { timestampField: string; syncDelay: string; frequency: string; }; createdAt: string; updatedAt: string; } & { summary: { status: \"NO_DATA\" | \"HEALTHY\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; }, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "> | undefined; \"GET /api/observability/slos\"?: ",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "public",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-public.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /api/observability/slos\", ",
+          "PartialC",
+          "<{ query: ",
+          "PartialC",
+          "<{ name: ",
+          "StringC",
+          "; indicatorTypes: ",
+          "Type",
+          "<string[], string, unknown>; page: ",
+          "StringC",
+          "; perPage: ",
+          "StringC",
+          "; sortBy: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"name\">, ",
+          "LiteralC",
+          "<\"indicatorType\">]>; sortDirection: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"asc\">, ",
+          "LiteralC",
+          "<\"desc\">]>; }>; }>, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          ", { page: number; perPage: number; total: number; results: ({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; 'threshold.us': number; } & { index?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; index?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { timestampField: string; syncDelay: string; frequency: string; }; createdAt: string; updatedAt: string; } & { summary: { status: \"NO_DATA\" | \"HEALTHY\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; })[]; }, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "> | undefined; \"DELETE /api/observability/slos/{id}\"?: ",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "public",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-public.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"DELETE /api/observability/slos/{id}\", ",
+          "TypeC",
+          "<{ path: ",
+          "TypeC",
+          "<{ id: ",
+          "StringC",
+          "; }>; }>, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          ", void, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -10283,115 +10430,7 @@
         "label": "ObservabilityServerRouteRepository",
         "description": [],
         "signature": [
-          "{ \"GET /api/observability/slos\"?: ",
-          {
-            "pluginId": "@kbn/server-route-repository",
-            "scope": "public",
-            "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-public.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<\"GET /api/observability/slos\", ",
-          "PartialC",
-          "<{ query: ",
-          "PartialC",
-          "<{ name: ",
-          "StringC",
-          "; indicatorTypes: ",
-          "Type",
-          "<string[], string, unknown>; page: ",
-          "StringC",
-          "; perPage: ",
-          "StringC",
-          "; sortBy: ",
-          "UnionC",
-          "<[",
-          "LiteralC",
-          "<\"name\">, ",
-          "LiteralC",
-          "<\"indicatorType\">]>; sortDirection: ",
-          "UnionC",
-          "<[",
-          "LiteralC",
-          "<\"asc\">, ",
-          "LiteralC",
-          "<\"desc\">]>; }>; }>, ",
-          {
-            "pluginId": "observability",
-            "scope": "server",
-            "docId": "kibObservabilityPluginApi",
-            "section": "def-server.ObservabilityRouteHandlerResources",
-            "text": "ObservabilityRouteHandlerResources"
-          },
-          ", { page: number; perPage: number; total: number; results: ({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; 'threshold.us': number; } & { index?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; index?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { timestampField: string; syncDelay: string; frequency: string; }; createdAt: string; updatedAt: string; } & { summary: { status: \"NO_DATA\" | \"HEALTHY\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; })[]; }, ",
-          {
-            "pluginId": "observability",
-            "scope": "server",
-            "docId": "kibObservabilityPluginApi",
-            "section": "def-server.ObservabilityRouteCreateOptions",
-            "text": "ObservabilityRouteCreateOptions"
-          },
-          "> | undefined; \"DELETE /api/observability/slos/{id}\"?: ",
-          {
-            "pluginId": "@kbn/server-route-repository",
-            "scope": "public",
-            "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-public.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<\"DELETE /api/observability/slos/{id}\", ",
-          "TypeC",
-          "<{ path: ",
-          "TypeC",
-          "<{ id: ",
-          "StringC",
-          "; }>; }>, ",
-          {
-            "pluginId": "observability",
-            "scope": "server",
-            "docId": "kibObservabilityPluginApi",
-            "section": "def-server.ObservabilityRouteHandlerResources",
-            "text": "ObservabilityRouteHandlerResources"
-          },
-          ", void, ",
-          {
-            "pluginId": "observability",
-            "scope": "server",
-            "docId": "kibObservabilityPluginApi",
-            "section": "def-server.ObservabilityRouteCreateOptions",
-            "text": "ObservabilityRouteCreateOptions"
-          },
-          "> | undefined; \"GET /api/observability/slos/{id}\"?: ",
-          {
-            "pluginId": "@kbn/server-route-repository",
-            "scope": "public",
-            "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-public.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<\"GET /api/observability/slos/{id}\", ",
-          "TypeC",
-          "<{ path: ",
-          "TypeC",
-          "<{ id: ",
-          "StringC",
-          "; }>; }>, ",
-          {
-            "pluginId": "observability",
-            "scope": "server",
-            "docId": "kibObservabilityPluginApi",
-            "section": "def-server.ObservabilityRouteHandlerResources",
-            "text": "ObservabilityRouteHandlerResources"
-          },
-          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; 'threshold.us': number; } & { index?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; index?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { timestampField: string; syncDelay: string; frequency: string; }; createdAt: string; updatedAt: string; } & { summary: { status: \"NO_DATA\" | \"HEALTHY\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; }, ",
-          {
-            "pluginId": "observability",
-            "scope": "server",
-            "docId": "kibObservabilityPluginApi",
-            "section": "def-server.ObservabilityRouteCreateOptions",
-            "text": "ObservabilityRouteCreateOptions"
-          },
-          "> | undefined; \"PUT /api/observability/slos/{id}\"?: ",
+          "{ \"PUT /api/observability/slos/{id}\"?: ",
           {
             "pluginId": "@kbn/server-route-repository",
             "scope": "public",
@@ -10604,6 +10643,146 @@
             "text": "ObservabilityRouteHandlerResources"
           },
           ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; 'threshold.us': number; } & { index?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; index?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { timestampField: string; syncDelay: string; frequency: string; }; createdAt: string; updatedAt: string; }, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "> | undefined; \"POST /internal/observability/slos/_historical_summary\"?: ",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "public",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-public.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"POST /internal/observability/slos/_historical_summary\", ",
+          "TypeC",
+          "<{ body: ",
+          "TypeC",
+          "<{ sloIds: ",
+          "ArrayC",
+          "<",
+          "StringC",
+          ">; }>; }>, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          ", { [x: string]: { date: string; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; sliValue: number; status: \"NO_DATA\" | \"HEALTHY\" | \"DEGRADING\" | \"VIOLATED\"; }[]; }, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "> | undefined; \"GET /api/observability/slos/{id}\"?: ",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "public",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-public.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /api/observability/slos/{id}\", ",
+          "TypeC",
+          "<{ path: ",
+          "TypeC",
+          "<{ id: ",
+          "StringC",
+          "; }>; }>, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; 'threshold.us': number; } & { index?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; index?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { timestampField: string; syncDelay: string; frequency: string; }; createdAt: string; updatedAt: string; } & { summary: { status: \"NO_DATA\" | \"HEALTHY\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; }, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "> | undefined; \"GET /api/observability/slos\"?: ",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "public",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-public.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /api/observability/slos\", ",
+          "PartialC",
+          "<{ query: ",
+          "PartialC",
+          "<{ name: ",
+          "StringC",
+          "; indicatorTypes: ",
+          "Type",
+          "<string[], string, unknown>; page: ",
+          "StringC",
+          "; perPage: ",
+          "StringC",
+          "; sortBy: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"name\">, ",
+          "LiteralC",
+          "<\"indicatorType\">]>; sortDirection: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"asc\">, ",
+          "LiteralC",
+          "<\"desc\">]>; }>; }>, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          ", { page: number; perPage: number; total: number; results: ({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; 'threshold.us': number; } & { index?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; index?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { timestampField: string; syncDelay: string; frequency: string; }; createdAt: string; updatedAt: string; } & { summary: { status: \"NO_DATA\" | \"HEALTHY\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; })[]; }, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "> | undefined; \"DELETE /api/observability/slos/{id}\"?: ",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "public",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-public.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"DELETE /api/observability/slos/{id}\", ",
+          "TypeC",
+          "<{ path: ",
+          "TypeC",
+          "<{ id: ",
+          "StringC",
+          "; }>; }>, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          ", void, ",
           {
             "pluginId": "observability",
             "scope": "server",
