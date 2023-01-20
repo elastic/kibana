@@ -1,0 +1,143 @@
+title: Run Opsgenie connector parameters
+description: Test an Opsgenie action.
+oneOf:
+  - type: object
+    required:
+      - subAction
+      - subActionParams
+    description: Opsgenie connector properties when `subAction` is `closeAlert`.
+    properties:
+      subAction:
+        type: string
+        description: The action to test.
+        enum:
+          - closeAlert
+      subActionParams:
+        type: object
+        required:
+          - alias
+        properties:
+          alias:
+            type: string
+            description: The unique identifier used for alert deduplication in Opsgenie. The alias must match the value used when creating the alert.
+          note:
+            type: string
+            description: Additional information for the alert.
+          source:
+            type: string
+            description: The display name for the source of the alert.
+          user:
+            type: string
+            description: The display name for the owner.
+  - type: object
+    required:
+      - subAction
+      - subActionParams
+    description: Opsgenie connector properties when `subAction` is `createAlert`.
+    properties:
+      subAction:
+        type: string
+        description: The action to test.
+        enum:
+          - createAlert
+      subActionParams:
+        type: object
+        required:
+          - message
+        properties:
+          actions:
+            type: array
+            description: The custom actions available to the alert.
+            items: 
+              type: string
+          alias:
+            type: string
+            description: The unique identifier used for alert deduplication in Opsgenie.
+          description:
+            type: string
+            description: A description that provides detailed information about the alert.
+          details:
+            type: object
+            description: The custom properties of the alert.
+            additionalProperties: true
+            example: {"key1":"value1","key2":"value2"}
+          entity:
+            type: string
+            description: The domain of the alert. For example, the application or server name.
+          message:
+            type: string
+            description: The alert message.
+          note:
+            type: string
+            description: Additional information for the alert.
+          priority:
+            type: string
+            description: The priority level for the alert.
+            enum:
+              - P1
+              - P2
+              - P3
+              - P4
+              - P5
+          responders:
+            type: array
+            description: >
+              The entities to receive notifications about the alert.
+              If `type` is `user`, either `id` or `username` is required.
+              If `type` is `team`, either `id` or `name` is required.
+            items:
+              type: object
+              properties:
+                id:
+                  type: string
+                  description: The identifier for the entity.
+                name:
+                  type: string
+                  description: The name of the entity.
+                type:
+                  type: string
+                  description: The type of responders, in this case `escalation`.
+                  enum:
+                    - escalation
+                    - schedule
+                    - team
+                    - user
+                username:
+                  type: string
+                  description: A valid email address for the user.
+          source:
+            type: string
+            description: The display name for the source of the alert.
+          tags:
+            type: array
+            description: The tags for the alert.
+            items:
+              type: string
+          user:
+            type: string
+            description: The display name for the owner.
+          visibleTo:
+            type: array
+            description: The teams and users that the alert will be visible to without sending a notification. Only one of `id`, `name`, or `username` is required.
+            items:
+              type: object
+              required:
+                - type
+              properties:
+                id:
+                  type: string
+                  description: The identifier for the entity.
+                name:
+                  type: string
+                  description: The name of the entity.
+                type:
+                  type: string
+                  description: Valid values are `team` and `user`.
+                  enum:
+                    - team
+                    - user
+                username:
+                  type: string
+                  description: The user name. This property is required only when the `type` is `user`.     
+discriminator:
+  propertyName: subAction

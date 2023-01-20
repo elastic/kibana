@@ -27,8 +27,8 @@ post:
 #               - $ref: '../components/schemas/run_connector_request_cases_webhook.yaml'
 #                - $ref: '../components/schemas/run_connector_request_email.yaml'
                 - $ref: '../components/schemas/run_connector_request_index.yaml'  
-#                - $ref: '../components/schemas/run_connector_request_jira.yaml'
-#                - $ref: '../components/schemas/run_connector_request_opsgenie.yaml'
+                - $ref: '../components/schemas/run_connector_request_jira.yaml'
+                - $ref: '../components/schemas/run_connector_request_opsgenie.yaml'
 #               - $ref: '../components/schemas/run_connector_request_pagerduty.yaml'
 #               - $ref: '../components/schemas/run_connector_request_resilient.yaml'
                 - $ref: '../components/schemas/run_connector_request_serverlog.yaml'
@@ -44,6 +44,8 @@ post:
         examples:
           runIndexConnectorRequest:
             $ref: '../components/examples/run_index_connector_request.yaml'
+          runJiraConnectorRequest:
+            $ref: '../components/examples/run_jira_connector_request.yaml'
           runServerLogConnectorRequest:
             $ref: '../components/examples/run_server_log_connector_request.yaml'
   responses:

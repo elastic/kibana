@@ -1,0 +1,163 @@
+title: Run Jira connector parameters
+description: Test an action related to Jira issues.
+oneOf:
+  - type: object
+    required:
+      - subAction
+      - subActionParams
+    description: Jira connector properties when `subAction` is `fieldsByIssueType`.
+    properties:
+      subAction:
+        type: string
+        description: The action to test.
+        enum:
+          - fieldsByIssueType
+      subActionParams:
+        type: object
+        required:
+          - id
+        properties:
+          id:
+            type: string
+            description: The Jira issue type identifier.
+            example: 10024
+  - type: object
+    required:
+      - subAction
+    description: Jira connector properties when `subAction` is `getFields`.
+    properties:
+      subAction:
+        type: string
+        description: The action to test.
+        enum:
+          - getFields
+  - type: object
+    description: Jira connector properties when `subAction` is `getIncident`.
+    required:
+      - subAction
+      - subActionParams
+    properties:
+      subAction:
+        type: string
+        description: The action to test.
+        enum:
+          - getIncident
+      subActionParams:
+        type: object
+        required:
+          - externalId
+        properties:
+          externalId:
+            type: string
+            description: The Jira issue identifier.
+            example: 71778
+  - type: object
+    required:
+      - subAction
+    description: Jira connector properties when `subAction` is `issue`.
+    properties:
+      subAction:
+        type: string
+        description: The action to test.
+        enum:
+          - issue
+      subActionParams:
+        type: object
+        required:
+          - id
+        properties:
+          id:
+            type: string
+            description: The Jira issue identifier.
+            example: 71778
+  - type: object
+    required:
+      - subAction
+      - subActionParams
+    description: Jira connector properties when `subAction` is `issues`.
+    properties:
+      subAction:
+        type: string
+        description: The action to test.
+        enum:
+          - issues
+      subActionParams:
+        type: object
+        required:
+          - title
+        properties:
+          title:
+            type: string
+            description: The title of the Jira issue.
+  - type: object
+    required:
+      - subAction
+    description: Jira connector properties when `subAction` is `issueTypes`.
+    properties:
+      subAction:
+        type: string
+        description: The action to test.
+        enum:
+          - issueTypes
+  - type: object
+    required:
+      - subAction
+      - subActionParams
+    description: Jira connector properties when `subAction` is `pushToService`. 
+    properties:
+      subAction:
+        type: string
+        description: The action to test.
+        enum:
+          - pushToService
+      subActionParams:
+        type: object
+        required:
+          - incident
+        properties:
+          comments:
+            type: array
+            description: Additional information that is sent to Jira.
+            items:
+              type: object
+              properties:
+                comment:
+                  type: string
+                  description: A comment related to the incident. For example, describe how to troubleshoot the issue.
+                commentId:
+                  type: integer
+                  description: A unique identifier for the comment.
+          incident:
+            type: object
+            required:
+              - summary
+            description: Information necessary to create or update a Jira incident.
+            properties:
+              description:
+                type: string
+                description: The details about the incident.
+              externalId:
+                type: string
+                description: The Jira issue identifier. If present, the incident is updated. Otherwise, a new incident is created.
+              labels:
+                type: array
+                description: "The labels for the incident. For example, `[\"LABEL1\"]`. NOTE: Labels cannot contain spaces."
+                items:
+                  type: string
+              issueType:
+                type: integer
+                description: The type of incident. For example, `10006`. To obtain the list of valid values, set `subAction` to `issueTypes`.
+              parent:
+                type: string
+                description: The ID or key of the parent issue. Applies only to `Sub-task` types of issues.
+              priority:
+                type: string
+                description: The incident priority level. For example, `Lowest`.
+              summary:
+                type: string
+                description: A summary of the incident.
+              title:
+                type: string
+                description: A title for the incident, used for searching the contents of the knowledge base.
+discriminator:
+  propertyName: subAction
