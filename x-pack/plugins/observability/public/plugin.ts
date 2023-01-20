@@ -339,7 +339,11 @@ export class Plugin
       const { getO11yAlertsTableConfiguration } = await import(
         './config/register_alerts_table_configuration'
       );
-      return getO11yAlertsTableConfiguration(this.observabilityRuleTypeRegistry, config);
+      return getO11yAlertsTableConfiguration({
+        observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
+        getAlertLifecycleStatusBadge: pluginsStart.triggersActionsUi.getAlertLifecycleStatusBadge,
+        config,
+      });
     };
 
     const { alertsTableConfigurationRegistry } = pluginsStart.triggersActionsUi;

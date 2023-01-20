@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_UUID } from '@kbn/rule-data-utils';
+import { ALERT_UUID, ALERT_STATUS, ALERT_FLAPPING } from '@kbn/rule-data-utils';
 import { AlertStatus } from '@kbn/rule-data-utils';
 import React, { useState, Suspense, lazy, useCallback, useMemo, useEffect } from 'react';
 import {
@@ -100,10 +100,6 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     },
     [alerts, setFlyoutAlertIndex]
   );
-
-  const renderAlertLifecycleStatus = useCallback((alertStatus: AlertStatus, flapping?: boolean) => {
-    return <AlertLifecycleStatusBadge alertStatus={alertStatus} flapping={flapping} />;
-  }, []);
 
   const toolbarVisibility = useCallback(() => {
     const { rowSelection } = bulkActionsState;
@@ -230,6 +226,15 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     columnId: string;
   }) => {
     const value = data.find((d) => d.field === columnId)?.value ?? [];
+    if (columnId === ALERT_STATUS && Array.isArray(value)) {
+      const flapping = data.find((d) => d.field === ALERT_FLAPPING)?.value ?? [];
+      return (
+        <AlertLifecycleStatusBadge
+          alertStatus={value.join() as AlertStatus}
+          flapping={flapping[0]}
+        />
+      );
+    }
     if (Array.isArray(value)) {
       return <>{value.length ? value.join() : '--'}</>;
     }
@@ -241,10 +246,9 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       props.alertsTableConfiguration?.getRenderCellValue
         ? props.alertsTableConfiguration?.getRenderCellValue({
             setFlyoutAlert: handleFlyoutAlert,
-            renderAlertLifecycleStatus,
           })
         : basicRenderCellValue,
-    [handleFlyoutAlert, renderAlertLifecycleStatus, props.alertsTableConfiguration]
+    [handleFlyoutAlert, props.alertsTableConfiguration]
   )();
 
   const handleRenderCellValue = useCallback(

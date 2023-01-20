@@ -35231,8 +35231,6 @@
     "xpack.triggersActionsUI.sections.ruleDetails.ruleEventLogListKpi.responseTooltip": "多达 10,000 次最近规则运行的响应。",
     "xpack.triggersActionsUI.sections.ruleDetails.ruleEventLogPaginationStatus.paginationResultsRangeNoResult": "0",
     "xpack.triggersActionsUI.sections.ruleDetails.rulesList.ruleLastExecutionDescription": "上次响应",
-    "xpack.triggersActionsUI.sections.ruleDetails.rulesList.status.active": "活动",
-    "xpack.triggersActionsUI.sections.ruleDetails.rulesList.status.inactive": "已恢复",
     "xpack.triggersActionsUI.sections.ruleDetails.ruleStateFilter.disabledOptionText": "规则已禁用",
     "xpack.triggersActionsUI.sections.ruleDetails.ruleStateFilter.enabledOptionText": "规则已启用",
     "xpack.triggersActionsUI.sections.ruleDetails.ruleStateFilter.snoozedOptionText": "规则已暂停",

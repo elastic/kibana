@@ -24,6 +24,7 @@ import {
   RuleTagBadgeProps,
   RuleEventLogListOptions,
   RuleEventLogListProps,
+  AlertLifecycleStatusBadgeProps,
 } from './types';
 import { getAlertsTableLazy } from './common/get_alerts_table';
 import { getRuleStatusDropdownLazy } from './common/get_rule_status_dropdown';
@@ -32,6 +33,7 @@ import { getRuleStatusFilterLazy } from './common/get_rule_status_filter';
 import { getRuleTagBadgeLazy } from './common/get_rule_tag_badge';
 import { getRuleEventLogListLazy } from './common/get_rule_event_log_list';
 import { getRulesListLazy } from './common/get_rules_list';
+import { getAlertLifecycleStatusBadgeLazy } from './common/get_alert_lifecycle_status_badge';
 import { getAlertsTableStateLazy } from './common/get_alerts_table_state';
 import { getAlertsSearchBarLazy } from './common/get_alerts_search_bar';
 import { getRulesListNotifyBadgeLazy } from './common/get_rules_list_notify_badge';
@@ -84,6 +86,9 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
         ruleTypeRegistry,
         connectorServices,
       });
+    },
+    getAlertLifecycleStatusBadge: (props: AlertLifecycleStatusBadgeProps) => {
+      return getAlertLifecycleStatusBadgeLazy(props);
     },
     getAlertsStateTable: (props: AlertsTableStateProps) => {
       return getAlertsTableStateLazy(props);

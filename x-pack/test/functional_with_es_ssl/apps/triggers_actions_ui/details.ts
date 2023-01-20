@@ -10,7 +10,6 @@ import uuid from 'uuid';
 import { omit, mapValues, range, flatten } from 'lodash';
 import moment from 'moment';
 import { asyncForEach } from '@kbn/std';
-import { alwaysFiringAlertType } from '@kbn/alerting-fixture-plugin/server/plugin';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { ObjectRemover } from '../../lib/object_remover';
@@ -747,30 +746,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // refresh to ensure Api call and UI are looking at freshest output
         await browser.refresh();
 
-        // Get action groups
-        const { actionGroups } = alwaysFiringAlertType;
-
         // If the tab exists, click on the alert list
         await pageObjects.triggersActionsUI.maybeClickOnAlertTab();
 
         // Verify content
         await testSubjects.existOrFail('alertsList');
 
-        const actionGroupNameFromId = (actionGroupId: string) =>
-          actionGroups.find(
-            (actionGroup: { id: string; name: string }) => actionGroup.id === actionGroupId
-          )?.name;
-
         const summary = await getAlertSummary(rule.id);
         const dateOnAllAlertsFromApiResponse: Record<string, string> = mapValues(
           summary.alerts,
           (a) => a.activeStartDate
         );
-
-        const actionGroupNameOnAllInstancesFromApiResponse = mapValues(summary.alerts, (a) => {
-          const name = actionGroupNameFromId(a.actionGroupId);
-          return name ? ` (${name})` : '';
-        });
 
         log.debug(
           `API RESULT: ${Object.entries(dateOnAllAlertsFromApiResponse)
@@ -782,21 +768,21 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(alertsList.map((a) => omit(a, 'duration'))).to.eql([
           {
             alert: 'us-central',
-            status: `Active${actionGroupNameOnAllInstancesFromApiResponse['us-central']}`,
+            status: `Active`,
             start: moment(dateOnAllAlertsFromApiResponse['us-central'])
               .utc()
               .format('D MMM YYYY @ HH:mm:ss'),
           },
           {
             alert: 'us-east',
-            status: `Active${actionGroupNameOnAllInstancesFromApiResponse['us-east']}`,
+            status: `Active`,
             start: moment(dateOnAllAlertsFromApiResponse['us-east'])
               .utc()
               .format('D MMM YYYY @ HH:mm:ss'),
           },
           {
             alert: 'us-west',
-            status: `Active${actionGroupNameOnAllInstancesFromApiResponse['us-west']}`,
+            status: `Active`,
             start: moment(dateOnAllAlertsFromApiResponse['us-west'])
               .utc()
               .format('D MMM YYYY @ HH:mm:ss'),

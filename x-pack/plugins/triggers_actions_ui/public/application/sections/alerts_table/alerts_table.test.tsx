@@ -10,9 +10,9 @@ import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
-
+import { ALERT_RULE_NAME, ALERT_REASON, ALERT_FLAPPING, ALERT_STATUS } from '@kbn/rule-data-utils';
 import { AlertsTable } from './alerts_table';
-import { AlertsField, AlertsTableProps, BulkActionsState, RowSelectionState } from '../../../types';
+import { AlertsTableProps, BulkActionsState, RowSelectionState } from '../../../types';
 import { EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { BulkActionsContext } from './bulk_actions/context';
@@ -25,27 +25,47 @@ jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
 
 const columns = [
   {
-    id: AlertsField.name,
+    id: ALERT_RULE_NAME,
     displayAsText: 'Name',
   },
   {
-    id: AlertsField.reason,
+    id: ALERT_REASON,
     displayAsText: 'Reason',
+  },
+  {
+    id: ALERT_STATUS,
+    displayAsText: 'Alert status',
   },
 ];
 
-describe('AlertsTable', () => {
-  const alerts = [
-    {
-      [AlertsField.name]: ['one'],
-      [AlertsField.reason]: ['two'],
-    },
-    {
-      [AlertsField.name]: ['three'],
-      [AlertsField.reason]: ['four'],
-    },
-  ] as unknown as EcsFieldsResponse[];
+const alerts = [
+  {
+    [ALERT_RULE_NAME]: ['one'],
+    [ALERT_REASON]: ['two'],
+    [ALERT_STATUS]: ['active'],
+    [ALERT_FLAPPING]: [true],
+  },
+  {
+    [ALERT_RULE_NAME]: ['three'],
+    [ALERT_REASON]: ['four'],
+    [ALERT_STATUS]: ['active'],
+    [ALERT_FLAPPING]: [false],
+  },
+  {
+    [ALERT_RULE_NAME]: ['five'],
+    [ALERT_REASON]: ['six'],
+    [ALERT_STATUS]: ['recovered'],
+    [ALERT_FLAPPING]: [true],
+  },
+  {
+    [ALERT_RULE_NAME]: ['seven'],
+    [ALERT_REASON]: ['eight'],
+    [ALERT_STATUS]: ['recovered'],
+    [ALERT_FLAPPING]: [false],
+  },
+] as unknown as EcsFieldsResponse[];
 
+describe('AlertsTable', () => {
   const fetchAlertsData = {
     activePage: 0,
     alerts,
@@ -164,6 +184,23 @@ describe('AlertsTable', () => {
       expect(getByTestId('toolbar-alerts-count')).not.toBe(null);
     });
 
+    it('should show alert status', () => {
+      const props = {
+        ...tableProps,
+        pageSize: alerts.length,
+        alertsTableConfiguration: {
+          ...alertsTableConfiguration,
+          getRenderCellValue: undefined,
+        },
+      };
+
+      const { queryAllByTestId } = render(<AlertsTableWithLocale {...props} />);
+      expect(queryAllByTestId('alertLifecycleStatusBadge')[0].textContent).toEqual('Flapping');
+      expect(queryAllByTestId('alertLifecycleStatusBadge')[1].textContent).toEqual('Active');
+      expect(queryAllByTestId('alertLifecycleStatusBadge')[2].textContent).toEqual('Recovered');
+      expect(queryAllByTestId('alertLifecycleStatusBadge')[3].textContent).toEqual('Recovered');
+    });
+
     describe('leading control columns', () => {
       it('should return at least the flyout action control', async () => {
         const wrapper = render(<AlertsTableWithLocale {...tableProps} />);
@@ -206,6 +243,7 @@ describe('AlertsTable', () => {
                           onClick={() => {}}
                           size="s"
                           data-test-subj="testActionColumn"
+                          aria-label="testActionLabel"
                         />
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
@@ -215,6 +253,7 @@ describe('AlertsTable', () => {
                           onClick={() => {}}
                           size="s"
                           data-test-subj="testActionColumn2"
+                          aria-label="testActionLabel2"
                         />
                       </EuiFlexItem>
                     </>
@@ -249,6 +288,7 @@ describe('AlertsTable', () => {
                           onClick={() => {}}
                           size="s"
                           data-test-subj="testActionColumn"
+                          aria-label="testActionLabel"
                         />
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
@@ -258,6 +298,7 @@ describe('AlertsTable', () => {
                           onClick={() => {}}
                           size="s"
                           data-test-subj="testActionColumn2"
+                          aria-label="testActionLabel2"
                         />
                       </EuiFlexItem>
                     </>
@@ -307,6 +348,7 @@ describe('AlertsTable', () => {
                           onClick={() => {}}
                           size="s"
                           data-test-subj="testActionColumn"
+                          aria-label="testActionLabel"
                         />
                       </EuiFlexItem>
                     </>
@@ -332,8 +374,8 @@ describe('AlertsTable', () => {
           expect(within(selectedOptions[0]).queryByRole('checkbox')).not.toBeInTheDocument();
 
           // second row, first column
-          expect(within(selectedOptions[4]).queryByLabelText('Loading')).not.toBeInTheDocument();
-          expect(within(selectedOptions[4]).getByRole('checkbox')).toBeDefined();
+          expect(within(selectedOptions[5]).queryByLabelText('Loading')).not.toBeInTheDocument();
+          expect(within(selectedOptions[5]).getByRole('checkbox')).toBeDefined();
         });
 
         it('should show the row loader when callback triggered with false', async () => {

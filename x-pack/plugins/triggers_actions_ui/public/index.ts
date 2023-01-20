@@ -37,12 +37,12 @@ export type {
   RuleEventLogListProps,
   AlertTableFlyoutComponent,
   GetRenderCellValue,
-  RenderAlertLifecycleStatus,
   FieldBrowserOptions,
   FieldBrowserProps,
   RuleDefinitionProps,
   RulesListVisibleColumns,
   AlertSummaryTimeRange,
+  AlertLifecycleStatusBadgeProps,
 } from './types';
 
 export type {
