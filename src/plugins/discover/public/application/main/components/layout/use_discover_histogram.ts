@@ -13,6 +13,7 @@ import {
   UnifiedHistogramFetchStatus,
 } from '@kbn/unified-histogram-plugin/public';
 import { UnifiedHistogramState } from '@kbn/unified-histogram-plugin/public/container/services/state_service';
+import { isEqual } from 'lodash';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -137,11 +138,17 @@ export const useDiscoverHistogram = ({
       .subscribe((state) => {
         inspectorAdapters.lensRequests = state.lensRequestAdapter;
 
-        stateContainer.setAppState({
+        const { hideChart, interval, breakdownField } = stateContainer.appState.getState();
+        const oldState = { hideChart, interval, breakdownField };
+        const newState = {
           hideChart: state.chartHidden,
           interval: state.timeInterval,
           breakdownField: state.breakdownField,
-        });
+        };
+
+        if (!isEqual(oldState, newState)) {
+          stateContainer.setAppState(newState);
+        }
       });
 
     return () => {
