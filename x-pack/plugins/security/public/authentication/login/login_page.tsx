@@ -89,13 +89,15 @@ const loginFormMessages: Record<LogoutReason, NonNullable<LoginFormProps['messag
 
 export class LoginPage extends Component<Props, State> {
   state = { loginState: null, customBranding: {} } as State;
-  private subscription?: Subscription;
+  private customBrandingSubscription?: Subscription;
 
   public async componentDidMount() {
     const loadingCount$ = new BehaviorSubject(1);
-    this.subscription = this.props.customBranding.customBranding$.subscribe((next) => {
-      this.setState({ ...this.state, customBranding: next });
-    });
+    this.customBrandingSubscription = this.props.customBranding.customBranding$.subscribe(
+      (next) => {
+        this.setState({ ...this.state, customBranding: next });
+      }
+    );
     this.props.http.addLoadingCountSource(loadingCount$.asObservable());
 
     try {
@@ -111,7 +113,7 @@ export class LoginPage extends Component<Props, State> {
   }
 
   public componentWillUnmount() {
-    this.subscription?.unsubscribe();
+    this.customBrandingSubscription?.unsubscribe();
   }
 
   public render() {

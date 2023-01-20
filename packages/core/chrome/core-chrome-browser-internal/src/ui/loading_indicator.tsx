@@ -69,7 +69,15 @@ export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { v
     });
 
     const logoImage = this.props.customLogo ? (
-      <img src={this.props.customLogo} width={'24'} height={'24'} alt="logo" />
+      <img
+        src={this.props.customLogo}
+        width="24"
+        height="24"
+        alt="logo"
+        aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.customLogoAriaLabel', {
+          defaultMessage: 'User logo',
+        })}
+      />
     ) : (
       <EuiIcon
         type={'logoElastic'}
