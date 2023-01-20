@@ -28,7 +28,7 @@ import { ConfigKey, MonitorOverviewItem } from '../../../../../../../common/runt
 import { useMonitorEnableHandler } from '../../../../hooks/use_monitor_enable_handler';
 import { setFlyoutConfig } from '../../../../state/overview/actions';
 import { useEditMonitorLocator } from '../../hooks/use_edit_monitor_locator';
-import { useMonitorDetailLocator } from '../../hooks/use_monitor_detail_locator';
+import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_locator';
 import { useLocationName } from '../../../../hooks';
 
 type PopoverPosition = 'relative' | 'default';

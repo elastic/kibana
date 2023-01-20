@@ -25,6 +25,8 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
       loadTestFile(require.resolve('./bulk_enable'));
       loadTestFile(require.resolve('./bulk_disable'));
       loadTestFile(require.resolve('./clone'));
+      loadTestFile(require.resolve('./get_flapping_settings'));
+      loadTestFile(require.resolve('./update_flapping_settings'));
     });
   });
 }
