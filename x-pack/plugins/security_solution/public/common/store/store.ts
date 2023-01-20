@@ -25,10 +25,10 @@ import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import reduceReducers from 'reduce-reducers';
 import {
+  DEFAULT_DATA_VIEW_ID,
   DEFAULT_INDEX_KEY,
   DETECTION_ENGINE_INDEX_URL,
   SERVER_APP_ID,
-  SOURCERER_API_URL,
 } from '../../../common/constants';
 import { telemetryMiddleware } from '../lib/telemetry';
 import { appSelectors } from './app';
@@ -45,8 +45,8 @@ import { dataTableSelectors } from './data_table';
 import type { KibanaDataView, SourcererModel } from './sourcerer/model';
 import { initDataView } from './sourcerer/model';
 import type { AppObservableLibs, StartedSubPlugins, StartPlugins } from '../../types';
-import type { SecurityDataView } from '../containers/sourcerer/api';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
+import { createSourcererDataView } from '../containers/sourcerer/create_sourcerer_data_view';
 
 type ComposeType = typeof compose;
 declare global {
@@ -79,12 +79,17 @@ export const createStoreFactory = async (
   let kibanaDataViews: SourcererModel['kibanaDataViews'];
   try {
     // check for/generate default Security Solution Kibana data view
-    const sourcererDataViews: SecurityDataView = await coreStart.http.fetch(SOURCERER_API_URL, {
-      method: 'POST',
-      body: JSON.stringify({
+    const sourcererDataViews = await createSourcererDataView({
+      body: {
         patternList: [...configPatternList, ...(signal.name != null ? [signal.name] : [])],
-      }),
+      },
+      dataViewService: startPlugins.data.dataViews,
+      dataViewId: `${DEFAULT_DATA_VIEW_ID}-${(await startPlugins.spaces?.getActiveSpace())?.id}`,
     });
+
+    if (sourcererDataViews === undefined) {
+      throw new Error('');
+    }
     defaultDataView = { ...initDataView, ...sourcererDataViews.defaultDataView };
     kibanaDataViews = sourcererDataViews.kibanaDataViews.map((dataView: KibanaDataView) => ({
       ...initDataView,

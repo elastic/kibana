@@ -14,7 +14,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
 import React, { useMemo, useState } from 'react';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode } from '@elastic/eui';
@@ -160,7 +160,7 @@ export function TransactionsTable({
 
         return {
           // Everytime the main statistics is refetched, updates the requestId making the detailed API to be refetched.
-          requestId: uuid(),
+          requestId: uuidv4(),
           mainStatisticsData: {
             ...response,
             transactionGroups: currentPageTransactionGroups,
