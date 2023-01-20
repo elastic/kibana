@@ -112,10 +112,6 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getInternalFleetServices: memoize(() => endpointAppContextService.getInternalFleetServices()),
 
-      getScopedFleetServices: memoize((req: KibanaRequest) =>
-        endpointAppContextService.getScopedFleetServices(req)
-      ),
-
       getQueryRuleAdditionalOptions: {
         licensing,
         osqueryCreateAction: osquery.osqueryCreateAction,

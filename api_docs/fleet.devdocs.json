@@ -8297,6 +8297,47 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-server.PostPackagePolicyDeleteCallback",
+        "type": "Type",
+        "tags": [],
+        "label": "PostPackagePolicyDeleteCallback",
+        "description": [],
+        "signature": [
+          "(packagePolicies: ",
+          "DeletePackagePoliciesResponse",
+          ") => Promise<void>"
+        ],
+        "path": "x-pack/plugins/fleet/server/types/extensions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-server.PostPackagePolicyDeleteCallback.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "packagePolicies",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.PackagePolicy",
+                "text": "PackagePolicy"
+              },
+              "[]"
+            ],
+            "path": "x-pack/plugins/fleet/server/types/extensions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-server.PostPackagePolicyPostCreateCallback",
         "type": "Type",
         "tags": [],
@@ -8840,32 +8881,6 @@
   "common": {
     "classes": [],
     "functions": [
-      {
-        "parentPluginId": "fleet",
-        "id": "def-common.createFleetAuthzMock",
-        "type": "Function",
-        "tags": [],
-        "label": "createFleetAuthzMock",
-        "description": [
-          "\nCreates mock `authz` object"
-        ],
-        "signature": [
-          "() => ",
-          {
-            "pluginId": "fleet",
-            "scope": "common",
-            "docId": "kibFleetPluginApi",
-            "section": "def-common.FleetAuthz",
-            "text": "FleetAuthz"
-          }
-        ],
-        "path": "x-pack/plugins/fleet/common/mocks.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "fleet",
         "id": "def-common.decodeCloudId",
@@ -13743,6 +13758,28 @@
             "description": [],
             "signature": [
               "{ github: string; }"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/package_spec.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.PackageSpecManifest.elasticsearch",
+            "type": "Object",
+            "tags": [],
+            "label": "elasticsearch",
+            "description": [],
+            "signature": [
+              "Pick<",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.RegistryElasticsearch",
+                "text": "RegistryElasticsearch"
+              },
+              ", \"index_template.settings\" | \"index_template.mappings\"> | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/package_spec.ts",
             "deprecated": false,

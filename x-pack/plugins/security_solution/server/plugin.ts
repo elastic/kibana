@@ -478,10 +478,6 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.endpointAppContextService.start({
       fleetAuthzService: authz,
-      agentService,
-      packageService,
-      packagePolicyService,
-      agentPolicyService,
       endpointMetadataService: new EndpointMetadataService(
         core.savedObjects,
         agentPolicyService,

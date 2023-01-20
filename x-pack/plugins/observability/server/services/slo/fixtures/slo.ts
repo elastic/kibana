@@ -22,7 +22,7 @@ import {
   StoredSLO,
 } from '../../../domain/models';
 import { Paginated } from '../slo_repository';
-import { sevenDays } from './duration';
+import { sevenDays, twoMinute } from './duration';
 import { sevenDaysRolling } from './time_window';
 
 export const createAPMTransactionErrorRateIndicator = (
@@ -104,6 +104,18 @@ export const createSLO = (params: Partial<SLO> = {}): SLO => {
     revision: 1,
     createdAt: now,
     updatedAt: now,
+    ...params,
+  });
+};
+
+export const createSLOWithTimeslicesBudgetingMethod = (params: Partial<SLO> = {}): SLO => {
+  return createSLO({
+    budgetingMethod: 'timeslices',
+    objective: {
+      target: 0.98,
+      timesliceTarget: 0.95,
+      timesliceWindow: twoMinute(),
+    },
     ...params,
   });
 };

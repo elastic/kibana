@@ -39,6 +39,8 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { RuleDetailsLocatorDefinition } from './locators/rule_details';
 import { observabilityAppId, observabilityFeatureId, casesPath } from '../common';
 import { createLazyObservabilityPageTemplate } from './components/shared';
@@ -88,20 +90,22 @@ export interface ObservabilityPublicPluginsSetup {
 }
 
 export interface ObservabilityPublicPluginsStart {
-  usageCollection: UsageCollectionSetup;
+  actionTypeRegistry: ActionTypeRegistryContract;
   cases: CasesUiStart;
-  embeddable: EmbeddableStart;
-  home?: HomePublicPluginStart;
-  share: SharePluginStart;
-  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
-  lens: LensPublicStart;
   discover: DiscoverStart;
-  ruleTypeRegistry: RuleTypeRegistryContract;
-  actionTypeRegistry: ActionTypeRegistryContract;
-  security: SecurityPluginStart;
+  embeddable: EmbeddableStart;
   guidedOnboarding: GuidedOnboardingPluginStart;
+  lens: LensPublicStart;
+  licensing: LicensingPluginStart;
+  ruleTypeRegistry: RuleTypeRegistryContract;
+  security: SecurityPluginStart;
+  share: SharePluginStart;
+  spaces: SpacesPluginStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  usageCollection: UsageCollectionSetup;
+  home?: HomePublicPluginStart;
 }
 
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
