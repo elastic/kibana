@@ -91,7 +91,7 @@ export interface SavedObjectsTableState {
   exportAllOptions: ExportAllOption[];
   exportAllSelectedOptions: Record<string, boolean>;
   isIncludeReferencesDeepChecked: boolean;
-  hasCustomBranding?: boolean;
+  hasCustomBranding: boolean;
 }
 
 const unableFindSavedObjectsNotificationMessage = i18n.translate(
@@ -136,6 +136,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       exportAllOptions: [],
       exportAllSelectedOptions: {},
       isIncludeReferencesDeepChecked: true,
+      hasCustomBranding: false,
     };
   }
 
