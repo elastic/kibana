@@ -14,8 +14,10 @@ export const HISTOGRAM_BREAKDOWN_FIELD_KEY = 'histogramBreakdownField';
 
 const getLocalStorageKey = (prefix: string, key: string) => `${prefix}:${key}`;
 
-export const getChartHidden = (storage: Storage, localStorageKeyPrefix: string): boolean =>
-  storage.get(getLocalStorageKey(localStorageKeyPrefix, CHART_HIDDEN_KEY)) ?? false;
+export const getChartHidden = (
+  storage: Storage,
+  localStorageKeyPrefix: string
+): boolean | undefined => storage.get(getLocalStorageKey(localStorageKeyPrefix, CHART_HIDDEN_KEY));
 
 export const getTopPanelHeight = (
   storage: Storage,
@@ -34,7 +36,7 @@ export const setChartHidden = (
   storage: Storage,
   localStorageKeyPrefix: string,
   chartHidden: boolean | undefined
-) => storage.set(getLocalStorageKey(localStorageKeyPrefix, CHART_HIDDEN_KEY), chartHidden) ?? false;
+) => storage.set(getLocalStorageKey(localStorageKeyPrefix, CHART_HIDDEN_KEY), chartHidden);
 
 export const setTopPanelHeight = (
   storage: Storage,

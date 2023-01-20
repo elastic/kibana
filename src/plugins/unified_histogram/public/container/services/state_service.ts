@@ -59,7 +59,7 @@ export class UnifiedHistogramStateService {
 
     if (localStorageKeyPrefix) {
       this.localStorageKeyPrefix = localStorageKeyPrefix;
-      chartHidden = getChartHidden(services.storage, localStorageKeyPrefix);
+      chartHidden = getChartHidden(services.storage, localStorageKeyPrefix) ?? false;
       topPanelHeight = getTopPanelHeight(services.storage, localStorageKeyPrefix);
       breakdownField = getBreakdownField(services.storage, localStorageKeyPrefix);
     }
