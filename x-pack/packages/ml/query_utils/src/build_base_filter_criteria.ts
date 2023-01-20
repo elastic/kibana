@@ -8,8 +8,16 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Query } from '@kbn/es-query';
 
-// Builds the base filter criteria used in queries,
-// adding criteria for the time range and an optional query.
+/**
+ * Builds the base filter criteria used in queries,
+ * adding criteria for the time range and an optional query.
+ *
+ * @param timeFieldName - optional time field name of the data view
+ * @param earliestMs - optional earliest timestamp of the selected time range
+ * @param latestMs - optional latest timestamp of the selected time range
+ * @param query - optional query
+ * @returns filter criteria
+ */
 export function buildBaseFilterCriteria(
   timeFieldName?: string,
   earliestMs?: number,
