@@ -28,7 +28,6 @@ import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_hea
 import {
   PostMessageParams,
   SlackSecrets,
-  SlackExecutorOptions,
   SlackWebApiExecutorOptions,
   SlackWebhookExecutorOptions,
   WebhookParams,
