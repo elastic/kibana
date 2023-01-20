@@ -9,15 +9,12 @@ import { URL } from 'url';
 import HttpProxyAgent from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { i18n } from '@kbn/i18n';
-import { schema, TypeOf } from '@kbn/config-schema';
 import { IncomingWebhook, IncomingWebhookResult } from '@slack/webhook';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, getOrElse } from 'fp-ts/lib/Option';
 import type {
   ActionType as ConnectorType,
-  ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
-  ExecutorType,
   ValidatorServices,
 } from '@kbn/actions-plugin/server/types';
 import {
@@ -27,52 +24,35 @@ import {
 } from '@kbn/actions-plugin/common/types';
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { getCustomAgents } from '@kbn/actions-plugin/server/lib/get_custom_agents';
-import { getRetryAfterIntervalFromHeaders } from '../../lib/http_response_retry_header';
+import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
+import {
+  PostMessageParams,
+  SlackSecrets,
+  SlackExecutorOptions,
+  SlackWebApiExecutorOptions,
+  SlackWebhookExecutorOptions,
+  WebhookParams,
+  WebApiParams,
+} from '../../../common/slack/types';
+import { SlackSecretsSchema, ParamsSchema } from '../../../common/slack/schema';
+import { SLACK_CONNECTOR_ID } from '../../../common/slack/constants';
+import { SLACK_CONNECTOR_NAME } from './translations';
+import { SlackExecutorResultData } from './types';
+import { api } from './api';
+import { createExternalService } from './service';
 
 export type SlackConnectorType = ConnectorType<
   {},
-  ConnectorTypeSecretsType,
-  ActionParamsType,
+  SlackSecrets,
+  WebhookParams | WebApiParams,
   unknown
 >;
-export type SlackConnectorTypeExecutorOptions = ConnectorTypeExecutorOptions<
-  {},
-  ConnectorTypeSecretsType,
-  ActionParamsType
->;
 
-// secrets definition
-
-export type ConnectorTypeSecretsType = TypeOf<typeof SecretsSchema>;
-
-const secretsSchemaProps = {
-  webhookUrl: schema.string(),
-};
-const SecretsSchema = schema.object(secretsSchemaProps);
-
-// params definition
-
-export type ActionParamsType = TypeOf<typeof ParamsSchema>;
-
-const ParamsSchema = schema.object({
-  message: schema.string({ minLength: 1 }),
-});
-
-// connector type definition
-
-export const ConnectorTypeId = '.slack';
-// customizing executor is only used for tests
-export function getConnectorType({
-  executor = slackExecutor,
-}: {
-  executor?: ExecutorType<{}, ConnectorTypeSecretsType, ActionParamsType, unknown>;
-}): SlackConnectorType {
+export function getConnectorType(): SlackConnectorType {
   return {
-    id: ConnectorTypeId,
+    id: SLACK_CONNECTOR_ID,
     minimumLicenseRequired: 'gold',
-    name: i18n.translate('xpack.stackConnectors.slack.title', {
-      defaultMessage: 'Slack',
-    }),
+    name: SLACK_CONNECTOR_NAME,
     supportedFeatureIds: [
       AlertingConnectorFeatureId,
       UptimeConnectorFeatureId,
@@ -80,22 +60,28 @@ export function getConnectorType({
     ],
     validate: {
       secrets: {
-        schema: SecretsSchema,
-        customValidator: validateConnectorTypeConfig,
+        schema: SlackSecretsSchema,
+        customValidator: () => {},
       },
       params: {
         schema: ParamsSchema,
       },
     },
     renderParameterTemplates,
-    executor,
+    executor: (
+      execOptions: { secrets: { token: string } } | { secrets: { webhookUrl: string } }
+    ) => {
+      return execOptions.secrets.webhookUrl
+        ? slackWebhookExecutor(execOptions)
+        : slackWebApiExecutor(execOptions as SlackWebApiExecutorOptions);
+    },
   };
 }
 
 function renderParameterTemplates(
-  params: ActionParamsType,
+  params: WebhookParams,
   variables: Record<string, unknown>
-): ActionParamsType {
+): WebhookParams {
   return {
     message: renderMustacheString(params.message, variables, 'slack'),
   };
@@ -131,11 +117,10 @@ function validateConnectorTypeConfig(
   }
 }
 
-// action executor
-
-async function slackExecutor(
-  execOptions: SlackConnectorTypeExecutorOptions
-): Promise<ConnectorTypeExecutorResult<unknown>> {
+const slackWebhookExecutor = async (
+  execOptions: SlackWebhookExecutorOptions
+): Promise<ConnectorTypeExecutorResult<unknown>> => {
+  console.log('START!!!');
   const { actionId, secrets, params, configurationUtilities, logger } = execOptions;
 
   let result: IncomingWebhookResult;
@@ -212,7 +197,7 @@ async function slackExecutor(
   }
 
   return successResult(actionId, result);
-}
+};
 
 function successResult(actionId: string, data: unknown): ConnectorTypeExecutorResult<unknown> {
   return { status: 'ok', data, actionId };
@@ -280,3 +265,49 @@ function retryResultSeconds(
     serviceMessage: message,
   };
 }
+
+const supportedSubActions = ['getChannels', 'postMessage'];
+
+const slackWebApiExecutor = async (
+  execOptions: SlackWebApiExecutorOptions
+): Promise<ConnectorTypeExecutorResult<SlackExecutorResultData | {}>> => {
+  const { actionId, params, secrets, configurationUtilities, logger } = execOptions;
+  const { subAction, subActionParams } = params;
+  let data: SlackExecutorResultData | null = null;
+
+  const externalService = createExternalService(
+    {
+      secrets,
+    },
+    logger,
+    configurationUtilities
+  );
+
+  if (!api[subAction]) {
+    const errorMessage = `[Action][ExternalService] Unsupported subAction type ${subAction}.`;
+    logger.error(errorMessage);
+    throw new Error(errorMessage);
+  }
+
+  if (!supportedSubActions.includes(subAction)) {
+    const errorMessage = `[Action][ExternalService] subAction ${subAction} not implemented.`;
+    logger.error(errorMessage);
+    throw new Error(errorMessage);
+  }
+
+  if (subAction === 'getChannels') {
+    data = await api.getChannels({
+      externalService,
+    });
+  }
+
+  if (subAction === 'postMessage') {
+    const postMessageParams = subActionParams as PostMessageParams;
+    data = await api.postMessage({
+      externalService,
+      params: postMessageParams,
+    });
+  }
+
+  return { status: 'ok', data: data ?? {}, actionId };
+};

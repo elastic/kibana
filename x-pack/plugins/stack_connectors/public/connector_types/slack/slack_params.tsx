@@ -5,49 +5,22 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
-import { i18n } from '@kbn/i18n';
+import React from 'react';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { TextAreaWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
-import { SlackActionParams } from '../types';
+import type { ExecutorPostMessageParams } from '../../../common/slack/types';
+import { SlackWebApiParamsFields } from './slack_web_api_params';
+import { SlackWebhookParamsFields } from './slack_webhook_params';
 
-const SlackParamsFields: React.FunctionComponent<ActionParamsProps<SlackActionParams>> = ({
-  actionParams,
-  editAction,
-  index,
-  errors,
-  messageVariables,
-  defaultMessage,
-}) => {
-  const { message } = actionParams;
-  const [[isUsingDefault, defaultMessageUsed], setDefaultMessageUsage] = useState<
-    [boolean, string | undefined]
-  >([false, defaultMessage]);
-  useEffect(() => {
-    if (
-      !actionParams?.message ||
-      (isUsingDefault &&
-        actionParams?.message === defaultMessageUsed &&
-        defaultMessageUsed !== defaultMessage)
-    ) {
-      setDefaultMessageUsage([true, defaultMessage]);
-      editAction('message', defaultMessage, index);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [defaultMessage]);
+const SlackParamsFields: React.FunctionComponent<ActionParamsProps<ExecutorPostMessageParams>> = (
+  props
+) => {
+  const slackType = props.actionConnector?.config.type;
 
   return (
-    <TextAreaWithMessageVariables
-      index={index}
-      editAction={editAction}
-      messageVariables={messageVariables}
-      paramsProperty={'message'}
-      inputTargetValue={message}
-      label={i18n.translate('xpack.stackConnectors.components.slack.messageTextAreaFieldLabel', {
-        defaultMessage: 'Message',
-      })}
-      errors={(errors.message ?? []) as string[]}
-    />
+    <>
+      {slackType === 'webhook' ? <SlackWebhookParamsFields {...props} /> : null}
+      {slackType === 'web_api' ? <SlackWebApiParamsFields {...props} /> : null}
+    </>
   );
 };
 

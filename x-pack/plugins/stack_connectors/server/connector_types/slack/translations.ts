@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const SLACK_CONNECTOR_NAME = i18n.translate('xpack.stackConnectors.slack.v2.title', {
-  defaultMessage: 'New Slack',
+  defaultMessage: 'Slack',
 });
 
 export const ALLOWED_HOSTS_ERROR = (message: string) =>

@@ -24,7 +24,7 @@ const secretsFormSchema: SecretsFieldSchema[] = [
   },
 ];
 
-export const SlackWebApiConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
+export const SlackWebApiActionsFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   readOnly,
   isEdit,
 }) => (

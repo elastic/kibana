@@ -12,10 +12,11 @@ import type {
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { SlackActionParams, SlackSecrets } from '../types';
+import { SLACK_CONNECTOR_ID } from '../../../common/slack/constants';
 
 export function getConnectorType(): ConnectorTypeModel<unknown, SlackSecrets, SlackActionParams> {
   return {
-    id: '.slack',
+    id: SLACK_CONNECTOR_ID,
     iconClass: 'logoSlack',
     selectMessage: i18n.translate('xpack.stackConnectors.components.slack.selectMessageText', {
       defaultMessage: 'Send a message to a Slack channel or user.',

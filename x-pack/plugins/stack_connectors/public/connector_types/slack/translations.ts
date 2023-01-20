@@ -34,3 +34,31 @@ export const TOKEN_LABEL = i18n.translate(
     defaultMessage: 'Api token',
   }
 );
+
+export const URL_TEXT = i18n.translate('xpack.stackConnectors.components.slack.urlFieldLabel', {
+  defaultMessage: 'URL',
+});
+
+// new
+
+export const BASIC_AUTH_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.xmatters.connectorSettingsLabel',
+  {
+    defaultMessage: 'Select the Webhook or Web API slack communication type',
+  }
+);
+
+export const BASIC_AUTH_BUTTON_GROUP_LEGEND = i18n.translate(
+  'xpack.stackConnectors.components.xmatters.basicAuthButtonGroupLegend',
+  {
+    defaultMessage: 'Slack type',
+  }
+);
+
+export const WEBHOOK = i18n.translate('xpack.stackConnectors.components.slack.webhook', {
+  defaultMessage: 'Webhook',
+});
+
+export const WEB_API = i18n.translate('xpack.stackConnectors.components.slack.webApi', {
+  defaultMessage: 'Web API',
+});

@@ -8,9 +8,18 @@
 import { schema } from '@kbn/config-schema';
 
 export const SlackConfigSchema = schema.object({});
-export const SlackSecretsSchema = schema.object({
+
+export const SlackWebhookSecretsSchema = schema.object({
+  webhookUrl: schema.string(),
+});
+export const SlackWebApiSecretsSchema = schema.object({
   token: schema.string(),
 });
+
+export const SlackSecretsSchema = schema.oneOf([
+  SlackWebhookSecretsSchema,
+  SlackWebApiSecretsSchema,
+]);
 
 export const ExecutorGetChannelsParamsSchema = schema.object({
   subAction: schema.literal('getChannels'),
@@ -25,7 +34,12 @@ export const ExecutorPostMessageParamsSchema = schema.object({
   }),
 });
 
-export const ExecutorParamsSchema = schema.oneOf([
+export const WebhookParamsSchema = schema.object({
+  message: schema.string({ minLength: 1 }),
+});
+export const WebApiParamsSchema = schema.oneOf([
   ExecutorGetChannelsParamsSchema,
   ExecutorPostMessageParamsSchema,
 ]);
+
+export const ParamsSchema = schema.oneOf([WebApiParamsSchema, WebhookParamsSchema]);

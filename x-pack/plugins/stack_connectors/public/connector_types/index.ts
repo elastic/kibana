@@ -19,7 +19,6 @@ import { getServiceNowITOMConnectorType } from './servicenow_itom';
 import { getServiceNowITSMConnectorType } from './servicenow_itsm';
 import { getServiceNowSIRConnectorType } from './servicenow_sir';
 import { getSlackConnectorType } from './slack';
-import { getSlackV2ConnectorType } from './new_slack';
 import { getSwimlaneConnectorType } from './swimlane';
 import { getTeamsConnectorType } from './teams';
 import { getTinesConnectorType } from './tines';
@@ -42,7 +41,6 @@ export function registerConnectorTypes({
 }) {
   connectorTypeRegistry.register(getServerLogConnectorType());
   connectorTypeRegistry.register(getSlackConnectorType());
-  connectorTypeRegistry.register(getSlackV2ConnectorType());
   connectorTypeRegistry.register(getEmailConnectorType(services));
   connectorTypeRegistry.register(getIndexConnectorType());
   connectorTypeRegistry.register(getPagerDutyConnectorType());

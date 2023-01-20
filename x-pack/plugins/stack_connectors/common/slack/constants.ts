@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export const SLACK_CONNECTOR_ID = '.slack_v2';
+export const SLACK_CONNECTOR_ID = '.slack';
+export const SLACK_URL = 'https://slack.com/api/';

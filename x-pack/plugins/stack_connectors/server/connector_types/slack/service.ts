@@ -17,19 +17,18 @@ import {
 } from './types';
 import { SLACK_CONNECTOR_NAME } from './translations';
 import type {
-  SlackSecrets,
+  SlackWebApiSecrets,
   GetChannelsResponse,
   PostMessageParams,
-} from '../../../../common/slack/types';
-
-const SLACK_URL = 'https://slack.com/api/';
+} from '../../../common/slack/types';
+import { SLACK_URL } from '../../../common/slack/constants';
 
 export const createExternalService = (
   { secrets }: SlackServiceCredentials,
   logger: Logger,
   configurationUtilities: ActionsConfigurationUtilities
 ): SlackService => {
-  const { token } = secrets as SlackSecrets;
+  const { token } = secrets as SlackWebApiSecrets;
 
   if (!token) {
     throw Error(`[Action]${SLACK_CONNECTOR_NAME}: Wrong configuration.`);
@@ -38,7 +37,7 @@ export const createExternalService = (
   const axiosInstance = axios.create({
     baseURL: SLACK_URL,
     headers: {
-      Authorization: `Bearer ${secrets.token}`,
+      Authorization: `Bearer ${token}`,
       'Content-type': 'application/json; charset=UTF-8',
     },
   });
