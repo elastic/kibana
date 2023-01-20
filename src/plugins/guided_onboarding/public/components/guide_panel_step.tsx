@@ -22,8 +22,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import type { StepStatus } from '@kbn/guided-onboarding';
-import type { StepDescriptionWithLink, StepConfig } from '../../common';
+import type { StepStatus, StepConfig, StepDescriptionWithLink } from '@kbn/guided-onboarding';
 import { getGuidePanelStepStyles } from './guide_panel_step.styles';
 
 interface GuideStepProps {
