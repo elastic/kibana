@@ -11,17 +11,30 @@ import type { RuleExecutionSummary } from '../../../../../../common/detection_en
 import {
   ruleLastRunOutcomeToExecutionStatus,
   ruleExecutionStatusToNumber,
+  RuleExecutionStatus,
 } from '../../../../../../common/detection_engine/rule_monitoring';
 import type { RuleParams } from '../../../rule_schema';
 
 export const createRuleExecutionSummary = (
   rule: SanitizedRule<RuleParams> | ResolvedSanitizedRule<RuleParams>
 ): RuleExecutionSummary | null => {
+  if (rule.running) {
+    return {
+      last_execution: {
+        date: new Date().toISOString(),
+        message: '',
+        metrics: {},
+        status: RuleExecutionStatus.running,
+        status_order: ruleExecutionStatusToNumber(RuleExecutionStatus.running),
+      },
+    };
+  }
+
   if (!rule.lastRun) {
     return null;
   }
 
-  const ruleExecutionStatus = ruleLastRunOutcomeToExecutionStatus(rule.lastRun?.outcome);
+  const ruleExecutionStatus = ruleLastRunOutcomeToExecutionStatus(rule.lastRun.outcome);
 
   return {
     last_execution: {
