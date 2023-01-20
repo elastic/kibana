@@ -5,32 +5,12 @@
  * 2.0.
  */
 
+import { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
-import { Query } from '@kbn/es-query';
+import { Filter } from '@kbn/es-query';
 import { findingsNavigation } from '../navigation/constants';
 import { encodeQuery } from '../navigation/query_utils';
-import { FindingsBaseURLQuery } from '../../pages/findings/types';
-
-const getFindingsQuery = (queryValue: Query['query']): Pick<FindingsBaseURLQuery, 'query'> => {
-  const query =
-    typeof queryValue === 'string'
-      ? queryValue
-      : // TODO: use a tested query builder instead ASAP
-        Object.entries(queryValue)
-          .reduce<string[]>((a, [key, value]) => {
-            a.push(`${key}: "${value}"`);
-            return a;
-          }, [])
-          .join(' and ');
-
-  return {
-    query: {
-      language: 'kuery',
-      // NOTE: a query object is valid TS but throws on runtime
-      query,
-    },
-  }!;
-};
+import { useKibana } from './use_kibana';
 
 const createFilter = (key: string, value: string, negate = false): Filter => ({
   meta: {
@@ -44,38 +24,25 @@ const createFilter = (key: string, value: string, negate = false): Filter => ({
   query: { match_phrase: { [key]: value } },
 });
 
-export const useNavigateFindings = () => {
+export const useNavigateFindings = (pathname = findingsNavigation.findings_default.path) => {
   const history = useHistory();
+  const { services } = useKibana();
 
-  return (query: Query['query'] = {}) => {
-    const filters = Object.entries(query).map<string[]>(([key, value]) => createFilter(key, value));
-
-    history.push({
-      pathname: findingsNavigation.findings_default.path,
-      search: encodeQuery({
-        // query: getFindingsQuery,
-        query: {
-          query: '',
-          language: 'kuery',
-        },
-        filters,
-      }),
-    });
-  };
-};
-
-export const useNavigateFindingsByResource = () => {
-  const history = useHistory();
-
-  return (query: Query['query'] = {}) => {
-    history.push({
-      pathname: findingsNavigation.findings_by_resource.path,
-      ...(query && {
+  return useCallback(
+    (filterParams: Record<string, any> = {}) => {
+      const filters = Object.entries(filterParams).map(([key, value]) => createFilter(key, value));
+      history.push({
+        pathname,
         search: encodeQuery({
-          ...getFindingsQuery(query),
-          filters: [],
+          // Set default query from user's preference
+          query: services.data.query.queryString.getDefaultQuery(),
+          filters,
         }),
-      }),
-    });
-  };
+      });
+    },
+    [pathname, history, services.data.query.queryString]
+  );
 };
+
+export const useNavigateFindingsByResource = () =>
+  useNavigateFindings(findingsNavigation.findings_by_resource.path);
