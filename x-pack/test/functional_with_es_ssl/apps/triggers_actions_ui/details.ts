@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { omit, mapValues, range, flatten } from 'lodash';
 import moment from 'moment';
 import { asyncForEach } from '@kbn/std';
@@ -148,7 +148,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Rule Details', function () {
     describe('Header', function () {
-      const testRunUuid = uuid.v4();
+      const testRunUuid = uuidv4();
       before(async () => {
         await pageObjects.common.navigateToApp('triggersActions');
         const rule = await createRuleWithSmallInterval(testRunUuid);
@@ -316,7 +316,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('Edit rule button', function () {
-      const ruleName = uuid.v4();
+      const ruleName = uuidv4();
       const updatedRuleName = `Changed Rule Name ${ruleName}`;
 
       before(async () => {
@@ -403,7 +403,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
         await editButton.click();
 
-        await testSubjects.setValue('ruleNameInput', uuid.v4(), {
+        await testSubjects.setValue('ruleNameInput', uuidv4(), {
           clearWithKeyboard: true,
         });
 
@@ -421,7 +421,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('Edit rule with deleted connector', function () {
-      const testRunUuid = uuid.v4();
+      const testRunUuid = uuidv4();
 
       afterEach(async () => {
         await objectRemover.removeAll();
@@ -599,7 +599,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('Edit rule with legacy rule-level notify values', function () {
-      const testRunUuid = uuid.v4();
+      const testRunUuid = uuidv4();
 
       afterEach(async () => {
         await objectRemover.removeAll();
@@ -657,7 +657,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('View In App', function () {
-      const ruleName = uuid.v4();
+      const ruleName = uuidv4();
 
       beforeEach(async () => {
         await pageObjects.common.navigateToApp('triggersActions');
@@ -710,7 +710,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('Alerts', function () {
-      const testRunUuid = uuid.v4();
+      const testRunUuid = uuidv4();
       let rule: any;
 
       before(async () => {
@@ -907,7 +907,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('Alert Pagination', function () {
-      const testRunUuid = uuid.v4();
+      const testRunUuid = uuidv4();
       let rule: any;
 
       before(async () => {
@@ -982,7 +982,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('Execution log', () => {
-      const testRunUuid = uuid.v4();
+      const testRunUuid = uuidv4();
       let rule: any;
 
       before(async () => {

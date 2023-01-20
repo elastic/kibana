@@ -12,7 +12,7 @@ import type { Query } from '@kbn/es-query';
 import _ from 'lodash';
 import React, { ReactElement } from 'react';
 import { EuiIcon } from '@elastic/eui';
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 import { FeatureCollection } from 'geojson';
 import { DataRequest } from '../util/data_request';
 import {
@@ -141,7 +141,7 @@ export class AbstractLayer implements ILayer {
       ...options,
       sourceDescriptor: options.sourceDescriptor ? options.sourceDescriptor : null,
       __dataRequests: _.get(options, '__dataRequests', []),
-      id: _.get(options, 'id', uuid()),
+      id: _.get(options, 'id', uuidv4()),
       label: options.label && options.label.length > 0 ? options.label : null,
       minZoom: _.get(options, 'minZoom', MIN_ZOOM),
       maxZoom: _.get(options, 'maxZoom', MAX_ZOOM),
@@ -178,7 +178,7 @@ export class AbstractLayer implements ILayer {
   async cloneDescriptor(): Promise<LayerDescriptor[]> {
     const clonedDescriptor = copyPersistentState(this._descriptor);
     // layer id is uuid used to track styles/layers in mapbox
-    clonedDescriptor.id = uuid();
+    clonedDescriptor.id = uuidv4();
     const displayName = await this.getDisplayName();
     clonedDescriptor.label = `Clone of ${displayName}`;
     clonedDescriptor.sourceDescriptor = this.getSource().cloneDescriptor();
