@@ -4,9 +4,6 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
-export DISABLE_BOOTSTRAP_VALIDATION=false
-.buildkite/scripts/bootstrap.sh
-
 echo --- Check Mappings Update
 cmd="node scripts/check_mappings_update"
 if is_pr && ! is_auto_commit_disabled; then

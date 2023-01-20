@@ -97,15 +97,3 @@ steps:
       automatic:
         - exit_status: '-1'
           limit: 3
-
-  - command: .buildkite/scripts/steps/checks/saved_objects_compat_changes.sh
-    label: 'Saved Objects compatible mappings check'
-    agents:
-      queue: n2-16-spot
-    timeout_in_minutes: 60
-    depends_on:
-      - build
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
