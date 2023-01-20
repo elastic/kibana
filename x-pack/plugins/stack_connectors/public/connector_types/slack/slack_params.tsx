@@ -7,14 +7,16 @@
 
 import React from 'react';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
-import type { ExecutorPostMessageParams } from '../../../common/slack/types';
+import type { SlackActionConnector } from './types';
 import { SlackWebApiParamsFields } from './slack_web_api_params';
 import { SlackWebhookParamsFields } from './slack_webhook_params';
+import { SlackActionParams } from '../types';
 
-const SlackParamsFields: React.FunctionComponent<ActionParamsProps<ExecutorPostMessageParams>> = (
+const SlackParamsFields: React.FunctionComponent<ActionParamsProps<SlackActionParams>> = (
   props
 ) => {
-  const slackType = props.actionConnector?.config.type;
+  const { actionConnector } = props;
+  const { type: slackType } = (actionConnector as unknown as SlackActionConnector).config;
 
   return (
     <>

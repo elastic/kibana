@@ -7,7 +7,9 @@
 
 import { schema } from '@kbn/config-schema';
 
-export const SlackConfigSchema = schema.object({});
+export const SlackConfigSchema = schema.object({
+  type: schema.oneOf([schema.literal('webhook'), schema.literal('web_api')]),
+});
 
 export const SlackWebhookSecretsSchema = schema.object({
   webhookUrl: schema.string(),

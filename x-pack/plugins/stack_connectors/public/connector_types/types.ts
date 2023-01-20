@@ -116,7 +116,7 @@ export interface SlackSecrets {
   webhookUrl: string;
 }
 
-export type SlackActionConnector = UserConfiguredActionConnector<unknown, SlackSecrets>;
+export type SlackActionConnector = UserConfiguredActionConnector<unknown, SlackSecrets>; // why do we need to export it here?
 
 export interface WebhookConfig {
   method: string;
