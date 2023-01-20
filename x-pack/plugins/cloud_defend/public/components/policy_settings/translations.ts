@@ -15,12 +15,3 @@ export const enableControlHelp = i18n.translate('xpack.cloudDefend.enableControl
   defaultMessage:
     'Enables BPF/LSM control mechanism, for use with FIM and container drift prevention.',
 });
-
-export const controlYaml = i18n.translate('xpack.cloudDefend.controlYaml', {
-  defaultMessage: 'Configuration yaml',
-});
-
-export const controlYamlHelp = i18n.translate('xpack.cloudDefend.controlYamlHelp', {
-  defaultMessage:
-    'Configure BPF/LSM controls by creating selectors, and responses below. To learn more click <here>',
-});
