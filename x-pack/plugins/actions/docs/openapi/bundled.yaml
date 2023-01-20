@@ -71,16 +71,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: Unauthorized
-                  message:
-                    type: string
-                  statusCode:
-                    type: integer
-                    example: 401
+                $ref: '#/components/schemas/401_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -111,16 +102,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: Unauthorized
-                  message:
-                    type: string
-                  statusCode:
-                    type: integer
-                    example: 401
+                $ref: '#/components/schemas/401_response'
         '404':
           description: Object is not found.
           content:
@@ -158,16 +140,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: Unauthorized
-                  message:
-                    type: string
-                  statusCode:
-                    type: integer
-                    example: 401
+                $ref: '#/components/schemas/401_response'
         '404':
           description: Object is not found.
           content:
@@ -245,32 +218,13 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: Unauthorized
-                  message:
-                    type: string
-                  statusCode:
-                    type: integer
-                    example: 401
+                $ref: '#/components/schemas/401_response'
         '404':
           description: Object is not found.
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: Not Found
-                  message:
-                    type: string
-                    example: Saved object [action/baf33fc0-920c-11ed-b36a-874bd1548a00] not found
-                  statusCode:
-                    type: integer
-                    example: 404
+                $ref: '#/components/schemas/404_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -338,16 +292,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: Unauthorized
-                  message:
-                    type: string
-                  statusCode:
-                    type: integer
-                    example: 401
+                $ref: '#/components/schemas/401_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -418,16 +363,73 @@ paths:
           content:
             application/json:
               schema:
+                $ref: '#/components/schemas/401_response'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /s/{spaceId}/api/actions/connector/{connectorId}/_execute:
+    post:
+      summary: Runs a connector.
+      operationId: runConnector
+      description: |
+        You can use this API to test an action that involves interaction with Kibana services or integrations with third-party systems. You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges. If you use an index connector, you must also have `all`, `create`, `index`, or `write` indices privileges.
+      tags:
+        - connectors
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/connector_id'
+        - $ref: '#/components/parameters/space_id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              title: Run connector request body properties
+              description: The properties vary depending on the connector type.
+              type: object
+              required:
+                - params
+              properties:
+                params:
+                  oneOf:
+                    - $ref: '#/components/schemas/run_connector_request_index'
+                    - $ref: '#/components/schemas/run_connector_request_serverlog'
+            examples:
+              runIndexConnectorRequest:
+                $ref: '#/components/examples/run_index_connector_request'
+              runServerLogConnectorRequest:
+                $ref: '#/components/examples/run_server_log_connector_request'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
                 type: object
+                required:
+                  - connector_id
+                  - status
                 properties:
-                  error:
+                  connector_id:
                     type: string
-                    example: Unauthorized
-                  message:
+                    description: The identifier for the connector.
+                  data:
+                    type: object
+                    description: Information returned from the action.
+                    additionalProperties: true
+                  status:
                     type: string
-                  statusCode:
-                    type: integer
-                    example: 401
+                    description: The status of the action.
+                    enum:
+                      - error
+                      - ok
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -1951,6 +1953,22 @@ components:
         - $ref: '#/components/schemas/connector_response_properties_xmatters'
       discriminator:
         propertyName: connector_type_id
+    401_response:
+      type: object
+      title: Unsuccessful rule API response
+      properties:
+        error:
+          type: string
+          example: Unauthorized
+          enum:
+            - Unauthorized
+        message:
+          type: string
+        statusCode:
+          type: integer
+          example: 401
+          enum:
+            - 401
     update_connector_request_cases_webhook:
       title: Update Webhook - Case Managment connector request
       type: object
@@ -2078,6 +2096,22 @@ components:
           example: my-connector
         secrets:
           $ref: '#/components/schemas/secrets_properties_swimlane'
+    404_response:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Not Found
+          enum:
+            - Not Found
+        message:
+          type: string
+          example: Saved object [action/baf33fc0-920c-11ed-b36a-874bd1548a00] not found
+        statusCode:
+          type: integer
+          example: 404
+          enum:
+            - 404
     connector_types:
       title: Connector types
       type: string
@@ -2110,6 +2144,40 @@ components:
         - cases
         - uptime
         - siem
+    run_connector_request_index:
+      title: Run index connector parameters
+      description: Test an action that indexes a document into Elasticsearch.
+      type: object
+      required:
+        - documents
+      properties:
+        documents:
+          type: array
+          description: The documents to index in JSON format.
+          items:
+            type: object
+            additionalProperties: true
+    run_connector_request_serverlog:
+      title: Run server log connector parameters
+      description: Test an action that writes an entry to the Kibana server log.
+      type: object
+      required:
+        - message
+      properties:
+        level:
+          type: string
+          description: The log level of the message.
+          enum:
+            - debug
+            - error
+            - fatal
+            - info
+            - trace
+            - warn
+          default: info
+        message:
+          type: string
+          description: The message to log.
   examples:
     create_index_connector_request:
       summary: Create an index connector.
@@ -2199,6 +2267,20 @@ components:
           supported_feature_ids:
             - alerting
             - uptime
+    run_index_connector_request:
+      summary: Run an index connector.
+      value:
+        params:
+          documents:
+            - id: my_doc_id
+              name: my_doc_name
+              message: hello, world
+    run_server_log_connector_request:
+      summary: Run a server log connector.
+      value:
+        params:
+          level: warn
+          message: Test warning message.
 security:
   - basicAuth: []
   - apiKeyAuth: []
