@@ -20,9 +20,9 @@ import { fetchEndpointMetadataList } from '../../common/endpoint_metadata_servic
 import { indexEndpointHostDocs } from '../../../../common/endpoint/data_loaders/index_endpoint_hosts';
 import { setupFleetForEndpoint } from '../../../../common/endpoint/data_loaders/setup_fleet_for_endpoint';
 import { enableFleetServerIfNecessary } from '../../../../common/endpoint/data_loaders/index_fleet_server';
-import { fetchEndpointPackageInfo } from '../../common/fleet_services';
 import { METADATA_DATASTREAM } from '../../../../common/endpoint/constants';
 import { EndpointMetadataGenerator } from '../../../../common/endpoint/data_generators/endpoint_metadata_generator';
+import { getEndpointPackageInfo } from '../../../../common/endpoint/index_data';
 import { ENDPOINT_ALERTS_INDEX, ENDPOINT_EVENTS_INDEX } from '../../common/constants';
 
 let WAS_FLEET_SETUP_DONE = false;
@@ -105,7 +105,7 @@ export const loadEndpoints = async ({
     WAS_FLEET_SETUP_DONE = true;
   }
 
-  const endpointPackage = await fetchEndpointPackageInfo(kbnClient);
+  const endpointPackage = await getEndpointPackageInfo(kbnClient);
   const realPolicies: Record<string, CreatePackagePolicyResponse['item']> = {};
 
   let progress: LoadEndpointsProgress = {

@@ -21,6 +21,5 @@
     "@kbn/dev-cli-runner",
     "@kbn/std",
     "@kbn/some-dev-log",
-    "@kbn/package-map",
   ]
 }

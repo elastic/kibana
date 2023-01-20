@@ -18,18 +18,17 @@ import { INSPECT } from '../inspect/translations';
 export type ActionTypes = 'addToExistingCase' | 'addToNewCase' | 'openInLens';
 
 export const useActions = ({
-  withActions,
   attributes,
-  timeRange,
+  extraActions,
   inspectActionProps,
+  timeRange,
+  withActions,
 }: {
-  withActions?: boolean;
-
   attributes: LensAttributes | null;
-
-  timeRange: { from: string; to: string };
-
+  extraActions?: Action[];
   inspectActionProps?: { onInspectActionClicked: () => void; isDisabled: boolean };
+  timeRange: { from: string; to: string };
+  withActions?: boolean;
 }) => {
   const { lens } = useKibana().services;
   const { navigateToPrefilledEditor } = lens;
@@ -120,7 +119,9 @@ export const useActions = ({
     ]
   );
 
-  return actions;
+  const withExtraActions = actions.concat(extraActions ?? []);
+
+  return withExtraActions;
 };
 
 const getOpenInLensAction = ({ callback }: { callback: () => void }): Action => {

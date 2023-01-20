@@ -111,7 +111,9 @@ export function RuleDetailsPage() {
   const [editFlyoutVisible, setEditFlyoutVisible] = useState<boolean>(false);
   const [isRuleEditPopoverOpen, setIsRuleEditPopoverOpen] = useState(false);
   const [esQuery, setEsQuery] = useState<{ bool: BoolQuery }>();
-  const [defaultAlertTimeRange] = useState(getDefaultAlertSummaryTimeRange);
+  const [alertSummaryWidgetTimeRange, setAlertSummaryWidgetTimeRange] = useState(
+    getDefaultAlertSummaryTimeRange
+  );
   const ruleQuery = useRef<Query[]>([
     { query: `kibana.alert.rule.uuid: ${ruleId}`, language: 'kuery' },
   ]);
@@ -123,11 +125,15 @@ export function RuleDetailsPage() {
   const tabsRef = useRef<HTMLDivElement>(null);
 
   const onAlertSummaryWidgetClick = async (status: AlertStatus = ALERT_STATUS_ALL) => {
+    const timeRange = getDefaultAlertSummaryTimeRange();
+    setAlertSummaryWidgetTimeRange(timeRange);
     await locators.get(ruleDetailsLocatorID)?.navigate(
       {
+        rangeFrom: timeRange.utcFrom,
+        rangeTo: timeRange.utcTo,
         ruleId,
-        tabId: ALERTS_TAB,
         status,
+        tabId: ALERTS_TAB,
       },
       {
         replace: true,
@@ -386,7 +392,7 @@ export function RuleDetailsPage() {
           <AlertSummaryWidget
             featureIds={featureIds}
             onClick={onAlertSummaryWidgetClick}
-            timeRange={defaultAlertTimeRange}
+            timeRange={alertSummaryWidgetTimeRange}
             filter={alertSummaryWidgetFilter.current}
           />
         </EuiFlexItem>

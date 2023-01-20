@@ -14,7 +14,7 @@ export function useAbsoluteDate({ from, to }: { from: string; to: string }) {
   return useMemo(
     () => ({
       from: datemath.parse(from)?.toISOString() ?? from,
-      to: datemath.parse(to)?.toISOString() ?? to,
+      to: datemath.parse(to, { roundUp: true })?.toISOString() ?? to,
     }),
     // we want to recompute these any time the app refreshes
     // eslint-disable-next-line react-hooks/exhaustive-deps

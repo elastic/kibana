@@ -161,6 +161,7 @@ export function TextBasedDataPanel({
             {...fieldListGroupedProps}
             renderFieldItem={renderFieldItem}
             data-test-subj="lnsTextBasedLanguages"
+            localStorageKeyPrefix="lens"
           />
         </FieldList>
       </ChildDragDropProvider>

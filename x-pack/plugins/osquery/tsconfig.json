@@ -65,5 +65,6 @@
     "@kbn/securitysolution-es-utils",
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/std",
+    "@kbn/ecs",
   ]
 }

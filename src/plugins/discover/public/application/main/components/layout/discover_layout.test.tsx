@@ -21,12 +21,12 @@ import {
 } from '@kbn/data-plugin/common/search/search_source/mocks';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
-import { GetStateReturn } from '../../services/discover_state';
-import { DiscoverLayoutProps } from './types';
 import {
   AvailableFields$,
   DataDocuments$,
+  DataFetch$,
   DataMain$,
+  DataRefetch$,
   DataTotalHits$,
   RecordRawType,
 } from '../../hooks/use_saved_search';
@@ -38,25 +38,14 @@ import { LocalStorageMock } from '../../../../__mocks__/local_storage_mock';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { DiscoverServices } from '../../../../build_services';
 import { buildDataTableRecord } from '../../../../utils/build_data_record';
-import { DiscoverAppStateProvider } from '../../services/discover_app_state_container';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import { setTimeout } from 'timers/promises';
-import { act } from 'react-dom/test-utils';
 import { createSearchSessionMock } from '../../../../__mocks__/search_session';
 import { getSessionServiceMock } from '@kbn/data-plugin/public/search/session/mocks';
-
-function getAppStateContainer() {
-  const appStateContainer = getDiscoverStateMock({ isTimeBased: true }).appStateContainer;
-  appStateContainer.set({
-    query: { query: '', language: 'lucene' },
-    filters: [],
-  });
-  return appStateContainer;
-}
+import { DiscoverMainProvider } from '../../services/discover_state_provider';
 
 setHeaderActionMenuMounter(jest.fn());
 
-async function mountComponent(
+function mountComponent(
   dataView: DataView,
   prevSidebarClosed?: boolean,
   mountOptions: { attachTo?: HTMLElement } = {},
@@ -70,7 +59,9 @@ async function mountComponent(
       [SIDEBAR_CLOSED_KEY]: prevSidebarClosed,
     }) as unknown as Storage,
   } as unknown as DiscoverServices;
-
+  services.data.query.timefilter.timefilter.getTime = () => {
+    return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
+  };
   (services.data.query.queryString.getDefaultQuery as jest.Mock).mockReturnValue({
     language: 'kuery',
     query: '',
@@ -79,7 +70,7 @@ async function mountComponent(
     jest.fn().mockReturnValue(of({ rawResponse: { hits: { total: 2 } } }))
   );
 
-  const dataViewList = [dataView];
+  const stateContainer = getDiscoverStateMock({ isTimeBased: true });
 
   const main$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
@@ -113,9 +104,11 @@ async function mountComponent(
 
   session.getSession$.mockReturnValue(new BehaviorSubject('123'));
 
+  stateContainer.setAppState({ interval: 'auto', query });
+  stateContainer.internalState.transitions.setDataView(dataView);
+
   const props = {
     dataView,
-    dataViewList,
     inspectorAdapters: { requests: new RequestAdapter() },
     navigateTo: jest.fn(),
     onChangeDataView: jest.fn(),
@@ -123,39 +116,26 @@ async function mountComponent(
     resetSavedSearch: jest.fn(),
     savedSearch: savedSearchMock,
     savedSearchData$,
-    savedSearchRefetch$: new Subject(),
+    savedSearchFetch$: new Subject() as DataFetch$,
+    savedSearchRefetch$: new Subject() as DataRefetch$,
     searchSource: searchSourceMock,
     state: { columns: [], query, hideChart: false, interval: 'auto' },
-    stateContainer: {
-      setAppState: () => {},
-      appStateContainer: {
-        getState: () => ({
-          interval: 'auto',
-        }),
-      },
-    } as unknown as GetStateReturn,
+    stateContainer,
     setExpandedDoc: jest.fn(),
     persistDataView: jest.fn(),
     updateAdHocDataViewId: jest.fn(),
-    adHocDataViewList: [],
     searchSessionManager: createSearchSessionMock(session).searchSessionManager,
-    savedDataViewList: [],
     updateDataViewList: jest.fn(),
   };
 
   const component = mountWithIntl(
     <KibanaContextProvider services={services}>
-      <DiscoverAppStateProvider value={getAppStateContainer()}>
-        <DiscoverLayout {...(props as DiscoverLayoutProps)} />
-      </DiscoverAppStateProvider>
+      <DiscoverMainProvider value={stateContainer}>
+        <DiscoverLayout {...props} />
+      </DiscoverMainProvider>
     </KibanaContextProvider>,
     mountOptions
   );
-
-  // DiscoverMainContent uses UnifiedHistogramLayout which
-  // is lazy loaded, so we need to wait for it to be loaded
-  await act(() => setTimeout(0));
-  await component.update();
 
   return component;
 }
@@ -163,7 +143,7 @@ async function mountComponent(
 describe('Discover component', () => {
   test('selected data view without time field displays no chart toggle', async () => {
     const container = document.createElement('div');
-    await mountComponent(dataViewMock, undefined, { attachTo: container });
+    mountComponent(dataViewMock, undefined, { attachTo: container });
     expect(
       container.querySelector('[data-test-subj="unifiedHistogramChartOptionsToggle"]')
     ).toBeNull();
@@ -171,7 +151,7 @@ describe('Discover component', () => {
 
   test('selected data view with time field displays chart toggle', async () => {
     const container = document.createElement('div');
-    await mountComponent(dataViewWithTimefieldMock, undefined, { attachTo: container });
+    mountComponent(dataViewWithTimefieldMock, undefined, { attachTo: container });
     expect(
       container.querySelector('[data-test-subj="unifiedHistogramChartOptionsToggle"]')
     ).not.toBeNull();
@@ -179,7 +159,7 @@ describe('Discover component', () => {
 
   test('sql query displays no chart toggle', async () => {
     const container = document.createElement('div');
-    await mountComponent(
+    mountComponent(
       dataViewWithTimefieldMock,
       false,
       { attachTo: container },
@@ -194,7 +174,7 @@ describe('Discover component', () => {
   test('the saved search title h1 gains focus on navigate', async () => {
     const container = document.createElement('div');
     document.body.appendChild(container);
-    const component = await mountComponent(dataViewWithTimefieldMock, undefined, {
+    const component = mountComponent(dataViewWithTimefieldMock, undefined, {
       attachTo: container,
     });
     expect(
@@ -204,17 +184,17 @@ describe('Discover component', () => {
 
   describe('sidebar', () => {
     test('should be opened if discover:sidebarClosed was not set', async () => {
-      const component = await mountComponent(dataViewWithTimefieldMock, undefined);
+      const component = mountComponent(dataViewWithTimefieldMock, undefined);
       expect(component.find(DiscoverSidebar).length).toBe(1);
     }, 10000);
 
     test('should be opened if discover:sidebarClosed is false', async () => {
-      const component = await mountComponent(dataViewWithTimefieldMock, false);
+      const component = mountComponent(dataViewWithTimefieldMock, false);
       expect(component.find(DiscoverSidebar).length).toBe(1);
     }, 10000);
 
     test('should be closed if discover:sidebarClosed is true', async () => {
-      const component = await mountComponent(dataViewWithTimefieldMock, true);
+      const component = mountComponent(dataViewWithTimefieldMock, true);
       expect(component.find(DiscoverSidebar).length).toBe(0);
     }, 10000);
   });

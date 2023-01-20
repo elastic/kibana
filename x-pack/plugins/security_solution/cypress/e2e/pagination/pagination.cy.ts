@@ -15,7 +15,7 @@ import { waitsForEventsToBeLoaded } from '../../tasks/hosts/events';
 import { openEvents, openUncommonProcesses } from '../../tasks/hosts/main';
 import { waitForUncommonProcessesToBeLoaded } from '../../tasks/hosts/uncommon_processes';
 import { login, visit } from '../../tasks/login';
-import { goToFirstPage, goToSecondPage, sortFirstColumn } from '../../tasks/pagination';
+import { goToSecondPage, sortFirstColumn } from '../../tasks/pagination';
 import { refreshPage } from '../../tasks/security_header';
 import { HOSTS_URL, USERS_URL, HOSTS_PAGE_TAB_URLS } from '../../urls/navigation';
 import { ALL_HOSTS_TABLE } from '../../screens/hosts/all_hosts';
@@ -29,15 +29,15 @@ describe('Pagination', () => {
   describe('Host uncommon processes table)', () => {
     before(() => {
       esArchiverLoad('host_uncommon_processes');
+    });
+
+    beforeEach(() => {
       visit(HOSTS_PAGE_TAB_URLS.uncommonProcesses);
       waitForUncommonProcessesToBeLoaded();
     });
+
     after(() => {
       esArchiverUnload('host_uncommon_processes');
-    });
-
-    afterEach(() => {
-      goToFirstPage();
     });
 
     it('pagination updates results and page number', () => {

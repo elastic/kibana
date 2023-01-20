@@ -18,10 +18,12 @@ describe('Inspect', () => {
   before(() => {
     login();
   });
+
   context('Hosts stats and tables', () => {
-    before(() => {
+    beforeEach(() => {
       visit(HOSTS_URL);
     });
+
     afterEach(() => {
       closesModal();
     });
@@ -35,7 +37,7 @@ describe('Inspect', () => {
   });
 
   context('Hosts details', () => {
-    before(() => {
+    beforeEach(() => {
       visitHostDetailsPage('test.local');
     });
 

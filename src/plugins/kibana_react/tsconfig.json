@@ -5,7 +5,6 @@
   },
   "include": [".storybook/**/*", "common/**/*", "public/**/*", "../../../typings/**/*"],
   "kbn_references": [
-    "@kbn/kibana-utils-plugin",
     "@kbn/storybook",
     "@kbn/ui-theme",
     "@kbn/core",

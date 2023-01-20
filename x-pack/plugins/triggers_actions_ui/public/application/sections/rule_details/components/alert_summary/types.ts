@@ -7,11 +7,25 @@
 
 import { estypes } from '@elastic/elasticsearch';
 import { AlertStatus, ValidFeatureId } from '@kbn/rule-data-utils';
-import { AlertSummaryTimeRange } from '../../../../hooks/use_load_alert_summary';
+
+export interface Alert {
+  key: number;
+  doc_count: number;
+}
+
+export interface AlertSummaryTimeRange {
+  utcFrom: string;
+  utcTo: string;
+  // fixed_interval condition in ES query such as 1m, 1h, 1d
+  fixedInterval: string;
+  title?: JSX.Element | string;
+  dateFormat?: string;
+}
 
 export interface AlertSummaryWidgetProps {
   featureIds?: ValidFeatureId[];
   filter?: estypes.QueryDslQueryContainer;
-  onClick: (status?: AlertStatus) => void;
+  fullSize?: boolean;
+  onClick?: (status?: AlertStatus) => void;
   timeRange: AlertSummaryTimeRange;
 }

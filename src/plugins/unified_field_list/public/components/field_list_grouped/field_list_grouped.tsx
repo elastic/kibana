@@ -8,6 +8,7 @@
 
 import { partition, throttle } from 'lodash';
 import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { i18n } from '@kbn/i18n';
 import { EuiScreenReaderOnly, EuiSpacer } from '@elastic/eui';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
@@ -18,10 +19,13 @@ import { ExistenceFetchStatus, FieldsGroup, FieldsGroupNames } from '../../types
 import './field_list_grouped.scss';
 
 const PAGINATION_SIZE = 50;
+export const LOCAL_STORAGE_KEY_SECTIONS = 'unifiedFieldList.initiallyOpenSections';
+
+type InitiallyOpenSections = Record<string, boolean>;
 
 function getDisplayedFieldsLength<T extends FieldListItem>(
   fieldGroups: FieldListGroups<T>,
-  accordionState: Partial<Record<string, boolean>>
+  accordionState: InitiallyOpenSections
 ) {
   return Object.entries(fieldGroups)
     .filter(([key]) => accordionState[key])
@@ -35,6 +39,7 @@ export interface FieldListGroupedProps<T extends FieldListItem> {
   renderFieldItem: FieldsAccordionProps<T>['renderFieldItem'];
   scrollToTopResetCounter: number;
   screenReaderDescriptionId?: string;
+  localStorageKeyPrefix?: string; // Your app name: "discover", "lens", etc. If not provided, sections state would not be persisted.
   'data-test-subj'?: string;
 }
 
@@ -45,6 +50,7 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
   renderFieldItem,
   scrollToTopResetCounter,
   screenReaderDescriptionId,
+  localStorageKeyPrefix,
   'data-test-subj': dataTestSubject = 'fieldListGrouped',
 }: FieldListGroupedProps<T>) {
   const hasSyncedExistingFields =
@@ -56,9 +62,22 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
   );
   const [pageSize, setPageSize] = useState(PAGINATION_SIZE);
   const [scrollContainer, setScrollContainer] = useState<Element | undefined>(undefined);
-  const [accordionState, setAccordionState] = useState<Partial<Record<string, boolean>>>(() =>
+  const [storedInitiallyOpenSections, storeInitiallyOpenSections] =
+    useLocalStorage<InitiallyOpenSections>(
+      `${localStorageKeyPrefix ? localStorageKeyPrefix + '.' : ''}${LOCAL_STORAGE_KEY_SECTIONS}`,
+      {}
+    );
+  const [accordionState, setAccordionState] = useState<InitiallyOpenSections>(() =>
     Object.fromEntries(
-      fieldGroupsToShow.map(([key, { isInitiallyOpen }]) => [key, isInitiallyOpen])
+      fieldGroupsToShow.map(([key, { isInitiallyOpen }]) => {
+        const storedInitiallyOpen = localStorageKeyPrefix
+          ? storedInitiallyOpenSections?.[key]
+          : null; // from localStorage
+        return [
+          key,
+          typeof storedInitiallyOpen === 'boolean' ? storedInitiallyOpen : isInitiallyOpen,
+        ];
+      })
     )
   );
 
@@ -256,6 +275,12 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
                       Math.min(Math.ceil(pageSize * 1.5), displayedFieldLength)
                     )
                   );
+                  if (localStorageKeyPrefix) {
+                    storeInitiallyOpenSections({
+                      ...storedInitiallyOpenSections,
+                      [key]: open,
+                    });
+                  }
                 }}
                 showExistenceFetchError={fieldsExistenceStatus === ExistenceFetchStatus.failed}
                 showExistenceFetchTimeout={fieldsExistenceStatus === ExistenceFetchStatus.failed} // TODO: deprecate timeout logic?

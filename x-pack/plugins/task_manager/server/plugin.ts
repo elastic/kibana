@@ -135,6 +135,7 @@ export class TaskManagerPlugin
       getClusterClient: () =>
         startServicesPromise.then(({ elasticsearch }) => elasticsearch.client),
       shouldRunTasks: this.shouldRunBackgroundTasks,
+      docLinks: core.docLinks,
     });
     const monitoredUtilization$ = backgroundTaskUtilizationRoute({
       router,
@@ -200,12 +201,12 @@ export class TaskManagerPlugin
     savedObjects,
     elasticsearch,
     executionContext,
+    docLinks,
   }: CoreStart): TaskManagerStartContract {
     const savedObjectsRepository = savedObjects.createInternalRepository(['task']);
 
     const serializer = savedObjects.createSerializer();
     const taskStore = new TaskStore({
-      logger: this.logger,
       serializer,
       savedObjectsRepository,
       esClient: elasticsearch.client.asInternalUser,

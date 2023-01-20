@@ -26,21 +26,20 @@ import { createAPMTransactionDurationIndicator, createSLO, aStoredSLO } from './
 import { SLONotFound } from '../../errors';
 
 const SOME_SLO = createSLO({ indicator: createAPMTransactionDurationIndicator() });
+const ANOTHER_SLO = createSLO();
 
-function aFindResponse(slo: SLO): SavedObjectsFindResponse<StoredSLO> {
+function createFindResponse(sloList: SLO[]): SavedObjectsFindResponse<StoredSLO> {
   return {
     page: 1,
     per_page: 25,
-    total: 1,
-    saved_objects: [
-      {
-        id: slo.id,
-        attributes: sloSchema.encode(slo),
-        type: SO_SLO_TYPE,
-        references: [],
-        score: 1,
-      },
-    ],
+    total: sloList.length,
+    saved_objects: sloList.map((slo) => ({
+      id: slo.id,
+      attributes: sloSchema.encode(slo),
+      type: SO_SLO_TYPE,
+      references: [],
+      score: 1,
+    })),
   };
 }
 
@@ -96,6 +95,21 @@ describe('KibanaSavedObjectsSLORepository', () => {
     expect(soClientMock.get).toHaveBeenCalledWith(SO_SLO_TYPE, SOME_SLO.id);
   });
 
+  it('finds all SLOs by ids', async () => {
+    const repository = new KibanaSavedObjectsSLORepository(soClientMock);
+    soClientMock.find.mockResolvedValueOnce(createFindResponse([SOME_SLO, ANOTHER_SLO]));
+
+    const results = await repository.findAllByIds([SOME_SLO.id, ANOTHER_SLO.id]);
+
+    expect(results).toEqual([SOME_SLO, ANOTHER_SLO]);
+    expect(soClientMock.find).toHaveBeenCalledWith({
+      type: SO_SLO_TYPE,
+      page: 1,
+      perPage: 2,
+      filter: `slo.attributes.id:(${SOME_SLO.id} or ${ANOTHER_SLO.id})`,
+    });
+  });
+
   it('deletes an SLO', async () => {
     const repository = new KibanaSavedObjectsSLORepository(soClientMock);
 
@@ -114,7 +128,7 @@ describe('KibanaSavedObjectsSLORepository', () => {
     describe('Name filter', () => {
       it('includes the filter on name with wildcard when provided', async () => {
         const repository = new KibanaSavedObjectsSLORepository(soClientMock);
-        soClientMock.find.mockResolvedValueOnce(aFindResponse(SOME_SLO));
+        soClientMock.find.mockResolvedValueOnce(createFindResponse([SOME_SLO]));
 
         const result = await repository.find(
           { name: 'availability*' },
@@ -140,7 +154,7 @@ describe('KibanaSavedObjectsSLORepository', () => {
 
       it('includes the filter on name with added wildcard when not provided', async () => {
         const repository = new KibanaSavedObjectsSLORepository(soClientMock);
-        soClientMock.find.mockResolvedValueOnce(aFindResponse(SOME_SLO));
+        soClientMock.find.mockResolvedValueOnce(createFindResponse([SOME_SLO]));
 
         const result = await repository.find(
           { name: 'availa' },
@@ -168,7 +182,7 @@ describe('KibanaSavedObjectsSLORepository', () => {
     describe('indicatorTypes filter', () => {
       it('includes the filter on indicator types when provided', async () => {
         const repository = new KibanaSavedObjectsSLORepository(soClientMock);
-        soClientMock.find.mockResolvedValueOnce(aFindResponse(SOME_SLO));
+        soClientMock.find.mockResolvedValueOnce(createFindResponse([SOME_SLO]));
 
         const result = await repository.find(
           { indicatorTypes: ['sli.kql.custom'] },
@@ -194,10 +208,10 @@ describe('KibanaSavedObjectsSLORepository', () => {
 
       it('includes the filter on indicator types as logical OR when provided', async () => {
         const repository = new KibanaSavedObjectsSLORepository(soClientMock);
-        soClientMock.find.mockResolvedValueOnce(aFindResponse(SOME_SLO));
+        soClientMock.find.mockResolvedValueOnce(createFindResponse([SOME_SLO]));
 
         const result = await repository.find(
-          { indicatorTypes: ['sli.kql.custom', 'sli.apm.transaction_duration'] },
+          { indicatorTypes: ['sli.kql.custom', 'sli.apm.transactionDuration'] },
           DEFAULT_SORTING,
           DEFAULT_PAGINATION
         );
@@ -212,7 +226,7 @@ describe('KibanaSavedObjectsSLORepository', () => {
           type: SO_SLO_TYPE,
           page: 1,
           perPage: 25,
-          filter: `(slo.attributes.indicator.type: sli.kql.custom or slo.attributes.indicator.type: sli.apm.transaction_duration)`,
+          filter: `(slo.attributes.indicator.type: sli.kql.custom or slo.attributes.indicator.type: sli.apm.transactionDuration)`,
           sortField: 'name',
           sortOrder: 'asc',
         });
@@ -221,10 +235,10 @@ describe('KibanaSavedObjectsSLORepository', () => {
 
     it('includes filter on name and indicator types', async () => {
       const repository = new KibanaSavedObjectsSLORepository(soClientMock);
-      soClientMock.find.mockResolvedValueOnce(aFindResponse(SOME_SLO));
+      soClientMock.find.mockResolvedValueOnce(createFindResponse([SOME_SLO]));
 
       const result = await repository.find(
-        { name: 'latency', indicatorTypes: ['sli.kql.custom', 'sli.apm.transaction_duration'] },
+        { name: 'latency', indicatorTypes: ['sli.kql.custom', 'sli.apm.transactionDuration'] },
         DEFAULT_SORTING,
         DEFAULT_PAGINATION
       );
@@ -239,7 +253,7 @@ describe('KibanaSavedObjectsSLORepository', () => {
         type: SO_SLO_TYPE,
         page: 1,
         perPage: 25,
-        filter: `(slo.attributes.name: *latency*) and (slo.attributes.indicator.type: sli.kql.custom or slo.attributes.indicator.type: sli.apm.transaction_duration)`,
+        filter: `(slo.attributes.name: *latency*) and (slo.attributes.indicator.type: sli.kql.custom or slo.attributes.indicator.type: sli.apm.transactionDuration)`,
         sortField: 'name',
         sortOrder: 'asc',
       });
@@ -247,7 +261,7 @@ describe('KibanaSavedObjectsSLORepository', () => {
 
     it('does not include the filter when no criteria provided', async () => {
       const repository = new KibanaSavedObjectsSLORepository(soClientMock);
-      soClientMock.find.mockResolvedValueOnce(aFindResponse(SOME_SLO));
+      soClientMock.find.mockResolvedValueOnce(createFindResponse([SOME_SLO]));
 
       const result = await repository.find({}, DEFAULT_SORTING, DEFAULT_PAGINATION);
 
@@ -268,7 +282,7 @@ describe('KibanaSavedObjectsSLORepository', () => {
 
     it('sorts by name ascending', async () => {
       const repository = new KibanaSavedObjectsSLORepository(soClientMock);
-      soClientMock.find.mockResolvedValueOnce(aFindResponse(SOME_SLO));
+      soClientMock.find.mockResolvedValueOnce(createFindResponse([SOME_SLO]));
 
       await repository.find({}, DEFAULT_SORTING, DEFAULT_PAGINATION);
 
@@ -283,7 +297,7 @@ describe('KibanaSavedObjectsSLORepository', () => {
 
     it('sorts by name descending', async () => {
       const repository = new KibanaSavedObjectsSLORepository(soClientMock);
-      soClientMock.find.mockResolvedValueOnce(aFindResponse(SOME_SLO));
+      soClientMock.find.mockResolvedValueOnce(createFindResponse([SOME_SLO]));
 
       await repository.find(
         {},
@@ -302,7 +316,7 @@ describe('KibanaSavedObjectsSLORepository', () => {
 
     it('sorts by indicator type', async () => {
       const repository = new KibanaSavedObjectsSLORepository(soClientMock);
-      soClientMock.find.mockResolvedValueOnce(aFindResponse(SOME_SLO));
+      soClientMock.find.mockResolvedValueOnce(createFindResponse([SOME_SLO]));
 
       await repository.find(
         {},

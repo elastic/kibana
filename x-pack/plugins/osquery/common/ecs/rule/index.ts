@@ -9,7 +9,7 @@ export interface RuleEcs {
   id?: string[];
   rule_id?: string[];
   name?: string[];
-  false_positives: string[];
+  false_positives?: string[];
   saved_id?: string[];
   timeline_id?: string[];
   timeline_title?: string[];
@@ -27,10 +27,7 @@ export interface RuleEcs {
   severity?: string[];
   tags?: string[];
   threat?: unknown;
-  threshold?: {
-    field: string | string[];
-    value: number;
-  };
+  threshold?: unknown;
   type?: string[];
   size?: string[];
   to?: string[];

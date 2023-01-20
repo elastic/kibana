@@ -13,7 +13,7 @@ import { REPO_ROOT } from '../../lib/paths.mjs';
 import External from '../../lib/external_packages.js';
 
 export async function regenerateBaseTsconfig() {
-  const pkgMap = External['@kbn/package-map']().readPackageMap();
+  const pkgMap = External['@kbn/repo-packages']().readPackageMap();
   const tsconfigPath = Path.resolve(REPO_ROOT, 'tsconfig.base.json');
   const lines = (await Fsp.readFile(tsconfigPath, 'utf-8')).split('\n');
 

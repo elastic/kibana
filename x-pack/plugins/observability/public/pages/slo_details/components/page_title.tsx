@@ -6,11 +6,11 @@
  */
 
 import { EuiLoadingSpinner } from '@elastic/eui';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
-import { SLO } from '../../../typings';
 
 export interface Props {
-  slo: SLO | undefined;
+  slo: SLOWithSummaryResponse | undefined;
   isLoading: boolean;
 }
 

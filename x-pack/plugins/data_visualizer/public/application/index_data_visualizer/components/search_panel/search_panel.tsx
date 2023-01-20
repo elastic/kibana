@@ -6,20 +6,27 @@
  */
 
 import React, { FC, useEffect, useState } from 'react';
-import { EuiFlexItem, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
+import { css } from '@emotion/react';
+import {
+  useEuiBreakpoint,
+  useIsWithinMaxBreakpoint,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiSpacer,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Query, Filter } from '@kbn/es-query';
 import type { TimeRange } from '@kbn/es-query';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import { isDefined } from '../../../common/util/is_defined';
+import { isDefined } from '@kbn/ml-is-defined';
 import { DataVisualizerFieldNamesFilter } from './field_name_filter';
 import { DataVisualizerFieldTypeFilter } from './field_type_filter';
 import { SupportedFieldType } from '../../../../../common/types';
 import { SearchQueryLanguage } from '../../types/combined_query';
 import { useDataVisualizerKibana } from '../../../kibana_context';
-import './_index.scss';
 import { createMergedEsQuery } from '../../utils/saved_search_utils';
 import { OverallStats } from '../../types/overall_stats';
+
 interface Props {
   dataView: DataView;
   searchString: Query['query'];
@@ -44,7 +51,6 @@ interface Props {
   }): void;
   showEmptyFields: boolean;
   onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
-  compact?: boolean;
 }
 
 export const SearchPanel: FC<Props> = ({
@@ -59,7 +65,6 @@ export const SearchPanel: FC<Props> = ({
   visibleFieldNames,
   setSearchParams,
   showEmptyFields,
-  compact,
 }) => {
   const {
     services: {
@@ -115,14 +120,39 @@ export const SearchPanel: FC<Props> = ({
     }
   };
 
+  const dvSearchPanelControls = css({
+    marginLeft: '0px !important',
+    paddingLeft: '0px !important',
+    paddingRight: '0px !important',
+    flexDirection: 'row',
+    [useEuiBreakpoint(['xs', 's', 'm', 'l'])]: {
+      padding: 0,
+    },
+  });
+
+  const dvSearchPanelContainer = css({
+    alignItems: 'baseline',
+    [useEuiBreakpoint(['xs', 's', 'm', 'l'])]: {
+      flexDirection: 'column',
+    },
+  });
+
+  const dvSearchBar = css({
+    [useEuiBreakpoint(['xs', 's', 'm', 'l'])]: {
+      minWidth: `max(100%, 300px)`,
+    },
+  });
+
+  const isWithinXl = useIsWithinMaxBreakpoint('xl');
+
   return (
     <EuiFlexGroup
       gutterSize="none"
       data-test-subj="dataVisualizerSearchPanel"
-      className={'dvSearchPanel__container'}
+      css={dvSearchPanelContainer}
       responsive={false}
     >
-      <EuiFlexItem grow={9} className={'dvSearchBar'}>
+      <EuiFlexItem grow={9} css={dvSearchBar}>
         <SearchBar
           dataTestSubj="dataVisualizerQueryInput"
           appName={'dataVisualizer'}
@@ -144,16 +174,8 @@ export const SearchPanel: FC<Props> = ({
         />
       </EuiFlexItem>
 
-      {compact ? <EuiSpacer size="s" /> : null}
-      <EuiFlexItem
-        grow={2}
-        className={'dvSearchPanel__controls'}
-        css={{
-          marginLeft: '0px !important',
-          paddingLeft: '0px !important',
-          paddingRight: '0px !important',
-        }}
-      >
+      {isWithinXl ? <EuiSpacer size="s" /> : null}
+      <EuiFlexItem grow={2} css={dvSearchPanelControls}>
         <DataVisualizerFieldNamesFilter
           overallStats={overallStats}
           setVisibleFieldNames={setVisibleFieldNames}

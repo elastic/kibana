@@ -73,7 +73,7 @@ function computeSloWithSummary(
 
 function toPagination(params: FindSLOParams): Pagination {
   const page = Number(params.page);
-  const perPage = Number(params.per_page);
+  const perPage = Number(params.perPage);
 
   return {
     page: !isNaN(page) && page >= 1 ? page : DEFAULT_PAGE,
@@ -82,12 +82,12 @@ function toPagination(params: FindSLOParams): Pagination {
 }
 
 function toCriteria(params: FindSLOParams): Criteria {
-  return { name: params.name, indicatorTypes: params.indicator_types };
+  return { name: params.name, indicatorTypes: params.indicatorTypes };
 }
 
 function toSort(params: FindSLOParams): Sort {
   return {
-    field: params.sort_by === 'indicator_type' ? SortField.IndicatorType : SortField.Name,
-    direction: params.sort_direction === 'desc' ? SortDirection.Desc : SortDirection.Asc,
+    field: params.sortBy === 'indicatorType' ? SortField.IndicatorType : SortField.Name,
+    direction: params.sortDirection === 'desc' ? SortDirection.Desc : SortDirection.Asc,
   };
 }

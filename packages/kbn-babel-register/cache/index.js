@@ -10,7 +10,7 @@ const Fs = require('fs');
 const Path = require('path');
 const Crypto = require('crypto');
 
-const { readHashOfPackageMap } = require('@kbn/package-map');
+const { readHashOfPackageMap } = require('@kbn/repo-packages');
 const babel = require('@babel/core');
 const peggy = require('@kbn/peggy');
 const { REPO_ROOT, UPSTREAM_BRANCH } = require('@kbn/repo-info');

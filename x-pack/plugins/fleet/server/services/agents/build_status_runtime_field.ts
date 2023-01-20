@@ -45,7 +45,11 @@ function _buildSource(inactivityTimeouts: InactivityTimeouts, pathPrefix?: strin
   return `
     long lastCheckinMillis = ${field('last_checkin')}.size() > 0 
       ? ${field('last_checkin')}.value.toInstant().toEpochMilli() 
-      : -1;
+      : (
+          ${field('enrolled_at')}.size() > 0 
+          ? ${field('enrolled_at')}.value.toInstant().toEpochMilli() 
+          : -1
+        );
     if (${field('active')}.size() > 0 && ${field('active')}.value == false) {
       emit('unenrolled'); 
     } else if (${_buildInactiveClause(now, inactivityTimeouts, field)}) {

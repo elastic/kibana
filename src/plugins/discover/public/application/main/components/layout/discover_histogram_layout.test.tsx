@@ -12,7 +12,6 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { esHits } from '../../../../__mocks__/es_hits';
 import { dataViewMock } from '../../../../__mocks__/data_view';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
-import { GetStateReturn } from '../../services/discover_state';
 import {
   AvailableFields$,
   DataDocuments$,
@@ -28,7 +27,6 @@ import { DiscoverHistogramLayout, DiscoverHistogramLayoutProps } from './discove
 import { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import { CoreTheme } from '@kbn/core/public';
 import { act } from 'react-dom/test-utils';
-import { setTimeout } from 'timers/promises';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { LocalStorageMock } from '../../../../__mocks__/local_storage_mock';
 import { HISTOGRAM_HEIGHT_KEY } from './use_discover_histogram';
@@ -38,17 +36,30 @@ import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_
 import { UnifiedHistogramLayout } from '@kbn/unified-histogram-plugin/public';
 import { getSessionServiceMock } from '@kbn/data-plugin/public/search/session/mocks';
 import { ResetSearchButton } from './reset_search_button';
+import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import { DiscoverMainProvider } from '../../services/discover_state_provider';
 
-const mountComponent = async ({
+function getStateContainer() {
+  const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+
+  stateContainer.setAppState({
+    interval: 'auto',
+    hideChart: false,
+  });
+
+  stateContainer.setAppState = jest.fn();
+
+  return stateContainer;
+}
+
+const mountComponent = ({
   isPlainRecord = false,
-  hideChart = false,
   isTimeBased = true,
   storage,
   savedSearch = savedSearchMock,
   resetSavedSearch = jest.fn(),
 }: {
   isPlainRecord?: boolean;
-  hideChart?: boolean;
   isTimeBased?: boolean;
   storage?: Storage;
   savedSearch?: SavedSearch;
@@ -58,7 +69,9 @@ const mountComponent = async ({
   services.data.query.timefilter.timefilter.getAbsoluteTime = () => {
     return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
   };
-
+  services.data.query.timefilter.timefilter.getTime = () => {
+    return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
+  };
   (services.data.query.queryString.getDefaultQuery as jest.Mock).mockReturnValue({
     language: 'kuery',
     query: '',
@@ -103,6 +116,8 @@ const mountComponent = async ({
 
   session.getSession$.mockReturnValue(new BehaviorSubject('123'));
 
+  const stateContainer = getStateContainer();
+
   const props: DiscoverHistogramLayoutProps = {
     isPlainRecord,
     dataView: dataViewMock,
@@ -110,16 +125,9 @@ const mountComponent = async ({
     setExpandedDoc: jest.fn(),
     savedSearch,
     savedSearchData$,
+    savedSearchFetch$: new Subject(),
     savedSearchRefetch$: new Subject(),
-    state: { columns: [], hideChart },
-    stateContainer: {
-      setAppState: () => {},
-      appStateContainer: {
-        getState: () => ({
-          interval: 'auto',
-        }),
-      },
-    } as unknown as GetStateReturn,
+    stateContainer,
     onFieldEdited: jest.fn(),
     columns: [],
     viewMode: VIEW_MODE.DOCUMENT_LEVEL,
@@ -136,15 +144,12 @@ const mountComponent = async ({
   const component = mountWithIntl(
     <KibanaContextProvider services={services}>
       <KibanaThemeProvider theme$={coreTheme$}>
-        <DiscoverHistogramLayout {...props} />
+        <DiscoverMainProvider value={stateContainer}>
+          <DiscoverHistogramLayout {...props} />
+        </DiscoverMainProvider>
       </KibanaThemeProvider>
     </KibanaContextProvider>
   );
-
-  // DiscoverMainContent uses UnifiedHistogramLayout which
-  // is lazy loaded, so we need to wait for it to be loaded
-  await act(() => setTimeout(0));
-  component.update();
 
   return component;
 };
@@ -155,7 +160,7 @@ describe('Discover histogram layout component', () => {
       const storage = new LocalStorageMock({}) as unknown as Storage;
       const originalGet = storage.get;
       storage.get = jest.fn().mockImplementation(originalGet);
-      await mountComponent({ storage });
+      mountComponent({ storage });
       expect(storage.get).toHaveBeenCalledWith(HISTOGRAM_HEIGHT_KEY);
     });
 
@@ -163,7 +168,7 @@ describe('Discover histogram layout component', () => {
       const storage = new LocalStorageMock({}) as unknown as Storage;
       const originalGet = storage.get;
       storage.get = jest.fn().mockImplementation(originalGet);
-      const component = await mountComponent({ storage });
+      const component = mountComponent({ storage });
       expect(storage.get).toHaveBeenCalledWith(HISTOGRAM_HEIGHT_KEY);
       expect(storage.get).toHaveReturnedWith(null);
       expect(component.find(UnifiedHistogramLayout).prop('topPanelHeight')).toBe(undefined);
@@ -173,7 +178,7 @@ describe('Discover histogram layout component', () => {
       const storage = new LocalStorageMock({}) as unknown as Storage;
       const topPanelHeight = 123;
       storage.get = jest.fn().mockImplementation(() => topPanelHeight);
-      const component = await mountComponent({ storage });
+      const component = mountComponent({ storage });
       expect(storage.get).toHaveBeenCalledWith(HISTOGRAM_HEIGHT_KEY);
       expect(storage.get).toHaveReturnedWith(topPanelHeight);
       expect(component.find(UnifiedHistogramLayout).prop('topPanelHeight')).toBe(topPanelHeight);
@@ -183,7 +188,7 @@ describe('Discover histogram layout component', () => {
       const storage = new LocalStorageMock({}) as unknown as Storage;
       const originalSet = storage.set;
       storage.set = jest.fn().mockImplementation(originalSet);
-      const component = await mountComponent({ storage });
+      const component = mountComponent({ storage });
       const newTopPanelHeight = 123;
       expect(component.find(UnifiedHistogramLayout).prop('topPanelHeight')).not.toBe(
         newTopPanelHeight
@@ -199,12 +204,12 @@ describe('Discover histogram layout component', () => {
 
   describe('reset search button', () => {
     it('renders the button when there is a saved search', async () => {
-      const component = await mountComponent();
+      const component = mountComponent();
       expect(component.find(ResetSearchButton).exists()).toBe(true);
     });
 
     it('does not render the button when there is no saved search', async () => {
-      const component = await mountComponent({
+      const component = mountComponent({
         savedSearch: { ...savedSearchMock, id: undefined },
       });
       expect(component.find(ResetSearchButton).exists()).toBe(false);
@@ -212,7 +217,7 @@ describe('Discover histogram layout component', () => {
 
     it('should call resetSavedSearch when clicked', async () => {
       const resetSavedSearch = jest.fn();
-      const component = await mountComponent({ resetSavedSearch });
+      const component = mountComponent({ resetSavedSearch });
       component.find(ResetSearchButton).find('button').simulate('click');
       expect(resetSavedSearch).toHaveBeenCalled();
     });

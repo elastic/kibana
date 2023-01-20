@@ -32,6 +32,7 @@ export const SERVICE_RUNTIME_NAME = 'service.runtime.name';
 export const SERVICE_RUNTIME_VERSION = 'service.runtime.version';
 export const SERVICE_NODE_NAME = 'service.node.name';
 export const SERVICE_VERSION = 'service.version';
+export const SERVICE_TARGET_TYPE = 'service.target.type';
 
 export const URL_FULL = 'url.full';
 export const HTTP_REQUEST_METHOD = 'http.request.method';
@@ -158,6 +159,9 @@ export const INDEX = '_index';
 
 // Mobile
 export const NETWORK_CONNECTION_TYPE = 'network.connection.type';
-export const DEVICE_MODEL_NAME = 'device.model.name';
+export const DEVICE_MODEL_IDENTIFIER = 'device.model.identifier';
+export const SESSION_ID = 'session.id';
+export const APP_LAUNCH_TIME = 'application.launch.time';
+export const EVENT_NAME = 'event.name';
 
 export const CHILD_ID = 'child.id';

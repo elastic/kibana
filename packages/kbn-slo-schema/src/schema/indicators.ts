@@ -7,9 +7,15 @@
  */
 
 import * as t from 'io-ts';
-import { allOrAnyString, dateRangeSchema } from './common';
+import {
+  allOrAnyString,
+  dateRangeSchema,
+  dateType,
+  errorBudgetSchema,
+  statusSchema,
+} from './common';
 
-const apmTransactionDurationIndicatorTypeSchema = t.literal('sli.apm.transaction_duration');
+const apmTransactionDurationIndicatorTypeSchema = t.literal('sli.apm.transactionDuration');
 const apmTransactionDurationIndicatorSchema = t.type({
   type: apmTransactionDurationIndicatorTypeSchema,
   params: t.intersection([
@@ -26,7 +32,7 @@ const apmTransactionDurationIndicatorSchema = t.type({
   ]),
 });
 
-const apmTransactionErrorRateIndicatorTypeSchema = t.literal('sli.apm.transaction_error_rate');
+const apmTransactionErrorRateIndicatorTypeSchema = t.literal('sli.apm.transactionErrorRate');
 const apmTransactionErrorRateIndicatorSchema = t.type({
   type: apmTransactionErrorRateIndicatorTypeSchema,
   params: t.intersection([
@@ -62,6 +68,13 @@ const indicatorDataSchema = t.type({
   total: t.number,
 });
 
+const historicalSummarySchema = t.type({
+  date: dateType,
+  errorBudget: errorBudgetSchema,
+  sliValue: t.number,
+  status: statusSchema,
+});
+
 const indicatorTypesSchema = t.union([
   apmTransactionDurationIndicatorTypeSchema,
   apmTransactionErrorRateIndicatorTypeSchema,
@@ -69,7 +82,7 @@ const indicatorTypesSchema = t.union([
 ]);
 
 // Validate that a string is a comma separated list of indicator types,
-// e.g. sli.kql.custom,sli.apm.transaction_duration
+// e.g. sli.kql.custom,sli.apm.transactionDuration
 // Transform to an array of indicator type
 const indicatorTypesArraySchema = new t.Type<string[], string, unknown>(
   'indicatorTypesArray',
@@ -104,4 +117,5 @@ export {
   indicatorTypesArraySchema,
   indicatorTypesSchema,
   indicatorDataSchema,
+  historicalSummarySchema,
 };
