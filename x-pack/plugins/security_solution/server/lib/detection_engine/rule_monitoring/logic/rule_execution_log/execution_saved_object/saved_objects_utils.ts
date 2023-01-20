@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuidv5 from 'uuid/v5';
+import { v5 as uuidv5 } from 'uuid';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { RULE_EXECUTION_SO_TYPE } from './saved_objects_type';
 
