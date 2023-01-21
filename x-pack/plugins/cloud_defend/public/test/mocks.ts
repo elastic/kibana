@@ -6,7 +6,7 @@
  */
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
-import { INTEGRATION_PACKAGE_NAME, INPUT_CONTROL, ALERTS_DATASET } from '../../../common/constants';
+import { INTEGRATION_PACKAGE_NAME, INPUT_CONTROL, ALERTS_DATASET } from '../../common/constants';
 
 const MOCK_YAML_CONFIGURATION = `
 selectors:
@@ -37,7 +37,12 @@ responses:
     actions: [alert]
 `;
 
-export const getCloudDefendNewPolicyMock = (): NewPackagePolicy => ({
+export const MOCK_YAML_INVALID_CONFIGURATION = `
+selectrs:
+reeesponses:
+`;
+
+export const getCloudDefendNewPolicyMock = (yaml = MOCK_YAML_CONFIGURATION): NewPackagePolicy => ({
   name: 'some-cloud_defend-policy',
   description: '',
   namespace: 'default',
@@ -51,7 +56,7 @@ export const getCloudDefendNewPolicyMock = (): NewPackagePolicy => ({
       vars: {
         configuration: {
           type: 'yaml',
-          value: MOCK_YAML_CONFIGURATION,
+          value: yaml,
         },
       },
       streams: [
@@ -72,7 +77,7 @@ export const getCloudDefendNewPolicyMock = (): NewPackagePolicy => ({
   },
 });
 
-export const getCloudDefendPolicyMock = (): PackagePolicy => ({
+export const getCloudDefendPolicyMock = (yaml = MOCK_YAML_CONFIGURATION): PackagePolicy => ({
   id: 'c6d16e42-c32d-4dce-8a88-113cfe276ad1',
   version: 'abcd',
   revision: 1,
@@ -93,7 +98,7 @@ export const getCloudDefendPolicyMock = (): PackagePolicy => ({
       vars: {
         configuration: {
           type: 'yaml',
-          value: MOCK_YAML_CONFIGURATION,
+          value: yaml,
         },
       },
       streams: [
