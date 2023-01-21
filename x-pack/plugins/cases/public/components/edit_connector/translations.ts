@@ -8,6 +8,12 @@
 import { i18n } from '@kbn/i18n';
 
 export * from '../../common/translations';
+export {
+  UPDATE_THIRD,
+  PUSH_THIRD,
+  PUSH_LOCKED_TITLE,
+  PUSH_LOCKED_DESC,
+} from '../use_push_to_service/translations';
 
 export const EDIT_CONNECTOR_ARIA = i18n.translate(
   'xpack.cases.editConnector.editConnectorLinkAria',

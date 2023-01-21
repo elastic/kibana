@@ -18,6 +18,7 @@ import {
   EuiButtonEmpty,
   EuiLoadingSpinner,
   EuiButtonIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { isEmpty, noop } from 'lodash/fp';
@@ -34,7 +35,8 @@ import * as i18n from './translations';
 import { getConnectorById, getConnectorsFormValidators } from '../utils';
 import { usePushToService } from '../use_push_to_service';
 import { useApplicationCapabilities } from '../../common/lib/kibana';
-import { useCasesContext } from '../cases_context/use_cases_context';
+import { CaseCallOut } from '../use_push_to_service/callout';
+import type { ErrorMessage } from '../use_push_to_service/callout/types';
 
 export interface EditConnectorProps {
   caseData: Case;
@@ -108,6 +110,76 @@ const initialState = {
   editConnector: false,
 };
 
+interface PushButtonProps {
+  isLoading: boolean;
+  disabled: boolean;
+  errorsMsg: ErrorMessage[];
+  hasBeenPushed: boolean;
+  showTooltip: boolean;
+  connectorName: string;
+  pushToService: () => Promise<void>;
+}
+
+const PushButton: React.FC<PushButtonProps> = React.memo(
+  ({
+    disabled,
+    errorsMsg,
+    isLoading,
+    hasBeenPushed,
+    connectorName,
+    showTooltip,
+    pushToService,
+  }) => {
+    const button = (
+      <EuiButtonEmpty
+        data-test-subj="push-to-external-service"
+        iconType="importAction"
+        onClick={pushToService}
+        disabled={disabled}
+        isLoading={isLoading}
+      >
+        {hasBeenPushed ? i18n.UPDATE_THIRD(connectorName) : i18n.PUSH_THIRD(connectorName)}
+      </EuiButtonEmpty>
+    );
+
+    return showTooltip ? (
+      <EuiToolTip
+        position="top"
+        title={errorsMsg.length > 0 ? errorsMsg[0].title : i18n.PUSH_LOCKED_TITLE(connectorName)}
+        content={<p>{errorsMsg.length > 0 ? errorsMsg[0].description : i18n.PUSH_LOCKED_DESC}</p>}
+      >
+        {button}
+      </EuiToolTip>
+    ) : (
+      <>{button}</>
+    );
+  }
+);
+
+PushButton.displayName = 'PushButton';
+
+interface PushCalloutsProps {
+  hasConnectors: boolean;
+  hasLicenseError: boolean;
+  errorsMsg: ErrorMessage[];
+  onEditClick: () => void;
+}
+
+const PushCallouts: React.FC<PushCalloutsProps> = React.memo(
+  ({ hasConnectors, hasLicenseError, errorsMsg, onEditClick }) => {
+    return (
+      <CaseCallOut
+        hasConnectors={hasConnectors}
+        hasLicenseError={hasLicenseError}
+        messages={errorsMsg}
+        onEditClick={onEditClick}
+      />
+    );
+  }
+);
+
+PushCallouts.displayName = 'PushCallouts';
+
 export const EditConnector = React.memo(
   ({
     caseData,
@@ -118,7 +190,6 @@ export const EditConnector = React.memo(
     isValidConnector,
     onSubmit,
   }: EditConnectorProps) => {
-    const { permissions } = useCasesContext();
     const caseFields = caseData.connector.fields;
     const selectedConnector = caseData.connector.id;
 
@@ -225,16 +296,25 @@ export const EditConnector = React.memo(
       connectors: allAvailableConnectors,
     });
 
-    const { pushButton, pushCallouts } = usePushToService({
-      connector: {
-        ...caseData.connector,
-        name: isEmpty(connectorName) ? caseData.connector.name : connectorName,
-      },
+    const connectorWithName = {
+      ...caseData.connector,
+      name: isEmpty(connectorName) ? caseData.connector.name : connectorName,
+    };
+
+    const {
+      errorsMsg,
+      needsToBePushed,
+      hasBeenPushed,
+      isLoading: isLoadingPushToService,
+      hasPushPermissions,
+      hasErrorMessages,
+      hasLicenseError,
+      handlePushToService,
+    } = usePushToService({
+      connector: connectorWithName,
       caseConnectors,
       caseId: caseData.id,
       caseStatus: caseData.status,
-      allAvailableConnectors,
-      onEditClick,
       isValidConnector,
     });
 
@@ -252,7 +332,7 @@ export const EditConnector = React.memo(
               <h4>{i18n.CONNECTORS}</h4>
             </EuiFlexItem>
             {isLoading && <EuiLoadingSpinner data-test-subj="connector-loading" />}
-            {!isLoading && !editConnector && permissions.push && actionsReadCapabilities && (
+            {!isLoading && !editConnector && hasPushPermissions && actionsReadCapabilities && (
               <EuiFlexItem data-test-subj="connector-edit" grow={false}>
                 <EuiButtonIcon
                   data-test-subj="connector-edit-button"
@@ -265,8 +345,15 @@ export const EditConnector = React.memo(
           </MyFlexGroup>
           <EuiHorizontalRule margin="xs" />
           <MyFlexGroup data-test-subj="edit-allAvailableConnectors" direction="column">
-            {!isLoading && !editConnector && pushCallouts && actionsReadCapabilities && (
-              <EuiFlexItem data-test-subj="push-callouts">{pushCallouts}</EuiFlexItem>
+            {!isLoading && !editConnector && hasErrorMessages && actionsReadCapabilities && (
+              <EuiFlexItem data-test-subj="push-callouts">
+                <PushCallouts
+                  errorsMsg={errorsMsg}
+                  hasLicenseError={hasLicenseError}
+                  hasConnectors={allAvailableConnectors.length > 0}
+                  onEditClick={onEditClick}
+                />
+              </EuiFlexItem>
             )}
             <DisappearingFlexItem $isHidden={!editConnector}>
               <Form form={form}>
@@ -280,7 +367,7 @@ export const EditConnector = React.memo(
                         connectors: allAvailableConnectors,
                         dataTestSubj: 'caseConnectors',
                         defaultValue: selectedConnector,
-                        disabled: !permissions.push,
+                        disabled: !hasPushPermissions,
                         idAria: 'caseConnectors',
                         isEdit: editConnector,
                         isLoading,
@@ -333,13 +420,27 @@ export const EditConnector = React.memo(
                 </EuiFlexGroup>
               </EuiFlexItem>
             )}
-            {pushCallouts == null &&
+            {hasErrorMessages &&
               !isLoading &&
               !editConnector &&
-              permissions.push &&
+              hasPushPermissions &&
               actionsReadCapabilities && (
                 <EuiFlexItem data-test-subj="has-data-to-push-button" grow={false}>
-                  <span>{pushButton}</span>
+                  <PushButton
+                    hasBeenPushed={hasBeenPushed}
+                    disabled={
+                      isLoadingPushToService ||
+                      errorsMsg.length > 0 ||
+                      !hasPushPermissions ||
+                      !isValidConnector ||
+                      !needsToBePushed
+                    }
+                    isLoading={isLoadingPushToService}
+                    pushToService={handlePushToService}
+                    errorsMsg={errorsMsg}
+                    showTooltip={errorsMsg.length > 0 || !needsToBePushed || !hasPushPermissions}
+                    connectorName={connectorWithName.name}
+                  />
                 </EuiFlexItem>
               )}
           </MyFlexGroup>
