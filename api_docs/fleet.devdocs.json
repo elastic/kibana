@@ -9235,7 +9235,7 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"inactive\" | \"active\""
+              "\"active\" | \"inactive\""
             ],
             "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
             "deprecated": false,
