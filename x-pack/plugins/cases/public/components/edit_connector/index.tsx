@@ -41,10 +41,8 @@ import type { ErrorMessage } from '../use_push_to_service/callout/types';
 export interface EditConnectorProps {
   caseData: Case;
   caseConnectors: CaseConnectors;
-  connectorName: string;
-  allAvailableConnectors: ActionConnector[];
+  allAvailableConnectors: ActionConnector[] | undefined;
   isLoading: boolean;
-  isValidConnector: boolean;
   onSubmit: (
     connectorId: string,
     connectorFields: ConnectorTypeFields['fields'],
@@ -184,14 +182,15 @@ export const EditConnector = React.memo(
   ({
     caseData,
     caseConnectors,
-    connectorName,
     allAvailableConnectors,
     isLoading,
-    isValidConnector,
     onSubmit,
   }: EditConnectorProps) => {
     const caseFields = caseData.connector.fields;
     const selectedConnector = caseData.connector.id;
+    const actionConnector = allAvailableConnectors?.find((c) => c.id === caseData.connector.id);
+    const hasAllConnectorsBeenFetched = !!allAvailableConnectors;
+    const isValidConnector = !hasAllConnectorsBeenFetched || !!actionConnector;
 
     const { form } = useForm({
       defaultValue: { connectorId: selectedConnector },
@@ -208,7 +207,7 @@ export const EditConnector = React.memo(
       {
         ...initialState,
         fields: caseFields,
-        currentConnector: getConnectorById(caseData.connector.id, allAvailableConnectors),
+        currentConnector: getConnectorById(caseData.connector.id, allAvailableConnectors ?? []),
       }
     );
 
@@ -230,7 +229,7 @@ export const EditConnector = React.memo(
         if (currentConnector?.id !== newConnectorId) {
           dispatch({
             type: 'SET_CURRENT_CONNECTOR',
-            payload: getConnectorById(newConnectorId, allAvailableConnectors),
+            payload: getConnectorById(newConnectorId, allAvailableConnectors ?? []),
           });
           dispatch({
             type: 'SET_FIELDS',
@@ -293,12 +292,12 @@ export const EditConnector = React.memo(
 
     const connectorIdConfig = getConnectorsFormValidators({
       config: schema.connectorId as FieldConfig,
-      connectors: allAvailableConnectors,
+      connectors: allAvailableConnectors ?? [],
     });
 
     const connectorWithName = {
       ...caseData.connector,
-      name: isEmpty(connectorName) ? caseData.connector.name : connectorName,
+      name: isEmpty(actionConnector?.name) ? caseData.connector.name : actionConnector?.name ?? '',
     };
 
     const {
@@ -350,7 +349,7 @@ export const EditConnector = React.memo(
                 <PushCallouts
                   errorsMsg={errorsMsg}
                   hasLicenseError={hasLicenseError}
-                  hasConnectors={allAvailableConnectors.length > 0}
+                  hasConnectors={allAvailableConnectors ? allAvailableConnectors.length > 0 : false}
                   onEditClick={onEditClick}
                 />
               </EuiFlexItem>

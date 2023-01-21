@@ -132,17 +132,12 @@ export const CaseViewActivity = ({
     [assignees, onUpdateField]
   );
 
-  const { isLoading: isLoadingAllAvailableConnectors, data: allAvailableConnectors = [] } =
+  const { isLoading: isLoadingAllAvailableConnectors, data: allAvailableConnectors } =
     useGetConnectors();
-
-  const [connectorName, isValidConnector] = useMemo(() => {
-    const connector = allAvailableConnectors.find((c) => c.id === caseData.connector.id);
-    return [connector?.name ?? '', !!connector];
-  }, [allAvailableConnectors, caseData.connector]);
 
   const onSubmitConnector = useCallback(
     (connectorId, connectorFields, onError, onSuccess) => {
-      const connector = getConnectorById(connectorId, allAvailableConnectors);
+      const connector = getConnectorById(connectorId, allAvailableConnectors ?? []);
       const connectorToUpdate = connector
         ? normalizeActionConnector(connector)
         : getNoneConnector();
@@ -242,13 +237,11 @@ export const CaseViewActivity = ({
           {pushToServiceAuthorized && userActionsData && caseConnectors ? (
             <EditConnector
               caseData={caseData}
-              connectorName={connectorName}
               caseConnectors={caseConnectors}
               allAvailableConnectors={allAvailableConnectors}
               isLoading={
                 isLoadingAllAvailableConnectors || (isLoading && loadingKey === 'connector')
               }
-              isValidConnector={isLoadingAllAvailableConnectors ? true : isValidConnector}
               onSubmit={onSubmitConnector}
             />
           ) : null}
