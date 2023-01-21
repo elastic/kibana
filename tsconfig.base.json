@@ -1220,6 +1220,8 @@
       "@kbn/ts-type-check-cli/*": ["packages/kbn-ts-type-check-cli/*"],
       "@kbn/typed-react-router-config": ["packages/kbn-typed-react-router-config"],
       "@kbn/typed-react-router-config/*": ["packages/kbn-typed-react-router-config/*"],
+      "@kbn/ui-actions-browser": ["packages/kbn-ui-actions-browser"],
+      "@kbn/ui-actions-browser/*": ["packages/kbn-ui-actions-browser/*"],
       "@kbn/ui-actions-enhanced-examples-plugin": ["x-pack/examples/ui_actions_enhanced_examples"],
       "@kbn/ui-actions-enhanced-examples-plugin/*": ["x-pack/examples/ui_actions_enhanced_examples/*"],
       "@kbn/ui-actions-enhanced-plugin": ["src/plugins/ui_actions_enhanced"],
