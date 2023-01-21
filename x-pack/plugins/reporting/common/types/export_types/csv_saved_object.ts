@@ -9,6 +9,7 @@ import type { BaseParams, BasePayload } from '../base';
 
 interface CsvFromSavedObjectBase {
   objectType: 'saved search';
+  state?: any;
   timerange?: {
     timezone?: string;
     min?: string | number;

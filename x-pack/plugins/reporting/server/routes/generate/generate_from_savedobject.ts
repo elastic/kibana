@@ -26,6 +26,7 @@ const CsvSavedSearchExportParamsSchema = schema.object({
 
 const CsvSavedSearchExportBodySchema = schema.nullable(
   schema.object({
+    state: schema.any(),
     timerange: schema.maybe(
       schema.object({
         timezone: schema.maybe(schema.string()),
@@ -81,6 +82,7 @@ export function registerGenerateFromSavedObject(reporting: ReportingCore, logger
           browserTimezone: req.body?.timerange?.timezone || 'UTC',
           timerange: req.body?.timerange,
           savedObjectId: req.params.savedObjectId,
+          state: req.body?.state,
           title: searchObject.attributes.title ?? 'Unknown search',
           objectType: 'saved search',
           version: '7.17',
