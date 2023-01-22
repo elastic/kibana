@@ -137,6 +137,7 @@ export type SingleCaseMetricsFeature =
 export enum SortFieldCase {
   closedAt = 'closedAt',
   createdAt = 'createdAt',
+  updatedAt = 'updatedAt',
   severity = 'severity',
   status = 'status',
   title = 'title',
