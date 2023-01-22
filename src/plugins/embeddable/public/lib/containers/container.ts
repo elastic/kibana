@@ -156,10 +156,8 @@ export abstract class Container<
     this.updateInput(panels as Partial<TContainerInput>);
   }
 
-  public reload(clearCache: boolean = false) {
-    Object.values(this.children).forEach((child) =>
-      child instanceof ErrorEmbeddable ? child.reload() : child.reload(clearCache)
-    );
+  public reload() {
+    Object.values(this.children).forEach((child) => child.reload());
   }
 
   public async addNewEmbeddable<

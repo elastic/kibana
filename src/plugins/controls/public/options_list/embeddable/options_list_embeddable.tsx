@@ -41,7 +41,6 @@ import { OptionsListControl } from '../components/options_list_control';
 import { ControlsDataViewsService } from '../../services/data_views/types';
 import { ControlsOptionsListService } from '../../services/options_list/types';
 import { OptionsListField } from '../../../common/options_list/types';
-import { OptionsListStrings } from '../components/options_list_strings';
 
 const diffDataFetchProps = (
   last?: OptionsListDataFetchProps,
@@ -112,10 +111,6 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
     this.initialize();
   }
-
-  public getInputPlaceHolder = () =>
-    this.reduxEmbeddableTools.getState().explicitInput.placeholder ??
-    OptionsListStrings.control.getPlaceholder();
 
   private initialize = async () => {
     const { selectedOptions: initialSelectedOptions } = this.getInput();
@@ -410,8 +405,9 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     return [newFilter];
   };
 
-  reload = (clearCache: boolean = false) => {
-    if (clearCache) this.optionsListService.clearOptionsListCache();
+  reload = () => {
+    // clear cache when reload is requested
+    this.optionsListService.clearOptionsListCache();
     this.runOptionsListQuery();
   };
 
