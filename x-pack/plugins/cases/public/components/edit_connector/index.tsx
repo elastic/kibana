@@ -93,7 +93,7 @@ export const EditConnector = React.memo(
   }: EditConnectorProps) => {
     const caseFields = caseData.connector.fields;
     const selectedConnector = caseData.connector.id;
-    const actionConnector = allAvailableConnectors?.find((c) => c.id === caseData.connector.id);
+    const actionConnector = allAvailableConnectors.find((c) => c.id === caseData.connector.id);
     const isValidConnector = !!actionConnector;
 
     const { form } = useForm({
@@ -111,7 +111,7 @@ export const EditConnector = React.memo(
       {
         ...initialState,
         fields: caseFields,
-        currentConnector: getConnectorById(caseData.connector.id, allAvailableConnectors ?? []),
+        currentConnector: getConnectorById(caseData.connector.id, allAvailableConnectors),
       }
     );
 
@@ -133,7 +133,7 @@ export const EditConnector = React.memo(
         if (currentConnector?.id !== newConnectorId) {
           dispatch({
             type: 'SET_CURRENT_CONNECTOR',
-            payload: getConnectorById(newConnectorId, allAvailableConnectors ?? []),
+            payload: getConnectorById(newConnectorId, allAvailableConnectors),
           });
           dispatch({
             type: 'SET_FIELDS',
@@ -180,7 +180,7 @@ export const EditConnector = React.memo(
       const { isValid, data: newData } = await submit();
 
       if (isValid && newData.connectorId) {
-        const connector = getConnectorById(newData.connectorId, allAvailableConnectors ?? []);
+        const connector = getConnectorById(newData.connectorId, allAvailableConnectors);
         const connectorToUpdate = connector
           ? normalizeActionConnector(connector)
           : getNoneConnector();
@@ -204,7 +204,7 @@ export const EditConnector = React.memo(
 
     const connectorIdConfig = getConnectorsFormValidators({
       config: schema.connectorId as FieldConfig,
-      connectors: allAvailableConnectors ?? [],
+      connectors: allAvailableConnectors,
     });
 
     const connectorWithName = {
@@ -265,7 +265,7 @@ export const EditConnector = React.memo(
                 <PushCallouts
                   errorsMsg={errorsMsg}
                   hasLicenseError={hasLicenseError}
-                  hasConnectors={allAvailableConnectors ? allAvailableConnectors.length > 0 : false}
+                  hasConnectors={allAvailableConnectors.length > 0}
                   onEditClick={onEditClick}
                 />
               </EuiFlexItem>

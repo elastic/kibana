@@ -84,7 +84,6 @@ export const CaseViewActivity = ({
   );
 
   const { onUpdateField, isLoading, loadingKey } = useOnUpdateField({
-    caseId: caseData.id,
     caseData,
   });
 
