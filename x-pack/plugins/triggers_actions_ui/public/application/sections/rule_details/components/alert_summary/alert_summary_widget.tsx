@@ -21,6 +21,7 @@ export const AlertSummaryWidget = ({
   fullSize,
   onClick = () => {},
   timeRange,
+  chartThemes,
 }: AlertSummaryWidgetProps) => {
   const {
     alertSummary: { activeAlertCount, activeAlerts, recoveredAlertCount, recoveredAlerts },
@@ -41,6 +42,8 @@ export const AlertSummaryWidget = ({
       activeAlerts={activeAlerts}
       recoveredAlertCount={recoveredAlertCount}
       recoveredAlerts={recoveredAlerts}
+      dateFormat={timeRange.dateFormat}
+      chartThemes={chartThemes}
     />
   ) : (
     <AlertsSummaryWidgetCompact
@@ -50,6 +53,7 @@ export const AlertSummaryWidget = ({
       recoveredAlertCount={recoveredAlertCount}
       recoveredAlerts={recoveredAlerts}
       timeRangeTitle={timeRange.title}
+      chartThemes={chartThemes}
     />
   );
 };
