@@ -267,6 +267,7 @@ export function DiscoverSidebarComponent({
         };
       }
     }, []);
+  // todo
   const { fieldListGroupedProps } = useGroupedFields({
     dataViewId: (!isPlainRecord && selectedDataView?.id) || null, // passing `null` for text-based queries
     allFields,

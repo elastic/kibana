@@ -511,7 +511,7 @@ export class DataViewsService {
    */
   getFieldsForIndexPattern = async (
     indexPattern: DataView | DataViewSpec,
-    options?: GetFieldsOptions
+    options?: Omit<GetFieldsOptions, 'pattern'>
   ) =>
     this.getFieldsForWildcard({
       type: indexPattern.type,

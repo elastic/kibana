@@ -211,6 +211,8 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
 
   useEffect(() => {
     if (sidebarState.status === DiscoverSidebarReducerStatus.COMPLETED) {
+      // todo
+      console.log('*** refetchFieldsExistenceInfo');
       refetchFieldsExistenceInfo();
     }
     // refetching only if status changes

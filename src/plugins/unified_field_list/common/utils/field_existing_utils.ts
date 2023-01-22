@@ -67,14 +67,15 @@ export async function fetchFieldExistence({
     });
   }
 
+  // field list in slightly different format
   const allFields = buildFieldList(dataView, metaFields);
   const existingFieldList = await dataViewsService.getFieldsForIndexPattern(dataView, {
     // filled in by data views service
-    pattern: '',
     indexFilter: toQuery(timeFieldName, fromDate, toDate, dslQuery),
+    includeUnmapped: true,
   });
   return {
-    indexPatternTitle: dataView.title,
+    indexPatternTitle: dataView.getIndexPattern(),
     existingFieldNames: existingFields(existingFieldList, allFields),
   };
 }
@@ -125,6 +126,7 @@ async function legacyFetchFieldExistenceSampling({
  */
 export function buildFieldList(indexPattern: DataView, metaFields: string[]): Field[] {
   return indexPattern.fields.map((field) => {
+    // todo consider removing
     return {
       name: field.name,
       isScript: !!field.scripted,
@@ -236,6 +238,7 @@ export function existingFields(filteredFields: FieldSpec[], allFields: Field[]):
 /**
  * Exported only for unit tests.
  */
+// looks through all the docs to determine which fields are present
 export function legacyExistingFields(docs: estypes.SearchHit[], fields: Field[]): string[] {
   const missingFields = new Set(fields);
 

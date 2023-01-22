@@ -77,6 +77,7 @@ let lastFetchId: string = ''; // persist last fetch id to skip older requests/re
 export const useExistingFieldsFetcher = (
   params: ExistingFieldsFetcherParams
 ): ExistingFieldsFetcher => {
+  console.log('*** useExistingFieldsFetcher');
   const mountedRef = useRef<boolean>(true);
   const [activeRequests, setActiveRequests] = useState<number>(0);
   const isProcessing = activeRequests > 0;
@@ -125,6 +126,7 @@ export const useExistingFieldsFetcher = (
         info.hasDataViewRestrictions = true;
       } else {
         try {
+          // returns array of existing field names and name of index
           const result = await loadFieldExisting({
             dslQuery: await buildSafeEsQuery(
               dataView,
