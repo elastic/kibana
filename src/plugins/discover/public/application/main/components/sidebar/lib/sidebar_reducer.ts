@@ -70,10 +70,13 @@ export function discoverSidebarReducer(
   state: DiscoverSidebarReducerState,
   action: DiscoverSidebarReducerAction
 ): DiscoverSidebarReducerState {
+  console.log('*** discoverSidebarReducer');
   switch (action.type) {
     case DiscoverSidebarReducerActionType.RESET:
+      // empties field info
       return getInitialState(action.payload.dataView);
     case DiscoverSidebarReducerActionType.DATA_VIEW_SWITCHED:
+      // checks if data view is the same, otherwise empties field info
       return state.dataView === action.payload.dataView
         ? state // already updated in `DOCUMENTS_LOADED`
         : {
@@ -87,6 +90,7 @@ export function discoverSidebarReducer(
                 : state.status,
           };
     case DiscoverSidebarReducerActionType.DOCUMENTS_LOADING:
+      // has a list of fields
       return {
         ...state,
         fieldCounts: null,
@@ -94,9 +98,10 @@ export function discoverSidebarReducer(
         status: DiscoverSidebarReducerStatus.PROCESSING,
       };
     case DiscoverSidebarReducerActionType.DOCUMENTS_LOADED:
+      // todo this
       const mappedAndUnmappedFields = getDataViewFieldList(
         action.payload.dataView,
-        action.payload.fieldCounts,
+        action.payload.fieldCounts, // this is what it was waiting for
         action.payload.isPlainRecord
       );
       return {

@@ -20,7 +20,8 @@ export function calcFieldCounts(rows?: DataTableRecord[]) {
   rows.forEach((hit) => {
     const fields = Object.keys(hit.flattened);
     fields.forEach((fieldName) => {
-      counts[fieldName] = (counts[fieldName] || 0) + 1;
+      // todo try setting to 1
+      counts[fieldName] = 1;
     });
   });
 

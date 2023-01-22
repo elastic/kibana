@@ -44,6 +44,7 @@ import {
   DiscoverSidebarReducerActionType,
   DiscoverSidebarReducerStatus,
 } from './lib/sidebar_reducer';
+import { useSavedSearch } from '../../hooks/use_saved_search';
 
 export interface DiscoverSidebarResponsiveProps {
   /**
@@ -109,6 +110,8 @@ export interface DiscoverSidebarResponsiveProps {
    * list of available fields fetched from ES
    */
   availableFields$: AvailableFields$;
+
+  // fetch$: ReturnType<typeof useSavedSearch>['fetch$'];
 }
 
 /**
@@ -132,11 +135,38 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   );
   const selectedDataViewRef = useRef<DataView | null | undefined>(selectedDataView);
   const showFieldList = sidebarState.status !== DiscoverSidebarReducerStatus.INITIAL;
+  // todo verify if is correct
+  const useLegacy = services.uiSettings.get<boolean>('discover:sampleSize');
+
+  /*
+  useEffect(() => {
+    // if (useLegacy) {
+    //  return;
+    // }
+    const subscription = props.fetch$.subscribe(() => {
+      console.log('new fetch started');
+      dispatchSidebarStateAction({
+        type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADING,
+        payload: {
+          // I'm not sure why this exists
+          isPlainRecord: false,
+        },
+      });
+    });
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [props.fetch$, useLegacy]);
+  */
 
   useEffect(() => {
+    // if (!useLegacy) {
+    //   return;
+    // }
     const subscription = props.documents$.subscribe((documentState) => {
       const isPlainRecordType = documentState.recordRawType === RecordRawType.PLAIN;
 
+      // todo - make this parallel to fetch - what triggers new docs?
       switch (documentState?.fetchStatus) {
         case FetchStatus.UNINITIALIZED:
           dispatchSidebarStateAction({
@@ -179,7 +209,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       }
     });
     return () => subscription.unsubscribe();
-  }, [props.documents$, dispatchSidebarStateAction, selectedDataViewRef]);
+  }, [props.documents$, dispatchSidebarStateAction, selectedDataViewRef, useLegacy]);
 
   useEffect(() => {
     if (selectedDataView !== selectedDataViewRef.current) {
