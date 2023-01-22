@@ -18,7 +18,6 @@ import {
   EuiButtonEmpty,
   EuiLoadingSpinner,
   EuiButtonIcon,
-  EuiToolTip,
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { isEmpty, noop } from 'lodash/fp';
@@ -35,8 +34,8 @@ import * as i18n from './translations';
 import { getConnectorById, getConnectorsFormValidators } from '../utils';
 import { usePushToService } from '../use_push_to_service';
 import { useApplicationCapabilities } from '../../common/lib/kibana';
-import { CaseCallOut } from '../use_push_to_service/callout';
-import type { ErrorMessage } from '../use_push_to_service/callout/types';
+import { PushButton } from './push_button';
+import { PushCallouts } from './push_callouts';
 
 export interface EditConnectorProps {
   caseData: Case;
@@ -107,76 +106,6 @@ const initialState = {
   fields: null,
   editConnector: false,
 };
-
-interface PushButtonProps {
-  isLoading: boolean;
-  disabled: boolean;
-  errorsMsg: ErrorMessage[];
-  hasBeenPushed: boolean;
-  showTooltip: boolean;
-  connectorName: string;
-  pushToService: () => Promise<void>;
-}
-
-const PushButton: React.FC<PushButtonProps> = React.memo(
-  ({
-    disabled,
-    errorsMsg,
-    isLoading,
-    hasBeenPushed,
-    connectorName,
-    showTooltip,
-    pushToService,
-  }) => {
-    const button = (
-      <EuiButtonEmpty
-        data-test-subj="push-to-external-service"
-        iconType="importAction"
-        onClick={pushToService}
-        disabled={disabled}
-        isLoading={isLoading}
-      >
-        {hasBeenPushed ? i18n.UPDATE_THIRD(connectorName) : i18n.PUSH_THIRD(connectorName)}
-      </EuiButtonEmpty>
-    );
-
-    return showTooltip ? (
-      <EuiToolTip
-        position="top"
-        title={errorsMsg.length > 0 ? errorsMsg[0].title : i18n.PUSH_LOCKED_TITLE(connectorName)}
-        content={<p>{errorsMsg.length > 0 ? errorsMsg[0].description : i18n.PUSH_LOCKED_DESC}</p>}
-      >
-        {button}
-      </EuiToolTip>
-    ) : (
-      <>{button}</>
-    );
-  }
-);
-
-PushButton.displayName = 'PushButton';
-
-interface PushCalloutsProps {
-  hasConnectors: boolean;
-  hasLicenseError: boolean;
-  errorsMsg: ErrorMessage[];
-  onEditClick: () => void;
-}
-
-const PushCallouts: React.FC<PushCalloutsProps> = React.memo(
-  ({ hasConnectors, hasLicenseError, errorsMsg, onEditClick }) => {
-    return (
-      <CaseCallOut
-        hasConnectors={hasConnectors}
-        hasLicenseError={hasLicenseError}
-        messages={errorsMsg}
-        onEditClick={onEditClick}
-      />
-    );
-  }
-);
-
-PushCallouts.displayName = 'PushCallouts';
 
 export const EditConnector = React.memo(
   ({
