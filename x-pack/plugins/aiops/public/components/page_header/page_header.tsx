@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import React, { FC, useCallback } from 'react';
+import React, { FC, useCallback, useMemo } from 'react';
+
 import {
+  useIsWithinMaxBreakpoint,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
@@ -14,16 +16,39 @@ import {
   EuiPageContentHeader_Deprecated as EuiPageContentHeader,
   EuiPageContentHeaderSection_Deprecated as EuiPageContentHeaderSection,
 } from '@elastic/eui';
-import { FullTimeRangeSelectorProps } from '../full_time_range_selector/full_time_range_selector';
-import { useUrlState } from '../../hooks/use_url_state';
+
+import { useUrlState } from '@kbn/ml-url-state';
+import { useStorage } from '@kbn/ml-local-storage';
+import {
+  useTimefilter,
+  DatePickerWrapper,
+  FullTimeRangeSelector,
+  type FullTimeRangeSelectorProps,
+  FROZEN_TIER_PREFERENCE,
+} from '@kbn/ml-date-picker';
+
+import { useCss } from '../../hooks/use_css';
 import { useDataSource } from '../../hooks/use_data_source';
-import { useTimefilter } from '../../hooks/use_time_filter';
-import { FullTimeRangeSelector } from '../full_time_range_selector';
-import { DatePickerWrapper } from '../date_picker_wrapper';
+import {
+  AIOPS_FROZEN_TIER_PREFERENCE,
+  type AiOpsKey,
+  type AiOpsStorageMapped,
+} from '../../types/storage';
 
 export const PageHeader: FC = () => {
+  const { aiopsPageHeader, dataViewTitleHeader } = useCss();
+
   const [, setGlobalState] = useUrlState('_g');
   const { dataView } = useDataSource();
+
+  const [frozenDataPreference, setFrozenDataPreference] = useStorage<
+    AiOpsKey,
+    AiOpsStorageMapped<typeof AIOPS_FROZEN_TIER_PREFERENCE>
+  >(
+    AIOPS_FROZEN_TIER_PREFERENCE,
+    // By default we will exclude frozen data tier
+    FROZEN_TIER_PREFERENCE.EXCLUDE
+  );
 
   const timefilter = useTimefilter({
     timeRangeSelector: dataView.timeFieldName !== undefined,
@@ -37,44 +62,54 @@ export const PageHeader: FC = () => {
     [setGlobalState]
   );
 
-  return (
-    <>
-      <EuiFlexGroup gutterSize="none">
-        <EuiFlexItem>
-          <EuiPageContentHeader className="aiopsPageHeader">
-            <EuiPageContentHeaderSection>
-              <div className="dataViewTitleHeader">
-                <EuiTitle size="s">
-                  <h2>{dataView.getName()}</h2>
-                </EuiTitle>
-              </div>
-            </EuiPageContentHeaderSection>
+  const hasValidTimeField = useMemo(
+    () => dataView.timeFieldName !== undefined && dataView.timeFieldName !== '',
+    [dataView.timeFieldName]
+  );
 
-            <EuiFlexGroup
-              alignItems="center"
-              justifyContent="flexEnd"
-              gutterSize="s"
-              data-test-subj="aiopsTimeRangeSelectorSection"
-            >
-              {dataView.timeFieldName !== undefined && (
-                <EuiFlexItem grow={false}>
-                  <FullTimeRangeSelector
-                    dataView={dataView}
-                    query={undefined}
-                    disabled={false}
-                    timefilter={timefilter}
-                    callback={updateTimeState}
-                  />
-                </EuiFlexItem>
-              )}
+  const isWithinLBreakpoint = useIsWithinMaxBreakpoint('l');
+
+  return (
+    <EuiFlexGroup gutterSize="none">
+      <EuiFlexItem>
+        <EuiPageContentHeader css={aiopsPageHeader}>
+          <EuiPageContentHeaderSection>
+            <div css={dataViewTitleHeader}>
+              <EuiTitle size="s">
+                <h2>{dataView.getName()}</h2>
+              </EuiTitle>
+            </div>
+          </EuiPageContentHeaderSection>
+
+          {isWithinLBreakpoint ? <EuiSpacer size="m" /> : null}
+          <EuiFlexGroup
+            alignItems="center"
+            justifyContent="flexEnd"
+            gutterSize="s"
+            data-test-subj="aiopsTimeRangeSelectorSection"
+          >
+            {hasValidTimeField ? (
               <EuiFlexItem grow={false}>
-                <DatePickerWrapper />
+                <FullTimeRangeSelector
+                  frozenDataPreference={frozenDataPreference}
+                  setFrozenDataPreference={setFrozenDataPreference}
+                  dataView={dataView}
+                  query={undefined}
+                  disabled={false}
+                  timefilter={timefilter}
+                  callback={updateTimeState}
+                />
               </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPageContentHeader>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer />
-    </>
+            ) : null}
+            <EuiFlexItem grow={false}>
+              <DatePickerWrapper
+                isAutoRefreshOnly={!hasValidTimeField}
+                showRefresh={!hasValidTimeField}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPageContentHeader>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

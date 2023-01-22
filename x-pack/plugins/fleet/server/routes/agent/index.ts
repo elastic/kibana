@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import type { FleetAuthzRouter } from '../../services/security';
+import type { FleetAuthz } from '../../../common';
+
+import { getRouteRequiredAuthz, type FleetAuthzRouter } from '../../services/security';
 
 import { AGENT_API_ROUTES } from '../../constants';
 import {
@@ -34,6 +36,8 @@ import * as AgentService from '../../services/agents';
 import type { FleetConfigType } from '../..';
 
 import { PostBulkUpdateAgentTagsRequestSchema } from '../../types/rest_spec/agent';
+
+import { calculateRouteAuthz } from '../../services/security/security';
 
 import {
   getAgentsHandler,
@@ -234,9 +238,11 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     {
       path: AGENT_API_ROUTES.STATUS_PATTERN,
       validate: GetAgentStatusRequestSchema,
-      fleetAuthz: {
-        fleet: { all: true },
-      },
+      fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
+        calculateRouteAuthz(
+          fleetAuthz,
+          getRouteRequiredAuthz('get', AGENT_API_ROUTES.STATUS_PATTERN)
+        ).granted,
     },
     getAgentStatusForAgentPolicyHandler
   );

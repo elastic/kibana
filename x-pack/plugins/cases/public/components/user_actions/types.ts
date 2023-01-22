@@ -41,6 +41,7 @@ type UnsupportedUserActionTypes = typeof UNSUPPORTED_ACTION_TYPES[number];
 export type SupportedUserActionTypes = keyof Omit<typeof ActionTypes, UnsupportedUserActionTypes>;
 
 export interface UserActionBuilderArgs {
+  appId?: string;
   caseData: Case;
   userProfiles: Map<string, UserProfileWithAvatar>;
   currentUserProfile: CurrentUserProfile;

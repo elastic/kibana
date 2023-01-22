@@ -7,17 +7,18 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+
+import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import { asPercentWithTwoDecimals } from '../../../../common/utils/formatters';
-import { SLO } from '../../../typings';
-import { isSloHealthy } from '../helpers/is_slo_healthy';
 import { getSloDifference } from '../helpers/get_slo_difference';
 
 export interface SloSummaryStatsProps {
-  slo: SLO;
+  slo: SLOWithSummaryResponse;
 }
 
 export function SloSummaryStats({ slo }: SloSummaryStatsProps) {
-  const isHealthy = isSloHealthy(slo);
+  const titleColor = slo.summary.status === 'VIOLATED' ? 'danger' : '';
   const { label } = getSloDifference(slo);
 
   return (
@@ -29,18 +30,22 @@ export function SloSummaryStats({ slo }: SloSummaryStatsProps) {
               description={i18n.translate('xpack.observability.slos.slo.stats.observedValue', {
                 defaultMessage: 'Observed value',
               })}
-              title={asPercentWithTwoDecimals(slo.summary.sliValue, 1, 'n/a')}
-              titleColor={isHealthy ? '' : 'danger'}
+              title={
+                slo.summary.status === 'NO_DATA'
+                  ? NOT_AVAILABLE_LABEL
+                  : asPercentWithTwoDecimals(slo.summary.sliValue, 1)
+              }
+              titleColor={titleColor}
               titleSize="m"
               reverse
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false} style={{ width: 110 }}>
             <EuiStat
-              description={i18n.translate('xpack.observability.slos.slo.stats.slo', {
-                defaultMessage: 'SLO',
+              description={i18n.translate('xpack.observability.slos.slo.stats.objective', {
+                defaultMessage: 'Objective',
               })}
-              title={asPercentWithTwoDecimals(slo.objective.target, 1, 'n/a')}
+              title={asPercentWithTwoDecimals(slo.objective.target, 1)}
               titleSize="m"
               reverse
             />
@@ -55,7 +60,7 @@ export function SloSummaryStats({ slo }: SloSummaryStatsProps) {
                 defaultMessage: 'Difference',
               })}
               title={label}
-              titleColor={isHealthy ? '' : 'danger'}
+              titleColor={titleColor}
               titleSize="m"
               reverse
             />
@@ -65,8 +70,8 @@ export function SloSummaryStats({ slo }: SloSummaryStatsProps) {
               description={i18n.translate('xpack.observability.slos.slo.stats.budgetRemaining', {
                 defaultMessage: 'Budget remaining',
               })}
-              title={asPercentWithTwoDecimals(slo.summary.errorBudget.remaining, 1, 'n/a')}
-              titleColor={isHealthy ? '' : 'danger'}
+              title={asPercentWithTwoDecimals(slo.summary.errorBudget.remaining, 1)}
+              titleColor={titleColor}
               titleSize="m"
               reverse
             />

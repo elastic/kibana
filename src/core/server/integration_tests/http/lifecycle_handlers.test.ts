@@ -60,6 +60,7 @@ describe('core lifecycle handlers', () => {
             xContentTypeOptions: 'nosniff',
             referrerPolicy: 'strict-origin-when-cross-origin',
             permissionsPolicy: null,
+            crossOriginOpenerPolicy: 'same-origin',
           },
           customResponseHeaders: {
             'some-header': 'some-value',

@@ -41,7 +41,7 @@
 19c35
 <       .withHelper('raw', function(options) {
 ---
->       .withHelper('raw', function (options) {
+>       .withHelper('raw', function (options: Handlebars.HelperOptions) {
 22d37
 <       .withMessage('raw block helper gets raw content')
 26c41
@@ -52,7 +52,7 @@
 <       .withHelper('raw', function(a, b, c, options) {
 <         return options.fn() + a + b + c;
 ---
->       .withHelper('raw', function (a, b, c, options) {
+>       .withHelper('raw', function (a, b, c, options: Handlebars.HelperOptions) {
 >         const ret = options.fn() + a + b + c;
 >         return ret;
 32d47
@@ -66,7 +66,7 @@
 39c54
 <         .withHelper('identity', function(options) {
 ---
->         .withHelper('identity', function (options) {
+>         .withHelper('identity', function (options: Handlebars.HelperOptions) {
 45c60
 <     it('helper for nested raw block gets raw content', function() {
 ---
@@ -99,7 +99,7 @@
 <         var byes = ['Goodbye', 'goodbye', 'GOODBYE'];
 <         for (var i = 0, j = byes.length; i < j; i++) {
 ---
->       .withHelper('goodbyes', function (this: any, options) {
+>       .withHelper('goodbyes', function (this: any, options: Handlebars.HelperOptions) {
 >         let out = '';
 >         const byes = ['Goodbye', 'goodbye', 'GOODBYE'];
 >         for (let i = 0, j = byes.length; i < j; i++) {
@@ -113,7 +113,7 @@
 <         var byes = ['Goodbye', 'goodbye', 'GOODBYE'];
 <         for (var i = 0, j = byes.length; i < j; i++) {
 ---
->       .withHelper('goodbyes', function (options) {
+>       .withHelper('goodbyes', function (options: Handlebars.HelperOptions) {
 >         let out = '';
 >         const byes = ['Goodbye', 'goodbye', 'GOODBYE'];
 >         for (let i = 0, j = byes.length; i < j; i++) {
@@ -141,7 +141,7 @@
 <           '</a>'
 <         );
 ---
->       .withHelper('link', function (this: any, prefix, options) {
+>       .withHelper('link', function (this: any, prefix, options: Handlebars.HelperOptions) {
 >         return '<a href="' + prefix + '/' + this.url + '">' + options.fn(this) + '</a>';
 130,133c135,136
 <   it('helper with complex lookup and nested template in VM+Compiler', function() {
@@ -167,7 +167,7 @@
 <           '</a>'
 <         );
 ---
->       .withHelper('link', function (this: any, prefix, options) {
+>       .withHelper('link', function (this: any, prefix, options: Handlebars.HelperOptions) {
 >         return '<a href="' + prefix + '/' + this.url + '">' + options.fn(this) + '</a>';
 152c147
 <   it('helper returning undefined value', function() {
@@ -188,7 +188,7 @@
 169c164
 <       .withHelper('goodbyes', function(options) {
 ---
->       .withHelper('goodbyes', function (options) {
+>       .withHelper('goodbyes', function (options: Handlebars.HelperOptions) {
 172d166
 <       .withMessage('Block helper executed')
 176c170
@@ -198,7 +198,7 @@
 179c173
 <       .withHelper('form', function(options) {
 ---
->       .withHelper('form', function (this: any, options) {
+>       .withHelper('form', function (this: any, options: Handlebars.HelperOptions) {
 182d175
 <       .withMessage('Block helper executed with current context')
 186,187c179,180
@@ -230,7 +230,7 @@
 213c204
 <       .withHelper('form', function(context, options) {
 ---
->       .withHelper('form', function (context, options) {
+>       .withHelper('form', function (context, options: Handlebars.HelperOptions) {
 216d206
 <       .withMessage('Context variable resolved')
 220c210
@@ -240,7 +240,7 @@
 223c213
 <       .withHelper('form', function(context, options) {
 ---
->       .withHelper('form', function (context, options) {
+>       .withHelper('form', function (context, options: Handlebars.HelperOptions) {
 226d215
 <       .withMessage('Complex path variable resolved')
 230,233c219,220
@@ -258,11 +258,11 @@
 237c224
 <       .withHelper('link', function(options) {
 ---
->       .withHelper('link', function (this: any, options) {
+>       .withHelper('link', function (this: any, options: Handlebars.HelperOptions) {
 240c227
 <       .withHelper('form', function(context, options) {
 ---
->       .withHelper('form', function (context, options) {
+>       .withHelper('form', function (context, options: Handlebars.HelperOptions) {
 243d229
 <       .withMessage('Both blocks executed')
 247,249c233,235
@@ -598,7 +598,7 @@
 539c480
 <         .withHelper('goodbye', function(cruel, world, options) {
 ---
->         .withHelper('goodbye', function (cruel, world, options) {
+>         .withHelper('goodbye', function (cruel, world, options: Handlebars.HelperOptions) {
 542d482
 <         .withMessage('block helpers with multiple params')
 547,548c487,488
@@ -610,7 +610,7 @@
 550c490
 <         .withHelper('goodbye', function(options) {
 ---
->         .withHelper('goodbye', function (options) {
+>         .withHelper('goodbye', function (options: Handlebars.HelperOptions) {
 561d500
 <         .withMessage('Helper output hash')
 565,566c504,505
@@ -630,7 +630,7 @@
 589c526
 <         .withHelper('goodbye', function(options) {
 ---
->         .withHelper('goodbye', function (this: any, options) {
+>         .withHelper('goodbye', function (this: any, options: Handlebars.HelperOptions) {
 600d536
 <         .withMessage('Hash parameters output')
 604c540
@@ -640,7 +640,7 @@
 606c542
 <         .withHelper('goodbye', function(options) {
 ---
->         .withHelper('goodbye', function (this: any, options) {
+>         .withHelper('goodbye', function (this: any, options: Handlebars.HelperOptions) {
 617d552
 <         .withMessage('Hash parameters output')
 621,622c556,557
@@ -670,7 +670,7 @@
 654c585
 <         .withHelper('helperMissing', function(mesg, options) {
 ---
->         .withHelper('helperMissing', function (mesg, options) {
+>         .withHelper('helperMissing', function (mesg, options: Handlebars.HelperOptions) {
 662c593
 <     it('if a value is not found, custom helperMissing is used', function() {
 ---
@@ -678,7 +678,7 @@
 665c596
 <         .withHelper('helperMissing', function(options) {
 ---
->         .withHelper('helperMissing', function (options) {
+>         .withHelper('helperMissing', function (options: Handlebars.HelperOptions) {
 674,675c605,606
 <   describe('knownHelpers', function() {
 <     it('Known helper should render helper', function() {
@@ -893,7 +893,7 @@
 869c791
 <         .withHelper('goodbye', function(options) {
 ---
->         .withHelper('goodbye', function (this: any, options) {
+>         .withHelper('goodbye', function (this: any, options: Handlebars.HelperOptions) {
 872c794
 <         .withHelper('cruel', function(world) {
 ---
@@ -931,7 +931,7 @@
 ---
 >     it('Scoped names take precedence over block helpers', () => {
 >       expectTemplate('{{#goodbye}} {{cruel world}}{{/goodbye}} {{this.goodbye}}')
->         .withHelper('goodbye', function (this: any, options) {
+>         .withHelper('goodbye', function (this: any, options: Handlebars.HelperOptions) {
 906c824
 <         .withHelper('cruel', function(world) {
 ---
@@ -952,7 +952,7 @@
 <         .withHelper('goodbyes', function(options) {
 <           equals(options.fn.blockParams, 1);
 ---
->         .withHelper('goodbyes', function (options) {
+>         .withHelper('goodbyes', function (options: Handlebars.HelperOptions) {
 >           expect(options.fn.blockParams).toEqual(1);
 929c846
 <     it('should take presedence over helper values', function() {
@@ -966,7 +966,7 @@
 <         .withHelper('goodbyes', function(options) {
 <           equals(options.fn.blockParams, 1);
 ---
->         .withHelper('goodbyes', function (options) {
+>         .withHelper('goodbyes', function (options: Handlebars.HelperOptions) {
 >           expect(options.fn.blockParams).toEqual(1);
 941,944c858,859
 <     it('should not take presedence over pathed values', function() {
@@ -984,7 +984,7 @@
 <         .withHelper('goodbyes', function(options) {
 <           equals(options.fn.blockParams, 1);
 ---
->         .withHelper('goodbyes', function (this: any, options) {
+>         .withHelper('goodbyes', function (this: any, options: Handlebars.HelperOptions) {
 >           expect(options.fn.blockParams).toEqual(1);
 956,957c871,872
 <     it('should take presednece over parent block params', function() {
@@ -1004,7 +1004,7 @@
 962c882
 <         .withHelper('goodbyes', function(options) {
 ---
->         .withHelper('goodbyes', function (options) {
+>         .withHelper('goodbyes', function (options: Handlebars.HelperOptions) {
 966,967c886
 <               blockParams:
 <                 options.fn.blockParams === 1 ? [value++, value++] : undefined
@@ -1022,7 +1022,7 @@
 <         .withHelper('goodbyes', function(options) {
 <           equals(options.fn.blockParams, 1);
 ---
->         .withHelper('goodbyes', function (options) {
+>         .withHelper('goodbyes', function (options: Handlebars.HelperOptions) {
 >           expect(options.fn.blockParams).toEqual(1);
 987,991c904,906
 <   describe('built-in helpers malformed arguments ', function() {
@@ -1088,11 +1088,18 @@
 ---
 >   describe('the lookupProperty-option', () => {
 >     it('should be passed to custom helpers', () => {
-1040c945
+1040,1042c945,950
 <         .withHelper('testHelper', function testHelper(options) {
+<           return options.lookupProperty(this, 'testProperty');
+<         })
 ---
->         .withHelper('testHelper', function testHelper(this: any, options) {
-1047a953,958
+>         .withHelper(
+>           'testHelper',
+>           function testHelper(this: any, options: Handlebars.HelperOptions) {
+>             return options.lookupProperty(this, 'testProperty');
+>           }
+>         )
+1047a956,961
 > 
 > function deleteAllKeys(obj: { [key: string]: any }) {
 >   for (const key of Object.keys(obj)) {

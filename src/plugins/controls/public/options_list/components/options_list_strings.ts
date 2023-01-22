@@ -48,6 +48,12 @@ export const OptionsListStrings = {
         defaultMessage: 'Popover for {fieldName} control',
         values: { fieldName },
       }),
+    getSuggestionsAriaLabel: (fieldName: string, optionCount: number) =>
+      i18n.translate('controls.optionsList.popover.suggestionsAriaLabel', {
+        defaultMessage:
+          'Available {optionCount, plural, one {option} other {options}} for {fieldName}',
+        values: { fieldName, optionCount },
+      }),
     getLoadingMessage: () =>
       i18n.translate('controls.optionsList.popover.loading', {
         defaultMessage: 'Loading options',
@@ -72,21 +78,17 @@ export const OptionsListStrings = {
       i18n.translate('controls.optionsList.popover.clearAllSelectionsTitle', {
         defaultMessage: 'Clear selections',
       }),
-    getTotalCardinalityTooltip: (totalOptions: number) =>
-      i18n.translate('controls.optionsList.popover.cardinalityTooltip', {
-        defaultMessage: '{totalOptions} available options.',
-        values: { totalOptions },
-      }),
     getTotalCardinalityPlaceholder: (totalOptions: number) =>
       i18n.translate('controls.optionsList.popover.cardinalityPlaceholder', {
         defaultMessage:
           'Search {totalOptions} available {totalOptions, plural, one {option} other {options}}',
         values: { totalOptions },
       }),
-    getInvalidSelectionsTitle: (invalidSelectionCount: number) =>
-      i18n.translate('controls.optionsList.popover.invalidSelectionsTitle', {
-        defaultMessage: '{invalidSelectionCount} selected options ignored',
-        values: { invalidSelectionCount },
+    getInvalidSelectionsSectionAriaLabel: (fieldName: string, invalidSelectionCount: number) =>
+      i18n.translate('controls.optionsList.popover.invalidSelectionsAriaLabel', {
+        defaultMessage:
+          'Ignored {invalidSelectionCount, plural, one {selection} other {selections}} for {fieldName}',
+        values: { fieldName, invalidSelectionCount },
       }),
     getInvalidSelectionsSectionTitle: (invalidSelectionCount: number) =>
       i18n.translate('controls.optionsList.popover.invalidSelectionsSectionTitle', {
@@ -94,15 +96,15 @@ export const OptionsListStrings = {
           'Ignored {invalidSelectionCount, plural, one {selection} other {selections}}',
         values: { invalidSelectionCount },
       }),
-    getInvalidSelectionsAriaLabel: () =>
-      i18n.translate('controls.optionsList.popover.invalidSelectionsAriaLabel', {
-        defaultMessage: 'Deselect all ignored selections',
-      }),
     getInvalidSelectionsTooltip: (selectedOptions: number) =>
       i18n.translate('controls.optionsList.popover.invalidSelectionsTooltip', {
         defaultMessage:
           '{selectedOptions} selected {selectedOptions, plural, one {option} other {options}} {selectedOptions, plural, one {is} other {are}} ignored because {selectedOptions, plural, one {it is} other {they are}} no longer in the data.',
         values: { selectedOptions },
+      }),
+    getInvalidSelectionScreenReaderText: () =>
+      i18n.translate('controls.optionsList.popover.invalidSelectionScreenReaderText', {
+        defaultMessage: 'Invalid selection.',
       }),
     getIncludeLabel: () =>
       i18n.translate('controls.optionsList.popover.includeLabel', {
@@ -126,7 +128,19 @@ export const OptionsListStrings = {
       }),
     getSortDisabledTooltip: () =>
       i18n.translate('controls.optionsList.popover.sortDisabledTooltip', {
-        defaultMessage: 'Ignore sorting when “Show only selected” is true.',
+        defaultMessage: 'Sorting is ignored when “Show only selected” is true',
+      }),
+    getDocumentCountTooltip: (documentCount: number) =>
+      i18n.translate('controls.optionsList.popover.documentCountTooltip', {
+        defaultMessage:
+          'This value appears in {documentCount, number} {documentCount, plural, one {document} other {documents}}',
+        values: { documentCount },
+      }),
+    getDocumentCountScreenReaderText: (documentCount: number) =>
+      i18n.translate('controls.optionsList.popover.documentCountScreenReaderText', {
+        defaultMessage:
+          'Appears in {documentCount, number} {documentCount, plural, one {document} other {documents}}',
+        values: { documentCount },
       }),
   },
   controlAndPopover: {

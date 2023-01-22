@@ -25,7 +25,6 @@
 // force ESM in this module
 export {};
 
-// eslint-disable-next-line import/no-extraneous-dependencies
 import 'cypress-react-selector';
 // import './coverage';
 

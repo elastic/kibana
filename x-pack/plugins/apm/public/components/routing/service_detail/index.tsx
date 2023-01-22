@@ -238,6 +238,7 @@ export const serviceDetail = {
               path: t.type({
                 groupId: t.string,
               }),
+              query: t.partial({ errorId: t.string }),
             }),
           },
           '/services/{serviceName}/errors': {

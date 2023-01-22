@@ -219,7 +219,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
   const shouldShowRulesTable = !isLoading && !isTableEmpty;
 
   const tableProps =
-    selectedTab === AllRulesTabs.rules
+    selectedTab === AllRulesTabs.management
       ? {
           'data-test-subj': 'rules-table',
           columns: rulesColumns,

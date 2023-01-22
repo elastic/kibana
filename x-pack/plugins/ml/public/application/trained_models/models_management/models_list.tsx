@@ -25,10 +25,12 @@ import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/bas
 import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { usePageUrlState } from '@kbn/ml-url-state';
+import { useTimefilter } from '@kbn/ml-date-picker';
 import { useModelActions } from './model_actions';
 import { ModelsTableToConfigMapping } from '.';
 import { ModelsBarStats, StatsBar } from '../../components/stats_bar';
-import { useMlKibana, useTimefilter } from '../../contexts/kibana';
+import { useMlKibana } from '../../contexts/kibana';
 import { useTrainedModelsApiService } from '../../services/ml_api_service/trained_models';
 import {
   ModelPipelines,
@@ -39,7 +41,6 @@ import { BUILT_IN_MODEL_TAG } from '../../../../common/constants/data_frame_anal
 import { DeleteModelsModal } from './delete_models_modal';
 import { ML_PAGES } from '../../../../common/constants/locator';
 import { ListingPageUrlState } from '../../../../common/types/common';
-import { usePageUrlState } from '../../util/url_state';
 import { ExpandedRow } from './expanded_row';
 import { useTableSettings } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
 import { useToastNotificationService } from '../../services/toast_notification_service';
@@ -58,6 +59,11 @@ export type ModelItem = TrainedModelConfigResponse & {
 };
 
 export type ModelItemFull = Required<ModelItem>;
+
+interface PageUrlState {
+  pageKey: typeof ML_PAGES.TRAINED_MODELS_MANAGE;
+  pageUrlState: ListingPageUrlState;
+}
 
 export const getDefaultModelsListState = (): ListingPageUrlState => ({
   pageIndex: 0,
@@ -88,7 +94,7 @@ export const ModelsList: FC<Props> = ({
   // allow for an internally controlled page state which stores the state in the URL
   // or an external page state, which is passed in as a prop.
   // external page state is used on the management page.
-  const [pageStateInternal, updatePageStateInternal] = usePageUrlState(
+  const [pageStateInternal, updatePageStateInternal] = usePageUrlState<PageUrlState>(
     ML_PAGES.TRAINED_MODELS_MANAGE,
     getDefaultModelsListState()
   );

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 
 import { I18nProvider } from '@kbn/i18n-react';
 
@@ -58,7 +58,7 @@ describe('Transform: <DefinePivotForm />', () => {
 
     const searchItems = {
       dataView: {
-        title: 'the-data-view-title',
+        getIndexPattern: () => 'the-data-view-index-pattern',
         fields: [] as any[],
       } as SearchItems['dataView'],
     };
@@ -82,9 +82,13 @@ describe('Transform: <DefinePivotForm />', () => {
     );
 
     // Act
+
     // Assert
-    expect(getByText('Data view')).toBeInTheDocument();
-    expect(getByText(searchItems.dataView.title)).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(getByText('Data view')).toBeInTheDocument();
+      expect(getByText(searchItems.dataView.getIndexPattern())).toBeInTheDocument();
+    });
   });
 });
 

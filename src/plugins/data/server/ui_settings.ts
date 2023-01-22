@@ -166,12 +166,12 @@ export function getUiSettings(
     },
     defaultIndex: {
       name: i18n.translate('data.advancedSettings.defaultIndexTitle', {
-        defaultMessage: 'Default index',
+        defaultMessage: 'Default data view',
       }),
       value: null,
       type: 'string',
       description: i18n.translate('data.advancedSettings.defaultIndexText', {
-        defaultMessage: 'The index to access if no index is set',
+        defaultMessage: 'Used by discover and visualizations when a data view is not set.',
       }),
       schema: schema.nullable(schema.string()),
     },

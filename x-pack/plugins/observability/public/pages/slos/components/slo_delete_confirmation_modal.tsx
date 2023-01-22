@@ -8,12 +8,12 @@
 import { EuiConfirmModal } from '@elastic/eui';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useKibana } from '../../../utils/kibana_react';
 import { useDeleteSlo } from '../../../hooks/slo/use_delete_slo';
-import { SLO } from '../../../typings';
 
 export interface SloDeleteConfirmationModalProps {
-  slo: SLO;
+  slo: SLOWithSummaryResponse;
   onCancel: () => void;
   onDeleting: () => void;
   onDeleted: () => void;

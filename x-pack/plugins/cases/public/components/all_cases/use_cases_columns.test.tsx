@@ -49,8 +49,10 @@ describe('useCasesColumns ', () => {
       Object {
         "columns": Array [
           Object {
+            "field": "title",
             "name": "Name",
             "render": [Function],
+            "sortable": true,
             "width": "20%",
           },
           Object {
@@ -91,16 +93,28 @@ describe('useCasesColumns ', () => {
             "sortable": true,
           },
           Object {
+            "field": "updatedAt",
+            "name": "Updated on",
+            "render": [Function],
+            "sortable": true,
+            "width": undefined,
+          },
+          Object {
             "name": "External Incident",
             "render": [Function],
+            "width": undefined,
           },
           Object {
+            "field": "status",
             "name": "Status",
             "render": [Function],
+            "sortable": true,
           },
           Object {
+            "field": "severity",
             "name": "Severity",
             "render": [Function],
+            "sortable": true,
           },
           Object {
             "align": "right",
@@ -130,9 +144,11 @@ describe('useCasesColumns ', () => {
       Object {
         "columns": Array [
           Object {
+            "field": "title",
             "name": "Name",
             "render": [Function],
-            "width": "20%",
+            "sortable": true,
+            "width": undefined,
           },
           Object {
             "field": "assignees",
@@ -144,14 +160,14 @@ describe('useCasesColumns ', () => {
             "field": "tags",
             "name": "Tags",
             "render": [Function],
-            "width": "15%",
+            "width": undefined,
           },
           Object {
             "align": "right",
             "field": "totalAlerts",
             "name": "Alerts",
             "render": [Function],
-            "width": "80px",
+            "width": "55px",
           },
           Object {
             "align": "right",
@@ -172,16 +188,28 @@ describe('useCasesColumns ', () => {
             "sortable": true,
           },
           Object {
+            "field": "updatedAt",
+            "name": "Updated on",
+            "render": [Function],
+            "sortable": true,
+            "width": "80px",
+          },
+          Object {
             "name": "External Incident",
             "render": [Function],
+            "width": "80px",
           },
           Object {
+            "field": "status",
             "name": "Status",
             "render": [Function],
+            "sortable": true,
           },
           Object {
+            "field": "severity",
             "name": "Severity",
             "render": [Function],
+            "sortable": true,
           },
           Object {
             "align": "right",
@@ -210,8 +238,10 @@ describe('useCasesColumns ', () => {
       Object {
         "columns": Array [
           Object {
+            "field": "title",
             "name": "Name",
             "render": [Function],
+            "sortable": true,
             "width": "20%",
           },
           Object {
@@ -246,16 +276,28 @@ describe('useCasesColumns ', () => {
             "sortable": true,
           },
           Object {
+            "field": "updatedAt",
+            "name": "Updated on",
+            "render": [Function],
+            "sortable": true,
+            "width": undefined,
+          },
+          Object {
             "name": "External Incident",
             "render": [Function],
+            "width": undefined,
           },
           Object {
+            "field": "status",
             "name": "Status",
             "render": [Function],
+            "sortable": true,
           },
           Object {
+            "field": "severity",
             "name": "Severity",
             "render": [Function],
+            "sortable": true,
           },
           Object {
             "align": "right",
@@ -282,8 +324,10 @@ describe('useCasesColumns ', () => {
       Object {
         "columns": Array [
           Object {
+            "field": "title",
             "name": "Name",
             "render": [Function],
+            "sortable": true,
             "width": "20%",
           },
           Object {
@@ -317,16 +361,28 @@ describe('useCasesColumns ', () => {
             "sortable": true,
           },
           Object {
+            "field": "updatedAt",
+            "name": "Updated on",
+            "render": [Function],
+            "sortable": true,
+            "width": undefined,
+          },
+          Object {
             "name": "External Incident",
             "render": [Function],
+            "width": undefined,
           },
           Object {
+            "field": "status",
             "name": "Status",
             "render": [Function],
+            "sortable": true,
           },
           Object {
+            "field": "severity",
             "name": "Severity",
             "render": [Function],
+            "sortable": true,
           },
           Object {
             "align": "right",
@@ -347,8 +403,10 @@ describe('useCasesColumns ', () => {
       Object {
         "columns": Array [
           Object {
+            "field": "title",
             "name": "Name",
             "render": [Function],
+            "sortable": true,
             "width": "20%",
           },
           Object {
@@ -383,16 +441,28 @@ describe('useCasesColumns ', () => {
             "sortable": true,
           },
           Object {
+            "field": "updatedAt",
+            "name": "Updated on",
+            "render": [Function],
+            "sortable": true,
+            "width": undefined,
+          },
+          Object {
             "name": "External Incident",
             "render": [Function],
+            "width": undefined,
           },
           Object {
+            "field": "status",
             "name": "Status",
             "render": [Function],
+            "sortable": true,
           },
           Object {
+            "field": "severity",
             "name": "Severity",
             "render": [Function],
+            "sortable": true,
           },
           Object {
             "align": "right",
@@ -418,8 +488,10 @@ describe('useCasesColumns ', () => {
       Object {
         "columns": Array [
           Object {
+            "field": "title",
             "name": "Name",
             "render": [Function],
+            "sortable": true,
             "width": "20%",
           },
           Object {
@@ -454,16 +526,28 @@ describe('useCasesColumns ', () => {
             "sortable": true,
           },
           Object {
+            "field": "updatedAt",
+            "name": "Updated on",
+            "render": [Function],
+            "sortable": true,
+            "width": undefined,
+          },
+          Object {
             "name": "External Incident",
             "render": [Function],
+            "width": undefined,
           },
           Object {
+            "field": "status",
             "name": "Status",
             "render": [Function],
+            "sortable": true,
           },
           Object {
+            "field": "severity",
             "name": "Severity",
             "render": [Function],
+            "sortable": true,
           },
           Object {
             "align": "right",
@@ -487,22 +571,24 @@ describe('useCasesColumns ', () => {
       Object {
         "columns": Array [
           Object {
+            "field": "title",
             "name": "Name",
             "render": [Function],
-            "width": "20%",
+            "sortable": true,
+            "width": undefined,
           },
           Object {
             "field": "tags",
             "name": "Tags",
             "render": [Function],
-            "width": "15%",
+            "width": undefined,
           },
           Object {
             "align": "right",
             "field": "totalAlerts",
             "name": "Alerts",
             "render": [Function],
-            "width": "80px",
+            "width": "55px",
           },
           Object {
             "align": "right",
@@ -523,16 +609,28 @@ describe('useCasesColumns ', () => {
             "sortable": true,
           },
           Object {
+            "field": "updatedAt",
+            "name": "Updated on",
+            "render": [Function],
+            "sortable": true,
+            "width": "80px",
+          },
+          Object {
             "name": "External Incident",
             "render": [Function],
+            "width": "80px",
           },
           Object {
+            "field": "status",
             "name": "Status",
             "render": [Function],
+            "sortable": true,
           },
           Object {
+            "field": "severity",
             "name": "Severity",
             "render": [Function],
+            "sortable": true,
           },
           Object {
             "align": "right",
@@ -555,22 +653,24 @@ describe('useCasesColumns ', () => {
       Object {
         "columns": Array [
           Object {
+            "field": "title",
             "name": "Name",
             "render": [Function],
-            "width": "20%",
+            "sortable": true,
+            "width": undefined,
           },
           Object {
             "field": "tags",
             "name": "Tags",
             "render": [Function],
-            "width": "15%",
+            "width": undefined,
           },
           Object {
             "align": "right",
             "field": "totalAlerts",
             "name": "Alerts",
             "render": [Function],
-            "width": "80px",
+            "width": "55px",
           },
           Object {
             "align": "right",
@@ -591,16 +691,28 @@ describe('useCasesColumns ', () => {
             "sortable": true,
           },
           Object {
+            "field": "updatedAt",
+            "name": "Updated on",
+            "render": [Function],
+            "sortable": true,
+            "width": "80px",
+          },
+          Object {
             "name": "External Incident",
             "render": [Function],
+            "width": "80px",
           },
           Object {
+            "field": "status",
             "name": "Status",
             "render": [Function],
+            "sortable": true,
           },
           Object {
+            "field": "severity",
             "name": "Severity",
             "render": [Function],
+            "sortable": true,
           },
           Object {
             "align": "right",
@@ -622,8 +734,10 @@ describe('useCasesColumns ', () => {
       Object {
         "columns": Array [
           Object {
+            "field": "title",
             "name": "Name",
             "render": [Function],
+            "sortable": true,
             "width": "20%",
           },
           Object {
@@ -658,16 +772,28 @@ describe('useCasesColumns ', () => {
             "sortable": true,
           },
           Object {
+            "field": "updatedAt",
+            "name": "Updated on",
+            "render": [Function],
+            "sortable": true,
+            "width": undefined,
+          },
+          Object {
             "name": "External Incident",
             "render": [Function],
+            "width": undefined,
           },
           Object {
+            "field": "status",
             "name": "Status",
             "render": [Function],
+            "sortable": true,
           },
           Object {
+            "field": "severity",
             "name": "Severity",
             "render": [Function],
+            "sortable": true,
           },
         ],
       }

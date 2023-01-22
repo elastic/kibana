@@ -12,7 +12,7 @@ import { mount } from 'enzyme';
 
 import { EuiSelect } from '@elastic/eui';
 
-import { UrlStateProvider } from '../../../util/url_state';
+import { UrlStateProvider } from '@kbn/ml-url-state';
 
 import { SelectInterval } from './select_interval';
 

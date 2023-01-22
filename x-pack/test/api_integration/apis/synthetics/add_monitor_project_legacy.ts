@@ -5,7 +5,7 @@
  * 2.0.
  */
 import fetch, { BodyInit, HeadersInit, Response } from 'node-fetch';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
 import { format as formatUrl } from 'url';
 import {
@@ -45,7 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
     const setUniqueIds = (request: LegacyProjectMonitorsRequest) => {
       return {
         ...request,
-        monitors: request.monitors.map((monitor) => ({ ...monitor, id: uuid.v4() })),
+        monitors: request.monitors.map((monitor) => ({ ...monitor, id: uuidv4() })),
       };
     };
 
@@ -138,6 +138,11 @@ export default function ({ getService }: FtrProviderContext) {
             config_id: decryptedCreatedMonitor.body.id,
             custom_heartbeat_id: `${journeyId}-test-suite-default`,
             enabled: true,
+            alert: {
+              status: {
+                enabled: true,
+              },
+            },
             'filter_journeys.match': 'check if title is present',
             'filter_journeys.tags': [],
             form_monitor_type: 'multistep',
@@ -223,8 +228,8 @@ export default function ({ getService }: FtrProviderContext) {
         expect(messages[2].failedMonitors).eql([
           {
             id: httpProjectMonitors.monitors[0].id,
-            details: `Multiple urls are not supported for http project monitors in ${kibanaVersion}. Please set only 1 url per monitor. You monitor was not created or updated.`,
-            reason: 'Unsupported Heartbeat option',
+            details: `\`http\` project monitors must have exactly one value for field \`urls\` in version \`${kibanaVersion}\`. Your monitor was not created or updated.`,
+            reason: 'Invalid Heartbeat configuration',
           },
           {
             id: httpProjectMonitors.monitors[0].id,
@@ -265,6 +270,11 @@ export default function ({ getService }: FtrProviderContext) {
               'Content-Type': 'application/x-www-form-urlencoded',
             },
             enabled: false,
+            alert: {
+              status: {
+                enabled: true,
+              },
+            },
             form_monitor_type: 'http',
             journey_id: journeyId,
             locations: [
@@ -335,8 +345,8 @@ export default function ({ getService }: FtrProviderContext) {
         expect(messages[2].failedMonitors).eql([
           {
             id: tcpProjectMonitors.monitors[2].id,
-            details: `Multiple hosts are not supported for tcp project monitors in ${kibanaVersion}. Please set only 1 host per monitor. You monitor was not created or updated.`,
-            reason: 'Unsupported Heartbeat option',
+            details: `\`tcp\` project monitors must have exactly one value for field \`hosts\` in version \`${kibanaVersion}\`. Your monitor was not created or updated.`,
+            reason: 'Invalid Heartbeat configuration',
           },
           {
             id: tcpProjectMonitors.monitors[2].id,
@@ -367,6 +377,11 @@ export default function ({ getService }: FtrProviderContext) {
             'check.receive': '',
             'check.send': '',
             enabled: true,
+            alert: {
+              status: {
+                enabled: true,
+              },
+            },
             form_monitor_type: 'tcp',
             journey_id: journeyId,
             locations: [
@@ -434,8 +449,8 @@ export default function ({ getService }: FtrProviderContext) {
         expect(messages[2].failedMonitors).eql([
           {
             id: icmpProjectMonitors.monitors[2].id,
-            details: `Multiple hosts are not supported for icmp project monitors in ${kibanaVersion}. Please set only 1 host per monitor. You monitor was not created or updated.`,
-            reason: 'Unsupported Heartbeat option',
+            details: `\`icmp\` project monitors must have exactly one value for field \`hosts\` in version \`${kibanaVersion}\`. Your monitor was not created or updated.`,
+            reason: 'Invalid Heartbeat configuration',
           },
           {
             id: icmpProjectMonitors.monitors[2].id,
@@ -461,6 +476,11 @@ export default function ({ getService }: FtrProviderContext) {
             config_id: decryptedCreatedMonitor.body.id,
             custom_heartbeat_id: `${journeyId}-test-suite-default`,
             enabled: true,
+            alert: {
+              status: {
+                enabled: true,
+              },
+            },
             form_monitor_type: 'icmp',
             journey_id: journeyId,
             locations: [
@@ -804,8 +824,8 @@ export default function ({ getService }: FtrProviderContext) {
       const username = 'admin';
       const roleName = `synthetics_admin`;
       const password = `${username}-password`;
-      const SPACE_ID = `test-space-${uuid.v4()}`;
-      const SPACE_NAME = `test-space-name ${uuid.v4()}`;
+      const SPACE_ID = `test-space-${uuidv4()}`;
+      const SPACE_NAME = `test-space-name ${uuidv4()}`;
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
       try {
         await security.role.create(roleName, {
@@ -941,8 +961,8 @@ export default function ({ getService }: FtrProviderContext) {
       const username = 'admin';
       const roleName = `synthetics_admin`;
       const password = `${username}-password`;
-      const SPACE_ID = `test-space-${uuid.v4()}`;
-      const SPACE_NAME = `test-space-name ${uuid.v4()}`;
+      const SPACE_ID = `test-space-${uuidv4()}`;
+      const SPACE_NAME = `test-space-name ${uuidv4()}`;
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
       try {
         await security.role.create(roleName, {
@@ -995,8 +1015,8 @@ export default function ({ getService }: FtrProviderContext) {
       const username = 'admin';
       const roleName = `synthetics_admin`;
       const password = `${username}-password`;
-      const SPACE_ID = `test-space-${uuid.v4()}`;
-      const SPACE_NAME = `test-space-name ${uuid.v4()}`;
+      const SPACE_ID = `test-space-${uuidv4()}`;
+      const SPACE_NAME = `test-space-name ${uuidv4()}`;
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
       try {
         await security.role.create(roleName, {

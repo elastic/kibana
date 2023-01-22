@@ -156,7 +156,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
 
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
   const canSaveRule =
-    hasAllPrivilege(rule, ruleType) &&
+    hasAllPrivilege(rule.consumer, ruleType) &&
     // if the rule has actions, can the user save the rule's action params
     (canExecuteActions || (!canExecuteActions && rule.actions.length === 0));
 

@@ -277,6 +277,12 @@ export function getCoreUsageCollector(
                   'Indicates if security headers to disable embedding have been configured.',
               },
             },
+            crossOriginOpenerPolicy: {
+              type: 'keyword',
+              _meta: {
+                description: 'The crossOriginOpenerPolicy response header, "NULL" if disabled.',
+              },
+            },
           },
         },
 

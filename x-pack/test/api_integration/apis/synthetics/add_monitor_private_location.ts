@@ -5,7 +5,7 @@
  * 2.0.
  */
 import semver from 'semver';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { ConfigKey, HTTPFields } from '@kbn/synthetics-plugin/common/runtime_types';
 import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters';
@@ -242,12 +242,12 @@ export default function ({ getService }: FtrProviderContext) {
       const username = 'admin';
       const password = `${username}-password`;
       const roleName = 'uptime-role';
-      const SPACE_ID = `test-space-${uuid.v4()}`;
-      const SPACE_NAME = `test-space-name ${uuid.v4()}`;
+      const SPACE_ID = `test-space-${uuidv4()}`;
+      const SPACE_NAME = `test-space-name ${uuidv4()}`;
       let monitorId = '';
       const monitor = {
         ...httpMonitorJson,
-        name: `Test monitor ${uuid.v4()}`,
+        name: `Test monitor ${uuidv4()}`,
         [ConfigKey.NAMESPACE]: 'default',
         locations: [
           {
@@ -267,6 +267,7 @@ export default function ({ getService }: FtrProviderContext) {
                 uptime: ['all'],
                 fleet: ['all'],
                 fleetv2: ['all'],
+                actions: ['all'],
               },
               spaces: ['*'],
             },
@@ -334,7 +335,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const monitor = {
         ...httpMonitorJson,
-        name: `Test monitor ${uuid.v4()}`,
+        name: `Test monitor ${uuidv4()}`,
         [ConfigKey.NAMESPACE]: 'default',
         locations: [
           {

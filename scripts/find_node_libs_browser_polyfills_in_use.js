@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-require('../src/setup_node_env/no_transpilation');
+require('../src/setup_node_env');
 require('@kbn/optimizer').runFindNodeLibsBrowserPolyfillsInEntryBundlesCli();

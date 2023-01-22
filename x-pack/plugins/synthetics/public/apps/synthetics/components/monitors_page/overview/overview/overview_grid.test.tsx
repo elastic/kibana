@@ -29,6 +29,7 @@ describe('Overview Grid', () => {
         },
         name: `Monitor ${i}`,
         isEnabled: true,
+        isStatusAlertEnabled: true,
       });
       data.push({
         id: `${i}`,
@@ -39,6 +40,7 @@ describe('Overview Grid', () => {
         },
         name: `Monitor ${i}`,
         isEnabled: true,
+        isStatusAlertEnabled: true,
       });
     }
     return data;

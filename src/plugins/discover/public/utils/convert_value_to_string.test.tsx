@@ -15,7 +15,7 @@ describe('convertValueToString', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
       dataView: discoverGridContextComplexMock.dataView,
-      services: discoverServiceMock,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'keyword_key',
       rowIndex: 0,
       options: {
@@ -30,7 +30,7 @@ describe('convertValueToString', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
       dataView: discoverGridContextComplexMock.dataView,
-      services: discoverServiceMock,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'text_message',
       rowIndex: 0,
       options: {
@@ -45,7 +45,7 @@ describe('convertValueToString', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
       dataView: discoverGridContextComplexMock.dataView,
-      services: discoverServiceMock,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'text_message',
       rowIndex: 1,
       options: {
@@ -61,7 +61,7 @@ describe('convertValueToString', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
       dataView: discoverGridContextComplexMock.dataView,
-      services: discoverServiceMock,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'number_price',
       rowIndex: 0,
       options: {
@@ -76,7 +76,7 @@ describe('convertValueToString', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
       dataView: discoverGridContextComplexMock.dataView,
-      services: discoverServiceMock,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'date',
       rowIndex: 0,
       options: {
@@ -91,7 +91,7 @@ describe('convertValueToString', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
       dataView: discoverGridContextComplexMock.dataView,
-      services: discoverServiceMock,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'date_nanos',
       rowIndex: 0,
       options: {
@@ -106,7 +106,7 @@ describe('convertValueToString', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
       dataView: discoverGridContextComplexMock.dataView,
-      services: discoverServiceMock,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'bool_enabled',
       rowIndex: 0,
       options: {
@@ -121,7 +121,7 @@ describe('convertValueToString', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
       dataView: discoverGridContextComplexMock.dataView,
-      services: discoverServiceMock,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'binary_blob',
       rowIndex: 0,
       options: {
@@ -136,7 +136,7 @@ describe('convertValueToString', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
       dataView: discoverGridContextComplexMock.dataView,
-      services: discoverServiceMock,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'object_user.first',
       rowIndex: 0,
       options: {
@@ -151,7 +151,7 @@ describe('convertValueToString', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
       dataView: discoverGridContextComplexMock.dataView,
-      services: discoverServiceMock,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'nested_user',
       rowIndex: 0,
       options: {
@@ -168,7 +168,7 @@ describe('convertValueToString', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
       dataView: discoverGridContextComplexMock.dataView,
-      services: discoverServiceMock,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'flattened_labels',
       rowIndex: 0,
       options: {
@@ -183,7 +183,7 @@ describe('convertValueToString', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
       dataView: discoverGridContextComplexMock.dataView,
-      services: discoverServiceMock,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'range_time_frame',
       rowIndex: 0,
       options: {
@@ -200,7 +200,7 @@ describe('convertValueToString', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
       dataView: discoverGridContextComplexMock.dataView,
-      services: discoverServiceMock,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'rank_features',
       rowIndex: 0,
       options: {
@@ -215,7 +215,7 @@ describe('convertValueToString', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
       dataView: discoverGridContextComplexMock.dataView,
-      services: discoverServiceMock,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'histogram',
       rowIndex: 0,
       options: {
@@ -230,7 +230,7 @@ describe('convertValueToString', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
       dataView: discoverGridContextComplexMock.dataView,
-      services: discoverServiceMock,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'ip_addr',
       rowIndex: 0,
       options: {
@@ -245,7 +245,7 @@ describe('convertValueToString', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
       dataView: discoverGridContextComplexMock.dataView,
-      services: discoverServiceMock,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'version',
       rowIndex: 0,
       options: {
@@ -260,7 +260,7 @@ describe('convertValueToString', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
       dataView: discoverGridContextComplexMock.dataView,
-      services: discoverServiceMock,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'vector',
       rowIndex: 0,
       options: {
@@ -275,7 +275,7 @@ describe('convertValueToString', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
       dataView: discoverGridContextComplexMock.dataView,
-      services: discoverServiceMock,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'geo_point',
       rowIndex: 0,
       options: {
@@ -290,7 +290,7 @@ describe('convertValueToString', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
       dataView: discoverGridContextComplexMock.dataView,
-      services: discoverServiceMock,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'geo_point',
       rowIndex: 1,
       options: {
@@ -305,7 +305,7 @@ describe('convertValueToString', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
       dataView: discoverGridContextComplexMock.dataView,
-      services: discoverServiceMock,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'array_tags',
       rowIndex: 0,
       options: {
@@ -320,7 +320,7 @@ describe('convertValueToString', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
       dataView: discoverGridContextComplexMock.dataView,
-      services: discoverServiceMock,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'geometry',
       rowIndex: 0,
       options: {
@@ -337,7 +337,7 @@ describe('convertValueToString', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
       dataView: discoverGridContextComplexMock.dataView,
-      services: discoverServiceMock,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'runtime_number',
       rowIndex: 0,
       options: {
@@ -352,7 +352,7 @@ describe('convertValueToString', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
       dataView: discoverGridContextComplexMock.dataView,
-      services: discoverServiceMock,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'scripted_string',
       rowIndex: 0,
       options: {
@@ -367,7 +367,7 @@ describe('convertValueToString', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
       dataView: discoverGridContextComplexMock.dataView,
-      services: discoverServiceMock,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'unknown',
       rowIndex: 0,
       options: {
@@ -382,7 +382,7 @@ describe('convertValueToString', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
       dataView: discoverGridContextComplexMock.dataView,
-      services: discoverServiceMock,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'unknown',
       rowIndex: -1,
       options: {
@@ -397,7 +397,7 @@ describe('convertValueToString', () => {
     const result = convertValueToString({
       rows: discoverGridContextMock.rows,
       dataView: discoverGridContextMock.dataView,
-      services: discoverServiceMock,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: '_source',
       rowIndex: 0,
       options: {
@@ -420,7 +420,7 @@ describe('convertValueToString', () => {
     const result = convertValueToString({
       rows: discoverGridContextMock.rows,
       dataView: discoverGridContextMock.dataView,
-      services: discoverServiceMock,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: '_source',
       rowIndex: 0,
       options: {
@@ -437,7 +437,7 @@ describe('convertValueToString', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
       dataView: discoverGridContextComplexMock.dataView,
-      services: discoverServiceMock,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'array_tags',
       rowIndex: 1,
       options: {
@@ -451,7 +451,7 @@ describe('convertValueToString', () => {
     const result2 = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
       dataView: discoverGridContextComplexMock.dataView,
-      services: discoverServiceMock,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'scripted_string',
       rowIndex: 1,
       options: {

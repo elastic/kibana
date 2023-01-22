@@ -13,7 +13,7 @@ import { UPDATE_FILTER_REFERENCES_TRIGGER, updateFilterReferencesTrigger } from 
 import { ConfigSchema } from '../config';
 import { setIndexPatterns, setTheme, setOverlays } from './services';
 import { AutocompleteService } from './autocomplete/autocomplete_service';
-import { createSearchBar } from './search_bar';
+import { createSearchBar } from './search_bar/create_search_bar';
 import { createIndexPatternSelect } from './index_pattern_select';
 import type {
   UnifiedSearchStartDependencies,
@@ -83,15 +83,9 @@ export class UnifiedSearchPublicPlugin
       },
     });
 
-    uiActions.addTriggerAction(
-      APPLY_FILTER_TRIGGER,
-      uiActions.getAction(ACTION_GLOBAL_APPLY_FILTER)
-    );
+    uiActions.attachAction(APPLY_FILTER_TRIGGER, ACTION_GLOBAL_APPLY_FILTER);
 
-    uiActions.addTriggerAction(
-      UPDATE_FILTER_REFERENCES_TRIGGER,
-      uiActions.getAction(UPDATE_FILTER_REFERENCES_ACTION)
-    );
+    uiActions.attachAction(UPDATE_FILTER_REFERENCES_TRIGGER, UPDATE_FILTER_REFERENCES_ACTION);
 
     return {
       ui: {

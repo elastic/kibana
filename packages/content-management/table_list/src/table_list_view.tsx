@@ -138,6 +138,7 @@ export interface URLState {
     field: SortColumnField;
     direction: Direction;
   };
+
   [key: string]: unknown;
 }
 
@@ -146,6 +147,7 @@ interface URLQueryParams {
   title?: string;
   sort?: string;
   sortdir?: string;
+
   [key: string]: unknown;
 }
 
@@ -855,6 +857,12 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     );
   }
 
+  const testSubjectState = isDeletingItems
+    ? 'table-is-deleting'
+    : hasInitialFetchReturned && !isFetchingItems
+    ? 'table-is-ready'
+    : 'table-is-loading';
+
   return (
     <PageTemplate panelled data-test-subj={pageDataTestSubject}>
       <KibanaPageTemplate.Header
@@ -885,40 +893,42 @@ function TableListViewComp<T extends UserContentCommonSchema>({
         {showFetchError && renderFetchError()}
 
         {/* Table of items */}
-        <Table<T>
-          dispatch={dispatch}
-          items={items}
-          isFetchingItems={isFetchingItems}
-          searchQuery={searchQuery}
-          tableColumns={tableColumns}
-          hasUpdatedAtMetadata={hasUpdatedAtMetadata}
-          tableSort={tableSort}
-          pagination={pagination}
-          selectedIds={selectedIds}
-          entityName={entityName}
-          entityNamePlural={entityNamePlural}
-          tagsToTableItemMap={tagsToTableItemMap}
-          deleteItems={deleteItems}
-          tableCaption={tableListTitle}
-          onTableChange={onTableChange}
-          onTableSearchChange={onTableSearchChange}
-          onSortChange={onSortChange}
-          addOrRemoveIncludeTagFilter={addOrRemoveIncludeTagFilter}
-          addOrRemoveExcludeTagFilter={addOrRemoveExcludeTagFilter}
-          clearTagSelection={clearTagSelection}
-        />
-
-        {/* Delete modal */}
-        {showDeleteModal && (
-          <ConfirmDeleteModal<T>
-            isDeletingItems={isDeletingItems}
+        <div data-test-subj={testSubjectState}>
+          <Table<T>
+            dispatch={dispatch}
+            items={items}
+            isFetchingItems={isFetchingItems}
+            searchQuery={searchQuery}
+            tableColumns={tableColumns}
+            hasUpdatedAtMetadata={hasUpdatedAtMetadata}
+            tableSort={tableSort}
+            pagination={pagination}
+            selectedIds={selectedIds}
             entityName={entityName}
             entityNamePlural={entityNamePlural}
-            items={selectedItems}
-            onConfirm={deleteSelectedItems}
-            onCancel={() => dispatch({ type: 'onCancelDeleteItems' })}
+            tagsToTableItemMap={tagsToTableItemMap}
+            deleteItems={deleteItems}
+            tableCaption={tableListTitle}
+            onTableChange={onTableChange}
+            onTableSearchChange={onTableSearchChange}
+            onSortChange={onSortChange}
+            addOrRemoveIncludeTagFilter={addOrRemoveIncludeTagFilter}
+            addOrRemoveExcludeTagFilter={addOrRemoveExcludeTagFilter}
+            clearTagSelection={clearTagSelection}
           />
-        )}
+
+          {/* Delete modal */}
+          {showDeleteModal && (
+            <ConfirmDeleteModal<T>
+              isDeletingItems={isDeletingItems}
+              entityName={entityName}
+              entityNamePlural={entityNamePlural}
+              items={selectedItems}
+              onConfirm={deleteSelectedItems}
+              onCancel={() => dispatch({ type: 'onCancelDeleteItems' })}
+            />
+          )}
+        </div>
       </KibanaPageTemplate.Section>
     </PageTemplate>
   );

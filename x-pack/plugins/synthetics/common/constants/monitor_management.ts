@@ -5,8 +5,14 @@
  * 2.0.
  */
 
+export enum AlertConfigKey {
+  STATUS_ENABLED = 'alert.status.enabled',
+  TLS_ENABLED = 'alert.tls.enabled',
+}
+
 // values must match keys in the integration package
 export enum ConfigKey {
+  ALERT_CONFIG = 'alert',
   APM_SERVICE_NAME = 'service.name',
   CUSTOM_HEARTBEAT_ID = 'custom_heartbeat_id',
   CONFIG_ID = 'config_id',

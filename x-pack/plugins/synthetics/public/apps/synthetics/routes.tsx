@@ -16,10 +16,12 @@ import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useInspectorContext } from '@kbn/observability-plugin/public';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
+import { EditMonitorLink } from './components/common/links/edit_monitor';
+import { MonitorDetailsLocation } from './components/monitor_details/monitor_details_location';
+import { getStepDetailsRoute } from './components/step_details_page/route_config';
+import { getTestRunDetailsRoute } from './components/test_run_details/route_config';
 import { getSettingsRouteConfig } from './components/settings/route_config';
 import { TestRunDetails } from './components/test_run_details/test_run_details';
-import { ErrorDetailsPage } from './components/error_details/error_details_page';
-import { StepTitle } from './components/step_details_page/step_title';
 import { MonitorAddPageWithServiceAllowed } from './components/monitor_add_edit/monitor_add_page';
 import { MonitorEditPageWithServiceAllowed } from './components/monitor_add_edit/monitor_edit_page';
 import { MonitorDetailsPageTitle } from './components/monitor_details/monitor_details_page_title';
@@ -42,8 +44,6 @@ import {
   MONITOR_ERRORS_ROUTE,
   MONITOR_HISTORY_ROUTE,
   MONITOR_ROUTE,
-  ERROR_DETAILS_ROUTE,
-  STEP_DETAIL_ROUTE,
   OVERVIEW_ROUTE,
   TEST_RUN_DETAILS_ROUTE,
 } from '../../../common/constants';
@@ -52,12 +52,11 @@ import { MonitorsPageWithServiceAllowed } from './components/monitors_page/monit
 import { apiService } from '../../utils/api_service';
 import { RunTestManually } from './components/monitor_details/run_test_manually';
 import { MonitorDetailsStatus } from './components/monitor_details/monitor_details_status';
-import { MonitorDetailsLocation } from './components/monitor_details/monitor_details_location';
 import { MonitorDetailsLastRun } from './components/monitor_details/monitor_details_last_run';
 import { MonitorSummary } from './components/monitor_details/monitor_summary/monitor_summary';
 import { MonitorHistory } from './components/monitor_details/monitor_history/monitor_history';
 import { MonitorErrors } from './components/monitor_details/monitor_errors/monitor_errors';
-import { StepDetailPage } from './components/step_details_page/step_detail_page';
+import { getErrorDetailsRouteConfig } from './components/error_details/route_config';
 
 export type RouteProps = LazyObservabilityPageTemplateProps & {
   path: string;
@@ -84,6 +83,9 @@ const getRoutes = (
 ): RouteProps[] => {
   return [
     ...getSettingsRouteConfig(history, syntheticsPath, baseTitle),
+    getErrorDetailsRouteConfig(history, syntheticsPath, baseTitle),
+    getTestRunDetailsRoute(history, syntheticsPath, baseTitle),
+    getStepDetailsRoute(history, syntheticsPath, baseTitle),
     {
       title: i18n.translate('xpack.synthetics.gettingStartedRoute.title', {
         defaultMessage: 'Synthetics Getting Started | {baseTitle}',
@@ -159,6 +161,7 @@ const getRoutes = (
               />
             ),
             isSelected: true,
+            'data-test-subj': 'syntheticsMonitorOverviewTab',
           },
           {
             label: (
@@ -168,6 +171,7 @@ const getRoutes = (
               />
             ),
             href: `${syntheticsPath}${MONITORS_ROUTE}`,
+            'data-test-subj': 'syntheticsMonitorManagementTab',
           },
         ],
       },
@@ -192,6 +196,7 @@ const getRoutes = (
               />
             ),
             href: `${syntheticsPath}${OVERVIEW_ROUTE}`,
+            'data-test-subj': 'syntheticsMonitorOverviewTab',
           },
           {
             label: (
@@ -201,6 +206,7 @@ const getRoutes = (
               />
             ),
             isSelected: true,
+            'data-test-subj': 'syntheticsMonitorManagementTab',
           },
         ],
       },
@@ -264,41 +270,6 @@ const getRoutes = (
       },
     },
     {
-      title: i18n.translate('xpack.synthetics.stepDetailsRoute.title', {
-        defaultMessage: 'Step details | {baseTitle}',
-        values: { baseTitle },
-      }),
-      path: STEP_DETAIL_ROUTE,
-      component: StepDetailPage,
-      dataTestSubj: 'syntheticsMonitorEditPage',
-      pageHeader: {
-        pageTitle: <StepTitle />,
-        rightSideItems: [],
-        breadcrumbs: [
-          {
-            text: <OutPortal node={MonitorDetailsLinkPortalNode} />,
-          },
-        ],
-      },
-    },
-    {
-      title: i18n.translate('xpack.synthetics.errorDetailsRoute.title', {
-        defaultMessage: 'Error details | {baseTitle}',
-        values: { baseTitle },
-      }),
-      path: ERROR_DETAILS_ROUTE,
-      component: ErrorDetailsPage,
-      dataTestSubj: 'syntheticsMonitorEditPage',
-      pageHeader: {
-        pageTitle: (
-          <FormattedMessage
-            id="xpack.synthetics.editMonitor.errorDetailsRoute.title"
-            defaultMessage="Error details"
-          />
-        ),
-      },
-    },
-    {
       title: i18n.translate('xpack.synthetics.testRunDetailsRoute.title', {
         defaultMessage: 'Test run details | {baseTitle}',
         values: { baseTitle },
@@ -352,6 +323,7 @@ const getMonitorSummaryHeader = (
       },
     ],
     rightSideItems: [
+      <EditMonitorLink />,
       <RunTestManually />,
       <MonitorDetailsLastRun />,
       <MonitorDetailsStatus />,
@@ -364,6 +336,7 @@ const getMonitorSummaryHeader = (
         }),
         isSelected: selectedTab === 'overview',
         href: `${syntheticsPath}${MONITOR_ROUTE.replace(':monitorId?', monitorId)}${search}`,
+        'data-test-subj': 'syntheticsMonitorOverviewTab',
       },
       {
         label: i18n.translate('xpack.synthetics.monitorHistoryTab.title', {
@@ -371,6 +344,7 @@ const getMonitorSummaryHeader = (
         }),
         isSelected: selectedTab === 'history',
         href: `${syntheticsPath}${MONITOR_HISTORY_ROUTE.replace(':monitorId', monitorId)}${search}`,
+        'data-test-subj': 'syntheticsMonitorHistoryTab',
       },
       {
         label: i18n.translate('xpack.synthetics.monitorErrorsTab.title', {
@@ -379,6 +353,7 @@ const getMonitorSummaryHeader = (
         prepend: <EuiIcon type="alert" color="danger" />,
         isSelected: selectedTab === 'errors',
         href: `${syntheticsPath}${MONITOR_ERRORS_ROUTE.replace(':monitorId', monitorId)}${search}`,
+        'data-test-subj': 'syntheticsMonitorErrorsTab',
       },
     ],
   };

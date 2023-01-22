@@ -1,9 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
+    "outDir": "target/types",
   },
   "include": [
     "common/**/*",
@@ -11,12 +9,24 @@
     "server/**/*",
   ],
   "kbn_references": [
-    { "path": "../../core/tsconfig.json" },
-    { "path": "../data/tsconfig.json" },
-    { "path": "../home/tsconfig.json" },
-    { "path": "../kibana_react/tsconfig.json" },
-    { "path": "../management/tsconfig.json" },
-    { "path": "../saved_objects_tagging_oss/tsconfig.json" },
-    { "path": "../../../x-pack/plugins/spaces/tsconfig.json" },
+    "@kbn/core",
+    "@kbn/data-plugin",
+    "@kbn/home-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/management-plugin",
+    "@kbn/saved-objects-tagging-oss-plugin",
+    "@kbn/spaces-plugin",
+    "@kbn/i18n",
+    "@kbn/data-views-plugin",
+    "@kbn/utility-types",
+    "@kbn/i18n-react",
+    "@kbn/test-jest-helpers",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/core-saved-objects-common",
+    "@kbn/monaco",
+    "@kbn/config-schema",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

@@ -10,16 +10,16 @@ import { i18n } from '@kbn/i18n';
 
 import { Redirect } from 'react-router-dom';
 
+import { useTimefilter } from '@kbn/ml-date-picker';
+
 import type { NavigateToPath } from '../../contexts/kibana';
-
-import { MlRoute, PageLoader, PageProps } from '../router';
-import { useResolver } from '../use_resolver';
-
 import { checkFullLicense } from '../../license';
 import { checkGetJobsCapabilitiesResolver } from '../../capabilities/check_capabilities';
 import { getMlNodeCount } from '../../ml_nodes_check';
 import { loadMlServerInfo } from '../../services/ml_server_info';
-import { useTimefilter } from '../../contexts/kibana';
+
+import { MlRoute, PageLoader, PageProps } from '../router';
+import { useResolver } from '../use_resolver';
 import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
 
 const OverviewPage = React.lazy(() => import('../../overview/overview_page'));

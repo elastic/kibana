@@ -8,7 +8,7 @@
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 
-import type { BaseHit } from '../../../../../../common/detection_engine/types';
+import type { BaseHit, SearchTypes } from '../../../../../../common/detection_engine/types';
 import type { ConfigType } from '../../../../../config';
 import type { BuildReasonMessage } from '../../../signals/reason_formatters';
 import { getMergeStrategy } from '../../../signals/source_fields_merging/strategies';
@@ -16,10 +16,12 @@ import type { BaseSignalHit, SignalSource, SignalSourceHit } from '../../../sign
 import { additionalAlertFields, buildAlert } from './build_alert';
 import { filterSource } from './filter_source';
 import type { CompleteRule, RuleParams } from '../../../rule_schema';
+import type { IRuleExecutionLogForExecutors } from '../../../rule_monitoring';
 import { buildRuleNameFromMapping } from '../../../signals/mappings/build_rule_name_from_mapping';
 import { buildSeverityFromMapping } from '../../../signals/mappings/build_severity_from_mapping';
 import { buildRiskScoreFromMapping } from '../../../signals/mappings/build_risk_score_from_mapping';
 import type { BaseFieldsLatest } from '../../../../../../common/detection_engine/schemas/alerts';
+import { stripNonEcsFields } from './strip_non_ecs_fields';
 
 const isSourceDoc = (
   hit: SignalSourceHit
@@ -27,7 +29,7 @@ const isSourceDoc = (
   return hit._source != null;
 };
 
-const buildEventTypeAlert = (doc: BaseSignalHit): object => {
+const buildEventTypeAlert = (doc: BaseSignalHit): Record<string, SearchTypes> => {
   if (doc._source?.event != null && doc._source?.event instanceof Object) {
     return flattenWithPrefix('event', doc._source?.event ?? {});
   }
@@ -52,11 +54,26 @@ export const buildBulkBody = (
   applyOverrides: boolean,
   buildReasonMessage: BuildReasonMessage,
   indicesToQuery: string[],
-  alertTimestampOverride: Date | undefined
+  alertTimestampOverride: Date | undefined,
+  ruleExecutionLogger: IRuleExecutionLogForExecutors
 ): BaseFieldsLatest => {
   const mergedDoc = getMergeStrategy(mergeStrategy)({ doc, ignoreFields });
+
   const eventFields = buildEventTypeAlert(mergedDoc);
+  const { result: validatedEventFields, removed: removedEventFields } =
+    stripNonEcsFields(eventFields);
+
   const filteredSource = filterSource(mergedDoc);
+  const { result: validatedSource, removed: removedSourceFields } =
+    stripNonEcsFields(filteredSource);
+
+  if (removedEventFields.length || removedSourceFields.length) {
+    ruleExecutionLogger?.debug(
+      'Following fields were removed from alert source as ECS non-compliant:',
+      JSON.stringify(removedSourceFields),
+      JSON.stringify(removedEventFields)
+    );
+  }
 
   const overrides = applyOverrides
     ? {
@@ -86,8 +103,8 @@ export const buildBulkBody = (
 
   if (isSourceDoc(mergedDoc)) {
     return {
-      ...filteredSource,
-      ...eventFields,
+      ...validatedSource,
+      ...validatedEventFields,
       ...buildAlert(
         [mergedDoc],
         completeRule,
@@ -97,7 +114,10 @@ export const buildBulkBody = (
         alertTimestampOverride,
         overrides
       ),
-      ...additionalAlertFields({ ...mergedDoc, _source: { ...mergedDoc._source, ...eventFields } }),
+      ...additionalAlertFields({
+        ...mergedDoc,
+        _source: { ...mergedDoc._source, ...validatedEventFields },
+      }),
     };
   }
 

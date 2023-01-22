@@ -49,6 +49,7 @@ export function TextBasedDataPanel({
   core,
   data,
   query,
+  frame,
   filters,
   dateRange,
   expressions,
@@ -60,12 +61,14 @@ export function TextBasedDataPanel({
   useEffect(() => {
     async function fetchData() {
       if (query && isOfAggregateQueryType(query) && !isEqual(query, prevQuery)) {
+        const frameDataViews = frame.dataViews;
         const stateFromQuery = await getStateFromAggregateQuery(
           state,
           query,
           dataViews,
           data,
-          expressions
+          expressions,
+          frameDataViews
         );
 
         setDataHasLoaded(true);
@@ -73,7 +76,7 @@ export function TextBasedDataPanel({
       }
     }
     fetchData();
-  }, [data, dataViews, expressions, prevQuery, query, setState, state]);
+  }, [data, dataViews, expressions, prevQuery, query, setState, state, frame.dataViews]);
 
   const { fieldList } = state;
 
@@ -158,6 +161,7 @@ export function TextBasedDataPanel({
             {...fieldListGroupedProps}
             renderFieldItem={renderFieldItem}
             data-test-subj="lnsTextBasedLanguages"
+            localStorageKeyPrefix="lens"
           />
         </FieldList>
       </ChildDragDropProvider>

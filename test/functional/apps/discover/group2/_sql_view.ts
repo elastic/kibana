@@ -113,6 +113,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         cell = await dataGrid.getCellElement(0, 3);
         expect(await cell.getVisibleText()).to.be('2269');
       });
+
+      it('should query an index pattern that doesnt translate to a dataview correctly', async function () {
+        await PageObjects.discover.selectTextBaseLang('SQL');
+        const testQuery = `SELECT "@tags", geo.dest, count(*) occurred FROM "logstash*"
+          GROUP BY "@tags", geo.dest
+          HAVING occurred > 20
+          ORDER BY occurred DESC`;
+
+        await monacoEditor.setCodeEditorValue(testQuery);
+        await testSubjects.click('querySubmitButton');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        const cell = await dataGrid.getCellElement(0, 3);
+        expect(await cell.getVisibleText()).to.be('2269');
+      });
     });
   });
 }

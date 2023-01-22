@@ -11,7 +11,6 @@ import type {
   Rule as UIRule,
 } from '@kbn/securitysolution-exception-list-components';
 import { ViewerStatus } from '@kbn/securitysolution-exception-list-components';
-import { useParams } from 'react-router-dom';
 import type { ExceptionListSchema, NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import { useApi } from '@kbn/securitysolution-list-hooks';
 import { isEqual } from 'lodash';
@@ -46,17 +45,13 @@ const exceptionReferenceModalInitialState: ReferenceModalState = {
   listNamespaceType: 'single',
 };
 
-export const useListDetailsView = () => {
+export const useListDetailsView = (exceptionListId: string) => {
   const toasts = useToasts();
   const { services } = useKibana();
   const { http, notifications } = services;
   const { navigateToApp } = services.application;
 
   const { exportExceptionList, deleteExceptionList } = useApi(http);
-
-  const { detailName: exceptionListId } = useParams<{
-    detailName: string;
-  }>();
 
   const [{ loading: userInfoLoading, canUserCRUD, canUserREAD }] = useUserData();
 

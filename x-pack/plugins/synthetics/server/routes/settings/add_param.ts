@@ -14,6 +14,7 @@ import { SYNTHETICS_API_URLS } from '../../../common/constants';
 export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
   path: SYNTHETICS_API_URLS.PARAMS,
+
   validate: {
     body: schema.object({
       key: schema.string(),

@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { uniq } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
@@ -111,7 +111,12 @@ export async function updateTagsBatch(
     } else if (options.tagsToRemove.length === 1 && options.tagsToAdd.length === 0) {
       extraFilters.push(`tags:${options.tagsToRemove[0]}`);
     }
-    query = getElasticsearchQuery(options.kuery, false, false, hostedIds, extraFilters);
+    const DEFAULT_STATUS_FILTER =
+      'status:online or (status:error or status:degraded) or (status:updating or status:unenrolling or status:enrolling) or status:offline';
+    // removing default staus filters, as it is a runtime field and doesn't work with updateByQuery
+    // this is a quick fix for bulk update tags with default filters
+    const kuery = options.kuery === DEFAULT_STATUS_FILTER ? '' : options.kuery;
+    query = getElasticsearchQuery(kuery, false, false, hostedIds, extraFilters);
   } else {
     query = {
       terms: {
@@ -128,15 +133,15 @@ export async function updateTagsBatch(
       refresh: true,
       wait_for_completion: true,
       script: {
-        source: `   
+        source: `
       if (ctx._source.tags == null) {
         ctx._source.tags = [];
       }
-      if (params.tagsToAdd.length == 1 && params.tagsToRemove.length == 1) { 
+      if (params.tagsToAdd.length == 1 && params.tagsToRemove.length == 1) {
         ctx._source.tags.replaceAll(tag -> params.tagsToRemove[0] == tag ? params.tagsToAdd[0] : tag);
       } else {
         ctx._source.tags.removeAll(params.tagsToRemove);
-      } 
+      }
       ctx._source.tags.addAll(params.tagsToAdd);
 
       LinkedHashSet uniqueSet = new LinkedHashSet();
@@ -161,7 +166,7 @@ export async function updateTagsBatch(
 
   appContextService.getLogger().debug(JSON.stringify(res).slice(0, 1000));
 
-  const actionId = options.actionId ?? uuid();
+  const actionId = options.actionId ?? uuidv4();
 
   if (options.retryCount === undefined) {
     // creating an action doc so that update tags  shows up in activity
@@ -175,7 +180,7 @@ export async function updateTagsBatch(
   }
 
   // creating unique ids to use as agentId, as we don't have all agent ids in case of action by kuery
-  const getUuidArray = (count: number) => Array.from({ length: count }, () => uuid());
+  const getUuidArray = (count: number) => Array.from({ length: count }, () => uuidv4());
 
   // writing successful action results
   if (res.updated ?? 0 > 0) {
@@ -208,7 +213,7 @@ export async function updateTagsBatch(
         getUuidArray(res.version_conflicts!).map((id) => ({
           agentId: id,
           actionId,
-          error: 'version conflict on 3rd retry',
+          error: 'version conflict on last retry',
         }))
       );
     }

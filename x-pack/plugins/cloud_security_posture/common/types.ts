@@ -6,6 +6,7 @@
  */
 
 import type { PackagePolicy, AgentPolicy } from '@kbn/fleet-plugin/common';
+import { SUPPORTED_CLOUDBEAT_INPUTS, SUPPORTED_POLICY_TEMPLATES } from './constants';
 import type { CspRuleMetadata } from './schemas/csp_rule_metadata';
 
 export type Evaluation = 'passed' | 'failed' | 'NA';
@@ -75,6 +76,7 @@ interface BaseCspSetupStatus {
   installedPackagePolicies: number;
   healthyAgents: number;
   isPluginInitialized: boolean;
+  installedPolicyTemplates: PosturePolicyTemplate[];
 }
 
 interface CspSetupNotInstalledStatus extends BaseCspSetupStatus {
@@ -90,19 +92,17 @@ interface CspSetupInstalledStatus extends BaseCspSetupStatus {
 
 export type CspSetupStatus = CspSetupInstalledStatus | CspSetupNotInstalledStatus;
 
-export interface CspRulesStatus {
-  all: number;
-  enabled: number;
-  disabled: number;
-}
-
 export type AgentPolicyStatus = Pick<AgentPolicy, 'id' | 'name'> & { agents: number };
 
 export interface Benchmark {
   package_policy: PackagePolicy;
   agent_policy: AgentPolicyStatus;
-  rules: CspRulesStatus;
+  rules_count: number;
 }
 
 export type BenchmarkId = CspRuleMetadata['benchmark']['id'];
 export type BenchmarkName = CspRuleMetadata['benchmark']['name'];
+
+// Fleet Integration types
+export type PostureInput = typeof SUPPORTED_CLOUDBEAT_INPUTS[number];
+export type PosturePolicyTemplate = typeof SUPPORTED_POLICY_TEMPLATES[number];
