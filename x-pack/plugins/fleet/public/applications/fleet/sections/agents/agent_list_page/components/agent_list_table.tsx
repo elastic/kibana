@@ -19,8 +19,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 
 import type { Agent, AgentPolicy } from '../../../../types';
-import { isAgentUpgradeable, ExperimentalFeaturesService, formatBytes } from '../../../../services';
-import { AgentHealth, MetricNonAvailable } from '../../components';
+import { isAgentUpgradeable, ExperimentalFeaturesService } from '../../../../services';
+import { AgentHealth } from '../../components';
 
 import type { Pagination } from '../../../../hooks';
 import { useLink, useKibanaVersion } from '../../../../hooks';
@@ -28,6 +28,7 @@ import { useLink, useKibanaVersion } from '../../../../hooks';
 import { AgentPolicySummaryLine } from '../../../../components';
 import { Tags } from '../../components/tags';
 import type { AgentMetrics } from '../../../../../../../common/types';
+import { formatAgentCPU, formatAgentMemory } from '../../services/agent_metrics';
 
 const VERSION_FIELD = 'local_metadata.elastic.agent.version';
 const HOSTNAME_FIELD = 'local_metadata.host.hostname';
@@ -179,14 +180,9 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
             ),
             width: '75px',
             render: (metrics: AgentMetrics | undefined, agent: Agent) =>
-              metrics?.cpu_avg && metrics?.cpu_avg !== 0 ? (
-                `${(metrics.cpu_avg * 100).toFixed(2)} %`
-              ) : (
-                <MetricNonAvailable
-                  agentPolicy={
-                    agent.policy_id ? agentPoliciesIndexedById[agent.policy_id] : undefined
-                  }
-                />
+              formatAgentCPU(
+                agent.metrics,
+                agent.policy_id ? agentPoliciesIndexedById[agent.policy_id] : undefined
               ),
           },
           {
@@ -213,14 +209,9 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
             ),
             width: '90px',
             render: (metrics: AgentMetrics | undefined, agent: Agent) =>
-              metrics?.memory_size_byte_avg && metrics?.memory_size_byte_avg !== 0 ? (
-                formatBytes(metrics.memory_size_byte_avg)
-              ) : (
-                <MetricNonAvailable
-                  agentPolicy={
-                    agent.policy_id ? agentPoliciesIndexedById[agent.policy_id] : undefined
-                  }
-                />
+              formatAgentMemory(
+                agent.metrics,
+                agent.policy_id ? agentPoliciesIndexedById[agent.policy_id] : undefined
               ),
           },
         ]

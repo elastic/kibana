@@ -22,14 +22,11 @@ import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 
 import type { Agent, AgentPolicy } from '../../../../../types';
 import { useKibanaVersion } from '../../../../../hooks';
-import {
-  ExperimentalFeaturesService,
-  formatBytes,
-  isAgentUpgradeable,
-} from '../../../../../services';
+import { ExperimentalFeaturesService, isAgentUpgradeable } from '../../../../../services';
 import { AgentPolicySummaryLine } from '../../../../../components';
-import { AgentHealth, MetricNonAvailable } from '../../../components';
+import { AgentHealth } from '../../../components';
 import { Tags } from '../../../components/tags';
+import { formatAgentCPU, formatAgentMemory } from '../../../services/agent_metrics';
 
 // Allows child text to be truncated
 const FlexItemWithMinWidth = styled(EuiFlexItem)`
@@ -54,22 +51,13 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                     title: i18n.translate('xpack.fleet.agentDetails.cpuLabel', {
                       defaultMessage: 'CPU',
                     }),
-                    description:
-                      agent.metrics?.cpu_avg && agent.metrics?.cpu_avg !== 0 ? (
-                        `${(agent.metrics.cpu_avg * 100).toFixed(2)} %`
-                      ) : (
-                        <MetricNonAvailable agentPolicy={agentPolicy} />
-                      ),
+                    description: formatAgentCPU(agent.metrics, agentPolicy),
                   },
                   {
                     title: i18n.translate('xpack.fleet.agentDetails.memoryLabel', {
                       defaultMessage: 'Memory',
                     }),
-                    description: agent.metrics?.memory_size_byte_avg ? (
-                      formatBytes(agent.metrics?.memory_size_byte_avg)
-                    ) : (
-                      <MetricNonAvailable agentPolicy={agentPolicy} />
-                    ),
+                    description: formatAgentMemory(agent.metrics, agentPolicy),
                   },
                 ]
               : []),
