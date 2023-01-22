@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { AlertsTypeData } from './types';
+
 const from = '2022-04-05T12:00:00.000Z';
 const to = '2022-04-08T12:00:00.000Z';
 
@@ -73,12 +75,12 @@ export const mockAlertsData = {
             sum_other_doc_count: 0,
             buckets: [
               {
-                key: 'denied',
-                doc_count: 6,
-              },
-              {
                 key: 'info',
                 doc_count: 19,
+              },
+              {
+                key: 'denied',
+                doc_count: 6,
               },
             ],
           },
@@ -150,9 +152,9 @@ export const query = {
   runtime_mappings: undefined,
 };
 
-export const parsedAlerts = [
+export const parsedAlerts: AlertsTypeData[] = [
   { rule: 'Test rule 1', type: 'Detection', value: 537, color: '#D36086' },
   { rule: 'Test rule 2', type: 'Detection', value: 27, color: '#D36086' },
-  { rule: 'Test rule 3', type: 'Prevention', value: 6, color: '#54B399' },
   { rule: 'Test rule 3', type: 'Detection', value: 19, color: '#D36086' },
+  { rule: 'Test rule 3', type: 'Prevention', value: 6, color: '#54B399' },
 ];

@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 const from = '2022-04-05T12:00:00.000Z';
 const to = '2022-04-08T12:00:00.000Z';
 
@@ -103,7 +104,7 @@ export const query = {
   runtime_mappings: undefined,
 };
 
-export const parsedAlerts = [
+export const parsedAlerts: Array<{ key: Severity; value: number; label: string }> = [
   { key: 'high', value: 78, label: 'High' },
   { key: 'low', value: 46, label: 'Low' },
   { key: 'medium', value: 32, label: 'Medium' },

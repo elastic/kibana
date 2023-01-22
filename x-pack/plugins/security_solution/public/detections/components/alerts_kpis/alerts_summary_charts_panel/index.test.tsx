@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { act, render, fireEvent } from '@testing-library/react';
+import { act, render, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { TestProviders } from '../../../../common/mock';
@@ -22,20 +22,10 @@ describe('AlertsSummaryChartsPanel', () => {
   const defaultProps = {
     signalIndexName: 'signalIndexName',
   };
-
   const mockSetToggle = jest.fn();
   const mockUseQueryToggle = useQueryToggle as jest.Mock;
   beforeEach(() => {
-    act(() => {
-      mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: mockSetToggle });
-    });
-  });
-
-  afterEach(() => {
-    act(() => {
-      jest.clearAllMocks();
-      jest.restoreAllMocks();
-    });
+    mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: mockSetToggle });
   });
 
   test('renders correctly', async () => {
@@ -64,20 +54,20 @@ describe('AlertsSummaryChartsPanel', () => {
 
   describe('Query', () => {
     test('it render with a illegal KQL', async () => {
-      await act(async () => {
-        jest.mock('@kbn/es-query', () => ({
-          buildEsQuery: jest.fn().mockImplementation(() => {
-            throw new Error('Something went wrong');
-          }),
-        }));
-        const props = { ...defaultProps, query: { query: 'host.name: "', language: 'kql' } };
-        const { container } = render(
-          <TestProviders>
-            <AlertsSummaryChartsPanel {...props} />
-          </TestProviders>
-        );
+      jest.mock('@kbn/es-query', () => ({
+        buildEsQuery: jest.fn().mockImplementation(() => {
+          throw new Error('Something went wrong');
+        }),
+      }));
+      const props = { ...defaultProps, query: { query: 'host.name: "', language: 'kql' } };
+      const { container } = render(
+        <TestProviders>
+          <AlertsSummaryChartsPanel {...props} />
+        </TestProviders>
+      );
+      await waitFor(() => {
         expect(
-          container.querySelector('[data-test-subj="severty-level-chart"]')
+          container.querySelector('[data-test-subj="alerts-charts-panel"]')
         ).toBeInTheDocument();
       });
     });
@@ -113,8 +103,8 @@ describe('AlertsSummaryChartsPanel', () => {
     });
 
     test('toggleStatus=false, hide', async () => {
+      mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: mockSetToggle });
       await act(async () => {
-        mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: mockSetToggle });
         const { container } = render(
           <TestProviders>
             <AlertsSummaryChartsPanel {...defaultProps} />

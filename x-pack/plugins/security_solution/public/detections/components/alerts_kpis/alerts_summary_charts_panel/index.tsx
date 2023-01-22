@@ -9,13 +9,13 @@ import React, { useCallback, useState, useEffect } from 'react';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { Filter, Query } from '@kbn/es-query';
 import styled from 'styled-components';
-import * as i18n from './translations';
 import { KpiPanel } from '../common/components';
 import { HeaderSection } from '../../../../common/components/header_section';
+import { SeverityLevelPanel } from '../severity_level_panel';
+import { AlertsByTypePanel } from '../alerts_by_type_panel';
+import { AlertsProgressBarPanel } from '../alerts_progress_bar_panel';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
-import { SeverityLevelChart } from './severity_donut/severity_level_chart';
-import { AlertsByType } from './alerts_by_type/alerts_by_type';
-import { AlertsProgressBar } from './alerts_progress_bar/alerts_progress_bar';
+import * as i18n from './translations';
 
 const StyledFlexGroup = styled(EuiFlexGroup)`
   @media only screen and (min-width: ${({ theme }) => theme.eui.euiBreakpoints.l});
@@ -26,6 +26,7 @@ const StyledFlexItem = styled(EuiFlexItem)`
 `;
 
 const DETECTIONS_ALERTS_CHARTS_ID = 'detections-alerts-charts';
+
 interface Props {
   alignHeader?: 'center' | 'baseline' | 'stretch' | 'flexStart' | 'flexEnd';
   filters?: Filter[];
@@ -87,7 +88,7 @@ export const AlertsSummaryChartsPanel: React.FC<Props> = ({
           gutterSize="m"
         >
           <StyledFlexItem>
-            <SeverityLevelChart
+            <SeverityLevelPanel
               filters={filters}
               query={query}
               signalIndexName={signalIndexName}
@@ -97,7 +98,7 @@ export const AlertsSummaryChartsPanel: React.FC<Props> = ({
             />
           </StyledFlexItem>
           <StyledFlexItem>
-            <AlertsByType
+            <AlertsByTypePanel
               filters={filters}
               query={query}
               signalIndexName={signalIndexName}
@@ -106,7 +107,7 @@ export const AlertsSummaryChartsPanel: React.FC<Props> = ({
             />
           </StyledFlexItem>
           <StyledFlexItem>
-            <AlertsProgressBar
+            <AlertsProgressBarPanel
               addFilter={addFilter}
               filters={filters}
               query={query}

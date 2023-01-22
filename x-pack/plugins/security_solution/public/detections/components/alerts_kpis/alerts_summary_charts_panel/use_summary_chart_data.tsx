@@ -8,20 +8,33 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { buildEsQuery } from '@kbn/es-query';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
-import type { SummaryChartsAgg, SummaryChartsData, UseAlertsQueryProps } from '../types';
-import type { EntityFilter } from '../../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
-import type { ESBoolQuery } from '../../../../../../common/typed_json';
-import { useGlobalTime } from '../../../../../common/containers/use_global_time';
-import { useQueryAlerts } from '../../../../containers/detection_engine/alerts/use_query';
-import { ALERTS_QUERY_NAMES } from '../../../../containers/detection_engine/alerts/constants';
-import { useInspectButton } from '../../common/hooks';
-import { parseData } from '../helpers';
+import type { Filter, Query } from '@kbn/es-query';
+import type { SummaryChartsAgg, SummaryChartsData, AggregationType } from './types';
+import type { EntityFilter } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
+import type { ESBoolQuery } from '../../../../../common/typed_json';
+import { useGlobalTime } from '../../../../common/containers/use_global_time';
+import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
+import { ALERTS_QUERY_NAMES } from '../../../containers/detection_engine/alerts/constants';
+import { useInspectButton } from '../common/hooks';
+import { parseData } from './helpers';
 
 export type UseAlerts = (props: UseAlertsQueryProps) => {
   items: SummaryChartsData[] | null;
   isLoading: boolean;
   updatedAt: number;
 };
+
+export interface UseAlertsQueryProps {
+  aggregations: {};
+  aggregationType: AggregationType;
+  uniqueQueryId: string;
+  signalIndexName: string | null;
+  skip?: boolean;
+  entityFilter?: EntityFilter;
+  query?: Query;
+  filters?: Filter[];
+  runtimeMappings?: MappingRuntimeFields;
+}
 
 export const getAlertsQuery = ({
   additionalFilters = [],

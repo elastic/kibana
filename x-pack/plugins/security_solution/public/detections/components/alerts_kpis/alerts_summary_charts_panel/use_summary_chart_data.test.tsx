@@ -6,15 +6,14 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { TestProviders } from '../../../../../common/mock';
-import { ALERTS_QUERY_NAMES } from '../../../../containers/detection_engine/alerts/constants';
-import type { UseAlerts } from '.';
-import type { UseAlertsQueryProps } from '../types';
-import { useSummaryChartData, getAlertsQuery } from '.';
+import { TestProviders } from '../../../../common/mock';
+import { ALERTS_QUERY_NAMES } from '../../../containers/detection_engine/alerts/constants';
+import type { UseAlerts, UseAlertsQueryProps } from './use_summary_chart_data';
+import { useSummaryChartData, getAlertsQuery } from './use_summary_chart_data';
 import * as aggregations from './aggregations';
-import * as severityMock from '../mocks/mock_severity_response';
-import * as alertTypeMock from '../mocks/mock_alerts_type_response';
-import * as alertsGroupingMock from '../mocks/mock_alerts_grouping_response';
+import * as severityMock from '../severity_level_panel/mock_data';
+import * as alertTypeMock from '../alerts_by_type_panel/mock_data';
+import * as alertsGroupingMock from '../alerts_progress_bar_panel/mock_data';
 
 const from = '2022-04-05T12:00:00.000Z';
 const to = '2022-04-08T12:00:00.000Z';
@@ -33,7 +32,7 @@ const defaultUseQueryAlertsReturn = {
   refetch: () => {},
 };
 const mockUseQueryAlerts = jest.fn().mockReturnValue(defaultUseQueryAlertsReturn);
-jest.mock('../../../../containers/detection_engine/alerts/use_query', () => {
+jest.mock('../../../containers/detection_engine/alerts/use_query', () => {
   return {
     useQueryAlerts: (...props: unknown[]) => mockUseQueryAlerts(...props),
   };
@@ -42,7 +41,7 @@ jest.mock('../../../../containers/detection_engine/alerts/use_query', () => {
 const mockUseGlobalTime = jest
   .fn()
   .mockReturnValue({ from, to, setQuery: jest.fn(), deleteQuery: jest.fn() });
-jest.mock('../../../../../common/containers/use_global_time', () => {
+jest.mock('../../../../common/containers/use_global_time', () => {
   return {
     useGlobalTime: (...props: unknown[]) => mockUseGlobalTime(...props),
   };

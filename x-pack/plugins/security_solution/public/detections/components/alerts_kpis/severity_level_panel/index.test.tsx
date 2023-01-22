@@ -6,36 +6,35 @@
  */
 import { act, render } from '@testing-library/react';
 import React from 'react';
-import { TestProviders } from '../../../../../common/mock';
-import { AlertsProgressBar } from './alerts_progress_bar';
+import { TestProviders } from '../../../../common/mock';
+import { SeverityLevelPanel } from '.';
 
-jest.mock('../../../../../common/lib/kibana');
+jest.mock('../../../../common/lib/kibana');
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
   return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
 });
 
-describe('Alert by grouping', () => {
+describe('Severity level panel', () => {
   const defaultProps = {
     signalIndexName: 'signalIndexName',
+    skip: false,
   };
 
   afterEach(() => {
-    act(() => {
-      jest.clearAllMocks();
-      jest.restoreAllMocks();
-    });
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   test('renders correctly', async () => {
     await act(async () => {
       const { container } = render(
         <TestProviders>
-          <AlertsProgressBar {...defaultProps} />
+          <SeverityLevelPanel {...defaultProps} />
         </TestProviders>
       );
-      expect(container.querySelector('[data-test-subj="top-alerts"]')).toBeInTheDocument();
+      expect(container.querySelector('[data-test-subj="severty-level-panel"]')).toBeInTheDocument();
     });
   });
 
@@ -43,7 +42,7 @@ describe('Alert by grouping', () => {
     await act(async () => {
       const { container } = render(
         <TestProviders>
-          <AlertsProgressBar {...defaultProps} />
+          <SeverityLevelPanel {...defaultProps} />
         </TestProviders>
       );
       expect(container.querySelector(`[data-test-subj="header-section"]`)).toBeInTheDocument();
@@ -54,21 +53,23 @@ describe('Alert by grouping', () => {
     await act(async () => {
       const { container } = render(
         <TestProviders>
-          <AlertsProgressBar {...defaultProps} />
+          <SeverityLevelPanel {...defaultProps} />
         </TestProviders>
       );
       expect(container.querySelector('[data-test-subj="inspect-icon-button"]')).toBeInTheDocument();
     });
   });
 
-  test('progress bars renders correctly', async () => {
+  test('renders severity chart correctly', async () => {
     await act(async () => {
       const { container } = render(
         <TestProviders>
-          <AlertsProgressBar {...defaultProps} />
+          <SeverityLevelPanel {...defaultProps} />
         </TestProviders>
       );
-      expect(container.querySelector(`[data-test-subj="top-alerts"]`)).toBeInTheDocument();
+      expect(
+        container.querySelector(`[data-test-subj="severity-level-chart"]`)
+      ).toBeInTheDocument();
     });
   });
 });

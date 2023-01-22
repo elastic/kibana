@@ -6,9 +6,9 @@
  */
 import { i18n } from '@kbn/i18n';
 
-export const CHARTS_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.chartsTitle',
+export const ALERT_BY_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.alertsByHost.hostChartTitle',
   {
-    defaultMessage: 'Charts',
+    defaultMessage: 'Top alerts by',
   }
 );
