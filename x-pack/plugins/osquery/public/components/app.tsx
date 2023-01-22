@@ -6,10 +6,8 @@
  */
 
 import React from 'react';
-import useObservable from 'react-use/lib/useObservable';
 import {
   EuiLoadingElastic,
-  EuiLoadingSpinner,
   EuiPage,
   EuiPageBody,
   EuiPageContent_Deprecated as EuiPageContent,
@@ -21,12 +19,8 @@ import { useOsqueryIntegrationStatus } from '../common/hooks';
 import { OsqueryAppEmptyState } from './empty_state';
 import { MainNavigation } from './main_navigation';
 
-import { useKibana } from '../common/lib/kibana';
-
 const OsqueryAppComponent = () => {
   const { data: osqueryIntegration, isFetched } = useOsqueryIntegrationStatus();
-  const { customBranding } = useKibana().services;
-  const hasCustomBranding = useObservable(customBranding.hasCustomBranding$);
 
   if (!isFetched) {
     return (
@@ -39,11 +33,7 @@ const OsqueryAppComponent = () => {
             color="subdued"
             hasShadow={false}
           >
-            {hasCustomBranding ? (
-              <EuiLoadingSpinner size="xxl" />
-            ) : (
-              <EuiLoadingElastic size="xxl" />
-            )}
+            <EuiLoadingElastic size="xxl" />
           </EuiPageContent>
         </EuiPageBody>
       </EuiPage>
