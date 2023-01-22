@@ -13,16 +13,12 @@ import type { AlertSearchResponse } from '../../../containers/detection_engine/a
 
 describe('parse data by aggregation type', () => {
   test('parse severity data', () => {
-    const res = parseData(
-      'Severity',
-      severityMock.mockAlertsData as AlertSearchResponse<{}, SummaryChartsAgg>
-    );
+    const res = parseData(severityMock.mockAlertsData as AlertSearchResponse<{}, SummaryChartsAgg>);
     expect(res).toEqual(severityMock.parsedAlerts);
   });
 
   test('parse detections data', () => {
     const res = parseData(
-      'Type',
       alertsTypeMock.mockAlertsData as AlertSearchResponse<{}, SummaryChartsAgg>
     );
     expect(res).toEqual(alertsTypeMock.parsedAlerts);
@@ -30,7 +26,6 @@ describe('parse data by aggregation type', () => {
 
   test('parse host data', () => {
     const res = parseData(
-      'Top',
       alertsGroupingMock.mockAlertsData as AlertSearchResponse<{}, SummaryChartsAgg>
     );
     expect(res).toEqual(alertsGroupingMock.parsedAlerts);

@@ -4,8 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { has } from 'lodash';
 import type { AlertType, AlertsByTypeAgg, AlertsTypeData } from './types';
 import type { AlertSearchResponse } from '../../../containers/detection_engine/alerts/types';
+import type { SummaryChartsData } from '../alerts_summary_charts_panel/types';
 
 export const ALERT_TYPE_COLOR = {
   Detection: '#D36086',
@@ -14,10 +16,10 @@ export const ALERT_TYPE_COLOR = {
 
 export const parseAlertsTypeData = (
   response: AlertSearchResponse<{}, AlertsByTypeAgg>
-): AlertsTypeData[] | null => {
+): AlertsTypeData[] => {
   const rulesBuckets = response?.aggregations?.alertsByRule?.buckets ?? [];
   return rulesBuckets.length === 0
-    ? null
+    ? []
     : rulesBuckets.flatMap((rule) => {
         const events = rule.ruleByEventType?.buckets ?? [];
         return getAggregateAlerts(rule.key, events);
@@ -55,4 +57,8 @@ const getAggregateAlerts = (
     });
   }
   return ret;
+};
+
+export const isAlertsTypeData = (data: SummaryChartsData[]): data is AlertsTypeData[] => {
+  return data?.every((x) => has(x, 'type'));
 };

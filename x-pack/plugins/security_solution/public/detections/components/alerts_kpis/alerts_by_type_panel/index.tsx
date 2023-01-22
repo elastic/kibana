@@ -7,14 +7,14 @@
 
 import { EuiPanel } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import type { ChartsPanelProps } from '../alerts_summary_charts_panel/types';
-import type { AlertsTypeData } from './types';
 import { AlertsByType } from './alerts_by_type';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { InspectButtonContainer } from '../../../../common/components/inspect';
 import { useSummaryChartData } from '../alerts_summary_charts_panel/use_summary_chart_data';
 import { alertTypeAggregations } from '../alerts_summary_charts_panel/aggregations';
+import { isAlertsTypeData } from './helpers';
 import * as i18n from './translations';
 
 const ALERTS_BY_TYPE_CHART_ID = 'alerts-summary-alert_by_type';
@@ -26,7 +26,7 @@ export const AlertsByTypePanel: React.FC<ChartsPanelProps> = ({
   runtimeMappings,
   skip,
 }) => {
-  const uniqueQueryId = useMemo(() => `${ALERTS_BY_TYPE_CHART_ID}-${uuid.v4()}`, []);
+  const uniqueQueryId = useMemo(() => `${ALERTS_BY_TYPE_CHART_ID}-${uuid()}`, []);
 
   const { items, isLoading } = useSummaryChartData({
     aggregationType: 'Type',
@@ -38,6 +38,7 @@ export const AlertsByTypePanel: React.FC<ChartsPanelProps> = ({
     skip,
     uniqueQueryId,
   });
+  const data = useMemo(() => (isAlertsTypeData(items) ? items : []), [items]);
 
   return (
     <InspectButtonContainer>
@@ -50,7 +51,7 @@ export const AlertsByTypePanel: React.FC<ChartsPanelProps> = ({
           titleSize="xs"
           hideSubtitle
         />
-        <AlertsByType items={items as AlertsTypeData[]} isLoading={isLoading} />
+        <AlertsByType data={data} isLoading={isLoading} />
       </EuiPanel>
     </InspectButtonContainer>
   );

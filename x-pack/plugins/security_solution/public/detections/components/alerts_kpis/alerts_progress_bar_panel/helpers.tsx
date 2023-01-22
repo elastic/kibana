@@ -5,16 +5,18 @@
  * 2.0.
  */
 
+import { has } from 'lodash';
 import type { AlertsByGroupingAgg, AlertsProgressBarData } from './types';
 import type { AlertSearchResponse } from '../../../containers/detection_engine/alerts/types';
 import type { BucketItem } from '../../../../../common/search_strategy/security_solution/cti';
+import type { SummaryChartsData } from '../alerts_summary_charts_panel/types';
 
 export const parseAlertsGroupingData = (
   response: AlertSearchResponse<{}, AlertsByGroupingAgg>
-): AlertsProgressBarData[] | null => {
+): AlertsProgressBarData[] => {
   const buckets = response?.aggregations?.alertsByGrouping?.buckets ?? [];
   if (buckets.length === 0) {
-    return null;
+    return [];
   }
 
   const other = response?.aggregations?.alertsByGrouping?.sum_other_doc_count ?? 0;
@@ -38,4 +40,10 @@ export const parseAlertsGroupingData = (
   });
 
   return topHosts;
+};
+
+export const isAlertsProgressBarData = (
+  data: SummaryChartsData[]
+): data is AlertsProgressBarData[] => {
+  return data?.every((x) => has(x, 'percentage'));
 };

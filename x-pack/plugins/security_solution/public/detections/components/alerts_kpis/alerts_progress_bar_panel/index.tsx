@@ -6,7 +6,7 @@
  */
 import { EuiPanel, EuiLoadingSpinner } from '@elastic/eui';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import type { ChartsPanelProps } from '../alerts_summary_charts_panel/types';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { InspectButtonContainer } from '../../../../common/components/inspect';
@@ -15,6 +15,7 @@ import { AlertsProgressBar } from './alerts_progress_bar';
 import { useSummaryChartData } from '../alerts_summary_charts_panel/use_summary_chart_data';
 import { alertsGroupingAggregations } from '../alerts_summary_charts_panel/aggregations';
 import { showInitialLoadingSpinner } from '../alerts_histogram_panel/helpers';
+import { isAlertsProgressBarData } from './helpers';
 import * as i18n from './translations';
 
 const TOP_ALERTS_CHART_ID = 'alerts-summary-top-alerts';
@@ -30,7 +31,7 @@ export const AlertsProgressBarPanel: React.FC<ChartsPanelProps> = ({
 }) => {
   const [stackByField, setStackByField] = useState('host.name');
   const [isInitialLoading, setIsInitialLoading] = useState(true);
-  const uniqueQueryId = useMemo(() => `${TOP_ALERTS_CHART_ID}-${uuid.v4()}`, []);
+  const uniqueQueryId = useMemo(() => `${TOP_ALERTS_CHART_ID}-${uuid()}`, []);
   const dropDownOptions = DEFAULT_OPTIONS.map((field) => {
     return { value: field, label: field };
   });
@@ -49,7 +50,7 @@ export const AlertsProgressBarPanel: React.FC<ChartsPanelProps> = ({
     skip,
     uniqueQueryId,
   });
-
+  const data = useMemo(() => (isAlertsProgressBarData(items) ? items : []), [items]);
   useEffect(() => {
     if (!showInitialLoadingSpinner({ isInitialLoading, isLoadingAlerts: isLoading })) {
       setIsInitialLoading(false);
@@ -79,7 +80,7 @@ export const AlertsProgressBarPanel: React.FC<ChartsPanelProps> = ({
         {isInitialLoading ? (
           <EuiLoadingSpinner size="l" />
         ) : (
-          <AlertsProgressBar items={items} isLoading={isLoading} stackByField={stackByField} />
+          <AlertsProgressBar data={data} isLoading={isLoading} stackByField={stackByField} />
         )}
       </EuiPanel>
     </InspectButtonContainer>

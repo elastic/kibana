@@ -5,10 +5,9 @@
  * 2.0.
  */
 import { EuiProgress, EuiSpacer, EuiText, EuiHorizontalRule } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import type { AlertsProgressBarData } from './types';
-import type { SummaryChartsData } from '../alerts_summary_charts_panel/types';
 import { DefaultDraggable } from '../../../../common/components/draggables';
 
 const ProgressWrapper = styled.div`
@@ -20,19 +19,17 @@ const StyledEuiText = styled(EuiText)`
 `;
 
 export interface AlertsProcessBarProps {
-  items: SummaryChartsData[] | null;
+  data: AlertsProgressBarData[];
   isLoading: boolean;
   stackByField: string;
   addFilter?: ({ field, value }: { field: string; value: string | number }) => void;
 }
 
 export const AlertsProgressBar: React.FC<AlertsProcessBarProps> = ({
-  items,
+  data,
   isLoading,
   stackByField,
 }) => {
-  const data = useMemo(() => (items as AlertsProgressBarData[]) ?? [], [items]);
-
   return (
     <>
       <StyledEuiText size="s" data-test-subj="alerts-progress-bar-title">
@@ -48,7 +45,7 @@ export const AlertsProgressBar: React.FC<AlertsProcessBarProps> = ({
         </>
       ) : (
         <ProgressWrapper data-test-subj="progress-bar" className="eui-yScroll">
-          {data.map((item, i) => (
+          {data.map((item) => (
             <div key={`${item.key}`} data-test-subj={`progress-bar-${item.key}`}>
               <EuiProgress
                 valueText={

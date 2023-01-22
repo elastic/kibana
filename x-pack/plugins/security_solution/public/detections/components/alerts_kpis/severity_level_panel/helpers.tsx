@@ -5,9 +5,11 @@
  * 2.0.
  */
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
+import { has } from 'lodash';
 import type { AlertsBySeverityAgg } from './types';
 import type { AlertSearchResponse } from '../../../containers/detection_engine/alerts/types';
 import type { SeverityBuckets as SeverityData } from '../../../../overview/components/detection_response/alerts_by_status/types';
+import type { SummaryChartsData } from '../alerts_summary_charts_panel/types';
 import { severityLabels } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 import { emptyDonutColor } from '../../../../common/components/charts/donutchart_empty';
 import { SEVERITY_COLOR } from '../../../../overview/components/detection_response/utils';
@@ -19,11 +21,11 @@ export const getSeverityColor = (severity: string) => {
 
 export const parseSeverityData = (
   response: AlertSearchResponse<{}, AlertsBySeverityAgg>
-): SeverityData[] | null => {
+): SeverityData[] => {
   const severityBuckets = response?.aggregations?.statusBySeverity?.buckets ?? [];
 
   return severityBuckets.length === 0
-    ? null
+    ? []
     : severityBuckets.map((severity) => {
         return {
           key: severity.key,
@@ -31,4 +33,8 @@ export const parseSeverityData = (
           label: severityLabels[severity.key] ?? i18n.UNKNOWN_SEVERITY,
         };
       });
+};
+
+export const isAlertsBySeverityData = (data: SummaryChartsData[]): data is SeverityData[] => {
+  return data?.every((x) => has(x, 'key'));
 };

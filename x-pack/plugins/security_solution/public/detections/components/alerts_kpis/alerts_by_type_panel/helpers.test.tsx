@@ -21,6 +21,6 @@ describe('parse alerts by type data', () => {
     const res = parseAlertsTypeData(
       mock.mockAlertsEmptyData as AlertSearchResponse<{}, AlertsByTypeAgg>
     );
-    expect(res).toEqual(null);
+    expect(res).toEqual([]);
   });
 });

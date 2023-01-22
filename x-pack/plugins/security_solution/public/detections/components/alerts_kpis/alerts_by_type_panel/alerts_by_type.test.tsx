@@ -19,7 +19,7 @@ jest.mock('react-router-dom', () => {
 
 describe('Alert by type chart', () => {
   const defaultProps = {
-    items: [],
+    data: [],
     isLoading: false,
   };
 
@@ -67,7 +67,7 @@ describe('Alert by type chart', () => {
     act(() => {
       const { container } = render(
         <TestProviders>
-          <AlertsByType items={parsedAlerts} isLoading={false} />
+          <AlertsByType data={parsedAlerts} isLoading={false} />
         </TestProviders>
       );
       expect(
@@ -86,7 +86,7 @@ describe('Alert by type chart', () => {
     act(() => {
       const { queryAllByRole } = render(
         <TestProviders>
-          <AlertsByType items={parsedAlerts} isLoading={false} />
+          <AlertsByType data={parsedAlerts} isLoading={false} />
         </TestProviders>
       );
 

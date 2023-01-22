@@ -21,6 +21,6 @@ describe('parse progress bar data', () => {
     const res = parseAlertsGroupingData(
       mock.mockAlertsEmptyData as AlertSearchResponse<{}, AlertsByGroupingAgg>
     );
-    expect(res).toEqual(null);
+    expect(res).toEqual([]);
   });
 });

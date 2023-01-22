@@ -19,7 +19,7 @@ import { useInspectButton } from '../common/hooks';
 import { parseData } from './helpers';
 
 export type UseAlerts = (props: UseAlertsQueryProps) => {
-  items: SummaryChartsData[] | null;
+  items: SummaryChartsData[];
   isLoading: boolean;
   updatedAt: number;
 };
@@ -86,7 +86,7 @@ export const useSummaryChartData: UseAlerts = ({
 }) => {
   const { to, from, deleteQuery, setQuery } = useGlobalTime(false);
   const [updatedAt, setUpdatedAt] = useState(Date.now());
-  const [items, setItems] = useState<null | SummaryChartsData[]>(null);
+  const [items, setItems] = useState<SummaryChartsData[]>([]);
 
   const additionalFilters = useMemo(() => {
     try {
@@ -138,9 +138,9 @@ export const useSummaryChartData: UseAlerts = ({
 
   useEffect(() => {
     if (data == null) {
-      setItems(null);
+      setItems([]);
     } else {
-      setItems(parseData(aggregationType, data));
+      setItems(parseData(data));
     }
     setUpdatedAt(Date.now());
   }, [data, aggregationType]);

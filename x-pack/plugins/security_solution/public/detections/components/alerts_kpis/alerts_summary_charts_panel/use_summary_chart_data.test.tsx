@@ -109,7 +109,7 @@ describe('get severity chart data', () => {
     const { result } = renderUseSummaryChartData();
 
     expect(result.current).toEqual({
-      items: null,
+      items: [],
       isLoading: false,
       updatedAt: dateNow,
     });
@@ -167,7 +167,7 @@ describe('get severity chart data', () => {
     });
 
     expect(result.current).toEqual({
-      items: null,
+      items: [],
       isLoading: false,
       updatedAt: dateNow,
     });
@@ -186,7 +186,7 @@ describe('get severity chart data', () => {
       });
 
       expect(result.current).toEqual({
-        items: null,
+        items: [],
         isLoading: false,
         updatedAt: dateNow,
       });
@@ -230,7 +230,7 @@ describe('get severity chart data', () => {
       });
 
       expect(result.current).toEqual({
-        items: null,
+        items: [],
         isLoading: false,
         updatedAt: dateNow,
       });

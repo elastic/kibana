@@ -12,7 +12,6 @@ import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey'
 import type { ShapeTreeNode, ElementClickListener } from '@elastic/charts';
 import type { SeverityBuckets as SeverityData } from '../../../../overview/components/detection_response/alerts_by_status/types';
 import type { FillColor } from '../../../../common/components/charts/donutchart';
-import type { SummaryChartsData } from '../alerts_summary_charts_panel/types';
 import { DonutChart } from '../../../../common/components/charts/donutchart';
 import { ChartLabel } from '../../../../overview/components/detection_response/alerts_by_status/chart_label';
 import { getSeverityTableColumns } from './columns';
@@ -23,19 +22,19 @@ import { showInitialLoadingSpinner } from '../alerts_histogram_panel/helpers';
 const DONUT_HEIGHT = 150;
 
 export interface SeverityLevelProps {
-  items: SummaryChartsData[] | null;
+  data: SeverityData[];
   isLoading: boolean;
   addFilter?: ({ field, value }: { field: string; value: string | number }) => void;
 }
 
 export const SeverityLevelChart: React.FC<SeverityLevelProps> = ({
-  items,
+  data,
   isLoading,
   addFilter,
 }) => {
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const columns = useMemo(() => getSeverityTableColumns(), []);
-  const data = useMemo(() => (items as SeverityData[]) ?? [], [items]);
+
   const count = useMemo(() => {
     return data
       ? data.reduce(function (prev, cur) {

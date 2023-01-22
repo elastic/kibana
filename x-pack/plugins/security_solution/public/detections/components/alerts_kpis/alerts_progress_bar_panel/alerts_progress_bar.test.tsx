@@ -19,7 +19,7 @@ jest.mock('react-router-dom', () => {
 
 describe('Alert by grouping', () => {
   const defaultProps = {
-    items: [],
+    data: [],
     isLoading: false,
     stackByField: 'host.name',
   };
@@ -50,7 +50,7 @@ describe('Alert by grouping', () => {
     act(() => {
       const { container } = render(
         <TestProviders>
-          <AlertsProgressBar items={parsedAlerts} isLoading={false} stackByField={'host.name'} />
+          <AlertsProgressBar data={parsedAlerts} isLoading={false} stackByField={'host.name'} />
         </TestProviders>
       );
       expect(

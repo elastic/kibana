@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { act, render } from '@testing-library/react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { act, render, screen } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
 import { AlertsProgressBarPanel } from '.';
 import { useSummaryChartData } from '../alerts_summary_charts_panel/use_summary_chart_data';
+import { STACK_BY_ARIA_LABEL } from '../common/translations';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -21,24 +21,7 @@ jest.mock('react-router-dom', () => {
 jest.mock('../alerts_summary_charts_panel/use_summary_chart_data');
 const mockUseSummaryChartData = useSummaryChartData as jest.Mock;
 
-const options = [
-  {
-    label: 'host.name',
-    value: 'host.name',
-  },
-  {
-    label: 'user.name',
-    value: 'user.name',
-  },
-  {
-    label: 'source.ip',
-    value: 'source.ip',
-  },
-  {
-    label: 'destination.ip',
-    value: 'destination.ip',
-  },
-];
+const options = ['host.name', 'user.name', 'source.ip', 'destination.ip'];
 
 describe('Alert by grouping', () => {
   const defaultProps = {
@@ -47,7 +30,7 @@ describe('Alert by grouping', () => {
   };
 
   beforeEach(() => {
-    mockUseSummaryChartData.mockImplementation(() => ({ isLoading: false, items: [] }));
+    mockUseSummaryChartData.mockReturnValue({ items: [], isLoading: false });
   });
 
   afterEach(() => {
@@ -104,14 +87,19 @@ describe('Alert by grouping', () => {
 
     test('combo box renders corrected options', async () => {
       await act(async () => {
-        const wrapper = mountWithIntl(
+        render(
           <TestProviders>
             <AlertsProgressBarPanel {...defaultProps} />
           </TestProviders>
         );
-        expect(
-          wrapper.find('[data-test-subj="stackByComboBox"]').first().prop('dropDownoptions')
-        ).toEqual(options);
+        const comboBox = screen.getByRole('combobox', { name: STACK_BY_ARIA_LABEL });
+        if (comboBox) {
+          comboBox.focus(); // display the combo box options
+        }
+      });
+      const optionsFound = screen.getAllByRole('option').map((option) => option.textContent);
+      options.forEach((option, i) => {
+        expect(optionsFound[i]).toEqual(option);
       });
     });
   });

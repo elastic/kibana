@@ -18,7 +18,6 @@ import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { AlertsTypeData, AlertType } from './types';
-import type { SummaryChartsData } from '../alerts_summary_charts_panel/types';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { getAlertsTypeTableColumns } from './columns';
 import { ALERT_TYPE_COLOR } from './helpers';
@@ -39,13 +38,12 @@ interface PalletteObject {
 }
 
 export interface AlertsByTypeProps {
-  items: SummaryChartsData[] | null;
+  data: AlertsTypeData[];
   isLoading: boolean;
 }
 
-export const AlertsByType: React.FC<AlertsByTypeProps> = ({ items, isLoading }) => {
+export const AlertsByType: React.FC<AlertsByTypeProps> = ({ data, isLoading }) => {
   const columns = useMemo(() => getAlertsTypeTableColumns(), []);
-  const data = useMemo(() => (items as AlertsTypeData[]) ?? [], [items]);
 
   const subtotals = useMemo(
     () =>

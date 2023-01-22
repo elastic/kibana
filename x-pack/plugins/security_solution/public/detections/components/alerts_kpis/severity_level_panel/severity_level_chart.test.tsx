@@ -19,7 +19,7 @@ jest.mock('react-router-dom', () => {
 
 describe('Severity level chart', () => {
   const defaultProps = {
-    items: [],
+    data: [],
     isLoading: false,
   };
 
@@ -59,7 +59,7 @@ describe('Severity level chart', () => {
     act(() => {
       const { queryAllByRole, container } = render(
         <TestProviders>
-          <SeverityLevelChart items={parsedAlerts} isLoading={false} />
+          <SeverityLevelChart data={parsedAlerts} isLoading={false} />
         </TestProviders>
       );
       expect(container.querySelector('[data-test-subj="severity-level-table"')).toBeInTheDocument();

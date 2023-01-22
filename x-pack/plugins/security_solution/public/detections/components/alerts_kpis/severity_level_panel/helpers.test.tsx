@@ -21,6 +21,6 @@ describe('parse severity data', () => {
     const res = parseSeverityData(
       mock.mockAlertsEmptyData as AlertSearchResponse<{}, AlertsBySeverityAgg>
     );
-    expect(res).toEqual(null);
+    expect(res).toEqual([]);
   });
 });
