@@ -53,7 +53,7 @@ export const OptionsListPopover = ({
   return (
     <div
       id={`control-popover-${id}`}
-      style={{ width: Math.max(width, 300) }}
+      style={{ width, minWidth: 300 }}
       data-test-subj={`optionsList-control-popover`}
       aria-label={OptionsListStrings.popover.getAriaLabel(fieldName)}
     >
