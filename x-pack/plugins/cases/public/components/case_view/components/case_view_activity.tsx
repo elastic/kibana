@@ -243,6 +243,7 @@ export const CaseViewActivity = ({
                 isLoadingAllAvailableConnectors || (isLoading && loadingKey === 'connector')
               }
               onSubmit={onSubmitConnector}
+              key={caseData.connector.id}
             />
           ) : null}
         </EuiFlexGroup>

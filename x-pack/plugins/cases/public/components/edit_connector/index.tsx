@@ -343,7 +343,11 @@ export const EditConnector = React.memo(
             )}
           </MyFlexGroup>
           <EuiHorizontalRule margin="xs" />
-          <MyFlexGroup data-test-subj="edit-allAvailableConnectors" direction="column">
+          <MyFlexGroup
+            data-test-subj="edit-allAvailableConnectors"
+            direction="column"
+            alignItems="stretch"
+          >
             {!isLoading && !editConnector && hasErrorMessages && actionsReadCapabilities && (
               <EuiFlexItem data-test-subj="push-callouts">
                 <PushCallouts
@@ -419,27 +423,29 @@ export const EditConnector = React.memo(
                 </EuiFlexGroup>
               </EuiFlexItem>
             )}
-            {hasErrorMessages &&
+            {!hasErrorMessages &&
               !isLoading &&
               !editConnector &&
               hasPushPermissions &&
               actionsReadCapabilities && (
                 <EuiFlexItem data-test-subj="has-data-to-push-button" grow={false}>
-                  <PushButton
-                    hasBeenPushed={hasBeenPushed}
-                    disabled={
-                      isLoadingPushToService ||
-                      errorsMsg.length > 0 ||
-                      !hasPushPermissions ||
-                      !isValidConnector ||
-                      !needsToBePushed
-                    }
-                    isLoading={isLoadingPushToService}
-                    pushToService={handlePushToService}
-                    errorsMsg={errorsMsg}
-                    showTooltip={errorsMsg.length > 0 || !needsToBePushed || !hasPushPermissions}
-                    connectorName={connectorWithName.name}
-                  />
+                  <span>
+                    <PushButton
+                      hasBeenPushed={hasBeenPushed}
+                      disabled={
+                        isLoadingPushToService ||
+                        errorsMsg.length > 0 ||
+                        !hasPushPermissions ||
+                        !isValidConnector ||
+                        !needsToBePushed
+                      }
+                      isLoading={isLoadingPushToService}
+                      pushToService={handlePushToService}
+                      errorsMsg={errorsMsg}
+                      showTooltip={errorsMsg.length > 0 || !needsToBePushed || !hasPushPermissions}
+                      connectorName={connectorWithName.name}
+                    />
+                  </span>
                 </EuiFlexItem>
               )}
           </MyFlexGroup>
