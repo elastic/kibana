@@ -9,6 +9,8 @@ import React, { useCallback, useState, useEffect } from 'react';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { Filter, Query } from '@kbn/es-query';
 import styled from 'styled-components';
+import { v4 as uuidv4 } from 'uuid';
+import * as i18n from './translations';
 import { KpiPanel } from '../common/components';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { SeverityLevelPanel } from '../severity_level_panel';
@@ -48,6 +50,10 @@ export const AlertsSummaryChartsPanel: React.FC<Props> = ({
   signalIndexName,
   title = i18n.CHARTS_TITLE,
 }: Props) => {
+
+  // create a unique, but stable (across re-renders) query id
+  const uniqueQueryId = useMemo(() => `${DETECTIONS_ALERTS_CHARTS_ID}-${uuidv4()}`, []);
+
   const { toggleStatus, setToggleStatus } = useQueryToggle(DETECTIONS_ALERTS_CHARTS_ID);
   const [querySkip, setQuerySkip] = useState(!toggleStatus);
 

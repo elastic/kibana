@@ -7,7 +7,7 @@
 
 import { AlertNavigationRegistry } from './alert_navigation_registry';
 import { RuleType, RecoveredActionGroup, SanitizedRule } from '../../common';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 beforeEach(() => jest.resetAllMocks());
 
@@ -37,7 +37,7 @@ describe('AlertNavigationRegistry', () => {
   describe('has()', () => {
     test('returns false for unregistered consumer  handlers', () => {
       const registry = new AlertNavigationRegistry();
-      expect(registry.has('siem', mockRuleType(uuid.v4()))).toEqual(false);
+      expect(registry.has('siem', mockRuleType(uuidv4()))).toEqual(false);
     });
 
     test('returns false for unregistered rule types handlers', () => {
