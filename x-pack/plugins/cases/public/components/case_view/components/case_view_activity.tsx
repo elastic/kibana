@@ -234,7 +234,11 @@ export const CaseViewActivity = ({
             onSubmit={onSubmitTags}
             isLoading={isLoading && loadingKey === 'tags'}
           />
-          {pushToServiceAuthorized && userActionsData && caseConnectors ? (
+          {pushToServiceAuthorized &&
+          userActionsData &&
+          caseConnectors &&
+          caseData &&
+          allAvailableConnectors ? (
             <EditConnector
               caseData={caseData}
               caseConnectors={caseConnectors}
