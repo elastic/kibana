@@ -44,7 +44,6 @@ import {
   DiscoverSidebarReducerActionType,
   DiscoverSidebarReducerStatus,
 } from './lib/sidebar_reducer';
-import { useSavedSearch } from '../../hooks/use_saved_search';
 
 export interface DiscoverSidebarResponsiveProps {
   /**
