@@ -79,7 +79,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
           expect(body?.execution_summary?.last_execution.message).to.eql(
-            `WARNING: This rule may not have the required read privileges to the following indices/index patterns: ["${index[0]}"]`
+            `This rule may not have the required read privileges to the following indices/index patterns: ["${index[0]}"]`
           );
 
           await deleteUserAndRole(getService, ROLES.detections_admin);
@@ -118,7 +118,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
           expect(body?.execution_summary?.last_execution.message).to.eql(
-            `WARNING: This rule may not have the required read privileges to the following indices/index patterns: ["${index[0]}"]. \nERROR: An error occurred during rule execution: message: "Aggregations were missing on threshold rule search result"`
+            `This rule may not have the required read privileges to the following indices/index patterns: ["${index[0]}"]`
           );
 
           await deleteUserAndRole(getService, ROLES.detections_admin);
