@@ -189,7 +189,7 @@ export interface IEmbeddable<
 
   /**
    * Reload the embeddable so output and rendering is up to date. Especially relevant
-   * if the embeddable takes relative time as input (e.g. now to now-15).
+   * if the embeddable takes relative time as input (e.g. now to now-15)
    */
   reload(): void;
 
