@@ -23,7 +23,7 @@ import { isEmpty, noop } from 'lodash/fp';
 import type { FieldConfig } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Form, UseField, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { Case, CaseConnectors } from '../../../common/ui/types';
-import type { ActionConnector, ConnectorTypeFields } from '../../../common/api';
+import type { ActionConnector, CaseConnector, ConnectorTypeFields } from '../../../common/api';
 import { NONE_CONNECTOR_ID } from '../../../common/api';
 import { ConnectorSelector } from '../connector_selector/form';
 import { ConnectorFieldsForm } from '../connectors/fields_form';
@@ -34,18 +34,14 @@ import { usePushToService } from '../use_push_to_service';
 import { useApplicationCapabilities } from '../../common/lib/kibana';
 import { PushButton } from './push_button';
 import { PushCallouts } from './push_callouts';
+import { normalizeActionConnector, getNoneConnector } from '../configure_cases/utils';
 
 export interface EditConnectorProps {
   caseData: Case;
   caseConnectors: CaseConnectors;
   allAvailableConnectors: ActionConnector[];
   isLoading: boolean;
-  onSubmit: (
-    connectorId: string,
-    connectorFields: ConnectorTypeFields['fields'],
-    onError: () => void,
-    onSuccess: () => void
-  ) => void;
+  onSubmit: (connector: CaseConnector, onError: () => void, onSuccess: () => void) => void;
 }
 
 interface State {
@@ -182,14 +178,22 @@ export const EditConnector = React.memo(
 
     const onSubmitConnector = useCallback(async () => {
       const { isValid, data: newData } = await submit();
+
       if (isValid && newData.connectorId) {
-        onSubmit(newData.connectorId, fields, onError, noop);
+        const connector = getConnectorById(newData.connectorId, allAvailableConnectors ?? []);
+        const connectorToUpdate = connector
+          ? normalizeActionConnector(connector)
+          : getNoneConnector();
+
+        const connectorWithFields = { ...connectorToUpdate, fields } as CaseConnector;
+        onSubmit(connectorWithFields, onError, noop);
+
         dispatch({
           type: 'SET_EDIT_CONNECTOR',
           payload: false,
         });
       }
-    }, [dispatch, submit, fields, onSubmit, onError]);
+    }, [submit, allAvailableConnectors, fields, onSubmit, onError]);
 
     const onEditClick = useCallback(() => {
       dispatch({

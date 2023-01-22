@@ -28,8 +28,6 @@ import { UserList } from './user_list';
 import { useOnUpdateField } from '../use_on_update_field';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import * as i18n from '../translations';
-import { getNoneConnector, normalizeActionConnector } from '../../configure_cases/utils';
-import { getConnectorById } from '../../utils';
 import { SeveritySidebarSelector } from '../../severity/sidebar_selector';
 import { useGetCaseUserActions } from '../../../containers/use_get_case_user_actions';
 import { AssignUsers } from './assign_users';
@@ -136,20 +134,15 @@ export const CaseViewActivity = ({
     useGetConnectors();
 
   const onSubmitConnector = useCallback(
-    (connectorId, connectorFields, onError, onSuccess) => {
-      const connector = getConnectorById(connectorId, allAvailableConnectors ?? []);
-      const connectorToUpdate = connector
-        ? normalizeActionConnector(connector)
-        : getNoneConnector();
-
+    (connector, onError, onSuccess) => {
       onUpdateField({
         key: 'connector',
-        value: { ...connectorToUpdate, fields: connectorFields },
+        value: connector,
         onSuccess,
         onError,
       });
     },
-    [onUpdateField, allAvailableConnectors]
+    [onUpdateField]
   );
 
   return (
