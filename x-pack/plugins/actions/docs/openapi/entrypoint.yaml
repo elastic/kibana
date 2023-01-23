@@ -15,8 +15,8 @@ servers:
   - url: 'http://localhost:5601'
     description: local
 paths:
-# '/s/{spaceId}/api/actions/connector':
-#   $ref: 'paths/s@{spaceid}@api@actions@connector.yaml'
+   '/s/{spaceId}/api/actions/connector':
+    $ref: 'paths/s@{spaceid}@api@actions@connector.yaml'
    '/s/{spaceId}/api/actions/connector/{connectorId}':
     $ref: 'paths/s@{spaceid}@api@actions@connector@{connectorid}.yaml'
    '/s/{spaceId}/api/actions/connectors':

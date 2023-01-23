@@ -9,6 +9,7 @@ import { EuiFlexGroup, EuiSpacer, EuiFlexItem } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { Redirect, useLocation } from 'react-router-dom';
+import { OverviewAlerts } from './overview/overview_alerts';
 import { useEnablement, useGetUrlParams } from '../../../hooks';
 import { useSyntheticsRefreshContext } from '../../../contexts/synthetics_refresh_context';
 import {
@@ -78,7 +79,7 @@ export const OverviewPage: React.FC = () => {
 
   if (
     !search &&
-    enablementLoading &&
+    !enablementLoading &&
     isEnabled &&
     !monitorsLoading &&
     syntheticsMonitors.length === 0
@@ -115,6 +116,9 @@ export const OverviewPage: React.FC = () => {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <OverviewErrors />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <OverviewAlerts />
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer />

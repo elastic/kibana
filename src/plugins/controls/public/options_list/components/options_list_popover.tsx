@@ -22,10 +22,15 @@ import { OptionsListPopoverInvalidSelections } from './options_list_popover_inva
 
 export interface OptionsListPopoverProps {
   width: number;
+  isLoading: boolean;
   updateSearchString: (newSearchString: string) => void;
 }
 
-export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPopoverProps) => {
+export const OptionsListPopover = ({
+  width,
+  isLoading,
+  updateSearchString,
+}: OptionsListPopoverProps) => {
   // Redux embeddable container Context
   const { useEmbeddableSelector: select } = useReduxEmbeddableContext<
     OptionsListReduxState,
@@ -45,9 +50,10 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
   const [showOnlySelected, setShowOnlySelected] = useState(false);
 
   return (
-    <span
-      role="listbox"
+    <div
       id={`control-popover-${id}`}
+      style={{ width: width > 300 ? width : undefined }}
+      data-test-subj={`optionsList-control-popover`}
       aria-label={OptionsListStrings.popover.getAriaLabel(fieldName)}
     >
       <EuiPopoverTitle paddingSize="s">{title}</EuiPopoverTitle>
@@ -59,17 +65,15 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
         />
       )}
       <div
-        className="optionsList __items"
-        style={{ width: width > 300 ? width : undefined }}
         data-test-subj={`optionsList-control-available-options`}
-        data-option-count={Object.keys(availableOptions ?? {}).length}
+        data-option-count={isLoading ? 0 : Object.keys(availableOptions ?? {}).length}
       >
-        <OptionsListPopoverSuggestions showOnlySelected={showOnlySelected} />
+        <OptionsListPopoverSuggestions showOnlySelected={showOnlySelected} isLoading={isLoading} />
         {!showOnlySelected && invalidSelections && !isEmpty(invalidSelections) && (
           <OptionsListPopoverInvalidSelections />
         )}
       </div>
       {!hideExclude && <OptionsListPopoverFooter />}
-    </span>
+    </div>
   );
 };

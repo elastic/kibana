@@ -29,7 +29,6 @@ export const DiscoverHistogramLayout = ({
   dataView,
   resetSavedSearch,
   savedSearch,
-  savedSearchData$,
   stateContainer,
   isTimeBased,
   resizeRef,
@@ -44,13 +43,14 @@ export const DiscoverHistogramLayout = ({
     isPlainRecord,
     stateContainer,
     savedSearch,
-    savedSearchData$,
+    savedSearchData$: stateContainer.dataState.data$,
   };
 
   const histogramProps = useDiscoverHistogram({
     isTimeBased,
     inspectorAdapters,
     searchSessionManager,
+    savedSearchFetch$: stateContainer.dataState.fetch$,
     ...commonProps,
   });
 
