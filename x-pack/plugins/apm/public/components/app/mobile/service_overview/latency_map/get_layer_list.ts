@@ -20,7 +20,7 @@ import {
   STYLE_TYPE,
   SYMBOLIZE_AS_TYPES,
 } from '@kbn/maps-plugin/common';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import type { MapsStartApi } from '@kbn/maps-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
@@ -141,7 +141,7 @@ export async function getLayerList(maps?: MapsStartApi) {
       tooltipProperties: [COUNTRY_NAME],
     },
     style: getLayerStyle(),
-    id: uuid.v4(),
+    id: uuidv4(),
     label: null,
     minZoom: 0,
     maxZoom: 24,

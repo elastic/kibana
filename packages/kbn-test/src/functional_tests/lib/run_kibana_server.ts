@@ -9,7 +9,7 @@
 import Path from 'path';
 import Os from 'os';
 
-import Uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import type { ProcRunner } from '@kbn/dev-proc-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
 
@@ -98,7 +98,7 @@ export async function runKibanaServer(options: {
             ? []
             : [
                 '--node.roles=["ui"]',
-                `--path.data=${Path.resolve(Os.tmpdir(), `ftr-ui-${Uuid.v4()}`)}`,
+                `--path.data=${Path.resolve(Os.tmpdir(), `ftr-ui-${uuidv4()}`)}`,
               ]),
         ]),
       ],
@@ -121,7 +121,7 @@ export async function runKibanaServer(options: {
             ...kbnFlags,
             `--server.port=${DedicatedTaskRunner.getPort(config.get('servers.kibana.port'))}`,
             '--node.roles=["background_tasks"]',
-            `--path.data=${Path.resolve(Os.tmpdir(), `ftr-task-runner-${Uuid.v4()}`)}`,
+            `--path.data=${Path.resolve(Os.tmpdir(), `ftr-task-runner-${uuidv4()}`)}`,
             ...(typeof mainUuid === 'string' && mainUuid
               ? [`--server.uuid=${DedicatedTaskRunner.getUuid(mainUuid)}`]
               : []),
