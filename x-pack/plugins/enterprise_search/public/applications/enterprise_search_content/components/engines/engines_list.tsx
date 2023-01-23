@@ -8,12 +8,14 @@
 import React, { useEffect, useState } from 'react';
 
 import { useActions, useValues } from 'kea';
+import useThrottle from 'react-use/lib/useThrottle';
 
 import { EuiButton, EuiFieldSearch, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
 
+import { INPUT_THROTTLE_DELAY_MS } from '../../../shared/constants/timers';
 import { DataPanel } from '../../../shared/data_panel/data_panel';
 
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
@@ -26,13 +28,14 @@ export const EnginesList: React.FC = () => {
   const { fetchEngines, onPaginate, openDeleteEngineModal } = useActions(EnginesListLogic);
   const { meta, results } = useValues(EnginesListLogic);
   const [searchQuery, setSearchValue] = useState('');
+  const throttledSearchQuery = useThrottle(searchQuery, INPUT_THROTTLE_DELAY_MS);
 
   useEffect(() => {
     fetchEngines({
       meta,
-      searchQuery,
+      searchQuery: throttledSearchQuery,
     });
-  }, [meta.from, meta.size, searchQuery]);
+  }, [meta.from, meta.size, throttledSearchQuery]);
 
   return (
     <>

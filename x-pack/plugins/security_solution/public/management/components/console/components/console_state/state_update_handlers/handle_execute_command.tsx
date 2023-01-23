@@ -188,7 +188,21 @@ export const handleExecuteCommand: ConsoleStoreReducer<
           )
         );
       }
-
+      if (commandDefinition?.validate) {
+        const validationResult = commandDefinition.validate(command);
+        if (validationResult !== true) {
+          return updateStateWithNewCommandHistoryItem(
+            state,
+            createCommandHistoryEntry(
+              cloneCommandDefinitionWithNewRenderComponent(command, HelpCommandArgument),
+              createCommandExecutionState({
+                errorMessage: validationResult,
+              }),
+              false
+            )
+          );
+        }
+      }
       return updateStateWithNewCommandHistoryItem(
         state,
         createCommandHistoryEntry(
