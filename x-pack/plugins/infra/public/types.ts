@@ -36,12 +36,14 @@ import type {
   UseNodeMetricsTableOptions,
 } from './components/infrastructure_node_metrics_tables/shared';
 import { LogViewsServiceStart } from './services/log_views';
+import { ITelemetryClient } from './services/telemetry';
 
 // Our own setup and start contract values
 export type InfraClientSetupExports = void;
 
 export interface InfraClientStartExports {
   logViews: LogViewsServiceStart;
+  telemetry: ITelemetryClient;
   ContainerMetricsTable: (
     props: UseNodeMetricsTableOptions & Partial<SourceProviderProps>
   ) => JSX.Element;

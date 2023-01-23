@@ -50,7 +50,9 @@
     "@kbn/ui-actions-plugin",
     "@kbn/charts-plugin",
     "@kbn/lens-plugin",
-    "@kbn/core-saved-objects-common"
+    "@kbn/core-saved-objects-common",
+    "@kbn/core-analytics-server",
+    "@kbn/analytics-client"
   ],
   "exclude": ["target/**/*"]
 }
