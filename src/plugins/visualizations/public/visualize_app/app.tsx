@@ -19,6 +19,7 @@ import {
   AnalyticsNoDataPage,
 } from '@kbn/shared-ux-page-analytics-no-data';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import { VisualizeServices } from './types';
 import {
   VisualizeEditor,
@@ -37,6 +38,7 @@ interface NoDataComponentProps {
   dataViews: DataViewsContract;
   dataViewEditor: DataViewEditorStart;
   onDataViewCreated: (dataView: unknown) => void;
+  customBranding: CustomBrandingStart;
 }
 
 const NoDataComponent = ({
@@ -44,11 +46,16 @@ const NoDataComponent = ({
   dataViews,
   dataViewEditor,
   onDataViewCreated,
+  customBranding,
 }: NoDataComponentProps) => {
+  const { hasCustomBranding$ } = customBranding;
   const analyticsServices = {
     coreStart: core,
     dataViews,
     dataViewEditor,
+    customBranding: {
+      hasCustomBranding: hasCustomBranding$ as unknown as boolean,
+    },
   };
   return (
     <AnalyticsNoDataPageKibanaProvider {...analyticsServices}>
