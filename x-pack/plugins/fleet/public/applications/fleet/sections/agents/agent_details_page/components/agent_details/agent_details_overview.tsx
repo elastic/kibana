@@ -22,10 +22,12 @@ import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 
 import type { Agent, AgentPolicy } from '../../../../../types';
 import { useKibanaVersion } from '../../../../../hooks';
-import { isAgentUpgradeable } from '../../../../../services';
+import { ExperimentalFeaturesService, isAgentUpgradeable } from '../../../../../services';
 import { AgentPolicySummaryLine } from '../../../../../components';
 import { AgentHealth } from '../../../components';
-import { Tags } from '../../../agent_list_page/components/tags';
+import { Tags } from '../../../components/tags';
+import { formatAgentCPU, formatAgentMemory } from '../../../services/agent_metrics';
+import { AgentDashboardLink } from '../agent_dashboard_link';
 
 // Allows child text to be truncated
 const FlexItemWithMinWidth = styled(EuiFlexItem)`
@@ -37,11 +39,58 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
   agentPolicy?: AgentPolicy;
 }> = memo(({ agent, agentPolicy }) => {
   const kibanaVersion = useKibanaVersion();
+  const { displayAgentMetrics } = ExperimentalFeaturesService.get();
 
   return (
     <EuiPanel>
       <EuiDescriptionList compressed>
         <EuiFlexGroup direction="column" gutterSize="m">
+          {displayAgentMetrics && (
+            <EuiFlexGroup>
+              <FlexItemWithMinWidth grow={5}>
+                <EuiFlexGroup direction="column" gutterSize="m">
+                  {[
+                    {
+                      title: i18n.translate('xpack.fleet.agentDetails.cpuLabel', {
+                        defaultMessage: 'CPU',
+                      }),
+                      description: formatAgentCPU(agent.metrics, agentPolicy),
+                    },
+                    {
+                      title: i18n.translate('xpack.fleet.agentDetails.memoryLabel', {
+                        defaultMessage: 'Memory',
+                      }),
+                      description: formatAgentMemory(agent.metrics, agentPolicy),
+                    },
+                  ].map(({ title, description }) => {
+                    const tooltip =
+                      typeof description === 'string' && description.length > 20 ? description : '';
+                    return (
+                      <EuiFlexGroup>
+                        <FlexItemWithMinWidth grow={8}>
+                          <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
+                        </FlexItemWithMinWidth>
+                        <FlexItemWithMinWidth grow={4}>
+                          <EuiToolTip position="top" content={tooltip}>
+                            <EuiDescriptionListDescription className="eui-textTruncate">
+                              {description}
+                            </EuiDescriptionListDescription>
+                          </EuiToolTip>
+                        </FlexItemWithMinWidth>
+                      </EuiFlexGroup>
+                    );
+                  })}
+                </EuiFlexGroup>
+              </FlexItemWithMinWidth>
+              <FlexItemWithMinWidth grow={5}>
+                <EuiFlexGroup justifyContent="flexEnd">
+                  <EuiFlexItem grow={false}>
+                    <AgentDashboardLink agent={agent} agentPolicy={agentPolicy} />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </FlexItemWithMinWidth>
+            </EuiFlexGroup>
+          )}
           {[
             {
               title: i18n.translate('xpack.fleet.agentDetails.statusLabel', {
