@@ -82,6 +82,6 @@ steps:
         SERVICE: app-config-controllers
 EOF
 
-elif
+else
   echo "Skipping update for untracked branch $BUILDKITE_BRANCH"
 fi
