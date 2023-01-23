@@ -50,7 +50,7 @@ describe('useNotableAnomaliesSearch', () => {
       wrapper: TestProviders,
     });
 
-    expect(result.current.data.length).toEqual(6);
+    expect(result.current.data.length).toEqual(0);
   });
 
   it('calls notableAnomaliesSearch when skip is false', async () => {
@@ -116,6 +116,63 @@ describe('useNotableAnomaliesSearch', () => {
     });
   });
 
+  it('returns jobs sorted by name', async () => {
+    await act(async () => {
+      const firstJobId = 'v3_windows_anomalous_script';
+      const secondJobId = 'auth_rare_source_ip_for_a_user';
+      const fistJobCount = { key: firstJobId, doc_count: 99 };
+      const secondJobCount = { key: secondJobId, doc_count: 99 };
+      const firstJobSecurityName = '0000001';
+      const secondJobSecurityName = '0000002';
+      const firstJob = {
+        id: firstJobId,
+        jobState: 'started',
+        datafeedState: 'started',
+        customSettings: {
+          security_app_display_name: firstJobSecurityName,
+        },
+      };
+      const secondJob = {
+        id: secondJobId,
+        jobState: 'started',
+        datafeedState: 'started',
+        customSettings: {
+          security_app_display_name: secondJobSecurityName,
+        },
+      };
+
+      mockNotableAnomaliesSearch.mockResolvedValue({
+        aggregations: { number_of_anomalies: { buckets: [fistJobCount, secondJobCount] } },
+      });
+
+      mockUseSecurityJobs.mockReturnValue({
+        loading: false,
+        isMlAdmin: true,
+        jobs: [firstJob, secondJob],
+        refetch: useSecurityJobsRefetch,
+      });
+
+      const { result, waitForNextUpdate } = renderHook(
+        () => useNotableAnomaliesSearch({ skip: false, from, to }),
+        {
+          wrapper: TestProviders,
+        }
+      );
+      await waitForNextUpdate();
+      await waitForNextUpdate();
+
+      const names = result.current.data.map(({ name }) => name);
+      expect(names).toEqual([
+        firstJobSecurityName,
+        secondJobSecurityName,
+        'packetbeat_dns_tunneling',
+        'packetbeat_rare_dns_question',
+        'packetbeat_rare_server_domain',
+        'suspicious_login_activity',
+      ]);
+    });
+  });
+
   it('does not throw error when aggregations is undefined', async () => {
     await act(async () => {
       mockNotableAnomaliesSearch.mockResolvedValue({});
@@ -129,40 +186,6 @@ describe('useNotableAnomaliesSearch', () => {
       await waitForNextUpdate();
 
       expect(mockAddToastError).not.toBeCalled();
-    });
-  });
-
-  it('returns uninstalled jobs', async () => {
-    mockUseSecurityJobs.mockReturnValue({
-      loading: false,
-      isMlAdmin: true,
-      jobs: [],
-      refetch: useSecurityJobsRefetch,
-    });
-
-    await act(async () => {
-      mockNotableAnomaliesSearch.mockResolvedValue({
-        aggregations: { number_of_anomalies: { buckets: [] } },
-      });
-      const { result, waitForNextUpdate } = renderHook(
-        () => useNotableAnomaliesSearch({ skip: false, from, to }),
-        {
-          wrapper: TestProviders,
-        }
-      );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-
-      expect(result.current.data).toEqual(
-        expect.arrayContaining([
-          {
-            count: 0,
-            name: job.id,
-            job: undefined,
-            entity: AnomalyEntity.Host,
-          },
-        ])
-      );
     });
   });
 
