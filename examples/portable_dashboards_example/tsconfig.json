@@ -8,6 +8,7 @@
     "common/**/*.ts",
     "public/**/*.ts",
     "public/**/*.tsx",
+    "public/**/*.json",
     "server/**/*.ts",
     "../../typings/**/*"
   ],
