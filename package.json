@@ -669,7 +669,7 @@
     "remark-gfm": "1.0.0",
     "remark-parse": "^8.0.3",
     "remark-stringify": "^8.0.3",
-    "require-in-the-middle": "^5.2.0",
+    "require-in-the-middle": "^6.0.0",
     "reselect": "^4.1.6",
     "resize-observer-polyfill": "^1.5.1",
     "rison-node": "1.0.2",
