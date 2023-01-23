@@ -529,8 +529,7 @@ export class AlertsService implements IAlertsService {
 
           firstValueFrom(this.options.pluginStop$).then(() => {
             clearTimeout(timeoutId);
-            const msg = 'Server is stopping; must stop all async operations';
-            reject(new Error(msg));
+            reject(new Error('Server is stopping; must stop all async operations'));
           });
         });
       };
@@ -539,10 +538,8 @@ export class AlertsService implements IAlertsService {
     } catch (e) {
       this.options.logger.error(e);
 
-      if (e?.message.indexOf('Server is stopping') < 0) {
-        const reason = e?.message || 'Unknown reason';
-        throw new Error(`Failure during installation. ${reason}`);
-      }
+      const reason = e?.message || 'Unknown reason';
+      throw new Error(`Failure during installation. ${reason}`);
     }
   }
 }

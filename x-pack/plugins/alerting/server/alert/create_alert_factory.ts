@@ -52,6 +52,7 @@ export interface CreateAlertFactoryOpts<
   alerts: Record<string, Alert<State, Context>>;
   logger: Logger;
   maxAlerts: number;
+  autoRecoverAlerts: boolean;
   canSetRecoveryContext?: boolean;
 }
 
@@ -63,6 +64,7 @@ export function createAlertFactory<
   alerts,
   logger,
   maxAlerts,
+  autoRecoverAlerts,
   canSetRecoveryContext = false,
 }: CreateAlertFactoryOpts<State, Context>): AlertFactory<State, Context, ActionGroupIds> {
   // Keep track of which alerts we started with so we can determine which have recovered
@@ -128,8 +130,14 @@ export function createAlertFactory<
             );
             return [];
           }
+          if (!autoRecoverAlerts) {
+            logger.debug(
+              `Set autoRecoverAlerts to true on rule type to get access to recovered alerts.`
+            );
+            return [];
+          }
           const { currentRecoveredAlerts } = processAlerts<Alert<State, Context, ActionGroupIds>>({
-            reportedAlerts: splitAlerts<State, Context>(alerts, originalAlerts),
+            reportedAlerts: splitAlerts<State, Context>(alerts, originalAlerts, autoRecoverAlerts),
             trackedAlerts: {
               active: originalAlerts,
               recovered: {},
@@ -153,7 +161,8 @@ export function createAlertFactory<
  */
 export function splitAlerts<State extends AlertInstanceState, Context extends AlertInstanceContext>(
   reportedAlerts: Record<string, Alert<State, Context>>,
-  trackedActiveAlerts: Record<string, Alert<State, Context>>
+  trackedActiveAlerts: Record<string, Alert<State, Context>>,
+  autoRecoverAlerts: boolean
 ): {
   active: Record<string, Alert<State, Context>>;
   recovered: Record<string, Alert<State, Context>>;
@@ -170,7 +179,7 @@ export function splitAlerts<State extends AlertInstanceState, Context extends Al
     if (reportedAlerts.hasOwnProperty(id)) {
       if (reportedAlerts[id].hasScheduledActions()) {
         alerts.active[id] = reportedAlerts[id];
-      } else if (trackedActiveAlerts[id]) {
+      } else if (trackedActiveAlerts[id] && autoRecoverAlerts) {
         alerts.recovered[id] = reportedAlerts[id];
       }
     }

@@ -108,6 +108,7 @@ export class LegacyAlertsClient<
       alerts: this.reportedAlerts,
       logger: this.options.logger,
       maxAlerts: this.options.maxAlerts,
+      autoRecoverAlerts: this.options.ruleType.autoRecoverAlerts ?? true,
       canSetRecoveryContext: this.options.ruleType.doesSetRecoveryContext ?? false,
     });
   }
@@ -151,7 +152,13 @@ export class LegacyAlertsClient<
       currentRecoveredAlerts: processedAlertsRecoveredCurrent,
       recoveredAlerts: processedAlertsRecovered,
     } = processAlerts<Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>>({
-      reportedAlerts: splitAlerts<State, Context>(this.reportedAlerts, this.trackedAlerts.active),
+      reportedAlerts: splitAlerts<State, Context>(
+        this.reportedAlerts,
+        this.trackedAlerts.active,
+        this.options.ruleType.autoRecoverAlerts !== undefined
+          ? this.options.ruleType.autoRecoverAlerts
+          : true
+      ),
       trackedAlerts: this.trackedAlerts,
       hasReachedAlertLimit: this.alertFactory!.hasReachedAlertLimit(),
       alertLimit: this.options.maxAlerts,
