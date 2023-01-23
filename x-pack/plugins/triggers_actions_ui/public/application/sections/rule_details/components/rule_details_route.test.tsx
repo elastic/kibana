@@ -6,7 +6,7 @@
  */
 
 import * as React from 'react';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { shallow } from 'enzyme';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
@@ -153,8 +153,8 @@ describe('getRuleData useEffect handler', () => {
       actions: [
         {
           group: '',
-          id: uuid.v4(),
-          uuid: uuid.v4(),
+          id: uuidv4(),
+          uuid: uuidv4(),
           actionTypeId: connectorType.id,
           params: {},
         },
@@ -205,8 +205,8 @@ describe('getRuleData useEffect handler', () => {
       actions: [
         {
           group: '',
-          id: uuid.v4(),
-          uuid: uuid.v4(),
+          id: uuidv4(),
+          uuid: uuidv4(),
           actionTypeId: connectorType.id,
           params: {},
         },
@@ -249,8 +249,8 @@ describe('getRuleData useEffect handler', () => {
       actions: [
         {
           group: '',
-          id: uuid.v4(),
-          uuid: uuid.v4(),
+          id: uuidv4(),
+          uuid: uuidv4(),
           actionTypeId: connectorType.id,
           params: {},
         },
@@ -296,8 +296,8 @@ describe('getRuleData useEffect handler', () => {
       actions: [
         {
           group: '',
-          id: uuid.v4(),
-          uuid: uuid.v4(),
+          id: uuidv4(),
+          uuid: uuidv4(),
           actionTypeId: connectorType.id,
           params: {},
         },
@@ -347,8 +347,8 @@ describe('getRuleData useEffect handler', () => {
       actions: [
         {
           group: '',
-          id: uuid.v4(),
-          uuid: uuid.v4(),
+          id: uuidv4(),
+          uuid: uuidv4(),
           actionTypeId: connectorType.id,
           params: {},
         },
@@ -356,7 +356,7 @@ describe('getRuleData useEffect handler', () => {
     });
 
     const ruleType = {
-      id: uuid.v4(),
+      id: uuidv4(),
       name: 'type name',
     };
 
@@ -401,15 +401,15 @@ describe('getRuleData useEffect handler', () => {
       actions: [
         {
           group: '',
-          id: uuid.v4(),
-          uuid: uuid.v4(),
+          id: uuidv4(),
+          uuid: uuidv4(),
           actionTypeId: availableConnectorType.id,
           params: {},
         },
         {
           group: '',
-          id: uuid.v4(),
-          uuid: uuid.v4(),
+          id: uuidv4(),
+          uuid: uuidv4(),
           actionTypeId: missingConnectorType.id,
           params: {},
         },
@@ -417,7 +417,7 @@ describe('getRuleData useEffect handler', () => {
     });
 
     const ruleType = {
-      id: uuid.v4(),
+      id: uuidv4(),
       name: 'type name',
     };
 
@@ -479,9 +479,9 @@ function mockRouterProps(rule: Rule) {
 }
 function mockRule(overloads: Partial<Rule> = {}): Rule {
   return {
-    id: uuid.v4(),
+    id: uuidv4(),
     enabled: true,
-    name: `rule-${uuid.v4()}`,
+    name: `rule-${uuidv4()}`,
     tags: [],
     ruleTypeId: '.noop',
     consumer: 'consumer',

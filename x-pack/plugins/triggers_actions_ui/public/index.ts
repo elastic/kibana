@@ -42,6 +42,7 @@ export type {
   FieldBrowserProps,
   RuleDefinitionProps,
   RulesListVisibleColumns,
+  AlertSummaryTimeRange,
 } from './types';
 
 export type {

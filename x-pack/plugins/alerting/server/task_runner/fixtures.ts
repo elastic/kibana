@@ -146,6 +146,7 @@ export const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   producer: 'alerts',
   cancelAlertsOnRuleTimeout: true,
   ruleTaskTimeout: '5m',
+  autoRecoverAlerts: true,
 };
 
 export const mockRunNowResponse = {
@@ -350,6 +351,7 @@ export const generateAlertInstance = (
       },
       flappingHistory,
       flapping: false,
+      pendingRecoveredCount: 0,
     },
     state: {
       bar: false,

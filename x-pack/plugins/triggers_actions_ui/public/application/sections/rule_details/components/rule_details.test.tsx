@@ -6,7 +6,7 @@
  */
 
 import * as React from 'react';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { shallow } from 'enzyme';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from '@testing-library/react';
@@ -193,8 +193,8 @@ describe('rule_details', () => {
           actions: [
             {
               group: 'default',
-              id: uuid.v4(),
-              uuid: uuid.v4(),
+              id: uuidv4(),
+              uuid: uuidv4(),
               params: {},
               actionTypeId: '.server-log',
             },
@@ -232,15 +232,15 @@ describe('rule_details', () => {
           actions: [
             {
               group: 'default',
-              id: uuid.v4(),
-              uuid: uuid.v4(),
+              id: uuidv4(),
+              uuid: uuidv4(),
               params: {},
               actionTypeId: '.server-log',
             },
             {
               group: 'default',
-              id: uuid.v4(),
-              uuid: uuid.v4(),
+              id: uuidv4(),
+              uuid: uuidv4(),
               params: {},
               actionTypeId: '.email',
             },
@@ -358,8 +358,8 @@ describe('rule_details', () => {
         actions: [
           {
             group: 'default',
-            id: uuid.v4(),
-            uuid: uuid.v4(),
+            id: uuidv4(),
+            uuid: uuidv4(),
             params: {},
             actionTypeId: '.server-log',
           },
@@ -399,8 +399,8 @@ describe('rule_details', () => {
         actions: [
           {
             group: 'default',
-            id: uuid.v4(),
-            uuid: uuid.v4(),
+            id: uuidv4(),
+            uuid: uuidv4(),
             params: {},
             actionTypeId: '.server-log',
           },
@@ -809,9 +809,9 @@ describe('rule_details', () => {
 
   function mockRule(overloads: Partial<Rule> = {}): Rule {
     return {
-      id: uuid.v4(),
+      id: uuidv4(),
       enabled: true,
-      name: `rule-${uuid.v4()}`,
+      name: `rule-${uuidv4()}`,
       tags: [],
       ruleTypeId: '.noop',
       consumer: ALERTS_FEATURE_ID,

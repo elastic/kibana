@@ -7,6 +7,14 @@
 
 import { Duration, DurationUnit } from '../../../domain/models';
 
+export function thirtyDays(): Duration {
+  return new Duration(30, DurationUnit.Day);
+}
+
+export function oneMonth(): Duration {
+  return new Duration(1, DurationUnit.Month);
+}
+
 export function sevenDays(): Duration {
   return new Duration(7, DurationUnit.Day);
 }
@@ -21,4 +29,12 @@ export function sixHours(): Duration {
 
 export function oneMinute(): Duration {
   return new Duration(1, DurationUnit.Minute);
+}
+
+export function twoMinute(): Duration {
+  return new Duration(2, DurationUnit.Minute);
+}
+
+export function fiveMinute(): Duration {
+  return new Duration(5, DurationUnit.Minute);
 }
