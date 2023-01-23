@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
 
   // github.com/elastic/kibana/issues/148570
-  describe.skip('Filter panel', () => {
+  describe('Filter panel', () => {
     before(async () => {
       await PageObjects.common.navigateToApp('discover');
     });
