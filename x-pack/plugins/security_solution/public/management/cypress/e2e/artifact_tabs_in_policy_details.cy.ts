@@ -63,15 +63,15 @@ describe('Artifact tabs in Policy Details page', () => {
         cy.getBySel('policyDetailsPage').should('exist');
       });
 
-      it(`[ALL] Given there are no assigned ${testData.title} entries, user can Manage artifacts`, () => {
+      it(`[ALL] Given there are no assigned ${testData.title} entries, user can Manage and Assign artifacts`, () => {
         visitArtifactTab(testData.tabId);
+
+        // Manage artifacts
         cy.getBySel('unassigned-manage-artifacts-button').should('exist').click();
         cy.location('pathname').should('equal', `/app/security/administration/${testData.urlPath}`);
-      });
+        cy.getBySel('backToOrigin').click();
 
-      it(`[ALL] Given there are no assigned ${testData.title} entries, user can assign an artifact`, () => {
-        visitArtifactTab(testData.tabId);
-
+        // Assign artifacts
         cy.getBySel('unassigned-assign-artifacts-button').should('exist').click();
 
         cy.getBySel('artifacts-assign-flyout').should('exist');
@@ -84,15 +84,13 @@ describe('Artifact tabs in Policy Details page', () => {
       it(`[ALL] Given there are assigned ${testData.title} entries, user can see the artifacts and assign other artifacts`, () => {
         visitArtifactTab(testData.tabId);
 
+        // List of artifacts
         cy.getBySel('artifacts-collapsed-list-card').should('have.length', 1);
         cy.getBySel('artifacts-collapsed-list-card-header-titleHolder').contains(
           testData.artifactName
         );
-      });
 
-      it(`[ALL] Given there are assigned ${testData.title} entries, user can assign other artifacts`, () => {
-        visitArtifactTab(testData.tabId);
-
+        // Assign artifacts
         cy.getBySel('artifacts-assign-button').should('exist').click();
         cy.getBySel('artifacts-assign-flyout').should('exist');
       });
