@@ -8,6 +8,7 @@
 import React, { FC, useContext } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
+import { useFieldStatsTrigger } from '../../../../../utils/use_field_stats_trigger';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { Field } from '../../../../../../../../../common/types/fields';
 import {
@@ -23,10 +24,12 @@ interface Props {
 
 export const InfluencersSelect: FC<Props> = ({ fields, changeHandler, selectedInfluencers }) => {
   const { jobCreator } = useContext(JobCreatorContext);
+  const { renderOption, optionCss } = useFieldStatsTrigger();
+
   const options: EuiComboBoxOptionOption[] = [
     ...createFieldOptions(fields, jobCreator.additionalFields),
     ...createMlcategoryFieldOption(jobCreator.categorizationFieldName),
-  ];
+  ].map((o) => ({ ...o, css: optionCss }));
 
   const selection: EuiComboBoxOptionOption[] = selectedInfluencers.map((i) => ({ label: i }));
 
@@ -41,6 +44,7 @@ export const InfluencersSelect: FC<Props> = ({ fields, changeHandler, selectedIn
       onChange={onChange}
       isClearable={false}
       data-test-subj="mlInfluencerSelect"
+      renderOption={renderOption}
     />
   );
 };
