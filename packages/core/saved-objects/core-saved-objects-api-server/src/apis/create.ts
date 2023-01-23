@@ -7,7 +7,7 @@
  */
 
 import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
-import type { SavedObjectReference } from '@kbn/core-saved-objects-server';
+import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
 import type { MutatingOperationRefreshSetting, SavedObjectsBaseOptions } from './base';
 
 /**
