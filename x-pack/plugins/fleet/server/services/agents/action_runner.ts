@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
@@ -59,7 +59,7 @@ export abstract class ActionRunner {
   ) {
     this.esClient = esClient;
     this.soClient = soClient;
-    this.actionParams = { ...actionParams, actionId: actionParams.actionId ?? uuid() };
+    this.actionParams = { ...actionParams, actionId: actionParams.actionId ?? uuidv4() };
     this.retryParams = retryParams;
   }
 
