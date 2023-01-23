@@ -9,6 +9,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPagination } from '@elastic/eui';
 import { debounce } from 'lodash';
 
+import { useFetchHistoricalSummary } from '../../../hooks/slo/use_fetch_historical_summary';
 import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
 import {
   FilterType,
@@ -16,8 +17,10 @@ import {
   SortType,
 } from './slo_list_search_filter_sort_bar';
 import { SloListItems } from './slo_list_items';
+import { SloSparkline } from './slo_sparkline';
 
 export function SloList() {
+  const [sloIds, setSloIds] = useState<string[]>([]);
   const [activePage, setActivePage] = useState(0);
 
   const [query, setQuery] = useState('');
@@ -38,6 +41,16 @@ export function SloList() {
     indicatorTypes: indicatorTypeFilter,
     refetch: shouldReload,
   });
+
+  useEffect(() => {
+    setSloIds(slos.map((slo) => slo.id));
+  }, [slos]);
+
+  const {
+    loading: loadingHistoricalSummary,
+    error: errorHistoricalSummary,
+    data: historicalSummary,
+  } = useFetchHistoricalSummary({ sloIds, refetch: shouldReload });
 
   useEffect(() => {
     if (shouldReload) {
