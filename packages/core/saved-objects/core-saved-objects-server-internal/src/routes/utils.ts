@@ -18,7 +18,10 @@ import {
 import Boom from '@hapi/boom';
 import type { RequestHandlerWrapper } from '@kbn/core-http-server';
 import type { SavedObject } from '@kbn/core-saved-objects-common';
-import type { SavedObjectsExportResultDetails } from '@kbn/core-saved-objects-server';
+import type {
+  ISavedObjectTypeRegistry,
+  SavedObjectsExportResultDetails,
+} from '@kbn/core-saved-objects-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
 
 export async function createSavedObjectsStreamFromNdJson(ndJsonStream: Readable) {
@@ -116,6 +119,19 @@ export function throwOnHttpHiddenTypes(unsupportedTypes: string[]) {
     );
   }
 }
+/**
+ * @param {string[]} type saved object type
+ * @param {ISavedObjectTypeRegistry} registry the saved object type registry
+ */
+
+export function throwIfTypeNotVisibleByAPI(type: string, registry: ISavedObjectTypeRegistry) {
+  if (!type) return;
+  const fullType = registry.getType(type);
+  if (!fullType?.hidden && fullType?.hiddenFromHttpApis) {
+    throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
+  }
+}
+
 export interface BulkGetItem {
   type: string;
   id: string;

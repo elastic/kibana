@@ -12,6 +12,7 @@ import {
   validateObjects,
   throwOnHttpHiddenTypes,
   throwOnGloballyHiddenTypes,
+  throwIfTypeNotVisibleByAPI,
 } from './utils';
 import { Readable } from 'stream';
 import { createPromiseFromStreams, createConcatStream } from '@kbn/utils';
@@ -24,6 +25,7 @@ import type {
   KibanaResponseFactory,
 } from '@kbn/core-http-server';
 import { kibanaResponseFactory } from '@kbn/core-http-router-server-internal';
+import { typeRegistryInstanceMock } from '../saved_objects_service.test.mocks';
 
 async function readStreamToCompletion(stream: Readable) {
   return createPromiseFromStreams([stream, createConcatStream([])]);
@@ -278,5 +280,30 @@ describe('throwOnGloballyHiddenTypes', () => {
     expect(() => {
       throwOnGloballyHiddenTypes(httpVisibleTypes, []);
     }).not.toThrowError();
+  });
+});
+
+describe('throwIfTypeNotVisibleByAPI', () => {
+  const registry = typeRegistryInstanceMock;
+  registry.getType.mockImplementation((name: string) => {
+    return {
+      name,
+      hidden: name === 'hidden' ? true : false,
+      hiddenFromHttpApis: name === 'hiddenFromHttpApis' ? true : false,
+      namespaceType: 'multiple-isolated',
+      mappings: { properties: {} },
+    };
+  });
+
+  it('throws if a type is not visible by to the HTTP APIs', () => {
+    expect(() => throwIfTypeNotVisibleByAPI('hiddenFromHttpApis', registry)).toThrowError();
+  });
+
+  it('does not throw when a type is not hidden from the HTTP APIS', () => {
+    expect(() => throwIfTypeNotVisibleByAPI('hidden', registry)).not.toThrowError();
+  });
+
+  it('does not throw on visible types', () => {
+    expect(() => throwIfTypeNotVisibleByAPI('config', registry)).not.toThrowError();
   });
 });

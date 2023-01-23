@@ -7,10 +7,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { InternalSavedObjectRouter } from '../internal_types';
-import { catchAndReturnBoomErrors } from './utils';
+import { catchAndReturnBoomErrors, throwIfTypeNotVisibleByAPI } from './utils';
 
 interface RouteDependencies {
   coreUsageData: InternalCoreUsageDataSetup;
@@ -40,10 +39,7 @@ export const registerDeleteRoute = (
 
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient.incrementSavedObjectsDelete({ request: req }).catch(() => {});
-      const fullType = typeRegistry.getType(type);
-      if (!fullType?.hidden && fullType?.hiddenFromHttpApis) {
-        throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
-      }
+      throwIfTypeNotVisibleByAPI(type, typeRegistry);
 
       const client = getClient();
       const result = await client.delete(type, id, { force });

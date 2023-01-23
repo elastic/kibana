@@ -8,9 +8,8 @@
 
 import { schema } from '@kbn/config-schema';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
 import type { InternalSavedObjectRouter } from '../internal_types';
-import { catchAndReturnBoomErrors } from './utils';
+import { catchAndReturnBoomErrors, throwIfTypeNotVisibleByAPI } from './utils';
 
 interface RouteDependencies {
   coreUsageData: InternalCoreUsageDataSetup;
@@ -37,10 +36,7 @@ export const registerGetRoute = (
       usageStatsClient.incrementSavedObjectsGet({ request: req }).catch(() => {});
 
       const { savedObjects } = await context.core;
-      const fullType = savedObjects.typeRegistry.getType(type);
-      if (!fullType?.hidden && fullType?.hiddenFromHttpApis) {
-        throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
-      }
+      throwIfTypeNotVisibleByAPI(type, savedObjects.typeRegistry);
 
       const object = await savedObjects.client.get(type, id);
       return res.ok({ body: object });
