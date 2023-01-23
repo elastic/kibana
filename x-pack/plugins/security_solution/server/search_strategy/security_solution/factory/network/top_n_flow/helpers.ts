@@ -48,7 +48,7 @@ const formatTopNFlowEdges = (
       [flowTarget]: {
         domain: bucket.domain.buckets.map((bucketDomain) => bucketDomain.key),
         ip: bucket.key,
-        location: getGeoItem(bucket),
+        location: getGeoItem(bucket, flowTarget),
         autonomous_system: getAsItem(bucket),
         flows: getOr(0, 'flows.value', bucket),
         [`${getOppositeField(flowTarget)}_ips`]: getOr(
@@ -71,13 +71,13 @@ const formatTopNFlowEdges = (
 const getFlowTargetFromString = (flowAsString: string) =>
   flowAsString === 'source' ? FlowTargetSourceDest.source : FlowTargetSourceDest.destination;
 
-const getGeoItem = (result: NetworkTopNFlowBuckets): GeoItem | null =>
+const getGeoItem = (result: NetworkTopNFlowBuckets, flowTarget: string): GeoItem | null =>
   result.location.top_geo.hits.hits.length > 0 && result.location.top_geo.hits.hits[0].fields
     ? {
         geo: formatResponseObjectValues(
           getOr(
             '',
-            `${Object.keys(result.location.top_geo.hits.hits[0].fields)[0].split('.geo')[0]}.geo`,
+            `${flowTarget}.geo`,
             unflattenObject(
               transformLocationFields(getOr({}, `location.top_geo.hits.hits[0].fields`, result))
             )
