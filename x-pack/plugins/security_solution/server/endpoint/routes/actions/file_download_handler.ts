@@ -6,7 +6,7 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
-import { validateActionId } from '../../services/actions/validate_action_id';
+import { validateActionId, getFileDownloadStream, validateActionFileId } from '../../services';
 import { errorHandler } from '../error_handler';
 import { ACTION_AGENT_FILE_DOWNLOAD_ROUTE } from '../../../../common/endpoint/constants';
 import type { EndpointActionFileDownloadParams } from '../../../../common/endpoint/schema/actions';
@@ -17,7 +17,6 @@ import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
 } from '../../../types';
-import { getFileDownloadStream, validateActionFileId } from '../../services/actions/action_files';
 
 export const registerActionFileDownloadRoutes = (
   router: SecuritySolutionPluginRouter,
