@@ -8,11 +8,9 @@
 import { login, loginWithRole, ROLE } from '../tasks/login';
 
 import { getArtifactsListTestsData } from '../fixtures/artifacts_page';
-import {
-  loadEndpointDataForEventFiltersIfNeeded,
-  removeAllArtifacts,
-} from '../tasks/artifact_helpers';
+import { removeAllArtifacts } from '../tasks/artifacts';
 import { performUserActions } from '../tasks/perform_user_actions';
+import { loadEndpointDataForEventFiltersIfNeeded } from '../tasks/load_endpoint_data';
 
 const loginWithWriteAccess = (url: string) => {
   loginWithRole(ROLE.analyst_hunter);

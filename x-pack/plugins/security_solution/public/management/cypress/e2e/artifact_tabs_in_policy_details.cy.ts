@@ -7,10 +7,8 @@
 
 import { getEndpointSecurityPolicyManager } from '../../../../scripts/endpoint/common/roles_users/endpoint_security_policy_manager';
 import { getArtifactsListTestsData } from '../fixtures/artifacts_page';
-import {
-  loadEndpointDataForEventFiltersIfNeeded,
-  removeAllArtifacts,
-} from '../tasks/artifact_helpers';
+import { removeAllArtifacts } from '../tasks/artifacts';
+import { loadEndpointDataForEventFiltersIfNeeded } from '../tasks/load_endpoint_data';
 import { login, loginWithCustomRole, loginWithRole, ROLE } from '../tasks/login';
 import { performUserActions } from '../tasks/perform_user_actions';
 
