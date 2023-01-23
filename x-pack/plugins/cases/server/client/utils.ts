@@ -549,7 +549,7 @@ export const constructSearchById = (
     );
 
     return {
-      search: `${search} ${rawId}`,
+      search: `"${search}" "${rawId}"`,
       rootSearchFields: ['_id'],
     };
   }

@@ -369,7 +369,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await input.type('test*');
         await input.pressKeys(browser.keys.ENTER);
 
-        await cases.casesTable.validateCasesTableHasNthRows(3);
+        await cases.casesTable.validateCasesTableHasNthRows(2);
         await testSubjects.click('clearSearchButton');
         await cases.casesTable.validateCasesTableHasNthRows(4);
       });
