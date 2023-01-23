@@ -60,7 +60,7 @@ export const GroupRightPanel = React.memo<{
   onTakeActionsOpen?: () => void;
   badgeMetricStats?: Array<{ title: string; value: number; color?: string; width?: number }>;
   customMetricStats?: Array<{ title: string; customStatRenderer: JSX.Element }>;
-}>(({ bucket, takeActionItems, onTakeActionsOpen }) => {
+}>(({ bucket, badgeMetricStats, customMetricStats, takeActionItems, onTakeActionsOpen }) => {
   const [isPopoverOpen, setPopover] = useState(false);
 
   const onButtonClick = () => {
@@ -84,6 +84,17 @@ export const GroupRightPanel = React.memo<{
     bucket.severitiesSubAggregation?.buckets && bucket.severitiesSubAggregation?.buckets?.length
       ? getSingleGroupSeverity(bucket.severitiesSubAggregation?.buckets[0].key)
       : null;
+
+  const badgesComponents = badgeMetricStats?.map((metric) => (<>
+  {metric.title}
+  <EuiToolTip position="top" content={bucket.usersCountAggregation?.value}>
+    <EuiBadge color="hollow" style={{ marginLeft: 10, width: 35 }}>
+      {bucket.usersCountAggregation?.value && bucket.usersCountAggregation?.value > 99
+        ? '99+'
+        : bucket.usersCountAggregation?.value}
+    </EuiBadge>
+  </EuiToolTip>
+</>);
 
   return (
     <EuiFlexGroup key={`stats-${bucket.key[0]}`} gutterSize="s" alignItems="center">

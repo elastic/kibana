@@ -12,6 +12,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import uuid from 'uuid';
 import { GroupingAccordion } from '../accordion_panel';
+import { GroupRightPanel } from '../accordion_panel/group_stats';
 import type { GroupSelection } from '../groups_selector';
 import { GroupsUnitCount } from '../styles';
 import { GROUPS_UNIT } from '../translations';
@@ -109,15 +110,15 @@ const GroupingContainerComponent = ({
               selectedGroup={selectedGroup}
               groupBucket={groupBucket}
               renderChildComponent={}
-extraAction={(
-  <GroupRightPanel
-    bucket={groupBucket}
-    takeActionItems={takeActionItems}
-    onTakeActionsOpen={() => onOpenGroupAction && onOpenGroupAction(groupBucket)}
-    badgeStats={}
-    customStats={}
-  />
-)}
+              extraAction={
+                <GroupRightPanel
+                  bucket={groupBucket}
+                  takeActionItems={takeActionItems}
+                  onTakeActionsOpen={() => onOpenGroupAction && onOpenGroupAction(groupBucket)}
+                  badgeStats={}
+                  customStats={}
+                />
+              }
             />
             <EuiSpacer size="s" />
           </>

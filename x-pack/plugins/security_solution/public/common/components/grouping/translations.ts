@@ -12,3 +12,10 @@ export const GROUPS_UNIT = (totalCount: number) =>
     values: { totalCount },
     defaultMessage: `{totalCount, plural, =1 {group} other {groups}}`,
   });
+
+export const TAKE_ACTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.groups.additionalActions.takeAction',
+  {
+    defaultMessage: 'Take actions',
+  }
+);
