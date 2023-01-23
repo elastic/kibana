@@ -68,9 +68,8 @@ cd -
 
 echo "--- Trigger image tag update"
 if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]]; then
-  if [[ "$BUILDKITE_TRIGGERED_FROM_BUILD_PIPELINE_SLUG" == "kibana-on-merge" ]]
 
-    cat << EOF | buildkite-agent pipeline upload
+  cat << EOF | buildkite-agent pipeline upload
 steps:
   - trigger: k8s-gitops-update-image-tag
     label: "Update image tag for deployment-api"
@@ -83,9 +82,6 @@ steps:
         SERVICE: app-config-controllers
 EOF
 
-  elif
-    echo "Skipping update for untested build.  Update by running kibana-on-merge pipeline"
-  fi
 elif
   echo "Skipping update for untracked branch $BUILDKITE_BRANCH"
 fi
