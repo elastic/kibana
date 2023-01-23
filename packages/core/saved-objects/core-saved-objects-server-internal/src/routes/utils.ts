@@ -132,6 +132,20 @@ export function throwIfTypeNotVisibleByAPI(type: string, registry: ISavedObjectT
   }
 }
 
+export function throwIfAnyTypeNotVisibleByAPI(
+  typesToCheck: string[],
+  registry: ISavedObjectTypeRegistry
+) {
+  const unsupportedTypes = typesToCheck.filter((tname) => {
+    const fullType = registry.getType(tname);
+    if (!fullType?.hidden && fullType?.hiddenFromHttpApis) {
+      return fullType.name;
+    }
+  });
+  if (unsupportedTypes.length > 0) {
+    throwOnHttpHiddenTypes(unsupportedTypes);
+  }
+}
 export interface BulkGetItem {
   type: string;
   id: string;

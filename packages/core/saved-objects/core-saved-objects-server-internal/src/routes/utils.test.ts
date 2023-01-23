@@ -13,6 +13,7 @@ import {
   throwOnHttpHiddenTypes,
   throwOnGloballyHiddenTypes,
   throwIfTypeNotVisibleByAPI,
+  throwIfAnyTypeNotVisibleByAPI,
 } from './utils';
 import { Readable } from 'stream';
 import { createPromiseFromStreams, createConcatStream } from '@kbn/utils';
@@ -296,7 +297,11 @@ describe('throwIfTypeNotVisibleByAPI', () => {
   });
 
   it('throws if a type is not visible by to the HTTP APIs', () => {
-    expect(() => throwIfTypeNotVisibleByAPI('hiddenFromHttpApis', registry)).toThrowError();
+    expect(() =>
+      throwIfTypeNotVisibleByAPI('hiddenFromHttpApis', registry)
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"Unsupported saved object type: 'hiddenFromHttpApis': Bad Request"`
+    );
   });
 
   it('does not throw when a type is not hidden from the HTTP APIS', () => {
@@ -305,5 +310,34 @@ describe('throwIfTypeNotVisibleByAPI', () => {
 
   it('does not throw on visible types', () => {
     expect(() => throwIfTypeNotVisibleByAPI('config', registry)).not.toThrowError();
+  });
+});
+
+describe('throwIfAnyTypeNotVisibleByAPI', () => {
+  const registry = typeRegistryInstanceMock;
+  registry.getType.mockImplementation((name: string) => {
+    return {
+      name,
+      hidden: name === 'hidden' ? true : false,
+      hiddenFromHttpApis: name === 'hiddenFromHttpApis' ? true : false,
+      namespaceType: 'multiple-isolated',
+      mappings: { properties: {} },
+    };
+  });
+
+  it('throws if the provided types contains any that are not visible by to the HTTP APIs', () => {
+    expect(() =>
+      throwIfAnyTypeNotVisibleByAPI(['hiddenFromHttpApis'], registry)
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"Unsupported saved object type(s): hiddenFromHttpApis: Bad Request"`
+    );
+  });
+
+  it('does not throw when a type is not hidden from the HTTP APIS', () => {
+    expect(() => throwIfAnyTypeNotVisibleByAPI(['hidden'], registry)).not.toThrowError();
+  });
+
+  it('does not throw on visible types', () => {
+    expect(() => throwIfAnyTypeNotVisibleByAPI(['config'], registry)).not.toThrowError();
   });
 });

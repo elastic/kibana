@@ -9,7 +9,7 @@
 import { schema } from '@kbn/config-schema';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { InternalSavedObjectRouter } from '../internal_types';
-import { catchAndReturnBoomErrors, throwOnHttpHiddenTypes } from './utils';
+import { catchAndReturnBoomErrors, throwIfAnyTypeNotVisibleByAPI } from './utils';
 
 interface RouteDependencies {
   coreUsageData: InternalCoreUsageDataSetup;
@@ -36,15 +36,8 @@ export const registerBulkResolveRoute = (
       usageStatsClient.incrementSavedObjectsBulkResolve({ request: req }).catch(() => {});
 
       const { savedObjects } = await context.core;
-      const unsupportedTypes = [...new Set(req.body.map(({ type }) => type))].filter((tname) => {
-        const fullType = savedObjects.typeRegistry.getType(tname);
-        if (!fullType?.hidden && fullType?.hiddenFromHttpApis) {
-          return fullType.name;
-        }
-      });
-      if (unsupportedTypes.length > 0) {
-        throwOnHttpHiddenTypes(unsupportedTypes);
-      }
+      const typesToCheck = [...new Set(req.body.map(({ type }) => type))];
+      throwIfAnyTypeNotVisibleByAPI(typesToCheck, savedObjects.typeRegistry);
       const result = await savedObjects.client.bulkResolve(req.body);
       return res.ok({ body: result });
     })
