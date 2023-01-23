@@ -27,7 +27,11 @@ import {
   sendGetAgentTags,
 } from '../../../hooks';
 import { AgentEnrollmentFlyout } from '../../../components';
-import { AgentStatusKueryHelper, policyHasFleetServer } from '../../../services';
+import {
+  AgentStatusKueryHelper,
+  ExperimentalFeaturesService,
+  policyHasFleetServer,
+} from '../../../services';
 import { AGENTS_PREFIX, SO_SEARCH_LIMIT } from '../../../constants';
 import {
   AgentReassignAgentPolicyModal,
@@ -52,6 +56,8 @@ import { EmptyPrompt } from './components/empty_prompt';
 const REFRESH_INTERVAL_MS = 30000;
 
 export const AgentListPage: React.FunctionComponent<{}> = () => {
+  const { displayAgentMetrics } = ExperimentalFeaturesService.get();
+
   const { notifications, cloud } = useStartServices();
   useBreadcrumbs('agent_list');
   const defaultKuery: string = (useUrlParams().urlParams.kuery as string) || '';
@@ -278,6 +284,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
               sortOrder,
               showInactive,
               showUpgradeable,
+              withMetrics: displayAgentMetrics,
             }),
             sendGetAgentStatus({
               kuery: kuery && kuery !== '' ? kuery : undefined,
@@ -354,6 +361,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       notifications.toasts,
       sortField,
       sortOrder,
+      displayAgentMetrics,
     ]
   );
 

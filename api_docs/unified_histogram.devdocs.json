@@ -165,19 +165,6 @@
         "children": [
           {
             "parentPluginId": "unifiedHistogram",
-            "id": "def-public.UnifiedHistogramChartLoadEvent.complete",
-            "type": "boolean",
-            "tags": [],
-            "label": "complete",
-            "description": [
-              "\nTrue if loading is complete"
-            ],
-            "path": "src/plugins/unified_histogram/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "unifiedHistogram",
             "id": "def-public.UnifiedHistogramChartLoadEvent.adapters",
             "type": "Object",
             "tags": [],
@@ -357,15 +344,76 @@
           },
           {
             "parentPluginId": "unifiedHistogram",
-            "id": "def-public.UnifiedHistogramLayoutProps.lastReloadRequestTime",
-            "type": "number",
+            "id": "def-public.UnifiedHistogramLayoutProps.query",
+            "type": "CompoundType",
             "tags": [],
-            "label": "lastReloadRequestTime",
+            "label": "query",
             "description": [
-              "\nCan be updated to `Date.now()` to force a refresh"
+              "\nThe current query"
             ],
             "signature": [
-              "number | undefined"
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.AggregateQuery",
+                "text": "AggregateQuery"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/unified_histogram/public/layout/layout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedHistogram",
+            "id": "def-public.UnifiedHistogramLayoutProps.filters",
+            "type": "Array",
+            "tags": [],
+            "label": "filters",
+            "description": [
+              "\nThe current filters"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/plugins/unified_histogram/public/layout/layout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedHistogram",
+            "id": "def-public.UnifiedHistogramLayoutProps.timeRange",
+            "type": "Object",
+            "tags": [],
+            "label": "timeRange",
+            "description": [
+              "\nThe current time range"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
+              " | undefined"
             ],
             "path": "src/plugins/unified_histogram/public/layout/layout.tsx",
             "deprecated": false,
@@ -506,6 +554,71 @@
             ],
             "signature": [
               "React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined"
+            ],
+            "path": "src/plugins/unified_histogram/public/layout/layout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedHistogram",
+            "id": "def-public.UnifiedHistogramLayoutProps.disableAutoFetching",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "disableAutoFetching",
+            "description": [
+              "\nDisable automatic refetching based on props changes, and instead wait for a `refetch` message"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/unified_histogram/public/layout/layout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedHistogram",
+            "id": "def-public.UnifiedHistogramLayoutProps.disableTriggers",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "disableTriggers",
+            "description": [
+              "\nDisable triggers for the Lens embeddable"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/unified_histogram/public/layout/layout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedHistogram",
+            "id": "def-public.UnifiedHistogramLayoutProps.disabledActions",
+            "type": "Array",
+            "tags": [],
+            "label": "disabledActions",
+            "description": [
+              "\nDisabled action IDs for the Lens embeddable"
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/plugins/unified_histogram/public/layout/layout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedHistogram",
+            "id": "def-public.UnifiedHistogramLayoutProps.input$",
+            "type": "Object",
+            "tags": [],
+            "label": "input$",
+            "description": [
+              "\nInput observable"
+            ],
+            "signature": [
+              "UnifiedHistogramInput",
+              "$ | undefined"
             ],
             "path": "src/plugins/unified_histogram/public/layout/layout.tsx",
             "deprecated": false,
@@ -906,6 +1019,84 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "unifiedHistogram",
+            "id": "def-public.UnifiedHistogramLayoutProps.onFilter",
+            "type": "Function",
+            "tags": [],
+            "label": "onFilter",
+            "description": [
+              "\nCallback to pass to the Lens embeddable to handle filter changes"
+            ],
+            "signature": [
+              "((data: { data: { table: Pick<",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.Datatable",
+                "text": "Datatable"
+              },
+              ", \"rows\" | \"columns\">; column: number; row: number; value: any; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; }) => void) | undefined"
+            ],
+            "path": "src/plugins/unified_histogram/public/layout/layout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedHistogram",
+            "id": "def-public.UnifiedHistogramLayoutProps.onBrushEnd",
+            "type": "Function",
+            "tags": [],
+            "label": "onBrushEnd",
+            "description": [
+              "\nCallback to pass to the Lens embeddable to handle brush events"
+            ],
+            "signature": [
+              "((data: { table: ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.Datatable",
+                "text": "Datatable"
+              },
+              "; column: number; range: number[]; timeFieldName?: string | undefined; }) => void) | undefined"
+            ],
+            "path": "src/plugins/unified_histogram/public/layout/layout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedHistogram",
+        "id": "def-public.UnifiedHistogramRefetchMessage",
+        "type": "Interface",
+        "tags": [],
+        "label": "UnifiedHistogramRefetchMessage",
+        "description": [
+          "\nMessage to refetch the chart and total hits"
+        ],
+        "path": "src/plugins/unified_histogram/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedHistogram",
+            "id": "def-public.UnifiedHistogramRefetchMessage.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"refetch\""
+            ],
+            "path": "src/plugins/unified_histogram/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1160,6 +1351,55 @@
             "text": "ExpressionsInspectorAdapter"
           },
           " | undefined; }"
+        ],
+        "path": "src/plugins/unified_histogram/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedHistogram",
+        "id": "def-public.UnifiedHistogramInput$",
+        "type": "Type",
+        "tags": [],
+        "label": "UnifiedHistogramInput$",
+        "description": [
+          "\nUnified histogram input observable"
+        ],
+        "signature": [
+          "Subject",
+          "<",
+          {
+            "pluginId": "unifiedHistogram",
+            "scope": "public",
+            "docId": "kibUnifiedHistogramPluginApi",
+            "section": "def-public.UnifiedHistogramRefetchMessage",
+            "text": "UnifiedHistogramRefetchMessage"
+          },
+          ">"
+        ],
+        "path": "src/plugins/unified_histogram/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedHistogram",
+        "id": "def-public.UnifiedHistogramInputMessage",
+        "type": "Type",
+        "tags": [],
+        "label": "UnifiedHistogramInputMessage",
+        "description": [
+          "\nUnified histogram input message"
+        ],
+        "signature": [
+          {
+            "pluginId": "unifiedHistogram",
+            "scope": "public",
+            "docId": "kibUnifiedHistogramPluginApi",
+            "section": "def-public.UnifiedHistogramRefetchMessage",
+            "text": "UnifiedHistogramRefetchMessage"
+          }
         ],
         "path": "src/plugins/unified_histogram/public/types.ts",
         "deprecated": false,
