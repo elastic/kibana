@@ -59,6 +59,12 @@ export const LogCategorizationPage: FC = () => {
   const [pinnedCategory, setPinnedCategory] = useState<Category | null>(null);
   const [sparkLines, setSparkLines] = useState<SparkLinesPerCategory>({});
 
+  useEffect(() => {
+    if (savedSearch) {
+      setCurrentSavedSearch(savedSearch);
+    }
+  }, [savedSearch]);
+
   useEffect(
     function cancelRequestOnLeave() {
       return () => {

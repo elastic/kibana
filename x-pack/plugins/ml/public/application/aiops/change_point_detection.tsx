@@ -25,7 +25,7 @@ export const ChangePointDetectionPage: FC = () => {
 
   const context = useMlContext();
   const dataView = context.currentDataView;
-  const savedSearch = context.currentSavedSearch;
+  const savedSearch = context._savedSearch;
 
   return (
     <>

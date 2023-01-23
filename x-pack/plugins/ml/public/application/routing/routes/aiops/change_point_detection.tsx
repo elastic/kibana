@@ -42,10 +42,17 @@ export const changePointDetectionRouteFactory = (
 
 const PageWrapper: FC<PageProps> = ({ location, deps }) => {
   const { index, savedSearchId }: Record<string, any> = parse(location.search, { sort: false });
-  const { context } = useResolver(index, savedSearchId, deps.config, deps.dataViewsContract, {
-    checkBasicLicense,
-    cacheDataViewsContract: () => cacheDataViewsContract(deps.dataViewsContract),
-  });
+  const { context } = useResolver(
+    index,
+    savedSearchId,
+    deps.config,
+    deps.dataViewsContract,
+    deps.getSavedSearchDeps,
+    {
+      checkBasicLicense,
+      cacheDataViewsContract: () => cacheDataViewsContract(deps.dataViewsContract),
+    }
+  );
 
   return (
     <PageLoader context={context}>

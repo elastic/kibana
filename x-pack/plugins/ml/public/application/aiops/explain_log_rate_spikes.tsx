@@ -25,7 +25,7 @@ export const ExplainLogRateSpikesPage: FC = () => {
 
   const context = useMlContext();
   const dataView = context.currentDataView;
-  const savedSearch = context.currentSavedSearch;
+  const savedSearch = context._savedSearch;
 
   return (
     <>
@@ -46,8 +46,6 @@ export const ExplainLogRateSpikesPage: FC = () => {
         <ExplainLogRateSpikes
           dataView={dataView}
           savedSearch={savedSearch}
-          // @todo
-          _savedSearch={context._savedSearch}
           appDependencies={pick(services, [
             'application',
             'data',
