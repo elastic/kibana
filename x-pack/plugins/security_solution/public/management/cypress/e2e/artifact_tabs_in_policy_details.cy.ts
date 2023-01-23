@@ -5,24 +5,52 @@
  * 2.0.
  */
 
+import { getEndpointSecurityPolicyManager } from '../../../../scripts/endpoint/common/roles_users/endpoint_security_policy_manager';
 import { getArtifactsListTestsData } from '../fixtures/artifacts_page';
 import {
   loadEndpointDataForEventFiltersIfNeeded,
   removeAllArtifacts,
 } from '../tasks/artifact_helpers';
-import { login, loginWithRole, ROLE } from '../tasks/login';
+import { login, loginWithCustomRole, loginWithRole, ROLE } from '../tasks/login';
 import { performUserActions } from '../tasks/perform_user_actions';
 
+const loginWithPrivilegeAll = () => {
+  loginWithRole(ROLE.endpoint_security_policy_manager);
+};
+
+const loginWithPrivilegeNone = (privilegePrefix: string) => {
+  const roleWithoutArtifactPrivilege = getRoleWithoutArtifactPrivilege(privilegePrefix);
+  loginWithCustomRole('onlyPolicyManagementButNoArtifacts', roleWithoutArtifactPrivilege);
+};
+
+const getRoleWithoutArtifactPrivilege = (privilegePrefix: string) => {
+  const endpointSecurityPolicyManagerRole = getEndpointSecurityPolicyManager();
+
+  return {
+    ...endpointSecurityPolicyManagerRole,
+    kibana: [
+      {
+        ...endpointSecurityPolicyManagerRole.kibana[0],
+        feature: {
+          ...endpointSecurityPolicyManagerRole.kibana[0].feature,
+          siem: endpointSecurityPolicyManagerRole.kibana[0].feature.siem.filter(
+            (privilege) => privilege !== `${privilegePrefix}all`
+          ),
+        },
+      },
+    ],
+  };
+};
+
 const visitArtifactTab = (tabId: string) => {
-  loginWithWriteAccess(`/app/security/administration/policy`);
-  cy.getBySel('policyNameCellLink').eq(0).click({ force: true });
-  cy.getBySel('policyDetailsPage').should('exist');
+  visitPolicyDetailsPage();
   cy.get(`#${tabId}`).click();
 };
 
-const loginWithWriteAccess = (url: string) => {
-  loginWithRole(ROLE.endpoint_security_policy_manager);
-  cy.visit(url);
+const visitPolicyDetailsPage = () => {
+  cy.visit('/app/security/administration/policy');
+  cy.getBySel('policyNameCellLink').eq(0).click({ force: true });
+  cy.getBySel('policyDetailsPage').should('exist');
 };
 
 describe('Artifact tabs in Policy Details page', () => {
@@ -38,7 +66,15 @@ describe('Artifact tabs in Policy Details page', () => {
 
   for (const testData of getArtifactsListTestsData()) {
     describe(`${testData.title} tab`, () => {
+      it(`[NONE] User cannot see the tab for ${testData.title}`, () => {
+        loginWithPrivilegeNone(testData.privilegePrefix);
+        visitPolicyDetailsPage();
+
+        cy.get(`#${testData.tabId}`).should('not.exist');
+      });
+
       it(`[ALL] Given there are no ${testData.title} entries, user can add an artifact`, () => {
+        loginWithPrivilegeAll();
         visitArtifactTab(testData.tabId);
 
         cy.getBySel('unexisting-manage-artifacts-button').should('exist').click();
@@ -64,6 +100,7 @@ describe('Artifact tabs in Policy Details page', () => {
       });
 
       it(`[ALL] Given there are no assigned ${testData.title} entries, user can Manage and Assign artifacts`, () => {
+        loginWithPrivilegeAll();
         visitArtifactTab(testData.tabId);
 
         // Manage artifacts
@@ -82,6 +119,7 @@ describe('Artifact tabs in Policy Details page', () => {
       });
 
       it(`[ALL] Given there are assigned ${testData.title} entries, user can see the artifacts and assign other artifacts`, () => {
+        loginWithPrivilegeAll();
         visitArtifactTab(testData.tabId);
 
         // List of artifacts
@@ -96,6 +134,7 @@ describe('Artifact tabs in Policy Details page', () => {
       });
 
       it(`[ALL] Given there are assigned ${testData.title} entries, user can unassign a "per policy" artifact from the policy`, () => {
+        loginWithPrivilegeAll();
         visitArtifactTab(testData.tabId);
 
         cy.getBySel('artifacts-collapsed-list-card-header-actions-button').click();
