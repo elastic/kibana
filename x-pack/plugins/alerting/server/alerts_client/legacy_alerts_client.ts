@@ -101,6 +101,7 @@ export class LegacyAlertsClient<
       alerts: this.alerts,
       logger: this.options.logger,
       maxAlerts: this.options.maxAlerts,
+      autoRecoverAlerts: this.options.ruleType.autoRecoverAlerts ?? true,
       canSetRecoveryContext: this.options.ruleType.doesSetRecoveryContext ?? false,
     });
   }
@@ -127,6 +128,10 @@ export class LegacyAlertsClient<
       previouslyRecoveredAlerts: this.recoveredAlertsFromPreviousExecution,
       hasReachedAlertLimit: this.alertFactory!.hasReachedAlertLimit(),
       alertLimit: this.options.maxAlerts,
+      autoRecoverAlerts:
+        this.options.ruleType.autoRecoverAlerts !== undefined
+          ? this.options.ruleType.autoRecoverAlerts
+          : true,
       setFlapping: true,
     });
 

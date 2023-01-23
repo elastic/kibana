@@ -130,6 +130,7 @@ describe('Legacy Alerts Client', () => {
       logger,
       maxAlerts: 1000,
       canSetRecoveryContext: false,
+      autoRecoverAlerts: true,
     });
   });
 
@@ -242,6 +243,7 @@ describe('Legacy Alerts Client', () => {
       previouslyRecoveredAlerts: {},
       hasReachedAlertLimit: false,
       alertLimit: 1000,
+      autoRecoverAlerts: true,
       setFlapping: true,
     });
 

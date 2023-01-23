@@ -26,6 +26,7 @@ export interface SecuritySolutionUiConfigType {
  */
 export interface SecuritySolutionDataViewBase extends DataViewBase {
   fields: FieldSpec[];
+  getName?: () => string;
 }
 
 export type AlertWorkflowStatus = 'open' | 'closed' | 'acknowledged';
