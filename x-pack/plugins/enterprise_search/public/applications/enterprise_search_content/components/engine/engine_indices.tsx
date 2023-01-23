@@ -22,9 +22,8 @@ import { i18n } from '@kbn/i18n';
 import { EnterpriseSearchEngineIndex } from '../../../../../common/types/engines';
 
 import { CANCEL_BUTTON_LABEL } from '../../../shared/constants';
-import { healthColorsMap } from '../../../shared/constants/health_colors';
+import { indexHealthToHealthColor } from '../../../shared/constants/health_colors';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
-import { indexHealthToHealthColor } from '../../../shared/indices/utils';
 import { KibanaLogic } from '../../../shared/kibana';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
 import { SEARCH_INDEX_PATH, EngineViewTabs } from '../../routes';

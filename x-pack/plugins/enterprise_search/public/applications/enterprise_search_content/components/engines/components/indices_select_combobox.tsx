@@ -25,7 +25,7 @@ import { FormattedNumber } from '@kbn/i18n-react';
 import { Status } from '../../../../../../common/types/api';
 import { ElasticsearchIndexWithIngestion } from '../../../../../../common/types/indices';
 
-import { indexHealthToHealthColor } from '../../../../shared/indices/utils';
+import { indexHealthToHealthColor } from '../../../../shared/constants/health_colors';
 import { FetchIndicesForEnginesAPILogic } from '../../../api/engines/fetch_indices_api_logic';
 
 export type IndicesSelectComboBoxProps = Omit<
