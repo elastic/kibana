@@ -48,7 +48,7 @@ import {
   TEST_RUN_DETAILS_ROUTE,
 } from '../../../common/constants';
 import { PLUGIN } from '../../../common/constants/plugin';
-import { MonitorsPageWithServiceAllowed } from './components/monitors_page/monitor_page';
+import { MonitorsPageWithServiceAllowed } from './components/monitors_page/monitors_page';
 import { apiService } from '../../utils/api_service';
 import { RunTestManually } from './components/monitor_details/run_test_manually';
 import { MonitorDetailsStatus } from './components/monitor_details/monitor_details_status';

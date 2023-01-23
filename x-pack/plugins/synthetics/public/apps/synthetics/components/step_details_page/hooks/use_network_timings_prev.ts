@@ -36,10 +36,11 @@ export const useStepFilters = (checkGroupId: string, stepIndex: number) => {
   ];
 };
 
-export const useNetworkTimings = (checkGroupIdArg?: string, stepIndexArg?: number) => {
+export const useNetworkTimingsPrevious24Hours = (stepIndexArg?: number) => {
   const params = useParams<{ checkGroupId: string; stepIndex: string; monitorId: string }>();
 
-  const checkGroupId = checkGroupIdArg ?? params.checkGroupId;
+  const configId = params.monitorId;
+  const checkGroupId = params.checkGroupId;
   const stepIndex = stepIndexArg ?? Number(params.stepIndex);
 
   const runTimeMappings = NETWORK_TIMINGS_FIELDS.reduce(
@@ -52,7 +53,7 @@ export const useNetworkTimings = (checkGroupIdArg?: string, stepIndexArg?: numbe
     {}
   );
 
-  const { data } = useReduxEsSearch(
+  const { data, loading } = useReduxEsSearch(
     {
       index: SYNTHETICS_INDEX_PATTERN,
       body: {
@@ -67,8 +68,11 @@ export const useNetworkTimings = (checkGroupIdArg?: string, stepIndexArg?: numbe
           bool: {
             filter: [
               {
-                term: {
-                  'synthetics.type': 'journey/network_info',
+                range: {
+                  '@timestamp': {
+                    lte: 'now',
+                    gte: 'now-24h/h',
+                  },
                 },
               },
               {
@@ -76,71 +80,101 @@ export const useNetworkTimings = (checkGroupIdArg?: string, stepIndexArg?: numbe
                   'synthetics.payload.is_navigation_request': true,
                 },
               },
-              ...useStepFilters(checkGroupId, stepIndex),
+              {
+                term: {
+                  'synthetics.type': 'journey/network_info',
+                },
+              },
+              {
+                term: {
+                  'synthetics.step.index': stepIndex,
+                },
+              },
+              {
+                term: {
+                  config_id: configId,
+                },
+              },
+            ],
+            must_not: [
+              {
+                term: {
+                  'monitor.check_group': checkGroupId,
+                },
+              },
             ],
           },
         },
         aggs: {
           dns: {
-            sum: {
+            percentiles: {
               field: SYNTHETICS_DNS_TIMINGS,
+              percents: [50],
             },
           },
           ssl: {
-            sum: {
+            percentiles: {
               field: SYNTHETICS_SSL_TIMINGS,
+              percents: [50],
             },
           },
           blocked: {
-            sum: {
+            percentiles: {
               field: SYNTHETICS_BLOCKED_TIMINGS,
+              percents: [50],
             },
           },
           connect: {
-            sum: {
+            percentiles: {
               field: SYNTHETICS_CONNECT_TIMINGS,
+              percents: [50],
             },
           },
           receive: {
-            sum: {
+            percentiles: {
               field: SYNTHETICS_RECEIVE_TIMINGS,
+              percents: [50],
             },
           },
           send: {
-            sum: {
+            percentiles: {
               field: SYNTHETICS_SEND_TIMINGS,
+              percents: [50],
             },
           },
           wait: {
-            sum: {
+            percentiles: {
               field: SYNTHETICS_WAIT_TIMINGS,
+              percents: [50],
             },
           },
           total: {
-            sum: {
+            percentiles: {
               field: SYNTHETICS_TOTAL_TIMINGS,
+              percents: [50],
             },
           },
         },
       },
     },
-    [checkGroupId, stepIndex],
-    { name: `stepNetworkTimingsMetrics/${checkGroupId}/${stepIndex}` }
+    [configId, stepIndex, checkGroupId],
+    { name: `stepNetworkPreviousTimings/${configId}/${stepIndex}` }
   );
 
   const aggs = data?.aggregations;
 
   const timings = {
-    dns: aggs?.dns.value ?? 0,
-    connect: aggs?.connect.value ?? 0,
-    receive: aggs?.receive.value ?? 0,
-    send: aggs?.send.value ?? 0,
-    wait: aggs?.wait.value ?? 0,
-    blocked: aggs?.blocked.value ?? 0,
-    ssl: aggs?.ssl.value ?? 0,
+    dns: aggs?.dns.values['50.0'] ?? 0,
+    connect: aggs?.connect.values['50.0'] ?? 0,
+    receive: aggs?.receive.values['50.0'] ?? 0,
+    send: aggs?.send.values['50.0'] ?? 0,
+    wait: aggs?.wait.values['50.0'] ?? 0,
+    blocked: aggs?.blocked.values['50.0'] ?? 0,
+    ssl: aggs?.ssl.values['50.0'] ?? 0,
   };
 
   return {
+    loading,
     timings,
     timingsWithLabels: [
       {
