@@ -71,10 +71,9 @@ import { useKibana } from '../../../common/lib/kibana';
 import { NoPrivileges } from '../../../common/components/no_privileges';
 import { HeaderPage } from '../../../common/components/header_page';
 import { LandingPageComponent } from '../../../common/components/landing_page';
-import { AlertsTable } from '../../components/alerts_table';
 import { DetectionPageFilterSet } from '../../components/detection_page_filters';
-import { DetectionEngineAlertTable } from './trigger_alert_table';
 import { useAlertTableFilters } from './use_alert_table_filters';
+import { AlertsTableComponent } from '../../components/alerts_table';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -351,31 +350,12 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
             </Display>
             <EuiText size="m"> {`Trigger Actions UI`}</EuiText>
             <EuiHorizontalRule />
-            <DetectionEngineAlertTable
+            <AlertsTableComponent
               configId={`${APP_ID}`}
               flyoutSize="m"
               inputFilters={alertsTableDefaultFilters}
               tableId={TableId.alertsOnAlertsPage}
-              showBuildingBlockAlerts={showBuildingBlockAlerts}
-              onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChangedCallback}
-              showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
-              onShowOnlyThreatIndicatorAlertsChanged={onShowOnlyThreatIndicatorAlertsCallback}
               from={from}
-              to={to}
-            />
-            <EuiHorizontalRule />
-
-            <AlertsTable
-              tableId={TableId.alertsOnAlertsPage}
-              loading={isAlertTableLoading}
-              hasIndexWrite={hasIndexWrite ?? false}
-              hasIndexMaintenance={hasIndexMaintenance ?? false}
-              from={from}
-              defaultFilters={alertsTableDefaultFilters}
-              showBuildingBlockAlerts={showBuildingBlockAlerts}
-              onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChangedCallback}
-              showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
-              onShowOnlyThreatIndicatorAlertsChanged={onShowOnlyThreatIndicatorAlertsCallback}
               to={to}
             />
           </SecuritySolutionPageWrapper>

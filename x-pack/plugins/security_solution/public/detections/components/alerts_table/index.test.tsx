@@ -12,30 +12,19 @@ import '../../../common/mock/match_media';
 import { TestProviders } from '../../../common/mock';
 import { AlertsTableComponent } from '.';
 import { TableId } from '../../../../common/types';
+import { APP_ID } from '../../../../common/constants';
 
 describe('AlertsTableComponent', () => {
   it('renders correctly', () => {
     const wrapper = shallow(
       <TestProviders>
         <AlertsTableComponent
+          configId={`${APP_ID}`}
+          flyoutSize="m"
+          inputFilters={[]}
           tableId={TableId.test}
-          hasIndexWrite
-          hasIndexMaintenance
           from={'2020-07-07T08:20:18.966Z'}
-          loading
           to={'2020-07-08T08:20:18.966Z'}
-          globalQuery={{
-            query: 'query',
-            language: 'language',
-          }}
-          globalFilters={[]}
-          loadingEventIds={[]}
-          isSelectAllChecked={false}
-          showBuildingBlockAlerts={false}
-          onShowBuildingBlockAlertsChanged={jest.fn()}
-          showOnlyThreatIndicatorAlerts={false}
-          onShowOnlyThreatIndicatorAlertsChanged={jest.fn()}
-          dispatch={jest.fn()}
         />
       </TestProviders>
     );

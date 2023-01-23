@@ -7,7 +7,6 @@
 
 import type { AlertsTableConfigurationRegistry } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { useBulkAddToCaseActions } from '@kbn/observability-plugin/public/hooks/use_alert_bulk_case_actions';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { isEqual } from 'lodash';
 import type { Filter } from '@kbn/es-query';
@@ -16,6 +15,7 @@ import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useAddBulkToTimelineAction } from '../../components/alerts_table/timeline_actions/use_add_bulk_to_timeline';
 import { useBulkAlertActionItems } from './use_alert_actions';
+import { useBulkAddToCaseActions } from '../../components/alerts_table/timeline_actions/use_bulk_add_to_case_actions';
 
 // check to see if the query is a known "empty" shape
 export function isKnownEmptyQuery(query: QueryDslQueryContainer) {

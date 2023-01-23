@@ -127,6 +127,8 @@ export const QUERY_TAB_BUTTON = '[data-test-subj="timelineTabs-query"]';
 
 export const SERVER_SIDE_EVENT_COUNT = '[data-test-subj="server-side-event-count"]';
 
+export const ALERTS_TABLE_COUNT = `[data-test-subj="toolbar-alerts-count"]`;
+
 export const SOURCE_IP_KPI = '[data-test-subj="siem-timeline-source-ip-kpi"]';
 
 export const STAR_ICON = '[data-test-subj="timeline-favorite-empty-star"]';

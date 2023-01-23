@@ -9,7 +9,6 @@ import type { AlertsTableConfigurationRegistry } from '@kbn/triggers-actions-ui-
 import React, { useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { eventsViewerSelector } from '../../../common/components/events_viewer/selectors';
-import { checkBoxControlColumn } from '../../../common/components/control_columns';
 import type { Ecs } from '../../../../common/ecs';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { useLicense } from '../../../common/hooks/use_license';
@@ -35,11 +34,6 @@ export const useActionsColumn: AlertsTableConfigurationRegistry['useActionsColum
     ecs: ecsItem,
     data: oldAlertsData ? oldAlertsData[index] : [],
   }));
-
-  const withCheckboxLeadingColumns = [
-    checkBoxControlColumn,
-    ...getDefaultControlColumn(ACTION_BUTTON_COUNT),
-  ];
 
   const leadingControlColumns = useMemo(
     () => [...getDefaultControlColumn(ACTION_BUTTON_COUNT)],

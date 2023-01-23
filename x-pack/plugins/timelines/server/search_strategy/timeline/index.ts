@@ -36,8 +36,8 @@ import { isAggCardinalityAggregate } from './factory/helpers/is_agg_cardinality_
 export const timelineSearchStrategyProvider = <T extends TimelineFactoryQueryTypes>(
   data: PluginStart,
   alerting: AlertingPluginStartContract,
-  security?: SecurityPluginSetup,
-  logger: Logger
+  logger: Logger,
+  security?: SecurityPluginSetup
 ): ISearchStrategy<TimelineStrategyRequestType<T>, TimelineStrategyResponseType<T>> => {
   const esAsInternal = data.search.searchAsInternalUser;
   const es = data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
@@ -179,8 +179,6 @@ const timelineAlertsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
           );
         });
       }
-
-      logger.debug({ rawResponse });
 
       return {
         ...response,

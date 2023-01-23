@@ -114,7 +114,7 @@ import {
 } from '../screens/common/rule_actions';
 import { fillIndexConnectorForm, fillEmailConnectorForm } from './common/rule_actions';
 import { TOAST_ERROR } from '../screens/shared';
-import { SERVER_SIDE_EVENT_COUNT } from '../screens/timeline';
+import { ALERTS_TABLE_COUNT } from '../screens/timeline';
 import { TIMELINE } from '../screens/timelines';
 import { refreshPage } from './security_header';
 import { EUI_FILTER_SELECT_ITEM, COMBO_BOX_INPUT } from '../screens/common/controls';
@@ -669,7 +669,7 @@ export const waitForAlertsToPopulate = async (alertCountThreshold = 1) => {
     () => {
       refreshPage();
       return cy
-        .get(SERVER_SIDE_EVENT_COUNT)
+        .get(ALERTS_TABLE_COUNT)
         .invoke('text')
         .then((countText) => {
           const alertCount = parseInt(countText, 10) || 0;

@@ -33,8 +33,8 @@ export class TimelinesPlugin
       const TimelineSearchStrategy = timelineSearchStrategyProvider(
         depsStart.data,
         depsStart.alerting,
-        this.security,
-        this.logger
+        this.logger,
+        this.security
       );
       const TimelineEqlSearchStrategy = timelineEqlSearchStrategyProvider(depsStart.data);
 
