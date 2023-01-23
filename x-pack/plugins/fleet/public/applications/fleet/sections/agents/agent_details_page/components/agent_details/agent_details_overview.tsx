@@ -22,10 +22,11 @@ import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 
 import type { Agent, AgentPolicy } from '../../../../../types';
 import { useKibanaVersion } from '../../../../../hooks';
-import { isAgentUpgradeable } from '../../../../../services';
+import { ExperimentalFeaturesService, isAgentUpgradeable } from '../../../../../services';
 import { AgentPolicySummaryLine } from '../../../../../components';
 import { AgentHealth } from '../../../components';
-import { Tags } from '../../../agent_list_page/components/tags';
+import { Tags } from '../../../components/tags';
+import { formatAgentCPU, formatAgentMemory } from '../../../services/agent_metrics';
 
 // Allows child text to be truncated
 const FlexItemWithMinWidth = styled(EuiFlexItem)`
@@ -37,12 +38,29 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
   agentPolicy?: AgentPolicy;
 }> = memo(({ agent, agentPolicy }) => {
   const kibanaVersion = useKibanaVersion();
+  const { displayAgentMetrics } = ExperimentalFeaturesService.get();
 
   return (
     <EuiPanel>
       <EuiDescriptionList compressed>
         <EuiFlexGroup direction="column" gutterSize="m">
           {[
+            ...(displayAgentMetrics
+              ? [
+                  {
+                    title: i18n.translate('xpack.fleet.agentDetails.cpuLabel', {
+                      defaultMessage: 'CPU',
+                    }),
+                    description: formatAgentCPU(agent.metrics, agentPolicy),
+                  },
+                  {
+                    title: i18n.translate('xpack.fleet.agentDetails.memoryLabel', {
+                      defaultMessage: 'Memory',
+                    }),
+                    description: formatAgentMemory(agent.metrics, agentPolicy),
+                  },
+                ]
+              : []),
             {
               title: i18n.translate('xpack.fleet.agentDetails.statusLabel', {
                 defaultMessage: 'Status',

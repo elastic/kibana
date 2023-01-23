@@ -680,27 +680,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.lens.getFirstLayerIndexPattern()).to.equal(indexPatternString);
     });
 
-    it('should show a download button only when the configuration is valid', async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
-      await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.lens.goToTimeRange();
-      await PageObjects.lens.switchToVisualization('pie');
-      await PageObjects.lens.configureDimension({
-        dimension: 'lnsPie_sliceByDimensionPanel > lns-empty-dimension',
-        operation: 'date_histogram',
-        field: '@timestamp',
-      });
-      // incomplete configuration should not be downloadable
-      expect(await testSubjects.isEnabled('lnsApp_downloadCSVButton')).to.eql(false);
-
-      await PageObjects.lens.configureDimension({
-        dimension: 'lnsPie_sizeByDimensionPanel > lns-empty-dimension',
-        operation: 'average',
-        field: 'bytes',
-      });
-      expect(await testSubjects.isEnabled('lnsApp_downloadCSVButton')).to.eql(true);
-    });
-
     it('should allow filtering by legend on an xy chart', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');

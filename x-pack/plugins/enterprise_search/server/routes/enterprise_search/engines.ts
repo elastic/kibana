@@ -18,6 +18,7 @@ export function registerEnginesRoutes({
       validate: {
         query: schema.object({
           from: schema.number({ defaultValue: 0, min: 0 }),
+          q: schema.maybe(schema.string()),
           size: schema.number({ defaultValue: 10, min: 1 }),
         }),
       },
@@ -41,12 +42,12 @@ export function registerEnginesRoutes({
     {
       path: '/internal/enterprise_search/engines/{engine_name}',
       validate: {
+        body: schema.object({
+          indices: schema.arrayOf(schema.string()),
+          name: schema.maybe(schema.string()),
+        }),
         params: schema.object({
           engine_name: schema.string(),
-        }),
-        body: schema.object({
-          name: schema.maybe(schema.string()),
-          indices: schema.arrayOf(schema.string()),
         }),
       },
     },
@@ -62,6 +63,9 @@ export function registerEnginesRoutes({
         }),
       },
     },
-    enterpriseSearchRequestHandler.createRequest({ path: '/api/engines/:engine_name' })
+    enterpriseSearchRequestHandler.createRequest({
+      hasJsonResponse: false,
+      path: '/api/engines/:engine_name',
+    })
   );
 }

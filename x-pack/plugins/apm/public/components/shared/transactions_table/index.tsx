@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
 import React, { useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
@@ -157,7 +157,7 @@ export function TransactionsTable({
 
         return {
           // Everytime the main statistics is refetched, updates the requestId making the detailed API to be refetched.
-          requestId: uuid(),
+          requestId: uuidv4(),
           mainStatisticsData: {
             ...response,
             transactionGroups: currentPageTransactionGroups,

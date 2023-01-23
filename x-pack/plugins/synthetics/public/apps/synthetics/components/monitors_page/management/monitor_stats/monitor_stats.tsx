@@ -34,6 +34,7 @@ export const MonitorStats = ({ status }: { status: OverviewStatusState | null })
     <>
       <EuiFlexGroup gutterSize="l">
         <EuiPanel
+          data-test-subj="syntheticsManagementSummaryStats"
           css={{ display: 'flex', flexDirection: 'column', gap: euiTheme.size.l, flexGrow: 0 }}
           hasBorder={true}
           hasShadow={false}

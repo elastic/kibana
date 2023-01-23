@@ -41,6 +41,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     params: { agentId, tabId = '' },
   } = useRouteMatch<{ agentId: string; tabId?: string }>();
   const { getHref } = useLink();
+  const { displayAgentMetrics } = ExperimentalFeaturesService.get();
   const {
     isLoading,
     isInitialRequest,
@@ -49,6 +50,9 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     resendRequest: sendAgentRequest,
   } = useGetOneAgent(agentId, {
     pollIntervalMs: 5000,
+    query: {
+      withMetrics: displayAgentMetrics,
+    },
   });
   const {
     isLoading: isAgentPolicyLoading,

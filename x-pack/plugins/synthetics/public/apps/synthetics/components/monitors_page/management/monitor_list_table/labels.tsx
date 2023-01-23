@@ -34,13 +34,6 @@ export const NO_DATA_MESSAGE = i18n.translate(
   }
 );
 
-export const EXPAND_LOCATIONS_LABEL = i18n.translate(
-  'xpack.synthetics.management.monitorList.locations.expand',
-  {
-    defaultMessage: 'Click to view remaining locations',
-  }
-);
-
 export const EXPAND_TAGS_LABEL = i18n.translate(
   'xpack.synthetics.management.monitorList.tags.expand',
   {
@@ -201,10 +194,6 @@ export const DISABLE_MONITOR_LABEL = i18n.translate(
   }
 );
 
-export const PROJECT = i18n.translate('xpack.synthetics.management.project', {
-  defaultMessage: 'Project',
-});
-
 export const getMonitorEnabledSuccessLabel = (name: string) =>
   i18n.translate('xpack.synthetics.management.monitorEnabledSuccessMessage', {
     defaultMessage: 'Monitor {name} enabled successfully.',
@@ -221,4 +210,10 @@ export const getMonitorEnabledUpdateFailureMessage = (name: string) =>
   i18n.translate('xpack.synthetics.management.monitorEnabledUpdateFailureMessage', {
     defaultMessage: 'Unable to update monitor {name}.',
     values: { name },
+  });
+
+export const getFilterForTypeMessage = (typeName: string) =>
+  i18n.translate('xpack.synthetics.management.filter.clickTypeMessage', {
+    defaultMessage: 'Click to filter records for type {typeName}.',
+    values: { typeName },
   });

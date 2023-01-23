@@ -217,6 +217,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.security.sameSiteCookies (alternatives)',
         'xpack.security.showInsecureClusterWarning (boolean)',
         'xpack.securitySolution.enableExperimental (array)',
+        'xpack.securitySolution.prebuiltRulesPackageVersion (string)',
         'xpack.snapshot_restore.slm_ui.enabled (boolean)',
         'xpack.snapshot_restore.ui.enabled (boolean)',
         'xpack.trigger_actions_ui.enableExperimental (array)',
