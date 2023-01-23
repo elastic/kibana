@@ -110,11 +110,11 @@ export class JobCreator {
   public get savedSearch(): SavedSearchSavedObject | null {
     return this._savedSearch;
   }
-  
+
   public get dataView(): DataView {
     return this._indexPattern;
   }
-  
+
   public get dataViewId(): string | undefined {
     return this._indexPattern.id;
   }
