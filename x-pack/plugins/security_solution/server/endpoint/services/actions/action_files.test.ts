@@ -20,7 +20,7 @@ import {
 } from '../../../../common/endpoint/constants';
 import { BaseDataGenerator } from '../../../../common/endpoint/data_generators/base_data_generator';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { generateFileMetadataDocument } from './mocks';
+import { generateFileMetadataDocumentMock } from './mocks';
 import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
 
 jest.mock('@kbn/files-plugin/server');
@@ -82,7 +82,7 @@ describe('Action Files service', () => {
             _index: FILE_STORAGE_METADATA_INDEX,
             _id: '123',
             found: true,
-            _source: generateFileMetadataDocument(),
+            _source: generateFileMetadataDocumentMock(),
           };
         }
 

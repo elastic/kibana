@@ -162,7 +162,7 @@ export const applyActionListEsSearchMock = (
   });
 };
 
-export const generateFileMetadataDocument = (
+export const generateFileMetadataDocumentMock = (
   overrides: Partial<FileUploadMetadata> = {}
 ): FileUploadMetadata => {
   return {

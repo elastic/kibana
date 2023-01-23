@@ -10,7 +10,7 @@ import type { Client } from '@elastic/elasticsearch';
 import { AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import * as cborx from 'cbor-x';
 import { basename } from 'path';
-import { generateFileMetadataDocument } from '../../../../server/endpoint/services/actions/mocks';
+import { generateFileMetadataDocumentMock } from '../../../../server/endpoint/services/actions/mocks';
 import { getFileDownloadId } from '../../../../common/endpoint/service/response_actions/get_file_download_id';
 import { checkInFleetAgent } from '../../common/fleet_services';
 import { sendEndpointMetadataUpdate } from '../../common/endpoint_metadata_services';
@@ -195,7 +195,7 @@ export const sendEndpointActionResponse = async (
     )?.parameters?.path!;
 
     const fileName = basename(filePath.replace(/\\/g, '/'));
-    const fileMetaDoc: FileUploadMetadata = generateFileMetadataDocument({
+    const fileMetaDoc: FileUploadMetadata = generateFileMetadataDocumentMock({
       action_id: action.id,
       agent_id: action.agents[0],
       contents: [
