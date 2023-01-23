@@ -8,6 +8,7 @@
 import { find, isEmpty, uniqBy } from 'lodash/fp';
 import { ALERT_RULE_PARAMETERS, ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
 
+import { EventCode, EventCategory } from '@kbn/securitysolution-ecs';
 import * as i18n from './translations';
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
 import {
@@ -30,7 +31,6 @@ import type { EventSummaryField, EnrichedFieldInfo } from './types';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 
 import { isAlertFromEndpointEvent } from '../../utils/endpoint_alert_check';
-import { EventCode, EventCategory } from '../../../../common/ecs/event';
 
 const THRESHOLD_TERMS_FIELD = `${ALERT_THRESHOLD_RESULT}.terms.field`;
 const THRESHOLD_TERMS_VALUE = `${ALERT_THRESHOLD_RESULT}.terms.value`;
