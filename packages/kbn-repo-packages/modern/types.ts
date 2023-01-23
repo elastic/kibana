@@ -83,7 +83,8 @@ interface PackageManifestBaseFields {
    */
   description?: string;
   /**
-   * If you need this you should probably split your package
+   * Creates sections in the documentations based on the exports of the folders listed here.
+   * If you need this you should probably split up your package, which is why this is deprecated.
    * @deprecated
    */
   serviceFolders?: string[];
