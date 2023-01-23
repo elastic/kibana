@@ -8,7 +8,7 @@
 import React from 'react';
 import { ComponentStory } from '@storybook/react';
 
-import { aForecastedSLO } from '../../../data/slo';
+import { aForecastedSLO } from '../../../data/slo/slo';
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
 import { SloBadges as Component, Props } from './slo_badges';
 

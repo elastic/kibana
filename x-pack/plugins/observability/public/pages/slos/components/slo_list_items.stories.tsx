@@ -10,7 +10,7 @@ import { ComponentStory } from '@storybook/react';
 
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
 import { SloListItems as Component, SloListItemsProps } from './slo_list_items';
-import { aForecastedSLO, anSLO } from '../../../data/slo';
+import { aForecastedSLO, anSLO } from '../../../data/slo/slo';
 
 export default {
   component: Component,

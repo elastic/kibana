@@ -13,7 +13,7 @@ import { useKibana } from '../../utils/kibana_react';
 import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
 import { useLicense } from '../../hooks/use_license';
 import { SlosPage } from '.';
-import { emptySloList, sloList } from '../../data/slo';
+import { emptySloList, sloList } from '../../data/slo/slo';
 import type { ConfigSchema } from '../../plugin';
 import type { Subset } from '../../typings';
 
