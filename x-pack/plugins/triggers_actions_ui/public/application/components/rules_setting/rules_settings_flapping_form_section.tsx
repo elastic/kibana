@@ -42,8 +42,7 @@ const lookBackWindowLabel = i18n.translate(
 const lookBackWindowHelp = i18n.translate(
   'xpack.triggersActionsUI.rulesSettings.flapping.lookBackWindowHelp',
   {
-    defaultMessage:
-      'The minimum number of consecutive runs in which the threshold must be met to be a flapping alert.',
+    defaultMessage: 'The minimum number of consecutive runs in which the threshold must be met.',
   }
 );
 
@@ -58,7 +57,7 @@ const statusChangeThresholdHelp = i18n.translate(
   'xpack.triggersActionsUI.rulesSettings.flapping.statusChangeThresholdHelp',
   {
     defaultMessage:
-      'The minimum number of times an alert must switch states within the look back window to be a flapping alert.',
+      'The minimum number of times an alert must switch states in the look back window.',
   }
 );
 
@@ -214,7 +213,7 @@ export const RulesSettingsFlappingFormSection = memo(
             <EuiText size="s">
               <FormattedMessage
                 id="xpack.triggersActionsUI.rulesSettings.flapping.flappingSettingsDescription"
-                defaultMessage="If an alert changes status at least {statusChangeThreshold} within the last {lookBackWindow}, it is flapping."
+                defaultMessage="An alert is flapping if it changes status at least {statusChangeThreshold} in the last {lookBackWindow}."
                 values={{
                   lookBackWindow: <b>{getLookBackWindowLabelRuleRuns(lookBackWindow)}</b>,
                   statusChangeThreshold: (

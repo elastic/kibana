@@ -136,7 +136,7 @@ export const RulesSettingsModalFormRight = memo((props: RulesSettingsModalFormRi
           <EuiText size="s">
             <FormattedMessage
               id="xpack.triggersActionsUI.rulesSettings.flapping.flappingSettingsOffDescription"
-              defaultMessage="Alert flapping detection is off. Alerts will be generated based on the rule interval, which may result in higher alert volumes."
+              defaultMessage="Alert flapping detection is off. Alerts will be generated based on the rule interval, which might result in higher alert volumes."
             />
           </EuiText>
         </EuiPanel>
