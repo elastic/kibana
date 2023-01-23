@@ -155,7 +155,7 @@ export const ActionTypeForm = ({
           ? actionThrottle
           : Math.max(actionThrottle, minimumActionThrottle);
       const boundedThrottleUnit =
-        throttleUnitDuration >= minThrottleUnitDuration
+        parseDuration(`${actionThrottle}${actionThrottleUnit}`) >= minThrottleUnitDuration
           ? actionThrottleUnit
           : minimumActionThrottleUnit;
       return [boundedThrottle !== actionThrottle, boundedThrottleUnit !== actionThrottleUnit];
