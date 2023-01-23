@@ -36229,7 +36229,6 @@
     "cases.components.status.inProgress": "进行中",
     "cases.components.status.open": "打开",
     "devTools.badge.betaLabel": "公测版",
-    "devTools.badge.betaTooltipText": "此功能在未来的版本中可能会变化很大",
     "devTools.badge.readOnly.text": "只读",
     "devTools.badge.readOnly.tooltip": "无法保存",
     "devTools.breadcrumb.homeLabel": "开发工具",
