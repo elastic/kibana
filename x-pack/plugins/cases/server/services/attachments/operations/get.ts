@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObject, SavedObjectsBulkResponse } from '@kbn/core/server';
+import type { SavedObject } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   CASE_COMMENT_SAVED_OBJECT,
@@ -21,8 +21,16 @@ import type {
   CommentAttributes,
 } from '../../../../common/api';
 import { CommentType } from '../../../../common/api';
-import type { AttachedToCaseArgs, GetAttachmentArgs, ServiceContext } from '../types';
-import { injectAttachmentSOAttributesFromRefs } from '../../so_references';
+import type {
+  AttachedToCaseArgs,
+  BulkOptionalAttributes,
+  GetAttachmentArgs,
+  ServiceContext,
+} from '../types';
+import {
+  injectAttachmentAttributesAndHandleErrors,
+  injectAttachmentSOAttributesFromRefs,
+} from '../../so_references';
 
 type GetAllAlertsAttachToCaseArgs = AttachedToCaseArgs;
 
@@ -31,7 +39,7 @@ export class AttachmentGetter {
 
   public async bulkGet(
     attachmentIds: string[]
-  ): Promise<SavedObjectsBulkResponse<CommentAttributes>> {
+  ): Promise<BulkOptionalAttributes<CommentAttributes>> {
     try {
       this.context.log.debug(
         `Attempting to retrieve attachments with ids: ${attachmentIds.join()}`
@@ -44,7 +52,7 @@ export class AttachmentGetter {
 
       return {
         saved_objects: response.saved_objects.map((so) =>
-          injectAttachmentSOAttributesFromRefs(
+          injectAttachmentAttributesAndHandleErrors(
             so,
             this.context.persistableStateAttachmentTypeRegistry
           )

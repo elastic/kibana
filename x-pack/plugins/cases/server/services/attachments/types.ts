@@ -5,9 +5,15 @@
  * 2.0.
  */
 
-import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  Logger,
+  SavedObject,
+  SavedObjectsBulkResponse,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
+import type { PartialField } from '../../types';
 
 export interface ServiceContext {
   log: Logger;
@@ -22,4 +28,9 @@ export interface AttachedToCaseArgs {
 
 export interface GetAttachmentArgs {
   attachmentId: string;
+}
+
+export interface BulkOptionalAttributes<T>
+  extends Omit<SavedObjectsBulkResponse<T>, 'saved_objects'> {
+  saved_objects: Array<PartialField<SavedObject<T>, 'attributes'>>;
 }

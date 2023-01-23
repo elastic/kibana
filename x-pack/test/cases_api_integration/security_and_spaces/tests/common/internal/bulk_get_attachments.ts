@@ -60,7 +60,6 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should retrieve a single attachment', async () => {
         const response = await bulkGetAttachments({
           attachmentIds: [updatedCase.comments![0].id],
-          caseId: updatedCase.id,
           supertest,
         });
 
@@ -72,7 +71,6 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should retrieve a multiple attachments', async () => {
         const response = await bulkGetAttachments({
           attachmentIds: [updatedCase.comments![0].id, updatedCase.comments![1].id],
-          caseId: updatedCase.id,
           supertest,
         });
 
@@ -85,7 +83,6 @@ export default ({ getService }: FtrProviderContext): void => {
       it('returns an empty array when no ids are requested', async () => {
         const { attachments, errors } = await bulkGetAttachments({
           attachmentIds: [],
-          caseId: updatedCase.id,
           supertest,
           expectedHttpCode: 200,
         });
@@ -97,7 +94,6 @@ export default ({ getService }: FtrProviderContext): void => {
       it('returns a 400 when more than 10k ids are requested', async () => {
         await bulkGetAttachments({
           attachmentIds: Array.from(Array(10001).keys()).map((item) => item.toString()),
-          caseId: updatedCase.id,
           supertest,
           expectedHttpCode: 400,
         });
@@ -106,16 +102,15 @@ export default ({ getService }: FtrProviderContext): void => {
       it('populates the errors field with attachments that could not be found', async () => {
         const response = await bulkGetAttachments({
           attachmentIds: [updatedCase.comments![0].id, 'does-not-exist'],
-          caseId: updatedCase.id,
           supertest,
-          expectedHttpCode: 400,
+          expectedHttpCode: 200,
         });
 
         expect(response.attachments.length).to.be(1);
         expect(response.errors.length).to.be(1);
         expect(response.errors[0]).to.eql({
           error: 'Not Found',
-          message: 'Saved object [cases/does-not-exist] not found',
+          message: 'Saved object [cases-comments/does-not-exist] not found',
           status: 404,
           attachmentId: 'does-not-exist',
         });
@@ -163,7 +158,7 @@ export default ({ getService }: FtrProviderContext): void => {
           createComment({
             supertest: supertestWithoutAuth,
             caseId: obsCase.id,
-            params: postCommentUserReq,
+            params: { ...postCommentUserReq, owner: 'observabilityFixture' },
             auth: { user: superUser, space: 'space1' },
           }),
         ]);
@@ -177,59 +172,50 @@ export default ({ getService }: FtrProviderContext): void => {
             user: globalRead,
             numberOfExpectedCases: 2,
             owners: ['securitySolutionFixture', 'observabilityFixture'],
-            caseId: secCase.id,
           },
           {
             user: superUser,
             numberOfExpectedCases: 2,
             owners: ['securitySolutionFixture', 'observabilityFixture'],
-            caseId: secCase.id,
           },
           {
             user: secOnlyRead,
             numberOfExpectedCases: 1,
             owners: ['securitySolutionFixture'],
             errors: { forAttachmentId: obsAttachmentId, forOwner: obsCase.owner },
-            caseId: secCase.id,
           },
           {
             user: obsOnlyRead,
             numberOfExpectedCases: 1,
             owners: ['observabilityFixture'],
             errors: { forAttachmentId: secAttachmentId, forOwner: secCase.owner },
-            caseId: obsCase.id,
           },
           {
             user: obsSecRead,
             numberOfExpectedCases: 2,
             owners: ['securitySolutionFixture', 'observabilityFixture'],
-            caseId: obsCase.id,
           },
           {
             user: obsSec,
             numberOfExpectedCases: 2,
             owners: ['securitySolutionFixture', 'observabilityFixture'],
-            caseId: obsCase.id,
           },
           {
             user: secOnly,
             numberOfExpectedCases: 1,
             owners: ['securitySolutionFixture'],
             errors: { forAttachmentId: obsAttachmentId, forOwner: obsCase.owner },
-            caseId: secCase.id,
           },
           {
             user: obsOnly,
             numberOfExpectedCases: 1,
             owners: ['observabilityFixture'],
             errors: { forAttachmentId: secAttachmentId, forOwner: secCase.owner },
-            caseId: obsCase.id,
           },
         ]) {
           const { attachments, errors } = await bulkGetAttachments({
             supertest: supertestWithoutAuth,
             attachmentIds,
-            caseId: scenario.caseId,
             auth: { user: scenario.user, space: 'space1' },
           });
 
@@ -281,7 +267,6 @@ export default ({ getService }: FtrProviderContext): void => {
           await bulkGetAttachments({
             supertest: supertestWithoutAuth,
             attachmentIds: [patchedCase.comments![0].id],
-            caseId: patchedCase.id,
             auth: {
               user: scenario.user,
               space: scenario.space,
@@ -313,7 +298,6 @@ export default ({ getService }: FtrProviderContext): void => {
           const { attachments, errors } = await bulkGetAttachments({
             supertest: supertestWithoutAuth,
             attachmentIds: [patchedCase.comments![0].id],
-            caseId: patchedCase.id,
             auth: { user, space: 'space1' },
           });
 

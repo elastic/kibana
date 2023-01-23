@@ -22,6 +22,7 @@ import {
 } from '../attachment_framework/so_references';
 import { EXTERNAL_REFERENCE_REF_NAME } from '../common/constants';
 import { isCommentRequestTypeExternalReferenceSO } from '../common/utils';
+import type { PartialField } from '../types';
 import { SOReferenceExtractor } from './so_reference_extractor';
 
 export const getAttachmentSOExtractor = (attachment: Partial<CommentRequest>) => {
@@ -36,6 +37,36 @@ export const getAttachmentSOExtractor = (attachment: Partial<CommentRequest>) =>
   }
 
   return new SOReferenceExtractor(fieldsToExtract);
+};
+
+type OptionalAttributes<T> = PartialField<SavedObject<T>, 'attributes'>;
+
+/**
+ * This function should be used when there's a potential for the attributes field being undefined. Specifically when
+ * performing a bulkGet within the core saved object library. If a particular id cannot be found then the error field
+ * will be set and attributes will be undefined.
+ */
+export const injectAttachmentAttributesAndHandleErrors = (
+  savedObject: OptionalAttributes<CommentAttributesWithoutRefs>,
+  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
+): OptionalAttributes<CommentAttributes> => {
+  if (!hasAttributes(savedObject)) {
+    // we don't actually have an attributes field here so the type doesn't matter, this cast is to get the types to stop
+    // complaining though
+    return savedObject as OptionalAttributes<CommentAttributes>;
+  }
+
+  const soExtractor = getAttachmentSOExtractor(savedObject.attributes);
+  const so = soExtractor.populateFieldsFromReferences<CommentAttributes>(savedObject);
+  const injectedAttributes = injectPersistableReferencesToSO(so.attributes, so.references, {
+    persistableStateAttachmentTypeRegistry,
+  });
+
+  return { ...so, attributes: { ...so.attributes, ...injectedAttributes } };
+};
+
+const hasAttributes = <T>(savedObject: OptionalAttributes<T>): savedObject is SavedObject<T> => {
+  return savedObject.error == null && savedObject.attributes != null;
 };
 
 export const injectAttachmentSOAttributesFromRefs = (

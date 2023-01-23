@@ -266,7 +266,7 @@ type AttachmentSavedObjectWithErrors = SOWithErrors<CommentAttributes>;
  * Retrieves multiple attachments by id.
  */
 export async function bulkGet(
-  { attachmentIDs, caseID }: BulkGetArgs,
+  { attachmentIDs }: BulkGetArgs,
   clientArgs: CasesClientArgs
 ): Promise<BulkGetCommentsResponse> {
   const {
@@ -289,7 +289,7 @@ export async function bulkGet(
 
     const [validAttachments, soBulkGetErrors] = partition(
       attachments.saved_objects,
-      (attachment) => attachment.error === undefined
+      (attachment) => attachment.error === undefined && attachment.attributes != null
     ) as [Array<SavedObject<CommentAttributes>>, AttachmentSavedObjectWithErrors];
 
     const { authorized: authorizedCases, unauthorized: unauthorizedCases } =
@@ -303,7 +303,7 @@ export async function bulkGet(
     });
   } catch (error) {
     throw createCaseError({
-      message: `Failed to get attachments for case id: ${caseID}: ${error}`,
+      message: `Failed to bulk get attachments ${error}`,
       error,
       logger,
     });

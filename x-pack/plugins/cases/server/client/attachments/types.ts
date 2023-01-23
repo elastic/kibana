@@ -92,10 +92,6 @@ export interface GetArgs {
 
 export interface BulkGetArgs {
   /**
-   * The ID of the case to retrieve an attachment from
-   */
-  caseID: string;
-  /**
    * The ids of the attachments
    */
   attachmentIDs: string[] | string;
