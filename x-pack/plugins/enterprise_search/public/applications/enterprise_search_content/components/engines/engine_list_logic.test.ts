@@ -24,7 +24,7 @@ const DEFAULT_VALUES = {
   deleteStatus: Status.IDLE,
   isDeleteLoading: false,
   isDeleteModalVisible: false,
-  isLoading: false,
+  isLoading: true,
   meta: DEFAULT_META,
   parameters: { meta: DEFAULT_META },
   results: [],
@@ -71,21 +71,39 @@ describe('EnginesListLogic', () => {
     describe('onPaginate', () => {
       it('updates meta with newPageIndex', () => {
         expect(EnginesListLogic.values).toEqual(DEFAULT_VALUES);
-        // test below code when pagination is ready
-        // EnginesListLogic.actions.onPaginate(1);
-        // expect(EnginesListLogic.values).toEqual({
-        //   ...DEFAULT_VALUES,
-        //   meta: {
-        //     ...DEFAULT_META,
-        //     from: 1,
-        //   },
-        //   parameters: {
-        //     meta: {
-        //       ...DEFAULT_META,
-        //       from: 1,
-        //     },
-        //   },
-        // });
+
+        EnginesListLogic.actions.onPaginate({ page: { index: 1 } });
+        expect(EnginesListLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          meta: {
+            ...DEFAULT_META,
+            from: 10,
+          },
+          parameters: {
+            meta: {
+              ...DEFAULT_META,
+              from: 10,
+            },
+          },
+        });
+
+        EnginesListLogic.actions.onPaginate({ page: { index: 0 } });
+        expect(EnginesListLogic.values).toEqual(DEFAULT_VALUES);
+
+        EnginesListLogic.actions.onPaginate({ page: { index: 3 } });
+        expect(EnginesListLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          meta: {
+            ...DEFAULT_META,
+            from: 30,
+          },
+          parameters: {
+            meta: {
+              ...DEFAULT_META,
+              from: 30,
+            },
+          },
+        });
       });
     });
     describe('closeDeleteEngineModal', () => {
@@ -128,6 +146,7 @@ describe('EnginesListLogic', () => {
             meta: newPageMeta,
             // searchQuery: 'k',
           },
+          isLoading: false,
           meta: newPageMeta,
           parameters: {
             meta: newPageMeta,
@@ -206,6 +225,7 @@ describe('EnginesListLogic', () => {
             results,
             meta: DEFAULT_META,
           },
+          isLoading: false,
           meta: DEFAULT_META,
           parameters: {
             meta: DEFAULT_META,
