@@ -36,7 +36,7 @@ import { DiscoverFieldDetails } from './deprecated_stats/discover_field_details'
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { SHOW_LEGACY_FIELD_TOP_VALUES, PLUGIN_ID } from '../../../../../common';
 import { getUiActions } from '../../../../kibana_services';
-import { type DataDocuments$ } from '../../hooks/use_saved_search';
+import { type DataDocuments$ } from '../../services/discover_data_state_container';
 
 const FieldInfoIcon: React.FC = memo(() => (
   <EuiToolTip

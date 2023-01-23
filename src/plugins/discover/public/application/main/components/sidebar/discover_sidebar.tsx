@@ -43,7 +43,7 @@ import {
 import { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
 import { getUiActions } from '../../../../kibana_services';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
-import { RecordRawType } from '../../hooks/use_saved_search';
+import { RecordRawType } from '../../services/discover_data_state_container';
 
 const fieldSearchDescriptionId = htmlIdGenerator()();
 
