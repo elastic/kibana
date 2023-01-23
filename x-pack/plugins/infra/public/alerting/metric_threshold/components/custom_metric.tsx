@@ -21,6 +21,7 @@ import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import {
   Aggregators,
   CustomMetricAggTypes,
@@ -174,7 +175,7 @@ export const CustomMetricEditor: React.FC<Props> = ({
           isDisabled={disableAdd}
         >
           <FormattedMessage
-            id="xpack.infra.metrics.alertFlyout.addCustomRow"
+            id="xpack.infra.metrics.alertFlyout.customEquationEditor.addCustomRow"
             defaultMessage="Add aggregation/field"
           />
         </EuiButtonEmpty>
@@ -197,15 +198,27 @@ export const CustomMetricEditor: React.FC<Props> = ({
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow
-            label="Label (optional)"
+            label={i18n.translate(
+              'xpack.infra.metrics.alertFlyout.customEquationEditor.labelLabel',
+              { defaultMessage: 'Label (optional)' }
+            )}
             fullWidth
-            helpText="Custom label will show on the alert chart and in reason/alert title"
+            helpText={i18n.translate(
+              'xpack.infra.metrics.alertFlyout.customEquationEditor.labelHelpMessage',
+              {
+                defaultMessage:
+                  'Custom label will show on the alert chart and in reason/alert title',
+              }
+            )}
           >
             <EuiFieldText
               compressed
               fullWidth
               value={label}
-              placeholder="Custom metric"
+              placeholder={i18n.translate(
+                'xpack.infra.metrics.alertFlyout.customEquationEditor.equationPlaceHolder',
+                { defaultMessage: 'Custom equation' }
+              )}
               onChange={handleLabelChange}
             />
           </EuiFormRow>
@@ -241,6 +254,10 @@ const MetricRowControls: React.FC<MetricRowControlProps> = ({ onDelete, disableD
           style={{ marginBottom: '0.2em' }}
           onClick={onDelete}
           disabled={disableDelete}
+          title={i18n.translate(
+            'xpack.infra.metrics.alertFlyout.customEquationEditor.deleteRowButton',
+            { defaultMessage: 'Delete' }
+          )}
         />
       </EuiFlexItem>
     </>
@@ -320,7 +337,13 @@ const MetricRowWithAgg: React.FC<MetricRowWithAggProps> = ({
     <>
       <EuiFlexGroup gutterSize="xs" alignItems="flexEnd">
         <EuiFlexItem style={{ maxWidth: 145 }}>
-          <EuiFormRow label={`Aggregation ${name}`} isInvalid={isAggInvalid}>
+          <EuiFormRow
+            label={i18n.translate(
+              'xpack.infra.metrics.alertFlyout.customEquationEditor.aggregationLabel',
+              { defaultMessage: 'Aggregation {name}', values: { name } }
+            )}
+            isInvalid={isAggInvalid}
+          >
             <EuiSelect
               compressed
               options={aggOptions}
@@ -331,7 +354,13 @@ const MetricRowWithAgg: React.FC<MetricRowWithAggProps> = ({
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow label={`Field ${name}`} isInvalid={isFieldInvalid}>
+          <EuiFormRow
+            label={i18n.translate(
+              'xpack.infra.metrics.alertFlyout.customEquationEditor.fieldLabel',
+              { defaultMessage: 'Field {name}', values: { name } }
+            )}
+            isInvalid={isFieldInvalid}
+          >
             <EuiComboBox
               fullWidth
               compressed
@@ -405,12 +434,22 @@ const MetricRowWithCount: React.FC<MetricRowWithCountProps> = ({
     <>
       <EuiFlexGroup gutterSize="xs" alignItems="flexEnd">
         <EuiFlexItem style={{ maxWidth: 145 }}>
-          <EuiFormRow label={`Aggregation ${name}`}>
+          <EuiFormRow
+            label={i18n.translate(
+              'xpack.infra.metrics.alertFlyout.customEquationEditor.aggregationLabel',
+              { defaultMessage: 'Aggregation {name}', values: { name } }
+            )}
+          >
             <EuiSelect compressed options={aggOptions} value={agg} onChange={handleAggChange} />
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow label={`KQL Filter ${name}`}>
+          <EuiFormRow
+            label={i18n.translate(
+              'xpack.infra.metrics.alertFlyout.customEquationEditor.filterLabel',
+              { defaultMessage: 'KQL Filter {name}', values: { name } }
+            )}
+          >
             <EuiFieldText compressed value={filter} onChange={handleFilterChange} />
           </EuiFormRow>
         </EuiFlexItem>

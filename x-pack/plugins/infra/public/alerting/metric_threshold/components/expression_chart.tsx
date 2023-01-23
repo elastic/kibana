@@ -71,8 +71,8 @@ export const ExpressionChart: React.FC<Props> = ({
   if (metric.aggregation === 'custom') {
     metric.label =
       expression.label ||
-      i18n.translate('xpack.infra.metrics.alertFlyout.previewChart.customMetric.label', {
-        defaultMessage: 'Custom metric',
+      i18n.translate('xpack.infra.metrics.alertFlyout.previewChart.customEquation.label', {
+        defaultMessage: 'Custom equation',
       });
   }
   const isDarkMode = uiSettings?.get('theme:darkMode') || false;
