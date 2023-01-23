@@ -143,7 +143,6 @@ export class SavedObjectsService
       migratorPromise: firstValueFrom(this.migrator$),
       kibanaIndex,
       kibanaVersion: this.kibanaVersion,
-      typeRegistry: this.typeRegistry,
     });
 
     registerCoreObjectTypes(this.typeRegistry);
