@@ -146,7 +146,7 @@ const IntegrationPostureDashboard = ({
             <h2>
               <FormattedMessage
                 id="xpack.csp.integrationDashboard.noFindings.promptTitle"
-                defaultMessage="No Findings"
+                defaultMessage="Findings Evaluation Status"
               />
             </h2>
           }
@@ -154,7 +154,7 @@ const IntegrationPostureDashboard = ({
             <p>
               <FormattedMessage
                 id="xpack.csp.integrationDashboard.noFindingsPrompt.promptDescription"
-                defaultMessage="Integration installed but you dont have findings"
+                defaultMessage="Waiting for data to be collected and indexed. If this process is taking longer than expected then please reach out our support"
               />
             </p>
           }

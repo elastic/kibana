@@ -17,10 +17,12 @@ import {
   EuiHorizontalRule,
   EuiIcon,
   EuiIconTip,
+  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import classNames from 'classnames';
 import type { ReactElement } from 'react';
 import React, { Component } from 'react';
 
@@ -221,11 +223,12 @@ export class FeatureTable extends Component<Props, State> {
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>{infoIcon}</EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem className="eui-fullWidth">
             <EuiAccordion
               id={`featurePrivilegeControls_${feature.id}`}
               data-test-subj="featurePrivilegeControls"
               buttonContent={buttonContent}
+              buttonClassName="euiAccordionWithDescription"
               extraAction={extraAction}
               forceState={hasSubFeaturePrivileges ? undefined : 'closed'}
               arrowDisplay={hasSubFeaturePrivileges ? 'left' : 'none'}
@@ -241,7 +244,8 @@ export class FeatureTable extends Component<Props, State> {
                 });
               }}
             >
-              <div className="subFeaturePrivilegeExpandedRegion">
+              <EuiSpacer size="s" />
+              <EuiPanel color="subdued" paddingSize="s" className="subFeaturePanel">
                 <FeatureTableExpandedRow
                   feature={feature}
                   privilegeIndex={this.props.privilegeIndex}
@@ -256,7 +260,7 @@ export class FeatureTable extends Component<Props, State> {
                     this.props.canCustomizeSubFeaturePrivileges
                   }
                 />
-              </div>
+              </EuiPanel>
             </EuiAccordion>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -267,9 +271,7 @@ export class FeatureTable extends Component<Props, State> {
 
     if (feature.reserved && primaryFeaturePrivileges.length === 0) {
       const buttonContent = (
-        <>
-          {<EuiIcon type="empty" size="l" />} <FeatureTableCell feature={feature} />
-        </>
+        <FeatureTableCell className="noSubFeaturePrivileges" feature={feature} />
       );
 
       const extraAction = (
@@ -336,10 +338,10 @@ export class FeatureTable extends Component<Props, State> {
 
     const hasSubFeaturePrivileges = feature.getSubFeaturePrivileges().length > 0;
     const buttonContent = (
-      <>
-        {!hasSubFeaturePrivileges && <EuiIcon type="empty" size="l" />}{' '}
-        <FeatureTableCell feature={feature} />
-      </>
+      <FeatureTableCell
+        className={classNames({ noSubFeaturePrivileges: !hasSubFeaturePrivileges })}
+        feature={feature}
+      />
     );
 
     const extraAction = (

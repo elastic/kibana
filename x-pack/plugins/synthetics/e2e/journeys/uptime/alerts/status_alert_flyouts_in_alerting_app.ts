@@ -61,8 +61,9 @@ journey('StatusFlyoutInAlertingApp', async ({ page, params }) => {
 
     await page.click(byTestId('"xpack.synthetics.alerts.monitorStatus.filterBar"'));
 
-    await assertText({ page, text: 'browser' });
-    await assertText({ page, text: 'http' });
+    await page.waitForSelector(`text=browser`);
+    await page.waitForSelector(`text=http`);
+
     await retry.tryForTime(30 * 1000, async () => {
       await page.click('text=browser');
 
