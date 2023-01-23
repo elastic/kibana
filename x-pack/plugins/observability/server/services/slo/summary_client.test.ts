@@ -93,7 +93,7 @@ describe('SummaryClient', () => {
         esClientMock.msearch.mockResolvedValueOnce(createEsResponse());
         const summaryClient = new DefaultSummaryClient(esClientMock);
 
-        const result = await summaryClient.fetchSummary([slo]);
+        await summaryClient.fetchSummary([slo]);
 
         // @ts-ignore
         expect(esClientMock.msearch.mock.calls[0][0].searches).toEqual([
