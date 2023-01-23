@@ -710,6 +710,8 @@ export default ({ getService }: FtrProviderContext): void => {
             persistableStateAttachment,
             // This one should not show up in the filter for attachments
             postCommentActionsReq,
+            // This one should not show up in the filter for attachments
+            postCommentAlertReq,
           ],
         });
 

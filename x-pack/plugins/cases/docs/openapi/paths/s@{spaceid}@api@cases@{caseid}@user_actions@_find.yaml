@@ -49,7 +49,6 @@ get:
             - comment
             - connector
             - create_case
-            - delete_case
             - description
             - pushed
             - settings

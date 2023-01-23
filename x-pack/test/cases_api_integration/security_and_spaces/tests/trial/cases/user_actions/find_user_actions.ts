@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import http from 'http';
 import expect from '@kbn/expect';
 import { ActionTypes } from '@kbn/cases-plugin/common/api';
 import { getPostCaseRequest } from '../../../../../common/lib/mock';
@@ -31,15 +32,21 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('find_user_actions', () => {
     let serviceNowSimulatorURL: string = '';
+    let serviceNowServer: http.Server;
 
     before(async () => {
-      const { url } = await getServiceNowSimulationServer();
+      const { url, server } = await getServiceNowSimulationServer();
       serviceNowSimulatorURL = url;
+      serviceNowServer = server;
     });
 
     afterEach(async () => {
       await deleteAllCaseItems(es);
       await actionsRemover.removeAll();
+    });
+
+    after(async () => {
+      serviceNowServer.close();
     });
 
     describe('filters using the type query parameter', () => {

@@ -48,7 +48,7 @@ export const find = async (
     const [authorizationFilterRes] = await Promise.all([
       authorization.getAuthorizationFilter(Operations.findUserActions),
       // ensure that we have authorization for reading the case
-      casesClient.cases.get({ id: caseId, includeComments: false }),
+      casesClient.cases.resolve({ id: caseId, includeComments: false }),
     ]);
 
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } = authorizationFilterRes;

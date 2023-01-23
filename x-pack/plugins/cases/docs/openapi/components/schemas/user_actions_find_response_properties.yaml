@@ -1,7 +1,6 @@
 type: object
 required:
   - action
-  - case_id
   - comment_id
   - created_at
   - created_by
@@ -13,9 +12,6 @@ required:
 properties:
   action:
     $ref: 'actions.yaml'
-  case_id:
-    type: string
-    example: 22df07d0-03b1-11ed-920c-974bfa104448
   comment_id:
     type: string
     nullable: true
@@ -56,4 +52,18 @@ properties:
     type: string
     example: WzM1ODg4LDFd
   type:
-    $ref: 'action_types.yaml'
+    type: string
+    description: The type of action.
+    enum:
+      - assignees
+      - create_case
+      - comment
+      - connector
+      - description
+      - pushed
+      - tags
+      - title
+      - status
+      - settings
+      - severity
+    example: create_case

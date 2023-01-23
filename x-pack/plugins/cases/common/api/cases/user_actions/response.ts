@@ -65,7 +65,7 @@ const CaseUserActionResponseRt = rt.intersection([
 ]);
 
 /**
- * This includes the case_id and comment_id but not the action_id
+ * This includes the comment_id but not the action_id or case_id
  */
 const CaseUserActionInjectedAttributesWithoutActionIdRt = rt.intersection([
   CaseUserActionBasicRt,

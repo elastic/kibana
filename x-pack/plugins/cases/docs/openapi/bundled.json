@@ -2155,7 +2155,6 @@
                   "comment",
                   "connector",
                   "create_case",
-                  "delete_case",
                   "description",
                   "pushed",
                   "settings",
@@ -4267,7 +4266,6 @@
         "type": "object",
         "required": [
           "action",
-          "case_id",
           "comment_id",
           "created_at",
           "created_by",
@@ -4280,10 +4278,6 @@
         "properties": {
           "action": {
             "$ref": "#/components/schemas/actions"
-          },
-          "case_id": {
-            "type": "string",
-            "example": "22df07d0-03b1-11ed-920c-974bfa104448"
           },
           "comment_id": {
             "type": "string",
@@ -4379,7 +4373,22 @@
             "example": "WzM1ODg4LDFd"
           },
           "type": {
-            "$ref": "#/components/schemas/action_types"
+            "type": "string",
+            "description": "The type of action.",
+            "enum": [
+              "assignees",
+              "create_case",
+              "comment",
+              "connector",
+              "description",
+              "pushed",
+              "tags",
+              "title",
+              "status",
+              "settings",
+              "severity"
+            ],
+            "example": "create_case"
           }
         }
       }
@@ -5105,7 +5114,6 @@
             {
               "id": "b4cd0770-07c9-11ed-a5fd-47154cb8767e",
               "action": "create",
-              "case_id": "22df07d0-03b1-11ed-920c-974bfa104448",
               "comment_id": "578608d0-03b1-11ed-920c-974bfa104448",
               "created_at": "2022-07-20T01:17:22.150Z",
               "created_by": {
@@ -5141,7 +5149,6 @@
             {
               "id": "57af14a0-03b1-11ed-920c-974bfa104448",
               "action": "create",
-              "case_id": "22df07d0-03b1-11ed-920c-974bfa104448",
               "comment_id": "578608d0-03b1-11ed-920c-974bfa104448",
               "created_at": "2022-07-14T20:12:53.354Z",
               "created_by": {
@@ -5161,7 +5168,6 @@
             {
               "id": "573c6980-6123-11ed-aa41-81a0a61fe447",
               "action": "add",
-              "case_id": "22df07d0-03b1-11ed-920c-974bfa104448",
               "comment_id": null,
               "created_at": "2022-07-20T01:10:28.238Z",
               "created_by": {
@@ -5178,22 +5184,6 @@
               },
               "version": "WzM1ODg4LDFb",
               "type": "assignees"
-            },
-            {
-              "id": "fff460e0-07c9-11ed-a5fd-47154cb8767e",
-              "action": "delete",
-              "case_id": "22df07d0-03b1-11ed-920c-974bfa104448",
-              "comment_id": null,
-              "created_at": "2022-07-20T01:19:28.238Z",
-              "created_by": {
-                "username": "elastic",
-                "email": null,
-                "full_name": null
-              },
-              "owner": "cases",
-              "payload": null,
-              "version": "WzM1ODg4LDFe",
-              "type": "delete_case"
             }
           ]
         }
