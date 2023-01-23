@@ -26,7 +26,7 @@ const CsvSavedSearchExportParamsSchema = schema.object({
 
 const CsvSavedSearchExportBodySchema = schema.nullable(
   schema.object({
-    state: schema.any(),
+    state: schema.maybe(schema.any()),
     timerange: schema.maybe(
       schema.object({
         timezone: schema.maybe(schema.string()),

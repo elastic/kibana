@@ -702,3 +702,13 @@ exports[`Reporting APIs CSV Generation from Saved Search ID export from timebase
 2015-09-20 10:23:36.052,51.105.100.214,jpg
 "
 `;
+
+exports[`Reporting APIs CSV Generation from Saved Search ID export from timebased data view export with saved filters, job params timerange filter, and query from unsaved state csv file matches 1`] = `
+"@timestamp,clientip,extension
+2015-09-20 10:25:55.744,116.126.47.226,css
+2015-09-20 10:25:52.360,74.224.77.232,css
+2015-09-20 10:25:49.913,97.83.96.39,css
+2015-09-20 10:25:44.979,175.188.44.145,css
+2015-09-20 10:25:36.331,231.169.195.137,css
+"
+`;
