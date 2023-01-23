@@ -570,6 +570,7 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <ConnectorEventLogListKPI
+          data-test-subj="connectorEventLogListKpi"
           dateStart={dateStart}
           dateEnd={dateEnd}
           outcomeFilter={filter}

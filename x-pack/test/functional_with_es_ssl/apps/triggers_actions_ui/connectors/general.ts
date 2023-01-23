@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
@@ -298,7 +298,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
     });
 
     describe('Execution log', () => {
-      const testRunUuid = uuid.v4();
+      const testRunUuid = uuidv4();
       let rule: any;
 
       before(async () => {

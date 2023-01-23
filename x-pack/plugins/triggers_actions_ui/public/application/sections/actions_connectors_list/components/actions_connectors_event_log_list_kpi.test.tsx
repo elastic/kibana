@@ -38,7 +38,7 @@ const mockKpiResponse = {
 const loadGlobalExecutionKPIAggregationsMock =
   loadGlobalConnectorExecutionKPIAggregations as unknown as jest.MockedFunction<any>;
 
-describe('rule_event_log_list_kpi', () => {
+describe('actions_connectors_event_log_list_kpi', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);

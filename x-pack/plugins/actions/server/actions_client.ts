@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import Boom from '@hapi/boom';
 import url from 'url';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -685,7 +685,7 @@ export class ActionsClient {
       source,
       request: this.request,
       relatedSavedObjects,
-      actionExecutionId: uuid.v4(),
+      actionExecutionId: uuidv4(),
     });
   }
 
