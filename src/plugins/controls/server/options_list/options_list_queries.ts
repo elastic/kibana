@@ -92,9 +92,6 @@ export const getSuggestionAggregationBuilder = ({
   return suggestionAggSubtypes.textOrKeyword;
 };
 
-const getEscapedQuery = (q: string = '') =>
-  q.replace(/[.?+*|{}[\]()"\\#@&<>~]/g, (match) => `\\${match}`);
-
 const getIpBuckets = (rawEsResult: any, combinedBuckets: EsBucket[], type: 'ipv4' | 'ipv6') => {
   const results = get(
     rawEsResult,
@@ -265,14 +262,21 @@ const suggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBu
         nested: {
           path: subTypeNested.nested.path,
         },
+        filter: {
+          prefix: {
+            [fieldName]: {
+              value: searchString,
+              case_insensitive: true,
+            },
+          },
+        },
         aggs: {
           nestedSuggestions: {
             terms: {
               size,
-              field: fieldName,
-              include: `${getEscapedQuery(searchString)}.*`,
-              execution_hint: 'map',
               shard_size: 10,
+              field: fieldName,
+              execution_hint: 'map',
               order: getSortType(sort),
             },
           },
