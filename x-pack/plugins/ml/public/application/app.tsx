@@ -78,6 +78,10 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
     config: coreStart.uiSettings!,
     setBreadcrumbs: coreStart.chrome!.setBreadcrumbs,
     redirectToMlAccessDeniedPage,
+    getSavedSearchDeps: {
+      search: deps.data.search,
+      savedObjectsClient: coreStart.savedObjects.client,
+    },
   };
 
   const services = {

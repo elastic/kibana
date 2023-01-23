@@ -50,7 +50,7 @@ function getDocumentCountStatsSplitLabel(changePoint?: ChangePoint, group?: Grou
 
 export const ExplainLogRateSpikesPage: FC = () => {
   const { data: dataService } = useAiopsAppContext();
-  const { dataView, savedSearch } = useDataSource();
+  const { dataView, savedSearch, _savedSearch } = useDataSource();
 
   const {
     currentSelectedChangePoint,
@@ -70,10 +70,10 @@ export const ExplainLogRateSpikesPage: FC = () => {
   const [currentSavedSearch, setCurrentSavedSearch] = useState(savedSearch);
 
   useEffect(() => {
-    if (savedSearch) {
-      setCurrentSavedSearch(savedSearch);
+    if (_savedSearch) {
+      setCurrentSavedSearch(_savedSearch);
     }
-  }, [savedSearch]);
+  }, [_savedSearch]);
 
   const setSearchParams = useCallback(
     (searchParams: {

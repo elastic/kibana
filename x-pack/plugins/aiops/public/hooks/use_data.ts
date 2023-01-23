@@ -16,10 +16,7 @@ import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
 
 import type { DocumentStatsSearchStrategyParams } from '../get_document_stats';
 import type { AiOpsIndexBasedAppState } from '../components/explain_log_rate_spikes/explain_log_rate_spikes_app_state';
-import {
-  getEsQueryFromSavedSearch,
-  SavedSearchSavedObject,
-} from '../application/utils/search_utils';
+import { getEsQueryFromSavedSearch } from '../application/utils/search_utils';
 import type { GroupTableItem } from '../components/spike_analysis_table/types';
 
 import { useTimeBuckets } from './use_time_buckets';
@@ -33,7 +30,7 @@ export const useData = (
   {
     currentDataView,
     currentSavedSearch,
-  }: { currentDataView: DataView; currentSavedSearch: SavedSearch | SavedSearchSavedObject | null },
+  }: { currentDataView: DataView; currentSavedSearch: SavedSearch | null },
   aiopsListState: AiOpsIndexBasedAppState,
   onUpdate: (params: Dictionary<unknown>) => void,
   selectedChangePoint?: ChangePoint,

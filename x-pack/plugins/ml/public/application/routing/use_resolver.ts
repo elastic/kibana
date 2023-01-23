@@ -6,9 +6,11 @@
  */
 
 import { useEffect, useState } from 'react';
-import { IUiSettingsClient } from '@kbn/core/public';
+import { IUiSettingsClient, SavedObjectsClientContract } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { getSavedSearch } from '@kbn/saved-search-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
   getDataViewById,
   getDataViewAndSavedSearch,
@@ -34,6 +36,10 @@ export const useResolver = (
   savedSearchId: string | undefined,
   config: IUiSettingsClient,
   dataViewsContract: DataViewsContract,
+  getSavedSearchDeps: {
+    search: DataPublicPluginStart['search'];
+    savedObjectsClient: SavedObjectsClientContract;
+  },
   resolvers: Resolvers
 ): { context: MlContextValue; results: ResolverResults } => {
   const notifications = useNotifications();
@@ -76,9 +82,12 @@ export const useResolver = (
           savedSearch: null,
           dataView: null,
         };
+        let _savedSearch;
 
         if (savedSearchId !== undefined) {
+          _savedSearch = await getSavedSearch(savedSearchId, getSavedSearchDeps);
           dataViewAndSavedSearch = await getDataViewAndSavedSearch(savedSearchId);
+          console.log('dataViewAndSavedSearch', dataViewAndSavedSearch);
         } else if (dataViewId !== undefined) {
           dataViewAndSavedSearch.dataView = await getDataViewById(dataViewId);
         }
@@ -95,6 +104,7 @@ export const useResolver = (
           combinedQuery,
           currentDataView: dataView,
           currentSavedSearch: savedSearch,
+          _savedSearch,
           dataViewsContract,
           kibanaConfig: config,
         });

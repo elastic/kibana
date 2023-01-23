@@ -12,7 +12,7 @@ import { cloneDeep } from 'lodash';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { getEsQueryConfig, SearchSource } from '@kbn/data-plugin/common';
 import { SavedSearch } from '@kbn/discover-plugin/public';
-import { FilterManager } from '@kbn/data-plugin/public';
+import { FilterManager, isQuery, mapAndFlattenFilters } from '@kbn/data-plugin/public';
 import {
   fromKueryExpression,
   toElasticsearchQuery,
@@ -20,6 +20,7 @@ import {
   buildEsQuery,
   Query,
   Filter,
+  AggregateQuery,
 } from '@kbn/es-query';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -88,14 +89,15 @@ export function getQueryFromSavedSearchObject(savedSearch: SavedSearchSavedObjec
  * Should also form a valid query if only the query or filters is provided
  */
 export function createMergedEsQuery(
-  query?: Query,
+  query?: Query | AggregateQuery,
   filters?: Filter[],
   dataView?: DataView,
   uiSettings?: IUiSettingsClient
 ) {
   let combinedQuery: QueryDslQueryContainer = getDefaultQuery();
 
-  if (query && query.language === SEARCH_QUERY_LANGUAGE.KUERY) {
+  // @TODO: add support for aggregate query
+  if (isQuery(query) && query.language === SEARCH_QUERY_LANGUAGE.KUERY) {
     const ast = fromKueryExpression(query.query);
     if (query.query !== '') {
       combinedQuery = toElasticsearchQuery(ast, dataView);
@@ -127,6 +129,14 @@ export function createMergedEsQuery(
   return combinedQuery;
 }
 
+function getSavedSearchSource(savedSearch: SavedSearch) {
+  return savedSearch &&
+    'searchSource' in savedSearch &&
+    savedSearch?.searchSource instanceof SearchSource
+    ? savedSearch.searchSource
+    : undefined;
+}
+
 /**
  * Extract query data from the saved search object
  * with overrides from the provided query data and/or filters
@@ -141,27 +151,24 @@ export function getEsQueryFromSavedSearch({
 }: {
   dataView: DataView;
   uiSettings: IUiSettingsClient;
-  savedSearch: SavedSearchSavedObject | SavedSearch | null | undefined;
+  savedSearch: SavedSearch | null | undefined;
   query?: Query;
   filters?: Filter[];
   filterManager?: FilterManager;
 }) {
+  console.log('getEsQueryFromSavedSearch', savedSearch);
   if (!dataView || !savedSearch) return;
 
   const userQuery = query;
   const userFilters = filters;
 
+  const savedSearchSource = getSavedSearchSource(savedSearch);
+
   // If saved search has a search source with nested parent
   // e.g. a search coming from Dashboard saved search embeddable
   // which already combines both the saved search's original query/filters and the Dashboard's
   // then no need to process any further
-  if (
-    savedSearch &&
-    'searchSource' in savedSearch &&
-    savedSearch?.searchSource instanceof SearchSource &&
-    savedSearch.searchSource.getParent() !== undefined &&
-    userQuery
-  ) {
+  if (savedSearchSource && savedSearchSource.getParent() !== undefined && userQuery) {
     // Flattened query from search source may contain a clause that narrows the time range
     // which might interfere with global time pickers so we need to remove
     const savedQuery =
@@ -181,12 +188,13 @@ export function getEsQueryFromSavedSearch({
     };
   }
 
+  // @TODO: remove
   // If saved search is an json object with the original query and filter
   // retrieve the parsed query and filter
-  const savedSearchData = getQueryFromSavedSearchObject(savedSearch);
+  // const savedSearchData = savedSearch; // getQueryFromSavedSearchObject(savedSearch);
 
   // If no saved search available, use user's query and filters
-  if (!savedSearchData && userQuery) {
+  if (!savedSearch && userQuery) {
     if (filterManager && userFilters) filterManager.addFilters(userFilters);
 
     const combinedQuery = createMergedEsQuery(
@@ -205,11 +213,11 @@ export function getEsQueryFromSavedSearch({
 
   // If saved search available, merge saved search with the latest user query or filters
   // which might differ from extracted saved search data
-  if (savedSearchData) {
+  if (savedSearchSource) {
     const globalFilters = filterManager?.getGlobalFilters();
-    const currentQuery = userQuery ?? savedSearchData?.query;
-    const currentFilters = userFilters ?? savedSearchData?.filter;
-
+    const currentQuery = userQuery ?? savedSearchSource.getField('query');
+    const currentFilters =
+      userFilters ?? mapAndFlattenFilters(savedSearchSource.getField('filter') as Filter[]);
     if (filterManager) filterManager.setFilters(currentFilters);
     if (globalFilters) filterManager?.addFilters(globalFilters);
 

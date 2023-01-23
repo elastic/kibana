@@ -49,15 +49,24 @@ export const explainLogRateSpikesRouteFactory = (
   disabled: !AIOPS_ENABLED,
 });
 
-const PageWrapper: FC<PageProps> = ({ location, deps }) => {
+const PageWrapper: FC<PageProps> = ({ location, deps, ...restProps }) => {
+  console.log('deps.getSavedSearchDeps', deps.getSavedSearchDeps);
   const { redirectToMlAccessDeniedPage } = deps;
 
   const { index, savedSearchId }: Record<string, any> = parse(location.search, { sort: false });
-  const { context } = useResolver(index, savedSearchId, deps.config, deps.dataViewsContract, {
-    checkBasicLicense,
-    cacheDataViewsContract: () => cacheDataViewsContract(deps.dataViewsContract),
-    checkGetJobsCapabilities: () => checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
-  });
+  const { context } = useResolver(
+    index,
+    savedSearchId,
+    deps.config,
+    deps.dataViewsContract,
+    deps.getSavedSearchDeps,
+    {
+      checkBasicLicense,
+      cacheDataViewsContract: () => cacheDataViewsContract(deps.dataViewsContract),
+      checkGetJobsCapabilities: () =>
+        checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
+    }
+  );
 
   return (
     <PageLoader context={context}>

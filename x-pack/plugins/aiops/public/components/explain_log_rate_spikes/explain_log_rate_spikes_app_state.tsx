@@ -78,7 +78,9 @@ export const ExplainLogRateSpikesAppState: FC<ExplainLogRateSpikesAppStateProps>
   dataView,
   savedSearch,
   appDependencies,
+  ...restProps
 }) => {
+  console.log('restProps', restProps);
   if (!dataView) return null;
 
   if (!dataView.isTimeBased()) {
@@ -110,7 +112,7 @@ export const ExplainLogRateSpikesAppState: FC<ExplainLogRateSpikesAppStateProps>
   return (
     <AiopsAppContext.Provider value={appDependencies}>
       <UrlStateProvider>
-        <DataSourceContext.Provider value={{ dataView, savedSearch }}>
+        <DataSourceContext.Provider value={{ dataView, savedSearch: restProps._savedSearch }}>
           <SpikeAnalysisTableRowStateProvider>
             <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
               <DatePickerContextProvider {...datePickerDeps}>

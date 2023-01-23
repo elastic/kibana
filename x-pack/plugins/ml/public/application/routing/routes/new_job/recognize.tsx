@@ -54,6 +54,7 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
     savedSearchId,
     deps.config,
     deps.dataViewsContract,
+
     {
       ...basicResolvers(deps),
       existingJobsAndGroups: mlJobService.getJobAndGroupIds,

@@ -46,6 +46,8 @@ export const ExplainLogRateSpikesPage: FC = () => {
         <ExplainLogRateSpikes
           dataView={dataView}
           savedSearch={savedSearch}
+          // @todo
+          _savedSearch={context._savedSearch}
           appDependencies={pick(services, [
             'application',
             'data',
