@@ -24,7 +24,7 @@ import { useAppToasts } from '../../hooks/use_app_toasts';
 import { sourcererActions } from '../../store/sourcerer';
 import * as i18n from './translations';
 import { SourcererScopeName } from '../../store/sourcerer/model';
-import { getSourcererDataView } from '../sourcerer/api';
+import { getSourcererDataView } from '../sourcerer/get_sourcerer_data_view';
 import { useTrackHttpRequest } from '../../lib/apm/use_track_http_request';
 import { APP_UI_ID } from '../../../../common/constants';
 
@@ -121,11 +121,8 @@ export const useDataView = (): {
         const { endTracking } = startTracking({ name: `${APP_UI_ID} indexFieldsSearch` });
 
         if (needToBeInit) {
-          const dataViewToUpdate = await getSourcererDataView(
-            dataViewId,
-            abortCtrl.current[dataViewId].signal
-          );
-          dispatch(sourcererActions.setDataView(dataViewToUpdate));
+          const dataView = await getSourcererDataView(dataViewId, data.dataViews);
+          dispatch(sourcererActions.setDataView(dataView));
         }
 
         return new Promise<void>((resolve) => {
@@ -208,7 +205,7 @@ export const useDataView = (): {
       }
       return asyncSearch();
     },
-    [addError, addWarning, data.search, dispatch, setLoading, startTracking]
+    [addError, addWarning, data.search, dispatch, setLoading, startTracking, data.dataViews]
   );
 
   useEffect(() => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   EuiAvatar,
   EuiButton,
@@ -23,14 +23,15 @@ import { Controller, useForm } from 'react-hook-form';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 
 import { useKibana } from '../../../utils/kibana_react';
-import { useCreateSlo } from '../../../hooks/slo/use_create_slo';
+import { useCreateOrUpdateSlo } from '../../../hooks/slo/use_create_slo';
 import { useCheckFormPartialValidities } from '../helpers/use_check_form_partial_validities';
 import { SloEditFormDefinitionCustomKql } from './slo_edit_form_definition_custom_kql';
 import { SloEditFormDescription } from './slo_edit_form_description';
 import { SloEditFormObjectives } from './slo_edit_form_objectives';
 import {
-  processValues,
-  transformGetSloToCreateSloParams,
+  transformValuesToCreateSLOInput,
+  transformSloResponseToCreateSloInput,
+  transformValuesToUpdateSLOInput,
 } from '../helpers/process_slo_form_values';
 import { paths } from '../../../config';
 import { SLI_OPTIONS, SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
@@ -42,6 +43,7 @@ export interface Props {
 const maxWidth = 775;
 
 export function SloEditForm({ slo }: Props) {
+  const isEditMode = slo !== undefined;
   const {
     application: { navigateToUrl },
     http: { basePath },
@@ -50,7 +52,7 @@ export function SloEditForm({ slo }: Props) {
 
   const { control, watch, getFieldState, getValues, formState, trigger } = useForm({
     defaultValues: SLO_EDIT_FORM_DEFAULT_VALUES,
-    values: transformGetSloToCreateSloParams(slo),
+    values: transformSloResponseToCreateSloInput(slo),
     mode: 'all',
   });
 
@@ -58,36 +60,44 @@ export function SloEditForm({ slo }: Props) {
     { getFieldState, formState }
   );
 
-  const {
-    loading: loadingCreatingSlo,
-    success: successCreatingSlo,
-    error: errorCreatingSlo,
-    createSlo,
-  } = useCreateSlo();
+  const { loading, success, error, createSlo, updateSlo } = useCreateOrUpdateSlo();
 
-  const handleCreateSlo = () => {
+  const handleSubmit = () => {
     const values = getValues();
-    const processedValues = processValues(values);
-    createSlo(processedValues);
+    if (isEditMode) {
+      const processedValues = transformValuesToUpdateSLOInput(values);
+      updateSlo(slo.id, processedValues);
+    } else {
+      const processedValues = transformValuesToCreateSLOInput(values);
+      createSlo(processedValues);
+    }
   };
 
-  if (successCreatingSlo) {
-    toasts.addSuccess(
-      i18n.translate('xpack.observability.slos.sloEdit.creation.success', {
-        defaultMessage: 'Successfully created {name}',
-        values: { name: getValues().name },
-      })
-    );
-    navigateToUrl(basePath.prepend(paths.observability.slos));
-  }
+  useEffect(() => {
+    if (success) {
+      toasts.addSuccess(
+        isEditMode
+          ? i18n.translate('xpack.observability.slos.sloEdit.update.success', {
+              defaultMessage: 'Successfully updated {name}',
+              values: { name: getValues().name },
+            })
+          : i18n.translate('xpack.observability.slos.sloEdit.creation.success', {
+              defaultMessage: 'Successfully created {name}',
+              values: { name: getValues().name },
+            })
+      );
 
-  if (errorCreatingSlo) {
-    toasts.addError(new Error(errorCreatingSlo), {
-      title: i18n.translate('xpack.observability.slos.sloEdit.creation.error', {
-        defaultMessage: 'Something went wrong',
-      }),
-    });
-  }
+      navigateToUrl(basePath.prepend(paths.observability.slos));
+    }
+
+    if (error) {
+      toasts.addError(new Error(error), {
+        title: i18n.translate('xpack.observability.slos.sloEdit.creation.error', {
+          defaultMessage: 'Something went wrong',
+        }),
+      });
+    }
+  }, [success, error, toasts, isEditMode, getValues, navigateToUrl, basePath]);
 
   return (
     <EuiTimeline data-test-subj="sloForm">
@@ -197,13 +207,17 @@ export function SloEditForm({ slo }: Props) {
             fill
             color="primary"
             data-test-subj="sloFormSubmitButton"
-            onClick={handleCreateSlo}
+            onClick={handleSubmit}
             disabled={!formState.isValid}
-            isLoading={loadingCreatingSlo && !errorCreatingSlo}
+            isLoading={loading && !error}
           >
-            {i18n.translate('xpack.observability.slos.sloEdit.createSloButton', {
-              defaultMessage: 'Create SLO',
-            })}
+            {isEditMode
+              ? i18n.translate('xpack.observability.slos.sloEdit.editSloButton', {
+                  defaultMessage: 'Update SLO',
+                })
+              : i18n.translate('xpack.observability.slos.sloEdit.createSloButton', {
+                  defaultMessage: 'Create SLO',
+                })}
           </EuiButton>
 
           <EuiSpacer size="xl" />
