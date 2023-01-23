@@ -254,8 +254,7 @@ describe('Settings', () => {
         enableSaving={true}
         toasts={notificationServiceMock.createStartContract().toasts}
         docLinks={docLinksServiceMock.createStartContract().links}
-        uiSettings={mockConfig().core.settings.client}
-        globalUiSettings={mockConfig().core.settings.globalClient}
+        settingsService={mockConfig().core.settings}
         componentRegistry={new ComponentRegistry().start}
         theme={themeServiceMock.createStartContract().theme$}
       />
@@ -283,8 +282,7 @@ describe('Settings', () => {
         enableSaving={true}
         toasts={notificationServiceMock.createStartContract().toasts}
         docLinks={docLinksServiceMock.createStartContract().links}
-        uiSettings={mockConfig().core.settings.client}
-        globalUiSettings={mockConfig().core.settings.globalClient}
+        settingsService={mockConfig().core.settings}
         componentRegistry={new ComponentRegistry().start}
         theme={themeServiceMock.createStartContract().theme$}
       />
@@ -309,8 +307,7 @@ describe('Settings', () => {
         enableSaving={false}
         toasts={notificationServiceMock.createStartContract().toasts}
         docLinks={docLinksServiceMock.createStartContract().links}
-        uiSettings={mockConfig().core.settings.client}
-        globalUiSettings={mockConfig().core.settings.globalClient}
+        settingsService={mockConfig().core.settings}
         componentRegistry={new ComponentRegistry().start}
         theme={themeServiceMock.createStartContract().theme$}
       />
@@ -338,8 +335,7 @@ describe('Settings', () => {
         enableSaving={false}
         toasts={toasts}
         docLinks={docLinksServiceMock.createStartContract().links}
-        uiSettings={mockConfig().core.settings.client}
-        globalUiSettings={mockConfig().core.settings.globalClient}
+        settingsService={mockConfig().core.settings}
         componentRegistry={new ComponentRegistry().start}
         theme={themeServiceMock.createStartContract().theme$}
       />

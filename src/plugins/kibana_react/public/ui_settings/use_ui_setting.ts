@@ -66,16 +66,16 @@ type Setter<T> = (newValue: T) => Promise<boolean>;
 export const useUiSetting$ = <T>(key: string, defaultValue?: T): [T, Setter<T>] => {
   const { services } = useKibana();
 
-  if (typeof services.settings !== 'object') {
+  if (typeof services.uiSettings !== 'object') {
     throw new TypeError('uiSettings service not available in kibana-react context.');
   }
 
   const observable$ = useMemo(
-    () => services.settings!.client.get$(key, defaultValue),
-    [key, defaultValue, services.settings.client]
+    () => services.uiSettings!.get$(key, defaultValue),
+    [key, defaultValue, services.uiSettings]
   );
-  const value = useObservable<T>(observable$, services.settings!.client.get(key, defaultValue));
-  const set = useCallback((newValue: T) => services.settings!.client.set(key, newValue), [key]);
+  const value = useObservable<T>(observable$, services.uiSettings!.get(key, defaultValue));
+  const set = useCallback((newValue: T) => services.uiSettings!.set(key, newValue), [key]);
 
   return [value, set];
 };

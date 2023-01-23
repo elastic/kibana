@@ -60,7 +60,8 @@ export async function mountManagementSection(
   usageCollection?: UsageCollectionSetup
 ) {
   params.setBreadcrumbs(crumb);
-  const [{ settings, notifications, docLinks, application, chrome }] = await getStartServices();
+  const [{ settings, notifications, docLinks, application, chrome, uiSettings }] =
+    await getStartServices();
 
   const canSave = application.capabilities.advancedSettings.save as boolean;
   const trackUiMetric = usageCollection?.reportUiCounter.bind(usageCollection, 'advanced_settings');
@@ -73,7 +74,9 @@ export async function mountManagementSection(
 
   ReactDOM.render(
     <KibanaThemeProvider theme$={params.theme$}>
-      <KibanaContextProvider services={{ settings, notifications, docLinks, application, chrome }}>
+      <KibanaContextProvider
+        services={{ settings, notifications, docLinks, application, chrome, uiSettings }}
+      >
         <I18nProvider>
           <Router history={params.history}>
             <Switch>
@@ -85,8 +88,7 @@ export async function mountManagementSection(
                   enableSaving={canSave}
                   toasts={notifications.toasts}
                   docLinks={docLinks.links}
-                  uiSettings={settings.client}
-                  globalUiSettings={settings.globalClient}
+                  settingsService={settings}
                   theme={params.theme$}
                   componentRegistry={componentRegistry}
                   trackUiMetric={trackUiMetric}

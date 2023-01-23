@@ -18,7 +18,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { ScopedHistory } from '@kbn/core-application-browser';
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { ToastsStart } from '@kbn/core-notifications-browser';
 import { ThemeServiceStart } from '@kbn/core-theme-browser';
@@ -26,13 +26,14 @@ import { UiCounterMetricType } from '@kbn/analytics';
 import { url } from '@kbn/kibana-utils-plugin/common';
 import { parse } from 'query-string';
 import { UiSettingsScope } from '@kbn/core-ui-settings-common';
-import { DEFAULT_CATEGORY, fieldSorter, getAriaName, toEditableConfig } from './lib';
+import { mapConfig, mapSettings, initCategoryCounts, initCategories } from './settings_helper';
 import { parseErrorMsg } from './components/search/search';
 import { AdvancedSettings, QUERY } from './advanced_settings';
 import { ComponentRegistry } from '..';
 import { Search } from './components/search';
 import { FieldSetting } from './types';
 import { i18nTexts } from './i18n_texts';
+import { getAriaName } from './lib';
 
 interface AdvancedSettingsState {
   footerQueryMatched: boolean;
@@ -45,8 +46,7 @@ export type GroupedSettings = Record<string, FieldSetting[]>;
 interface Props {
   history: ScopedHistory;
   enableSaving: boolean;
-  uiSettings: IUiSettingsClient;
-  globalUiSettings: IUiSettingsClient;
+  settingsService: SettingsStart;
   docLinks: DocLinksStart['links'];
   toasts: ToastsStart;
   theme: ThemeServiceStart['theme$'];
@@ -58,51 +58,9 @@ const SPACE_SETTINGS_ID = 'space-settings';
 const GLOBAL_SETTINGS_ID = 'global-settings';
 
 export const Settings = (props: Props) => {
-  const { componentRegistry, history, toasts, uiSettings, globalUiSettings, ...rest } = props;
-
-  const mapConfig = (config: IUiSettingsClient) => {
-    const all = config.getAll();
-    return Object.entries(all)
-      .map(([settingId, settingDef]) => {
-        return toEditableConfig({
-          def: settingDef,
-          name: settingId,
-          value: settingDef.userValue,
-          isCustom: config.isCustom(settingId),
-          isOverridden: config.isOverridden(settingId),
-        });
-      })
-      .filter((c) => !c.readOnly)
-      .filter((c) => !c.isCustom) // hide any settings that aren't explicitly registered by enabled plugins.
-      .sort(fieldSorter);
-  };
-
-  const mapSettings = (fieldSettings: FieldSetting[]) => {
-    // Group settings by category
-    return fieldSettings.reduce((grouped: GroupedSettings, setting) => {
-      // We will want to change this logic when we put each category on its
-      // own page aka allowing a setting to be included in multiple categories.
-      const category = setting.category[0];
-      (grouped[category] = grouped[category] || []).push(setting);
-      return grouped;
-    }, {});
-  };
-
-  const initCategoryCounts = (grouped: GroupedSettings) => {
-    return Object.keys(grouped).reduce((counts: Record<string, number>, category: string) => {
-      counts[category] = grouped[category].length;
-      return counts;
-    }, {});
-  };
-
-  const initCategories = (grouped: GroupedSettings) => {
-    return Object.keys(grouped).sort((a, b) => {
-      if (a === DEFAULT_CATEGORY) return -1;
-      if (b === DEFAULT_CATEGORY) return 1;
-      if (a > b) return 1;
-      return a === b ? 0 : -1;
-    });
-  };
+  const { componentRegistry, history, settingsService, ...rest } = props;
+  const uiSettings = settingsService.client;
+  const globalUiSettings = settingsService.globalClient;
 
   const [settings, setSettings] = useState<FieldSetting[]>(mapConfig(uiSettings));
   const [globalSettings, setGlobalSettings] = useState<FieldSetting[]>(mapConfig(globalUiSettings));
@@ -236,7 +194,6 @@ export const Settings = (props: Props) => {
           callOutTitle={i18nTexts.defaultSpaceCalloutTitle}
           callOutSubtitle={i18nTexts.defaultSpaceCalloutSubtitle}
           uiSettings={uiSettings}
-          toasts={props.toasts}
           {...rest}
         />
       ),
@@ -252,7 +209,6 @@ export const Settings = (props: Props) => {
         ) : null,
       content: (
         <AdvancedSettings
-          toasts={props.toasts}
           settings={globalSettings}
           groupedSettings={groupedSettings.global}
           categoryCounts={categoryCounts.global}
@@ -297,7 +253,7 @@ export const Settings = (props: Props) => {
       const query = initialQuery ? getAriaName(queryString) : queryString ?? '';
       return Query.parse(query);
     } catch ({ message }) {
-      toasts.addWarning({
+      props.toasts.addWarning({
         title: parseErrorMsg,
         text: message,
       });
