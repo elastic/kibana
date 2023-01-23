@@ -38,7 +38,7 @@ export function showOptions(this: DashboardContainer, anchorElement: HTMLElement
   }
 
   isOpen = true;
-  const { Wrapper: DashboardReduxWrapper } = this.getReduxEmbeddableTools();
+  const { Wrapper: DashboardReduxWrapper } = this.reduxEmbeddableTools;
 
   document.body.appendChild(container);
   const element = (

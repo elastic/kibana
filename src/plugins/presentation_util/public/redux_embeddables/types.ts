@@ -49,6 +49,7 @@ export interface ReduxEmbeddableTools<
 > {
   cleanup: () => void;
   Wrapper: React.FC<PropsWithChildren<{}>>;
+  store: EnhancedStore<ReduxEmbeddableStateType, AnyAction>;
   dispatch: EnhancedStore<ReduxEmbeddableStateType>['dispatch'];
   getState: EnhancedStore<ReduxEmbeddableStateType>['getState'];
   onStateChange: EnhancedStore<ReduxEmbeddableStateType>['subscribe'];

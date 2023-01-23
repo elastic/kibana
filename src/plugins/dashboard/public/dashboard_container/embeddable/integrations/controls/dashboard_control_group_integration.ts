@@ -6,24 +6,21 @@
  * Side Public License, v 1.
  */
 
-import _, { identity, pickBy } from 'lodash';
-import { Observable, Subscription } from 'rxjs';
+import { isEqual } from 'lodash';
 import deepEqual from 'fast-deep-equal';
+import { Observable, Subscription } from 'rxjs';
 import { compareFilters, COMPARE_ALL_OPTIONS, type Filter } from '@kbn/es-query';
 import { debounceTime, distinctUntilChanged, distinctUntilKeyChanged, skip } from 'rxjs/operators';
 
 import {
   ControlGroupInput,
-  CONTROL_GROUP_TYPE,
   getDefaultControlGroupInput,
   persistableControlGroupInputIsEqual,
 } from '@kbn/controls-plugin/common';
-import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
-import { ControlGroupContainer, ControlGroupOutput } from '@kbn/controls-plugin/public';
+import { ControlGroupContainer } from '@kbn/controls-plugin/public';
 
 import { DashboardContainer } from '../../dashboard_container';
-import { pluginServices } from '../../../../services/plugin_services';
-import { DashboardContainerByValueInput } from '../../../../../common';
+import { DashboardContainerInput } from '../../../../../common';
 
 interface DiffChecks {
   [key: string]: (a?: unknown, b?: unknown) => boolean;
@@ -35,42 +32,11 @@ const distinctUntilDiffCheck = <T extends {}>(a: T, b: T, diffChecks: DiffChecks
     .includes(false);
 
 type DashboardControlGroupCommonKeys = keyof Pick<
-  DashboardContainerByValueInput | ControlGroupInput,
+  DashboardContainerInput | ControlGroupInput,
   'filters' | 'lastReloadRequestTime' | 'timeRange' | 'query'
 >;
 
-export async function startControlGroupIntegration(
-  this: DashboardContainer,
-  initialInput: DashboardContainerByValueInput
-): Promise<ControlGroupContainer | undefined> {
-  const {
-    embeddable: { getEmbeddableFactory },
-  } = pluginServices.getServices();
-  const controlsGroupFactory = getEmbeddableFactory<
-    ControlGroupInput,
-    ControlGroupOutput,
-    ControlGroupContainer
-  >(CONTROL_GROUP_TYPE);
-  const { filters, query, timeRange, viewMode, controlGroupInput, id } = initialInput;
-  const controlGroup = await controlsGroupFactory?.create({
-    id: `control_group_${id ?? 'new_dashboard'}`,
-    ...getDefaultControlGroupInput(),
-    ...pickBy(controlGroupInput, identity), // undefined keys in initialInput should not overwrite defaults
-    timeRange,
-    viewMode,
-    filters,
-    query,
-  });
-  if (!controlGroup || isErrorEmbeddable(controlGroup)) {
-    return;
-  }
-
-  this.untilInitialized().then(() => startSyncingDashboardControlGroup.bind(this)());
-  await controlGroup.untilInitialized();
-  return controlGroup;
-}
-
-async function startSyncingDashboardControlGroup(this: DashboardContainer) {
+export async function startSyncingDashboardControlGroup(this: DashboardContainer) {
   if (!this.controlGroup) return;
   const subscriptions = new Subscription();
 
@@ -123,10 +89,10 @@ async function startSyncingDashboardControlGroup(this: DashboardContainer) {
 
   // pass down any pieces of input needed to refetch or force refetch data for the controls
   subscriptions.add(
-    (this.getInput$() as Readonly<Observable<DashboardContainerByValueInput>>)
+    (this.getInput$() as Readonly<Observable<DashboardContainerInput>>)
       .pipe(
         distinctUntilChanged((a, b) =>
-          distinctUntilDiffCheck<DashboardContainerByValueInput>(a, b, dashboardRefetchDiff)
+          distinctUntilDiffCheck<DashboardContainerInput>(a, b, dashboardRefetchDiff)
         )
       )
       .subscribe(() => {
@@ -149,7 +115,7 @@ async function startSyncingDashboardControlGroup(this: DashboardContainer) {
 
   // dashboard may reset the control group input when discarding changes. Subscribe to these changes and update accordingly
   subscriptions.add(
-    (this.getInput$() as Readonly<Observable<DashboardContainerByValueInput>>)
+    (this.getInput$() as Readonly<Observable<DashboardContainerInput>>)
       .pipe(debounceTime(10), distinctUntilKeyChanged('controlGroupInput'))
       .subscribe(() => {
         if (!isControlGroupInputEqual()) {
@@ -182,7 +148,7 @@ async function startSyncingDashboardControlGroup(this: DashboardContainer) {
       .getOutput$()
       .pipe(
         distinctUntilChanged(({ timeslice: timesliceA }, { timeslice: timesliceB }) =>
-          _.isEqual(timesliceA, timesliceB)
+          isEqual(timesliceA, timesliceB)
         )
       )
       .subscribe(({ timeslice }) => {

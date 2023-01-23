@@ -139,7 +139,7 @@ export function DashboardApp({
       },
 
       // Override all state with URL + Locator input
-      overrideInput: {
+      initialInput: {
         // State loaded from the dashboard app URL and from the locator overrides all other dashboard state.
         ...initialUrlState,
         ...stateFromLocator,
@@ -167,7 +167,7 @@ export function DashboardApp({
    * dashboard's redux state.
    */
   const DashboardReduxWrapper = useMemo(
-    () => dashboardContainer?.getReduxEmbeddableTools().Wrapper,
+    () => dashboardContainer?.reduxEmbeddableTools.Wrapper,
     [dashboardContainer]
   );
 

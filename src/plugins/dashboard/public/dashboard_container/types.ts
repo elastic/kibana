@@ -8,22 +8,22 @@
 
 import type { ContainerOutput } from '@kbn/embeddable-plugin/public';
 import type { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public';
-import type { DashboardContainerByValueInput } from '../../common/dashboard_container/types';
+import type { DashboardContainerInput } from '../../common/dashboard_container/types';
 
 export type DashboardReduxState = ReduxEmbeddableState<
-  DashboardContainerByValueInput,
+  DashboardContainerInput,
   DashboardContainerOutput,
   DashboardPublicState
 >;
 
 export type DashboardStateFromSaveModal = Pick<
-  DashboardContainerByValueInput,
+  DashboardContainerInput,
   'title' | 'description' | 'tags' | 'timeRestore' | 'timeRange' | 'refreshInterval'
 > &
   Pick<DashboardPublicState, 'lastSavedId'>;
 
 export interface DashboardPublicState {
-  lastSavedInput: DashboardContainerByValueInput;
+  lastSavedInput: DashboardContainerInput;
   isEmbeddedExternally?: boolean;
   hasUnsavedChanges?: boolean;
   expandedPanelId?: string;

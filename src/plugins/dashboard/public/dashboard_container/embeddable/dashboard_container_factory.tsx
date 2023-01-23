@@ -21,15 +21,10 @@ import { SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
 
-import {
-  createInject,
-  createExtract,
-  DashboardContainerInput,
-  DashboardContainerByValueInput,
-} from '../../../common';
 import { DASHBOARD_CONTAINER_TYPE } from '..';
 import type { DashboardContainer } from './dashboard_container';
 import { DEFAULT_DASHBOARD_INPUT } from '../../dashboard_constants';
+import { createInject, createExtract, DashboardContainerInput } from '../../../common';
 import { LoadDashboardFromSavedObjectReturn } from '../../services/dashboard_saved_object/lib/load_dashboard_state_from_saved_object';
 
 export type DashboardContainerFactory = EmbeddableFactory<
@@ -40,7 +35,6 @@ export type DashboardContainerFactory = EmbeddableFactory<
 
 export interface DashboardCreationOptions {
   initialInput?: Partial<DashboardContainerInput>;
-  overrideInput?: Partial<DashboardContainerByValueInput>;
 
   incomingEmbeddable?: EmbeddablePackageState;
 
@@ -97,11 +91,14 @@ export class DashboardContainerFactoryDefinition
   public create = async (
     initialInput: DashboardContainerInput,
     parent?: Container,
-    creationOptions?: DashboardCreationOptions
+    creationOptions?: DashboardCreationOptions,
+    savedObjectId?: string
   ): Promise<DashboardContainer | ErrorEmbeddable> => {
-    const { DashboardContainer: DashboardContainerEmbeddable } = await import(
-      './dashboard_container'
-    );
-    return Promise.resolve(new DashboardContainerEmbeddable(initialInput, parent, creationOptions));
+    const { buildDashboard } = await import('./dashboard_builder');
+    try {
+      return Promise.resolve(buildDashboard(creationOptions, savedObjectId));
+    } catch (e) {
+      return new ErrorEmbeddable(e.text, { id: e.id });
+    }
   };
 }

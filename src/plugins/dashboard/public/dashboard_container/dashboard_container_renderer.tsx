@@ -22,8 +22,8 @@ import {
 } from './embeddable/dashboard_container_factory';
 import { DASHBOARD_CONTAINER_TYPE } from '..';
 import { DashboardReduxState } from './types';
+import { DashboardContainerInput } from '../../common';
 import { pluginServices } from '../services/plugin_services';
-import { DEFAULT_DASHBOARD_INPUT } from '../dashboard_constants';
 import { DashboardContainer } from './embeddable/dashboard_container';
 import { dashboardContainerReducers } from './state/dashboard_container_reducers';
 
@@ -69,17 +69,12 @@ export const DashboardContainerRenderer = ({
         DASHBOARD_CONTAINER_TYPE
       ) as DashboardContainerFactory & { create: DashboardContainerFactoryDefinition['create'] };
       const container = (await dashboardFactory?.create(
-        {
-          id,
-          ...DEFAULT_DASHBOARD_INPUT,
-          ...creationOptions?.initialInput,
-          savedObjectId: dashboardIdToBuild,
-        },
+        {} as unknown as DashboardContainerInput, // Input from creationOptions is used instead.
         undefined,
-        creationOptions
+        creationOptions,
+        savedObjectId
       )) as DashboardContainer;
 
-      await container.untilInitialized();
       if (canceled) {
         container.destroy();
         return;

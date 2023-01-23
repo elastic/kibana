@@ -15,7 +15,7 @@ import { DashboardSaveModal } from './overlays/save_modal';
 import { DashboardContainer } from '../dashboard_container';
 import { showCloneModal } from './overlays/show_clone_modal';
 import { pluginServices } from '../../../services/plugin_services';
-import { DashboardContainerByValueInput } from '../../../../common';
+import { DashboardContainerInput } from '../../../../common';
 import { SaveDashboardReturn } from '../../../services/dashboard_saved_object/types';
 
 export function runSaveAs(this: DashboardContainer) {
@@ -34,7 +34,7 @@ export function runSaveAs(this: DashboardContainer) {
     getState,
     dispatch,
     actions: { setStateFromSaveModal, setLastSavedInput },
-  } = this.getReduxEmbeddableTools();
+  } = this.reduxEmbeddableTools;
   const {
     explicitInput: currentState,
     componentState: { lastSavedId },
@@ -80,7 +80,7 @@ export function runSaveAs(this: DashboardContainer) {
         // do not save if title is duplicate and is unconfirmed
         return {};
       }
-      const stateToSave: DashboardContainerByValueInput = {
+      const stateToSave: DashboardContainerInput = {
         ...currentState,
         ...stateFromSaveModal,
       };
@@ -130,7 +130,7 @@ export async function runQuickSave(this: DashboardContainer) {
     getState,
     dispatch,
     actions: { setLastSavedInput },
-  } = this.getReduxEmbeddableTools();
+  } = this.reduxEmbeddableTools;
   const {
     explicitInput: currentState,
     componentState: { lastSavedId },
@@ -155,7 +155,7 @@ export async function runClone(this: DashboardContainer) {
     getState,
     dispatch,
     actions: { setTitle },
-  } = this.getReduxEmbeddableTools();
+  } = this.reduxEmbeddableTools;
   const { explicitInput: currentState } = getState();
 
   return new Promise<SaveDashboardReturn | undefined>((resolve) => {

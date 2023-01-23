@@ -115,6 +115,7 @@ export const createReduxEmbeddableTools = <
 
   // return redux tools for the embeddable class to use.
   return {
+    store,
     Wrapper,
     actions: context.actions,
     dispatch: store.dispatch,

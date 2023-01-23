@@ -83,7 +83,7 @@ function getLocatorParams({
   const {
     componentState: { lastSavedId },
     explicitInput: { panels, query, viewMode },
-  } = container.getReduxEmbeddableTools().getState();
+  } = container.reduxEmbeddableTools.getState();
 
   return {
     viewMode,

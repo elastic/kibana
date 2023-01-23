@@ -6,14 +6,11 @@
  * Side Public License, v 1.
  */
 import { omit } from 'lodash';
-import { AnyAction, Middleware } from '@reduxjs/toolkit';
-import { debounceTime, Observable, Subject, switchMap } from 'rxjs';
 
-import { DashboardContainer } from '../../dashboard_container';
-import { pluginServices } from '../../../../services/plugin_services';
-import { DashboardContainerByValueInput } from '../../../../../common';
-import { CHANGE_CHECK_DEBOUNCE } from '../../../../dashboard_constants';
 import { isKeyEqual } from './dashboard_diffing_functions';
+import { DashboardContainer } from '../../dashboard_container';
+import { DashboardContainerInput } from '../../../../../common';
+import { pluginServices } from '../../../../services/plugin_services';
 import { dashboardContainerReducers } from '../../../state/dashboard_container_reducers';
 
 /**
@@ -21,7 +18,7 @@ import { dashboardContainerReducers } from '../../../state/dashboard_container_r
  * and the last saved input, so we can safely ignore any output reducers, and most componentState reducers.
  * This is only for performance reasons, because the diffing function itself can be quite heavy.
  */
-const reducersToIgnore: Array<keyof typeof dashboardContainerReducers> = [
+export const reducersToIgnore: Array<keyof typeof dashboardContainerReducers> = [
   'setTimeslice',
   'setFullScreenMode',
   'setSearchSessionId',
@@ -32,7 +29,7 @@ const reducersToIgnore: Array<keyof typeof dashboardContainerReducers> = [
 /**
  * Some keys will often have deviated from their last saved state, but should not persist over reloads
  */
-const keysToOmitFromSessionStorage: Array<keyof DashboardContainerByValueInput> = [
+const keysToOmitFromSessionStorage: Array<keyof DashboardContainerInput> = [
   'lastReloadRequestTime',
   'executionContext',
   'searchSessionId',
@@ -46,7 +43,7 @@ const keysToOmitFromSessionStorage: Array<keyof DashboardContainerByValueInput> 
  * Some keys will often have deviated from their last saved state, but should be
  * ignored when calculating whether or not this dashboard has unsaved changes.
  */
-export const keysNotConsideredUnsavedChanges: Array<keyof DashboardContainerByValueInput> = [
+export const keysNotConsideredUnsavedChanges: Array<keyof DashboardContainerInput> = [
   'lastReloadRequestTime',
   'executionContext',
   'searchSessionId',
@@ -54,71 +51,15 @@ export const keysNotConsideredUnsavedChanges: Array<keyof DashboardContainerByVa
   'viewMode',
 ];
 
-/**
- * Does an initial diff between @param initialInput and @param initialLastSavedInput, and created a middleware
- * which listens to the redux store and checks for & publishes the unsaved changes on dispatches.
- */
-export function startDiffingDashboardState(
+export function updateUnsavedChangesState(
   this: DashboardContainer,
-  {
-    useSessionBackup,
-    setCleanupFunction,
-  }: {
-    useSessionBackup?: boolean;
-    setCleanupFunction: (cleanupFunction: () => void) => void;
-  }
-) {
-  const checkForUnsavedChangesSubject$ = new Subject<null>();
-
-  // middleware starts the check for unsaved changes function if the action dispatched could cause them.
-  const diffingMiddleware: Middleware<AnyAction> = (store) => (next) => (action) => {
-    const dispatchedActionName = action.type.split('/')?.[1];
-    if (
-      dispatchedActionName &&
-      dispatchedActionName !== 'updateEmbeddableReduxOutput' && // ignore any generic output updates.
-      !reducersToIgnore.includes(dispatchedActionName)
-    ) {
-      checkForUnsavedChangesSubject$.next(null);
-    }
-    next(action);
-  };
-
-  const getHasUnsavedChangesSubscription = checkForUnsavedChangesSubject$
-    .pipe(
-      debounceTime(CHANGE_CHECK_DEBOUNCE),
-      switchMap(() => {
-        return new Observable((observer) => {
-          const {
-            explicitInput: currentInput,
-            componentState: { lastSavedInput },
-          } = this.getReduxEmbeddableTools().getState();
-          getUnsavedChanges
-            .bind(this)(lastSavedInput, currentInput)
-            .then((unsavedChanges) => {
-              if (observer.closed) return;
-
-              updateUnsavedChangesState.bind(this)(unsavedChanges);
-              if (useSessionBackup) backupUnsavedChanges.bind(this)(unsavedChanges);
-            });
-        });
-      })
-    )
-    .subscribe();
-
-  setCleanupFunction(() => getHasUnsavedChangesSubscription.unsubscribe());
-
-  return diffingMiddleware;
-}
-
-function updateUnsavedChangesState(
-  this: DashboardContainer,
-  unsavedChanges: Partial<DashboardContainerByValueInput>
+  unsavedChanges: Partial<DashboardContainerInput>
 ) {
   const {
     getState,
     dispatch,
     actions: { setHasUnsavedChanges },
-  } = this.getReduxEmbeddableTools();
+  } = this.reduxEmbeddableTools;
 
   // dispatch has unsaved changes state
   const hasChanges = Object.keys(omit(unsavedChanges, keysNotConsideredUnsavedChanges)).length > 0;
@@ -127,9 +68,9 @@ function updateUnsavedChangesState(
   }
 }
 
-function backupUnsavedChanges(
+export function backupUnsavedChanges(
   this: DashboardContainer,
-  unsavedChanges: Partial<DashboardContainerByValueInput>
+  unsavedChanges: Partial<DashboardContainerInput>
 ) {
   const { dashboardSessionStorage } = pluginServices.getServices();
   dashboardSessionStorage.setState(
@@ -138,25 +79,26 @@ function backupUnsavedChanges(
   );
 }
 
+type DashboardContainerInputWithoutId = Omit<DashboardContainerInput, 'id'>;
+
 /**
  * Does a shallow diff between @param lastExplicitInput and @param currentExplicitInput and
  * @returns an object out of the keys which are different.
  */
 export async function getUnsavedChanges(
   this: DashboardContainer,
-  lastInput: DashboardContainerByValueInput,
-  input: DashboardContainerByValueInput,
-  keys?: Array<keyof DashboardContainerByValueInput>
-): Promise<Partial<DashboardContainerByValueInput>> {
-  await this.untilInitialized();
+  lastInput: DashboardContainerInputWithoutId,
+  input: DashboardContainerInputWithoutId,
+  keys?: Array<keyof DashboardContainerInputWithoutId>
+): Promise<Partial<DashboardContainerInputWithoutId>> {
   const allKeys =
     keys ??
     ([...new Set([...Object.keys(lastInput), ...Object.keys(input)])] as Array<
-      keyof DashboardContainerByValueInput
+      keyof DashboardContainerInputWithoutId
     >);
   const keyComparePromises = allKeys.map(
     (key) =>
-      new Promise<{ key: keyof DashboardContainerByValueInput; isEqual: boolean }>((resolve) =>
+      new Promise<{ key: keyof DashboardContainerInputWithoutId; isEqual: boolean }>((resolve) =>
         isKeyEqual(key, {
           container: this,
 
@@ -176,7 +118,7 @@ export async function getUnsavedChanges(
       }
       return changes;
     },
-    {} as Partial<DashboardContainerByValueInput>
+    {} as Partial<DashboardContainerInput>
   );
   return unsavedChanges;
 }

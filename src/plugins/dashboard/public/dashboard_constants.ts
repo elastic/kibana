@@ -7,7 +7,7 @@
  */
 
 import { ViewMode } from '@kbn/embeddable-plugin/common';
-import type { DashboardContainerByValueInput } from '../common';
+import type { DashboardContainerInput } from '../common';
 
 // ------------------------------------------------------------------
 // URL Constants
@@ -67,7 +67,7 @@ export const CHANGE_CHECK_DEBOUNCE = 100;
 // ------------------------------------------------------------------
 // Default State
 // ------------------------------------------------------------------
-export const DEFAULT_DASHBOARD_INPUT: Omit<DashboardContainerByValueInput, 'id'> = {
+export const DEFAULT_DASHBOARD_INPUT: Omit<DashboardContainerInput, 'id'> = {
   viewMode: ViewMode.EDIT, // new dashboards start in  edit mode.
   timeRestore: false,
   query: { query: '', language: 'kuery' },

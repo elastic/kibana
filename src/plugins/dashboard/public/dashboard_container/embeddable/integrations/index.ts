@@ -8,19 +8,16 @@
 
 export {
   getUnsavedChanges,
-  startDiffingDashboardState,
   keysNotConsideredUnsavedChanges,
 } from './diff_state/dashboard_diffing_integration';
 
-export {
-  startUnifiedSearchIntegration,
-  applySavedFiltersToUnifiedSearch,
-} from './unified_search/start_dashboard_unified_search_integration';
+export { combineDashboardFiltersWithControlGroupFilters } from './controls/dashboard_control_group_integration';
 
 export {
-  startControlGroupIntegration,
-  combineDashboardFiltersWithControlGroupFilters,
-} from './controls/dashboard_control_group_integration';
+  reducersToIgnore,
+  backupUnsavedChanges,
+  updateUnsavedChangesState,
+} from './diff_state/dashboard_diffing_integration';
 
 export { startSyncingDashboardDataViews } from './data_views/sync_dashboard_data_views';
 export { startDashboardSearchSessionIntegration } from './search_sessions/start_dashboard_search_session_integration';
