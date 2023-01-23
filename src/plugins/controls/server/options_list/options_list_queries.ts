@@ -153,7 +153,6 @@ const suggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBu
     buildAggregation: ({ fieldName, sort }: OptionsListRequestBody) => ({
       terms: {
         field: fieldName,
-        execution_hint: 'map',
         shard_size: 10,
         order: getSortType(sort),
       },
@@ -208,7 +207,6 @@ const suggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBu
             terms: {
               size,
               field: fieldName,
-              execution_hint: 'map',
               shard_size: 10,
               order: getSortType(sort),
             },
@@ -262,33 +260,50 @@ const suggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBu
         nested: {
           path: subTypeNested.nested.path,
         },
-        filter: {
-          prefix: {
-            [fieldName]: {
-              value: searchString,
-              case_insensitive: true,
-            },
-          },
-        },
         aggs: {
           nestedSuggestions: {
-            terms: {
-              size,
-              shard_size: 10,
-              field: fieldName,
-              execution_hint: 'map',
-              order: getSortType(sort),
+            filter: {
+              prefix: {
+                [fieldName]: {
+                  value: searchString,
+                  case_insensitive: true,
+                },
+              },
+            },
+            aggs: {
+              suggestions: {
+                terms: {
+                  size,
+                  shard_size: 10,
+                  field: fieldName,
+                  order: getSortType(sort),
+                },
+              },
+              unique_terms: {
+                cardinality: {
+                  field: fieldName,
+                },
+              },
             },
           },
         },
       };
     },
-    parse: (rawEsResult) =>
-      get(rawEsResult, 'aggregations.suggestions.nestedSuggestions.buckets')?.reduce(
-        (suggestions: OptionsListSuggestions, suggestion: EsBucket) => {
-          return { ...suggestions, [suggestion.key]: { doc_count: suggestion.doc_count } };
-        },
-        {}
-      ),
+    parse: (rawEsResult) => {
+      const suggestions = get(
+        rawEsResult,
+        'aggregations.suggestions.nestedSuggestions.suggestions.buckets'
+      )?.reduce((acc: OptionsListSuggestions, suggestion: EsBucket) => {
+        return { ...acc, [suggestion.key]: { doc_count: suggestion.doc_count } };
+      }, {});
+
+      return {
+        suggestions,
+        totalCardinality: get(
+          rawEsResult,
+          'aggregations.suggestions.nestedSuggestions.unique_terms.value'
+        ),
+      };
+    },
   },
 };
