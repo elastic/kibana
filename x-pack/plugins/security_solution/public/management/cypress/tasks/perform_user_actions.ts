@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+export type ActionTypes = 'click' | 'input' | 'clear';
+
 export interface FormAction {
-  type: string;
+  type: ActionTypes;
   selector?: string;
   customSelector?: string;
   value?: string;

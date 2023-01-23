@@ -5,7 +5,37 @@
  * 2.0.
  */
 
-export const getArtifactsListTestsData = () => [
+import type { FormAction } from '../tasks/perform_user_actions';
+
+interface FormEditingDescription {
+  formActions: FormAction[];
+
+  checkResults: Array<{
+    selector: string;
+    value: string;
+  }>;
+}
+
+interface ArtifactsFixtureType {
+  title: string;
+  pagePrefix: string;
+  tabId: string;
+  artifactName: string;
+  privilegePrefix: string;
+  pageObject: string;
+  urlPath: string;
+  emptyState: string;
+
+  create: FormEditingDescription;
+  update: FormEditingDescription;
+
+  delete: {
+    confirmSelector: string;
+    card: string;
+  };
+}
+
+export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
   {
     title: 'Trusted applications',
     pagePrefix: 'trustedAppsListPage',
