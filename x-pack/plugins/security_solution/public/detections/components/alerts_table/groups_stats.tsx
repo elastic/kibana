@@ -73,13 +73,13 @@ const getSingleGroupSeverity = (severity?: string) => {
 export const GroupRightPanel = React.memo<{
   bucket: RawBucket;
   actionItems: JSX.Element[];
-  onClickOpen?: () => void;
-}>(({ bucket, actionItems, onClickOpen }) => {
+  onClick?: (isOpen: boolean) => void;
+}>(({ bucket, actionItems, onClick }) => {
   const [isPopoverOpen, setPopover] = useState(false);
 
   const onButtonClick = () => {
-    if (!isPopoverOpen && onClickOpen) {
-      onClickOpen();
+    if (onClick) {
+      onClick(isPopoverOpen);
     }
     setPopover(!isPopoverOpen);
   };

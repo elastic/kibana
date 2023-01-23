@@ -7,10 +7,9 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTablePagination } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import { isArray } from 'lodash/fp';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import uuid from 'uuid';
+import type { BadgeMetric, CustomMetric } from '../accordion_panel';
 import { GroupingAccordion } from '../accordion_panel';
 import { GroupRightPanel } from '../accordion_panel/group_stats';
 import type { GroupSelection } from '../groups_selector';
@@ -47,6 +46,9 @@ interface GroupingContainerProps {
   groupingId?: string;
   onGroupPanelExpand: (bucket?: RawBucket) => void;
   unitCountText?: (n: number) => string;
+  badgeMetricStats?: BadgeMetric[];
+  customMetricStats?: CustomMetric[];
+  renderChildComponent: (groupFilter: Filter[]) => React.ReactNode;
 }
 
 const GroupingContainerComponent = ({
@@ -57,6 +59,9 @@ const GroupingContainerComponent = ({
   groupingId = DEFAULT_GROUPING_QUERY_ID,
   onGroupPanelExpand,
   unitCountText,
+  badgeMetricStats,
+  customMetricStats,
+  renderChildComponent,
 }: GroupingContainerProps) => {
   const [activePage, setActivePage] = useState<number>(0);
   const [groupsPageSize, setShowPerPageOptions] = useState<number>(5);
@@ -69,8 +74,6 @@ const GroupingContainerComponent = ({
     },
     [onGroupPanelExpand]
   );
-  // create a unique, but stable (across re-renders) query id
-  const uniqueQueryId = useMemo(() => `${groupingId}-${uuid.v4()}`, [groupingId]);
 
   const goToPage = (pageNumber: number) => {
     setActivePage(pageNumber);
@@ -109,14 +112,14 @@ const GroupingContainerComponent = ({
             <GroupingAccordion
               selectedGroup={selectedGroup}
               groupBucket={groupBucket}
-              renderChildComponent={}
+              renderChildComponent={renderChildComponent}
               extraAction={
                 <GroupRightPanel
                   bucket={groupBucket}
                   takeActionItems={takeActionItems}
                   onTakeActionsOpen={() => onOpenGroupAction && onOpenGroupAction(groupBucket)}
-                  badgeStats={}
-                  customStats={}
+                  badgeMetricStats={badgeMetricStats}
+                  customMetricStats={customMetricStats}
                 />
               }
             />

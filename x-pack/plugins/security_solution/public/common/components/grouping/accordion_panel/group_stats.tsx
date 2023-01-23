@@ -11,55 +11,21 @@ import {
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
 import React, { useState } from 'react';
+import type { BadgeMetric, CustomMetric } from '.';
 import { StatsContainer } from '../styles';
 import { TAKE_ACTION } from '../translations';
 import type { RawBucket } from '../types';
-
-const getSingleGroupSeverity = (severity?: string) => {
-  switch (severity) {
-    case 'low':
-      return (
-        <>
-          <EuiIcon type="dot" color="#54b399" />
-          {i18n.STATS_GROUP_SEVERITY_LOW}
-        </>
-      );
-    case 'medium':
-      return (
-        <>
-          <EuiIcon type="dot" color="#d6bf57" />
-          {i18n.STATS_GROUP_SEVERITY_MEDIUM}
-        </>
-      );
-    case 'hight':
-      return (
-        <>
-          <EuiIcon type="dot" color="#da8b45" />
-          {i18n.STATS_GROUP_SEVERITY_HIGH}
-        </>
-      );
-    case 'critical':
-      return (
-        <>
-          <EuiIcon type="dot" color="#e7664c" />
-          {i18n.STATS_GROUP_SEVERITY_CRITICAL}
-        </>
-      );
-  }
-  return null;
-};
 
 export const GroupRightPanel = React.memo<{
   bucket: RawBucket;
   takeActionItems: JSX.Element[];
   onTakeActionsOpen?: () => void;
-  badgeMetricStats?: Array<{ title: string; value: number; color?: string; width?: number }>;
-  customMetricStats?: Array<{ title: string; customStatRenderer: JSX.Element }>;
+  badgeMetricStats?: BadgeMetric[];
+  customMetricStats?: CustomMetric[];
 }>(({ bucket, badgeMetricStats, customMetricStats, takeActionItems, onTakeActionsOpen }) => {
   const [isPopoverOpen, setPopover] = useState(false);
 
@@ -80,93 +46,39 @@ export const GroupRightPanel = React.memo<{
     </EuiButtonEmpty>
   );
 
-  const singleSeverityComponent =
-    bucket.severitiesSubAggregation?.buckets && bucket.severitiesSubAggregation?.buckets?.length
-      ? getSingleGroupSeverity(bucket.severitiesSubAggregation?.buckets[0].key)
-      : null;
+  const badgesComponents = badgeMetricStats?.map((metric) => (
+    <EuiFlexItem grow={false}>
+      <StatsContainer>
+        <>
+          {metric.title}
+          <EuiToolTip position="top" content={metric.value}>
+            <EuiBadge
+              style={{ marginLeft: 10, width: metric.width ?? 35 }}
+              color={metric.color ?? 'hollow'}
+            >
+              {metric.value > 99 ? '99+' : metric.value}
+            </EuiBadge>
+          </EuiToolTip>
+        </>
+      </StatsContainer>
+    </EuiFlexItem>
+  ));
 
-  const badgesComponents = badgeMetricStats?.map((metric) => (<>
-  {metric.title}
-  <EuiToolTip position="top" content={bucket.usersCountAggregation?.value}>
-    <EuiBadge color="hollow" style={{ marginLeft: 10, width: 35 }}>
-      {bucket.usersCountAggregation?.value && bucket.usersCountAggregation?.value > 99
-        ? '99+'
-        : bucket.usersCountAggregation?.value}
-    </EuiBadge>
-  </EuiToolTip>
-</>);
+  const customComponents = customMetricStats?.map((customMetric) => (
+    <EuiFlexItem grow={false}>
+      <StatsContainer>
+        <>
+          {customMetric.title}
+          {customMetric.customStatRenderer}
+        </>
+      </StatsContainer>
+    </EuiFlexItem>
+  ));
 
   return (
     <EuiFlexGroup key={`stats-${bucket.key[0]}`} gutterSize="s" alignItems="center">
-      <EuiFlexItem grow={false}>
-        <StatsContainer>
-          {bucket.countSeveritySubAggregation?.value &&
-          bucket.countSeveritySubAggregation?.value > 1 ? (
-            <>
-              {i18n.STATS_GROUP_SEVERITY}
-              <span className="smallDot">
-                <EuiIcon type="dot" color="#54b399" />
-              </span>
-              <span className="smallDot">
-                <EuiIcon type="dot" color="#d6bf57" />
-              </span>
-              <span className="smallDot">
-                <EuiIcon type="dot" color="#da8b45" />
-              </span>
-
-              <span>
-                <EuiIcon type="dot" color="#e7664c" />
-              </span>
-              {i18n.STATS_GROUP_SEVERITY_MULTI}
-            </>
-          ) : (
-            <>
-              {i18n.STATS_GROUP_SEVERITY}
-              {singleSeverityComponent}
-            </>
-          )}
-        </StatsContainer>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <StatsContainer>
-          <>
-            {i18n.STATS_GROUP_USERS}
-            <EuiToolTip position="top" content={bucket.usersCountAggregation?.value}>
-              <EuiBadge color="hollow" style={{ marginLeft: 10, width: 35 }}>
-                {bucket.usersCountAggregation?.value && bucket.usersCountAggregation?.value > 99
-                  ? '99+'
-                  : bucket.usersCountAggregation?.value}
-              </EuiBadge>
-            </EuiToolTip>
-          </>
-        </StatsContainer>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <StatsContainer>
-          <>
-            {i18n.STATS_GROUP_HOSTS}
-            <EuiToolTip position="top" content={bucket.hostsCountAggregation?.value}>
-              <EuiBadge color="hollow" style={{ marginLeft: 10, width: 35 }}>
-                {bucket.hostsCountAggregation?.value && bucket.hostsCountAggregation?.value > 99
-                  ? '99+'
-                  : bucket.hostsCountAggregation?.value}
-              </EuiBadge>
-            </EuiToolTip>
-          </>
-        </StatsContainer>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <StatsContainer>
-          <>
-            {i18n.STATS_GROUP_ALERTS}
-            <EuiToolTip position="top" content={bucket.doc_count}>
-              <EuiBadge style={{ marginLeft: 10, width: 50 }} color="#a83632">
-                {bucket.doc_count > 999 ? '999+' : bucket.doc_count}
-              </EuiBadge>
-            </EuiToolTip>
-          </>
-        </StatsContainer>
-      </EuiFlexItem>
+      {customComponents}
+      {badgesComponents}
       <EuiFlexItem grow={false}>
         <EuiPopover
           id="contextMenuExample"

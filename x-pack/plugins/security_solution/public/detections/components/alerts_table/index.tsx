@@ -10,7 +10,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
@@ -276,7 +276,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   const { deleteQuery, setQuery } = useGlobalTime(false);
   // create a unique, but stable (across re-renders) query id
-  const uniqueQueryId = useMemo(() => `${ALERTS_GROUPING_ID}-${uuid.v4()}`, []);
+  const uniqueQueryId = useMemo(() => `${ALERTS_GROUPING_ID}-${uuidv4()}`, []);
 
   const getGroupFields = (groupValue: string) => {
     if (groupValue === 'kibana.alert.rule.name') {
@@ -510,9 +510,14 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   });
 
   const onOpenGroupAction = useCallback(
-    (bucket: RawBucket) => {
-      setSelectedBucket(bucket);
-      dispatch(dataTableActions.setDataTableSelectAll({ id: tableId, selectAll: true }));
+    (bucket: RawBucket, isOpen: boolean) => {
+      if (isOpen) {
+        setSelectedBucket(bucket);
+        dispatch(dataTableActions.setDataTableSelectAll({ id: tableId, selectAll: true }));
+      } else {
+        setSelectedBucket(undefined);
+        dispatch(dataTableActions.setDataTableSelectAll({ id: tableId, selectAll: false }));
+      }
     },
     [tableId, dispatch]
   );
@@ -548,7 +553,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       defaultCellActions={defaultCellActions}
       defaultModel={getAlertsDefaultModel(license)}
       end={to}
-      bulkActions={selectedGroup ? false : bulkActions}
+      bulkActions={bulkActions}
       hasCrudPermissions={hasIndexWrite && hasIndexMaintenance}
       tableId={tableId}
       leadingControlColumns={leadingControlColumns}
@@ -600,7 +605,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
                       <GroupRightPanel
                         bucket={field0Bucket}
                         actionItems={bulkActionItems}
-                        onClickOpen={() => onOpenGroupAction(field0Bucket)}
+                        onClick={(isOpen) => onOpenGroupAction(field0Bucket, isOpen)}
                       />
                     }
                     paddingSize="l"

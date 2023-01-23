@@ -11,6 +11,18 @@ import { isArray } from 'lodash/fp';
 import React, { useMemo } from 'react';
 import type { RawBucket } from '../types';
 
+export interface BadgeMetric {
+  title: string;
+  value: number;
+  color?: string;
+  width?: number;
+}
+
+export interface CustomMetric {
+  title: string;
+  customStatRenderer: JSX.Element;
+}
+
 interface GroupingAccordionProps {
   level?: number;
   groupBucket: RawBucket;
