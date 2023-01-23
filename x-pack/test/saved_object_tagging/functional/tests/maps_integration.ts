@@ -35,8 +35,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     await searchFilter.click();
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/89073
-  describe.skip('maps integration', () => {
+  describe.only('maps integration', () => {
     before(async () => {
       await kibanaServer.importExport.load(
         'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/maps/data.json'
