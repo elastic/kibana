@@ -28,7 +28,6 @@ export const upgradeIntegration = async ({
   esClient,
   logger,
 }: UpgradeIntegrationOptions) => {
-
   if (packageInfo && satisfies(packageInfo?.version ?? '', '<1.6.0')) {
     try {
       logger.info('Updating osquery_manager integration');
