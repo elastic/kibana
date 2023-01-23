@@ -25,7 +25,7 @@ export const Tabs = () => {
   const tabs: EuiTabbedContentTab[] = [
     {
       id: 'metrics',
-      name: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts', {
+      name: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.title', {
         defaultMessage: 'Metrics',
       }),
       'data-test-subj': 'hostsView-tabs-metrics',
