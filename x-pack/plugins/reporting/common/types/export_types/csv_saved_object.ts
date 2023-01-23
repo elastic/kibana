@@ -11,7 +11,7 @@ import type { BaseParams, BasePayload } from '../base';
 interface CsvFromSavedObjectBase {
   objectType: 'saved search';
   state?: {
-    query: estypes.QueryDslQueryContainer | estypes.QueryDslQueryContainer[];
+    query?: estypes.QueryDslQueryContainer | estypes.QueryDslQueryContainer[];
   };
   timerange?: {
     timezone?: string;

@@ -26,7 +26,27 @@ const CsvSavedSearchExportParamsSchema = schema.object({
 
 const CsvSavedSearchExportBodySchema = schema.nullable(
   schema.object({
-    state: schema.maybe(schema.any()),
+    state: schema.maybe(
+      schema.object({
+        query: schema.maybe(
+          schema.any({
+            validate: (input) => {
+              const failMessage = 'Must be a object of Query DSL or an array of Query DSL objects';
+              if (typeof input !== 'object') {
+                return failMessage;
+              }
+              if (Array.isArray(input)) {
+                for (let i = 0; i < input.length; i++) {
+                  if (typeof input[i] !== 'object') {
+                    return failMessage;
+                  }
+                }
+              }
+            },
+          })
+        ),
+      })
+    ),
     timerange: schema.maybe(
       schema.object({
         timezone: schema.maybe(schema.string()),
