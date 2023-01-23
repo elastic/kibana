@@ -33,6 +33,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { Status } from '../../../../../common/types/api';
 import { ElasticsearchIndexWithIngestion } from '../../../../../common/types/indices';
+import { isNotNullish } from '../../../../../common/utils/is_not_nullish';
 
 import { CANCEL_BUTTON_LABEL } from '../../../shared/constants';
 
@@ -62,15 +63,7 @@ export const CreateEngineFlyout = ({ onClose }: CreateEngineFlyoutProps) => {
   const onIndicesChange = (
     selectedOptions: Array<EuiComboBoxOptionOption<ElasticsearchIndexWithIngestion>>
   ) => {
-    setSelectedIndices(
-      selectedOptions
-        .map((option) => option.value)
-        .filter(
-          (
-            index: ElasticsearchIndexWithIngestion | undefined
-          ): index is ElasticsearchIndexWithIngestion => !!index
-        )
-    );
+    setSelectedIndices(selectedOptions.map((option) => option.value).filter(isNotNullish));
   };
 
   return (
@@ -169,7 +162,7 @@ export const CreateEngineFlyout = ({ onClose }: CreateEngineFlyoutProps) => {
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               disabled={formDisabled}
-              data-telemetry-id={`entSearchContent-engines-createEngine-cancel`}
+              data-telemetry-id="entSearchContent-engines-createEngine-cancel"
               onClick={onClose}
             >
               {CANCEL_BUTTON_LABEL}
@@ -179,7 +172,7 @@ export const CreateEngineFlyout = ({ onClose }: CreateEngineFlyoutProps) => {
           <EuiFlexItem grow={false}>
             <EuiButton
               disabled={createDisabled || formDisabled}
-              data-telemetry-id={`entSearchContent-engines-createEngine-submit`}
+              data-telemetry-id="entSearchContent-engines-createEngine-submit"
               fill
               iconType="plusInCircle"
               onClick={() => {
