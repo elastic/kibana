@@ -36,7 +36,7 @@ export const MetricsGrid = () => {
           <EuiFlexGrid columns={2} gutterSize="s">
             <EuiFlexItem>
               <MetricChart
-                type="cpuCores"
+                type="load"
                 title={i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.load', {
                   defaultMessage: 'Normalized Load',
                 })}

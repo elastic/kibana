@@ -6,7 +6,7 @@
  */
 
 export { CPU } from './cpu';
-export { CPUCores } from './cpu_cores';
+export { Load } from './load';
 export { Memory } from './memory';
 export { RX } from './rx';
 export { TX } from './tx';

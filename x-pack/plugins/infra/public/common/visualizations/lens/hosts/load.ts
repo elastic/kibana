@@ -28,7 +28,7 @@ const BREAKDOWN_COLUMN_NAME = 'hosts_aggs_breakdown';
 const HISTOGRAM_COLUMN_NAME = 'x_date_histogram';
 const REFERENCE_LAYER = 'referenceLayer';
 
-export class CPUCores implements ILensVisualization {
+export class Load implements ILensVisualization {
   constructor(
     private dataView: DataView,
     private options: LensOptions,
@@ -36,7 +36,7 @@ export class CPUCores implements ILensVisualization {
   ) {}
 
   getTitle(): string {
-    return 'CPU Cores Usage';
+    return 'Normalized Load';
   }
 
   getVisualizationType(): string {

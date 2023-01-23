@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { CPU, CPUCores, Memory, RX, TX, DiskIORead, DiskIOWrite } from './lens/hosts';
+import { CPU, Load, Memory, RX, TX, DiskIORead, DiskIOWrite } from './lens/hosts';
 
 export { buildLensAttributes } from './lens/lens_visualization';
 
 export const hostMetricsLensAttributes = {
   cpu: CPU,
-  cpuCores: CPUCores,
+  load: Load,
   memory: Memory,
   rx: RX,
   tx: TX,

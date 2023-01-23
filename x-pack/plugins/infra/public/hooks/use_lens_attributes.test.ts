@@ -48,7 +48,7 @@ describe('useHostTable hook', () => {
   it('should return the basic lens attributes', async () => {
     const { result, waitForNextUpdate } = renderHook(() =>
       useLensAttributes({
-        type: 'cpuCores',
+        type: 'load',
         dataView: mockDataView,
       })
     );
@@ -57,7 +57,7 @@ describe('useHostTable hook', () => {
     const { state, title } = result.current.attributes ?? {};
     const { datasourceStates, filters } = state ?? {};
 
-    expect(title).toBe('CPU Cores Usage');
+    expect(title).toBe('Normalized Load');
     expect(datasourceStates).toEqual({
       formBased: {
         layers: {
@@ -187,7 +187,7 @@ describe('useHostTable hook', () => {
   it('should return attributes with injected values', async () => {
     const { result, waitForNextUpdate } = renderHook(() =>
       useLensAttributes({
-        type: 'cpuCores',
+        type: 'load',
         dataView: mockDataView,
       })
     );
