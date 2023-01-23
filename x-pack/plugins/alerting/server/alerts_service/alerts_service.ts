@@ -478,6 +478,7 @@ export class AlertsService implements IAlertsService {
     installFn: () => Promise<void>,
     timeoutMs: number = INSTALLATION_TIMEOUT
   ): Promise<void> {
+    let serverStopped: boolean = false;
     try {
       let timeoutId: NodeJS.Timeout;
       const install = async (): Promise<void> => {
@@ -496,8 +497,8 @@ export class AlertsService implements IAlertsService {
 
           firstValueFrom(this.options.pluginStop$).then(() => {
             clearTimeout(timeoutId);
-            const msg = 'Server is stopping; must stop all async operations';
-            reject(new Error(msg));
+            serverStopped = true;
+            reject(new Error('Server is stopping; must stop all async operations'));
           });
         });
       };
@@ -506,7 +507,7 @@ export class AlertsService implements IAlertsService {
     } catch (e) {
       this.options.logger.error(e);
 
-      if (e?.message.indexOf('Server is stopping') < 0) {
+      if (!serverStopped) {
         const reason = e?.message || 'Unknown reason';
         throw new Error(`Failure during installation. ${reason}`);
       }
