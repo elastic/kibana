@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { uniq } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
@@ -133,15 +133,15 @@ export async function updateTagsBatch(
       refresh: true,
       wait_for_completion: true,
       script: {
-        source: `   
+        source: `
       if (ctx._source.tags == null) {
         ctx._source.tags = [];
       }
-      if (params.tagsToAdd.length == 1 && params.tagsToRemove.length == 1) { 
+      if (params.tagsToAdd.length == 1 && params.tagsToRemove.length == 1) {
         ctx._source.tags.replaceAll(tag -> params.tagsToRemove[0] == tag ? params.tagsToAdd[0] : tag);
       } else {
         ctx._source.tags.removeAll(params.tagsToRemove);
-      } 
+      }
       ctx._source.tags.addAll(params.tagsToAdd);
 
       LinkedHashSet uniqueSet = new LinkedHashSet();
@@ -166,7 +166,7 @@ export async function updateTagsBatch(
 
   appContextService.getLogger().debug(JSON.stringify(res).slice(0, 1000));
 
-  const actionId = options.actionId ?? uuid();
+  const actionId = options.actionId ?? uuidv4();
 
   if (options.retryCount === undefined) {
     // creating an action doc so that update tags  shows up in activity
@@ -180,7 +180,7 @@ export async function updateTagsBatch(
   }
 
   // creating unique ids to use as agentId, as we don't have all agent ids in case of action by kuery
-  const getUuidArray = (count: number) => Array.from({ length: count }, () => uuid());
+  const getUuidArray = (count: number) => Array.from({ length: count }, () => uuidv4());
 
   // writing successful action results
   if (res.updated ?? 0 > 0) {
