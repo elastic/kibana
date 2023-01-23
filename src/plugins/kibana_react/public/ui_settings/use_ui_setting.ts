@@ -26,7 +26,7 @@ export const useUiSetting = <T>(key: string, defaultValue?: T): T => {
     throw new TypeError('uiSettings service not available in kibana-react context.');
   }
 
-  return services.uiSettings!.get(key, defaultValue);
+  return services.uiSettings.get(key, defaultValue);
 };
 
 /**
