@@ -35,7 +35,7 @@ export const createFiltersFromMultiValueClickAction = async ({
         )?.[0];
       })
     )
-  ).filter(Boolean) as unknown as Filter[];
+  ).filter(Boolean) as Filter[];
   if (filters.length === 0) return;
   // no need for combined filter in case of one filter
   if (filters.length === 1) {

@@ -144,6 +144,10 @@ export type XYChartRenderProps = Omit<XYChartProps, 'canNavigateToLens'> & {
   timeFormat: string;
 };
 
+function nonNullable<T>(v: T): v is NonNullable<T> {
+  return v != null;
+}
+
 function getValueLabelsStyling(isHorizontal: boolean): {
   displayValue: RecursivePartial<DisplayValueStyle>;
 } {
@@ -550,7 +554,9 @@ export function XYChart({
     getValueLabelsStyling(shouldRotate);
 
   const filterSelectedTooltipValues = (
-    tooltipSelectedValues: Array<TooltipValue<Record<string, unknown>, XYChartSeriesIdentifier>>
+    tooltipSelectedValues: Array<
+      TooltipValue<Record<string, string | number>, XYChartSeriesIdentifier>
+    >
   ) => {
     const layerIndexes: number[] = [];
     tooltipSelectedValues.forEach((v) => {
@@ -576,25 +582,22 @@ export function XYChart({
       const splitAccessor = getAccessorByDimension(layer.splitAccessors[0], table.columns);
       const filterValues = tooltipSelectedValues
         .map((v) => v.datum?.[splitAccessor])
-        .filter((item) => item !== undefined);
-      const finalValues = filterValues.map((v) => {
-        const splitPointRowIndex = formattedDatatables[layer.layerId].table.rows.findIndex(
-          (row) => {
-            if (Array.isArray(v)) {
-              return v.includes(row[splitAccessor]);
-            }
-            return row[splitAccessor] === v;
-          }
-        );
-        return table.rows[splitPointRowIndex][splitAccessor];
-      });
-      onClickMultiValue({
-        data: {
-          column: table.columns.findIndex((column) => column.id === splitAccessor),
-          value: finalValues,
-          table,
-        },
-      });
+        .filter(nonNullable);
+
+      const splitPoints = filterValues
+        .map((v) =>
+          createSplitPoint(splitAccessor, v, formattedDatatables[layer.layerId].table.rows, table)
+        )
+        .filter(nonNullable);
+      if (splitPoints.length) {
+        onClickMultiValue({
+          data: {
+            column: splitPoints[0].column,
+            value: splitPoints.map(({ value }) => value),
+            table,
+          },
+        });
+      }
     });
   };
 
@@ -811,7 +814,7 @@ export function XYChart({
         }}
       >
         <Chart ref={chartRef}>
-          <Tooltip<Record<string, unknown>, XYChartSeriesIdentifier>
+          <Tooltip<Record<string, string | number>, XYChartSeriesIdentifier>
             boundary={document.getElementById('app-fixed-viewport') ?? undefined}
             headerFormatter={
               !args.detailedTooltip
