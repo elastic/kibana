@@ -558,6 +558,12 @@ export function parseDataStreamElasticsearchEntry(
     );
   }
 
+  if (expandedElasticsearch?.index_template?.data_stream) {
+    parsedElasticsearchEntry['index_template.data_stream'] = {
+      ...expandedElasticsearch.index_template.data_stream,
+    };
+  }
+
   if (expandedElasticsearch?.index_mode) {
     parsedElasticsearchEntry.index_mode = expandedElasticsearch.index_mode;
   }
