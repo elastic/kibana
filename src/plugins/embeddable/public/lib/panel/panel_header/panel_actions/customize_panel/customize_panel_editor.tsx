@@ -185,7 +185,7 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
               name="title"
               type="text"
               disabled={hideTitle}
-              value={title}
+              value={title ?? ''}
               onChange={(e) => setTitle(e.target.value)}
               aria-label={i18n.translate(
                 'embeddableApi.customizePanel.flyout.optionsMenuForm.panelTitleInputAriaLabel',
