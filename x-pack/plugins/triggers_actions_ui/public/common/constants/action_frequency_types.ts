@@ -7,8 +7,14 @@
 
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 
-export const DEFAULT_FREQUENCY = {
+export const DEFAULT_FREQUENCY_WITH_SUMMARY = {
   notifyWhen: RuleNotifyWhen.ACTIVE,
   throttle: null,
   summary: true,
+};
+
+export const DEFAULT_FREQUENCY_WITHOUT_SUMMARY = {
+  notifyWhen: RuleNotifyWhen.CHANGE,
+  throttle: null,
+  summary: false,
 };

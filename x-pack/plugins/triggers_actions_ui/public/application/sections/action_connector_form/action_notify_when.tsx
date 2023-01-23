@@ -29,9 +29,10 @@ import { some, filter, map } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { getTimeOptions } from '../../../common/lib/get_time_options';
 import { RuleNotifyWhenType, RuleAction } from '../../../types';
-import { DEFAULT_FREQUENCY } from '../../../common/constants';
-
-const DEFAULT_NOTIFY_WHEN_VALUE: RuleNotifyWhenType = 'onActionGroupChange';
+import {
+  DEFAULT_FREQUENCY_WITH_SUMMARY,
+  DEFAULT_FREQUENCY_WITHOUT_SUMMARY,
+} from '../../../common/constants';
 
 export const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<RuleNotifyWhenType>> = [
   {
@@ -127,10 +128,12 @@ interface ActionNotifyWhenProps {
   onNotifyWhenChange: (notifyWhen: RuleNotifyWhenType) => void;
   onThrottleChange: (throttle: number | null, throttleUnit: string) => void;
   onSummaryChange: (summary: boolean) => void;
+  hasSummary?: boolean;
 }
 
 export const ActionNotifyWhen = ({
-  frequency = DEFAULT_FREQUENCY,
+  hasSummary,
+  frequency = hasSummary ? DEFAULT_FREQUENCY_WITH_SUMMARY : DEFAULT_FREQUENCY_WITHOUT_SUMMARY,
   throttle,
   throttleUnit,
   onNotifyWhenChange,
@@ -138,8 +141,11 @@ export const ActionNotifyWhen = ({
   onSummaryChange,
 }: ActionNotifyWhenProps) => {
   const [showCustomThrottleOpts, setShowCustomThrottleOpts] = useState<boolean>(false);
-  const [notifyWhenValue, setNotifyWhenValue] =
-    useState<RuleNotifyWhenType>(DEFAULT_NOTIFY_WHEN_VALUE);
+  const [notifyWhenValue, setNotifyWhenValue] = useState<RuleNotifyWhenType>(
+    hasSummary
+      ? DEFAULT_FREQUENCY_WITH_SUMMARY.notifyWhen
+      : DEFAULT_FREQUENCY_WITHOUT_SUMMARY.notifyWhen
+  );
 
   // Track whether the user has changed the notify when value from default. This is necessary because the
   // "default" notifyWhen value for summary: true is the second menu item for summary: false. We want the UX to be:
@@ -160,8 +166,8 @@ export const ActionNotifyWhen = ({
   const [notifyWhenValueChangedFromDefault, setNotifyWhenValueChangedFromDefault] = useState(
     // Check if the initial notifyWhen value is different from the default value for its summary type
     frequency.summary
-      ? frequency.notifyWhen !== DEFAULT_FREQUENCY.notifyWhen
-      : frequency.notifyWhen !== RuleNotifyWhen.CHANGE
+      ? frequency.notifyWhen !== DEFAULT_FREQUENCY_WITH_SUMMARY.notifyWhen
+      : frequency.notifyWhen !== DEFAULT_FREQUENCY_WITHOUT_SUMMARY.notifyWhen
   );
 
   const [summaryMenuOpen, setSummaryMenuOpen] = useState(false);
@@ -289,7 +295,7 @@ export const ActionNotifyWhen = ({
         <EuiFlexItem>
           <EuiSuperSelect
             fullWidth
-            prepend={summaryOrPerRuleSelect}
+            prepend={hasSummary ? summaryOrPerRuleSelect : <></>}
             data-test-subj="notifyWhenSelect"
             options={notifyWhenOptions}
             valueOfSelected={notifyWhenValue}

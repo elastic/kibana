@@ -67,6 +67,7 @@ export type ActionTypeFormProps = {
   recoveryActionGroup?: string;
   isActionGroupDisabledForActionType?: (actionGroupId: string, actionTypeId: string) => boolean;
   hideNotifyWhen?: boolean;
+  hasSummary?: boolean;
 } & Pick<
   ActionAccordionFormProps,
   | 'defaultActionGroupId'
@@ -104,6 +105,7 @@ export const ActionTypeForm = ({
   isActionGroupDisabledForActionType,
   recoveryActionGroup,
   hideNotifyWhen = false,
+  hasSummary,
 }: ActionTypeFormProps) => {
   const {
     application: { capabilities },
@@ -210,6 +212,7 @@ export const ActionTypeForm = ({
       frequency={actionItem.frequency}
       throttle={actionThrottle}
       throttleUnit={actionThrottleUnit}
+      hasSummary={hasSummary}
       onNotifyWhenChange={useCallback(
         (notifyWhen) => {
           setActionFrequencyProperty('notifyWhen', notifyWhen, index);
@@ -410,15 +413,23 @@ export const ActionTypeForm = ({
                       </EuiFlexItem>
                       {(selectedActionGroup || actionItem.frequency?.summary) && !isOpen && (
                         <EuiFlexItem grow={false}>
-                          <EuiBadge>
+                          <EuiBadge iconType="clock">
                             {actionItem.frequency?.summary
                               ? i18n.translate(
                                   'xpack.triggersActionsUI.sections.actionTypeForm.summaryGroupTitle',
                                   {
-                                    defaultMessage: 'Summary',
+                                    defaultMessage: 'Summary of alerts',
                                   }
                                 )
-                              : selectedActionGroup!.name}
+                              : i18n.translate(
+                                  'xpack.triggersActionsUI.sections.actionTypeForm.runWhenGroupTitle',
+                                  {
+                                    defaultMessage: 'Run when {groupName}',
+                                    values: {
+                                      groupName: selectedActionGroup!.name.toLocaleLowerCase(),
+                                    },
+                                  }
+                                )}
                           </EuiBadge>
                         </EuiFlexItem>
                       )}
