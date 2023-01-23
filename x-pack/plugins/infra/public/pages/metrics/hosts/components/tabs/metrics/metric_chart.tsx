@@ -22,7 +22,6 @@ interface Props {
   breakdownSize: number;
 }
 
-const HEIGHT = 300;
 export const MetricChart = ({ title, type, breakdownSize }: Props) => {
   const {
     unifiedSearchDateRange,
