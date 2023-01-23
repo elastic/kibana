@@ -257,22 +257,27 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
               </StyledExpression>
             )}
             {!displayWarningThreshold && criticalThresholdExpression}
+            {!displayWarningThreshold && (
+              <>
+                {' '}
+                <EuiSpacer size={'xs'} />
+                <StyledExpressionRow>
+                  <EuiButtonEmpty
+                    color={'primary'}
+                    flush={'left'}
+                    size="xs"
+                    iconType={'plusInCircleFilled'}
+                    onClick={toggleWarningThreshold}
+                  >
+                    <FormattedMessage
+                      id="xpack.infra.metrics.alertFlyout.addWarningThreshold"
+                      defaultMessage="Add warning threshold"
+                    />
+                  </EuiButtonEmpty>
+                </StyledExpressionRow>
+              </>
+            )}
           </StyledExpressionRow>
-          {aggType === Aggregators.CUSTOM && (
-            <>
-              <EuiSpacer size={'s'} />
-              <StyledExpressionRow>
-                <CustomMetricEditor
-                  expression={expression}
-                  fields={normalizedFields}
-                  aggregationTypes={aggregationType}
-                  onChange={handleCustomMetricChange}
-                  errors={errors}
-                />
-              </StyledExpressionRow>
-              <EuiSpacer size={'s'} />
-            </>
-          )}
           {displayWarningThreshold && (
             <>
               <StyledExpressionRow>
@@ -307,24 +312,19 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
               </StyledExpressionRow>
             </>
           )}
-          {!displayWarningThreshold && (
+          {aggType === Aggregators.CUSTOM && (
             <>
-              {' '}
-              <EuiSpacer size={'xs'} />
+              <EuiSpacer size={'m'} />
               <StyledExpressionRow>
-                <EuiButtonEmpty
-                  color={'primary'}
-                  flush={'left'}
-                  size="xs"
-                  iconType={'plusInCircleFilled'}
-                  onClick={toggleWarningThreshold}
-                >
-                  <FormattedMessage
-                    id="xpack.infra.metrics.alertFlyout.addWarningThreshold"
-                    defaultMessage="Add warning threshold"
-                  />
-                </EuiButtonEmpty>
+                <CustomMetricEditor
+                  expression={expression}
+                  fields={normalizedFields}
+                  aggregationTypes={aggregationType}
+                  onChange={handleCustomMetricChange}
+                  errors={errors}
+                />
               </StyledExpressionRow>
+              <EuiSpacer size={'s'} />
             </>
           )}
         </EuiFlexItem>
@@ -460,7 +460,7 @@ export const aggregationType: { [key: string]: AggregationType } = {
   },
   custom: {
     text: i18n.translate('xpack.infra.metrics.alertFlyout.aggregationText.custom', {
-      defaultMessage: 'Custom metric',
+      defaultMessage: 'Custom equation',
     }),
     fieldRequired: false,
     value: AGGREGATION_TYPES.CUSTOM,

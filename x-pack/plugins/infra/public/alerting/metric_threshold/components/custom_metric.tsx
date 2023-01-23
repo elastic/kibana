@@ -9,9 +9,7 @@ import {
   EuiFormRow,
   EuiButtonIcon,
   EuiHorizontalRule,
-  EuiBadge,
   EuiFlexItem,
-  EuiPanel,
   EuiFlexGroup,
   EuiSelect,
   EuiComboBox,
@@ -20,6 +18,9 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { omit, range, first, xor, debounce, get } from 'lodash';
 import { AggregationType, IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import {
   Aggregators,
   CustomMetricAggTypes,
@@ -114,10 +115,11 @@ export const CustomMetricEditor: React.FC<Props> = ({
     [debouncedOnChange, expression, customMetrics, equation]
   );
 
+  const disableAdd = useMemo(() => customMetrics?.length === 26, [customMetrics]);
+
   const filteredAggregationTypes = omit(aggregationTypes, ['custom', 'rate', 'p99', 'p95']);
 
   const metricRows = customMetrics?.map((row) => {
-    const disableAdd = customMetrics?.length === 26;
     const disableDelete = customMetrics?.length === 1;
     if (row.aggType === Aggregators.COUNT) {
       return (
@@ -159,11 +161,28 @@ export const CustomMetricEditor: React.FC<Props> = ({
   }, [customMetrics]);
 
   return (
-    <EuiPanel>
+    <div style={{ minWidth: '100%' }}>
+      <EuiSpacer size={'s'} />
       {metricRows}
       <EuiFlexGroup>
+        <EuiButtonEmpty
+          color={'primary'}
+          flush={'left'}
+          size="xs"
+          iconType={'plusInCircleFilled'}
+          onClick={handleAddNewRow}
+          isDisabled={disableAdd}
+        >
+          <FormattedMessage
+            id="xpack.infra.metrics.alertFlyout.addCustomRow"
+            defaultMessage="Add aggregation/field"
+          />
+        </EuiButtonEmpty>
+      </EuiFlexGroup>
+      <EuiSpacer size={'m'} />
+      <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiFormRow label="Equation">
+          <EuiFormRow label="Equation" fullWidth helpText="Supports basic math expressions">
             <EuiFieldText
               compressed
               fullWidth
@@ -173,8 +192,15 @@ export const CustomMetricEditor: React.FC<Props> = ({
             />
           </EuiFormRow>
         </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size={'s'} />
+      <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiFormRow label="Label (optional)">
+          <EuiFormRow
+            label="Label (optional)"
+            fullWidth
+            helpText="Custom label will show on the alert chart and in reason/alert title"
+          >
             <EuiFieldText
               compressed
               fullWidth
@@ -185,7 +211,7 @@ export const CustomMetricEditor: React.FC<Props> = ({
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiPanel>
+    </div>
   );
 };
 
@@ -201,28 +227,13 @@ interface MetricRowBaseProps {
 }
 
 interface MetricRowControlProps {
-  onAdd: () => void;
   onDelete: () => void;
   disableDelete: boolean;
-  disableAdd: boolean;
 }
 
-const MetricRowControls: React.FC<MetricRowControlProps> = ({
-  onAdd,
-  onDelete,
-  disableDelete,
-  disableAdd,
-}) => {
+const MetricRowControls: React.FC<MetricRowControlProps> = ({ onDelete, disableDelete }) => {
   return (
     <>
-      <EuiFlexItem grow={0}>
-        <EuiButtonIcon
-          iconType="plusInCircleFilled"
-          style={{ marginBottom: '0.2em' }}
-          onClick={onAdd}
-          disabled={disableAdd}
-        />
-      </EuiFlexItem>
       <EuiFlexItem grow={0}>
         <EuiButtonIcon
           iconType="trash"
@@ -236,14 +247,6 @@ const MetricRowControls: React.FC<MetricRowControlProps> = ({
   );
 };
 
-const MetricRowVarName: React.FC<{ name: string }> = ({ name }) => {
-  return (
-    <EuiFlexItem grow={0}>
-      <EuiBadge style={{ paddingTop: '1.2em', height: '4.2em' }}>{name}</EuiBadge>
-    </EuiFlexItem>
-  );
-};
-
 interface MetricRowWithAggProps extends MetricRowBaseProps {
   aggType?: CustomMetricAggTypes;
   field?: string;
@@ -254,9 +257,7 @@ const MetricRowWithAgg: React.FC<MetricRowWithAggProps> = ({
   name,
   aggType = Aggregators.AVERAGE,
   field,
-  onAdd,
   onDelete,
-  disableAdd,
   disableDelete,
   fields,
   aggregationTypes,
@@ -318,9 +319,8 @@ const MetricRowWithAgg: React.FC<MetricRowWithAggProps> = ({
   return (
     <>
       <EuiFlexGroup gutterSize="xs" alignItems="flexEnd">
-        <MetricRowVarName name={name} />
         <EuiFlexItem style={{ maxWidth: 145 }}>
-          <EuiFormRow label="Agg" isInvalid={isAggInvalid}>
+          <EuiFormRow label={`Aggregation ${name}`} isInvalid={isAggInvalid}>
             <EuiSelect
               compressed
               options={aggOptions}
@@ -331,7 +331,7 @@ const MetricRowWithAgg: React.FC<MetricRowWithAggProps> = ({
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow label="Field" isInvalid={isFieldInvalid}>
+          <EuiFormRow label={`Field ${name}`} isInvalid={isFieldInvalid}>
             <EuiComboBox
               fullWidth
               compressed
@@ -343,12 +343,7 @@ const MetricRowWithAgg: React.FC<MetricRowWithAggProps> = ({
             />
           </EuiFormRow>
         </EuiFlexItem>
-        <MetricRowControls
-          onAdd={onAdd}
-          onDelete={handleDelete}
-          disableAdd={disableAdd}
-          disableDelete={disableDelete}
-        />
+        <MetricRowControls onDelete={handleDelete} disableDelete={disableDelete} />
       </EuiFlexGroup>
       <EuiHorizontalRule margin="xs" />
     </>
@@ -364,9 +359,7 @@ const MetricRowWithCount: React.FC<MetricRowWithCountProps> = ({
   name,
   agg,
   filter,
-  onAdd,
   onDelete,
-  disableAdd,
   disableDelete,
   onChange,
   aggregationTypes,
@@ -411,23 +404,17 @@ const MetricRowWithCount: React.FC<MetricRowWithCountProps> = ({
   return (
     <>
       <EuiFlexGroup gutterSize="xs" alignItems="flexEnd">
-        <MetricRowVarName name={name} />
         <EuiFlexItem style={{ maxWidth: 145 }}>
-          <EuiFormRow label="Agg">
+          <EuiFormRow label={`Aggregation ${name}`}>
             <EuiSelect compressed options={aggOptions} value={agg} onChange={handleAggChange} />
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow label="KQL filter">
+          <EuiFormRow label={`KQL Filter ${name}`}>
             <EuiFieldText compressed value={filter} onChange={handleFilterChange} />
           </EuiFormRow>
         </EuiFlexItem>
-        <MetricRowControls
-          onAdd={onAdd}
-          onDelete={handleDelete}
-          disableDelete={disableDelete}
-          disableAdd={disableAdd}
-        />
+        <MetricRowControls onDelete={handleDelete} disableDelete={disableDelete} />
       </EuiFlexGroup>
       <EuiHorizontalRule margin="xs" />
     </>
