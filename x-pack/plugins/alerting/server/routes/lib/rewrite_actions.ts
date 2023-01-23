@@ -32,18 +32,14 @@ export const rewriteActionsReq: (
 };
 
 export const rewriteActionsRes = (actions?: RuleAction[]) => {
-  const rewriteFrequency = ({ notifyWhen, ...rest }: NonNullable<RuleAction['frequency']>) =>
-    ({
-      ...rest,
-      notify_when: notifyWhen,
-    } as ReqRuleAction['frequency']);
+  const rewriteFrequency = ({ notifyWhen, ...rest }: NonNullable<RuleAction['frequency']>) => ({
+    ...rest,
+    notify_when: notifyWhen,
+  });
   if (!actions) return [];
-  return actions.map(
-    ({ actionTypeId, frequency, ...action }) =>
-      ({
-        ...action,
-        connector_type_id: actionTypeId,
-        ...(frequency ? { frequency: rewriteFrequency(frequency) } : {}),
-      } as ReqRuleAction & { connector_type_id: RuleAction['actionTypeId'] })
-  );
+  return actions.map(({ actionTypeId, frequency, ...action }) => ({
+    ...action,
+    connector_type_id: actionTypeId,
+    ...(frequency ? { frequency: rewriteFrequency(frequency) } : {}),
+  }));
 };
