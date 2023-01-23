@@ -39,9 +39,6 @@ interface KibanaDependencies {
         prepend: (path: string) => string;
       };
     };
-    // customBranding: {
-    //   hasCustomBranding: boolean;
-    // };
     application: {
       capabilities: {
         navLinks: Record<string, boolean>;
