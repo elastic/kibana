@@ -13753,7 +13753,6 @@
     "xpack.fleet.agentList.statusOfflineFilterText": "脱机",
     "xpack.fleet.agentList.statusUnhealthyFilterText": "运行不正常",
     "xpack.fleet.agentList.statusUpdatingFilterText": "正在更新",
-    "xpack.fleet.agentList.tagsColumnTitle": "标签",
     "xpack.fleet.agentList.tagsFilterText": "标签",
     "xpack.fleet.agentList.unenrollOneButton": "取消注册代理",
     "xpack.fleet.agentList.upgradeOneButton": "升级代理",
