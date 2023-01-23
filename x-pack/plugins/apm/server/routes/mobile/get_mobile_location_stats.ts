@@ -21,10 +21,11 @@ import {
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getBucketSize } from '../../lib/helpers/get_bucket_size';
+import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 
 type Timeseries = Array<{ x: number; y: number }>;
 
-export interface MobileLocationStats {
+interface LocationStats {
   mostSessions: {
     location?: string | number;
     value?: number;
@@ -42,15 +43,12 @@ export interface MobileLocationStats {
   };
 }
 
-export async function getMobileLocationStats({
-  kuery,
-  apmEventClient,
-  serviceName,
-  environment,
-  start,
-  end,
-  locationField = CLIENT_GEO_COUNTRY_NAME,
-}: {
+export interface MobileLocationStats {
+  currentPeriod: LocationStats;
+  previousPeriod: LocationStats;
+}
+
+interface Props {
   kuery: string;
   apmEventClient: APMEventClient;
   serviceName: string;
@@ -58,10 +56,28 @@ export async function getMobileLocationStats({
   start: number;
   end: number;
   locationField?: string;
-}): Promise<MobileLocationStats> {
-  const { intervalString } = getBucketSize({
+  offset?: string;
+}
+
+async function getMobileLocationStats({
+  kuery,
+  apmEventClient,
+  serviceName,
+  environment,
+  start,
+  end,
+  locationField = CLIENT_GEO_COUNTRY_NAME,
+  offset,
+}: Props) {
+  const { startWithOffset, endWithOffset } = getOffsetInMs({
     start,
     end,
+    offset,
+  });
+
+  const { intervalString } = getBucketSize({
+    start: startWithOffset,
+    end: endWithOffset,
     minBucketSize: 60,
   });
 
@@ -114,7 +130,7 @@ export async function getMobileLocationStats({
         bool: {
           filter: [
             ...termQuery(SERVICE_NAME, serviceName),
-            ...rangeQuery(start, end),
+            ...rangeQuery(startWithOffset, endWithOffset),
             ...environmentQuery(environment),
             ...kqlQuery(kuery),
           ],
@@ -141,7 +157,7 @@ export async function getMobileLocationStats({
       timeseries:
         response.aggregations?.timeseries?.buckets.map((bucket) => ({
           x: bucket.key,
-          y: bucket.sessions.buckets[0].sessions.value ?? 0,
+          y: bucket.sessions.buckets[0]?.sessions.value ?? 0,
         })) ?? [],
     },
     mostRequests: {
@@ -170,5 +186,53 @@ export async function getMobileLocationStats({
           y: bucket.crashCount.crashesByLocation.buckets[0]?.doc_count ?? 0,
         })) ?? [],
     },
+  };
+}
+
+export async function getMobileLocationStatsPeriods({
+  kuery,
+  apmEventClient,
+  serviceName,
+  environment,
+  start,
+  end,
+  locationField,
+  offset,
+}: Props): Promise<MobileLocationStats> {
+  const commonProps = {
+    kuery,
+    apmEventClient,
+    serviceName,
+    environment,
+    locationField,
+  };
+
+  const currentPeriodPromise = getMobileLocationStats({
+    ...commonProps,
+    start,
+    end,
+  });
+
+  const previousPeriodPromise = offset
+    ? getMobileLocationStats({
+        ...commonProps,
+        start,
+        end,
+        offset,
+      })
+    : {
+        mostSessions: { timeseries: [] },
+        mostRequests: { timeseries: [] },
+        mostCrashes: { timeseries: [] },
+      };
+
+  const [currentPeriod, previousPeriod] = await Promise.all([
+    currentPeriodPromise,
+    previousPeriodPromise,
+  ]);
+
+  return {
+    currentPeriod,
+    previousPeriod,
   };
 }

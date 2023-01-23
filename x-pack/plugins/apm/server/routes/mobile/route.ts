@@ -18,7 +18,7 @@ import { getMobileFilters } from './get_mobile_filters';
 import { getMobileSessions, SessionsTimeseries } from './get_mobile_sessions';
 import { getMobileStatsPeriods, MobilePeriodStats } from './get_mobile_stats';
 import {
-  getMobileLocationStats,
+  getMobileLocationStatsPeriods,
   MobileLocationStats,
 } from './get_mobile_location_stats';
 
@@ -106,6 +106,7 @@ const mobileLocationStatsRoute = createApmServerRoute({
       kueryRt,
       rangeRt,
       environmentRt,
+      offsetRt,
       t.partial({
         locationField: t.string,
       }),
@@ -116,9 +117,10 @@ const mobileLocationStatsRoute = createApmServerRoute({
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const { serviceName } = params.path;
-    const { kuery, environment, start, end, locationField } = params.query;
+    const { kuery, environment, start, end, locationField, offset } =
+      params.query;
 
-    const locationStats = await getMobileLocationStats({
+    const locationStats = await getMobileLocationStatsPeriods({
       kuery,
       environment,
       start,
@@ -126,6 +128,7 @@ const mobileLocationStatsRoute = createApmServerRoute({
       serviceName,
       apmEventClient,
       locationField,
+      offset,
     });
 
     return locationStats;

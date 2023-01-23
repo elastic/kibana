@@ -158,7 +158,7 @@ function EmbeddedMapComponent({
           data-test-subj="serviceOverviewEmbeddedMap"
           css={css`
             width: 100%;
-            height: 460px;
+            height: 500px;
             display: flex;
             flex: 1 1 100%;
             z-index: 1;

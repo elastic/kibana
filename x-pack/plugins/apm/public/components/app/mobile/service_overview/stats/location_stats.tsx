@@ -11,9 +11,10 @@ import React from 'react';
 import { useTheme } from '@kbn/observability-plugin/public';
 import { useAnyOfApmParams } from '../../../../../hooks/use_apm_params';
 import { useFetcher, isPending } from '../../../../../hooks/use_fetcher';
-import { MetricItem } from './metric_item';
 import { CLIENT_GEO_COUNTRY_NAME } from '../../../../../../common/es_fields/apm';
 import { NOT_AVAILABLE_LABEL } from '../../../../../../common/i18n';
+import { MetricItem } from './metric_item';
+import { usePreviousPeriodLabel } from '../../../../../hooks/use_previous_period_text';
 
 const getIcon =
   (type: string) =>
@@ -28,6 +29,34 @@ const getIcon =
   }) =>
     <EuiIcon type={type} width={width} height={height} fill={color} />;
 
+const getComparisonStatsMsg = (
+  comparisonEnabled: boolean,
+  keyword: string,
+  previousPeriodLabel: string
+) => {
+  if (comparisonEnabled) {
+    return `{currentStatValue} ${keyword} ({comparisonDiffValue}% ${previousPeriodLabel})`;
+  }
+  return `{currentStatValue} ${keyword}`;
+};
+
+const formatDifference = (value: number) => {
+  return value > 0 ? '+' + value.toFixed(2) : '-' + value.toFixed(2);
+};
+
+const calculateDiffPercentageAndFormat = (
+  currentValue?: number,
+  previousValue?: number
+) => {
+  if (currentValue && previousValue) {
+    const diffPercentageValue =
+      ((currentValue - previousValue) / previousValue) * 100;
+
+    return formatDifference(diffPercentageValue);
+  }
+  return '0';
+};
+
 export function MobileLocationStats({
   start,
   end,
@@ -41,8 +70,10 @@ export function MobileLocationStats({
 
   const {
     path: { serviceName },
-    query: { environment },
+    query: { environment, offset, comparisonEnabled },
   } = useAnyOfApmParams('/mobile-services/{serviceName}/overview');
+
+  const previousPeriodLabel = usePreviousPeriodLabel();
 
   const locationField = CLIENT_GEO_COUNTRY_NAME;
 
@@ -59,15 +90,19 @@ export function MobileLocationStats({
               environment,
               kuery,
               locationField,
+              offset,
             },
           },
         }
       );
     },
-    [start, end, environment, kuery, serviceName, locationField]
+    [start, end, environment, kuery, serviceName, locationField, offset]
   );
 
   const loadingLocationStats = isPending(locationStatsStatus);
+
+  const currentPeriod = locationStatsData?.currentPeriod;
+  const previousPeriod = locationStatsData?.previousPeriod;
 
   const metrics: MetricDatum[] = [
     {
@@ -78,34 +113,50 @@ export function MobileLocationStats({
       extra: i18n.translate(
         'xpack.apm.mobile.location.metrics.http.requests.value',
         {
-          defaultMessage: '{requests} http requests',
+          defaultMessage: getComparisonStatsMsg(
+            comparisonEnabled,
+            'http requests',
+            previousPeriodLabel
+          ),
           values: {
-            requests: locationStatsData?.mostRequests.value,
+            currentStatValue: currentPeriod?.mostRequests.value,
+            comparisonDiffValue: calculateDiffPercentageAndFormat(
+              currentPeriod?.mostRequests.value,
+              previousPeriod?.mostRequests.value
+            ),
           },
         }
       ),
       icon: getIcon('visBarHorizontal'),
-      value: locationStatsData?.mostRequests.location ?? NOT_AVAILABLE_LABEL,
-      trend: locationStatsData?.mostRequests.timeseries,
+      value: currentPeriod?.mostRequests.location ?? NOT_AVAILABLE_LABEL,
+      trend: currentPeriod?.mostRequests.timeseries,
       trendShape: MetricTrendShape.Area,
     },
     {
-      color: euiTheme.eui.euiColorLightestShade,
+      color: euiTheme.eui.euiColorDisabled,
       title: i18n.translate('xpack.apm.mobile.location.metrics.crashes', {
         defaultMessage: 'Most crashes',
       }),
-      extra: i18n.translate(
-        'xpack.apm.mobile.location.metrics.http.crashes.value',
-        {
-          defaultMessage: '{crashes} crashes',
-          values: {
-            crashes: locationStatsData?.mostCrashes.value,
-          },
-        }
-      ),
+      subtitle: i18n.translate('xpack.apm.mobile.coming.soon', {
+        defaultMessage: 'Coming Soon',
+      }),
+      extra: i18n.translate('xpack.apm.mobile.location.metrics.crashes.value', {
+        defaultMessage: getComparisonStatsMsg(
+          comparisonEnabled,
+          'crashes/min',
+          previousPeriodLabel
+        ),
+        values: {
+          currentStatValue: currentPeriod?.mostCrashes.value,
+          comparisonDiffValue: calculateDiffPercentageAndFormat(
+            currentPeriod?.mostCrashes.value,
+            previousPeriod?.mostCrashes.value
+          ),
+        },
+      }),
       icon: getIcon('bug'),
-      value: locationStatsData?.mostCrashes.location ?? NOT_AVAILABLE_LABEL,
-      trend: locationStatsData?.mostCrashes.timeseries,
+      value: currentPeriod?.mostCrashes.location ?? NOT_AVAILABLE_LABEL,
+      trend: currentPeriod?.mostCrashes.timeseries,
       trendShape: MetricTrendShape.Area,
     },
     {
@@ -114,17 +165,52 @@ export function MobileLocationStats({
         defaultMessage: 'Most sessions',
       }),
       extra: i18n.translate(
-        'xpack.apm.mobile.location.metrics.http.sessions.value',
+        'xpack.apm.mobile.location.metrics.sessions.value',
         {
-          defaultMessage: '{sessions} sessions',
+          defaultMessage: getComparisonStatsMsg(
+            comparisonEnabled,
+            'sessions',
+            previousPeriodLabel
+          ),
           values: {
-            sessions: locationStatsData?.mostSessions.value,
+            currentStatValue: currentPeriod?.mostSessions.value,
+            comparisonDiffValue: calculateDiffPercentageAndFormat(
+              currentPeriod?.mostSessions.value,
+              previousPeriod?.mostSessions.value
+            ),
           },
         }
       ),
       icon: getIcon('timeslider'),
-      value: locationStatsData?.mostSessions.location ?? NOT_AVAILABLE_LABEL,
-      trend: locationStatsData?.mostSessions.timeseries,
+      value: currentPeriod?.mostSessions.location ?? NOT_AVAILABLE_LABEL,
+      trend: currentPeriod?.mostSessions.timeseries,
+      trendShape: MetricTrendShape.Area,
+    },
+    {
+      color: euiTheme.eui.euiColorDisabled,
+      title: i18n.translate('xpack.apm.mobile.location.metrics.launches', {
+        defaultMessage: 'Most launches',
+      }),
+      subtitle: i18n.translate('xpack.apm.mobile.coming.soon', {
+        defaultMessage: 'Coming Soon',
+      }),
+      extra: i18n.translate(
+        'xpack.apm.mobile.location.metrics.launches.value',
+        {
+          defaultMessage: getComparisonStatsMsg(
+            comparisonEnabled,
+            'launches',
+            previousPeriodLabel
+          ), // return simple msg
+          values: {
+            currentStatValue: 0,
+            comparisonDiffValue: calculateDiffPercentageAndFormat(0, 0),
+          },
+        }
+      ),
+      icon: getIcon('launch'),
+      value: NOT_AVAILABLE_LABEL,
+      trend: [],
       trendShape: MetricTrendShape.Area,
     },
   ];
@@ -137,7 +223,6 @@ export function MobileLocationStats({
             id={key}
             data={[metric]}
             isLoading={loadingLocationStats}
-            height="150px"
           />
         </EuiFlexItem>
       ))}
