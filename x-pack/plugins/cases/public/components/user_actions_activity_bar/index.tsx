@@ -26,11 +26,7 @@ interface UserActionsActivityProps {
 export const UserActionsActivityBar = React.memo<UserActionsActivityProps>(
   ({ params, onFilterActivityChange, onSortActivityChange }) => {
     return (
-      <EuiFlexGroup
-        wrap={true}
-        responsive={false}
-        justifyContent="spaceBetween"
-      >
+      <EuiFlexGroup wrap={true} responsive={false} justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <FilterActivity type={params.type} onFilterChange={onFilterActivityChange} />
         </EuiFlexItem>
