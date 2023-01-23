@@ -16,8 +16,9 @@ import type {
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
-
 import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
+
+import { upgradeIntegration } from './utils/upgrade_integration';
 import type { PackSavedObjectAttributes } from './common/types';
 import { updateGlobalPacksCreateCallback } from './lib/update_global_packs';
 import { packSavedObjectType } from '../common/types';
@@ -134,6 +135,9 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       if (packageInfo) {
         await this.initialize(core, dataViewsService);
       }
+
+      // Upgrade integration into 1.6.0 and rollover if found 'generic' dataset - we do not want to wait for it
+      upgradeIntegration({ packageInfo, client, esClient, logger: this.logger });
 
       if (registerIngestCallback) {
         registerIngestCallback(

@@ -15,6 +15,26 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { fleetMock } from '@kbn/fleet-plugin/public/mocks';
 import type { CloudDefendPluginStartDeps } from '../types';
+import './__mocks__/worker';
+import './__mocks__/resizeobserver';
+import '@kbn/kibana-react-plugin/public/code_editor/code_editor.test.helpers';
+
+// @ts-ignore-next
+window.Worker = Worker;
+
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: jest.fn().mockImplementation((query) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: jest.fn(), // Deprecated
+    removeListener: jest.fn(), // Deprecated
+    addEventListener: jest.fn(),
+    removeEventListener: jest.fn(),
+    dispatchEvent: jest.fn(),
+  })),
+});
 
 interface CspAppDeps {
   core: CoreStart;
