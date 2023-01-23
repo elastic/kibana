@@ -29,6 +29,8 @@ import {
 } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { DataStateContainer, getDataStateContainer } from './discover_data_state_container';
+import { DiscoverSearchSessionManager } from './discover_search_session';
 import { DiscoverAppLocatorParams, DISCOVER_APP_LOCATOR } from '../../../../common';
 import { AppState } from './discover_app_state_container';
 import {
@@ -52,7 +54,7 @@ interface DiscoverStateContainerParams {
   /**
    * Browser history
    */
-  history?: History;
+  history: History;
   /**
    * The current savedSearch
    */
@@ -76,6 +78,14 @@ export interface DiscoverStateContainer {
    * Internal state that's used at several places in the UI
    */
   internalState: InternalStateContainer;
+  /**
+   * Service for handling search sessions
+   */
+  searchSessionManager: DiscoverSearchSessionManager;
+  /**
+   * Data fetching related state
+   **/
+  dataState: DataStateContainer;
   /**
    * Initialize state with filters and query,  start state syncing
    */
@@ -179,6 +189,14 @@ export function getDiscoverStateContainer({
     ...(toasts && withNotifyOnErrors(toasts)),
   });
 
+  /**
+   * Search session logic
+   */
+  const searchSessionManager = new DiscoverSearchSessionManager({
+    history,
+    session: services.data.search.session,
+  });
+
   const appStateFromUrl = cleanupUrlState(stateStorage.get(APP_STATE_URL_KEY) as AppStateUrl);
 
   let initialAppState = handleSourceColumnState(
@@ -234,6 +252,17 @@ export function getDiscoverStateContainer({
     }
   };
 
+  const dataStateContainer = getDataStateContainer({
+    services,
+    searchSessionManager,
+    getAppState: appStateContainer.getState,
+    getSavedSearch: () => {
+      // Simulating the behavior of the removed hook to always create a clean searchSource child that
+      // we then use to add query, filters, etc., will be removed soon.
+      return { ...savedSearch, searchSource: savedSearch.searchSource.createChild() };
+    },
+    appStateContainer,
+  });
   const setDataView = (dataView: DataView) => {
     internalStateContainer.transitions.setDataView(dataView);
   };
@@ -255,6 +284,8 @@ export function getDiscoverStateContainer({
     kbnUrlStateStorage: stateStorage,
     appState: appStateContainerModified,
     internalState: internalStateContainer,
+    dataState: dataStateContainer,
+    searchSessionManager,
     startSync: () => {
       const { start, stop } = syncAppState();
       start();
