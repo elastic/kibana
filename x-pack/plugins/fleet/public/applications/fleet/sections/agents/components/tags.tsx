@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { EuiToolTip } from '@elastic/eui';
+import { EuiToolTip, EuiText, type EuiTextProps } from '@elastic/eui';
 import { take } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
 
-import { truncateTag } from '../utils';
+import { truncateTag } from '../agent_list_page/utils';
 
 const Wrapped = styled.div`
+  display: flex;
   .wrappedText {
     white-space: pre-wrap;
   }
@@ -20,12 +21,14 @@ const Wrapped = styled.div`
 
 interface Props {
   tags: string[];
+  color?: EuiTextProps['color'];
+  size?: EuiTextProps['size'];
 }
 
 // Number of tags displayed before "+ N more" is displayed
 const MAX_TAGS_TO_DISPLAY = 3;
 
-export const Tags: React.FunctionComponent<Props> = ({ tags }) => {
+export const Tags: React.FunctionComponent<Props> = ({ tags, color, size }) => {
   return (
     <>
       <Wrapped>
@@ -33,12 +36,14 @@ export const Tags: React.FunctionComponent<Props> = ({ tags }) => {
           anchorClassName={'wrappedText'}
           content={<span data-test-subj="agentTagsTooltip">{tags.join(', ')}</span>}
         >
-          <span data-test-subj="agentTags">
-            {take(tags, 3).map(truncateTag).join(', ')}
-            {tags.length > MAX_TAGS_TO_DISPLAY
-              ? ` + ${tags.length - MAX_TAGS_TO_DISPLAY} more`
-              : ''}
-          </span>
+          <EuiText size={size} color={color}>
+            <span data-test-subj="agentTags">
+              {take(tags, 3).map(truncateTag).join(', ')}
+              {tags.length > MAX_TAGS_TO_DISPLAY
+                ? ` + ${tags.length - MAX_TAGS_TO_DISPLAY} more`
+                : ''}
+            </span>
+          </EuiText>
         </EuiToolTip>
       </Wrapped>
     </>
