@@ -3941,6 +3941,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/securitysolution-ecs@link:packages/kbn-securitysolution-ecs":
+  version "0.0.0"
+  uid ""
+
 "@kbn/securitysolution-es-utils@link:packages/kbn-securitysolution-es-utils":
   version "0.0.0"
   uid ""
