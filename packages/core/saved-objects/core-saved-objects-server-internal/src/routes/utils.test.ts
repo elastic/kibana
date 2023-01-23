@@ -11,6 +11,7 @@ import {
   validateTypes,
   validateObjects,
   throwOnHttpHiddenTypes,
+  throwOnGloballyHiddenTypes,
 } from './utils';
 import { Readable } from 'stream';
 import { createPromiseFromStreams, createConcatStream } from '@kbn/utils';
@@ -254,5 +255,28 @@ describe('throwOnHttpHiddenTypes', () => {
     }).toThrowErrorMatchingInlineSnapshot(
       `"Unsupported saved object type(s): index-pattern, not-allowed-type, not-allowed-type-2: Bad Request"`
     );
+  });
+  it("returns if there aren't any types provided to check", () => {
+    expect(() => {
+      throwOnHttpHiddenTypes([]);
+    }).not.toThrowError();
+  });
+});
+
+describe('throwOnGloballyHiddenTypes', () => {
+  const httpVisibleTypes = ['config', 'index-pattern', 'dashboard'];
+
+  it('throws if some objects are not globally visible', () => {
+    expect(() => {
+      throwOnGloballyHiddenTypes(httpVisibleTypes, ['not-allowed-type']);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"Unsupported saved object type(s): not-allowed-type: Bad Request"`
+    );
+  });
+
+  it("returns if there aren't any types provided to check", () => {
+    expect(() => {
+      throwOnGloballyHiddenTypes(httpVisibleTypes, []);
+    }).not.toThrowError();
   });
 });

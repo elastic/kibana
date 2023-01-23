@@ -157,7 +157,6 @@ describe('POST /api/saved_objects/_bulk_create', () => {
         },
       ])
       .expect(400);
-    // expect(result.body.message).toContain('Unsupported saved object type(s):');
     expect(result.body.message).toContain(
       'Unsupported saved object type(s): hidden-from-http: Bad Request'
     );
