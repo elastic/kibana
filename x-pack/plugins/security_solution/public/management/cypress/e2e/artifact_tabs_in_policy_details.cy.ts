@@ -124,7 +124,7 @@ describe('Artifact tabs in Policy Details page', () => {
           performUserActions(formActions);
 
           // Add a per policy artifact - but not assign it to any policy
-          cy.contains('Per Policy').click();
+          cy.get('[data-test-subj$="-perPolicy"]').click(); // test-subjects are generated in different formats, but all ends with -perPolicy
           cy.getBySel(`${testData.pagePrefix}-flyout-submitButton`).click();
 
           // Check new artifact is in the list
