@@ -368,11 +368,7 @@ export const expectNumberOfRules = (expectedNumber: number) => {
 };
 
 export const expectToContainRule = (ruleName: string) => {
-  cy.get(RULES_TABLE).then(($table) => {
-    const rulesRow = cy.wrap($table.find(RULES_ROW));
-
-    rulesRow.should('include.text', ruleName);
-  });
+  cy.get(RULES_TABLE).find(RULES_ROW).should('include.text', ruleName);
 };
 
 const selectOverwriteRulesImport = () => {

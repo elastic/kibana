@@ -29,7 +29,7 @@ const configSchema = schema.object({
   ui: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     transactionGroupBucketSize: schema.number({ defaultValue: 1000 }),
-    maxTraceItems: schema.number({ defaultValue: 1000 }),
+    maxTraceItems: schema.number({ defaultValue: 5000 }),
   }),
   searchAggregatedTransactions: schema.oneOf(
     [

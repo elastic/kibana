@@ -5,25 +5,44 @@
  * 2.0.
  */
 
-import React, { FC, useCallback } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiTitle,
-  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
-  EuiPageContentHeaderSection_Deprecated as EuiPageContentHeaderSection,
-} from '@elastic/eui';
+import { css } from '@emotion/react';
+import React, { FC, useCallback, useMemo } from 'react';
+
+import { EuiFlexGroup, EuiFlexItem, EuiPageHeader } from '@elastic/eui';
+
 import { useUrlState } from '@kbn/ml-url-state';
-import { FullTimeRangeSelectorProps } from '../full_time_range_selector/full_time_range_selector';
+import { useStorage } from '@kbn/ml-local-storage';
+import {
+  useTimefilter,
+  DatePickerWrapper,
+  FullTimeRangeSelector,
+  type FullTimeRangeSelectorProps,
+  FROZEN_TIER_PREFERENCE,
+} from '@kbn/ml-date-picker';
+
 import { useDataSource } from '../../hooks/use_data_source';
-import { useTimefilter } from '../../hooks/use_time_filter';
-import { FullTimeRangeSelector } from '../full_time_range_selector';
-import { DatePickerWrapper } from '../date_picker_wrapper';
+import {
+  AIOPS_FROZEN_TIER_PREFERENCE,
+  type AiOpsKey,
+  type AiOpsStorageMapped,
+} from '../../types/storage';
+
+const dataViewTitleHeader = css({
+  minWidth: '300px',
+});
 
 export const PageHeader: FC = () => {
   const [, setGlobalState] = useUrlState('_g');
   const { dataView } = useDataSource();
+
+  const [frozenDataPreference, setFrozenDataPreference] = useStorage<
+    AiOpsKey,
+    AiOpsStorageMapped<typeof AIOPS_FROZEN_TIER_PREFERENCE>
+  >(
+    AIOPS_FROZEN_TIER_PREFERENCE,
+    // By default we will exclude frozen data tier
+    FROZEN_TIER_PREFERENCE.EXCLUDE
+  );
 
   const timefilter = useTimefilter({
     timeRangeSelector: dataView.timeFieldName !== undefined,
@@ -37,44 +56,37 @@ export const PageHeader: FC = () => {
     [setGlobalState]
   );
 
-  return (
-    <>
-      <EuiFlexGroup gutterSize="none">
-        <EuiFlexItem>
-          <EuiPageContentHeader className="aiopsPageHeader">
-            <EuiPageContentHeaderSection>
-              <div className="dataViewTitleHeader">
-                <EuiTitle size="s">
-                  <h2>{dataView.getName()}</h2>
-                </EuiTitle>
-              </div>
-            </EuiPageContentHeaderSection>
+  const hasValidTimeField = useMemo(
+    () => dataView.timeFieldName !== undefined && dataView.timeFieldName !== '',
+    [dataView.timeFieldName]
+  );
 
-            <EuiFlexGroup
-              alignItems="center"
-              justifyContent="flexEnd"
-              gutterSize="s"
-              data-test-subj="aiopsTimeRangeSelectorSection"
-            >
-              {dataView.timeFieldName !== undefined && (
-                <EuiFlexItem grow={false}>
-                  <FullTimeRangeSelector
-                    dataView={dataView}
-                    query={undefined}
-                    disabled={false}
-                    timefilter={timefilter}
-                    callback={updateTimeState}
-                  />
-                </EuiFlexItem>
-              )}
-              <EuiFlexItem grow={false}>
-                <DatePickerWrapper />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPageContentHeader>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer />
-    </>
+  return (
+    <EuiPageHeader
+      pageTitle={<div css={dataViewTitleHeader}>{dataView.getName()}</div>}
+      rightSideItems={[
+        <EuiFlexGroup gutterSize="s" data-test-subj="aiopsTimeRangeSelectorSection">
+          {hasValidTimeField ? (
+            <EuiFlexItem grow={false}>
+              <FullTimeRangeSelector
+                frozenDataPreference={frozenDataPreference}
+                setFrozenDataPreference={setFrozenDataPreference}
+                dataView={dataView}
+                query={undefined}
+                disabled={false}
+                timefilter={timefilter}
+                callback={updateTimeState}
+              />
+            </EuiFlexItem>
+          ) : null}
+          <DatePickerWrapper
+            isAutoRefreshOnly={!hasValidTimeField}
+            showRefresh={!hasValidTimeField}
+            width="full"
+            flexGroup={false}
+          />
+        </EuiFlexGroup>,
+      ]}
+    />
   );
 };

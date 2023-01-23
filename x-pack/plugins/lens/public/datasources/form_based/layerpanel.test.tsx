@@ -261,7 +261,7 @@ describe('Layer Data Panel', () => {
       getIndexPatternPickerOptions(instance)!.map(
         (option: IndexPatternPickerOption) => option.label
       )
-    ).toEqual(['my-fake-index-pattern', 'my-fake-restricted-pattern', 'my-compatible-pattern']);
+    ).toEqual(['my-compatible-pattern', 'my-fake-index-pattern', 'my-fake-restricted-pattern']);
   });
 
   it('should switch data panel to target index pattern', () => {

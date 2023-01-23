@@ -51,6 +51,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         id: createdAlert.id,
         tags: ['bar'],
         rule_type_id: 'test.noop',
+        running: false,
         consumer: 'alertsFixture',
         created_by: null,
         enabled: true,
@@ -169,6 +170,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           updatedAt: response.body.updatedAt,
           executionStatus: response.body.executionStatus,
           revision: 1,
+          running: false,
           ...(response.body.nextRun ? { nextRun: response.body.nextRun } : {}),
           ...(response.body.lastRun ? { lastRun: response.body.lastRun } : {}),
         });

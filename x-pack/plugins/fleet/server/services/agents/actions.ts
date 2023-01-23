@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { appContextService } from '../app_context';
@@ -26,27 +26,33 @@ import { bulkUpdateAgents } from './crud';
 
 const ONE_MONTH_IN_MS = 2592000000;
 
+export const NO_EXPIRATION = 'NONE';
+
 export async function createAgentAction(
   esClient: ElasticsearchClient,
   newAgentAction: NewAgentAction
 ): Promise<AgentAction> {
-  const actionId = newAgentAction.id ?? uuid.v4();
+  const actionId = newAgentAction.id ?? uuidv4();
   const timestamp = new Date().toISOString();
   const body: FleetServerAgentAction = {
     '@timestamp': timestamp,
-    expiration: newAgentAction.expiration ?? new Date(Date.now() + ONE_MONTH_IN_MS).toISOString(),
+    expiration:
+      newAgentAction.expiration === NO_EXPIRATION
+        ? undefined
+        : newAgentAction.expiration ?? new Date(Date.now() + ONE_MONTH_IN_MS).toISOString(),
     agents: newAgentAction.agents,
     action_id: actionId,
     data: newAgentAction.data,
     type: newAgentAction.type,
     start_time: newAgentAction.start_time,
     minimum_execution_duration: newAgentAction.minimum_execution_duration,
+    rollout_duration_seconds: newAgentAction.rollout_duration_seconds,
     total: newAgentAction.total,
   };
 
   await esClient.create({
     index: AGENT_ACTIONS_INDEX,
-    id: uuid.v4(),
+    id: uuidv4(),
     body,
     refresh: 'wait_for',
   });
@@ -63,7 +69,7 @@ export async function bulkCreateAgentActions(
   newAgentActions: NewAgentAction[]
 ): Promise<AgentAction[]> {
   const actions = newAgentActions.map((newAgentAction) => {
-    const id = newAgentAction.id ?? uuid.v4();
+    const id = newAgentAction.id ?? uuidv4();
     return {
       id,
       ...newAgentAction,
@@ -81,7 +87,7 @@ export async function bulkCreateAgentActions(
         '@timestamp': new Date().toISOString(),
         expiration: action.expiration ?? new Date(Date.now() + ONE_MONTH_IN_MS).toISOString(),
         start_time: action.start_time,
-        minimum_execution_duration: action.minimum_execution_duration,
+        rollout_duration_seconds: action.rollout_duration_seconds,
         agents: action.agents,
         action_id: action.id,
         data: action.data,
@@ -151,7 +157,7 @@ export async function bulkCreateAgentActionResults(
     return [
       {
         create: {
-          _id: uuid.v4(),
+          _id: uuidv4(),
         },
       },
       body,
@@ -248,7 +254,7 @@ export async function cancelAgentAction(esClient: ElasticsearchClient, actionId:
     throw new AgentActionNotFoundError('Action not found');
   }
 
-  const cancelActionId = uuid.v4();
+  const cancelActionId = uuidv4();
   const now = new Date().toISOString();
   for (const hit of res.hits.hits) {
     if (!hit._source || !hit._source.agents || !hit._source.action_id) {

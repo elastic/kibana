@@ -14,7 +14,7 @@ import { apiIndex, connectorIndex, crawlerIndex } from '../../__mocks__/view_ind
 
 import { nextTick } from '@kbn/test-jest-helpers';
 
-import { HttpError, Status } from '../../../../../common/types/api';
+import { Status } from '../../../../../common/types/api';
 
 import { SyncStatus } from '../../../../../common/types/connectors';
 import { StartSyncApiLogic } from '../../api/connector/start_sync_api_logic';
@@ -229,16 +229,6 @@ describe('IndexViewLogic', () => {
   });
 
   describe('listeners', () => {
-    it('calls clearFlashMessages on makeStartSyncRequest', () => {
-      IndexViewLogic.actions.makeStartSyncRequest({ connectorId: 'connectorId' });
-      expect(mockFlashMessageHelpers.clearFlashMessages).toHaveBeenCalledTimes(1);
-    });
-
-    it('calls flashAPIErrors on apiError', () => {
-      IndexViewLogic.actions.startSyncApiError({} as HttpError);
-      expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledTimes(1);
-      expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledWith({});
-    });
     it('calls makeFetchIndexRequest on fetchIndex', () => {
       IndexViewLogic.actions.makeFetchIndexRequest = jest.fn();
       IndexNameLogic.actions.setIndexName('indexName');

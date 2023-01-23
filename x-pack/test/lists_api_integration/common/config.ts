@@ -54,10 +54,10 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ...disabledPlugins
             .filter((k) => k !== 'security')
             .map((key) => `--xpack.${key}.enabled=false`),
-          `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'alerts')}`,
-          `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'actions')}`,
-          `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'task_manager')}`,
-          `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'aad')}`,
+          `--plugin-path=${path.join(__dirname, 'plugins/alerts')}`,
+          `--plugin-path=${path.join(__dirname, 'plugins/actions')}`,
+          `--plugin-path=${path.join(__dirname, 'plugins/task_manager')}`,
+          `--plugin-path=${path.join(__dirname, 'plugins/aad')}`,
           ...(ssl
             ? [
                 `--elasticsearch.hosts=${servers.elasticsearch.protocol}://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,

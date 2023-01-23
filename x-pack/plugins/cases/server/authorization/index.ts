@@ -167,6 +167,14 @@ const CaseOperations = {
     docType: 'case',
     savedObjectType: CASE_SAVED_OBJECT,
   },
+  [ReadOperations.BulkGetCases]: {
+    ecsType: EVENT_TYPES.access,
+    name: ACCESS_CASE_OPERATION,
+    action: 'case_bulk_get',
+    verbs: accessVerbs,
+    docType: 'cases',
+    savedObjectType: CASE_SAVED_OBJECT,
+  },
 };
 
 const ConfigurationOperations = {
@@ -302,10 +310,26 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     docType: 'cases',
     savedObjectType: CASE_SAVED_OBJECT,
   },
+  [ReadOperations.FindUserActions]: {
+    ecsType: EVENT_TYPES.access,
+    name: ACCESS_USER_ACTION_OPERATION,
+    action: 'case_user_actions_find',
+    verbs: accessVerbs,
+    docType: 'user actions',
+    savedObjectType: CASE_USER_ACTION_SAVED_OBJECT,
+  },
   [ReadOperations.GetUserActions]: {
     ecsType: EVENT_TYPES.access,
     name: ACCESS_USER_ACTION_OPERATION,
     action: 'case_user_actions_get',
+    verbs: accessVerbs,
+    docType: 'user actions',
+    savedObjectType: CASE_USER_ACTION_SAVED_OBJECT,
+  },
+  [ReadOperations.GetConnectors]: {
+    ecsType: EVENT_TYPES.access,
+    name: ACCESS_USER_ACTION_OPERATION,
+    action: 'case_connectors_get',
     verbs: accessVerbs,
     docType: 'user actions',
     savedObjectType: CASE_USER_ACTION_SAVED_OBJECT,

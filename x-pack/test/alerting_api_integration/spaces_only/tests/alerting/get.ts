@@ -38,6 +38,8 @@ const getTestUtils = (
         name: 'abc',
         tags: ['foo'],
         rule_type_id: 'test.noop',
+        revision: 0,
+        running: false,
         consumer: 'alertsFixture',
         schedule: { interval: '1m' },
         enabled: true,
@@ -54,7 +56,6 @@ const getTestUtils = (
         created_at: response.body.created_at,
         updated_at: response.body.updated_at,
         execution_status: response.body.execution_status,
-        revision: 0,
         ...(response.body.next_run ? { next_run: response.body.next_run } : {}),
         ...(response.body.last_run ? { last_run: response.body.last_run } : {}),
         ...(describeType === 'internal'
@@ -156,6 +157,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           updatedAt: response.body.updatedAt,
           executionStatus: response.body.executionStatus,
           revision: 0,
+          running: false,
           ...(response.body.nextRun ? { nextRun: response.body.nextRun } : {}),
           ...(response.body.lastRun ? { lastRun: response.body.lastRun } : {}),
         });

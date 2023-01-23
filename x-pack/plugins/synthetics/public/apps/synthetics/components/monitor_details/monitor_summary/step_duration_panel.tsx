@@ -18,7 +18,13 @@ import { ClientPluginsStart } from '../../../../../plugin';
 import { useSelectedLocation } from '../hooks/use_selected_location';
 import { useAbsoluteDate } from '../../../hooks';
 
-export const StepDurationPanel = ({ legendPosition }: { legendPosition?: Position }) => {
+export const StepDurationPanel = ({
+  legendPosition,
+  doBreakdown = true,
+}: {
+  legendPosition?: Position;
+  doBreakdown?: boolean;
+}) => {
   const { observability } = useKibana<ClientPluginsStart>().services;
   const time = useAbsoluteDate({ from: 'now-24h/h', to: 'now' });
 
@@ -40,12 +46,18 @@ export const StepDurationPanel = ({ legendPosition }: { legendPosition?: Positio
     return null;
   }
 
+  const label = !doBreakdown
+    ? MONITOR_DURATION
+    : isBrowser
+    ? DURATION_BY_STEP_LABEL
+    : DURATION_BY_LOCATION;
+
   return (
     <EuiPanel hasShadow={false} hasBorder>
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
-            <h3>{isBrowser ? DURATION_BY_STEP_LABEL : DURATION_BY_LOCATION}</h3>
+            <h3>{label}</h3>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem>
@@ -60,19 +72,23 @@ export const StepDurationPanel = ({ legendPosition }: { legendPosition?: Positio
         customHeight={'300px'}
         reportType={ReportTypes.KPI}
         legendPosition={legendPosition}
+        legendIsVisible={doBreakdown}
         attributes={[
           {
             time,
-            name: DURATION_BY_STEP_LABEL,
+            name: label,
             reportDefinitions: {
               'monitor.id': [monitorId],
               'observer.geo.name': [selectedLocation?.label],
             },
-            selectedMetricField: isBrowser ? 'synthetics.step.duration.us' : 'monitor.duration.us',
+            selectedMetricField:
+              isBrowser && doBreakdown ? 'synthetics.step.duration.us' : 'monitor.duration.us',
             dataType: 'synthetics',
-            breakdown: isBrowser ? 'synthetics.step.name.keyword' : 'observer.geo.name',
-            operationType: 'last_value',
+            operationType: doBreakdown ? 'last_value' : 'average',
             seriesType: 'area_stacked',
+            ...(doBreakdown
+              ? { breakdown: isBrowser ? 'synthetics.step.name.keyword' : 'observer.geo.name' }
+              : {}),
           },
         ]}
       />
@@ -86,6 +102,10 @@ const DURATION_BY_STEP_LABEL = i18n.translate('xpack.synthetics.detailsPanel.dur
 
 const DURATION_BY_LOCATION = i18n.translate('xpack.synthetics.detailsPanel.durationByLocation', {
   defaultMessage: 'Duration by location',
+});
+
+const MONITOR_DURATION = i18n.translate('xpack.synthetics.detailsPanel.monitorDuration', {
+  defaultMessage: 'Monitor duration',
 });
 
 const LAST_24H_LABEL = i18n.translate('xpack.synthetics.detailsPanel.last24Hours', {

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiText, EuiSpacer, EuiCodeBlock, EuiBadge } from '@elastic/eui';
+import { EuiText, EuiSpacer, EuiCodeBlock } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
@@ -24,20 +24,9 @@ export function SampleSummary({ error }: Props) {
   const logMessage = error.error.log?.message;
   const excMessage = error.error.exception?.[0].message;
   const culprit = error.error.culprit;
-  const isUnhandled = error.error.exception?.[0].handled === false;
 
   return (
     <>
-      {isUnhandled && (
-        <>
-          <EuiBadge color="warning">
-            {i18n.translate('xpack.apm.errorGroupDetails.unhandledLabel', {
-              defaultMessage: 'Unhandled',
-            })}
-          </EuiBadge>
-          <EuiSpacer />
-        </>
-      )}
       {logMessage && (
         <>
           <EuiText size="s">

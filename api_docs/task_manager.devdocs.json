@@ -198,7 +198,7 @@
             "label": "start",
             "description": [],
             "signature": [
-              "({ savedObjects, elasticsearch, executionContext, }: ",
+              "({ savedObjects, elasticsearch, executionContext, docLinks, }: ",
               {
                 "pluginId": "@kbn/core-lifecycle-server",
                 "scope": "common",
@@ -224,7 +224,7 @@
                 "id": "def-server.TaskManagerPlugin.start.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    savedObjects,\n    elasticsearch,\n    executionContext,\n  }",
+                "label": "{\n    savedObjects,\n    elasticsearch,\n    executionContext,\n    docLinks,\n  }",
                 "description": [],
                 "signature": [
                   {

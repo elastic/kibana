@@ -75,7 +75,7 @@ describe('Add exception using data views from rule details', () => {
         customQuery: 'agent.name:*',
         dataSource: { dataView: 'exceptions-*', type: 'dataView' },
         runsEvery: {
-          interval: '1',
+          interval: '10',
           timeType: 'Seconds',
           type: 's',
         },
@@ -94,12 +94,12 @@ describe('Add exception using data views from rule details', () => {
   it('Creates an exception item from alert actions overflow menu', () => {
     cy.get(LOADING_INDICATOR).should('not.exist');
     addExceptionFromFirstAlert();
-    addExceptionFlyoutItemName(ITEM_NAME);
     addExceptionConditions({
       field: 'agent.name',
       operator: 'is',
       values: ['foo'],
     });
+    addExceptionFlyoutItemName(ITEM_NAME);
     selectBulkCloseAlerts();
     submitNewExceptionItem();
 

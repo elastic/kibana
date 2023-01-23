@@ -34,6 +34,7 @@ export interface ImageViewerProps {
   onClear?: () => void;
   onError?: () => void;
   onLoad?: () => void;
+  onClick?: () => void;
   containerCSS?: SerializedStyles;
 }
 
@@ -43,6 +44,7 @@ export function ImageViewer({
   onClear,
   onError,
   onLoad,
+  onClick,
   className,
   containerCSS,
 }: ImageViewerProps) {
@@ -87,12 +89,18 @@ export function ImageViewer({
           // meta={imageConfig.src.type === 'file' ? imageConfig.src.fileImageMeta : undefined}
           alt={imageConfig.altText ?? ''}
           className={classNames(className, { 'visually-hidden': hasFailedToLoad })}
-          title={onChange ? 'Click to select a different image' : undefined}
+          title={
+            onChange
+              ? i18n.translate('imageEmbeddable.imageViewer.selectDifferentImageTitle', {
+                  defaultMessage: 'Select a different image',
+                })
+              : undefined
+          }
           style={{
             width: '100%',
             height: '100%',
             objectFit: imageConfig?.sizing?.objectFit ?? 'contain',
-            cursor: onChange ? 'pointer' : 'initial',
+            cursor: onChange || onClick ? 'pointer' : 'initial',
             display: 'block', // needed to remove gap under the image
             backgroundColor: imageConfig.backgroundColor,
           }}
@@ -101,6 +109,7 @@ export function ImageViewer({
           }}
           onClick={() => {
             if (onChange) onChange();
+            if (onClick) onClick();
           }}
           onLoad={() => {
             if (onLoad) onLoad();
