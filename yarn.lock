@@ -28553,10 +28553,10 @@ xpath@0.0.32:
   resolved "https://registry.yarnpkg.com/xpath/-/xpath-0.0.32.tgz#1b73d3351af736e17ec078d6da4b8175405c48af"
   integrity sha512-rxMJhSIoiO8vXcWvSifKqhvV96GjiD5wYb8/QHdoRyQvraTpp4IEv944nhGausZZ3u7dhQXteZuZbaqfpB7uYw==
 
-xstate@^4.35.1:
-  version "4.35.1"
-  resolved "https://registry.yarnpkg.com/xstate/-/xstate-4.35.1.tgz#f2ea205e6e47cca285336a8f44ef2c154c9629a5"
-  integrity sha512-imxk6+76HJRt7qHrUnWnAjaHHhAsUKoVa+PXkyaPd3Gll0VjZsy6/L+FkatIJnjI5Kpwp0R8k63KfIFnzVLskQ==
+xstate@^4.35.2:
+  version "4.35.2"
+  resolved "https://registry.yarnpkg.com/xstate/-/xstate-4.35.2.tgz#92916638e315c448f1d26e920273187907256817"
+  integrity sha512-5X7EyJv5OHHtGQwN7DsmCAbSnDs3Mxl1cXQ4PVaLwi+7p/RRapERnd1dFyHjYin+KQoLLfuXpl1dPBThgyIGNg==
 
 "xtend@>=4.0.0 <4.1.0-0", xtend@^4.0.0, xtend@^4.0.1, xtend@^4.0.2, xtend@~4.0.0, xtend@~4.0.1:
   version "4.0.2"
