@@ -136,6 +136,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('should show hosts landing page with callout when the hosts view is disabled', async () => {
         const landingPageDisabled = await pageObjects.infraHostsView.getHostsLandingPageDisabled();
+        const roleDocsUrl = await pageObjects.infraHostsView.getHostsLandingPageRoleLink();
+        const parsedUrl = new URL(roleDocsUrl);
+
+        expect(parsedUrl.host).to.be('www.elastic.co');
+        expect(parsedUrl.pathname).to.be('/guide/en/kibana/current/kibana-privileges.html');
         expect(landingPageDisabled).to.contain(
           'Your user role doesn’t have sufficient privileges to enable this feature'
         );

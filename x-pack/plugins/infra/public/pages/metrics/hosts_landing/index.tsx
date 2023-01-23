@@ -74,7 +74,10 @@ export const HostsLandingPage = () => {
               defaultMessage="They will need a {docsLink} with Kibana > Management > Advanced Settings > All permissions."
               values={{
                 docsLink: (
-                  <EuiLink href="https://www.elastic.co/guide/en/kibana/current/kibana-privileges.html#kibana-feature-privileges">
+                  <EuiLink
+                    data-test-subj="hostsView-role-docs-link"
+                    href="https://www.elastic.co/guide/en/kibana/current/kibana-privileges.html#kibana-feature-privileges"
+                  >
                     {ROLE}
                   </EuiLink>
                 ),

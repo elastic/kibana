@@ -25,6 +25,12 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return containerText;
     },
 
+    async getHostsLandingPageRoleLink() {
+      const container = await testSubjects.find('hostsView-role-docs-link');
+      const containerText = await container.getAttribute('href');
+      return containerText;
+    },
+
     async getHostsLandingPageEnableButton() {
       const container = await testSubjects.find('hostsView-enable-feature-button');
       return container;
