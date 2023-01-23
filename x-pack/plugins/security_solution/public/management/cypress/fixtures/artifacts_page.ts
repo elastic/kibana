@@ -22,7 +22,6 @@ interface ArtifactsFixtureType {
   tabId: string;
   artifactName: string;
   privilegePrefix: string;
-  pageObject: string;
   urlPath: string;
   emptyState: string;
 
@@ -134,7 +133,6 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
       confirmSelector: 'trustedAppsListPage-deleteModal-submitButton',
       card: 'trustedAppsListPage-card',
     },
-    pageObject: 'trustedApplications',
     urlPath: 'trusted_apps',
     emptyState: 'trustedAppsListPage-emptyState',
   },
@@ -237,7 +235,6 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
       confirmSelector: 'EventFiltersListPage-deleteModal-submitButton',
       card: 'EventFiltersListPage-card',
     },
-    pageObject: 'eventFilters',
     urlPath: 'event_filters',
     emptyState: 'EventFiltersListPage-emptyState',
   },
@@ -348,7 +345,6 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
       confirmSelector: 'blocklistDeletionConfirm',
       card: 'blocklistCard',
     },
-    pageObject: 'blocklist',
     urlPath: 'blocklist',
     emptyState: 'blocklistPage-emptyState',
   },
@@ -432,7 +428,6 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
       confirmSelector: 'hostIsolationExceptionsDeletionConfirm',
       card: 'hostIsolationExceptionsCard',
     },
-    pageObject: 'hostIsolationExceptions',
     urlPath: 'host_isolation_exceptions',
     emptyState: 'hostIsolationExceptionsListPage-emptyState',
   },
