@@ -25,7 +25,7 @@ const loginWithWriteAccess = (url: string) => {
   cy.visit(url);
 };
 
-describe('Artifact tabs in Policy Details', () => {
+describe('Artifact tabs in Policy Details page', () => {
   before(() => {
     login();
     loadEndpointDataForEventFiltersIfNeeded();
@@ -36,20 +36,20 @@ describe('Artifact tabs in Policy Details', () => {
     removeAllArtifacts();
   });
 
-  describe('Artifact tabs in Policy Details page', () => {
-    describe(`Trusted Applications tab`, () => {
-      it('[ALL] Given there are no artifacts, user can add an artifact', () => {
-        visitArtifactTab('trustedApps');
+  for (const testData of getArtifactsListTestsData()) {
+    describe(`${testData.title} tab`, () => {
+      it(`[ALL] Given there are no ${testData.title} entries, user can add an artifact`, () => {
+        visitArtifactTab(testData.tabId);
 
         cy.getBySel('unexisting-manage-artifacts-button').should('exist').click();
 
-        const { formActions, checkResults } = getArtifactsListTestsData()[0].create;
+        const { formActions, checkResults } = testData.create;
 
         performUserActions(formActions);
 
         // Add a per policy artifact - but not assign it to any policy
-        cy.getBySel('trustedApps-form-effectedPolicies-perPolicy').click();
-        cy.getBySel('trustedAppsListPage-flyout-submitButton').click();
+        cy.contains('Per Policy').click();
+        cy.getBySel(`${testData.pagePrefix}-flyout-submitButton`).click();
 
         // Check new artifact is in the list
         for (const checkResult of checkResults) {
@@ -63,42 +63,42 @@ describe('Artifact tabs in Policy Details', () => {
         cy.getBySel('policyDetailsPage').should('exist');
       });
 
-      it('[ALL] Given there are no assigned artifacts, user can Manage artifacts', () => {
-        visitArtifactTab('trustedApps');
+      it(`[ALL] Given there are no assigned ${testData.title} entries, user can Manage artifacts`, () => {
+        visitArtifactTab(testData.tabId);
         cy.getBySel('unassigned-manage-artifacts-button').should('exist').click();
-        cy.location('pathname').should('equal', '/app/security/administration/trusted_apps');
+        cy.location('pathname').should('equal', `/app/security/administration/${testData.urlPath}`);
       });
 
-      it('[ALL] Given there are no assigned artifacts, user can Assign an artifact', () => {
-        visitArtifactTab('trustedApps');
+      it(`[ALL] Given there are no assigned ${testData.title} entries, user can assign an artifact`, () => {
+        visitArtifactTab(testData.tabId);
 
         cy.getBySel('unassigned-assign-artifacts-button').should('exist').click();
 
         cy.getBySel('artifacts-assign-flyout').should('exist');
         cy.getBySel('artifacts-assign-confirm-button').should('be.disabled');
 
-        cy.getBySel('Trusted application name_checkbox').click();
+        cy.getBySel(`${testData.artifactName}_checkbox`).click();
         cy.getBySel('artifacts-assign-confirm-button').click();
       });
 
-      it('[ALL] Given there are assigned artifacts, user can see the artifacts and assign other artifacts', () => {
-        visitArtifactTab('trustedApps');
+      it(`[ALL] Given there are assigned ${testData.title} entries, user can see the artifacts and assign other artifacts`, () => {
+        visitArtifactTab(testData.tabId);
 
         cy.getBySel('artifacts-collapsed-list-card').should('have.length', 1);
         cy.getBySel('artifacts-collapsed-list-card-header-titleHolder').contains(
-          'Trusted application name'
+          testData.artifactName
         );
       });
 
-      it('[ALL] Given there are assigned artifacts, user can assign other artifacts', () => {
-        visitArtifactTab('trustedApps');
+      it(`[ALL] Given there are assigned ${testData.title} entries, user can assign other artifacts`, () => {
+        visitArtifactTab(testData.tabId);
 
         cy.getBySel('artifacts-assign-button').should('exist').click();
         cy.getBySel('artifacts-assign-flyout').should('exist');
       });
 
-      it('[ALL] Given there are assigned artifacts, user can unassign a "per policy" artifact from the policy', () => {
-        visitArtifactTab('trustedApps');
+      it(`[ALL] Given there are assigned ${testData.title} entries, user can unassign a "per policy" artifact from the policy`, () => {
+        visitArtifactTab(testData.tabId);
 
         cy.getBySel('artifacts-collapsed-list-card-header-actions-button').click();
         cy.getBySel('remove-from-policy-action').click();
@@ -107,5 +107,5 @@ describe('Artifact tabs in Policy Details', () => {
         cy.contains('Successfully removed');
       });
     });
-  });
+  }
 });

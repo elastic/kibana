@@ -9,6 +9,8 @@ export const getArtifactsListTestsData = () => [
   {
     title: 'Trusted applications',
     pagePrefix: 'trustedAppsListPage',
+    tabId: 'trustedApps',
+    artifactName: 'Trusted application name',
     create: {
       formActions: [
         {
@@ -108,6 +110,8 @@ export const getArtifactsListTestsData = () => [
   {
     title: 'Event Filters',
     pagePrefix: 'EventFiltersListPage',
+    tabId: 'eventFilters',
+    artifactName: 'Event filter name',
     create: {
       formActions: [
         {
@@ -208,6 +212,8 @@ export const getArtifactsListTestsData = () => [
   {
     title: 'Blocklist',
     pagePrefix: 'blocklistPage',
+    tabId: 'blocklists',
+    artifactName: 'Blocklist name',
     create: {
       formActions: [
         {
@@ -316,6 +322,8 @@ export const getArtifactsListTestsData = () => [
   {
     title: 'Host isolation exceptions',
     pagePrefix: 'hostIsolationExceptionsListPage',
+    tabId: 'hostIsolationExceptions',
+    artifactName: 'Host Isolation exception name',
     create: {
       formActions: [
         {
