@@ -178,7 +178,7 @@ the `subAction` value.
 (Optional, array of strings) The custom actions available to the alert.
 
 `alias`::::
-(Optional, string) The unique identifier used for alert de-duplication in {opsgenie}.
+(Optional, string) The unique identifier used for alert deduplication in {opsgenie}.
 
 `description`::::
 (Optional, string) A description that provides detailed information about the alert.
@@ -258,7 +258,7 @@ required.
 [%collapsible%open]
 ======
 `alias`::::
-(Required, string) The unique identifier used for alert de-duplication in {opsgenie}.
+(Required, string) The unique identifier used for alert deduplication in {opsgenie}.
 The alias must match the value used when creating the alert.
 
 `note`::::

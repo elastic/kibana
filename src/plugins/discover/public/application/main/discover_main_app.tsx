@@ -49,13 +49,11 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
    * State related logic
    */
   const {
-    data$,
     inspectorAdapters,
     onChangeDataView,
     onUpdateQuery,
     persistDataView,
     updateAdHocDataViewId,
-    refetch$,
     resetSavedSearch,
     searchSource,
     stateContainer,
@@ -117,8 +115,6 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
         setExpandedDoc={setExpandedDoc}
         navigateTo={navigateTo}
         savedSearch={savedSearch}
-        savedSearchData$={data$}
-        savedSearchRefetch$={refetch$}
         searchSource={searchSource}
         stateContainer={stateContainer}
         persistDataView={persistDataView}

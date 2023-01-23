@@ -21,6 +21,7 @@ interface Args {
   index?: number;
   score: Anomaly;
   interval: string;
+  jobName: string;
 }
 
 const Icon = styled(EuiIcon)`
@@ -38,6 +39,7 @@ export const AnomalyScoreComponent = ({
   score,
   interval,
   narrowDateRange,
+  jobName,
 }: Args): JSX.Element => {
   const [isOpen, setIsOpen] = useState(false);
   return (
@@ -61,7 +63,14 @@ export const AnomalyScoreComponent = ({
         >
           <EuiDescriptionList
             data-test-subj="anomaly-description-list"
-            listItems={createDescriptionList(score, startDate, endDate, interval, narrowDateRange)}
+            listItems={createDescriptionList(
+              score,
+              startDate,
+              endDate,
+              interval,
+              narrowDateRange,
+              jobName
+            )}
           />
         </EuiPopover>
       </EuiFlexItem>
