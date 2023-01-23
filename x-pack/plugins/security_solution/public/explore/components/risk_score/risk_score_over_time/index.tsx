@@ -36,7 +36,7 @@ import { isUserRiskScore } from '../../../../../common/search_strategy';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
-import { getRiskScoreOverTimeAreaAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/risk_scores/risk_score_overtime_area';
+import { getRiskScoreOverTimeAreaAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/risk_scores/risk_score_over_time_area';
 
 export interface RiskScoreOverTimeProps {
   from: string;

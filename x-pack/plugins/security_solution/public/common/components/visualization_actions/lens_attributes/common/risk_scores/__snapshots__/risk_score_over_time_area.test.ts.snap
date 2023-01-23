@@ -1,0 +1,187 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getRiskScoreOverTimeAreaAttributes should render 1`] = `
+Object {
+  "description": "",
+  "references": Array [],
+  "state": Object {
+    "adHocDataViews": Object {
+      "1dd5663b-f062-43f8-8688-fc8166c2ca8e": Object {
+        "allowNoIndex": false,
+        "fieldAttrs": Object {},
+        "fieldFormats": Object {},
+        "id": "1dd5663b-f062-43f8-8688-fc8166c2ca8e",
+        "name": "ml_host_risk_score_mockSpaceId",
+        "runtimeFieldMap": Object {},
+        "sourceFilters": Array [],
+        "timeFieldName": "@timestamp",
+        "title": "ml_host_risk_score_mockSpaceId",
+      },
+    },
+    "datasourceStates": Object {
+      "formBased": Object {
+        "layers": Object {
+          "d594baeb-5eca-480c-8885-ba79eaf41372": Object {
+            "columnOrder": Array [
+              "02a55c97-d7a4-440d-ac77-33b941c16189",
+              "8886a925-4419-4d9a-8498-3bda4ecf1b0a",
+              "df9461a3-db14-4196-932c-6404dabfd11a",
+              "df9461a3-db14-4196-932c-6404dabfd11aX0",
+            ],
+            "columns": Object {
+              "02a55c97-d7a4-440d-ac77-33b941c16189": Object {
+                "dataType": "date",
+                "isBucketed": true,
+                "label": "@timestamp",
+                "operationType": "date_histogram",
+                "params": Object {
+                  "dropPartials": false,
+                  "includeEmptyRows": true,
+                  "interval": "auto",
+                },
+                "scale": "interval",
+                "sourceField": "@timestamp",
+              },
+              "8886a925-4419-4d9a-8498-3bda4ecf1b0a": Object {
+                "customLabel": true,
+                "dataType": "number",
+                "isBucketed": false,
+                "label": "Risk score",
+                "operationType": "average",
+                "params": Object {
+                  "emptyAsNull": true,
+                  "format": Object {
+                    "id": "number",
+                    "params": Object {
+                      "decimals": 0,
+                    },
+                  },
+                },
+                "scale": "ratio",
+                "sourceField": "host.risk.calculated_score_norm",
+              },
+              "df9461a3-db14-4196-932c-6404dabfd11a": Object {
+                "customLabel": true,
+                "dataType": "number",
+                "isBucketed": false,
+                "label": "Risky threshold",
+                "operationType": "formula",
+                "params": Object {
+                  "formula": "70",
+                  "isFormulaBroken": false,
+                },
+                "references": Array [
+                  "df9461a3-db14-4196-932c-6404dabfd11aX0",
+                ],
+                "scale": "ratio",
+              },
+              "df9461a3-db14-4196-932c-6404dabfd11aX0": Object {
+                "customLabel": true,
+                "dataType": "number",
+                "isBucketed": false,
+                "label": "Part of Risky threshold",
+                "operationType": "math",
+                "params": Object {
+                  "tinymathAst": 70,
+                },
+                "references": Array [],
+                "scale": "ratio",
+              },
+            },
+            "incompleteColumns": Object {},
+            "sampling": 1,
+          },
+        },
+      },
+      "textBased": Object {
+        "layers": Object {},
+      },
+    },
+    "filters": Array [
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "host.id",
+          "negate": false,
+          "params": Object {
+            "query": "123",
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "match_phrase": Object {
+            "host.id": "123",
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "host.name",
+          "negate": false,
+          "params": Object {
+            "query": "mockHost",
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "match_phrase": Object {
+            "host.name": "mockHost",
+          },
+        },
+      },
+    ],
+    "internalReferences": Array [
+      Object {
+        "id": "1dd5663b-f062-43f8-8688-fc8166c2ca8e",
+        "name": "indexpattern-datasource-layer-d594baeb-5eca-480c-8885-ba79eaf41372",
+        "type": "index-pattern",
+      },
+    ],
+    "query": Object {
+      "language": "kql",
+      "query": "host.name: *",
+    },
+    "visualization": Object {
+      "axisTitlesVisibilitySettings": Object {
+        "x": false,
+        "yLeft": false,
+        "yRight": true,
+      },
+      "layers": Array [
+        Object {
+          "accessors": Array [
+            "8886a925-4419-4d9a-8498-3bda4ecf1b0a",
+            "df9461a3-db14-4196-932c-6404dabfd11a",
+          ],
+          "layerId": "d594baeb-5eca-480c-8885-ba79eaf41372",
+          "layerType": "data",
+          "position": "top",
+          "seriesType": "line",
+          "showGridlines": false,
+          "xAccessor": "02a55c97-d7a4-440d-ac77-33b941c16189",
+          "yConfig": Array [
+            Object {
+              "color": "#c06060",
+              "forAccessor": "df9461a3-db14-4196-932c-6404dabfd11a",
+            },
+          ],
+        },
+      ],
+      "legend": Object {
+        "isVisible": true,
+        "position": "right",
+      },
+      "preferredSeriesType": "line",
+      "title": "Empty XY chart",
+      "valueLabels": "hide",
+      "xTitle": "",
+      "yTitle": "",
+    },
+  },
+  "title": "host risk score over time",
+  "visualizationType": "lnsXY",
+}
+`;
