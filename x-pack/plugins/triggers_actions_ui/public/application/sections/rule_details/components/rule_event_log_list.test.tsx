@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -634,7 +634,7 @@ describe.skip('rule_event_log_list', () => {
     loadExecutionLogAggregationsMock.mockResolvedValue({
       data: [
         {
-          id: uuid.v4(),
+          id: uuidv4(),
           timestamp: '2022-03-20T07:40:44-07:00',
           duration: 5000000,
           status: 'success',
