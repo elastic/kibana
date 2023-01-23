@@ -179,12 +179,13 @@ export class AlertingEventLogger {
       updateEvent(this.event, { status: status.status });
 
       if (status.error) {
+        delete this.event.rule?.name;
         updateEvent(this.event, {
           outcome: 'failure',
           alertingOutcome: 'failure',
           reason: status.error?.reason || 'unknown',
           error: this.event?.error?.message || status.error.message,
-          ...(this.event.message
+          ...(this.event.message && this.event.event?.outcome === 'failure'
             ? {}
             : {
                 message: `${this.ruleContext.ruleType.id}:${this.ruleContext.ruleId}: execution failed`,
