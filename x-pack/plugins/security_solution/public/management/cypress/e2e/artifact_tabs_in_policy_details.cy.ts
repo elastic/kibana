@@ -18,9 +18,37 @@ const loginWithPrivilegeAll = () => {
   loginWithRole(ROLE.endpoint_security_policy_manager);
 };
 
+const loginWithPrivilegeRead = (privilegePrefix: string) => {
+  const roleWithArtifactReadPrivilege = getRoleWithArtifactReadPrivilege(privilegePrefix);
+  loginWithCustomRole('roleWithArtifactReadPrivilege', roleWithArtifactReadPrivilege);
+};
+
 const loginWithPrivilegeNone = (privilegePrefix: string) => {
   const roleWithoutArtifactPrivilege = getRoleWithoutArtifactPrivilege(privilegePrefix);
-  loginWithCustomRole('onlyPolicyManagementButNoArtifacts', roleWithoutArtifactPrivilege);
+
+  loginWithCustomRole('roleWithoutArtifactPrivilege', roleWithoutArtifactPrivilege);
+};
+
+const getRoleWithArtifactReadPrivilege = (privilegePrefix: string) => {
+  const endpointSecurityPolicyManagerRole = getEndpointSecurityPolicyManager();
+
+  return {
+    ...endpointSecurityPolicyManagerRole,
+    kibana: [
+      {
+        ...endpointSecurityPolicyManagerRole.kibana[0],
+        feature: {
+          ...endpointSecurityPolicyManagerRole.kibana[0].feature,
+          siem: [
+            ...endpointSecurityPolicyManagerRole.kibana[0].feature.siem.filter(
+              (privilege) => privilege !== `${privilegePrefix}all`
+            ),
+            `${privilegePrefix}read`,
+          ],
+        },
+      },
+    ],
+  };
 };
 
 const getRoleWithoutArtifactPrivilege = (privilegePrefix: string) => {
@@ -73,9 +101,20 @@ describe('Artifact tabs in Policy Details page', () => {
         cy.get(`#${testData.tabId}`).should('not.exist');
       });
 
+      it(`[READ] Given there are no ${testData.title} entries, user CANNOT add an artifact`, () => {
+        loginWithPrivilegeRead(testData.privilegePrefix);
+        visitArtifactTab(testData.tabId);
+
+        cy.getBySel('policy-artifacts-empty-unexisting').should('exist');
+
+        cy.getBySel('unexisting-manage-artifacts-button').should('not.exist');
+      });
+
       it(`[ALL] Given there are no ${testData.title} entries, user can add an artifact`, () => {
         loginWithPrivilegeAll();
         visitArtifactTab(testData.tabId);
+
+        cy.getBySel('policy-artifacts-empty-unexisting').should('exist');
 
         cy.getBySel('unexisting-manage-artifacts-button').should('exist').click();
 
@@ -99,9 +138,21 @@ describe('Artifact tabs in Policy Details page', () => {
         cy.getBySel('policyDetailsPage').should('exist');
       });
 
+      it(`[READ] Given there are no assigned ${testData.title} entries, user CANNOT Manage or Assign artifacts`, () => {
+        loginWithPrivilegeRead(testData.privilegePrefix);
+        visitArtifactTab(testData.tabId);
+
+        cy.getBySel('policy-artifacts-empty-unassigned').should('exist');
+
+        cy.getBySel('unassigned-manage-artifacts-button').should('not.exist');
+        cy.getBySel('unassigned-assign-artifacts-button').should('not.exist');
+      });
+
       it(`[ALL] Given there are no assigned ${testData.title} entries, user can Manage and Assign artifacts`, () => {
         loginWithPrivilegeAll();
         visitArtifactTab(testData.tabId);
+
+        cy.getBySel('policy-artifacts-empty-unassigned').should('exist');
 
         // Manage artifacts
         cy.getBySel('unassigned-manage-artifacts-button').should('exist').click();
@@ -131,6 +182,24 @@ describe('Artifact tabs in Policy Details page', () => {
         // Assign artifacts
         cy.getBySel('artifacts-assign-button').should('exist').click();
         cy.getBySel('artifacts-assign-flyout').should('exist');
+      });
+
+      it(`[READ] Given there are assigned ${testData.title} entries, user can see the artifacts but CANNOT assign or remove from policy`, () => {
+        loginWithPrivilegeRead(testData.privilegePrefix);
+        visitArtifactTab(testData.tabId);
+
+        // List of artifacts
+        cy.getBySel('artifacts-collapsed-list-card').should('have.length', 1);
+        cy.getBySel('artifacts-collapsed-list-card-header-titleHolder').contains(
+          testData.artifactName
+        );
+
+        // Cannot assign artifacts
+        cy.getBySel('artifacts-assign-button').should('not.exist');
+
+        // Cannot remove from policy
+        cy.getBySel('artifacts-collapsed-list-card-header-actions-button').click();
+        cy.getBySel('remove-from-policy-action').should('not.exist');
       });
 
       it(`[ALL] Given there are assigned ${testData.title} entries, user can unassign a "per policy" artifact from the policy`, () => {
