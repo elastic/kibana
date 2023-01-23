@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { addIdToItem, removeIdFromItem } from '@kbn/securitysolution-utils';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import {
@@ -160,7 +160,7 @@ export const getNewExceptionItem = ({
     item_id: undefined,
     list_id: listId,
     meta: {
-      temporaryUuid: uuid.v4(),
+      temporaryUuid: uuidv4(),
     },
     name,
     namespace_type: namespaceType,
@@ -898,7 +898,7 @@ export const getFormattedBuilderEntries = (
 
 export const getDefaultEmptyEntry = (): EmptyEntry => ({
   field: '',
-  id: uuid.v4(),
+  id: uuidv4(),
   operator: OperatorEnum.INCLUDED,
   type: OperatorTypeEnum.MATCH,
   value: '',
@@ -907,7 +907,7 @@ export const getDefaultEmptyEntry = (): EmptyEntry => ({
 export const getDefaultNestedEmptyEntry = (): EmptyNestedEntry => ({
   entries: [],
   field: '',
-  id: uuid.v4(),
+  id: uuidv4(),
   type: OperatorTypeEnum.NESTED,
 });
 
