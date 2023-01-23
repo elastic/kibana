@@ -188,7 +188,7 @@ export const enterpriseSearchQuery = ({ timeRange, timeout }: QueryOptions) => {
           size: MAX_BUCKET_SIZE,
         },
         aggs: {
-          enterpriseSearch: {
+          enterprisesearch: {
             terms: {
               field: 'agent.id',
             },
