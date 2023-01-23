@@ -47,10 +47,17 @@ const flappingDescription = i18n.translate(
   }
 );
 
-const flappingEnableLabel = i18n.translate(
-  'xpack.triggersActionsUI.rulesSettings.modal.enableFlappingLabel',
+const flappingOnLabel = i18n.translate(
+  'xpack.triggersActionsUI.rulesSettings.modal.flappingOnLabel',
   {
-    defaultMessage: 'Enabled flapping detection (recommended)',
+    defaultMessage: 'On (recommended)',
+  }
+);
+
+const flappingOffLabel = i18n.translate(
+  'xpack.triggersActionsUI.rulesSettings.modal.flappingOffLabel',
+  {
+    defaultMessage: 'Off',
   }
 );
 
@@ -100,7 +107,7 @@ export const RulesSettingsModalFormLeft = memo((props: RulesSettingsModalFormLef
         <EuiFlexItem grow={false}>
           <EuiSwitch
             data-test-subj="rulesSettingsModalEnableSwitch"
-            label={flappingEnableLabel}
+            label={settings!.enabled ? flappingOnLabel : flappingOffLabel}
             checked={settings!.enabled}
             disabled={isSwitchDisabled}
             onChange={onChange}
