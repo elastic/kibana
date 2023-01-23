@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState, useRef } from 'react';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import {
   MapEmbeddable,
   MapEmbeddableInput,
@@ -83,7 +83,7 @@ function EmbeddedMapComponent({
 
       const input: MapEmbeddableInput = {
         attributes: { title: '' },
-        id: uuid.v4(),
+        id: uuidv4(),
         title: i18n.translate(
           'xpack.apm.serviceOverview.embeddedMap.input.title',
           {

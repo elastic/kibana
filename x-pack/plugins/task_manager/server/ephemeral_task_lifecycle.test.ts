@@ -14,7 +14,7 @@ import { mockLogger } from './test_utils';
 import { asErr, asOk } from './lib/result_type';
 import { FillPoolResult } from './lib/fill_pool';
 import { EphemeralTaskLifecycle, EphemeralTaskLifecycleOpts } from './ephemeral_task_lifecycle';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { asTaskPollingCycleEvent, asTaskRunEvent, TaskPersistence } from './task_events';
 import { TaskRunResult } from './task_running';
 import { TaskPoolRunResult } from './task_pool';
@@ -173,7 +173,7 @@ describe('EphemeralTaskLifecycle', () => {
 
       lifecycleEvent$.next(
         asTaskRunEvent(
-          uuid.v4(),
+          uuidv4(),
           asOk({
             task: taskManagerMock.createTask(),
             result: TaskRunResult.Success,

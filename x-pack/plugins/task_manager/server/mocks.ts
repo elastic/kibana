@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { TaskManagerSetupContract, TaskManagerStartContract } from './plugin';
 import { ConcreteTaskInstance, TaskStatus } from './task';
 
@@ -42,7 +42,7 @@ const createStartMock = () => {
 
 const createTaskMock = (overrides: Partial<ConcreteTaskInstance> = {}): ConcreteTaskInstance => {
   return {
-    id: `task_${uuid.v4()}`,
+    id: `task_${uuidv4()}`,
     attempts: 0,
     schedule: undefined,
     params: { hello: 'world' },
