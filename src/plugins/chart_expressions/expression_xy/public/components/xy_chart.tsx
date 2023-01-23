@@ -787,7 +787,7 @@ export function XYChart({
     position: uiState ? 'absolute' : 'relative',
   });
   // enable the tooltip actions only if there is at least one splitAccessor to the dataLayer
-  const hasTooltipActions = dataLayers.some((dataLayer) => dataLayer.splitAccessors);
+  const hasTooltipActions = dataLayers.some((dataLayer) => dataLayer.splitAccessors) && interactive;
 
   return (
     <div css={chartContainerStyle}>
