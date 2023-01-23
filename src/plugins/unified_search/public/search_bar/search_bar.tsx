@@ -165,13 +165,23 @@ function SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query>({
     [`uniSearchBar--${displayStyle}`]: displayStyle,
   });
 
-  const [stateQuery, setStateQuery] = useState(query ? { ...query } : undefined);
+  const [stateQuery, setStateQuery] = useState<QT | Query | AggregateQuery | undefined>(
+    query ? { ...query } : undefined
+  );
   const [stateDateRangeFrom, setStateDateRangeFrom] = useState<string>(dateRangeFrom ?? 'now-15m');
   const [stateDateRangeTo, setStateDateRangeTo] = useState<string>(dateRangeTo ?? 'now');
   const [stateOpenQueryBarMenu, setStateOpenQueryBarMenu] = useState(false);
 
   useEffect(() => {
-    if (query && !isEqual(query, stateQuery)) {
+    if (isOfQueryType(stateQuery) && isOfQueryType(query)) {
+      if (stateQuery?.language !== query?.language) {
+        setStateQuery({ query: '', language: query.language });
+      } else {
+        setStateQuery({ ...query });
+      }
+    }
+
+    if (query && !isOfQueryType(query)) {
       setStateQuery({ ...query });
     }
 
@@ -449,7 +459,7 @@ function SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query>({
             />
           ) : undefined
         }
-        query={stateQuery}
+        query={stateQuery as Query}
         refreshInterval={refreshInterval}
         screenTitle={screenTitle}
         showAddFilter={showFilterBar}
