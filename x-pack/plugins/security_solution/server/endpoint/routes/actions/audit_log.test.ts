@@ -31,7 +31,7 @@ import {
   createRouteHandlerContext,
 } from '../../mocks';
 import { registerActionAuditLogRoutes } from './audit_log';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import type { Results } from './mocks';
 import { mockAuditLogSearchResult } from './mocks';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
@@ -53,7 +53,7 @@ describe('Action Log API', () => {
 
     it('should accept a single agent ID', () => {
       expect(() => {
-        EndpointActionLogRequestSchema.params.validate({ agent_id: uuid.v4() });
+        EndpointActionLogRequestSchema.params.validate({ agent_id: uuidv4() });
       }).not.toThrow();
     });
 
