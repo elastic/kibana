@@ -106,7 +106,7 @@ async function getSessionTimeseries({
     response?.aggregations?.timeseries.buckets.map((bucket) => {
       return {
         x: bucket.key,
-        y: bucket.doc_count ?? 0,
+        y: bucket.sessions.value,
       };
     }) ?? [];
 

@@ -105,7 +105,7 @@ async function getHttpRequestsTimeseries({
     response?.aggregations?.timeseries.buckets.map((bucket) => {
       return {
         x: bucket.key,
-        y: bucket.doc_count ?? 0,
+        y: bucket.requests.doc_count,
       };
     }) ?? [];
 
