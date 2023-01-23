@@ -67,7 +67,9 @@
     "@kbn/share-plugin",
     "@kbn/core-notifications-browser",
     "@kbn/slo-schema",
-    "@kbn/core-http-server-internal",
+    "@kbn/guided-onboarding",
+    "@kbn/charts-plugin",
+    "@kbn/securitysolution-ecs",
   ],
   "exclude": [
     "target/**/*",
