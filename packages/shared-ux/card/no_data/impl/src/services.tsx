@@ -24,10 +24,10 @@ const Context = React.createContext<Services | null>(null);
  * A Context Provider that provides services to the component and its dependencies.
  */
 export const NoDataCardProvider: FC<NoDataCardServices> = ({ children, ...services }) => {
-  const { addBasePath, canAccessFleet } = services;
+  const { addBasePath, canAccessFleet, customBranding } = services;
 
   return (
-    <Context.Provider value={{ addBasePath, canAccessFleet }}>
+    <Context.Provider value={{ addBasePath, canAccessFleet, customBranding }}>
       <RedirectAppLinksProvider {...services}>{children}</RedirectAppLinksProvider>
     </Context.Provider>
   );
@@ -43,6 +43,7 @@ export const NoDataCardKibanaProvider: FC<NoDataCardKibanaDependencies> = ({
   const value: Services = {
     addBasePath: dependencies.coreStart.http.basePath.prepend,
     canAccessFleet: dependencies.coreStart.application.capabilities.navLinks.integrations,
+    customBranding: { hasCustomBranding: dependencies.coreStart.customBranding.hasCustomBranding },
   };
 
   return (

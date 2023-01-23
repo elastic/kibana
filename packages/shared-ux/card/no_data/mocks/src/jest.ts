@@ -27,13 +27,13 @@ const defaultParams = { canAccessFleet: true };
 export const getServicesMock = (params: Partial<NoDataCardServices> = defaultParams) => {
   const canAccessFleet =
     params.canAccessFleet !== undefined ? params.canAccessFleet : defaultParams.canAccessFleet;
-  const hasCustomBranding = params.hasCustomBranding ?? false;
+  const hasCustomBranding = params?.customBranding?.hasCustomBranding ?? false;
 
   const services: NoDataCardServices = {
     ...getRedirectAppLinksServicesMock(),
     canAccessFleet,
     addBasePath: (path) => path,
-    hasCustomBranding,
+    customBranding: { hasCustomBranding },
   };
 
   return services;
@@ -48,7 +48,7 @@ export const getKibanaDependenciesMock = (
   const integrations =
     params.canAccessFleet !== undefined ? params.canAccessFleet : defaultParams.canAccessFleet;
 
-  const hasCustomBranding = params.hasCustomBranding ?? false;
+  const hasCustomBranding = params?.customBranding?.hasCustomBranding ?? false;
 
   const result = deepmerge(
     {

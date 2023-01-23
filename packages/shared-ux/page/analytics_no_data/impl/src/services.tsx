@@ -45,6 +45,7 @@ export const AnalyticsNoDataPageKibanaProvider: FC<AnalyticsNoDataPageKibanaDepe
 }) => {
   const value: Services = {
     kibanaGuideDocLink: dependencies.coreStart.docLinks.links.kibana.guide,
+    kibanaHasCustomBranding: dependencies.coreStart.customBranding.hasCustomBranding,
   };
 
   return (
