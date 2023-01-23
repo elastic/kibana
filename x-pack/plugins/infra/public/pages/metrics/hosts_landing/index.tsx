@@ -9,6 +9,8 @@ import React, { useEffect, useState } from 'react';
 import { EuiButton, EuiCallOut } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EuiLink } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { HostsPage } from '../hosts';
 import { EnableHostViewPage } from './enable_host_view_page';
 
@@ -16,6 +18,10 @@ export const HostsLandingPage = () => {
   const kibana = useKibana();
   const canEditAdvancedSettings = kibana.services.application?.capabilities.advancedSettings.save;
   const [isHostViewEnabled, setIsHostViewEnabled] = useState<boolean | undefined>(undefined);
+
+  const ROLE = i18n.translate('xpack.infra.hostsLandingPage.role', {
+    defaultMessage: 'role',
+  });
 
   useEffect(() => {
     setIsHostViewEnabled(
@@ -39,7 +45,9 @@ export const HostsLandingPage = () => {
               setIsHostViewEnabled(true);
             }}
           >
-            Enable hosts view
+            {i18n.translate('xpack.infra.hostsLandingPage.role', {
+              defaultMessage: 'Enable hosts view',
+            })}
           </EuiButton>
         }
       />
@@ -51,15 +59,26 @@ export const HostsLandingPage = () => {
       actions={
         <EuiCallOut data-test-subj="hostView-no-enable-access" size="s" color="warning">
           <p>
-            Your user role doesn’t have sufficient privileges to enable this feature - please reach
-            out to your Kibana Administrator and ask them to visit this page to enable this feature.
+            {i18n.translate(
+              'xpack.infra.hostsLandingPage.calloutReachOutToYourKibanaAdministrator',
+              {
+                defaultMessage: `Your user role doesn’t have sufficient privileges to enable this feature - please 
+                reach out to your Kibana Administrator and ask them to visit this page to enable this feature.`,
+              }
+            )}
           </p>
           <p>
-            They will need a{' '}
-            <EuiLink href="https://www.elastic.co/guide/en/kibana/current/kibana-privileges.html#kibana-feature-privileges">
-              role
-            </EuiLink>{' '}
-            with Kibana &gt; Management &gt; Advanced Settings &gt; All permissions.
+            <FormattedMessage
+              id="xpack.infra.hostsLandingPage.calloutRoleClarificationWithDocsLink"
+              defaultMessage="They will need a {docsLink} with Kibana > Management > Advanced Settings > All permissions."
+              values={{
+                docsLink: (
+                  <EuiLink href="https://www.elastic.co/guide/en/kibana/current/kibana-privileges.html#kibana-feature-privileges">
+                    {ROLE}
+                  </EuiLink>
+                ),
+              }}
+            />
           </p>
         </EuiCallOut>
       }

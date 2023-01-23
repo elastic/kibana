@@ -42,7 +42,9 @@ export const HostViewIntroPanel = () => {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiLink data-test-subj="inventory-hostsView-link" {...link}>
-          Introducing a new Hosts analysis experience
+          {i18n.translate('xpack.infra.layout.hostsLandingPageLink', {
+            defaultMessage: 'Introducing a new Hosts analysis experience',
+          })}
         </EuiLink>
       </EuiFlexItem>
     </EuiFlexGroup>
