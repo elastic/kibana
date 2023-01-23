@@ -217,7 +217,7 @@ export const previewRulesRoute = async (
 
           const rule = {
             ...internalRule,
-            actions: internalRule.actions.map((action) => ({ ...action, uuid: uuid.v4() })),
+            actions: internalRule.actions.map((action) => ({ ...action, uuid: uuidv4() })),
             id: previewId,
             createdAt: new Date(),
             createdBy: username ?? 'preview-created-by',

@@ -12,7 +12,6 @@ import { Plugin } from './plugin';
 
 export type {
   RuleAction,
-  RuleActionOptionalUuid,
   Rule,
   RuleType,
   RuleTypeModel,
