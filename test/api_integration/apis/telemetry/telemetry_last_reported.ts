@@ -28,7 +28,7 @@ export default function optInTest({ getService }: FtrProviderContext) {
       await supertest
         .get('/api/telemetry/v2/last_reported')
         .set('kbn-xsrf', 'xxx')
-        .expect(200, { lastReported: undefined });
+        .expect(200, { lastReported: null });
     });
 
     it('PUT should update telemetry.lastReported to now', async () => {
