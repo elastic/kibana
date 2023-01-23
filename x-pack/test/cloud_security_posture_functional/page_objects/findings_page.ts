@@ -59,9 +59,6 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     getDropDownPopUp: () => testSubjects.find('comboBoxOptionsList '),
 
-    getElementRow: (id: string, section: string) =>
-      testSubjects.find(`findings_resource_table_row_${id}/${section}`),
-
     getHeaders: async () => {
       const element = await table.getElement();
       return await element.findAllByCssSelector('thead tr :is(th,td)');
@@ -168,17 +165,13 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
       const dropDownSelect = await dropDownPopUpBox.findByCssSelector(selector);
       await dropDownSelect.click();
     },
-
-    clickOnRowValue: async (value: string, section: string) => {
-      const findingsTable = await table.getElementRow(value, section);
-      const selector = `a[title="${value}"]`;
-      const rowValueSelect = await findingsTable.findByCssSelector(selector);
-      await rowValueSelect.click();
-    },
   };
 
   const tableGroupBy = {
     getElementGroupedBy: () => testSubjects.find('pageContainer'),
+
+    getElementRow: (id: string, section: string) =>
+      testSubjects.find(`findings_resource_table_row_${id}/${section}`),
 
     getHeaders: async () => {
       const element = await tableGroupBy.getElementGroupedBy();
@@ -215,6 +208,13 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     hasColumnValue: async (columnName: string, value: string) => {
       const values = await tableGroupBy.getColumnValues(columnName);
       return values.includes(value);
+    },
+
+    clickOnRowValue: async (value: string, section: string) => {
+      const findingsTable = await tableGroupBy.getElementRow(value, section);
+      const selector = `a[title="${value}"]`;
+      const rowValueSelect = await findingsTable.findByCssSelector(selector);
+      await rowValueSelect.click();
     },
 
     clickBasedOnText: async (value: string) => {

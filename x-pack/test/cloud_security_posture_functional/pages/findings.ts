@@ -220,7 +220,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('Clicking on resource id navigates user to different table', async () => {
         for (let outerCounter = 0; outerCounter < data.length; outerCounter++) {
-          await table.clickOnRowValue(
+          await tableGroupBy.clickOnRowValue(
             data[outerCounter].resource.id,
             data[outerCounter].rule.section
           );
