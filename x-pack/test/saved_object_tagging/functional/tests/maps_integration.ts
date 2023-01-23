@@ -50,8 +50,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('listing', () => {
       beforeEach(async () => {
+        // force refresh of maps listing page between tests
         await PageObjects.common.navigateToUrlWithBrowserHistory('maps', '/');
-        await PageObjects.maps.gotoMapListingPage();
+        await listingTable.waitUntilTableIsLoaded();
       });
 
       it('allows to manually type tag filter query', async () => {
@@ -88,6 +89,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.maps.saveMap('my-new-map', true, true, ['tag-1', 'tag-3']);
 
         await PageObjects.maps.gotoMapListingPage();
+        await listingTable.waitUntilTableIsLoaded();
         await selectFilterTags('tag-1');
         const itemNames = await listingTable.getAllItemsNames();
         expect(itemNames).to.contain('my-new-map');
@@ -124,6 +126,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.click('confirmSaveSavedObjectButton');
 
         await PageObjects.maps.gotoMapListingPage();
+        await listingTable.waitUntilTableIsLoaded();
         await selectFilterTags('my-new-tag');
         const itemNames = await listingTable.getAllItemsNames();
         expect(itemNames).to.contain('map-with-new-tag');
@@ -132,7 +135,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('editing', () => {
       beforeEach(async () => {
+        // force refresh of maps listing page between tests
         await PageObjects.common.navigateToUrlWithBrowserHistory('maps', '/');
+        await listingTable.waitUntilTableIsLoaded();
       });
 
       it('allows to select tags for an existing map', async () => {
@@ -141,6 +146,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.maps.saveMap('map 4 (tag-1)', true, true, ['tag-3']);
 
         await PageObjects.maps.gotoMapListingPage();
+        await listingTable.waitUntilTableIsLoaded();
         await selectFilterTags('tag-3');
         const itemNames = await listingTable.getAllItemsNames();
         expect(itemNames).to.contain('map 4 (tag-1)');
