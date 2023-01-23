@@ -3174,7 +3174,7 @@
             "description": [],
             "signature": [
               "(T & ",
-              "CommonAlertFields800",
+              "CommonAlertFields870",
               " & { _id: string; _index: string; })[]"
             ],
             "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",

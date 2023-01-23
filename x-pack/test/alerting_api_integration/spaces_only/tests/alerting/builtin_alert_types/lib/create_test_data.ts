@@ -6,7 +6,7 @@
  */
 import type { Client } from '@elastic/elasticsearch';
 import { times } from 'lodash';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 
 // default end date
@@ -113,7 +113,7 @@ async function createEsDocument(
   };
 
   const response = await es.index({
-    id: uuid(),
+    id: uuidv4(),
     index: indexName,
     refresh: 'wait_for',
     op_type: 'create',
