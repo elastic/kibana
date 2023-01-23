@@ -137,7 +137,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
       // Upgrade integration into 1.6.0 and rollover if found 'generic' dataset - we do not want to wait for it
       upgradeIntegration({ packageInfo, client, esClient, logger: this.logger });
-      
+
       if (registerIngestCallback) {
         registerIngestCallback(
           'packagePolicyPostCreate',
