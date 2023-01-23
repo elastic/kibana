@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createJourneyRoute } from './pings/journeys';
 import { updateDefaultAlertingRoute } from './default_alerts/update_default_alert';
 import { syncParamsSyntheticsParamsRoute } from './settings/sync_global_params';
 import { editSyntheticsParamsRoute } from './settings/edit_param';
@@ -75,6 +76,7 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   enableDefaultAlertingRoute,
   getDefaultAlertingRoute,
   updateDefaultAlertingRoute,
+  createJourneyRoute,
 ];
 
 export const syntheticsAppStreamingApiRoutes: SyntheticsStreamingRouteFactory[] = [
