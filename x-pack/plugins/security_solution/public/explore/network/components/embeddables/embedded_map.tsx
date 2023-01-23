@@ -6,14 +6,14 @@
  */
 
 import { EuiAccordion, EuiLink, EuiText } from '@elastic/eui';
-import React, { useCallback, useEffect, useState, useMemo } from 'react';
+import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
 import { createHtmlPortalNode, InPortal } from 'react-reverse-portal';
 import styled, { css } from 'styled-components';
-
 import type { Filter, Query } from '@kbn/es-query';
 import type { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import type { MapEmbeddable } from '@kbn/maps-plugin/public/embeddable';
+import { isEqual } from 'lodash/fp';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useIsFieldInIndexPattern } from '../../../containers/fields';
 import { Loader } from '../../../../common/components/loader';
@@ -123,47 +123,48 @@ export const EmbeddedMapComponent = ({
   const isFieldInIndexPattern = useIsFieldInIndexPattern();
 
   const [mapDataViews, setMapDataViews] = useState<SourcererDataView[]>([]);
+  const [availableDataViews, setAvailableDataViews] = useState<SourcererDataView[]>([]);
 
-  const availableDataViews = useMemo(() => {
+  const isMountedRef = useRef(true);
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  const fetchData = useCallback(async () => {
+    try {
+      const apiResponse = await Promise.all(
+        availableDataViews.map(async ({ title }) =>
+          isFieldInIndexPattern(title, getRequiredMapsFields(title))
+        )
+      );
+      // ensures only index patterns with maps fields are passed
+      const goodDataViews = availableDataViews.filter((_, i) => apiResponse[i] ?? false);
+      if (isMountedRef.current) {
+        setMapDataViews(goodDataViews);
+      }
+    } catch (e) {
+      if (isMountedRef.current) {
+        setMapDataViews([]);
+        addError(e, { title: i18n.ERROR_CREATING_EMBEDDABLE });
+        setIsError(true);
+      }
+    }
+  }, [addError, availableDataViews, isFieldInIndexPattern]);
+
+  useEffect(() => {
     const dataViews = kibanaDataViews.filter((dataView) =>
       selectedPatterns.includes(dataView.title)
     );
     if (selectedPatterns.length > 0 && dataViews.length === 0) {
       setIsIndexError(true);
     }
-    return dataViews;
-  }, [kibanaDataViews, selectedPatterns]);
-
-  useEffect(() => {
-    let canceled = false;
-
-    const fetchData = async () => {
-      try {
-        const apiResponse = await Promise.all(
-          availableDataViews.map(async ({ title }) =>
-            isFieldInIndexPattern(title, getRequiredMapsFields(title))
-          )
-        );
-        // ensures only index patterns with maps fields are passed
-        const goodDataViews = availableDataViews.filter((_, i) => apiResponse[i] ?? false);
-        if (!canceled) {
-          setMapDataViews(goodDataViews);
-        }
-      } catch (e) {
-        if (!canceled) {
-          setMapDataViews([]);
-          addError(e, { title: i18n.ERROR_CREATING_EMBEDDABLE });
-          setIsError(true);
-        }
-      }
-    };
-    if (availableDataViews.length) {
+    if (!isEqual(availableDataViews, dataViews)) {
+      setAvailableDataViews(dataViews);
       fetchData();
     }
-    return () => {
-      canceled = true;
-    };
-  }, [addError, availableDataViews, isFieldInIndexPattern]);
+  }, [availableDataViews, fetchData, kibanaDataViews, selectedPatterns]);
 
   // This portalNode provided by react-reverse-portal allows us re-parent the MapToolTip within our
   // own component tree instead of the embeddables (default). This is necessary to have access to
