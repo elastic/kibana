@@ -7,5 +7,12 @@
   "version": "1.0.0",
   "kibanaVersion": "kibana",
   "ui": true,
-  "requiredPlugins": ["data", "developerExamples", "presentationUtil", "controls"]
+  "requiredPlugins": [
+    "controls",
+    "data",
+    "developerExamples",
+    "embeddable",
+    "navigation",
+    "presentationUtil"
+  ]
 }

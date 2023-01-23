@@ -45,6 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.uiSettings.replace({});
+      await PageObjects.discover.cleanSidebarLocalStorage();
     });
 
     describe('field filtering', function () {
@@ -62,7 +63,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.clickFieldListItem('extension');
         expect(await testSubjects.getVisibleText('dscFieldStats-topValues')).to.be(allTermsResult);
 
-        await filterBar.addFilter('extension', 'is', 'jpg');
+        await filterBar.addFilter({ field: 'extension', operation: 'is', value: 'jpg' });
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         const onlyJpgResult = 'jpg\n100%';
@@ -409,7 +410,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'jpg\n65.0%\ncss\n15.4%\npng\n9.8%\ngif\n6.6%\nphp\n3.2%'
         );
 
-        await filterBar.addFilter('extension', 'is', 'jpg');
+        await filterBar.addFilter({ field: 'extension', operation: 'is', value: 'jpg' });
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSidebarHasLoaded();
 
@@ -540,6 +541,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.existOrFail('discoverNoResultsError'); // still has error
 
         // check that the sidebar is rendered event after a refresh
+        await PageObjects.discover.waitUntilSidebarHasLoaded();
         allFields = await PageObjects.discover.getAllFieldNames();
         expect(allFields.includes('_invalid-runtimefield')).to.be(true);
 

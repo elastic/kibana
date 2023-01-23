@@ -621,9 +621,9 @@
               "(objects: SavedObjectTarget[]) => Promise<",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesResponse",
+                "section": "def-common.SavedObjectsCollectMultiNamespaceReferencesResponse",
                 "text": "SavedObjectsCollectMultiNamespaceReferencesResponse"
               },
               ">"
@@ -3390,9 +3390,9 @@
               "(id: string) => ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.ISavedObjectsPointInTimeFinder",
+                "section": "def-common.ISavedObjectsPointInTimeFinder",
                 "text": "ISavedObjectsPointInTimeFinder"
               },
               "<unknown, unknown>"
@@ -3732,9 +3732,9 @@
               "(request: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
+                "section": "def-common.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>) => string"
@@ -3755,9 +3755,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-server.KibanaRequest",
+                    "section": "def-common.KibanaRequest",
                     "text": "KibanaRequest"
                   },
                   "<unknown, unknown, unknown, any>"
@@ -3871,9 +3871,9 @@
               "(request: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
+                "section": "def-common.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>) => ",
@@ -3901,9 +3901,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-server.KibanaRequest",
+                    "section": "def-common.KibanaRequest",
                     "text": "KibanaRequest"
                   },
                   "<unknown, unknown, unknown, any>"
@@ -3929,9 +3929,9 @@
               "(request: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
+                "section": "def-common.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>) => string"
@@ -3952,9 +3952,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-server.KibanaRequest",
+                    "section": "def-common.KibanaRequest",
                     "text": "KibanaRequest"
                   },
                   "<unknown, unknown, unknown, any>"
@@ -3980,9 +3980,9 @@
               "(request: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
+                "section": "def-common.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>) => boolean"
@@ -4003,9 +4003,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-server.KibanaRequest",
+                    "section": "def-common.KibanaRequest",
                     "text": "KibanaRequest"
                   },
                   "<unknown, unknown, unknown, any>"
@@ -4031,9 +4031,9 @@
               "(request: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
+                "section": "def-common.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>) => Promise<",
@@ -4062,9 +4062,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-server.KibanaRequest",
+                    "section": "def-common.KibanaRequest",
                     "text": "KibanaRequest"
                   },
                   "<unknown, unknown, unknown, any>"
@@ -4187,25 +4187,25 @@
           "(request: ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.KibanaRequest",
+            "section": "def-common.KibanaRequest",
             "text": "KibanaRequest"
           },
           "<unknown, unknown, unknown, any>, savedObjectsStart: ",
           {
             "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-server.SavedObjectsServiceStart",
+            "section": "def-common.SavedObjectsServiceStart",
             "text": "SavedObjectsServiceStart"
           },
           ") => ",
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-server.ISavedObjectsRepository",
+            "section": "def-common.ISavedObjectsRepository",
             "text": "ISavedObjectsRepository"
           }
         ],
@@ -4224,9 +4224,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
+                "section": "def-common.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>"
@@ -4245,9 +4245,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectsServiceStart",
+                "section": "def-common.SavedObjectsServiceStart",
                 "text": "SavedObjectsServiceStart"
               }
             ],
@@ -4273,9 +4273,9 @@
           "(request: ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.KibanaRequest",
+            "section": "def-common.KibanaRequest",
             "text": "KibanaRequest"
           },
           "<unknown, unknown, unknown, any>, baseClient: ",
@@ -4310,9 +4310,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
+                "section": "def-common.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>"

@@ -22,6 +22,7 @@ Object {
               >
                 <li
                   class="euiBreadcrumb emotion-euiBreadcrumb-page-isTruncated"
+                  data-test-subj="euiBreadcrumb"
                 >
                   <a
                     aria-current="false"
@@ -401,6 +402,7 @@ Object {
             >
               <li
                 class="euiBreadcrumb emotion-euiBreadcrumb-page-isTruncated"
+                data-test-subj="euiBreadcrumb"
               >
                 <a
                   aria-current="false"
@@ -683,6 +685,7 @@ Object {
               >
                 <li
                   class="euiBreadcrumb emotion-euiBreadcrumb-page-isTruncated"
+                  data-test-subj="euiBreadcrumb"
                 >
                   <a
                     aria-current="false"
@@ -908,6 +911,7 @@ Object {
             >
               <li
                 class="euiBreadcrumb emotion-euiBreadcrumb-page-isTruncated"
+                data-test-subj="euiBreadcrumb"
               >
                 <a
                   aria-current="false"
@@ -1190,6 +1194,7 @@ Object {
               >
                 <li
                   class="euiBreadcrumb emotion-euiBreadcrumb-page-isTruncated"
+                  data-test-subj="euiBreadcrumb"
                 >
                   <a
                     aria-current="false"
@@ -1388,6 +1393,7 @@ Object {
             >
               <li
                 class="euiBreadcrumb emotion-euiBreadcrumb-page-isTruncated"
+                data-test-subj="euiBreadcrumb"
               >
                 <a
                   aria-current="false"
@@ -1643,6 +1649,7 @@ Object {
               >
                 <li
                   class="euiBreadcrumb emotion-euiBreadcrumb-page-isTruncated"
+                  data-test-subj="euiBreadcrumb"
                 >
                   <a
                     aria-current="false"
@@ -1902,6 +1909,7 @@ Object {
             >
               <li
                 class="euiBreadcrumb emotion-euiBreadcrumb-page-isTruncated"
+                data-test-subj="euiBreadcrumb"
               >
                 <a
                   aria-current="false"

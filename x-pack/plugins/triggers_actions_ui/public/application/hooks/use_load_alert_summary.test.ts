@@ -5,72 +5,110 @@
  * 2.0.
  */
 
-import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { renderHook } from '@testing-library/react-hooks';
+import { ValidFeatureId } from '@kbn/rule-data-utils';
 import { useKibana } from '../../common/lib/kibana';
-import { mockAggsResponse, mockAlertSummaryTimeRange } from '../mock/alert_summary_widget';
+import {
+  mockedAlertSummaryResponse,
+  mockedAlertSummaryTimeRange,
+} from '../mock/alert_summary_widget';
 import { useLoadAlertSummary } from './use_load_alert_summary';
 
 jest.mock('../../common/lib/kibana');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-describe('useLoadRuleAlertsAggs', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    useKibanaMock().services.http.post = jest.fn().mockResolvedValue({ ...mockAggsResponse() });
-    useKibanaMock().services.http.get = jest.fn().mockResolvedValue({ index_name: ['mock_index'] });
+describe('useLoadAlertSummary', () => {
+  const featureIds: ValidFeatureId[] = ['apm'];
+  const mockedPostAPI = jest.fn();
+
+  beforeAll(() => {
+    useKibanaMock().services.http.post = mockedPostAPI;
   });
 
-  it('should return the expected data from the Elasticsearch Aggs. query', async () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should return the mocked data from API', async () => {
+    mockedPostAPI.mockResolvedValue({
+      ...mockedAlertSummaryResponse,
+    });
+
     const { result, waitForNextUpdate } = renderHook(() =>
       useLoadAlertSummary({
-        features: ALERTS_FEATURE_ID,
-        timeRange: mockAlertSummaryTimeRange,
+        featureIds,
+        timeRange: mockedAlertSummaryTimeRange,
       })
     );
     expect(result.current).toEqual({
       isLoading: true,
-      alertSummary: { active: 0, recovered: 0 },
+      alertSummary: {
+        activeAlertCount: 0,
+        activeAlerts: [],
+        recoveredAlertCount: 0,
+        recoveredAlerts: [],
+      },
     });
 
     await waitForNextUpdate();
+
     const { alertSummary, error } = result.current;
     expect(alertSummary).toEqual({
-      active: 1,
-      recovered: 7,
+      ...mockedAlertSummaryResponse,
     });
     expect(error).toBeFalsy();
   });
 
-  it('should have the correct query body sent to Elasticsearch', async () => {
+  it('should call API with correct input', async () => {
     const ruleId = 'c95bc120-1d56-11ed-9cc7-e7214ada1128';
-    const { utcFrom, utcTo } = mockAlertSummaryTimeRange;
+    const { utcFrom, utcTo, fixedInterval } = mockedAlertSummaryTimeRange;
     const filter = {
       term: {
         'kibana.alert.rule.uuid': ruleId,
       },
     };
+    mockedPostAPI.mockResolvedValue({
+      ...mockedAlertSummaryResponse,
+    });
+
     const { waitForNextUpdate } = renderHook(() =>
       useLoadAlertSummary({
-        features: ALERTS_FEATURE_ID,
-        timeRange: mockAlertSummaryTimeRange,
+        featureIds,
+        timeRange: mockedAlertSummaryTimeRange,
         filter,
       })
     );
 
     await waitForNextUpdate();
-    const body =
-      `{"index":"mock_index","size":0,` +
-      `"query":{"bool":{"filter":[{"range":{"@timestamp":{"gte":"${utcFrom}","lt":"${utcTo}"}}},` +
-      `{"bool":{"should":[{"term":{"kibana.alert.status":"active"}},{"term":{"kibana.alert.status":"recovered"}}]}},` +
-      `{"term":{"kibana.alert.rule.uuid":"c95bc120-1d56-11ed-9cc7-e7214ada1128"}}]}},` +
-      `"aggs":{"total":{"filters":{"filters":{"totalActiveAlerts":{"term":{"kibana.alert.status":"active"}},"totalRecoveredAlerts":{"term":{"kibana.alert.status":"recovered"}}}}}}}`;
 
-    expect(useKibanaMock().services.http.post).toHaveBeenCalledWith(
-      '/internal/rac/alerts/find',
+    const body = JSON.stringify({
+      fixed_interval: fixedInterval,
+      gte: utcFrom,
+      lte: utcTo,
+      featureIds,
+      filter: [filter],
+    });
+    expect(mockedPostAPI).toHaveBeenCalledWith(
+      '/internal/rac/alerts/_alert_summary',
       expect.objectContaining({
         body,
       })
     );
+  });
+
+  it('should return error if API call fails', async () => {
+    const error = new Error('Fetch Alert Summary Failed');
+    mockedPostAPI.mockRejectedValueOnce(error);
+
+    const { result, waitForNextUpdate } = renderHook(() =>
+      useLoadAlertSummary({
+        featureIds,
+        timeRange: mockedAlertSummaryTimeRange,
+      })
+    );
+
+    await waitForNextUpdate();
+
+    expect(result.current.error).toMatch(error.message);
   });
 });

@@ -11,16 +11,12 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 import { createExploratoryViewUrl } from '@kbn/observability-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { useGetUrlParams } from '../../../hooks';
 import { MONITOR_ROUTE, SETTINGS_ROUTE } from '../../../../../../common/constants';
 import { stringifyUrlParams } from '../../../utils/url_params';
 import { InspectorHeaderLink } from './inspector_header_link';
-
-const ADD_DATA_LABEL = i18n.translate('xpack.synthetics.addDataButtonLabel', {
-  defaultMessage: 'Add data',
-});
+import { ToggleAlertFlyoutButton } from '../../alerts/toggle_alert_flyout_button';
 
 const ANALYZE_DATA = i18n.translate('xpack.synthetics.analyzeDataButtonLabel', {
   defaultMessage: 'Explore data',
@@ -32,7 +28,6 @@ const ANALYZE_MESSAGE = i18n.translate('xpack.synthetics.analyzeDataButtonLabel.
 });
 
 export function ActionMenuContent(): React.ReactElement {
-  const kibana = useKibana();
   const { basePath } = useSyntheticsSettingsContext();
   const params = useGetUrlParams();
   const { dateRangeStart, dateRangeEnd } = params;
@@ -71,7 +66,7 @@ export function ActionMenuContent(): React.ReactElement {
 
   return (
     <EuiHeaderLinks gutterSize="xs">
-      {/* <ManageMonitorsBtn /> TODO: See if it's needed for new Synthetics App */}
+      <ToggleAlertFlyoutButton />
 
       <EuiHeaderLink
         aria-label={i18n.translate('xpack.synthetics.page_header.settingsLink.label', {
@@ -104,16 +99,6 @@ export function ActionMenuContent(): React.ReactElement {
         </EuiHeaderLink>
       </EuiToolTip>
 
-      <EuiHeaderLink
-        aria-label={i18n.translate('xpack.synthetics.page_header.addDataLink.label', {
-          defaultMessage: 'Navigate to a tutorial about adding Uptime data',
-        })}
-        href={kibana.services?.application?.getUrlForApp('/home#/tutorial/uptimeMonitors')}
-        color="primary"
-        iconType="indexOpen"
-      >
-        {ADD_DATA_LABEL}
-      </EuiHeaderLink>
       <InspectorHeaderLink />
     </EuiHeaderLinks>
   );

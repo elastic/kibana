@@ -5,15 +5,24 @@
  * 2.0.
  */
 
+import { LOADING_INDICATOR } from '../../../screens/security_header';
 import { getNewRule } from '../../../objects/rule';
 import { ALERTS_COUNT, EMPTY_ALERT_TABLE, NUMBER_OF_ALERTS } from '../../../screens/alerts';
 import { createCustomRuleEnabled } from '../../../tasks/api_calls/rules';
 import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
-import { goToClosedAlerts, goToOpenedAlerts } from '../../../tasks/alerts';
 import {
+  addExceptionFromFirstAlert,
+  goToClosedAlertsOnRuleDetailsPage,
+  goToOpenedAlertsOnRuleDetailsPage,
+} from '../../../tasks/alerts';
+import {
+  addExceptionConditions,
+  addExceptionFlyoutItemName,
   editException,
   editExceptionFlyoutItemName,
+  selectBulkCloseAlerts,
   submitEditedExceptionItem,
+  submitNewExceptionItem,
 } from '../../../tasks/exceptions';
 import {
   esArchiverLoad,
@@ -66,7 +75,7 @@ describe('Add exception using data views from rule details', () => {
         customQuery: 'agent.name:*',
         dataSource: { dataView: 'exceptions-*', type: 'dataView' },
         runsEvery: {
-          interval: '1',
+          interval: '10',
           timeType: 'Seconds',
           type: 's',
         },
@@ -75,14 +84,57 @@ describe('Add exception using data views from rule details', () => {
     );
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     goToRuleDetails();
-    goToExceptionsTab();
+    waitForAlertsToPopulate();
   });
 
   afterEach(() => {
     esArchiverUnload('exceptions_2');
   });
 
+  it('Creates an exception item from alert actions overflow menu', () => {
+    cy.get(LOADING_INDICATOR).should('not.exist');
+    addExceptionFromFirstAlert();
+    addExceptionConditions({
+      field: 'agent.name',
+      operator: 'is',
+      values: ['foo'],
+    });
+    addExceptionFlyoutItemName(ITEM_NAME);
+    selectBulkCloseAlerts();
+    submitNewExceptionItem();
+
+    // Alerts table should now be empty from having added exception and closed
+    // matching alert
+    cy.get(EMPTY_ALERT_TABLE).should('exist');
+
+    // Closed alert should appear in table
+    goToClosedAlertsOnRuleDetailsPage();
+    cy.get(ALERTS_COUNT).should('exist');
+    cy.get(NUMBER_OF_ALERTS).should('have.text', `${NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS}`);
+
+    // Remove the exception and load an event that would have matched that exception
+    // to show that said exception now starts to show up again
+    goToExceptionsTab();
+
+    // when removing exception and again, no more exist, empty screen shows again
+    removeException();
+    cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('exist');
+
+    // load more docs
+    esArchiverLoad('exceptions_2');
+
+    // now that there are no more exceptions, the docs should match and populate alerts
+    goToAlertsTab();
+    goToOpenedAlertsOnRuleDetailsPage();
+    waitForTheRuleToBeExecuted();
+    waitForAlertsToPopulate();
+
+    cy.get(ALERTS_COUNT).should('exist');
+    cy.get(NUMBER_OF_ALERTS).should('have.text', '2 alerts');
+  });
+
   it('Creates an exception item', () => {
+    goToExceptionsTab();
     // when no exceptions exist, empty component shows with action to add exception
     cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('exist');
 
@@ -106,7 +158,7 @@ describe('Add exception using data views from rule details', () => {
     cy.get(EMPTY_ALERT_TABLE).should('exist');
 
     // Closed alert should appear in table
-    goToClosedAlerts();
+    goToClosedAlertsOnRuleDetailsPage();
     cy.get(ALERTS_COUNT).should('exist');
     cy.get(NUMBER_OF_ALERTS).should('have.text', `${NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS}`);
 
@@ -123,7 +175,7 @@ describe('Add exception using data views from rule details', () => {
 
     // now that there are no more exceptions, the docs should match and populate alerts
     goToAlertsTab();
-    goToOpenedAlerts();
+    goToOpenedAlertsOnRuleDetailsPage();
     waitForTheRuleToBeExecuted();
     waitForAlertsToPopulate();
 
@@ -136,6 +188,7 @@ describe('Add exception using data views from rule details', () => {
     const ITEM_FIELD = 'unique_value.test';
     const FIELD_DIFFERENT_FROM_EXISTING_ITEM_FIELD = 'agent.name';
 
+    goToExceptionsTab();
     // add item to edit
     addFirstExceptionFromRuleDetails(
       {

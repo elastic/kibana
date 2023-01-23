@@ -356,6 +356,48 @@
       },
       {
         "parentPluginId": "@kbn/monaco",
+        "id": "def-common.ESQLCustomAutocompleteCallbacks",
+        "type": "Interface",
+        "tags": [],
+        "label": "ESQLCustomAutocompleteCallbacks",
+        "description": [],
+        "path": "packages/kbn-monaco/src/esql/lib/autocomplete/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/monaco",
+            "id": "def-common.ESQLCustomAutocompleteCallbacks.getSourceIdentifiers",
+            "type": "Function",
+            "tags": [],
+            "label": "getSourceIdentifiers",
+            "description": [],
+            "signature": [
+              "CallbackFn | undefined"
+            ],
+            "path": "packages/kbn-monaco/src/esql/lib/autocomplete/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/monaco",
+            "id": "def-common.ESQLCustomAutocompleteCallbacks.getFieldsIdentifiers",
+            "type": "Function",
+            "tags": [],
+            "label": "getFieldsIdentifiers",
+            "description": [],
+            "signature": [
+              "CallbackFn | undefined"
+            ],
+            "path": "packages/kbn-monaco/src/esql/lib/autocomplete/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/monaco",
         "id": "def-common.LangModuleType",
         "type": "Interface",
         "tags": [],
@@ -401,6 +443,20 @@
             "signature": [
               "languages",
               ".LanguageConfiguration | undefined"
+            ],
+            "path": "packages/kbn-monaco/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/monaco",
+            "id": "def-common.LangModuleType.getSuggestionProvider",
+            "type": "Object",
+            "tags": [],
+            "label": "getSuggestionProvider",
+            "description": [],
+            "signature": [
+              "Function | undefined"
             ],
             "path": "packages/kbn-monaco/src/types.ts",
             "deprecated": false,
@@ -724,6 +780,127 @@
       }
     ],
     "objects": [
+      {
+        "parentPluginId": "@kbn/monaco",
+        "id": "def-common.monacoeditoresmvseditoreditor.api",
+        "type": "Object",
+        "tags": [],
+        "label": "'monaco-editor/esm/vs/editor/editor.api'",
+        "description": [],
+        "signature": [
+          "typeof ",
+          "node_modules/monaco-editor/esm/vs/editor/editor.api"
+        ],
+        "path": "node_modules/monaco-yaml/index.d.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/monaco",
+        "id": "def-common.monacoeditoresmvseditoreditor.api",
+        "type": "Object",
+        "tags": [],
+        "label": "'monaco-editor/esm/vs/editor/editor.api'",
+        "description": [],
+        "signature": [
+          "typeof ",
+          "node_modules/monaco-editor/esm/vs/editor/editor.api"
+        ],
+        "path": "node_modules/monaco-yaml/index.d.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/monaco",
+        "id": "def-common.ESQLLang",
+        "type": "Object",
+        "tags": [],
+        "label": "ESQLLang",
+        "description": [],
+        "path": "packages/kbn-monaco/src/esql/language.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/monaco",
+            "id": "def-common.ESQLLang.ID",
+            "type": "string",
+            "tags": [],
+            "label": "ID",
+            "description": [],
+            "path": "packages/kbn-monaco/src/esql/language.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/monaco",
+            "id": "def-common.ESQLLang.onLanguage",
+            "type": "Function",
+            "tags": [],
+            "label": "onLanguage",
+            "description": [],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "packages/kbn-monaco/src/esql/language.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/monaco",
+            "id": "def-common.ESQLLang.getSuggestionProvider",
+            "type": "Function",
+            "tags": [],
+            "label": "getSuggestionProvider",
+            "description": [],
+            "signature": [
+              "(callbacks?: ",
+              {
+                "pluginId": "@kbn/monaco",
+                "scope": "common",
+                "docId": "kibKbnMonacoPluginApi",
+                "section": "def-common.ESQLCustomAutocompleteCallbacks",
+                "text": "ESQLCustomAutocompleteCallbacks"
+              },
+              " | undefined) => ",
+              "ESQLCompletionAdapter"
+            ],
+            "path": "packages/kbn-monaco/src/esql/language.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/monaco",
+                "id": "def-common.ESQLLang.getSuggestionProvider.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "callbacks",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/monaco",
+                    "scope": "common",
+                    "docId": "kibKbnMonacoPluginApi",
+                    "section": "def-common.ESQLCustomAutocompleteCallbacks",
+                    "text": "ESQLCustomAutocompleteCallbacks"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/kbn-monaco/src/esql/language.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/monaco",
         "id": "def-common.PainlessLang",

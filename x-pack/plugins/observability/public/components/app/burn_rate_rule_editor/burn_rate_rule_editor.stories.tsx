@@ -8,6 +8,7 @@
 import React from 'react';
 import { ComponentStory } from '@storybook/react';
 
+import { BurnRateRuleParams } from '../../../typings';
 import { BurnRateRuleEditor as Component } from './burn_rate_rule_editor';
 
 export default {
@@ -16,7 +17,13 @@ export default {
   argTypes: {},
 };
 
-const Template: ComponentStory<typeof Component> = () => <Component />;
+const Template: ComponentStory<typeof Component> = () => (
+  <Component
+    ruleParams={{} as BurnRateRuleParams}
+    setRuleParams={() => {}}
+    errors={{ sloId: [], longWindow: [], burnRateThreshold: [] }}
+  />
+);
 
 const defaultProps = {};
 

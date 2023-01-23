@@ -30,10 +30,12 @@ export const useExceptionsListCard = ({
   exceptionsList,
   handleExport,
   handleDelete,
+  handleManageRules,
 }: {
   exceptionsList: ExceptionListInfo;
   handleExport: ({ id, listId, namespaceType }: ListAction) => () => Promise<void>;
   handleDelete: ({ id, listId, namespaceType }: ListAction) => () => Promise<void>;
+  handleManageRules: () => void;
 }) => {
   const [viewerStatus, setViewerStatus] = useState<ViewerStatus | string>(ViewerStatus.LOADING);
   const [exceptionToEdit, setExceptionToEdit] = useState<ExceptionListItemSchema>();
@@ -130,6 +132,15 @@ export const useExceptionsListCard = ({
           })();
         },
       },
+      {
+        key: 'ManageRules',
+        icon: 'gear',
+        disabled: listCannotBeEdited,
+        label: 'Manage Rules',
+        onClick: (e: React.MouseEvent<Element, MouseEvent>) => {
+          handleManageRules();
+        },
+      },
     ],
     [
       exceptionsList.id,
@@ -138,6 +149,7 @@ export const useExceptionsListCard = ({
       handleDelete,
       handleExport,
       listCannotBeEdited,
+      handleManageRules,
     ]
   );
 
@@ -162,6 +174,7 @@ export const useExceptionsListCard = ({
   );
 
   // routes to x-pack/plugins/security_solution/public/exceptions/routes.tsx
+  // details component is here: x-pack/plugins/security_solution/public/exceptions/pages/list_detail_view/index.tsx
   const { onClick: goToExceptionDetail } = useGetSecuritySolutionLinkProps()({
     deepLinkId: SecurityPageName.exceptions,
     path: `/details/${exceptionsList.list_id}`,

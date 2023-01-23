@@ -10,10 +10,18 @@
   },
   "server": {
     "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/ml-agg-utils",
-        "id": "def-server.buildSamplerAggregation",
+        "id": "def-common.buildSamplerAggregation",
         "type": "Function",
         "tags": [],
         "label": "buildSamplerAggregation",
@@ -31,7 +39,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.buildSamplerAggregation.$1",
+            "id": "def-common.buildSamplerAggregation.$1",
             "type": "Any",
             "tags": [],
             "label": "aggs",
@@ -46,7 +54,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.buildSamplerAggregation.$2",
+            "id": "def-common.buildSamplerAggregation.$2",
             "type": "number",
             "tags": [],
             "label": "samplerShardSize",
@@ -65,7 +73,7 @@
       },
       {
         "parentPluginId": "@kbn/ml-agg-utils",
-        "id": "def-server.fetchAggIntervals",
+        "id": "def-common.fetchAggIntervals",
         "type": "Function",
         "tags": [],
         "label": "fetchAggIntervals",
@@ -76,9 +84,9 @@
           "(client: ",
           {
             "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.ElasticsearchClient",
+            "section": "def-common.ElasticsearchClient",
             "text": "ElasticsearchClient"
           },
           ", indexPattern: string, query: ",
@@ -86,9 +94,9 @@
           ", fields: ",
           {
             "pluginId": "@kbn/ml-agg-utils",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnMlAggUtilsPluginApi",
-            "section": "def-server.HistogramField",
+            "section": "def-common.HistogramField",
             "text": "HistogramField"
           },
           "[], samplerShardSize: number, runtimeMappings?: ",
@@ -96,9 +104,9 @@
           " | undefined, abortSignal?: AbortSignal | undefined, randomSamplerProbability?: number | undefined) => Promise<",
           {
             "pluginId": "@kbn/ml-agg-utils",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnMlAggUtilsPluginApi",
-            "section": "def-server.NumericColumnStatsMap",
+            "section": "def-common.NumericColumnStatsMap",
             "text": "NumericColumnStatsMap"
           },
           ">"
@@ -109,7 +117,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.fetchAggIntervals.$1",
+            "id": "def-common.fetchAggIntervals.$1",
             "type": "Object",
             "tags": [],
             "label": "client",
@@ -117,9 +125,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.ElasticsearchClient",
+                "section": "def-common.ElasticsearchClient",
                 "text": "ElasticsearchClient"
               }
             ],
@@ -130,7 +138,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.fetchAggIntervals.$2",
+            "id": "def-common.fetchAggIntervals.$2",
             "type": "string",
             "tags": [],
             "label": "indexPattern",
@@ -145,7 +153,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.fetchAggIntervals.$3",
+            "id": "def-common.fetchAggIntervals.$3",
             "type": "Object",
             "tags": [],
             "label": "query",
@@ -160,7 +168,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.fetchAggIntervals.$4",
+            "id": "def-common.fetchAggIntervals.$4",
             "type": "Array",
             "tags": [],
             "label": "fields",
@@ -168,9 +176,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/ml-agg-utils",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnMlAggUtilsPluginApi",
-                "section": "def-server.HistogramField",
+                "section": "def-common.HistogramField",
                 "text": "HistogramField"
               },
               "[]"
@@ -182,7 +190,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.fetchAggIntervals.$5",
+            "id": "def-common.fetchAggIntervals.$5",
             "type": "number",
             "tags": [],
             "label": "samplerShardSize",
@@ -197,7 +205,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.fetchAggIntervals.$6",
+            "id": "def-common.fetchAggIntervals.$6",
             "type": "Object",
             "tags": [],
             "label": "runtimeMappings",
@@ -213,7 +221,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.fetchAggIntervals.$7",
+            "id": "def-common.fetchAggIntervals.$7",
             "type": "Object",
             "tags": [],
             "label": "abortSignal",
@@ -228,7 +236,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.fetchAggIntervals.$8",
+            "id": "def-common.fetchAggIntervals.$8",
             "type": "number",
             "tags": [],
             "label": "randomSamplerProbability",
@@ -247,7 +255,7 @@
       },
       {
         "parentPluginId": "@kbn/ml-agg-utils",
-        "id": "def-server.fetchHistogramsForFields",
+        "id": "def-common.fetchHistogramsForFields",
         "type": "Function",
         "tags": [],
         "label": "fetchHistogramsForFields",
@@ -258,17 +266,17 @@
           "(client: ",
           {
             "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.ElasticsearchClient",
+            "section": "def-common.ElasticsearchClient",
             "text": "ElasticsearchClient"
           },
           ", indexPattern: string, query: any, fields: ",
           {
             "pluginId": "@kbn/ml-agg-utils",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnMlAggUtilsPluginApi",
-            "section": "def-server.FieldsForHistograms",
+            "section": "def-common.FieldsForHistograms",
             "text": "FieldsForHistograms"
           },
           ", samplerShardSize: number, runtimeMappings?: ",
@@ -276,9 +284,9 @@
           " | undefined, abortSignal?: AbortSignal | undefined, randomSamplerProbability?: number | undefined) => Promise<(",
           {
             "pluginId": "@kbn/ml-agg-utils",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnMlAggUtilsPluginApi",
-            "section": "def-server.NumericChartData",
+            "section": "def-common.NumericChartData",
             "text": "NumericChartData"
           },
           " | OrdinalChartData | UnsupportedChartData)[]>"
@@ -289,7 +297,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.fetchHistogramsForFields.$1",
+            "id": "def-common.fetchHistogramsForFields.$1",
             "type": "Object",
             "tags": [],
             "label": "client",
@@ -299,9 +307,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.ElasticsearchClient",
+                "section": "def-common.ElasticsearchClient",
                 "text": "ElasticsearchClient"
               }
             ],
@@ -312,7 +320,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.fetchHistogramsForFields.$2",
+            "id": "def-common.fetchHistogramsForFields.$2",
             "type": "string",
             "tags": [],
             "label": "indexPattern",
@@ -329,7 +337,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.fetchHistogramsForFields.$3",
+            "id": "def-common.fetchHistogramsForFields.$3",
             "type": "Any",
             "tags": [],
             "label": "query",
@@ -346,7 +354,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.fetchHistogramsForFields.$4",
+            "id": "def-common.fetchHistogramsForFields.$4",
             "type": "Array",
             "tags": [],
             "label": "fields",
@@ -356,9 +364,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/ml-agg-utils",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnMlAggUtilsPluginApi",
-                "section": "def-server.FieldsForHistograms",
+                "section": "def-common.FieldsForHistograms",
                 "text": "FieldsForHistograms"
               }
             ],
@@ -369,7 +377,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.fetchHistogramsForFields.$5",
+            "id": "def-common.fetchHistogramsForFields.$5",
             "type": "number",
             "tags": [],
             "label": "samplerShardSize",
@@ -386,7 +394,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.fetchHistogramsForFields.$6",
+            "id": "def-common.fetchHistogramsForFields.$6",
             "type": "Object",
             "tags": [],
             "label": "runtimeMappings",
@@ -404,7 +412,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.fetchHistogramsForFields.$7",
+            "id": "def-common.fetchHistogramsForFields.$7",
             "type": "Object",
             "tags": [],
             "label": "abortSignal",
@@ -419,7 +427,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.fetchHistogramsForFields.$8",
+            "id": "def-common.fetchHistogramsForFields.$8",
             "type": "number",
             "tags": [],
             "label": "randomSamplerProbability",
@@ -442,7 +450,7 @@
       },
       {
         "parentPluginId": "@kbn/ml-agg-utils",
-        "id": "def-server.getSampleProbability",
+        "id": "def-common.getSampleProbability",
         "type": "Function",
         "tags": [],
         "label": "getSampleProbability",
@@ -456,7 +464,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.getSampleProbability.$1",
+            "id": "def-common.getSampleProbability.$1",
             "type": "number",
             "tags": [],
             "label": "totalDocCount",
@@ -475,7 +483,7 @@
       },
       {
         "parentPluginId": "@kbn/ml-agg-utils",
-        "id": "def-server.getSamplerAggregationsResponsePath",
+        "id": "def-common.getSamplerAggregationsResponsePath",
         "type": "Function",
         "tags": [],
         "label": "getSamplerAggregationsResponsePath",
@@ -489,7 +497,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.getSamplerAggregationsResponsePath.$1",
+            "id": "def-common.getSamplerAggregationsResponsePath.$1",
             "type": "number",
             "tags": [],
             "label": "samplerShardSize",
@@ -508,7 +516,7 @@
       },
       {
         "parentPluginId": "@kbn/ml-agg-utils",
-        "id": "def-server.numberValidator",
+        "id": "def-common.numberValidator",
         "type": "Function",
         "tags": [],
         "label": "numberValidator",
@@ -519,9 +527,9 @@
           "(conditions: { min?: number | undefined; max?: number | undefined; integerOnly?: boolean | undefined; } | undefined) => (value: number) => ",
           {
             "pluginId": "@kbn/ml-agg-utils",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnMlAggUtilsPluginApi",
-            "section": "def-server.NumberValidationResult",
+            "section": "def-common.NumberValidationResult",
             "text": "NumberValidationResult"
           },
           " | null"
@@ -532,7 +540,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.numberValidator.$1",
+            "id": "def-common.numberValidator.$1",
             "type": "Object",
             "tags": [],
             "label": "conditions",
@@ -543,7 +551,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/ml-agg-utils",
-                "id": "def-server.numberValidator.$1.min",
+                "id": "def-common.numberValidator.$1.min",
                 "type": "number",
                 "tags": [],
                 "label": "min",
@@ -557,7 +565,7 @@
               },
               {
                 "parentPluginId": "@kbn/ml-agg-utils",
-                "id": "def-server.numberValidator.$1.max",
+                "id": "def-common.numberValidator.$1.max",
                 "type": "number",
                 "tags": [],
                 "label": "max",
@@ -571,7 +579,7 @@
               },
               {
                 "parentPluginId": "@kbn/ml-agg-utils",
-                "id": "def-server.numberValidator.$1.integerOnly",
+                "id": "def-common.numberValidator.$1.integerOnly",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "integerOnly",
@@ -593,7 +601,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/ml-agg-utils",
-        "id": "def-server.AggCardinality",
+        "id": "def-common.AggCardinality",
         "type": "Interface",
         "tags": [],
         "label": "AggCardinality",
@@ -606,7 +614,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.AggCardinality.cardinality",
+            "id": "def-common.AggCardinality.cardinality",
             "type": "CompoundType",
             "tags": [],
             "label": "cardinality",
@@ -623,7 +631,7 @@
       },
       {
         "parentPluginId": "@kbn/ml-agg-utils",
-        "id": "def-server.ChangePoint",
+        "id": "def-common.ChangePoint",
         "type": "Interface",
         "tags": [],
         "label": "ChangePoint",
@@ -633,17 +641,17 @@
         "signature": [
           {
             "pluginId": "@kbn/ml-agg-utils",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnMlAggUtilsPluginApi",
-            "section": "def-server.ChangePoint",
+            "section": "def-common.ChangePoint",
             "text": "ChangePoint"
           },
           " extends ",
           {
             "pluginId": "@kbn/ml-agg-utils",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnMlAggUtilsPluginApi",
-            "section": "def-server.FieldValuePair",
+            "section": "def-common.FieldValuePair",
             "text": "FieldValuePair"
           }
         ],
@@ -653,7 +661,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.ChangePoint.doc_count",
+            "id": "def-common.ChangePoint.doc_count",
             "type": "number",
             "tags": [],
             "label": "doc_count",
@@ -664,7 +672,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.ChangePoint.bg_count",
+            "id": "def-common.ChangePoint.bg_count",
             "type": "number",
             "tags": [],
             "label": "bg_count",
@@ -675,7 +683,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.ChangePoint.total_doc_count",
+            "id": "def-common.ChangePoint.total_doc_count",
             "type": "number",
             "tags": [],
             "label": "total_doc_count",
@@ -686,7 +694,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.ChangePoint.total_bg_count",
+            "id": "def-common.ChangePoint.total_bg_count",
             "type": "number",
             "tags": [],
             "label": "total_bg_count",
@@ -697,7 +705,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.ChangePoint.score",
+            "id": "def-common.ChangePoint.score",
             "type": "number",
             "tags": [],
             "label": "score",
@@ -708,7 +716,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.ChangePoint.pValue",
+            "id": "def-common.ChangePoint.pValue",
             "type": "CompoundType",
             "tags": [],
             "label": "pValue",
@@ -722,7 +730,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.ChangePoint.normalizedScore",
+            "id": "def-common.ChangePoint.normalizedScore",
             "type": "number",
             "tags": [],
             "label": "normalizedScore",
@@ -733,7 +741,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.ChangePoint.histogram",
+            "id": "def-common.ChangePoint.histogram",
             "type": "Array",
             "tags": [],
             "label": "histogram",
@@ -741,12 +749,26 @@
             "signature": [
               {
                 "pluginId": "@kbn/ml-agg-utils",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnMlAggUtilsPluginApi",
-                "section": "def-server.ChangePointHistogramItem",
+                "section": "def-common.ChangePointHistogramItem",
                 "text": "ChangePointHistogramItem"
               },
               "[] | undefined"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.ChangePoint.unique",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "unique",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
             "deprecated": false,
@@ -757,7 +779,7 @@
       },
       {
         "parentPluginId": "@kbn/ml-agg-utils",
-        "id": "def-server.ChangePointGroup",
+        "id": "def-common.ChangePointGroup",
         "type": "Interface",
         "tags": [],
         "label": "ChangePointGroup",
@@ -770,7 +792,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.ChangePointGroup.id",
+            "id": "def-common.ChangePointGroup.id",
             "type": "string",
             "tags": [],
             "label": "id",
@@ -781,7 +803,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.ChangePointGroup.group",
+            "id": "def-common.ChangePointGroup.group",
             "type": "Array",
             "tags": [],
             "label": "group",
@@ -795,7 +817,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.ChangePointGroup.docCount",
+            "id": "def-common.ChangePointGroup.docCount",
             "type": "number",
             "tags": [],
             "label": "docCount",
@@ -806,7 +828,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.ChangePointGroup.pValue",
+            "id": "def-common.ChangePointGroup.pValue",
             "type": "CompoundType",
             "tags": [],
             "label": "pValue",
@@ -820,7 +842,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.ChangePointGroup.histogram",
+            "id": "def-common.ChangePointGroup.histogram",
             "type": "Array",
             "tags": [],
             "label": "histogram",
@@ -828,9 +850,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/ml-agg-utils",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnMlAggUtilsPluginApi",
-                "section": "def-server.ChangePointHistogramItem",
+                "section": "def-common.ChangePointHistogramItem",
                 "text": "ChangePointHistogramItem"
               },
               "[] | undefined"
@@ -844,7 +866,7 @@
       },
       {
         "parentPluginId": "@kbn/ml-agg-utils",
-        "id": "def-server.ChangePointGroupHistogram",
+        "id": "def-common.ChangePointGroupHistogram",
         "type": "Interface",
         "tags": [],
         "label": "ChangePointGroupHistogram",
@@ -857,7 +879,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.ChangePointGroupHistogram.id",
+            "id": "def-common.ChangePointGroupHistogram.id",
             "type": "string",
             "tags": [],
             "label": "id",
@@ -868,7 +890,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.ChangePointGroupHistogram.histogram",
+            "id": "def-common.ChangePointGroupHistogram.histogram",
             "type": "Array",
             "tags": [],
             "label": "histogram",
@@ -876,9 +898,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/ml-agg-utils",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnMlAggUtilsPluginApi",
-                "section": "def-server.ChangePointHistogramItem",
+                "section": "def-common.ChangePointHistogramItem",
                 "text": "ChangePointHistogramItem"
               },
               "[]"
@@ -892,7 +914,7 @@
       },
       {
         "parentPluginId": "@kbn/ml-agg-utils",
-        "id": "def-server.ChangePointHistogram",
+        "id": "def-common.ChangePointHistogram",
         "type": "Interface",
         "tags": [],
         "label": "ChangePointHistogram",
@@ -902,17 +924,17 @@
         "signature": [
           {
             "pluginId": "@kbn/ml-agg-utils",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnMlAggUtilsPluginApi",
-            "section": "def-server.ChangePointHistogram",
+            "section": "def-common.ChangePointHistogram",
             "text": "ChangePointHistogram"
           },
           " extends ",
           {
             "pluginId": "@kbn/ml-agg-utils",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnMlAggUtilsPluginApi",
-            "section": "def-server.FieldValuePair",
+            "section": "def-common.FieldValuePair",
             "text": "FieldValuePair"
           }
         ],
@@ -922,7 +944,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.ChangePointHistogram.histogram",
+            "id": "def-common.ChangePointHistogram.histogram",
             "type": "Array",
             "tags": [],
             "label": "histogram",
@@ -930,9 +952,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/ml-agg-utils",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnMlAggUtilsPluginApi",
-                "section": "def-server.ChangePointHistogramItem",
+                "section": "def-common.ChangePointHistogramItem",
                 "text": "ChangePointHistogramItem"
               },
               "[]"
@@ -946,7 +968,7 @@
       },
       {
         "parentPluginId": "@kbn/ml-agg-utils",
-        "id": "def-server.ChangePointHistogramItem",
+        "id": "def-common.ChangePointHistogramItem",
         "type": "Interface",
         "tags": [],
         "label": "ChangePointHistogramItem",
@@ -959,7 +981,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.ChangePointHistogramItem.doc_count_overall",
+            "id": "def-common.ChangePointHistogramItem.doc_count_overall",
             "type": "number",
             "tags": [],
             "label": "doc_count_overall",
@@ -970,7 +992,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.ChangePointHistogramItem.doc_count_change_point",
+            "id": "def-common.ChangePointHistogramItem.doc_count_change_point",
             "type": "number",
             "tags": [],
             "label": "doc_count_change_point",
@@ -981,7 +1003,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.ChangePointHistogramItem.key",
+            "id": "def-common.ChangePointHistogramItem.key",
             "type": "number",
             "tags": [],
             "label": "key",
@@ -992,7 +1014,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.ChangePointHistogramItem.key_as_string",
+            "id": "def-common.ChangePointHistogramItem.key_as_string",
             "type": "string",
             "tags": [],
             "label": "key_as_string",
@@ -1006,7 +1028,7 @@
       },
       {
         "parentPluginId": "@kbn/ml-agg-utils",
-        "id": "def-server.FieldValuePair",
+        "id": "def-common.FieldValuePair",
         "type": "Interface",
         "tags": [],
         "label": "FieldValuePair",
@@ -1019,7 +1041,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.FieldValuePair.fieldName",
+            "id": "def-common.FieldValuePair.fieldName",
             "type": "string",
             "tags": [],
             "label": "fieldName",
@@ -1030,7 +1052,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.FieldValuePair.fieldValue",
+            "id": "def-common.FieldValuePair.fieldValue",
             "type": "CompoundType",
             "tags": [],
             "label": "fieldValue",
@@ -1047,7 +1069,7 @@
       },
       {
         "parentPluginId": "@kbn/ml-agg-utils",
-        "id": "def-server.HistogramField",
+        "id": "def-common.HistogramField",
         "type": "Interface",
         "tags": [],
         "label": "HistogramField",
@@ -1060,7 +1082,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.HistogramField.fieldName",
+            "id": "def-common.HistogramField.fieldName",
             "type": "string",
             "tags": [],
             "label": "fieldName",
@@ -1071,7 +1093,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.HistogramField.type",
+            "id": "def-common.HistogramField.type",
             "type": "Enum",
             "tags": [],
             "label": "type",
@@ -1094,7 +1116,7 @@
       },
       {
         "parentPluginId": "@kbn/ml-agg-utils",
-        "id": "def-server.NumberValidationResult",
+        "id": "def-common.NumberValidationResult",
         "type": "Interface",
         "tags": [],
         "label": "NumberValidationResult",
@@ -1105,7 +1127,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.NumberValidationResult.min",
+            "id": "def-common.NumberValidationResult.min",
             "type": "boolean",
             "tags": [],
             "label": "min",
@@ -1116,7 +1138,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.NumberValidationResult.max",
+            "id": "def-common.NumberValidationResult.max",
             "type": "boolean",
             "tags": [],
             "label": "max",
@@ -1127,7 +1149,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.NumberValidationResult.integerOnly",
+            "id": "def-common.NumberValidationResult.integerOnly",
             "type": "boolean",
             "tags": [],
             "label": "integerOnly",
@@ -1141,7 +1163,7 @@
       },
       {
         "parentPluginId": "@kbn/ml-agg-utils",
-        "id": "def-server.NumericChartData",
+        "id": "def-common.NumericChartData",
         "type": "Interface",
         "tags": [],
         "label": "NumericChartData",
@@ -1154,7 +1176,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.NumericChartData.data",
+            "id": "def-common.NumericChartData.data",
             "type": "Array",
             "tags": [],
             "label": "data",
@@ -1168,7 +1190,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.NumericChartData.id",
+            "id": "def-common.NumericChartData.id",
             "type": "string",
             "tags": [],
             "label": "id",
@@ -1179,7 +1201,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.NumericChartData.interval",
+            "id": "def-common.NumericChartData.interval",
             "type": "number",
             "tags": [],
             "label": "interval",
@@ -1190,7 +1212,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.NumericChartData.stats",
+            "id": "def-common.NumericChartData.stats",
             "type": "Object",
             "tags": [],
             "label": "stats",
@@ -1204,7 +1226,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.NumericChartData.type",
+            "id": "def-common.NumericChartData.type",
             "type": "string",
             "tags": [],
             "label": "type",
@@ -1221,7 +1243,7 @@
       },
       {
         "parentPluginId": "@kbn/ml-agg-utils",
-        "id": "def-server.NumericColumnStats",
+        "id": "def-common.NumericColumnStats",
         "type": "Interface",
         "tags": [],
         "label": "NumericColumnStats",
@@ -1234,7 +1256,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.NumericColumnStats.interval",
+            "id": "def-common.NumericColumnStats.interval",
             "type": "number",
             "tags": [],
             "label": "interval",
@@ -1245,7 +1267,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.NumericColumnStats.min",
+            "id": "def-common.NumericColumnStats.min",
             "type": "number",
             "tags": [],
             "label": "min",
@@ -1256,7 +1278,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.NumericColumnStats.max",
+            "id": "def-common.NumericColumnStats.max",
             "type": "number",
             "tags": [],
             "label": "max",
@@ -1270,7 +1292,7 @@
       },
       {
         "parentPluginId": "@kbn/ml-agg-utils",
-        "id": "def-server.NumericHistogramField",
+        "id": "def-common.NumericHistogramField",
         "type": "Interface",
         "tags": [],
         "label": "NumericHistogramField",
@@ -1280,17 +1302,17 @@
         "signature": [
           {
             "pluginId": "@kbn/ml-agg-utils",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnMlAggUtilsPluginApi",
-            "section": "def-server.NumericHistogramField",
+            "section": "def-common.NumericHistogramField",
             "text": "NumericHistogramField"
           },
           " extends ",
           {
             "pluginId": "@kbn/ml-agg-utils",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnMlAggUtilsPluginApi",
-            "section": "def-server.HistogramField",
+            "section": "def-common.HistogramField",
             "text": "HistogramField"
           }
         ],
@@ -1300,7 +1322,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-server.NumericHistogramField.type",
+            "id": "def-common.NumericHistogramField.type",
             "type": "CompoundType",
             "tags": [],
             "label": "type",
@@ -1335,7 +1357,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/ml-agg-utils",
-        "id": "def-server.FieldsForHistograms",
+        "id": "def-common.FieldsForHistograms",
         "type": "Type",
         "tags": [],
         "label": "FieldsForHistograms",
@@ -1346,9 +1368,9 @@
           "(",
           {
             "pluginId": "@kbn/ml-agg-utils",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnMlAggUtilsPluginApi",
-            "section": "def-server.NumericHistogramField",
+            "section": "def-common.NumericHistogramField",
             "text": "NumericHistogramField"
           },
           " | NumericHistogramFieldWithColumnStats | OrdinalHistogramField | UnsupportedHistogramField)[]"
@@ -1360,7 +1382,7 @@
       },
       {
         "parentPluginId": "@kbn/ml-agg-utils",
-        "id": "def-server.NumericColumnStatsMap",
+        "id": "def-common.NumericColumnStatsMap",
         "type": "Type",
         "tags": [],
         "label": "NumericColumnStatsMap",
@@ -1371,9 +1393,9 @@
           "{ [x: string]: ",
           {
             "pluginId": "@kbn/ml-agg-utils",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnMlAggUtilsPluginApi",
-            "section": "def-server.NumericColumnStats",
+            "section": "def-common.NumericColumnStats",
             "text": "NumericColumnStats"
           },
           "; }"
@@ -1385,7 +1407,7 @@
       },
       {
         "parentPluginId": "@kbn/ml-agg-utils",
-        "id": "def-server.RANDOM_SAMPLER_SEED",
+        "id": "def-common.RANDOM_SAMPLER_SEED",
         "type": "number",
         "tags": [],
         "label": "RANDOM_SAMPLER_SEED",
@@ -1399,14 +1421,6 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": []
   }
 }

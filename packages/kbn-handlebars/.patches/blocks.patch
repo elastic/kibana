@@ -304,123 +304,141 @@
 ---
 >   describe('decorators', () => {
 >     it('should apply mustache decorators', () => {
-299c203
+299,300c203,204
 <         .withHelper('helper', function(options) {
+<           return options.fn.run;
 ---
->         .withHelper('helper', function (options) {
-302c206,207
+>         .withHelper('helper', function (options: Handlebars.HelperOptions) {
+>           return (options.fn as any).run;
+302,303c206,207
 <         .withDecorator('decorator', function(fn) {
+<           fn.run = 'success';
 ---
 >         .withDecorator('decorator', function (fn) {
->           // @ts-expect-error: Property 'run' does not exist on type 'TemplateDelegate<any>'
-309c214
+>           (fn as any).run = 'success';
+309c213
 <     it('should apply allow undefined return', function() {
 ---
 >     it('should apply allow undefined return', () => {
-311c216
+311,312c215,216
 <         .withHelper('helper', function(options) {
+<           return options.fn() + options.fn.run;
 ---
->         .withHelper('helper', function (options) {
-314c219,220
+>         .withHelper('helper', function (options: Handlebars.HelperOptions) {
+>           return options.fn() + (options.fn as any).run;
+314,315c218,219
 <         .withDecorator('decorator', function(fn) {
+<           fn.run = 'cess';
 ---
 >         .withDecorator('decorator', function (fn) {
->           // @ts-expect-error: Property 'run' does not exist on type 'TemplateDelegate<any>'
-320,324c226,228
+>           (fn as any).run = 'cess';
+320,325c224,227
 <     it('should apply block decorators', function() {
 <       expectTemplate(
 <         '{{#helper}}{{#*decorator}}success{{/decorator}}{{/helper}}'
 <       )
 <         .withHelper('helper', function(options) {
+<           return options.fn.run;
 ---
 >     it('should apply block decorators', () => {
 >       expectTemplate('{{#helper}}{{#*decorator}}success{{/decorator}}{{/helper}}')
->         .withHelper('helper', function (options) {
-327c231,232
+>         .withHelper('helper', function (options: Handlebars.HelperOptions) {
+>           return (options.fn as any).run;
+327,328c229,230
 <         .withDecorator('decorator', function(fn, props, container, options) {
+<           fn.run = options.fn();
 ---
 >         .withDecorator('decorator', function (fn, props, container, options) {
->           // @ts-expect-error: Property 'run' does not exist on type 'TemplateDelegate<any>'
-334c239
+>           (fn as any).run = options.fn();
+334c236
 <     it('should support nested decorators', function() {
 ---
 >     it('should support nested decorators', () => {
-338c243
+338,339c240,241
 <         .withHelper('helper', function(options) {
+<           return options.fn.run;
 ---
->         .withHelper('helper', function (options) {
-342c247,248
+>         .withHelper('helper', function (options: Handlebars.HelperOptions) {
+>           return (options.fn as any).run;
+342,343c244,245
 <           decorator: function(fn, props, container, options) {
+<             fn.run = options.fn.nested + options.fn();
 ---
 >           decorator(fn, props, container, options) {
->             // @ts-expect-error: Property 'run' does not exist on type 'TemplateDelegate<any>'
-346c252
+>             (fn as any).run = options.fn.nested + options.fn();
+346c248
 <           nested: function(fn, props, container, options) {
 ---
 >           nested(fn, props, container, options) {
-348c254
+348c250
 <           }
 ---
 >           },
-353c259
+353c255
 <     it('should apply multiple decorators', function() {
 ---
 >     it('should apply multiple decorators', () => {
-357c263
+357,358c259,260
 <         .withHelper('helper', function(options) {
+<           return options.fn.run;
 ---
->         .withHelper('helper', function (options) {
-360c266,267
+>         .withHelper('helper', function (options: Handlebars.HelperOptions) {
+>           return (options.fn as any).run;
+360,361c262,263
 <         .withDecorator('decorator', function(fn, props, container, options) {
+<           fn.run = (fn.run || '') + options.fn();
 ---
 >         .withDecorator('decorator', function (fn, props, container, options) {
->           // @ts-expect-error: Property 'run' does not exist on type 'TemplateDelegate<any>'
-367c274
+>           (fn as any).run = ((fn as any).run || '') + options.fn();
+367c269
 <     it('should access parent variables', function() {
 ---
 >     it('should access parent variables', () => {
-369c276
+369,370c271,272
 <         .withHelper('helper', function(options) {
+<           return options.fn.run;
 ---
->         .withHelper('helper', function (options) {
-372c279,280
+>         .withHelper('helper', function (options: Handlebars.HelperOptions) {
+>           return (options.fn as any).run;
+372,373c274,275
 <         .withDecorator('decorator', function(fn, props, container, options) {
+<           fn.run = options.args;
 ---
 >         .withDecorator('decorator', function (fn, props, container, options) {
->           // @ts-expect-error: Property 'run' does not exist on type 'TemplateDelegate<any>'
-380,381c288,289
+>           (fn as any).run = options.args;
+380,381c282,283
 <     it('should work with root program', function() {
 <       var run;
 ---
 >     it('should work with root program', () => {
 >       let run;
-383,384c291,292
+383,384c285,286
 <         .withDecorator('decorator', function(fn, props, container, options) {
 <           equals(options.args[0], 'success');
 ---
 >         .withDecorator('decorator', function (fn, props, container, options) {
 >           expect(options.args[0]).toEqual('success');
-390c298
+390c292
 <       equals(run, true);
 ---
 >       expect(run).toEqual(true);
-393,394c301,302
+393,394c295,296
 <     it('should fail when accessing variables from root', function() {
 <       var run;
 ---
 >     it('should fail when accessing variables from root', () => {
 >       let run;
-396,397c304,305
+396,397c298,299
 <         .withDecorator('decorator', function(fn, props, container, options) {
 <           equals(options.args[0], undefined);
 ---
 >         .withDecorator('decorator', function (fn, props, container, options) {
 >           expect(options.args[0]).toBeUndefined();
-403c311
+403c305
 <       equals(run, true);
 ---
 >       expect(run).toEqual(true);
-406,408c314,317
+406,408c308,311
 <     describe('registration', function() {
 <       it('unregisters', function() {
 <         handlebarsEnv.decorators = {};
@@ -429,15 +447,19 @@
 >       beforeEach(() => {
 >         global.kbnHandlebarsEnv = Handlebars.create();
 >       });
-410c319,323
+410c313,321
 <         handlebarsEnv.registerDecorator('foo', function() {
 ---
+>       afterEach(() => {
+>         global.kbnHandlebarsEnv = null;
+>       });
+> 
 >       it('unregisters', () => {
 >         // @ts-expect-error: Cannot assign to 'decorators' because it is a read-only property.
 >         kbnHandlebarsEnv!.decorators = {};
 > 
 >         kbnHandlebarsEnv!.registerDecorator('foo', function () {
-414,416c327,329
+414,416c325,327
 <         equals(!!handlebarsEnv.decorators.foo, true);
 <         handlebarsEnv.unregisterDecorator('foo');
 <         equals(handlebarsEnv.decorators.foo, undefined);
@@ -445,14 +467,14 @@
 >         expect(!!kbnHandlebarsEnv!.decorators.foo).toEqual(true);
 >         kbnHandlebarsEnv!.unregisterDecorator('foo');
 >         expect(kbnHandlebarsEnv!.decorators.foo).toBeUndefined();
-419,420c332,334
+419,420c330,332
 <       it('allows multiple globals', function() {
 <         handlebarsEnv.decorators = {};
 ---
 >       it('allows multiple globals', () => {
 >         // @ts-expect-error: Cannot assign to 'decorators' because it is a read-only property.
 >         kbnHandlebarsEnv!.decorators = {};
-422,424c336,339
+422,424c334,337
 <         handlebarsEnv.registerDecorator({
 <           foo: function() {},
 <           bar: function() {}
@@ -461,7 +483,7 @@
 >         kbnHandlebarsEnv!.registerDecorator({
 >           foo() {},
 >           bar() {},
-427,432c342,347
+427,432c340,345
 <         equals(!!handlebarsEnv.decorators.foo, true);
 <         equals(!!handlebarsEnv.decorators.bar, true);
 <         handlebarsEnv.unregisterDecorator('foo');
@@ -475,7 +497,7 @@
 >         kbnHandlebarsEnv!.unregisterDecorator('bar');
 >         expect(kbnHandlebarsEnv!.decorators.foo).toBeUndefined();
 >         expect(kbnHandlebarsEnv!.decorators.bar).toBeUndefined();
-435,445c350,356
+435,445c348,354
 <       it('fails with multiple and args', function() {
 <         shouldThrow(
 <           function() {
@@ -495,7 +517,7 @@
 >             {
 >               world() {
 >                 return 'world!';
-447,452c358,364
+447,452c356,362
 <               {}
 <             );
 <           },

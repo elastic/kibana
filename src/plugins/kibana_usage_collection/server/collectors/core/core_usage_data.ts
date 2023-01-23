@@ -253,6 +253,7 @@ export interface CoreConfigUsageData {
       referrerPolicy: string;
       permissionsPolicyConfigured: boolean;
       disableEmbedding: boolean;
+      crossOriginOpenerPolicy: string;
     };
   };
 

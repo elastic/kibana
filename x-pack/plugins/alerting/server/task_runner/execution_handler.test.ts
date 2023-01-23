@@ -846,6 +846,7 @@ describe('Execution Handler', () => {
       generateExecutionParams({
         rule: {
           ...defaultExecutionParams.rule,
+          mutedInstanceIds: ['foo'],
           actions: [
             {
               id: '1',
@@ -872,6 +873,7 @@ describe('Execution Handler', () => {
       executionUuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
       ruleId: '1',
       spaceId: 'test1',
+      excludedAlertInstanceIds: ['foo'],
     });
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
     expect(actionsClient.bulkEnqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
@@ -959,6 +961,7 @@ describe('Execution Handler', () => {
       generateExecutionParams({
         rule: {
           ...defaultExecutionParams.rule,
+          mutedInstanceIds: ['foo'],
           actions: [
             {
               id: '1',
@@ -986,6 +989,7 @@ describe('Execution Handler', () => {
       end: new Date(),
       ruleId: '1',
       spaceId: 'test1',
+      excludedAlertInstanceIds: ['foo'],
     });
     expect(result).toEqual({
       throttledActions: {

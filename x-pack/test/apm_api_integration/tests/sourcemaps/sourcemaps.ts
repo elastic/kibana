@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import pRetry from 'p-retry';
 import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import type { ApmSourceMap } from '@kbn/apm-plugin/server/routes/source_maps/create_apm_source_map_index_template';
 import type { SourceMap } from '@kbn/apm-plugin/server/routes/source_maps/route';
@@ -11,47 +12,40 @@ import expect from '@kbn/expect';
 import { first, last, times } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
+const SAMPLE_SOURCEMAP = {
+  version: 3,
+  file: 'out.js',
+  sourceRoot: '',
+  sources: ['foo.js', 'bar.js'],
+  sourcesContent: ['', null],
+  names: ['src', 'maps', 'are', 'fun'],
+  mappings: 'A,AAAB;;ABCDE;',
+};
+
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
   const esClient = getService('es');
 
-  function sleep(ms: number) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
+  function waitForSourceMapCount(expectedCount: number) {
+    const getSourceMapCount = async () => {
+      const res = await esClient.search({
+        index: '.apm-source-map',
+        size: 0,
+        track_total_hits: true,
+      });
 
-  async function waitFor(
-    cb: () => Promise<boolean>,
-    { retries = 50, delay = 100 }: { retries?: number; delay?: number } = {}
-  ): Promise<void> {
-    if (retries === 0) {
-      throw new Error(`Maximum number of retries reached`);
-    }
+      // @ts-expect-error
+      const actualCount = res.hits.total.value as number;
 
-    const res = await cb();
-    if (!res) {
-      await sleep(delay);
-      return waitFor(cb, { retries: retries - 1, delay });
-    }
-  }
+      if (expectedCount === actualCount) {
+        return expectedCount;
+      }
 
-  async function waitForSourceMapCount(
-    count: number,
-    { retries, delay }: { retries?: number; delay?: number } = {}
-  ) {
-    await waitFor(
-      async () => {
-        const res = await esClient.search({
-          index: '.apm-source-map',
-          size: 0,
-          track_total_hits: true,
-        });
-        // @ts-expect-error
-        return res.hits.total.value === count;
-      },
-      { retries, delay }
-    );
-    return count;
+      throw new Error(`Expected ${expectedCount} source maps, got ${actualCount}`);
+    };
+
+    return pRetry(getSourceMapCount, { minTimeout: 100, retries: 10, factor: 1.5 }); // max wait is ~17s (https://www.wolframalpha.com/input?i2d=true&i=sum+100*Power%5B1.5%2Cj%5D%5C%2844%29+j%3D1+to+10)
   }
 
   async function deleteAllApmSourceMaps() {
@@ -142,11 +136,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           serviceName: 'uploading-test',
           serviceVersion: '1.0.0',
           bundleFilePath: 'bar',
-          sourcemap: {
-            version: 123,
-            sources: [''],
-            mappings: '',
-          },
+          sourcemap: SAMPLE_SOURCEMAP,
         });
 
         await waitForSourceMapCount(1);
@@ -194,11 +184,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             serviceName: 'list-test',
             serviceVersion: `1.0.${i}`,
             bundleFilePath: 'bar',
-            sourcemap: {
-              version: 123,
-              sources: [''],
-              mappings: '',
-            },
+            sourcemap: SAMPLE_SOURCEMAP,
           });
         }
         await waitForSourceMapCount(totalCount);
@@ -257,11 +243,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           serviceName: `delete-test_${getRandomString()}`,
           serviceVersion: '1.0.0',
           bundleFilePath: 'bar',
-          sourcemap: {
-            version: 123,
-            sources: [''],
-            mappings: '',
-          },
+          sourcemap: SAMPLE_SOURCEMAP,
         });
 
         // wait for the sourcemap to be indexed in .apm-source-map index
@@ -298,11 +280,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               serviceName: `migration-test`,
               serviceVersion: `1.0.${i}`,
               bundleFilePath: 'bar',
-              sourcemap: {
-                version: 123,
-                sources: [''],
-                mappings: '',
-              },
+              sourcemap: SAMPLE_SOURCEMAP,
             });
           })
         );

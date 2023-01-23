@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { REPO_ROOT } from '@kbn/utils';
+// @ts-ignore we have to check types with "allowJs: false" for now, causing this import to fail
+import { REPO_ROOT } from '@kbn/repo-info';
 import expect from '@kbn/expect';
 import fs from 'fs';
 import path from 'path';
@@ -106,7 +107,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.dashboard.loadSavedDashboard(dashboardPeriodOf2DaysData);
 
         // add a filter
-        await filterBar.addFilter('category', 'is', `Men's Shoes`);
+        await filterBar.addFilter({ field: 'category', operation: 'is', value: `Men's Shoes` });
 
         await clickActionsMenu('EcommerceData');
         await clickDownloadCsv();
@@ -179,7 +180,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         await PageObjects.common.sleep(1000);
-        await filterBar.addFilter('name.keyword', 'is', 'Fethany');
+        await filterBar.addFilter({ field: 'name.keyword', operation: 'is', value: 'Fethany' });
         await PageObjects.common.sleep(1000);
       });
 

@@ -25,6 +25,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { CasesDeepLinkId, CasesUiStart, getCasesDeepLinks } from '@kbn/cases-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import {
@@ -39,6 +40,8 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { RuleDetailsLocatorDefinition } from './locators/rule_details';
 import { observabilityAppId, observabilityFeatureId, casesPath } from '../common';
 import { createLazyObservabilityPageTemplate } from './components/shared';
@@ -54,6 +57,7 @@ import { getExploratoryViewEmbeddable } from './components/shared/exploratory_vi
 import { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/exploratory_view_url';
 import { createUseRulesLink } from './hooks/create_use_rules_link';
 import getAppDataView from './utils/observability_data_views/get_app_data_view';
+import { registerObservabilityRuleTypes } from './rules/register_observability_rule_types';
 
 export interface ConfigSchema {
   unsafe: {
@@ -87,20 +91,23 @@ export interface ObservabilityPublicPluginsSetup {
 }
 
 export interface ObservabilityPublicPluginsStart {
-  usageCollection: UsageCollectionSetup;
+  actionTypeRegistry: ActionTypeRegistryContract;
   cases: CasesUiStart;
-  embeddable: EmbeddableStart;
-  home?: HomePublicPluginStart;
-  share: SharePluginStart;
-  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
-  lens: LensPublicStart;
   discover: DiscoverStart;
-  ruleTypeRegistry: RuleTypeRegistryContract;
-  actionTypeRegistry: ActionTypeRegistryContract;
-  security: SecurityPluginStart;
+  embeddable: EmbeddableStart;
   guidedOnboarding: GuidedOnboardingPluginStart;
+  lens: LensPublicStart;
+  licensing: LicensingPluginStart;
+  ruleTypeRegistry: RuleTypeRegistryContract;
+  security: SecurityPluginStart;
+  share: SharePluginStart;
+  spaces: SpacesPluginStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  usageCollection: UsageCollectionSetup;
+  home?: HomePublicPluginStart;
 }
 
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
@@ -141,11 +148,20 @@ export class Plugin
         },
       ],
     },
+    {
+      id: 'slos',
+      title: i18n.translate('xpack.observability.slosLinkTitle', {
+        defaultMessage: 'SLOs',
+      }),
+      navLinkStatus: AppNavLinkStatus.hidden,
+      order: 8002,
+      path: '/slos',
+    },
     getCasesDeepLinks({
       basePath: casesPath,
       extend: {
         [CasesDeepLinkId.cases]: {
-          order: 8002,
+          order: 8003,
           navLinkStatus: AppNavLinkStatus.hidden,
         },
         [CasesDeepLinkId.casesCreate]: {
@@ -226,6 +242,8 @@ export class Plugin
 
     coreSetup.application.register(app);
 
+    registerObservabilityRuleTypes(config, this.observabilityRuleTypeRegistry);
+
     if (pluginsSetup.home) {
       pluginsSetup.home.featureCatalogue.registerSolution({
         id: observabilityFeatureId,
@@ -267,6 +285,7 @@ export class Plugin
           // See https://github.com/elastic/kibana/issues/103325.
           const otherLinks: NavigationEntry[] = deepLinks
             .filter((link) => link.navLinkStatus === AppNavLinkStatus.visible)
+            .filter((link) => (link.id === 'slos' ? config.unsafe.slo.enabled : link))
             .map((link) => ({
               app: observabilityAppId,
               label: link.title,
@@ -298,10 +317,14 @@ export class Plugin
 
   public start(coreStart: CoreStart, pluginsStart: ObservabilityPublicPluginsStart) {
     const { application } = coreStart;
+    const config = this.initContext.config.get();
+
+    const filterSlo = (link: AppDeepLink) =>
+      link.id === 'slos' ? config.unsafe.slo.enabled : link;
 
     updateGlobalNavigation({
       capabilities: application.capabilities,
-      deepLinks: this.deepLinks,
+      deepLinks: this.deepLinks.filter(filterSlo),
       updater$: this.appUpdater$,
     });
 
@@ -318,18 +341,16 @@ export class Plugin
       const { getO11yAlertsTableConfiguration } = await import(
         './config/register_alerts_table_configuration'
       );
-      return getO11yAlertsTableConfiguration(
-        this.observabilityRuleTypeRegistry,
-        this.initContext.config.get()
-      );
+      return getO11yAlertsTableConfiguration(this.observabilityRuleTypeRegistry, config);
     };
 
     const { alertsTableConfigurationRegistry } = pluginsStart.triggersActionsUi;
-    getAsyncO11yAlertsTableConfiguration().then((config) => {
-      alertsTableConfigurationRegistry.register(config);
+    getAsyncO11yAlertsTableConfiguration().then((alertsTableConfig) => {
+      alertsTableConfigurationRegistry.register(alertsTableConfig);
     });
 
     return {
+      observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
       navigation: {
         PageTemplate,
       },

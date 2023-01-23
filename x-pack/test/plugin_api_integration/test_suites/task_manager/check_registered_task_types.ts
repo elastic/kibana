@@ -100,6 +100,7 @@ export default function ({ getService }: FtrProviderContext) {
         'alerting:transform_health',
         'alerting:xpack.ml.anomaly_detection_alert',
         'alerting:xpack.ml.anomaly_detection_jobs_health',
+        'alerting:xpack.synthetics.alerts.monitorStatus',
         'alerting:xpack.uptime.alerts.durationAnomaly',
         'alerting:xpack.uptime.alerts.monitorStatus',
         'alerting:xpack.uptime.alerts.tls',

@@ -1,9 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
+    "outDir": "target/types",
   },
   "include": [
     "common/**/*",
@@ -12,22 +10,51 @@
     "../../../typings/**/*"
   ],
   "kbn_references": [
-    { "path": "../../../src/core/tsconfig.json" },
+    "@kbn/core",
 
     // optionalPlugins from ./kibana.json
-    { "path": "../lens/tsconfig.json" },
-    { "path": "../security/tsconfig.json" },
-    { "path": "../spaces/tsconfig.json" },
+    "@kbn/lens-plugin",
+    "@kbn/security-plugin",
+    "@kbn/spaces-plugin",
 
     // Required from './kibana.json'
-    { "path": "../actions/tsconfig.json" },
-    { "path": "../rule_registry/tsconfig.json" },
-    { "path": "../triggers_actions_ui/tsconfig.json"},
-    { "path": "../stack_connectors/tsconfig.json"},
-    { "path": "../notifications/tsconfig.json" },
-    { "path": "../../../src/plugins/es_ui_shared/tsconfig.json" },
-    { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
-    { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
-    { "path": "../../../src/plugins/saved_objects/tsconfig.json" }
+    "@kbn/actions-plugin",
+    "@kbn/rule-registry-plugin",
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/notifications-plugin",
+    "@kbn/es-ui-shared-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/saved-objects-plugin",
+    "@kbn/i18n",
+    "@kbn/utility-types",
+    "@kbn/securitysolution-io-ts-utils",
+    "@kbn/cases-components",
+    "@kbn/es-query",
+    "@kbn/i18n-react",
+    "@kbn/management-plugin",
+    "@kbn/core-http-browser",
+    "@kbn/data-plugin",
+    "@kbn/embeddable-plugin",
+    "@kbn/home-plugin",
+    "@kbn/features-plugin",
+    "@kbn/licensing-plugin",
+    "@kbn/user-profile-components",
+    "@kbn/rule-data-utils",
+    "@kbn/ui-theme",
+    "@kbn/std",
+    "@kbn/test-jest-helpers",
+    "@kbn/config-schema",
+    "@kbn/task-manager-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/core-saved-objects-server",
+    "@kbn/core-saved-objects-common",
+    "@kbn/safer-lodash-set",
+    "@kbn/logging-mocks",
+    "@kbn/ecs",
+    "@kbn/core-saved-objects-base-server-mocks",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

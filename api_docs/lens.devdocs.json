@@ -9143,6 +9143,8 @@
         "description": [],
         "signature": [
           "(",
+          "LensByReferenceInput",
+          " | ",
           {
             "pluginId": "lens",
             "scope": "public",
@@ -9150,8 +9152,6 @@
             "section": "def-public.TypedLensByValueInput",
             "text": "TypedLensByValueInput"
           },
-          " | ",
-          "LensByReferenceInput",
           ") & { withDefaultActions?: boolean | undefined; extraActions?: ",
           {
             "pluginId": "uiActions",
@@ -9996,9 +9996,9 @@
           " implements ",
           {
             "pluginId": "@kbn/core-plugins-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCorePluginsServerPluginApi",
-            "section": "def-server.Plugin",
+            "section": "def-common.Plugin",
             "text": "Plugin"
           },
           "<",
@@ -10042,9 +10042,9 @@
               "(core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreLifecycleServerPluginApi",
-                "section": "def-server.CoreSetup",
+                "section": "def-common.CoreSetup",
                 "text": "CoreSetup"
               },
               "<",
@@ -10103,9 +10103,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreLifecycleServerPluginApi",
-                    "section": "def-server.CoreSetup",
+                    "section": "def-common.CoreSetup",
                     "text": "CoreSetup"
                   },
                   "<",
@@ -10158,9 +10158,9 @@
               "(core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreLifecycleServerPluginApi",
-                "section": "def-server.CoreStart",
+                "section": "def-common.CoreStart",
                 "text": "CoreStart"
               },
               ", plugins: ",
@@ -10187,9 +10187,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreLifecycleServerPluginApi",
-                    "section": "def-server.CoreStart",
+                    "section": "def-common.CoreStart",
                     "text": "CoreStart"
                   }
                 ],
@@ -10626,6 +10626,27 @@
                 "section": "def-server.DataPluginSetup",
                 "text": "DataPluginSetup"
               }
+            ],
+            "path": "x-pack/plugins/lens/server/plugin.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-server.PluginSetupContract.share",
+            "type": "Object",
+            "tags": [],
+            "label": "share",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "share",
+                "scope": "server",
+                "docId": "kibSharePluginApi",
+                "section": "def-server.SharePluginSetup",
+                "text": "SharePluginSetup"
+              },
+              " | undefined"
             ],
             "path": "x-pack/plugins/lens/server/plugin.tsx",
             "deprecated": false,
@@ -11720,6 +11741,22 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
+          " | undefined, filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[] | undefined, refreshInterval: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.RefreshInterval",
+            "text": "RefreshInterval"
+          },
           " | undefined) => string"
         ],
         "path": "x-pack/plugins/lens/common/constants.ts",
@@ -11755,6 +11792,50 @@
                 "docId": "kibDataQueryPluginApi",
                 "section": "def-common.TimeRange",
                 "text": "TimeRange"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/lens/common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-common.getEditPath.$3",
+            "type": "Array",
+            "tags": [],
+            "label": "filters",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[] | undefined"
+            ],
+            "path": "x-pack/plugins/lens/common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-common.getEditPath.$4",
+            "type": "Object",
+            "tags": [],
+            "label": "refreshInterval",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.RefreshInterval",
+                "text": "RefreshInterval"
               },
               " | undefined"
             ],
@@ -12550,9 +12631,9 @@
           "<{}, ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
+            "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
           "> | undefined) => ",
@@ -12587,9 +12668,9 @@
               "<{}, ",
               {
                 "pluginId": "@kbn/utility-types",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
+                "section": "def-common.SerializableRecord",
                 "text": "SerializableRecord"
               },
               "> | undefined"

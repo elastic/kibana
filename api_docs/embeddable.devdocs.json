@@ -485,36 +485,6 @@
               {
                 "parentPluginId": "embeddable",
                 "id": "def-public.AttributeService.Unnamed.$2",
-                "type": "Function",
-                "tags": [],
-                "label": "showSaveModal",
-                "description": [],
-                "signature": [
-                  "(saveModal: React.ReactElement<any, string | React.JSXElementConstructor<any>>, I18nContext: ({ children }: { children: React.ReactNode; }) => JSX.Element) => void"
-                ],
-                "path": "src/plugins/embeddable/public/lib/attribute_service/attribute_service.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "embeddable",
-                "id": "def-public.AttributeService.Unnamed.$3",
-                "type": "Function",
-                "tags": [],
-                "label": "i18nContext",
-                "description": [],
-                "signature": [
-                  "({ children }: { children: React.ReactNode; }) => JSX.Element"
-                ],
-                "path": "src/plugins/embeddable/public/lib/attribute_service/attribute_service.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "embeddable",
-                "id": "def-public.AttributeService.Unnamed.$4",
                 "type": "Object",
                 "tags": [],
                 "label": "toasts",
@@ -535,7 +505,7 @@
               },
               {
                 "parentPluginId": "embeddable",
-                "id": "def-public.AttributeService.Unnamed.$5",
+                "id": "def-public.AttributeService.Unnamed.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -551,7 +521,7 @@
               },
               {
                 "parentPluginId": "embeddable",
-                "id": "def-public.AttributeService.Unnamed.$6",
+                "id": "def-public.AttributeService.Unnamed.$4",
                 "type": "Function",
                 "tags": [],
                 "label": "getEmbeddableFactory",
@@ -7041,10 +7011,10 @@
             ],
             "signature": [
               {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.PresentableGrouping",
+                "pluginId": "@kbn/ui-actions-browser",
+                "scope": "common",
+                "docId": "kibKbnUiActionsBrowserPluginApi",
+                "section": "def-common.PresentableGrouping",
                 "text": "PresentableGrouping"
               },
               "<unknown> | undefined"
@@ -7179,15 +7149,31 @@
             "tags": [],
             "label": "getExplicitInput",
             "description": [
-              "\nCan be used to request explicit input from the user, to be passed in to `EmbeddableFactory:create`.\nExplicit input is stored on the parent container for this embeddable. It overrides all inherited\ninput passed down from the parent container."
+              "\nCan be used to request explicit input from the user, to be passed in to `EmbeddableFactory:create`.\nExplicit input is stored on the parent container for this embeddable. It overrides all inherited\ninput passed down from the parent container.\n\nCan be used to edit an embeddable by re-requesting explicit input. Initial input can be provided to allow the editor to show the current state."
             ],
             "signature": [
-              "() => Promise<Partial<TEmbeddableInput>>"
+              "(initialInput?: Partial<TEmbeddableInput> | undefined) => Promise<Partial<TEmbeddableInput>>"
             ],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.EmbeddableFactory.getExplicitInput.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "initialInput",
+                "description": [],
+                "signature": [
+                  "Partial<TEmbeddableInput> | undefined"
+                ],
+                "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
             "returnComment": []
           },
           {
@@ -7603,6 +7589,20 @@
           },
           {
             "parentPluginId": "embeddable",
+            "id": "def-public.EmbeddableOutput.editableWithExplicitInput",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "editableWithExplicitInput",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "embeddable",
             "id": "def-public.EmbeddableOutput.savedObjectId",
             "type": "string",
             "tags": [],
@@ -7806,7 +7806,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<object>) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly registerAction: <A extends ",
+              "<any>) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly registerAction: <Context extends object>(definition: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -7814,7 +7814,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<object>>(definition: A) => ",
+              "<Context>) => ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -7822,9 +7822,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<",
-              "ActionContext",
-              "<A>>; readonly registerTrigger: (trigger: ",
+              "<Context>; readonly registerTrigger: (trigger: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -7868,7 +7866,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<object>) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly registerAction: <A extends ",
+              "<any>) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly registerAction: <Context extends object>(definition: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -7876,7 +7874,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<object>>(definition: A) => ",
+              "<Context>) => ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -7884,9 +7882,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<",
-              "ActionContext",
-              "<A>>; readonly registerTrigger: (trigger: ",
+              "<Context>; readonly registerTrigger: (trigger: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -7896,15 +7892,7 @@
               },
               ") => void; readonly unregisterAction: (actionId: string) => void; readonly getTrigger: (triggerId: string) => ",
               "TriggerContract",
-              "<object>; readonly hasAction: (actionId: string) => boolean; readonly getAction: <T extends ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionDefinition",
-                "text": "ActionDefinition"
-              },
-              "<object>>(id: string) => ",
+              "<object>; readonly hasAction: (actionId: string) => boolean; readonly getAction: (id: string) => ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -7912,9 +7900,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<",
-              "ActionContext",
-              "<T>>; readonly getTriggerActions: (triggerId: string) => ",
+              "<object>; readonly getTriggerActions: (triggerId: string) => ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -10049,9 +10035,9 @@
           " | undefined; title?: string | undefined; id: string; lastReloadRequestTime?: number | undefined; hidePanelTitles?: boolean | undefined; enhancements?: ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
+            "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
           " | undefined; disabledActions?: string[] | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; syncTooltips?: boolean | undefined; executionContext?: ",
@@ -10586,9 +10572,9 @@
             "<",
             {
               "pluginId": "@kbn/utility-types",
-              "scope": "server",
+              "scope": "common",
               "docId": "kibKbnUtilityTypesPluginApi",
-              "section": "def-server.SerializableRecord",
+              "section": "def-common.SerializableRecord",
               "text": "SerializableRecord"
             },
             ">) => void"
@@ -10615,9 +10601,9 @@
                 "<",
                 {
                   "pluginId": "@kbn/utility-types",
-                  "scope": "server",
+                  "scope": "common",
                   "docId": "kibKbnUtilityTypesPluginApi",
-                  "section": "def-server.SerializableRecord",
+                  "section": "def-common.SerializableRecord",
                   "text": "SerializableRecord"
                 },
                 ">"
@@ -11296,9 +11282,9 @@
             "<",
             {
               "pluginId": "@kbn/utility-types",
-              "scope": "server",
+              "scope": "common",
               "docId": "kibKbnUtilityTypesPluginApi",
-              "section": "def-server.SerializableRecord",
+              "section": "def-common.SerializableRecord",
               "text": "SerializableRecord"
             },
             ">) => void"
@@ -11325,9 +11311,9 @@
                 "<",
                 {
                   "pluginId": "@kbn/utility-types",
-                  "scope": "server",
+                  "scope": "common",
                   "docId": "kibKbnUtilityTypesPluginApi",
-                  "section": "def-server.SerializableRecord",
+                  "section": "def-common.SerializableRecord",
                   "text": "SerializableRecord"
                 },
                 ">"
@@ -11497,9 +11483,9 @@
               "<",
               {
                 "pluginId": "@kbn/utility-types",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
+                "section": "def-common.SerializableRecord",
                 "text": "SerializableRecord"
               },
               "> & { isContainerType: boolean; }"
@@ -11545,9 +11531,9 @@
               "<",
               {
                 "pluginId": "@kbn/utility-types",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
+                "section": "def-common.SerializableRecord",
                 "text": "SerializableRecord"
               },
               ">"
@@ -11746,9 +11732,9 @@
           " | undefined; title?: string | undefined; id: string; lastReloadRequestTime?: number | undefined; hidePanelTitles?: boolean | undefined; enhancements?: ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
+            "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
           " | undefined; disabledActions?: string[] | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; syncTooltips?: boolean | undefined; executionContext?: ",

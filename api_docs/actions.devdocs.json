@@ -541,9 +541,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/logging",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.Logger",
+                "section": "def-common.Logger",
                 "text": "Logger"
               }
             ],
@@ -900,9 +900,9 @@
           "(source: ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.KibanaRequest",
+            "section": "def-common.KibanaRequest",
             "text": "KibanaRequest"
           },
           "<unknown, unknown, unknown, any>) => ",
@@ -922,9 +922,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
+                "section": "def-common.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>"
@@ -1537,9 +1537,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/logging",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.Logger",
+                "section": "def-common.Logger",
                 "text": "Logger"
               }
             ],
@@ -1823,9 +1823,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/logging",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.Logger",
+                "section": "def-common.Logger",
                 "text": "Logger"
               }
             ],
@@ -2366,17 +2366,17 @@
             "(request: ",
             {
               "pluginId": "@kbn/core-http-server",
-              "scope": "server",
+              "scope": "common",
               "docId": "kibKbnCoreHttpServerPluginApi",
-              "section": "def-server.KibanaRequest",
+              "section": "def-common.KibanaRequest",
               "text": "KibanaRequest"
             },
             "<unknown, unknown, unknown, any>) => Promise<",
             {
               "pluginId": "@kbn/utility-types",
-              "scope": "server",
+              "scope": "common",
               "docId": "kibKbnUtilityTypesPluginApi",
-              "section": "def-server.PublicMethodsOf",
+              "section": "def-common.PublicMethodsOf",
               "text": "PublicMethodsOf"
             },
             "<",
@@ -2403,9 +2403,9 @@
               "signature": [
                 {
                   "pluginId": "@kbn/core-http-server",
-                  "scope": "server",
+                  "scope": "common",
                   "docId": "kibKbnCoreHttpServerPluginApi",
-                  "section": "def-server.KibanaRequest",
+                  "section": "def-common.KibanaRequest",
                   "text": "KibanaRequest"
                 },
                 "<unknown, unknown, unknown, any>"
@@ -2429,17 +2429,17 @@
             "(request: ",
             {
               "pluginId": "@kbn/core-http-server",
-              "scope": "server",
+              "scope": "common",
               "docId": "kibKbnCoreHttpServerPluginApi",
-              "section": "def-server.KibanaRequest",
+              "section": "def-common.KibanaRequest",
               "text": "KibanaRequest"
             },
             "<unknown, unknown, unknown, any>) => ",
             {
               "pluginId": "@kbn/utility-types",
-              "scope": "server",
+              "scope": "common",
               "docId": "kibKbnUtilityTypesPluginApi",
-              "section": "def-server.PublicMethodsOf",
+              "section": "def-common.PublicMethodsOf",
               "text": "PublicMethodsOf"
             },
             "<",
@@ -2466,9 +2466,9 @@
               "signature": [
                 {
                   "pluginId": "@kbn/core-http-server",
-                  "scope": "server",
+                  "scope": "common",
                   "docId": "kibKbnCoreHttpServerPluginApi",
-                  "section": "def-server.KibanaRequest",
+                  "section": "def-common.KibanaRequest",
                   "text": "KibanaRequest"
                 },
                 "<unknown, unknown, unknown, any>"
@@ -3029,78 +3029,6 @@
       }
     ],
     "interfaces": [
-      {
-        "parentPluginId": "actions",
-        "id": "def-common.ActionResult",
-        "type": "Interface",
-        "tags": [],
-        "label": "ActionResult",
-        "description": [],
-        "path": "x-pack/plugins/actions/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "actions",
-            "id": "def-common.ActionResult.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "path": "x-pack/plugins/actions/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "actions",
-            "id": "def-common.ActionResult.actionTypeId",
-            "type": "string",
-            "tags": [],
-            "label": "actionTypeId",
-            "description": [],
-            "path": "x-pack/plugins/actions/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "actions",
-            "id": "def-common.ActionResult.name",
-            "type": "string",
-            "tags": [],
-            "label": "name",
-            "description": [],
-            "path": "x-pack/plugins/actions/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "actions",
-            "id": "def-common.ActionResult.config",
-            "type": "Object",
-            "tags": [],
-            "label": "config",
-            "description": [],
-            "signature": [
-              "{ [x: string]: any; }"
-            ],
-            "path": "x-pack/plugins/actions/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "actions",
-            "id": "def-common.ActionResult.isPreconfigured",
-            "type": "boolean",
-            "tags": [],
-            "label": "isPreconfigured",
-            "description": [],
-            "path": "x-pack/plugins/actions/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "actions",
         "id": "def-common.ActionsPublicConfigType",

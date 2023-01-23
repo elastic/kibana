@@ -12,8 +12,8 @@ import { EuiText, EuiSpacer, EuiLink, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 import { DiscoverFieldBucket } from './discover_field_bucket';
-import { Bucket, FieldDetails } from './types';
-import { getDetails } from './get_details';
+import { Bucket } from './types';
+import { getDetails, isValidFieldDetails } from './get_details';
 import { DataDocuments$ } from '../../../hooks/use_saved_search';
 import { FetchStatus } from '../../../../types';
 
@@ -33,13 +33,13 @@ export function DiscoverFieldDetails({
   dataView,
   onAddFilter,
 }: DiscoverFieldDetailsProps) {
-  const details: FieldDetails = useMemo(() => {
+  const details = useMemo(() => {
     const data = documents$.getValue();
     const documents = data.fetchStatus === FetchStatus.COMPLETE ? data.result : undefined;
     return getDetails(field, documents, dataView);
   }, [field, documents$, dataView]);
 
-  if (!details?.error && !details?.buckets) {
+  if (!details) {
     return null;
   }
 
@@ -52,8 +52,8 @@ export function DiscoverFieldDetails({
           })}
         </h5>
       </EuiTitle>
-      {details.error && <EuiText size="xs">{details.error}</EuiText>}
-      {!details.error && (
+      {!isValidFieldDetails(details) && <EuiText size="xs">{details.error}</EuiText>}
+      {isValidFieldDetails(details) && (
         <>
           <div style={{ marginTop: '4px' }}>
             {details.buckets.map((bucket: Bucket, idx: number) => (

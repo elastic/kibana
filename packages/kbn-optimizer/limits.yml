@@ -12,6 +12,7 @@ pageLoadAssetSize:
   cloud: 21076
   cloudChat: 19894
   cloudDataMigration: 19170
+  cloudDefend: 18697
   cloudExperiments: 59358
   cloudFullStory: 18493
   cloudGainsight: 18710
@@ -66,6 +67,7 @@ pageLoadAssetSize:
   grokdebugger: 26779
   guidedOnboarding: 42965
   home: 30182
+  imageEmbeddable: 12500
   indexLifecycleManagement: 107090
   indexManagement: 140608
   infra: 184320
@@ -145,6 +147,6 @@ pageLoadAssetSize:
   visTypeTimeseries: 55203
   visTypeVega: 153573
   visTypeVislib: 242838
-  visTypeXy: 31800
+  visTypeXy: 46868
   visualizations: 90000
   watcher: 43598

@@ -25,7 +25,7 @@ import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import { useCancelAddPackagePolicy } from '../hooks';
 
 import { splitPkgKey } from '../../../../../../../common/services';
-import { dataTypes } from '../../../../../../../common/constants';
+import { generateNewAgentPolicyWithDefaults } from '../../../../services';
 import type { NewAgentPolicy } from '../../../../types';
 import { useConfig, sendGetAgentStatus, useGetPackageInfoByKey } from '../../../../hooks';
 import {
@@ -80,12 +80,9 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   } = useConfig();
   const { params } = useRouteMatch<AddToPolicyParams>();
 
-  const [newAgentPolicy, setNewAgentPolicy] = useState<NewAgentPolicy>({
-    name: 'Agent policy 1',
-    description: '',
-    namespace: 'default',
-    monitoring_enabled: Object.values(dataTypes),
-  });
+  const [newAgentPolicy, setNewAgentPolicy] = useState<NewAgentPolicy>(
+    generateNewAgentPolicyWithDefaults({ name: 'Agent policy 1' })
+  );
 
   const [withSysMonitoring, setWithSysMonitoring] = useState<boolean>(true);
   const validation = agentPolicyFormValidation(newAgentPolicy);
@@ -109,6 +106,16 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
 
   const [agentCount, setAgentCount] = useState<number>(0);
 
+  const integrationInfo = useMemo(
+    () =>
+      (params as AddToPolicyParams).integration
+        ? packageInfo?.policy_templates?.find(
+            (policyTemplate) => policyTemplate.name === (params as AddToPolicyParams).integration
+          )
+        : undefined,
+    [packageInfo?.policy_templates, params]
+  );
+
   // Save package policy
   const {
     onSubmit,
@@ -124,6 +131,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     setHasAgentPolicyError,
     validationResults,
     hasAgentPolicyError,
+    isInitialized,
   } = useOnSubmit({
     agentCount,
     packageInfo,
@@ -131,6 +139,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     selectedPolicyTab,
     withSysMonitoring,
     queryParamsPolicyId,
+    integrationToEnable: integrationInfo?.name,
   });
 
   const setPolicyValidation = useCallback(
@@ -215,16 +224,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     packageInfo,
   });
 
-  const integrationInfo = useMemo(
-    () =>
-      (params as AddToPolicyParams).integration
-        ? packageInfo?.policy_templates?.find(
-            (policyTemplate) => policyTemplate.name === (params as AddToPolicyParams).integration
-          )
-        : undefined,
-    [packageInfo?.policy_templates, params]
-  );
-
   const layoutProps = useMemo(
     () => ({
       from,
@@ -271,7 +270,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
 
   const stepConfigurePackagePolicy = useMemo(
     () =>
-      isPackageInfoLoading ? (
+      isPackageInfoLoading || !isInitialized ? (
         <Loading />
       ) : packageInfo ? (
         <>
@@ -282,7 +281,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             updatePackagePolicy={updatePackagePolicy}
             validationResults={validationResults!}
             submitAttempted={formState === 'INVALID'}
-            integrationToEnable={integrationInfo?.name}
           />
 
           {/* Only show the out-of-box configuration step if a UI extension is NOT registered */}
@@ -311,6 +309,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         <div />
       ),
     [
+      isInitialized,
       isPackageInfoLoading,
       agentPolicy,
       packageInfo,

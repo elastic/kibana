@@ -11,7 +11,17 @@ import { i18n } from '@kbn/i18n';
 import type { Filter } from '@kbn/es-query';
 import { EmbeddedMap } from './embedded_map';
 
-export function LatencyMap({ filters }: { filters: Filter[] }) {
+export function LatencyMap({
+  start,
+  end,
+  kuery,
+  filters,
+}: {
+  start: string;
+  end: string;
+  kuery?: string;
+  filters: Filter[];
+}) {
   return (
     <>
       <EuiTitle size="xs">
@@ -22,7 +32,7 @@ export function LatencyMap({ filters }: { filters: Filter[] }) {
         </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <EmbeddedMap filters={filters} />
+      <EmbeddedMap start={start} end={end} kuery={kuery} filters={filters} />
     </>
   );
 }

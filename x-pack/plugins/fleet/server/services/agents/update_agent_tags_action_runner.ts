@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { uniq } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
@@ -20,7 +20,7 @@ import { agentPolicyService } from '../agent_policy';
 
 import { SO_SEARCH_LIMIT } from '../../../common/constants';
 
-import { ActionRunner } from './action_runner';
+import { ActionRunner, MAX_RETRY_COUNT } from './action_runner';
 
 import { BulkActionTaskType } from './bulk_actions_resolver';
 import { filterHostedPolicies } from './filter_hosted_agents';
@@ -63,6 +63,7 @@ export class UpdateAgentTagsActionRunner extends ActionRunner {
         actionId: this.actionParams.actionId,
         total: this.actionParams.total,
         kuery: this.actionParams.kuery,
+        retryCount: this.retryParams.retryCount,
       }
     );
 
@@ -82,6 +83,7 @@ export async function updateTagsBatch(
     actionId?: string;
     total?: number;
     kuery?: string;
+    retryCount?: number;
   }
 ): Promise<{ actionId: string; updated?: number; took?: number }> {
   const errors: Record<Agent['id'], Error> = { ...outgoingErrors };
@@ -94,11 +96,6 @@ export async function updateTagsBatch(
     hostedAgentError
   );
   const agentIds = filteredAgents.map((agent) => agent.id);
-  const hostedAgentIds = givenAgents
-    .filter(
-      (agent) => filteredAgents.find((filteredAgent) => filteredAgent.id === agent.id) === undefined
-    )
-    .map((agent) => agent.id);
 
   let query: estypes.QueryDslQueryContainer | undefined;
   if (options.kuery !== undefined) {
@@ -108,7 +105,18 @@ export async function updateTagsBatch(
     });
     const hostedIds = hostedPolicies.items.map((item) => item.id);
 
-    query = getElasticsearchQuery(options.kuery, false, false, hostedIds);
+    const extraFilters = [];
+    if (options.tagsToAdd.length === 1 && options.tagsToRemove.length === 0) {
+      extraFilters.push(`NOT (tags:${options.tagsToAdd[0]})`);
+    } else if (options.tagsToRemove.length === 1 && options.tagsToAdd.length === 0) {
+      extraFilters.push(`tags:${options.tagsToRemove[0]}`);
+    }
+    const DEFAULT_STATUS_FILTER =
+      'status:online or (status:error or status:degraded) or (status:updating or status:unenrolling or status:enrolling) or status:offline';
+    // removing default staus filters, as it is a runtime field and doesn't work with updateByQuery
+    // this is a quick fix for bulk update tags with default filters
+    const kuery = options.kuery === DEFAULT_STATUS_FILTER ? '' : options.kuery;
+    query = getElasticsearchQuery(kuery, false, false, hostedIds, extraFilters);
   } else {
     query = {
       terms: {
@@ -125,15 +133,15 @@ export async function updateTagsBatch(
       refresh: true,
       wait_for_completion: true,
       script: {
-        source: `   
+        source: `
       if (ctx._source.tags == null) {
         ctx._source.tags = [];
       }
-      if (params.tagsToAdd.length == 1 && params.tagsToRemove.length == 1) { 
+      if (params.tagsToAdd.length == 1 && params.tagsToRemove.length == 1) {
         ctx._source.tags.replaceAll(tag -> params.tagsToRemove[0] == tag ? params.tagsToAdd[0] : tag);
       } else {
         ctx._source.tags.removeAll(params.tagsToRemove);
-      } 
+      }
       ctx._source.tags.addAll(params.tagsToAdd);
 
       LinkedHashSet uniqueSet = new LinkedHashSet();
@@ -150,7 +158,7 @@ export async function updateTagsBatch(
           updatedAt: new Date().toISOString(),
         },
       },
-      conflicts: 'abort', // relying on the task to retry in case of conflicts
+      conflicts: 'proceed', // relying on the task to retry in case of conflicts - retry only conflicted agents
     });
   } catch (error) {
     throw new Error('Caught error: ' + JSON.stringify(error).slice(0, 1000));
@@ -158,28 +166,28 @@ export async function updateTagsBatch(
 
   appContextService.getLogger().debug(JSON.stringify(res).slice(0, 1000));
 
-  const actionId = options.actionId ?? uuid();
-  const total = options.total ?? givenAgents.length;
+  const actionId = options.actionId ?? uuidv4();
 
-  // creating an action doc so that update tags  shows up in activity
-  await createAgentAction(esClient, {
-    id: actionId,
-    agents: options.kuery === undefined ? agentIds : [],
-    created_at: new Date().toISOString(),
-    type: 'UPDATE_TAGS',
-    total,
-  });
+  if (options.retryCount === undefined) {
+    // creating an action doc so that update tags  shows up in activity
+    await createAgentAction(esClient, {
+      id: actionId,
+      agents: options.kuery === undefined ? agentIds : [],
+      created_at: new Date().toISOString(),
+      type: 'UPDATE_TAGS',
+      total: res.total,
+    });
+  }
 
-  // creating unique 0...n ids to use as agentId, as we don't have all agent ids in case of action by kuery
-  const getArray = (count: number) => [...Array(count).keys()];
+  // creating unique ids to use as agentId, as we don't have all agent ids in case of action by kuery
+  const getUuidArray = (count: number) => Array.from({ length: count }, () => uuidv4());
 
   // writing successful action results
   if (res.updated ?? 0 > 0) {
     await bulkCreateAgentActionResults(
       esClient,
-
-      (options.kuery === undefined ? agentIds : getArray(res.updated!)).map((id) => ({
-        agentId: id + '',
+      (options.kuery === undefined ? agentIds : getUuidArray(res.updated!)).map((id) => ({
+        agentId: id,
         actionId,
       }))
     );
@@ -197,18 +205,19 @@ export async function updateTagsBatch(
     );
   }
 
-  // writing hosted agent errors - hosted agents filtered out
-  if ((res.total ?? total) < total) {
-    await bulkCreateAgentActionResults(
-      esClient,
-      (options.kuery === undefined ? hostedAgentIds : getArray(total - (res.total ?? total))).map(
-        (id) => ({
-          agentId: id + '',
+  if (res.version_conflicts ?? 0 > 0) {
+    // write out error results on last retry, so action is not stuck in progress
+    if (options.retryCount === MAX_RETRY_COUNT) {
+      await bulkCreateAgentActionResults(
+        esClient,
+        getUuidArray(res.version_conflicts!).map((id) => ({
+          agentId: id,
           actionId,
-          error: hostedAgentError,
-        })
-      )
-    );
+          error: 'version conflict on last retry',
+        }))
+      );
+    }
+    throw new Error(`version conflict of ${res.version_conflicts} agents`);
   }
 
   return { actionId, updated: res.updated, took: res.took };

@@ -261,7 +261,7 @@ export function getFormBasedDatasource({
           ...state,
           layers: {
             ...newLayers,
-            [layerId]: blankLayer(state.currentIndexPatternId, state.layers[layerId].linkToLayers),
+            [layerId]: blankLayer(state.currentIndexPatternId, state.layers[layerId]?.linkToLayers),
           },
         },
       };
@@ -408,7 +408,9 @@ export function getFormBasedDatasource({
       Object.values(state?.layers)?.forEach((l) => {
         const { columns } = l;
         Object.values(columns).forEach((c) => {
-          if ('sourceField' in c) {
+          if (operationDefinitionMap[c.operationType]?.getCurrentFields) {
+            fields.push(...(operationDefinitionMap[c.operationType]?.getCurrentFields?.(c) || []));
+          } else if ('sourceField' in c) {
             fields.push(c.sourceField);
           }
         });

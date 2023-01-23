@@ -33,7 +33,7 @@ import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 
 import { FILTER_OPEN, TableId } from '../../../../../common/types';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
-import { SecuritySolutionTabNavigation } from '../../../../common/components/navigation';
+import { TabNavigationWithBreadcrumbs } from '../../../../common/components/navigation/tab_navigation_with_breadcrumbs';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import {
   useDeepEqualSelector,
@@ -46,7 +46,6 @@ import { FormattedDate } from '../../../../common/components/formatted_date';
 import { tableDefaults } from '../../../../common/store/data_table/defaults';
 import { dataTableActions, dataTableSelectors } from '../../../../common/store/data_table';
 import {
-  getRulesUrl,
   getDetectionEngineUrl,
   getRuleDetailsTabUrl,
 } from '../../../../common/components/link_to/redirect_to_detection_engine';
@@ -672,12 +671,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
           <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
             <Display show={!globalFullScreen}>
               <HeaderPage
-                backOptions={{
-                  path: getRulesUrl(),
-                  text: i18n.BACK_TO_RULES,
-                  pageId: SecurityPageName.rules,
-                  dataTestSubj: 'ruleDetailsBackToAllRules',
-                }}
                 border
                 subtitle={subTitle}
                 subtitle2={
@@ -809,7 +802,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiSpacer />
-              <SecuritySolutionTabNavigation navTabs={pageTabs} />
+              <TabNavigationWithBreadcrumbs navTabs={pageTabs} />
               <EuiSpacer />
             </Display>
             <StyledMinHeightTabContainer>

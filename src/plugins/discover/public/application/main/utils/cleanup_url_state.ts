@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import { AppState } from '../services/discover_app_state_container';
 import { migrateLegacyQuery } from '../../../utils/migrate_legacy_query';
-import { AppState, AppStateUrl } from '../services/discover_state';
+import { AppStateUrl } from '../services/discover_state';
 
 /**
  * Takes care of the given url state, migrates legacy props and cleans up empty props

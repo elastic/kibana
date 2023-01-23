@@ -1,0 +1,50 @@
+load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
+
+SRCS = glob(
+  [
+    "**/*.js",
+    "**/*.ts",
+  ],
+  exclude = [
+    "**/*.config.js",
+    "**/*.mock.*",
+    "**/*.test.*",
+    "**/*.stories.*",
+    "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/mocks/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
+  ],
+)
+
+# In this array place runtime dependencies, including other packages and NPM packages
+# which must be available for this code to run.
+#
+#  To reference other packages use:
+#    "//repo/relative/path/to/package"
+#    eg. "//packages/kbn-utils"
+#
+#  To reference a NPM package use:
+#    "@npm//name-of-package"
+#    eg. "@npm//lodash"
+BUNDLER_DEPS = [
+  "@npm//@babel/core",
+  "@npm//chalk",
+  "@npm//pirates",
+  "@npm//lmdb",
+  "@npm//source-map-support",
+  "//packages/kbn-repo-packages",
+  "//packages/kbn-repo-info",
+  "//packages/kbn-babel-transform",
+]
+
+js_library(
+  name = "kbn-babel-register",
+  package_name = "@kbn/babel-register",
+  srcs = ["package.json"] + SRCS,
+  deps = BUNDLER_DEPS,
+  visibility = ["//visibility:public"],
+)

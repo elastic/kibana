@@ -6,9 +6,9 @@
  */
 
 import type { UserProfile } from '@kbn/security-plugin/common';
-import { userProfiles } from '../api.mock';
+import { userProfiles, suggestionUserProfiles } from '../api.mock';
 
-export const suggestUserProfiles = async (): Promise<UserProfile[]> => userProfiles;
+export const suggestUserProfiles = async (): Promise<UserProfile[]> => suggestionUserProfiles;
 
 export const bulkGetUserProfiles = async (): Promise<UserProfile[]> => userProfiles;
 

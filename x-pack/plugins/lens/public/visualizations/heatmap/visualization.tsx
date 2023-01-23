@@ -219,12 +219,12 @@ export const getHeatmapVisualization = ({
                 (frame.activeData || activePalette?.params?.rangeType !== 'number')
                   ? {
                       columnId: state.valueAccessor,
-                      triggerIcon: 'colorBy',
+                      triggerIconType: 'colorBy',
                       palette: displayStops.map(({ color }) => color),
                     }
                   : {
                       columnId: state.valueAccessor,
-                      triggerIcon: 'none',
+                      triggerIconType: 'none',
                     },
               ]
             : [],

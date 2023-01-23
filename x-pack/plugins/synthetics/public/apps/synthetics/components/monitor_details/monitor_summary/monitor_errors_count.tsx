@@ -8,6 +8,7 @@
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useMemo } from 'react';
 import { ReportTypes } from '@kbn/observability-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { ClientPluginsStart } from '../../../../../plugin';
 import { useSelectedLocation } from '../hooks/use_selected_location';
 
@@ -44,9 +45,13 @@ export const MonitorErrorsCount = ({ monitorId, from, to }: MonitorErrorsCountPr
           },
           dataType: 'synthetics',
           selectedMetricField: 'monitor_errors',
-          name: 'synthetics-series-1',
+          name: ERRORS_LABEL,
         },
       ]}
     />
   );
 };
+
+export const ERRORS_LABEL = i18n.translate('xpack.synthetics.monitorDetails.summary.errors', {
+  defaultMessage: 'Errors',
+});

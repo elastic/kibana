@@ -267,6 +267,8 @@ export default ({ getService }: FtrProviderContext): void => {
                 external_service: postedCase.external_service,
                 owner: postedCase.owner,
                 connector: postedCase.connector,
+                severity: postedCase.severity,
+                status: postedCase.status,
                 comments: [],
                 totalAlerts: 0,
                 totalComment: 0,
@@ -309,6 +311,34 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
       }
+
+      it('sorts by severity', async () => {
+        const case4 = await createCase(supertest, {
+          ...postCaseReq,
+          severity: CaseSeverity.CRITICAL,
+        });
+        const case3 = await createCase(supertest, {
+          ...postCaseReq,
+          severity: CaseSeverity.HIGH,
+        });
+        const case2 = await createCase(supertest, {
+          ...postCaseReq,
+          severity: CaseSeverity.MEDIUM,
+        });
+        const case1 = await createCase(supertest, { ...postCaseReq, severity: CaseSeverity.LOW });
+
+        const cases = await findCases({
+          supertest,
+          query: { sortField: 'severity', sortOrder: 'asc' },
+        });
+
+        expect(cases).to.eql({
+          ...findCasesResp,
+          total: 4,
+          cases: [case1, case2, case3, case4],
+          count_open_cases: 4,
+        });
+      });
 
       describe('search and searchField', () => {
         beforeEach(async () => {

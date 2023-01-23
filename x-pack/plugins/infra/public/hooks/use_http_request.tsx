@@ -26,7 +26,7 @@ export function useHTTPRequest<Response>(
   const toast = toastDanger ? toastDanger : kibana.notifications.toasts.danger;
   const [response, setResponse] = useState<Response | null>(null);
   const [error, setError] = useState<InfraHttpError | null>(null);
-  const [request, makeRequest] = useTrackedPromise(
+  const [request, makeRequest] = useTrackedPromise<any, Response>(
     {
       cancelPreviousOn: 'resolution',
       createPromise: () => {

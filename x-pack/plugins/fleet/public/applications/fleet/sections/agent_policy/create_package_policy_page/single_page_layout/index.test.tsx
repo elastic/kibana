@@ -42,6 +42,9 @@ jest.mock('../../../../hooks', () => {
     sendGetOneAgentPolicy: jest.fn().mockResolvedValue({
       data: { item: { id: 'agent-policy-1', name: 'Agent policy 1', namespace: 'default' } },
     }),
+    sendGetSettings: jest.fn().mockResolvedValue({
+      data: { item: {} },
+    }),
     useGetPackageInfoByKey: jest.fn(),
     sendCreatePackagePolicy: jest
       .fn()
@@ -380,6 +383,7 @@ describe('when on the package policy create page', () => {
           monitoring_enabled: ['logs', 'metrics'],
           name: 'Agent policy 2',
           namespace: 'default',
+          inactivity_timeout: 1209600,
         },
         { withSysMonitoring: false }
       );
@@ -410,6 +414,7 @@ describe('when on the package policy create page', () => {
             monitoring_enabled: ['logs', 'metrics'],
             name: 'Agent policy 2',
             namespace: 'default',
+            inactivity_timeout: 1209600,
           },
           { withSysMonitoring: true }
         );

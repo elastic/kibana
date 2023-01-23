@@ -31,15 +31,17 @@ const Container = euiStyled.div`
 const toggleFlyout = ({
   history,
   item,
+  flyoutDetailTab,
 }: {
   history: History;
   item?: IWaterfallItem;
+  flyoutDetailTab?: string;
 }) => {
   history.replace({
     ...history.location,
     search: fromQuery({
       ...toQuery(location.search),
-      flyoutDetailTab: undefined,
+      flyoutDetailTab,
       waterfallItemId: item?.id,
     }),
   });
@@ -152,11 +154,16 @@ export function Waterfall({
               duration={duration}
               waterfall={waterfall}
               timelineMargins={timelineMargins}
-              onClickWaterfallItem={(item: IWaterfallItem) =>
-                toggleFlyout({ history, item })
-              }
+              onClickWaterfallItem={(
+                item: IWaterfallItem,
+                flyoutDetailTab: string
+              ) => toggleFlyout({ history, item, flyoutDetailTab })}
               showCriticalPath={showCriticalPath}
-              maxLevelOpen={maxLevelOpen}
+              maxLevelOpen={
+                waterfall.traceItemCount > 500
+                  ? maxLevelOpen
+                  : waterfall.traceItemCount
+              }
             />
           )}
         </WaterfallItemsContainer>

@@ -6,74 +6,72 @@
  */
 
 import { useEffect, useState, useCallback, useRef } from 'react';
+import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import { estypes } from '@elastic/elasticsearch';
 import { AsApiContract } from '@kbn/actions-plugin/common';
 import { HttpSetup } from '@kbn/core/public';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
 import { useKibana } from '../../common/lib/kibana';
-
-export interface AlertSummaryTimeRange {
-  utcFrom: string;
-  utcTo: string;
-  title: JSX.Element | string;
-}
+import {
+  Alert,
+  AlertSummaryTimeRange,
+} from '../sections/rule_details/components/alert_summary/types';
 
 interface UseLoadAlertSummaryProps {
-  features: string;
+  featureIds?: ValidFeatureId[];
   timeRange: AlertSummaryTimeRange;
   filter?: estypes.QueryDslQueryContainer;
 }
+
 interface AlertSummary {
-  active: number;
-  recovered: number;
-  error?: string;
+  activeAlertCount: number;
+  activeAlerts: Alert[];
+  recoveredAlertCount: number;
+  recoveredAlerts: Alert[];
 }
 
-interface LoadAlertSummary {
+interface LoadAlertSummaryResponse {
   isLoading: boolean;
-  alertSummary: {
-    active: number;
-    recovered: number;
-  };
+  alertSummary: AlertSummary;
   error?: string;
 }
 
-interface IndexName {
-  index: string;
-}
-
-export function useLoadAlertSummary({ features, timeRange, filter }: UseLoadAlertSummaryProps) {
+export function useLoadAlertSummary({ featureIds, timeRange, filter }: UseLoadAlertSummaryProps) {
   const { http } = useKibana().services;
-  const [alertSummary, setAlertSummary] = useState<LoadAlertSummary>({
+  const [alertSummary, setAlertSummary] = useState<LoadAlertSummaryResponse>({
     isLoading: true,
-    alertSummary: { active: 0, recovered: 0 },
+    alertSummary: {
+      activeAlertCount: 0,
+      activeAlerts: [],
+      recoveredAlertCount: 0,
+      recoveredAlerts: [],
+    },
   });
   const isCancelledRef = useRef(false);
   const abortCtrlRef = useRef(new AbortController());
-  const loadRuleAlertsAgg = useCallback(async () => {
+  const loadAlertSummary = useCallback(async () => {
+    if (!featureIds) return;
     isCancelledRef.current = false;
     abortCtrlRef.current.abort();
     abortCtrlRef.current = new AbortController();
+
     try {
-      if (!features) return;
-      const { index } = await fetchIndexNameAPI({
-        http,
-        features,
-      });
-      const { active, recovered, error } = await fetchRuleAlertsAggByTimeRange({
-        http,
-        index,
-        signal: abortCtrlRef.current.signal,
-        timeRange,
-        filter,
-      });
-      if (error) throw error;
+      const { activeAlertCount, activeAlerts, recoveredAlertCount, recoveredAlerts } =
+        await fetchAlertSummary({
+          featureIds,
+          filter,
+          http,
+          signal: abortCtrlRef.current.signal,
+          timeRange,
+        });
+
       if (!isCancelledRef.current) {
-        setAlertSummary((oldState: LoadAlertSummary) => ({
-          ...oldState,
+        setAlertSummary(() => ({
           alertSummary: {
-            active,
-            recovered,
+            activeAlertCount,
+            activeAlerts,
+            recoveredAlertCount,
+            recoveredAlerts,
           },
           isLoading: false,
         }));
@@ -81,120 +79,56 @@ export function useLoadAlertSummary({ features, timeRange, filter }: UseLoadAler
     } catch (error) {
       if (!isCancelledRef.current) {
         if (error.name !== 'AbortError') {
-          setAlertSummary((oldState: LoadAlertSummary) => ({
+          setAlertSummary((oldState) => ({
             ...oldState,
             isLoading: false,
-            error,
+            error: error.message,
           }));
         }
       }
     }
-  }, [features, filter, http, timeRange]);
+  }, [featureIds, filter, http, timeRange]);
+
   useEffect(() => {
-    loadRuleAlertsAgg();
-  }, [loadRuleAlertsAgg]);
+    loadAlertSummary();
+  }, [loadAlertSummary]);
 
   return alertSummary;
 }
 
-async function fetchIndexNameAPI({
-  http,
-  features,
-}: {
-  http: HttpSetup;
-  features: string;
-}): Promise<IndexName> {
-  const res = await http.get<{ index_name: string[] }>(`${BASE_RAC_ALERTS_API_PATH}/index`, {
-    query: { features },
-  });
-  return {
-    index: res.index_name[0],
-  };
-}
-
-async function fetchRuleAlertsAggByTimeRange({
-  http,
-  index,
-  signal,
-  timeRange: { utcFrom, utcTo },
+async function fetchAlertSummary({
+  featureIds,
   filter,
+  http,
+  signal,
+  timeRange: { utcFrom, utcTo, fixedInterval },
 }: {
   http: HttpSetup;
-  index: string;
+  featureIds: ValidFeatureId[];
   signal: AbortSignal;
   timeRange: AlertSummaryTimeRange;
   filter?: estypes.QueryDslQueryContainer;
 }): Promise<AlertSummary> {
-  try {
-    const res = await http.post<AsApiContract<any>>(`${BASE_RAC_ALERTS_API_PATH}/find`, {
-      signal,
-      body: JSON.stringify({
-        index,
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              {
-                range: {
-                  '@timestamp': {
-                    gte: utcFrom,
-                    lt: utcTo,
-                  },
-                },
-              },
-              {
-                bool: {
-                  should: [
-                    {
-                      term: {
-                        'kibana.alert.status': 'active',
-                      },
-                    },
-                    {
-                      term: {
-                        'kibana.alert.status': 'recovered',
-                      },
-                    },
-                  ],
-                },
-              },
-              ...(filter ? [filter] : []),
-            ],
-          },
-        },
-        aggs: {
-          total: {
-            filters: {
-              filters: {
-                totalActiveAlerts: {
-                  term: {
-                    'kibana.alert.status': 'active',
-                  },
-                },
-                totalRecoveredAlerts: {
-                  term: {
-                    'kibana.alert.status': 'recovered',
-                  },
-                },
-              },
-            },
-          },
-        },
-      }),
-    });
+  const res = await http.post<AsApiContract<any>>(`${BASE_RAC_ALERTS_API_PATH}/_alert_summary`, {
+    signal,
+    body: JSON.stringify({
+      fixed_interval: fixedInterval,
+      gte: utcFrom,
+      lte: utcTo,
+      featureIds,
+      filter: [filter],
+    }),
+  });
 
-    const active = res?.aggregations?.total.buckets.totalActiveAlerts?.doc_count ?? 0;
-    const recovered = res?.aggregations?.total.buckets.totalRecoveredAlerts?.doc_count ?? 0;
+  const activeAlertCount = res?.activeAlertCount ?? 0;
+  const activeAlerts = res?.activeAlerts ?? [];
+  const recoveredAlertCount = res?.recoveredAlertCount ?? 0;
+  const recoveredAlerts = res?.recoveredAlerts ?? [];
 
-    return {
-      active,
-      recovered,
-    };
-  } catch (error) {
-    return {
-      error,
-      active: 0,
-      recovered: 0,
-    };
-  }
+  return {
+    activeAlertCount,
+    activeAlerts,
+    recoveredAlertCount,
+    recoveredAlerts,
+  };
 }

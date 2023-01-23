@@ -260,6 +260,15 @@
       "prCreation": "immediate"
     },
     {
+      "groupName": "Cloud Defend",
+      "matchPackageNames": ["monaco-yaml"],
+      "reviewers": ["team:sec-cloudnative-integrations"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team: Cloud Native Integrations", "release_note:skip", "backport:skip"],
+      "enabled": true,
+      "prCreation": "immediate"
+    },
+    {
       "groupName": "XState",
       "matchPackageNames": ["xstate"],
       "matchPackagePrefixes": ["@xstate/"],

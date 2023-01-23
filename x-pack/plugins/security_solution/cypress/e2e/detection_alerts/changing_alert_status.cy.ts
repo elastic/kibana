@@ -66,6 +66,7 @@ describe('Changing alert status', () => {
         .then((numberOfOpenedAlertsText) => {
           const numberOfOpenedAlerts = parseInt(numberOfOpenedAlertsText, 10);
           goToClosedAlerts();
+          waitForAlerts();
           cy.get(ALERTS_COUNT)
             .invoke('text')
             .then((alertNumberString) => {
@@ -95,6 +96,8 @@ describe('Changing alert status', () => {
 
               goToOpenedAlerts();
               waitForAlerts();
+
+              selectCountTable();
 
               cy.get(ALERTS_COUNT).should(
                 'have.text',

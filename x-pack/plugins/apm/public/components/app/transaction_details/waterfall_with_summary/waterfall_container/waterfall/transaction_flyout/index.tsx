@@ -38,6 +38,7 @@ interface Props {
   errorCount?: number;
   rootTransactionDuration?: number;
   spanLinksCount: SpanLinksCount;
+  flyoutDetailTab?: string;
 }
 
 export function TransactionFlyout({
@@ -47,6 +48,7 @@ export function TransactionFlyout({
   errorCount = 0,
   rootTransactionDuration,
   spanLinksCount,
+  flyoutDetailTab,
 }: Props) {
   const { data: transaction, status } = useFetcher(
     (callApmApi) => {
@@ -96,6 +98,7 @@ export function TransactionFlyout({
               errorCount={errorCount}
               rootTransactionDuration={rootTransactionDuration}
               spanLinksCount={spanLinksCount}
+              flyoutDetailTab={flyoutDetailTab}
             />
           )}
         </EuiFlyoutBody>
@@ -109,11 +112,13 @@ function TransactionFlyoutBody({
   errorCount,
   rootTransactionDuration,
   spanLinksCount,
+  flyoutDetailTab,
 }: {
   transaction: Transaction;
   errorCount: number;
   rootTransactionDuration?: number;
   spanLinksCount: SpanLinksCount;
+  flyoutDetailTab?: string;
 }) {
   const spanLinksTabContent = getSpanLinksTabContent({
     spanLinksCount,
@@ -121,6 +126,24 @@ function TransactionFlyoutBody({
     spanId: transaction.transaction.id,
     processorEvent: ProcessorEvent.transaction,
   });
+
+  const tabs = [
+    {
+      id: 'metadata',
+      name: i18n.translate('xpack.apm.propertiesTable.tabs.metadataLabel', {
+        defaultMessage: 'Metadata',
+      }),
+      content: (
+        <>
+          <EuiSpacer size="m" />
+          <TransactionMetadata transactionId={transaction.transaction.id} />
+        </>
+      ),
+    },
+    ...(spanLinksTabContent ? [spanLinksTabContent] : []),
+  ];
+
+  const initialTab = tabs.find(({ id }) => id === flyoutDetailTab) ?? tabs[0];
 
   return (
     <>
@@ -134,28 +157,7 @@ function TransactionFlyoutBody({
       />
       <EuiHorizontalRule margin="m" />
       <DroppedSpansWarning transactionDoc={transaction} />
-      <EuiTabbedContent
-        tabs={[
-          {
-            id: 'metadata',
-            name: i18n.translate(
-              'xpack.apm.propertiesTable.tabs.metadataLabel',
-              {
-                defaultMessage: 'Metadata',
-              }
-            ),
-            content: (
-              <>
-                <EuiSpacer size="m" />
-                <TransactionMetadata
-                  transactionId={transaction.transaction.id}
-                />
-              </>
-            ),
-          },
-          ...(spanLinksTabContent ? [spanLinksTabContent] : []),
-        ]}
-      />
+      <EuiTabbedContent initialSelectedTab={initialTab} tabs={tabs} />
     </>
   );
 }

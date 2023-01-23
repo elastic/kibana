@@ -30,6 +30,7 @@ export default function createRegisteredRuleTypeTests({ getService }: FtrProvide
         '.es-query',
         'xpack.ml.anomaly_detection_alert',
         'xpack.ml.anomaly_detection_jobs_health',
+        'xpack.synthetics.alerts.monitorStatus',
         'xpack.uptime.alerts.monitorStatus',
         'xpack.uptime.alerts.tlsCertificate',
         'xpack.uptime.alerts.durationAnomaly',

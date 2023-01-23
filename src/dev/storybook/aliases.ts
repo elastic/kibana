@@ -10,6 +10,8 @@
 export const storybookAliases = {
   apm: 'x-pack/plugins/apm/.storybook',
   canvas: 'x-pack/plugins/canvas/storybook',
+  cases: 'packages/kbn-cases-components/.storybook',
+  cell_actions: 'packages/kbn-cell-actions/.storybook',
   ci_composite: '.ci/.storybook',
   cloud_chat: 'x-pack/plugins/cloud_integrations/cloud_chat/.storybook',
   coloring: 'packages/kbn-coloring/.storybook',
@@ -45,5 +47,6 @@ export const storybookAliases = {
   threat_intelligence: 'x-pack/plugins/threat_intelligence/.storybook',
   triggers_actions_ui: 'x-pack/plugins/triggers_actions_ui/.storybook',
   ui_actions_enhanced: 'src/plugins/ui_actions_enhanced/.storybook',
+  ui_actions: 'src/plugins/ui_actions/.storybook',
   unified_search: 'src/plugins/unified_search/.storybook',
 };

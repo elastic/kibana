@@ -8,7 +8,7 @@
 import { mockSearchResult } from './test_helpers';
 import { getMonitorAlerts, getMonitorDetails } from './get_monitor_details';
 import * as statusCheck from '../alerts/status_check';
-import { CLIENT_ALERT_TYPES } from '../../../../common/constants/alerts';
+import { CLIENT_ALERT_TYPES } from '../../../../common/constants/uptime_alerts';
 
 describe('getMonitorDetails', () => {
   it('getMonitorDetails will provide expected calls', async () => {

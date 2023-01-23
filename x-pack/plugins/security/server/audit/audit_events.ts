@@ -67,6 +67,9 @@ type EcsRequest = Required<EcsHttp>['request'];
  * Audit request schema using ECS format
  */
 export interface AuditRequest extends EcsRequest {
+  /**
+   * HTTP request headers
+   */
   headers?: {
     'x-forwarded-for'?: string;
   };
@@ -76,6 +79,9 @@ export interface AuditRequest extends EcsRequest {
  * Audit http schema using ECS format
  */
 export interface AuditHttp extends EcsHttp {
+  /**
+   * HTTP request details
+   */
   request?: AuditRequest;
 }
 
@@ -88,8 +94,19 @@ export interface AuditHttp extends EcsHttp {
  * @public
  */
 export interface AuditEvent extends LogMeta {
+  /**
+   * Log message
+   */
   message: string;
+
+  /**
+   * Kibana specific fields
+   */
   kibana?: AuditKibana;
+
+  /**
+   * Fields describing an HTTP request
+   */
   http?: AuditHttp;
 }
 
@@ -198,6 +215,32 @@ export function userLogoutEvent({
   };
 }
 
+export function userSessionConcurrentLimitLogoutEvent({
+  username,
+  provider,
+  userProfileId,
+}: UserLogoutParams): AuditEvent {
+  return {
+    message: `User [${username}] is logging out due to exceeded concurrent sessions limit for ${provider.type} provider [name=${provider.name}]`,
+    event: {
+      action: 'user_logout',
+      category: ['authentication'],
+      outcome: 'unknown',
+    },
+    user:
+      userProfileId || username
+        ? {
+            id: userProfileId,
+            name: username,
+          }
+        : undefined,
+    kibana: {
+      authentication_provider: provider.name,
+      authentication_type: provider.type,
+    },
+  };
+}
+
 export interface SessionCleanupParams {
   sessionId: string;
   usernameHash?: string;
@@ -211,6 +254,29 @@ export function sessionCleanupEvent({
 }: SessionCleanupParams): AuditEvent {
   return {
     message: `Removing invalid or expired session for user [hash=${usernameHash}]`,
+    event: {
+      action: 'session_cleanup',
+      category: ['authentication'],
+      outcome: 'unknown',
+    },
+    user: {
+      hash: usernameHash,
+    },
+    kibana: {
+      session_id: sessionId,
+      authentication_provider: provider.name,
+      authentication_type: provider.type,
+    },
+  };
+}
+
+export function sessionCleanupConcurrentLimitEvent({
+  usernameHash,
+  sessionId,
+  provider,
+}: SessionCleanupParams): AuditEvent {
+  return {
+    message: `Removing session for user [hash=${usernameHash}] due to exceeded concurrent sessions limit`,
     event: {
       action: 'session_cleanup',
       category: ['authentication'],

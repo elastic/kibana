@@ -263,6 +263,7 @@ describe('edit package policy page', () => {
     const { id, ...restProps } = mockPackagePolicy;
     expect(sendUpdatePackagePolicy).toHaveBeenCalledWith('nginx-1', {
       ...restProps,
+      vars: {},
       inputs: [
         {
           ...mockPackagePolicy.inputs[0],

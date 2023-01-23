@@ -196,6 +196,9 @@ describe('bulkEnableRules', () => {
       })
       .mockResolvedValueOnce({
         saved_objects: [savedObjectWith409Error],
+      })
+      .mockResolvedValueOnce({
+        saved_objects: [savedObjectWith409Error],
       });
 
     encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
@@ -217,11 +220,17 @@ describe('bulkEnableRules', () => {
         find: function* asyncGenerator() {
           yield { saved_objects: [disabledRule2] };
         },
+      })
+      .mockResolvedValueOnce({
+        close: jest.fn(),
+        find: function* asyncGenerator() {
+          yield { saved_objects: [disabledRule2] };
+        },
       });
 
     const result = await rulesClient.bulkEnableRules({ ids: ['id1', 'id2'] });
 
-    expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(3);
+    expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(4);
     expect(result).toStrictEqual({
       errors: [{ message: 'UPS', rule: { id: 'id2', name: 'fakeName' }, status: 409 }],
       rules: [returnedRule1],
@@ -309,6 +318,7 @@ describe('bulkEnableRules', () => {
     mockCreatePointInTimeFinderAsInternalUser({
       saved_objects: [disabledRuleWithAction1, disabledRuleWithAction2],
     });
+
     actionsAuthorization.ensureAuthorized.mockImplementation(() => {
       throw new Error('UPS');
     });

@@ -17,7 +17,7 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { useMlKibana, useNavigateToPath } from '../../../../contexts/kibana';
 
 import { useMlContext } from '../../../../contexts/ml';

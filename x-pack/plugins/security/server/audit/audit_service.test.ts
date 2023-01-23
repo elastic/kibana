@@ -8,6 +8,8 @@
 import type { Socket } from 'net';
 import { lastValueFrom, Observable, of } from 'rxjs';
 
+import type { FakeRawRequest } from '@kbn/core/server';
+import { CoreKibanaRequest } from '@kbn/core/server';
 import {
   coreMock,
   httpServerMock,
@@ -175,7 +177,7 @@ describe('#setup', () => {
 });
 
 describe('#asScoped', () => {
-  it('logs event enriched with meta data', async () => {
+  it('logs event enriched with meta data from request', async () => {
     const audit = new AuditService(logger);
     const auditSetup = audit.setup({
       license,
@@ -209,6 +211,53 @@ describe('#asScoped', () => {
         request: { method: 'GET', headers: { 'x-forwarded-for': '1.1.1.1, 2.2.2.2' } },
       },
       user: { id: 'uid', name: 'jdoe', roles: ['admin'] },
+    });
+    audit.stop();
+  });
+
+  it('logs event enriched with meta data from fake request', async () => {
+    const audit = new AuditService(logger);
+    const auditSetup = audit.setup({
+      license,
+      config,
+      logging,
+      http,
+      getCurrentUser,
+      getSpaceId: () => undefined,
+      getSID: () => Promise.resolve(undefined),
+      recordAuditLoggingUsage,
+    });
+
+    const fakeRawRequest: FakeRawRequest = {
+      headers: {},
+      path: '/',
+    };
+    const request = CoreKibanaRequest.from(fakeRawRequest);
+
+    await auditSetup.asScoped(request).log({
+      message: 'MESSAGE',
+      event: { action: 'ACTION' },
+    });
+    expect(logger.info).toHaveBeenLastCalledWith('MESSAGE', {
+      client: {
+        ip: undefined,
+      },
+      event: {
+        action: 'ACTION',
+      },
+      http: undefined,
+      kibana: {
+        session_id: undefined,
+        space_id: undefined,
+      },
+      trace: {
+        id: expect.any(String),
+      },
+      user: {
+        id: 'uid',
+        name: 'jdoe',
+        roles: ['admin'],
+      },
     });
     audit.stop();
   });

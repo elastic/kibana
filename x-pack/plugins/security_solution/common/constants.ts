@@ -471,3 +471,27 @@ export const RISKY_USERS_DOC_LINK =
 export const MAX_NUMBER_OF_NEW_TERMS_FIELDS = 3;
 
 export const BULK_ADD_TO_TIMELINE_LIMIT = 2000;
+
+export const DEFAULT_DETECTION_PAGE_FILTERS = [
+  {
+    title: 'Status',
+    fieldName: 'kibana.alert.workflow_status',
+    selectedOptions: ['open'],
+  },
+  {
+    title: 'Severity',
+    fieldName: 'kibana.alert.severity',
+    selectedOptions: [],
+  },
+  {
+    title: 'User',
+    fieldName: 'user.name',
+  },
+  {
+    title: 'Host',
+    fieldName: 'host.name',
+  },
+];
+
+export const CELL_ACTIONS_DEFAULT_TRIGGER = 'security-solution-default-cellActions';
+export const CELL_ACTIONS_TIMELINE_TRIGGER = 'security-solution-timeline-cellActions';

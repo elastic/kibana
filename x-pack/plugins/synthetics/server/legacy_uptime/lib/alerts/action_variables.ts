@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 
 export const MESSAGE = 'message';
-export const MONITOR_WITH_GEO = 'downMonitorsWithGeo';
 export const ALERT_REASON_MSG = 'reason';
 export const ALERT_DETAILS_URL = 'alertDetailsUrl';
 export const VIEW_IN_APP_URL = 'viewInAppUrl';
@@ -20,16 +19,6 @@ export const ACTION_VARIABLES = {
       'xpack.synthetics.alerts.monitorStatus.actionVariables.context.message.description',
       {
         defaultMessage: 'A generated message summarizing the currently down monitors',
-      }
-    ),
-  },
-  [MONITOR_WITH_GEO]: {
-    name: MONITOR_WITH_GEO,
-    description: i18n.translate(
-      'xpack.synthetics.alerts.monitorStatus.actionVariables.context.downMonitorsWithGeo.description',
-      {
-        defaultMessage:
-          'A generated summary that shows some or all of the monitors detected as "down" by the alert',
       }
     ),
   },

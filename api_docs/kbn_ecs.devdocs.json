@@ -13,10 +13,18 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
     "misc": [
       {
         "parentPluginId": "@kbn/ecs",
-        "id": "def-server.Ecs",
+        "id": "def-common.Ecs",
         "type": "Type",
         "tags": [],
         "label": "Ecs",
@@ -106,7 +114,7 @@
       },
       {
         "parentPluginId": "@kbn/ecs",
-        "id": "def-server.EcsEventCategory",
+        "id": "def-common.EcsEventCategory",
         "type": "Type",
         "tags": [],
         "label": "EcsEventCategory",
@@ -121,7 +129,7 @@
       },
       {
         "parentPluginId": "@kbn/ecs",
-        "id": "def-server.EcsEventKind",
+        "id": "def-common.EcsEventKind",
         "type": "Type",
         "tags": [],
         "label": "EcsEventKind",
@@ -136,7 +144,7 @@
       },
       {
         "parentPluginId": "@kbn/ecs",
-        "id": "def-server.EcsEventOutcome",
+        "id": "def-common.EcsEventOutcome",
         "type": "Type",
         "tags": [],
         "label": "EcsEventOutcome",
@@ -151,7 +159,7 @@
       },
       {
         "parentPluginId": "@kbn/ecs",
-        "id": "def-server.EcsEventType",
+        "id": "def-common.EcsEventType",
         "type": "Type",
         "tags": [],
         "label": "EcsEventType",
@@ -165,14 +173,6 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": []
   }
 }

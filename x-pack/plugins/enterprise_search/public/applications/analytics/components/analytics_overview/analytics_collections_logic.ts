@@ -10,15 +10,12 @@ import { kea, MakeLogicType } from 'kea';
 import { AnalyticsCollection } from '../../../../../common/types/analytics';
 import { Status } from '../../../../../common/types/api';
 import { Actions } from '../../../shared/api_logic/create_api_logic';
-import { flashAPIErrors, clearFlashMessages } from '../../../shared/flash_messages';
 import {
   FetchAnalyticsCollectionsAPILogic,
   FetchAnalyticsCollectionsApiLogicResponse,
 } from '../../api/index/fetch_analytics_collections_api_logic';
 
 export interface AnalyticsCollectionsActions {
-  apiError: Actions<{}, FetchAnalyticsCollectionsApiLogicResponse>['apiError'];
-  apiSuccess: Actions<{}, FetchAnalyticsCollectionsApiLogicResponse>['apiSuccess'];
   fetchAnalyticsCollections(): void;
   makeRequest: Actions<{}, FetchAnalyticsCollectionsApiLogicResponse>['makeRequest'];
 }
@@ -37,15 +34,13 @@ export const AnalyticsCollectionsLogic = kea<
     fetchAnalyticsCollections: () => {},
   },
   connect: {
-    actions: [FetchAnalyticsCollectionsAPILogic, ['makeRequest', 'apiSuccess', 'apiError']],
+    actions: [FetchAnalyticsCollectionsAPILogic, ['makeRequest']],
     values: [FetchAnalyticsCollectionsAPILogic, ['data', 'status']],
   },
   listeners: ({ actions }) => ({
-    apiError: (e) => flashAPIErrors(e),
     fetchAnalyticsCollections: () => {
       actions.makeRequest({});
     },
-    makeRequest: () => clearFlashMessages(),
   }),
   path: ['enterprise_search', 'analytics', 'collections'],
   selectors: ({ selectors }) => ({

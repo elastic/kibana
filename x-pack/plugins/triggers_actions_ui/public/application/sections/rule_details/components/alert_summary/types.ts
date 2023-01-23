@@ -6,14 +6,33 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
-import { AlertStatus } from '@kbn/rule-data-utils';
-import { AlertSummaryTimeRange } from '../../../../hooks/use_load_alert_summary';
-import { Rule } from '../../../../../types';
+import { AlertStatus, ValidFeatureId } from '@kbn/rule-data-utils';
+import type { PartialTheme, Theme } from '@elastic/charts';
 
-export interface RuleAlertsSummaryProps {
-  rule: Rule;
-  filteredRuleTypes: string[];
-  onClick: (status?: AlertStatus) => void;
-  timeRange: AlertSummaryTimeRange;
+export interface Alert {
+  key: number;
+  doc_count: number;
+}
+
+export interface AlertSummaryTimeRange {
+  utcFrom: string;
+  utcTo: string;
+  // fixed_interval condition in ES query such as 1m, 1h, 1d
+  fixedInterval: string;
+  title?: JSX.Element | string;
+  dateFormat?: string;
+}
+
+export interface ChartThemes {
+  theme: PartialTheme;
+  baseTheme: Theme;
+}
+
+export interface AlertSummaryWidgetProps {
+  featureIds?: ValidFeatureId[];
   filter?: estypes.QueryDslQueryContainer;
+  fullSize?: boolean;
+  onClick?: (status?: AlertStatus) => void;
+  timeRange: AlertSummaryTimeRange;
+  chartThemes: ChartThemes;
 }

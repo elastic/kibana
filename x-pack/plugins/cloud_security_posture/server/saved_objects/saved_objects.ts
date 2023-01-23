@@ -16,6 +16,7 @@ import {
   cspRuleTemplateSchemaV840,
   CspRuleTemplate,
   CspRule,
+  cspRuleTemplateSchemaV870,
 } from '../../common/schemas';
 
 import {
@@ -56,6 +57,7 @@ export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup) {
     schemas: {
       '8.3.0': cspRuleTemplateSchemaV830,
       '8.4.0': cspRuleTemplateSchemaV840,
+      '8.7.0': cspRuleTemplateSchemaV870,
     },
     migrations: cspRuleTemplateMigrations,
     mappings: cspRuleTemplateSavedObjectMapping,

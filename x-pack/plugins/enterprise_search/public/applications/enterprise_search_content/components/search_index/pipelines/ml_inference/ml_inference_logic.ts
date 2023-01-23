@@ -162,6 +162,7 @@ export interface MLInferenceProcessorsValues {
   mlInferencePipelinesData: FetchMlInferencePipelinesResponse | undefined;
   mlModelsData: TrainedModel[] | null;
   mlModelsStatus: Status;
+  selectedMLModel: TrainedModel | null;
   sourceFields: string[] | undefined;
   supportedMLModels: TrainedModel[];
 }
@@ -241,6 +242,7 @@ export const MLInferenceLogic = kea<
             ? configuration.destinationField
             : undefined,
         indexName,
+        inferenceConfig: configuration.inferenceConfig,
         modelId: configuration.modelID,
         pipelineName: configuration.pipelineName,
         sourceField: configuration.sourceField,
@@ -343,6 +345,7 @@ export const MLInferenceLogic = kea<
           model,
           pipelineName: configuration.pipelineName,
           sourceField: configuration.sourceField,
+          inferenceConfig: configuration.inferenceConfig,
         });
       },
     ],
@@ -433,6 +436,19 @@ export const MLInferenceLogic = kea<
           .filter((p): p is MLInferencePipelineOption => p !== undefined);
 
         return existingPipelines;
+      },
+    ],
+    selectedMLModel: [
+      () => [selectors.supportedMLModels, selectors.addInferencePipelineModal],
+      (
+        supportedMLModels: MLInferenceProcessorsValues['supportedMLModels'],
+        addInferencePipelineModal: MLInferenceProcessorsValues['addInferencePipelineModal']
+      ) => {
+        return (
+          supportedMLModels.find(
+            (model) => model.model_id === addInferencePipelineModal.configuration.modelID
+          ) ?? null
+        );
       },
     ],
   }),

@@ -38,9 +38,11 @@ import {
   throwBadControlState,
   throwBadResponse,
   versionMigrationCompleted,
+  buildRemoveAliasActions,
 } from './helpers';
 import { createBatches } from './create_batches';
 import type { MigrationLog } from '../types';
+import { diffMappings } from '../core/build_active_mappings';
 
 export const FATAL_REASON_REQUEST_ENTITY_TOO_LARGE = `While indexing a batch of saved objects, Elasticsearch returned a 413 Request Entity Too Large exception. Ensure that the Kibana configuration option 'migrations.maxBatchSizeBytes' is set to a value that is lower than or equal to the Elasticsearch 'http.max_content_length' configuration option.`;
 const CLUSTER_SHARD_LIMIT_EXCEEDED_REASON = `[cluster_shard_limit_exceeded] Upgrading Kibana requires adding a small number of new shards. Ensure that Kibana is able to add 10 more shards by increasing the cluster.max_shards_per_node setting, or removing indices to clear up resources.`;
@@ -71,7 +73,6 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
 
   if (stateP.controlState === 'INIT') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
-
     if (Either.isLeft(res)) {
       const left = res.left;
       if (isTypeof(left, 'incompatible_cluster_routing_allocation')) {
@@ -97,12 +98,13 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
 
       const aliases = aliasesRes.right;
 
+      // The source index .kibana is pointing to. E.g: ".kibana_8.7.0_001"
+      const source = aliases[stateP.currentAlias];
+
       if (
         // This version's migration has already been completed.
         versionMigrationCompleted(stateP.currentAlias, stateP.versionAlias, aliases)
       ) {
-        const source = aliases[stateP.currentAlias]!;
-
         return {
           ...stateP,
           // Skip to 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT' so that if a new plugin was
@@ -112,15 +114,15 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           // Source is a none because we didn't do any migration from a source
           // index
           sourceIndex: Option.none,
-          targetIndex: `${stateP.indexPrefix}_${stateP.kibanaVersion}_001`,
-          sourceIndexMappings: indices[source].mappings,
+          targetIndex: source!,
+          sourceIndexMappings: indices[source!].mappings,
           // in this scenario, a .kibana_X.Y.Z_001 index exists that matches the current kibana version
           // aka we are NOT upgrading to a newer version
           // we inject the target index's current mappings in the state, to check them later
-          targetIndexCurrentMappings: indices[source].mappings,
+          targetIndexRawMappings: indices[source!].mappings,
           targetIndexMappings: mergeMigrationMappingPropertyHashes(
             stateP.targetIndexMappings,
-            indices[aliases[stateP.currentAlias]!].mappings
+            indices[source!].mappings
           ),
           versionIndexReadyActions: Option.none,
         };
@@ -158,15 +160,15 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         };
       } else if (
         // If the `.kibana` alias exists
-        aliases[stateP.currentAlias] != null
+        source != null
       ) {
-        // The source index is the index the `.kibana` alias points to
-        const source = aliases[stateP.currentAlias]!;
+        // CHECKPOINT here we decide to go for yellow source
         return {
           ...stateP,
+          aliases,
           controlState: 'WAIT_FOR_YELLOW_SOURCE',
-          sourceIndex: Option.some(source) as Option.Some<string>,
-          sourceIndexMappings: indices[source].mappings,
+          sourceIndex: Option.some(source!) as Option.Some<string>,
+          sourceIndexMappings: indices[source!].mappings,
         };
       } else if (indices[stateP.legacyIndex] != null) {
         // Migrate from a legacy index
@@ -275,6 +277,30 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           },
         ],
       };
+    }
+  } else if (stateP.controlState === 'PREPARE_COMPATIBLE_MIGRATION') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
+      return {
+        ...stateP,
+        controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
+      };
+    } else if (Either.isLeft(res)) {
+      // Note: if multiple newer Kibana versions are competing with each other to perform a migration,
+      // it might happen that another Kibana instance has deleted this instance's version index.
+      // NIT to handle this in properly, we'd have to add a PREPARE_COMPATIBLE_MIGRATION_CONFLICT step,
+      // similar to MARK_VERSION_INDEX_READY_CONFLICT.
+      if (isTypeof(res.left, 'alias_not_found_exception')) {
+        // We assume that the alias was already deleted by another Kibana instance
+        return {
+          ...stateP,
+          controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
+        };
+      } else {
+        throwBadResponse(stateP, res.left as never);
+      }
+    } else {
+      throwBadResponse(stateP, res);
     }
   } else if (stateP.controlState === 'LEGACY_SET_WRITE_BLOCK') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -421,10 +447,50 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'WAIT_FOR_YELLOW_SOURCE') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      return {
-        ...stateP,
-        controlState: 'CHECK_UNKNOWN_DOCUMENTS',
-      };
+      // check the existing mappings to see if we can avoid reindexing
+      if (
+        // source exists
+        Boolean(stateP.sourceIndexMappings._meta?.migrationMappingPropertyHashes) &&
+        // ...and mappings are unchanged
+        !diffMappings(
+          /* actual */
+          stateP.sourceIndexMappings,
+          /* expected */
+          stateP.targetIndexMappings
+        )
+      ) {
+        // The source index .kibana is pointing to. E.g: ".xx8.7.0_001"
+        const source = stateP.sourceIndex.value;
+
+        return {
+          ...stateP,
+          controlState: 'PREPARE_COMPATIBLE_MIGRATION',
+          sourceIndex: Option.none,
+          targetIndex: source!,
+          targetIndexRawMappings: stateP.sourceIndexMappings,
+          targetIndexMappings: mergeMigrationMappingPropertyHashes(
+            stateP.targetIndexMappings,
+            stateP.sourceIndexMappings
+          ),
+          preTransformDocsActions: [
+            // Point the version alias to the source index. This let's other Kibana
+            // instances know that a migration for the current version is "done"
+            // even though we may be waiting for document transformations to finish.
+            { add: { index: source!, alias: stateP.versionAlias } },
+            ...buildRemoveAliasActions(source!, Object.keys(stateP.aliases), [
+              stateP.currentAlias,
+              stateP.versionAlias,
+            ]),
+          ],
+          versionIndexReadyActions: Option.none,
+        };
+      } else {
+        // the mappings have changed, but changes might still be compatible
+        return {
+          ...stateP,
+          controlState: 'CHECK_UNKNOWN_DOCUMENTS',
+        };
+      }
     } else if (Either.isLeft(res)) {
       const left = res.left;
       if (isTypeof(left, 'index_not_yellow_timeout')) {

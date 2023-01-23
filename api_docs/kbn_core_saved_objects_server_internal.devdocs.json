@@ -9,10 +9,18 @@
     "objects": []
   },
   "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/core-saved-objects-server-internal",
-        "id": "def-server.SavedObjectsService",
+        "id": "def-common.SavedObjectsService",
         "type": "Class",
         "tags": [],
         "label": "SavedObjectsService",
@@ -20,9 +28,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-server-internal",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreSavedObjectsServerInternalPluginApi",
-            "section": "def-server.SavedObjectsService",
+            "section": "def-common.SavedObjectsService",
             "text": "SavedObjectsService"
           },
           " implements ",
@@ -32,9 +40,9 @@
           ", ",
           {
             "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-server.SavedObjectsServiceStart",
+            "section": "def-common.SavedObjectsServiceStart",
             "text": "SavedObjectsServiceStart"
           },
           ">"
@@ -45,7 +53,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-server-internal",
-            "id": "def-server.SavedObjectsService.Unnamed",
+            "id": "def-common.SavedObjectsService.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -59,7 +67,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-server-internal",
-                "id": "def-server.SavedObjectsService.Unnamed.$1",
+                "id": "def-common.SavedObjectsService.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "coreContext",
@@ -77,7 +85,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server-internal",
-            "id": "def-server.SavedObjectsService.setup",
+            "id": "def-common.SavedObjectsService.setup",
             "type": "Function",
             "tags": [],
             "label": "setup",
@@ -95,7 +103,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-server-internal",
-                "id": "def-server.SavedObjectsService.setup.$1",
+                "id": "def-common.SavedObjectsService.setup.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "setupDeps",
@@ -113,7 +121,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server-internal",
-            "id": "def-server.SavedObjectsService.start",
+            "id": "def-common.SavedObjectsService.start",
             "type": "Function",
             "tags": [],
             "label": "start",
@@ -124,9 +132,9 @@
               ") => Promise<",
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectsServiceStart",
+                "section": "def-common.SavedObjectsServiceStart",
                 "text": "SavedObjectsServiceStart"
               },
               ">"
@@ -137,7 +145,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-server-internal",
-                "id": "def-server.SavedObjectsService.start.$1",
+                "id": "def-common.SavedObjectsService.start.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "{\n    elasticsearch,\n    pluginsInitialized = true,\n    docLinks,\n    node,\n  }",
@@ -155,7 +163,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server-internal",
-            "id": "def-server.SavedObjectsService.stop",
+            "id": "def-common.SavedObjectsService.stop",
             "type": "Function",
             "tags": [],
             "label": "stop",
@@ -176,7 +184,7 @@
     "functions": [
       {
         "parentPluginId": "@kbn/core-saved-objects-server-internal",
-        "id": "def-server.registerBulkCreateRoute",
+        "id": "def-common.registerBulkCreateRoute",
         "type": "Function",
         "tags": [],
         "label": "registerBulkCreateRoute",
@@ -192,7 +200,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-server-internal",
-            "id": "def-server.registerBulkCreateRoute.$1",
+            "id": "def-common.registerBulkCreateRoute.$1",
             "type": "Object",
             "tags": [],
             "label": "router",
@@ -207,7 +215,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server-internal",
-            "id": "def-server.registerBulkCreateRoute.$2",
+            "id": "def-common.registerBulkCreateRoute.$2",
             "type": "Object",
             "tags": [],
             "label": "{ coreUsageData }",
@@ -226,7 +234,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-server-internal",
-        "id": "def-server.registerBulkDeleteRoute",
+        "id": "def-common.registerBulkDeleteRoute",
         "type": "Function",
         "tags": [],
         "label": "registerBulkDeleteRoute",
@@ -242,7 +250,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-server-internal",
-            "id": "def-server.registerBulkDeleteRoute.$1",
+            "id": "def-common.registerBulkDeleteRoute.$1",
             "type": "Object",
             "tags": [],
             "label": "router",
@@ -257,7 +265,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server-internal",
-            "id": "def-server.registerBulkDeleteRoute.$2",
+            "id": "def-common.registerBulkDeleteRoute.$2",
             "type": "Object",
             "tags": [],
             "label": "{ coreUsageData }",
@@ -276,7 +284,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-server-internal",
-        "id": "def-server.registerBulkGetRoute",
+        "id": "def-common.registerBulkGetRoute",
         "type": "Function",
         "tags": [],
         "label": "registerBulkGetRoute",
@@ -292,7 +300,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-server-internal",
-            "id": "def-server.registerBulkGetRoute.$1",
+            "id": "def-common.registerBulkGetRoute.$1",
             "type": "Object",
             "tags": [],
             "label": "router",
@@ -307,7 +315,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server-internal",
-            "id": "def-server.registerBulkGetRoute.$2",
+            "id": "def-common.registerBulkGetRoute.$2",
             "type": "Object",
             "tags": [],
             "label": "{ coreUsageData }",
@@ -326,7 +334,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-server-internal",
-        "id": "def-server.registerBulkResolveRoute",
+        "id": "def-common.registerBulkResolveRoute",
         "type": "Function",
         "tags": [],
         "label": "registerBulkResolveRoute",
@@ -342,7 +350,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-server-internal",
-            "id": "def-server.registerBulkResolveRoute.$1",
+            "id": "def-common.registerBulkResolveRoute.$1",
             "type": "Object",
             "tags": [],
             "label": "router",
@@ -357,7 +365,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server-internal",
-            "id": "def-server.registerBulkResolveRoute.$2",
+            "id": "def-common.registerBulkResolveRoute.$2",
             "type": "Object",
             "tags": [],
             "label": "{ coreUsageData }",
@@ -376,7 +384,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-server-internal",
-        "id": "def-server.registerBulkUpdateRoute",
+        "id": "def-common.registerBulkUpdateRoute",
         "type": "Function",
         "tags": [],
         "label": "registerBulkUpdateRoute",
@@ -392,7 +400,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-server-internal",
-            "id": "def-server.registerBulkUpdateRoute.$1",
+            "id": "def-common.registerBulkUpdateRoute.$1",
             "type": "Object",
             "tags": [],
             "label": "router",
@@ -407,7 +415,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server-internal",
-            "id": "def-server.registerBulkUpdateRoute.$2",
+            "id": "def-common.registerBulkUpdateRoute.$2",
             "type": "Object",
             "tags": [],
             "label": "{ coreUsageData }",
@@ -426,7 +434,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-server-internal",
-        "id": "def-server.registerCreateRoute",
+        "id": "def-common.registerCreateRoute",
         "type": "Function",
         "tags": [],
         "label": "registerCreateRoute",
@@ -442,7 +450,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-server-internal",
-            "id": "def-server.registerCreateRoute.$1",
+            "id": "def-common.registerCreateRoute.$1",
             "type": "Object",
             "tags": [],
             "label": "router",
@@ -457,7 +465,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server-internal",
-            "id": "def-server.registerCreateRoute.$2",
+            "id": "def-common.registerCreateRoute.$2",
             "type": "Object",
             "tags": [],
             "label": "{ coreUsageData }",
@@ -476,7 +484,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-server-internal",
-        "id": "def-server.registerDeleteRoute",
+        "id": "def-common.registerDeleteRoute",
         "type": "Function",
         "tags": [],
         "label": "registerDeleteRoute",
@@ -492,7 +500,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-server-internal",
-            "id": "def-server.registerDeleteRoute.$1",
+            "id": "def-common.registerDeleteRoute.$1",
             "type": "Object",
             "tags": [],
             "label": "router",
@@ -507,7 +515,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server-internal",
-            "id": "def-server.registerDeleteRoute.$2",
+            "id": "def-common.registerDeleteRoute.$2",
             "type": "Object",
             "tags": [],
             "label": "{ coreUsageData }",
@@ -526,7 +534,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-server-internal",
-        "id": "def-server.registerDeleteUnknownTypesRoute",
+        "id": "def-common.registerDeleteUnknownTypesRoute",
         "type": "Function",
         "tags": [],
         "label": "registerDeleteUnknownTypesRoute",
@@ -542,7 +550,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-server-internal",
-            "id": "def-server.registerDeleteUnknownTypesRoute.$1",
+            "id": "def-common.registerDeleteUnknownTypesRoute.$1",
             "type": "Object",
             "tags": [],
             "label": "router",
@@ -557,7 +565,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server-internal",
-            "id": "def-server.registerDeleteUnknownTypesRoute.$2",
+            "id": "def-common.registerDeleteUnknownTypesRoute.$2",
             "type": "Object",
             "tags": [],
             "label": "{ kibanaIndex, kibanaVersion }",
@@ -576,7 +584,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-server-internal",
-        "id": "def-server.registerExportRoute",
+        "id": "def-common.registerExportRoute",
         "type": "Function",
         "tags": [],
         "label": "registerExportRoute",
@@ -592,7 +600,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-server-internal",
-            "id": "def-server.registerExportRoute.$1",
+            "id": "def-common.registerExportRoute.$1",
             "type": "Object",
             "tags": [],
             "label": "router",
@@ -607,7 +615,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server-internal",
-            "id": "def-server.registerExportRoute.$2",
+            "id": "def-common.registerExportRoute.$2",
             "type": "Object",
             "tags": [],
             "label": "{ config, coreUsageData }",
@@ -626,7 +634,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-server-internal",
-        "id": "def-server.registerFindRoute",
+        "id": "def-common.registerFindRoute",
         "type": "Function",
         "tags": [],
         "label": "registerFindRoute",
@@ -642,7 +650,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-server-internal",
-            "id": "def-server.registerFindRoute.$1",
+            "id": "def-common.registerFindRoute.$1",
             "type": "Object",
             "tags": [],
             "label": "router",
@@ -657,7 +665,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server-internal",
-            "id": "def-server.registerFindRoute.$2",
+            "id": "def-common.registerFindRoute.$2",
             "type": "Object",
             "tags": [],
             "label": "{ coreUsageData }",
@@ -676,7 +684,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-server-internal",
-        "id": "def-server.registerGetRoute",
+        "id": "def-common.registerGetRoute",
         "type": "Function",
         "tags": [],
         "label": "registerGetRoute",
@@ -692,7 +700,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-server-internal",
-            "id": "def-server.registerGetRoute.$1",
+            "id": "def-common.registerGetRoute.$1",
             "type": "Object",
             "tags": [],
             "label": "router",
@@ -707,7 +715,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server-internal",
-            "id": "def-server.registerGetRoute.$2",
+            "id": "def-common.registerGetRoute.$2",
             "type": "Object",
             "tags": [],
             "label": "{ coreUsageData }",
@@ -726,7 +734,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-server-internal",
-        "id": "def-server.registerImportRoute",
+        "id": "def-common.registerImportRoute",
         "type": "Function",
         "tags": [],
         "label": "registerImportRoute",
@@ -742,7 +750,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-server-internal",
-            "id": "def-server.registerImportRoute.$1",
+            "id": "def-common.registerImportRoute.$1",
             "type": "Object",
             "tags": [],
             "label": "router",
@@ -757,7 +765,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server-internal",
-            "id": "def-server.registerImportRoute.$2",
+            "id": "def-common.registerImportRoute.$2",
             "type": "Object",
             "tags": [],
             "label": "{ config, coreUsageData }",
@@ -776,7 +784,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-server-internal",
-        "id": "def-server.registerLegacyExportRoute",
+        "id": "def-common.registerLegacyExportRoute",
         "type": "Function",
         "tags": [],
         "label": "registerLegacyExportRoute",
@@ -789,9 +797,9 @@
           "; logger: ",
           {
             "pluginId": "@kbn/logging",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnLoggingPluginApi",
-            "section": "def-server.Logger",
+            "section": "def-common.Logger",
             "text": "Logger"
           },
           "; }) => void"
@@ -802,7 +810,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-server-internal",
-            "id": "def-server.registerLegacyExportRoute.$1",
+            "id": "def-common.registerLegacyExportRoute.$1",
             "type": "Object",
             "tags": [],
             "label": "router",
@@ -817,7 +825,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server-internal",
-            "id": "def-server.registerLegacyExportRoute.$2",
+            "id": "def-common.registerLegacyExportRoute.$2",
             "type": "Object",
             "tags": [],
             "label": "{\n    kibanaVersion,\n    coreUsageData,\n    logger,\n  }",
@@ -828,7 +836,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-server-internal",
-                "id": "def-server.registerLegacyExportRoute.$2.kibanaVersion",
+                "id": "def-common.registerLegacyExportRoute.$2.kibanaVersion",
                 "type": "string",
                 "tags": [],
                 "label": "kibanaVersion",
@@ -839,7 +847,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-server-internal",
-                "id": "def-server.registerLegacyExportRoute.$2.coreUsageData",
+                "id": "def-common.registerLegacyExportRoute.$2.coreUsageData",
                 "type": "Object",
                 "tags": [],
                 "label": "coreUsageData",
@@ -853,7 +861,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-server-internal",
-                "id": "def-server.registerLegacyExportRoute.$2.logger",
+                "id": "def-common.registerLegacyExportRoute.$2.logger",
                 "type": "Object",
                 "tags": [],
                 "label": "logger",
@@ -861,9 +869,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/logging",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnLoggingPluginApi",
-                    "section": "def-server.Logger",
+                    "section": "def-common.Logger",
                     "text": "Logger"
                   }
                 ],
@@ -879,7 +887,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-server-internal",
-        "id": "def-server.registerLegacyImportRoute",
+        "id": "def-common.registerLegacyImportRoute",
         "type": "Function",
         "tags": [],
         "label": "registerLegacyImportRoute",
@@ -892,9 +900,9 @@
           "; logger: ",
           {
             "pluginId": "@kbn/logging",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnLoggingPluginApi",
-            "section": "def-server.Logger",
+            "section": "def-common.Logger",
             "text": "Logger"
           },
           "; }) => void"
@@ -905,7 +913,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-server-internal",
-            "id": "def-server.registerLegacyImportRoute.$1",
+            "id": "def-common.registerLegacyImportRoute.$1",
             "type": "Object",
             "tags": [],
             "label": "router",
@@ -920,7 +928,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server-internal",
-            "id": "def-server.registerLegacyImportRoute.$2",
+            "id": "def-common.registerLegacyImportRoute.$2",
             "type": "Object",
             "tags": [],
             "label": "{\n    maxImportPayloadBytes,\n    coreUsageData,\n    logger,\n  }",
@@ -931,7 +939,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-server-internal",
-                "id": "def-server.registerLegacyImportRoute.$2.maxImportPayloadBytes",
+                "id": "def-common.registerLegacyImportRoute.$2.maxImportPayloadBytes",
                 "type": "number",
                 "tags": [],
                 "label": "maxImportPayloadBytes",
@@ -942,7 +950,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-server-internal",
-                "id": "def-server.registerLegacyImportRoute.$2.coreUsageData",
+                "id": "def-common.registerLegacyImportRoute.$2.coreUsageData",
                 "type": "Object",
                 "tags": [],
                 "label": "coreUsageData",
@@ -956,7 +964,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-server-internal",
-                "id": "def-server.registerLegacyImportRoute.$2.logger",
+                "id": "def-common.registerLegacyImportRoute.$2.logger",
                 "type": "Object",
                 "tags": [],
                 "label": "logger",
@@ -964,9 +972,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/logging",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnLoggingPluginApi",
-                    "section": "def-server.Logger",
+                    "section": "def-common.Logger",
                     "text": "Logger"
                   }
                 ],
@@ -982,7 +990,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-server-internal",
-        "id": "def-server.registerMigrateRoute",
+        "id": "def-common.registerMigrateRoute",
         "type": "Function",
         "tags": [],
         "label": "registerMigrateRoute",
@@ -1000,7 +1008,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-server-internal",
-            "id": "def-server.registerMigrateRoute.$1",
+            "id": "def-common.registerMigrateRoute.$1",
             "type": "Object",
             "tags": [],
             "label": "router",
@@ -1015,7 +1023,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server-internal",
-            "id": "def-server.registerMigrateRoute.$2",
+            "id": "def-common.registerMigrateRoute.$2",
             "type": "Object",
             "tags": [],
             "label": "migratorPromise",
@@ -1036,7 +1044,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-server-internal",
-        "id": "def-server.registerResolveImportErrorsRoute",
+        "id": "def-common.registerResolveImportErrorsRoute",
         "type": "Function",
         "tags": [],
         "label": "registerResolveImportErrorsRoute",
@@ -1052,7 +1060,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-server-internal",
-            "id": "def-server.registerResolveImportErrorsRoute.$1",
+            "id": "def-common.registerResolveImportErrorsRoute.$1",
             "type": "Object",
             "tags": [],
             "label": "router",
@@ -1067,7 +1075,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server-internal",
-            "id": "def-server.registerResolveImportErrorsRoute.$2",
+            "id": "def-common.registerResolveImportErrorsRoute.$2",
             "type": "Object",
             "tags": [],
             "label": "{ config, coreUsageData }",
@@ -1086,7 +1094,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-server-internal",
-        "id": "def-server.registerResolveRoute",
+        "id": "def-common.registerResolveRoute",
         "type": "Function",
         "tags": [],
         "label": "registerResolveRoute",
@@ -1102,7 +1110,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-server-internal",
-            "id": "def-server.registerResolveRoute.$1",
+            "id": "def-common.registerResolveRoute.$1",
             "type": "Object",
             "tags": [],
             "label": "router",
@@ -1117,7 +1125,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server-internal",
-            "id": "def-server.registerResolveRoute.$2",
+            "id": "def-common.registerResolveRoute.$2",
             "type": "Object",
             "tags": [],
             "label": "{ coreUsageData }",
@@ -1136,7 +1144,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-server-internal",
-        "id": "def-server.registerUpdateRoute",
+        "id": "def-common.registerUpdateRoute",
         "type": "Function",
         "tags": [],
         "label": "registerUpdateRoute",
@@ -1152,7 +1160,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-server-internal",
-            "id": "def-server.registerUpdateRoute.$1",
+            "id": "def-common.registerUpdateRoute.$1",
             "type": "Object",
             "tags": [],
             "label": "router",
@@ -1167,7 +1175,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server-internal",
-            "id": "def-server.registerUpdateRoute.$2",
+            "id": "def-common.registerUpdateRoute.$2",
             "type": "Object",
             "tags": [],
             "label": "{ coreUsageData }",
@@ -1190,7 +1198,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-saved-objects-server-internal",
-        "id": "def-server.InternalSavedObjectsServiceStart",
+        "id": "def-common.InternalSavedObjectsServiceStart",
         "type": "Type",
         "tags": [],
         "label": "InternalSavedObjectsServiceStart",
@@ -1198,9 +1206,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-server.SavedObjectsServiceStart",
+            "section": "def-common.SavedObjectsServiceStart",
             "text": "SavedObjectsServiceStart"
           }
         ],
@@ -1210,14 +1218,6 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": []
   }
 }

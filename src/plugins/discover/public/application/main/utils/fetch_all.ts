@@ -10,6 +10,7 @@ import { Adapters } from '@kbn/inspector-plugin/common';
 import { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import { BehaviorSubject, filter, firstValueFrom, map, merge, scan } from 'rxjs';
+import { AppState } from '../services/discover_app_state_container';
 import { getRawRecordType } from './get_raw_record_type';
 import {
   checkHitCount,
@@ -21,7 +22,6 @@ import {
 } from '../hooks/use_saved_search_messages';
 import { updateSearchSource } from './update_search_source';
 import { fetchDocuments } from './fetch_documents';
-import { AppState } from '../services/discover_state';
 import { FetchStatus } from '../../types';
 import { DataMsg, RecordRawType, SavedSearchData } from '../hooks/use_saved_search';
 import { DiscoverServices } from '../../../build_services';
@@ -52,7 +52,14 @@ export function fetchAll(
   reset = false,
   fetchDeps: FetchDeps
 ): Promise<void> {
-  const { initialFetchStatus, appStateContainer, services, useNewFieldsApi, data } = fetchDeps;
+  const {
+    initialFetchStatus,
+    appStateContainer,
+    services,
+    useNewFieldsApi,
+    data,
+    inspectorAdapters,
+  } = fetchDeps;
 
   try {
     const dataView = searchSource.getField('index')!;
@@ -81,7 +88,7 @@ export function fetchAll(
     // Start fetching all required requests
     const documents =
       useSql && query
-        ? fetchSql(query, services.dataViews, data, services.expressions)
+        ? fetchSql(query, dataView, data, services.expressions, inspectorAdapters)
         : fetchDocuments(searchSource.createCopy(), fetchDeps);
 
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects

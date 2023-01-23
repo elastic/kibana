@@ -7,7 +7,6 @@
 
 import type { BulkOperationError, RulesClient } from '@kbn/alerting-plugin/server';
 import pMap from 'p-map';
-
 import {
   MAX_RULES_TO_UPDATE_IN_PARALLEL,
   NOTIFICATION_THROTTLE_NO_ACTIONS,

@@ -159,4 +159,13 @@ describe('KibanaSocket', () => {
       expect(socket.remoteAddress).toBe('1.1.1.1');
     });
   });
+
+  describe('getFakeSocket', () => {
+    it('returns a stub', async () => {
+      const fakeSocket = KibanaSocket.getFakeSocket();
+      expect(fakeSocket.getPeerCertificate()).toBeNull();
+      expect(fakeSocket.getProtocol()).toBeNull();
+      await expect(fakeSocket.renegotiate({})).resolves.toBeUndefined();
+    });
+  });
 });

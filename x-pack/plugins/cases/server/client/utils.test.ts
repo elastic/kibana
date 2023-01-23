@@ -15,6 +15,7 @@ import {
 import { toElasticsearchQuery } from '@kbn/es-query';
 import { CaseStatuses } from '../../common';
 import { CaseSeverity } from '../../common/api';
+import { ESCaseSeverity, ESCaseStatus } from '../services/cases/types';
 
 describe('utils', () => {
   describe('convertSortField', () => {
@@ -28,6 +29,14 @@ describe('utils', () => {
 
     it('transforms created_at correctly', () => {
       expect(convertSortField('created_at')).toBe('created_at');
+    });
+
+    it('transforms updated_at correctly', () => {
+      expect(convertSortField('updated_at')).toBe('updated_at');
+    });
+
+    it('transforms updatedAt correctly', () => {
+      expect(convertSortField('updatedAt')).toBe('updated_at');
     });
 
     it('transforms closedAt correctly', () => {
@@ -385,8 +394,12 @@ describe('utils', () => {
       `);
     });
 
-    it('creates a filter for the status', () => {
-      expect(constructQueryOptions({ status: CaseStatuses.open }).filter).toMatchInlineSnapshot(`
+    it.each([
+      [CaseStatuses.open, ESCaseStatus.OPEN],
+      [CaseStatuses['in-progress'], ESCaseStatus.IN_PROGRESS],
+      [CaseStatuses.closed, ESCaseStatus.CLOSED],
+    ])('creates a filter for status "%s"', (status, expectedStatus) => {
+      expect(constructQueryOptions({ status }).filter).toMatchInlineSnapshot(`
         Object {
           "arguments": Array [
             Object {
@@ -397,7 +410,7 @@ describe('utils', () => {
             Object {
               "isQuoted": false,
               "type": "literal",
-              "value": "open",
+              "value": "${expectedStatus}",
             },
           ],
           "function": "is",
@@ -406,9 +419,13 @@ describe('utils', () => {
       `);
     });
 
-    it('creates a filter for the severity', () => {
-      expect(constructQueryOptions({ severity: CaseSeverity.CRITICAL }).filter)
-        .toMatchInlineSnapshot(`
+    it.each([
+      [CaseSeverity.LOW, ESCaseSeverity.LOW],
+      [CaseSeverity.MEDIUM, ESCaseSeverity.MEDIUM],
+      [CaseSeverity.HIGH, ESCaseSeverity.HIGH],
+      [CaseSeverity.CRITICAL, ESCaseSeverity.CRITICAL],
+    ])('creates a filter for severity "%s"', (severity, expectedSeverity) => {
+      expect(constructQueryOptions({ severity }).filter).toMatchInlineSnapshot(`
         Object {
           "arguments": Array [
             Object {
@@ -419,13 +436,13 @@ describe('utils', () => {
             Object {
               "isQuoted": false,
               "type": "literal",
-              "value": "critical",
+              "value": "${expectedSeverity}",
             },
           ],
           "function": "is",
           "type": "function",
         }
-      `);
+        `);
     });
 
     it('creates a filter for the time range', () => {

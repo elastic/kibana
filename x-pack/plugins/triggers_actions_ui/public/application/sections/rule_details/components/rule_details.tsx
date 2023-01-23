@@ -27,8 +27,8 @@ import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { RuleExecutionStatusErrorReasons, parseDuration } from '@kbn/alerting-plugin/common';
 import { getRuleDetailsRoute } from '@kbn/rule-data-utils';
 import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
-import { bulkUpdateAPIKey, deleteRules } from '../../../lib/rule_api';
-import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
+import { bulkUpdateAPIKey } from '../../../lib/rule_api';
+import { RulesDeleteModalConfirmation } from '../../../components/rules_delete_modal_confirmation';
 import { RuleActionsPopover } from './rule_actions_popover';
 import {
   hasAllPrivilege,
@@ -61,6 +61,13 @@ import { ruleReducer } from '../../rule_form/rule_reducer';
 import { loadAllActions as loadConnectors } from '../../../lib/action_connector_api';
 import { triggersActionsUiConfig } from '../../../../common/lib/config_api';
 import { runRule } from '../../../lib/run_rule';
+import {
+  getConfirmDeletionButtonText,
+  getConfirmDeletionModalText,
+  SINGLE_RULE_TITLE,
+  MULTIPLE_RULE_TITLE,
+} from '../../rules_list/translations';
+import { useBulkOperationToast } from '../../../hooks/use_bulk_operation_toast';
 
 export type RuleDetailsProps = {
   rule: Rule;
@@ -70,7 +77,7 @@ export type RuleDetailsProps = {
   refreshToken?: number;
 } & Pick<
   BulkOperationsComponentOpts,
-  'bulkDisableRules' | 'bulkEnableRules' | 'snoozeRule' | 'unsnoozeRule'
+  'bulkDisableRules' | 'bulkEnableRules' | 'bulkDeleteRules' | 'snoozeRule' | 'unsnoozeRule'
 >;
 
 const ruleDetailStyle = {
@@ -83,6 +90,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   actionTypes,
   bulkDisableRules,
   bulkEnableRules,
+  bulkDeleteRules,
   snoozeRule,
   unsnoozeRule,
   requestRefresh,
@@ -148,7 +156,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
 
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
   const canSaveRule =
-    hasAllPrivilege(rule, ruleType) &&
+    hasAllPrivilege(rule.consumer, ruleType) &&
     // if the rule has actions, can the user save the rule's action params
     (canExecuteActions || (!canExecuteActions && rule.actions.length === 0));
 
@@ -266,29 +274,41 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     </>
   ) : null;
 
+  const [isDeleteModalFlyoutVisible, setIsDeleteModalVisibility] = useState<boolean>(false);
+  const { showToast } = useBulkOperationToast({});
+
+  const onDeleteConfirm = async () => {
+    setIsDeleteModalVisibility(false);
+    const { errors, total } = await bulkDeleteRules({
+      ids: rulesToDelete,
+    });
+    showToast({ action: 'DELETE', errors, total });
+    setRulesToDelete([]);
+    goToRulesList();
+  };
+  const onDeleteCancel = () => {
+    setIsDeleteModalVisibility(false);
+    setRulesToDelete([]);
+  };
+
   return (
     <>
-      <DeleteModalConfirmation
-        onDeleted={async () => {
-          setRulesToDelete([]);
-          goToRulesList();
-        }}
-        onErrors={async () => {
-          // Refresh the rule from the server, it may have been deleted
-          await requestRefresh();
-          setRulesToDelete([]);
-        }}
-        onCancel={() => {
-          setRulesToDelete([]);
-        }}
-        apiDeleteCall={deleteRules}
-        idsToDelete={rulesToDelete}
-        singleTitle={i18n.translate('xpack.triggersActionsUI.sections.rulesList.singleTitle', {
-          defaultMessage: 'rule',
-        })}
-        multipleTitle=""
-        setIsLoadingState={() => {}}
-      />
+      {isDeleteModalFlyoutVisible && (
+        <RulesDeleteModalConfirmation
+          onConfirm={onDeleteConfirm}
+          onCancel={onDeleteCancel}
+          confirmButtonText={getConfirmDeletionButtonText(
+            rulesToDelete.length,
+            SINGLE_RULE_TITLE,
+            MULTIPLE_RULE_TITLE
+          )}
+          confirmModalText={getConfirmDeletionModalText(
+            rulesToDelete.length,
+            SINGLE_RULE_TITLE,
+            MULTIPLE_RULE_TITLE
+          )}
+        />
+      )}
       <UpdateApiKeyModalConfirmation
         onCancel={() => {
           setRulesToUpdateAPIKey([]);
@@ -358,6 +378,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
             canSaveRule={canSaveRule}
             rule={rule}
             onDelete={(ruleId) => {
+              setIsDeleteModalVisibility(true);
               setRulesToDelete([ruleId]);
             }}
             onApiKeyUpdate={(ruleId) => {

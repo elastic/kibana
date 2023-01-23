@@ -116,7 +116,9 @@ export interface AlertThreadPoolRejectionsState extends AlertNodeState {
 }
 
 export interface AlertLicenseState extends AlertState {
-  expiryDateMS: number;
+  meta: {
+    expiryDateMS: number;
+  };
 }
 
 export interface AlertNodesChangedState extends AlertState {

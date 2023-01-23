@@ -329,6 +329,61 @@
       },
       {
         "parentPluginId": "triggersActionsUi",
+        "id": "def-public.bulkDeleteRules",
+        "type": "Function",
+        "tags": [],
+        "label": "bulkDeleteRules",
+        "description": [],
+        "signature": [
+          "({ filter, ids, http, }: ",
+          {
+            "pluginId": "triggersActionsUi",
+            "scope": "public",
+            "docId": "kibTriggersActionsUiPluginApi",
+            "section": "def-public.BulkOperationAttributes",
+            "text": "BulkOperationAttributes"
+          },
+          ") => Promise<",
+          {
+            "pluginId": "triggersActionsUi",
+            "scope": "public",
+            "docId": "kibTriggersActionsUiPluginApi",
+            "section": "def-public.BulkOperationResponse",
+            "text": "BulkOperationResponse"
+          },
+          ">"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/bulk_delete.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.bulkDeleteRules.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  filter,\n  ids,\n  http,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "triggersActionsUi",
+                "scope": "public",
+                "docId": "kibTriggersActionsUiPluginApi",
+                "section": "def-public.BulkOperationAttributes",
+                "text": "BulkOperationAttributes"
+              }
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/bulk_delete.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
         "id": "def-public.ButtonGroupField",
         "type": "Function",
         "tags": [],
@@ -391,79 +446,6 @@
             "trackAdoption": false
           }
         ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
-        "id": "def-public.deleteRules",
-        "type": "Function",
-        "tags": [],
-        "label": "deleteRules",
-        "description": [],
-        "signature": [
-          "({\n  ids,\n  http,\n}: { ids: string[]; http: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.HttpSetup",
-            "text": "HttpSetup"
-          },
-          "; }) => Promise<{ successes: string[]; errors: string[]; }>"
-        ],
-        "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/delete.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.deleteRules.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  ids,\n  http,\n}",
-            "description": [],
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/delete.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "triggersActionsUi",
-                "id": "def-public.deleteRules.$1.ids",
-                "type": "Array",
-                "tags": [],
-                "label": "ids",
-                "description": [],
-                "signature": [
-                  "string[]"
-                ],
-                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/delete.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "triggersActionsUi",
-                "id": "def-public.deleteRules.$1.http",
-                "type": "Object",
-                "tags": [],
-                "label": "http",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "common",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-common.HttpSetup",
-                    "text": "HttpSetup"
-                  }
-                ],
-                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/delete.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -3775,6 +3757,21 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.AlertsTableProps.controls",
+            "type": "Object",
+            "tags": [],
+            "label": "controls",
+            "description": [],
+            "signature": [
+              "EuiDataGridToolBarAdditionalControlsOptions",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4065,6 +4062,156 @@
               }
             ],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.AlertSummaryTimeRange",
+        "type": "Interface",
+        "tags": [],
+        "label": "AlertSummaryTimeRange",
+        "description": [],
+        "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_details/components/alert_summary/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.AlertSummaryTimeRange.utcFrom",
+            "type": "string",
+            "tags": [],
+            "label": "utcFrom",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_details/components/alert_summary/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.AlertSummaryTimeRange.utcTo",
+            "type": "string",
+            "tags": [],
+            "label": "utcTo",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_details/components/alert_summary/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.AlertSummaryTimeRange.fixedInterval",
+            "type": "string",
+            "tags": [],
+            "label": "fixedInterval",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_details/components/alert_summary/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.AlertSummaryTimeRange.title",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "signature": [
+              "string | JSX.Element | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_details/components/alert_summary/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.AlertSummaryTimeRange.dateFormat",
+            "type": "string",
+            "tags": [],
+            "label": "dateFormat",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_details/components/alert_summary/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.BulkOperationResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "BulkOperationResponse",
+        "description": [],
+        "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.BulkOperationResponse.rules",
+            "type": "Array",
+            "tags": [],
+            "label": "rules",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "triggersActionsUi",
+                "scope": "public",
+                "docId": "kibTriggersActionsUiPluginApi",
+                "section": "def-public.Rule",
+                "text": "Rule"
+              },
+              "<",
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.RuleTypeParams",
+                "text": "RuleTypeParams"
+              },
+              ">[]"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.BulkOperationResponse.errors",
+            "type": "Array",
+            "tags": [],
+            "label": "errors",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "alerting",
+                "scope": "server",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-server.BulkOperationError",
+                "text": "BulkOperationError"
+              },
+              "[]"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.BulkOperationResponse.total",
+            "type": "number",
+            "tags": [],
+            "label": "total",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5434,7 +5581,7 @@
             "label": "setRuleProperty",
             "description": [],
             "signature": [
-              "<Prop extends \"name\" | \"params\" | \"tags\" | \"id\" | \"monitoring\" | \"enabled\" | \"actions\" | \"throttle\" | \"consumer\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"ruleTypeId\">(key: Prop, value: ",
+              "<Prop extends \"name\" | \"params\" | \"tags\" | \"id\" | \"monitoring\" | \"enabled\" | \"actions\" | \"throttle\" | \"consumer\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"running\" | \"ruleTypeId\">(key: Prop, value: ",
               "SanitizedRule",
               "<Params>[Prop] | null) => void"
             ],
@@ -6464,6 +6611,30 @@
           "{ [K in keyof T as CamelToSnake<RenameActionToConnector<Extract<K, string>>>]: T[K]; }"
         ],
         "path": "x-pack/plugins/actions/common/rewrite_request_case.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.BulkOperationAttributes",
+        "type": "Type",
+        "tags": [],
+        "label": "BulkOperationAttributes",
+        "description": [],
+        "signature": [
+          "BulkOperationAttributesWithoutHttp",
+          " & { http: ",
+          {
+            "pluginId": "@kbn/core-http-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpBrowserPluginApi",
+            "section": "def-common.HttpSetup",
+            "text": "HttpSetup"
+          },
+          "; }"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -8445,16 +8616,16 @@
         },
         {
           "parentPluginId": "triggersActionsUi",
-          "id": "def-public.TriggersAndActionsUIPublicPluginStart.getRuleAlertsSummary",
+          "id": "def-public.TriggersAndActionsUIPublicPluginStart.getAlertSummaryWidget",
           "type": "Function",
           "tags": [],
-          "label": "getRuleAlertsSummary",
+          "label": "getAlertSummaryWidget",
           "description": [],
           "signature": [
             "(props: ",
-            "RuleAlertsSummaryProps",
+            "AlertSummaryWidgetProps",
             ") => React.ReactElement<",
-            "RuleAlertsSummaryProps",
+            "AlertSummaryWidgetProps",
             ", string | React.JSXElementConstructor<any>>"
           ],
           "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
@@ -8463,13 +8634,13 @@
           "children": [
             {
               "parentPluginId": "triggersActionsUi",
-              "id": "def-public.TriggersAndActionsUIPublicPluginStart.getRuleAlertsSummary.$1",
+              "id": "def-public.TriggersAndActionsUIPublicPluginStart.getAlertSummaryWidget.$1",
               "type": "Object",
               "tags": [],
               "label": "props",
               "description": [],
               "signature": [
-                "RuleAlertsSummaryProps"
+                "AlertSummaryWidgetProps"
               ],
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
               "deprecated": false,
@@ -8756,9 +8927,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<string | string[]>"
@@ -8779,9 +8950,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<string>"
@@ -8802,9 +8973,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<string>"
@@ -8825,9 +8996,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<string | undefined>"
@@ -8848,9 +9019,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<string>"
@@ -8871,9 +9042,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<string | undefined>"
@@ -8894,9 +9065,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<string | undefined>"
@@ -8917,9 +9088,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<number | undefined>"
@@ -8940,9 +9111,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<number>"
@@ -8963,9 +9134,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<string>"

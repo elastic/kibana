@@ -36,6 +36,14 @@ const Status = {
       <FormattedMessage id="xpack.fleet.agentHealth.inactiveStatusText" defaultMessage="Inactive" />
     </EuiBadge>
   ),
+  Unenrolled: (
+    <EuiBadge color="hollow">
+      <FormattedMessage
+        id="xpack.fleet.agentHealth.unenrolledStatusText"
+        defaultMessage="Unenrolled"
+      />
+    </EuiBadge>
+  ),
   Unhealthy: (
     <EuiBadge color="warning">
       <FormattedMessage
@@ -64,6 +72,8 @@ function getStatusComponent(status: Agent['status']): React.ReactElement {
     case 'enrolling':
     case 'updating':
       return Status.Updating;
+    case 'unenrolled':
+      return Status.Unenrolled;
     default:
       return Status.Healthy;
   }

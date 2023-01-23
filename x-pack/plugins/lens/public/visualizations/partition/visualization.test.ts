@@ -260,7 +260,7 @@ describe('pie_visualization', () => {
                   Array [
                     Object {
                       "columnId": "1",
-                      "triggerIcon": "aggregate",
+                      "triggerIconType": "aggregate",
                     },
                     Object {
                       "columnId": "2",
@@ -268,15 +268,15 @@ describe('pie_visualization', () => {
                         "red",
                         "black",
                       ],
-                      "triggerIcon": "colorBy",
+                      "triggerIconType": "colorBy",
                     },
                     Object {
                       "columnId": "3",
-                      "triggerIcon": "aggregate",
+                      "triggerIconType": "aggregate",
                     },
                     Object {
                       "columnId": "4",
-                      "triggerIcon": undefined,
+                      "triggerIconType": undefined,
                     },
                   ]
               `);
@@ -302,7 +302,7 @@ describe('pie_visualization', () => {
             Array [
               Object {
                 "columnId": "1",
-                "triggerIcon": "aggregate",
+                "triggerIconType": "aggregate",
               },
               Object {
                 "columnId": "2",
@@ -310,17 +310,17 @@ describe('pie_visualization', () => {
                   "red",
                   "black",
                 ],
-                "triggerIcon": "colorBy",
+                "triggerIconType": "colorBy",
               },
             ],
             Array [
               Object {
                 "columnId": "3",
-                "triggerIcon": "aggregate",
+                "triggerIconType": "aggregate",
               },
               Object {
                 "columnId": "4",
-                "triggerIcon": undefined,
+                "triggerIconType": undefined,
               },
             ],
             Array [],
@@ -348,22 +348,22 @@ describe('pie_visualization', () => {
               Object {
                 "color": "overridden-color",
                 "columnId": "1",
-                "triggerIcon": "color",
+                "triggerIconType": "color",
               },
               Object {
                 "color": "black",
                 "columnId": "2",
-                "triggerIcon": "color",
+                "triggerIconType": "color",
               },
               Object {
                 "color": "black",
                 "columnId": "3",
-                "triggerIcon": "color",
+                "triggerIconType": "color",
               },
               Object {
                 "color": "black",
                 "columnId": "4",
-                "triggerIcon": "color",
+                "triggerIconType": "color",
               },
             ],
           ]
@@ -422,15 +422,15 @@ describe('pie_visualization', () => {
           Array [
             Object {
               "columnId": "2",
-              "triggerIcon": "disabled",
+              "triggerIconType": "disabled",
             },
             Object {
               "columnId": "3",
-              "triggerIcon": "disabled",
+              "triggerIconType": "disabled",
             },
             Object {
               "columnId": "4",
-              "triggerIcon": "disabled",
+              "triggerIconType": "disabled",
             },
           ]
         `);

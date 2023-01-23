@@ -91,7 +91,7 @@ export const AnalyticsCollectionView: React.FC = () => {
       restrictWidth
       isLoading={isLoading}
       pageChrome={[...collectionViewBreadcrumbs]}
-      pageViewTelemetry="View Analytics Collection"
+      pageViewTelemetry={`View Analytics Collection - ${section}`}
       pageHeader={{
         description: i18n.translate(
           'xpack.enterpriseSearch.analytics.collectionsView.pageDescription',

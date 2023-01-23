@@ -6,34 +6,37 @@
  */
 
 import { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import { withSpan } from '@kbn/apm-utils';
 
 export const bulkMarkApiKeysForInvalidation = async (
   { apiKeys }: { apiKeys: string[] },
   logger: Logger,
   savedObjectsClient: SavedObjectsClientContract
 ): Promise<void> => {
-  if (apiKeys.length === 0) {
-    return;
-  }
+  withSpan({ name: 'bulkMarkApiKeysForInvalidation', type: 'rules' }, async () => {
+    if (apiKeys.length === 0) {
+      return;
+    }
 
-  try {
-    const apiKeyIds = apiKeys.map(
-      (apiKey) => Buffer.from(apiKey, 'base64').toString().split(':')[0]
-    );
-    await savedObjectsClient.bulkCreate(
-      apiKeyIds.map((apiKeyId) => ({
-        attributes: {
-          apiKeyId,
-          createdAt: new Date().toISOString(),
-        },
-        type: 'api_key_pending_invalidation',
-      }))
-    );
-  } catch (e) {
-    logger.error(
-      `Failed to bulk mark list of API keys [${apiKeys
-        .map((key) => `"${key}"`)
-        .join(', ')}] for invalidation: ${e.message}`
-    );
-  }
+    try {
+      const apiKeyIds = apiKeys.map(
+        (apiKey) => Buffer.from(apiKey, 'base64').toString().split(':')[0]
+      );
+      await savedObjectsClient.bulkCreate(
+        apiKeyIds.map((apiKeyId) => ({
+          attributes: {
+            apiKeyId,
+            createdAt: new Date().toISOString(),
+          },
+          type: 'api_key_pending_invalidation',
+        }))
+      );
+    } catch (e) {
+      logger.error(
+        `Failed to bulk mark list of API keys [${apiKeys
+          .map((key) => `"${key}"`)
+          .join(', ')}] for invalidation: ${e.message}`
+      );
+    }
+  });
 };

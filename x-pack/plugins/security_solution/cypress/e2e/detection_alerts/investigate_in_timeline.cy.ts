@@ -54,6 +54,7 @@ describe('Alerts timeline', () => {
       .first()
       .invoke('text')
       .then((severityVal) => {
+        scrollAlertTableColumnIntoView(ALERT_TABLE_FILE_NAME_HEADER);
         addAlertPropertyToTimeline(ALERT_TABLE_SEVERITY_VALUES, 0);
         openActiveTimeline();
         cy.get(PROVIDER_BADGE)

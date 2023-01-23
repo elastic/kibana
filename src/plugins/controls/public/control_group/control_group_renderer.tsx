@@ -6,12 +6,15 @@
  * Side Public License, v 1.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
+import { isEqual } from 'lodash';
 import useLifecycles from 'react-use/lib/useLifecycles';
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
+import type { Filter, TimeRange, Query } from '@kbn/es-query';
+import { compareFilters } from '@kbn/es-query';
 
 import { pluginServices } from '../services';
 import { getDefaultControlGroupInput } from '../../common';
@@ -26,20 +29,26 @@ import { controlGroupReducers } from './state/control_group_reducers';
 import { controlGroupInputBuilder } from './control_group_input_builder';
 
 export interface ControlGroupRendererProps {
-  onLoadComplete?: (controlGroup: ControlGroupContainer) => void;
+  filters?: Filter[];
   getInitialInput: (
     initialInput: Partial<ControlGroupInput>,
     builder: typeof controlGroupInputBuilder
   ) => Promise<Partial<ControlGroupInput>>;
+  onLoadComplete?: (controlGroup: ControlGroupContainer) => void;
+  timeRange?: TimeRange;
+  query?: Query;
 }
 
 export const ControlGroupRenderer = ({
   onLoadComplete,
   getInitialInput,
+  filters,
+  timeRange,
+  query,
 }: ControlGroupRendererProps) => {
   const controlGroupRef = useRef(null);
   const [controlGroup, setControlGroup] = useState<ControlGroupContainer>();
-  const id = useMemo(() => uuid.v4(), []);
+  const id = useMemo(() => uuidv4(), []);
   /**
    * Use Lifecycles to load initial control group container
    */
@@ -73,6 +82,24 @@ export const ControlGroupRenderer = ({
       controlGroup?.destroy();
     }
   );
+
+  useEffect(() => {
+    if (!controlGroup) {
+      return;
+    }
+
+    if (
+      (timeRange && !isEqual(controlGroup.getInput().timeRange, timeRange)) ||
+      !compareFilters(controlGroup.getInput().filters ?? [], filters ?? []) ||
+      !isEqual(controlGroup.getInput().query, query)
+    ) {
+      controlGroup.updateInput({
+        timeRange,
+        query,
+        filters,
+      });
+    }
+  }, [query, filters, controlGroup, timeRange]);
 
   return <div ref={controlGroupRef} />;
 };

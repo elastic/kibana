@@ -325,6 +325,10 @@ experimental[] Indicates which roles to configure the {kib} process with, which 
 run {kib} in different modes. Valid options are `background_tasks` and `ui`,
 or `*` to select all roles. *Default: `*`*
 
+`notifications.connectors.default.email`::
+Specifies the name of the connector that is used to send email notifications.
+In {ecloud}, the default value is `elastic-cloud-email`.
+
 [[path-data]] `path.data`::
 The path where {kib} stores persistent data
 not saved in {es}. *Default: `data`*
@@ -417,6 +421,10 @@ Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/C
 https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options[`X-Frame-Options`] headers are configured to disable embedding
 {kib} in other webpages using iframes. When set to `true`, secure headers are used to disable embedding, which adds the `frame-ancestors:
 'self'` directive to the `Content-Security-Policy` response header and adds the `X-Frame-Options: SAMEORIGIN` response header. *Default:* `false`
+
+[[server-securityResponseHeaders-crossOriginOpenerPolicy]] `server.securityResponseHeaders.crossOriginOpenerPolicy`::
+Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Opener-Policy[`Cross-Origin-Opener-Policy`] header is used in all
+responses to the client from the {kib} server, and specifies what value is used. Allowed values are `unsafe-none`, `same-origin-allow-popups`, `same-origin`, or `null`. To disable, set to `null`. *Default:* `"same-origin"`
 
 `server.customResponseHeaders` {ess-icon}::
 Header names and values to send on all responses to the client from the {kib} server. *Default: `{}`*
