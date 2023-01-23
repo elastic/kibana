@@ -36,6 +36,7 @@ import {
   ALERT_RULE_CONSUMER,
   ALERT_RULE_EXECUTION_UUID,
   ALERT_RULE_NAME,
+  ALERT_RULE_PARAMETERS,
   ALERT_RULE_PRODUCER,
   ALERT_RULE_TAGS,
   ALERT_RULE_TYPE_ID,
@@ -62,6 +63,7 @@ describe('searchAfterAndBulkCreate', () => {
     match_all: {},
   };
   const mockCommonFields: CommonAlertFieldsLatest = {
+    [ALERT_RULE_PARAMETERS]: {},
     [ALERT_RULE_CATEGORY]: 'Custom Query Rule',
     [ALERT_RULE_CONSUMER]: SERVER_APP_ID,
     [ALERT_RULE_EXECUTION_UUID]: '97e8f53a-4971-4935-bb54-9b8f86930cc7',

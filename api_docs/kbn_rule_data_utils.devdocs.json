@@ -1266,7 +1266,7 @@
         "label": "AlertStatus",
         "description": [],
         "signature": [
-          "\"active\" | \"recovered\""
+          "\"recovered\" | \"active\""
         ],
         "path": "packages/kbn-rule-data-utils/src/alerts_as_data_status.ts",
         "deprecated": false,

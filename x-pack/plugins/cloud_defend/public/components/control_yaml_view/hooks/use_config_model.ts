@@ -8,6 +8,7 @@ import { useMemo } from 'react';
 import yaml from 'js-yaml';
 import { setDiagnosticsOptions } from 'monaco-yaml';
 import { monaco } from '@kbn/monaco';
+import { MAX_CONDITION_VALUE_LENGTH } from '../../../common/constants';
 
 const { Uri, editor } = monaco;
 
@@ -19,7 +20,7 @@ export const useConfigModel = (configuration: string) => {
     try {
       return yaml.load(configuration);
     } catch {
-      return { selectors: [] };
+      return { selectors: [], responses: [] };
     }
   }, [configuration]);
 
@@ -70,6 +71,7 @@ export const useConfigModel = (configuration: string) => {
                 properties: {
                   name: {
                     type: 'string',
+                    maxLength: MAX_CONDITION_VALUE_LENGTH,
                   },
                   operation: {
                     type: 'array',
@@ -79,42 +81,42 @@ export const useConfigModel = (configuration: string) => {
                   containerImageName: {
                     type: 'array',
                     minItems: 1,
-                    items: { type: 'string' },
+                    items: { type: 'string', maxLength: MAX_CONDITION_VALUE_LENGTH },
                   },
                   containerImageTag: {
                     type: 'array',
                     minItems: 1,
-                    items: { type: 'string' },
+                    items: { type: 'string', maxLength: MAX_CONDITION_VALUE_LENGTH },
                   },
                   targetFilePath: {
                     type: 'array',
                     minItems: 1,
-                    items: { type: 'string' },
+                    items: { type: 'string', maxLength: MAX_CONDITION_VALUE_LENGTH },
                   },
                   orchestratorClusterId: {
                     type: 'array',
                     minItems: 1,
-                    items: { type: 'string' },
+                    items: { type: 'string', maxLength: MAX_CONDITION_VALUE_LENGTH },
                   },
                   orchestratorClusterName: {
                     type: 'array',
                     minItems: 1,
-                    items: { type: 'string' },
+                    items: { type: 'string', maxLength: MAX_CONDITION_VALUE_LENGTH },
                   },
                   orchestratorNamespace: {
                     type: 'array',
                     minItems: 1,
-                    items: { type: 'string' },
+                    items: { type: 'string', maxLength: MAX_CONDITION_VALUE_LENGTH },
                   },
                   orchestratorResourceLabel: {
                     type: 'array',
                     minItems: 1,
-                    items: { type: 'string' },
+                    items: { type: 'string', maxLength: MAX_CONDITION_VALUE_LENGTH },
                   },
                   orchestratorResourceName: {
                     type: 'array',
                     minItems: 1,
-                    items: { type: 'string' },
+                    items: { type: 'string', maxLength: MAX_CONDITION_VALUE_LENGTH },
                   },
                   orchestratorType: {
                     type: 'array',
@@ -130,7 +132,11 @@ export const useConfigModel = (configuration: string) => {
                 properties: {
                   match: { type: 'array', minItems: 1, items: { enum: selectorNames } },
                   exclude: { type: 'array', items: { enum: selectorNames } },
-                  actions: { type: 'array', minItems: 1, items: { enum: ['alert', 'block'] } },
+                  actions: {
+                    type: 'array',
+                    minItems: 1,
+                    items: { enum: ['alert', 'block'] },
+                  },
                 },
               },
             },
@@ -146,5 +152,5 @@ export const useConfigModel = (configuration: string) => {
     }
 
     return model;
-  }, [configuration, json.selectors]);
+  }, [configuration, json?.selectors]);
 };

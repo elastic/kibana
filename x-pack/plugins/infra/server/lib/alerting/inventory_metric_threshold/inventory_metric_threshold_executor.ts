@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ALERT_ACTION_GROUP, ALERT_REASON, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
+import { ALERT_REASON, ALERT_ACTION_GROUP } from '@kbn/rule-data-utils';
 import { first, get } from 'lodash';
 import {
   ActionGroup,
@@ -103,7 +103,6 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         fields: {
           [ALERT_REASON]: reason,
           [ALERT_ACTION_GROUP]: actionGroup,
-          [ALERT_RULE_PARAMETERS]: params as any, // the type assumes the object is already flattened when writing the same way as when reading https://github.com/elastic/kibana/blob/main/x-pack/plugins/rule_registry/common/field_map/runtime_type_from_fieldmap.ts#L60
           ...flattenAdditionalContext(additionalContext),
         },
       });
