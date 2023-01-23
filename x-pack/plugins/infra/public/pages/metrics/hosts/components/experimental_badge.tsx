@@ -6,16 +6,16 @@
  */
 
 import { EuiBetaBadge } from '@elastic/eui';
-import { css } from '@emotion/react';
+import type { IconType, ToolTipPositions } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
-export const ExperimentalBadge = () => (
+interface Props {
+  iconType?: IconType;
+  tooltipPosition?: ToolTipPositions;
+}
+export const ExperimentalBadge = ({ iconType, tooltipPosition }: Props) => (
   <EuiBetaBadge
-    css={css`
-      display: flex;
-      justify-content: center;
-    `}
     label={i18n.translate('xpack.infra.hostsPage.experimentalBadgeLabel', {
       defaultMessage: 'Technical preview',
     })}
@@ -23,5 +23,7 @@ export const ExperimentalBadge = () => (
       defaultMessage:
         'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
     })}
+    iconType={iconType}
+    tooltipPosition={tooltipPosition}
   />
 );

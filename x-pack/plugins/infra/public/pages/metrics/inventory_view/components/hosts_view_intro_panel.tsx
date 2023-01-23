@@ -6,10 +6,11 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiBetaBadge, EuiLink, EuiIcon } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiBetaBadge, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useLinkProps } from '@kbn/observability-plugin/public';
 import { css } from '@emotion/react';
+import { ExperimentalBadge } from '../../hosts/components/experimental_badge';
 
 export const HostViewIntroPanel = () => {
   const link = useLinkProps({
@@ -38,7 +39,7 @@ export const HostViewIntroPanel = () => {
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiIcon type="beaker" />
+        <ExperimentalBadge iconType="beaker" tooltipPosition="top" />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiLink data-test-subj="inventory-hostsView-link" {...link}>

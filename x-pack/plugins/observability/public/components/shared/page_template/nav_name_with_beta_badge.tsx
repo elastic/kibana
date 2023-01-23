@@ -6,6 +6,7 @@
  */
 import { EuiBetaBadge } from '@elastic/eui';
 import type { IconType } from '@elastic/eui/src/components/icon/icon';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -35,7 +36,13 @@ export function NavNameWithBetaBadge({ label, iconType }: Props) {
       <LabelContainer className="eui-textTruncate">
         <span>{label}</span>
       </LabelContainer>
-      <StyledBetaBadge label="Lab" size="m" color="hollow" iconType={iconType} />
+      <StyledBetaBadge
+        label={i18n.translate('xpack.infra.hostsPage.experimentalBadgeLabel', {
+          defaultMessage: 'Technical preview',
+        })}
+        size="m"
+        iconType={iconType}
+      />
     </>
   );
 }
