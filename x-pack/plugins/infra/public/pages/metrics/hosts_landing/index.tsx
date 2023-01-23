@@ -54,10 +54,12 @@ export const HostsLandingPage = () => {
             Your user role doesn’t have sufficient privileges to enable this feature - please reach
             out to your Kibana Administrator and ask them to visit this page to enable this feature.
           </p>
-          {/* TODO link & link test */}
           <p>
-            They will need a <EuiLink href="#">role</EuiLink> with Kibana &gt; Management &gt;
-            Advanced Settings &gt; All permissions.
+            They will need a{' '}
+            <EuiLink href="https://www.elastic.co/guide/en/kibana/current/kibana-privileges.html#kibana-feature-privileges">
+              role
+            </EuiLink>{' '}
+            with Kibana &gt; Management &gt; Advanced Settings &gt; All permissions.
           </p>
         </EuiCallOut>
       }
