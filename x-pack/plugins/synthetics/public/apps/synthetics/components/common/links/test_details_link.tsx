@@ -57,13 +57,21 @@ export const getTestRunDetailLink = ({
 }: {
   monitorId: string;
   checkGroup: string;
-  basePath?: string;
+  basePath: string;
   locationId?: string;
 }) => {
   const testRunUrl = `/monitor/${monitorId}/test-run/${checkGroup}?locationId=${locationId}`;
-  if (basePath) {
-    return `${basePath}/app/synthetics${testRunUrl}`;
-  } else {
-    return testRunUrl;
-  }
+  return `${basePath}/app/synthetics${testRunUrl}`;
+};
+
+export const getTestRunDetailRelativeLink = ({
+  monitorId,
+  checkGroup,
+  locationId,
+}: {
+  monitorId: string;
+  checkGroup: string;
+  locationId?: string;
+}) => {
+  return `/monitor/${monitorId}/test-run/${checkGroup}?locationId=${locationId}`;
 };
