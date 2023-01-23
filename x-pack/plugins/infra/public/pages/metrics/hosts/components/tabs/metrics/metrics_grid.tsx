@@ -37,8 +37,8 @@ export const MetricsGrid = () => {
             <EuiFlexItem>
               <MetricChart
                 type="cpuCores"
-                title={i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.cpuCores', {
-                  defaultMessage: 'CPU Cores Usage',
+                title={i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.load', {
+                  defaultMessage: 'Normalized Load',
                 })}
                 breakdownSize={DEFAULT_BREAKDOWN_SIZE}
               />

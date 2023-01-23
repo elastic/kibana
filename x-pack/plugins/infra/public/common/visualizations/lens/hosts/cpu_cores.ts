@@ -182,7 +182,7 @@ export class CPUCores implements ILensVisualization {
       },
       {
         type: 'index-pattern',
-        id: 'f1a19408-dbcc-40f3-8245-2d9ae1b0b0de',
+        id: this.dataView.id ?? '',
         name: `indexpattern-datasource-layer-${REFERENCE_LAYER}`,
       },
     ];
