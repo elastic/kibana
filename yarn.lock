@@ -1531,10 +1531,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@72.2.0":
-  version "72.2.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-72.2.0.tgz#0d89ec4c6d8a677ba41d086abd509c5a5ea09180"
-  integrity sha512-3JHKLWqbU1A6qMVkw0n1VZ5PaL07sd3N44tWsRCn+DEaDv9jq68ilEmY1wdYqKXw8VyFwcPbd8ZYZpdzBD2nPA==
+"@elastic/eui@73.0.0":
+  version "73.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-73.0.0.tgz#e1340997e2807ef9416daeb3bff71aad14549d19"
+  integrity sha512-vOdZH5FE9iBRHpSpHnVOH/L8AMX2VJDXlpOQpSprE6kK32k5a0C8PtjHWVntRwWbN9t/pcdqC4oHcZsABIv9GA==
   dependencies:
     "@types/chroma-js" "^2.0.0"
     "@types/lodash" "^4.14.160"
@@ -24027,6 +24027,15 @@ require-in-the-middle@^5.2.0:
   version "5.2.0"
   resolved "https://registry.yarnpkg.com/require-in-the-middle/-/require-in-the-middle-5.2.0.tgz#4b71e3cc7f59977100af9beb76bf2d056a5a6de2"
   integrity sha512-efCx3b+0Z69/LGJmm9Yvi4cqEdxnoGnxYxGxBghkkTTFeXRtTCmmhO0AnAfHz59k957uTSuy8WaHqOs8wbYUWg==
+  dependencies:
+    debug "^4.1.1"
+    module-details-from-path "^1.0.3"
+    resolve "^1.22.1"
+
+require-in-the-middle@^6.0.0:
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/require-in-the-middle/-/require-in-the-middle-6.0.0.tgz#01cc6416286fb5e672d0fe031d996f8bc202509d"
+  integrity sha512-+dtWQ7l2lqQDxheaG3jjyN1QI37gEwvzACSgjYi4/C2y+ZTUMeRW8BIOm+9NBKvwaMBUSZfPXVOt1skB0vBkRw==
   dependencies:
     debug "^4.1.1"
     module-details-from-path "^1.0.3"
