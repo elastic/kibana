@@ -10,13 +10,7 @@ import React, { Component } from 'react';
 
 import { UiCounterMetricType } from '@kbn/analytics';
 
-import {
-  IUiSettingsClient,
-  DocLinksStart,
-  ToastsStart,
-  ScopedHistory,
-  ThemeServiceStart,
-} from '@kbn/core/public';
+import { IUiSettingsClient, DocLinksStart, ToastsStart, ThemeServiceStart } from '@kbn/core/public';
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
@@ -28,7 +22,6 @@ import { FieldSetting, SettingsChanges } from './types';
 export const QUERY = 'query';
 
 interface AdvancedSettingsProps {
-  history: ScopedHistory;
   enableSaving: boolean;
   uiSettings: IUiSettingsClient;
   docLinks: DocLinksStart['links'];

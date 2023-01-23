@@ -58,7 +58,7 @@ const SPACE_SETTINGS_ID = 'space-settings';
 const GLOBAL_SETTINGS_ID = 'global-settings';
 
 export const Settings = (props: Props) => {
-  const { componentRegistry, history, toasts, uiSettings, globalUiSettings } = props;
+  const { componentRegistry, history, toasts, uiSettings, globalUiSettings, ...rest } = props;
 
   const mapConfig = (config: IUiSettingsClient) => {
     const all = config.getAll();
@@ -235,7 +235,9 @@ export const Settings = (props: Props) => {
           queryText={queryState.query.text}
           callOutTitle={i18nTexts.defaultSpaceCalloutTitle}
           callOutSubtitle={i18nTexts.defaultSpaceCalloutSubtitle}
-          {...props}
+          uiSettings={uiSettings}
+          toasts={props.toasts}
+          {...rest}
         />
       ),
     },
@@ -250,6 +252,7 @@ export const Settings = (props: Props) => {
         ) : null,
       content: (
         <AdvancedSettings
+          toasts={props.toasts}
           settings={globalSettings}
           groupedSettings={groupedSettings.global}
           categoryCounts={categoryCounts.global}
@@ -260,7 +263,8 @@ export const Settings = (props: Props) => {
           queryText={queryState.query.text}
           callOutTitle={i18nTexts.globalCalloutTitle}
           callOutSubtitle={i18nTexts.globalCalloutSubtitle}
-          {...props}
+          uiSettings={globalUiSettings}
+          {...rest}
         />
       ),
     },

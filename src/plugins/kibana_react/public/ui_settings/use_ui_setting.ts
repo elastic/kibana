@@ -22,11 +22,30 @@ import { useKibana } from '../context';
 export const useUiSetting = <T>(key: string, defaultValue?: T): T => {
   const { services } = useKibana();
 
-  if (typeof services.uiSettings !== 'object') {
+  if (typeof services.settings !== 'object') {
     throw new TypeError('uiSettings service not available in kibana-react context.');
   }
 
-  return services.uiSettings.get(key, defaultValue);
+  return services.settings?.client.get(key, defaultValue);
+};
+
+/**
+ * Returns the current global UI-settings value.
+ *
+ * Usage:
+ *
+ * ```js
+ * const customBranding = useGlobalUiSetting('customBranding:pageTitle');
+ * ```
+ */
+export const useGlobalUiSetting = <T>(key: string, defaultValue?: T): T => {
+  const { services } = useKibana();
+
+  if (typeof services.settings !== 'object') {
+    throw new TypeError('uiSettings service not available in kibana-react context.');
+  }
+
+  return services.settings.globalClient.get(key, defaultValue);
 };
 
 type Setter<T> = (newValue: T) => Promise<boolean>;
@@ -47,16 +66,16 @@ type Setter<T> = (newValue: T) => Promise<boolean>;
 export const useUiSetting$ = <T>(key: string, defaultValue?: T): [T, Setter<T>] => {
   const { services } = useKibana();
 
-  if (typeof services.uiSettings !== 'object') {
+  if (typeof services.settings !== 'object') {
     throw new TypeError('uiSettings service not available in kibana-react context.');
   }
 
   const observable$ = useMemo(
-    () => services.uiSettings!.get$(key, defaultValue),
-    [key, defaultValue, services.uiSettings]
+    () => services.settings!.client.get$(key, defaultValue),
+    [key, defaultValue, services.settings.client]
   );
-  const value = useObservable<T>(observable$, services.uiSettings!.get(key, defaultValue));
-  const set = useCallback((newValue: T) => services.uiSettings!.set(key, newValue), [key]);
+  const value = useObservable<T>(observable$, services.settings!.client.get(key, defaultValue));
+  const set = useCallback((newValue: T) => services.settings!.client.set(key, newValue), [key]);
 
   return [value, set];
 };

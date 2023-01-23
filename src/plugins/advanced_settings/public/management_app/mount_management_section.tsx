@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { LocationDescriptor } from 'history';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { url } from '@kbn/kibana-utils-plugin/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
@@ -73,27 +73,29 @@ export async function mountManagementSection(
 
   ReactDOM.render(
     <KibanaThemeProvider theme$={params.theme$}>
-      <I18nProvider>
-        <Router history={params.history}>
-          <Switch>
-            {/* TODO: remove route param (`query`) in 7.13 */}
-            <Route path={`/:${QUERY}`}>{(props) => <Redirect to={redirectUrl(props)} />}</Route>
-            <Route path="/">
-              <Settings
-                history={params.history}
-                enableSaving={canSave}
-                toasts={notifications.toasts}
-                docLinks={docLinks.links}
-                uiSettings={settings.client}
-                globalUiSettings={settings.globalClient}
-                theme={params.theme$}
-                componentRegistry={componentRegistry}
-                trackUiMetric={trackUiMetric}
-              />
-            </Route>
-          </Switch>
-        </Router>
-      </I18nProvider>
+      <KibanaContextProvider services={{ settings, notifications, docLinks, application, chrome }}>
+        <I18nProvider>
+          <Router history={params.history}>
+            <Switch>
+              {/* TODO: remove route param (`query`) in 7.13 */}
+              <Route path={`/:${QUERY}`}>{(props) => <Redirect to={redirectUrl(props)} />}</Route>
+              <Route path="/">
+                <Settings
+                  history={params.history}
+                  enableSaving={canSave}
+                  toasts={notifications.toasts}
+                  docLinks={docLinks.links}
+                  uiSettings={settings.client}
+                  globalUiSettings={settings.globalClient}
+                  theme={params.theme$}
+                  componentRegistry={componentRegistry}
+                  trackUiMetric={trackUiMetric}
+                />
+              </Route>
+            </Switch>
+          </Router>
+        </I18nProvider>
+      </KibanaContextProvider>
     </KibanaThemeProvider>,
     params.element
   );
