@@ -41,6 +41,7 @@ import {
   EventLogListStatusFilter,
   getIsColumnSortable,
 } from '../../common/components/event_log';
+import { useMultipleSpaces } from '../../../hooks/use_multiple_spaces';
 
 const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
 
@@ -159,18 +160,13 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
   });
 
   const spacesData = useSpacesData();
-  const accessibleSpaceIds = useMemo(
-    () => (spacesData ? [...spacesData.spacesMap.values()].map((e) => e.id) : []),
-    [spacesData]
-  );
-  const areMultipleSpacesAccessible = useMemo(
-    () => accessibleSpaceIds.length > 1,
-    [accessibleSpaceIds]
-  );
-  const namespaces = useMemo(
-    () => (showFromAllSpaces && spacesData ? accessibleSpaceIds : undefined),
-    [showFromAllSpaces, spacesData, accessibleSpaceIds]
-  );
+  const { onShowAllSpacesChange, canAccessMultipleSpaces, namespaces } = useMultipleSpaces({
+    setShowFromAllSpaces,
+    showFromAllSpaces,
+    visibleColumns,
+    setVisibleColumns,
+    spacesData,
+  });
 
   const isInitialized = useRef(false);
 
@@ -285,20 +281,6 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
     },
     [search, setSearchText]
   );
-
-  const onShowAllSpacesChange = useCallback(() => {
-    setShowFromAllSpaces((prev) => !prev);
-    const nextShowFromAllSpaces = !showFromAllSpaces;
-
-    if (nextShowFromAllSpaces && !visibleColumns.includes('space_ids')) {
-      const connectorNameIndex = visibleColumns.findIndex((c) => c === 'connector_name');
-      const newVisibleColumns = [...visibleColumns];
-      newVisibleColumns.splice(connectorNameIndex + 1, 0, 'space_ids');
-      setVisibleColumns(newVisibleColumns);
-    } else if (!nextShowFromAllSpaces && visibleColumns.includes('space_ids')) {
-      setVisibleColumns(visibleColumns.filter((c) => c !== 'space_ids'));
-    }
-  }, [setShowFromAllSpaces, showFromAllSpaces, visibleColumns]);
 
   const columns: EuiDataGridColumn[] = useMemo(
     () => [
@@ -556,7 +538,7 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
               updateButtonProps={updateButtonProps}
             />
           </EuiFlexItem>
-          {hasAllSpaceSwitch && areMultipleSpacesAccessible && (
+          {hasAllSpaceSwitch && canAccessMultipleSpaces && (
             <EuiFlexItem data-test-subj="showAllSpacesSwitch">
               <EuiSwitch
                 label={ALL_SPACES_LABEL}

@@ -50,6 +50,7 @@ import {
   ComponentOpts as RuleApis,
   withBulkRuleOperations,
 } from '../../common/components/with_bulk_rule_api_operations';
+import { useMultipleSpaces } from '../../../hooks/use_multiple_spaces';
 
 const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
 
@@ -181,18 +182,14 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
   });
 
   const spacesData = useSpacesData();
-  const accessibleSpaceIds = useMemo(
-    () => (spacesData ? [...spacesData.spacesMap.values()].map((e) => e.id) : []),
-    [spacesData]
-  );
-  const areMultipleSpacesAccessible = useMemo(
-    () => accessibleSpaceIds.length > 1,
-    [accessibleSpaceIds]
-  );
-  const namespaces = useMemo(
-    () => (showFromAllSpaces && spacesData ? accessibleSpaceIds : undefined),
-    [showFromAllSpaces, spacesData, accessibleSpaceIds]
-  );
+  const { onShowAllSpacesChange, canAccessMultipleSpaces, namespaces } = useMultipleSpaces({
+    setShowFromAllSpaces,
+    showFromAllSpaces,
+    visibleColumns,
+    setVisibleColumns,
+    spacesData,
+  });
+
   const activeSpace = useMemo(
     () => spacesData?.spacesMap.get(spacesData?.activeSpaceId),
     [spacesData]
@@ -349,20 +346,6 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
     },
     [search, setSearchText]
   );
-
-  const onShowAllSpacesChange = useCallback(() => {
-    setShowFromAllSpaces((prev) => !prev);
-    const nextShowFromAllSpaces = !showFromAllSpaces;
-
-    if (nextShowFromAllSpaces && !visibleColumns.includes('space_ids')) {
-      const ruleNameIndex = visibleColumns.findIndex((c) => c === 'rule_name');
-      const newVisibleColumns = [...visibleColumns];
-      newVisibleColumns.splice(ruleNameIndex + 1, 0, 'space_ids');
-      setVisibleColumns(newVisibleColumns);
-    } else if (!nextShowFromAllSpaces && visibleColumns.includes('space_ids')) {
-      setVisibleColumns(visibleColumns.filter((c) => c !== 'space_ids'));
-    }
-  }, [setShowFromAllSpaces, showFromAllSpaces, visibleColumns]);
 
   const columns: EuiDataGridColumn[] = useMemo(
     () => [
@@ -724,7 +707,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
               updateButtonProps={updateButtonProps}
             />
           </EuiFlexItem>
-          {hasAllSpaceSwitch && areMultipleSpacesAccessible && (
+          {hasAllSpaceSwitch && canAccessMultipleSpaces && (
             <EuiFlexItem data-test-subj="showAllSpacesSwitch">
               <EuiSwitch
                 label={ALL_SPACES_LABEL}
