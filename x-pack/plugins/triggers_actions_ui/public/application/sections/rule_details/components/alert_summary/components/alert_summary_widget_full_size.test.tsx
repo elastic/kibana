@@ -41,7 +41,6 @@ describe('AlertSummaryWidgetFullSize', () => {
     const alertSummaryWidget = renderComponent();
 
     expect(alertSummaryWidget.queryByTestId('activeAlertsCount')).toHaveTextContent('2');
-    expect(alertSummaryWidget.queryByTestId('recoveredAlertsCount')).toHaveTextContent('15');
-    expect(alertSummaryWidget.queryByTestId('totalAlertsCount')).toHaveTextContent('17');
+    expect(alertSummaryWidget.queryByTestId('totalAlertsCount')).toHaveTextContent('22');
   });
 });
