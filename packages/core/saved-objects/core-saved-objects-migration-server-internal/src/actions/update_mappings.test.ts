@@ -60,7 +60,7 @@ describe('updateMappings', () => {
           },
         },
       },
-    })
+    });
 
     const res = await task();
 
