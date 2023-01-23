@@ -49,6 +49,7 @@ import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { RecordRawType } from '../../services/discover_data_state_container';
 
 const fieldSearchDescriptionId = htmlIdGenerator()();
+let itemGrowingIndex = 0;
 
 export interface DiscoverSidebarProps extends DiscoverSidebarResponsiveProps {
   /**
@@ -243,47 +244,49 @@ export function DiscoverSidebarComponent({
     onOverrideFieldGroupDetails,
   });
 
+  itemGrowingIndex = 0;
   const renderFieldItem: FieldListGroupedProps<DataViewField>['renderFieldItem'] = useCallback(
     ({ field, groupName, fieldSearchHighlight, itemIndex, groupIndex }) => {
       const isSelected =
         groupName === FieldsGroupNames.SelectedFields ||
         Boolean(selectedFieldsState.selectedFieldsMap[field.name]);
       return (
-        <EuiDraggable
-          key={`field${field.name}`}
-          index={groupIndex * 10000 + itemIndex} // TODO: come up with a better index for items across all sections
-          draggableId={field.name}
-          spacing="none"
-          customDragHandle
-          hasInteractiveChildren
-          isDragDisabled={isSelected}
-        >
-          {(
-            provided,
-            state // TODO: add `<li>`
-          ) => (
-            <EuiPanel hasShadow={state.isDragging} paddingSize="none" data-attr-field={field.name}>
-              <DiscoverField
-                alwaysShowActionButton={alwaysShowActionButtons}
-                field={field}
-                highlight={fieldSearchHighlight}
-                dataView={selectedDataView!}
-                onAddField={onAddField}
-                onRemoveField={onRemoveField}
-                onAddFilter={onAddFilter}
-                documents$={documents$}
-                trackUiMetric={trackUiMetric}
-                multiFields={multiFieldsMap?.get(field.name)} // ideally we better calculate multifields when they are requested first from the popover
-                onEditField={editField}
-                onDeleteField={deleteField}
-                showFieldStats={showFieldStats}
-                contextualFields={columns}
-                selected={isSelected}
-                provided={provided}
-              />
-            </EuiPanel>
-          )}
-        </EuiDraggable>
+        <li key={`field${field.name}`} data-attr-field={field.name}>
+          <EuiDraggable
+            index={itemGrowingIndex++} // TODO: come up with a better index for items across all sections
+            draggableId={field.name}
+            spacing="none"
+            hasInteractiveChildren
+            disableInteractiveElementBlocking
+          >
+            {(provided, snapshot) => (
+              <EuiPanel
+                hasShadow={snapshot.isDragging}
+                color={snapshot.isDragging ? undefined : 'transparent'}
+                paddingSize="none"
+              >
+                <DiscoverField
+                  alwaysShowActionButton={alwaysShowActionButtons}
+                  field={field}
+                  highlight={fieldSearchHighlight}
+                  dataView={selectedDataView!}
+                  onAddField={onAddField}
+                  onRemoveField={onRemoveField}
+                  onAddFilter={onAddFilter}
+                  documents$={documents$}
+                  trackUiMetric={trackUiMetric}
+                  multiFields={multiFieldsMap?.get(field.name)} // ideally we better calculate multifields when they are requested first from the popover
+                  onEditField={editField}
+                  onDeleteField={deleteField}
+                  showFieldStats={showFieldStats}
+                  contextualFields={columns}
+                  selected={isSelected}
+                  provided={provided}
+                />
+              </EuiPanel>
+            )}
+          </EuiDraggable>
+        </li>
       );
     },
     [

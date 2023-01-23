@@ -16,9 +16,9 @@ import {
   EuiIcon,
   EuiSpacer,
   EuiHighlight,
-  EuiPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
+  // EuiPanel,
+  // EuiFlexGroup,
+  // EuiFlexItem,
 } from '@elastic/eui';
 import { DraggableProvided } from 'react-beautiful-dnd';
 import { i18n } from '@kbn/i18n';
@@ -163,21 +163,23 @@ const ActionButton: React.FC<ActionButtonProps> = memo(
       </EuiToolTip>
     );
 
-    return (
-      <EuiFlexGroup direction="row" responsive={false} gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={false}>{tableAction}</EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiPanel
-            color="transparent"
-            paddingSize="s"
-            {...provided.dragHandleProps}
-            aria-label="Drag Handle"
-          >
-            <EuiIcon type="grab" />
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
+    return tableAction;
+
+    // return (
+    //   <EuiFlexGroup direction="row" responsive={false} gutterSize="s" alignItems="center">
+    //     <EuiFlexItem grow={false}>{tableAction}</EuiFlexItem>
+    //     <EuiFlexItem grow={false}>
+    //       <EuiPanel
+    //         color="transparent"
+    //         paddingSize="s"
+    //         {...provided.dragHandleProps}
+    //         aria-label="Drag Handle"
+    //       >
+    //         <EuiIcon type="grab" />
+    //       </EuiPanel>
+    //     </EuiFlexItem>
+    //   </EuiFlexGroup>
+    // );
   }
 );
 
