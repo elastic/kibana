@@ -237,6 +237,32 @@ describe('FrameHeading', () => {
     });
   });
 
+  describe('with a RUM stackframe', () => {
+    it('renders', () => {
+      expect(
+        getRenderedStackframeText(
+          {
+            library_frame: false,
+            exclude_from_grouping: false,
+            filename: 'static/js/main.616809fb.js',
+            abs_path: 'http://opbeans-frontend:3000/static/js/main.616809fb.js',
+            sourcemap: {
+              error:
+                'No Sourcemap available for ServiceName opbeans-rum, ServiceVersion 2020-08-25 02:09:37, Path http://opbeans-frontend:3000/static/js/main.616809fb.js.',
+              updated: false,
+            },
+            line: { number: 319, column: 3842 },
+            function: 'unstable_runWithPriority',
+          },
+          'javascript',
+          '0'
+        )
+      ).toEqual(
+        'at unstable_runWithPriority (static/js/main.616809fb.js:319:3842)'
+      );
+    });
+  });
+
   describe('with a PHP stackframe', () => {
     it('renders', () => {
       expect(
