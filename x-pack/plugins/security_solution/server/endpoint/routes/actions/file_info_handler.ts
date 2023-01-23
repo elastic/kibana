@@ -6,6 +6,7 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
+import { validateActionId } from '../../services/actions/validate_action_id';
 import { getFileInfo, validateActionFileId } from '../../services/actions/action_files';
 import { ACTION_AGENT_FILE_INFO_ROUTE } from '../../../../common/endpoint/constants';
 import type { EndpointAppContext } from '../../types';
@@ -33,6 +34,7 @@ export const getActionFileInfoRouteHandler = (
     const esClient = (await context.core).elasticsearch.client.asInternalUser;
 
     try {
+      await validateActionId(esClient, actionId);
       await validateActionFileId(esClient, logger, fileId, actionId);
 
       return res.ok({
