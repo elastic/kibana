@@ -8,18 +8,20 @@
 
 import React from 'react';
 import { isOfQueryType } from '@kbn/es-query';
+import type { Filter, AggregateQuery, Query } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { SavedQuery } from '@kbn/data-plugin/public';
+
 import { SavedQueryManagementList } from '../saved_query_management';
 import type { IUnifiedSearchPluginServices } from '../types';
-
 interface MemoizedSavedQueryManagementProps {
-  filters: any;
-  query: any;
-  savedQuery: any;
-  showSaveQuery: any;
-  onClearSavedQuery: any;
+  filters: Filter[] | undefined;
+  query: AggregateQuery | Query | undefined;
+  savedQuery: SavedQuery | undefined;
+  showSaveQuery: boolean | undefined;
+  onClearSavedQuery: () => void;
   onClose: () => void;
-  onLoadSavedQuery: any;
+  onLoadSavedQuery: (newSavedQuery: SavedQuery) => void;
 }
 
 function SavedQueryManagement({
@@ -37,15 +39,12 @@ function SavedQueryManagement({
     },
   } = useKibana<IUnifiedSearchPluginServices>().services;
 
-  const hasFiltersOrQuery = () => {
-    const hasFilters = Boolean(filters!.length > 0);
-    const hasQuery = Boolean(query && isOfQueryType(query) && query.query);
-    return hasFilters || hasQuery;
-  };
+  const hasFiltersOrQuery =
+    Boolean(filters!.length > 0) || Boolean(query && isOfQueryType(query) && query.query);
 
   return (
     <SavedQueryManagementList
-      hasFiltersOrQuery={hasFiltersOrQuery()}
+      hasFiltersOrQuery={hasFiltersOrQuery}
       loadedSavedQuery={savedQuery}
       savedQueryService={savedQueries}
       showSaveQuery={showSaveQuery}

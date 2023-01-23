@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { compact, isEqual } from 'lodash';
 import classNames from 'classnames';
 import { EuiIconProps, useEuiTheme } from '@elastic/eui';
@@ -170,6 +170,20 @@ function SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query>({
   const [stateDateRangeTo, setStateDateRangeTo] = useState<string>(dateRangeTo ?? 'now');
   const [stateOpenQueryBarMenu, setStateOpenQueryBarMenu] = useState(false);
 
+  useEffect(() => {
+    if (query && !isEqual(query, stateQuery)) {
+      setStateQuery({ ...query });
+    }
+
+    if (dateRangeFrom && dateRangeFrom !== stateDateRangeFrom) {
+      setStateDateRangeFrom(dateRangeFrom);
+    }
+
+    if (dateRangeTo && dateRangeTo !== stateDateRangeTo) {
+      setStateDateRangeTo(dateRangeTo);
+    }
+  }, [dateRangeFrom, dateRangeTo, query, stateDateRangeFrom, stateDateRangeTo, stateQuery]);
+
   const timeRangeForSuggestionsOverride = showDatePicker ? undefined : false;
 
   const shouldRenderFilterBar =
@@ -195,32 +209,9 @@ function SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query>({
 
     return (
       (stateQuery && query && !isEqual(stateQuery, query)) ||
-      stateDateRangeFrom !== dateRangeFrom ||
-      stateDateRangeTo !== dateRangeTo
+      dateRangeFrom !== stateDateRangeFrom ||
+      dateRangeTo !== stateDateRangeTo
     );
-  };
-
-  const handleLoadSavedQuery = (newSavedQuery: SavedQuery) => {
-    const newDateRangeFrom = newSavedQuery?.attributes.timefilter?.from || stateDateRangeFrom;
-
-    const newDateRangeTo = newSavedQuery?.attributes.timefilter?.to || stateDateRangeTo;
-
-    setStateQuery(newSavedQuery.attributes.query);
-    setStateDateRangeFrom(newDateRangeFrom);
-    setStateDateRangeTo(newDateRangeTo);
-
-    onSavedQueryUpdated?.(newSavedQuery);
-  };
-
-  const handleQueryBarChange = (queryAndDateRange: {
-    dateRange: TimeRange;
-    query?: QT | Query;
-  }) => {
-    setStateQuery(queryAndDateRange.query);
-    setStateDateRangeFrom(queryAndDateRange.dateRange.from);
-    setStateDateRangeTo(queryAndDateRange.dateRange.to);
-
-    onQueryChange?.(queryAndDateRange);
   };
 
   const handleSave = async (savedQueryMeta: SavedQueryMeta, saveAsNew = false) => {
@@ -278,6 +269,25 @@ function SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query>({
     }
   };
 
+  const handleLoadSavedQuery = (newSavedQuery: SavedQuery) => {
+    setStateQuery(newSavedQuery.attributes.query);
+    setStateDateRangeFrom(newSavedQuery.attributes.timefilter?.from || stateDateRangeFrom);
+    setStateDateRangeTo(newSavedQuery.attributes.timefilter?.to || stateDateRangeTo);
+
+    onSavedQueryUpdated?.(newSavedQuery);
+  };
+
+  const handleQueryBarChange = (queryAndDateRange: {
+    dateRange: TimeRange;
+    query?: QT | Query;
+  }) => {
+    setStateQuery(queryAndDateRange.query);
+    setStateDateRangeFrom(queryAndDateRange.dateRange.from);
+    setStateDateRangeTo(queryAndDateRange.dateRange.to);
+
+    onQueryChange?.(queryAndDateRange);
+  };
+
   const handleTextLangQueryChange = (newQuery?: AggregateQuery) => {
     setStateQuery(newQuery as QT);
 
@@ -303,6 +313,8 @@ function SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query>({
         to: stateDateRangeTo,
       },
     });
+
+    reportUiCounter?.(appName, METRIC_TYPE.CLICK, 'query_submitted');
   };
 
   const handleQueryBarSubmit = ({
@@ -329,8 +341,7 @@ function SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query>({
 
   const handleCloseQueryBarMenu = () => setStateOpenQueryBarMenu(false);
 
-  const toggleFilterBarMenuPopover = (openQueryBarMenu: boolean) =>
-    setStateOpenQueryBarMenu(openQueryBarMenu);
+  const toggleFilterBarMenuPopover = (open: boolean) => setStateOpenQueryBarMenu(open);
 
   return (
     <div className={classes} css={cssStyles} data-test-subj="globalQueryBar">
