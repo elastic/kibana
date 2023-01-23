@@ -183,12 +183,7 @@ export const buildEventsSearchQuery = ({
     body: {
       query: {
         bool: {
-          filter: [
-            ...filterWithTime,
-            {
-              match_all: {},
-            },
-          ],
+          filter: filterWithTime,
         },
       },
       fields: [
