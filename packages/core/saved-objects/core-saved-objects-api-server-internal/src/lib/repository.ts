@@ -716,22 +716,25 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       };
     });
 
-    const namespaceString = SavedObjectsUtils.namespaceIdToString(namespace);
     const validObjects = expectedBulkGetResults.filter(isRight);
-    const typesAndSpaces = new Map<string, Set<string>>();
-    for (const { value } of validObjects) {
-      typesAndSpaces.set(value.type, new Set([namespaceString])); // Always enforce authZ for the active space
-    }
-
-    await this._securityExtension?.authorize({
-      actions: new Set([SecurityAction.CHECK_CONFLICTS]),
-      types: new Set(typesAndSpaces.keys()),
-      spaces: new Set([namespaceString]), // Always check authZ for the active space
-      enforceMap: typesAndSpaces,
-      // auditing is intentionally bypassed, this function in the previous Security SOC wrapper implementation
-      // did not have audit logging. This is primarily because it is only used by Kibana and is not exposed in a
-      // public HTTP API
-      auditOptions: { bypassOnSuccess: true, bypassOnFailure: true },
+    // const namespaceString = SavedObjectsUtils.namespaceIdToString(namespace);
+    // const typesAndSpaces = new Map<string, Set<string>>();
+    // for (const { value } of validObjects) {
+    //   typesAndSpaces.set(value.type, new Set([namespaceString])); // Always enforce authZ for the active space
+    // }
+    // await this._securityExtension?.authorize({
+    //   actions: new Set([SecurityAction.CHECK_CONFLICTS]),
+    //   types: new Set(typesAndSpaces.keys()),
+    //   spaces: new Set([namespaceString]), // Always check authZ for the active space
+    //   enforceMap: typesAndSpaces,
+    //   // auditing is intentionally bypassed, this function in the previous Security SOC wrapper implementation
+    //   // did not have audit logging. This is primarily because it is only used by Kibana and is not exposed in a
+    //   // public HTTP API
+    //   auditOptions: { bypassOnSuccess: true, bypassOnFailure: true },
+    // });
+    await this._securityExtension?.authorizeCheckConflicts({
+      namespace,
+      objects: validObjects.map((element) => ({ type: element.value.type, id: element.value.id })),
     });
 
     const bulkGetDocs = validObjects.map(({ value: { type, id } }) => ({
@@ -1065,42 +1068,8 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
         force,
       });
 
-    // Perform Auth Check (on both L/R, we'll deal with that later)
-    // const namespaceString = SavedObjectsUtils.namespaceIdToString(namespace);
-    // const typesAndSpaces = new Map<string, Set<string>>();
-    // const spacesToAuthorize = new Set<string>([namespaceString]); // Always check authZ for the active space
-    // if (this._securityExtension) {
-    //   for (const { value } of expectedBulkDeleteMultiNamespaceDocsResults) {
-    //     const index = (value as { esRequestIndex: number }).esRequestIndex;
-    //     const { type } = value;
-    //     const preflightResult =
-    //       index !== undefined ? multiNamespaceDocsResponse?.body.docs[index] : undefined;
-
-    //     const spacesToEnforce = typesAndSpaces.get(type) ?? new Set([namespaceString]); // Always enforce authZ for the active space
-    //     typesAndSpaces.set(type, spacesToEnforce);
-    //     // @ts-expect-error MultiGetHit._source is optional
-    //     for (const space of preflightResult?._source?.namespaces ?? []) {
-    //       spacesToAuthorize.add(space); // existing namespaces are included
-    //     }
-    //   }
-    // }
-
-    // await this._securityExtension?.authorize({
-    //   actions: new Set([SecurityAction.BULK_DELETE]),
-    //   types: new Set(typesAndSpaces.keys()),
-    //   spaces: spacesToAuthorize,
-    //   enforceMap: typesAndSpaces,
-    //   auditOptions: {
-    //     objects: expectedBulkDeleteMultiNamespaceDocsResults.map((element) => {
-    //       return {
-    //         type: element.value.type,
-    //         id: element.value.id,
-    //       };
-    //     }),
-    //   },
-    // });
-
     if (this._securityExtension) {
+      // Perform Auth Check (on both L/R, we'll deal with that later)
       const authObjects: AuthorizeUpdateObject[] = expectedBulkDeleteMultiNamespaceDocsResults.map(
         (element) => {
           const index = (element.value as { esRequestIndex: number }).esRequestIndex;

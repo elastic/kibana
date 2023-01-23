@@ -54,6 +54,7 @@ import {
   AuthorizeBulkCreateParams,
   AuthorizeBulkDeleteParams,
   AuthorizeBulkUpdateParams,
+  AuthorizeCheckConflictsParams,
   AuthorizeDeleteParams,
   AuthorizeUpdateSpacesParams,
 } from '@kbn/core-saved-objects-server/src/extensions/security';
@@ -325,6 +326,18 @@ export const setupAuthorizeBulkDelete = (
 ) => {
   mockSecurityExt.authorizeBulkDelete.mockImplementation(
     (params: AuthorizeBulkDeleteParams): Promise<CheckAuthorizationResult<string>> => {
+      if (status === 'unauthorized') throw enforceError;
+      return Promise.resolve({ status, typeMap: authMap });
+    }
+  );
+};
+
+export const setupAuthorizeCheckConflicts = (
+  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>,
+  status: 'fully_authorized' | 'partially_authorized' | 'unauthorized'
+) => {
+  mockSecurityExt.authorizeCheckConflicts.mockImplementation(
+    (params: AuthorizeCheckConflictsParams): Promise<CheckAuthorizationResult<string>> => {
       if (status === 'unauthorized') throw enforceError;
       return Promise.resolve({ status, typeMap: authMap });
     }

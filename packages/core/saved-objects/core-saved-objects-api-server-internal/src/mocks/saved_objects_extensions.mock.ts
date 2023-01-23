@@ -26,6 +26,7 @@ const createSecurityExtension = (): jest.Mocked<ISavedObjectsSecurityExtension> 
   authorizeBulkUpdate: jest.fn(),
   authorizeDelete: jest.fn(),
   authorizeBulkDelete: jest.fn(),
+  authorizeCheckConflicts: jest.fn(),
   authorizeAndRedactMultiNamespaceReferences: jest.fn(),
   authorizeAndRedactInternalBulkResolve: jest.fn(),
   authorize: jest.fn(),

@@ -383,6 +383,11 @@ export interface AuthorizeBulkDeleteParams {
   objects: AuthorizeObject[];
 }
 
+export interface AuthorizeCheckConflictsParams {
+  namespace: string | undefined;
+  objects: AuthorizeObject[];
+}
+
 export interface AuthorizeAndRedactMultiNamespaceReferencesParams {
   namespaceString: string;
   objects: SavedObjectReferenceWithContext[];
@@ -434,6 +439,10 @@ export interface ISavedObjectsSecurityExtension {
 
   authorizeBulkDelete: (
     params: AuthorizeBulkDeleteParams
+  ) => Promise<CheckAuthorizationResult<string> | undefined>;
+
+  authorizeCheckConflicts: (
+    params: AuthorizeCheckConflictsParams
   ) => Promise<CheckAuthorizationResult<string> | undefined>;
 
   /**

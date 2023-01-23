@@ -74,6 +74,7 @@ import {
   setupAuthorizeBulkCreate,
   setupAuthorizeDelete,
   setupAuthorizeBulkDelete,
+  setupAuthorizeCheckConflicts,
 } from '../test_helpers/repository.test.common';
 import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
 
@@ -616,90 +617,106 @@ describe('SavedObjectsRepository Security Extension', () => {
     const obj1 = { type, id: 'one' };
     const obj2 = { type, id: 'two' };
 
-    test(`propagates decorated error when authorize rejects promise`, async () => {
-      mockSecurityExt.authorize.mockRejectedValueOnce(checkAuthError);
+    const expectedResult = {
+      errors: [
+        {
+          error: {
+            error: 'Conflict',
+            message: `Saved object [${obj1.type}/${obj1.id}] conflict`,
+            statusCode: 409,
+          },
+          id: obj1.id,
+          type: obj1.type,
+        },
+        {
+          error: {
+            error: 'Conflict',
+            message: `Saved object [${obj2.type}/${obj2.id}] conflict`,
+            statusCode: 409,
+          },
+          id: obj2.id,
+          type: obj2.type,
+        },
+      ],
+    };
+
+    test(`propagates decorated error when authorizeCheckConflicts rejects promise`, async () => {
+      mockSecurityExt.authorizeCheckConflicts.mockRejectedValueOnce(checkAuthError);
       await expect(
         checkConflictsSuccess(client, repository, registry, [obj1, obj2], { namespace })
       ).rejects.toThrow(checkAuthError);
-      expect(mockSecurityExt.authorize).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeCheckConflicts).toHaveBeenCalledTimes(1);
     });
 
     test(`propagates decorated error when unauthorized`, async () => {
-      setupAuthorizeEnforceFailure(mockSecurityExt);
+      setupAuthorizeCheckConflicts(mockSecurityExt, 'unauthorized');
 
       await expect(
         checkConflictsSuccess(client, repository, registry, [obj1, obj2], { namespace })
       ).rejects.toThrow(enforceError);
 
-      expect(mockSecurityExt.authorize).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeCheckConflicts).toHaveBeenCalledTimes(1);
     });
 
-    test(`returns result when authorized`, async () => {
-      setupAuthorizeFullyAuthorized(mockSecurityExt);
+    test(`returns result when partially authorized`, async () => {
+      setupAuthorizeCheckConflicts(mockSecurityExt, 'partially_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const result = await checkConflictsSuccess(client, repository, registry, [obj1, obj2], {
         namespace,
       });
 
-      expect(mockSecurityExt.authorize).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeCheckConflicts).toHaveBeenCalledTimes(1);
       expect(client.mget).toHaveBeenCalledTimes(1);
-      // Default mock mget makes each object found
-      expect(result).toEqual(
-        expect.objectContaining({
-          errors: [
-            {
-              error: {
-                error: 'Conflict',
-                message: `Saved object [${obj1.type}/${obj1.id}] conflict`,
-                statusCode: 409,
-              },
-              id: obj1.id,
-              type: obj1.type,
-            },
-            {
-              error: {
-                error: 'Conflict',
-                message: `Saved object [${obj2.type}/${obj2.id}] conflict`,
-                statusCode: 409,
-              },
-              id: obj2.id,
-              type: obj2.type,
-            },
-          ],
-        })
-      );
+      expect(result).toEqual(expectedResult);
     });
 
-    test(`calls authorize with correct actions, types, spaces, and enforce map`, async () => {
+    test(`returns result when fully authorized`, async () => {
+      setupAuthorizeCheckConflicts(mockSecurityExt, 'fully_authorized');
+      setupRedactPassthrough(mockSecurityExt);
+
+      const result = await checkConflictsSuccess(client, repository, registry, [obj1, obj2], {
+        namespace,
+      });
+
+      expect(mockSecurityExt.authorizeCheckConflicts).toHaveBeenCalledTimes(1);
+      expect(client.mget).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(expectedResult);
+    });
+
+    test(`calls authorizeCheckConflicts with correct parameters`, async () => {
       await checkConflictsSuccess(client, repository, registry, [obj1, obj2], { namespace });
 
-      expect(mockSecurityExt.authorize).toHaveBeenCalledTimes(1);
-      const expectedActions = new Set([SecurityAction.CHECK_CONFLICTS]);
-      const expectedSpaces = new Set([namespace]);
-      const expectedTypes = new Set([obj1.type, obj2.type]);
-      const expectedEnforceMap = new Map<string, Set<string>>();
-      expectedEnforceMap.set(obj1.type, new Set([namespace]));
-      expectedEnforceMap.set(obj2.type, new Set([namespace]));
-
-      const {
-        actions: actualActions,
-        spaces: actualSpaces,
-        types: actualTypes,
-        enforceMap: actualEnforceMap,
-        options: actualOptions,
-        auditOptions: actualAuditOptions,
-      } = mockSecurityExt.authorize.mock.calls[0][0];
-
-      expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
-      expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
-      expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
-      expect(setMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
-      expect(actualOptions).toBeUndefined();
-      expect(actualAuditOptions).toEqual({
-        bypassOnSuccess: true,
-        bypassOnFailure: true,
+      expect(mockSecurityExt.authorizeCheckConflicts).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeCheckConflicts).toHaveBeenCalledWith({
+        namespace,
+        objects: [obj1, obj2],
       });
+      // const expectedActions = new Set([SecurityAction.CHECK_CONFLICTS]);
+      // const expectedSpaces = new Set([namespace]);
+      // const expectedTypes = new Set([obj1.type, obj2.type]);
+      // const expectedEnforceMap = new Map<string, Set<string>>();
+      // expectedEnforceMap.set(obj1.type, new Set([namespace]));
+      // expectedEnforceMap.set(obj2.type, new Set([namespace]));
+
+      // const {
+      //   actions: actualActions,
+      //   spaces: actualSpaces,
+      //   types: actualTypes,
+      //   enforceMap: actualEnforceMap,
+      //   options: actualOptions,
+      //   auditOptions: actualAuditOptions,
+      // } = mockSecurityExt.authorize.mock.calls[0][0];
+
+      // expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
+      // expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
+      // expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
+      // expect(setMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
+      // expect(actualOptions).toBeUndefined();
+      // expect(actualAuditOptions).toEqual({
+      //   bypassOnSuccess: true,
+      //   bypassOnFailure: true,
+      // });
     });
   });
 

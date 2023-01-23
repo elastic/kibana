@@ -1760,7 +1760,7 @@ describe('#create', () => {
     });
   });
 
-  describe(`@authorizeBulkCreate`, () => {
+  describe(`#authorizeBulkCreate`, () => {
     const actionString = 'bulk_create';
     const objects = [obj1, obj2, obj3, obj4];
 
@@ -2240,7 +2240,7 @@ describe('update', () => {
     });
   });
 
-  describe(`@authorizeBulkUpdate`, () => {
+  describe(`#authorizeBulkUpdate`, () => {
     const actionString = 'bulk_update';
     const objects = [obj1, obj2, obj3, obj4];
     const fullyAuthorizedCheckPrivilegesResponse = {
@@ -2712,7 +2712,7 @@ describe('delete', () => {
     });
   });
 
-  describe(`@authorizeBulkUpdate`, () => {
+  describe(`#authorizeBulkDelete`, () => {
     const actionString = 'bulk_delete';
     const objects = [obj1, obj2, obj3, obj4];
     const fullyAuthorizedCheckPrivilegesResponse = {
@@ -2995,6 +2995,250 @@ describe('delete', () => {
         });
       }
     });
+  });
+});
+
+describe(`#authorizeCheckConflicts`, () => {
+  const namespace = 'x';
+  const actionString = 'bulk_create';
+  const objects = [obj1, obj2, obj3, obj4];
+  const fullyAuthorizedCheckPrivilegesResponse = {
+    hasAllRequested: true,
+    privileges: {
+      kibana: [
+        { privilege: 'mock-saved_object:a/bulk_create', authorized: true },
+        { privilege: 'login:', authorized: true },
+        { resource: 'x', privilege: 'mock-saved_object:b/bulk_create', authorized: true },
+        { resource: 'x', privilege: 'mock-saved_object:c/bulk_create', authorized: true },
+        { resource: 'x', privilege: 'mock-saved_object:d/bulk_create', authorized: true },
+        { resource: 'bar', privilege: 'mock-saved_object:c/bulk_create', authorized: true },
+        { resource: 'z', privilege: 'mock-saved_object:d/bulk_create', authorized: true },
+      ],
+    },
+  } as CheckPrivilegesResponse;
+
+  const expectedTypes = new Set(objects.map((obj) => obj.type));
+
+  const expectedActions = new Set([SecurityAction.CHECK_CONFLICTS]);
+  const expectedSpaces = new Set([namespace]);
+
+  const expectedEnforceMap = new Map([
+    [obj1.type, new Set([namespace])],
+    [obj2.type, new Set([namespace])],
+    [obj3.type, new Set([namespace])],
+    [obj4.type, new Set([namespace])],
+  ]);
+
+  const expectedTypeMap = new Map()
+    .set('a', {
+      bulk_create: { isGloballyAuthorized: true, authorizedSpaces: [] },
+      ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+    })
+    .set('b', {
+      bulk_create: { authorizedSpaces: ['x'] },
+      ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+    })
+    .set('c', {
+      bulk_create: { authorizedSpaces: ['x', 'bar'] },
+      ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+    })
+    .set('d', {
+      bulk_create: { authorizedSpaces: ['x', 'z'] },
+      ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+    });
+
+  test('throws an error when `objects` is empty', async () => {
+    const { securityExtension, checkPrivileges } = setup();
+    const emptyObjects: AuthorizeObject[] = [];
+
+    await expect(
+      securityExtension.authorizeCheckConflicts({
+        namespace,
+        objects: emptyObjects,
+      })
+    ).rejects.toThrowError('No objects specified for bulk_create authorization');
+    expect(checkPrivileges).not.toHaveBeenCalled();
+  });
+
+  test('throws an error when `namespace` is empty', async () => {
+    const { securityExtension, checkPrivileges } = setup();
+    checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
+
+    await expect(
+      securityExtension.authorizeCheckConflicts({
+        namespace: '',
+        objects,
+      })
+    ).rejects.toThrowError('namespace cannot be an empty string');
+    expect(checkPrivileges).not.toHaveBeenCalled();
+  });
+
+  test('throws an error when checkAuthorization fails', async () => {
+    const { securityExtension, checkPrivileges } = setup();
+    checkPrivileges.mockRejectedValue(new Error('Oh no!'));
+
+    await expect(
+      securityExtension.authorizeCheckConflicts({ namespace, objects })
+    ).rejects.toThrowError('Oh no!');
+  });
+
+  test(`calls authorize methods with expected actions, types, spaces, and enforce map`, async () => {
+    const { securityExtension, checkPrivileges } = setup();
+    checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse); // Return any well-formed response to avoid an unhandled error
+
+    await securityExtension.authorizeCheckConflicts({
+      namespace,
+      objects,
+    });
+
+    expect(authorizeSpy).toHaveBeenCalledTimes(1);
+    expect(authorizeSpy).toHaveBeenCalledWith({
+      actions: expectedActions,
+      types: expectedTypes,
+      spaces: expectedSpaces,
+      enforceMap: expectedEnforceMap,
+      auditOptions: {
+        bypassOnFailure: true,
+        bypassOnSuccess: true,
+      },
+    });
+
+    expect(checkAuthorizationSpy).toHaveBeenCalledTimes(1);
+    expect(checkAuthorizationSpy).toHaveBeenCalledWith({
+      actions: new Set([actionString]),
+      spaces: expectedSpaces,
+      types: expectedTypes,
+      options: { allowGlobalResource: false },
+    });
+
+    expect(checkPrivileges).toHaveBeenCalledTimes(1);
+    expect(checkPrivileges).toHaveBeenCalledWith(
+      [
+        `mock-saved_object:${obj1.type}/${actionString}`,
+        `mock-saved_object:${obj2.type}/${actionString}`,
+        `mock-saved_object:${obj3.type}/${actionString}`,
+        `mock-saved_object:${obj4.type}/${actionString}`,
+        'login:',
+      ],
+      [...expectedSpaces]
+    );
+
+    expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
+    expect(enforceAuthorizationSpy).toHaveBeenCalledWith({
+      action: SecurityAction.CHECK_CONFLICTS,
+      typesAndSpaces: expectedEnforceMap,
+      typeMap: expectedTypeMap,
+      auditOptions: { bypassOnFailure: true, bypassOnSuccess: true },
+    });
+  });
+
+  test(`returns result when fully authorized`, async () => {
+    const { securityExtension, checkPrivileges } = setup();
+    checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
+
+    const result = await securityExtension.authorizeCheckConflicts({
+      namespace,
+      objects,
+    });
+    expect(result).toEqual({
+      status: 'fully_authorized',
+      typeMap: expectedTypeMap,
+    });
+    expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
+  });
+
+  test(`returns result when partially authorized`, async () => {
+    const { securityExtension, checkPrivileges } = setup();
+    checkPrivileges.mockResolvedValue({
+      hasAllRequested: false,
+      privileges: {
+        kibana: [
+          { privilege: 'mock-saved_object:a/bulk_create', authorized: true },
+          { privilege: 'login:', authorized: true },
+          { resource: 'x', privilege: 'mock-saved_object:b/bulk_create', authorized: true },
+          { resource: 'x', privilege: 'mock-saved_object:c/bulk_create', authorized: true },
+          { resource: 'x', privilege: 'mock-saved_object:d/bulk_create', authorized: true },
+          { resource: 'bar', privilege: 'mock-saved_object:c/bulk_create', authorized: false },
+          { resource: 'z', privilege: 'mock-saved_object:d/bulk_create', authorized: false },
+        ],
+      },
+    } as CheckPrivilegesResponse);
+
+    const result = await securityExtension.authorizeCheckConflicts({
+      namespace,
+      objects,
+    });
+    expect(result).toEqual({
+      status: 'partially_authorized',
+      typeMap: new Map()
+        .set(obj1.type, {
+          bulk_create: { isGloballyAuthorized: true, authorizedSpaces: [] },
+          ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+        })
+        .set(obj2.type, {
+          bulk_create: { authorizedSpaces: ['x'] },
+          ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+        })
+        .set(obj3.type, {
+          bulk_create: { authorizedSpaces: ['x'] },
+          ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+        })
+        .set(obj4.type, {
+          bulk_create: { authorizedSpaces: ['x'] },
+          ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+        }),
+    });
+    expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
+  });
+
+  test(`does not add any audit events when successful`, async () => {
+    const { securityExtension, checkPrivileges, auditLogger } = setup();
+    checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
+
+    await securityExtension.authorizeCheckConflicts({
+      namespace,
+      objects,
+    });
+
+    expect(auditHelperSpy).not.toHaveBeenCalled();
+    expect(addAuditEventSpy).not.toHaveBeenCalled();
+    expect(auditLogger.log).not.toHaveBeenCalled();
+  });
+
+  test(`throws when unauthorized`, async () => {
+    const { securityExtension, checkPrivileges } = setup();
+    checkPrivileges.mockResolvedValue({
+      hasAllRequested: false,
+      privileges: {
+        kibana: [
+          { privilege: 'mock-saved_object:a/bulk_create', authorized: true },
+          { privilege: 'login:', authorized: true },
+        ],
+      },
+    } as CheckPrivilegesResponse);
+
+    await expect(
+      securityExtension.authorizeCheckConflicts({
+        namespace,
+        objects,
+      })
+    ).rejects.toThrow(`Unable to bulk_create ${obj2.type},${obj3.type},${obj4.type}`);
+    expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
+  });
+
+  test(`does not add any audit events when unauthorized`, async () => {
+    const { securityExtension, checkPrivileges, auditLogger } = setup();
+    setupSimpleCheckPrivsMockResolve(checkPrivileges, obj1.type, 'bulk_create', false);
+
+    await expect(
+      securityExtension.authorizeCheckConflicts({
+        namespace,
+        objects,
+      })
+    ).rejects.toThrow(`Unable to bulk_create ${obj1.type},${obj2.type},${obj3.type},${obj4.type}`);
+    expect(auditHelperSpy).not.toHaveBeenCalled();
+    expect(addAuditEventSpy).not.toHaveBeenCalled();
+    expect(auditLogger.log).not.toHaveBeenCalled();
   });
 });
 

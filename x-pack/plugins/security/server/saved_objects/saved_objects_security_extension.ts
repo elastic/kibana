@@ -36,6 +36,7 @@ import type {
   AuthorizeBulkCreateParams,
   AuthorizeBulkDeleteParams,
   AuthorizeBulkUpdateParams,
+  AuthorizeCheckConflictsParams,
   AuthorizeDeleteParams,
   AuthorizeObject,
   AuthorizeUpdateSpacesParams,
@@ -613,6 +614,37 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       auditOptions: {
         objects,
       },
+    });
+  }
+
+  async authorizeCheckConflicts(
+    params: AuthorizeCheckConflictsParams
+  ): Promise<CheckAuthorizationResult<string> | undefined> {
+    const action = SecurityAction.CHECK_CONFLICTS;
+    const { namespace, objects } = params;
+    if (objects.length === 0) {
+      throw new Error(
+        `No objects specified for ${
+          this.actionMap.get(action)?.authzAction ?? 'unknown'
+        } authorization`
+      );
+    }
+
+    const namespaceString = SavedObjectsUtils.namespaceIdToString(namespace);
+    const typesAndSpaces = new Map<string, Set<string>>();
+    for (const obj of params.objects) {
+      typesAndSpaces.set(obj.type, new Set([namespaceString])); // Always enforce authZ for the active space
+    }
+
+    return this.authorize({
+      actions: new Set([SecurityAction.CHECK_CONFLICTS]),
+      types: new Set(typesAndSpaces.keys()),
+      spaces: new Set([namespaceString]), // Always check authZ for the active space
+      enforceMap: typesAndSpaces,
+      // auditing is intentionally bypassed, this function in the previous Security SOC wrapper implementation
+      // did not have audit logging. This is primarily because it is only used by Kibana and is not exposed in a
+      // public HTTP API
+      auditOptions: { bypassOnSuccess: true, bypassOnFailure: true },
     });
   }
 
