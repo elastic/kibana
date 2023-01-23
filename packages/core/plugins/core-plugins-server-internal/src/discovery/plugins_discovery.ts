@@ -6,9 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { from, merge } from 'rxjs';
+import { from, merge, EMPTY } from 'rxjs';
 import { catchError, filter, map, mergeMap, concatMap, shareReplay, toArray } from 'rxjs/operators';
+import { snakeCase } from 'lodash';
 import { Logger } from '@kbn/logging';
+import { PluginType } from '@kbn/core-base-common';
+import { PluginManifest } from '@kbn/core-plugins-server';
+import { getPluginPackagesFilter } from '@kbn/repo-packages';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { NodeInfo } from '@kbn/core-node-server';
 import { PluginWrapper } from '../plugin';
@@ -48,7 +52,7 @@ export function discover({
     );
   }
 
-  const discoveryResults$ = merge(
+  const fsDiscovery$ = merge(
     from(config.additionalPluginPaths),
     scanPluginSearchPaths(config.pluginSearchPaths, log)
   ).pipe(
@@ -64,9 +68,56 @@ export function discover({
       return typeof pluginPathOrError === 'string'
         ? createPlugin$(pluginPathOrError, log, coreContext, instanceInfo, nodeInfo)
         : [pluginPathOrError];
-    }),
-    shareReplay()
+    })
   );
+
+  const pluginPkgDiscovery$ = from(coreContext.env.repoPackages ?? EMPTY).pipe(
+    filter(
+      getPluginPackagesFilter({
+        oss: coreContext.env.cliArgs.oss,
+        examples: coreContext.env.cliArgs.runExamples,
+        paths: config.additionalPluginPaths,
+        parentDirs: config.pluginSearchPaths,
+      })
+    ),
+    map((pkg) => {
+      log.debug(`Successfully discovered plugin package "${pkg.id}"`);
+      const opaqueId = Symbol(pkg.id);
+
+      const pg = pkg.manifest.plugin;
+      const manifest: PluginManifest = {
+        type: pg.type === 'preboot' ? PluginType.preboot : PluginType.standard,
+        id: pg.id,
+        version: '1.0.0',
+        enabledOnAnonymousPages: pg.enabledOnAnonymousPages,
+        serviceFolders: pkg.manifest.serviceFolders,
+        kibanaVersion: coreContext.env.packageInfo.version,
+        optionalPlugins: pg.optionalPlugins ?? [],
+        requiredBundles: pg.requiredBundles ?? [],
+        requiredPlugins: pg.requiredPlugins ?? [],
+        owner: {
+          name: pkg.manifest.owner.join(' & '),
+        },
+        server: pkg.manifest.plugin.server,
+        ui: pkg.manifest.plugin.browser,
+        configPath: pkg.manifest.plugin.configPath ?? snakeCase(pg.id),
+      };
+      return new PluginWrapper({
+        path: pkg.directory,
+        manifest,
+        opaqueId,
+        initializerContext: createPluginInitializerContext({
+          coreContext,
+          opaqueId,
+          manifest,
+          instanceInfo,
+          nodeInfo,
+        }),
+      });
+    })
+  );
+
+  const discoveryResults$ = merge(fsDiscovery$, pluginPkgDiscovery$).pipe(shareReplay());
 
   return {
     plugin$: discoveryResults$.pipe(
