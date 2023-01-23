@@ -39,8 +39,9 @@ export const addSyntheticsProjectMonitorRouteLegacy: SyntheticsStreamingRouteFac
     syntheticsMonitorClient,
     subject,
   }): Promise<any> => {
+    const monitors = (request.body?.monitors as ProjectMonitor[]) || [];
+
     try {
-      const monitors = (request.body?.monitors as ProjectMonitor[]) || [];
       const { id: spaceId } = await server.spaces.spacesService.getActiveSpace(request);
 
       const { keep_stale: keepStale, project: projectId } = request.body || {};
@@ -77,7 +78,12 @@ export const addSyntheticsProjectMonitorRouteLegacy: SyntheticsStreamingRouteFac
         failedStaleMonitors: pushMonitorFormatter.failedStaleMonitors,
       });
     } catch (error) {
-      subject?.error(error);
+      if (error?.output?.statusCode === 404) {
+        subject?.next('Unable to create monitors. Space not found.');
+        subject?.next({ failedMonitors: monitors.map((m) => m.id) });
+      } else {
+        subject?.error(error);
+      }
     } finally {
       subject?.complete();
     }
