@@ -22,11 +22,11 @@ import { useKibana } from '../context';
 export const useUiSetting = <T>(key: string, defaultValue?: T): T => {
   const { services } = useKibana();
 
-  if (typeof services.settings !== 'object') {
+  if (typeof services.uiSettings !== 'object') {
     throw new TypeError('uiSettings service not available in kibana-react context.');
   }
 
-  return services.settings?.client.get(key, defaultValue);
+  return services.uiSettings!.get(key, defaultValue);
 };
 
 /**
