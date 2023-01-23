@@ -533,7 +533,7 @@ describe('collectMultiNamespaceReferences', () => {
         await expect(collectMultiNamespaceReferences(params)).rejects.toThrow(enforceError);
         expect(mockSecurityExt.authorizeAndRedactMultiNamespaceReferences).toHaveBeenCalledTimes(1);
 
-        const { namespaceString: actualNamespace, objects: actualObjects } =
+        const { namespace: actualNamespace, objects: actualObjects } =
           mockSecurityExt.authorizeAndRedactMultiNamespaceReferences.mock.calls[0][0];
         expect(actualNamespace).toEqual('default');
         expect(actualObjects).toEqual(expectedObjects);
@@ -546,7 +546,7 @@ describe('collectMultiNamespaceReferences', () => {
         ).rejects.toThrow(enforceError);
         expect(mockSecurityExt.authorizeAndRedactMultiNamespaceReferences).toHaveBeenCalledTimes(1);
 
-        const { namespaceString: actualNamespace, objects: actualObjects } =
+        const { namespace: actualNamespace, objects: actualObjects } =
           mockSecurityExt.authorizeAndRedactMultiNamespaceReferences.mock.calls[0][0];
         expect(actualNamespace).toEqual(namespace);
         expect(actualObjects).toEqual(expectedObjects);

@@ -354,22 +354,22 @@ export interface AuthorizeUpdateObject extends AuthorizeObject {
 }
 
 export interface AuthorizeBulkCreateParams {
-  namespaceString: string;
+  namespace: string | undefined;
   objects: AuthorizeCreateObject[];
 }
 
 export interface AuthorizeCreateParams {
-  namespaceString: string;
+  namespace: string | undefined;
   object: AuthorizeCreateObject;
 }
 
 export interface AuthorizeUpdateParams {
-  namespaceString: string;
+  namespace: string | undefined;
   object: AuthorizeUpdateObject;
 }
 
 export interface AuthorizeBulkUpdateParams {
-  namespaceString: string;
+  namespace: string | undefined;
   objects: AuthorizeUpdateObject[];
 }
 
@@ -389,7 +389,7 @@ export interface AuthorizeCheckConflictsParams {
 }
 
 export interface AuthorizeAndRedactMultiNamespaceReferencesParams {
-  namespaceString: string;
+  namespace: string | undefined;
   objects: SavedObjectReferenceWithContext[];
   options?: MultiNamespaceReferencesOptions;
 }

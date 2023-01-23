@@ -348,7 +348,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     }
 
     const authorizationResult = await this._securityExtension?.authorizeCreate({
-      namespaceString,
+      namespace,
       object: {
         type,
         id,
@@ -518,7 +518,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     });
 
     const authorizationResult = await this._securityExtension?.authorizeBulkCreate({
-      namespaceString,
+      namespace,
       objects: authObjects,
     });
 
@@ -1851,11 +1851,11 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       });
     }
 
-    const namespaceString = SavedObjectsUtils.namespaceIdToString(namespace);
+    // const namespaceString = SavedObjectsUtils.namespaceIdToString(namespace);
     const existingNamespaces = preflightResult?.savedObjectNamespaces || [];
 
     const authorizationResult = await this._securityExtension?.authorizeUpdate({
-      namespaceString,
+      namespace,
       object: { type, id, existingNamespaces },
     });
 
@@ -2121,7 +2121,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     });
 
     const authorizationResult = await this._securityExtension?.authorizeBulkUpdate({
-      namespaceString,
+      namespace,
       objects: authObjects,
     });
 

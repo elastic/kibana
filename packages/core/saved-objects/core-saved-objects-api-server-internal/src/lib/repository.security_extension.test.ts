@@ -312,7 +312,7 @@ describe('SavedObjectsRepository Security Extension', () => {
         existingNamespaces: multiNamespaceObjNamespaces,
       };
 
-      const { namespaceString: actualNamespace, object: actualObject } =
+      const { namespace: actualNamespace, object: actualObject } =
         mockSecurityExt.authorizeUpdate.mock.calls[0][0];
 
       expect(actualNamespace).toEqual(expectedNamespace);
@@ -407,7 +407,7 @@ describe('SavedObjectsRepository Security Extension', () => {
         initialNamespaces: undefined,
         existingNamespaces: undefined,
       };
-      const { namespaceString: actualNamespace, object: actualObject } =
+      const { namespace: actualNamespace, object: actualObject } =
         mockSecurityExt.authorizeCreate.mock.calls[0][0];
 
       expect(actualNamespace).toEqual(expectedNamespace);
@@ -429,7 +429,7 @@ describe('SavedObjectsRepository Security Extension', () => {
         existingNamespaces: undefined,
       };
 
-      const { namespaceString: actualNamespace, object: actualObject } =
+      const { namespace: actualNamespace, object: actualObject } =
         mockSecurityExt.authorizeCreate.mock.calls[0][0];
 
       expect(actualNamespace).toEqual(expectedNamespace);
@@ -1305,7 +1305,7 @@ describe('SavedObjectsRepository Security Extension', () => {
         },
       ];
 
-      const { namespaceString: actualNamespace, objects: actualObjects } =
+      const { namespace: actualNamespace, objects: actualObjects } =
         mockSecurityExt.authorizeBulkCreate.mock.calls[0][0];
 
       expect(expectedNamespace).toEqual(actualNamespace);
@@ -1348,7 +1348,7 @@ describe('SavedObjectsRepository Security Extension', () => {
         },
       ];
 
-      const { namespaceString: actualNamespace, objects: actualObjects } =
+      const { namespace: actualNamespace, objects: actualObjects } =
         mockSecurityExt.authorizeBulkCreate.mock.calls[0][0];
 
       expect(expectedNamespace).toEqual(actualNamespace);
@@ -1392,7 +1392,7 @@ describe('SavedObjectsRepository Security Extension', () => {
         },
       ];
 
-      const { namespaceString: actualNamespace, objects: actualObjects } =
+      const { namespace: actualNamespace, objects: actualObjects } =
         mockSecurityExt.authorizeBulkCreate.mock.calls[0][0];
 
       expect(expectedNamespace).toEqual(actualNamespace);
@@ -1501,7 +1501,7 @@ describe('SavedObjectsRepository Security Extension', () => {
         },
       ];
 
-      const { namespaceString: actualNamespace, objects: actualObjects } =
+      const { namespace: actualNamespace, objects: actualObjects } =
         mockSecurityExt.authorizeBulkUpdate.mock.calls[0][0];
 
       expect(actualNamespace).toEqual(expectedNamespace);
@@ -1539,7 +1539,7 @@ describe('SavedObjectsRepository Security Extension', () => {
         },
       ];
 
-      const { namespaceString: actualNamespace, objects: actualObjects } =
+      const { namespace: actualNamespace, objects: actualObjects } =
         mockSecurityExt.authorizeBulkUpdate.mock.calls[0][0];
 
       expect(actualNamespace).toEqual(expectedNamespace);

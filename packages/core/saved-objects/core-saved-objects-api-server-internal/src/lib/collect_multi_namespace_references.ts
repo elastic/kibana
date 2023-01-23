@@ -130,7 +130,7 @@ export async function collectMultiNamespaceReferences(
   // write audit events, filter the object graph, and redact spaces from the objects.
   const filteredAndRedactedResults =
     await securityExtension.authorizeAndRedactMultiNamespaceReferences({
-      namespaceString: SavedObjectsUtils.namespaceIdToString(options?.namespace),
+      namespace: SavedObjectsUtils.namespaceIdToString(options?.namespace),
       objects: results,
       options: { purpose: options?.purpose },
     });

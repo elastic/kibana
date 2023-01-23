@@ -1594,14 +1594,14 @@ describe('#create', () => {
   describe(`#authorizeCreate`, () => {
     const actionString = 'create';
 
-    test('throws an error when `namespaceString` is empty and there are no object spaces', async () => {
+    test('throws an error when `namespace` is empty', async () => {
       const { securityExtension, checkPrivileges } = setup();
       await expect(
         securityExtension.authorizeCreate({
-          namespaceString: '',
-          object: { ...obj1, initialNamespaces: undefined },
+          namespace: '',
+          object: obj1,
         })
-      ).rejects.toThrowError('No spaces specified for authorization');
+      ).rejects.toThrowError('namespace cannot be an empty string');
       expect(checkPrivileges).not.toHaveBeenCalled();
     });
 
@@ -1610,7 +1610,7 @@ describe('#create', () => {
       checkPrivileges.mockRejectedValue(new Error('Oh no!'));
 
       await expect(
-        securityExtension.authorizeCreate({ namespaceString: namespace, object: obj1 })
+        securityExtension.authorizeCreate({ namespace, object: obj1 })
       ).rejects.toThrowError('Oh no!');
     });
 
@@ -1619,7 +1619,7 @@ describe('#create', () => {
       setupSimpleCheckPrivsMockResolve(checkPrivileges, obj1.type, actionString, true);
 
       await securityExtension.authorizeCreate({
-        namespaceString: namespace,
+        namespace,
         object: obj1,
       });
 
@@ -1670,7 +1670,7 @@ describe('#create', () => {
       setupSimpleCheckPrivsMockResolve(checkPrivileges, obj1.type, actionString, true);
 
       const result = await securityExtension.authorizeCreate({
-        namespaceString: namespace,
+        namespace,
         object: obj1,
       });
       expect(result).toEqual({
@@ -1688,7 +1688,7 @@ describe('#create', () => {
       setupSimpleCheckPrivsMockResolve(checkPrivileges, obj1.type, actionString, true);
 
       await securityExtension.authorizeCreate({
-        namespaceString: namespace,
+        namespace,
         object: obj1,
       });
 
@@ -1718,7 +1718,7 @@ describe('#create', () => {
 
       await expect(
         securityExtension.authorizeCreate({
-          namespaceString: namespace,
+          namespace,
           object: obj1,
         })
       ).rejects.toThrow(`Unable to create ${obj1.type}`);
@@ -1731,7 +1731,7 @@ describe('#create', () => {
 
       await expect(
         securityExtension.authorizeCreate({
-          namespaceString: namespace,
+          namespace,
           object: obj1,
         })
       ).rejects.toThrow(`Unable to create ${obj1.type}`);
@@ -1822,23 +1822,23 @@ describe('#create', () => {
 
       await expect(
         securityExtension.authorizeBulkCreate({
-          namespaceString: namespace,
+          namespace,
           objects: emptyObjects,
         })
       ).rejects.toThrowError('No objects specified for bulk_create authorization');
       expect(checkPrivileges).not.toHaveBeenCalled();
     });
 
-    test('throws an error when `namespaceString` is empty and there are no object spaces', async () => {
+    test('throws an error when `namespace` is empty', async () => {
       const { securityExtension, checkPrivileges } = setup();
       checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
 
       await expect(
         securityExtension.authorizeBulkCreate({
-          namespaceString: '',
-          objects: [{ ...obj1, initialNamespaces: undefined }, obj2],
+          namespace: '',
+          objects: [obj1, obj2],
         })
-      ).rejects.toThrowError('No spaces specified for authorization');
+      ).rejects.toThrowError('namespace cannot be an empty string');
       expect(checkPrivileges).not.toHaveBeenCalled();
     });
 
@@ -1847,7 +1847,7 @@ describe('#create', () => {
       checkPrivileges.mockRejectedValue(new Error('Oh no!'));
 
       await expect(
-        securityExtension.authorizeBulkCreate({ namespaceString: namespace, objects: [obj1] })
+        securityExtension.authorizeBulkCreate({ namespace, objects: [obj1] })
       ).rejects.toThrowError('Oh no!');
     });
 
@@ -1856,7 +1856,7 @@ describe('#create', () => {
       checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse); // Return any well-formed response to avoid an unhandled error
 
       await securityExtension.authorizeBulkCreate({
-        namespaceString: namespace,
+        namespace,
         objects,
       });
 
@@ -1906,7 +1906,7 @@ describe('#create', () => {
       checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
 
       const result = await securityExtension.authorizeBulkCreate({
-        namespaceString: namespace,
+        namespace,
         objects,
       });
       expect(result).toEqual({
@@ -1935,7 +1935,7 @@ describe('#create', () => {
       } as CheckPrivilegesResponse);
 
       const result = await securityExtension.authorizeBulkCreate({
-        namespaceString: namespace,
+        namespace,
         objects,
       });
       expect(result).toEqual({
@@ -1966,7 +1966,7 @@ describe('#create', () => {
       checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
 
       await securityExtension.authorizeBulkCreate({
-        namespaceString: namespace,
+        namespace,
         objects,
       });
 
@@ -2006,7 +2006,7 @@ describe('#create', () => {
 
       await expect(
         securityExtension.authorizeBulkCreate({
-          namespaceString: namespace,
+          namespace,
           objects,
         })
       ).rejects.toThrow(`Unable to bulk_create ${obj2.type},${obj3.type},${obj4.type}`);
@@ -2027,7 +2027,7 @@ describe('#create', () => {
 
       await expect(
         securityExtension.authorizeBulkCreate({
-          namespaceString: namespace,
+          namespace,
           objects,
         })
       ).rejects.toThrow(
@@ -2075,14 +2075,14 @@ describe('update', () => {
   describe(`#authorizeUpdate`, () => {
     const actionString = 'update';
 
-    test('throws an error when `namespaceString` is empty and there are no object spaces', async () => {
+    test('throws an error when `namespace` is empty', async () => {
       const { securityExtension, checkPrivileges } = setup();
       await expect(
         securityExtension.authorizeUpdate({
-          namespaceString: '',
+          namespace: '',
           object: obj2,
         })
-      ).rejects.toThrowError('No spaces specified for authorization');
+      ).rejects.toThrowError('namespace cannot be an empty string');
       expect(checkPrivileges).not.toHaveBeenCalled();
     });
 
@@ -2091,7 +2091,7 @@ describe('update', () => {
       checkPrivileges.mockRejectedValue(new Error('Oh no!'));
 
       await expect(
-        securityExtension.authorizeUpdate({ namespaceString: namespace, object: obj1 })
+        securityExtension.authorizeUpdate({ namespace, object: obj1 })
       ).rejects.toThrowError('Oh no!');
     });
 
@@ -2100,7 +2100,7 @@ describe('update', () => {
       setupSimpleCheckPrivsMockResolve(checkPrivileges, obj1.type, actionString, true);
 
       await securityExtension.authorizeUpdate({
-        namespaceString: namespace,
+        namespace,
         object: obj1,
       });
 
@@ -2150,7 +2150,7 @@ describe('update', () => {
       setupSimpleCheckPrivsMockResolve(checkPrivileges, obj1.type, actionString, true);
 
       const result = await securityExtension.authorizeUpdate({
-        namespaceString: namespace,
+        namespace,
         object: obj1,
       });
       expect(result).toEqual({
@@ -2168,7 +2168,7 @@ describe('update', () => {
       setupSimpleCheckPrivsMockResolve(checkPrivileges, obj1.type, actionString, true);
 
       await securityExtension.authorizeUpdate({
-        namespaceString: namespace,
+        namespace,
         object: obj1,
       });
 
@@ -2198,7 +2198,7 @@ describe('update', () => {
 
       await expect(
         securityExtension.authorizeUpdate({
-          namespaceString: namespace,
+          namespace,
           object: obj1,
         })
       ).rejects.toThrow(`Unable to update ${obj1.type}`);
@@ -2211,7 +2211,7 @@ describe('update', () => {
 
       await expect(
         securityExtension.authorizeUpdate({
-          namespaceString: namespace,
+          namespace,
           object: obj1,
         })
       ).rejects.toThrow(`Unable to update ${obj1.type}`);
@@ -2301,23 +2301,23 @@ describe('update', () => {
 
       await expect(
         securityExtension.authorizeBulkUpdate({
-          namespaceString: namespace,
+          namespace,
           objects: emptyObjects,
         })
       ).rejects.toThrowError('No objects specified for bulk_update authorization');
       expect(checkPrivileges).not.toHaveBeenCalled();
     });
 
-    test('throws an error when `namespaceString` is empty and there are no object spaces', async () => {
+    test('throws an error when `namespace` is empty', async () => {
       const { securityExtension, checkPrivileges } = setup();
       checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
 
       await expect(
         securityExtension.authorizeBulkUpdate({
-          namespaceString: '',
-          objects: [{ ...obj1, objectNamespace: undefined }, obj2],
+          namespace: '',
+          objects: [obj1, obj2],
         })
-      ).rejects.toThrowError('No spaces specified for authorization');
+      ).rejects.toThrowError('namespace cannot be an empty string');
       expect(checkPrivileges).not.toHaveBeenCalled();
     });
 
@@ -2326,7 +2326,7 @@ describe('update', () => {
       checkPrivileges.mockRejectedValue(new Error('Oh no!'));
 
       await expect(
-        securityExtension.authorizeBulkUpdate({ namespaceString: namespace, objects: [obj1] })
+        securityExtension.authorizeBulkUpdate({ namespace, objects: [obj1] })
       ).rejects.toThrowError('Oh no!');
     });
 
@@ -2335,7 +2335,7 @@ describe('update', () => {
       checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse); // Return any well-formed response to avoid an unhandled error
 
       await securityExtension.authorizeBulkUpdate({
-        namespaceString: namespace,
+        namespace,
         objects,
       });
 
@@ -2384,7 +2384,7 @@ describe('update', () => {
       checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
 
       const result = await securityExtension.authorizeBulkUpdate({
-        namespaceString: namespace,
+        namespace,
         objects,
       });
       expect(result).toEqual({
@@ -2413,7 +2413,7 @@ describe('update', () => {
       } as CheckPrivilegesResponse);
 
       const result = await securityExtension.authorizeBulkUpdate({
-        namespaceString: namespace,
+        namespace,
         objects,
       });
       expect(result).toEqual({
@@ -2444,7 +2444,7 @@ describe('update', () => {
       checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
 
       await securityExtension.authorizeBulkUpdate({
-        namespaceString: namespace,
+        namespace,
         objects,
       });
 
@@ -2484,7 +2484,7 @@ describe('update', () => {
 
       await expect(
         securityExtension.authorizeBulkUpdate({
-          namespaceString: namespace,
+          namespace,
           objects,
         })
       ).rejects.toThrow(`Unable to bulk_update ${obj2.type},${obj3.type},${obj4.type}`);
@@ -2497,7 +2497,7 @@ describe('update', () => {
 
       await expect(
         securityExtension.authorizeBulkUpdate({
-          namespaceString: namespace,
+          namespace,
           objects,
         })
       ).rejects.toThrow(
@@ -2999,6 +2999,15 @@ describe('delete', () => {
 });
 
 describe(`#authorizeCheckConflicts`, () => {
+  beforeEach(() => {
+    checkAuthorizationSpy.mockClear();
+    enforceAuthorizationSpy.mockClear();
+    redactNamespacesSpy.mockClear();
+    authorizeSpy.mockClear();
+    auditHelperSpy.mockClear();
+    addAuditEventSpy.mockClear();
+  });
+
   const namespace = 'x';
   const actionString = 'bulk_create';
   const objects = [obj1, obj2, obj3, obj4];
@@ -3448,23 +3457,20 @@ describe('#authorizeAndRedactMultiNamespaceReferences', () => {
       const emptyObjects: SavedObjectReferenceWithContext[] = [];
 
       const result = await securityExtension.authorizeAndRedactMultiNamespaceReferences({
-        namespaceString: namespace,
+        namespace,
         objects: emptyObjects,
       });
       expect(result).toEqual(emptyObjects);
     });
 
-    test('throws an error when `namespaceString` is empty and there are no object spaces', async () => {
+    test('throws an error when `namespace` is empty', async () => {
       const { securityExtension, checkPrivileges } = setup();
       await expect(
         securityExtension.authorizeAndRedactMultiNamespaceReferences({
-          namespaceString: '',
-          objects: [
-            { ...refObj1, spaces: [], spacesWithMatchingAliases: undefined },
-            { ...refObj2, spaces: [], spacesWithMatchingOrigins: undefined },
-          ],
+          namespace: '',
+          objects: [refObj1, refObj2],
         })
-      ).rejects.toThrowError('No spaces specified for authorization');
+      ).rejects.toThrowError('namespace cannot be an empty string');
       expect(checkPrivileges).not.toHaveBeenCalled();
     });
 
@@ -3474,7 +3480,7 @@ describe('#authorizeAndRedactMultiNamespaceReferences', () => {
 
       await expect(
         securityExtension.authorizeAndRedactMultiNamespaceReferences({
-          namespaceString: namespace,
+          namespace,
           objects,
         })
       ).rejects.toThrowError('Oh no!');
@@ -3485,7 +3491,7 @@ describe('#authorizeAndRedactMultiNamespaceReferences', () => {
       checkPrivileges.mockResolvedValue(partiallyAuthorizedCheckPrivilegesResponse); // Return any well-formed response to avoid an unhandled error
 
       await securityExtension.authorizeAndRedactMultiNamespaceReferences({
-        namespaceString: namespace,
+        namespace,
         objects,
       });
 
@@ -3544,7 +3550,7 @@ describe('#authorizeAndRedactMultiNamespaceReferences', () => {
       checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse); // Return any well-formed response to avoid an unhandled error
 
       const result = await securityExtension.authorizeAndRedactMultiNamespaceReferences({
-        namespaceString: namespace,
+        namespace,
         objects,
       });
 
@@ -3572,7 +3578,7 @@ describe('#authorizeAndRedactMultiNamespaceReferences', () => {
       checkPrivileges.mockResolvedValue(partiallyAuthorizedCheckPrivilegesResponse); // Return any well-formed response to avoid an unhandled error
 
       const result = await securityExtension.authorizeAndRedactMultiNamespaceReferences({
-        namespaceString: namespace,
+        namespace,
         objects,
       });
       expect(redactNamespacesSpy).toHaveBeenCalledTimes(5); // spaces x3, spaces of aliases x1, spaces of origins x1
@@ -3584,7 +3590,7 @@ describe('#authorizeAndRedactMultiNamespaceReferences', () => {
       checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse); // Return any well-formed response to avoid an unhandled error
 
       await securityExtension.authorizeAndRedactMultiNamespaceReferences({
-        namespaceString: namespace,
+        namespace,
         objects,
       });
 
@@ -3627,7 +3633,7 @@ describe('#authorizeAndRedactMultiNamespaceReferences', () => {
 
       await expect(
         securityExtension.authorizeAndRedactMultiNamespaceReferences({
-          namespaceString: namespace,
+          namespace,
           objects,
         })
       ).rejects.toThrow(`Unable to bulk_get ${refObj2.type},${refObj3.type}`);
@@ -3645,7 +3651,7 @@ describe('#authorizeAndRedactMultiNamespaceReferences', () => {
 
       await expect(
         securityExtension.authorizeAndRedactMultiNamespaceReferences({
-          namespaceString: namespace,
+          namespace,
           objects,
         })
       ).rejects.toThrow(`Unable to bulk_get ${refObj1.type},${refObj2.type},${refObj3.type}`);
@@ -3746,7 +3752,7 @@ describe('#authorizeAndRedactMultiNamespaceReferences', () => {
       checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
 
       await securityExtension.authorizeAndRedactMultiNamespaceReferences({
-        namespaceString: namespace,
+        namespace,
         objects,
         options: { purpose },
       });

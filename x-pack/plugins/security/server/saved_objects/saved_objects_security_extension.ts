@@ -437,7 +437,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     params: AuthorizeCreateParams
   ): Promise<CheckAuthorizationResult<string> | undefined> {
     return this.internalAuthorizeCreate({
-      namespaceString: params.namespaceString,
+      namespace: params.namespace,
       objects: [params.object],
     });
   }
@@ -452,7 +452,8 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     params: AuthorizeBulkCreateParams,
     options?: InternalAuthorizeOptions
   ): Promise<CheckAuthorizationResult<string> | undefined> {
-    const { namespaceString, objects } = params;
+    const namespaceString = SavedObjectsUtils.namespaceIdToString(params.namespace);
+    const { objects } = params;
 
     const action =
       options?.forceBulkAction || objects.length > 1
@@ -500,7 +501,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     params: AuthorizeUpdateParams
   ): Promise<CheckAuthorizationResult<string> | undefined> {
     return this.internalAuthorizeUpdate({
-      namespaceString: params.namespaceString,
+      namespace: params.namespace,
       objects: [params.object],
     });
   }
@@ -515,7 +516,8 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     params: AuthorizeBulkUpdateParams,
     options?: InternalAuthorizeOptions
   ): Promise<CheckAuthorizationResult<string> | undefined> {
-    const { namespaceString, objects } = params;
+    const namespaceString = SavedObjectsUtils.namespaceIdToString(params.namespace);
+    const { objects } = params;
 
     const action =
       options?.forceBulkAction || objects.length > 1
@@ -657,7 +659,8 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
   async authorizeAndRedactMultiNamespaceReferences(
     params: AuthorizeAndRedactMultiNamespaceReferencesParams
   ): Promise<SavedObjectReferenceWithContext[]> {
-    const { namespaceString, objects, options = {} } = params;
+    const namespaceString = SavedObjectsUtils.namespaceIdToString(params.namespace);
+    const { objects, options = {} } = params;
     if (objects.length === 0) return objects;
     const { purpose } = options;
 
