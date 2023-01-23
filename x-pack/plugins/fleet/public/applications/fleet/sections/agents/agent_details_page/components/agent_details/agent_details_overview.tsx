@@ -27,6 +27,7 @@ import { AgentPolicySummaryLine } from '../../../../../components';
 import { AgentHealth } from '../../../components';
 import { Tags } from '../../../components/tags';
 import { formatAgentCPU, formatAgentMemory } from '../../../services/agent_metrics';
+import { AgentDashboardLink } from '../agent_dashboard_link';
 
 // Allows child text to be truncated
 const FlexItemWithMinWidth = styled(EuiFlexItem)`
@@ -44,23 +45,53 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
     <EuiPanel>
       <EuiDescriptionList compressed>
         <EuiFlexGroup direction="column" gutterSize="m">
+          {displayAgentMetrics && (
+            <EuiFlexGroup>
+              <FlexItemWithMinWidth grow={5}>
+                <EuiFlexGroup direction="column" gutterSize="m">
+                  {[
+                    {
+                      title: i18n.translate('xpack.fleet.agentDetails.cpuLabel', {
+                        defaultMessage: 'CPU',
+                      }),
+                      description: formatAgentCPU(agent.metrics, agentPolicy),
+                    },
+                    {
+                      title: i18n.translate('xpack.fleet.agentDetails.memoryLabel', {
+                        defaultMessage: 'Memory',
+                      }),
+                      description: formatAgentMemory(agent.metrics, agentPolicy),
+                    },
+                  ].map(({ title, description }) => {
+                    const tooltip =
+                      typeof description === 'string' && description.length > 20 ? description : '';
+                    return (
+                      <EuiFlexGroup>
+                        <FlexItemWithMinWidth grow={8}>
+                          <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
+                        </FlexItemWithMinWidth>
+                        <FlexItemWithMinWidth grow={4}>
+                          <EuiToolTip position="top" content={tooltip}>
+                            <EuiDescriptionListDescription className="eui-textTruncate">
+                              {description}
+                            </EuiDescriptionListDescription>
+                          </EuiToolTip>
+                        </FlexItemWithMinWidth>
+                      </EuiFlexGroup>
+                    );
+                  })}
+                </EuiFlexGroup>
+              </FlexItemWithMinWidth>
+              <FlexItemWithMinWidth grow={5}>
+                <EuiFlexGroup justifyContent="flexEnd">
+                  <EuiFlexItem grow={false}>
+                    <AgentDashboardLink agent={agent} agentPolicy={agentPolicy} />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </FlexItemWithMinWidth>
+            </EuiFlexGroup>
+          )}
           {[
-            ...(displayAgentMetrics
-              ? [
-                  {
-                    title: i18n.translate('xpack.fleet.agentDetails.cpuLabel', {
-                      defaultMessage: 'CPU',
-                    }),
-                    description: formatAgentCPU(agent.metrics, agentPolicy),
-                  },
-                  {
-                    title: i18n.translate('xpack.fleet.agentDetails.memoryLabel', {
-                      defaultMessage: 'Memory',
-                    }),
-                    description: formatAgentMemory(agent.metrics, agentPolicy),
-                  },
-                ]
-              : []),
             {
               title: i18n.translate('xpack.fleet.agentDetails.statusLabel', {
                 defaultMessage: 'Status',
