@@ -6,6 +6,7 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
+import { validateActionId } from '../../services/actions/validate_action_id';
 import { errorHandler } from '../error_handler';
 import { ACTION_AGENT_FILE_DOWNLOAD_ROUTE } from '../../../../common/endpoint/constants';
 import type { EndpointActionFileDownloadParams } from '../../../../common/endpoint/schema/actions';
@@ -53,6 +54,7 @@ export const getActionFileDownloadRouteHandler = (
     const esClient = (await context.core).elasticsearch.client.asInternalUser;
 
     try {
+      await validateActionId(esClient, actionId);
       await validateActionFileId(esClient, logger, fileId, actionId);
 
       const { stream, fileName } = await getFileDownloadStream(esClient, logger, fileId);

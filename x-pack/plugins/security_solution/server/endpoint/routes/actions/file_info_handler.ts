@@ -6,8 +6,7 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
-import { validateActionId } from '../../services/actions/validate_action_id';
-import { getFileInfo, validateActionFileId } from '../../services/actions/action_files';
+import { validateActionId, getFileInfo, validateActionFileId } from '../../services';
 import { ACTION_AGENT_FILE_INFO_ROUTE } from '../../../../common/endpoint/constants';
 import type { EndpointAppContext } from '../../types';
 import type { EndpointActionFileInfoParams } from '../../../../common/endpoint/schema/actions';

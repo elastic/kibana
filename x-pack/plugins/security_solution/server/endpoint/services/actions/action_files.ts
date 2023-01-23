@@ -11,6 +11,7 @@ import type { FileClient } from '@kbn/files-plugin/server';
 import { createEsFileClient } from '@kbn/files-plugin/server';
 import { errors } from '@elastic/elasticsearch';
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import type { FileUploadMetadata, UploadedFileInfo } from '../../../../common/endpoint/types';
 import { NotFoundError } from '../../errors';
 import {
@@ -165,6 +166,6 @@ export const validateActionFileId = async (
   const fileInfo = await getFileInfo(esClient, logger, fileId);
 
   if (fileInfo.actionId !== actionId) {
-    throw new EndpointError(`Invalid file id [${fileId}] for action [${actionId}]`);
+    throw new CustomHttpRequestError(`Invalid file id [${fileId}] for action [${actionId}]`, 400);
   }
 };
