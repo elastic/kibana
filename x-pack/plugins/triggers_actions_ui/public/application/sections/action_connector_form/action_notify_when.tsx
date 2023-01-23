@@ -160,8 +160,8 @@ export const ActionNotifyWhen = ({
   const [notifyWhenValueChangedFromDefault, setNotifyWhenValueChangedFromDefault] = useState(
     // Check if the initial notifyWhen value is different from the default value for its summary type
     frequency.summary
-      ? frequency.notifyWhen !== RuleNotifyWhen.ACTIVE
-      : frequency.notifyWhen !== DEFAULT_FREQUENCY.notifyWhen
+      ? frequency.notifyWhen !== DEFAULT_FREQUENCY.notifyWhen
+      : frequency.notifyWhen !== RuleNotifyWhen.CHANGE
   );
 
   const [summaryMenuOpen, setSummaryMenuOpen] = useState(false);
@@ -278,73 +278,71 @@ export const ActionNotifyWhen = ({
   );
 
   return (
-    <>
-      <EuiFormRow
-        fullWidth
-        label={i18n.translate(
-          'xpack.triggersActionsUI.sections.ruleForm.actionNotifyWhen.actionFrequencyLabel',
-          { defaultMessage: 'Action frequency' }
-        )}
-      >
-        <EuiFlexGroup gutterSize="s">
-          <EuiFlexItem>
-            <EuiSuperSelect
-              fullWidth
-              prepend={summaryOrPerRuleSelect}
-              data-test-subj="notifyWhenSelect"
-              options={notifyWhenOptions}
-              valueOfSelected={notifyWhenValue}
-              onChange={onNotifyWhenValueChange}
-            />
-            {showCustomThrottleOpts && (
-              <>
-                <EuiSpacer size="xs" />
-                <EuiFormRow fullWidth>
-                  <EuiFlexGroup gutterSize="s">
-                    <EuiFlexItem grow={2}>
-                      <EuiFieldNumber
-                        min={1}
-                        value={throttle ?? 1}
-                        name="throttle"
-                        data-test-subj="throttleInput"
-                        prepend={i18n.translate(
-                          'xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.label',
-                          {
-                            defaultMessage: 'Every',
-                          }
-                        )}
-                        onChange={(e) => {
-                          pipe(
-                            some(e.target.value.trim()),
-                            filter((value) => value !== ''),
-                            map((value) => parseInt(value, 10)),
-                            filter((value) => !isNaN(value)),
-                            map((value) => {
-                              onThrottleChange(value, throttleUnit);
-                            })
-                          );
-                        }}
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={3}>
-                      <EuiSelect
-                        data-test-subj="throttleUnitInput"
-                        value={throttleUnit}
-                        options={getTimeOptions(throttle ?? 1)}
-                        onChange={(e) => {
-                          onThrottleChange(throttle, e.target.value);
-                        }}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFormRow>
-              </>
-            )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFormRow>
-      <EuiSpacer size="s" />
-    </>
+    <EuiFormRow
+      fullWidth
+      label={i18n.translate(
+        'xpack.triggersActionsUI.sections.ruleForm.actionNotifyWhen.actionFrequencyLabel',
+        { defaultMessage: 'Action frequency' }
+      )}
+    >
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <EuiSuperSelect
+            fullWidth
+            prepend={summaryOrPerRuleSelect}
+            data-test-subj="notifyWhenSelect"
+            options={notifyWhenOptions}
+            valueOfSelected={notifyWhenValue}
+            onChange={onNotifyWhenValueChange}
+          />
+          {showCustomThrottleOpts && (
+            <>
+              <EuiSpacer size="s" />
+              <EuiFormRow fullWidth>
+                <EuiFlexGroup gutterSize="s">
+                  <EuiFlexItem style={{ flexGrow: 0.1 }} />
+                  <EuiFlexItem grow={2}>
+                    <EuiFieldNumber
+                      min={1}
+                      value={throttle ?? 1}
+                      name="throttle"
+                      data-test-subj="throttleInput"
+                      prepend={i18n.translate(
+                        'xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.label',
+                        {
+                          defaultMessage: 'Every',
+                        }
+                      )}
+                      onChange={(e) => {
+                        pipe(
+                          some(e.target.value.trim()),
+                          filter((value) => value !== ''),
+                          map((value) => parseInt(value, 10)),
+                          filter((value) => !isNaN(value)),
+                          map((value) => {
+                            onThrottleChange(value, throttleUnit);
+                          })
+                        );
+                      }}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={3}>
+                    <EuiSelect
+                      data-test-subj="throttleUnitInput"
+                      value={throttleUnit}
+                      options={getTimeOptions(throttle ?? 1)}
+                      onChange={(e) => {
+                        onThrottleChange(throttle, e.target.value);
+                      }}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFormRow>
+            </>
+          )}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFormRow>
   );
 };
 

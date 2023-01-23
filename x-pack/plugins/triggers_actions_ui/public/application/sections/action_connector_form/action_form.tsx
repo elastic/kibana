@@ -100,7 +100,7 @@ export const ActionForm = ({
   const [activeActionItem, setActiveActionItem] = useState<ActiveActionConnectorState | undefined>(
     undefined
   );
-  const [isAddActionPanelOpen, setIsAddActionPanelOpen] = useState<boolean>(true);
+  const [isAddActionPanelOpen, setIsAddActionPanelOpen] = useState<boolean>(actions.length === 0);
   const [connectors, setConnectors] = useState<ActionConnector[]>([]);
   const [isLoadingConnectors, setIsLoadingConnectors] = useState<boolean>(false);
   const [isLoadingActionTypes, setIsLoadingActionTypes] = useState<boolean>(false);
@@ -389,17 +389,13 @@ export const ActionForm = ({
                   (_item: RuleAction, i: number) => i !== index
                 );
                 setActions(updatedActions);
-                setIsAddActionPanelOpen(
-                  updatedActions.filter((item: RuleAction) => item.id !== actionItem.id).length ===
-                    0
-                );
+                setIsAddActionPanelOpen(updatedActions.length === 0);
                 setActiveActionItem(undefined);
               }}
               hideNotifyWhen={hideNotifyWhen}
             />
           );
         })}
-      <EuiSpacer size="m" />
       {isAddActionPanelOpen ? (
         <>
           <EuiFlexGroup id="alertActionTypeTitle" justifyContent="spaceBetween">
@@ -449,9 +445,11 @@ export const ActionForm = ({
         </>
       ) : (
         <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow>
             <EuiButton
-              size="s"
+              size="m"
+              fullWidth
+              iconType="plusInCircle"
               data-test-subj="addAlertActionButton"
               onClick={() => setIsAddActionPanelOpen(true)}
             >
