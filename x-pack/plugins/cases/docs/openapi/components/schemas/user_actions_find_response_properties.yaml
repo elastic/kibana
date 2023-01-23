@@ -1,23 +1,17 @@
 type: object
 required:
   - action
-  - action_id
-  - case_id
   - comment_id
   - created_at
   - created_by
+  - id
   - owner
   - payload
   - type
+  - version
 properties:
   action:
     $ref: 'actions.yaml'
-  action_id:
-    type: string
-    example: 22fd3e30-03b1-11ed-920c-974bfa104448
-  case_id:
-    type: string
-    example: 22df07d0-03b1-11ed-920c-974bfa104448
   comment_id:
     type: string
     nullable: true
@@ -34,6 +28,9 @@ properties:
       - email
       - full_name
       - username
+  id:
+    type: string
+    example: 22fd3e30-03b1-11ed-920c-974bfa104448
   owner:
     $ref: 'owners.yaml'
   payload:
@@ -51,5 +48,22 @@ properties:
       - $ref: 'payload_tags.yaml'
       - $ref: 'payload_title.yaml'
       - $ref: 'payload_user_comment.yaml'
+  version:
+    type: string
+    example: WzM1ODg4LDFd
   type:
-    $ref: 'action_types.yaml'
+    type: string
+    description: The type of action.
+    enum:
+      - assignees
+      - create_case
+      - comment
+      - connector
+      - description
+      - pushed
+      - tags
+      - title
+      - status
+      - settings
+      - severity
+    example: create_case
