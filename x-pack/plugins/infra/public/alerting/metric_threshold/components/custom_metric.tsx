@@ -183,8 +183,18 @@ export const CustomMetricEditor: React.FC<Props> = ({
       <EuiSpacer size={'m'} />
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiFormRow label="Equation" fullWidth helpText="Supports basic math expressions">
+          <EuiFormRow
+            label="Equation"
+            fullWidth
+            helpText={i18n.translate(
+              'xpack.infra.metrics.alertFlyout.customEquationEditor.equationHelpMessage',
+              { defaultMessage: 'Supports basic math expressions' }
+            )}
+            isInvalid={errors.equation != null}
+            error={[errors.equation]}
+          >
             <EuiFieldText
+              isInvalid={errors.equation != null}
               compressed
               fullWidth
               placeholder={placeholder}

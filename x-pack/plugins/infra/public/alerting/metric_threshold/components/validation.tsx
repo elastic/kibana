@@ -15,6 +15,8 @@ import {
   QUERY_INVALID,
 } from '../../../../common/alerting/metrics';
 
+const EQUATION_REGEX = /[^A-Z|+|\-|\s|\d+|\.|\(|\)|\/|\*|>|<|=|\?|\:|&|\!|\|]+/g;
+
 export function validateMetricThreshold({
   criteria,
   filterQuery,
@@ -38,6 +40,7 @@ export function validateMetricThreshold({
       };
       metric: string[];
       customMetrics: Record<string, { aggType?: string; field?: string }>;
+      equation?: string;
     };
   } & { filterQuery?: string[] } = {};
   validationResult.errors = errors;
@@ -148,28 +151,40 @@ export function validateMetricThreshold({
     }
 
     if (c.aggType === 'custom' && c.customMetrics) {
-      c.customMetrics.forEach((metric) => {
-        const customMetricErrors: { aggType?: string; field?: string } = {};
-        if (!metric.aggType) {
-          customMetricErrors.aggType = i18n.translate(
-            'xpack.infra.metrics.alertFlyout.error.customMetrics.aggTypeRequired',
-            {
-              defaultMessage: 'Aggregation is required',
-            }
-          );
-        }
-        if (metric.aggType !== 'count' && !metric.field) {
-          customMetricErrors.field = i18n.translate(
-            'xpack.infra.metrics.alertFlyout.error.customMetrics.fieldRequired',
-            {
-              defaultMessage: 'Field is required',
-            }
-          );
-        }
-        if (!isEmpty(customMetricErrors)) {
-          errors[id].customMetrics[metric.name] = customMetricErrors;
-        }
-      });
+      if (c.customMetrics) {
+        c.customMetrics.forEach((metric) => {
+          const customMetricErrors: { aggType?: string; field?: string } = {};
+          if (!metric.aggType) {
+            customMetricErrors.aggType = i18n.translate(
+              'xpack.infra.metrics.alertFlyout.error.customMetrics.aggTypeRequired',
+              {
+                defaultMessage: 'Aggregation is required',
+              }
+            );
+          }
+          if (metric.aggType !== 'count' && !metric.field) {
+            customMetricErrors.field = i18n.translate(
+              'xpack.infra.metrics.alertFlyout.error.customMetrics.fieldRequired',
+              {
+                defaultMessage: 'Field is required',
+              }
+            );
+          }
+          if (!isEmpty(customMetricErrors)) {
+            errors[id].customMetrics[metric.name] = customMetricErrors;
+          }
+        });
+      }
+
+      if (c.equation && c.equation.match(EQUATION_REGEX)) {
+        errors[id].equation = i18n.translate(
+          'xpack.infra.metrics.alertFlyout.error.equation.invalidCharacters',
+          {
+            defaultMessage:
+              'The equation field only supports the following characters: A-Z, +, -, /, *, (, ), ?, !, &, :, |, >, <, = ',
+          }
+        );
+      }
     }
   });
 
