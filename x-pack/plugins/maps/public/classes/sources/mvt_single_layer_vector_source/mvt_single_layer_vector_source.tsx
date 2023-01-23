@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 import React from 'react';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';
 import { AbstractSource, ImmutableSourceProperty, SourceEditorArgs } from '../source';
@@ -53,7 +53,7 @@ export class MVTSingleLayerVectorSource extends AbstractSource implements IMvtVe
   }: Partial<TiledSingleLayerVectorSourceDescriptor>) {
     return {
       type: SOURCE_TYPES.MVT_SINGLE_LAYER,
-      id: uuid(),
+      id: uuidv4(),
       urlTemplate: urlTemplate ? urlTemplate : '',
       layerName: layerName ? layerName : '',
       minSourceZoom:

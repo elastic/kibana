@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { apmServiceInventoryOptimizedSorting } from '@kbn/observability-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -92,7 +92,7 @@ function useServicesMainStatisticsFetcher() {
           },
         }).then((mainStatisticsData) => {
           return {
-            requestId: uuid(),
+            requestId: uuidv4(),
             ...mainStatisticsData,
           };
         });
