@@ -23,7 +23,7 @@ import { stubLogstashDataView } from '@kbn/data-plugin/common/stubs';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import { FetchStatus } from '../../../types';
-import { AvailableFields$, DataDocuments$ } from '../../hooks/use_saved_search';
+import { AvailableFields$, DataDocuments$ } from '../../services/discover_data_state_container';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { DiscoverMainProvider } from '../../services/discover_state_provider';
