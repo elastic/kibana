@@ -33,10 +33,10 @@ import {
 } from '../../mock';
 import type { SelectedDataView } from '../../store/sourcerer/model';
 import { SourcererScopeName } from '../../store/sourcerer/model';
-import { postSourcererDataView } from './api';
 import * as source from '../source/use_data_view';
 import { sourcererActions } from '../../store/sourcerer';
 import { useInitializeUrlParam, useUpdateUrlParam } from '../../utils/global_query_string';
+import { createSourcererDataView } from './create_sourcerer_data_view';
 
 const mockRouteSpy: RouteSpyState = {
   pageName: SecurityPageName.overview,
@@ -49,7 +49,7 @@ const mockDispatch = jest.fn();
 const mockUseUserInfo = useUserInfo as jest.Mock;
 jest.mock('../../lib/apm/use_track_http_request');
 jest.mock('../../../detections/components/user_info');
-jest.mock('./api');
+jest.mock('./create_sourcerer_data_view');
 jest.mock('../../utils/global_query_string');
 jest.mock('react-redux', () => {
   const original = jest.requireActual('react-redux');
@@ -141,7 +141,7 @@ describe('Sourcerer Hooks', () => {
       defaultDataView: mockSourcererState.defaultDataView,
       kibanaDataViews: [mockSourcererState.defaultDataView],
     };
-    (postSourcererDataView as jest.Mock).mockResolvedValue(mockNewDataViews);
+    (createSourcererDataView as jest.Mock).mockResolvedValue(mockNewDataViews);
 
     store = createStore(
       {

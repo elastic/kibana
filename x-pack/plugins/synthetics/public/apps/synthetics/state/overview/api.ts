@@ -43,7 +43,7 @@ export const fetchMonitorOverview = async (
   pageState: MonitorOverviewPageState
 ): Promise<MonitorOverviewResult> => {
   const params = toMonitorOverviewQueryArgs(pageState);
-  return await apiService.get(
+  return apiService.get(
     SYNTHETICS_API_URLS.SYNTHETICS_OVERVIEW,
     params,
     MonitorOverviewResultCodec
@@ -54,5 +54,5 @@ export const fetchOverviewStatus = async (
   pageState: MonitorOverviewPageState
 ): Promise<OverviewStatus> => {
   const params = toMonitorOverviewQueryArgs(pageState);
-  return await apiService.get(SYNTHETICS_API_URLS.OVERVIEW_STATUS, params, OverviewStatusCodec);
+  return apiService.get(SYNTHETICS_API_URLS.OVERVIEW_STATUS, params, OverviewStatusCodec);
 };
