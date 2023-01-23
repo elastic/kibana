@@ -38,6 +38,7 @@ export const HostsLandingPage = () => {
       <EnableHostViewPage
         actions={
           <EuiButton
+            iconType="check"
             color="primary"
             data-test-subj="hostsView-enable-feature-button"
             onClick={() => {
