@@ -123,8 +123,6 @@ export async function getSharingData(
   // Combine the time range filter from the job request body with any filters that have been saved into the saved search object
   // NOTE: if the filters that were saved into the search are NOT an array, it may be a function. Function
   // filters are not supported in this API.
-  searchSource.removeField('filter');
-
   let combinedFilters: Filter[] = [];
   const savedSearchFilter = normalizeFilter(searchSource.getField('filter'));
   const jobParamsStateFilter = normalizeFilter(jobParamsUnsavedState?.query as FilterResponse);
@@ -139,6 +137,7 @@ export async function getSharingData(
     combinedFilters = combinedFilters.concat(jobParamsStateFilter);
   }
 
+  searchSource.removeField('filter');
   if (combinedFilters.length > 0) {
     searchSource.setField('filter', combinedFilters);
   }
