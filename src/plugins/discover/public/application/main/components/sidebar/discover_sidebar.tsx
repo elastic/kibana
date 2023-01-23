@@ -322,13 +322,15 @@ export function DiscoverSidebarComponent({
             prepend={<FieldListFilters {...fieldListFiltersProps} />}
             className="dscSidebar__list"
           >
-            {showFieldList && (
+            {showFieldList ? (
               <FieldListGrouped
                 {...fieldListGroupedProps}
                 renderFieldItem={renderFieldItem}
                 screenReaderDescriptionId={fieldSearchDescriptionId}
                 localStorageKeyPrefix="discover"
               />
+            ) : (
+              <EuiFlexItem grow />
             )}
             {!!editField && (
               <EuiFlexItem grow={false}>
