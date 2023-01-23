@@ -15,6 +15,7 @@ export default function ({ getService, getPageObjects }) {
   const to = 'Sep 22, 2015 @ 04:00:00.000';
 
   // Failing: See https://github.com/elastic/kibana/issues/137408
+  // Failing: See https://github.com/elastic/kibana/issues/149358
   describe.skip('discover visualize button', () => {
     beforeEach(async () => {
       await security.testUser.setRoles([
