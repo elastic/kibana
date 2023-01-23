@@ -2962,7 +2962,7 @@ describe('create()', () => {
           frequency: {
             summary: false,
             notifyWhen: 'onThrottleInterval',
-            throttle: '5h',
+            throttle: '240m',
           },
         },
       ],
