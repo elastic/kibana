@@ -13,6 +13,7 @@ import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client.mock';
 import { makeLensEmbeddableFactory } from '@kbn/lens-plugin/server/embeddable/make_lens_embeddable_factory';
 
+import type { CasesFindRequest } from '../../common/api';
 import type { CasesClient } from '.';
 import type { AttachmentsSubClient } from './attachments/client';
 import type { CasesSubClient } from './cases/client';
@@ -21,6 +22,9 @@ import type { CasesClientFactory } from './factory';
 import type { MetricsSubClient } from './metrics/client';
 import type { UserActionsSubClient } from './user_actions/client';
 
+import { CaseStatuses } from '../../common';
+import { CaseSeverity } from '../../common/api';
+import { SortFieldCase } from '../../public/containers/types';
 import {
   createExternalReferenceAttachmentTypeRegistryMock,
   createPersistableStateAttachmentTypeRegistryMock,
@@ -182,3 +186,19 @@ export const createCasesClientMockArgs = () => {
     savedObjectsSerializer: createSavedObjectsSerializerMock(),
   };
 };
+
+export const createCasesClientMockFindRequest = (
+  overwrites?: CasesFindRequest
+): CasesFindRequest => ({
+  search: '',
+  searchFields: ['title', 'description'],
+  severity: CaseSeverity.LOW,
+  assignees: [],
+  reporters: [],
+  status: CaseStatuses.open,
+  tags: [],
+  owner: [],
+  sortField: SortFieldCase.createdAt,
+  sortOrder: 'desc',
+  ...overwrites,
+});
