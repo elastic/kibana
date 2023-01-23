@@ -70,6 +70,7 @@ export default function ({ getService }: FtrProviderContext) {
     };
 
     before(async () => {
+      await supertest.post(API_URLS.SYNTHETICS_ENABLEMENT).set('kbn-xsrf', 'true').expect(200);
       await supertest.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
       await supertest
         .post('/api/fleet/epm/packages/synthetics/0.11.4')
@@ -286,6 +287,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         for (const monitor of successfulMonitors) {
           const journeyId = monitor.id;
+          const isTLSEnabled = Object.keys(monitor).some((key) => key.includes('ssl'));
           const createdMonitorsResponse = await supertest
             .get(API_URLS.SYNTHETICS_MONITORS)
             .query({ filter: `${syntheticsMonitorType}.attributes.journey_id: ${journeyId}` })
@@ -299,7 +301,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           expect(decryptedCreatedMonitor.body.attributes).to.eql({
             __ui: {
-              is_tls_enabled: false,
+              is_tls_enabled: isTLSEnabled,
             },
             'check.request.method': 'POST',
             'check.response.status': ['200'],
@@ -354,7 +356,7 @@ export default function ({ getService }: FtrProviderContext) {
             'ssl.certificate': '',
             'ssl.certificate_authorities': '',
             'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
-            'ssl.verification_mode': 'full',
+            'ssl.verification_mode': isTLSEnabled ? 'strict' : 'full',
             'ssl.key': '',
             'ssl.key_passphrase': '',
             tags: Array.isArray(monitor.tags) ? monitor.tags : monitor.tags?.split(','),
@@ -406,6 +408,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         for (const monitor of successfulMonitors) {
           const journeyId = monitor.id;
+          const isTLSEnabled = Object.keys(monitor).some((key) => key.includes('ssl'));
           const createdMonitorsResponse = await supertest
             .get(API_URLS.SYNTHETICS_MONITORS)
             .query({ filter: `${syntheticsMonitorType}.attributes.journey_id: ${journeyId}` })
@@ -419,7 +422,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           expect(decryptedCreatedMonitor.body.attributes).to.eql({
             __ui: {
-              is_tls_enabled: false,
+              is_tls_enabled: isTLSEnabled,
             },
             config_id: decryptedCreatedMonitor.body.id,
             custom_heartbeat_id: `${journeyId}-${project}-default`,
@@ -460,7 +463,7 @@ export default function ({ getService }: FtrProviderContext) {
             'ssl.certificate': '',
             'ssl.certificate_authorities': '',
             'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
-            'ssl.verification_mode': 'full',
+            'ssl.verification_mode': isTLSEnabled ? 'strict' : 'full',
             'ssl.key': '',
             'ssl.key_passphrase': '',
             tags: Array.isArray(monitor.tags) ? monitor.tags : monitor.tags?.split(','),
@@ -1417,6 +1420,69 @@ export default function ({ getService }: FtrProviderContext) {
           .put(API_URLS.SYNTHETICS_MONITORS_PROJECT_LEGACY)
           .set('kbn-xsrf', 'true')
           .send({ ...projectMonitors, keep_stale: false, project });
+      }
+    });
+
+    it('project monitors - cannot update a monitor of one type to another type', async () => {
+      const project = `test-project-${uuidv4()}`;
+
+      try {
+        await supertest
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project))
+          .set('kbn-xsrf', 'true')
+          .send(projectMonitors)
+          .expect(200);
+        const { body } = await supertest
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project))
+          .set('kbn-xsrf', 'true')
+          .send({
+            monitors: [{ ...httpProjectMonitors.monitors[1], id: projectMonitors.monitors[0].id }],
+          })
+          .expect(200);
+        expect(body).eql({
+          createdMonitors: [],
+          updatedMonitors: [],
+          failedMonitors: [
+            {
+              details: `Monitor ${projectMonitors.monitors[0].id} of type browser cannot be updated to type http. Please delete the monitor first and try again.`,
+              payload: {
+                'check.request': {
+                  headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                  },
+                  method: 'POST',
+                },
+                'check.response': {
+                  body: {
+                    positive: ['Saved', 'saved'],
+                  },
+                  status: [200],
+                },
+                enabled: false,
+                hash: 'ekrjelkjrelkjre',
+                id: projectMonitors.monitors[0].id,
+                locations: ['localhost'],
+                name: 'My Monitor 3',
+                response: {
+                  include_body: 'always',
+                },
+                'response.include_headers': false,
+                schedule: 60,
+                timeout: '80s',
+                type: 'http',
+                tags: 'tag2,tag2',
+                urls: ['http://localhost:9200'],
+              },
+              reason: 'Cannot update monitor to different type.',
+            },
+          ],
+        });
+      } finally {
+        await Promise.all([
+          projectMonitors.monitors.map((monitor) => {
+            return deleteMonitor(monitor.id, project);
+          }),
+        ]);
       }
     });
 
