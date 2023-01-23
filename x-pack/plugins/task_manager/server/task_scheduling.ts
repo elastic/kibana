@@ -8,7 +8,7 @@
 import { filter, take } from 'rxjs/operators';
 import pMap from 'p-map';
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { chunk, pick } from 'lodash';
 import { Subject } from 'rxjs';
 import agent from 'elastic-apm-node';
@@ -43,7 +43,6 @@ import { EphemeralTaskRejectedDueToCapacityError } from './task_running';
 
 const VERSION_CONFLICT_STATUS = 409;
 const BULK_ACTION_SIZE = 100;
-const BULK_UPDATE_NUM_RETRIES = 3;
 export interface TaskSchedulingOpts {
   logger: Logger;
   taskStore: TaskStore;
@@ -265,10 +264,7 @@ export class TaskScheduling {
   }
 
   private async bulkUpdateTasksHelper(updatedTasks: ConcreteTaskInstance[]) {
-    // Performs bulk update with retries
-    return (
-      await this.store.bulkUpdate(updatedTasks, BULK_UPDATE_NUM_RETRIES)
-    ).reduce<BulkUpdateTaskResult>(
+    return (await this.store.bulkUpdate(updatedTasks)).reduce<BulkUpdateTaskResult>(
       (acc, task) => {
         if (task.tag === 'ok') {
           acc.tasks.push(task.value);
@@ -326,7 +322,7 @@ export class TaskScheduling {
         task
       );
     }
-    const id = uuid.v4();
+    const id = uuidv4();
     const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
       ...options,
       taskInstance: task,

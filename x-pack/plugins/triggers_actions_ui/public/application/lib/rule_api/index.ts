@@ -46,3 +46,5 @@ export { runSoon } from './run_soon';
 export { bulkDeleteRules } from './bulk_delete';
 export { bulkEnableRules } from './bulk_enable';
 export { bulkDisableRules } from './bulk_disable';
+export { getFlappingSettings } from './get_flapping_settings';
+export { updateFlappingSettings } from './update_flapping_settings';

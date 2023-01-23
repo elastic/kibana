@@ -23,3 +23,6 @@ export const selectEncryptedSyntheticsSavedMonitors = createSelector(
 );
 export const selectMonitorUpsertStatuses = (state: SyntheticsAppState) =>
   state.monitorList.monitorUpsertStatuses;
+
+export const selectMonitorUpsertStatus = (configId: string) => (state: SyntheticsAppState) =>
+  state.monitorList.monitorUpsertStatuses?.[configId] ?? null;

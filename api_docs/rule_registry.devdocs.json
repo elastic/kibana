@@ -1547,9 +1547,9 @@
           },
           "<Params, ",
           "WrappedLifecycleRuleState",
-          "<State>, InstanceState, InstanceContext, ActionGroupIds>) => Promise<",
+          "<State>, InstanceState, InstanceContext, ActionGroupIds>) => Promise<{ state: ",
           "WrappedLifecycleRuleState",
-          "<State>>"
+          "<State>; }>"
         ],
         "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts",
         "deprecated": false,
@@ -1793,7 +1793,7 @@
             "section": "def-common.WithoutReservedActionGroups",
             "text": "WithoutReservedActionGroups"
           },
-          "<TActionGroupIds, never>>) => Promise<void | TState>; getSummarizedAlerts: ({ start, end, executionUuid, ruleId, spaceId, excludedAlertInstanceIds, }: ",
+          "<TActionGroupIds, never>>) => Promise<{ state: TState; }>; getSummarizedAlerts: ({ start, end, executionUuid, ruleId, spaceId, excludedAlertInstanceIds, }: ",
           {
             "pluginId": "alerting",
             "scope": "server",
@@ -3174,7 +3174,7 @@
             "description": [],
             "signature": [
               "(T & ",
-              "CommonAlertFields800",
+              "CommonAlertFields870",
               " & { _id: string; _index: string; })[]"
             ],
             "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
@@ -3719,7 +3719,7 @@
             "section": "def-server.LifecycleAlertServices",
             "text": "LifecycleAlertServices"
           },
-          "<InstanceState, InstanceContext, ActionGroupIds>>) => Promise<void | State>"
+          "<InstanceState, InstanceContext, ActionGroupIds>>) => Promise<{ state: State; }>"
         ],
         "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts",
         "deprecated": false,
@@ -3919,7 +3919,7 @@
             "section": "def-server.PersistenceServices",
             "text": "PersistenceServices"
           },
-          "; }) => Promise<void | TState>; }"
+          "; }) => Promise<{ state: TState; }>; }"
         ],
         "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
         "deprecated": false,

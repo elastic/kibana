@@ -59,19 +59,12 @@ import {
   DASHBOARD_LOADED_EVENT,
   DEFAULT_DASHBOARD_INPUT,
 } from '../../dashboard_constants';
-import { DashboardReduxState } from '../types';
 import { DashboardCreationOptions } from './dashboard_container_factory';
 import { DashboardAnalyticsService } from '../../services/analytics/types';
 import { DashboardViewport } from '../component/viewport/dashboard_viewport';
 import { DashboardPanelState, DashboardContainerInput } from '../../../common';
+import { DashboardReduxState, DashboardRenderPerformanceStats } from '../types';
 import { dashboardContainerReducers } from '../state/dashboard_container_reducers';
-
-export interface DashboardLoadedInfo {
-  timeToData: number;
-  timeToDone: number;
-  numOfPanels: number;
-  status: string;
-}
 
 export interface InheritedChildInput {
   filters: Filter[];
@@ -109,6 +102,9 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     typeof dashboardContainerReducers
   >;
 
+  private dashboardCreationStartTime?: number;
+  private savedObjectLoadTime?: number;
+
   private domNode?: HTMLElement;
   private overlayRef?: OverlayRef;
   private allDataViews: DataView[] = [];
@@ -123,6 +119,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     initialInput: DashboardContainerInput,
     reduxEmbeddablePackage: ReduxEmbeddablePackage,
     initialLastSavedInput?: DashboardContainerInput,
+    dashboardCreationStartTime?: number,
     parent?: Container,
     creationOptions?: DashboardCreationOptions,
     savedObjectId?: string
@@ -149,6 +146,9 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     } = pluginServices.getServices());
 
     this.creationOptions = creationOptions;
+    this.dashboardCreationStartTime = dashboardCreationStartTime;
+
+    // start diffing dashboard state
     const diffingMiddleware = this.startCheckingForUnsavedChanges();
 
     // set up data views integration
@@ -172,6 +172,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       },
     });
 
+    // create selector that react components can use
     this.select = createSelectorHook(
       createContext({
         store: this.reduxEmbeddableTools.store,
@@ -184,15 +185,23 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     return this.reduxEmbeddableTools.getState().componentState.lastSavedId;
   }
 
-  private onDataLoaded(data: DashboardLoadedInfo) {
-    if (this.analyticsService) {
+  public reportPerformanceMetrics(stats: DashboardRenderPerformanceStats) {
+    if (this.analyticsService && this.dashboardCreationStartTime) {
+      const panelCount = Object.keys(
+        this.reduxEmbeddableTools.getState().explicitInput.panels
+      ).length;
+      const totalDuration = stats.panelsRenderDoneTime - this.dashboardCreationStartTime;
       reportPerformanceMetricEvent(this.analyticsService, {
         eventName: DASHBOARD_LOADED_EVENT,
-        duration: data.timeToDone,
+        duration: totalDuration,
         key1: 'time_to_data',
-        value1: data.timeToData,
+        value1: (stats.lastTimeToData || stats.panelsRenderDoneTime) - stats.panelsRenderStartTime,
         key2: 'num_of_panels',
-        value2: data.numOfPanels,
+        value2: panelCount,
+        key3: 'total_load_time',
+        value3: totalDuration,
+        key4: 'saved_object_load_time',
+        value4: this.savedObjectLoadTime,
       });
     }
   }
@@ -272,7 +281,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
         <ExitFullScreenButtonKibanaProvider coreStart={{ chrome: this.chrome }}>
           <KibanaThemeProvider theme$={this.theme$}>
             <DashboardReduxWrapper>
-              <DashboardViewport onDataLoaded={this.onDataLoaded.bind(this)} />
+              <DashboardViewport />
             </DashboardReduxWrapper>
           </KibanaThemeProvider>
         </ExitFullScreenButtonKibanaProvider>

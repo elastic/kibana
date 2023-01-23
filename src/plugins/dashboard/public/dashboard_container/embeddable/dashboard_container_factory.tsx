@@ -94,6 +94,7 @@ export class DashboardContainerFactoryDefinition
     creationOptions?: DashboardCreationOptions,
     savedObjectId?: string
   ): Promise<DashboardContainer | ErrorEmbeddable> => {
+    const dashboardCreationStartTime = performance.now();
     const { buildDashboard } = await import('./dashboard_builder');
     try {
       return Promise.resolve(buildDashboard(creationOptions, savedObjectId));

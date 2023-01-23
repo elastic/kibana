@@ -36,7 +36,7 @@ BUNDLER_DEPS = [
   "@npm//pirates",
   "@npm//lmdb",
   "@npm//source-map-support",
-  "//packages/kbn-package-map",
+  "//packages/kbn-repo-packages",
   "//packages/kbn-repo-info",
   "//packages/kbn-babel-transform",
 ]

@@ -31,6 +31,7 @@ import { syncUnifiedSearchState } from './integrations/unified_search/sync_dashb
  */
 export const buildDashboard = async (
   creationOptions?: DashboardCreationOptions,
+  dashboardCreationStartTime?: number,
   savedObjectId?: string
 ): Promise<DashboardContainer | ErrorEmbeddable> => {
   // --------------------------------------------------------------------------------------
@@ -223,6 +224,7 @@ export const buildDashboard = async (
     initialInput,
     reduxEmbeddablePackage,
     savedObjectResult?.dashboardInput,
+    dashboardCreationStartTime,
     undefined,
     creationOptions
   );

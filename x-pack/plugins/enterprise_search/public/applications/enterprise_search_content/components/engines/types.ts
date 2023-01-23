@@ -11,23 +11,19 @@ export interface Meta {
   total: number;
 }
 
-export interface EngineListDetails {
-  name: string;
-  indices: string[];
-  last_updated: string;
-  document_count: number;
-}
 export const DEFAULT_META = {
-  from: 1,
-  size: 3,
+  from: 0,
+  size: 10,
   total: 0,
 };
 
-export const convertMetaToPagination = (meta: Meta) => ({
-  pageIndex: meta.from - 1,
-  pageSize: meta.size,
-  totalItemCount: meta.total,
-});
+export const convertMetaToPagination = (meta: Meta) => {
+  return {
+    pageIndex: meta.from / meta.size,
+    pageSize: meta.size,
+    totalItemCount: meta.total,
+  };
+};
 export const updateMetaPageIndex = (oldState: Meta, newPageIndex: number) => {
-  return { ...oldState, from: newPageIndex };
+  return { ...oldState, from: newPageIndex * oldState.size };
 };

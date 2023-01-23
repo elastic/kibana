@@ -18,10 +18,12 @@ import {
   deleteConfiguration,
   createConfiguration,
   updateConfiguration,
+} from '../../../../common/lib/utils';
+import {
   getServiceNowConnector,
   createConnector,
   getServiceNowSimulationServer,
-} from '../../../../common/lib/utils';
+} from '../../../../common/lib/connectors';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
