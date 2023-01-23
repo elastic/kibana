@@ -10,7 +10,7 @@ import React from 'react';
 
 export const ACTIVE_COLOR = '#E7664C';
 export const RECOVERED_COLOR = '#54B399';
-export const TOOLTIP_DATE_FORMAT = 'MMMM D, YYYY';
+export const TOOLTIP_DATE_FORMAT = 'YYYY-MM-DD HH:mm';
 
 export const ALL_ALERT_LABEL = (
   <FormattedMessage

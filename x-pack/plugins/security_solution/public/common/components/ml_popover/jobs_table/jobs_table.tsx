@@ -75,8 +75,12 @@ const getJobsTableColumns = (
 ) => [
   {
     name: i18n.COLUMN_JOB_NAME,
-    render: ({ id, description }: SecurityJob) => (
-      <JobName id={id} description={description} basePath={basePath} />
+    render: ({ id, description, customSettings }: SecurityJob) => (
+      <JobName
+        id={customSettings?.security_app_display_name ?? id}
+        description={description}
+        basePath={basePath}
+      />
     ),
   },
   {
