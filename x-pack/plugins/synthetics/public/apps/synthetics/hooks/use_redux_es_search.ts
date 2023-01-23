@@ -8,11 +8,11 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ESSearchResponse } from '@kbn/es-types';
 import { IInspectorInfo } from '@kbn/data-plugin/common';
-import { useInspectorContext } from '@kbn/observability-plugin/public';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, useMemo } from 'react';
 import {
   executeEsQueryAction,
+  selectEsQueryError,
   selectEsQueryLoading,
   selectEsQueryResult,
 } from '../state/elasticsearch';
@@ -27,26 +27,26 @@ export const useReduxEsSearch = <
 ) => {
   const { name, isRequestReady = true } = options ?? {};
 
-  const { addInspectorRequest } = useInspectorContext();
-
   const dispatch = useDispatch();
 
   const loadings = useSelector(selectEsQueryLoading);
   const results = useSelector(selectEsQueryResult);
+  const errors = useSelector(selectEsQueryError);
 
   useEffect(() => {
     if (params.index && isRequestReady) {
-      dispatch(executeEsQueryAction.get({ params, name, addInspectorRequest }));
+      dispatch(executeEsQueryAction.get({ params, name }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [addInspectorRequest, dispatch, name, JSON.stringify(params), isRequestReady]);
+  }, [dispatch, name, JSON.stringify(params), isRequestReady]);
 
   return useMemo(() => {
     return {
       data: results[name] as ESSearchResponse<DocumentSource, TParams>,
       loading: loadings[name],
+      error: errors[name],
     };
-  }, [loadings, name, results]);
+  }, [errors, loadings, name, results]);
 };
 
 export function createEsParams<T extends estypes.SearchRequest>(params: T): T {

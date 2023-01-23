@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { GuideId, GuideState, GuideStepIds, StepStatus } from '@kbn/guided-onboarding';
+import type { GuideId, GuideState, GuideConfig } from '@kbn/guided-onboarding';
 
 /**
  * Guided onboarding overall status:
@@ -30,59 +30,6 @@ export interface PluginState {
   // a specific period after deployment creation when guided onboarding UI is highlighted
   isActivePeriod: boolean;
   activeGuide?: GuideState;
-}
-
-/* To append a link to the description, specify its text and url in the properties.
- * An example:
- * {
- *   description: 'This is a description with a link'.
- *   linkText: 'My link',
- *   linkUrl: 'example.com',
- *   isLinkExternal: true,
- * }
- *
- */
-export interface StepDescriptionWithLink {
-  descriptionText: string;
-  linkText: string;
-  linkUrl: string;
-  isLinkExternal?: boolean;
-}
-
-export interface StepConfig {
-  id: GuideStepIds;
-  title: string;
-  // description is displayed as a single paragraph, can be combined with description list
-  description?: string | StepDescriptionWithLink;
-  // description list is displayed as an unordered list, can be combined with description
-  descriptionList?: Array<string | StepDescriptionWithLink>;
-  location?: {
-    appID: string;
-    path: string;
-  };
-  status?: StepStatus;
-  integration?: string;
-  manualCompletion?: {
-    title: string;
-    description: string;
-    readyToCompleteOnNavigation?: boolean;
-  };
-}
-
-export interface GuideConfig {
-  title: string;
-  description: string;
-  guideName: string;
-  telemetryId: string;
-  docs?: {
-    text: string;
-    url: string;
-  };
-  completedGuideRedirectLocation?: {
-    appID: string;
-    path: string;
-  };
-  steps: StepConfig[];
 }
 
 export type GuidesConfig = {
