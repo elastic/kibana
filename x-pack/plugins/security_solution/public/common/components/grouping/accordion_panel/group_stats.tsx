@@ -16,25 +16,9 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import React, { useState } from 'react';
-import styled from 'styled-components';
-import type { RawBucket } from '../../../common/components/grouping';
-import * as i18n from './translations';
-
-export const StatsContainer = styled.span`
-  font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
-  font-weight: ${({ theme }) => theme.eui.euiFontWeightSemiBold};
-  border-right: ${({ theme }) => theme.eui.euiBorderThin};
-  margin-right: ${({ theme }) => theme.eui.euiSizeS};
-  padding-right: ${({ theme }) => theme.eui.euiSizeM};
-  .smallDot {
-    width: 3px !important;
-    display: inline-block;
-  }
-  .euiBadge__text {
-    text-align: center;
-    width: 100%;
-  }
-`;
+import { StatsContainer } from '../styles';
+import { TAKE_ACTION } from '../translations';
+import type { RawBucket } from '../types';
 
 const getSingleGroupSeverity = (severity?: string) => {
   switch (severity) {
@@ -72,14 +56,16 @@ const getSingleGroupSeverity = (severity?: string) => {
 
 export const GroupRightPanel = React.memo<{
   bucket: RawBucket;
-  actionItems: JSX.Element[];
-  onClickOpen?: () => void;
-}>(({ bucket, actionItems, onClickOpen }) => {
+  takeActionItems: JSX.Element[];
+  onTakeActionsOpen?: () => void;
+  badgeMetricStats?: Array<{ title: string; value: number; color?: string; width?: number }>;
+  customMetricStats?: Array<{ title: string; customStatRenderer: JSX.Element }>;
+}>(({ bucket, takeActionItems, onTakeActionsOpen }) => {
   const [isPopoverOpen, setPopover] = useState(false);
 
   const onButtonClick = () => {
-    if (!isPopoverOpen && onClickOpen) {
-      onClickOpen();
+    if (!isPopoverOpen && onTakeActionsOpen) {
+      onTakeActionsOpen();
     }
     setPopover(!isPopoverOpen);
   };
@@ -90,7 +76,7 @@ export const GroupRightPanel = React.memo<{
 
   const takeActionsButton = (
     <EuiButtonEmpty onClick={onButtonClick} iconType="arrowDown" iconSide="right">
-      {i18n.TAKE_ACTION}
+      {TAKE_ACTION}
     </EuiButtonEmpty>
   );
 
@@ -179,7 +165,7 @@ export const GroupRightPanel = React.memo<{
           panelPaddingSize="none"
           anchorPosition="downLeft"
         >
-          <EuiContextMenuPanel items={actionItems} />
+          <EuiContextMenuPanel items={takeActionItems} />
         </EuiPopover>
       </EuiFlexItem>
     </EuiFlexGroup>

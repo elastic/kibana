@@ -435,9 +435,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
 
   const [transformedLeadingControlColumns] = useMemo(() => {
     return [
-      showCheckboxes && bulkActions !== false
-        ? [checkBoxControlColumn, ...leadingControlColumns]
-        : leadingControlColumns,
+      showCheckboxes ? [checkBoxControlColumn, ...leadingControlColumns] : leadingControlColumns,
     ].map((controlColumns) =>
       transformControlColumns({
         columnHeaders,
@@ -464,7 +462,6 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     );
   }, [
     showCheckboxes,
-    bulkActions,
     leadingControlColumns,
     columnHeaders,
     nonDeletedEvents,

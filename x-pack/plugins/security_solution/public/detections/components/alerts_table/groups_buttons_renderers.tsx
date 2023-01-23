@@ -19,7 +19,7 @@ import {
 import type { FunctionComponent } from 'react';
 import React from 'react';
 import type { GenericBuckets } from '../../../../common/search_strategy';
-import type { RawBucket } from '../../../common/components/grouping_accordion';
+import type { RawBucket } from '../../../common/components/grouping';
 import { PopoverItems } from '../../../common/components/popover_items';
 import { COLUMN_TAGS } from '../../pages/detection_engine/rules/translations';
 // icon ip

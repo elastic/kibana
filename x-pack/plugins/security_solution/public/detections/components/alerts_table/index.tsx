@@ -22,15 +22,15 @@ import {
   EuiTablePagination,
 } from '@elastic/eui';
 import styled from 'styled-components';
-import { GROUPS_UNIT } from '../../../common/components/toolbar/unit/translations';
+import { GROUPS_UNIT } from '../../../common/components/grouping/translations';
 import { defaultUnit, UnitCount } from '../../../common/components/toolbar/unit';
 import { useBulkActionItems } from '../../../common/components/toolbar/bulk_actions/use_bulk_action_items';
 import type {
   GroupingTableAggregation,
   GroupSelection,
   RawBucket,
-} from '../../../common/components/grouping_accordion';
-import { getGroupingQuery, GroupsSelector } from '../../../common/components/grouping_accordion';
+} from '../../../common/components/grouping';
+import { getGroupingQuery, GroupsSelector } from '../../../common/components/grouping';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { combineQueries } from '../../../common/lib/kuery';
 import type { AlertWorkflowStatus } from '../../../common/types';
@@ -404,8 +404,6 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     queryName: ALERTS_QUERY_NAMES.ALERTS_GROUPING,
   });
 
-  // console.log(alertsGroupsData?.aggregations?.stackByMupltipleFields0?.buckets);
-
   useEffect(() => {
     setAlertsQuery(queryGroups);
   }, [queryGroups, setAlertsQuery]);
@@ -566,81 +564,85 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   return (
     <>
-      {selectedGroup ? (
-        <EuiFlexGroup
-          justifyContent="spaceBetween"
-          alignItems="center"
-          style={{ paddingBottom: 20, paddingTop: 20 }}
-        >
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="none">
-              <EuiFlexItem grow={false}>
-                <UnitCount data-test-subj="alert-count">{unitCountText}</UnitCount>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <UnitCount data-test-subj="groups-count" style={{ borderRight: 'none' }}>
-                  {unitGroupsCountText}
-                </UnitCount>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>{groupsSelector}</EuiFlexItem>
-        </EuiFlexGroup>
-      ) : null}
       {!selectedGroup ? (
         dataTable
       ) : (
-        <GroupsContainer>
-          {alertsGroupsData?.aggregations?.stackByMupltipleFields0?.buckets?.map((field0Bucket) => (
-            <>
-              <EuiAccordion
-                id={`group0-${field0Bucket.key[0]}`}
-                className="euiAccordionForm"
-                buttonClassName="euiAccordionForm__button"
-                buttonContent={getSelectedGroupButtonContent(selectedGroup, field0Bucket)}
-                extraAction={
-                  <GroupRightPanel
-                    bucket={field0Bucket}
-                    actionItems={bulkActionItems}
-                    onClickOpen={() => onOpenGroupAction(field0Bucket)}
-                  />
-                }
-                paddingSize="l"
-                forceState={trigger[`group0-${field0Bucket.key[0]}`] ?? 'closed'}
-                onToggle={(isOpen) => {
-                  setTrigger({ [`group0-${field0Bucket.key[0]}`]: isOpen ? 'open' : 'closed' });
-                  if (isOpen) {
-                    setSelectedBucket(field0Bucket);
-                  }
+        <>
+          <EuiFlexGroup
+            justifyContent="spaceBetween"
+            alignItems="center"
+            style={{ paddingBottom: 20, paddingTop: 20 }}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="none">
+                <EuiFlexItem grow={false}>
+                  <UnitCount data-test-subj="alert-count">{unitCountText}</UnitCount>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <UnitCount data-test-subj="groups-count" style={{ borderRight: 'none' }}>
+                    {unitGroupsCountText}
+                  </UnitCount>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{groupsSelector}</EuiFlexItem>
+          </EuiFlexGroup>
+          <GroupsContainer>
+            {alertsGroupsData?.aggregations?.stackByMupltipleFields0?.buckets?.map(
+              (field0Bucket) => (
+                <>
+                  <EuiAccordion
+                    id={`group0-${field0Bucket.key[0]}`}
+                    className="euiAccordionForm"
+                    buttonClassName="euiAccordionForm__button"
+                    buttonContent={getSelectedGroupButtonContent(selectedGroup, field0Bucket)}
+                    extraAction={
+                      <GroupRightPanel
+                        bucket={field0Bucket}
+                        actionItems={bulkActionItems}
+                        onClickOpen={() => onOpenGroupAction(field0Bucket)}
+                      />
+                    }
+                    paddingSize="l"
+                    forceState={trigger[`group0-${field0Bucket.key[0]}`] ?? 'closed'}
+                    onToggle={(isOpen) => {
+                      setTrigger({ [`group0-${field0Bucket.key[0]}`]: isOpen ? 'open' : 'closed' });
+                      if (isOpen) {
+                        setSelectedBucket(field0Bucket);
+                      }
+                    }}
+                  >
+                    {trigger[`group0-${field0Bucket.key[0]}`] === 'open' ? dataTable : null}
+                  </EuiAccordion>
+                  <EuiSpacer size="s" />
+                </>
+              )
+            )}
+            <EuiSpacer size="m" />
+            {(alertsGroupsData?.aggregations?.groupsNumber?.value && groupsPageSize
+              ? Math.ceil(alertsGroupsData?.aggregations?.groupsNumber?.value / groupsPageSize)
+              : 0) > 1 && (
+              <EuiTablePagination
+                data-test-subj="hostTablePaginator"
+                activePage={activePage}
+                showPerPageOptions={true}
+                itemsPerPage={groupsPageSize}
+                onChangeItemsPerPage={(pageSize) => {
+                  setShowPerPageOptions(pageSize);
                 }}
-              >
-                {trigger[`group0-${field0Bucket.key[0]}`] === 'open' ? dataTable : null}
-              </EuiAccordion>
-              <EuiSpacer size="s" />
-            </>
-          ))}
-          <EuiSpacer size="m" />
-          {(alertsGroupsData?.aggregations?.groupsNumber?.value && groupsPageSize
-            ? Math.ceil(alertsGroupsData?.aggregations?.groupsNumber?.value / groupsPageSize)
-            : 0) > 1 && (
-            <EuiTablePagination
-              data-test-subj="hostTablePaginator"
-              activePage={activePage}
-              showPerPageOptions={true}
-              itemsPerPage={groupsPageSize}
-              onChangeItemsPerPage={(pageSize) => {
-                setShowPerPageOptions(pageSize);
-              }}
-              pageCount={
-                alertsGroupsData?.aggregations?.groupsNumber?.value && groupsPageSize
-                  ? Math.ceil(alertsGroupsData?.aggregations?.groupsNumber?.value / groupsPageSize)
-                  : 0
-              }
-              onChangePage={goToPage}
-              itemsPerPageOptions={[5, 10, 20, 50]}
-            />
-          )}
-        </GroupsContainer>
+                pageCount={
+                  alertsGroupsData?.aggregations?.groupsNumber?.value && groupsPageSize
+                    ? Math.ceil(
+                        alertsGroupsData?.aggregations?.groupsNumber?.value / groupsPageSize
+                      )
+                    : 0
+                }
+                onChangePage={goToPage}
+                itemsPerPageOptions={[5, 10, 20, 50]}
+              />
+            )}
+          </GroupsContainer>
+        </>
       )}
     </>
   );

@@ -7,6 +7,8 @@
 
 import type { GenericBuckets } from '../../../../common/search_strategy/common';
 
+export const DEFAULT_GROUPING_QUERY_ID = 'defaultGroupingQuery';
+
 export type RawBucket = GenericBuckets & {
   alertsCount?: {
     value?: number | null; // Elasticsearch returns `null` when a sub-aggregation cannot be computed
@@ -39,6 +41,9 @@ export type RawBucket = GenericBuckets & {
 export interface GroupingTableAggregation {
   stackByMupltipleFields0?: {
     buckets?: RawBucket[];
+  };
+  groupsCount0?: {
+    value?: number | null;
   };
 }
 
