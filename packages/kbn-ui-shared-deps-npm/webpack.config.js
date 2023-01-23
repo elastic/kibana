@@ -105,6 +105,7 @@ module.exports = (_, argv) => {
         'rxjs/operators',
         'styled-components',
         'tslib',
+        'uuid',
       ],
       'kbn-ui-shared-deps-npm.v8.dark': ['@elastic/eui/dist/eui_theme_dark.css'],
       'kbn-ui-shared-deps-npm.v8.light': ['@elastic/eui/dist/eui_theme_light.css'],
