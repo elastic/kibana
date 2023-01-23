@@ -20,6 +20,7 @@ import {
 } from '@kbn/shared-ux-page-analytics-no-data';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
+import { of } from 'rxjs';
 import { VisualizeServices } from './types';
 import {
   VisualizeEditor,
@@ -48,13 +49,18 @@ const NoDataComponent = ({
   onDataViewCreated,
   customBranding,
 }: NoDataComponentProps) => {
-  const { hasCustomBranding$ } = customBranding;
+  const hasCustomBranding = customBranding.hasCustomBranding$.pipe(() => {
+    return of(true);
+  })
+    ? true
+    : false;
+
   const analyticsServices = {
     coreStart: core,
     dataViews,
     dataViewEditor,
     customBranding: {
-      hasCustomBranding: hasCustomBranding$ as unknown as boolean,
+      hasCustomBranding,
     },
   };
   return (
@@ -131,6 +137,7 @@ export const VisualizeApp = ({ onAppLeave }: VisualizeAppProps) => {
         dataViewEditor={dataViewEditor}
         dataViews={dataViews}
         onDataViewCreated={onDataViewCreated}
+        customBranding={core.customBranding}
       />
     );
   }

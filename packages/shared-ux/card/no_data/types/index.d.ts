@@ -20,6 +20,7 @@ import type {
 export interface Services {
   addBasePath: (path: string) => string;
   canAccessFleet: boolean;
+  hasCustomBranding: boolean;
 }
 
 /**
@@ -38,9 +39,9 @@ interface KibanaDependencies {
         prepend: (path: string) => string;
       };
     };
-    customBranding: {
-      hasCustomBranding: boolean;
-    };
+    // customBranding: {
+    //   hasCustomBranding: boolean;
+    // };
     application: {
       capabilities: {
         navLinks: Record<string, boolean>;

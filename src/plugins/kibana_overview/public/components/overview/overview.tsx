@@ -40,6 +40,7 @@ import {
   FeatureCatalogueSolution,
   FeatureCatalogueCategory,
 } from '@kbn/home-plugin/public';
+import { of } from 'rxjs';
 import { PLUGIN_ID, PLUGIN_PATH } from '../../../common';
 import { AppPluginStartDependencies } from '../../types';
 import { AddData } from '../add_data';
@@ -62,8 +63,17 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
   const [hasDataView, setHasDataView] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const { services } = useKibana<CoreStart & AppPluginStartDependencies>();
-  const { http, docLinks, dataViews, share, uiSettings, application, chrome, dataViewEditor } =
-    services;
+  const {
+    http,
+    docLinks,
+    dataViews,
+    share,
+    uiSettings,
+    application,
+    chrome,
+    dataViewEditor,
+    customBranding,
+  } = services;
   const addBasePath = http.basePath.prepend;
   const IS_DARK_THEME = uiSettings.get('theme:darkMode');
 
@@ -171,12 +181,21 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
   }
 
   if (isNewKibanaInstance) {
+    const hasCustomBranding = customBranding.hasCustomBranding$.pipe(() => {
+      return of(true);
+    })
+      ? true
+      : false;
+
     const analyticsServices = {
       coreStart: {
         application,
         chrome,
         docLinks,
         http,
+        customBranding: {
+          hasCustomBranding,
+        },
       },
       dataViews: {
         ...dataViews,
@@ -190,6 +209,9 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
         },
       },
       dataViewEditor,
+      customBranding: {
+        hasCustomBranding,
+      },
     };
 
     return (
