@@ -93,6 +93,7 @@ export {
 export type {
   SavedObject,
   SavedObjectAttribute,
+  SavedObjectAttributes,
   SavedObjectAttributeSingle,
   SavedObjectReference,
 } from '@kbn/core-saved-objects-common/src/server_types';

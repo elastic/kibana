@@ -10,10 +10,12 @@ import {
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { resolveMissingLabels } from '../../routes/status/current_status';
 import { AlertConfigKey } from '../../../common/constants/monitor_management';
 import { getAllLocations } from '../../synthetics_service/get_all_locations';
-import { getAllMonitors } from '../../saved_objects/synthetics_monitor/get_all_monitors';
+import {
+  getAllMonitors,
+  processMonitors,
+} from '../../saved_objects/synthetics_monitor/get_all_monitors';
 import { GetMonitorDownStatusMessageParams } from '../../legacy_uptime/lib/requests/get_monitor_status';
 import { queryMonitorStatus } from '../../queries/query_monitor_status';
 import { UptimeEsClient } from '../../legacy_uptime/lib/lib';
@@ -23,7 +25,6 @@ import {
   EncryptedSyntheticsMonitor,
   OverviewStatus,
   OverviewStatusMetaData,
-  SourceType,
 } from '../../../common/runtime_types';
 import { statusCheckTranslations } from '../../legacy_uptime/lib/alerts/translations';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
@@ -91,59 +92,34 @@ export class StatusRuleExecutor {
       soClient: this.soClient,
       search: `attributes.${AlertConfigKey.STATUS_ENABLED}: true`,
     });
-    const allIds: string[] = [];
-    const enabledIds: string[] = [];
-    let listOfLocationsSet = new Set<string>();
-    const missingLabelLocations = new Set<string>();
-    let projectMonitorsCount = 0;
 
-    this.monitors.forEach((monitor) => {
-      const attrs = monitor.attributes;
-      projectMonitorsCount += attrs?.[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT ? 1 : 0;
-      allIds.push(attrs[ConfigKey.MONITOR_QUERY_ID]);
+    const { allIds, enabledIds, listOfLocations, monitorLocationMap, projectMonitorsCount } =
+      await processMonitors(
+        this.monitors,
+        this.server,
+        this.soClient,
+        this.syntheticsMonitorClient
+      );
 
-      if (attrs[ConfigKey.ENABLED] === true) {
-        enabledIds.push(attrs[ConfigKey.MONITOR_QUERY_ID]);
-      }
-
-      listOfLocationsSet = new Set([
-        ...listOfLocationsSet,
-        ...(attrs[ConfigKey.LOCATIONS]
-          .filter((loc) => {
-            if (!loc.label) {
-              missingLabelLocations.add(loc.id);
-            }
-            return loc.label;
-          })
-          .map((location) => location.label) as string[]),
-      ]);
-    });
-
-    const { listOfLocations } = await resolveMissingLabels(
-      this.server,
-      this.soClient,
-      this.syntheticsMonitorClient,
-      listOfLocationsSet,
-      missingLabelLocations
-    );
-
-    return { enabledIds, listOfLocations, allIds, projectMonitorsCount };
+    return { enabledIds, listOfLocations, allIds, monitorLocationMap, projectMonitorsCount };
   }
 
   async getDownChecks(
     prevDownConfigs: OverviewStatus['downConfigs'] = {}
   ): Promise<AlertOverviewStatus> {
-    const { listOfLocations, allIds, enabledIds, projectMonitorsCount } = await this.getMonitors();
+    const { listOfLocations, enabledIds, allIds, monitorLocationMap, projectMonitorsCount } =
+      await this.getMonitors();
 
     if (enabledIds.length > 0) {
       const currentStatus = await queryMonitorStatus(
         this.esClient,
-        [...listOfLocations],
+        listOfLocations,
         {
           to: 'now',
           from: this.previousStartedAt?.toISOString() ?? 'now-1m',
         },
-        enabledIds
+        enabledIds,
+        monitorLocationMap
       );
 
       const downConfigs = currentStatus.downConfigs;
@@ -160,9 +136,9 @@ export class StatusRuleExecutor {
       return {
         ...currentStatus,
         staleDownConfigs,
+        projectMonitorsCount,
         allMonitorsCount: allIds.length,
         disabledMonitorsCount: allIds.length - enabledIds.length,
-        projectMonitorsCount,
       };
     }
     const staleDownConfigs = this.markDeletedConfigs(prevDownConfigs);
@@ -172,6 +148,7 @@ export class StatusRuleExecutor {
       staleDownConfigs,
       down: 0,
       up: 0,
+      pending: 0,
       enabledIds,
       allMonitorsCount: allIds.length,
       disabledMonitorsCount: allIds.length,
