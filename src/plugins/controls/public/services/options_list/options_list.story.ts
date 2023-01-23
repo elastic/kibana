@@ -20,6 +20,7 @@ let optionsListRequestMethod = async (request: OptionsListRequest, abortSignal: 
         r({
           suggestions: {},
           totalCardinality: 100,
+          rejected: false,
         }),
       120
     )

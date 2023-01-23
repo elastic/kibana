@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { getGeoData } from './browser_docs';
 
 export interface DocOverrides {
@@ -82,7 +82,7 @@ export const getUpHit = ({
   ecs: {
     version: '8.0.0',
   },
-  config_id: (monitorId || configId) ?? 'b9d9e146-746f-427f-bbf5-6e786b5b4e73',
+  config_id: configId ?? 'b9d9e146-746f-427f-bbf5-6e786b5b4e73',
   data_stream: {
     namespace: 'default',
     type: 'synthetics',
@@ -227,7 +227,7 @@ export const firstDownHit = ({
     ip: '142.250.181.196',
     name: name ?? 'Test Monitor',
     fleet_managed: true,
-    check_group: uuid.v4(),
+    check_group: uuidv4(),
     timespan: {
       lt: '2022-12-18T09:52:50.128Z',
       gte: '2022-12-18T09:49:50.128Z',
@@ -250,7 +250,7 @@ export const firstDownHit = ({
   ecs: {
     version: '8.0.0',
   },
-  config_id: (monitorId || configId) ?? 'b9d9e146-746f-427f-bbf5-6e786b5b4e73',
+  config_id: configId ?? 'b9d9e146-746f-427f-bbf5-6e786b5b4e73',
   data_stream: {
     namespace: 'default',
     type: 'synthetics',

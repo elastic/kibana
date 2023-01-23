@@ -7,7 +7,7 @@
 import { createHash } from 'crypto';
 import { chunk, get, invert, isEmpty, partition } from 'lodash';
 import moment from 'moment';
-import uuidv5 from 'uuid/v5';
+import { v5 as uuidv5 } from 'uuid';
 
 import dateMath from '@kbn/datemath';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
