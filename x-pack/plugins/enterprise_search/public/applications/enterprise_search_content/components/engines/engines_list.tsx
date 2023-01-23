@@ -91,7 +91,7 @@ export const EnginesList: React.FC = () => {
           pageTitle: i18n.translate('xpack.enterpriseSearch.content.engines.title', {
             defaultMessage: 'Engines',
           }),
-          rightSideItems: [<CreateButton />],
+          rightSideItems: results.length ? [<CreateButton />] : [],
         }}
         pageViewTelemetry="Engines"
         isLoading={isLoading}
