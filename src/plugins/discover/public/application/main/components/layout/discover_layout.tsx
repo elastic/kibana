@@ -37,7 +37,7 @@ import { DiscoverTopNav } from '../top_nav/discover_topnav';
 import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
 import { getResultState } from '../../utils/get_result_state';
 import { DiscoverUninitialized } from '../uninitialized/uninitialized';
-import { DataMainMsg, RecordRawType } from '../../hooks/use_saved_search';
+import { DataMainMsg, RecordRawType } from '../../services/discover_data_state_container';
 import { useColumns } from '../../../../hooks/use_data_grid_columns';
 import { FetchStatus } from '../../../types';
 import { useDataState } from '../../hooks/use_data_state';
@@ -60,10 +60,7 @@ export function DiscoverLayout({
   onChangeDataView,
   onUpdateQuery,
   setExpandedDoc,
-  savedSearchFetch$,
-  savedSearchRefetch$,
   resetSavedSearch,
-  savedSearchData$,
   savedSearch,
   searchSource,
   stateContainer,
@@ -84,7 +81,7 @@ export function DiscoverLayout({
     spaces,
     inspector,
   } = useDiscoverServices();
-  const { main$ } = savedSearchData$;
+  const { main$ } = stateContainer.dataState.data$;
   const [query, savedQuery, columns, sort] = useAppStateSelector((state) => [
     state.query,
     state.savedQuery,
@@ -163,8 +160,8 @@ export function DiscoverLayout({
     if (!dataView.isPersisted()) {
       await updateAdHocDataViewId(dataView);
     }
-    savedSearchRefetch$.next('reset');
-  }, [dataView, savedSearchRefetch$, updateAdHocDataViewId]);
+    stateContainer.dataState.refetch$.next('reset');
+  }, [dataView, stateContainer, updateAdHocDataViewId]);
 
   const onDisableFilters = useCallback(() => {
     const disabledFilters = filterManager
@@ -220,7 +217,11 @@ export function DiscoverLayout({
     }
 
     if (resultState === 'uninitialized') {
-      return <DiscoverUninitialized onRefresh={() => savedSearchRefetch$.next(undefined)} />;
+      return (
+        <DiscoverUninitialized
+          onRefresh={() => stateContainer.dataState.refetch$.next(undefined)}
+        />
+      );
     }
 
     return (
@@ -233,9 +234,6 @@ export function DiscoverLayout({
           expandedDoc={expandedDoc}
           setExpandedDoc={setExpandedDoc}
           savedSearch={savedSearch}
-          savedSearchData$={savedSearchData$}
-          savedSearchFetch$={savedSearchFetch$}
-          savedSearchRefetch$={savedSearchRefetch$}
           stateContainer={stateContainer}
           isTimeBased={isTimeBased}
           columns={currentColumns}
@@ -265,9 +263,6 @@ export function DiscoverLayout({
     resetSavedSearch,
     resultState,
     savedSearch,
-    savedSearchData$,
-    savedSearchFetch$,
-    savedSearchRefetch$,
     searchSessionManager,
     setExpandedDoc,
     stateContainer,
@@ -322,7 +317,7 @@ export function DiscoverLayout({
         <EuiFlexGroup className="dscPageBody__contents" gutterSize="s">
           <EuiFlexItem grow={false} className="dscPageBody__sidebar">
             <SidebarMemoized
-              documents$={savedSearchData$.documents$}
+              documents$={stateContainer.dataState.data$.documents$}
               onAddField={onAddColumn}
               columns={currentColumns}
               onAddFilter={!isPlainRecord ? onAddFilter : undefined}
@@ -335,7 +330,7 @@ export function DiscoverLayout({
               onFieldEdited={onFieldEdited}
               viewMode={viewMode}
               onDataViewCreated={onDataViewCreated}
-              availableFields$={savedSearchData$.availableFields$}
+              availableFields$={stateContainer.dataState.data$.availableFields$}
             />
           </EuiFlexItem>
           <EuiHideFor sizes={['xs', 's']}>

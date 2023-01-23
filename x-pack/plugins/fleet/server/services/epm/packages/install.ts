@@ -285,10 +285,12 @@ async function installPackageFromRegistry({
   force = false,
   ignoreConstraints = false,
   neverIgnoreVerificationError = false,
+  prerelease = false,
 }: InstallRegistryPackageParams): Promise<InstallResult> {
   const logger = appContextService.getLogger();
   // TODO: change epm API to /packageName/version so we don't need to do this
-  const { pkgName, pkgVersion } = Registry.splitPkgKey(pkgkey);
+  const { pkgName, pkgVersion: version } = Registry.splitPkgKey(pkgkey);
+  let pkgVersion = version;
 
   // Workaround apm issue with async spans: https://github.com/elastic/apm-agent-nodejs/issues/2611
   await Promise.resolve();
@@ -310,12 +312,22 @@ async function installPackageFromRegistry({
       installType,
     });
 
-    // get latest package version and requested version in parallel for performance
-    const [latestPackage, { paths, packageInfo, verificationResult }] = await Promise.all([
+    const queryLatest = () =>
       Registry.fetchFindLatestPackageOrThrow(pkgName, {
         ignoreConstraints,
-        prerelease: isPackagePrerelease(pkgVersion), // fetching latest GA version if the package to install is GA, so that it is allowed to install
-      }),
+        prerelease: prerelease === true || isPackagePrerelease(pkgVersion), // fetching latest GA version if the package to install is GA, so that it is allowed to install
+      });
+
+    let latestPkg;
+    // fetching latest package first to set the version
+    if (!pkgVersion) {
+      latestPkg = await queryLatest();
+      pkgVersion = latestPkg.version;
+    }
+
+    // get latest package version and requested version in parallel for performance
+    const [latestPackage, { paths, packageInfo, verificationResult }] = await Promise.all([
+      latestPkg ? Promise.resolve(latestPkg) : queryLatest(),
       Registry.getPackage(pkgName, pkgVersion, {
         ignoreUnverified: force && !neverIgnoreVerificationError,
       }),
@@ -576,7 +588,8 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
   const bundledPackages = await getBundledPackages();
 
   if (args.installSource === 'registry') {
-    const { pkgkey, force, ignoreConstraints, spaceId, neverIgnoreVerificationError } = args;
+    const { pkgkey, force, ignoreConstraints, spaceId, neverIgnoreVerificationError, prerelease } =
+      args;
 
     const matchingBundledPackage = bundledPackages.find(
       (pkg) => Registry.pkgToPkgKey(pkg) === pkgkey
@@ -608,6 +621,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       force,
       neverIgnoreVerificationError,
       ignoreConstraints,
+      prerelease,
     });
     return response;
   } else if (args.installSource === 'upload') {

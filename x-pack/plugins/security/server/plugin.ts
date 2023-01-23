@@ -8,7 +8,7 @@
 import type { Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import type { CloudStart } from '@kbn/cloud-plugin/public';
+import type { CloudStart } from '@kbn/cloud-plugin/server';
 import type { TypeOf } from '@kbn/config-schema';
 import type {
   CoreSetup,
