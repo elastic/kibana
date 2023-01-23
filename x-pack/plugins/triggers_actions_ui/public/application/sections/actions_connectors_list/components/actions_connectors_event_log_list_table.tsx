@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 import { SpacesContextProps } from '@kbn/spaces-plugin/public';
 import { IExecutionLog } from '@kbn/actions-plugin/common';
-import { useKibana, useSpacesData } from '../../../../common/lib/kibana';
+import { useKibana } from '../../../../common/lib/kibana';
 import {
   GLOBAL_CONNECTOR_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS,
   CONNECTOR_LOCKED_COLUMNS,
@@ -159,13 +159,11 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
     );
   });
 
-  const spacesData = useSpacesData();
   const { onShowAllSpacesChange, canAccessMultipleSpaces, namespaces } = useMultipleSpaces({
     setShowFromAllSpaces,
     showFromAllSpaces,
     visibleColumns,
     setVisibleColumns,
-    spacesData,
   });
 
   const isInitialized = useRef(false);

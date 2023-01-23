@@ -6,19 +6,19 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { SpacesData } from '@kbn/spaces-plugin/public';
+import { useSpacesData } from '../../common/lib/kibana';
 
 interface UseMultipleSpacesProps {
   setShowFromAllSpaces: React.Dispatch<React.SetStateAction<boolean>>;
   showFromAllSpaces: boolean;
   visibleColumns: string[];
   setVisibleColumns: React.Dispatch<React.SetStateAction<string[]>>;
-  spacesData: SpacesData | undefined;
 }
 
 export const useMultipleSpaces = (props: UseMultipleSpacesProps) => {
-  const { setShowFromAllSpaces, showFromAllSpaces, visibleColumns, setVisibleColumns, spacesData } =
-    props;
+  const { setShowFromAllSpaces, showFromAllSpaces, visibleColumns, setVisibleColumns } = props;
+
+  const spacesData = useSpacesData();
 
   const onShowAllSpacesChange = useCallback(() => {
     setShowFromAllSpaces((prev) => !prev);
@@ -46,10 +46,15 @@ export const useMultipleSpaces = (props: UseMultipleSpacesProps) => {
     () => (showFromAllSpaces && spacesData ? accessibleSpaceIds : undefined),
     [showFromAllSpaces, spacesData, accessibleSpaceIds]
   );
+  const activeSpace = useMemo(
+    () => spacesData?.spacesMap.get(spacesData?.activeSpaceId),
+    [spacesData]
+  );
 
   return {
     onShowAllSpacesChange,
     canAccessMultipleSpaces,
     namespaces,
+    activeSpace,
   };
 };

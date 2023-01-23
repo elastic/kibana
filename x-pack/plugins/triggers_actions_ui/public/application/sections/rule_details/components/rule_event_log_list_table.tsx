@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 import { IExecutionLog } from '@kbn/alerting-plugin/common';
 import { SpacesContextProps } from '@kbn/spaces-plugin/public';
-import { useKibana, useSpacesData } from '../../../../common/lib/kibana';
+import { useKibana } from '../../../../common/lib/kibana';
 import {
   RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS,
   GLOBAL_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS,
@@ -181,19 +181,13 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
     );
   });
 
-  const spacesData = useSpacesData();
-  const { onShowAllSpacesChange, canAccessMultipleSpaces, namespaces } = useMultipleSpaces({
-    setShowFromAllSpaces,
-    showFromAllSpaces,
-    visibleColumns,
-    setVisibleColumns,
-    spacesData,
-  });
-
-  const activeSpace = useMemo(
-    () => spacesData?.spacesMap.get(spacesData?.activeSpaceId),
-    [spacesData]
-  );
+  const { onShowAllSpacesChange, canAccessMultipleSpaces, namespaces, activeSpace } =
+    useMultipleSpaces({
+      setShowFromAllSpaces,
+      showFromAllSpaces,
+      visibleColumns,
+      setVisibleColumns,
+    });
 
   const isInitialized = useRef(false);
 
