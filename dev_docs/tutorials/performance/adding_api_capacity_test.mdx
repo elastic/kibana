@@ -41,7 +41,7 @@ Create a new json file in `x-pack/test/scalability/apis` with required propertie
 - **journeyName** is a test name, e.g. `GET /internal/security/session`
 - **scalabilitySetup** is used to set load model
 - **testData** is used to populate Elasticsearch and Kibana wth test data
-- **streams: [ {requests: [] }]** defines the API endpoint(s) to be called
+- **streams: `[ {requests: [] }]`** defines the API endpoint(s) to be called
 
 `scalabilitySetup` includes warmup and test phases.
 Warmup phase simulates 10 concurrent requests during 30s period and is important to get consistent results in test phase.

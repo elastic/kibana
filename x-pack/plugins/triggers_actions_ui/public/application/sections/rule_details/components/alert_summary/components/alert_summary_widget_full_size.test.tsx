@@ -10,7 +10,10 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { AlertsSummaryWidgetFullSize } from './alert_summary_widget_full_size';
 import { render } from '@testing-library/react';
 import { AlertSummaryWidgetProps } from '..';
-import { mockAlertSummaryResponse } from '../../../../../mock/alert_summary_widget';
+import {
+  mockedAlertSummaryResponse,
+  mockedChartThemes,
+} from '../../../../../mock/alert_summary_widget';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useUiSetting: jest.fn(() => false),
@@ -20,7 +23,11 @@ describe('AlertSummaryWidgetFullSize', () => {
   const renderComponent = (props: Partial<AlertSummaryWidgetProps> = {}) =>
     render(
       <IntlProvider locale="en">
-        <AlertsSummaryWidgetFullSize {...mockAlertSummaryResponse} {...props} />
+        <AlertsSummaryWidgetFullSize
+          chartThemes={mockedChartThemes}
+          {...mockedAlertSummaryResponse}
+          {...props}
+        />
       </IntlProvider>
     );
 
