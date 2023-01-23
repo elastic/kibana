@@ -130,6 +130,12 @@ export function createAlertFactory<
             );
             return [];
           }
+          if (!autoRecoverAlerts) {
+            logger.debug(
+              `Set autoRecoverAlerts to true on rule type to get access to recovered alerts.`
+            );
+            return [];
+          }
 
           const { currentRecoveredAlerts } = processAlerts<
             State,

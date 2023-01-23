@@ -310,6 +310,34 @@ describe('createAlertFactory()', () => {
     alertFactory.alertLimit.setLimitReached(false);
     alertFactory.alertLimit.checkLimitUsage();
   });
+
+  test('returns empty array if recovered alerts exist but autoRecoverAlerts is false', () => {
+    const alertFactory = createAlertFactory({
+      alerts: {},
+      logger,
+      maxAlerts: 1000,
+      canSetRecoveryContext: true,
+      autoRecoverAlerts: false,
+    });
+    const result = alertFactory.create('1');
+    expect(result).toEqual({
+      meta: {
+        flappingHistory: [],
+      },
+      state: {},
+      context: {},
+      scheduledExecutionOptions: undefined,
+      id: '1',
+    });
+
+    const { getRecoveredAlerts: getRecoveredAlertsFn } = alertFactory.done();
+    const recoveredAlerts = getRecoveredAlertsFn!();
+    expect(Array.isArray(recoveredAlerts)).toBe(true);
+    expect(recoveredAlerts.length).toEqual(0);
+    expect(logger.debug).toHaveBeenCalledWith(
+      `Set autoRecoverAlerts to true on rule type to get access to recovered alerts.`
+    );
+  });
 });
 
 describe('getPublicAlertFactory', () => {
