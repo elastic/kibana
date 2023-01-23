@@ -9,6 +9,7 @@ import { Meta } from '../../../../../common/types';
 import { ElasticsearchIndexWithIngestion } from '../../../../../common/types/indices';
 
 import { Actions, createApiLogic } from '../../../shared/api_logic/create_api_logic';
+import { INPUT_THROTTLE_DELAY_MS } from '../../../shared/constants/timers';
 import { HttpLogic } from '../../../shared/http';
 
 export interface EnginesFetchIndicesApiParams {
@@ -46,7 +47,10 @@ export const fetchIndices = async ({
 
 export const FetchIndicesForEnginesAPILogic = createApiLogic(
   ['content', 'engines_fetch_indices_api_logic'],
-  fetchIndices
+  fetchIndices,
+  {
+    requestBreakpointMS: INPUT_THROTTLE_DELAY_MS,
+  }
 );
 
 export type FetchIndicesForEnginesAPILogicActions = Actions<

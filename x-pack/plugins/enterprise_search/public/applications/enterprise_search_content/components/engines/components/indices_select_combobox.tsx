@@ -8,7 +8,6 @@
 import React, { useState, useEffect } from 'react';
 
 import { useValues, useActions } from 'kea';
-import useThrottle from 'react-use/lib/useThrottle';
 
 import {
   EuiComboBox,
@@ -36,17 +35,14 @@ export type IndicesSelectComboBoxProps = Omit<
   'data-telemetry-id'?: string;
 };
 
-const ENGINES_SEARCH_THROTTLE_MS = 500;
-
 export const IndicesSelectComboBox = (props: IndicesSelectComboBoxProps) => {
   const [searchQuery, setSearchQuery] = useState<string | undefined>(undefined);
-  const throttledSearchQuery = useThrottle(searchQuery, ENGINES_SEARCH_THROTTLE_MS);
   const { makeRequest } = useActions(FetchIndicesForEnginesAPILogic);
   const { status, data } = useValues(FetchIndicesForEnginesAPILogic);
 
   useEffect(() => {
-    makeRequest({ searchQuery: throttledSearchQuery });
-  }, [throttledSearchQuery]);
+    makeRequest({ searchQuery });
+  }, [searchQuery]);
 
   const options: Array<EuiComboBoxOptionOption<ElasticsearchIndexWithIngestion>> =
     data?.indices?.map(indexToOption) ?? [];
