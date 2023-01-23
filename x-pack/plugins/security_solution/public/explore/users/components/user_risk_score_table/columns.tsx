@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiIcon, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
+import { CellActions, CellActionsMode } from '@kbn/cell-actions';
 import { escapeDataProviderId } from '../../../../common/components/drag_and_drop/helpers';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import type { UserRiskScoreColumns } from '.';
@@ -16,7 +17,7 @@ import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { RiskScoreFields } from '../../../../../common/search_strategy';
 import { UserDetailsLink } from '../../../../common/components/links';
 import { UsersTableType } from '../../store/model';
-import { getRowItemsWithActions } from '../../../../common/components/tables/helpers';
+import { CELL_ACTIONS_DEFAULT_TRIGGER } from '../../../../../common/constants';
 
 export const getUserRiskScoreColumns = ({
   dispatchSeverityUpdate,
@@ -32,13 +33,22 @@ export const getUserRiskScoreColumns = ({
     render: (userName) => {
       if (userName != null && userName.length > 0) {
         const id = escapeDataProviderId(`user-risk-score-table-userName-${userName}`);
-        return getRowItemsWithActions({
-          values: [userName],
-          fieldName: 'user.name',
-          render: (item) => <UserDetailsLink userName={item} userTab={UsersTableType.risk} />,
-          idPrefix: id,
-          fieldType: 'keyword',
-        });
+        return (
+          <CellActions
+            key={id}
+            mode={CellActionsMode.HOVER}
+            visibleCellActions={5}
+            showActionTooltips
+            triggerId={CELL_ACTIONS_DEFAULT_TRIGGER}
+            field={{
+              name: 'user.name',
+              value: userName,
+              type: 'keyword',
+            }}
+          >
+            <UserDetailsLink userName={userName} userTab={UsersTableType.risk} />
+          </CellActions>
+        );
       }
       return getEmptyTagValue();
     },

@@ -9,6 +9,7 @@ import { get } from 'lodash/fp';
 import numeral from '@elastic/numeral';
 import React from 'react';
 
+import { CellActions, CellActionsMode } from '@kbn/cell-actions';
 import { CountryFlag } from '../source_destination/country_flag';
 import type {
   AutonomousSystemItem,
@@ -24,6 +25,7 @@ import type { Columns } from '../../../components/paginated_table';
 import * as i18n from './translations';
 import { getRowItemsWithActions } from '../../../../common/components/tables/helpers';
 import { PreferenceFormattedBytes } from '../../../../common/components/formatted_bytes';
+import { CELL_ACTIONS_DEFAULT_TRIGGER } from '../../../../../common/constants';
 
 export type NetworkTopNFlowColumns = [
   Columns<NetworkTopNFlowEdges>,
@@ -61,28 +63,38 @@ export const getNetworkTopNFlowColumns = (
       if (ip != null) {
         return (
           <>
-            {getRowItemsWithActions({
-              values: [ip],
-              fieldName: ipAttr,
-              fieldType: 'ip',
-              idPrefix: id,
-              render: (item) => <NetworkDetailsLink ip={item} flowTarget={flowTarget} />,
-            })}
+            <CellActions
+              key={id}
+              mode={CellActionsMode.HOVER}
+              visibleCellActions={5}
+              showActionTooltips
+              triggerId={CELL_ACTIONS_DEFAULT_TRIGGER}
+              field={{
+                name: ipAttr,
+                value: ip,
+                type: 'keyword',
+              }}
+            >
+              <NetworkDetailsLink ip={ip} flowTarget={flowTarget} />
+            </CellActions>
 
-            {geo &&
-              getRowItemsWithActions({
-                values: [geo],
-                fieldName: geoAttrName,
-
-                fieldType: 'geo_point',
-                idPrefix: `${id}-${geo}`,
-                render: (item) => (
-                  <>
-                    {' '}
-                    <CountryFlag countryCode={item} /> {item}
-                  </>
-                ),
-              })}
+            {geo && (
+              <CellActions
+                key={`${id}-${geo}`}
+                mode={CellActionsMode.HOVER}
+                visibleCellActions={5}
+                showActionTooltips
+                triggerId={CELL_ACTIONS_DEFAULT_TRIGGER}
+                field={{
+                  name: geoAttrName,
+                  value: geo,
+                  type: 'geo_point',
+                }}
+              >
+                {' '}
+                <CountryFlag countryCode={geo} /> {geo}
+              </CellActions>
+            )}
           </>
         );
       } else {

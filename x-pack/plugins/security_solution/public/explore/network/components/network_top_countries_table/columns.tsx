@@ -9,7 +9,7 @@ import { get } from 'lodash/fp';
 import numeral from '@elastic/numeral';
 import React from 'react';
 import type { DataViewBase } from '@kbn/es-query';
-import { CountryFlagAndName } from '../source_destination/country_flag';
+import { CellActions, CellActionsMode } from '@kbn/cell-actions';
 import type {
   NetworkTopCountriesEdges,
   TopNetworkTablesEcsField,
@@ -17,11 +17,11 @@ import type {
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy/security_solution/network';
 import { networkModel } from '../../store';
 import { escapeDataProviderId } from '../../../../common/components/drag_and_drop/helpers';
-import { getEmptyTagValue } from '../../../../common/components/empty_value';
+import { defaultToEmptyTag, getEmptyTagValue } from '../../../../common/components/empty_value';
 import type { Columns } from '../../../components/paginated_table';
 import * as i18n from './translations';
 import { PreferenceFormattedBytes } from '../../../../common/components/formatted_bytes';
-import { getRowItemsWithActions } from '../../../../common/components/tables/helpers';
+import { CELL_ACTIONS_DEFAULT_TRIGGER } from '../../../../../common/constants';
 
 export type NetworkTopCountriesColumns = [
   Columns<NetworkTopCountriesEdges>,
@@ -53,13 +53,22 @@ export const getNetworkTopCountriesColumns = (
       const geoAttr = `${flowTarget}.geo.country_iso_code`;
       const id = escapeDataProviderId(`${tableId}-table-${flowTarget}-country-${geo}`);
       if (geo != null) {
-        return getRowItemsWithActions({
-          values: [geo],
-          fieldName: geoAttr,
-          fieldType: 'keyword',
-          idPrefix: id,
-          render: (item) => <CountryFlagAndName countryCode={item} />,
-        });
+        return (
+          <CellActions
+            key={id}
+            mode={CellActionsMode.HOVER}
+            visibleCellActions={5}
+            showActionTooltips
+            triggerId={CELL_ACTIONS_DEFAULT_TRIGGER}
+            field={{
+              name: geoAttr,
+              value: geo,
+              type: 'keyword',
+            }}
+          >
+            {defaultToEmptyTag(geo)}
+          </CellActions>
+        );
       } else {
         return getEmptyTagValue();
       }

@@ -8,6 +8,7 @@
 import numeral from '@elastic/numeral';
 import React from 'react';
 
+import { CellActions, CellActionsMode } from '@kbn/cell-actions';
 import type { NetworkDnsItem } from '../../../../../common/search_strategy';
 import { NetworkDnsFields } from '../../../../../common/search_strategy';
 import { escapeDataProviderId } from '../../../../common/components/drag_and_drop/helpers';
@@ -16,7 +17,7 @@ import type { Columns } from '../../../components/paginated_table';
 import { PreferenceFormattedBytes } from '../../../../common/components/formatted_bytes';
 
 import * as i18n from './translations';
-import { getRowItemsWithActions } from '../../../../common/components/tables/helpers';
+import { CELL_ACTIONS_DEFAULT_TRIGGER } from '../../../../../common/constants';
 export type NetworkDnsColumns = [
   Columns<NetworkDnsItem['dnsName']>,
   Columns<NetworkDnsItem['queryCount']>,
@@ -34,13 +35,22 @@ export const getNetworkDnsColumns = (): NetworkDnsColumns => [
     sortable: true,
     render: (dnsName) => {
       if (dnsName != null) {
-        return getRowItemsWithActions({
-          values: [dnsName],
-          fieldName: 'dns.question.registered_domain',
-          fieldType: 'keyword',
-          idPrefix: escapeDataProviderId(`networkDns-table--name-${dnsName}`),
-          render: defaultToEmptyTag,
-        });
+        return (
+          <CellActions
+            key={escapeDataProviderId(`networkDns-table--name-${dnsName}`)}
+            mode={CellActionsMode.HOVER}
+            visibleCellActions={5}
+            showActionTooltips
+            triggerId={CELL_ACTIONS_DEFAULT_TRIGGER}
+            field={{
+              name: 'dns.question.registered_domain',
+              value: dnsName,
+              type: 'keyword',
+            }}
+          >
+            {defaultToEmptyTag(dnsName)}
+          </CellActions>
+        );
       } else {
         return getEmptyTagValue();
       }
