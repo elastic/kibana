@@ -11,7 +11,7 @@ import type { FileClient } from '@kbn/files-plugin/server';
 import { createEsFileClient } from '@kbn/files-plugin/server';
 import { errors } from '@elastic/elasticsearch';
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { UploadedFileInfo } from '../../../../common/endpoint/types';
+import type { FileUploadMetadata, UploadedFileInfo } from '../../../../common/endpoint/types';
 import { NotFoundError } from '../../errors';
 import {
   FILE_STORAGE_DATA_INDEX,
@@ -84,9 +84,17 @@ export const getFileInfo = async (
   fileId: string
 ): Promise<UploadedFileInfo> => {
   try {
-    const fileClient = getFileClient(esClient, logger);
-    const file = await fileClient.get({ id: fileId });
-    const { name, id, mimeType, size, status, created } = file.data;
+    const { _id: id, _source: fileDoc } = await esClient.get<FileUploadMetadata>({
+      index: FILE_STORAGE_METADATA_INDEX,
+      id: fileId,
+    });
+
+    if (!fileDoc) {
+      throw new NotFoundError(`File with id [${fileId}] not found`);
+    }
+
+    const { upload_start: uploadStart, action_id: actionId, agent_id: agentId } = fileDoc;
+    const { name, Status: status, mime_type: mimeType, size } = fileDoc.file;
     let fileHasChunks: boolean = true;
 
     if (status === 'READY') {
@@ -104,7 +112,9 @@ export const getFileInfo = async (
       id,
       mimeType,
       size,
-      created,
+      actionId,
+      agentId,
+      created: new Date(uploadStart).toISOString(),
       status: fileHasChunks ? status : 'DELETED',
     };
   } catch (error) {
@@ -154,9 +164,7 @@ export const validateActionFileId = async (
 ): Promise<void> => {
   const fileInfo = await getFileInfo(esClient, logger, fileId);
 
-  // FIXME: PT match the "action id" found in the file info to the actionID provided on input
-  //        Need to gain access to a system where `get-file` is working and see where the `action_id` is stored
-  if (!fileInfo || !actionId) {
+  if (fileInfo.actionId !== actionId) {
     throw new EndpointError(`Invalid file id [${fileId}] for action [${actionId}]`);
   }
 };
