@@ -61,7 +61,7 @@
                 "id": "def-server.DocumentMigrator.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    typeRegistry,\n    kibanaVersion,\n    minimumConvertVersion = DEFAULT_MINIMUM_CONVERT_VERSION,\n    log,\n  }",
+                "label": "{ typeRegistry, kibanaVersion, convertVersion, log }",
                 "description": [],
                 "signature": [
                   "DocumentMigratorOptions"

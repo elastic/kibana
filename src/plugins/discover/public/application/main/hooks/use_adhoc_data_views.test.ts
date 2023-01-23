@@ -132,4 +132,29 @@ describe('useAdHocDataViews', () => {
     });
     expect(updatedDataView!.id).toEqual('updated-mock-id');
   });
+
+  it('should update the adHocList correctly for text based mode', async () => {
+    const hook = renderHook((d: DataView) =>
+      useAdHocDataViews({
+        dataView: mockDataView,
+        savedSearch: savedSearchMock,
+        stateContainer: {
+          appStateContainer: { getState: jest.fn().mockReturnValue({}) },
+          replaceUrlAppState: jest.fn(),
+          kbnUrlStateStorage: {
+            kbnUrlControls: { flush: jest.fn() },
+          },
+        } as unknown as GetStateReturn,
+        setUrlTracking: jest.fn(),
+        dataViews: mockDiscoverServices.dataViews,
+        filterManager: mockDiscoverServices.filterManager,
+        toastNotifications: mockDiscoverServices.toastNotifications,
+        isTextBasedMode: true,
+      })
+    );
+
+    const adHocList = await hook.result.current.adHocDataViewList;
+    expect(adHocList.length).toBe(1);
+    expect(adHocList[0].id).toEqual('mock-id');
+  });
 });

@@ -23,13 +23,16 @@ import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import { HeaderMenu } from '@kbn/securitysolution-exception-list-components';
 import styled from 'styled-components';
 import { euiThemeVars } from '@kbn/ui-theme';
+import type { Rule } from '../../../detection_engine/rule_management/logic/types';
 import { EditExceptionFlyout } from '../../../detection_engine/rule_exceptions/components/edit_exception_flyout';
 import { AddExceptionFlyout } from '../../../detection_engine/rule_exceptions/components/add_exception_flyout';
 import type { ExceptionListInfo } from '../../hooks/use_all_exception_lists';
 import { TitleBadge } from '../title_badge';
 import * as i18n from '../../translations';
 import { ListExceptionItems } from '../list_exception_items';
+import { useListDetailsView } from '../../hooks';
 import { useExceptionsListCard } from '../../hooks/use_exceptions_list.card';
+import { ManageRules } from '../manage_rules';
 
 interface ExceptionsListCardProps {
   exceptionsList: ExceptionListInfo;
@@ -72,6 +75,17 @@ const ListHeaderContainer = styled(EuiFlexGroup)`
 export const ExceptionsListCard = memo<ExceptionsListCardProps>(
   ({ exceptionsList, handleDelete, handleExport, readOnly }) => {
     const {
+      linkedRules,
+      showManageRulesFlyout,
+      showManageButtonLoader,
+      disableManageButton,
+      onManageRules,
+      onSaveManageRules,
+      onCancelManageRules,
+      onRuleSelectionChange,
+    } = useListDetailsView(exceptionsList.list_id);
+
+    const {
       listId,
       listName,
       listType,
@@ -105,6 +119,7 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
       exceptionsList,
       handleExport,
       handleDelete,
+      handleManageRules: onManageRules,
     });
 
     return (
@@ -221,6 +236,16 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
             onCancel={handleCancelExceptionItemFlyout}
             onConfirm={handleConfirmExceptionFlyout}
             data-test-subj="editExceptionItemFlyoutInSharedLists"
+          />
+        ) : null}
+        {showManageRulesFlyout ? (
+          <ManageRules
+            linkedRules={linkedRules as Rule[]}
+            showButtonLoader={showManageButtonLoader}
+            saveIsDisabled={disableManageButton}
+            onSave={onSaveManageRules}
+            onCancel={onCancelManageRules}
+            onRuleSelectionChange={onRuleSelectionChange}
           />
         ) : null}
       </EuiFlexGroup>

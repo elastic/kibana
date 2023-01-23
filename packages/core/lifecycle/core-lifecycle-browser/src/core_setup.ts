@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { InjectedMetadataSetup } from '@kbn/core-injected-metadata-browser';
 import type { ThemeServiceSetup } from '@kbn/core-theme-browser';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 import type { ExecutionContextSetup } from '@kbn/core-execution-context-browser';
@@ -49,8 +48,6 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   settings: SettingsStart;
   /** {@link ExecutionContextSetup} */
   executionContext: ExecutionContextSetup;
-  /** {@link InjectedMetadataSetup} */
-  injectedMetadata: InjectedMetadataSetup;
   /** {@link ThemeServiceSetup} */
   theme: ThemeServiceSetup;
   /** {@link StartServicesAccessor} */

@@ -20,6 +20,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiToolTip,
+  EuiBadge,
   withEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -152,9 +153,14 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
       <div>
         <EuiPopoverTitle paddingSize="s">
           <EuiFlexGroup alignItems="baseline" responsive={false}>
-            <EuiFlexItem>
+            <EuiFlexGroup gutterSize="s">
               {this.props.mode === 'add' ? strings.getPanelTitleAdd() : strings.getPanelTitleEdit()}
-            </EuiFlexItem>
+              <EuiBadge color="hollow">
+                {i18n.translate('unifiedSearch.filter.filterEditor.experimentalLabel', {
+                  defaultMessage: 'Technical preview',
+                })}
+              </EuiBadge>
+            </EuiFlexGroup>
             <EuiFlexItem grow={false} className="filterEditor__hiddenItem" />
             <EuiFlexItem grow={false}>
               <EuiToolTip

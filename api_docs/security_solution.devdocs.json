@@ -1241,6 +1241,17 @@
             "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.TimelineModel.selectAll",
+            "type": "boolean",
+            "tags": [],
+            "label": "selectAll",
+            "description": [],
+            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

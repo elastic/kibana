@@ -165,13 +165,13 @@
       },
       {
         "parentPluginId": "expressionShape",
-        "id": "def-public.LazyProgressDrawer",
+        "id": "def-public.ProgressDrawerComponent",
         "type": "Function",
         "tags": [],
-        "label": "LazyProgressDrawer",
+        "label": "ProgressDrawerComponent",
         "description": [],
         "signature": [
-          "React.ExoticComponent<Pick<",
+          "React.ForwardRefExoticComponent<Pick<",
           {
             "pluginId": "expressionShape",
             "scope": "public",
@@ -187,96 +187,16 @@
             "section": "def-public.ShapeRef",
             "text": "ShapeRef"
           },
-          ">> & { readonly _result: React.ForwardRefExoticComponent<Pick<",
-          {
-            "pluginId": "expressionShape",
-            "scope": "public",
-            "docId": "kibExpressionShapePluginApi",
-            "section": "def-public.ShapeDrawerComponentProps",
-            "text": "ShapeDrawerComponentProps"
-          },
-          ", \"children\" | \"shapeType\" | \"shapeAttributes\" | \"shapeContentAttributes\" | \"textAttributes\"> & React.RefAttributes<",
-          {
-            "pluginId": "expressionShape",
-            "scope": "public",
-            "docId": "kibExpressionShapePluginApi",
-            "section": "def-public.ShapeRef",
-            "text": "ShapeRef"
-          },
-          ">>; }"
+          ">>"
         ],
-        "path": "src/plugins/expression_shape/public/components/progress/index.ts",
+        "path": "src/plugins/expression_shape/public/components/progress/progress_drawer.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
             "parentPluginId": "expressionShape",
-            "id": "def-public.LazyProgressDrawer.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P"
-            ],
-            "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "expressionShape",
-        "id": "def-public.LazyShapeDrawer",
-        "type": "Function",
-        "tags": [],
-        "label": "LazyShapeDrawer",
-        "description": [],
-        "signature": [
-          "React.ExoticComponent<Pick<",
-          {
-            "pluginId": "expressionShape",
-            "scope": "public",
-            "docId": "kibExpressionShapePluginApi",
-            "section": "def-public.ShapeDrawerComponentProps",
-            "text": "ShapeDrawerComponentProps"
-          },
-          ", \"children\" | \"shapeType\" | \"shapeAttributes\" | \"shapeContentAttributes\" | \"textAttributes\"> & React.RefAttributes<",
-          {
-            "pluginId": "expressionShape",
-            "scope": "public",
-            "docId": "kibExpressionShapePluginApi",
-            "section": "def-public.ShapeRef",
-            "text": "ShapeRef"
-          },
-          ">> & { readonly _result: React.ForwardRefExoticComponent<Pick<",
-          {
-            "pluginId": "expressionShape",
-            "scope": "public",
-            "docId": "kibExpressionShapePluginApi",
-            "section": "def-public.ShapeDrawerComponentProps",
-            "text": "ShapeDrawerComponentProps"
-          },
-          ", \"children\" | \"shapeType\" | \"shapeAttributes\" | \"shapeContentAttributes\" | \"textAttributes\"> & React.RefAttributes<",
-          {
-            "pluginId": "expressionShape",
-            "scope": "public",
-            "docId": "kibExpressionShapePluginApi",
-            "section": "def-public.ShapeRef",
-            "text": "ShapeRef"
-          },
-          ">>; }"
-        ],
-        "path": "src/plugins/expression_shape/public/components/shape/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "expressionShape",
-            "id": "def-public.LazyShapeDrawer.$1",
+            "id": "def-public.ProgressDrawerComponent.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -353,6 +273,54 @@
           }
         ],
         "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionShape",
+        "id": "def-public.ShapeDrawerComponent",
+        "type": "Function",
+        "tags": [],
+        "label": "ShapeDrawerComponent",
+        "description": [],
+        "signature": [
+          "React.ForwardRefExoticComponent<Pick<",
+          {
+            "pluginId": "expressionShape",
+            "scope": "public",
+            "docId": "kibExpressionShapePluginApi",
+            "section": "def-public.ShapeDrawerComponentProps",
+            "text": "ShapeDrawerComponentProps"
+          },
+          ", \"children\" | \"shapeType\" | \"shapeAttributes\" | \"shapeContentAttributes\" | \"textAttributes\"> & React.RefAttributes<",
+          {
+            "pluginId": "expressionShape",
+            "scope": "public",
+            "docId": "kibExpressionShapePluginApi",
+            "section": "def-public.ShapeRef",
+            "text": "ShapeRef"
+          },
+          ">>"
+        ],
+        "path": "src/plugins/expression_shape/public/components/shape/shape_drawer.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "expressionShape",
+            "id": "def-public.ShapeDrawerComponent.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {

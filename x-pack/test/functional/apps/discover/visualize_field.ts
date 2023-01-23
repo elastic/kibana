@@ -147,5 +147,23 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(await dimensions[1].getVisibleText()).to.be('average');
       });
     });
+
+    it('should visualize correctly text based language queries based on index patterns', async () => {
+      await PageObjects.discover.selectTextBaseLang('SQL');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await monacoEditor.setCodeEditorValue(
+        'SELECT extension, AVG("bytes") as average FROM "logstash*" GROUP BY extension'
+      );
+      await testSubjects.click('querySubmitButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await testSubjects.click('textBased-visualize');
+
+      await retry.try(async () => {
+        const dimensions = await testSubjects.findAll('lns-dimensionTrigger-textBased');
+        expect(dimensions).to.have.length(2);
+        expect(await dimensions[1].getVisibleText()).to.be('average');
+      });
+    });
   });
 }

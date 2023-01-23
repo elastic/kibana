@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { merge } from 'lodash';
 import type { PublicContract } from '@kbn/utility-types';
 import { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
 import type { GetSummarizedAlertsFnOpts } from '@kbn/alerting-plugin/server';
@@ -179,12 +180,38 @@ const getLifecycleAlertsByExecutionUuid = async ({
   };
 };
 
+const expandDottedField = (dottedFieldName: string, val: unknown): object => {
+  const parts = dottedFieldName.split('.');
+  if (parts.length === 1) {
+    return { [parts[0]]: val };
+  } else {
+    return { [parts[0]]: expandDottedField(parts.slice(1).join('.'), val) };
+  }
+};
+
+const expandFlattenedAlert = (alert: object) => {
+  return Object.entries(alert).reduce(
+    (acc, [key, val]) => merge(acc, expandDottedField(key, val)),
+    {}
+  );
+};
+
 const getHitsWithCount = <TSearchRequest extends ESSearchRequest>(
   response: ESSearchResponse<AlertDocument, TSearchRequest>
 ) => {
   return {
     count: (response.hits.total as SearchTotalHits).value,
-    data: response.hits.hits.map((r) => r._source),
+    data: response.hits.hits.map((hit) => {
+      const { _id, _index, _source } = hit;
+
+      const rawAlert = {
+        _id,
+        _index,
+        ..._source,
+      };
+
+      return expandFlattenedAlert(rawAlert as object);
+    }),
   };
 };
 

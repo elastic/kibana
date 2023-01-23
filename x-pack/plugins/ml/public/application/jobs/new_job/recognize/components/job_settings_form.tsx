@@ -180,8 +180,8 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
             label={
               <FormattedMessage
                 id="xpack.ml.newJob.recognize.useFullDataLabel"
-                defaultMessage="Use full {indexPatternTitle} data"
-                values={{ indexPatternTitle: dataView.title }}
+                defaultMessage="Use full {dataViewIndexPattern} data"
+                values={{ dataViewIndexPattern: dataView.getIndexPattern() }}
               />
             }
             checked={useFullIndexData}

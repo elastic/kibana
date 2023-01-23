@@ -32,6 +32,7 @@ export const useAdHocDataViews = ({
   dataViews,
   toastNotifications,
   trackUiMetric,
+  isTextBasedMode,
 }: {
   dataView: DataView;
   savedSearch: SavedSearch;
@@ -41,6 +42,7 @@ export const useAdHocDataViews = ({
   filterManager: FilterManager;
   toastNotifications: ToastsStart;
   trackUiMetric?: (metricType: string, eventName: string | string[], count?: number) => void;
+  isTextBasedMode?: boolean;
 }) => {
   const [adHocDataViewList, setAdHocDataViewList] = useState<DataView[]>(
     !dataView.isPersisted() ? [dataView] : []
@@ -50,11 +52,14 @@ export const useAdHocDataViews = ({
     if (!dataView.isPersisted()) {
       setAdHocDataViewList((prev) => {
         const existing = prev.find((prevDataView) => prevDataView.id === dataView.id);
-        return existing ? prev : [...prev, dataView];
+        return existing ? prev : isTextBasedMode ? [dataView] : [...prev, dataView];
       });
-      trackUiMetric?.(METRIC_TYPE.COUNT, ADHOC_DATA_VIEW_RENDER_EVENT);
+      // increase the counter only for dataview mode
+      if (!isTextBasedMode) {
+        trackUiMetric?.(METRIC_TYPE.COUNT, ADHOC_DATA_VIEW_RENDER_EVENT);
+      }
     }
-  }, [dataView, trackUiMetric]);
+  }, [dataView, isTextBasedMode, trackUiMetric]);
 
   /**
    * Takes care of checking data view id references in filters
@@ -125,5 +130,6 @@ export const useAdHocDataViews = ({
     persistDataView,
     updateAdHocDataViewId,
     onAddAdHocDataViews,
+    setAdHocDataViewList,
   };
 };

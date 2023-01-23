@@ -1241,7 +1241,8 @@
             "label": "paramsModifier",
             "description": [],
             "signature": [
-              "RuleParamsModifier<Params> | undefined"
+              "RuleParamsModifier",
+              "<Params> | undefined"
             ],
             "path": "x-pack/plugins/alerting/server/rules_client/methods/bulk_edit.ts",
             "deprecated": false,
@@ -1314,7 +1315,8 @@
             "label": "paramsModifier",
             "description": [],
             "signature": [
-              "RuleParamsModifier<Params> | undefined"
+              "RuleParamsModifier",
+              "<Params> | undefined"
             ],
             "path": "x-pack/plugins/alerting/server/rules_client/methods/bulk_edit.ts",
             "deprecated": false,
@@ -2215,7 +2217,22 @@
             "label": "ruleMonitoringService",
             "description": [],
             "signature": [
-              "PublicRuleMonitoringService",
+              "PublicMetricsSetters",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.RuleExecutorServices.ruleResultService",
+            "type": "Object",
+            "tags": [],
+            "label": "ruleResultService",
+            "description": [],
+            "signature": [
+              "PublicLastRunSetters",
               " | undefined"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
@@ -3130,7 +3147,15 @@
             "section": "def-common.SanitizedRule",
             "text": "SanitizedRule"
           },
-          "<Params>[]; errors: ",
+          "<Params>[]; skipped: ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.BulkActionSkipResult",
+            "text": "BulkActionSkipResult"
+          },
+          "[]; errors: ",
           {
             "pluginId": "alerting",
             "scope": "server",
@@ -4105,6 +4130,59 @@
               }
             ],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.BulkActionSkipResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "BulkActionSkipResult",
+        "description": [],
+        "path": "x-pack/plugins/alerting/common/bulk_edit.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.BulkActionSkipResult.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/bulk_edit.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.BulkActionSkipResult.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/bulk_edit.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.BulkActionSkipResult.skip_reason",
+            "type": "string",
+            "tags": [],
+            "label": "skip_reason",
+            "description": [],
+            "signature": [
+              "\"RULE_NOT_MODIFIED\""
+            ],
+            "path": "x-pack/plugins/alerting/common/bulk_edit.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5640,7 +5718,7 @@
             "label": "outcomeMsg",
             "description": [],
             "signature": [
-              "string | null | undefined"
+              "string[] | null | undefined"
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
@@ -6617,6 +6695,21 @@
           "\"/api/alerting\""
         ],
         "path": "x-pack/plugins/alerting/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.BulkEditSkipReason",
+        "type": "Type",
+        "tags": [],
+        "label": "BulkEditSkipReason",
+        "description": [],
+        "signature": [
+          "\"RULE_NOT_MODIFIED\""
+        ],
+        "path": "x-pack/plugins/alerting/common/bulk_edit.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

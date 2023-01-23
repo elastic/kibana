@@ -26,6 +26,7 @@ export class ActionInternal<A extends ActionDefinition = ActionDefinition>
   public readonly ReactMenuItem?: React.FC<ActionMenuItemProps<Context<A>>>;
   public readonly grouping?: PresentableGrouping<Context<A>>;
   public readonly showNotification?: boolean;
+  public readonly disabled?: boolean;
 
   constructor(public readonly definition: A) {
     this.id = this.definition.id;
@@ -35,6 +36,7 @@ export class ActionInternal<A extends ActionDefinition = ActionDefinition>
     this.ReactMenuItem = this.MenuItem ? uiToReactComponent(this.MenuItem) : undefined;
     this.grouping = this.definition.grouping;
     this.showNotification = this.definition.showNotification;
+    this.disabled = this.definition.disabled;
   }
 
   public execute(context: Context<A>) {

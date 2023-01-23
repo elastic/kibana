@@ -311,7 +311,11 @@
 /x-pack/plugins/licensing/  @elastic/kibana-core
 /x-pack/plugins/global_search/  @elastic/kibana-core
 /x-pack/plugins/cloud/ @elastic/kibana-core
-/x-pack/plugins/cloud_integrations/ @elastic/kibana-core
+/x-pack/plugins/cloud_integrations/cloud_chat/ @elastic/kibana-core
+/x-pack/plugins/cloud_integrations/cloud_experiments/ @elastic/kibana-core
+/x-pack/plugins/cloud_integrations/cloud_full_story/ @elastic/kibana-core
+/x-pack/plugins/cloud_integrations/cloud_gain_sight/ @elastic/kibana-core
+/x-pack/plugins/cloud_integrations/cloud_links/ @elastic/kibana-core
 /x-pack/test/saved_objects_field_count/ @elastic/kibana-core
 /src/plugins/saved_objects_management/ @elastic/kibana-core
 /src/plugins/advanced_settings/ @elastic/kibana-core
@@ -425,9 +429,10 @@
 /x-pack/plugins/ingest_pipelines/  @elastic/platform-deployment-management
 #CC# /x-pack/plugins/cross_cluster_replication/ @elastic/platform-deployment-management
 
-# Management Experience - Platform Onboarding
+# Platform Onboarding
 /src/plugins/guided_onboarding/ @elastic/platform-onboarding
 /examples/guided_onboarding_example/ @elastic/platform-onboarding
+/x-pack/plugins/cloud_integrations/cloud_data_migration/ @elastic/platform-onboarding
 
 # Security Solution
 /x-pack/test/endpoint_api_integration_no_ingest/ @elastic/security-solution
@@ -779,7 +784,6 @@ packages/core/i18n/core-i18n-browser-mocks @elastic/kibana-core
 packages/core/i18n/core-i18n-server @elastic/kibana-core
 packages/core/i18n/core-i18n-server-internal @elastic/kibana-core
 packages/core/i18n/core-i18n-server-mocks @elastic/kibana-core
-packages/core/injected-metadata/core-injected-metadata-browser @elastic/kibana-core
 packages/core/injected-metadata/core-injected-metadata-browser-internal @elastic/kibana-core
 packages/core/injected-metadata/core-injected-metadata-browser-mocks @elastic/kibana-core
 packages/core/injected-metadata/core-injected-metadata-common-internal @elastic/kibana-core

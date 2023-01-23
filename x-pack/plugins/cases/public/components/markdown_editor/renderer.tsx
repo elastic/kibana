@@ -7,7 +7,7 @@
 
 import React, { memo, useMemo } from 'react';
 import { cloneDeep } from 'lodash/fp';
-import type { EuiLinkAnchorProps } from '@elastic/eui';
+import type { EuiMarkdownFormatProps, EuiLinkAnchorProps } from '@elastic/eui';
 import { EuiMarkdownFormat } from '@elastic/eui';
 import { MarkdownLink } from './markdown_link';
 import { usePlugins } from './use_plugins';
@@ -15,6 +15,7 @@ import { usePlugins } from './use_plugins';
 interface Props {
   children: string;
   disableLinks?: boolean;
+  textSize?: EuiMarkdownFormatProps['textSize'];
 }
 
 const withDisabledLinks = (disableLinks?: boolean): React.FC<EuiLinkAnchorProps> => {
@@ -27,7 +28,7 @@ const withDisabledLinks = (disableLinks?: boolean): React.FC<EuiLinkAnchorProps>
   return MarkdownLinkProcessingComponent;
 };
 
-const MarkdownRendererComponent: React.FC<Props> = ({ children, disableLinks }) => {
+const MarkdownRendererComponent: React.FC<Props> = ({ children, disableLinks, textSize }) => {
   const { processingPlugins, parsingPlugins } = usePlugins();
   // Deep clone of the processing plugins to prevent affecting the markdown editor.
   const processingPluginList = cloneDeep(processingPlugins);
@@ -42,6 +43,7 @@ const MarkdownRendererComponent: React.FC<Props> = ({ children, disableLinks }) 
       parsingPluginList={parsingPlugins}
       processingPluginList={processingPluginList}
       grow={false}
+      textSize={textSize}
     >
       {children}
     </EuiMarkdownFormat>

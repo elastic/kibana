@@ -113,7 +113,7 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
   const [stepCreateState, setStepCreateState] = useState(getDefaultStepCreateState);
 
   const transformConfig = getCreateTransformRequestBody(
-    dataView.title,
+    dataView.getIndexPattern(),
     stepDefineState,
     stepDetailsState
   );

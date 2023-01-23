@@ -101,6 +101,7 @@ export enum KibanaSavedObjectType {
 }
 
 export enum ElasticsearchAssetType {
+  index = 'index',
   componentTemplate = 'component_template',
   ingestPipeline = 'ingest_pipeline',
   indexTemplate = 'index_template',
@@ -109,6 +110,10 @@ export enum ElasticsearchAssetType {
   dataStreamIlmPolicy = 'data_stream_ilm_policy',
   mlModel = 'ml_model',
 }
+export type FleetElasticsearchAssetType = Exclude<
+  ElasticsearchAssetType,
+  ElasticsearchAssetType.index
+>;
 
 export type DataType = typeof dataTypes;
 export type MonitoringType = typeof monitoringTypes;
@@ -313,7 +318,7 @@ export type ElasticsearchAssetParts = AssetParts & {
 
 export type KibanaAssetTypeToParts = Record<KibanaAssetType, KibanaAssetParts[]>;
 export type ElasticsearchAssetTypeToParts = Record<
-  ElasticsearchAssetType,
+  FleetElasticsearchAssetType,
   ElasticsearchAssetParts[]
 >;
 

@@ -16,7 +16,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Query } from '@kbn/es-query';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { ChangePoint, FieldValuePair } from '@kbn/ml-agg-utils';
-import type { GroupTableItem } from '../../components/spike_analysis_table/spike_analysis_table_groups';
+import type { GroupTableItem } from '../../components/spike_analysis_table/types';
 
 /*
  * Contains utility functions for building and processing queries.

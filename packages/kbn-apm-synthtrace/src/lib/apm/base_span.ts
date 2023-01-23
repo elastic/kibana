@@ -69,6 +69,11 @@ export class BaseSpan extends Serializable<ApmFields> {
     return this;
   }
 
+  crash(): this {
+    this.fields['event.name'] = 'crash';
+    return this;
+  }
+
   serialize(): ApmFields[] {
     return [this.fields, ...this._children.flatMap((child) => child.serialize())];
   }

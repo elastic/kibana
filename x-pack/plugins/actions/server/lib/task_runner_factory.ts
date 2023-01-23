@@ -6,7 +6,6 @@
  */
 
 import { pick } from 'lodash';
-import type { Request } from '@hapi/hapi';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fromNullable, getOrElse } from 'fp-ts/lib/Option';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
@@ -18,6 +17,8 @@ import {
   SavedObjectReference,
   IBasePath,
   SavedObject,
+  Headers,
+  FakeRawRequest,
 } from '@kbn/core/server';
 import { RunContext } from '@kbn/task-manager-plugin/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
@@ -221,26 +222,19 @@ export class TaskRunnerFactory {
 }
 
 function getFakeRequest(apiKey?: string) {
-  const requestHeaders: Record<string, string> = {};
+  const requestHeaders: Headers = {};
   if (apiKey) {
     requestHeaders.authorization = `ApiKey ${apiKey}`;
   }
 
-  // Since we're using API keys and accessing elasticsearch can only be done
-  // via a request, we're faking one with the proper authorization headers.
-  const fakeRequest = CoreKibanaRequest.from({
+  const fakeRawRequest: FakeRawRequest = {
     headers: requestHeaders,
     path: '/',
-    route: { settings: {} },
-    url: {
-      href: '/',
-    },
-    raw: {
-      req: {
-        url: '/',
-      },
-    },
-  } as unknown as Request);
+  };
+
+  // Since we're using API keys and accessing elasticsearch can only be done
+  // via a request, we're faking one with the proper authorization headers.
+  const fakeRequest = CoreKibanaRequest.from(fakeRawRequest);
 
   return fakeRequest;
 }

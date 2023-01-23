@@ -37,6 +37,7 @@ import { MiniHistogram } from '../mini_histogram';
 import { getFailedTransactionsCorrelationImpactLabel } from './get_failed_transactions_correlation_impact_label';
 import { SpikeAnalysisTable } from './spike_analysis_table';
 import { useSpikeAnalysisTableRowContext } from './spike_analysis_table_row_provider';
+import type { GroupTableItem } from './types';
 
 const NARROW_COLUMN_WIDTH = '120px';
 const EXPAND_COLUMN_WIDTH = '40px';
@@ -53,15 +54,6 @@ const viewInDiscoverMessage = i18n.translate(
     defaultMessage: 'View in Discover',
   }
 );
-
-export interface GroupTableItem {
-  id: string;
-  docCount: number;
-  pValue: number | null;
-  group: FieldValuePair[];
-  repeatedValues: FieldValuePair[];
-  histogram: ChangePoint['histogram'];
-}
 
 interface SpikeAnalysisTableProps {
   changePoints: ChangePoint[];

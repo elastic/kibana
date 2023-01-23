@@ -411,13 +411,20 @@ export const LensTopNavMenu = ({
         const dataViewId = datasourceMap[activeDatasourceId].getUsedDataView(
           datasourceStates[activeDatasourceId].state
         );
-        const dataView = await data.dataViews.get(dataViewId);
+        const dataView = dataViewId ? await data.dataViews.get(dataViewId) : undefined;
         setCurrentIndexPattern(dataView ?? indexPatterns[0]);
       }
     };
 
     setCurrentPattern();
-  }, [activeDatasourceId, datasourceMap, datasourceStates, indexPatterns, data.dataViews]);
+  }, [
+    activeDatasourceId,
+    datasourceMap,
+    datasourceStates,
+    indexPatterns,
+    data.dataViews,
+    isOnTextBasedMode,
+  ]);
 
   useEffect(() => {
     if (typeof query === 'object' && query !== null && isOfAggregateQueryType(query)) {
@@ -979,6 +986,7 @@ export const LensTopNavMenu = ({
       }
     }
   }
+
   return (
     <AggregateQueryTopNavMenu
       setMenuMountPoint={setHeaderActionMenu}

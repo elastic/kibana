@@ -70,6 +70,7 @@ import { getPublicAlertFactory } from '../alert/create_alert_factory';
 import { TaskRunnerTimer, TaskRunnerTimerSpan } from './task_runner_timer';
 import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
 import { ILastRun, lastRunFromState, lastRunToRaw } from '../lib/last_run_status';
+import { RuleResultService } from '../monitoring/rule_result_service';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -113,6 +114,7 @@ export class TaskRunner<
   private cancelled: boolean;
   private stackTraceLog: StackTraceLog | null;
   private ruleMonitoring: RuleMonitoringService;
+  private ruleResult: RuleResultService;
 
   constructor(
     ruleType: NormalizedRuleType<
@@ -146,6 +148,7 @@ export class TaskRunner<
     this.alertingEventLogger = new AlertingEventLogger(this.context.eventLogger);
     this.stackTraceLog = null;
     this.ruleMonitoring = new RuleMonitoringService();
+    this.ruleResult = new RuleResultService();
   }
 
   private async updateRuleSavedObject(
@@ -334,6 +337,7 @@ export class TaskRunner<
                 shouldWriteAlerts: () => this.shouldLogAndScheduleActionsForAlerts(),
                 shouldStopExecution: () => this.cancelled,
                 ruleMonitoringService: this.ruleMonitoring.getLastRunMetricsSetters(),
+                ruleResultService: this.ruleResult.getLastRunSetters(),
               },
               params,
               state: ruleTypeState as RuleState,
@@ -579,7 +583,7 @@ export class TaskRunner<
       ILastRun
     >(
       stateWithMetrics,
-      (ruleRunStateWithMetrics) => lastRunFromState(ruleRunStateWithMetrics),
+      (ruleRunStateWithMetrics) => lastRunFromState(ruleRunStateWithMetrics, this.ruleResult),
       (err: ElasticsearchError) => lastRunFromError(err)
     );
 
@@ -637,6 +641,7 @@ export class TaskRunner<
           executionStatus
         )} - ${JSON.stringify(lastRun)}`
       );
+
       await this.updateRuleSavedObject(ruleId, namespace, {
         executionStatus: ruleExecutionStatusToRaw(executionStatus),
         nextRun,
@@ -818,7 +823,9 @@ export class TaskRunner<
       nextRun = getNextRun({ startDate: startedAt, interval: taskSchedule.interval });
     }
 
-    const outcomeMsg = `${this.ruleType.id}:${ruleId}: execution cancelled due to timeout - exceeded rule type timeout of ${this.ruleType.ruleTaskTimeout}`;
+    const outcomeMsg = [
+      `${this.ruleType.id}:${ruleId}: execution cancelled due to timeout - exceeded rule type timeout of ${this.ruleType.ruleTaskTimeout}`,
+    ];
     const date = new Date();
     // Update the rule saved object with execution status
     const executionStatus: RuleExecutionStatus = {
@@ -826,7 +833,7 @@ export class TaskRunner<
       status: 'error',
       error: {
         reason: RuleExecutionStatusErrorReasons.Timeout,
-        message: outcomeMsg,
+        message: outcomeMsg.join(' '),
       },
     };
     this.logger.debug(

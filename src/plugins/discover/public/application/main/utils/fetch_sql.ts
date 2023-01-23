@@ -12,7 +12,7 @@ import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';
-import type { DataViewsContract } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
 import { DataTableRecord } from '../../../types';
 
@@ -25,7 +25,7 @@ interface SQLErrorResponse {
 
 export function fetchSql(
   query: Query | AggregateQuery,
-  dataViewsService: DataViewsContract,
+  dataView: DataView,
   data: DataPublicPluginStart,
   expressions: ExpressionsStart,
   inspectorAdapters: Adapters,
@@ -37,7 +37,7 @@ export function fetchSql(
     filters,
     query,
     time: timeRange,
-    dataViewsService,
+    dataView,
     inputQuery,
   })
     .then((ast) => {

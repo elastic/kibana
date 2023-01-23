@@ -103,7 +103,11 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
     },
 
     async clickExistingApiKeyToOpenFlyout(apiKeyName: string) {
-      await testSubjects.click(`roleRowName-${apiKeyName}`);
+      await testSubjects.click(`apiKeyRowName-${apiKeyName}`);
+    },
+
+    async ensureApiKeyExists(apiKeyName: string) {
+      await testSubjects.existOrFail(`apiKeyRowName-${apiKeyName}`);
     },
 
     async getMetadataSwitch() {

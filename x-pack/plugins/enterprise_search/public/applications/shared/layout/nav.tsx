@@ -75,21 +75,6 @@ export const useEnterpriseSearchNav = () => {
         defaultMessage: 'Content',
       }),
     },
-    ...(enginesSectionEnabled
-      ? [
-          {
-            id: 'enterpriseSearchEngines',
-            name: i18n.translate('xpack.enterpriseSearch.nav.enginesTitle', {
-              defaultMessage: 'Engines',
-            }),
-            ...generateNavLink({
-              shouldNotCreateHref: true,
-              shouldShowActiveForSubroutes: true,
-              to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + ENGINES_PATH,
-            }),
-          },
-        ]
-      : []),
     {
       id: 'enterpriseSearchAnalytics',
       items: [
@@ -166,6 +151,83 @@ export const useEnterpriseSearchNav = () => {
       }),
     },
   ];
+
+  if (enginesSectionEnabled) {
+    return [
+      navItems[0], // Overview
+      navItems[1], // Content
+      {
+        id: 'enginesSearch', // TODO: just search? or wait for that
+        items: [
+          {
+            id: 'elasticsearch',
+            name: i18n.translate('xpack.enterpriseSearch.nav.elasticsearchTitle', {
+              defaultMessage: 'Elasticsearch',
+            }),
+            ...generateNavLink({
+              shouldNotCreateHref: true,
+              to: ELASTICSEARCH_PLUGIN.URL,
+            }),
+          },
+          {
+            id: 'enterpriseSearchEngines',
+            name: i18n.translate('xpack.enterpriseSearch.nav.enginesTitle', {
+              defaultMessage: 'Engines',
+            }),
+            ...generateNavLink({
+              shouldNotCreateHref: true,
+              shouldShowActiveForSubroutes: true,
+              to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + ENGINES_PATH,
+            }),
+          },
+        ],
+        name: i18n.translate('xpack.enterpriseSearch.nav.searchTitle', {
+          defaultMessage: 'Search',
+        }),
+      },
+      navItems[2], // Behavioural Analytics
+      ...(productAccess.hasAppSearchAccess || productAccess.hasWorkplaceSearchAccess
+        ? [
+            {
+              id: 'standaloneExperiences',
+              items: [
+                ...(productAccess.hasAppSearchAccess
+                  ? [
+                      {
+                        id: 'app_search',
+                        name: i18n.translate('xpack.enterpriseSearch.nav.appSearchTitle', {
+                          defaultMessage: 'App Search',
+                        }),
+                        ...generateNavLink({
+                          shouldNotCreateHref: true,
+                          to: APP_SEARCH_PLUGIN.URL,
+                        }),
+                      },
+                    ]
+                  : []),
+                ...(productAccess.hasWorkplaceSearchAccess
+                  ? [
+                      {
+                        id: 'workplace_search',
+                        name: i18n.translate('xpack.enterpriseSearch.nav.workplaceSearchTitle', {
+                          defaultMessage: 'Workplace Search',
+                        }),
+                        ...generateNavLink({
+                          shouldNotCreateHref: true,
+                          to: WORKPLACE_SEARCH_PLUGIN.URL,
+                        }),
+                      },
+                    ]
+                  : []),
+              ],
+              name: i18n.translate('xpack.enterpriseSearch.nav.standaloneExperiencesTitle', {
+                defaultMessage: 'Standalone Experiences',
+              }),
+            },
+          ]
+        : []),
+    ];
+  }
 
   return navItems;
 };

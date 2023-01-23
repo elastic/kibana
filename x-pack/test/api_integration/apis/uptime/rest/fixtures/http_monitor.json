@@ -56,7 +56,7 @@
   "locations": [
     {
       "id": "eu-west-01",
-      "label": "Europe West",
+      "label": "Europe East",
       "geo": {
         "lat": 33.2343132435,
         "lon": 73.2342343434

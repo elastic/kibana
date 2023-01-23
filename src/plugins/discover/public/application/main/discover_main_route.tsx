@@ -8,6 +8,7 @@
 import React, { useEffect, useState, memo, useCallback, useMemo } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { DataViewListItem } from '@kbn/data-plugin/public';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DataViewSavedObjectConflictError } from '@kbn/data-views-plugin/public';
 import { redirectWhenMissing } from '@kbn/kibana-utils-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
@@ -93,15 +94,8 @@ export function DiscoverMainRoute(props: Props) {
           return;
         }
 
-        const defaultDataView = await data.dataViews.getDefaultDataView();
-
-        if (!defaultDataView) {
-          setShowNoDataPage(true);
-          return;
-        }
-
         const { appStateContainer } = getState({ history, savedSearch: nextSavedSearch, services });
-        const { index } = appStateContainer.getState();
+        const { index, query } = appStateContainer.getState();
         const ip = await loadDataView(
           data.dataViews,
           config,
@@ -110,8 +104,13 @@ export function DiscoverMainRoute(props: Props) {
         );
 
         const ipList = ip.list;
-        const dataViewData = resolveDataView(ip, nextSavedSearch.searchSource, toastNotifications);
-        await data.dataViews.refreshFields(dataViewData);
+        const isTextBasedQuery = query && isOfAggregateQueryType(query);
+        const dataViewData = resolveDataView(
+          ip,
+          nextSavedSearch.searchSource,
+          toastNotifications,
+          isTextBasedQuery
+        );
         setDataViewList(ipList);
 
         return dataViewData;

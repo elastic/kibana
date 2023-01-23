@@ -261,10 +261,6 @@
               },
               {
                 "plugin": "data",
-                "path": "src/plugins/data/public/query/filter_manager/lib/get_display_value.ts"
-              },
-              {
-                "plugin": "data",
                 "path": "src/plugins/data/common/search/search_source/inspect/inspector_stats.ts"
               },
               {
@@ -273,11 +269,15 @@
               },
               {
                 "plugin": "data",
-                "path": "src/plugins/data/public/search/errors/painless_error.tsx"
+                "path": "src/plugins/data/common/search/aggs/param_types/field.ts"
               },
               {
                 "plugin": "data",
-                "path": "src/plugins/data/common/search/aggs/param_types/field.ts"
+                "path": "src/plugins/data/public/query/filter_manager/lib/get_display_value.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/public/search/errors/painless_error.tsx"
               },
               {
                 "plugin": "unifiedSearch",
@@ -401,39 +401,11 @@
               },
               {
                 "plugin": "dataVisualizer",
-                "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/full_time_range_selector/full_time_range_selector_service.ts"
-              },
-              {
-                "plugin": "dataVisualizer",
-                "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/actions_panel/actions_panel.tsx"
-              },
-              {
-                "plugin": "dataVisualizer",
                 "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/hooks/use_data_visualizer_grid_data.ts"
               },
               {
                 "plugin": "dataVisualizer",
                 "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/util/index_utils.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/util/index_utils.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/util/index_utils.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/new_job_capabilities_service_analytics.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/new_job_capabilities_service_analytics.ts"
               },
               {
                 "plugin": "ml",
@@ -485,14 +457,6 @@
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/new_job_capabilities_service.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/new_job_capabilities_service.ts"
-              },
-              {
-                "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/job_creator/job_creator.ts"
               },
               {
@@ -530,26 +494,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/jobs/new_job/pages/new_job/wizard_steps.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/new_job/recognize/components/job_settings_form.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/new_job/recognize/page.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/new_job/recognize/page.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/new_job/recognize/page.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/new_job/job_from_lens/quick_create_job.ts"
               },
               {
                 "plugin": "ml",
@@ -709,79 +653,7 @@
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_details/step_details_form.tsx"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/wizard/wizard.tsx"
-              },
-              {
-                "plugin": "transform",
                 "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/common/filter_agg/components/filter_term_form.tsx"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/hooks/use_index_data.ts"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/hooks/use_index_data.ts"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/hooks/use_index_data.ts"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/hooks/use_index_data.ts"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/hooks/use_index_data.ts"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/hooks/use_index_data.ts"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/hooks/use_index_data.ts"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/hooks/use_step_define_form.ts"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/hooks/use_step_define_form.ts"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/step_define_form.tsx"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/step_define_form.tsx"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/step_define_form.tsx"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/step_define_form.tsx"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/step_define_summary.tsx"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/step_define_summary.tsx"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/step_define_summary.tsx"
               },
               {
                 "plugin": "transform",
@@ -1006,6 +878,10 @@
               {
                 "plugin": "visTypeTimeseries",
                 "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/application/main/hooks/use_text_based_query_language.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -8574,10 +8450,6 @@
               },
               {
                 "plugin": "data",
-                "path": "src/plugins/data/public/query/filter_manager/lib/get_display_value.ts"
-              },
-              {
-                "plugin": "data",
                 "path": "src/plugins/data/common/search/search_source/inspect/inspector_stats.ts"
               },
               {
@@ -8586,11 +8458,15 @@
               },
               {
                 "plugin": "data",
-                "path": "src/plugins/data/public/search/errors/painless_error.tsx"
+                "path": "src/plugins/data/common/search/aggs/param_types/field.ts"
               },
               {
                 "plugin": "data",
-                "path": "src/plugins/data/common/search/aggs/param_types/field.ts"
+                "path": "src/plugins/data/public/query/filter_manager/lib/get_display_value.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/public/search/errors/painless_error.tsx"
               },
               {
                 "plugin": "unifiedSearch",
@@ -8714,39 +8590,11 @@
               },
               {
                 "plugin": "dataVisualizer",
-                "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/full_time_range_selector/full_time_range_selector_service.ts"
-              },
-              {
-                "plugin": "dataVisualizer",
-                "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/actions_panel/actions_panel.tsx"
-              },
-              {
-                "plugin": "dataVisualizer",
                 "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/hooks/use_data_visualizer_grid_data.ts"
               },
               {
                 "plugin": "dataVisualizer",
                 "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/util/index_utils.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/util/index_utils.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/util/index_utils.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/new_job_capabilities_service_analytics.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/new_job_capabilities_service_analytics.ts"
               },
               {
                 "plugin": "ml",
@@ -8798,14 +8646,6 @@
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/new_job_capabilities_service.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/new_job_capabilities_service.ts"
-              },
-              {
-                "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/job_creator/job_creator.ts"
               },
               {
@@ -8843,26 +8683,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/jobs/new_job/pages/new_job/wizard_steps.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/new_job/recognize/components/job_settings_form.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/new_job/recognize/page.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/new_job/recognize/page.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/new_job/recognize/page.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/new_job/job_from_lens/quick_create_job.ts"
               },
               {
                 "plugin": "ml",
@@ -9022,79 +8842,7 @@
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_details/step_details_form.tsx"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/wizard/wizard.tsx"
-              },
-              {
-                "plugin": "transform",
                 "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/common/filter_agg/components/filter_term_form.tsx"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/hooks/use_index_data.ts"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/hooks/use_index_data.ts"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/hooks/use_index_data.ts"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/hooks/use_index_data.ts"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/hooks/use_index_data.ts"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/hooks/use_index_data.ts"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/hooks/use_index_data.ts"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/hooks/use_step_define_form.ts"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/hooks/use_step_define_form.ts"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/step_define_form.tsx"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/step_define_form.tsx"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/step_define_form.tsx"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/step_define_form.tsx"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/step_define_summary.tsx"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/step_define_summary.tsx"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/step_define_summary.tsx"
               },
               {
                 "plugin": "transform",
@@ -9319,6 +9067,10 @@
               {
                 "plugin": "visTypeTimeseries",
                 "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/application/main/hooks/use_text_based_query_language.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -12811,7 +12563,7 @@
             "signature": [
               "(options: { pattern: string | string[]; metaFields?: string[] | undefined; fieldCapsOptions?: { allow_no_indices: boolean; includeUnmapped?: boolean | undefined; } | undefined; type?: string | undefined; rollupIndex?: string | undefined; indexFilter?: ",
               "QueryDslQueryContainer",
-              " | undefined; }) => Promise<{ fields: ",
+              " | undefined; fields?: string[] | undefined; }) => Promise<{ fields: ",
               {
                 "pluginId": "dataViews",
                 "scope": "server",
@@ -12916,6 +12668,20 @@
                     "signature": [
                       "QueryDslQueryContainer",
                       " | undefined"
+                    ],
+                    "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "dataViews",
+                    "id": "def-server.IndexPatternsFetcher.getFieldsForWildcard.$1.fields",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "fields",
+                    "description": [],
+                    "signature": [
+                      "string[] | undefined"
                     ],
                     "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
                     "deprecated": false,
@@ -15968,10 +15734,6 @@
               },
               {
                 "plugin": "data",
-                "path": "src/plugins/data/public/query/filter_manager/lib/get_display_value.ts"
-              },
-              {
-                "plugin": "data",
                 "path": "src/plugins/data/common/search/search_source/inspect/inspector_stats.ts"
               },
               {
@@ -15980,11 +15742,15 @@
               },
               {
                 "plugin": "data",
-                "path": "src/plugins/data/public/search/errors/painless_error.tsx"
+                "path": "src/plugins/data/common/search/aggs/param_types/field.ts"
               },
               {
                 "plugin": "data",
-                "path": "src/plugins/data/common/search/aggs/param_types/field.ts"
+                "path": "src/plugins/data/public/query/filter_manager/lib/get_display_value.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/public/search/errors/painless_error.tsx"
               },
               {
                 "plugin": "unifiedSearch",
@@ -16108,39 +15874,11 @@
               },
               {
                 "plugin": "dataVisualizer",
-                "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/full_time_range_selector/full_time_range_selector_service.ts"
-              },
-              {
-                "plugin": "dataVisualizer",
-                "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/actions_panel/actions_panel.tsx"
-              },
-              {
-                "plugin": "dataVisualizer",
                 "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/hooks/use_data_visualizer_grid_data.ts"
               },
               {
                 "plugin": "dataVisualizer",
                 "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/util/index_utils.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/util/index_utils.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/util/index_utils.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/new_job_capabilities_service_analytics.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/new_job_capabilities_service_analytics.ts"
               },
               {
                 "plugin": "ml",
@@ -16192,14 +15930,6 @@
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/new_job_capabilities_service.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/new_job_capabilities_service.ts"
-              },
-              {
-                "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/job_creator/job_creator.ts"
               },
               {
@@ -16237,26 +15967,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/jobs/new_job/pages/new_job/wizard_steps.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/new_job/recognize/components/job_settings_form.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/new_job/recognize/page.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/new_job/recognize/page.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/new_job/recognize/page.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/new_job/job_from_lens/quick_create_job.ts"
               },
               {
                 "plugin": "ml",
@@ -16416,79 +16126,7 @@
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_details/step_details_form.tsx"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/wizard/wizard.tsx"
-              },
-              {
-                "plugin": "transform",
                 "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/common/filter_agg/components/filter_term_form.tsx"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/hooks/use_index_data.ts"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/hooks/use_index_data.ts"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/hooks/use_index_data.ts"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/hooks/use_index_data.ts"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/hooks/use_index_data.ts"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/hooks/use_index_data.ts"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/hooks/use_index_data.ts"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/hooks/use_step_define_form.ts"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/hooks/use_step_define_form.ts"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/step_define_form.tsx"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/step_define_form.tsx"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/step_define_form.tsx"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/step_define_form.tsx"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/step_define_summary.tsx"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/step_define_summary.tsx"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/step_define_summary.tsx"
               },
               {
                 "plugin": "transform",
@@ -16713,6 +16351,10 @@
               {
                 "plugin": "visTypeTimeseries",
                 "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/application/main/hooks/use_text_based_query_language.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -23480,6 +23122,20 @@
             "description": [],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.GetFieldsOptions.fields",
+            "type": "Array",
+            "tags": [],
+            "label": "fields",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
             ],
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false,

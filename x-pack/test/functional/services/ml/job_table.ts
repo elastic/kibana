@@ -467,6 +467,18 @@ export function MachineLearningJobTableProvider(
       await testSubjects.missingOrFail('mlDeleteJobConfirmModal', { timeout: 30 * 1000 });
     }
 
+    public async clickDeleteAnnotationsInDeleteJobModal(checked: boolean) {
+      await testSubjects.setEuiSwitch(
+        'mlDeleteJobConfirmModal > mlDeleteJobConfirmModalDeleteAnnotationsSwitch',
+        checked ? 'check' : 'uncheck'
+      );
+      const isChecked = await testSubjects.isEuiSwitchChecked(
+        'mlDeleteJobConfirmModal > mlDeleteJobConfirmModalDeleteAnnotationsSwitch'
+      );
+
+      expect(isChecked).to.eql(checked, `Expected delete annotations switch to be ${checked}`);
+    }
+
     public async clickOpenJobInSingleMetricViewerButton(jobId: string) {
       await testSubjects.click(this.rowSelector(jobId, 'mlOpenJobsInSingleMetricViewerButton'));
       await testSubjects.existOrFail('~mlPageSingleMetricViewer');

@@ -13,6 +13,8 @@ import type { RequestHandler } from '@kbn/core/server';
 
 import { groupBy, keyBy } from 'lodash';
 
+import { populatePackagePolicyAssignedAgentsCount } from '../../services/package_policies/populate_package_policy_assigned_agents_count';
+
 import { agentPolicyService, appContextService, packagePolicyService } from '../../services';
 import type {
   GetPackagePoliciesRequestSchema,
@@ -85,6 +87,7 @@ export const getPackagePoliciesHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof GetPackagePoliciesRequestSchema.query>
 > = async (context, request, response) => {
+  const esClient = (await context.core).elasticsearch.client.asInternalUser;
   const fleetContext = await context.fleet;
   const soClient = fleetContext.internalSoClient;
   const limitedToPackages = fleetContext.limitedToPackages;
@@ -106,6 +109,10 @@ export const getPackagePoliciesHandler: FleetRequestHandler<
           message: validationResult,
         },
       });
+    }
+
+    if (request.query.withAgentCount) {
+      await populatePackagePolicyAssignedAgentsCount(esClient, items);
     }
 
     // agnostic to package-level RBAC

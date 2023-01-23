@@ -74,6 +74,7 @@ export type ApmFields = Fields &
     'device.manufacturer': string;
     'ecs.version': string;
     'event.outcome': string;
+    'event.name': string;
     'event.ingested': number;
     'error.id': string;
     'error.exception': ApmException[];

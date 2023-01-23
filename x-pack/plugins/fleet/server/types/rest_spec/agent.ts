@@ -9,18 +9,29 @@ import { schema } from '@kbn/config-schema';
 import moment from 'moment';
 import semverIsValid from 'semver/functions/valid';
 
+import { SO_SEARCH_LIMIT } from '../../constants';
+
 import { NewAgentActionSchema } from '../models';
 
 export const GetAgentsRequestSchema = {
-  query: schema.object({
-    page: schema.number({ defaultValue: 1 }),
-    perPage: schema.number({ defaultValue: 20 }),
-    kuery: schema.maybe(schema.string()),
-    showInactive: schema.boolean({ defaultValue: false }),
-    showUpgradeable: schema.boolean({ defaultValue: false }),
-    sortField: schema.maybe(schema.string()),
-    sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
-  }),
+  query: schema.object(
+    {
+      page: schema.number({ defaultValue: 1 }),
+      perPage: schema.number({ defaultValue: 20 }),
+      kuery: schema.maybe(schema.string()),
+      showInactive: schema.boolean({ defaultValue: false }),
+      showUpgradeable: schema.boolean({ defaultValue: false }),
+      sortField: schema.maybe(schema.string()),
+      sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
+    },
+    {
+      validate: (request) => {
+        if (request.page * request.perPage > SO_SEARCH_LIMIT) {
+          return `You cannot use page and perPage page over ${SO_SEARCH_LIMIT} agents`;
+        }
+      },
+    }
+  ),
 };
 
 export const GetOneAgentRequestSchema = {

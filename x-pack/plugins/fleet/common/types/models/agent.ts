@@ -24,10 +24,17 @@ export type AgentStatus =
   | 'inactive'
   | 'enrolling'
   | 'unenrolling'
+  | 'unenrolled'
   | 'updating'
   | 'degraded';
 
-export type SimplifiedAgentStatus = 'healthy' | 'unhealthy' | 'updating' | 'offline' | 'inactive';
+export type SimplifiedAgentStatus =
+  | 'healthy'
+  | 'unhealthy'
+  | 'updating'
+  | 'offline'
+  | 'inactive'
+  | 'unenrolled';
 
 export type AgentActionType =
   | 'UNENROLL'

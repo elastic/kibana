@@ -93,8 +93,8 @@ export const getFileInfo = async (
       fileHasChunks = await doesFileHaveChunks(esClient, fileId);
 
       if (!fileHasChunks) {
-        logger.debug(
-          `File with id [${fileId}] has no data chunks. Status will be adjusted to DELETED`
+        logger.warn(
+          `File with id [${fileId}] has no data chunks in index [${FILE_STORAGE_DATA_INDEX}]. File status will be adjusted to DELETED`
         );
       }
     }
@@ -118,10 +118,17 @@ const doesFileHaveChunks = async (
 ): Promise<boolean> => {
   const chunks = await esClient.search({
     index: FILE_STORAGE_DATA_INDEX,
+    size: 0,
     body: {
       query: {
-        term: {
-          bid: fileId,
+        bool: {
+          filter: [
+            {
+              term: {
+                bid: fileId,
+              },
+            },
+          ],
         },
       },
       // Setting `_source` to false - we don't need the actual document to be returned

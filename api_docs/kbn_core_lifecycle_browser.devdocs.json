@@ -275,28 +275,6 @@
           },
           {
             "parentPluginId": "@kbn/core-lifecycle-browser",
-            "id": "def-common.CoreSetup.injectedMetadata",
-            "type": "Object",
-            "tags": [],
-            "label": "injectedMetadata",
-            "description": [
-              "{@link InjectedMetadataSetup}"
-            ],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-injected-metadata-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreInjectedMetadataBrowserPluginApi",
-                "section": "def-common.InjectedMetadataSetup",
-                "text": "InjectedMetadataSetup"
-              }
-            ],
-            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_setup.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-lifecycle-browser",
             "id": "def-common.CoreSetup.theme",
             "type": "Object",
             "tags": [],
@@ -697,28 +675,6 @@
                 "docId": "kibKbnCoreThemeBrowserPluginApi",
                 "section": "def-common.ThemeServiceStart",
                 "text": "ThemeServiceStart"
-              }
-            ],
-            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-lifecycle-browser",
-            "id": "def-common.CoreStart.injectedMetadata",
-            "type": "Object",
-            "tags": [],
-            "label": "injectedMetadata",
-            "description": [
-              "{@link InjectedMetadataStart}"
-            ],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-injected-metadata-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreInjectedMetadataBrowserPluginApi",
-                "section": "def-common.InjectedMetadataStart",
-                "text": "InjectedMetadataStart"
               }
             ],
             "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts",

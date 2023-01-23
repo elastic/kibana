@@ -205,6 +205,7 @@ export class TaskManagerPlugin
 
     const serializer = savedObjects.createSerializer();
     const taskStore = new TaskStore({
+      logger: this.logger,
       serializer,
       savedObjectsRepository,
       esClient: elasticsearch.client.asInternalUser,

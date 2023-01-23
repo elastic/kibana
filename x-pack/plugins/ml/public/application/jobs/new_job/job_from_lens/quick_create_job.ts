@@ -309,7 +309,7 @@ export class QuickJobCreator {
     );
 
     const jobConfig = createEmptyJob();
-    const datafeedConfig = createEmptyDatafeed(dataView.title);
+    const datafeedConfig = createEmptyDatafeed(dataView.getIndexPattern());
 
     const combinedFiltersAndQueries = this.combineQueriesAndFilters(
       { query, filters },

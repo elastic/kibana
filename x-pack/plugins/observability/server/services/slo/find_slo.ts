@@ -9,7 +9,15 @@ import { IndicatorData, SLO, SLOId, SLOWithSummary } from '../../domain/models';
 import { computeErrorBudget, computeSLI } from '../../domain/services';
 import { FindSLOParams, FindSLOResponse, findSLOResponseSchema } from '../../types/rest_specs';
 import { SLIClient } from './sli_client';
-import { Criteria, Paginated, Pagination, SLORepository } from './slo_repository';
+import {
+  Criteria,
+  Paginated,
+  Pagination,
+  SLORepository,
+  Sort,
+  SortField,
+  SortDirection,
+} from './slo_repository';
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_PER_PAGE = 25;
@@ -20,9 +28,11 @@ export class FindSLO {
   public async execute(params: FindSLOParams): Promise<FindSLOResponse> {
     const pagination: Pagination = toPagination(params);
     const criteria: Criteria = toCriteria(params);
+    const sort: Sort = toSort(params);
 
     const { results: sloList, ...resultMeta }: Paginated<SLO> = await this.repository.find(
       criteria,
+      sort,
       pagination
     );
     const indicatorDataBySlo = await this.sliClient.fetchCurrentSLIData(sloList);
@@ -71,5 +81,12 @@ function toPagination(params: FindSLOParams): Pagination {
 }
 
 function toCriteria(params: FindSLOParams): Criteria {
-  return { name: params.name };
+  return { name: params.name, indicatorTypes: params.indicator_types };
+}
+
+function toSort(params: FindSLOParams): Sort {
+  return {
+    field: params.sort_by === 'indicator_type' ? SortField.IndicatorType : SortField.Name,
+    direction: params.sort_direction === 'desc' ? SortDirection.Desc : SortDirection.Asc,
+  };
 }

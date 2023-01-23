@@ -219,6 +219,7 @@ export class SavedSearchEmbeddable
       : child;
 
     const query = this.savedSearch.searchSource.getField('query');
+    const dataView = this.savedSearch.searchSource.getField('index')!;
     const recordRawType = getRawRecordType(query);
     const useSql = recordRawType === RecordRawType.PLAIN;
 
@@ -227,7 +228,7 @@ export class SavedSearchEmbeddable
       if (useSql && query) {
         const result = await fetchSql(
           this.savedSearch.searchSource.getField('query')!,
-          this.services.dataViews,
+          dataView,
           this.services.data,
           this.services.expressions,
           this.services.inspector,

@@ -28,6 +28,7 @@ import {
   RuleDataService,
 } from '@kbn/rule-registry-plugin/server';
 import { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
+import { get } from 'lodash';
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
   MockRuleParams,
@@ -357,7 +358,7 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
       expect(summarizedAlertsExcludingId1.new.count).to.eql(1);
       expect(summarizedAlertsExcludingId1.ongoing.count).to.eql(0);
       expect(summarizedAlertsExcludingId1.recovered.count).to.eql(0);
-      expect(summarizedAlertsExcludingId1.new.data[0][ALERT_INSTANCE_ID]).to.eql(id2);
+      expect(get(summarizedAlertsExcludingId1.new.data[0], ALERT_INSTANCE_ID)).to.eql(id2);
 
       const summarizedAlertsExcludingId2 = await getSummarizedAlerts({
         ruleId,
@@ -368,7 +369,7 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
       expect(summarizedAlertsExcludingId2.new.count).to.eql(1);
       expect(summarizedAlertsExcludingId2.ongoing.count).to.eql(0);
       expect(summarizedAlertsExcludingId2.recovered.count).to.eql(0);
-      expect(summarizedAlertsExcludingId2.new.data[0][ALERT_INSTANCE_ID]).to.eql(id1);
+      expect(get(summarizedAlertsExcludingId2.new.data[0], ALERT_INSTANCE_ID)).to.eql(id1);
     });
   });
 }

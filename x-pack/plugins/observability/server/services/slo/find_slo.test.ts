@@ -11,7 +11,7 @@ import { FindSLO } from './find_slo';
 import { createSLO, createPaginatedSLO } from './fixtures/slo';
 import { createSLIClientMock, createSLORepositoryMock } from './mocks';
 import { SLIClient } from './sli_client';
-import { SLORepository } from './slo_repository';
+import { SLORepository, SortField, SortDirection } from './slo_repository';
 
 describe('FindSLO', () => {
   let mockRepository: jest.Mocked<SLORepository>;
@@ -34,6 +34,7 @@ describe('FindSLO', () => {
 
       expect(mockRepository.find).toHaveBeenCalledWith(
         { name: undefined },
+        { field: SortField.Name, direction: SortDirection.Asc },
         { page: 1, perPage: 25 }
       );
 
@@ -95,6 +96,7 @@ describe('FindSLO', () => {
 
       expect(mockRepository.find).toHaveBeenCalledWith(
         { name: undefined },
+        { field: SortField.Name, direction: SortDirection.Asc },
         { page: 1, perPage: 25 }
       );
     });
@@ -108,6 +110,21 @@ describe('FindSLO', () => {
 
       expect(mockRepository.find).toHaveBeenCalledWith(
         { name: 'Availability' },
+        { field: SortField.Name, direction: SortDirection.Asc },
+        { page: 1, perPage: 25 }
+      );
+    });
+
+    it('calls the repository with the indicator_type filter criteria', async () => {
+      const slo = createSLO();
+      mockRepository.find.mockResolvedValueOnce(createPaginatedSLO(slo));
+      mockSLIClient.fetchCurrentSLIData.mockResolvedValueOnce(someIndicatorData(slo));
+
+      await findSLO.execute({ indicator_types: ['sli.kql.custom'] });
+
+      expect(mockRepository.find).toHaveBeenCalledWith(
+        { indicatorTypes: ['sli.kql.custom'] },
+        { field: SortField.Name, direction: SortDirection.Asc },
         { page: 1, perPage: 25 }
       );
     });
@@ -121,6 +138,7 @@ describe('FindSLO', () => {
 
       expect(mockRepository.find).toHaveBeenCalledWith(
         { name: 'My SLO*' },
+        { field: SortField.Name, direction: SortDirection.Asc },
         { page: 2, perPage: 100 }
       );
     });
@@ -134,6 +152,49 @@ describe('FindSLO', () => {
 
       expect(mockRepository.find).toHaveBeenCalledWith(
         { name: undefined },
+        { field: SortField.Name, direction: SortDirection.Asc },
+        { page: 1, perPage: 25 }
+      );
+    });
+
+    it('sorts by name by default when not specified', async () => {
+      const slo = createSLO();
+      mockRepository.find.mockResolvedValueOnce(createPaginatedSLO(slo));
+      mockSLIClient.fetchCurrentSLIData.mockResolvedValueOnce(someIndicatorData(slo));
+
+      await findSLO.execute({ sort_by: undefined });
+
+      expect(mockRepository.find).toHaveBeenCalledWith(
+        { name: undefined },
+        { field: SortField.Name, direction: SortDirection.Asc },
+        { page: 1, perPage: 25 }
+      );
+    });
+
+    it('sorts by indicator type', async () => {
+      const slo = createSLO();
+      mockRepository.find.mockResolvedValueOnce(createPaginatedSLO(slo));
+      mockSLIClient.fetchCurrentSLIData.mockResolvedValueOnce(someIndicatorData(slo));
+
+      await findSLO.execute({ sort_by: 'indicator_type' });
+
+      expect(mockRepository.find).toHaveBeenCalledWith(
+        { name: undefined },
+        { field: SortField.IndicatorType, direction: SortDirection.Asc },
+        { page: 1, perPage: 25 }
+      );
+    });
+
+    it('sorts by indicator type in descending order', async () => {
+      const slo = createSLO();
+      mockRepository.find.mockResolvedValueOnce(createPaginatedSLO(slo));
+      mockSLIClient.fetchCurrentSLIData.mockResolvedValueOnce(someIndicatorData(slo));
+
+      await findSLO.execute({ sort_by: 'indicator_type', sort_direction: 'desc' });
+
+      expect(mockRepository.find).toHaveBeenCalledWith(
+        { name: undefined },
+        { field: SortField.IndicatorType, direction: SortDirection.Desc },
         { page: 1, perPage: 25 }
       );
     });

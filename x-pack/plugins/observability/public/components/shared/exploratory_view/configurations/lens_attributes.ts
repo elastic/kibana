@@ -123,7 +123,7 @@ export const parseCustomFieldName = (
 
       return {
         ...(currField ?? {}),
-        fieldName: selectedMetricField,
+        fieldName: currField?.field ?? selectedMetricField,
         columnLabel: currField?.label,
         columnField: currField?.field,
       };
@@ -563,6 +563,7 @@ export class LensAttributes {
     const fieldMetaInfo = this.getFieldMeta(sourceField, layerConfig, metricOption);
 
     const {
+      format,
       formula,
       fieldMeta,
       columnType,
@@ -577,6 +578,7 @@ export class LensAttributes {
       return getDistributionInPercentageColumn({
         layerId,
         formula,
+        format,
         label: columnLabel ?? label,
         dataView: layerConfig.dataView,
         lensFormulaHelper: this.lensFormulaHelper!,
@@ -679,9 +681,11 @@ export class LensAttributes {
         paramFilters,
         showPercentileAnnotations,
         formula,
+        format,
       } = metricOption;
       const fieldMeta = layerConfig.dataView.getFieldByName(fieldName!);
       return {
+        format,
         formula,
         palette,
         fieldMeta,

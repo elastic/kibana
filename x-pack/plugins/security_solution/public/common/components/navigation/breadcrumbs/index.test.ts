@@ -134,7 +134,7 @@ const rulesBReadcrumb = {
 };
 
 const exceptionsBReadcrumb = {
-  text: 'Rule Exceptions',
+  text: 'Shared Exception Lists',
   href: 'securitySolutionUI/exceptions',
 };
 
@@ -309,7 +309,7 @@ describe('Navigation Breadcrumbs', () => {
         expect(breadcrumbs).toEqual([
           securityBreadCrumb,
           {
-            text: 'Rule Exceptions',
+            text: 'Shared Exception Lists',
             href: '',
           },
         ]);
@@ -654,7 +654,7 @@ describe('Navigation Breadcrumbs', () => {
           securityBreadCrumb,
           manageBreadcrumbs,
           {
-            text: 'Rule Exceptions',
+            text: 'Shared Exception Lists',
             href: '',
           },
         ]);

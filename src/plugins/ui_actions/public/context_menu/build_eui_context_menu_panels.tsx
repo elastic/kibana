@@ -10,9 +10,8 @@ import * as React from 'react';
 import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { uiToReactComponent } from '@kbn/kibana-react-plugin/public';
-import { Action, ActionExecutionContext } from '../actions';
-import { Trigger } from '../triggers';
+import type { Trigger } from '../triggers';
+import type { Action, ActionDefinition, ActionExecutionContext, ActionInternal } from '../actions';
 
 export const defaultTitle = i18n.translate('uiActions.actionPanel.title', {
   defaultMessage: 'Options',
@@ -23,7 +22,7 @@ export const txtMore = i18n.translate('uiActions.actionPanel.more', {
 });
 
 interface ActionWithContext<Context extends object = object> {
-  action: Action<Context>;
+  action: Action<Context> | ActionInternal<ActionDefinition<Context>>;
   context: Context;
 
   /**
@@ -44,7 +43,11 @@ type PanelDescriptor = EuiContextMenuPanelDescriptor & {
 };
 
 const onClick =
-  (action: Action, context: ActionExecutionContext<object>, close: () => void) =>
+  (
+    action: Action | ActionInternal<ActionDefinition>,
+    context: ActionExecutionContext<object>,
+    close: () => void
+  ) =>
   (event: React.MouseEvent) => {
     if (event.currentTarget instanceof HTMLAnchorElement) {
       // from react-router's <Link/>
@@ -163,8 +166,10 @@ export async function buildContextMenuForActions({
       }
     }
     panels[parentPanel || 'mainMenu'].items!.push({
-      name: action.MenuItem
-        ? React.createElement(uiToReactComponent(action.MenuItem), { context })
+      name: (action as ActionInternal<ActionDefinition>).ReactMenuItem
+        ? React.createElement((action as ActionInternal<ActionDefinition>).ReactMenuItem!, {
+            context,
+          })
         : action.getDisplayName(context),
       icon: action.getIconType(context),
       toolTipContent: action.getDisplayNameTooltip ? action.getDisplayNameTooltip(context) : '',

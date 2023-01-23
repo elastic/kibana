@@ -32,7 +32,7 @@ describe('helpers', () => {
   it('helper for raw block gets raw content', () => {
     expectTemplate('{{{{raw}}}} {{test}} {{{{/raw}}}}')
       .withInput({ test: 'hello' })
-      .withHelper('raw', function (options) {
+      .withHelper('raw', function (options: Handlebars.HelperOptions) {
         return options.fn();
       })
       .toCompileTo(' {{test}} ');
@@ -41,7 +41,7 @@ describe('helpers', () => {
   it('helper for raw block gets parameters', () => {
     expectTemplate('{{{{raw 1 2 3}}}} {{test}} {{{{/raw}}}}')
       .withInput({ test: 'hello' })
-      .withHelper('raw', function (a, b, c, options) {
+      .withHelper('raw', function (a, b, c, options: Handlebars.HelperOptions) {
         const ret = options.fn() + a + b + c;
         return ret;
       })
@@ -51,7 +51,7 @@ describe('helpers', () => {
   describe('raw block parsing (with identity helper-function)', () => {
     function runWithIdentityHelper(template: string, expected: string) {
       expectTemplate(template)
-        .withHelper('identity', function (options) {
+        .withHelper('identity', function (options: Handlebars.HelperOptions) {
           return options.fn();
         })
         .toCompileTo(expected);
@@ -95,7 +95,7 @@ describe('helpers', () => {
   it('helper block with identical context', () => {
     expectTemplate('{{#goodbyes}}{{name}}{{/goodbyes}}')
       .withInput({ name: 'Alan' })
-      .withHelper('goodbyes', function (this: any, options) {
+      .withHelper('goodbyes', function (this: any, options: Handlebars.HelperOptions) {
         let out = '';
         const byes = ['Goodbye', 'goodbye', 'GOODBYE'];
         for (let i = 0, j = byes.length; i < j; i++) {
@@ -109,7 +109,7 @@ describe('helpers', () => {
   it('helper block with complex lookup expression', () => {
     expectTemplate('{{#goodbyes}}{{../name}}{{/goodbyes}}')
       .withInput({ name: 'Alan' })
-      .withHelper('goodbyes', function (options) {
+      .withHelper('goodbyes', function (options: Handlebars.HelperOptions) {
         let out = '';
         const byes = ['Goodbye', 'goodbye', 'GOODBYE'];
         for (let i = 0, j = byes.length; i < j; i++) {
@@ -126,7 +126,7 @@ describe('helpers', () => {
         prefix: '/root',
         goodbyes: [{ text: 'Goodbye', url: 'goodbye' }],
       })
-      .withHelper('link', function (this: any, prefix, options) {
+      .withHelper('link', function (this: any, prefix, options: Handlebars.HelperOptions) {
         return '<a href="' + prefix + '/' + this.url + '">' + options.fn(this) + '</a>';
       })
       .toCompileTo('<a href="/root/goodbye">Goodbye</a>');
@@ -138,7 +138,7 @@ describe('helpers', () => {
         prefix: '/root',
         goodbyes: [{ text: 'Goodbye', url: 'goodbye' }],
       })
-      .withHelper('link', function (this: any, prefix, options) {
+      .withHelper('link', function (this: any, prefix, options: Handlebars.HelperOptions) {
         return '<a href="' + prefix + '/' + this.url + '">' + options.fn(this) + '</a>';
       })
       .toCompileTo('<a href="/root/goodbye">Goodbye</a>');
@@ -161,7 +161,7 @@ describe('helpers', () => {
   it('block helper', () => {
     expectTemplate('{{#goodbyes}}{{text}}! {{/goodbyes}}cruel {{world}}!')
       .withInput({ world: 'world' })
-      .withHelper('goodbyes', function (options) {
+      .withHelper('goodbyes', function (options: Handlebars.HelperOptions) {
         return options.fn({ text: 'GOODBYE' });
       })
       .toCompileTo('GOODBYE! cruel world!');
@@ -170,7 +170,7 @@ describe('helpers', () => {
   it('block helper staying in the same context', () => {
     expectTemplate('{{#form}}<p>{{name}}</p>{{/form}}')
       .withInput({ name: 'Yehuda' })
-      .withHelper('form', function (this: any, options) {
+      .withHelper('form', function (this: any, options: Handlebars.HelperOptions) {
         return '<form>' + options.fn(this) + '</form>';
       })
       .toCompileTo('<form><p>Yehuda</p></form>');
@@ -201,7 +201,7 @@ describe('helpers', () => {
   it('block helper passing a new context', () => {
     expectTemplate('{{#form yehuda}}<p>{{name}}</p>{{/form}}')
       .withInput({ yehuda: { name: 'Yehuda' } })
-      .withHelper('form', function (context, options) {
+      .withHelper('form', function (context, options: Handlebars.HelperOptions) {
         return '<form>' + options.fn(context) + '</form>';
       })
       .toCompileTo('<form><p>Yehuda</p></form>');
@@ -210,7 +210,7 @@ describe('helpers', () => {
   it('block helper passing a complex path context', () => {
     expectTemplate('{{#form yehuda/cat}}<p>{{name}}</p>{{/form}}')
       .withInput({ yehuda: { name: 'Yehuda', cat: { name: 'Harold' } } })
-      .withHelper('form', function (context, options) {
+      .withHelper('form', function (context, options: Handlebars.HelperOptions) {
         return '<form>' + options.fn(context) + '</form>';
       })
       .toCompileTo('<form><p>Harold</p></form>');
@@ -221,10 +221,10 @@ describe('helpers', () => {
       .withInput({
         yehuda: { name: 'Yehuda' },
       })
-      .withHelper('link', function (this: any, options) {
+      .withHelper('link', function (this: any, options: Handlebars.HelperOptions) {
         return '<a href="' + this.name + '">' + options.fn(this) + '</a>';
       })
-      .withHelper('form', function (context, options) {
+      .withHelper('form', function (context, options: Handlebars.HelperOptions) {
         return '<form>' + options.fn(context) + '</form>';
       })
       .toCompileTo('<form><p>Yehuda</p><a href="Yehuda">Hello</a></form>');
@@ -477,7 +477,7 @@ describe('helpers', () => {
     it('block multi-params work', () => {
       expectTemplate('Message: {{#goodbye cruel world}}{{greeting}} {{adj}} {{noun}}{{/goodbye}}')
         .withInput({ cruel: 'cruel', world: 'world' })
-        .withHelper('goodbye', function (cruel, world, options) {
+        .withHelper('goodbye', function (cruel, world, options: Handlebars.HelperOptions) {
           return options.fn({ greeting: 'Goodbye', adj: cruel, noun: world });
         })
         .toCompileTo('Message: Goodbye cruel world');
@@ -487,7 +487,7 @@ describe('helpers', () => {
   describe('hash', () => {
     it('helpers can take an optional hash', () => {
       expectTemplate('{{goodbye cruel="CRUEL" world="WORLD" times=12}}')
-        .withHelper('goodbye', function (options) {
+        .withHelper('goodbye', function (options: Handlebars.HelperOptions) {
           return (
             'GOODBYE ' +
             options.hash.cruel +
@@ -523,7 +523,7 @@ describe('helpers', () => {
 
     it('block helpers can take an optional hash', () => {
       expectTemplate('{{#goodbye cruel="CRUEL" times=12}}world{{/goodbye}}')
-        .withHelper('goodbye', function (this: any, options) {
+        .withHelper('goodbye', function (this: any, options: Handlebars.HelperOptions) {
           return (
             'GOODBYE ' +
             options.hash.cruel +
@@ -539,7 +539,7 @@ describe('helpers', () => {
 
     it('block helpers can take an optional hash with single quoted stings', () => {
       expectTemplate('{{#goodbye cruel="CRUEL" times=12}}world{{/goodbye}}')
-        .withHelper('goodbye', function (this: any, options) {
+        .withHelper('goodbye', function (this: any, options: Handlebars.HelperOptions) {
           return (
             'GOODBYE ' +
             options.hash.cruel +
@@ -582,7 +582,7 @@ describe('helpers', () => {
     it('if a context is not found, custom helperMissing is used', () => {
       expectTemplate('{{hello}} {{link_to world}}')
         .withInput({ hello: 'Hello', world: 'world' })
-        .withHelper('helperMissing', function (mesg, options) {
+        .withHelper('helperMissing', function (mesg, options: Handlebars.HelperOptions) {
           if (options.name === 'link_to') {
             return new Handlebars.SafeString('<a>' + mesg + '</a>');
           }
@@ -593,7 +593,7 @@ describe('helpers', () => {
     it('if a value is not found, custom helperMissing is used', () => {
       expectTemplate('{{hello}} {{link_to}}')
         .withInput({ hello: 'Hello', world: 'world' })
-        .withHelper('helperMissing', function (options) {
+        .withHelper('helperMissing', function (options: Handlebars.HelperOptions) {
           if (options.name === 'link_to') {
             return new Handlebars.SafeString('<a>winning</a>');
           }
@@ -788,7 +788,7 @@ describe('helpers', () => {
 
     it('helpers take precedence over same-named context properties$', () => {
       expectTemplate('{{#goodbye}} {{cruel world}}{{/goodbye}}')
-        .withHelper('goodbye', function (this: any, options) {
+        .withHelper('goodbye', function (this: any, options: Handlebars.HelperOptions) {
           return this.goodbye.toUpperCase() + options.fn(this);
         })
         .withHelper('cruel', function (world) {
@@ -818,7 +818,7 @@ describe('helpers', () => {
 
     it('Scoped names take precedence over block helpers', () => {
       expectTemplate('{{#goodbye}} {{cruel world}}{{/goodbye}} {{this.goodbye}}')
-        .withHelper('goodbye', function (this: any, options) {
+        .withHelper('goodbye', function (this: any, options: Handlebars.HelperOptions) {
           return this.goodbye.toUpperCase() + options.fn(this);
         })
         .withHelper('cruel', function (world) {
@@ -836,7 +836,7 @@ describe('helpers', () => {
     it('should take presedence over context values', () => {
       expectTemplate('{{#goodbyes as |value|}}{{value}}{{/goodbyes}}{{value}}')
         .withInput({ value: 'foo' })
-        .withHelper('goodbyes', function (options) {
+        .withHelper('goodbyes', function (options: Handlebars.HelperOptions) {
           expect(options.fn.blockParams).toEqual(1);
           return options.fn({ value: 'bar' }, { blockParams: [1, 2] });
         })
@@ -848,7 +848,7 @@ describe('helpers', () => {
         .withHelper('value', function () {
           return 'foo';
         })
-        .withHelper('goodbyes', function (options) {
+        .withHelper('goodbyes', function (options: Handlebars.HelperOptions) {
           expect(options.fn.blockParams).toEqual(1);
           return options.fn({}, { blockParams: [1, 2] });
         })
@@ -861,7 +861,7 @@ describe('helpers', () => {
         .withHelper('value', function () {
           return 'foo';
         })
-        .withHelper('goodbyes', function (this: any, options) {
+        .withHelper('goodbyes', function (this: any, options: Handlebars.HelperOptions) {
           expect(options.fn.blockParams).toEqual(1);
           return options.fn(this, { blockParams: [1, 2] });
         })
@@ -879,7 +879,7 @@ describe('helpers', () => {
         }
       )
         .withInput({ value: 'foo' })
-        .withHelper('goodbyes', function (options) {
+        .withHelper('goodbyes', function (options: Handlebars.HelperOptions) {
           return options.fn(
             { value: 'bar' },
             {
@@ -893,7 +893,7 @@ describe('helpers', () => {
     it('should allow block params on chained helpers', () => {
       expectTemplate('{{#if bar}}{{else goodbyes as |value|}}{{value}}{{/if}}{{value}}')
         .withInput({ value: 'foo' })
-        .withHelper('goodbyes', function (options) {
+        .withHelper('goodbyes', function (options: Handlebars.HelperOptions) {
           expect(options.fn.blockParams).toEqual(1);
           return options.fn({ value: 'bar' }, { blockParams: [1, 2] });
         })
@@ -942,9 +942,12 @@ describe('helpers', () => {
   describe('the lookupProperty-option', () => {
     it('should be passed to custom helpers', () => {
       expectTemplate('{{testHelper}}')
-        .withHelper('testHelper', function testHelper(this: any, options) {
-          return options.lookupProperty(this, 'testProperty');
-        })
+        .withHelper(
+          'testHelper',
+          function testHelper(this: any, options: Handlebars.HelperOptions) {
+            return options.lookupProperty(this, 'testProperty');
+          }
+        )
         .withInput({ testProperty: 'abc' })
         .toCompileTo('abc');
     });

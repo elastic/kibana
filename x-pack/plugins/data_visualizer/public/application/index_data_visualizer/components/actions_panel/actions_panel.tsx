@@ -48,8 +48,8 @@ export const ActionsPanel: FC<Props> = ({
   useEffect(() => {
     let unmounted = false;
 
-    const indexPatternId = dataView.id;
-    const indexPatternTitle = dataView.title;
+    const dataViewId = dataView.id;
+    const dataViewIndexPattern = dataView.getIndexPattern();
     const getDiscoverUrl = async (): Promise<void> => {
       const isDiscoverAvailable = capabilities.discover?.show ?? false;
       if (!isDiscoverAvailable) return;
@@ -59,7 +59,7 @@ export const ActionsPanel: FC<Props> = ({
         return;
       }
       const discoverUrl = await discover.locator.getUrl({
-        indexPatternId,
+        indexPatternId: dataViewId,
         filters: data.query.filterManager.getFilters() ?? [],
         query:
           searchString && searchQueryLanguage !== undefined
@@ -72,12 +72,12 @@ export const ActionsPanel: FC<Props> = ({
       setDiscoverLink(discoverUrl);
     };
 
-    if (Array.isArray(getAdditionalLinks) && indexPatternId !== undefined) {
+    if (Array.isArray(getAdditionalLinks) && dataViewId !== undefined) {
       Promise.all(
         getAdditionalLinks.map(async (asyncCardGetter) => {
           const results = await asyncCardGetter({
-            dataViewId: indexPatternId,
-            dataViewTitle: indexPatternTitle,
+            dataViewId,
+            dataViewTitle: dataViewIndexPattern,
           });
           if (Array.isArray(results)) {
             return await Promise.all(

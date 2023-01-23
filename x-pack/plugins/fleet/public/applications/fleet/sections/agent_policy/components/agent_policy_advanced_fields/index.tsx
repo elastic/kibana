@@ -32,7 +32,7 @@ import { AgentPolicyPackageBadge } from '../../../../components';
 import { AgentPolicyDeleteProvider } from '../agent_policy_delete_provider';
 import type { ValidationResults } from '../agent_policy_validation';
 
-import { ExperimentalFeaturesService, policyHasFleetServer } from '../../../../services';
+import { policyHasFleetServer } from '../../../../services';
 
 import {
   useOutputOptions,
@@ -75,8 +75,6 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   const hasManagedPackagePolicy =
     'package_policies' in agentPolicy &&
     agentPolicy?.package_policies?.some((packagePolicy) => packagePolicy.is_managed);
-
-  const { inactivityTimeout: inactivityTimeoutEnabled } = ExperimentalFeaturesService.get();
 
   return (
     <>
@@ -302,48 +300,46 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
-      {inactivityTimeoutEnabled && (
-        <EuiDescribedFormGroup
-          title={
-            <h4>
-              <FormattedMessage
-                id="xpack.fleet.agentPolicyForm.inactivityTimeoutLabel"
-                defaultMessage="Inactivity timeout"
-              />
-            </h4>
-          }
-          description={
+      <EuiDescribedFormGroup
+        title={
+          <h4>
             <FormattedMessage
-              id="xpack.fleet.agentPolicyForm.inactivityTimeoutDescription"
-              defaultMessage="An optional timeout in seconds. If provided, an agent will automatically change to inactive status and be filtered out of the agents list."
+              id="xpack.fleet.agentPolicyForm.inactivityTimeoutLabel"
+              defaultMessage="Inactivity timeout"
             />
+          </h4>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.fleet.agentPolicyForm.inactivityTimeoutDescription"
+            defaultMessage="An optional timeout in seconds. If provided, an agent will automatically change to inactive status and be filtered out of the agents list."
+          />
+        }
+      >
+        <EuiFormRow
+          fullWidth
+          error={
+            touchedFields.inactivity_timeout && validation.inactivity_timeout
+              ? validation.inactivity_timeout
+              : null
           }
+          isInvalid={Boolean(touchedFields.inactivity_timeout && validation.inactivity_timeout)}
         >
-          <EuiFormRow
+          <EuiFieldNumber
             fullWidth
-            error={
-              touchedFields.inactivity_timeout && validation.inactivity_timeout
-                ? validation.inactivity_timeout
-                : null
-            }
+            disabled={agentPolicy.is_managed === true}
+            value={agentPolicy.inactivity_timeout || ''}
+            min={0}
+            onChange={(e) => {
+              updateAgentPolicy({
+                inactivity_timeout: e.target.value ? Number(e.target.value) : 0,
+              });
+            }}
             isInvalid={Boolean(touchedFields.inactivity_timeout && validation.inactivity_timeout)}
-          >
-            <EuiFieldNumber
-              fullWidth
-              disabled={agentPolicy.is_managed === true}
-              value={agentPolicy.inactivity_timeout || ''}
-              min={0}
-              onChange={(e) => {
-                updateAgentPolicy({
-                  inactivity_timeout: e.target.value ? Number(e.target.value) : 0,
-                });
-              }}
-              isInvalid={Boolean(touchedFields.inactivity_timeout && validation.inactivity_timeout)}
-              onBlur={() => setTouchedFields({ ...touchedFields, inactivity_timeout: true })}
-            />
-          </EuiFormRow>
-        </EuiDescribedFormGroup>
-      )}
+            onBlur={() => setTouchedFields({ ...touchedFields, inactivity_timeout: true })}
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
       <EuiDescribedFormGroup
         title={
           <h4>

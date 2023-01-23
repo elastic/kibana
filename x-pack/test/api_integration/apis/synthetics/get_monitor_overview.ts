@@ -17,8 +17,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from '../uptime/rest/helper/get_fixture_json';
 
 export default function ({ getService }: FtrProviderContext) {
-  // Failing: See https://github.com/elastic/kibana/issues/146014
-  describe.skip('GetMonitorsOverview', function () {
+  describe('GetMonitorsOverview', function () {
     this.tags('skipCloud');
 
     const supertest = getService('supertest');
@@ -170,9 +169,9 @@ export default function ({ getService }: FtrProviderContext) {
         );
         savedMonitors = savedResponse;
 
-        const apiResponse = await supertest.get(
-          `/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_OVERVIEW}`
-        );
+        const apiResponse = await supertest
+          .get(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_OVERVIEW}`)
+          .query({ sortField: 'status' });
         expect(apiResponse.body.monitors).eql([
           {
             id: savedMonitors[0].attributes[ConfigKey.MONITOR_QUERY_ID],
@@ -180,7 +179,7 @@ export default function ({ getService }: FtrProviderContext) {
             name: 'test monitor a',
             location: {
               id: 'eu-west-01',
-              label: 'Europe West',
+              label: 'Europe East',
               geo: {
                 lat: 33.2343132435,
                 lon: 73.2342343434,
@@ -212,7 +211,7 @@ export default function ({ getService }: FtrProviderContext) {
             name: 'test monitor b',
             location: {
               id: 'eu-west-01',
-              label: 'Europe West',
+              label: 'Europe East',
               geo: {
                 lat: 33.2343132435,
                 lon: 73.2342343434,

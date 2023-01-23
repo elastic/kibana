@@ -14,7 +14,12 @@ import { searchSourceCommonMock } from '@kbn/data-plugin/common/search/search_so
 import { rulesClientMock } from './rules_client.mock';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { Alert, AlertFactoryDoneUtils } from './alert';
-import { AlertInstanceContext, AlertInstanceState, PublicRuleMonitoringService } from './types';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  PublicRuleResultService,
+  PublicRuleMonitoringService,
+} from './types';
 
 export { rulesClientMock };
 
@@ -108,6 +113,18 @@ const createRuleMonitoringServiceMock = () => {
   return mock;
 };
 
+const createRuleLastRunServiceMock = () => {
+  const mock = {
+    getLastRunErrors: jest.fn(),
+    getLastRunWarnings: jest.fn(),
+    getLastRunOutcomeMessages: jest.fn(),
+    getLastRunResults: jest.fn(),
+    getLastRunSetters: jest.fn(),
+  } as unknown as jest.Mocked<PublicRuleResultService>;
+
+  return mock;
+};
+
 const createRuleExecutorServicesMock = <
   InstanceState extends AlertInstanceState = AlertInstanceState,
   InstanceContext extends AlertInstanceContext = AlertInstanceContext
@@ -143,3 +160,5 @@ export const alertsMock = {
 };
 
 export const ruleMonitoringServiceMock = { create: createRuleMonitoringServiceMock };
+
+export const ruleLastRunServiceMock = { create: createRuleLastRunServiceMock };

@@ -8526,16 +8526,16 @@
         },
         {
           "parentPluginId": "triggersActionsUi",
-          "id": "def-public.TriggersAndActionsUIPublicPluginStart.getRuleAlertsSummary",
+          "id": "def-public.TriggersAndActionsUIPublicPluginStart.getAlertSummaryWidget",
           "type": "Function",
           "tags": [],
-          "label": "getRuleAlertsSummary",
+          "label": "getAlertSummaryWidget",
           "description": [],
           "signature": [
             "(props: ",
-            "RuleAlertsSummaryProps",
+            "AlertSummaryWidgetProps",
             ") => React.ReactElement<",
-            "RuleAlertsSummaryProps",
+            "AlertSummaryWidgetProps",
             ", string | React.JSXElementConstructor<any>>"
           ],
           "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
@@ -8544,13 +8544,13 @@
           "children": [
             {
               "parentPluginId": "triggersActionsUi",
-              "id": "def-public.TriggersAndActionsUIPublicPluginStart.getRuleAlertsSummary.$1",
+              "id": "def-public.TriggersAndActionsUIPublicPluginStart.getAlertSummaryWidget.$1",
               "type": "Object",
               "tags": [],
               "label": "props",
               "description": [],
               "signature": [
-                "RuleAlertsSummaryProps"
+                "AlertSummaryWidgetProps"
               ],
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
               "deprecated": false,

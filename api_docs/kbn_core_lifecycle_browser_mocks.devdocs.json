@@ -212,7 +212,7 @@
                 "section": "def-common.ThemeServiceStart",
                 "text": "ThemeServiceStart"
               },
-              ">; injectedMetadata: { getInjectedVar: jest.MockInstance<unknown, [name: string, defaultValue?: any]> & ((name: string, defaultValue?: any) => unknown); }; fatalErrors: jest.Mocked<",
+              ">; fatalErrors: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-fatal-errors-browser",
                 "scope": "common",
@@ -268,7 +268,7 @@
                 "section": "def-common.IUiSettingsClient",
                 "text": "IUiSettingsClient"
               },
-              ">; }; deprecations: undefined; injectedMetadata: { getInjectedVar: jest.MockInstance<unknown, [name: string, defaultValue?: any]> & ((name: string, defaultValue?: any) => unknown); }; theme: jest.Mocked<",
+              ">; }; deprecations: undefined; theme: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-theme-browser",
                 "scope": "common",
@@ -445,7 +445,7 @@
                 "section": "def-common.ThemeServiceStart",
                 "text": "ThemeServiceStart"
               },
-              ">; injectedMetadata: { getInjectedVar: jest.MockInstance<unknown, [name: string, defaultValue?: any]> & ((name: string, defaultValue?: any) => unknown); }; fatalErrors: jest.Mocked<",
+              ">; fatalErrors: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-fatal-errors-browser",
                 "scope": "common",

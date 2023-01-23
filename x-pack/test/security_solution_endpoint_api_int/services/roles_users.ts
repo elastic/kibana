@@ -82,7 +82,7 @@ export function RolesUsersProvider({ getService }: FtrProviderContext) {
           ];
         }
 
-        await security.role.create(predefinedRole, rolesMapping[predefinedRole]);
+        await security.role.create(predefinedRole, roleConfig);
       }
       if (customRole) {
         await security.role.create(customRole.roleName, {

@@ -31,7 +31,7 @@ export async function setFullTimeRange(
 ): Promise<GetTimeFieldRangeResponse> {
   const runtimeMappings = dataView.getRuntimeMappings();
   const resp = await getTimeFieldRange({
-    index: dataView.title,
+    index: dataView.getIndexPattern(),
     timeFieldName: dataView.timeFieldName,
     query: excludeFrozenData ? addExcludeFrozenToQuery(query) : query,
     ...(isPopulatedObject(runtimeMappings) ? { runtimeMappings } : {}),

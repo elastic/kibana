@@ -97,6 +97,7 @@ export const expectErrorInvalidType = (obj: TypeIdTuple, overrides?: Record<stri
   expectErrorResult(obj, createUnsupportedTypeErrorPayload(obj.type), overrides);
 
 export const KIBANA_VERSION = '2.0.0';
+export const ALLOWED_CONVERT_VERSION = '8.0.0';
 export const CUSTOM_INDEX_TYPE = 'customIndex';
 /** This type has namespaceType: 'agnostic'. */
 export const NAMESPACE_AGNOSTIC_TYPE = 'globalType';
@@ -372,6 +373,7 @@ export const createDocumentMigrator = (registry: SavedObjectTypeRegistry) => {
   return new DocumentMigrator({
     typeRegistry: registry,
     kibanaVersion: KIBANA_VERSION,
+    convertVersion: ALLOWED_CONVERT_VERSION,
     log: loggerMock.create(),
   });
 };

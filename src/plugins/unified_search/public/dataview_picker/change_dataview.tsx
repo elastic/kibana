@@ -116,15 +116,13 @@ export function ChangeDataView({
       setDataViewsList(dataViewsRefs);
     };
     fetchDataViews();
-  }, [data, currentDataViewId, adHocDataViews, savedDataViews]);
+  }, [data, currentDataViewId, adHocDataViews, savedDataViews, isTextBasedLangSelected]);
 
   useEffect(() => {
-    if (trigger.label) {
-      if (textBasedLanguage) {
-        setTriggerLabel(textBasedLanguage.toUpperCase());
-      } else {
-        setTriggerLabel(trigger.label);
-      }
+    if (textBasedLanguage) {
+      setTriggerLabel(textBasedLanguage.toUpperCase());
+    } else {
+      setTriggerLabel(trigger.label);
     }
   }, [textBasedLanguage, trigger.label]);
 
@@ -157,7 +155,8 @@ export function ChangeDataView({
         {...rest}
       >
         <>
-          {isAdHocSelected && (
+          {/* we don't want to display the adHoc icon on text based mode */}
+          {isAdHocSelected && !isTextBasedLangSelected && (
             <EuiIcon
               type={adhoc}
               color="primary"
@@ -303,8 +302,8 @@ export function ChangeDataView({
           isTextBasedLangSelected={isTextBasedLangSelected}
           setPopoverIsOpen={setPopoverIsOpen}
           onChangeDataView={async (newId) => {
-            const dataView = await data.dataViews.get(newId);
-            await data.dataViews.refreshFields(dataView);
+            // refreshing the field list
+            await dataViews.get(newId, undefined, true);
             setSelectedDataViewId(newId);
             setPopoverIsOpen(false);
             if (isTextBasedLangSelected && !isTextLangTransitionModalDismissed) {

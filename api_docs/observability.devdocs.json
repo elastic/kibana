@@ -1896,6 +1896,110 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-public.BurnRateRuleParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "BurnRateRuleParams",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "observability",
+            "scope": "public",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-public.BurnRateRuleParams",
+            "text": "BurnRateRuleParams"
+          },
+          " extends ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.RuleTypeParams",
+            "text": "RuleTypeParams"
+          }
+        ],
+        "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.BurnRateRuleParams.sloId",
+            "type": "string",
+            "tags": [],
+            "label": "sloId",
+            "description": [],
+            "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.BurnRateRuleParams.burnRateThreshold",
+            "type": "number",
+            "tags": [],
+            "label": "burnRateThreshold",
+            "description": [],
+            "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.BurnRateRuleParams.maxBurnRateThreshold",
+            "type": "number",
+            "tags": [],
+            "label": "maxBurnRateThreshold",
+            "description": [],
+            "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.BurnRateRuleParams.longWindow",
+            "type": "Object",
+            "tags": [],
+            "label": "longWindow",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "observability",
+                "scope": "public",
+                "docId": "kibObservabilityPluginApi",
+                "section": "def-public.Duration",
+                "text": "Duration"
+              }
+            ],
+            "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.BurnRateRuleParams.shortWindow",
+            "type": "Object",
+            "tags": [],
+            "label": "shortWindow",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "observability",
+                "scope": "public",
+                "docId": "kibObservabilityPluginApi",
+                "section": "def-public.Duration",
+                "text": "Duration"
+              }
+            ],
+            "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-public.ConfigProps",
         "type": "Interface",
         "tags": [],
@@ -9564,11 +9668,25 @@
           "PartialC",
           "<{ name: ",
           "StringC",
-          "; page: ",
+          "; indicator_types: ",
+          "Type",
+          "<string[], string, unknown>; page: ",
           "StringC",
           "; per_page: ",
           "StringC",
-          "; }>; }>, ",
+          "; sort_by: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"name\">, ",
+          "LiteralC",
+          "<\"indicator_type\">]>; sort_direction: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"asc\">, ",
+          "LiteralC",
+          "<\"desc\">]>; }>; }>, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -10112,11 +10230,25 @@
           "PartialC",
           "<{ name: ",
           "StringC",
-          "; page: ",
+          "; indicator_types: ",
+          "Type",
+          "<string[], string, unknown>; page: ",
           "StringC",
           "; per_page: ",
           "StringC",
-          "; }>; }>, ",
+          "; sort_by: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"name\">, ",
+          "LiteralC",
+          "<\"indicator_type\">]>; sort_direction: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"asc\">, ",
+          "LiteralC",
+          "<\"desc\">]>; }>; }>, ",
           {
             "pluginId": "observability",
             "scope": "server",

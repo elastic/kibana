@@ -152,4 +152,13 @@ describe('KibanaSocket', () => {
       expect(socket.authorizationError).toBe(authorizationError);
     });
   });
+
+  describe('getFakeSocket', () => {
+    it('returns a stub', async () => {
+      const fakeSocket = KibanaSocket.getFakeSocket();
+      expect(fakeSocket.getPeerCertificate()).toBeNull();
+      expect(fakeSocket.getProtocol()).toBeNull();
+      await expect(fakeSocket.renegotiate({})).resolves.toBeUndefined();
+    });
+  });
 });

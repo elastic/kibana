@@ -22,12 +22,10 @@ const Template: ComponentStory<typeof Component> = (props: SloListItemsProps) =>
   <Component {...props} />
 );
 
-const defaultProps = {
+const defaultProps: SloListItemsProps = {
   slos: [anSLO, anSLO, anSLO],
   loading: false,
   error: false,
-  filters: [],
-  sort: undefined,
   onDeleted: () => {},
   onDeleting: () => {},
 };

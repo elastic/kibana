@@ -22,6 +22,7 @@ import {
   ALERT_RULE_TYPE,
   ALERT_RULE_NOTE,
   ALERT_RULE_PARAMETERS,
+  ALERT_RULE_CREATED_BY,
   ALERT_SUPPRESSION_START,
   ALERT_SUPPRESSION_END,
   ALERT_SUPPRESSION_DOCS_COUNT,
@@ -473,6 +474,7 @@ const createThresholdTimeline = async (
 
     const alertDoc = formattedAlertData[0];
     const params = getField(alertDoc, ALERT_RULE_PARAMETERS);
+    const ruleAuthor = getField(alertDoc, ALERT_RULE_CREATED_BY);
     const filters: Filter[] =
       (params as MightHaveFilters).filters ??
       (alertDoc.signal?.rule as MightHaveFilters)?.filters ??
@@ -521,6 +523,7 @@ const createThresholdTimeline = async (
       },
       to: thresholdTo,
       ruleNote: noteContent,
+      ruleAuthor,
     });
   } catch (error) {
     const { toasts } = KibanaServices.get().notifications;
@@ -940,6 +943,7 @@ export const sendAlertToTimelineAction = async ({
 
   const ecsData: Ecs = Array.isArray(ecs) ? ecs[0] : ecs;
   const ruleNote = getField(ecsData, ALERT_RULE_NOTE);
+  const ruleAuthor = getField(ecsData, ALERT_RULE_CREATED_BY);
   const noteContent = Array.isArray(ruleNote) && ruleNote.length > 0 ? ruleNote[0] : '';
   const ruleTimelineId = getField(ecsData, ALERT_RULE_TIMELINE_ID);
   const timelineId = !isEmpty(ruleTimelineId)
@@ -1062,6 +1066,7 @@ export const sendAlertToTimelineAction = async ({
             },
             to,
             ruleNote: noteContent,
+            ruleAuthor,
             notes: notes ?? null,
           });
         }
@@ -1127,6 +1132,7 @@ export const sendAlertToTimelineAction = async ({
       },
       to,
       ruleNote: noteContent,
+      ruleAuthor,
     });
   }
 };

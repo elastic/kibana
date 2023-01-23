@@ -67,6 +67,25 @@ const indicatorTypesSchema = t.union([
   kqlCustomIndicatorTypeSchema,
 ]);
 
+// Validate that a string is a comma separated list of indicator types,
+// e.g. sli.kql.custom,sli.apm.transaction_duration
+// Transform to an array of indicator type
+const indicatorTypesArraySchema = new t.Type<string[], string, unknown>(
+  'indicatorTypesArray',
+  (input: unknown): input is string[] =>
+    Array.isArray(input) && input.every((i) => typeof i === 'string'),
+  (input: unknown, context: t.Context) => {
+    if (typeof input === 'string') {
+      const values = input.split(',');
+      if (values.every((value) => typeof value === 'string' && indicatorTypesSchema.is(value))) {
+        return t.success(values);
+      }
+    }
+    return t.failure(input, context);
+  },
+  (values: string[]): string => values.join(',')
+);
+
 const indicatorSchema = t.union([
   apmTransactionDurationIndicatorSchema,
   apmTransactionErrorRateIndicatorSchema,
@@ -81,6 +100,7 @@ export {
   kqlCustomIndicatorSchema,
   kqlCustomIndicatorTypeSchema,
   indicatorSchema,
+  indicatorTypesArraySchema,
   indicatorTypesSchema,
   indicatorDataSchema,
 };

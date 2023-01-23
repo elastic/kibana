@@ -6,7 +6,7 @@
  */
 
 import uuid from 'uuid';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { appContextService } from '../app_context';
 import type {
@@ -287,7 +287,11 @@ export async function cancelAgentAction(esClient: ElasticsearchClient, actionId:
 }
 
 export interface ActionsService {
-  getAgent: (esClient: ElasticsearchClient, agentId: string) => Promise<Agent>;
+  getAgent: (
+    esClient: ElasticsearchClient,
+    soClient: SavedObjectsClientContract,
+    agentId: string
+  ) => Promise<Agent>;
 
   cancelAgentAction: (esClient: ElasticsearchClient, actionId: string) => Promise<AgentAction>;
 

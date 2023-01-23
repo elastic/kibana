@@ -416,6 +416,12 @@ export interface Span {
       }
   >;
   /**
+   * Describes the event used by the Mobile SDKs: ApplicationLifecycle, Breadcrumb, Crash, Application Opened.
+   */
+  event?: null | {
+    name: string;
+  };
+  /**
    * Start is the offset relative to the transaction's timestamp identifying the start of the span, in milliseconds.
    */
   start?: null | number;

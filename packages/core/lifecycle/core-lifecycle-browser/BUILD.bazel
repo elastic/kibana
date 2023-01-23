@@ -42,7 +42,6 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
-  "//packages/core/injected-metadata/core-injected-metadata-browser:npm_module_types",
   "//packages/core/theme/core-theme-browser:npm_module_types",
   "//packages/core/analytics/core-analytics-browser:npm_module_types",
   "//packages/core/execution-context/core-execution-context-browser:npm_module_types",

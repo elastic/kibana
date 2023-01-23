@@ -847,6 +847,76 @@
       },
       {
         "parentPluginId": "uiActions",
+        "id": "def-public.CellActions",
+        "type": "Function",
+        "tags": [],
+        "label": "CellActions",
+        "description": [],
+        "signature": [
+          "({ field, triggerId, children, mode, showActionTooltips, visibleCellActions, metadata, }: React.PropsWithChildren<",
+          "CellActionsProps",
+          ">) => JSX.Element"
+        ],
+        "path": "src/plugins/ui_actions/public/cell_actions/components/cell_actions.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.CellActions.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  field,\n  triggerId,\n  children,\n  mode,\n  showActionTooltips = true,\n  visibleCellActions = 3,\n  metadata,\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              "CellActionsProps",
+              ">"
+            ],
+            "path": "src/plugins/ui_actions/public/cell_actions/components/cell_actions.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "uiActions",
+        "id": "def-public.CellActionsContextProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "CellActionsContextProvider",
+        "description": [],
+        "signature": [
+          "({ children, getTriggerCompatibleActions, }: React.PropsWithChildren<CellActionsContextProviderProps>) => JSX.Element"
+        ],
+        "path": "src/plugins/ui_actions/public/cell_actions/components/cell_actions_context.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.CellActionsContextProvider.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  children,\n  getTriggerCompatibleActions,\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<CellActionsContextProviderProps>"
+            ],
+            "path": "src/plugins/ui_actions/public/cell_actions/components/cell_actions_context.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "uiActions",
         "id": "def-public.createAction",
         "type": "Function",
         "tags": [],
@@ -2255,7 +2325,20 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "uiActions",
+        "id": "def-public.CellActionsMode",
+        "type": "Enum",
+        "tags": [],
+        "label": "CellActionsMode",
+        "description": [],
+        "path": "src/plugins/ui_actions/public/cell_actions/components/cell_actions.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [
       {
         "parentPluginId": "uiActions",

@@ -26,7 +26,6 @@ import { useBreakpoints } from '../../../../hooks/use_breakpoints';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
-import { useFiltersForMobileCharts } from './use_filters_for_mobile_charts';
 import { ServiceOverviewThroughputChart } from '../../service_overview/service_overview_throughput_chart';
 import { TransactionsTable } from '../../../shared/transactions_table';
 import {
@@ -36,13 +35,12 @@ import {
   SERVICE_VERSION,
 } from '../../../../../common/es_fields/apm';
 import { MostUsedChart } from './most_used_chart';
-import { MobileFilters } from './filters';
 import { LatencyMap } from './latency_map';
 import { FailedTransactionRateChart } from '../../../shared/charts/failed_transaction_rate_chart';
 import { ServiceOverviewDependenciesTable } from '../../service_overview/service_overview_dependencies_table';
 import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transactions_badge';
 import { LatencyChart } from '../../../shared/charts/latency_chart';
-
+import { useFiltersForEmbeddableCharts } from '../../../../hooks/use_filters_for_embeddable_charts';
 /**
  * The height a chart should be if it's next to a table with 5 rows and a title.
  * Add the height of the pagination row.
@@ -52,21 +50,11 @@ export const chartHeight = 288;
 export function MobileServiceOverview() {
   const { serviceName, fallbackToTransactions } = useApmServiceContext();
   const router = useApmRouter();
-  const filters = useFiltersForMobileCharts();
+  const filters = useFiltersForEmbeddableCharts();
 
   const {
     query,
-    query: {
-      environment,
-      kuery,
-      rangeFrom,
-      rangeTo,
-      netConnectionType,
-      device,
-      osVersion,
-      appVersion,
-      transactionType,
-    },
+    query: { environment, kuery, rangeFrom, rangeTo },
   } = useApmParams('/mobile-services/{serviceName}/overview');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -100,21 +88,6 @@ export function MobileServiceOverview() {
     >
       <ChartPointerEventContextProvider>
         <EuiFlexGroup direction="column" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <MobileFilters
-              start={start}
-              end={end}
-              environment={environment}
-              transactionType={transactionType}
-              kuery={kuery}
-              filters={{
-                device,
-                osVersion,
-                appVersion,
-                netConnectionType,
-              }}
-            />
-          </EuiFlexItem>
           {fallbackToTransactions && (
             <EuiFlexItem>
               <AggregatedTransactionsBadge />

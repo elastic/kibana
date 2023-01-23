@@ -25,14 +25,17 @@ import type { WindowParameters } from '@kbn/aiops-utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Query } from '@kbn/es-query';
-import type { FieldValuePair } from '@kbn/ml-agg-utils';
 
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { initialState, streamReducer } from '../../../common/api/stream_reducer';
 import type { ApiExplainLogRateSpikes } from '../../../common/api';
 
-import { SpikeAnalysisGroupsTable } from '../spike_analysis_table';
-import { SpikeAnalysisTable } from '../spike_analysis_table';
+import {
+  getGroupTableItems,
+  SpikeAnalysisTable,
+  SpikeAnalysisGroupsTable,
+} from '../spike_analysis_table';
+import {} from '../spike_analysis_table';
 import { useSpikeAnalysisTableRowContext } from '../spike_analysis_table/spike_analysis_table_row_provider';
 
 const groupResultsMessage = i18n.translate(
@@ -159,35 +162,10 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const groupTableItems = useMemo(() => {
-    const tableItems = data.changePointsGroups.map(({ id, group, docCount, histogram, pValue }) => {
-      const sortedGroup = group.sort((a, b) =>
-        a.fieldName > b.fieldName ? 1 : b.fieldName > a.fieldName ? -1 : 0
-      );
-      const dedupedGroup: FieldValuePair[] = [];
-      const repeatedValues: FieldValuePair[] = [];
-
-      sortedGroup.forEach((pair) => {
-        const { fieldName, fieldValue } = pair;
-        if (pair.duplicate === false) {
-          dedupedGroup.push({ fieldName, fieldValue });
-        } else {
-          repeatedValues.push({ fieldName, fieldValue });
-        }
-      });
-
-      return {
-        id,
-        docCount,
-        pValue,
-        group: dedupedGroup,
-        repeatedValues,
-        histogram,
-      };
-    });
-
-    return tableItems;
-  }, [data.changePointsGroups]);
+  const groupTableItems = useMemo(
+    () => getGroupTableItems(data.changePointsGroups),
+    [data.changePointsGroups]
+  );
 
   const shouldRerunAnalysis = useMemo(
     () =>

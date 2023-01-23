@@ -8,6 +8,7 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { waitFor } from '@testing-library/react';
+import { DataViewsContract } from '@kbn/data-plugin/public';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { useTextBasedQueryLanguage } from './use_text_based_query_language';
 import { AppState, GetStateReturn } from '../services/discover_state';
@@ -22,7 +23,8 @@ import { savedSearchMock } from '../../../__mocks__/saved_search';
 
 function getHookProps(
   replaceUrlAppState: (newState: Partial<AppState>) => Promise<void>,
-  query: AggregateQuery | Query | undefined
+  query: AggregateQuery | Query | undefined,
+  dataViewsService?: DataViewsContract
 ) {
   const stateContainer = {
     replaceUrlAppState,
@@ -43,7 +45,7 @@ function getHookProps(
 
   return {
     documents$,
-    dataViews: discoverServiceMock.dataViews,
+    dataViews: dataViewsService ?? discoverServiceMock.dataViews,
     stateContainer,
     dataViewList: [dataViewMock as DataViewListItem],
     savedSearch: savedSearchMock,
@@ -72,7 +74,7 @@ describe('useTextBasedQueryLanguage', () => {
     renderHook(() => useTextBasedQueryLanguage(props));
 
     await waitFor(() => expect(replaceUrlAppState).toHaveBeenCalledTimes(1));
-    expect(replaceUrlAppState).toHaveBeenCalledWith({ index: 'the-data-view-id' });
+    expect(replaceUrlAppState).toHaveBeenCalledWith({ columns: [], index: 'the-data-view-id' });
 
     replaceUrlAppState.mockReset();
 
@@ -159,6 +161,7 @@ describe('useTextBasedQueryLanguage', () => {
 
     await waitFor(() => {
       expect(replaceUrlAppState).toHaveBeenCalledWith({
+        columns: [],
         index: 'the-data-view-id',
       });
     });
@@ -313,6 +316,47 @@ describe('useTextBasedQueryLanguage', () => {
     await waitFor(() => expect(replaceUrlAppState).toHaveBeenCalledTimes(1));
     expect(replaceUrlAppState).toHaveBeenCalledWith({
       columns: ['field1'],
+    });
+  });
+
+  test('changing a text based query with an index pattern that not corresponds to a dataview should return results', async () => {
+    const replaceUrlAppState = jest.fn();
+    const dataViewsCreateMock = discoverServiceMock.dataViews.create as jest.Mock;
+    dataViewsCreateMock.mockImplementation(() => ({
+      ...dataViewMock,
+    }));
+    const dataViewsService = {
+      ...discoverServiceMock.dataViews,
+      create: dataViewsCreateMock,
+    };
+    const props = getHookProps(replaceUrlAppState, query, dataViewsService);
+    const { documents$ } = props;
+
+    renderHook(() => useTextBasedQueryLanguage(props));
+
+    documents$.next(msgComplete);
+    await waitFor(() => expect(replaceUrlAppState).toHaveBeenCalledTimes(2));
+    replaceUrlAppState.mockReset();
+
+    documents$.next({
+      recordRawType: RecordRawType.PLAIN,
+      fetchStatus: FetchStatus.COMPLETE,
+      result: [
+        {
+          id: '1',
+          raw: { field1: 1 },
+          flattened: { field1: 1 },
+        } as unknown as DataTableRecord,
+      ],
+      query: { sql: 'SELECT field1 from the-data-view-*' },
+    });
+    await waitFor(() => expect(replaceUrlAppState).toHaveBeenCalledTimes(1));
+
+    await waitFor(() => {
+      expect(replaceUrlAppState).toHaveBeenCalledWith({
+        index: 'the-data-view-id',
+        columns: ['field1'],
+      });
     });
   });
 });

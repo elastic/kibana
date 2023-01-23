@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { omit, isEqual, keyBy } from 'lodash';
+import { omit, isEqual, keyBy, groupBy } from 'lodash';
 import uuidv5 from 'uuid/v5';
 import { safeDump } from 'js-yaml';
 import pMap from 'p-map';
@@ -658,7 +658,7 @@ class AgentPolicyService {
       throw new HostedAgentPolicyRestrictionRelatedError(`Cannot delete hosted agent policy ${id}`);
     }
 
-    const { total } = await getAgentsByKuery(esClient, {
+    const { total } = await getAgentsByKuery(esClient, soClient, {
       showInactive: false,
       perPage: 0,
       page: 1,
@@ -1030,6 +1030,25 @@ class AgentPolicyService {
     );
 
     return res;
+  }
+
+  public async getInactivityTimeouts(
+    soClient: SavedObjectsClientContract
+  ): Promise<Array<{ policyIds: string[]; inactivityTimeout: number }>> {
+    const findRes = await soClient.find<AgentPolicySOAttributes>({
+      type: SAVED_OBJECT_TYPE,
+      page: 1,
+      perPage: SO_SEARCH_LIMIT,
+      filter: `${SAVED_OBJECT_TYPE}.attributes.inactivity_timeout: *`,
+      fields: [`inactivity_timeout`],
+    });
+
+    const groupedResults = groupBy(findRes.saved_objects, (so) => so.attributes.inactivity_timeout);
+
+    return Object.entries(groupedResults).map(([inactivityTimeout, policies]) => ({
+      inactivityTimeout: parseInt(inactivityTimeout, 10),
+      policyIds: policies.map((policy) => policy.id),
+    }));
   }
 }
 

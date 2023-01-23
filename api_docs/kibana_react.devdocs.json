@@ -3334,14 +3334,6 @@
             "section": "def-common.ThemeServiceStart",
             "text": "ThemeServiceStart"
           },
-          " | undefined; injectedMetadata?: ",
-          {
-            "pluginId": "@kbn/core-injected-metadata-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreInjectedMetadataBrowserPluginApi",
-            "section": "def-common.InjectedMetadataStart",
-            "text": "InjectedMetadataStart"
-          },
           " | undefined; }"
         ],
         "path": "src/plugins/kibana_react/public/context/types.ts",

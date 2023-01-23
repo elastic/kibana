@@ -191,7 +191,7 @@ export abstract class ActionRunner {
     const perPage = this.actionParams.batchSize ?? SO_SEARCH_LIMIT;
 
     const getAgents = () =>
-      getAgentsByKuery(this.esClient, {
+      getAgentsByKuery(this.esClient, this.soClient, {
         kuery: this.actionParams.kuery,
         showInactive: this.actionParams.showInactive ?? false,
         page: 1,
