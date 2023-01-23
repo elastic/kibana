@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import {
   EuiSpacer,
@@ -171,6 +171,10 @@ export const Settings = (props: Props) => {
     [history]
   );
 
+  const searchCategories = useMemo(() => {
+    return categories.global.concat(categories.namespace);
+  }, [categories.global, categories.namespace]);
+
   const tabs = [
     {
       id: SPACE_SETTINGS_ID,
@@ -282,13 +286,19 @@ export const Settings = (props: Props) => {
     };
   };
 
-  const onQueryChange = ({ query }: { query: Query }) => {
-    setUrlQuery(query.text);
-  };
+  const onQueryChange = useCallback(
+    ({ query }: { query: Query }) => {
+      setUrlQuery(query.text);
+    },
+    [setUrlQuery]
+  );
 
-  const onFooterQueryMatchChange = (matched: boolean) => {
-    setQueryState({ ...queryState, footerQueryMatched: matched });
-  };
+  const onFooterQueryMatchChange = useCallback(
+    (matched: boolean) => {
+      setQueryState({ ...queryState, footerQueryMatched: matched });
+    },
+    [queryState]
+  );
 
   const PageTitle = (
     <EuiText>
@@ -304,7 +314,7 @@ export const Settings = (props: Props) => {
         <EuiFlexItem>
           <Search
             query={queryState.query}
-            categories={categories.global.concat(categories.namespace)}
+            categories={searchCategories}
             onQueryChange={onQueryChange}
           />
         </EuiFlexItem>
