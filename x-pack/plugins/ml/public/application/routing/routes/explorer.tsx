@@ -11,7 +11,6 @@ import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiThemeProvider as StyledComponentsThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { useUrlState } from '@kbn/ml-url-state';
 import { useTimefilter } from '@kbn/ml-date-picker';
@@ -38,6 +37,7 @@ import { MlAnnotationUpdatesContext } from '../../contexts/ml/ml_annotation_upda
 import { AnnotationUpdatesService } from '../../services/annotations_service';
 import { useTimeBuckets } from '../../components/custom_hooks/use_time_buckets';
 import { MlPageHeader } from '../../components/page_header';
+import { PageTitle } from '../../components/page_title';
 import { AnomalyResultsViewSelector } from '../../components/anomaly_results_view_selector';
 import { AnomalyDetectionEmptyState } from '../../jobs/jobs_list/components/anomaly_detection_empty_state';
 import {
@@ -263,7 +263,11 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <FormattedMessage id="xpack.ml.explorer.pageTitle" defaultMessage="Anomaly Explorer" />
+            <PageTitle
+              title={i18n.translate('xpack.ml.explorer.pageTitle', {
+                defaultMessage: 'Anomaly Explorer',
+              })}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </MlPageHeader>

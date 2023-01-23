@@ -99,6 +99,11 @@ interface AgentBase {
   components?: FleetServerAgentComponent[];
 }
 
+export interface AgentMetrics {
+  cpu_avg?: number;
+  memory_size_byte_avg?: number;
+}
+
 export interface Agent extends AgentBase {
   id: string;
   access_api_key?: string;
@@ -114,6 +119,7 @@ export interface Agent extends AgentBase {
   status?: AgentStatus;
   packages: string[];
   sort?: Array<number | string | null>;
+  metrics?: AgentMetrics;
 }
 
 export interface AgentSOAttributes extends AgentBase {
