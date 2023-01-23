@@ -128,7 +128,7 @@ export const KPICharts = () => {
           metricType="avg"
           color="#F5A35C"
           title={i18n.translate('xpack.infra.hostsViewPage.metricTrend.tx.title', {
-            defaultMessage: 'Network outbound (TX) usage',
+            defaultMessage: 'Network outbound (TX)',
           })}
           subtitle={i18n.translate('xpack.infra.hostsViewPage.metricTrend.tx.subtitle', {
             defaultMessage: 'Average',

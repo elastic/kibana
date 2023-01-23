@@ -51,8 +51,9 @@ export const useLensAttributes = ({
       return null;
     }
 
+    const VisualizationClass = hostMetricsLensAttributes[type];
     const visualizationAttributes = buildLensAttributes(
-      hostMetricsLensAttributes[type].getAttributes(dataView, options, formulaAPI)
+      new VisualizationClass(dataView, options, formulaAPI)
     );
 
     return visualizationAttributes;

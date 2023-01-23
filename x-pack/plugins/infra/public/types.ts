@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import type {
-  CoreSetup,
-  CoreStart,
-  Plugin as PluginClass,
-  SavedObjectReference,
-} from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin as PluginClass } from '@kbn/core/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -34,15 +29,7 @@ import type {
 // import type { OsqueryPluginStart } from '../../osquery/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import {
-  type FormulaPublicApi,
-  type XYState,
-  type PersistedIndexPatternLayer,
-  type TypedLensByValueInput,
-  LensPublicStart,
-} from '@kbn/lens-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import type { Filter } from '@kbn/es-query';
+import { type TypedLensByValueInput, LensPublicStart } from '@kbn/lens-plugin/public';
 import type { UnwrapPromise } from '../common/utility_types';
 import type {
   SourceProviderProps,
@@ -112,29 +99,7 @@ export interface InfraHttpError extends IHttpFetchError {
 }
 
 export type LensAttributes = TypedLensByValueInput['attributes'];
-interface VisualizationStateByType {
-  lnsXY: XYState;
-}
-
-export interface LensVisualizationProperties<
-  TVis extends keyof VisualizationStateByType = 'lnsXY'
-> {
-  title: string;
-  visualizationType: TVis;
-  getReferences: () => SavedObjectReference[];
-  getLayers: () => PersistedIndexPatternLayer;
-  getVisualizationState: () => VisualizationStateByType[TVis];
-  getFilters: () => Filter[];
-}
 
 export interface LensOptions {
   breakdownSize: number;
-}
-
-export interface LensVisualization<TVis extends keyof VisualizationStateByType = 'lnsXY'> {
-  getAttributes: (
-    dataView: DataView,
-    options: LensOptions,
-    formula?: FormulaPublicApi
-  ) => LensVisualizationProperties<TVis>;
 }

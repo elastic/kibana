@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-export { cpu } from './cpu';
-export { cpuCores } from './cpu_cores';
-export { memory } from './memory';
-export { rx } from './rx';
-export { tx } from './tx';
-export { diskIORead } from './diskio_read';
-export { diskIOWrite } from './diskio_write';
+export { CPU } from './cpu';
+export { CPUCores } from './cpu_cores';
+export { Memory } from './memory';
+export { RX } from './rx';
+export { TX } from './tx';
+export { DiskIORead } from './diskio_read';
+export { DiskIOWrite } from './diskio_write';

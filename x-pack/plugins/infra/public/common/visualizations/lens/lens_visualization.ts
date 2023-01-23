@@ -4,32 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { LensAttributes, LensVisualizationProperties } from '../../../types';
-import { DEFAULT_LAYER_ID } from './utils';
+import { LensAttributes } from '../../../types';
+import { ILensVisualization } from './types';
 
-export const buildLensAttributes = ({
-  title,
-  visualizationType,
-  getReferences,
-  getFilters,
-  getLayers,
-  getVisualizationState,
-}: LensVisualizationProperties): LensAttributes => {
+export const buildLensAttributes = (visualization: ILensVisualization): LensAttributes => {
   return {
-    title,
-    visualizationType,
-    references: getReferences(),
+    title: visualization.getTitle(),
+    visualizationType: visualization.getVisualizationType(),
+    references: visualization.getReferences(),
     state: {
       datasourceStates: {
         formBased: {
-          layers: {
-            [DEFAULT_LAYER_ID]: getLayers(),
-          },
+          layers: visualization.getLayers(),
         },
       },
-      filters: getFilters(),
+      filters: visualization.getFilters(),
       query: { language: 'kuery', query: '' },
-      visualization: getVisualizationState(),
+      visualization: visualization.getVisualizationState(),
     },
   };
 };
