@@ -375,6 +375,7 @@
     "@kbn/rule-data-utils": "link:packages/kbn-rule-data-utils",
     "@kbn/safer-lodash-set": "link:packages/kbn-safer-lodash-set",
     "@kbn/securitysolution-autocomplete": "link:packages/kbn-securitysolution-autocomplete",
+    "@kbn/securitysolution-ecs": "link:packages/kbn-securitysolution-ecs",
     "@kbn/securitysolution-es-utils": "link:packages/kbn-securitysolution-es-utils",
     "@kbn/securitysolution-exception-list-components": "link:packages/kbn-securitysolution-exception-list-components",
     "@kbn/securitysolution-hook-utils": "link:packages/kbn-securitysolution-hook-utils",
