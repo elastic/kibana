@@ -9,7 +9,8 @@
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 
-import { type AliasAction, isTypeof } from '../actions';
+import { isTypeof } from '../actions';
+import type { AliasAction } from '../actions';
 import type { AllActionStates, State } from '../state';
 import type { ResponseType } from '../next';
 import {
@@ -488,7 +489,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // the mappings have changed, but changes might still be compatible
         return {
           ...stateP,
-          controlState: 'CHECK_UNKNOWN_DOCUMENTS',
+          controlState: 'CHECK_COMPATIBLE_MAPPINGS',
         };
       }
     } else if (Either.isLeft(res)) {
@@ -506,6 +507,41 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       }
     } else {
       return throwBadResponse(stateP, res);
+    }
+  } else if (stateP.controlState === 'CHECK_COMPATIBLE_MAPPINGS') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
+      // The source index .kibana is pointing to. E.g: ".xx8.7.0_001"
+      const source = stateP.sourceIndex.value;
+
+      return {
+        ...stateP,
+        controlState: 'PREPARE_COMPATIBLE_MIGRATION',
+        sourceIndex: Option.none,
+        targetIndex: source!,
+        targetIndexRawMappings: stateP.sourceIndexMappings,
+        targetIndexMappings: mergeMigrationMappingPropertyHashes(
+          stateP.targetIndexMappings,
+          stateP.sourceIndexMappings
+        ),
+        preTransformDocsActions: [
+          // Point the version alias to the source index. This let's other Kibana
+          // instances know that a migration for the current version is "done"
+          // even though we may be waiting for document transformations to finish.
+          { add: { index: source!, alias: stateP.versionAlias } },
+          ...buildRemoveAliasActions(source!, Object.keys(stateP.aliases), [
+            stateP.currentAlias,
+            stateP.versionAlias,
+          ]),
+        ],
+        versionIndexReadyActions: Option.none,
+      };
+    } else {
+      // the mappings could not be updated, and thus we can assume they are NOT compatible
+      return {
+        ...stateP,
+        controlState: 'CHECK_UNKNOWN_DOCUMENTS',
+      };
     }
   } else if (stateP.controlState === 'CHECK_UNKNOWN_DOCUMENTS') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;

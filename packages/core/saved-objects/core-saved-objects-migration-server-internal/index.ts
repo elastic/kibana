@@ -24,7 +24,7 @@ export {
   cloneIndex,
   waitForTask,
   updateAndPickupMappings,
-  updateTargetMappingsMeta,
+  updateMappings,
   updateAliases,
   transformDocs,
   setWriteBlock,

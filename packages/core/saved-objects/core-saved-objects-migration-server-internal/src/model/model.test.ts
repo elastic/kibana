@@ -47,6 +47,7 @@ import type {
   UpdateTargetMappingsMeta,
   CheckTargetMappingsState,
   PrepareCompatibleMigration,
+  CheckCompatibleMappingsState,
 } from '../state';
 import { type TransformErrorObjects, TransformSavedObjectDocumentError } from '../core';
 import type { AliasAction, RetryableEsClientError } from '../actions';
@@ -1322,13 +1323,12 @@ describe('migrations v2 model', () => {
             sourceIndexMappings: actualMappings,
           };
 
-          test('WAIT_FOR_YELLOW_SOURCE -> CHECK_UNKNOWN_DOCUMENTS', () => {
+          test('WAIT_FOR_YELLOW_SOURCE -> CHECK_COMPATIBLE_MAPPINGS', () => {
             const res: ResponseType<'WAIT_FOR_YELLOW_SOURCE'> = Either.right({});
             const newState = model(changedMappingsState, res);
-            expect(newState.controlState).toEqual('CHECK_UNKNOWN_DOCUMENTS');
 
             expect(newState).toMatchObject({
-              controlState: 'CHECK_UNKNOWN_DOCUMENTS',
+              controlState: 'CHECK_COMPATIBLE_MAPPINGS',
               sourceIndex: Option.some('.kibana_7.11.0_001'),
               sourceIndexMappings: actualMappings,
             });
@@ -1351,6 +1351,60 @@ describe('migrations v2 model', () => {
             "message": "Action failed with '[index_not_yellow_timeout] Timeout waiting for ... Refer to repeatedTimeoutRequests for information on how to resolve the issue.'. Retrying attempt 1 in 2 seconds.",
           }
         `);
+      });
+    });
+
+    describe('CHECK_COMPATIBLE_MAPPINGS', () => {
+      const checkCompatibleMappingsState: CheckCompatibleMappingsState = {
+        ...baseState,
+        controlState: 'CHECK_COMPATIBLE_MAPPINGS',
+        sourceIndex: Option.some('.kibana_7.11.0_001') as Option.Some<string>,
+        sourceIndexMappings: baseState.targetIndexMappings,
+        aliases: {
+          '.kibana': '.kibana_7.11.0_001',
+          '.kibana_7.11.0': '.kibana_7.11.0_001',
+        },
+      };
+
+      describe('if action succeeds', () => {
+        test('CHECK_COMPATIBLE_MAPPINGS -> PREPARE_COMPATIBLE_MIGRATION', () => {
+          const res: ResponseType<'CHECK_COMPATIBLE_MAPPINGS'> = Either.right(
+            'update_mappings_succeeded' as const
+          );
+          const newState = model(checkCompatibleMappingsState, res);
+
+          expect(newState).toMatchObject({
+            controlState: 'PREPARE_COMPATIBLE_MIGRATION',
+            sourceIndex: Option.none,
+            targetIndex: '.kibana_7.11.0_001',
+            targetIndexRawMappings: indexMapping,
+            targetIndexMappings: baseState.targetIndexMappings,
+            preTransformDocsActions: [
+              {
+                add: {
+                  alias: '.kibana_7.11.0',
+                  index: '.kibana_7.11.0_001',
+                },
+              },
+            ],
+            versionIndexReadyActions: Option.none,
+          });
+        });
+      });
+
+      describe('if action fails', () => {
+        test('CHECK_COMPATIBLE_MAPPINGS -> CHECK_UNKNOWN_DOCUMENTS', () => {
+          const res: ResponseType<'CHECK_COMPATIBLE_MAPPINGS'> = Either.left(
+            'incompatible_mapping_exception'
+          );
+          const newState = model(checkCompatibleMappingsState, res);
+
+          expect(newState).toMatchObject({
+            controlState: 'CHECK_UNKNOWN_DOCUMENTS',
+            sourceIndex: Option.some('.kibana_7.11.0_001'),
+            sourceIndexMappings: baseState.targetIndexMappings,
+          });
+        });
       });
     });
 
@@ -2542,7 +2596,7 @@ describe('migrations v2 model', () => {
 
       test('UPDATE_TARGET_MAPPINGS_META -> CHECK_VERSION_INDEX_READY_ACTIONS if the mapping _meta information is successfully updated', () => {
         const res: ResponseType<'UPDATE_TARGET_MAPPINGS_META'> = Either.right(
-          'update_mappings_meta_succeeded'
+          'update_mappings_succeeded'
         );
         const newState = model(updateTargetMappingsMetaState, res) as CheckVersionIndexReadyActions;
         expect(newState.controlState).toBe('CHECK_VERSION_INDEX_READY_ACTIONS');

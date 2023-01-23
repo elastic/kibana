@@ -7,42 +7,44 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { omit } from 'lodash';
 import type {
   AllActionStates,
-  ReindexSourceToTempOpenPit,
-  ReindexSourceToTempRead,
-  ReindexSourceToTempClosePit,
-  ReindexSourceToTempTransform,
-  MarkVersionIndexReady,
+  CalculateExcludeFiltersState,
+  CheckCompatibleMappingsState,
+  CheckTargetMappingsState,
+  CheckUnknownDocumentsState,
+  CloneTempToSource,
+  CreateNewTargetState,
+  CreateReindexTempState,
   InitState,
   LegacyCreateReindexTargetState,
   LegacyDeleteState,
   LegacyReindexState,
   LegacyReindexWaitForTaskState,
   LegacySetWriteBlockState,
-  OutdatedDocumentsTransform,
-  SetSourceWriteBlockState,
-  State,
-  UpdateTargetMappingsState,
-  UpdateTargetMappingsWaitForTaskState,
-  CreateReindexTempState,
+  MarkVersionIndexReady,
   MarkVersionIndexReadyConflict,
-  CreateNewTargetState,
-  CloneTempToSource,
-  SetTempWriteBlock,
-  WaitForYellowSourceState,
-  TransformedDocumentsBulkIndex,
-  ReindexSourceToTempIndexBulk,
+  OutdatedDocumentsRefresh,
+  OutdatedDocumentsSearchClosePit,
   OutdatedDocumentsSearchOpenPit,
   OutdatedDocumentsSearchRead,
-  OutdatedDocumentsSearchClosePit,
-  RefreshTarget,
-  OutdatedDocumentsRefresh,
-  CheckUnknownDocumentsState,
-  CalculateExcludeFiltersState,
-  WaitForMigrationCompletionState,
-  CheckTargetMappingsState,
+  OutdatedDocumentsTransform,
   PrepareCompatibleMigration,
+  RefreshTarget,
+  ReindexSourceToTempClosePit,
+  ReindexSourceToTempIndexBulk,
+  ReindexSourceToTempOpenPit,
+  ReindexSourceToTempRead,
+  ReindexSourceToTempTransform,
+  SetSourceWriteBlockState,
+  SetTempWriteBlock,
+  State,
+  TransformedDocumentsBulkIndex,
+  UpdateTargetMappingsState,
+  UpdateTargetMappingsWaitForTaskState,
+  WaitForMigrationCompletionState,
+  WaitForYellowSourceState,
 } from './state';
 import type { TransformRawDocs } from './types';
 import * as Actions from './actions';
@@ -69,6 +71,12 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
       Actions.fetchIndices({ client, indices: [state.currentAlias, state.versionAlias] }),
     WAIT_FOR_YELLOW_SOURCE: (state: WaitForYellowSourceState) =>
       Actions.waitForIndexStatus({ client, index: state.sourceIndex.value, status: 'yellow' }),
+    CHECK_COMPATIBLE_MAPPINGS: (state: CheckCompatibleMappingsState) =>
+      Actions.updateMappings({
+        client,
+        index: state.sourceIndex.value, // attempt to update source mappings in-place
+        mappings: omit(state.targetIndexMappings, ['_meta']), // ._meta property will be updated on a later step
+      }),
     CHECK_UNKNOWN_DOCUMENTS: (state: CheckUnknownDocumentsState) =>
       Actions.checkForUnknownDocs({
         client,
@@ -142,7 +150,7 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
       Actions.updateAndPickupMappings({
         client,
         index: state.targetIndex,
-        mappings: state.targetIndexMappings,
+        mappings: omit(state.targetIndexMappings, ['_meta']), // ._meta property will be updated on a later step
       }),
     UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK: (state: UpdateTargetMappingsWaitForTaskState) =>
       Actions.waitForPickupUpdatedMappingsTask({
@@ -151,10 +159,10 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
         timeout: '60s',
       }),
     UPDATE_TARGET_MAPPINGS_META: (state: UpdateTargetMappingsState) =>
-      Actions.updateTargetMappingsMeta({
+      Actions.updateMappings({
         client,
         index: state.targetIndex,
-        meta: state.targetIndexMappings._meta,
+        mappings: state.targetIndexMappings,
       }),
     CHECK_VERSION_INDEX_READY_ACTIONS: () => Actions.noop,
     OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT: (state: OutdatedDocumentsSearchOpenPit) =>
