@@ -84,7 +84,6 @@ const getRuleMock = ({
         tags: [chance.word(), chance.word()],
         version: chance.sentence(),
       },
-      muted: false,
     },
   } as RuleSavedObject);
 

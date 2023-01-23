@@ -12,6 +12,7 @@ import { getMockPolicyAWS, getMockPolicyEKS, getMockPolicyK8s } from './mocks';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import userEvent from '@testing-library/user-event';
 import { getPosturePolicy } from './utils';
+import { CLOUDBEAT_AWS, CLOUDBEAT_EKS } from '../../../common/constants';
 
 describe('<CspPolicyTemplateForm />', () => {
   const onChange = jest.fn();
@@ -148,8 +149,8 @@ describe('<CspPolicyTemplateForm />', () => {
    * AWS Credentials input fields tests for KSPM/CSPM integrations
    */
   const awsInputs = {
-    'cloudbeat/cis_eks': getMockPolicyEKS,
-    'cloudbeat/cis_aws': getMockPolicyAWS,
+    [CLOUDBEAT_EKS]: getMockPolicyEKS,
+    [CLOUDBEAT_AWS]: getMockPolicyAWS,
   };
 
   for (const [inputKey, getPolicy] of Object.entries(awsInputs) as Array<

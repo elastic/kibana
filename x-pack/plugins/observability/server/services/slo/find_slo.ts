@@ -7,7 +7,7 @@
 
 import { FindSLOParams, FindSLOResponse, findSLOResponseSchema } from '@kbn/slo-schema';
 import { IndicatorData, SLO, SLOId, SLOWithSummary } from '../../domain/models';
-import { computeErrorBudget, computeSLI } from '../../domain/services';
+import { computeErrorBudget, computeSLI, computeSummaryStatus } from '../../domain/services';
 import { SLIClient } from './sli_client';
 import {
   Criteria,
@@ -62,9 +62,10 @@ function computeSloWithSummary(
   for (const slo of sloList) {
     const sliValue = computeSLI(indicatorDataBySlo[slo.id]);
     const errorBudget = computeErrorBudget(slo, indicatorDataBySlo[slo.id]);
+    const status = computeSummaryStatus(slo, sliValue, errorBudget);
     sloListWithSummary.push({
       ...slo,
-      summary: { sliValue, errorBudget },
+      summary: { status, sliValue, errorBudget },
     });
   }
   return sloListWithSummary;
@@ -72,7 +73,7 @@ function computeSloWithSummary(
 
 function toPagination(params: FindSLOParams): Pagination {
   const page = Number(params.page);
-  const perPage = Number(params.per_page);
+  const perPage = Number(params.perPage);
 
   return {
     page: !isNaN(page) && page >= 1 ? page : DEFAULT_PAGE,
@@ -81,12 +82,12 @@ function toPagination(params: FindSLOParams): Pagination {
 }
 
 function toCriteria(params: FindSLOParams): Criteria {
-  return { name: params.name, indicatorTypes: params.indicator_types };
+  return { name: params.name, indicatorTypes: params.indicatorTypes };
 }
 
 function toSort(params: FindSLOParams): Sort {
   return {
-    field: params.sort_by === 'indicator_type' ? SortField.IndicatorType : SortField.Name,
-    direction: params.sort_direction === 'desc' ? SortDirection.Desc : SortDirection.Asc,
+    field: params.sortBy === 'indicatorType' ? SortField.IndicatorType : SortField.Name,
+    direction: params.sortDirection === 'desc' ? SortDirection.Desc : SortDirection.Asc,
   };
 }

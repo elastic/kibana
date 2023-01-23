@@ -212,12 +212,12 @@ describe('update_agent_tags', () => {
           tagsToRemove: [],
           kuery: '',
           total: 100,
-          retryCount: 3,
+          retryCount: 5,
         }
       )
     ).rejects.toThrowError('version conflict of 100 agents');
     const errorResults = esClient.bulk.mock.calls[0][0] as any;
-    expect(errorResults.body[1].error).toEqual('version conflict on 3rd retry');
+    expect(errorResults.body[1].error).toEqual('version conflict on last retry');
   });
 
   it('should run add tags async when actioning more agents than batch size', async () => {

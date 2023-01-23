@@ -247,7 +247,31 @@ paths:
               schema:
                 $ref: '#/components/schemas/bulk_install_packages_response'
       operationId: bulk-install-packages
-    parameters: []
+      parameters:
+        - in: query
+          name: prerelease
+          schema:
+            type: boolean
+            default: false
+          description: >-
+            Whether to return prerelease versions of packages (e.g. beta, rc,
+            preview) 
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                packages:
+                  type: array
+                  items:
+                    type: string
+                  description: list of package names to install
+                force:
+                  type: boolean
+                  description: force install to ignore package verification errors
+              required:
+                - packages
   /epm/packages/{pkgkey}:
     get:
       summary: Packages - Info
@@ -285,6 +309,14 @@ paths:
           name: pkgkey
           in: path
           required: true
+        - in: query
+          name: prerelease
+          schema:
+            type: boolean
+            default: false
+          description: >-
+            Whether to return prerelease versions of packages (e.g. beta, rc,
+            preview) 
       deprecated: true
     post:
       summary: Packages - Install
@@ -437,6 +469,14 @@ paths:
           Return all fields from the package manifest, not just those supported
           by the Elastic Package Registry
         in: query
+      - in: query
+        name: prerelease
+        schema:
+          type: boolean
+          default: false
+        description: >-
+          Whether to return prerelease versions of packages (e.g. beta, rc,
+          preview) 
     post:
       summary: Packages - Install
       tags: []
@@ -4075,6 +4115,25 @@ components:
               type: string
             key:
               type: string
+        proxy_id:
+          type: string
+        shipper:
+          type: object
+          properties:
+            disk_queue_enabled:
+              type: boolean
+            disk_queue_path:
+              type: string
+            disk_queue_max_size:
+              type: number
+            disk_queue_encryption_enabled:
+              type: boolean
+            disk_queue_compression_enabled:
+              type: boolean
+            compression_level:
+              type: number
+            loadbalance:
+              type: boolean
       required:
         - id
         - is_default

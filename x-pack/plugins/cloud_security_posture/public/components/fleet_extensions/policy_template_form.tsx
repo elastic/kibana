@@ -10,7 +10,8 @@ import type {
   NewPackagePolicy,
   PackagePolicyCreateExtensionComponentProps,
 } from '@kbn/fleet-plugin/public';
-import { CLOUDBEAT_AWS, CLOUDBEAT_VANILLA, PostureInput } from '../../../common/constants';
+import type { PostureInput } from '../../../common/types';
+import { CLOUDBEAT_AWS, CLOUDBEAT_VANILLA } from '../../../common/constants';
 import {
   getPosturePolicy,
   INPUTS_WITH_AWS_VARS,

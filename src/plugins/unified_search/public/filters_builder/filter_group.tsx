@@ -100,6 +100,7 @@ export const FilterGroup = ({
     const showDelimiter = booleanRelation && index + 1 < arrayRef.length;
     return (
       <EuiFlexGroup
+        key={index}
         direction="column"
         gutterSize={shouldNormalizeFirstLevel ? 'none' : 'xs'}
         responsive={false}

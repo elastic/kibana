@@ -19,7 +19,7 @@ BUNDLER_DEPS = [
   "@npm//@babel/helper-plugin-utils",
   "@npm//normalize-path",
   "//packages/kbn-repo-info",
-  "//packages/kbn-package-map",
+  "//packages/kbn-repo-packages",
 ]
 
 js_library(

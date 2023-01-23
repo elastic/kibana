@@ -529,12 +529,12 @@ async function expectStatusCode(
   try {
     response = await fn();
   } catch (e) {
-    if (e && e.response && e.response.status) {
-      if (e.response.status === statusCode) {
+    if (e && e.res && e.res.status) {
+      if (e.res.status === statusCode) {
         return;
       }
       throw new Error(
-        `Expected a [${statusCode}] response, got [${e.response.status}]: ${inspect(e.response)}`
+        `Expected a [${statusCode}] response, got [${e.res.status}]: ${inspect(e.res)}`
       );
     } else {
       throw new Error(

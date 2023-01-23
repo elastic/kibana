@@ -11,6 +11,7 @@ import * as t from 'io-ts';
 import {
   budgetingMethodSchema,
   dateType,
+  historicalSummarySchema,
   indicatorSchema,
   indicatorTypesArraySchema,
   objectiveSchema,
@@ -51,20 +52,20 @@ const getSLOParamsSchema = t.type({
 });
 
 const sortDirectionSchema = t.union([t.literal('asc'), t.literal('desc')]);
-const sortBySchema = t.union([t.literal('name'), t.literal('indicator_type')]);
+const sortBySchema = t.union([t.literal('name'), t.literal('indicatorType')]);
 
 const findSLOParamsSchema = t.partial({
   query: t.partial({
     name: t.string,
-    indicator_types: indicatorTypesArraySchema,
+    indicatorTypes: indicatorTypesArraySchema,
     page: t.string,
-    per_page: t.string,
-    sort_by: sortBySchema,
-    sort_direction: sortDirectionSchema,
+    perPage: t.string,
+    sortBy: sortBySchema,
+    sortDirection: sortDirectionSchema,
   }),
 });
 
-const SLOResponseSchema = t.type({
+const sloResponseSchema = t.type({
   id: t.string,
   name: t.string,
   description: t.string,
@@ -78,12 +79,12 @@ const SLOResponseSchema = t.type({
   updatedAt: dateType,
 });
 
-const SLOWithSummaryResponseSchema = t.intersection([
-  SLOResponseSchema,
+const sloWithSummaryResponseSchema = t.intersection([
+  sloResponseSchema,
   t.type({ summary: summarySchema }),
 ]);
 
-const getSLOResponseSchema = SLOWithSummaryResponseSchema;
+const getSLOResponseSchema = sloWithSummaryResponseSchema;
 
 const updateSLOParamsSchema = t.type({
   path: t.type({
@@ -96,52 +97,70 @@ const updateSLOParamsSchema = t.type({
     timeWindow: timeWindowSchema,
     budgetingMethod: budgetingMethodSchema,
     objective: objectiveSchema,
-    settings: settingsSchema,
+    settings: optionalSettingsSchema,
   }),
 });
 
-const updateSLOResponseSchema = SLOResponseSchema;
+const updateSLOResponseSchema = sloResponseSchema;
 
 const findSLOResponseSchema = t.type({
   page: t.number,
   perPage: t.number,
   total: t.number,
-  results: t.array(SLOWithSummaryResponseSchema),
+  results: t.array(sloWithSummaryResponseSchema),
 });
 
-type SLOResponse = t.OutputOf<typeof SLOResponseSchema>;
-type SLOWithSummaryResponse = t.OutputOf<typeof SLOWithSummaryResponseSchema>;
+const fetchHistoricalSummaryParamsSchema = t.type({ body: t.type({ sloIds: t.array(t.string) }) });
+const fetchHistoricalSummaryResponseSchema = t.record(t.string, t.array(historicalSummarySchema));
 
-type CreateSLOParams = t.TypeOf<typeof createSLOParamsSchema.props.body>;
-type CreateSLOResponse = t.TypeOf<typeof createSLOResponseSchema>;
+type SLOResponse = t.OutputOf<typeof sloResponseSchema>;
+type SLOWithSummaryResponse = t.OutputOf<typeof sloWithSummaryResponseSchema>;
+
+type CreateSLOInput = t.OutputOf<typeof createSLOParamsSchema.props.body>; // Raw payload sent by the frontend
+type CreateSLOParams = t.TypeOf<typeof createSLOParamsSchema.props.body>; // Parsed payload used by the backend
+type CreateSLOResponse = t.TypeOf<typeof createSLOResponseSchema>; // Raw response sent to the frontend
 
 type GetSLOResponse = t.OutputOf<typeof getSLOResponseSchema>;
 
+type UpdateSLOInput = t.OutputOf<typeof updateSLOParamsSchema.props.body>;
 type UpdateSLOParams = t.TypeOf<typeof updateSLOParamsSchema.props.body>;
 type UpdateSLOResponse = t.OutputOf<typeof updateSLOResponseSchema>;
 
 type FindSLOParams = t.TypeOf<typeof findSLOParamsSchema.props.query>;
 type FindSLOResponse = t.OutputOf<typeof findSLOResponseSchema>;
 
+type FetchHistoricalSummaryParams = t.TypeOf<typeof fetchHistoricalSummaryParamsSchema.props.body>;
+type FetchHistoricalSummaryResponse = t.OutputOf<typeof fetchHistoricalSummaryResponseSchema>;
+
+type BudgetingMethod = t.TypeOf<typeof budgetingMethodSchema>;
+
 export {
-  SLOResponseSchema,
   createSLOParamsSchema,
   deleteSLOParamsSchema,
-  getSLOParamsSchema,
-  getSLOResponseSchema,
-  updateSLOParamsSchema,
-  updateSLOResponseSchema,
   findSLOParamsSchema,
   findSLOResponseSchema,
+  getSLOParamsSchema,
+  getSLOResponseSchema,
+  fetchHistoricalSummaryParamsSchema,
+  fetchHistoricalSummaryResponseSchema,
+  sloResponseSchema,
+  sloWithSummaryResponseSchema,
+  updateSLOParamsSchema,
+  updateSLOResponseSchema,
 };
 export type {
-  SLOResponse,
-  SLOWithSummaryResponse,
+  BudgetingMethod,
+  CreateSLOInput,
   CreateSLOParams,
   CreateSLOResponse,
-  GetSLOResponse,
-  UpdateSLOParams,
-  UpdateSLOResponse,
   FindSLOParams,
   FindSLOResponse,
+  GetSLOResponse,
+  FetchHistoricalSummaryParams,
+  FetchHistoricalSummaryResponse,
+  SLOResponse,
+  SLOWithSummaryResponse,
+  UpdateSLOInput,
+  UpdateSLOParams,
+  UpdateSLOResponse,
 };

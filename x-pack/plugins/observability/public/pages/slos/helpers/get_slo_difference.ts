@@ -4,14 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { asPercent } from '../../../../common/utils/formatters';
-import { SLO } from '../../../typings';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 
-export function getSloDifference(slo: SLO) {
+import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
+import { asPercent } from '../../../../common/utils/formatters';
+
+export function getSloDifference(slo: SLOWithSummaryResponse) {
+  if (slo.summary.status === 'NO_DATA') {
+    return {
+      value: Number.NaN,
+      label: NOT_AVAILABLE_LABEL,
+    };
+  }
   const difference = slo.summary.sliValue - slo.objective.target;
 
   return {
     value: difference,
-    label: `${difference > 0 ? '+' : ''}${asPercent(difference, 1, 'n/a')}`,
+    label: `${difference > 0 ? '+' : ''}${asPercent(difference, 1)}`,
   };
 }

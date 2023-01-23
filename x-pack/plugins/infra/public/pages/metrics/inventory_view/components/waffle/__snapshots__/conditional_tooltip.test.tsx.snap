@@ -55,7 +55,7 @@ exports[`ConditionalToolTip renders correctly 1`] = `
       class="euiFlexItem emotion-euiFlexItem-growZero"
       data-test-subj="conditionalTooltipContent-value"
     >
-      8Mbit/s
+      8 Mbit/s
     </div>
   </div>
   <div
@@ -71,7 +71,7 @@ exports[`ConditionalToolTip renders correctly 1`] = `
       class="euiFlexItem emotion-euiFlexItem-growZero"
       data-test-subj="conditionalTooltipContent-value"
     >
-      8Mbit/s
+      8 Mbit/s
     </div>
   </div>
   <div

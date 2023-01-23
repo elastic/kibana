@@ -7,7 +7,7 @@
 
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Filter, Query } from '@kbn/es-query';
-import { EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexItem, EuiLoadingContent, EuiLoadingSpinner } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
@@ -143,7 +143,7 @@ const ChartPanelsComponent: React.FC<Props> = ({
       {alertViewSelection === 'trend' && (
         <FullHeightFlexItem grow={2}>
           {isLoadingIndexPattern ? (
-            <EuiLoadingSpinner data-test-subj="trendLoadingSpinner" size="xl" />
+            <EuiLoadingContent lines={10} data-test-subj="trendLoadingSpinner" />
           ) : (
             <AlertsHistogramPanel
               alignHeader="flexStart"
@@ -174,7 +174,7 @@ const ChartPanelsComponent: React.FC<Props> = ({
       {alertViewSelection === 'table' && (
         <FullHeightFlexItem grow={1}>
           {isLoadingIndexPattern ? (
-            <EuiLoadingSpinner data-test-subj="tableLoadingSpinner" size="xl" />
+            <EuiLoadingContent lines={10} data-test-subj="tableLoadingSpinner" />
           ) : (
             <AlertsCountPanel
               alignHeader="flexStart"
@@ -202,7 +202,7 @@ const ChartPanelsComponent: React.FC<Props> = ({
       {alertViewSelection === 'treemap' && (
         <FullHeightFlexItem grow={1}>
           {isLoadingIndexPattern ? (
-            <EuiLoadingSpinner data-test-subj="treemapLoadingSpinner" size="xl" />
+            <EuiLoadingContent lines={10} data-test-subj="treemapLoadingSpinner" />
           ) : (
             <AlertsTreemapPanel
               addFilter={addFilter}

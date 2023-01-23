@@ -169,6 +169,10 @@ export class SyntheticsPrivateLocation {
     allPrivateLocations: PrivateLocation[],
     spaceId: string
   ) {
+    if (configs.length === 0) {
+      return;
+    }
+
     await this.checkPermissions(
       request,
       `Unable to update Synthetics package policy for monitor. Fleet write permissions are needed to use Synthetics private locations.`

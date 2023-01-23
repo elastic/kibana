@@ -71,9 +71,15 @@ export function syntheticsAppPageProvider({ page, kibanaUrl }: { page: Page; kib
     },
 
     async navigateToAddMonitor() {
-      await page.goto(addMonitor, {
-        waitUntil: 'networkidle',
-      });
+      if (await page.isVisible('text=select a different monitor type', { timeout: 0 })) {
+        await page.click('text=select a different monitor type');
+      } else if (await page.isVisible('text=Create monitor', { timeout: 0 })) {
+        await page.click('text=Create monitor');
+      } else {
+        await page.goto(addMonitor, {
+          waitUntil: 'networkidle',
+        });
+      }
     },
 
     async ensureIsOnMonitorConfigPage() {
@@ -89,12 +95,19 @@ export function syntheticsAppPageProvider({ page, kibanaUrl }: { page: Page; kib
     async deleteMonitors() {
       let isSuccessful: boolean = false;
       while (true) {
-        if ((await page.$(this.byTestId('syntheticsMonitorListActions'))) === null) {
+        if (
+          !(await page.isVisible(this.byTestId('euiCollapsedItemActionsButton'), { timeout: 0 }))
+        ) {
           isSuccessful = true;
           break;
         }
-        await page.click(this.byTestId('syntheticsMonitorListActions'), { delay: 800 });
-        await page.click('text=delete', { delay: 800 });
+        await page.click(this.byTestId('euiCollapsedItemActionsButton'), {
+          delay: 800,
+          force: true,
+        });
+        await page.click(`.euiContextMenuPanel ${this.byTestId('syntheticsMonitorDeleteAction')}`, {
+          delay: 800,
+        });
         await page.waitForSelector('[data-test-subj="confirmModalTitleText"]');
         await this.clickByTestSubj('confirmModalConfirmButton');
         isSuccessful = Boolean(await this.findByTestSubj('uptimeDeleteMonitorSuccess'));
@@ -104,10 +117,16 @@ export function syntheticsAppPageProvider({ page, kibanaUrl }: { page: Page; kib
       return isSuccessful;
     },
 
-    async navigateToEditMonitor() {
+    async navigateToEditMonitor(monitorName: string) {
+      await this.adjustRows();
       await page.waitForSelector('text=Showing');
-      await this.clickByTestSubj('syntheticsMonitorListActions');
-      await page.click('text=Edit', { timeout: 2 * 60 * 1000, delay: 800 });
+      await page.click(
+        `tr:has-text("${monitorName}") [data-test-subj="euiCollapsedItemActionsButton"]`
+      );
+      await page.click(`.euiContextMenuPanel ${this.byTestId('syntheticsMonitorEditAction')}`, {
+        timeout: 2 * 60 * 1000,
+        delay: 800,
+      });
       await this.findByText('Edit monitor');
     },
 
@@ -161,6 +180,12 @@ export function syntheticsAppPageProvider({ page, kibanaUrl }: { page: Page; kib
 
     async fillCodeEditor(value: string) {
       await page.fill('[data-test-subj=codeEditorContainer] textarea', value);
+    },
+
+    async adjustRows() {
+      await page.click('[data-test-subj="tablePaginationPopoverButton"]');
+      await page.click('text="100 rows"');
+      await page.waitForTimeout(3e3);
     },
 
     async createBasicHTTPMonitorDetails({

@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { SerializableRecord } from '@kbn/utility-types';
-import { createAction } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { MlCoreSetup } from '../plugin';
 import { ML_APP_LOCATOR } from '../../common/constants/locator';
 import {
@@ -23,8 +23,10 @@ import { ExplorerAppState } from '../../common/types/locator';
 
 export const OPEN_IN_ANOMALY_EXPLORER_ACTION = 'openInAnomalyExplorerAction';
 
-export function createOpenInExplorerAction(getStartServices: MlCoreSetup['getStartServices']) {
-  return createAction<SwimLaneDrilldownContext | AnomalyChartsFieldSelectionContext>({
+export function createOpenInExplorerAction(
+  getStartServices: MlCoreSetup['getStartServices']
+): UiActionsActionDefinition<SwimLaneDrilldownContext | AnomalyChartsFieldSelectionContext> {
+  return {
     id: 'open-in-anomaly-explorer',
     type: OPEN_IN_ANOMALY_EXPLORER_ACTION,
     getIconType(context): string {
@@ -129,5 +131,5 @@ export function createOpenInExplorerAction(getStartServices: MlCoreSetup['getSta
         embeddable.type === ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE
       );
     },
-  });
+  };
 }

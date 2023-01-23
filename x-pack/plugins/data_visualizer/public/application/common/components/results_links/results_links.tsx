@@ -14,9 +14,9 @@ import { RefreshInterval } from '@kbn/data-plugin/public';
 import { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
 import { flatten } from 'lodash';
+import { isDefined } from '@kbn/ml-is-defined';
 import { LinkCardProps } from '../link_card/link_card';
 import { useDataVisualizerKibana } from '../../../kibana_context';
-import { isDefined } from '../../util/is_defined';
 
 type LinkType = 'file' | 'index';
 

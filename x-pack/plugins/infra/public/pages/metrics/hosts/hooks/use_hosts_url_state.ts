@@ -34,6 +34,7 @@ const CALCULATED_DATE_RANGE_FROM = new Date(
 const INITIAL_HOSTS_STATE: HostsState = {
   query: DEFAULT_QUERY,
   filters: [],
+  panelFilters: [],
   // for unified search
   dateRange: { ...INITIAL_DATE_RANGE },
   // for useSnapshot
@@ -55,14 +56,16 @@ const reducer = (state: HostsState, action: Action): HostsState => {
     case 'setFilter':
       return { ...state, filters: [...action.payload] };
     case 'setQuery':
-      const { filters, query, ...payload } = action.payload;
+      const { filters, query, panelFilters, ...payload } = action.payload;
       const newFilters = !filters ? state.filters : filters;
+      const newControlPanelFilters = !panelFilters ? state.panelFilters : panelFilters;
       const newQuery = !query ? state.query : query;
       return {
         ...state,
         ...payload,
         filters: [...newFilters],
         query: { ...newQuery },
+        panelFilters: [...newControlPanelFilters],
       };
     default:
       throw new Error();
@@ -75,6 +78,7 @@ export const useHostsUrlState = () => {
     decodeUrlState,
     encodeUrlState,
     urlStateKey: '_a',
+    writeDefaultState: true,
   });
 
   const [state, dispatch] = useReducer(reducer, urlState);
@@ -98,19 +102,14 @@ export const useHostsUrlState = () => {
   }, [setUrlState, state, urlState]);
 
   return {
-    state,
     dispatch,
     getRangeInTimestamp,
     getTime,
+    state,
   };
 };
 
 const HostsFilterRT = rt.intersection([
-  rt.partial({
-    $state: rt.type({
-      store: enumeration('FilterStateStore', FilterStateStore),
-    }),
-  }),
   rt.type({
     meta: rt.partial({
       alias: rt.union([rt.null, rt.string]),
@@ -128,28 +127,32 @@ const HostsFilterRT = rt.intersection([
   }),
   rt.partial({
     query: rt.record(rt.string, rt.any),
+    $state: rt.type({
+      store: enumeration('FilterStateStore', FilterStateStore),
+    }),
   }),
 ]);
 
 const HostsFiltersRT = rt.array(HostsFilterRT);
 
-export const HostsQueryStateRT = rt.type({
+const HostsQueryStateRT = rt.type({
   language: rt.string,
   query: rt.any,
 });
 
-export const StringDateRangeRT = rt.type({
+const StringDateRangeRT = rt.type({
   from: rt.string,
   to: rt.string,
 });
 
-export const DateRangeRT = rt.type({
+const DateRangeRT = rt.type({
   from: rt.number,
   to: rt.number,
 });
 
-export const HostsStateRT = rt.type({
+const HostsStateRT = rt.type({
   filters: HostsFiltersRT,
+  panelFilters: HostsFiltersRT,
   query: HostsQueryStateRT,
   dateRange: StringDateRangeRT,
   dateRangeTimestamp: DateRangeRT,
@@ -157,12 +160,7 @@ export const HostsStateRT = rt.type({
 
 export type HostsState = rt.TypeOf<typeof HostsStateRT>;
 
-const SetQueryType = rt.partial({
-  query: HostsQueryStateRT,
-  dateRange: StringDateRangeRT,
-  filters: HostsFiltersRT,
-  dateRangeTimestamp: DateRangeRT,
-});
+const SetQueryType = rt.partial(HostsStateRT.props);
 
 const encodeUrlState = HostsStateRT.encode;
 const decodeUrlState = (value: unknown) => {

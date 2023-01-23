@@ -51,7 +51,7 @@ describe('GetSLO', () => {
             transactionType: 'irrelevant',
             goodStatusCodes: ['2xx', '3xx', '4xx'],
           },
-          type: 'sli.apm.transaction_error_rate',
+          type: 'sli.apm.transactionErrorRate',
         },
         objective: {
           target: 0.999,
@@ -66,6 +66,7 @@ describe('GetSLO', () => {
           frequency: '1m',
         },
         summary: {
+          status: 'HEALTHY',
           sliValue: 0.9999,
           errorBudget: {
             initial: 0.001,

@@ -65,4 +65,20 @@ export const cspmUsageSchema: MakeSchemaFrom<CspmUsage> = {
       failed_findings_count: { type: 'long' },
     },
   },
+  accounts_stats: {
+    type: 'array',
+    items: {
+      account_id: { type: 'keyword' },
+      posture_score: { type: 'long' },
+      latest_findings_doc_count: { type: 'long' },
+      benchmark_id: { type: 'keyword' },
+      benchmark_name: { type: 'keyword' },
+      benchmark_version: { type: 'keyword' },
+      passed_findings_count: { type: 'long' },
+      failed_findings_count: { type: 'long' },
+      agents_count: { type: 'short' },
+      nodes_count: { type: 'short' },
+      pods_count: { type: 'short' },
+    },
+  },
 };

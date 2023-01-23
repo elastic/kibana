@@ -36,6 +36,13 @@ describe('Alert details with unmapped fields', () => {
     waitForAlertsToPopulate();
     expandFirstAlert();
   });
+
+  beforeEach(() => {
+    visitWithoutDateRange(ALERTS_URL);
+    waitForAlertsToPopulate();
+    expandFirstAlert();
+  });
+
   after(() => {
     esArchiverUnload('unmapped_fields');
   });
@@ -52,7 +59,7 @@ describe('Alert details with unmapped fields', () => {
   });
 
   it('Displays the unmapped field on the table', () => {
-    const expectedUnmmappedField = {
+    const expectedUnmappedField = {
       field: 'unmapped',
       text: 'This is the unmapped field',
     };
@@ -61,9 +68,10 @@ describe('Alert details with unmapped fields', () => {
     cy.get(ALERT_FLYOUT).find(pageSelector(4)).click({ force: true });
     cy.get(ALERT_FLYOUT)
       .find(TABLE_ROWS)
+      .last()
       .within(() => {
-        cy.get(CELL_TEXT).should('contain', expectedUnmmappedField.field);
-        cy.get(CELL_TEXT).should('contain', expectedUnmmappedField.text);
+        cy.get(CELL_TEXT).should('contain', expectedUnmappedField.field);
+        cy.get(CELL_TEXT).should('contain', expectedUnmappedField.text);
       });
   });
 

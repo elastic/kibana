@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { SimpleSavedObject } from '@kbn/core/public';
 import {
   ConfigKey,
@@ -27,8 +27,8 @@ export default function ({ getService }: FtrProviderContext) {
     const username = 'admin';
     const roleName = `synthetics_admin`;
     const password = `${username}-password`;
-    const SPACE_ID = `test-space-${uuid.v4()}`;
-    const SPACE_NAME = `test-space-name ${uuid.v4()}`;
+    const SPACE_ID = `test-space-${uuidv4()}`;
+    const SPACE_NAME = `test-space-name ${uuidv4()}`;
 
     let _monitors: MonitorFields[];
     let monitors: MonitorFields[];
@@ -188,6 +188,7 @@ export default function ({ getService }: FtrProviderContext) {
               isServiceManaged: true,
             },
             isEnabled: true,
+            isStatusAlertEnabled: true,
           },
           {
             id: savedMonitors[0].attributes[ConfigKey.MONITOR_QUERY_ID],
@@ -204,6 +205,7 @@ export default function ({ getService }: FtrProviderContext) {
               isServiceManaged: true,
             },
             isEnabled: true,
+            isStatusAlertEnabled: true,
           },
           {
             id: savedMonitors[1].attributes[ConfigKey.MONITOR_QUERY_ID],
@@ -220,6 +222,7 @@ export default function ({ getService }: FtrProviderContext) {
               isServiceManaged: true,
             },
             isEnabled: true,
+            isStatusAlertEnabled: true,
           },
           {
             id: savedMonitors[1].attributes[ConfigKey.MONITOR_QUERY_ID],
@@ -236,6 +239,7 @@ export default function ({ getService }: FtrProviderContext) {
               isServiceManaged: true,
             },
             isEnabled: true,
+            isStatusAlertEnabled: true,
           },
         ]);
         expect(savedMonitors[1].attributes[ConfigKey.MONITOR_QUERY_ID]).eql(customHeartbeatId);

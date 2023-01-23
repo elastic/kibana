@@ -45,6 +45,12 @@ paths:
               examples:
                 createCaseResponse:
                   $ref: '#/components/examples/create_case_response'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     delete:
@@ -67,6 +73,12 @@ paths:
       responses:
         '204':
           description: Indicates a successful call.
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     patch:
@@ -99,6 +111,12 @@ paths:
               examples:
                 updateCaseResponse:
                   $ref: '#/components/examples/update_case_response'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -257,6 +275,12 @@ paths:
               examples:
                 findCaseResponse:
                   $ref: '#/components/examples/find_case_response'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -293,6 +317,12 @@ paths:
                 example:
                   - id: 06116b80-e1c3-11ec-be9b-9b1838238ee6
                     title: security_case
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -409,6 +439,12 @@ paths:
                     version:
                       type: string
                       example: WzIwNzMsMV0=
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     post:
@@ -573,6 +609,12 @@ paths:
               examples:
                 setCaseConfigResponse:
                   $ref: '#/components/examples/set_case_configuration_response'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -728,6 +770,12 @@ paths:
                     version:
                       type: string
                       example: WzIwNzMsMV0=
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -777,6 +825,12 @@ paths:
               examples:
                 findConnectorResponse:
                   $ref: '#/components/examples/find_connector_response'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -820,6 +874,12 @@ paths:
               examples:
                 getReportersResponse:
                   $ref: '#/components/examples/get_reporters_response'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -853,6 +913,12 @@ paths:
               examples:
                 getStatusResponse:
                   $ref: '#/components/examples/get_status_response'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -888,6 +954,12 @@ paths:
               examples:
                 getTagsResponse:
                   $ref: '#/components/examples/get_tags_response'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -920,6 +992,12 @@ paths:
               examples:
                 getCaseResponse:
                   $ref: '#/components/examples/get_case_response'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -948,6 +1026,12 @@ paths:
               examples:
                 getCaseAlertsResponse:
                   $ref: '#/components/examples/get_case_alerts_response'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -983,6 +1067,12 @@ paths:
               examples:
                 createCaseCommentResponse:
                   $ref: '#/components/examples/add_comment_response'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     delete:
@@ -999,6 +1089,12 @@ paths:
       responses:
         '204':
           description: Indicates a successful call.
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     patch:
@@ -1031,6 +1127,12 @@ paths:
               examples:
                 updateCaseCommentResponse:
                   $ref: '#/components/examples/update_comment_response'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     get:
@@ -1051,6 +1153,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/case_response_properties'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -1071,6 +1179,12 @@ paths:
       responses:
         '204':
           description: Indicates a successful call.
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     get:
@@ -1096,6 +1210,12 @@ paths:
               examples:
                 getCaseCommentResponse:
                   $ref: '#/components/examples/get_comment_response'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -1129,6 +1249,12 @@ paths:
               examples:
                 pushCaseResponse:
                   $ref: '#/components/examples/push_case_response'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -1157,6 +1283,12 @@ paths:
               examples:
                 getCaseActivityResponse:
                   $ref: '#/components/examples/get_case_activity_response'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -2004,6 +2136,18 @@ components:
         version:
           type: string
           example: WzUzMiwxXQ==
+    4xx_response:
+      type: object
+      title: Unsuccessful cases API response
+      properties:
+        error:
+          type: string
+          example: Unauthorized
+        message:
+          type: string
+        statusCode:
+          type: integer
+          example: 401
     update_case_request:
       title: Update case request
       description: The update case API request body varies depending on the type of connector.

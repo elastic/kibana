@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { SuperTest, Test } from 'supertest';
 import { chunk, omit } from 'lodash';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { UserAtSpaceScenarios } from '../../../scenarios';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -19,7 +19,8 @@ const findTestUtils = (
   supertest: SuperTest<Test>,
   supertestWithoutAuth: any
 ) => {
-  describe(describeType, () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/148660
+  describe.skip(describeType, () => {
     afterEach(() => objectRemover.removeAll());
 
     for (const scenario of UserAtSpaceScenarios) {
@@ -68,6 +69,7 @@ const findTestUtils = (
                 name: 'abc',
                 tags: ['foo'],
                 rule_type_id: 'test.noop',
+                running: false,
                 consumer: 'alertsFixture',
                 schedule: { interval: '1m' },
                 enabled: true,
@@ -271,6 +273,7 @@ const findTestUtils = (
                 name: 'abc',
                 tags: ['foo'],
                 rule_type_id: 'test.noop',
+                running: false,
                 consumer: 'alertsFixture',
                 schedule: { interval: '1m' },
                 enabled: false,
@@ -312,7 +315,7 @@ const findTestUtils = (
         });
 
         it('should handle find alert request with fields appropriately', async () => {
-          const myTag = uuid.v4();
+          const myTag = uuidv4();
           const { body: createdAlert } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
@@ -395,7 +398,7 @@ const findTestUtils = (
         });
 
         it('should handle find alert request with executionStatus field appropriately', async () => {
-          const myTag = uuid.v4();
+          const myTag = uuidv4();
           const { body: createdAlert } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')

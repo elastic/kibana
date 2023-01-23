@@ -9,7 +9,7 @@ import { GetSLOResponse, getSLOResponseSchema } from '@kbn/slo-schema';
 import { IndicatorData, SLO, SLOId, SLOWithSummary } from '../../domain/models';
 import { SLORepository } from './slo_repository';
 import { SLIClient } from './sli_client';
-import { computeSLI, computeErrorBudget } from '../../domain/services';
+import { computeSLI, computeErrorBudget, computeSummaryStatus } from '../../domain/services';
 
 export class GetSLO {
   constructor(private repository: SLORepository, private sliClient: SLIClient) {}
@@ -34,5 +34,6 @@ function computeSloWithSummary(
 ): SLOWithSummary {
   const sliValue = computeSLI(indicatorDataBySlo[slo.id]);
   const errorBudget = computeErrorBudget(slo, indicatorDataBySlo[slo.id]);
-  return { ...slo, summary: { sliValue, errorBudget } };
+  const status = computeSummaryStatus(slo, sliValue, errorBudget);
+  return { ...slo, summary: { status, sliValue, errorBudget } };
 }

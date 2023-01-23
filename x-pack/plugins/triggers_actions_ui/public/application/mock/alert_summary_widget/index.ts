@@ -5,88 +5,62 @@
  * 2.0.
  */
 
-import { AlertSummaryTimeRange } from '../../hooks/use_load_alert_summary';
-import { Rule } from '../../../types';
+import { LIGHT_THEME } from '@elastic/charts';
+import { EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
+import {
+  AlertSummaryTimeRange,
+  ChartThemes,
+} from '../../sections/rule_details/components/alert_summary/types';
 
-export const mockRule = (): Rule => {
-  return {
-    id: '1',
-    name: 'test rule',
-    tags: ['tag1'],
-    enabled: true,
-    ruleTypeId: 'test_rule_type',
-    schedule: { interval: '1s' },
-    actions: [],
-    params: { name: 'test rule type name' },
-    createdBy: null,
-    updatedBy: null,
-    apiKeyOwner: null,
-    throttle: '1m',
-    muteAll: false,
-    mutedInstanceIds: [],
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    consumer: 'alerts',
-    notifyWhen: 'onActiveAlert',
-    executionStatus: {
-      status: 'active',
-      lastDuration: 500,
-      lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
-    },
-    monitoring: {
-      run: {
-        history: [
-          {
-            success: true,
-            duration: 1000000,
-            timestamp: 1234567,
-          },
-          {
-            success: true,
-            duration: 200000,
-            timestamp: 1234567,
-          },
-          {
-            success: false,
-            duration: 300000,
-            timestamp: 1234567,
-          },
-        ],
-        calculated_metrics: {
-          success_ratio: 0.66,
-          p50: 200000,
-          p95: 300000,
-          p99: 390000,
-        },
-        last_run: {
-          timestamp: '2020-08-20T19:23:38Z',
-          metrics: {
-            duration: 500,
-          },
-        },
-      },
-    },
-  };
+export const mockedAlertSummaryResponse = {
+  activeAlertCount: 2,
+  activeAlerts: [
+    { key: 1671108000000, doc_count: 0 },
+    { key: 1671208000000, doc_count: 0 },
+    { key: 1671308000000, doc_count: 0 },
+    { key: 1671408000000, doc_count: 2 },
+    { key: 1671508000000, doc_count: 4 },
+    { key: 1671608000000, doc_count: 5 },
+    { key: 1671708000000, doc_count: 3 },
+    { key: 1671808000000, doc_count: 6 },
+    { key: 1671908000000, doc_count: 14 },
+    { key: 1672008000000, doc_count: 15 },
+    { key: 1672108000000, doc_count: 15 },
+    { key: 1672208000000, doc_count: 10 },
+    { key: 1672308000000, doc_count: 9 },
+    { key: 1672408000000, doc_count: 7 },
+    { key: 1672508000000, doc_count: 2 },
+    { key: 1672608000000, doc_count: 2 },
+  ],
+  recoveredAlertCount: 15,
+  recoveredAlerts: [
+    { key: 1671108000000, doc_count: 0 },
+    { key: 1671208000000, doc_count: 0 },
+    { key: 1671308000000, doc_count: 0 },
+    { key: 1671408000000, doc_count: 0 },
+    { key: 1671508000000, doc_count: 0 },
+    { key: 1671608000000, doc_count: 0 },
+    { key: 1671708000000, doc_count: 2 },
+    { key: 1671808000000, doc_count: 0 },
+    { key: 1671908000000, doc_count: 0 },
+    { key: 1672008000000, doc_count: 0 },
+    { key: 1672108000000, doc_count: 0 },
+    { key: 1672208000000, doc_count: 5 },
+    { key: 1672308000000, doc_count: 1 },
+    { key: 1672408000000, doc_count: 2 },
+    { key: 1672508000000, doc_count: 5 },
+    { key: 1672608000000, doc_count: 0 },
+  ],
 };
 
-export const mockAlertSummaryResponse = () => {
-  return {
-    activeAlertCount: 1,
-    recoveredAlertCount: 1,
-    activeAlerts: [
-      { key_as_string: '1671321600000', key: 1671321600000, doc_count: 0 },
-      { key_as_string: '1671408000000', key: 1671408000000, doc_count: 2 },
-    ],
-    recoveredAlerts: [
-      { key_as_string: '2022-12-18T00:00:00.000Z', key: 1671321600000, doc_count: 0 },
-      { key_as_string: '2022-12-19T00:00:00.000Z', key: 1671408000000, doc_count: 1 },
-    ],
-  };
-};
-
-export const mockAlertSummaryTimeRange: AlertSummaryTimeRange = {
+export const mockedAlertSummaryTimeRange: AlertSummaryTimeRange = {
   utcFrom: 'mockedUtcFrom',
   utcTo: 'mockedUtcTo',
   fixedInterval: 'mockedFixedInterval',
   title: 'mockedTitle',
+};
+
+export const mockedChartThemes: ChartThemes = {
+  theme: EUI_CHARTS_THEME_LIGHT.theme,
+  baseTheme: LIGHT_THEME,
 };

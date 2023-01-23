@@ -6,11 +6,12 @@
  */
 
 import expect from '@kbn/expect';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { omit, mapValues, range, flatten } from 'lodash';
 import moment from 'moment';
 import { asyncForEach } from '@kbn/std';
 import { alwaysFiringAlertType } from '@kbn/alerting-fixture-plugin/server/plugin';
+import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { ObjectRemover } from '../../lib/object_remover';
 import { getTestAlertData, getTestActionData } from '../../lib/get_test_data';
@@ -88,6 +89,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           message: 'from alert 1s',
           level: 'warn',
         },
+        frequency: {
+          summary: false,
+          notify_when: RuleNotifyWhen.THROTTLE,
+          throttle: '1m',
+        },
       })),
       params,
       ...overwrites,
@@ -110,6 +116,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         params: {
           message: 'from alert 1s',
           level: 'warn',
+        },
+        frequency: {
+          summary: false,
+          notify_when: RuleNotifyWhen.THROTTLE,
+          throttle: '1m',
         },
       })),
       params,
@@ -138,7 +149,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Rule Details', function () {
     describe('Header', function () {
-      const testRunUuid = uuid.v4();
+      const testRunUuid = uuidv4();
       before(async () => {
         await pageObjects.common.navigateToApp('triggersActions');
         const rule = await createRuleWithSmallInterval(testRunUuid);
@@ -306,7 +317,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('Edit rule button', function () {
-      const ruleName = uuid.v4();
+      const ruleName = uuidv4();
       const updatedRuleName = `Changed Rule Name ${ruleName}`;
 
       before(async () => {
@@ -329,6 +340,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               group: 'threshold met',
               id: 'my-server-log',
               params: { level: 'info', message: ' {{context.message}}' },
+              frequency: {
+                summary: false,
+                notify_when: RuleNotifyWhen.THROTTLE,
+                throttle: '1m',
+              },
             },
           ],
         });
@@ -388,7 +404,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
         await editButton.click();
 
-        await testSubjects.setValue('ruleNameInput', uuid.v4(), {
+        await testSubjects.setValue('ruleNameInput', uuidv4(), {
           clearWithKeyboard: true,
         });
 
@@ -406,7 +422,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('Edit rule with deleted connector', function () {
-      const testRunUuid = uuid.v4();
+      const testRunUuid = uuidv4();
 
       afterEach(async () => {
         await objectRemover.removeAll();
@@ -425,6 +441,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               group: 'default',
               id: connector.id,
               params: { level: 'info', message: ' {{context.message}}' },
+              frequency: {
+                summary: false,
+                notify_when: RuleNotifyWhen.THROTTLE,
+                throttle: '1m',
+              },
             },
           ],
         });
@@ -487,11 +508,21 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               group: 'default',
               id: connector.id,
               params: { level: 'info', message: ' {{context.message}}' },
+              frequency: {
+                summary: false,
+                notify_when: RuleNotifyWhen.THROTTLE,
+                throttle: '1m',
+              },
             },
             {
               group: 'other',
               id: connector.id,
               params: { level: 'info', message: ' {{context.message}}' },
+              frequency: {
+                summary: false,
+                notify_when: RuleNotifyWhen.THROTTLE,
+                throttle: '1m',
+              },
             },
           ],
         });
@@ -568,8 +599,66 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
+    describe('Edit rule with legacy rule-level notify values', function () {
+      const testRunUuid = uuidv4();
+
+      afterEach(async () => {
+        await objectRemover.removeAll();
+      });
+
+      it('should convert rule-level params to action-level params and save the alert successfully', async () => {
+        const connectors = await createConnectors(testRunUuid);
+        await pageObjects.common.navigateToApp('triggersActions');
+        const rule = await createAlwaysFiringRule({
+          name: `test-rule-${testRunUuid}`,
+          schedule: {
+            interval: '1s',
+          },
+          notify_when: RuleNotifyWhen.THROTTLE,
+          throttle: '2d',
+          actions: connectors.map((connector) => ({
+            id: connector.id,
+            group: 'default',
+            params: {
+              message: 'from alert 1s',
+              level: 'warn',
+            },
+          })),
+        });
+        const updatedRuleName = `Changed rule ${rule.name}`;
+
+        // refresh to see rule
+        await browser.refresh();
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        // verify content
+        await testSubjects.existOrFail('rulesList');
+
+        // click on first alert
+        await pageObjects.common.navigateToApp('triggersActions');
+        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(rule.name);
+
+        const editButton = await testSubjects.find('openEditRuleFlyoutButton');
+        await editButton.click();
+        const notifyWhenSelect = await testSubjects.find('notifyWhenSelect');
+        expect(await notifyWhenSelect.getVisibleText()).to.eql('On custom action intervals');
+        const throttleInput = await testSubjects.find('throttleInput');
+        const throttleUnitInput = await testSubjects.find('throttleUnitInput');
+        expect(await throttleInput.getAttribute('value')).to.be('2');
+        expect(await throttleUnitInput.getAttribute('value')).to.be('d');
+        await testSubjects.setValue('ruleNameInput', updatedRuleName, {
+          clearWithKeyboard: true,
+        });
+
+        await find.clickByCssSelector('[data-test-subj="saveEditedRuleButton"]:not(disabled)');
+
+        const toastTitle = await pageObjects.common.closeToast();
+        expect(toastTitle).to.eql(`Updated '${updatedRuleName}'`);
+      });
+    });
+
     describe('View In App', function () {
-      const ruleName = uuid.v4();
+      const ruleName = uuidv4();
 
       beforeEach(async () => {
         await pageObjects.common.navigateToApp('triggersActions');
@@ -622,7 +711,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('Alerts', function () {
-      const testRunUuid = uuid.v4();
+      const testRunUuid = uuidv4();
       let rule: any;
 
       before(async () => {
@@ -832,7 +921,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('Alert Pagination', function () {
-      const testRunUuid = uuid.v4();
+      const testRunUuid = uuidv4();
       let rule: any;
 
       before(async () => {
@@ -907,7 +996,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('Execution log', () => {
-      const testRunUuid = uuid.v4();
+      const testRunUuid = uuidv4();
       let rule: any;
 
       before(async () => {
@@ -921,7 +1010,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           },
           {
             schedule: { interval: '1s' },
-            throttle: null,
           }
         );
 

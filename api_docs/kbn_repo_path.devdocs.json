@@ -109,7 +109,20 @@
             "tags": [],
             "label": "basename",
             "description": [
-              "\nbasename of the path\n(lazy and cached getter)"
+              "\nbasename of the path (including extension)\n(lazy and cached getter)"
+            ],
+            "path": "packages/kbn-repo-path/repo_path.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/repo-path",
+            "id": "def-common.RepoPath.repoRelDir",
+            "type": "string",
+            "tags": [],
+            "label": "repoRelDir",
+            "description": [
+              "\nrepoRelDir of the path\n(lazy and cached getter)"
             ],
             "path": "packages/kbn-repo-path/repo_path.ts",
             "deprecated": false,
@@ -153,6 +166,22 @@
             "type": "Function",
             "tags": [],
             "label": "isJavaScript",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "packages/kbn-repo-path/repo_path.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/repo-path",
+            "id": "def-common.RepoPath.isJsTsCode",
+            "type": "Function",
+            "tags": [],
+            "label": "isJsTsCode",
             "description": [],
             "signature": [
               "() => boolean"

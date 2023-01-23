@@ -34,6 +34,7 @@ import { FileUpload } from '@kbn/shared-ux-file-upload';
 import { FilePicker } from '@kbn/shared-ux-file-picker';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
 import { FileImageMetadata, imageEmbeddableFileKind } from '../imports';
 import { ImageConfig } from '../types';
 import { ImageViewer } from '../image_viewer/image_viewer'; // use eager version to avoid flickering
@@ -56,6 +57,7 @@ export interface ImageEditorFlyoutProps {
   onSave: (imageConfig: ImageConfig) => void;
   initialImageConfig?: ImageConfig;
   validateUrl: ValidateUrlFn;
+  user?: AuthenticatedUser;
 }
 
 export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
@@ -429,6 +431,9 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
       {isFilePickerOpen && (
         <FilePicker
           kind={imageEmbeddableFileKind.id}
+          shouldAllowDelete={(file) =>
+            props.user ? props.user.profile_uid === file.user?.id : false
+          }
           multiple={false}
           onClose={() => {
             setIsFilePickerOpen(false);
