@@ -53,6 +53,7 @@ exports[`#start() returns \`Context\` component 1`] = `
           "euiColumnSelector.button": "Columns",
           "euiColumnSelector.buttonActivePlural": [Function],
           "euiColumnSelector.buttonActiveSingular": [Function],
+          "euiColumnSelector.dragHandleAriaLabel": "Drag handle",
           "euiColumnSelector.hideAll": "Hide all",
           "euiColumnSelector.search": "Search",
           "euiColumnSelector.searchcolumns": "Search columns",
