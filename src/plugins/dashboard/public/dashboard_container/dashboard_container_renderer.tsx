@@ -13,20 +13,15 @@ import classNames from 'classnames';
 import { EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
-import useObservable from 'react-use/lib/useObservable';
-import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
-
 import {
   DashboardContainerFactory,
   DashboardContainerFactoryDefinition,
   DashboardCreationOptions,
 } from './embeddable/dashboard_container_factory';
 import { DASHBOARD_CONTAINER_TYPE } from '..';
-import { DashboardReduxState } from './types';
 import { pluginServices } from '../services/plugin_services';
 import { DEFAULT_DASHBOARD_INPUT } from '../dashboard_constants';
 import { DashboardContainer } from './embeddable/dashboard_container';
-import { dashboardContainerReducers } from './state/dashboard_container_reducers';
 
 export interface DashboardContainerRendererProps {
   savedObjectId?: string;
@@ -119,13 +114,6 @@ export const DashboardContainerRenderer = ({
     <div className={viewportClasses}>{loading ? loadingSpinner : <div ref={dashboardRoot} />}</div>
   );
 };
-
-export const useDashboardContainerContext = () =>
-  useReduxEmbeddableContext<
-    DashboardReduxState,
-    typeof dashboardContainerReducers,
-    DashboardContainer
-  >();
 
 // required for dynamic import using React.lazy()
 // eslint-disable-next-line import/no-default-export

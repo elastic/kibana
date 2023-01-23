@@ -10,7 +10,7 @@ import React from 'react';
 
 export const DASHBOARD_CONTAINER_TYPE = 'dashboard';
 
-export { useDashboardContainerContext } from './dashboard_container_renderer';
+export { useDashboardContainerContext } from './dashboard_container_context';
 export const LazyDashboardContainerRenderer = React.lazy(
   () => import('./dashboard_container_renderer')
 );

@@ -28,7 +28,7 @@ import { withSuspense } from '@kbn/presentation-util-plugin/public';
 
 const INPUT_KEY = 'portableDashboard:saveExample:input';
 
-const DashboardContainerRenderer = withSuspense(LazyDashboardContainerRenderer);
+const DashboardContainerRenderer = withSuspense(LazyDashboardContainerRenderer); // make this so we don't have two loading states - loading in the dashboard plugin instead
 
 export const DynamicByReferenceExample = ({ dataView }: { dataView: DataView }) => {
   const [isSaving, setIsSaving] = useState(false);
