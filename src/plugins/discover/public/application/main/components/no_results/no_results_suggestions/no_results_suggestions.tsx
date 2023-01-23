@@ -7,7 +7,6 @@
  */
 
 import React from 'react';
-import dateMath from '@kbn/datemath';
 import { EuiEmptyPrompt, EuiButton, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { isOfQueryType, isOfAggregateQueryType } from '@kbn/es-query';
@@ -58,7 +57,7 @@ export const NoResultsSuggestions: React.FC<NoResultsSuggestionProps> = React.me
       const range = await refetch();
       if (range?.from && range?.to) {
         timefilter.setTime({
-          from: dateMath.parse(range.to)!.subtract(24, 'hours').toISOString(),
+          from: range.from,
           to: range.to,
         });
       }
@@ -121,11 +120,11 @@ export const NoResultsSuggestions: React.FC<NoResultsSuggestionProps> = React.me
               fill
               onClick={expandTimeRange}
               isLoading={isLoading}
-              data-test-subj="discoverNoResultsViewRecentMatches"
+              data-test-subj="discoverNoResultsViewAllMatches"
             >
               <FormattedMessage
-                id="discover.noResults.suggestion.viewRecentMatchesButtonText"
-                defaultMessage="View recent matches"
+                id="discover.noResults.suggestion.viewAllMatchesButtonText"
+                defaultMessage="View all matches"
               />
             </EuiButton>
           ) : undefined

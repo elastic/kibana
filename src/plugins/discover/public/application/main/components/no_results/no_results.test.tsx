@@ -75,7 +75,7 @@ async function mountAndFindSubjects(
     adjustFilters: findTestSubject(component!, 'discoverNoResultsAdjustFilters').exists(),
     checkIndices: findTestSubject(component!, 'discoverNoResultsCheckIndices').exists(),
     disableFiltersButton: findTestSubject(component!, 'discoverNoResultsDisableFilters').exists(),
-    recentMatchesButton: findTestSubject(component!, 'discoverNoResultsViewRecentMatches').exists(),
+    recentMatchesButton: findTestSubject(component!, 'discoverNoResultsViewAllMatches').exists(),
   };
 }
 
