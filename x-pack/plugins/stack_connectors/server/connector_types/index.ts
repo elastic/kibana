@@ -45,7 +45,6 @@ export { ConnectorTypeId as ServerLogConnectorTypeId } from './server_log';
 export type { ActionParamsType as ServerLogActionParams } from './server_log';
 export { ServiceNowITOMConnectorTypeId } from './servicenow_itom';
 export type { ActionParams as SlackActionParams } from '../../common/slack/types';
-export { SLACK_CONNECTOR_ID as SlackV2ConnectorTypeId } from '../../common/slack/constants';
 export { ConnectorTypeId as TeamsConnectorTypeId } from './teams';
 export type { ActionParamsType as TeamsActionParams } from './teams';
 export { ConnectorTypeId as WebhookConnectorTypeId } from './webhook';
@@ -90,7 +89,6 @@ export function registerConnectorTypes({
   actions.registerType(getResilientConnectorType());
   actions.registerType(getTeamsConnectorType());
 
-  // actions.registerSubActionConnectorType(getNewSlackConnectorType());
   actions.registerSubActionConnectorType(getOpsgenieConnectorType());
   actions.registerSubActionConnectorType(getTinesConnectorType());
 }

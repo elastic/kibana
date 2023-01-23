@@ -13,6 +13,7 @@ import type {
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { SlackActionParams, SlackSecrets } from '../types';
 import { SLACK_CONNECTOR_ID } from '../../../common/slack/constants';
+import type { ActionParams } from '../../../common/slack/types';
 
 export function getConnectorType(): ConnectorTypeModel<unknown, SlackSecrets, SlackActionParams> {
   return {
@@ -25,23 +26,27 @@ export function getConnectorType(): ConnectorTypeModel<unknown, SlackSecrets, Sl
       defaultMessage: 'Send to Slack',
     }),
     validateParams: async (
-      actionParams: SlackActionParams
-    ): Promise<GenericValidationResult<SlackActionParams>> => {
+      actionParams: ActionParams
+    ): Promise<GenericValidationResult<ActionParams>> => {
       const translations = await import('./translations');
       const errors = {
         message: new Array<string>(),
       };
       const validationResult = { errors };
-      if (actionParams.subAction === 'postMessage') {
-        if (!actionParams.subActionParams.text) {
+
+      if ('subAction' in actionParams) {
+        if (actionParams.subAction === 'postMessage') {
+          if (!actionParams.subActionParams.text) {
+            errors.message.push(translations.MESSAGE_REQUIRED);
+          }
+          if (!actionParams.subActionParams.channels?.length) {
+            errors.message.push(translations.CHANNEL_REQUIRED);
+          }
+        }
+      } else {
+        if (!actionParams.message) {
           errors.message.push(translations.MESSAGE_REQUIRED);
         }
-        if (!actionParams.subActionParams.channels?.length) {
-          errors.message.push(translations.CHANNEL_REQUIRED);
-        }
-      }
-      if (!actionParams.subAction && !actionParams.message) {
-        errors.message.push(translations.MESSAGE_REQUIRED);
       }
       return validationResult;
     },

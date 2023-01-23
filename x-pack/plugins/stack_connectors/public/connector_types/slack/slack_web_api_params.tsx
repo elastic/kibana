@@ -32,6 +32,7 @@ export const SlackWebApiParamsFields: React.FunctionComponent<
 > = ({ actionConnector, actionParams, editAction, index, errors, messageVariables }) => {
   const { subAction, subActionParams } = actionParams;
   const { channels, text } = subActionParams ?? {};
+  const { toasts } = useKibana().notifications;
 
   if (!subAction) {
     editAction('subAction', 'postMessage', index);
@@ -56,7 +57,6 @@ export const SlackWebApiParamsFields: React.FunctionComponent<
     subAction: 'getChannels',
   });
 
-  const { toasts } = useKibana().notifications;
   useEffect(() => {
     if (channelsError) {
       toasts.danger({

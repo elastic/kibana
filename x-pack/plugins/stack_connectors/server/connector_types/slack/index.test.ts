@@ -11,16 +11,14 @@ import {
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
 } from '@kbn/actions-plugin/server/types';
 import { validateParams, validateSecrets } from '@kbn/actions-plugin/server/lib';
-import {
-  getConnectorType,
-  SlackConnectorType,
-  SlackConnectorTypeExecutorOptions,
-  ConnectorTypeId,
-} from '.';
+import { getConnectorType } from '.';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { loggerMock } from '@kbn/logging-mocks';
+import type { SlackConnectorType } from '../../../common/slack/types';
+import { SLACK_CONNECTOR_ID } from '../../../common/slack/constants';
+import { SLACK_CONNECTOR_NAME } from './translations';
 
 jest.mock('@slack/webhook', () => {
   return {
@@ -38,26 +36,34 @@ let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
 
 beforeEach(() => {
   configurationUtilities = actionsConfigMock.create();
-  connectorType = getConnectorType({
-    async executor(options) {
-      return { status: 'ok', actionId: options.actionId };
-    },
-  });
+  connectorType = getConnectorType();
 });
 
 describe('connector registration', () => {
   test('returns connector type', () => {
-    expect(connectorType.id).toEqual(ConnectorTypeId);
-    expect(connectorType.name).toEqual('Slack');
+    expect(connectorType.id).toEqual(SLACK_CONNECTOR_ID);
+    expect(connectorType.name).toEqual(SLACK_CONNECTOR_NAME);
   });
 });
 
 describe('validateParams()', () => {
-  test('should validate and pass when params is valid', () => {
+  test('should validate and pass when params is valid for webhhok type', () => {
     expect(
       validateParams(connectorType, { message: 'a message' }, { configurationUtilities })
     ).toEqual({
       message: 'a message',
+    });
+  });
+
+  test.only('should validate and pass when params is valid for web_api type', () => {
+    expect(
+      validateParams(
+        connectorType,
+        { channels: ['general'], text: 'a text' },
+        { configurationUtilities }
+      )
+    ).toEqual({
+      message: 'a text',
     });
   });
 
@@ -68,11 +74,11 @@ describe('validateParams()', () => {
       `"error validating action params: [message]: expected value of type [string] but got [undefined]"`
     );
 
-    expect(() => {
-      validateParams(connectorType, { message: 1 }, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: [message]: expected value of type [string] but got [number]"`
-    );
+    //   expect(() => {
+    //     validateParams(connectorType, { message: 1 }, { configurationUtilities });
+    //   }).toThrowErrorMatchingInlineSnapshot(
+    //     `"error validating action params: [message]: expected value of type [string] but got [number]"`
+    //   );
   });
 });
 

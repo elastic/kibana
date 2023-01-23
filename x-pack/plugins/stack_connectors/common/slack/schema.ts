@@ -12,10 +12,10 @@ export const SlackConfigSchema = schema.object({
 });
 
 export const SlackWebhookSecretsSchema = schema.object({
-  webhookUrl: schema.string(),
+  webhookUrl: schema.string({ minLength: 1 }),
 });
 export const SlackWebApiSecretsSchema = schema.object({
-  token: schema.string(),
+  token: schema.string({ minLength: 1 }),
 });
 
 export const SlackSecretsSchema = schema.oneOf([
@@ -44,4 +44,4 @@ export const WebApiParamsSchema = schema.oneOf([
   ExecutorPostMessageParamsSchema,
 ]);
 
-export const ParamsSchema = schema.oneOf([WebhookParamsSchema, WebApiParamsSchema]);
+export const SlackParamsSchema = schema.oneOf([WebhookParamsSchema, WebApiParamsSchema]);

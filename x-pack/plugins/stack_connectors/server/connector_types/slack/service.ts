@@ -9,7 +9,7 @@ import axios from 'axios';
 import { Logger } from '@kbn/core/server';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { request, getErrorMessage } from '@kbn/actions-plugin/server/lib/axios_utils';
-import {
+import type {
   SlackService,
   SlackServiceCredentials,
   PostMessageResponse,

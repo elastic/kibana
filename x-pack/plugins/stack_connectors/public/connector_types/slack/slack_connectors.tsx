@@ -6,8 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { useFormContext, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { ButtonGroupField, HiddenField } from '@kbn/triggers-actions-ui-plugin/public';
@@ -16,10 +15,7 @@ import { SlackWebApiActionsFields } from './slack_web_api_connectors';
 import { SlackWebhookActionFields } from './slack_webhook_connectors';
 
 const getSlackType = (arg: { type: string } | null | undefined) => {
-  if (arg == null) {
-    return 'web_api';
-  }
-
+  if (!arg) return 'web_api';
   return arg.type === 'webhook' ? 'webhook' : 'web_api';
 };
 
@@ -54,14 +50,6 @@ const SlackActionFields: React.FunctionComponent<ActionConnectorFieldsProps> = (
 
   return (
     <>
-      <EuiTitle size="xxs">
-        <h4>
-          <FormattedMessage
-            id="xpack.stackConnectors.components.xmatters.authenticationLabel"
-            defaultMessage="Authentication"
-          />
-        </h4>
-      </EuiTitle>
       <EuiSpacer size="xs" />
       <ButtonGroupField
         defaultValue={selectedAuthDefaultValue}

@@ -8,13 +8,10 @@
 import React from 'react';
 import {
   ActionConnectorFieldsProps,
-  ConfigFieldSchema,
   SecretsFieldSchema,
   SimpleConnectorForm,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import * as i18n from './translations';
-
-const configFormSchema: ConfigFieldSchema[] = [];
 
 const secretsFormSchema: SecretsFieldSchema[] = [
   {
@@ -31,7 +28,7 @@ export const SlackWebApiActionsFields: React.FunctionComponent<ActionConnectorFi
   <SimpleConnectorForm
     isEdit={isEdit}
     readOnly={readOnly}
-    configFormSchema={configFormSchema}
+    configFormSchema={[]}
     secretsFormSchema={secretsFormSchema}
   />
 );

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ValidatorServices } from '@kbn/actions-plugin/server/types';
+import type { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import type {
   SlackSecrets,
   GetChannelsResponse,
@@ -55,6 +55,5 @@ export interface SlackService {
 }
 
 export interface SlackServiceValidation {
-  config: (configObject: {}, validatorServices: ValidatorServices) => void;
-  secrets: (secrets: { token: string }, validatorServices: ValidatorServices) => void;
+  secrets: (secrets: SlackSecrets, validatorServices: ValidatorServices) => void;
 }
