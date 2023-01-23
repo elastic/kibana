@@ -19,6 +19,7 @@ import { getSocManager } from '../../../../scripts/endpoint/common/roles_users/s
 import { getPlatformEngineer } from '../../../../scripts/endpoint/common/roles_users/platform_engineer';
 import { getEndpointOperationsAnalyst } from '../../../../scripts/endpoint/common/roles_users/endpoint_operations_analyst';
 import { getEndpointSecurityPolicyManager } from '../../../../scripts/endpoint/common/roles_users/endpoint_security_policy_manager';
+import { getDetectionsEngineer } from '../../../../scripts/endpoint/common/roles_users/detections_engineer';
 
 export enum ROLE {
   t1_analyst = 't1Analyst',
@@ -32,7 +33,7 @@ export enum ROLE {
   endpoint_security_policy_manager = 'endpointSecurityPolicyManager',
 }
 
-export const rolesMapping: { [id: string]: Omit<Role, 'name'> } = {
+export const rolesMapping: { [key in ROLE]: Omit<Role, 'name'> } = {
   t1Analyst: getT1Analyst(),
   t2Analyst: getT2Analyst(),
   hunter: getHunter(),
@@ -41,6 +42,7 @@ export const rolesMapping: { [id: string]: Omit<Role, 'name'> } = {
   platformEngineer: getPlatformEngineer(),
   endpointOperationsAnalyst: getEndpointOperationsAnalyst(),
   endpointSecurityPolicyManager: getEndpointSecurityPolicyManager(),
+  detectionsEngineer: getDetectionsEngineer(),
 };
 /**
  * Credentials in the `kibana.dev.yml` config file will be used to authenticate
@@ -85,7 +87,7 @@ const LOGIN_API_ENDPOINT = '/internal/security/login';
  * @param role string role/user to log in with
  * @param route string route to visit
  */
-export const getUrlWithRoute = (role: ROLE, route: string) => {
+export const getUrlWithRoute = (role: string, route: string) => {
   const url = Cypress.config().baseUrl;
   const kibana = new URL(String(url));
   const theUrl = `${Url.format({
@@ -138,13 +140,17 @@ export const getCurlScriptEnvVars = () => ({
 });
 
 export const createRoleAndUser = (role: ROLE) => {
+  createCustomRoleAndUser(role, rolesMapping[role]);
+};
+
+export const createCustomRoleAndUser = (role: string, rolePrivileges: Omit<Role, 'name'>) => {
   const env = getCurlScriptEnvVars();
 
   // post the role
   cy.request({
     method: 'PUT',
     url: `${env.KIBANA_URL}/api/security/role/${role}`,
-    body: rolesMapping[role],
+    body: rolePrivileges,
     headers: {
       'kbn-xsrf': 'cypress',
     },
@@ -220,7 +226,11 @@ export const loginWithUser = (user: User) => {
 };
 
 export const loginWithRole = async (role: ROLE) => {
-  createRoleAndUser(role);
+  loginWithCustomRole(role, rolesMapping[role]);
+};
+
+export const loginWithCustomRole = async (role: string, rolePrivileges: Omit<Role, 'name'>) => {
+  createCustomRoleAndUser(role, rolePrivileges);
   const theUrl = Url.format({
     auth: `${role}:changeme`,
     username: role,
