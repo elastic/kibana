@@ -54,6 +54,8 @@
     "@kbn/field-types",
     "@kbn/es-types",
     "@kbn/core-saved-objects-common",
+    "@kbn/core-analytics-server",
+    "@kbn/analytics-client"
   ],
   "exclude": [
     "target/**/*",
