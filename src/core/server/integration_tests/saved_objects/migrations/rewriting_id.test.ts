@@ -113,7 +113,7 @@ describe('migration v2', () => {
   });
 
   it('rewrites id deterministically for SO with namespaceType: "multiple" and "multiple-isolated"', async () => {
-    const migratedIndex = `.kibana_${pkg.version}_001`;
+    const migratedIndexAlias = `.kibana_${pkg.version}`;
     const { startES } = createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
       settings: {
@@ -167,7 +167,7 @@ describe('migration v2', () => {
     const coreStart = await root.start();
     const esClient = coreStart.elasticsearch.client.asInternalUser;
 
-    const migratedDocs = await fetchDocs(esClient, migratedIndex);
+    const migratedDocs = await fetchDocs(esClient, migratedIndexAlias);
 
     // each newly converted multi-namespace object in a non-default space has its ID deterministically regenerated, and a legacy-url-alias
     // object is created which links the old ID to the new ID

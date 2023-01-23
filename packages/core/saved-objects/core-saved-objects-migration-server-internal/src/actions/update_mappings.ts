@@ -40,7 +40,11 @@ export const updateMappings = ({
         ...mappings,
       })
       .then(() => Either.right('update_mappings_succeeded' as const))
-      .catch(catchRetryableEsClientErrors)
-      .catch(() => Either.left('incompatible_mapping_exception'));
+      .catch((res) => {
+        if (res?.statusCode === 400 && res?.body?.error?.type === 'illegal_argument_exception') {
+          return Either.left('incompatible_mapping_exception');
+        }
+        return catchRetryableEsClientErrors(res);
+      });
   };
 };

@@ -45,8 +45,9 @@ describe('migration v2', () => {
     await new Promise((resolve) => setTimeout(resolve, 10000));
   });
 
-  it('migrates the documents to the highest version', async () => {
-    const migratedIndex = `.kibana_${pkg.version}_001`;
+  // eslint-disable-next-line jest/no-focused-tests
+  fit('migrates the documents to the highest version', async () => {
+    const migratedIndexAlias = `.kibana_${pkg.version}`;
     const { startES } = createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
       settings: {
@@ -85,7 +86,7 @@ describe('migration v2', () => {
     const coreStart = await root.start();
     const esClient = coreStart.elasticsearch.client.asInternalUser;
 
-    const migratedDocs = await fetchDocs(esClient, migratedIndex);
+    const migratedDocs = await fetchDocs(esClient, migratedIndexAlias);
 
     expect(migratedDocs.length).toBe(1);
     const [doc] = migratedDocs;

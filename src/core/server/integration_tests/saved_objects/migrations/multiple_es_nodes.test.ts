@@ -97,7 +97,7 @@ function createRoot({ logFileName, hosts }: RootConfig) {
 describe('migration v2', () => {
   let esServer: TestElasticsearchUtils;
   let root: Root;
-  const migratedIndex = `.kibana_${pkg.version}_001`;
+  const migratedIndexAlias = `.kibana_${pkg.version}`;
 
   beforeAll(async () => {
     await removeLogFile();
@@ -186,7 +186,7 @@ describe('migration v2', () => {
     await root.start();
     const esClient = esServer.es.getClient();
 
-    const migratedFooDocs = await fetchDocs(esClient, migratedIndex, 'foo');
+    const migratedFooDocs = await fetchDocs(esClient, migratedIndexAlias, 'foo');
     expect(migratedFooDocs.length).toBe(2500);
     migratedFooDocs.forEach((doc, i) => {
       expect(doc.id).toBe(`foo:${i}`);
@@ -194,7 +194,7 @@ describe('migration v2', () => {
       expect(doc.migrationVersion.foo).toBe('7.14.0');
     });
 
-    const migratedBarDocs = await fetchDocs(esClient, migratedIndex, 'bar');
+    const migratedBarDocs = await fetchDocs(esClient, migratedIndexAlias, 'bar');
     expect(migratedBarDocs.length).toBe(2500);
     migratedBarDocs.forEach((doc, i) => {
       expect(doc.id).toBe(`bar:${i}`);
