@@ -46,7 +46,7 @@ export async function getSharingData(
   savedSearch: SavedSearchObjectType,
   jobParamsTimeRange?: { min?: string | number; max?: string | number; timezone?: string },
   jobParamsUnsavedState?: {
-    query: estypes.QueryDslQueryContainer | estypes.QueryDslQueryContainer[];
+    query?: estypes.QueryDslQueryContainer | estypes.QueryDslQueryContainer[];
   }
 ) {
   const searchSource = currentSearchSource.createCopy();
