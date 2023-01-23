@@ -15,6 +15,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { AlertsTableStateProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/alerts_table_state';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
+import { getTime } from '@kbn/data-plugin/public';
 import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
 import { getDataTablesInStorageByIds } from '../../../timelines/containers/local_storage';
 import { alertTableViewModeSelector } from '../../../common/store/alert_table/selectors';
@@ -71,6 +72,8 @@ interface DetectionEngineAlertTableProps {
   onShowOnlyThreatIndicatorAlertsChanged: (showOnlyThreatIndicatorAlerts: boolean) => void;
   showBuildingBlockAlerts: boolean;
   showOnlyThreatIndicatorAlerts: boolean;
+  from: string;
+  to: string;
 }
 export const DetectionEngineAlertTable: FC<DetectionEngineAlertTableProps> = ({
   configId,
@@ -82,6 +85,8 @@ export const DetectionEngineAlertTable: FC<DetectionEngineAlertTableProps> = ({
   showOnlyThreatIndicatorAlerts,
   onShowBuildingBlockAlertsChanged,
   showBuildingBlockAlerts,
+  from,
+  to,
 }) => {
   const { triggersActionsUi } = useKibana().services;
 
@@ -95,7 +100,30 @@ export const DetectionEngineAlertTable: FC<DetectionEngineAlertTableProps> = ({
 
   const dispatch = useDispatch();
 
-  const boolQueryDSL = buildQueryFromFilters(inputFilters, undefined);
+  const timeRangeFilter = useMemo(
+    () =>
+      getTime(
+        undefined,
+        {
+          from,
+          to,
+        },
+        {
+          fieldName: '@timestamp',
+        }
+      ),
+    [from, to]
+  );
+
+  const allFilters = useMemo(() => {
+    if (timeRangeFilter) {
+      return [...inputFilters, timeRangeFilter];
+    } else {
+      return inputFilters;
+    }
+  }, [inputFilters, timeRangeFilter]);
+
+  const boolQueryDSL = buildQueryFromFilters(allFilters, undefined);
 
   const getViewMode = alertTableViewModeSelector();
 

@@ -360,6 +360,8 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
               onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChangedCallback}
               showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
               onShowOnlyThreatIndicatorAlertsChanged={onShowOnlyThreatIndicatorAlertsCallback}
+              from={from}
+              to={to}
             />
             <EuiHorizontalRule />
 
