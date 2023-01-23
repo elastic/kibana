@@ -162,7 +162,7 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
               <EuiButtonEmpty
                 size="xs"
                 data-test-subj="resetCustomEmbeddablePanelTitleButton"
-                onClick={() => setTitle(embeddable.getOutput().defaultTitle ?? '')}
+                onClick={() => setTitle(embeddable.getOutput().defaultTitle)}
                 disabled={hideTitle}
                 aria-label={i18n.translate(
                   'embeddableApi.customizePanel.flyout.optionsMenuForm.resetCustomTitleButtonAriaLabel',
@@ -206,7 +206,9 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
               <EuiButtonEmpty
                 size="xs"
                 data-test-subj="resetCustomEmbeddablePanelDescriptionButton"
-                onClick={() => setDescription(embeddable.getOutput().defaultDescription)}
+                onClick={() => {
+                  setDescription(embeddable.getOutput().defaultDescription);
+                }}
                 disabled={hideTitle}
                 aria-label={i18n.translate(
                   'embeddableApi.customizePanel.flyout.optionsMenuForm.resetCustomDescriptionButtonAriaLabel',
@@ -228,7 +230,7 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
               data-test-subj="customEmbeddablePanelDescriptionInput"
               disabled={hideTitle}
               name="description"
-              value={description}
+              value={description ?? ''}
               onChange={(e) => setDescription(e.target.value)}
               aria-label={i18n.translate(
                 'embeddableApi.customizePanel.flyout.optionsMenuForm.panelDescriptionAriaLabel',

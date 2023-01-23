@@ -1052,7 +1052,7 @@ export class Embeddable
     }
 
     const title = input.hidePanelTitles ? '' : input.title ?? this.savedVis.title;
-    const description = input.description ?? this.savedVis.description;
+    const description = input.hidePanelTitles ? '' : input.description ?? this.savedVis.description;
     const savedObjectId = (input as LensByReferenceInput).savedObjectId;
     this.updateOutput({
       ...this.getOutput(),
