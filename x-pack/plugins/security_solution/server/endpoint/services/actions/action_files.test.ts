@@ -14,9 +14,14 @@ import { getFileDownloadStream, getFileInfo } from './action_files';
 import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
 import { NotFoundError } from '../../errors';
-import { FILE_STORAGE_DATA_INDEX } from '../../../../common/endpoint/constants';
+import {
+  FILE_STORAGE_DATA_INDEX,
+  FILE_STORAGE_METADATA_INDEX,
+} from '../../../../common/endpoint/constants';
 import { BaseDataGenerator } from '../../../../common/endpoint/data_generators/base_data_generator';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { generateFileMetadataDocument } from './mocks';
+import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
 
 jest.mock('@kbn/files-plugin/server');
 const createEsFileClient = _createEsFileClient as jest.Mock;
@@ -70,15 +75,35 @@ describe('Action Files service', () => {
 
         return BaseDataGenerator.toEsSearchResponse([]);
       });
+
+      esClientMock.get.mockImplementation(async (reqOptions): Promise<GetResponse> => {
+        if (reqOptions.index === FILE_STORAGE_METADATA_INDEX) {
+          return {
+            _index: FILE_STORAGE_METADATA_INDEX,
+            _id: '123',
+            found: true,
+            _source: generateFileMetadataDocument(),
+          };
+        }
+
+        return {
+          _index: FILE_STORAGE_METADATA_INDEX,
+          _id: '123',
+          found: false,
+          _source: undefined,
+        };
+      });
     });
 
     it('should return expected output', async () => {
       await expect(getFileInfo(esClientMock, loggerMock, '123')).resolves.toEqual({
-        created: '2022-10-10T14:57:30.682Z',
+        actionId: '83484393-ddba-4f3c-9c7e-f492ee198a85',
+        agentId: 'eef9254d-f3ed-4518-889f-18714bd6cec1',
+        created: '2023-01-23T16:50:51.278Z',
         id: '123',
-        mimeType: 'text/plain',
-        name: 'test.txt',
-        size: 1234,
+        mimeType: 'application/zip',
+        name: 'upload.zip',
+        size: 64395,
         status: 'READY',
       });
     });
@@ -87,11 +112,13 @@ describe('Action Files service', () => {
       fileChunksEsResponseMock = BaseDataGenerator.toEsSearchResponse([]);
 
       await expect(getFileInfo(esClientMock, loggerMock, '123')).resolves.toEqual({
-        created: '2022-10-10T14:57:30.682Z',
+        actionId: '83484393-ddba-4f3c-9c7e-f492ee198a85',
+        agentId: 'eef9254d-f3ed-4518-889f-18714bd6cec1',
+        created: '2023-01-23T16:50:51.278Z',
         id: '123',
-        mimeType: 'text/plain',
-        name: 'test.txt',
-        size: 1234,
+        mimeType: 'application/zip',
+        name: 'upload.zip',
+        size: 64395,
         status: 'DELETED',
       });
 
@@ -101,7 +128,7 @@ describe('Action Files service', () => {
     });
 
     it('should return a `NotFoundError` if file id is not found', async () => {
-      fileClientMock.get.mockRejectedValue(
+      esClientMock.get.mockRejectedValue(
         new errors.ResponseError({
           statusCode: 404,
         } as DiagnosticResult)

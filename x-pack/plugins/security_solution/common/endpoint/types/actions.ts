@@ -403,6 +403,7 @@ export interface FileUploadMetadata {
     Omit<BaseFileMetadata, 'name' | 'size' | 'Status' | 'ChunkSize' | 'mime_type' | 'extension'> & {
       compression: FileCompression;
       attributes: string[];
+      type: string;
     };
   host: {
     hostname: string;
