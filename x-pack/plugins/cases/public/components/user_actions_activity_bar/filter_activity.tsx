@@ -12,11 +12,12 @@ import * as i18n from './translations';
 import type { FilterType } from './types';
 
 interface FilterActivityProps {
+  isLoading?: boolean;
   type: FilterType;
   onFilterChange: (type: FilterType) => void;
 }
 
-export const FilterActivity = React.memo<FilterActivityProps>(({ type, onFilterChange }) => {
+export const FilterActivity = React.memo<FilterActivityProps>(({ type, onFilterChange, isLoading = false }) => {
   const handleFilterChange = useCallback(
     (value: FilterType) => {
       onFilterChange(value);
@@ -25,29 +26,32 @@ export const FilterActivity = React.memo<FilterActivityProps>(({ type, onFilterC
   );
 
   return (
-    <EuiFilterGroup>
+    <EuiFilterGroup data-test-subj="user-actions-filter-activity-group">
       <EuiFilterButton
         withNext
         grow={false}
-        numFilters={100}
         onClick={() => handleFilterChange('all')}
         hasActiveFilters={type === 'all'}
+        isLoading={isLoading}
+        data-test-subj="user-actions-filter-activity-button-all"
       >
         {i18n.ALL}
       </EuiFilterButton>
       <EuiFilterButton
         withNext
         grow={false}
-        numFilters={50}
         hasActiveFilters={type === 'user'}
+        isLoading={isLoading}
         onClick={() => handleFilterChange('user')}
+        data-test-subj="user-actions-filter-activity-button-comments"
       >
         {i18n.COMMENTS}
       </EuiFilterButton>
       <EuiFilterButton
-        numFilters={50}
         hasActiveFilters={type === 'action'}
         onClick={() => handleFilterChange('action')}
+        isLoading={isLoading}
+        data-test-subj="user-actions-filter-activity-button-actions"
       >
         {i18n.ACTIONS}
       </EuiFilterButton>

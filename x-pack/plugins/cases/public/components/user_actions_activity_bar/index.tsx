@@ -18,26 +18,24 @@ export interface Params {
 }
 
 interface UserActionsActivityProps {
-  type: FilterType;
-  sortOrder: SortOrderType;
+  params: Params;
   onFilterActivityChange: (type: FilterType) => void;
   onSortActivityChange: (sortOrder: SortOrderType) => void;
 }
 
 export const UserActionsActivityBar = React.memo<UserActionsActivityProps>(
-  ({ type, sortOrder, onFilterActivityChange, onSortActivityChange }) => {
+  ({ params, onFilterActivityChange, onSortActivityChange }) => {
     return (
       <EuiFlexGroup
         wrap={true}
         responsive={false}
-        alignItems="center"
         justifyContent="spaceBetween"
       >
         <EuiFlexItem grow={false}>
-          <FilterActivity type={type} onFilterChange={onFilterActivityChange} />
+          <FilterActivity type={params.type} onFilterChange={onFilterActivityChange} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <SortActivity sortOrder={sortOrder} onOrderChange={onSortActivityChange} />
+          <SortActivity sortOrder={params.sortOrder} onOrderChange={onSortActivityChange} />
         </EuiFlexItem>
       </EuiFlexGroup>
     );

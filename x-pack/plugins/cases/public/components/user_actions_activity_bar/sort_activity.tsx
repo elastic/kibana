@@ -5,52 +5,50 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
-import { EuiComboBox } from '@elastic/eui';
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import React, { useCallback } from 'react';
+import { EuiSelect } from '@elastic/eui';
+import type { EuiSelectOption } from '@elastic/eui';
 
 import * as i18n from './translations';
 import type { SortOrderType } from './types';
 
 interface FilterActivityProps {
+  isLoading?: boolean;
   sortOrder: SortOrderType;
   onOrderChange: (sortOrder: SortOrderType) => void;
 }
 
-export const SortActivity = React.memo<FilterActivityProps>(({ sortOrder, onOrderChange }) => {
-  const [selectedOption, setSelectedOption] = useState<EuiComboBoxOptionOption[]>([
-    { id: sortOrder, label: sortOrder === 'asc' ? 'Oldest First' : 'Newest First' },
-  ]);
+export const SortOptions: EuiSelectOption[] = [
+  {
+    value: 'desc',
+    text: i18n.NEWEST,
+  },
+  {
+    value: 'asc',
+    text: i18n.OLDEST,
+  },
+];
 
-  const options: EuiComboBoxOptionOption[] = [
-    {
-      id: 'desc',
-      label: i18n.NEWEST,
-    },
-    {
-      id: 'asc',
-      label: i18n.OLDEST,
-    },
-  ];
+export const SortActivity = React.memo<FilterActivityProps>(
+  ({ sortOrder, onOrderChange, isLoading = false }) => {
+    const onChange = useCallback(
+      (e) => {
+        onOrderChange(e.target.value);
+      },
+      [onOrderChange]
+    );
 
-  const onComboBoxChange = useCallback(
-    (currentOption) => {
-      setSelectedOption(currentOption);
-      onOrderChange(currentOption[0].id);
-    },
-    [setSelectedOption, onOrderChange]
-  );
-
-  return (
-    <EuiComboBox
-      prepend="SortBy"
-      placeholder="Oldest First"
-      singleSelection={{ asPlainText: true }}
-      options={options}
-      selectedOptions={selectedOption}
-      onChange={onComboBoxChange}
-    />
-  );
-});
+    return (
+      <EuiSelect
+        prepend="SortBy"
+        data-test-subj="user-actions-sort-select"
+        isLoading={isLoading}
+        onChange={onChange}
+        options={SortOptions}
+        value={sortOrder ?? ''}
+      />
+    );
+  }
+);
 
 SortActivity.displayName = 'SortActivity';
