@@ -498,9 +498,9 @@ describe('PluginsService', () => {
       `);
     });
 
-    describe('"enableAllPlugins" __internal__ configuration', () => {
-      it('enables all plugins regardless of their configuration', async () => {
-        (pluginsConfig as any).__internal__ = { enableAllPlugins: true };
+    describe('forceEnableAllPlugins', () => {
+      it('enables all plugins when "true"', async () => {
+        (pluginsConfig as any).forceEnableAllPlugins = true;
         jest
           .spyOn(configService, 'isEnabledAtPath')
           .mockImplementation((path) => Promise.resolve(!path.includes('disabled')));
