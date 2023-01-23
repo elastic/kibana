@@ -5,15 +5,9 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
-import { CSSObject } from '@emotion/react';
+import { ITelemetryClient } from './types';
 
-export const useStyles = () => {
-  return useMemo(() => {
-    const yamlEditor: CSSObject = {
-      height: '400px',
-    };
-
-    return { yamlEditor };
-  }, []);
-};
+export const createLogViewsClientMock = (): jest.Mocked<ITelemetryClient> => ({
+  reportHostEntryClicked: jest.fn(),
+  reportHostsViewQuerySubmitted: jest.fn(),
+});
