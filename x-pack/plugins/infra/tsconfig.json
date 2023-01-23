@@ -53,6 +53,8 @@
     "@kbn/logging-mocks",
     "@kbn/field-types",
     "@kbn/es-types",
+    "@kbn/core-analytics-server",
+    "@kbn/analytics-client",
   ],
   "exclude": [
     "target/**/*",
