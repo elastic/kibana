@@ -101,6 +101,7 @@ export const useFetchIndex = (
   onlyCheckIfIndicesExist: boolean = false,
   strategy: string = 'indexFields'
 ): [boolean, FetchIndexReturn] => {
+  console.log('indexNames', indexNames);
   const { data } = useKibana().services;
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
@@ -120,67 +121,35 @@ export const useFetchIndex = (
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
-        searchSubscription$.current = data.search
-          .search<IndexFieldsStrategyRequest<'indices'>, IndexFieldsStrategyResponse>(
-            { indices: iNames, onlyCheckIfIndicesExist },
-            {
-              abortSignal: abortCtrl.current.signal,
-              strategy,
-            }
-          )
-          .subscribe({
-            next: (response) => {
-              if (isCompleteResponse(response)) {
-                Promise.resolve().then(() => {
-                  ReactDOM.unstable_batchedUpdates(() => {
-                    const stringifyIndices = response.indicesExist.sort().join();
+        const dv = await data.dataViews.create({ title: iNames.join(','), allowNoIndex: true });
+        const { browserFields } = getDataViewStateFromIndexFields(iNames, dv.fields);
 
-                    previousIndexesName.current = response.indicesExist;
-                    const { browserFields } = getDataViewStateFromIndexFields(
-                      stringifyIndices,
-                      response.indexFields
-                    );
-                    setLoading(false);
-                    setState({
-                      browserFields,
-                      indexes: response.indicesExist,
-                      indexExists: response.indicesExist.length > 0,
-                      indexPatterns: getIndexFields(stringifyIndices, response.indexFields),
-                    });
-
-                    searchSubscription$.current.unsubscribe();
-                  });
-                });
-              } else if (isErrorResponse(response)) {
-                setLoading(false);
-                addWarning(i18n.ERROR_BEAT_FIELDS);
-                searchSubscription$.current.unsubscribe();
-              }
-            },
-            error: (msg) => {
-              setLoading(false);
-              addError(msg, {
-                title: i18n.FAIL_BEAT_FIELDS,
-              });
-              searchSubscription$.current.unsubscribe();
-            },
-          });
+        setState({
+          browserFields,
+          indexes: dv.getIndexPattern().split(','),
+          indexExists: dv.getIndexPattern().split(',').length > 0,
+          indexPatterns: getIndexFields(dv.getIndexPattern(), dv.fields),
+        });
+        setLoading(false);
       };
-      searchSubscription$.current.unsubscribe();
-      abortCtrl.current.abort();
+
+      // searchSubscription$.current.unsubscribe();
+      // abortCtrl.current.abort();
       asyncSearch();
     },
-    [data.search, addError, addWarning, onlyCheckIfIndicesExist, setLoading, setState, strategy]
+    [data.dataViews]
   );
 
   useEffect(() => {
-    if (!isEmpty(indexNames) && !isEqual(previousIndexesName.current, indexNames)) {
+    if (!isEmpty(indexNames)) {
+      //&& !isEqual(previousIndexesName.current, indexNames)) {
+      console.log('how many times do we actually call this?');
       indexFieldsSearch(indexNames);
     }
-    return () => {
-      searchSubscription$.current.unsubscribe();
-      abortCtrl.current.abort();
-    };
+    // return () => {
+    //   searchSubscription$.current.unsubscribe();
+    //   abortCtrl.current.abort();
+    // };
   }, [indexNames, indexFieldsSearch, previousIndexesName]);
 
   return [isLoading, state];

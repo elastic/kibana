@@ -100,6 +100,13 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
     defineRuleData?.index
   );
 
+  useEffect(() => console.log('ruleIndices', ruleIndices), [ruleIndices]);
+
+  useEffect(
+    () => console.log('defineRuleData?.index', defineRuleData?.index),
+    [defineRuleData?.index]
+  );
+
   /**
    * 1. if not null, fetch data view from id saved on rule form
    * 2. Create a state to set the indexPattern to be used
