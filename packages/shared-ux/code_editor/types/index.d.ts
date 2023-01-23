@@ -87,6 +87,9 @@ export interface Props {
    */
   fullWidth?: boolean;
 
+  /**
+   * Place holder text for the code editor
+   */
   placeholder?: string;
   /**
    * Accessible name for the editor. (Defaults to "Code editor")

@@ -346,7 +346,7 @@ export const CodeEditor: React.FC<Props> = ({
           monaco.languages.setLanguageConfiguration(languageId, languageConfiguration);
         }
       });
-      // Register themes
+
       monaco.editor.defineTheme('euiColors', useDarkTheme ? DARK_THEME : LIGHT_THEME);
       monaco.editor.defineTheme(
         'euiColorsTransparent',

@@ -13,14 +13,12 @@ import { Property } from 'csstype';
 import { monaco } from '@kbn/monaco';
 import { euiLightVars as lightTheme, euiDarkVars as darkTheme } from '@kbn/ui-theme';
 
-// .react-monaco-editor-container .monaco-editor .inputarea:focus
 export const codeEditorMonacoStyles = () => css`
    {
     animation: none !important; // Removes textarea EUI blue underline animation from EUI
   }
 `;
 
-// .kibanaCodeEditor
 export const codeEditorStyles = () => css`
    {
     position: relative;
@@ -28,7 +26,6 @@ export const codeEditorStyles = () => css`
   }
 `;
 
-// &__placeholderContainer
 export const codeEditorPlaceholderContainerStyles = (subduedText: string) => css`
    {
     color: ${subduedText};
@@ -37,7 +34,6 @@ export const codeEditorPlaceholderContainerStyles = (subduedText: string) => css
   }
 `;
 
-// &__keyboardHint
 export const codeEditorKeyboardHintStyles = (levels: {
   content: Property.ZIndex;
   mask: Property.ZIndex;
@@ -67,7 +63,6 @@ export const codeEditorKeyboardHintStyles = (levels: {
     }
   `;
 
-// &__controls
 export const codeEditorControlsStyles = (
   size: {
     base: string;
@@ -100,7 +95,6 @@ export const codeEditorControlsStyles = (
   }
 `;
 
-// &__isFullScreen
 export const codeEditorFullScreenStyles = () => css`
    {
     position: absolute;
@@ -109,13 +103,10 @@ export const codeEditorFullScreenStyles = () => css`
   }
 `;
 
-// .kibanaCodeEditor_controls
 export const codeEditorControlsWithinFullScreenStyles = (size: string) => css`
   top: ${size};
   right: ${size};
 }`;
-
-// Previously editor_theme.ts
 
 // NOTE: For talk around where this theme information will ultimately live,
 // please see this discuss issue: https://github.com/elastic/kibana/issues/43814
