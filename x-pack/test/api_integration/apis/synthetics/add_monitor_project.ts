@@ -98,6 +98,20 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    it('project monitors - returns 404 for non-existing spaces', async () => {
+      const project = `test-project-${uuid.v4()}`;
+      await supertest
+        .put(
+          `/s/i_dont_exist${API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
+            '{projectName}',
+            project
+          )}`
+        )
+        .set('kbn-xsrf', 'true')
+        .send(projectMonitors)
+        .expect(404);
+    });
+
     it('project monitors - handles browser monitors', async () => {
       const successfulMonitors = [projectMonitors.monitors[0]];
       const project = `test-project-${uuidv4()}`;
