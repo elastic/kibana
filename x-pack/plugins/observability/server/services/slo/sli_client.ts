@@ -10,7 +10,6 @@ import {
   AggregationsDateRangeAggregate,
   AggregationsSumAggregate,
   MsearchMultisearchBody,
-  MsearchResponseItem,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { assertNever } from '@kbn/std';
@@ -35,7 +34,6 @@ interface LookbackWindow {
   duration: Duration;
 }
 
-type AggKey = 'good' | 'total';
 type EsAggregations = Record<WindowName, AggregationsDateRangeAggregate>;
 
 export class DefaultSLIClient implements SLIClient {
@@ -56,9 +54,7 @@ export class DefaultSLIClient implements SLIClient {
       return indicatorDataBySlo;
     }
 
-    const result = await this.esClient.msearch<unknown, Record<AggKey, AggregationsSumAggregate>>({
-      searches,
-    });
+    const result = await this.esClient.msearch({ searches });
 
     for (let i = 0; i < result.responses.length; i++) {
       const slo = sloList[i];
@@ -68,7 +64,11 @@ export class DefaultSLIClient implements SLIClient {
         continue;
       }
 
-      indicatorDataBySlo[slo.id] = handleResult(dateRangeBySlo[slo.id], result.responses[i]);
+      // @ts-ignore
+      const { aggregations } = result.responses[i];
+      const good = aggregations?.good?.value || 0;
+      const total = aggregations?.total?.value || 0;
+      indicatorDataBySlo[slo.id] = { dateRange: dateRangeBySlo[slo.id], good, total };
     }
 
     return indicatorDataBySlo;
@@ -162,22 +162,6 @@ function commonQuery(
         ],
       },
     },
-  };
-}
-
-function handleResult(dateRange: DateRange, response: MsearchResponseItem): IndicatorData {
-  // @ts-ignore
-  const { aggregations } = response;
-  const good = aggregations?.good;
-  const total = aggregations?.total;
-  if (good === undefined || good.value === null || total === undefined || total.value === null) {
-    throw new InternalQueryError('SLI aggregation query');
-  }
-
-  return {
-    dateRange,
-    good: good.value,
-    total: total.value,
   };
 }
 
