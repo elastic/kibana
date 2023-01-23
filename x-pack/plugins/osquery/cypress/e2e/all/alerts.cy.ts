@@ -200,7 +200,7 @@ describe('Alert Event Details', () => {
 
   it('should be able to add investigation guides to response actions', () => {
     const investigationGuideNote =
-      'It seems that you have suggested queries in investigation guide, would you like to add them as response actions?';
+      'You have queries in the investigation guide. Add them as response actions?';
     cy.visit('/app/security/rules');
     cy.contains(RULE_NAME).click();
     cy.contains('Edit rule settings').click();

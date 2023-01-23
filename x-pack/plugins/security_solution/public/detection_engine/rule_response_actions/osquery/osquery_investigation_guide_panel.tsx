@@ -11,6 +11,7 @@ import React, { useCallback, useState } from 'react';
 
 interface OsqueryInvestigationGuidePanelProps {
   onClick: () => void;
+  queriesLength: number;
 }
 
 const panelCss = {
@@ -19,7 +20,7 @@ const panelCss = {
 const flexGroupCss = { padding: `0 24px` };
 
 export const OsqueryInvestigationGuidePanel = React.memo<OsqueryInvestigationGuidePanelProps>(
-  ({ onClick }) => {
+  ({ onClick, queriesLength }) => {
     const [hideInvestigationGuideSuggestion, setHideInvestigationGuideSuggestion] = useState(false);
 
     const handleClick = useCallback(() => {
@@ -37,7 +38,10 @@ export const OsqueryInvestigationGuidePanel = React.memo<OsqueryInvestigationGui
             <EuiText size="s">
               <FormattedMessage
                 id="xpack.securitySolution.responseActionsList.investigationGuideSuggestion"
-                defaultMessage="It seems that you have suggested queries in investigation guide, would you like to add them as response actions?"
+                defaultMessage="You have {queriesLength, plural, one {a query} other {queries}} in the investigation guide. Add {queriesLength, plural, one {it as a response action} other {them as response actions}}?"
+                values={{
+                  queriesLength,
+                }}
               />
             </EuiText>
           </EuiFlexItem>
