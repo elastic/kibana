@@ -175,16 +175,30 @@ export const Settings = (props: Props) => {
     return categories.global.concat(categories.namespace);
   }, [categories.global, categories.namespace]);
 
-  const renderAdvancedSettings = (scope: 'namespace' | 'global') => {
-    const callOutTitle =
-      scope === 'namespace' ? i18nTexts.defaultSpaceCalloutTitle : i18nTexts.globalCalloutTitle;
-    const callOutSubtitle =
-      scope === 'namespace'
-        ? i18nTexts.defaultSpaceCalloutSubtitle
-        : i18nTexts.globalCalloutSubtitle;
+  const callOutTitle = (scope: UiSettingsScope) => {
+    if (scope === 'namespace') {
+      return i18nTexts.defaultSpaceCalloutTitle;
+    }
+    return i18nTexts.globalCalloutTitle;
+  };
+
+  const callOutSubtitle = (scope: UiSettingsScope) => {
+    if (scope === 'namespace') {
+      return i18nTexts.defaultSpaceCalloutSubtitle;
+    }
+    return i18nTexts.globalCalloutSubtitle;
+  };
+
+  const getClientForScope = (scope: UiSettingsScope) => {
+    if (scope === 'namespace') {
+      return uiSettings;
+    }
+    return globalUiSettings;
+  };
+
+  const renderAdvancedSettings = (scope: UiSettingsScope) => {
     return (
       <AdvancedSettings
-        settings={scope === 'namespace' ? settings : globalSettings}
         groupedSettings={groupedSettings[scope]}
         categoryCounts={categoryCounts[scope]}
         categories={categories[scope]}
@@ -192,9 +206,10 @@ export const Settings = (props: Props) => {
         clearQuery={() => setUrlQuery('')}
         noResults={!queryState.footerQueryMatched}
         queryText={queryState.query.text}
-        callOutTitle={callOutTitle}
-        callOutSubtitle={callOutSubtitle}
-        uiSettings={scope === 'namespace' ? uiSettings : globalUiSettings}
+        callOutTitle={callOutTitle(scope)}
+        callOutSubtitle={callOutSubtitle(scope)}
+        settingsService={settingsService}
+        uiSettingsClient={getClientForScope(scope)}
         {...rest}
       />
     );

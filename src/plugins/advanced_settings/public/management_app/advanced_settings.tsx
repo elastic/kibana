@@ -10,10 +10,11 @@ import React, { Component } from 'react';
 
 import { UiCounterMetricType } from '@kbn/analytics';
 
-import { IUiSettingsClient, DocLinksStart, ToastsStart, ThemeServiceStart } from '@kbn/core/public';
+import { DocLinksStart, ToastsStart, ThemeServiceStart } from '@kbn/core/public';
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { IUiSettingsClient, SettingsStart } from '@kbn/core-ui-settings-browser';
 import { AdvancedSettingsVoiceAnnouncement } from './components/advanced_settings_voice_announcement';
 import { Form } from './components/form';
 
@@ -23,12 +24,14 @@ export const QUERY = 'query';
 
 interface AdvancedSettingsProps {
   enableSaving: boolean;
-  uiSettings: IUiSettingsClient;
+  settingsService: SettingsStart;
+  /** TODO: remove once use_ui_setting is changed to use the settings service
+   * https://github.com/elastic/kibana/issues/149347 */
+  uiSettingsClient: IUiSettingsClient;
   docLinks: DocLinksStart['links'];
   toasts: ToastsStart;
   theme: ThemeServiceStart['theme$'];
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
-  settings: FieldSetting[];
   groupedSettings: GroupedSettings;
   categoryCounts: Record<string, number>;
   categories: string[];
@@ -49,7 +52,7 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps> {
 
   saveConfig = async (changes: SettingsChanges) => {
     const arr = Object.entries(changes).map(([key, value]) =>
-      this.props.uiSettings.set(key, value)
+      this.props.uiSettingsClient.set(key, value)
     );
     return Promise.all(arr);
   };
@@ -67,7 +70,12 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps> {
           queryText={this.props.queryText}
           settings={this.props.visibleSettings}
         />
-        <KibanaContextProvider services={{ uiSettings: this.props.uiSettings }}>
+        <KibanaContextProvider
+          services={{
+            uiSettings: this.props.settingsService.client,
+            settings: this.props.settingsService,
+          }}
+        >
           <Form
             settings={this.props.groupedSettings}
             visibleSettings={this.props.visibleSettings}
