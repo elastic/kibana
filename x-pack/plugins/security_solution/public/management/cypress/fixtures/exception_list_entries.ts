@@ -5,47 +5,8 @@
  * 2.0.
  */
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
-export const getHieListResponse = (isEmpty = true) => {
-  const data: Array<Record<string, unknown>> = [];
 
-  if (!isEmpty) {
-    data.push({
-      _version: 'WzI1MjAsMV0=',
-      comments: [],
-      created_at: '2023-01-12T10:14:28.385Z',
-      created_by: 'elastic',
-      description: 'Description of host isolation exception',
-      entries: [
-        {
-          field: 'destination.ip',
-          operator: 'included',
-          type: 'match',
-          value: '10.153.77.81',
-        },
-      ],
-      id: 'test_id',
-      item_id: 'test_host_isolation_exception_item_id',
-      list_id: 'endpoint_host_isolation_exceptions',
-      name: 'test host isolation exception',
-      namespace_type: 'agnostic',
-      os_types: ['windows', 'linux', 'macos'],
-      tags: [],
-      tie_breaker_id: 'be01ec60-3f12-4cf4-9130-cdc3fc8ad397',
-      type: 'simple',
-      updated_at: '2023-01-12T10:14:28.385Z',
-      updated_by: 'elastic',
-    });
-  }
-
-  return {
-    data,
-    page: 1,
-    per_page: 10,
-    total: data.length,
-  };
-};
-
-export const testExceptionListItems = [
+export const getTestExceptionListItems = () => [
   {
     name: 'Trusted Apps',
     pageId: 'trusted_apps',

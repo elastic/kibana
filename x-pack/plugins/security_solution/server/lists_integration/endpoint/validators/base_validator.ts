@@ -118,7 +118,7 @@ export class BaseValidator {
   ): Promise<void> {
     if (this.isItemByPolicy(item) && !(await this.isAllowedToCreateArtifactsByPolicy())) {
       throw new EndpointArtifactExceptionValidationError(
-        'Your license level does not allow create/update of by policy artifacts',
+        'Your license level does not allow create/update of policy artifacts',
         403
       );
     }

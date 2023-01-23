@@ -5,18 +5,20 @@
  * 2.0.
  */
 
+import type { HostInfo } from '../../../../common/endpoint/types';
 import {
   ISOLATE_HOST_ROUTE_V2,
   HOST_METADATA_LIST_ROUTE,
 } from '../../../../common/endpoint/constants';
 import { login, loginWithRole, ROLE } from '../tasks/login';
 import { setupLicense } from '../tasks/license';
-import { platinum, gold } from '../fixtures/licenses';
+import { getPlatinumLicense, getGoldLicense } from '../fixtures/licenses';
 import { loadEndpointIfNoneExist } from '../tasks/load_endpoint_data';
+import { getEndpointListPath } from '../../common/routing';
 
 const loginWithWriteAccess = (url: string) => {
   loginWithRole(ROLE.analyst_hunter);
-  cy.visit(url);
+  cy.visit(`/app/security${url}`);
 };
 
 describe('Endpoint list', () => {
@@ -27,15 +29,15 @@ describe('Endpoint list', () => {
 
   describe('Platinum license', () => {
     beforeEach(() => {
-      setupLicense(platinum);
+      setupLicense(getPlatinumLicense());
     });
 
     it('should allow isolating endpoint', () => {
-      loginWithWriteAccess('/app/security/administration/endpoints');
+      loginWithWriteAccess(getEndpointListPath({ name: 'endpointList' }));
       cy.request('GET', HOST_METADATA_LIST_ROUTE)
         .then((metadataResponse) => {
           const endpointIds = metadataResponse.body.data.map(
-            (endpoint: { metadata: { agent: { id: string } } }) => endpoint.metadata.agent.id
+            (endpoint: HostInfo) => endpoint.metadata.agent.id
           );
           cy.request({
             method: 'POST',
@@ -45,7 +47,6 @@ describe('Endpoint list', () => {
               endpoint_ids: [endpointIds[0]],
               comment: 'Isolating from Cypress with Platinum license',
             },
-            failOnStatusCode: false,
           });
         })
         .then((isolateResp) => {
@@ -56,15 +57,15 @@ describe('Endpoint list', () => {
 
   describe('Gold license', () => {
     beforeEach(() => {
-      setupLicense(gold);
+      setupLicense(getGoldLicense());
     });
 
     it('should not allow isolating endpoint', () => {
-      loginWithWriteAccess('/app/security/administration/endpoints');
+      loginWithWriteAccess(getEndpointListPath({ name: 'endpointList' }));
       cy.request('GET', HOST_METADATA_LIST_ROUTE)
         .then((metadataResponse) => {
           const endpointIds = metadataResponse.body.data.map(
-            (endpoint: { metadata: { agent: { id: string } } }) => endpoint.metadata.agent.id
+            (endpoint: HostInfo) => endpoint.metadata.agent.id
           );
           cy.request({
             method: 'POST',

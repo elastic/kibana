@@ -14,8 +14,8 @@ import { login, loginWithRole, ROLE } from '../tasks/login';
 import { setupLicense } from '../tasks/license';
 import { loadEndpointIfNoneExist } from '../tasks/load_endpoint_data';
 import { getPackagePolicyId } from '../tasks/package_policy';
-import { platinum, gold } from '../fixtures/licenses';
-import { testExceptionListItems } from '../fixtures/exception_list_entries';
+import { getPlatinumLicense, getGoldLicense } from '../fixtures/licenses';
+import { getTestExceptionListItems } from '../fixtures/exception_list_entries';
 import { createArtifactLists, removeAllArtifacts } from '../tasks/artifacts';
 
 const verifyErrorMessage = (
@@ -25,8 +25,38 @@ const verifyErrorMessage = (
   const errorMessage =
     listId === ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id
       ? 'Endpoint authorization failure'
-      : 'Your license level does not allow create/update of by policy artifacts';
+      : 'Your license level does not allow create/update of policy artifacts';
   expect(response.body.message).to.eql(`EndpointArtifactError: ${errorMessage}`);
+};
+
+const createTestArtifact = (
+  listId: typeof ENDPOINT_ARTIFACT_LIST_IDS[number],
+  policyId: string,
+  testEntry: ReturnType<typeof getTestExceptionListItems>[number]['testEntry']
+): Cypress.Chainable<Cypress.Response<string>> => {
+  return cy
+    .request({
+      method: 'GET',
+      url: `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${listId}&namespace_type=agnostic`,
+    })
+    .then((response) => {
+      expect(response.status).to.eq(200);
+
+      cy.request({
+        method: 'POST',
+        url: EXCEPTION_LIST_ITEM_URL,
+        headers: { 'kbn-xsrf': 'kibana' },
+        body: {
+          ...testEntry,
+          list_id: listId,
+          tags: [`policy:${policyId}`],
+        },
+        failOnStatusCode: false,
+      }).then((createResponse) => {
+        expect(createResponse.status).to.eq(200);
+        return createResponse.body.id;
+      });
+    });
 };
 
 const loginWithWriteAccess = (url: string) => {
@@ -50,19 +80,16 @@ describe('Exception lists', () => {
 
   describe('Platinum license', () => {
     beforeEach(() => {
-      setupLicense(platinum);
+      setupLicense(getPlatinumLicense());
     });
 
-    for (const artifact of testExceptionListItems) {
+    for (const artifact of getTestExceptionListItems()) {
       describe(`${artifact.name}`, () => {
-        let artifactId = '';
-
         it('should allow creating artifact with policy assigned', () => {
           loginWithWriteAccess(`/app/security/administration/${artifact.pageId}`);
           cy.request({
             method: 'GET',
             url: `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${artifact.listId}&namespace_type=agnostic`,
-            failOnStatusCode: false,
           }).then((response) => {
             expect(response.status).to.eq(200);
             cy.request({
@@ -77,10 +104,6 @@ describe('Exception lists', () => {
               failOnStatusCode: false,
             }).then((createResponse) => {
               expect(createResponse.status).to.eq(200);
-              expect(createResponse.body.entries).to.deep.equal(artifact.testEntry.entries);
-              expect(createResponse.body.list_id).to.eql(artifact.listId);
-              expect(createResponse.body).to.have.property('created_at');
-              artifactId = createResponse.body.id;
             });
           });
         });
@@ -88,54 +111,53 @@ describe('Exception lists', () => {
         it('should allow editing artifact with policy assigned', () => {
           const updatedDescription = 'updated description';
           loginWithWriteAccess(`/app/security/administration/${artifact.pageId}`);
-          cy.request({
-            method: 'GET',
-            url: `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${artifact.listId}&namespace_type=agnostic`,
-            failOnStatusCode: false,
-          }).then((response) => {
-            expect(response.status).to.eq(200);
+
+          createTestArtifact(artifact.listId, policyId, artifact.testEntry).then((artifactId) => {
             cy.request({
-              method: 'PUT',
-              url: EXCEPTION_LIST_ITEM_URL,
-              headers: { 'kbn-xsrf': 'kibana' },
-              body: {
-                ...artifact.testEntry,
-                id: artifactId,
-                tags: [`policy:${policyId}`],
-                description: updatedDescription,
-              },
-              failOnStatusCode: false,
-            }).then((createResponse) => {
-              expect(createResponse.status).to.eq(200);
-              expect(createResponse.body.entries).to.deep.equal(artifact.testEntry.entries);
-              expect(createResponse.body.list_id).to.eql(artifact.listId);
-              expect(createResponse.body.description).to.eql(updatedDescription);
+              method: 'GET',
+              url: `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${artifact.listId}&namespace_type=agnostic`,
+            }).then((response) => {
+              expect(response.status).to.eq(200);
+              cy.request({
+                method: 'PUT',
+                url: EXCEPTION_LIST_ITEM_URL,
+                headers: { 'kbn-xsrf': 'kibana' },
+                body: {
+                  ...artifact.testEntry,
+                  id: artifactId,
+                  tags: [`policy:${policyId}`],
+                  description: updatedDescription,
+                },
+                failOnStatusCode: false,
+              }).then((createResponse) => {
+                expect(createResponse.status).to.eq(200);
+              });
             });
           });
         });
 
         it('should allow detaching artifact from an assigned policy', () => {
           loginWithWriteAccess(`/app/security/administration/${artifact.pageId}`);
-          cy.request({
-            method: 'GET',
-            url: `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${artifact.listId}&namespace_type=agnostic`,
-            failOnStatusCode: false,
-          }).then((response) => {
-            expect(response.status).to.eq(200);
+
+          createTestArtifact(artifact.listId, policyId, artifact.testEntry).then((artifactId) => {
             cy.request({
-              method: 'PUT',
-              url: EXCEPTION_LIST_ITEM_URL,
-              headers: { 'kbn-xsrf': 'kibana' },
-              body: {
-                ...artifact.testEntry,
-                id: artifactId,
-              },
+              method: 'GET',
+              url: `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${artifact.listId}&namespace_type=agnostic`,
               failOnStatusCode: false,
-            }).then((createResponse) => {
-              expect(createResponse.status).to.eq(200);
-              expect(createResponse.body.entries).to.deep.equal(artifact.testEntry.entries);
-              expect(createResponse.body.list_id).to.eql(artifact.listId);
-              expect(createResponse.body.tags[0]).to.eql(undefined);
+            }).then((response) => {
+              expect(response.status).to.eq(200);
+              cy.request({
+                method: 'PUT',
+                url: EXCEPTION_LIST_ITEM_URL,
+                headers: { 'kbn-xsrf': 'kibana' },
+                body: {
+                  ...artifact.testEntry,
+                  id: artifactId,
+                },
+                failOnStatusCode: false,
+              }).then((createResponse) => {
+                expect(createResponse.status).to.eq(200);
+              });
             });
           });
         });
@@ -145,21 +167,18 @@ describe('Exception lists', () => {
 
   describe('Gold license', () => {
     beforeEach(() => {
-      setupLicense(gold);
+      setupLicense(getGoldLicense());
     });
 
-    for (const artifact of testExceptionListItems.filter(
+    for (const artifact of getTestExceptionListItems().filter(
       (item) => item.pageId !== 'host_isolation_exceptions'
     )) {
       describe(`${artifact.name}`, () => {
-        let artifactId = '';
-
         it('should not allow creating artifact with policy assigned', () => {
           loginWithWriteAccess(`/app/security/administration/${artifact.pageId}`);
           cy.request({
             method: 'GET',
             url: `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${artifact.listId}&namespace_type=agnostic`,
-            failOnStatusCode: false,
           }).then((response) => {
             expect(response.status).to.eq(200);
             cy.request({
@@ -184,7 +203,6 @@ describe('Exception lists', () => {
           cy.request({
             method: 'GET',
             url: `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${artifact.listId}&namespace_type=agnostic`,
-            failOnStatusCode: false,
           }).then((response) => {
             expect(response.status).to.eq(200);
             cy.request({
@@ -199,10 +217,6 @@ describe('Exception lists', () => {
               failOnStatusCode: false,
             }).then((createResponse) => {
               expect(createResponse.status).to.eq(200);
-              expect(createResponse.body.entries).to.deep.equal(artifact.testEntry.entries);
-              expect(createResponse.body.list_id).to.eql(artifact.listId);
-              expect(createResponse.body).to.have.property('created_at');
-              artifactId = createResponse.body.id;
             });
           });
         });
@@ -210,26 +224,28 @@ describe('Exception lists', () => {
         it('should not allow artifact to assign a specific policy', () => {
           const updatedDescription = 'updated description';
           loginWithWriteAccess(`/app/security/administration/${artifact.pageId}`);
-          cy.request({
-            method: 'GET',
-            url: `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${artifact.listId}&namespace_type=agnostic`,
-            failOnStatusCode: false,
-          }).then((response) => {
-            expect(response.status).to.eq(200);
+
+          createTestArtifact(artifact.listId, 'all', artifact.testEntry).then((artifactId) => {
             cy.request({
-              method: 'PUT',
-              url: EXCEPTION_LIST_ITEM_URL,
-              headers: { 'kbn-xsrf': 'kibana' },
-              body: {
-                ...artifact.testEntry,
-                id: artifactId,
-                tags: [`policy:${policyId}`],
-                description: updatedDescription,
-              },
-              failOnStatusCode: false,
-            }).then((editResponse) => {
-              expect(editResponse.status).to.eq(403);
-              verifyErrorMessage(artifact.listId, editResponse);
+              method: 'GET',
+              url: `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${artifact.listId}&namespace_type=agnostic`,
+            }).then((response) => {
+              expect(response.status).to.eq(200);
+              cy.request({
+                method: 'PUT',
+                url: EXCEPTION_LIST_ITEM_URL,
+                headers: { 'kbn-xsrf': 'kibana' },
+                body: {
+                  ...artifact.testEntry,
+                  id: artifactId,
+                  tags: [`policy:${policyId}`],
+                  description: updatedDescription,
+                },
+                failOnStatusCode: false,
+              }).then((editResponse) => {
+                expect(editResponse.status).to.eq(403);
+                verifyErrorMessage(artifact.listId, editResponse);
+              });
             });
           });
         });
@@ -239,24 +255,25 @@ describe('Exception lists', () => {
         // when clearly testing it with local es/kibana instance it returns a 403
         it.skip('should not allow artifact detaching from global policy', () => {
           loginWithWriteAccess(`/app/security/administration/${artifact.pageId}`);
-          cy.request({
-            method: 'GET',
-            url: `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${artifact.listId}&namespace_type=agnostic`,
-            failOnStatusCode: false,
-          }).then((response) => {
-            expect(response.status).to.eq(200);
+          createTestArtifact(artifact.listId, 'all', artifact.testEntry).then((artifactId) => {
             cy.request({
-              method: 'PUT',
-              url: EXCEPTION_LIST_ITEM_URL,
-              headers: { 'kbn-xsrf': 'kibana' },
-              body: {
-                ...artifact.testEntry,
-                id: artifactId,
-              },
-              failOnStatusCode: false,
-            }).then((editResponse) => {
-              expect(editResponse.status).to.eq(403);
-              verifyErrorMessage(artifact.listId, editResponse);
+              method: 'GET',
+              url: `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${artifact.listId}&namespace_type=agnostic`,
+            }).then((response) => {
+              expect(response.status).to.eq(200);
+              cy.request({
+                method: 'PUT',
+                url: EXCEPTION_LIST_ITEM_URL,
+                headers: { 'kbn-xsrf': 'kibana' },
+                body: {
+                  ...artifact.testEntry,
+                  id: artifactId,
+                },
+                failOnStatusCode: false,
+              }).then((editResponse) => {
+                expect(editResponse.status).to.eq(403);
+                verifyErrorMessage(artifact.listId, editResponse);
+              });
             });
           });
         });

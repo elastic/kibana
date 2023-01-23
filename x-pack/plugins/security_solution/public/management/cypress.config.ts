@@ -34,7 +34,10 @@ export default defineCypressConfig({
   e2e: {
     baseUrl: 'http://localhost:5620',
     supportFile: 'public/management/cypress/support/e2e.ts',
-    specPattern: 'public/management/cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
+    specPattern: [
+      'public/management/cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
+      'public/management/cypress/api/**/*.cy.{js,jsx,ts,tsx}',
+    ],
     experimentalRunAllSpecs: true,
   },
 });

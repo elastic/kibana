@@ -7,12 +7,13 @@
 
 import { login, loginWithRole, ROLE } from '../tasks/login';
 import { setupLicense } from '../tasks/license';
-import { enterprise, platinum } from '../fixtures/licenses';
+import { getEnterpriseLicense, getPlatinumLicense } from '../fixtures/licenses';
 import { loadEndpointIfNoneExist } from '../tasks/load_endpoint_data';
+import { getEndpointListPath } from '../../common/routing';
 
 const loginWithWriteAccess = (url: string) => {
   loginWithRole(ROLE.analyst_hunter);
-  cy.visit(url);
+  cy.visit(`/app/security${url}`);
 };
 
 describe('Responder', () => {
@@ -23,11 +24,11 @@ describe('Responder', () => {
 
   describe('Enterprise license', () => {
     beforeEach(() => {
-      setupLicense(enterprise);
+      setupLicense(getEnterpriseLicense());
     });
 
     it('should display responder action item for an endpoint', () => {
-      loginWithWriteAccess('/app/security/administration/endpoints');
+      loginWithWriteAccess(getEndpointListPath({ name: 'endpointList' }));
       cy.getBySel('endpointTableRowActions').first().click();
       cy.getBySel('console').should('exist');
     });
@@ -35,11 +36,11 @@ describe('Responder', () => {
 
   describe('Platinum license', () => {
     beforeEach(() => {
-      setupLicense(platinum);
+      setupLicense(getPlatinumLicense());
     });
 
     it('should not display responder action item for an endpoint', () => {
-      loginWithWriteAccess('/app/security/administration/endpoints');
+      loginWithWriteAccess(getEndpointListPath({ name: 'endpointList' }));
       cy.getBySel('endpointTableRowActions').first().click();
       cy.getBySel('console').should('not.exist');
     });
