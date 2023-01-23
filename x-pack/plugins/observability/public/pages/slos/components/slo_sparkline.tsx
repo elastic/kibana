@@ -1,0 +1,68 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { AreaSeries, Chart, Fit, LineSeries, ScaleType, Settings } from '@elastic/charts';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import React from 'react';
+
+import { useEuiTheme } from '@elastic/eui';
+import { EUI_SPARKLINE_THEME_PARTIAL } from '@elastic/eui/dist/eui_charts_theme';
+import { ObservabilityAppServices } from '../../../application/types';
+
+interface Data {
+  key: number;
+  value: number | undefined;
+}
+type ChartType = 'area' | 'line';
+type State = 'success' | 'error';
+
+export interface Props {
+  id: string;
+  data: Data[];
+  chart: ChartType;
+  state: State;
+}
+
+export function SloSparkline({ chart, data, id, state }: Props) {
+  const { charts } = useKibana<ObservabilityAppServices>().services;
+  const { euiTheme } = useEuiTheme();
+  const chartThemes = {
+    theme: charts.theme.useChartsTheme(),
+    baseTheme: charts.theme.useChartsBaseTheme(),
+  };
+
+  const color = state === 'error' ? euiTheme.colors.danger : euiTheme.colors.success;
+  const ChartComponent = chart === 'area' ? AreaSeries : LineSeries;
+
+  return (
+    <Chart size={{ height: 64, width: 128 }}>
+      <Settings
+        theme={[chartThemes.theme, EUI_SPARKLINE_THEME_PARTIAL]}
+        baseTheme={chartThemes.baseTheme}
+        showLegend={false}
+        tooltip="none"
+      />
+      <ChartComponent
+        id={id}
+        data={data}
+        fit={Fit.Lookahead}
+        xScaleType={ScaleType.Time}
+        yScaleType={ScaleType.Linear}
+        xAccessor={'key'}
+        yAccessors={['value']}
+        color={color}
+        timeZone="UTC"
+        lineSeriesStyle={{
+          line: {
+            strokeWidth: 1,
+          },
+          point: { visible: false },
+        }}
+      />
+    </Chart>
+  );
+}
