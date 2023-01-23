@@ -124,6 +124,8 @@ export function alertTests({ getService }: FtrProviderContext, space: Space) {
           producer: 'alertsFixture',
           ruleTypeId: 'test.always-firing',
           ruleTypeName: 'Test: Always Firing',
+          muteAll: false,
+          snoozeSchedule: [],
         },
       };
       if (expected.alertInfo.namespace === undefined) {

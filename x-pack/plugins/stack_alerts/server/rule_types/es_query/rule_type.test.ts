@@ -724,6 +724,8 @@ async function invokeExecutor({
       updatedAt: new Date(),
       throttle: null,
       notifyWhen: null,
+      muteAll: false,
+      snoozeSchedule: [],
     },
     logger,
   });

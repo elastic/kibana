@@ -58,6 +58,38 @@ export default function alertTests({ getService }: FtrProviderContext) {
         let alertUtils: AlertUtils;
         let indexRecordActionId: string;
 
+        const getAlertInfo = (alertId: string, actions: any) => ({
+          alertId,
+          consumer: 'alertsFixture',
+          spaceId: space.id,
+          namespace: space.id,
+          name: 'abc',
+          enabled: true,
+          notifyWhen: 'onActiveAlert',
+          schedule: {
+            interval: '1m',
+          },
+          tags: ['tag-A', 'tag-B'],
+          throttle: '1m',
+          createdBy: user.fullName,
+          updatedBy: user.fullName,
+          actions: actions.map((action: any) => {
+            /* eslint-disable @typescript-eslint/naming-convention */
+            const { connector_type_id, group, id, params } = action;
+            return {
+              actionTypeId: connector_type_id,
+              group,
+              id,
+              params,
+            };
+          }),
+          producer: 'alertsFixture',
+          ruleTypeId: 'test.always-firing',
+          ruleTypeName: 'Test: Always Firing',
+          muteAll: false,
+          snoozeSchedule: [],
+        });
+
         before(async () => {
           const { body: createdAction } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
@@ -145,35 +177,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                   index: ES_TEST_INDEX_NAME,
                   reference,
                 },
-                alertInfo: {
-                  id: alertId,
-                  consumer: 'alertsFixture',
-                  spaceId: space.id,
-                  namespace: space.id,
-                  name: 'abc',
-                  enabled: true,
-                  notifyWhen: 'onActiveAlert',
-                  schedule: {
-                    interval: '1m',
-                  },
-                  tags: ['tag-A', 'tag-B'],
-                  throttle: '1m',
-                  createdBy: user.fullName,
-                  updatedBy: user.fullName,
-                  actions: response.body.actions.map((action: any) => {
-                    /* eslint-disable @typescript-eslint/naming-convention */
-                    const { connector_type_id, group, id, params } = action;
-                    return {
-                      actionTypeId: connector_type_id,
-                      group,
-                      id,
-                      params,
-                    };
-                  }),
-                  producer: 'alertsFixture',
-                  ruleTypeId: 'test.always-firing',
-                  ruleTypeName: 'Test: Always Firing',
-                },
+                alertInfo: getAlertInfo(alertId, response.body.actions),
               });
               // @ts-expect-error _source: unknown
               expect(alertSearchResult.body.hits.hits[0]._source.alertInfo.createdAt).to.match(
@@ -297,35 +301,7 @@ instanceStateValue: true
                   index: ES_TEST_INDEX_NAME,
                   reference,
                 },
-                alertInfo: {
-                  id: alertId,
-                  consumer: 'alertsFixture',
-                  spaceId: space.id,
-                  namespace: space.id,
-                  name: 'abc',
-                  enabled: true,
-                  notifyWhen: 'onActiveAlert',
-                  schedule: {
-                    interval: '1m',
-                  },
-                  tags: ['tag-A', 'tag-B'],
-                  throttle: '1m',
-                  createdBy: user.fullName,
-                  updatedBy: user.fullName,
-                  actions: response.body.actions.map((action: any) => {
-                    /* eslint-disable @typescript-eslint/naming-convention */
-                    const { connector_type_id, group, id, params } = action;
-                    return {
-                      actionTypeId: connector_type_id,
-                      group,
-                      id,
-                      params,
-                    };
-                  }),
-                  producer: 'alertsFixture',
-                  ruleTypeId: 'test.always-firing',
-                  ruleTypeName: 'Test: Always Firing',
-                },
+                alertInfo: getAlertInfo(alertId, response.body.actions),
               });
 
               // @ts-expect-error _source: unknown
@@ -457,6 +433,8 @@ instanceStateValue: true
             producer: 'alertsFixture',
             ruleTypeId: 'test.always-firing',
             ruleTypeName: 'Test: Always Firing',
+            muteAll: false,
+            snoozeSchedule: [],
           });
 
           // @ts-expect-error _source: unknown

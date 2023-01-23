@@ -114,6 +114,8 @@ const mockOptions = {
     producer: '',
     ruleTypeId: '',
     ruleTypeName: '',
+    muteAll: false,
+    snoozeSchedule: [],
   },
   logger,
 };

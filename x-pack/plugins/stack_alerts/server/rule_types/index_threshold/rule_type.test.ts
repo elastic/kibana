@@ -215,6 +215,8 @@ describe('ruleType', () => {
         updatedAt: new Date(),
         throttle: null,
         notifyWhen: null,
+        muteAll: false,
+        snoozeSchedule: [],
       },
       logger,
     });
@@ -278,6 +280,8 @@ describe('ruleType', () => {
         updatedAt: new Date(),
         throttle: null,
         notifyWhen: null,
+        muteAll: false,
+        snoozeSchedule: [],
       },
       logger,
     });
@@ -341,6 +345,8 @@ describe('ruleType', () => {
         updatedAt: new Date(),
         throttle: null,
         notifyWhen: null,
+        muteAll: false,
+        snoozeSchedule: [],
       },
       logger,
     });
@@ -403,6 +409,8 @@ describe('ruleType', () => {
         updatedAt: new Date(),
         throttle: null,
         notifyWhen: null,
+        muteAll: false,
+        snoozeSchedule: [],
       },
       logger,
     });

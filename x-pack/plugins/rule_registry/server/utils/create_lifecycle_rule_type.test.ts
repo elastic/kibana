@@ -110,6 +110,7 @@ function createRule(shouldWriteAlerts: boolean = true) {
           createdAt,
           createdBy: 'createdBy',
           enabled: true,
+          muteAll: false,
           name: 'name',
           notifyWhen: 'onActionGroupChange',
           producer: 'producer',
@@ -118,6 +119,7 @@ function createRule(shouldWriteAlerts: boolean = true) {
           schedule: {
             interval: '1m',
           },
+          snoozeSchedule: [],
           tags: ['tags'],
           throttle: null,
           updatedAt: createdAt,
