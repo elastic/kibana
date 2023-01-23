@@ -3763,63 +3763,6 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
-            "id": "def-common.SavedObjectsMigrationLogger.warning",
-            "type": "Function",
-            "tags": [
-              "deprecated"
-            ],
-            "label": "warning",
-            "description": [],
-            "signature": [
-              "(msg: string) => void"
-            ],
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
-            "deprecated": true,
-            "removeBy": "8.8.0",
-            "trackAdoption": false,
-            "references": [
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/server/saved_objects/saved_object_migrations.ts"
-              },
-              {
-                "plugin": "dashboard",
-                "path": "src/plugins/dashboard/server/dashboard_saved_object/migrations/migrate_to_730/migrations_730.ts"
-              },
-              {
-                "plugin": "dashboard",
-                "path": "src/plugins/dashboard/server/dashboard_saved_object/migrations/migrate_to_730/migrations_730.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-migration-server-internal",
-                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/document_migrator.test.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-migration-server-internal",
-                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/migration_logger.ts"
-              }
-            ],
-            "children": [
-              {
-                "parentPluginId": "@kbn/core-saved-objects-server",
-                "id": "def-common.SavedObjectsMigrationLogger.warning.$1",
-                "type": "string",
-                "tags": [],
-                "label": "msg",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/core-saved-objects-server",
             "id": "def-common.SavedObjectsMigrationLogger.warn",
             "type": "Function",
             "tags": [],

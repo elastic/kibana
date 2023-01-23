@@ -14,19 +14,19 @@ import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ESSearchResponse } from '@kbn/es-types';
 import { FETCH_STATUS } from '@kbn/observability-plugin/public';
 import { getInspectResponse } from '@kbn/observability-plugin/common';
-import type { FetcherResult } from '@kbn/observability-plugin/public/hooks/use_fetcher';
 import { kibanaService } from '../../../../utils/kibana_service';
+import { apiService } from '../../../../utils/api_service';
 
 export const executeEsQueryAPI = async ({
   params,
   name,
-  addInspectorRequest,
 }: {
   params: estypes.SearchRequest;
   name: string;
-  addInspectorRequest: <Data>(result: FetcherResult<Data>) => void;
 }) => {
   const data = kibanaService.startPlugins.data;
+
+  const addInspectorRequest = apiService.addInspectorRequest;
 
   const response = new Promise<IKibanaSearchResponse>((resolve, reject) => {
     const startTime = Date.now();
