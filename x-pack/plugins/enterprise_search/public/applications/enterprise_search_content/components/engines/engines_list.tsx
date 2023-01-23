@@ -120,7 +120,7 @@ export const EnginesList: React.FC = () => {
         isLoading={isLoading}
       >
         <EuiSpacer />
-        {results.length ? (
+        {searchQuery! || results?.length ? (
           <>
             <div>
               <EuiFieldSearch
@@ -154,25 +154,32 @@ export const EnginesList: React.FC = () => {
             </EuiText>
 
             <EuiSpacer size="m" />
-            <EuiText size="s">
-              <FormattedMessage
-                id="xpack.enterpriseSearch.content.engines.enginesList.description"
-                defaultMessage="Showing {from}-{to} of {total}"
-                values={{
-                  from: (
-                    <strong>
-                      <FormattedNumber value={meta.from + 1} />
-                    </strong>
-                  ),
-                  to: (
-                    <strong>
-                      <FormattedNumber value={meta.from + (results?.length ?? 0)} />
-                    </strong>
-                  ),
-                  total: <FormattedNumber value={meta.total} />,
-                }}
-              />
-            </EuiText>
+            {results?.length ? (
+              <>
+                <EuiText size="s">
+                  <FormattedMessage
+                    id="xpack.enterpriseSearch.content.engines.enginesList.description"
+                    defaultMessage="Showing {from}-{to} of {total}"
+                    values={{
+                      from: (
+                        <strong>
+                          <FormattedNumber value={meta.from + 1} />
+                        </strong>
+                      ),
+                      to: (
+                        <strong>
+                          <FormattedNumber value={meta.from + (results?.length ?? 0)} />
+                        </strong>
+                      ),
+                      total: <FormattedNumber value={meta.total} />,
+                    }}
+                  />
+                </EuiText>
+              </>
+            ) : (
+              <></>
+            )}
+
             <DataPanel
               title={
                 <h2>
