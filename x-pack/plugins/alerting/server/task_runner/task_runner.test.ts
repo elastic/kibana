@@ -76,6 +76,7 @@ import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_e
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -120,6 +121,7 @@ describe('Task Runner', () => {
   const rulesClient = rulesClientMock.create();
   const ruleTypeRegistry = ruleTypeRegistryMock.create();
   const savedObjectsService = savedObjectsServiceMock.createInternalStartContract();
+  const mockAlertService = alertsServiceMock.create();
   const elasticsearchService = elasticsearchServiceMock.createInternalStart();
   const dataPlugin = dataPluginMock.createStartContract();
   const uiSettingsService = uiSettingsServiceMock.createStartContract();
@@ -151,6 +153,7 @@ describe('Task Runner', () => {
     eventLogger: eventLoggerMock.create(),
     internalSavedObjectsRepository: savedObjectsRepositoryMock.create(),
     ruleTypeRegistry,
+    alertsService: null,
     kibanaBaseUrl: 'https://localhost:5601',
     supportsEphemeralTasks: false,
     maxEphemeralActionsPerRule: 10,
@@ -219,7 +222,7 @@ describe('Task Runner', () => {
     ruleType.executor.mockResolvedValue({ state: {} });
   });
 
-  test('successfully executes the task', async () => {
+  test('test successfully executes the task', async () => {
     const taskRunner = new TaskRunner(
       ruleType,
       {

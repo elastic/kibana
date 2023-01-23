@@ -31,6 +31,9 @@ const ALERT_END = `${ALERT_NAMESPACE}.end` as const;
 // kibana.alert.flapping - whether the alert is currently in a flapping state
 const ALERT_FLAPPING = `${ALERT_NAMESPACE}.flapping` as const;
 
+// kibana.alert.flapping_history - whether the alert is currently in a flapping state
+const ALERT_FLAPPING_HISTORY = `${ALERT_NAMESPACE}.flapping_history` as const;
+
 // kibana.alert.id - alert ID, also known as alert instance ID
 const ALERT_ID = `${ALERT_NAMESPACE}.id` as const;
 
@@ -90,6 +93,7 @@ const fields = {
   ALERT_DURATION,
   ALERT_END,
   ALERT_FLAPPING,
+  ALERT_FLAPPING_HISTORY,
   ALERT_ID,
   ALERT_REASON,
   ALERT_RULE_CATEGORY,
@@ -115,6 +119,7 @@ export {
   ALERT_DURATION,
   ALERT_END,
   ALERT_FLAPPING,
+  ALERT_FLAPPING_HISTORY,
   ALERT_ID,
   ALERT_REASON,
   ALERT_RULE_CATEGORY,

@@ -45,6 +45,7 @@ import {
   RuleTypeState,
   parseDuration,
   RawAlertInstance,
+  RuleAlertData,
 } from '../../common';
 import { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
@@ -66,7 +67,7 @@ import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
 import { ILastRun, lastRunFromState, lastRunToRaw } from '../lib/last_run_status';
 import { RunningHandler } from './running_handler';
 import { RuleResultService } from '../monitoring/rule_result_service';
-import { LegacyAlertsClient } from '../alerts_client/legacy_alerts_client';
+import { IAlertsClient, LegacyAlertsClient } from '../alerts_client/legacy_alerts_client';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -83,7 +84,8 @@ export class TaskRunner<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
+  AlertData extends RuleAlertData
 > {
   private context: TaskRunnerContext;
   private logger: Logger;
@@ -96,7 +98,8 @@ export class TaskRunner<
     State,
     Context,
     ActionGroupIds,
-    RecoveryActionGroupId
+    RecoveryActionGroupId,
+    AlertData
   >;
   private readonly executionId: string;
   private readonly ruleTypeRegistry: RuleTypeRegistry;
@@ -111,12 +114,6 @@ export class TaskRunner<
   private ruleMonitoring: RuleMonitoringService;
   private ruleRunning: RunningHandler;
   private ruleResult: RuleResultService;
-  private legacyAlertsClient: LegacyAlertsClient<
-    State,
-    Context,
-    ActionGroupIds,
-    RecoveryActionGroupId
-  >;
 
   constructor(
     ruleType: NormalizedRuleType<
@@ -126,7 +123,8 @@ export class TaskRunner<
       State,
       Context,
       ActionGroupIds,
-      RecoveryActionGroupId
+      RecoveryActionGroupId,
+      AlertData
     >,
     taskInstance: ConcreteTaskInstance,
     context: TaskRunnerContext,
@@ -155,11 +153,6 @@ export class TaskRunner<
       loggerId
     );
     this.ruleResult = new RuleResultService();
-    this.legacyAlertsClient = new LegacyAlertsClient({
-      logger: this.logger,
-      maxAlerts: context.maxAlerts,
-      ruleType: this.ruleType as UntypedNormalizedRuleType,
-    });
   }
 
   private async updateRuleSavedObjectPostRun(
@@ -265,6 +258,7 @@ export class TaskRunner<
         alertRecoveredInstances: alertRecoveredRawInstances = {},
         alertTypeState: ruleTypeState = {},
         previousStartedAt,
+        previousExecutionUuid,
       },
     } = this.taskInstance;
 
@@ -274,6 +268,47 @@ export class TaskRunner<
     const ruleType = this.ruleTypeRegistry.get(ruleTypeId);
 
     const ruleLabel = `${this.ruleType.id}:${ruleId}: '${name}'`;
+
+    const legacyAlertsClient = new LegacyAlertsClient<
+      State,
+      Context,
+      ActionGroupIds,
+      RecoveryActionGroupId
+    >({
+      logger: this.logger,
+      maxAlerts: this.maxAlerts,
+      ruleType: this.ruleType as UntypedNormalizedRuleType,
+      ruleLabel,
+      activeAlertsFromState: alertRawInstances,
+      recoveredAlertsFromState: alertRecoveredRawInstances,
+    });
+
+    const alertsClient =
+      this.context.alertsService?.createAlertsClient<
+        AlertData,
+        State,
+        Context,
+        ActionGroupIds,
+        RecoveryActionGroupId
+      >({
+        ruleType: ruleType as UntypedNormalizedRuleType,
+        maxAlerts: this.maxAlerts,
+        eventLogger: this.alertingEventLogger,
+        legacyAlertsClient,
+      }) ?? null;
+    alertsClient?.initialize({
+      rule: {
+        id: rule.id,
+        name: rule.name,
+        tags: rule.tags,
+        consumer: rule.consumer,
+        spaceId,
+        executionId: this.executionId,
+      },
+    });
+
+    const alertsClientToUse: IAlertsClient<State, Context, ActionGroupIds, RecoveryActionGroupId> =
+      alertsClient ? alertsClient : legacyAlertsClient;
 
     const wrappedClientOptions = {
       rule: {
@@ -299,10 +334,8 @@ export class TaskRunner<
     const { updatedRuleTypeState } = await this.timer.runWithTimer(
       TaskRunnerTimerSpan.RuleTypeRun,
       async () => {
-        this.legacyAlertsClient.initialize(alertRawInstances, alertRecoveredRawInstances);
-
         const checkHasReachedAlertLimit = () => {
-          const reachedLimit = this.legacyAlertsClient.hasReachedAlertLimit();
+          const reachedLimit = alertsClientToUse.hasReachedAlertLimit() || false;
           if (reachedLimit) {
             this.logger.warn(
               `rule execution generated greater than ${this.maxAlerts} alerts: ${ruleLabel}`
@@ -340,8 +373,16 @@ export class TaskRunner<
                 searchSourceClient: wrappedSearchSourceClient.searchSourceClient,
                 uiSettingsClient: this.context.uiSettings.asScopedToClient(savedObjectsClient),
                 scopedClusterClient: wrappedScopedClusterClient.client(),
-                alertFactory: this.legacyAlertsClient.getExecutorServices(),
+                /**
+                 * Deprecate alertFactory and remove when all rules are onboarded to
+                 * the alertsClient
+                 * @deprecated
+                 */
+                alertFactory: legacyAlertsClient.getExecutorServices(),
+                // alertsClient: alertsClient?.getExecutorServices(),
+                // can move to alertsclient
                 shouldWriteAlerts: () => this.shouldLogAndScheduleActionsForAlerts(),
+                // can move to alertsclient
                 shouldStopExecution: () => this.cancelled,
                 ruleMonitoringService: this.ruleMonitoring.getLastRunMetricsSetters(),
                 dataViews,
@@ -381,7 +422,7 @@ export class TaskRunner<
           // or requested it and then reported back whether it exceeded the limit
           // If neither of these apply, this check will throw an error
           // These errors should show up during rule type development
-          this.legacyAlertsClient.checkLimitUsage();
+          alertsClientToUse.checkLimitUsage();
         } catch (err) {
           // Check if this error is due to reaching the alert limit
           if (!checkHasReachedAlertLimit()) {
@@ -413,12 +454,12 @@ export class TaskRunner<
     );
 
     await this.timer.runWithTimer(TaskRunnerTimerSpan.ProcessAlerts, async () => {
-      this.legacyAlertsClient.processAndLogAlerts({
+      alertsClientToUse.processAndLogAlerts({
         eventLogger: this.alertingEventLogger,
-        ruleLabel,
         ruleRunMetricsStore,
-        shouldLogAndScheduleActionsForAlerts: this.shouldLogAndScheduleActionsForAlerts(),
+        shouldLogAlerts: this.shouldLogAndScheduleActionsForAlerts(),
       });
+      // await this.alertsClient?.processAndLogAlerts();
     });
 
     const executionHandler = new ExecutionHandler({
@@ -450,8 +491,8 @@ export class TaskRunner<
         this.countUsageOfActionExecutionAfterRuleCancellation();
       } else {
         executionHandlerRunResult = await executionHandler.run({
-          ...this.legacyAlertsClient.getProcessedAlerts('active'),
-          ...this.legacyAlertsClient.getProcessedAlerts('recoveredCurrent'),
+          ...alertsClientToUse.getProcessedAlerts('active'),
+          ...alertsClientToUse.getProcessedAlerts('recoveredCurrent'),
         });
       }
     });
@@ -462,7 +503,7 @@ export class TaskRunner<
     // we don't need to keep this information around.
     if (this.ruleType.autoRecoverAlerts) {
       const { alertsToReturn: alerts, recoveredAlertsToReturn: recovered } =
-        this.legacyAlertsClient.getAlertsToSerialize();
+        alertsClientToUse.getAlertsToSerialize();
       alertsToReturn = alerts;
       recoveredAlertsToReturn = recovered;
     }
@@ -653,6 +694,7 @@ export class TaskRunner<
         TaskRunnerTimerSpan.PrepareRule,
         async () => this.prepareToRun()
       );
+
       this.ruleMonitoring.setMonitoring(preparedResult.rule.monitoring);
 
       stateWithMetrics = asOk(await this.runRule(preparedResult));
@@ -699,6 +741,7 @@ export class TaskRunner<
       return {
         ...omit(runStateWithMetrics, ['metrics']),
         previousStartedAt: startedAt,
+        // previousExecutionUuid: this.executionId,
       };
     };
 

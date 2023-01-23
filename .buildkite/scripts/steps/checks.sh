@@ -12,6 +12,7 @@ export DISABLE_BOOTSTRAP_VALIDATION=false
 .buildkite/scripts/steps/checks/verify_notice.sh
 .buildkite/scripts/steps/checks/plugin_list_docs.sh
 .buildkite/scripts/steps/checks/event_log.sh
+.buildkite/scripts/steps/checks/alerts_as_data.sh
 .buildkite/scripts/steps/checks/telemetry.sh
 .buildkite/scripts/steps/checks/jest_configs.sh
 .buildkite/scripts/steps/checks/bundle_limits.sh

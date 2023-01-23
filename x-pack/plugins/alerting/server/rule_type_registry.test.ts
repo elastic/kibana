@@ -33,6 +33,7 @@ beforeEach(() => {
     taskRunnerFactory: new TaskRunnerFactory(),
     licenseState: mockedLicenseState,
     licensing: licensingMock.createSetup(),
+    alertsService: null,
     minimumScheduleInterval: { value: '1m', enforce: false },
     inMemoryMetrics,
   };

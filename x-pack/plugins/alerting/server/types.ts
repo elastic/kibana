@@ -48,6 +48,7 @@ import {
   RuleSnooze,
   IntervalSchedule,
   RuleLastRun,
+  RuleAlertData,
 } from '../common';
 import { PublicAlertFactory } from './alert/create_alert_factory';
 import { FieldMap } from '../common/alert_schema/field_maps/types';
@@ -172,7 +173,8 @@ export interface RuleType<
   InstanceState extends AlertInstanceState = never,
   InstanceContext extends AlertInstanceContext = never,
   ActionGroupIds extends string = never,
-  RecoveryActionGroupId extends string = never
+  RecoveryActionGroupId extends string = never,
+  AlertData extends RuleAlertData = never
 > {
   id: string;
   name: string;

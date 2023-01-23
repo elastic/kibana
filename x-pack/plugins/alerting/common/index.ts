@@ -25,6 +25,8 @@ export * from './parse_duration';
 export * from './execution_log_types';
 export * from './rule_snooze_type';
 
+export { AlertSchema, type Alert } from './alert_schema';
+
 export interface AlertingFrameworkHealth {
   isSufficientlySecure: boolean;
   hasPermanentEncryptionKey: boolean;

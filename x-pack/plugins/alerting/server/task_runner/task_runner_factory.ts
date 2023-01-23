@@ -24,6 +24,7 @@ import { IEventLogger } from '@kbn/event-log-plugin/server';
 import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import {
+  RuleAlertData,
   RuleTypeParams,
   RuleTypeRegistry,
   SpaceIdToNamespaceFunction,
@@ -36,6 +37,7 @@ import { TaskRunner } from './task_runner';
 import { NormalizedRuleType } from '../rule_type_registry';
 import { InMemoryMetrics } from '../monitoring';
 import { ActionsConfigMap } from '../lib/get_actions_config_map';
+import { AlertsService } from '../alerts_service/alerts_service';
 
 export interface TaskRunnerContext {
   logger: Logger;
@@ -54,6 +56,7 @@ export interface TaskRunnerContext {
   basePathService: IBasePath;
   internalSavedObjectsRepository: ISavedObjectsRepository;
   ruleTypeRegistry: RuleTypeRegistry;
+  alertsService: AlertsService | null;
   kibanaBaseUrl: string | undefined;
   supportsEphemeralTasks: boolean;
   maxEphemeralActionsPerRule: number;
@@ -82,7 +85,8 @@ export class TaskRunnerFactory {
     InstanceState extends AlertInstanceState,
     InstanceContext extends AlertInstanceContext,
     ActionGroupIds extends string,
-    RecoveryActionGroupId extends string
+    RecoveryActionGroupId extends string,
+    AlertData extends RuleAlertData
   >(
     ruleType: NormalizedRuleType<
       Params,
@@ -91,7 +95,8 @@ export class TaskRunnerFactory {
       InstanceState,
       InstanceContext,
       ActionGroupIds,
-      RecoveryActionGroupId
+      RecoveryActionGroupId,
+      AlertData
     >,
     { taskInstance }: RunContext,
     inMemoryMetrics: InMemoryMetrics
@@ -107,7 +112,8 @@ export class TaskRunnerFactory {
       InstanceState,
       InstanceContext,
       ActionGroupIds,
-      RecoveryActionGroupId
+      RecoveryActionGroupId,
+      AlertData
     >(ruleType, taskInstance, this.taskRunnerContext!, inMemoryMetrics);
   }
 }

@@ -59,7 +59,7 @@ import { TaskRunnerFactory } from './task_runner';
 import { RulesClientFactory } from './rules_client_factory';
 import { RulesSettingsClientFactory } from './rules_settings_client_factory';
 import { ILicenseState, LicenseState } from './lib/license_state';
-import { AlertingRequestHandlerContext, ALERTS_FEATURE_ID } from './types';
+import { AlertingRequestHandlerContext, ALERTS_FEATURE_ID, RuleAlertData } from './types';
 import { defineRoutes } from './routes';
 import {
   AlertInstanceContext,
@@ -187,7 +187,7 @@ export class AlertingPlugin {
   private kibanaBaseUrl: string | undefined;
   private usageCounter: UsageCounter | undefined;
   private inMemoryMetrics: InMemoryMetrics;
-  private alertsService?: AlertsService;
+  private alertsService: AlertsService | null;
   private pluginStop$: Subject<void>;
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -199,6 +199,7 @@ export class AlertingPlugin {
     this.rulesSettingsClientFactory = new RulesSettingsClientFactory();
     this.telemetryLogger = initializerContext.logger.get('usage');
     this.kibanaVersion = initializerContext.env.packageInfo.version;
+    this.alertsService = null;
     this.inMemoryMetrics = new InMemoryMetrics(initializerContext.logger.get('in_memory_metrics'));
     this.pluginStop$ = new ReplaySubject(1);
   }
@@ -342,7 +343,8 @@ export class AlertingPlugin {
         InstanceState extends AlertInstanceState = never,
         InstanceContext extends AlertInstanceContext = never,
         ActionGroupIds extends string = never,
-        RecoveryActionGroupId extends string = never
+        RecoveryActionGroupId extends string = never,
+        AlertData extends RuleAlertData = never
       >(
         ruleType: RuleType<
           Params,
@@ -351,7 +353,8 @@ export class AlertingPlugin {
           InstanceState,
           InstanceContext,
           ActionGroupIds,
-          RecoveryActionGroupId
+          RecoveryActionGroupId,
+          AlertData
         >
       ) => {
         if (!(ruleType.minimumLicenseRequired in LICENSE_TYPE)) {
@@ -480,6 +483,7 @@ export class AlertingPlugin {
       internalSavedObjectsRepository: core.savedObjects.createInternalRepository(['alert']),
       executionContext: core.executionContext,
       ruleTypeRegistry: this.ruleTypeRegistry!,
+      alertsService: this.alertsService,
       kibanaBaseUrl: this.kibanaBaseUrl,
       supportsEphemeralTasks: plugins.taskManager.supportsEphemeralTasks(),
       maxEphemeralActionsPerRule: this.config.maxEphemeralActionsPerAlert,
