@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import type { GetLensAttributes } from '../../../types';
 export const getRiskScoreOverTimeAreaAttributes: GetLensAttributes = (
   stackByField,
   extraOptions = { spaceId: 'default' }
 ) => {
-  const layerId = uuid.v4();
-  const internalReferenceId = uuid.v4();
+  const layerId = uuidv4();
+  const internalReferenceId = uuidv4();
   return {
     title: `${stackByField} risk score over time`,
     description: '',
