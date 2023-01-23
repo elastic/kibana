@@ -69,7 +69,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       cluster_id: 'lower case cluster id',
     },
     {
-      resource: { id: chance.guid(), name: `process`, sub_type: 'Upper case type again' },
+      resource: { id: chance.guid(), name: `process another`, sub_type: 'Upper case type again' },
       result: { evaluation: 'failed' },
       rule: {
         benchmark: {
@@ -214,36 +214,52 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('Group by Resource', async () => {
         await table.toggleDropDownModal();
         await table.selectGroupBy('Resource');
-        await table.clickOnRowValue(data[0].resource.id, data[0].rule.section);
-        expect(await tableGroupBy.hasColumnValue('Rule', data[0].rule.name)).to.be(true);
-        expect(await tableGroupBy.hasColumnValue('Rule', data[1].rule.name)).to.be(false);
-        expect(await tableGroupBy.hasColumnValue('Rule', data[2].rule.name)).to.be(false);
-        expect(await tableGroupBy.hasColumnValue('Rule', data[3].rule.name)).to.be(false);
-        await tableGroupBy.clickBasedOnText('Back to resources');
-        expect(await tableGroupBy.hasColumnValue('Resource Name', data[1].resource.name)).to.be(
-          true
-        );
-        await table.clickOnRowValue(data[1].resource.id, data[1].rule.section);
-        expect(await tableGroupBy.hasColumnValue('Rule', data[0].rule.name)).to.be(false);
-        expect(await tableGroupBy.hasColumnValue('Rule', data[1].rule.name)).to.be(true);
-        expect(await tableGroupBy.hasColumnValue('Rule', data[2].rule.name)).to.be(false);
-        expect(await tableGroupBy.hasColumnValue('Rule', data[3].rule.name)).to.be(false);
-        await tableGroupBy.clickBasedOnText('Back to resources');
-        expect(await tableGroupBy.hasColumnValue('Resource Name', data[1].resource.name)).to.be(
-          true
-        );
-        await table.clickOnRowValue(data[3].resource.id, data[3].rule.section);
-        expect(await tableGroupBy.hasColumnValue('Rule', data[0].rule.name)).to.be(false);
-        expect(await tableGroupBy.hasColumnValue('Rule', data[1].rule.name)).to.be(false);
-        expect(await tableGroupBy.hasColumnValue('Rule', data[2].rule.name)).to.be(false);
-        expect(await tableGroupBy.hasColumnValue('Rule', data[3].rule.name)).to.be(true);
-        await tableGroupBy.clickBasedOnText('Back to resources');
+        /* Findings by resource table has no Rule column */
+        expect(await tableGroupBy.hasColumnName('Rule')).to.be(false);
+      });
 
+      it('Clicking on resource id navigates user to different table', async () => {
+        for (let outerCounter = 0; outerCounter < data.length; outerCounter++) {
+          await table.clickOnRowValue(
+            data[outerCounter].resource.id,
+            data[outerCounter].rule.section
+          );
+          /* resource_findings table has no Resource ID, Resource Type, Resource Name column */
+          expect(await tableGroupBy.hasColumnName('Resource ID')).to.be(false);
+          expect(await tableGroupBy.hasColumnName('Resource Type')).to.be(false);
+          expect(await tableGroupBy.hasColumnName('Resource Name')).to.be(false);
+          /* checks if the table title is correct  */
+          expect(
+            await tableGroupBy.hasText(`${data[outerCounter].resource.name} - Findings`)
+          ).to.be(true);
+          for (let innerCounter = 0; innerCounter < data.length; innerCounter++) {
+            if (innerCounter === outerCounter)
+              expect(await tableGroupBy.hasColumnValue('Rule', data[innerCounter].rule.name)).to.be(
+                true
+              );
+            else
+              expect(await tableGroupBy.hasColumnValue('Rule', data[innerCounter].rule.name)).to.be(
+                false
+              );
+          }
+          await tableGroupBy.clickBasedOnText('Back to resources');
+          /* Make sure user is back to findings main page + also works as a little delay to allow the page to load completely */
+          expect(await tableGroupBy.hasColumnValue('Resource Name', data[1].resource.name)).to.be(
+            true
+          );
+        }
+      });
+
+      it('Using query on resource_findings table', async () => {
         await queryBar.setQuery(data[1].rule.name);
         await queryBar.submitQuery();
         expect(await tableGroupBy.hasColumnValue('Resource Name', data[1].resource.name)).to.be(
           true
         );
+        expect(await tableGroupBy.hasColumnName('Rule')).to.be(false);
+        expect(await tableGroupBy.hasColumnName('Resource ID')).to.be(true);
+        expect(await tableGroupBy.hasColumnName('Resource Type')).to.be(true);
+        expect(await tableGroupBy.hasColumnName('Resource Name')).to.be(true);
       });
     });
   });

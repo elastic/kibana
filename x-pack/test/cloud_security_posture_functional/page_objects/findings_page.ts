@@ -205,6 +205,13 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
       return await Promise.all(columnCells.map((cell) => cell.getVisibleText()));
     },
 
+    hasColumnName: async (columnName: string) => {
+      const headers = await tableGroupBy.getHeaders();
+      const texts = await Promise.all(headers.map((header) => header.getVisibleText()));
+      const columnIndex = texts.findIndex((i) => i === columnName);
+      return columnIndex >= 0 ? true : false;
+    },
+
     hasColumnValue: async (columnName: string, value: string) => {
       const values = await tableGroupBy.getColumnValues(columnName);
       return values.includes(value);
@@ -215,6 +222,13 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
       const selector = `//*[contains(text(),'${value}')]`;
       const clickTarget = await pageContainer.findByXpath(selector);
       await clickTarget.click();
+    },
+
+    hasText: async (value: string) => {
+      const pageContainer = await tableGroupBy.getElementGroupedBy();
+      const selector = `//*[contains(text(),'${value}')]`;
+      const clickTarget = await pageContainer.findAllByXpath(selector);
+      return clickTarget.length > 0;
     },
   };
 
