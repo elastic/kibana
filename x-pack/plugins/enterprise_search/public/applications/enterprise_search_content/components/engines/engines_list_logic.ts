@@ -127,7 +127,7 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
     ],
     isLoading: [
       () => [selectors.status],
-      (status: EngineListValues['status']) => [Status.LOADING].includes(status),
+      (status: EngineListValues['status']) => [Status.LOADING, Status.IDLE].includes(status),
     ],
     results: [() => [selectors.data], (data) => data?.results ?? []],
     meta: [() => [selectors.parameters], (parameters) => parameters.meta],
