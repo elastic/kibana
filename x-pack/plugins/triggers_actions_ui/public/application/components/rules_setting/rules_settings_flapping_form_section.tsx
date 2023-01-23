@@ -42,7 +42,7 @@ const lookBackWindowLabel = i18n.translate(
 const lookBackWindowHelp = i18n.translate(
   'xpack.triggersActionsUI.rulesSettings.flapping.lookBackWindowHelp',
   {
-    defaultMessage: 'The minimum number of consecutive runs in which the threshold must be met.',
+    defaultMessage: 'The minimum number of runs in which the threshold must be met.',
   }
 );
 
