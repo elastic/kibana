@@ -124,6 +124,33 @@ describe('useHostTable hook', () => {
             },
             indexPatternId: 'mock-id',
           },
+          referenceLayer: {
+            columnOrder: ['referenceColumn'],
+            columns: {
+              referenceColumn: {
+                customLabel: true,
+                dataType: 'number',
+                isBucketed: false,
+                isStaticValue: true,
+                label: 'Reference',
+                operationType: 'static_value',
+                params: {
+                  format: {
+                    id: 'percent',
+                    params: {
+                      decimals: 2,
+                    },
+                  },
+                  value: 1,
+                },
+                references: [],
+                scale: 'ratio',
+              },
+            },
+            incompleteColumns: {},
+            linkToLayers: [],
+            sampling: 1,
+          },
         },
       },
     });
