@@ -363,7 +363,6 @@
     "controls.optionsList.errors.dataViewNotFound": "找不到数据视图：{dataViewId}",
     "controls.optionsList.errors.fieldNotFound": "找不到字段：{fieldName}",
     "controls.optionsList.popover.ariaLabel": "{fieldName} 控件的弹出框",
-    "controls.optionsList.popover.cardinalityPlaceholder": "搜索 {totalOptions} 个可用{totalOptions, plural, other {选项}}",
     "controls.optionsList.popover.invalidSelectionsSectionTitle": "已忽略{invalidSelectionCount, plural, other {个选择}}",
     "controls.optionsList.popover.invalidSelectionsTooltip": "{selectedOptions} 个选定{selectedOptions, plural, other {选项}} {selectedOptions, plural, other {已}}忽略，因为{selectedOptions, plural, one {其} other {它们}}已不再在数据中。",
     "controls.rangeSlider.errors.dataViewNotFound": "找不到数据视图：{dataViewId}",

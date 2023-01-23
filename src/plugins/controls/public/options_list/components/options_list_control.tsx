@@ -23,10 +23,10 @@ import './options_list.scss';
 
 export const OptionsListControl = ({
   typeaheadSubject,
-  sizeSubject,
+  loadMoreSubject,
 }: {
   typeaheadSubject: Subject<string>;
-  sizeSubject: Subject<number>;
+  loadMoreSubject: Subject<number>;
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -36,7 +36,7 @@ export const OptionsListControl = ({
   // Redux embeddable Context
   const {
     useEmbeddableDispatch,
-    actions: { replaceSelection, setSearchString, setSize },
+    actions: { replaceSelection, setSearchString },
     useEmbeddableSelector: select,
   } = useReduxEmbeddableContext<OptionsListReduxState, typeof optionsListReducers>();
   const dispatch = useEmbeddableDispatch();
@@ -85,9 +85,9 @@ export const OptionsListControl = ({
 
   const loadMoreSuggestions = useCallback(
     (cardinality: number) => {
-      sizeSubject.next(Math.min(cardinality, 1000));
+      loadMoreSubject.next(Math.min(cardinality, 1000));
     },
-    [sizeSubject]
+    [loadMoreSubject]
   );
 
   const { hasSelections, selectionDisplayNode, validSelectionsCount } = useMemo(() => {
@@ -169,8 +169,8 @@ export const OptionsListControl = ({
         <OptionsListPopover
           width={dimensions.width}
           isLoading={debouncedLoading}
-          loadMoreSuggestions={loadMoreSuggestions}
           updateSearchString={updateSearchString}
+          loadMoreSuggestions={loadMoreSuggestions}
         />
       </EuiPopover>
     </EuiFilterGroup>

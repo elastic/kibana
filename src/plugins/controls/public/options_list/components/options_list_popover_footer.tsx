@@ -8,16 +8,15 @@
 
 import React from 'react';
 import {
+  useEuiBackgroundColor,
+  useEuiPaddingSize,
   EuiPopoverFooter,
   EuiButtonGroup,
-  useEuiBackgroundColor,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonIcon,
-  EuiBadge,
-  EuiToolTip,
   EuiProgress,
-  useEuiPaddingSize,
+  EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';

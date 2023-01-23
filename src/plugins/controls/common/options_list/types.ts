@@ -9,8 +9,8 @@
 import { FieldSpec, DataView, RuntimeFieldSpec } from '@kbn/data-views-plugin/common';
 import type { Filter, Query, BoolQuery, TimeRange } from '@kbn/es-query';
 
-import { OptionsListSortingType } from './suggestions_sorting';
-import { DataControlInput } from '../types';
+import type { OptionsListSortingType } from './suggestions_sorting';
+import type { DataControlInput } from '../types';
 
 export const OPTIONS_LIST_CONTROL = 'optionsListControl';
 
@@ -55,10 +55,10 @@ export type OptionsListRequest = Omit<
   'filters' | 'fieldName' | 'fieldSpec' | 'textFieldName'
 > & {
   timeRange?: TimeRange;
-  field: OptionsListField;
   runPastTimeout?: boolean;
   dataView: DataView;
   filters?: Filter[];
+  field: FieldSpec;
   query?: Query;
 };
 

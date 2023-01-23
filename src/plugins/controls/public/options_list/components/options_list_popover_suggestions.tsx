@@ -8,7 +8,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { debounce } from 'lodash';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { EuiSelectable } from '@elastic/eui';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
@@ -18,18 +18,15 @@ import { OptionsListStrings } from './options_list_strings';
 import { optionsListReducers } from '../options_list_reducers';
 import { OptionsListPopoverEmptyMessage } from './options_list_popover_empty_message';
 import { OptionsListPopoverSuggestionBadge } from './options_list_popover_suggestion_badge';
-import { euiThemeVars } from '@kbn/ui-theme';
 
 interface OptionsListPopoverSuggestionsProps {
-  isLoading: boolean;
   showOnlySelected: boolean;
   loadMoreSuggestions: (cardinality: number) => void;
 }
 
 export const OptionsListPopoverSuggestions = ({
-  isLoading,
-  loadMoreSuggestions,
   showOnlySelected,
+  loadMoreSuggestions,
 }: OptionsListPopoverSuggestionsProps) => {
   // Redux embeddable container Context
   const {
@@ -49,6 +46,7 @@ export const OptionsListPopoverSuggestions = ({
   const existsSelected = select((state) => state.explicitInput.existsSelected);
   const singleSelect = select((state) => state.explicitInput.singleSelect);
   const hideExists = select((state) => state.explicitInput.hideExists);
+  const isLoading = select((state) => state.output.loading) ?? false;
   const fieldName = select((state) => state.explicitInput.fieldName);
   const sort = select((state) => state.explicitInput.sort);
 
@@ -105,15 +103,14 @@ export const OptionsListPopoverSuggestions = ({
       options.push({
         key: 'loading-option',
         className: 'optionslist--loadingMoreGroupLabel',
-        label: 'Loading more options...',
+        label: OptionsListStrings.popover.getLoadingMoreMessage(),
         isGroupLabel: true,
       });
     } else if (options.length === 1000) {
       options.push({
         key: 'no-more-option',
         className: 'optionslist--endOfOptionsGroupLabel',
-        label:
-          "You've reached the end of the top 1,000 results. Try narrowing down the available options with a search.",
+        label: OptionsListStrings.popover.getAtEndOfOptionsMessage(),
         isGroupLabel: true,
       });
     }
@@ -135,23 +132,19 @@ export const OptionsListPopoverSuggestions = ({
     const { scrollTop, scrollHeight, clientHeight } = listbox;
     if (scrollTop + clientHeight >= scrollHeight - parseInt(euiThemeVars.euiSizeXXL, 10)) {
       // reached the bottom of the list
-      console.log('---> reached the bottom, fire event');
       loadMoreSuggestions(totalCardinality);
     }
   }, [loadMoreSuggestions, totalCardinality]);
 
   useEffect(() => {
     const container = listRef.current;
-    if (canLoadMoreSuggestions) {
-      console.log('add');
-
+    if (!isLoading && canLoadMoreSuggestions) {
       container?.addEventListener('scroll', loadMoreOptions, true);
       return () => {
-        console.log('destroy');
         container?.removeEventListener('scroll', loadMoreOptions, true);
       };
     }
-  }, [loadMoreOptions, canLoadMoreSuggestions]);
+  }, [loadMoreOptions, isLoading, canLoadMoreSuggestions]);
 
   useEffect(() => {
     // scroll back to the top when changing the sorting or the search string

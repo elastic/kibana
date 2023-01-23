@@ -9,6 +9,7 @@ import { PayloadAction } from '@reduxjs/toolkit';
 import { WritableDraft } from 'immer/dist/types/types-external';
 
 import { Filter } from '@kbn/es-query';
+import { FieldSpec } from '@kbn/data-views-plugin/common';
 
 import { OptionsListReduxState, OptionsListComponentState } from './types';
 import { getIpRangeQuery } from '../../common/options_list/ip_search';
@@ -96,7 +97,7 @@ export const optionsListReducers = {
   },
   setField: (
     state: WritableDraft<OptionsListReduxState>,
-    action: PayloadAction<OptionsListField | undefined>
+    action: PayloadAction<FieldSpec | undefined>
   ) => {
     state.componentState.field = action.payload;
   },

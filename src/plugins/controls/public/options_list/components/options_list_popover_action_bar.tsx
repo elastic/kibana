@@ -10,7 +10,6 @@ import React from 'react';
 
 import {
   EuiFieldSearch,
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,

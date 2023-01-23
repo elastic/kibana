@@ -24,7 +24,7 @@ import {
   buildExistsFilter,
 } from '@kbn/es-query';
 import { ReduxEmbeddableTools, ReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/public';
+import { DataView, FieldSpec } from '@kbn/data-views-plugin/public';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
@@ -78,7 +78,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
   private loadMoreSubject: Subject<number> = new Subject<number>();
   private abortController?: AbortController;
   private dataView?: DataView;
-  private field?: OptionsListField;
+  private field?: FieldSpec;
 
   private reduxEmbeddableTools: ReduxEmbeddableTools<
     OptionsListReduxState,
@@ -145,18 +145,19 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
     // debounce typeahead pipe to slow down search string related queries
     const typeaheadPipe = this.typeaheadSubject.pipe(debounceTime(100));
-    const loadMorePipe = this.loadMoreSubject.pipe(debounceTime(1000));
+    const loadMorePipe = this.loadMoreSubject.pipe(debounceTime(100));
 
     // fetch available options when input changes or when search string has changed
     this.subscriptions.add(
       merge(dataFetchPipe, typeaheadPipe)
         .pipe(skip(1)) // Skip the first input update because options list query will be run by initialize.
-        .subscribe(() => this.runOptionsListQuery())
+        .subscribe(() => {
+          this.runOptionsListQuery();
+        })
     );
     // fetch more options when reaching the bottom of the available options
     this.subscriptions.add(
       loadMorePipe.subscribe((size) => {
-        console.log('FETCH MORE');
         this.runOptionsListQuery(size);
       })
     );
@@ -212,7 +213,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
   private getCurrentDataViewAndField = async (): Promise<{
     dataView?: DataView;
-    field?: OptionsListField;
+    field?: FieldSpec;
   }> => {
     const {
       dispatch,
@@ -269,7 +270,6 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       getState,
       actions: { setLoading, publishFilters, setSearchString, updateQueryResults },
     } = this.reduxEmbeddableTools;
-    // console.log('HERE');
     const previousFieldName = this.field?.name;
     const { dataView, field } = await this.getCurrentDataViewAndField();
     if (!dataView || !field) return;
@@ -425,7 +425,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
         <OptionsListReduxWrapper>
           <OptionsListControl
             typeaheadSubject={this.typeaheadSubject}
-            sizeSubject={this.loadMoreSubject}
+            loadMoreSubject={this.loadMoreSubject}
           />
         </OptionsListReduxWrapper>
       </KibanaThemeProvider>,

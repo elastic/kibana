@@ -41,6 +41,7 @@ describe('options list queries', () => {
     test('creates validation aggregation when given selections', () => {
       const validationAggBuilder = getValidationAggregationBuilder();
       const optionsListRequestBodyMock: OptionsListRequestBody = {
+        size: 10,
         fieldName: 'coolTestField',
         selectedOptions: ['coolOption1', 'coolOption2', 'coolOption3'],
       };
@@ -73,6 +74,7 @@ describe('options list queries', () => {
     test('returns undefined when not given selections', () => {
       const validationAggBuilder = getValidationAggregationBuilder();
       const optionsListRequestBodyMock: OptionsListRequestBody = {
+        size: 10,
         fieldName: 'coolTestField',
       };
       expect(validationAggBuilder.buildAggregation(optionsListRequestBodyMock)).toBeUndefined();
@@ -106,8 +108,9 @@ describe('options list queries', () => {
     describe('text / keyword field', () => {
       test('with a search string, creates case insensitive aggregation', () => {
         const optionsListRequestBodyMock: OptionsListRequestBody = {
-          fieldName: 'coolTestField.keyword',
+          size: 10,
           searchString: 'cooool',
+          fieldName: 'coolTestField.keyword',
           fieldSpec: { aggregatable: true } as unknown as FieldSpec,
         };
         const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
@@ -136,9 +139,10 @@ describe('options list queries', () => {
 
       test('without a search string, creates keyword aggregation', () => {
         const optionsListRequestBodyMock: OptionsListRequestBody = {
+          size: 10,
           fieldName: 'coolTestField.keyword',
-          fieldSpec: { aggregatable: true } as unknown as FieldSpec,
           sort: { by: '_count', direction: 'asc' },
+          fieldSpec: { aggregatable: true } as unknown as FieldSpec,
         };
         const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
         expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
@@ -160,9 +164,10 @@ describe('options list queries', () => {
 
     test('creates boolean aggregation for boolean field', () => {
       const optionsListRequestBodyMock: OptionsListRequestBody = {
+        size: 10,
         fieldName: 'coolean',
-        fieldSpec: { type: 'boolean' } as unknown as FieldSpec,
         sort: { by: '_key', direction: 'desc' },
+        fieldSpec: { type: 'boolean' } as unknown as FieldSpec,
       };
       const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
       expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
@@ -182,10 +187,11 @@ describe('options list queries', () => {
 
     test('creates nested aggregation for nested field', () => {
       const optionsListRequestBodyMock: OptionsListRequestBody = {
-        fieldName: 'coolNestedField',
+        size: 10,
         searchString: 'cooool',
-        fieldSpec: { subType: { nested: { path: 'path.to.nested' } } } as unknown as FieldSpec,
+        fieldName: 'coolNestedField',
         sort: { by: '_key', direction: 'asc' },
+        fieldSpec: { subType: { nested: { path: 'path.to.nested' } } } as unknown as FieldSpec,
       };
       const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
       expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
@@ -213,8 +219,9 @@ describe('options list queries', () => {
 
     test('creates keyword only aggregation', () => {
       const optionsListRequestBodyMock: OptionsListRequestBody = {
-        fieldName: 'coolTestField.keyword',
+        size: 10,
         searchString: 'cooool',
+        fieldName: 'coolTestField.keyword',
         fieldSpec: { aggregatable: true } as unknown as FieldSpec,
       };
       const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
@@ -237,9 +244,10 @@ describe('options list queries', () => {
     describe('IP field', () => {
       test('without a search string, creates IP range aggregation with default range', () => {
         const optionsListRequestBodyMock: OptionsListRequestBody = {
+          size: 10,
           fieldName: 'clientip',
-          fieldSpec: { type: 'ip' } as unknown as FieldSpec,
           sort: { by: '_count', direction: 'asc' },
+          fieldSpec: { type: 'ip' } as unknown as FieldSpec,
         };
         const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
         expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
@@ -274,10 +282,11 @@ describe('options list queries', () => {
 
       test('full IPv4 in the search string, creates IP range aggregation with CIDR mask', () => {
         const optionsListRequestBodyMock: OptionsListRequestBody = {
+          size: 10,
           fieldName: 'clientip',
-          fieldSpec: { type: 'ip' } as unknown as FieldSpec,
           searchString: '41.77.243.255',
           sort: { by: '_key', direction: 'desc' },
+          fieldSpec: { type: 'ip' } as unknown as FieldSpec,
         };
         const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
         expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
@@ -311,10 +320,11 @@ describe('options list queries', () => {
 
       test('full IPv6 in the search string, creates IP range aggregation with CIDR mask', () => {
         const optionsListRequestBodyMock: OptionsListRequestBody = {
+          size: 10,
           fieldName: 'clientip',
+          sort: { by: '_key', direction: 'asc' },
           fieldSpec: { type: 'ip' } as unknown as FieldSpec,
           searchString: 'f688:fb50:6433:bba2:604:f2c:194a:d3c5',
-          sort: { by: '_key', direction: 'asc' },
         };
         const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
         expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
@@ -348,9 +358,10 @@ describe('options list queries', () => {
 
       test('partial IPv4 in the search string, creates IP range aggregation with min and max', () => {
         const optionsListRequestBodyMock: OptionsListRequestBody = {
+          size: 10,
           fieldName: 'clientip',
-          fieldSpec: { type: 'ip' } as unknown as FieldSpec,
           searchString: '41.77',
+          fieldSpec: { type: 'ip' } as unknown as FieldSpec,
         };
         const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
         expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
@@ -385,10 +396,11 @@ describe('options list queries', () => {
 
       test('partial IPv46 in the search string, creates IP range aggregation with min and max', () => {
         const optionsListRequestBodyMock: OptionsListRequestBody = {
+          size: 10,
           fieldName: 'clientip',
-          fieldSpec: { type: 'ip' } as unknown as FieldSpec,
           searchString: 'cdb6:',
           sort: { by: '_count', direction: 'desc' },
+          fieldSpec: { type: 'ip' } as unknown as FieldSpec,
         };
         const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
         expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
@@ -426,8 +438,9 @@ describe('options list queries', () => {
   describe('suggestion parsing', () => {
     test('parses keyword / text result', () => {
       const optionsListRequestBodyMock: OptionsListRequestBody = {
-        fieldName: 'coolTestField.keyword',
+        size: 10,
         searchString: 'cooool',
+        fieldName: 'coolTestField.keyword',
         fieldSpec: { aggregatable: true } as unknown as FieldSpec,
       };
       const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
@@ -459,6 +472,7 @@ describe('options list queries', () => {
 
     test('parses boolean result', () => {
       const optionsListRequestBodyMock: OptionsListRequestBody = {
+        size: 10,
         fieldName: 'coolean',
         fieldSpec: { type: 'boolean' } as unknown as FieldSpec,
       };
@@ -485,8 +499,9 @@ describe('options list queries', () => {
 
     test('parses nested result', () => {
       const optionsListRequestBodyMock: OptionsListRequestBody = {
-        fieldName: 'coolNestedField',
+        size: 10,
         searchString: 'cooool',
+        fieldName: 'coolNestedField',
         fieldSpec: { subType: { nested: { path: 'path.to.nested' } } } as unknown as FieldSpec,
       };
       const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
@@ -518,8 +533,9 @@ describe('options list queries', () => {
 
     test('parses keyword only result', () => {
       const optionsListRequestBodyMock: OptionsListRequestBody = {
-        fieldName: 'coolTestField.keyword',
+        size: 10,
         searchString: 'cooool',
+        fieldName: 'coolTestField.keyword',
         fieldSpec: { aggregatable: true } as unknown as FieldSpec,
       };
       const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
@@ -550,6 +566,7 @@ describe('options list queries', () => {
 
   test('parses mixed IPv4 and IPv6 result', () => {
     const optionsListRequestBodyMock: OptionsListRequestBody = {
+      size: 10,
       fieldName: 'clientip',
       fieldSpec: { type: 'ip' } as unknown as FieldSpec,
     };

@@ -9,7 +9,7 @@
 import React, { useState } from 'react';
 import { isEmpty } from 'lodash';
 
-import { EuiLoadingSpinner, EuiPopoverTitle } from '@elastic/eui';
+import { EuiPopoverTitle } from '@elastic/eui';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
 import { OptionsListReduxState } from '../types';
@@ -74,7 +74,6 @@ export const OptionsListPopover = ({
           style={{ width: '100%', height: '100%' }}
         >
           <OptionsListPopoverSuggestions
-            isLoading={isLoading}
             loadMoreSuggestions={loadMoreSuggestions}
             showOnlySelected={showOnlySelected}
           />

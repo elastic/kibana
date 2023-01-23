@@ -7,7 +7,6 @@
  */
 
 import { Observable } from 'rxjs';
-import { get, takeRight, pick } from 'lodash';
 
 import { PluginSetup as UnifiedSearchPluginSetup } from '@kbn/unified-search-plugin/server';
 import { getKbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/server';
@@ -87,7 +86,7 @@ export const setupOptionsListSuggestionsRoute = (
     /**
      * Build ES Query
      */
-    const { runPastTimeout, filters, fieldName, runtimeFieldMap } = request;
+    const { runPastTimeout, filters, runtimeFieldMap } = request;
     const { terminateAfter, timeout } = getAutocompleteSettings();
     const timeoutSettings = runPastTimeout
       ? {}
@@ -123,7 +122,7 @@ export const setupOptionsListSuggestionsRoute = (
         ...runtimeFieldMap,
       },
     };
-    console.log(JSON.stringify(body));
+    // console.log(JSON.stringify(body));
 
     /**
      * Run ES query

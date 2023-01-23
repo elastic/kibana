@@ -54,9 +54,14 @@ export const OptionsListStrings = {
           'Available {optionCount, plural, one {option} other {options}} for {fieldName}',
         values: { fieldName, optionCount },
       }),
-    getLoadingMessage: () =>
-      i18n.translate('controls.optionsList.popover.loading', {
-        defaultMessage: 'Loading options',
+    getLoadingMoreMessage: () =>
+      i18n.translate('controls.optionsList.popover.loadingMore', {
+        defaultMessage: 'Loading more options...',
+      }),
+    getAtEndOfOptionsMessage: () =>
+      i18n.translate('controls.optionsList.popover.endOfOptions', {
+        defaultMessage:
+          'The top 1,000 available options are displayed. View more options by searching for the name.',
       }),
     getEmptyMessage: () =>
       i18n.translate('controls.optionsList.popover.empty', {
