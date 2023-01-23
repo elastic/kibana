@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { StaticValueColumn } from '../../types';
 
 export const createStaticValueColumn = (value: number): StaticValueColumn => ({
   operationType: 'static_value',
-  columnId: uuid(),
+  columnId: uuidv4(),
   isBucketed: false,
   isSplit: false,
   dataType: 'number',

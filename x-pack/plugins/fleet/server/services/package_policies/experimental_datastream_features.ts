@@ -63,7 +63,7 @@ export async function handleExperimentalDatastreamFeatureOptIn({
           mappings: {
             ...componentTemplate.template.mappings,
             _source: {
-              mode: featureMapEntry.features.synthetic_source ? 'synthetic' : 'stored',
+              ...(featureMapEntry.features.synthetic_source ? { mode: 'synthetic' } : {}),
             },
           },
         },
