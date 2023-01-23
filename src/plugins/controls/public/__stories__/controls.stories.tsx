@@ -9,7 +9,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiTextAlign } from '@elastic/eui';
 import React, { useEffect, useMemo, useState, useCallback, FC } from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import {
   getFlightOptionsAsync,
@@ -98,7 +98,7 @@ export const ControlGroupStoryComponent: FC<{
         controlStyle: 'oneLine',
         chainingSystem: 'NONE', // a chaining system doesn't make sense in storybook since the controls aren't backed by elasticsearch
         panels: panels ?? {},
-        id: uuid.v4(),
+        id: uuidv4(),
         viewMode,
       });
 

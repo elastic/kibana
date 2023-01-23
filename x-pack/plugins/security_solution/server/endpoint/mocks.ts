@@ -90,8 +90,6 @@ export const createMockEndpointAppContextService = (
     start: jest.fn(),
     stop: jest.fn(),
     getExperimentalFeatures: jest.fn(),
-    getAgentService: jest.fn(),
-    getAgentPolicyService: jest.fn(),
     getManifestManager: jest.fn().mockReturnValue(mockManifestManager ?? jest.fn()),
     getEndpointMetadataService: jest.fn(() => mockEndpointMetadataContext.endpointMetadataService),
     getInternalFleetServices: jest.fn(() => mockEndpointMetadataContext.fleetServices),
@@ -159,13 +157,9 @@ export const createMockEndpointAppContextServiceStartContract =
     );
 
     return {
-      agentService,
-      agentPolicyService,
       endpointMetadataService,
       endpointFleetServicesFactory,
-      packagePolicyService,
       logger,
-      packageService,
       fleetAuthzService: createFleetAuthzServiceMock(),
       manifestManager: getManifestManagerMock(),
       security,

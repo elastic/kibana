@@ -60,7 +60,7 @@ export const StepMetaInfo = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-      <EuiFlexGroup gutterSize="m">
+      <EuiFlexGroup gutterSize="m" wrap>
         {isFailed && stateId && (
           <EuiFlexItem grow={false}>
             <ErrorDetailsButton configId={monitorId} stateId={stateId} />
