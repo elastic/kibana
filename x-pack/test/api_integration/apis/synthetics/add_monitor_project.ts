@@ -1472,69 +1472,7 @@ export default function ({ getService }: FtrProviderContext) {
                 type: 'http',
                 tags: 'tag2,tag2',
                 urls: ['http://localhost:9200'],
-              },
-              reason: 'Cannot update monitor to different type.',
-            },
-          ],
-        });
-      } finally {
-        await Promise.all([
-          projectMonitors.monitors.map((monitor) => {
-            return deleteMonitor(monitor.id, project);
-          }),
-        ]);
-      }
-    });
-
-    it('project monitors - cannot update a monitor of one type to another type', async () => {
-      const project = `test-project-${uuidv4()}`;
-
-      try {
-        await supertest
-          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project))
-          .set('kbn-xsrf', 'true')
-          .send(projectMonitors)
-          .expect(200);
-        const { body } = await supertest
-          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project))
-          .set('kbn-xsrf', 'true')
-          .send({
-            monitors: [{ ...httpProjectMonitors.monitors[1], id: projectMonitors.monitors[0].id }],
-          })
-          .expect(200);
-        expect(body).eql({
-          createdMonitors: [],
-          updatedMonitors: [],
-          failedMonitors: [
-            {
-              details: `Monitor ${projectMonitors.monitors[0].id} of type browser cannot be updated to type http. Please delete the monitor first and try again.`,
-              payload: {
-                'check.request': {
-                  headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                  },
-                  method: 'POST',
-                },
-                'check.response': {
-                  body: {
-                    positive: ['Saved', 'saved'],
-                  },
-                  status: [200],
-                },
-                enabled: false,
-                hash: 'ekrjelkjrelkjre',
-                id: projectMonitors.monitors[0].id,
-                locations: ['localhost'],
-                name: 'My Monitor 3',
-                response: {
-                  include_body: 'always',
-                },
-                'response.include_headers': false,
-                schedule: 60,
-                timeout: '80s',
-                type: 'http',
-                tags: 'tag2,tag2',
-                urls: ['http://localhost:9200'],
+                'ssl.verification_mode': 'strict',
               },
               reason: 'Cannot update monitor to different type.',
             },
