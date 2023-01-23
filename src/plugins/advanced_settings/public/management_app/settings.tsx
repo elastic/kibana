@@ -175,6 +175,31 @@ export const Settings = (props: Props) => {
     return categories.global.concat(categories.namespace);
   }, [categories.global, categories.namespace]);
 
+  const renderAdvancedSettings = (scope: 'namespace' | 'global') => {
+    const callOutTitle =
+      scope === 'namespace' ? i18nTexts.defaultSpaceCalloutTitle : i18nTexts.globalCalloutTitle;
+    const callOutSubtitle =
+      scope === 'namespace'
+        ? i18nTexts.defaultSpaceCalloutSubtitle
+        : i18nTexts.globalCalloutSubtitle;
+    return (
+      <AdvancedSettings
+        settings={scope === 'namespace' ? settings : globalSettings}
+        groupedSettings={groupedSettings[scope]}
+        categoryCounts={categoryCounts[scope]}
+        categories={categories[scope]}
+        visibleSettings={queryState.filteredSettings[scope]}
+        clearQuery={() => setUrlQuery('')}
+        noResults={!queryState.footerQueryMatched}
+        queryText={queryState.query.text}
+        callOutTitle={callOutTitle}
+        callOutSubtitle={callOutSubtitle}
+        uiSettings={scope === 'namespace' ? uiSettings : globalUiSettings}
+        {...rest}
+      />
+    );
+  };
+
   const tabs = [
     {
       id: SPACE_SETTINGS_ID,
@@ -185,22 +210,7 @@ export const Settings = (props: Props) => {
             {Object.keys(queryState.filteredSettings.namespace).length}
           </EuiNotificationBadge>
         ) : null,
-      content: (
-        <AdvancedSettings
-          settings={settings}
-          groupedSettings={groupedSettings.namespace}
-          categoryCounts={categoryCounts.namespace}
-          categories={categories.namespace}
-          visibleSettings={queryState.filteredSettings.namespace}
-          clearQuery={() => setUrlQuery('')}
-          noResults={!queryState.footerQueryMatched}
-          queryText={queryState.query.text}
-          callOutTitle={i18nTexts.defaultSpaceCalloutTitle}
-          callOutSubtitle={i18nTexts.defaultSpaceCalloutSubtitle}
-          uiSettings={uiSettings}
-          {...rest}
-        />
-      ),
+      content: renderAdvancedSettings('namespace'),
     },
     {
       id: GLOBAL_SETTINGS_ID,
@@ -211,22 +221,7 @@ export const Settings = (props: Props) => {
             {Object.keys(queryState.filteredSettings.global).length}
           </EuiNotificationBadge>
         ) : null,
-      content: (
-        <AdvancedSettings
-          settings={globalSettings}
-          groupedSettings={groupedSettings.global}
-          categoryCounts={categoryCounts.global}
-          categories={categories.global}
-          visibleSettings={queryState.filteredSettings.global}
-          clearQuery={() => setUrlQuery('')}
-          noResults={!queryState.footerQueryMatched}
-          queryText={queryState.query.text}
-          callOutTitle={i18nTexts.globalCalloutTitle}
-          callOutSubtitle={i18nTexts.globalCalloutSubtitle}
-          uiSettings={globalUiSettings}
-          {...rest}
-        />
-      ),
+      content: renderAdvancedSettings('global'),
     },
   ];
 
