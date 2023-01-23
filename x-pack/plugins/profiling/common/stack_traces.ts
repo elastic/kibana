@@ -7,6 +7,45 @@
 
 import { ProfilingESField } from './elasticsearch';
 
+interface ProfilingEvents {
+  [key: string]: number;
+}
+
+interface ProfilingStackTrace {
+  ['file_ids']: string[];
+  ['frame_ids']: string[];
+  ['address_or_lines']: number[];
+  ['type_ids']: number[];
+}
+
+interface ProfilingStackTraces {
+  [key: string]: ProfilingStackTrace;
+}
+
+interface ProfilingStackFrame {
+  ['file_name']: string | undefined;
+  ['function_name']: string;
+  ['function_offset']: number | undefined;
+  ['line_number']: number | undefined;
+  ['source_type']: number | undefined;
+}
+
+interface ProfilingStackFrames {
+  [key: string]: ProfilingStackFrame;
+}
+
+interface ProfilingExecutables {
+  [key: string]: string;
+}
+
+export interface StackTraceResponse {
+  ['stack_trace_events']?: ProfilingEvents;
+  ['stack_traces']?: ProfilingStackTraces;
+  ['stack_frames']?: ProfilingStackFrames;
+  ['executables']?: ProfilingExecutables;
+  ['total_frames']: number;
+}
+
 export enum StackTracesDisplayOption {
   StackTraces = 'stackTraces',
   Percentage = 'percentage',

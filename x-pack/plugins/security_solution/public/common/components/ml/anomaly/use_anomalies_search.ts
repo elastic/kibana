@@ -6,7 +6,7 @@
  */
 
 import { useState, useEffect, useMemo } from 'react';
-import { filter, head, orderBy, pipe, has } from 'lodash/fp';
+import { filter, head, orderBy, pipe, has, sortBy } from 'lodash/fp';
 
 import { DEFAULT_ANOMALY_SCORE } from '../../../../../common/constants';
 import * as i18n from './translations';
@@ -26,7 +26,7 @@ export enum AnomalyEntity {
 }
 
 export interface AnomaliesCount {
-  name: NotableAnomaliesJobId;
+  name: NotableAnomaliesJobId | string;
   count: number;
   entity: AnomalyEntity;
   job?: SecurityJob;
@@ -47,7 +47,7 @@ export const useNotableAnomaliesSearch = ({
   data: AnomaliesCount[];
   refetch: inputsModel.Refetch;
 } => {
-  const [data, setData] = useState<AnomaliesCount[]>(formatResultData([], []));
+  const [data, setData] = useState<AnomaliesCount[]>([]);
 
   const {
     loading: jobsLoading,
@@ -131,18 +131,20 @@ function formatResultData(
   }>,
   notableAnomaliesJobs: SecurityJob[]
 ): AnomaliesCount[] {
-  return NOTABLE_ANOMALIES_IDS.map((notableJobId) => {
+  const unsortedAnomalies: AnomaliesCount[] = NOTABLE_ANOMALIES_IDS.map((notableJobId) => {
     const job = findJobWithId(notableJobId)(notableAnomaliesJobs);
     const bucket = buckets.find(({ key }) => key === job?.id);
     const hasUserName = has("entity.hits.hits[0]._source['user.name']", bucket);
 
     return {
-      name: notableJobId,
+      name: job?.customSettings?.security_app_display_name ?? notableJobId,
       count: bucket?.doc_count ?? 0,
       entity: hasUserName ? AnomalyEntity.User : AnomalyEntity.Host,
       job,
     };
   });
+
+  return sortBy(['name'], unsortedAnomalies);
 }
 
 /**

@@ -9,11 +9,12 @@ import numeral from '@elastic/numeral';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { useEffect, useState } from 'react';
-
 import { i18n } from '@kbn/i18n';
-import { toMinutes } from '../../../utils/slo/duration';
+import { SLOResponse } from '@kbn/slo-schema';
+
+import { toDuration, toMinutes } from '../../../utils/slo/duration';
 import { useFetchSloDetails } from '../../../hooks/slo/use_fetch_slo_details';
-import { BurnRateRuleParams, Duration, DurationUnit, SLO } from '../../../typings';
+import { BurnRateRuleParams, Duration, DurationUnit } from '../../../typings';
 import { SloSelector } from './slo_selector';
 import { BurnRate } from './burn_rate';
 import { LongWindowDuration } from './long_window_duration';
@@ -29,7 +30,7 @@ export function BurnRateRuleEditor(props: Props) {
   const { setRuleParams, ruleParams, errors } = props;
   const { loading: loadingInitialSlo, slo: initialSlo } = useFetchSloDetails(ruleParams?.sloId);
 
-  const [selectedSlo, setSelectedSlo] = useState<SLO | undefined>(undefined);
+  const [selectedSlo, setSelectedSlo] = useState<SLOResponse | undefined>(undefined);
   const [longWindowDuration, setLongWindowDuration] = useState<Duration>({
     value: ruleParams?.longWindow?.value ?? 1,
     unit: (ruleParams?.longWindow?.unit as DurationUnit) ?? 'h',
@@ -58,14 +59,14 @@ export function BurnRateRuleEditor(props: Props) {
     setRuleParams('burnRateThreshold', value);
   };
 
-  const onSelectedSlo = (slo: SLO | undefined) => {
+  const onSelectedSlo = (slo: SLOResponse | undefined) => {
     setSelectedSlo(slo);
     setRuleParams('sloId', slo?.id);
   };
 
   useEffect(() => {
     if (selectedSlo) {
-      const sloDurationInMinutes = toMinutes(selectedSlo.timeWindow.duration);
+      const sloDurationInMinutes = toMinutes(toDuration(selectedSlo.timeWindow.duration));
       const longWindowDurationInMinutes = toMinutes(longWindowDuration);
       const maxBurnRateThreshold = Math.floor(sloDurationInMinutes / longWindowDurationInMinutes);
       setMaxBurnRate(maxBurnRateThreshold);
@@ -86,7 +87,8 @@ export function BurnRateRuleEditor(props: Props) {
     if (selectedSlo && longWindowDuration?.value > 0 && burnRate >= 1) {
       return numeral(
         longWindowDuration.value /
-          ((burnRate * toMinutes(longWindowDuration)) / toMinutes(selectedSlo.timeWindow.duration))
+          ((burnRate * toMinutes(longWindowDuration)) /
+            toMinutes(toDuration(selectedSlo.timeWindow.duration)))
       ).format('0a');
     }
 

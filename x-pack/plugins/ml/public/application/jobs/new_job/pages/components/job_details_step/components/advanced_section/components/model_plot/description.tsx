@@ -8,7 +8,7 @@
 import React, { memo, FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
+import { EuiDescribedFormGroup } from '@elastic/eui';
 
 export const Description: FC = memo(({ children }) => {
   const title = i18n.translate(
@@ -23,13 +23,11 @@ export const Description: FC = memo(({ children }) => {
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.jobDetailsStep.advancedSection.enableModelPlot.description"
-          defaultMessage="Select to store additional model information used for plotting model bounds. This will add overhead to the performance of the system and is not recommended for high cardinality data."
+          defaultMessage="Store additional model information used for plotting model bounds. This adds overhead to the system performance. Not recommended for high cardinality data."
         />
       }
     >
-      <EuiFormRow label={title}>
-        <>{children}</>
-      </EuiFormRow>
+      <>{children}</>
     </EuiDescribedFormGroup>
   );
 });

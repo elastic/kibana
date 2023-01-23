@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { sloSchema, sloWithSummarySchema } from '../../types/schema';
+import { sloSchema, sloWithSummarySchema } from '@kbn/slo-schema';
 
 type SLO = t.TypeOf<typeof sloSchema>;
 type SLOId = t.TypeOf<typeof sloSchema.props.id>;

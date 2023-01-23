@@ -266,10 +266,12 @@ export class NewEventModal extends Component {
         >
           <EuiModalHeader>
             <EuiModalHeaderTitle>
-              <FormattedMessage
-                id="xpack.ml.calendarsEdit.newEventModal.createNewEventTitle"
-                defaultMessage="Create new event"
-              />
+              <h1>
+                <FormattedMessage
+                  id="xpack.ml.calendarsEdit.newEventModal.createNewEventTitle"
+                  defaultMessage="Create new event"
+                />
+              </h1>
             </EuiModalHeaderTitle>
           </EuiModalHeader>
 

@@ -1,9 +1,7 @@
 {
-  "extends": "../../../../tsconfig.bazel.json",
+  "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "outDir": "target_types",
+    "outDir": "target/types",
     "stripInternal": false,
     "types": [
       "jest",
@@ -12,5 +10,14 @@
   },
   "include": [
     "**/*.ts",
+  ],
+  "kbn_references": [
+    "@kbn/core-elasticsearch-server",
+    "@kbn/field-types",
+    "@kbn/ml-is-populated-object",
+    "@kbn/ml-string-hash"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

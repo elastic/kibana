@@ -11,10 +11,18 @@
   "server": {
     "classes": [],
     "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-usage-data-server",
-        "id": "def-server.CoreConfigUsageData",
+        "id": "def-common.CoreConfigUsageData",
         "type": "Interface",
         "tags": [],
         "label": "CoreConfigUsageData",
@@ -27,7 +35,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreConfigUsageData.elasticsearch",
+            "id": "def-common.CoreConfigUsageData.elasticsearch",
             "type": "Object",
             "tags": [],
             "label": "elasticsearch",
@@ -41,7 +49,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreConfigUsageData.http",
+            "id": "def-common.CoreConfigUsageData.http",
             "type": "Object",
             "tags": [],
             "label": "http",
@@ -55,7 +63,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreConfigUsageData.logging",
+            "id": "def-common.CoreConfigUsageData.logging",
             "type": "Object",
             "tags": [],
             "label": "logging",
@@ -69,7 +77,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreConfigUsageData.savedObjects",
+            "id": "def-common.CoreConfigUsageData.savedObjects",
             "type": "Object",
             "tags": [],
             "label": "savedObjects",
@@ -83,7 +91,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreConfigUsageData.deprecatedKeys",
+            "id": "def-common.CoreConfigUsageData.deprecatedKeys",
             "type": "Object",
             "tags": [],
             "label": "deprecatedKeys",
@@ -100,7 +108,7 @@
       },
       {
         "parentPluginId": "@kbn/core-usage-data-server",
-        "id": "def-server.CoreEnvironmentUsageData",
+        "id": "def-common.CoreEnvironmentUsageData",
         "type": "Interface",
         "tags": [],
         "label": "CoreEnvironmentUsageData",
@@ -113,7 +121,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreEnvironmentUsageData.memory",
+            "id": "def-common.CoreEnvironmentUsageData.memory",
             "type": "Object",
             "tags": [],
             "label": "memory",
@@ -130,7 +138,7 @@
       },
       {
         "parentPluginId": "@kbn/core-usage-data-server",
-        "id": "def-server.CoreIncrementCounterParams",
+        "id": "def-common.CoreIncrementCounterParams",
         "type": "Interface",
         "tags": [],
         "label": "CoreIncrementCounterParams",
@@ -141,7 +149,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreIncrementCounterParams.counterName",
+            "id": "def-common.CoreIncrementCounterParams.counterName",
             "type": "string",
             "tags": [],
             "label": "counterName",
@@ -154,7 +162,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreIncrementCounterParams.counterType",
+            "id": "def-common.CoreIncrementCounterParams.counterType",
             "type": "string",
             "tags": [],
             "label": "counterType",
@@ -170,7 +178,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreIncrementCounterParams.incrementBy",
+            "id": "def-common.CoreIncrementCounterParams.incrementBy",
             "type": "number",
             "tags": [],
             "label": "incrementBy",
@@ -189,7 +197,7 @@
       },
       {
         "parentPluginId": "@kbn/core-usage-data-server",
-        "id": "def-server.CoreServicesUsageData",
+        "id": "def-common.CoreServicesUsageData",
         "type": "Interface",
         "tags": [],
         "label": "CoreServicesUsageData",
@@ -202,7 +210,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreServicesUsageData.savedObjects",
+            "id": "def-common.CoreServicesUsageData.savedObjects",
             "type": "Object",
             "tags": [],
             "label": "savedObjects",
@@ -219,7 +227,7 @@
       },
       {
         "parentPluginId": "@kbn/core-usage-data-server",
-        "id": "def-server.CoreUsageCounter",
+        "id": "def-common.CoreUsageCounter",
         "type": "Interface",
         "tags": [],
         "label": "CoreUsageCounter",
@@ -232,7 +240,7 @@
       },
       {
         "parentPluginId": "@kbn/core-usage-data-server",
-        "id": "def-server.CoreUsageData",
+        "id": "def-common.CoreUsageData",
         "type": "Interface",
         "tags": [],
         "label": "CoreUsageData",
@@ -242,17 +250,17 @@
         "signature": [
           {
             "pluginId": "@kbn/core-usage-data-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreUsageDataServerPluginApi",
-            "section": "def-server.CoreUsageData",
+            "section": "def-common.CoreUsageData",
             "text": "CoreUsageData"
           },
           " extends ",
           {
             "pluginId": "@kbn/core-usage-data-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreUsageDataServerPluginApi",
-            "section": "def-server.CoreUsageStats",
+            "section": "def-common.CoreUsageStats",
             "text": "CoreUsageStats"
           }
         ],
@@ -262,7 +270,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageData.config",
+            "id": "def-common.CoreUsageData.config",
             "type": "Object",
             "tags": [],
             "label": "config",
@@ -270,9 +278,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-usage-data-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreUsageDataServerPluginApi",
-                "section": "def-server.CoreConfigUsageData",
+                "section": "def-common.CoreConfigUsageData",
                 "text": "CoreConfigUsageData"
               }
             ],
@@ -282,7 +290,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageData.services",
+            "id": "def-common.CoreUsageData.services",
             "type": "Object",
             "tags": [],
             "label": "services",
@@ -290,9 +298,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-usage-data-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreUsageDataServerPluginApi",
-                "section": "def-server.CoreServicesUsageData",
+                "section": "def-common.CoreServicesUsageData",
                 "text": "CoreServicesUsageData"
               }
             ],
@@ -302,7 +310,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageData.environment",
+            "id": "def-common.CoreUsageData.environment",
             "type": "Object",
             "tags": [],
             "label": "environment",
@@ -310,9 +318,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-usage-data-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreUsageDataServerPluginApi",
-                "section": "def-server.CoreEnvironmentUsageData",
+                "section": "def-common.CoreEnvironmentUsageData",
                 "text": "CoreEnvironmentUsageData"
               }
             ],
@@ -325,7 +333,7 @@
       },
       {
         "parentPluginId": "@kbn/core-usage-data-server",
-        "id": "def-server.CoreUsageDataSetup",
+        "id": "def-common.CoreUsageDataSetup",
         "type": "Interface",
         "tags": [
           "note"
@@ -340,7 +348,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageDataSetup.registerUsageCounter",
+            "id": "def-common.CoreUsageDataSetup.registerUsageCounter",
             "type": "Function",
             "tags": [],
             "label": "registerUsageCounter",
@@ -351,9 +359,9 @@
               "(usageCounter: ",
               {
                 "pluginId": "@kbn/core-usage-data-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreUsageDataServerPluginApi",
-                "section": "def-server.CoreUsageCounter",
+                "section": "def-common.CoreUsageCounter",
                 "text": "CoreUsageCounter"
               },
               ") => void"
@@ -364,7 +372,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-usage-data-server",
-                "id": "def-server.CoreUsageDataSetup.registerUsageCounter.$1",
+                "id": "def-common.CoreUsageDataSetup.registerUsageCounter.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "usageCounter",
@@ -372,9 +380,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-usage-data-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreUsageDataServerPluginApi",
-                    "section": "def-server.CoreUsageCounter",
+                    "section": "def-common.CoreUsageCounter",
                     "text": "CoreUsageCounter"
                   }
                 ],
@@ -391,7 +399,7 @@
       },
       {
         "parentPluginId": "@kbn/core-usage-data-server",
-        "id": "def-server.CoreUsageDataStart",
+        "id": "def-common.CoreUsageDataStart",
         "type": "Interface",
         "tags": [
           "note"
@@ -406,7 +414,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageDataStart.getConfigsUsageData",
+            "id": "def-common.CoreUsageDataStart.getConfigsUsageData",
             "type": "Function",
             "tags": [],
             "label": "getConfigsUsageData",
@@ -415,9 +423,9 @@
               "() => Promise<",
               {
                 "pluginId": "@kbn/core-usage-data-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreUsageDataServerPluginApi",
-                "section": "def-server.ConfigUsageData",
+                "section": "def-common.ConfigUsageData",
                 "text": "ConfigUsageData"
               },
               ">"
@@ -433,7 +441,7 @@
       },
       {
         "parentPluginId": "@kbn/core-usage-data-server",
-        "id": "def-server.CoreUsageStats",
+        "id": "def-common.CoreUsageStats",
         "type": "Interface",
         "tags": [],
         "label": "CoreUsageStats",
@@ -444,7 +452,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkCreate.total",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkCreate.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkCreate.total'",
@@ -458,7 +466,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkCreate.namespace.default.total",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkCreate.namespace.default.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkCreate.namespace.default.total'",
@@ -472,7 +480,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkCreate.namespace.default.kibanaRequest.yes",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkCreate.namespace.default.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkCreate.namespace.default.kibanaRequest.yes'",
@@ -486,7 +494,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkCreate.namespace.default.kibanaRequest.no",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkCreate.namespace.default.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkCreate.namespace.default.kibanaRequest.no'",
@@ -500,7 +508,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkCreate.namespace.custom.total",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkCreate.namespace.custom.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkCreate.namespace.custom.total'",
@@ -514,7 +522,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkCreate.namespace.custom.kibanaRequest.yes",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkCreate.namespace.custom.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkCreate.namespace.custom.kibanaRequest.yes'",
@@ -528,7 +536,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkCreate.namespace.custom.kibanaRequest.no",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkCreate.namespace.custom.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkCreate.namespace.custom.kibanaRequest.no'",
@@ -542,7 +550,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkGet.total",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkGet.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkGet.total'",
@@ -556,7 +564,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkGet.namespace.default.total",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkGet.namespace.default.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkGet.namespace.default.total'",
@@ -570,7 +578,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkGet.namespace.default.kibanaRequest.yes",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkGet.namespace.default.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkGet.namespace.default.kibanaRequest.yes'",
@@ -584,7 +592,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkGet.namespace.default.kibanaRequest.no",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkGet.namespace.default.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkGet.namespace.default.kibanaRequest.no'",
@@ -598,7 +606,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkGet.namespace.custom.total",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkGet.namespace.custom.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkGet.namespace.custom.total'",
@@ -612,7 +620,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkGet.namespace.custom.kibanaRequest.yes",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkGet.namespace.custom.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkGet.namespace.custom.kibanaRequest.yes'",
@@ -626,7 +634,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkGet.namespace.custom.kibanaRequest.no",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkGet.namespace.custom.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkGet.namespace.custom.kibanaRequest.no'",
@@ -640,7 +648,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkResolve.total",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkResolve.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkResolve.total'",
@@ -654,7 +662,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkResolve.namespace.default.total",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkResolve.namespace.default.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkResolve.namespace.default.total'",
@@ -668,7 +676,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkResolve.namespace.default.kibanaRequest.yes",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkResolve.namespace.default.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkResolve.namespace.default.kibanaRequest.yes'",
@@ -682,7 +690,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkResolve.namespace.default.kibanaRequest.no",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkResolve.namespace.default.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkResolve.namespace.default.kibanaRequest.no'",
@@ -696,7 +704,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkResolve.namespace.custom.total",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkResolve.namespace.custom.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkResolve.namespace.custom.total'",
@@ -710,7 +718,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkResolve.namespace.custom.kibanaRequest.yes",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkResolve.namespace.custom.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkResolve.namespace.custom.kibanaRequest.yes'",
@@ -724,7 +732,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkResolve.namespace.custom.kibanaRequest.no",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkResolve.namespace.custom.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkResolve.namespace.custom.kibanaRequest.no'",
@@ -738,7 +746,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkUpdate.total",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkUpdate.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkUpdate.total'",
@@ -752,7 +760,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkUpdate.namespace.default.total",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkUpdate.namespace.default.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkUpdate.namespace.default.total'",
@@ -766,7 +774,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkUpdate.namespace.default.kibanaRequest.yes",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkUpdate.namespace.default.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkUpdate.namespace.default.kibanaRequest.yes'",
@@ -780,7 +788,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkUpdate.namespace.default.kibanaRequest.no",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkUpdate.namespace.default.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkUpdate.namespace.default.kibanaRequest.no'",
@@ -794,7 +802,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkUpdate.namespace.custom.total",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkUpdate.namespace.custom.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkUpdate.namespace.custom.total'",
@@ -808,7 +816,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkUpdate.namespace.custom.kibanaRequest.yes",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkUpdate.namespace.custom.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkUpdate.namespace.custom.kibanaRequest.yes'",
@@ -822,7 +830,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkUpdate.namespace.custom.kibanaRequest.no",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkUpdate.namespace.custom.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkUpdate.namespace.custom.kibanaRequest.no'",
@@ -836,7 +844,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkDelete.total",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkDelete.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkDelete.total'",
@@ -850,7 +858,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkDelete.namespace.default.total",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkDelete.namespace.default.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkDelete.namespace.default.total'",
@@ -864,7 +872,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkDelete.namespace.default.kibanaRequest.yes",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkDelete.namespace.default.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkDelete.namespace.default.kibanaRequest.yes'",
@@ -878,7 +886,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkDelete.namespace.default.kibanaRequest.no",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkDelete.namespace.default.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkDelete.namespace.default.kibanaRequest.no'",
@@ -892,7 +900,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkDelete.namespace.custom.total",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkDelete.namespace.custom.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkDelete.namespace.custom.total'",
@@ -906,7 +914,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkDelete.namespace.custom.kibanaRequest.yes",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkDelete.namespace.custom.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkDelete.namespace.custom.kibanaRequest.yes'",
@@ -920,7 +928,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkDelete.namespace.custom.kibanaRequest.no",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkDelete.namespace.custom.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkDelete.namespace.custom.kibanaRequest.no'",
@@ -934,7 +942,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsCreate.total",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsCreate.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsCreate.total'",
@@ -948,7 +956,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsCreate.namespace.default.total",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsCreate.namespace.default.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsCreate.namespace.default.total'",
@@ -962,7 +970,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsCreate.namespace.default.kibanaRequest.yes",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsCreate.namespace.default.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsCreate.namespace.default.kibanaRequest.yes'",
@@ -976,7 +984,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsCreate.namespace.default.kibanaRequest.no",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsCreate.namespace.default.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsCreate.namespace.default.kibanaRequest.no'",
@@ -990,7 +998,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsCreate.namespace.custom.total",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsCreate.namespace.custom.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsCreate.namespace.custom.total'",
@@ -1004,7 +1012,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsCreate.namespace.custom.kibanaRequest.yes",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsCreate.namespace.custom.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsCreate.namespace.custom.kibanaRequest.yes'",
@@ -1018,7 +1026,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsCreate.namespace.custom.kibanaRequest.no",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsCreate.namespace.custom.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsCreate.namespace.custom.kibanaRequest.no'",
@@ -1032,7 +1040,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsDelete.total",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsDelete.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsDelete.total'",
@@ -1046,7 +1054,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsDelete.namespace.default.total",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsDelete.namespace.default.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsDelete.namespace.default.total'",
@@ -1060,7 +1068,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsDelete.namespace.default.kibanaRequest.yes",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsDelete.namespace.default.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsDelete.namespace.default.kibanaRequest.yes'",
@@ -1074,7 +1082,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsDelete.namespace.default.kibanaRequest.no",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsDelete.namespace.default.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsDelete.namespace.default.kibanaRequest.no'",
@@ -1088,7 +1096,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsDelete.namespace.custom.total",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsDelete.namespace.custom.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsDelete.namespace.custom.total'",
@@ -1102,7 +1110,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsDelete.namespace.custom.kibanaRequest.yes",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsDelete.namespace.custom.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsDelete.namespace.custom.kibanaRequest.yes'",
@@ -1116,7 +1124,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsDelete.namespace.custom.kibanaRequest.no",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsDelete.namespace.custom.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsDelete.namespace.custom.kibanaRequest.no'",
@@ -1130,7 +1138,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsFind.total",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsFind.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsFind.total'",
@@ -1144,7 +1152,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsFind.namespace.default.total",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsFind.namespace.default.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsFind.namespace.default.total'",
@@ -1158,7 +1166,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsFind.namespace.default.kibanaRequest.yes",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsFind.namespace.default.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsFind.namespace.default.kibanaRequest.yes'",
@@ -1172,7 +1180,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsFind.namespace.default.kibanaRequest.no",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsFind.namespace.default.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsFind.namespace.default.kibanaRequest.no'",
@@ -1186,7 +1194,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsFind.namespace.custom.total",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsFind.namespace.custom.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsFind.namespace.custom.total'",
@@ -1200,7 +1208,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsFind.namespace.custom.kibanaRequest.yes",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsFind.namespace.custom.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsFind.namespace.custom.kibanaRequest.yes'",
@@ -1214,7 +1222,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsFind.namespace.custom.kibanaRequest.no",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsFind.namespace.custom.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsFind.namespace.custom.kibanaRequest.no'",
@@ -1228,7 +1236,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsGet.total",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsGet.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsGet.total'",
@@ -1242,7 +1250,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsGet.namespace.default.total",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsGet.namespace.default.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsGet.namespace.default.total'",
@@ -1256,7 +1264,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsGet.namespace.default.kibanaRequest.yes",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsGet.namespace.default.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsGet.namespace.default.kibanaRequest.yes'",
@@ -1270,7 +1278,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsGet.namespace.default.kibanaRequest.no",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsGet.namespace.default.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsGet.namespace.default.kibanaRequest.no'",
@@ -1284,7 +1292,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsGet.namespace.custom.total",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsGet.namespace.custom.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsGet.namespace.custom.total'",
@@ -1298,7 +1306,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsGet.namespace.custom.kibanaRequest.yes",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsGet.namespace.custom.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsGet.namespace.custom.kibanaRequest.yes'",
@@ -1312,7 +1320,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsGet.namespace.custom.kibanaRequest.no",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsGet.namespace.custom.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsGet.namespace.custom.kibanaRequest.no'",
@@ -1326,7 +1334,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsResolve.total",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsResolve.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsResolve.total'",
@@ -1340,7 +1348,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsResolve.namespace.default.total",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsResolve.namespace.default.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsResolve.namespace.default.total'",
@@ -1354,7 +1362,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsResolve.namespace.default.kibanaRequest.yes",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsResolve.namespace.default.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsResolve.namespace.default.kibanaRequest.yes'",
@@ -1368,7 +1376,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsResolve.namespace.default.kibanaRequest.no",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsResolve.namespace.default.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsResolve.namespace.default.kibanaRequest.no'",
@@ -1382,7 +1390,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsResolve.namespace.custom.total",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsResolve.namespace.custom.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsResolve.namespace.custom.total'",
@@ -1396,7 +1404,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsResolve.namespace.custom.kibanaRequest.yes",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsResolve.namespace.custom.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsResolve.namespace.custom.kibanaRequest.yes'",
@@ -1410,7 +1418,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsResolve.namespace.custom.kibanaRequest.no",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsResolve.namespace.custom.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsResolve.namespace.custom.kibanaRequest.no'",
@@ -1424,7 +1432,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsUpdate.total",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsUpdate.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsUpdate.total'",
@@ -1438,7 +1446,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsUpdate.namespace.default.total",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsUpdate.namespace.default.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsUpdate.namespace.default.total'",
@@ -1452,7 +1460,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsUpdate.namespace.default.kibanaRequest.yes",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsUpdate.namespace.default.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsUpdate.namespace.default.kibanaRequest.yes'",
@@ -1466,7 +1474,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsUpdate.namespace.default.kibanaRequest.no",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsUpdate.namespace.default.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsUpdate.namespace.default.kibanaRequest.no'",
@@ -1480,7 +1488,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsUpdate.namespace.custom.total",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsUpdate.namespace.custom.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsUpdate.namespace.custom.total'",
@@ -1494,7 +1502,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsUpdate.namespace.custom.kibanaRequest.yes",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsUpdate.namespace.custom.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsUpdate.namespace.custom.kibanaRequest.yes'",
@@ -1508,7 +1516,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsUpdate.namespace.custom.kibanaRequest.no",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsUpdate.namespace.custom.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsUpdate.namespace.custom.kibanaRequest.no'",
@@ -1522,7 +1530,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsImport.total",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsImport.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsImport.total'",
@@ -1536,7 +1544,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsImport.namespace.default.total",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsImport.namespace.default.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsImport.namespace.default.total'",
@@ -1550,7 +1558,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsImport.namespace.default.kibanaRequest.yes",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsImport.namespace.default.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsImport.namespace.default.kibanaRequest.yes'",
@@ -1564,7 +1572,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsImport.namespace.default.kibanaRequest.no",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsImport.namespace.default.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsImport.namespace.default.kibanaRequest.no'",
@@ -1578,7 +1586,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsImport.namespace.custom.total",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsImport.namespace.custom.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsImport.namespace.custom.total'",
@@ -1592,7 +1600,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsImport.namespace.custom.kibanaRequest.yes",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsImport.namespace.custom.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsImport.namespace.custom.kibanaRequest.yes'",
@@ -1606,7 +1614,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsImport.namespace.custom.kibanaRequest.no",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsImport.namespace.custom.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsImport.namespace.custom.kibanaRequest.no'",
@@ -1620,7 +1628,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsImport.createNewCopiesEnabled.yes",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsImport.createNewCopiesEnabled.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsImport.createNewCopiesEnabled.yes'",
@@ -1634,7 +1642,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsImport.createNewCopiesEnabled.no",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsImport.createNewCopiesEnabled.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsImport.createNewCopiesEnabled.no'",
@@ -1648,7 +1656,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsImport.overwriteEnabled.yes",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsImport.overwriteEnabled.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsImport.overwriteEnabled.yes'",
@@ -1662,7 +1670,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsImport.overwriteEnabled.no",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsImport.overwriteEnabled.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsImport.overwriteEnabled.no'",
@@ -1676,7 +1684,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsResolveImportErrors.total",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsResolveImportErrors.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsResolveImportErrors.total'",
@@ -1690,7 +1698,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsResolveImportErrors.namespace.default.total",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsResolveImportErrors.namespace.default.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsResolveImportErrors.namespace.default.total'",
@@ -1704,7 +1712,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsResolveImportErrors.namespace.default.kibanaRequest.yes",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsResolveImportErrors.namespace.default.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsResolveImportErrors.namespace.default.kibanaRequest.yes'",
@@ -1718,7 +1726,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsResolveImportErrors.namespace.default.kibanaRequest.no",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsResolveImportErrors.namespace.default.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsResolveImportErrors.namespace.default.kibanaRequest.no'",
@@ -1732,7 +1740,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsResolveImportErrors.namespace.custom.total",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsResolveImportErrors.namespace.custom.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsResolveImportErrors.namespace.custom.total'",
@@ -1746,7 +1754,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsResolveImportErrors.namespace.custom.kibanaRequest.yes",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsResolveImportErrors.namespace.custom.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsResolveImportErrors.namespace.custom.kibanaRequest.yes'",
@@ -1760,7 +1768,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsResolveImportErrors.namespace.custom.kibanaRequest.no",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsResolveImportErrors.namespace.custom.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsResolveImportErrors.namespace.custom.kibanaRequest.no'",
@@ -1774,7 +1782,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsResolveImportErrors.createNewCopiesEnabled.yes",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsResolveImportErrors.createNewCopiesEnabled.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsResolveImportErrors.createNewCopiesEnabled.yes'",
@@ -1788,7 +1796,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsResolveImportErrors.createNewCopiesEnabled.no",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsResolveImportErrors.createNewCopiesEnabled.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsResolveImportErrors.createNewCopiesEnabled.no'",
@@ -1802,7 +1810,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsExport.total",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsExport.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsExport.total'",
@@ -1816,7 +1824,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsExport.namespace.default.total",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsExport.namespace.default.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsExport.namespace.default.total'",
@@ -1830,7 +1838,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsExport.namespace.default.kibanaRequest.yes",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsExport.namespace.default.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsExport.namespace.default.kibanaRequest.yes'",
@@ -1844,7 +1852,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsExport.namespace.default.kibanaRequest.no",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsExport.namespace.default.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsExport.namespace.default.kibanaRequest.no'",
@@ -1858,7 +1866,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsExport.namespace.custom.total",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsExport.namespace.custom.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsExport.namespace.custom.total'",
@@ -1872,7 +1880,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsExport.namespace.custom.kibanaRequest.yes",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsExport.namespace.custom.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsExport.namespace.custom.kibanaRequest.yes'",
@@ -1886,7 +1894,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsExport.namespace.custom.kibanaRequest.no",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsExport.namespace.custom.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsExport.namespace.custom.kibanaRequest.no'",
@@ -1900,7 +1908,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsExport.allTypesSelected.yes",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsExport.allTypesSelected.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsExport.allTypesSelected.yes'",
@@ -1914,7 +1922,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsExport.allTypesSelected.no",
+            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsExport.allTypesSelected.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsExport.allTypesSelected.no'",
@@ -1928,7 +1936,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.legacyDashboardExport.total",
+            "id": "def-common.CoreUsageStats.apiCalls.legacyDashboardExport.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.legacyDashboardExport.total'",
@@ -1942,7 +1950,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.legacyDashboardExport.namespace.default.total",
+            "id": "def-common.CoreUsageStats.apiCalls.legacyDashboardExport.namespace.default.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.legacyDashboardExport.namespace.default.total'",
@@ -1956,7 +1964,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.legacyDashboardExport.namespace.default.kibanaRequest.yes",
+            "id": "def-common.CoreUsageStats.apiCalls.legacyDashboardExport.namespace.default.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.legacyDashboardExport.namespace.default.kibanaRequest.yes'",
@@ -1970,7 +1978,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.legacyDashboardExport.namespace.default.kibanaRequest.no",
+            "id": "def-common.CoreUsageStats.apiCalls.legacyDashboardExport.namespace.default.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.legacyDashboardExport.namespace.default.kibanaRequest.no'",
@@ -1984,7 +1992,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.legacyDashboardExport.namespace.custom.total",
+            "id": "def-common.CoreUsageStats.apiCalls.legacyDashboardExport.namespace.custom.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.legacyDashboardExport.namespace.custom.total'",
@@ -1998,7 +2006,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.legacyDashboardExport.namespace.custom.kibanaRequest.yes",
+            "id": "def-common.CoreUsageStats.apiCalls.legacyDashboardExport.namespace.custom.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.legacyDashboardExport.namespace.custom.kibanaRequest.yes'",
@@ -2012,7 +2020,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.legacyDashboardExport.namespace.custom.kibanaRequest.no",
+            "id": "def-common.CoreUsageStats.apiCalls.legacyDashboardExport.namespace.custom.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.legacyDashboardExport.namespace.custom.kibanaRequest.no'",
@@ -2026,7 +2034,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.legacyDashboardImport.total",
+            "id": "def-common.CoreUsageStats.apiCalls.legacyDashboardImport.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.legacyDashboardImport.total'",
@@ -2040,7 +2048,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.legacyDashboardImport.namespace.default.total",
+            "id": "def-common.CoreUsageStats.apiCalls.legacyDashboardImport.namespace.default.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.legacyDashboardImport.namespace.default.total'",
@@ -2054,7 +2062,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.legacyDashboardImport.namespace.default.kibanaRequest.yes",
+            "id": "def-common.CoreUsageStats.apiCalls.legacyDashboardImport.namespace.default.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.legacyDashboardImport.namespace.default.kibanaRequest.yes'",
@@ -2068,7 +2076,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.legacyDashboardImport.namespace.default.kibanaRequest.no",
+            "id": "def-common.CoreUsageStats.apiCalls.legacyDashboardImport.namespace.default.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.legacyDashboardImport.namespace.default.kibanaRequest.no'",
@@ -2082,7 +2090,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.legacyDashboardImport.namespace.custom.total",
+            "id": "def-common.CoreUsageStats.apiCalls.legacyDashboardImport.namespace.custom.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.legacyDashboardImport.namespace.custom.total'",
@@ -2096,7 +2104,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.legacyDashboardImport.namespace.custom.kibanaRequest.yes",
+            "id": "def-common.CoreUsageStats.apiCalls.legacyDashboardImport.namespace.custom.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.legacyDashboardImport.namespace.custom.kibanaRequest.yes'",
@@ -2110,7 +2118,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.apiCalls.legacyDashboardImport.namespace.custom.kibanaRequest.no",
+            "id": "def-common.CoreUsageStats.apiCalls.legacyDashboardImport.namespace.custom.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.legacyDashboardImport.namespace.custom.kibanaRequest.no'",
@@ -2124,7 +2132,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.savedObjectsRepository.resolvedOutcome.exactMatch",
+            "id": "def-common.CoreUsageStats.savedObjectsRepository.resolvedOutcome.exactMatch",
             "type": "number",
             "tags": [],
             "label": "'savedObjectsRepository.resolvedOutcome.exactMatch'",
@@ -2138,7 +2146,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.savedObjectsRepository.resolvedOutcome.aliasMatch",
+            "id": "def-common.CoreUsageStats.savedObjectsRepository.resolvedOutcome.aliasMatch",
             "type": "number",
             "tags": [],
             "label": "'savedObjectsRepository.resolvedOutcome.aliasMatch'",
@@ -2152,7 +2160,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.savedObjectsRepository.resolvedOutcome.conflict",
+            "id": "def-common.CoreUsageStats.savedObjectsRepository.resolvedOutcome.conflict",
             "type": "number",
             "tags": [],
             "label": "'savedObjectsRepository.resolvedOutcome.conflict'",
@@ -2166,7 +2174,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.savedObjectsRepository.resolvedOutcome.notFound",
+            "id": "def-common.CoreUsageStats.savedObjectsRepository.resolvedOutcome.notFound",
             "type": "number",
             "tags": [],
             "label": "'savedObjectsRepository.resolvedOutcome.notFound'",
@@ -2180,7 +2188,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreUsageStats.savedObjectsRepository.resolvedOutcome.total",
+            "id": "def-common.CoreUsageStats.savedObjectsRepository.resolvedOutcome.total",
             "type": "number",
             "tags": [],
             "label": "'savedObjectsRepository.resolvedOutcome.total'",
@@ -2200,7 +2208,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-usage-data-server",
-        "id": "def-server.ConfigUsageData",
+        "id": "def-common.ConfigUsageData",
         "type": "Type",
         "tags": [],
         "label": "ConfigUsageData",
@@ -2217,7 +2225,7 @@
       },
       {
         "parentPluginId": "@kbn/core-usage-data-server",
-        "id": "def-server.CoreIncrementUsageCounter",
+        "id": "def-common.CoreIncrementUsageCounter",
         "type": "Type",
         "tags": [],
         "label": "CoreIncrementUsageCounter",
@@ -2226,9 +2234,9 @@
           "(params: ",
           {
             "pluginId": "@kbn/core-usage-data-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreUsageDataServerPluginApi",
-            "section": "def-server.CoreIncrementCounterParams",
+            "section": "def-common.CoreIncrementCounterParams",
             "text": "CoreIncrementCounterParams"
           },
           ") => void"
@@ -2240,7 +2248,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-server.CoreIncrementUsageCounter.$1",
+            "id": "def-common.CoreIncrementUsageCounter.$1",
             "type": "Object",
             "tags": [],
             "label": "params",
@@ -2248,9 +2256,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-usage-data-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreUsageDataServerPluginApi",
-                "section": "def-server.CoreIncrementCounterParams",
+                "section": "def-common.CoreIncrementCounterParams",
                 "text": "CoreIncrementCounterParams"
               }
             ],
@@ -2262,14 +2270,6 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": []
   }
 }

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { GetSLOResponse, getSLOResponseSchema } from '@kbn/slo-schema';
 import { IndicatorData, SLO, SLOId, SLOWithSummary } from '../../domain/models';
-import { GetSLOResponse, getSLOResponseSchema } from '../../types/rest_specs';
 import { SLORepository } from './slo_repository';
 import { SLIClient } from './sli_client';
-import { computeSLI, computeErrorBudget } from '../../domain/services';
+import { computeSLI, computeErrorBudget, computeSummaryStatus } from '../../domain/services';
 
 export class GetSLO {
   constructor(private repository: SLORepository, private sliClient: SLIClient) {}
@@ -24,20 +24,7 @@ export class GetSLO {
   }
 
   private toResponse(slo: SLOWithSummary): GetSLOResponse {
-    return getSLOResponseSchema.encode({
-      id: slo.id,
-      name: slo.name,
-      description: slo.description,
-      indicator: slo.indicator,
-      time_window: slo.time_window,
-      budgeting_method: slo.budgeting_method,
-      objective: slo.objective,
-      settings: slo.settings,
-      summary: slo.summary,
-      revision: slo.revision,
-      created_at: slo.created_at,
-      updated_at: slo.updated_at,
-    });
+    return getSLOResponseSchema.encode(slo);
   }
 }
 
@@ -47,5 +34,6 @@ function computeSloWithSummary(
 ): SLOWithSummary {
   const sliValue = computeSLI(indicatorDataBySlo[slo.id]);
   const errorBudget = computeErrorBudget(slo, indicatorDataBySlo[slo.id]);
-  return { ...slo, summary: { sli_value: sliValue, error_budget: errorBudget } };
+  const status = computeSummaryStatus(slo, sliValue, errorBudget);
+  return { ...slo, summary: { status, sliValue, errorBudget } };
 }

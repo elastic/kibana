@@ -7,11 +7,7 @@
 
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { MIME_FILTERS } from '../components/network_waterfall/step_detail/waterfall/waterfall_filter';
-import {
-  MimeType,
-  MimeTypesMap,
-} from '../components/network_waterfall/step_detail/waterfall/types';
+import { MIME_FILTERS, MimeType, MimeTypesMap } from '../common/network_data/types';
 import { networkEventsSelector } from '../../../state/network_events/selectors';
 
 export const useObjectMetrics = () => {

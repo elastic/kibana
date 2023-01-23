@@ -9,7 +9,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSelectable, EuiPanel, EuiBadge } from '@elastic/eui';
-import { TextBasedLanguages } from '.';
+import { TextBasedLanguages } from './data_view_picker';
 
 export interface TextBasedLanguagesListProps {
   textBasedLanguages: TextBasedLanguages[];
@@ -31,6 +31,7 @@ export default function TextBasedLanguagesList({
       value?: string;
       checked?: 'on' | 'off' | undefined;
     }>
+      key="textbasedLanguages-options"
       data-test-subj="text-based-languages-switcher"
       singleSelection="always"
       options={textBasedLanguages.map((lang) => ({

@@ -6,12 +6,18 @@
  * Side Public License, v 1.
  */
 
-export interface FieldDetails {
-  error: string;
+export interface ValidFieldDetails {
   exists: number;
   total: number;
+  missing: number;
   buckets: Bucket[];
 }
+
+export interface ErrorFieldDetails {
+  error: string;
+}
+
+export type FieldDetails = ValidFieldDetails | ErrorFieldDetails;
 
 export interface Bucket {
   display: string;

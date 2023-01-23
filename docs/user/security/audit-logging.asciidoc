@@ -90,6 +90,24 @@ Refer to the corresponding {es} logs for potential write errors.
 | `unknown` | User is creating a space.
 | `failure` | User is not authorized to create a space.
 
+.2+| `case_create`
+| `unknown` | User is creating a case.
+| `failure` | User is not authorized to create a case.
+
+.2+| `case_configuration_create`
+| `unknown` | User is creating a case configuration.
+| `failure` | User is not authorized to create a case configuration.
+
+.2+| `case_comment_create`
+| `unknown` | User is creating a case comment.
+| `failure` | User is not authorized to create a case comment.
+
+.1+| `case_user_action_create_comment`
+| `success` | User has created a case comment.
+
+.1+| `case_user_action_create_case`
+| `success` | User has created a case.
+
 3+a|
 ====== Type: change
 
@@ -165,6 +183,48 @@ Refer to the corresponding {es} logs for potential write errors.
 | `unknown` | User is unsnoozing a rule.
 | `failure` | User is not authorized to unsnooze a rule.
 
+.2+| `case_update`
+| `unknown` | User is updating a case.
+| `failure` | User is not authorized to update a case.
+
+.2+| `case_push`
+| `unknown` | User is pushing a case to an external service.
+| `failure` | User is not authorized to push a case to an external service.
+
+.2+| `case_configuration_update`
+| `unknown` | User is updating a case configuration.
+| `failure` | User is not authorized to update a case configuration.
+
+.2+| `case_comment_update`
+| `unknown` | User is updating a case comment.
+| `failure` | User is not authorized to update a case comment.
+
+.1+| `case_user_action_add_case_assignees`
+| `success` | User has added a case assignee.
+
+.1+| `case_user_action_update_case_connector`
+| `success` | User has updated a case connector.
+
+.1+| `case_user_action_update_case_description`
+| `success` | User has updated a case description.
+
+.1+| `case_user_action_update_case_settings`
+| `success` | User has updated the case settings.
+
+.1+| `case_user_action_update_case_severity`
+| `success` | User has updated the case severity.
+
+.1+| `case_user_action_update_case_status`
+| `success` | User has updated the case status.
+
+.1+| `case_user_action_pushed_case`
+| `success` | User has pushed a case to an external service.
+
+.1+| `case_user_action_add_case_tags`
+| `success` | User has added tags to a case.
+
+.1+| `case_user_action_update_case_title`
+| `success` | User has updated the case title.
 
 3+a|
 ====== Type: deletion
@@ -192,6 +252,30 @@ Refer to the corresponding {es} logs for potential write errors.
 .2+| `space_delete`
 | `unknown` | User is deleting a space.
 | `failure` | User is not authorized to delete a space.
+
+.2+| `case_delete`
+| `unknown` | User is deleting a case.
+| `failure` | User is not authorized to delete a case.
+
+.2+| `case_comment_delete_all`
+| `unknown` | User is deleting all comments associated with a case.
+| `failure` | User is not authorized to delete all comments associated with a case.
+
+.2+| `case_comment_delete`
+| `unknown` | User is deleting a case comment.
+| `failure` | User is not authorized to delete a case comment.
+
+.1+| `case_user_action_delete_case_assignees`
+| `success` | User has removed a case assignee.
+
+.1+| `case_user_action_delete_comment`
+| `success` | User has deleted a case comment.
+
+.1+| `case_user_action_delete_case`
+| `success` | User has deleted a case.
+
+.1+| `case_user_action_delete_case_tags`
+| `success` | User has removed tags from a case.
 
 3+a|
 ====== Type: access
@@ -247,6 +331,78 @@ Refer to the corresponding {es} logs for potential write errors.
 .2+| `alert_find`
 | `success` | User has accessed an alert as part of a search operation.
 | `failure` | User is not authorized to access alerts.
+
+.2+| `case_get`
+| `success` | User has accessed a case.
+| `failure` | User is not authorized to access a case.
+
+.2+| `case_bulk_get`
+| `success` | User has accessed multiple cases.
+| `failure` | User is not authorized to access multiple cases.
+
+.2+| `case_resolve`
+| `success` | User has accessed a case.
+| `failure` | User is not authorized to access a case.
+
+.2+| `case_find`
+| `success` | User has accessed a case as part of a search operation.
+| `failure` | User is not authorized to search for cases.
+
+.2+| `case_ids_by_alert_id_get`
+| `success` | User has accessed cases.
+| `failure` | User is not authorized to access cases.
+
+.2+| `case_get_metrics`
+| `success` | User has accessed metrics for a case.
+| `failure` | User is not authorized to access metrics for a case.
+
+.2+| `cases_get_metrics`
+| `success` | User has accessed metrics for cases.
+| `failure` | User is not authorized to access metrics for cases.
+
+.2+| `case_configuration_find`
+| `success` | User has accessed a case configuration as part of a search operation.
+| `failure` | User is not authorized to search for case configurations.
+
+.2+| `case_comment_get_metrics`
+| `success` | User has accessed metrics for case comments.
+| `failure` | User is not authorized to access metrics for case comments.
+
+.2+| `case_comment_alerts_attach_to_case`
+| `success` | User has accessed case alerts.
+| `failure` | User is not authorized to access case alerts.
+
+.2+| `case_comment_get`
+| `success` | User has accessed a case comment.
+| `failure` | User is not authorized to access a case comment.
+
+.2+| `case_comment_get_all`
+| `success` | User has accessed case comments.
+| `failure` | User is not authorized to access case comments.
+
+.2+| `case_comment_find`
+| `success` | User has accessed a case comment as part of a search operation.
+| `failure` | User is not authorized to search for case comments.
+
+.2+| `case_tags_get`
+| `success` | User has accessed a case.
+| `failure` | User is not authorized to access a case.
+
+.2+| `case_reporters_get`
+| `success` | User has accessed a case.
+| `failure` | User is not authorized to access a case.
+
+.2+| `case_find_statuses`
+| `success` | User has accessed a case as part of a search operation.
+| `failure` | User is not authorized to search for cases.
+
+.2+| `case_user_actions_get`
+| `success` | User has accessed the user activity of a case.
+| `failure` | User is not authorized to access the user activity of a case.
+
+.2+| `case_user_action_get_metrics`
+| `success` | User has accessed metrics for the user activity of a case.
+| `failure` | User is not authorized to access metrics for the user activity of a case.
 
 3+a|
 ===== Category: web
@@ -313,7 +469,11 @@ Possible values:
 `deletion`
 
 | [[field-event-outcome]] `event.outcome`
-| Denotes whether the event represents a success or failure. 
+a| Denotes whether the event represents a success or failure: 
+
+* Any actions that the user is not authorized to perform are logged with outcome:  `failure`
+* Authorized read operations are only logged after successfully fetching the data from {es} with outcome: `success`
+* Authorized create, update, or delete operations are logged before attempting the operation in {es} with outcome: `unknown`
 
 Possible values:
 `success`,
@@ -407,10 +567,18 @@ Example: `[marketing]`
 | *Field*
 | *Description*
 
+| `client.ip`
+| Client IP address.
+
 | `http.request.method`
 | HTTP request method.
 
 Example: `get`, `post`, `put`, `delete`
+
+| `http.request.headers.x-forwarded-for`
+| `X-Forwarded-For` request header used to identify the originating client IP address when connecting through proxy servers.
+
+Example: `161.66.20.177, 236.198.214.101`
 
 | `url.domain`
 | Domain of the URL.

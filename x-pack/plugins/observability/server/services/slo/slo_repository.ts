@@ -11,11 +11,11 @@ import { pipe } from 'fp-ts/lib/pipeable';
 
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
+import { sloSchema } from '@kbn/slo-schema';
 
 import { StoredSLO, SLO } from '../../domain/models';
 import { SO_SLO_TYPE } from '../../saved_objects';
 import { SLONotFound } from '../../errors';
-import { sloSchema } from '../../types/schema';
 
 type ObjectValues<T> = T[keyof T];
 
@@ -57,6 +57,7 @@ export interface Paginated<T> {
 
 export interface SLORepository {
   save(slo: SLO): Promise<SLO>;
+  findAllByIds(ids: string[]): Promise<SLO[]>;
   findById(id: string): Promise<SLO>;
   deleteById(id: string): Promise<void>;
   find(criteria: Criteria, sort: Sort, pagination: Pagination): Promise<Paginated<SLO>>;
@@ -115,6 +116,25 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
       perPage: response.per_page,
       results: response.saved_objects.map((slo) => toSLO(slo.attributes)),
     };
+  }
+
+  async findAllByIds(ids: string[]): Promise<SLO[]> {
+    if (ids.length === 0) return [];
+
+    try {
+      const response = await this.soClient.find<StoredSLO>({
+        type: SO_SLO_TYPE,
+        page: 1,
+        perPage: ids.length,
+        filter: `slo.attributes.id:(${ids.join(' or ')})`,
+      });
+      return response.saved_objects.map((slo) => toSLO(slo.attributes));
+    } catch (err) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+        throw new SLONotFound(`SLOs [${ids.join(',')}] not found`);
+      }
+      throw err;
+    }
   }
 }
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+
 import { ConnectorConfiguration } from '../../../../../common/types/connectors';
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
@@ -35,5 +37,12 @@ export const postConnectorConfiguration = async ({
 
 export const ConnectorConfigurationApiLogic = createApiLogic(
   ['content', 'configuration_connector_api_logic'],
-  postConnectorConfiguration
+  postConnectorConfiguration,
+  {
+    showSuccessFlashFn: () =>
+      i18n.translate(
+        'xpack.enterpriseSearch.content.indices.configurationConnector.configuration.successToast.title',
+        { defaultMessage: 'Configuration updated' }
+      ),
+  }
 );

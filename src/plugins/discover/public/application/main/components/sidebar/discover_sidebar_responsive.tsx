@@ -23,16 +23,21 @@ import {
   EuiShowFor,
   EuiTitle,
 } from '@elastic/eui';
-import type { DataView, DataViewField, DataViewListItem } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import {
   useExistingFieldsFetcher,
   useQuerySubscriber,
 } from '@kbn/unified-field-list-plugin/public';
+import { VIEW_MODE } from '../../../../../common/constants';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebar } from './discover_sidebar';
-import { AvailableFields$, DataDocuments$, RecordRawType } from '../../hooks/use_saved_search';
-import { VIEW_MODE } from '../../../../components/view_mode_toggle';
+import {
+  AvailableFields$,
+  DataDocuments$,
+  RecordRawType,
+} from '../../services/discover_data_state_container';
+import { calcFieldCounts } from '../../utils/calc_field_counts';
 import { FetchStatus } from '../../../types';
 import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../../../components/discover_tour';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
@@ -43,7 +48,6 @@ import {
   DiscoverSidebarReducerActionType,
   DiscoverSidebarReducerStatus,
 } from './lib/sidebar_reducer';
-import { calcFieldCounts } from '../../utils/calc_field_counts';
 
 export interface DiscoverSidebarResponsiveProps {
   /**
@@ -58,10 +62,6 @@ export interface DiscoverSidebarResponsiveProps {
    * hits fetched from ES, displayed in the doc table
    */
   documents$: DataDocuments$;
-  /**
-   * List of available data views
-   */
-  dataViewList: DataViewListItem[];
   /**
    * Has been toggled closed
    */

@@ -1,0 +1,51 @@
+{
+  "journeyName": "GET /api/saved_objects_tagging/tags",
+  "scalabilitySetup": {
+    "warmup": [
+      {
+        "action": "constantUsersPerSec",
+        "userCount": 10,
+        "duration": "30s"
+      }
+    ],
+    "test": [
+      {
+        "action": "rampUsersPerSec",
+        "minUsersCount": 10,
+        "maxUsersCount": 600,
+        "duration": "275s"
+      }
+    ],
+    "maxDuration": "7m"
+  },
+  "testData": {
+    "esArchives": [],
+    "kbnArchives": [
+      "x-pack/test/functional/fixtures/kbn_archiver/saved_objects_management/saved_objects_mix.json"
+    ]
+  },
+  "streams": [
+    {
+      "requests": [
+        {
+          "date": "2022-11-14T09:31:49.963Z",
+          "http": {
+            "method": "GET",
+            "path": "/api/saved_objects_tagging/tags",
+            "headers": {
+              "Cookie": "sid=Fe26.2**b4f51707bfe081641d5680f3564a6294e67",
+              "Kbn-Version": "8.7.0-SNAPSHOT",
+              "Kbn-System-Request": "true",
+              "Referer": "http://localhost:5620/app/home",
+              "X-Kbn-Context": "%7B%22name%22%3A%22home%22%2C%22url%22%3A%22%2Fapp%2Fhome%22%7D",
+              "Host": "localhost:5620",
+              "Accept-Encoding": "gzip, deflate, br",
+              "Content-Type": "application/json"
+            },
+            "statusCode": 200
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -18,15 +18,15 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useKibana } from '../../../utils/kibana_react';
 import { SloSummaryStats } from './slo_summary_stats';
 import { SloDeleteConfirmationModal } from './slo_delete_confirmation_modal';
 import { SloBadges } from './slo_badges';
 import { paths } from '../../../config';
-import { SLO } from '../../../typings';
 
 export interface SloListItemProps {
-  slo: SLO;
+  slo: SLOWithSummaryResponse;
   onDeleted: () => void;
   onDeleting: () => void;
 }
@@ -43,6 +43,10 @@ export function SloListItem({ slo, onDeleted, onDeleting }: SloListItemProps) {
 
   const handleClickActions = () => {
     setIsActionsPopoverOpen(!isActionsPopoverOpen);
+  };
+
+  const handleEdit = () => {
+    navigateToUrl(basePath.prepend(paths.observability.sloEdit(slo.id)));
   };
 
   const handleDelete = () => {
@@ -81,12 +85,7 @@ export function SloListItem({ slo, onDeleted, onDeleting }: SloListItemProps) {
                 <EuiFlexItem>
                   <EuiLink onClick={handleNavigate}>{slo.name}</EuiLink>
                 </EuiFlexItem>
-
-                <EuiFlexItem grow={false}>
-                  <div>
-                    <SloBadges slo={slo} />
-                  </div>
-                </EuiFlexItem>
+                <SloBadges slo={slo} />
               </EuiFlexGroup>
             </EuiFlexItem>
 
@@ -117,7 +116,12 @@ export function SloListItem({ slo, onDeleted, onDeleting }: SloListItemProps) {
             <EuiContextMenuPanel
               size="s"
               items={[
-                <EuiContextMenuItem key="edit" icon="trash" onClick={handleDelete}>
+                <EuiContextMenuItem key="edit" icon="pencil" onClick={handleEdit}>
+                  {i18n.translate('xpack.observability.slos.slo.item.actions.edit', {
+                    defaultMessage: 'Edit',
+                  })}
+                </EuiContextMenuItem>,
+                <EuiContextMenuItem key="delete" icon="trash" onClick={handleDelete}>
                   {i18n.translate('xpack.observability.slos.slo.item.actions.delete', {
                     defaultMessage: 'Delete',
                   })}

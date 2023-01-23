@@ -11,10 +11,18 @@
   "server": {
     "classes": [],
     "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-logging-server",
-        "id": "def-server.ConsoleAppenderConfig",
+        "id": "def-common.ConsoleAppenderConfig",
         "type": "Interface",
         "tags": [],
         "label": "ConsoleAppenderConfig",
@@ -27,7 +35,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-logging-server",
-            "id": "def-server.ConsoleAppenderConfig.type",
+            "id": "def-common.ConsoleAppenderConfig.type",
             "type": "string",
             "tags": [],
             "label": "type",
@@ -41,7 +49,7 @@
           },
           {
             "parentPluginId": "@kbn/core-logging-server",
-            "id": "def-server.ConsoleAppenderConfig.layout",
+            "id": "def-common.ConsoleAppenderConfig.layout",
             "type": "CompoundType",
             "tags": [],
             "label": "layout",
@@ -49,17 +57,17 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-logging-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreLoggingServerPluginApi",
-                "section": "def-server.PatternLayoutConfigType",
+                "section": "def-common.PatternLayoutConfigType",
                 "text": "PatternLayoutConfigType"
               },
               " | ",
               {
                 "pluginId": "@kbn/core-logging-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreLoggingServerPluginApi",
-                "section": "def-server.JsonLayoutConfigType",
+                "section": "def-common.JsonLayoutConfigType",
                 "text": "JsonLayoutConfigType"
               }
             ],
@@ -72,7 +80,7 @@
       },
       {
         "parentPluginId": "@kbn/core-logging-server",
-        "id": "def-server.FileAppenderConfig",
+        "id": "def-common.FileAppenderConfig",
         "type": "Interface",
         "tags": [],
         "label": "FileAppenderConfig",
@@ -85,7 +93,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-logging-server",
-            "id": "def-server.FileAppenderConfig.type",
+            "id": "def-common.FileAppenderConfig.type",
             "type": "string",
             "tags": [],
             "label": "type",
@@ -99,7 +107,7 @@
           },
           {
             "parentPluginId": "@kbn/core-logging-server",
-            "id": "def-server.FileAppenderConfig.layout",
+            "id": "def-common.FileAppenderConfig.layout",
             "type": "CompoundType",
             "tags": [],
             "label": "layout",
@@ -107,17 +115,17 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-logging-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreLoggingServerPluginApi",
-                "section": "def-server.PatternLayoutConfigType",
+                "section": "def-common.PatternLayoutConfigType",
                 "text": "PatternLayoutConfigType"
               },
               " | ",
               {
                 "pluginId": "@kbn/core-logging-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreLoggingServerPluginApi",
-                "section": "def-server.JsonLayoutConfigType",
+                "section": "def-common.JsonLayoutConfigType",
                 "text": "JsonLayoutConfigType"
               }
             ],
@@ -127,7 +135,7 @@
           },
           {
             "parentPluginId": "@kbn/core-logging-server",
-            "id": "def-server.FileAppenderConfig.fileName",
+            "id": "def-common.FileAppenderConfig.fileName",
             "type": "string",
             "tags": [],
             "label": "fileName",
@@ -141,7 +149,7 @@
       },
       {
         "parentPluginId": "@kbn/core-logging-server",
-        "id": "def-server.JsonLayoutConfigType",
+        "id": "def-common.JsonLayoutConfigType",
         "type": "Interface",
         "tags": [],
         "label": "JsonLayoutConfigType",
@@ -154,7 +162,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-logging-server",
-            "id": "def-server.JsonLayoutConfigType.type",
+            "id": "def-common.JsonLayoutConfigType.type",
             "type": "string",
             "tags": [],
             "label": "type",
@@ -171,7 +179,7 @@
       },
       {
         "parentPluginId": "@kbn/core-logging-server",
-        "id": "def-server.LoggerConfigType",
+        "id": "def-common.LoggerConfigType",
         "type": "Interface",
         "tags": [],
         "label": "LoggerConfigType",
@@ -184,7 +192,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-logging-server",
-            "id": "def-server.LoggerConfigType.appenders",
+            "id": "def-common.LoggerConfigType.appenders",
             "type": "Array",
             "tags": [],
             "label": "appenders",
@@ -198,7 +206,7 @@
           },
           {
             "parentPluginId": "@kbn/core-logging-server",
-            "id": "def-server.LoggerConfigType.name",
+            "id": "def-common.LoggerConfigType.name",
             "type": "string",
             "tags": [],
             "label": "name",
@@ -209,7 +217,7 @@
           },
           {
             "parentPluginId": "@kbn/core-logging-server",
-            "id": "def-server.LoggerConfigType.level",
+            "id": "def-common.LoggerConfigType.level",
             "type": "CompoundType",
             "tags": [],
             "label": "level",
@@ -226,7 +234,7 @@
       },
       {
         "parentPluginId": "@kbn/core-logging-server",
-        "id": "def-server.LoggerContextConfigInput",
+        "id": "def-common.LoggerContextConfigInput",
         "type": "Interface",
         "tags": [],
         "label": "LoggerContextConfigInput",
@@ -239,7 +247,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-logging-server",
-            "id": "def-server.LoggerContextConfigInput.appenders",
+            "id": "def-common.LoggerContextConfigInput.appenders",
             "type": "CompoundType",
             "tags": [],
             "label": "appenders",
@@ -248,17 +256,17 @@
               "Record<string, ",
               {
                 "pluginId": "@kbn/core-logging-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreLoggingServerPluginApi",
-                "section": "def-server.AppenderConfigType",
+                "section": "def-common.AppenderConfigType",
                 "text": "AppenderConfigType"
               },
               "> | Map<string, ",
               {
                 "pluginId": "@kbn/core-logging-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreLoggingServerPluginApi",
-                "section": "def-server.AppenderConfigType",
+                "section": "def-common.AppenderConfigType",
                 "text": "AppenderConfigType"
               },
               "> | undefined"
@@ -269,7 +277,7 @@
           },
           {
             "parentPluginId": "@kbn/core-logging-server",
-            "id": "def-server.LoggerContextConfigInput.loggers",
+            "id": "def-common.LoggerContextConfigInput.loggers",
             "type": "Array",
             "tags": [],
             "label": "loggers",
@@ -277,9 +285,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-logging-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreLoggingServerPluginApi",
-                "section": "def-server.LoggerConfigType",
+                "section": "def-common.LoggerConfigType",
                 "text": "LoggerConfigType"
               },
               "[] | undefined"
@@ -293,7 +301,7 @@
       },
       {
         "parentPluginId": "@kbn/core-logging-server",
-        "id": "def-server.LoggingServiceSetup",
+        "id": "def-common.LoggingServiceSetup",
         "type": "Interface",
         "tags": [],
         "label": "LoggingServiceSetup",
@@ -306,7 +314,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-logging-server",
-            "id": "def-server.LoggingServiceSetup.configure",
+            "id": "def-common.LoggingServiceSetup.configure",
             "type": "Function",
             "tags": [],
             "label": "configure",
@@ -319,9 +327,9 @@
               "<",
               {
                 "pluginId": "@kbn/core-logging-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreLoggingServerPluginApi",
-                "section": "def-server.LoggerContextConfigInput",
+                "section": "def-common.LoggerContextConfigInput",
                 "text": "LoggerContextConfigInput"
               },
               ">) => void"
@@ -332,7 +340,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-logging-server",
-                "id": "def-server.LoggingServiceSetup.configure.$1",
+                "id": "def-common.LoggingServiceSetup.configure.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "config$",
@@ -342,9 +350,9 @@
                   "<",
                   {
                     "pluginId": "@kbn/core-logging-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreLoggingServerPluginApi",
-                    "section": "def-server.LoggerContextConfigInput",
+                    "section": "def-common.LoggerContextConfigInput",
                     "text": "LoggerContextConfigInput"
                   },
                   ">"
@@ -362,7 +370,7 @@
       },
       {
         "parentPluginId": "@kbn/core-logging-server",
-        "id": "def-server.MetaRewritePolicyConfig",
+        "id": "def-common.MetaRewritePolicyConfig",
         "type": "Interface",
         "tags": [],
         "label": "MetaRewritePolicyConfig",
@@ -373,7 +381,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-logging-server",
-            "id": "def-server.MetaRewritePolicyConfig.type",
+            "id": "def-common.MetaRewritePolicyConfig.type",
             "type": "string",
             "tags": [],
             "label": "type",
@@ -387,7 +395,7 @@
           },
           {
             "parentPluginId": "@kbn/core-logging-server",
-            "id": "def-server.MetaRewritePolicyConfig.mode",
+            "id": "def-common.MetaRewritePolicyConfig.mode",
             "type": "CompoundType",
             "tags": [],
             "label": "mode",
@@ -403,7 +411,7 @@
           },
           {
             "parentPluginId": "@kbn/core-logging-server",
-            "id": "def-server.MetaRewritePolicyConfig.properties",
+            "id": "def-common.MetaRewritePolicyConfig.properties",
             "type": "Array",
             "tags": [],
             "label": "properties",
@@ -413,9 +421,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-logging-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreLoggingServerPluginApi",
-                "section": "def-server.MetaRewritePolicyConfigProperty",
+                "section": "def-common.MetaRewritePolicyConfigProperty",
                 "text": "MetaRewritePolicyConfigProperty"
               },
               "[]"
@@ -429,7 +437,7 @@
       },
       {
         "parentPluginId": "@kbn/core-logging-server",
-        "id": "def-server.MetaRewritePolicyConfigProperty",
+        "id": "def-common.MetaRewritePolicyConfigProperty",
         "type": "Interface",
         "tags": [],
         "label": "MetaRewritePolicyConfigProperty",
@@ -440,7 +448,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-logging-server",
-            "id": "def-server.MetaRewritePolicyConfigProperty.path",
+            "id": "def-common.MetaRewritePolicyConfigProperty.path",
             "type": "string",
             "tags": [],
             "label": "path",
@@ -451,7 +459,7 @@
           },
           {
             "parentPluginId": "@kbn/core-logging-server",
-            "id": "def-server.MetaRewritePolicyConfigProperty.value",
+            "id": "def-common.MetaRewritePolicyConfigProperty.value",
             "type": "CompoundType",
             "tags": [],
             "label": "value",
@@ -468,7 +476,7 @@
       },
       {
         "parentPluginId": "@kbn/core-logging-server",
-        "id": "def-server.NumericRollingStrategyConfig",
+        "id": "def-common.NumericRollingStrategyConfig",
         "type": "Interface",
         "tags": [],
         "label": "NumericRollingStrategyConfig",
@@ -479,7 +487,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-logging-server",
-            "id": "def-server.NumericRollingStrategyConfig.type",
+            "id": "def-common.NumericRollingStrategyConfig.type",
             "type": "string",
             "tags": [],
             "label": "type",
@@ -493,7 +501,7 @@
           },
           {
             "parentPluginId": "@kbn/core-logging-server",
-            "id": "def-server.NumericRollingStrategyConfig.pattern",
+            "id": "def-common.NumericRollingStrategyConfig.pattern",
             "type": "string",
             "tags": [],
             "label": "pattern",
@@ -506,7 +514,7 @@
           },
           {
             "parentPluginId": "@kbn/core-logging-server",
-            "id": "def-server.NumericRollingStrategyConfig.max",
+            "id": "def-common.NumericRollingStrategyConfig.max",
             "type": "number",
             "tags": [],
             "label": "max",
@@ -522,7 +530,7 @@
       },
       {
         "parentPluginId": "@kbn/core-logging-server",
-        "id": "def-server.PatternLayoutConfigType",
+        "id": "def-common.PatternLayoutConfigType",
         "type": "Interface",
         "tags": [],
         "label": "PatternLayoutConfigType",
@@ -535,7 +543,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-logging-server",
-            "id": "def-server.PatternLayoutConfigType.type",
+            "id": "def-common.PatternLayoutConfigType.type",
             "type": "string",
             "tags": [],
             "label": "type",
@@ -549,7 +557,7 @@
           },
           {
             "parentPluginId": "@kbn/core-logging-server",
-            "id": "def-server.PatternLayoutConfigType.highlight",
+            "id": "def-common.PatternLayoutConfigType.highlight",
             "type": "CompoundType",
             "tags": [],
             "label": "highlight",
@@ -563,7 +571,7 @@
           },
           {
             "parentPluginId": "@kbn/core-logging-server",
-            "id": "def-server.PatternLayoutConfigType.pattern",
+            "id": "def-common.PatternLayoutConfigType.pattern",
             "type": "string",
             "tags": [],
             "label": "pattern",
@@ -580,7 +588,7 @@
       },
       {
         "parentPluginId": "@kbn/core-logging-server",
-        "id": "def-server.RewriteAppenderConfig",
+        "id": "def-common.RewriteAppenderConfig",
         "type": "Interface",
         "tags": [],
         "label": "RewriteAppenderConfig",
@@ -593,7 +601,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-logging-server",
-            "id": "def-server.RewriteAppenderConfig.type",
+            "id": "def-common.RewriteAppenderConfig.type",
             "type": "string",
             "tags": [],
             "label": "type",
@@ -607,7 +615,7 @@
           },
           {
             "parentPluginId": "@kbn/core-logging-server",
-            "id": "def-server.RewriteAppenderConfig.appenders",
+            "id": "def-common.RewriteAppenderConfig.appenders",
             "type": "Array",
             "tags": [],
             "label": "appenders",
@@ -623,7 +631,7 @@
           },
           {
             "parentPluginId": "@kbn/core-logging-server",
-            "id": "def-server.RewriteAppenderConfig.policy",
+            "id": "def-common.RewriteAppenderConfig.policy",
             "type": "Object",
             "tags": [],
             "label": "policy",
@@ -633,9 +641,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-logging-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreLoggingServerPluginApi",
-                "section": "def-server.MetaRewritePolicyConfig",
+                "section": "def-common.MetaRewritePolicyConfig",
                 "text": "MetaRewritePolicyConfig"
               }
             ],
@@ -648,7 +656,7 @@
       },
       {
         "parentPluginId": "@kbn/core-logging-server",
-        "id": "def-server.RollingFileAppenderConfig",
+        "id": "def-common.RollingFileAppenderConfig",
         "type": "Interface",
         "tags": [],
         "label": "RollingFileAppenderConfig",
@@ -661,7 +669,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-logging-server",
-            "id": "def-server.RollingFileAppenderConfig.type",
+            "id": "def-common.RollingFileAppenderConfig.type",
             "type": "string",
             "tags": [],
             "label": "type",
@@ -675,7 +683,7 @@
           },
           {
             "parentPluginId": "@kbn/core-logging-server",
-            "id": "def-server.RollingFileAppenderConfig.layout",
+            "id": "def-common.RollingFileAppenderConfig.layout",
             "type": "CompoundType",
             "tags": [],
             "label": "layout",
@@ -685,17 +693,17 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-logging-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreLoggingServerPluginApi",
-                "section": "def-server.PatternLayoutConfigType",
+                "section": "def-common.PatternLayoutConfigType",
                 "text": "PatternLayoutConfigType"
               },
               " | ",
               {
                 "pluginId": "@kbn/core-logging-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreLoggingServerPluginApi",
-                "section": "def-server.JsonLayoutConfigType",
+                "section": "def-common.JsonLayoutConfigType",
                 "text": "JsonLayoutConfigType"
               }
             ],
@@ -705,7 +713,7 @@
           },
           {
             "parentPluginId": "@kbn/core-logging-server",
-            "id": "def-server.RollingFileAppenderConfig.fileName",
+            "id": "def-common.RollingFileAppenderConfig.fileName",
             "type": "string",
             "tags": [],
             "label": "fileName",
@@ -718,7 +726,7 @@
           },
           {
             "parentPluginId": "@kbn/core-logging-server",
-            "id": "def-server.RollingFileAppenderConfig.policy",
+            "id": "def-common.RollingFileAppenderConfig.policy",
             "type": "CompoundType",
             "tags": [],
             "label": "policy",
@@ -728,17 +736,17 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-logging-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreLoggingServerPluginApi",
-                "section": "def-server.TimeIntervalTriggeringPolicyConfig",
+                "section": "def-common.TimeIntervalTriggeringPolicyConfig",
                 "text": "TimeIntervalTriggeringPolicyConfig"
               },
               " | ",
               {
                 "pluginId": "@kbn/core-logging-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreLoggingServerPluginApi",
-                "section": "def-server.SizeLimitTriggeringPolicyConfig",
+                "section": "def-common.SizeLimitTriggeringPolicyConfig",
                 "text": "SizeLimitTriggeringPolicyConfig"
               }
             ],
@@ -748,7 +756,7 @@
           },
           {
             "parentPluginId": "@kbn/core-logging-server",
-            "id": "def-server.RollingFileAppenderConfig.strategy",
+            "id": "def-common.RollingFileAppenderConfig.strategy",
             "type": "Object",
             "tags": [],
             "label": "strategy",
@@ -758,9 +766,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-logging-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreLoggingServerPluginApi",
-                "section": "def-server.NumericRollingStrategyConfig",
+                "section": "def-common.NumericRollingStrategyConfig",
                 "text": "NumericRollingStrategyConfig"
               }
             ],
@@ -773,7 +781,7 @@
       },
       {
         "parentPluginId": "@kbn/core-logging-server",
-        "id": "def-server.SizeLimitTriggeringPolicyConfig",
+        "id": "def-common.SizeLimitTriggeringPolicyConfig",
         "type": "Interface",
         "tags": [],
         "label": "SizeLimitTriggeringPolicyConfig",
@@ -784,7 +792,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-logging-server",
-            "id": "def-server.SizeLimitTriggeringPolicyConfig.type",
+            "id": "def-common.SizeLimitTriggeringPolicyConfig.type",
             "type": "string",
             "tags": [],
             "label": "type",
@@ -798,7 +806,7 @@
           },
           {
             "parentPluginId": "@kbn/core-logging-server",
-            "id": "def-server.SizeLimitTriggeringPolicyConfig.size",
+            "id": "def-common.SizeLimitTriggeringPolicyConfig.size",
             "type": "Object",
             "tags": [],
             "label": "size",
@@ -808,9 +816,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.ByteSizeValue",
+                "section": "def-common.ByteSizeValue",
                 "text": "ByteSizeValue"
               }
             ],
@@ -823,7 +831,7 @@
       },
       {
         "parentPluginId": "@kbn/core-logging-server",
-        "id": "def-server.TimeIntervalTriggeringPolicyConfig",
+        "id": "def-common.TimeIntervalTriggeringPolicyConfig",
         "type": "Interface",
         "tags": [],
         "label": "TimeIntervalTriggeringPolicyConfig",
@@ -834,7 +842,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-logging-server",
-            "id": "def-server.TimeIntervalTriggeringPolicyConfig.type",
+            "id": "def-common.TimeIntervalTriggeringPolicyConfig.type",
             "type": "string",
             "tags": [],
             "label": "type",
@@ -848,7 +856,7 @@
           },
           {
             "parentPluginId": "@kbn/core-logging-server",
-            "id": "def-server.TimeIntervalTriggeringPolicyConfig.interval",
+            "id": "def-common.TimeIntervalTriggeringPolicyConfig.interval",
             "type": "Object",
             "tags": [],
             "label": "interval",
@@ -864,7 +872,7 @@
           },
           {
             "parentPluginId": "@kbn/core-logging-server",
-            "id": "def-server.TimeIntervalTriggeringPolicyConfig.modulate",
+            "id": "def-common.TimeIntervalTriggeringPolicyConfig.modulate",
             "type": "boolean",
             "tags": [],
             "label": "modulate",
@@ -883,7 +891,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-logging-server",
-        "id": "def-server.AppenderConfigType",
+        "id": "def-common.AppenderConfigType",
         "type": "Type",
         "tags": [],
         "label": "AppenderConfigType",
@@ -891,33 +899,33 @@
         "signature": [
           {
             "pluginId": "@kbn/core-logging-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreLoggingServerPluginApi",
-            "section": "def-server.ConsoleAppenderConfig",
+            "section": "def-common.ConsoleAppenderConfig",
             "text": "ConsoleAppenderConfig"
           },
           " | ",
           {
             "pluginId": "@kbn/core-logging-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreLoggingServerPluginApi",
-            "section": "def-server.FileAppenderConfig",
+            "section": "def-common.FileAppenderConfig",
             "text": "FileAppenderConfig"
           },
           " | ",
           {
             "pluginId": "@kbn/core-logging-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreLoggingServerPluginApi",
-            "section": "def-server.RewriteAppenderConfig",
+            "section": "def-common.RewriteAppenderConfig",
             "text": "RewriteAppenderConfig"
           },
           " | ",
           {
             "pluginId": "@kbn/core-logging-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreLoggingServerPluginApi",
-            "section": "def-server.RollingFileAppenderConfig",
+            "section": "def-common.RollingFileAppenderConfig",
             "text": "RollingFileAppenderConfig"
           }
         ],
@@ -928,7 +936,7 @@
       },
       {
         "parentPluginId": "@kbn/core-logging-server",
-        "id": "def-server.LayoutConfigType",
+        "id": "def-common.LayoutConfigType",
         "type": "Type",
         "tags": [],
         "label": "LayoutConfigType",
@@ -938,17 +946,17 @@
         "signature": [
           {
             "pluginId": "@kbn/core-logging-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreLoggingServerPluginApi",
-            "section": "def-server.PatternLayoutConfigType",
+            "section": "def-common.PatternLayoutConfigType",
             "text": "PatternLayoutConfigType"
           },
           " | ",
           {
             "pluginId": "@kbn/core-logging-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreLoggingServerPluginApi",
-            "section": "def-server.JsonLayoutConfigType",
+            "section": "def-common.JsonLayoutConfigType",
             "text": "JsonLayoutConfigType"
           }
         ],
@@ -959,7 +967,7 @@
       },
       {
         "parentPluginId": "@kbn/core-logging-server",
-        "id": "def-server.RewritePolicyConfig",
+        "id": "def-common.RewritePolicyConfig",
         "type": "Type",
         "tags": [],
         "label": "RewritePolicyConfig",
@@ -969,9 +977,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-logging-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreLoggingServerPluginApi",
-            "section": "def-server.MetaRewritePolicyConfig",
+            "section": "def-common.MetaRewritePolicyConfig",
             "text": "MetaRewritePolicyConfig"
           }
         ],
@@ -982,7 +990,7 @@
       },
       {
         "parentPluginId": "@kbn/core-logging-server",
-        "id": "def-server.RollingStrategyConfig",
+        "id": "def-common.RollingStrategyConfig",
         "type": "Type",
         "tags": [],
         "label": "RollingStrategyConfig",
@@ -990,9 +998,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-logging-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreLoggingServerPluginApi",
-            "section": "def-server.NumericRollingStrategyConfig",
+            "section": "def-common.NumericRollingStrategyConfig",
             "text": "NumericRollingStrategyConfig"
           }
         ],
@@ -1003,7 +1011,7 @@
       },
       {
         "parentPluginId": "@kbn/core-logging-server",
-        "id": "def-server.TriggeringPolicyConfig",
+        "id": "def-common.TriggeringPolicyConfig",
         "type": "Type",
         "tags": [],
         "label": "TriggeringPolicyConfig",
@@ -1013,17 +1021,17 @@
         "signature": [
           {
             "pluginId": "@kbn/core-logging-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreLoggingServerPluginApi",
-            "section": "def-server.TimeIntervalTriggeringPolicyConfig",
+            "section": "def-common.TimeIntervalTriggeringPolicyConfig",
             "text": "TimeIntervalTriggeringPolicyConfig"
           },
           " | ",
           {
             "pluginId": "@kbn/core-logging-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreLoggingServerPluginApi",
-            "section": "def-server.SizeLimitTriggeringPolicyConfig",
+            "section": "def-common.SizeLimitTriggeringPolicyConfig",
             "text": "SizeLimitTriggeringPolicyConfig"
           }
         ],
@@ -1033,14 +1041,6 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": []
   }
 }

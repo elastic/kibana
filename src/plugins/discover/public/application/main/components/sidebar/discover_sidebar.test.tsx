@@ -16,18 +16,17 @@ import {
   DiscoverSidebarComponent as DiscoverSidebar,
   DiscoverSidebarProps,
 } from './discover_sidebar';
-import { DataViewListItem } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { stubLogstashDataView } from '@kbn/data-plugin/common/stubs';
-import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import { FetchStatus } from '../../../types';
-import { AvailableFields$, DataDocuments$ } from '../../hooks/use_saved_search';
+import { AvailableFields$, DataDocuments$ } from '../../services/discover_data_state_container';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import { DiscoverAppStateProvider } from '../../services/discover_app_state_container';
+import { VIEW_MODE } from '../../../../../common/constants';
+import { DiscoverMainProvider } from '../../services/discover_state_provider';
 import * as ExistingFieldsHookApi from '@kbn/unified-field-list-plugin/public/hooks/use_existing_fields';
 import { ExistenceFetchStatus } from '@kbn/unified-field-list-plugin/public';
 import { getDataViewFieldList } from './lib/get_data_view_field_list';
@@ -43,6 +42,16 @@ jest.mock('../../../../kibana_services', () => ({
     getTriggerCompatibleActions: mockGetActions,
   }),
 }));
+
+function getStateContainer({ query }: { query?: Query | AggregateQuery }) {
+  const state = getDiscoverStateMock({ isTimeBased: true });
+  state.appState.set({
+    query: query ?? { query: '', language: 'lucene' },
+    filters: [],
+  });
+  state.internalState.transitions.setDataView(stubLogstashDataView);
+  return state;
+}
 
 function getCompProps(): DiscoverSidebarProps {
   const dataView = stubLogstashDataView;
@@ -85,7 +94,6 @@ function getCompProps(): DiscoverSidebarProps {
   return {
     columns: ['extension'],
     allFields,
-    dataViewList: [dataView as DataViewListItem],
     onChangeDataView: jest.fn(),
     onAddFilter: jest.fn(),
     onAddField: jest.fn(),
@@ -107,22 +115,17 @@ function getCompProps(): DiscoverSidebarProps {
   };
 }
 
-function getAppStateContainer({ query }: { query?: Query | AggregateQuery }) {
-  const appStateContainer = getDiscoverStateMock({ isTimeBased: true }).appStateContainer;
-  appStateContainer.set({
-    query: query ?? { query: '', language: 'lucene' },
-    filters: [],
-  });
-  return appStateContainer;
-}
-
 async function mountComponent(
   props: DiscoverSidebarProps,
   appStateParams: { query?: Query | AggregateQuery } = {}
 ): Promise<ReactWrapper<DiscoverSidebarProps>> {
   let comp: ReactWrapper<DiscoverSidebarProps>;
   const mockedServices = createDiscoverServicesMock();
-  mockedServices.data.dataViews.getIdsWithTitle = jest.fn(async () => props.dataViewList);
+  mockedServices.data.dataViews.getIdsWithTitle = jest.fn(async () =>
+    props.selectedDataView
+      ? [{ id: props.selectedDataView.id!, title: props.selectedDataView.title! }]
+      : []
+  );
   mockedServices.data.dataViews.get = jest.fn().mockImplementation(async (id) => {
     return [props.selectedDataView].find((d) => d!.id === id);
   });
@@ -130,9 +133,9 @@ async function mountComponent(
   await act(async () => {
     comp = await mountWithIntl(
       <KibanaContextProvider services={mockedServices}>
-        <DiscoverAppStateProvider value={getAppStateContainer(appStateParams)}>
+        <DiscoverMainProvider value={getStateContainer(appStateParams)}>
           <DiscoverSidebar {...props} />
-        </DiscoverAppStateProvider>
+        </DiscoverMainProvider>
       </KibanaContextProvider>
     );
     // wait for lazy modules

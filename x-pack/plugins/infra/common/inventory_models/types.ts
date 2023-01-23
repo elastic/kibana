@@ -248,7 +248,6 @@ export const ESPercentileAggRT = rt.type({
 export const ESCaridnalityAggRT = rt.type({
   cardinality: rt.partial({
     field: rt.string,
-    script: rt.string,
   }),
 });
 

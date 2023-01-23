@@ -11,7 +11,7 @@ import { format } from 'url';
 import getPort from 'get-port';
 import supertest from 'supertest';
 import { ProcRunner } from '@kbn/dev-proc-runner';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { FtrService } from '../../functional/ftr_provider_context';
 
 interface HealthGatewayOptions {

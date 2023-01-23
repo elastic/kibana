@@ -6,13 +6,15 @@
  */
 
 import moment from 'moment';
-import { ErrorBudget, IndicatorData, SLO, toMomentUnitOfTime } from '../models';
 import {
   calendarAlignedTimeWindowSchema,
+  Duration,
   occurrencesBudgetingMethodSchema,
   rollingTimeWindowSchema,
   timeslicesBudgetingMethodSchema,
-} from '../../types/schema';
+} from '@kbn/slo-schema';
+
+import { DateRange, ErrorBudget, IndicatorData, SLO, toMomentUnitOfTime } from '../models';
 import { toHighPrecision } from '../../utils/number';
 
 // More details about calculus: https://github.com/elastic/kibana/issues/143980
@@ -23,16 +25,16 @@ export function computeErrorBudget(slo: SLO, sliData: IndicatorData): ErrorBudge
     return toErrorBudget(initialErrorBudget, 0);
   }
 
-  if (rollingTimeWindowSchema.is(slo.time_window)) {
+  if (rollingTimeWindowSchema.is(slo.timeWindow)) {
     return computeForRolling(slo, sliData);
   }
 
-  if (calendarAlignedTimeWindowSchema.is(slo.time_window)) {
-    if (timeslicesBudgetingMethodSchema.is(slo.budgeting_method)) {
+  if (calendarAlignedTimeWindowSchema.is(slo.timeWindow)) {
+    if (timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)) {
       return computeForCalendarAlignedWithTimeslices(slo, sliData);
     }
 
-    if (occurrencesBudgetingMethodSchema.is(slo.budgeting_method)) {
+    if (occurrencesBudgetingMethodSchema.is(slo.budgetingMethod)) {
       return computeForCalendarAlignedWithOccurrences(slo, sliData);
     }
   }
@@ -48,7 +50,7 @@ function computeForRolling(slo: SLO, sliData: IndicatorData) {
 }
 
 function computeForCalendarAlignedWithOccurrences(slo: SLO, sliData: IndicatorData) {
-  const { good, total, date_range: dateRange } = sliData;
+  const { good, total, dateRange } = sliData;
   const initialErrorBudget = 1 - slo.objective.target;
   const now = moment();
 
@@ -67,20 +69,25 @@ function computeForCalendarAlignedWithOccurrences(slo: SLO, sliData: IndicatorDa
 }
 
 function computeForCalendarAlignedWithTimeslices(slo: SLO, sliData: IndicatorData) {
-  const { good, total, date_range: dateRange } = sliData;
+  const { good, total, dateRange } = sliData;
   const initialErrorBudget = 1 - slo.objective.target;
 
-  const dateRangeDurationInUnit = moment(dateRange.to).diff(
-    dateRange.from,
-    toMomentUnitOfTime(slo.objective.timeslice_window!.unit)
-  );
-  const totalSlices = Math.ceil(dateRangeDurationInUnit / slo.objective.timeslice_window!.value);
+  const totalSlices = computeTotalSlicesFromDateRange(dateRange, slo.objective.timesliceWindow!);
   const consumedErrorBudget = (total - good) / (totalSlices * initialErrorBudget);
 
   return toErrorBudget(initialErrorBudget, consumedErrorBudget);
 }
 
-function toErrorBudget(
+export function computeTotalSlicesFromDateRange(dateRange: DateRange, timesliceWindow: Duration) {
+  const dateRangeDurationInUnit = moment(dateRange.to).diff(
+    dateRange.from,
+    toMomentUnitOfTime(timesliceWindow.unit)
+  );
+  const totalSlices = Math.ceil(dateRangeDurationInUnit / timesliceWindow!.value);
+  return totalSlices;
+}
+
+export function toErrorBudget(
   initial: number,
   consumed: number,
   isEstimated: boolean = false
@@ -89,6 +96,6 @@ function toErrorBudget(
     initial: toHighPrecision(initial),
     consumed: toHighPrecision(consumed),
     remaining: Math.max(toHighPrecision(1 - consumed), 0),
-    is_estimated: isEstimated,
+    isEstimated,
   };
 }

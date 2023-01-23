@@ -59,7 +59,7 @@ To instruct the `Visitor` code to traverse any child nodes of a given node, our 
 
 We keep state internally in the `ElasticHandlebarsVisitor` object using the following private properties:
 
-- `scopes`: An array (stack) of `context` objects. In a simple template this array will always only contain a single element: The main `context` object. In more complicated scenarios, new `context` objects will be pushed and popped to and from the `scopes` stack as needed.
+- `contexts`: An array (stack) of `context` objects. In a simple template this array will always only contain a single element: The main `context` object. In more complicated scenarios, new `context` objects will be pushed and popped to and from the `contexts` stack as needed.
 - `output`: An array containing the "rendered" output of each node (normally just one element per node). In the most simple template, this is simply joined together into a the final output string after the AST has been traversed. In more complicated templates, we use this array temporarily to collect parameters to give to helper functions (see the `getParams` function).
 
 ## Testing

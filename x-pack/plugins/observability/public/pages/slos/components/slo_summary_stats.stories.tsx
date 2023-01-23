@@ -8,7 +8,7 @@
 import React from 'react';
 import { ComponentStory } from '@storybook/react';
 
-import { anSLO } from '../../../../common/data/slo';
+import { anSLO } from '../../../data/slo';
 import { SloSummaryStats as Component, SloSummaryStatsProps } from './slo_summary_stats';
 
 export default {

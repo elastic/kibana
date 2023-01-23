@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
@@ -22,7 +22,7 @@ import { getAgentActions } from './actions';
 import { closePointInTime, getAgentsByKuery } from './crud';
 import type { BulkActionsResolver } from './bulk_actions_resolver';
 
-export const MAX_RETRY_COUNT = 3;
+export const MAX_RETRY_COUNT = 5;
 
 export interface ActionParams {
   kuery: string;
@@ -59,7 +59,7 @@ export abstract class ActionRunner {
   ) {
     this.esClient = esClient;
     this.soClient = soClient;
-    this.actionParams = { ...actionParams, actionId: actionParams.actionId ?? uuid() };
+    this.actionParams = { ...actionParams, actionId: actionParams.actionId ?? uuidv4() };
     this.retryParams = retryParams;
   }
 
@@ -113,10 +113,10 @@ export abstract class ActionRunner {
               );
 
             if (this.retryParams.retryCount === MAX_RETRY_COUNT) {
-              const errorMessage = `Stopping after ${MAX_RETRY_COUNT}rd retry. Error: ${error.message}`;
+              const errorMessage = `Stopping after retry #${MAX_RETRY_COUNT}. Error: ${error.message}`;
               appContextService.getLogger().warn(errorMessage);
 
-              // clean up tasks after 3rd retry reached
+              // clean up tasks after last retry reached
               await Promise.all([
                 this.bulkActionsResolver!.removeIfExists(this.checkTaskId!),
                 this.bulkActionsResolver!.removeIfExists(this.retryParams.taskId!),

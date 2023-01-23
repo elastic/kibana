@@ -266,7 +266,7 @@ describe('IndicesLogic', () => {
           isDeleteLoading: true,
         });
       });
-      it('should update isDeleteLoading to to false on apiError', () => {
+      it('should update isDeleteLoading to false on apiError', () => {
         IndicesLogic.actions.deleteIndex({ indexName: 'to-delete' });
         IndicesLogic.actions.deleteError({} as HttpError);
 
@@ -276,9 +276,9 @@ describe('IndicesLogic', () => {
           isDeleteLoading: false,
         });
       });
-      it('should update isDeleteLoading to to false on apiSuccess', () => {
+      it('should update isDeleteLoading to false on apiSuccess', () => {
         IndicesLogic.actions.deleteIndex({ indexName: 'to-delete' });
-        IndicesLogic.actions.deleteSuccess();
+        IndicesLogic.actions.deleteSuccess({ indexName: 'to-delete' });
 
         expect(IndicesLogic.values).toEqual({
           ...DEFAULT_VALUES,
@@ -294,20 +294,10 @@ describe('IndicesLogic', () => {
       IndicesLogic.actions.makeRequest({ meta: DEFAULT_META, returnHiddenIndices: false });
       expect(mockFlashMessageHelpers.clearFlashMessages).toHaveBeenCalledTimes(1);
     });
-    it('calls flashAPIErrors on apiError', () => {
-      IndicesLogic.actions.apiError({} as HttpError);
-      expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledTimes(1);
-      expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledWith({});
-    });
-    it('calls flashAPIErrors on deleteError', () => {
-      IndicesLogic.actions.deleteError({} as HttpError);
-      expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledTimes(1);
-      expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledWith({});
-    });
     it('calls flashSuccessToast, closeDeleteModal and fetchIndices on deleteSuccess', () => {
       IndicesLogic.actions.fetchIndices = jest.fn();
       IndicesLogic.actions.closeDeleteModal = jest.fn();
-      IndicesLogic.actions.deleteSuccess();
+      IndicesLogic.actions.deleteSuccess({ indexName: 'index-name' });
       expect(mockFlashMessageHelpers.flashSuccessToast).toHaveBeenCalledTimes(1);
       expect(IndicesLogic.actions.fetchIndices).toHaveBeenCalledWith(
         IndicesLogic.values.searchParams

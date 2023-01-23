@@ -31,7 +31,7 @@ describe('GetSLO', () => {
         [slo.id]: {
           good: 9999,
           total: 10000,
-          date_range: toDateRange(slo.time_window),
+          dateRange: toDateRange(slo.timeWindow),
         },
       });
 
@@ -42,40 +42,41 @@ describe('GetSLO', () => {
         id: slo.id,
         name: 'irrelevant',
         description: 'irrelevant',
-        budgeting_method: 'occurrences',
+        budgetingMethod: 'occurrences',
         indicator: {
           params: {
             environment: 'irrelevant',
-            good_status_codes: ['2xx', '3xx', '4xx'],
             service: 'irrelevant',
-            transaction_name: 'irrelevant',
-            transaction_type: 'irrelevant',
+            transactionName: 'irrelevant',
+            transactionType: 'irrelevant',
+            goodStatusCodes: ['2xx', '3xx', '4xx'],
           },
-          type: 'sli.apm.transaction_error_rate',
+          type: 'sli.apm.transactionErrorRate',
         },
         objective: {
           target: 0.999,
         },
-        time_window: {
+        timeWindow: {
           duration: '7d',
-          is_rolling: true,
+          isRolling: true,
         },
         settings: {
-          timestamp_field: '@timestamp',
-          sync_delay: '1m',
+          timestampField: '@timestamp',
+          syncDelay: '1m',
           frequency: '1m',
         },
         summary: {
-          sli_value: 0.9999,
-          error_budget: {
+          status: 'HEALTHY',
+          sliValue: 0.9999,
+          errorBudget: {
             initial: 0.001,
             consumed: 0.1,
             remaining: 0.9,
-            is_estimated: false,
+            isEstimated: false,
           },
         },
-        created_at: slo.created_at.toISOString(),
-        updated_at: slo.updated_at.toISOString(),
+        createdAt: slo.createdAt.toISOString(),
+        updatedAt: slo.updatedAt.toISOString(),
         revision: slo.revision,
       });
     });

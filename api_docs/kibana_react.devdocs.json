@@ -581,18 +581,6 @@
             "path": "src/plugins/home/public/application/components/tutorial/tutorial.js"
           },
           {
-            "plugin": "spaces",
-            "path": "x-pack/plugins/spaces/public/space_selector/space_selector.tsx"
-          },
-          {
-            "plugin": "spaces",
-            "path": "x-pack/plugins/spaces/public/space_selector/space_selector.tsx"
-          },
-          {
-            "plugin": "spaces",
-            "path": "x-pack/plugins/spaces/public/space_selector/space_selector.tsx"
-          },
-          {
             "plugin": "ml",
             "path": "x-pack/plugins/ml/public/application/components/ml_page/ml_page.tsx"
           },
@@ -1160,51 +1148,6 @@
       },
       {
         "parentPluginId": "kibanaReact",
-        "id": "def-public.reactToUiComponent",
-        "type": "Function",
-        "tags": [],
-        "label": "reactToUiComponent",
-        "description": [
-          "\nTransform a React component into a `UiComponent`.\n"
-        ],
-        "signature": [
-          "<Props extends object>(ReactComp: React.ComponentType<Props>) => ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.UiComponent",
-            "text": "UiComponent"
-          },
-          "<Props>"
-        ],
-        "path": "src/plugins/kibana_react/public/adapters/react_to_ui_component.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.reactToUiComponent.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "ReactComp",
-            "description": [
-              "A React component."
-            ],
-            "signature": [
-              "React.ComponentType<Props>"
-            ],
-            "path": "src/plugins/kibana_react/public/adapters/react_to_ui_component.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
         "id": "def-public.RedirectAppLinks",
         "type": "Function",
         "tags": [
@@ -1722,71 +1665,6 @@
               ">"
             ],
             "path": "src/plugins/kibana_react/public/toolbar_button/toolbar_button.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
-        "id": "def-public.uiToReactComponent",
-        "type": "Function",
-        "tags": [],
-        "label": "uiToReactComponent",
-        "description": [
-          "\nTransforms `UiComponent` into a React component."
-        ],
-        "signature": [
-          "<Props extends object>(Comp: ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.UiComponent",
-            "text": "UiComponent"
-          },
-          "<Props>, as?: string) => React.FC<Props>"
-        ],
-        "path": "src/plugins/kibana_react/public/adapters/ui_to_react_component.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.uiToReactComponent.$1",
-            "type": "Function",
-            "tags": [],
-            "label": "Comp",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.UiComponent",
-                "text": "UiComponent"
-              },
-              "<Props>"
-            ],
-            "path": "src/plugins/kibana_react/public/adapters/ui_to_react_component.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.uiToReactComponent.$2",
-            "type": "string",
-            "tags": [],
-            "label": "as",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "src/plugins/kibana_react/public/adapters/ui_to_react_component.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -3175,7 +3053,7 @@
           "Omit<",
           "EuiPageProps",
           ", \"paddingSize\"> & { template?: \"default\" | \"empty\" | \"centeredBody\" | \"centeredContent\" | undefined; paddingSize?: \"none\" | \"m\" | \"s\" | \"l\" | undefined; pageSideBar?: React.ReactNode; pageSideBarProps?: ",
-          "EuiPageSideBarProps",
+          "EuiPageSideBarProps_Deprecated",
           " | undefined; pageHeader?: ",
           "EuiPageHeaderProps",
           " | undefined; pageBodyProps?: ",
@@ -3237,6 +3115,14 @@
             "docId": "kibKbnCoreChromeBrowserPluginApi",
             "section": "def-common.ChromeStart",
             "text": "ChromeStart"
+          },
+          " | undefined; customBranding?: ",
+          {
+            "pluginId": "@kbn/core-custom-branding-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreCustomBrandingBrowserPluginApi",
+            "section": "def-common.CustomBrandingStart",
+            "text": "CustomBrandingStart"
           },
           " | undefined; docLinks?: ",
           {

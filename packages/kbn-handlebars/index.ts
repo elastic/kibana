@@ -187,7 +187,7 @@ interface Container {
 }
 
 class ElasticHandlebarsVisitor extends Handlebars.Visitor {
-  private scopes: any[] = [];
+  private contexts: any[] = [];
   private output: any[] = [];
   private template?: string;
   private compileOptions: ExtendedCompileOptions;
@@ -288,7 +288,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   }
 
   render(context: any, options: ExtendedRuntimeOptions = {}): string {
-    this.scopes = [context];
+    this.contexts = [context];
     this.output = [];
     this.runtimeOptions = options;
     this.container.helpers = Object.assign(this.initialHelpers, options.helpers);
@@ -364,7 +364,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     } else if (path.data) {
       result = this.lookupData(this.runtimeOptions!.data, path);
     } else {
-      result = this.resolvePath(this.scopes[path.depth], path);
+      result = this.resolvePath(this.contexts[path.depth], path);
     }
 
     this.output.push(result);
@@ -514,7 +514,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     // @ts-expect-error strict is not a valid property on PathExpression, but we used in the same way it's also used in the original handlebars
     path.strict = true;
     const result = this.resolveNodes(path)[0];
-    const lambdaResult = this.container.lambda(result, this.scopes[0]);
+    const lambdaResult = this.container.lambda(result, this.context);
 
     if (isBlock(node)) {
       this.blockValue(node, lambdaResult);
@@ -531,8 +531,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     const name = node.path.original;
     const options = this.setupParams(node, name);
 
-    const context = this.scopes[0];
-    const result = this.container.hooks.blockHelperMissing!.call(context, value, options);
+    const result = this.container.hooks.blockHelperMissing!.call(this.context, value, options);
 
     this.output.push(result);
   }
@@ -647,8 +646,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     const helper = this.setupHelper(block, name);
 
     if (!helper.fn) {
-      const context = this.scopes[0];
-      value = this.container.hooks.blockHelperMissing!.call(context, value, helper.options);
+      value = this.container.hooks.blockHelperMissing!.call(this.context, value, helper.options);
     }
 
     return value;
@@ -665,7 +663,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   } {
     return {
       fn: this.container.lookupProperty(this.container.helpers, helperName),
-      context: this.scopes[0],
+      context: this.context,
       params: this.resolveNodes(node.params),
       options: this.setupParams(node, helperName),
     };
@@ -679,9 +677,9 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     if (decorator.params.length > 0) {
       if (!this.processedRootDecorators) {
         // When processing the root decorators, temporarily remove the root context so it's not accessible to the decorator
-        const context = this.scopes.shift();
+        const context = this.contexts.shift();
         options.args = this.resolveNodes(decorator.params);
-        this.scopes.unshift(context);
+        this.contexts.unshift(context);
       } else {
         options.args = this.resolveNodes(decorator.params);
       }
@@ -735,8 +733,8 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
       // stash parent program data
       const tmpRuntimeOptions = this.runtimeOptions;
       this.runtimeOptions = runtimeOptions;
-      const shiftContext = nextContext !== this.scopes[0];
-      if (shiftContext) this.scopes.unshift(nextContext);
+      const shiftContext = nextContext !== this.context;
+      if (shiftContext) this.contexts.unshift(nextContext);
       this.blockParamValues.unshift(runtimeOptions.blockParams || []);
 
       // execute child program
@@ -744,7 +742,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
 
       // unstash parent program data
       this.blockParamValues.shift();
-      if (shiftContext) this.scopes.shift();
+      if (shiftContext) this.contexts.shift();
       this.runtimeOptions = tmpRuntimeOptions;
 
       // return result of child program
@@ -808,6 +806,10 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     this.output = currentOutput;
 
     return result;
+  }
+
+  private get context() {
+    return this.contexts[0];
   }
 }
 

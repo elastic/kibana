@@ -39,7 +39,6 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
     },
   })),
   withKibana: jest.fn((comp) => comp),
-  reactToUiComponent: jest.fn(),
 }));
 
 jest.mock('../../services', () => ({

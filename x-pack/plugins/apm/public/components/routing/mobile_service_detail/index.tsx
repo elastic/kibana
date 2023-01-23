@@ -133,6 +133,7 @@ export const mobileServiceDetail = {
           searchBarOptions: {
             showTransactionTypeSelector: true,
             showTimeComparison: true,
+            showMobileFilters: true,
           },
         }),
         params: t.partial({

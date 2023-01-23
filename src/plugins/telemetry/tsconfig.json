@@ -1,9 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
+    "outDir": "target/types",
     "isolatedModules": true
   },
   "include": [
@@ -15,13 +13,27 @@
     "schema/oss_root.json",
   ],
   "kbn_references": [
-    { "path": "../../core/tsconfig.json" },
-    { "path": "../../plugins/home/tsconfig.json" },
-    { "path": "../../plugins/kibana_react/tsconfig.json" },
-    { "path": "../../plugins/kibana_utils/tsconfig.json" },
-    { "path": "../../plugins/screenshot_mode/tsconfig.json" },
-    { "path": "../../plugins/telemetry_collection_manager/tsconfig.json" },
-    { "path": "../../plugins/usage_collection/tsconfig.json" },
-    { "path": "../../../x-pack/plugins/security/tsconfig.json" }
+    "@kbn/core",
+    "@kbn/home-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/screenshot-mode-plugin",
+    "@kbn/telemetry-collection-manager-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/security-plugin",
+    "@kbn/analytics-shippers-elastic-v3-browser",
+    "@kbn/test-jest-helpers",
+    "@kbn/shared-ux-utility",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/analytics-shippers-elastic-v3-server",
+    "@kbn/config-schema",
+    "@kbn/utils",
+    "@kbn/core-saved-objects-server",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/core-saved-objects-utils-server",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

@@ -5,10 +5,9 @@
  * 2.0.
  */
 
+import { timeslicesBudgetingMethodSchema, Duration, DurationUnit } from '@kbn/slo-schema';
 import { IllegalArgumentError } from '../../errors';
 import { SLO } from '../models';
-import { Duration, DurationUnit } from '../models/duration';
-import { timeslicesBudgetingMethodSchema } from '../../types/schema';
 
 /**
  * Asserts the SLO is valid from a business invariants point of view.
@@ -22,21 +21,21 @@ export function validateSLO(slo: SLO) {
     throw new IllegalArgumentError('Invalid objective.target');
   }
 
-  if (!isValidTimeWindowDuration(slo.time_window.duration)) {
+  if (!isValidTimeWindowDuration(slo.timeWindow.duration)) {
     throw new IllegalArgumentError('Invalid time_window.duration');
   }
 
-  if (timeslicesBudgetingMethodSchema.is(slo.budgeting_method)) {
+  if (timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)) {
     if (
-      slo.objective.timeslice_target === undefined ||
-      !isValidTargetNumber(slo.objective.timeslice_target)
+      slo.objective.timesliceTarget === undefined ||
+      !isValidTargetNumber(slo.objective.timesliceTarget)
     ) {
       throw new IllegalArgumentError('Invalid objective.timeslice_target');
     }
 
     if (
-      slo.objective.timeslice_window === undefined ||
-      !isValidTimesliceWindowDuration(slo.objective.timeslice_window, slo.time_window.duration)
+      slo.objective.timesliceWindow === undefined ||
+      !isValidTimesliceWindowDuration(slo.objective.timesliceWindow, slo.timeWindow.duration)
     ) {
       throw new IllegalArgumentError('Invalid objective.timeslice_window');
     }
@@ -50,7 +49,7 @@ function validateSettings(slo: SLO) {
     throw new IllegalArgumentError('Invalid settings.frequency');
   }
 
-  if (!isValidSyncDelaySettings(slo.settings.sync_delay)) {
+  if (!isValidSyncDelaySettings(slo.settings.syncDelay)) {
     throw new IllegalArgumentError('Invalid settings.sync_delay');
   }
 }

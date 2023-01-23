@@ -14,6 +14,7 @@ import { AppMountParameters } from '@kbn/core/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { ControlsExampleStartDeps } from './plugin';
 import { BasicReduxExample } from './basic_redux_example';
+import { EditExample } from './edit_example';
 import { SearchExample } from './search_example';
 
 export const renderApp = async (
@@ -25,6 +26,8 @@ export const renderApp = async (
     dataViews.length > 0 ? (
       <>
         <SearchExample dataView={dataViews[0]} navigation={navigation} data={data} />
+        <EuiSpacer size="xl" />
+        <EditExample />
         <EuiSpacer size="xl" />
         <BasicReduxExample dataViewId={dataViews[0].id!} />
       </>
