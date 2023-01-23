@@ -46,7 +46,7 @@ export const HostsLandingPage = () => {
               setIsHostViewEnabled(true);
             }}
           >
-            {i18n.translate('xpack.infra.hostsLandingPage.role', {
+            {i18n.translate('xpack.infra.hostsLandingPage.enableHostsView', {
               defaultMessage: 'Enable hosts view',
             })}
           </EuiButton>
