@@ -214,7 +214,7 @@ export const CasesFindRequestRt = rt.partial({
    */
   searchFields: rt.union([rt.array(rt.string), rt.string]),
   /**
-   * The fields to perform the simple_query_string parsed query against
+   * The root fields to perform the simple_query_string parsed query against
    */
   rootSearchFields: rt.array(rt.string),
   /**

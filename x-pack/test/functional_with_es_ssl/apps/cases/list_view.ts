@@ -295,9 +295,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           description: 'lots of information about an incident',
         });
         const case2 = await cases.api.createCase({ title: 'test2', tags: ['two'] });
-
-        await cases.api.createCase({ title: case2.id, assignees: [{ uid: profiles[0].uid }] });
-        await cases.api.createCase({
+        const case3 = await cases.api.createCase({
+          title: case2.id,
+          assignees: [{ uid: profiles[0].uid }],
+        });
+        const case4 = await cases.api.createCase({
           title: 'test4',
           assignees: [{ uid: profiles[1].uid }],
           description: case2.id,
@@ -305,6 +307,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         caseIds.push(case1.id);
         caseIds.push(case2.id);
+        caseIds.push(case3.id);
+        caseIds.push(case4.id);
 
         await header.waitUntilLoadingHasFinished();
         await cases.casesTable.waitForCasesToBeListed();
@@ -346,6 +350,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await input.pressKeys(browser.keys.ENTER);
 
         await cases.casesTable.validateCasesTableHasNthRows(1);
+        await cases.casesTable.getCaseById(caseIds[0]);
         await testSubjects.click('clearSearchButton');
         await cases.casesTable.validateCasesTableHasNthRows(4);
       });
@@ -358,6 +363,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await input.pressKeys(browser.keys.ENTER);
 
         await cases.casesTable.validateCasesTableHasNthRows(3);
+        await cases.casesTable.getCaseById(caseIds[1]); // id match
+        await cases.casesTable.getCaseById(caseIds[2]); // title match
+        await cases.casesTable.getCaseById(caseIds[3]); // description match
         await testSubjects.click('clearSearchButton');
         await cases.casesTable.validateCasesTableHasNthRows(4);
       });
@@ -414,7 +422,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.casesTable.filterByTag('one');
         await cases.casesTable.refreshTable();
         await cases.casesTable.validateCasesTableHasNthRows(1);
-        const row = await cases.casesTable.getCaseFromTable(0);
+        const row = await cases.casesTable.getCaseByIndex(0);
         const tags = await row.findByTestSubject('case-table-column-tags-one');
         expect(await tags.getVisibleText()).to.be('one');
       });
@@ -459,11 +467,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           await cases.casesTable.validateCasesTableHasNthRows(2);
 
           const firstCaseTitle = await (
-            await cases.casesTable.getCaseFromTable(0)
+            await cases.casesTable.getCaseByIndex(0)
           ).findByTestSubject('case-details-link');
 
           const secondCaseTitle = await (
-            await cases.casesTable.getCaseFromTable(1)
+            await cases.casesTable.getCaseByIndex(1)
           ).findByTestSubject('case-details-link');
 
           expect(await firstCaseTitle.getVisibleText()).be('test2');

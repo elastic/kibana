@@ -17,7 +17,7 @@ import {
   buildNestedFilter,
   buildRangeFilter,
   constructQueryOptions,
-  constructSearchById,
+  constructSearch,
   convertSortField,
 } from './utils';
 
@@ -927,25 +927,28 @@ describe('utils', () => {
     it('handles uuid-v4 search terms correctly', () => {
       const uuidv4 = '0d397548-30f7-4a7f-aa54-cfe1a38cb902';
 
-      expect(
-        constructSearchById(uuidv4, DEFAULT_NAMESPACE_STRING, savedObjectsSerializer)
-      ).toMatchInlineSnapshot(
-        `
+      expect(constructSearch(uuidv4, DEFAULT_NAMESPACE_STRING, savedObjectsSerializer))
+        .toMatchInlineSnapshot(`
         Object {
           "rootSearchFields": Array [
             "_id",
           ],
-          "search": "${uuidv4} cases:${uuidv4}",
+          "search": "\\"0d397548-30f7-4a7f-aa54-cfe1a38cb902\\" \\"cases:0d397548-30f7-4a7f-aa54-cfe1a38cb902\\"",
         }
-      `
-      );
+      `);
     });
 
     it('handles non-uuid-v4 search terms correctly', () => {
       const search = 'foobar';
 
-      expect(constructSearchById(search, DEFAULT_NAMESPACE_STRING, savedObjectsSerializer)).toEqual(
-        {}
+      expect(constructSearch(search, DEFAULT_NAMESPACE_STRING, savedObjectsSerializer)).toEqual({
+        search,
+      });
+    });
+
+    it('returns undefined if search term undefined', () => {
+      expect(constructSearch(undefined, DEFAULT_NAMESPACE_STRING, savedObjectsSerializer)).toEqual(
+        undefined
       );
     });
   });

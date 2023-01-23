@@ -23,6 +23,7 @@ import type {
   CommentRequest,
   CaseSeverity,
   CommentRequestExternalReferenceType,
+  CasesFindRequest,
 } from '../../common/api';
 import type { SavedObjectFindOptionsKueryNode } from '../common/types';
 import type { CasesFindQueryParams } from './types';
@@ -532,26 +533,29 @@ export const convertSortField = (sortField: string | undefined): SortFieldCase =
   }
 };
 
-export const constructSearchById = (
-  search: string,
+export const constructSearch = (
+  search: string | undefined,
   spaceId: string,
   savedObjectsSerializer: ISavedObjectsSerializer
-) => {
+): Pick<CasesFindRequest, 'search' | 'rootSearchFields'> | undefined => {
   // import { version as uuidVersion, validate as uuidValidate } from 'uuid';
   const uuidValidate = (foobar: string) => foobar.length === 36; // uuid length
   const uuidVersion = (foobar: string) => 4;
 
-  if (search !== '' && uuidValidate(search) && uuidVersion(search) === 4) {
-    const rawId = savedObjectsSerializer.generateRawId(
-      spaceIdToNamespace(spaceId),
-      CASE_SAVED_OBJECT,
-      search
-    );
+  if (search) {
+    if (uuidValidate(search) && uuidVersion(search) === 4) {
+      const rawId = savedObjectsSerializer.generateRawId(
+        spaceIdToNamespace(spaceId),
+        CASE_SAVED_OBJECT,
+        search
+      );
 
-    return {
-      search: `"${search}" "${rawId}"`,
-      rootSearchFields: ['_id'],
-    };
+      return {
+        search: `"${search}" "${rawId}"`,
+        rootSearchFields: ['_id'],
+      };
+    }
+    return { search };
   }
-  return {};
+  return undefined;
 };
