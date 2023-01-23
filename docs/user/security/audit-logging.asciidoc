@@ -376,6 +376,10 @@ Refer to the corresponding {es} logs for potential write errors.
 | `success` | User has accessed a case comment.
 | `failure` | User is not authorized to access a case comment.
 
+.2+| `case_comment_bulk_get`
+| `success` | User has accessed multiple case comments.
+| `failure` | User is not authorized to access multiple case comments.
+
 .2+| `case_comment_get_all`
 | `success` | User has accessed case comments.
 | `failure` | User is not authorized to access case comments.
@@ -399,7 +403,6 @@ Refer to the corresponding {es} logs for potential write errors.
 .2+| `case_user_actions_get`
 | `success` | User has accessed the user activity of a case.
 | `failure` | User is not authorized to access the user activity of a case.
-
 
 .2+| `case_user_actions_find`
 | `success` | User has accessed the user activity of a case as part of a search operation.

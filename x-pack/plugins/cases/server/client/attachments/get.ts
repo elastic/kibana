@@ -293,7 +293,10 @@ export async function bulkGet(
     ) as [Array<SavedObject<CommentAttributes>>, AttachmentSavedObjectWithErrors];
 
     const { authorized: authorizedCases, unauthorized: unauthorizedCases } =
-      await authorization.getAndEnsureAuthorizedEntities({ savedObjects: validAttachments });
+      await authorization.getAndEnsureAuthorizedEntities({
+        savedObjects: validAttachments,
+        operation: Operations.bulkGetComments,
+      });
 
     const errors = constructErrors(soBulkGetErrors, unauthorizedCases);
 

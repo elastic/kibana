@@ -153,10 +153,11 @@ describe('CasesService', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
   const mockLogger = loggerMock.create();
   const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
-  const attachmentService = new AttachmentService(
-    mockLogger,
-    persistableStateAttachmentTypeRegistry
-  );
+  const attachmentService = new AttachmentService({
+    log: mockLogger,
+    persistableStateAttachmentTypeRegistry,
+    unsecuredSavedObjectsClient,
+  });
 
   let service: CasesService;
 

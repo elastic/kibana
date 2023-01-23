@@ -144,6 +144,7 @@ export const createAlertServiceMock = (): AlertServiceMock => {
 const createAttachmentGetterServiceMock = (): AttachmentGetterServiceMock => {
   const service: PublicMethodsOf<AttachmentGetter> = {
     get: jest.fn(),
+    bulkGet: jest.fn(),
     getAllAlertsAttachToCase: jest.fn(),
     getCaseCommentStats: jest.fn(),
     getAttachmentIdsForCases: jest.fn(),

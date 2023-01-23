@@ -508,6 +508,7 @@ export const deleteCases = async ({
   return body;
 };
 
+// TODO: move the comment related stuff to the attachment helper file
 export const createComment = async ({
   supertest,
   caseId,

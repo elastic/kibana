@@ -1038,6 +1038,7 @@ describe('authorization', () => {
             { id: '1', attributes: { owner: 'b' }, type: 'test', references: [] },
             { id: '2', attributes: { owner: 'c' }, type: 'test', references: [] },
           ],
+          operation: Operations.bulkGetCases,
         });
       } catch (error) {
         expect(error.message).toBe('Unauthorized to access cases of any owner');
@@ -1115,6 +1116,7 @@ describe('authorization', () => {
           { id: '1', attributes: { owner: 'a' }, type: 'test', references: [] },
           { id: '2', attributes: { owner: 'b' }, type: 'test', references: [] },
         ],
+        operation: Operations.bulkGetCases,
       });
 
       await expect(helpersPromise).resolves.not.toThrow();
@@ -1183,6 +1185,7 @@ describe('authorization', () => {
             { id: '2', attributes: { owner: 'b' }, type: 'test', references: [] },
             { id: '3', attributes: { owner: 'c' }, type: 'test', references: [] },
           ],
+          operation: Operations.bulkGetCases,
         });
 
         expect(res).toEqual({
@@ -1305,6 +1308,7 @@ describe('authorization', () => {
             { id: '2', attributes: { owner: 'b' }, type: 'test', references: [] },
             { id: '3', attributes: { owner: 'c' }, type: 'test', references: [] },
           ],
+          operation: Operations.bulkGetCases,
         });
 
         expect(res).toEqual({

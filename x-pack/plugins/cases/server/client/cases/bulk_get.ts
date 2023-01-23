@@ -33,6 +33,7 @@ import { asArray, flattenCaseSavedObject } from '../../common/utils';
 import type { CasesClientArgs, SOWithErrors } from '../types';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 import type { CaseSavedObject } from '../../common/types';
+import { Operations } from '../../authorization';
 
 type CaseSavedObjectWithErrors = SOWithErrors<CaseAttributes>;
 
@@ -68,7 +69,10 @@ export const bulkGet = async <Field extends keyof CaseResponse = keyof CaseRespo
     ) as [CaseSavedObject[], CaseSavedObjectWithErrors];
 
     const { authorized: authorizedCases, unauthorized: unauthorizedCases } =
-      await authorization.getAndEnsureAuthorizedEntities({ savedObjects: validCases });
+      await authorization.getAndEnsureAuthorizedEntities({
+        savedObjects: validCases,
+        operation: Operations.bulkGetCases,
+      });
 
     const requestForTotals = ['totalComment', 'totalAlerts'].some(
       (totalKey) => !fields || fields.includes(totalKey)
