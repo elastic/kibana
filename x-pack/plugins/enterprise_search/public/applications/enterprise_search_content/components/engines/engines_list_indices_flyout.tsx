@@ -27,6 +27,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EnterpriseSearchEngineIndex } from '../../../../../common/types/engines';
 
+import { healthColorsMap } from '../../../shared/constants/health_colors';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
 import { SEARCH_INDEX_PATH } from '../../routes';
@@ -35,12 +36,6 @@ import { ingestionMethodToText } from '../../utils/indices';
 
 import { EnginesListLogic } from './engines_list_logic';
 
-const healthColorsMap = {
-  green: 'success',
-  red: 'danger',
-  unavailable: '',
-  yellow: 'warning',
-};
 export const EngineListIndicesFlyout: React.FC = () => {
   const { fetchEngineData, fetchEngineName, isFetchEngineLoading, isFetchEngineFlyoutVisible } =
     useValues(EnginesListLogic);
