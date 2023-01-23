@@ -1531,10 +1531,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@72.2.0":
-  version "72.2.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-72.2.0.tgz#0d89ec4c6d8a677ba41d086abd509c5a5ea09180"
-  integrity sha512-3JHKLWqbU1A6qMVkw0n1VZ5PaL07sd3N44tWsRCn+DEaDv9jq68ilEmY1wdYqKXw8VyFwcPbd8ZYZpdzBD2nPA==
+"@elastic/eui@73.0.0":
+  version "73.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-73.0.0.tgz#e1340997e2807ef9416daeb3bff71aad14549d19"
+  integrity sha512-vOdZH5FE9iBRHpSpHnVOH/L8AMX2VJDXlpOQpSprE6kK32k5a0C8PtjHWVntRwWbN9t/pcdqC4oHcZsABIv9GA==
   dependencies:
     "@types/chroma-js" "^2.0.0"
     "@types/lodash" "^4.14.160"
@@ -7987,12 +7987,10 @@
   dependencies:
     "@types/react" "*"
 
-"@types/uuid@^3.4.4":
-  version "3.4.4"
-  resolved "https://registry.yarnpkg.com/@types/uuid/-/uuid-3.4.4.tgz#7af69360fa65ef0decb41fd150bf4ca5c0cefdf5"
-  integrity sha512-tPIgT0GUmdJQNSHxp0X2jnpQfBSTfGxUMc/2CXBU2mnyTFVYVa2ojpoQ74w0U2yn2vw3jnC640+77lkFFpdVDw==
-  dependencies:
-    "@types/node" "*"
+"@types/uuid@^9.0.0":
+  version "9.0.0"
+  resolved "https://registry.yarnpkg.com/@types/uuid/-/uuid-9.0.0.tgz#53ef263e5239728b56096b0a869595135b7952d2"
+  integrity sha512-kr90f+ERiQtKWMz5rP32ltJ/BtULDI5RVO0uavn1HQUOwjx0R1h0rnDYNL0CepF1zL5bSY6FISAfd9tOdDhU5Q==
 
 "@types/vfile-message@^2.0.0":
   version "2.0.0"
@@ -27303,10 +27301,10 @@ uuid-browser@^3.1.0:
   resolved "https://registry.yarnpkg.com/uuid-browser/-/uuid-browser-3.1.0.tgz#0f05a40aef74f9e5951e20efbf44b11871e56410"
   integrity sha1-DwWkCu90+eWVHiDvv0SxGHHlZBA=
 
-uuid@3.3.2:
-  version "3.3.2"
-  resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.3.2.tgz#1b4af4955eb3077c501c23872fc6513811587131"
-  integrity sha512-yXJmeNaw3DnnKAOKJE51sL/ZaYfWJRl1pK9dr19YFCu0ObS231AB1/LbqTKRAQ5kw8A90rA6fr4riOUpTZvQZA==
+uuid@9.0.0, uuid@^9:
+  version "9.0.0"
+  resolved "https://registry.yarnpkg.com/uuid/-/uuid-9.0.0.tgz#592f550650024a38ceb0c562f2f6aa435761efb5"
+  integrity sha512-MXcSTerfPa4uqyzStbRoTgt5XIe3x5+42+q1sDuy3R5MDk66URdLMOZe5aPX/SQd+kuYAh0FdP/pO28IkQyTeg==
 
 uuid@^3.3.2, uuid@^3.3.3:
   version "3.4.0"
@@ -27317,11 +27315,6 @@ uuid@^8.3.0, uuid@^8.3.2:
   version "8.3.2"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-8.3.2.tgz#80d5b5ced271bb9af6c445f21a1a04c606cefbe2"
   integrity sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==
-
-uuid@^9:
-  version "9.0.0"
-  resolved "https://registry.yarnpkg.com/uuid/-/uuid-9.0.0.tgz#592f550650024a38ceb0c562f2f6aa435761efb5"
-  integrity sha512-MXcSTerfPa4uqyzStbRoTgt5XIe3x5+42+q1sDuy3R5MDk66URdLMOZe5aPX/SQd+kuYAh0FdP/pO28IkQyTeg==
 
 v8-compile-cache-lib@^3.0.1:
   version "3.0.1"
