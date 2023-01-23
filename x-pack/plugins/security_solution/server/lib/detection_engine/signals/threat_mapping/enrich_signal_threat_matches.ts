@@ -21,11 +21,8 @@ import type {
 import { ThreatMatchQueryType } from './types';
 import { extractNamedQueries } from './utils';
 
-const extractQuery = (hit) =>
-  hit.matched_queries.map((query) => {
-    const [field, value] = query.split(':');
-    return { field, value };
-  });
+export const MAX_NUMBER_OF_SIGNAL_MATCHES = 1000;
+
 export const getSignalMatchesFromThreatList = (
   threatList: ThreatListItem[] = [],
   signalValueMap?: SignalValuesMap
@@ -42,6 +39,15 @@ export const getSignalMatchesFromThreatList = (
   }) => {
     if (!signalMap[id]) {
       signalMap[id] = [];
+    }
+
+    // creating map of signal with large number of threats could lead to out of memory Kibana crash
+    // large number of threats also can cause signals bulk create failure due too large payload (413)
+    // large number of threats significantly slower alert details page render
+    // so, its number is limited to MAX_NUMBER_OF_SIGNAL_MATCHES
+    // more details https://github.com/elastic/kibana/issues/143595#issuecomment-1335433592
+    if (signalMap[id].length >= MAX_NUMBER_OF_SIGNAL_MATCHES) {
+      return;
     }
 
     signalMap[id].push({
@@ -81,22 +87,6 @@ export const getSignalMatchesFromThreatList = (
           query,
         });
       }
-
-      // creating map of signal with large number of threats could lead to out of memory Kibana crash
-      // large number of threats also can cause signals bulk create failure due too large payload (413)
-      // large number of threats significantly slower alert details page render
-      // so, its number is limited to MAX_NUMBER_OF_SIGNAL_MATCHES
-      // more details https://github.com/elastic/kibana/issues/143595#issuecomment-1335433592
-      if (signalMap[signalId].length >= MAX_NUMBER_OF_SIGNAL_MATCHES) {
-        return;
-      }
-
-      signalMap[signalId].push({
-        id: threatHit._id,
-        index: threatHit._index,
-        field: item.field,
-        value: item.value,
-      });
     })
   );
 
