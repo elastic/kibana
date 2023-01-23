@@ -55,8 +55,8 @@ export const usePushToService = ({
 
   const { isLoading: isLoadingLicense, data: actionLicense = null } = useGetActionLicense();
   const hasLicenseError = actionLicense != null && !actionLicense.enabledInLicense;
-  const needsToBePushed = caseConnectors[connector.id]?.needsToBePushed ?? false;
-  const hasBeenPushed = !!caseConnectors[connector.id]?.hasBeenPushed ?? false;
+  const needsToBePushed = !!caseConnectors[connector.id]?.needsToBePushed;
+  const hasBeenPushed = !!caseConnectors[connector.id]?.hasBeenPushed;
 
   const handlePushToService = useCallback(async () => {
     if (connector.id != null && connector.id !== 'none') {

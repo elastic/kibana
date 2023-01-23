@@ -8,13 +8,14 @@
 import { useQuery } from '@tanstack/react-query';
 import type { GetCaseConnectorsResponse } from '../../common/api';
 import * as i18n from './translations';
-import { useToasts } from '../common/lib/kibana';
 import { getCaseConnectors } from './api';
 import type { ServerError } from '../types';
 import { casesQueriesKeys } from './constants';
+import { useCasesToast } from '../common/use_cases_toast';
 
 export const useGetCaseConnectors = (caseId: string) => {
-  const toasts = useToasts();
+  const { showErrorToast } = useCasesToast();
+
   return useQuery<GetCaseConnectorsResponse, ServerError>(
     casesQueriesKeys.caseConnectors(caseId),
     () => {
@@ -23,14 +24,7 @@ export const useGetCaseConnectors = (caseId: string) => {
     },
     {
       onError: (error: ServerError) => {
-        if (error.name !== 'AbortError') {
-          toasts.addError(
-            error.body && error.body.message ? new Error(error.body.message) : error,
-            {
-              title: i18n.ERROR_TITLE,
-            }
-          );
-        }
+        showErrorToast(error, { title: i18n.ERROR_TITLE });
       },
     }
   );

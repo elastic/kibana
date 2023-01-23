@@ -66,8 +66,7 @@ const getFooters = ({
   const latestPush = isLatestPush(userAction.createdAt, connectorInfo.latestPushDate);
   const showTopFooter = userAction.action === Actions.push_to_service && latestPush;
 
-  const showBottomFooter =
-    userAction.action === Actions.push_to_service && connectorInfo.needsToBePushed && latestPush;
+  const showBottomFooter = showTopFooter && connectorInfo.needsToBePushed;
 
   if (showTopFooter) {
     footers.push({

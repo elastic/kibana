@@ -255,11 +255,7 @@ export const EditConnector = React.memo(
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiHorizontalRule margin="xs" />
-          <EuiFlexGroup
-            data-test-subj="edit-allAvailableConnectors"
-            direction="column"
-            alignItems="stretch"
-          >
+          <EuiFlexGroup data-test-subj="edit-connectors" direction="column" alignItems="stretch">
             {!isLoading && !editConnector && hasErrorMessages && actionsReadCapabilities && (
               <EuiFlexItem data-test-subj="push-callouts">
                 <PushCallouts
@@ -313,7 +309,7 @@ export const EditConnector = React.memo(
                     <EuiButton
                       disabled={!enableSave}
                       color="success"
-                      data-test-subj="edit-allAvailableConnectors-submit"
+                      data-test-subj="edit-connectors-submit"
                       fill
                       iconType="save"
                       onClick={onSubmitConnector}
@@ -324,7 +320,7 @@ export const EditConnector = React.memo(
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty
-                      data-test-subj="edit-allAvailableConnectors-cancel"
+                      data-test-subj="edit-connectors-cancel"
                       iconType="cross"
                       onClick={onCancelConnector}
                       size="s"
