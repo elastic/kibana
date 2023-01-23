@@ -138,7 +138,7 @@ describe('useHostTable hook', () => {
                   format: {
                     id: 'percent',
                     params: {
-                      decimals: 2,
+                      decimals: 0,
                     },
                   },
                   value: 1,

@@ -89,7 +89,7 @@ export class CPUCores implements ILensVisualization {
               format: {
                 id: 'percent',
                 params: {
-                  decimals: 2,
+                  decimals: 0,
                 },
               },
             },
