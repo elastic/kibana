@@ -25,6 +25,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { CasesDeepLinkId, CasesUiStart, getCasesDeepLinks } from '@kbn/cases-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import {
@@ -40,6 +41,7 @@ import {
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { RuleDetailsLocatorDefinition } from './locators/rule_details';
 import { observabilityAppId, observabilityFeatureId, casesPath } from '../common';
 import { createLazyObservabilityPageTemplate } from './components/shared';
@@ -89,21 +91,23 @@ export interface ObservabilityPublicPluginsSetup {
 }
 
 export interface ObservabilityPublicPluginsStart {
-  usageCollection: UsageCollectionSetup;
+  actionTypeRegistry: ActionTypeRegistryContract;
   cases: CasesUiStart;
-  embeddable: EmbeddableStart;
-  home?: HomePublicPluginStart;
-  share: SharePluginStart;
-  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
-  lens: LensPublicStart;
   discover: DiscoverStart;
-  ruleTypeRegistry: RuleTypeRegistryContract;
-  actionTypeRegistry: ActionTypeRegistryContract;
-  security: SecurityPluginStart;
+  embeddable: EmbeddableStart;
   guidedOnboarding: GuidedOnboardingPluginStart;
+  lens: LensPublicStart;
+  licensing: LicensingPluginStart;
+  ruleTypeRegistry: RuleTypeRegistryContract;
+  security: SecurityPluginStart;
+  share: SharePluginStart;
   spaces: SpacesPluginStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  usageCollection: UsageCollectionSetup;
+  home?: HomePublicPluginStart;
 }
 
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
