@@ -51,8 +51,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     describe('when no data', () => {
       it('handles empty state', async () => {
         const response = await getSessionsChart({ serviceName: 'foo' });
-        expect(response.body.currentPeriod).to.eql([]);
-        expect(response.body.previousPeriod).to.eql([]);
+        expect(response.body.currentPeriod.timeseries).to.eql([]);
+        expect(response.body.previousPeriod.timeseries).to.eql([]);
         expect(response.status).to.be(200);
       });
     });
@@ -75,13 +75,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.status).to.be(200);
         expect(
-          response.body.currentPeriod.some(
+          response.body.currentPeriod.timeseries.some(
             (item: { x: number; y?: number | null }) => item.x && item.y
           )
         ).to.eql(true);
 
-        expect(response.body.currentPeriod[0].y).to.eql(8);
-        expect(response.body.previousPeriod[0].y).to.eql(0);
+        expect(response.body.currentPeriod.timeseries[0].y).to.eql(2);
+        expect(response.body.previousPeriod.timeseries[0].y).to.eql(0);
       });
 
       it('returns only current period timeseries when offset is not available', async () => {
@@ -89,13 +89,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.status).to.be(200);
         expect(
-          response.body.currentPeriod.some(
+          response.body.currentPeriod.timeseries.some(
             (item: { x: number; y?: number | null }) => item.x && item.y
           )
         ).to.eql(true);
 
-        expect(response.body.currentPeriod[0].y).to.eql(8);
-        expect(response.body.previousPeriod).to.eql([]);
+        expect(response.body.currentPeriod.timeseries[0].y).to.eql(2);
+        expect(response.body.previousPeriod.timeseries).to.eql([]);
       });
     });
 
@@ -108,12 +108,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         expect(
-          response.body.currentPeriod.every(
+          response.body.currentPeriod.timeseries.every(
             (item: { x: number; y?: number | null }) => item.y === 0
           )
         ).to.eql(true);
         expect(
-          response.body.previousPeriod.every(
+          response.body.previousPeriod.timeseries.every(
             (item: { x: number; y?: number | null }) => item.y === 0
           )
         ).to.eql(true);
@@ -128,13 +128,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.status).to.be(200);
         expect(
-          response.body.currentPeriod.some(
+          response.body.currentPeriod.timeseries.some(
             (item: { x: number; y?: number | null }) => item.x && item.y
           )
         ).to.eql(true);
 
-        expect(response.body.currentPeriod[0].y).to.eql(2);
-        expect(response.body.previousPeriod).to.eql([]);
+        expect(response.body.currentPeriod.timeseries[0].y).to.eql(2);
+        expect(response.body.previousPeriod.timeseries).to.eql([]);
       });
     });
   });

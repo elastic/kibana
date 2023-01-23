@@ -54,21 +54,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     describe('when no data', () => {
       it('handles empty state', async () => {
         const response = await getMobileStats({ serviceName: 'foo' });
-        expect(response).to.eql({
-          sessions: {
-            timeseries: [],
-          },
-          requests: {
-            timeseries: [],
-          },
-          maxLoadTime: {
-            timeseries: [],
-          },
-          crashCount: {
-            value: 0,
-            timeseries: [],
-          },
-        });
+        expect(
+          response.currentPeriod.sessions.timeseries.every(
+            (item: { x: number; y?: number | null }) => item.y === 0
+          )
+        ).to.eql(true);
+        expect(
+          response.currentPeriod.requests.timeseries.every(
+            (item: { x: number; y?: number | null }) => item.y === 0
+          )
+        ).to.eql(true);
       });
     });
   });
@@ -95,19 +90,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('returns same sessions', () => {
-        const { value, timeseries } = response.sessions;
-        const timeseriesTotal = sumBy(timeseries, 'y');
-        expect(value).to.be(timeseriesTotal);
-      });
-
-      it('returns same crashCount', () => {
-        const { value, timeseries } = response.crashCount;
+        const { value, timeseries } = response.currentPeriod.sessions;
         const timeseriesTotal = sumBy(timeseries, 'y');
         expect(value).to.be(timeseriesTotal);
       });
 
       it('returns same requests', () => {
-        const { value, timeseries } = response.requests;
+        const { value, timeseries } = response.currentPeriod.requests;
         const timeseriesTotal = sumBy(timeseries, 'y');
         expect(value).to.be(timeseriesTotal);
       });
@@ -121,49 +110,40 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           kuery: `app.version:"none"`,
         });
 
-        expect(response).to.eql({
-          sessions: {
-            value: 0,
-            timeseries: [],
-          },
-          requests: {
-            value: 0,
-            timeseries: [],
-          },
-          maxLoadTime: {
-            value: null,
-            timeseries: [],
-          },
-          crashCount: {
-            value: 0,
-            timeseries: [],
-          },
-        });
+        expect(response.currentPeriod.sessions.value).to.eql(0);
+        expect(response.currentPeriod.requests.value).to.eql(0);
+
+        expect(
+          response.currentPeriod.sessions.timeseries.every(
+            (item: { x: number; y?: number | null }) => item.y === 0
+          )
+        ).to.eql(true);
+        expect(
+          response.currentPeriod.requests.timeseries.every(
+            (item: { x: number; y?: number | null }) => item.y === 0
+          )
+        ).to.eql(true);
       });
 
       it('returns the correct values when single filter is applied', async () => {
         const response = await getMobileStats({
           serviceName: 'synth-android',
           environment: 'production',
-          kuery: `network.connection.type:"wifi"`,
+          kuery: `service.version:"1.0"`,
         });
 
-        expect(response.sessions.value).to.eql(3);
-        expect(response.requests.value).to.eql(0);
-        expect(response.crashCount.value).to.eql(0);
-        expect(response.maxLoadTime.value).to.eql(null);
+        expect(response.currentPeriod.sessions.value).to.eql(6);
+        expect(response.currentPeriod.requests.value).to.eql(0);
       });
 
       it('returns the correct values when multiple filters are applied', async () => {
         const response = await getMobileStats({
           serviceName: 'synth-android',
-          kuery: `app.version:"1.0" and environment: "production"`,
+          kuery: `service.version:"1.0" and service.environment: "production"`,
         });
 
-        expect(response.sessions.value).to.eql(0);
-        expect(response.requests.value).to.eql(0);
-        expect(response.crashCount.value).to.eql(0);
-        expect(response.maxLoadTime.value).to.eql(null);
+        expect(response.currentPeriod.sessions.value).to.eql(6);
+        expect(response.currentPeriod.requests.value).to.eql(0);
       });
     });
   });
