@@ -143,10 +143,7 @@ export default function ({ getService }: FtrProviderContext) {
       .expect(200);
   }
 
-  // FLAKY: https://github.com/elastic/kibana/issues/149092
-  // FLAKY: https://github.com/elastic/kibana/issues/149091
-  // FLAKY: https://github.com/elastic/kibana/issues/149090
-  describe.skip('Session Concurrent Limit cleanup', () => {
+  describe('Session Concurrent Limit cleanup', () => {
     before(async () => {
       await security.user.create('anonymous_user', {
         password: 'changeme',
