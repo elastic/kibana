@@ -9,7 +9,7 @@
 import { EuiComboBox } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { UnifiedHistogramBreakdownContext } from '..';
+import { UnifiedHistogramBreakdownContext } from '../types';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
 import { BreakdownFieldSelector } from './breakdown_field_selector';
 import { fieldSupportsBreakdown } from './utils/field_supports_breakdown';
