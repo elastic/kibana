@@ -601,8 +601,10 @@ export class TaskRunner<
       this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_EXECUTIONS);
       if (lastRun.outcome === 'failed') {
         this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_FAILURES);
+        this.inMemoryMetrics.addFailedRuleInfo(ruleId, this.ruleType.id, this.ruleType.producer);
       } else if (executionStatus.error) {
         this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_FAILURES);
+        this.inMemoryMetrics.addFailedRuleInfo(ruleId, this.ruleType.id, this.ruleType.producer);
       }
       this.logger.debug(
         `Updating rule task for ${this.ruleType.id} rule with id ${ruleId} - ${JSON.stringify(

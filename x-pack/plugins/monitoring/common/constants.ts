@@ -521,7 +521,7 @@ export const RULE_DETAILS = {
     paramDetails: {
       threshold: {
         label: i18n.translate('xpack.monitoring.alerts.ruleFailures.paramDetails.threshold.label', {
-          defaultMessage: `Notify when rules failures is over`,
+          defaultMessage: `Notify when the number of failing rules is more than`,
         }),
         type: AlertParamType.Number,
       } as CommonAlertParamDetail,
