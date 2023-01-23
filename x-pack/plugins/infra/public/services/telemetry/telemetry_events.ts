@@ -15,7 +15,7 @@ const hostsViewQuerySubmittedSchema: HostsViewQuerySubmittedSchema = {
   control_filters: {
     type: 'array',
     items: {
-      type: 'keyword',
+      type: 'text',
       _meta: {
         description: 'Selected host control filter.',
         optional: false,

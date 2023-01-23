@@ -6,7 +6,12 @@
  */
 
 import { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
-import { InfraTelemetryEventTypes, ITelemetryClient } from './types';
+import {
+  HostEntryClickedParams,
+  HostsViewQuerySubmittedParams,
+  InfraTelemetryEventTypes,
+  ITelemetryClient,
+} from './types';
 
 /**
  * Client which aggregate all the available telemetry tracking functions
@@ -15,19 +20,17 @@ import { InfraTelemetryEventTypes, ITelemetryClient } from './types';
 export class TelemetryClient implements ITelemetryClient {
   constructor(private analytics: AnalyticsServiceSetup) {}
 
-  public reportHostEntryClicked: ITelemetryClient['reportHostEntryClicked'] = ({
+  public reportHostEntryClicked = ({
     hostname,
     cloud_provider: cloudProvider = 'unknown',
-  }) => {
+  }: HostEntryClickedParams) => {
     this.analytics.reportEvent(InfraTelemetryEventTypes.HOSTS_ENTRY_CLICKED, {
       hostname,
       cloud_provider: cloudProvider,
     });
   };
 
-  public reportHostsViewQuerySubmitted: ITelemetryClient['reportHostsViewQuerySubmitted'] = (
-    params
-  ) => {
+  public reportHostsViewQuerySubmitted = (params: HostsViewQuerySubmittedParams) => {
     this.analytics.reportEvent(InfraTelemetryEventTypes.HOSTS_VIEW_QUERY_SUBMITTED, params);
   };
 }
