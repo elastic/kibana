@@ -89,7 +89,7 @@ export const DiscoverMainContent = ({
               <div
                 css={css`
                   height: 100%;
-                  opacity: ${isDraggingOver ? 0 : 1};
+                  opacity: ${isDraggingOver ? 0.5 : 1};
                 `}
               >
                 <DiscoverDocuments
