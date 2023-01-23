@@ -101,7 +101,7 @@ class OptionsListService implements ControlsOptionsListService {
     } catch (error) {
       // Remove rejected results from memoize cache
       this.cachedOptionsListRequest.cache.delete(this.optionsListCacheResolver(request));
-      return {} as OptionsListResponse;
+      return { rejected: true } as OptionsListResponse;
     }
   };
 }
