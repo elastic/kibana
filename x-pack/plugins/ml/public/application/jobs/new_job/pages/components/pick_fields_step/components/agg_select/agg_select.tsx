@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { FC, useContext, useState, useEffect } from 'react';
+import React, { FC, useContext, useState, useEffect, useMemo } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
-
+import { FieldStatsInfoButton } from '../../../../../common/components/field_stats_info_button';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { Field, Aggregation, AggFieldPair } from '../../../../../../../../../common/types/fields';
+import { useFieldStatsTrigger } from '../../../../../utils/use_field_stats_trigger';
 
 // The display label used for an aggregation e.g. sum(bytes).
 export type Label = string;
@@ -22,7 +23,7 @@ export interface DropDownLabel {
 }
 
 // Label object structure for EUI's ComboBox with support for nesting.
-export interface DropDownOption {
+export interface DropDownOption extends EuiComboBoxOptionOption {
   label: Label;
   options: DropDownLabel[];
 }
@@ -42,24 +43,42 @@ export const AggSelect: FC<Props> = ({ fields, changeHandler, selectedOptions, r
   // create list of labels based on already selected detectors
   // so they can be removed from the dropdown list
   const removeLabels = removeOptions.map(createLabel);
+  const { handleFieldStatsButtonClick } = useFieldStatsTrigger();
 
-  const options: EuiComboBoxOptionOption[] = fields.map((f) => {
-    const aggOption: DropDownOption = { label: f.name, options: [] };
-    if (typeof f.aggs !== 'undefined') {
-      aggOption.options = f.aggs
-        .filter((a) => a.dslName !== null) // don't include aggs which have no ES equivalent
-        .map(
-          (a) =>
-            ({
-              label: `${a.title}(${f.name})`,
-              agg: a,
-              field: f,
-            } as DropDownLabel)
-        )
-        .filter((o) => removeLabels.includes(o.label) === false);
-    }
-    return aggOption;
-  });
+  const options: EuiComboBoxOptionOption[] = useMemo(
+    () =>
+      fields.map((f) => {
+        const aggOption: DropDownOption = {
+          isGroupLabelOption: true,
+          key: f.name,
+          // @ts-ignore Purposefully passing label as element instead of string
+          // for more robust rendering
+          label: (
+            <FieldStatsInfoButton
+              field={f}
+              label={f.name}
+              onButtonClick={handleFieldStatsButtonClick}
+            />
+          ),
+          options: [],
+        };
+        if (typeof f.aggs !== 'undefined') {
+          aggOption.options = f.aggs
+            .filter((a) => a.dslName !== null) // don't include aggs which have no ES equivalent
+            .map(
+              (a) =>
+                ({
+                  label: `${a.title}(${f.name})`,
+                  agg: a,
+                  field: f,
+                } as DropDownLabel)
+            )
+            .filter((o) => removeLabels.includes(o.label) === false);
+        }
+        return aggOption;
+      }),
+    [handleFieldStatsButtonClick, fields, removeLabels]
+  );
 
   useEffect(() => {
     setValidation(jobValidator.duplicateDetectors);

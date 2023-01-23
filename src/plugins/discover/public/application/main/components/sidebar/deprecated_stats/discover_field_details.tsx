@@ -14,8 +14,8 @@ import { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 import { DiscoverFieldBucket } from './discover_field_bucket';
 import { Bucket } from './types';
 import { getDetails, isValidFieldDetails } from './get_details';
-import { DataDocuments$ } from '../../../hooks/use_saved_search';
 import { FetchStatus } from '../../../../types';
+import { DataDocuments$ } from '../../../services/discover_data_state_container';
 
 interface DiscoverFieldDetailsProps {
   /**
