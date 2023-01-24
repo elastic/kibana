@@ -79,5 +79,6 @@
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/react-field",
     "@kbn/unified-field-list-plugin",
+    "@kbn/saved-search-plugin",
   ],
 }
