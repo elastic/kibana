@@ -958,6 +958,10 @@ export class Embeddable
       );
     }
 
+    this.renderBadgeMessages();
+  }
+
+  private renderBadgeMessages() {
     const warningsToDisplay = this.getUserMessages('embeddableBadge', {
       severity: 'warning',
     });

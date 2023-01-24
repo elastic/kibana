@@ -10,10 +10,7 @@ import moment from 'moment';
 
 import type { NetworkTlsNode } from '../../../../../common/search_strategy';
 import type { Columns } from '../../../components/paginated_table';
-import {
-  getRowItemDraggables,
-  getRowItemDraggable,
-} from '../../../../common/components/tables/helpers';
+import { getRowItemsWithActions } from '../../../../common/components/tables/helpers';
 import { LocalizedDateTooltip } from '../../../../common/components/localized_date_tooltip';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
 
@@ -35,12 +32,11 @@ export const getTlsColumns = (tableId: string): TlsColumns => [
     mobileOptions: { show: true },
     sortable: false,
     render: ({ _id, issuers }) =>
-      getRowItemDraggables({
-        rowItems: issuers,
-        attrName: 'tls.server.issuer',
-        idPrefix: `${tableId}-${_id}-table-issuers`,
-        isAggregatable: true,
+      getRowItemsWithActions({
+        values: issuers,
+        fieldName: 'tls.server.issuer',
         fieldType: 'keyword',
+        idPrefix: `${tableId}-${_id}-table-issuers`,
       }),
   },
   {
@@ -50,12 +46,11 @@ export const getTlsColumns = (tableId: string): TlsColumns => [
     mobileOptions: { show: true },
     sortable: false,
     render: ({ _id, subjects }) =>
-      getRowItemDraggables({
-        rowItems: subjects,
-        attrName: 'tls.server.subject',
-        idPrefix: `${tableId}-${_id}-table-subjects`,
-        isAggregatable: true,
+      getRowItemsWithActions({
+        values: subjects,
+        fieldName: 'tls.server.subject',
         fieldType: 'keyword',
+        idPrefix: `${tableId}-${_id}-table-subjects`,
       }),
   },
   {
@@ -65,12 +60,11 @@ export const getTlsColumns = (tableId: string): TlsColumns => [
     mobileOptions: { show: true },
     sortable: true,
     render: (sha1) =>
-      getRowItemDraggable({
-        rowItem: sha1,
-        attrName: 'tls.server.hash.sha1',
-        idPrefix: `${tableId}-${sha1}-table-sha1`,
-        isAggregatable: true,
+      getRowItemsWithActions({
+        values: sha1 ? [sha1] : undefined,
+        fieldName: 'tls.server.hash.sha1',
         fieldType: 'keyword',
+        idPrefix: `${tableId}-${sha1}-table-sha1`,
       }),
   },
   {
@@ -80,12 +74,11 @@ export const getTlsColumns = (tableId: string): TlsColumns => [
     mobileOptions: { show: true },
     sortable: false,
     render: ({ _id, ja3 }) =>
-      getRowItemDraggables({
-        rowItems: ja3,
-        attrName: 'tls.server.ja3s',
-        idPrefix: `${tableId}-${_id}-table-ja3`,
-        isAggregatable: true,
+      getRowItemsWithActions({
+        values: ja3,
+        fieldName: 'tls.server.ja3s',
         fieldType: 'keyword',
+        idPrefix: `${tableId}-${_id}-table-ja3`,
       }),
   },
   {
@@ -95,9 +88,10 @@ export const getTlsColumns = (tableId: string): TlsColumns => [
     mobileOptions: { show: true },
     sortable: false,
     render: ({ _id, notAfter }) =>
-      getRowItemDraggables({
-        rowItems: notAfter,
-        attrName: 'tls.server.not_after',
+      getRowItemsWithActions({
+        values: notAfter,
+        fieldName: 'tls.server.not_after',
+        fieldType: 'date',
         idPrefix: `${tableId}-${_id}-table-notAfter`,
         render: (validUntil) => (
           <LocalizedDateTooltip date={moment(new Date(validUntil)).toDate()}>
