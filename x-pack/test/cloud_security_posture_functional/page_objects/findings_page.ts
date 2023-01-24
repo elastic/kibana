@@ -55,9 +55,14 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
   const table = {
     getElement: () => testSubjects.find('findings_table'),
 
-    getDropDownGroupBy: () => testSubjects.find('comboBoxInput'),
+    getFindingsContainer: () => testSubjects.find('findings_container'),
 
-    getDropDownPopUp: () => testSubjects.find('comboBoxOptionsList '),
+    getDropDownGroupBy: async () => {
+      const dropDownGroupBy = await table.getFindingsContainer();
+      return dropDownGroupBy.findByTestSubject('comboBoxInput');
+    },
+
+    getGroupByDropDownList: () => testSubjects.find('comboBoxOptionsList '),
 
     getHeaders: async () => {
       const element = await table.getElement();
@@ -154,32 +159,32 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
       }
     },
 
-    toggleDropDownModal: async () => {
+    toggleGroupByDropDown: async () => {
       const dropDown = await table.getDropDownGroupBy();
       await dropDown.click();
     },
 
     selectGroupBy: async (groupName: string) => {
-      const dropDownPopUpBox = await table.getDropDownPopUp();
+      const dropDownPopUpBox = await table.getGroupByDropDownList();
       const selector = `button[title="${groupName}"]`;
       const dropDownSelect = await dropDownPopUpBox.findByCssSelector(selector);
       await dropDownSelect.click();
     },
   };
 
-  const tableGroupBy = {
+  const findingsByResourceTable = {
     getElementGroupedBy: () => testSubjects.find('pageContainer'),
 
     getElementRow: (id: string, section: string) =>
       testSubjects.find(`findings_resource_table_row_${id}/${section}`),
 
     getHeaders: async () => {
-      const element = await tableGroupBy.getElementGroupedBy();
+      const element = await findingsByResourceTable.getElementGroupedBy();
       return await element.findAllByCssSelector('thead tr :is(th,td)');
     },
 
     getColumnIndex: async (columnName: string) => {
-      const headers = await tableGroupBy.getHeaders();
+      const headers = await findingsByResourceTable.getHeaders();
       const texts = await Promise.all(headers.map((header) => header.getVisibleText()));
       const columnIndex = texts.findIndex((i) => i === columnName);
       expect(columnIndex).to.be.greaterThan(-1);
@@ -188,8 +193,8 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     getColumnValues: async (columnName: string) => {
       const elementsWithNoFilterCell = ['CIS Section', '@timestamp'];
-      const tableElement = await tableGroupBy.getElementGroupedBy();
-      const columnIndex = await tableGroupBy.getColumnIndex(columnName);
+      const tableElement = await findingsByResourceTable.getElementGroupedBy();
+      const columnIndex = await findingsByResourceTable.getColumnIndex(columnName);
       const selector = elementsWithNoFilterCell.includes(columnName)
         ? `tbody tr td:nth-child(${columnIndex})`
         : `tbody tr td:nth-child(${columnIndex}) div[data-test-subj="filter_cell_value"]`;
@@ -199,36 +204,38 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     },
 
     hasColumnName: async (columnName: string) => {
-      const headers = await tableGroupBy.getHeaders();
+      const headers = await findingsByResourceTable.getHeaders();
       const texts = await Promise.all(headers.map((header) => header.getVisibleText()));
       const columnIndex = texts.findIndex((i) => i === columnName);
       return columnIndex >= 0 ? true : false;
     },
 
-    hasColumnValue: async (columnName: string, value: string) => {
-      const values = await tableGroupBy.getColumnValues(columnName);
-      return values.includes(value);
-    },
-
-    clickOnRowValue: async (value: string, section: string) => {
-      const findingsTable = await tableGroupBy.getElementRow(value, section);
+    clickOnResourceIdLink: async (value: string, section: string) => {
+      const findingsTable = await findingsByResourceTable.getElementRow(value, section);
       const selector = `a[title="${value}"]`;
       const rowValueSelect = await findingsTable.findByCssSelector(selector);
       await rowValueSelect.click();
     },
 
     clickBasedOnText: async (value: string) => {
-      const pageContainer = await tableGroupBy.getElementGroupedBy();
+      const pageContainer = await findingsByResourceTable.getElementGroupedBy();
       const selector = `//*[contains(text(),'${value}')]`;
       const clickTarget = await pageContainer.findByXpath(selector);
       await clickTarget.click();
     },
 
     hasText: async (value: string) => {
-      const pageContainer = await tableGroupBy.getElementGroupedBy();
+      const pageContainer = await findingsByResourceTable.getElementGroupedBy();
       const selector = `//*[contains(text(),'${value}')]`;
       const clickTarget = await pageContainer.findAllByXpath(selector);
       return clickTarget.length > 0;
+    },
+  };
+
+  const resourceFindingsTable = {
+    hasColumnValue: async (columnName: string, value: string) => {
+      const values = await findingsByResourceTable.getColumnValues(columnName);
+      return values.includes(value);
     },
   };
 
@@ -243,8 +250,9 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
   return {
     navigateToFindingsPage,
     table,
-    tableGroupBy,
+    findingsByResourceTable,
     index,
     distributionBar,
+    resourceFindingsTable,
   };
 }
