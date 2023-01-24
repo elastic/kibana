@@ -19,7 +19,7 @@ import {
   DataMain$,
   DataTotalHits$,
   RecordRawType,
-} from '../../hooks/use_saved_search';
+} from '../../services/discover_data_state_container';
 import type { DiscoverStateContainer } from '../../services/discover_state';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
