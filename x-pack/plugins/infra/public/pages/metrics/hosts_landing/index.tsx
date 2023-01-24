@@ -11,6 +11,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { enableInfrastructureHostsView } from '@kbn/observability-plugin/public';
 import { HostsPage } from '../hosts';
 import { EnableHostViewPage } from './enable_host_view_page';
 
@@ -24,9 +25,7 @@ export const HostsLandingPage = () => {
   });
 
   useEffect(() => {
-    setIsHostViewEnabled(
-      kibana.services.uiSettings?.get('observability:enableInfrastructureHostsView')
-    );
+    setIsHostViewEnabled(kibana.services.uiSettings?.get(enableInfrastructureHostsView));
   }, [isHostViewEnabled, kibana.services.uiSettings]);
 
   if (isHostViewEnabled) {
@@ -42,7 +41,7 @@ export const HostsLandingPage = () => {
             color="primary"
             data-test-subj="hostsView-enable-feature-button"
             onClick={() => {
-              kibana.services.uiSettings?.set('observability:enableInfrastructureHostsView', true);
+              kibana.services.uiSettings?.set(enableInfrastructureHostsView, true);
               setIsHostViewEnabled(true);
             }}
           >
