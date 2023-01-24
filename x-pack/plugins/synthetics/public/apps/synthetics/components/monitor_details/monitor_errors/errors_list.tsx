@@ -11,12 +11,12 @@ import { EuiBasicTable, EuiSpacer, EuiText } from '@elastic/eui';
 import { useHistory, useParams } from 'react-router-dom';
 import { ErrorDetailsLink } from '../../common/links/error_details_link';
 import { useSelectedLocation } from '../hooks/use_selected_location';
-import { useKibanaDateFormat } from '../../../../../hooks/use_kibana_date_format';
 import { Ping } from '../../../../../../common/runtime_types';
 import { useErrorFailedStep } from '../hooks/use_error_failed_step';
 import {
   formatTestDuration,
   formatTestRunAt,
+  useDateFormatForTest,
 } from '../../../utils/monitor_test_result/test_time_formats';
 
 export const ErrorsList = ({ errorStates, loading }: { errorStates: Ping[]; loading: boolean }) => {
@@ -41,7 +41,7 @@ export const ErrorsList = ({ errorStates, loading }: { errorStates: Ping[]; load
 
   const history = useHistory();
 
-  const format = useKibanaDateFormat();
+  const format = useDateFormatForTest();
 
   const selectedLocation = useSelectedLocation();
 

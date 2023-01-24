@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FailedTestsByStep } from './failed_tests_by_step';
 import { Ping } from '../../../../../../common/runtime_types';
 import { PanelWithTitle } from '../../common/components/panel_with_title';
 import { MonitorErrorsCount } from '../monitor_summary/monitor_errors_count';
@@ -61,7 +62,9 @@ export const ErrorsTabContent = ({
           </PanelWithTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
-          <PanelWithTitle title={FAILED_TESTS_BY_STEPS_LABEL} />
+          <PanelWithTitle title={FAILED_TESTS_BY_STEPS_LABEL}>
+            <FailedTestsByStep time={time} />
+          </PanelWithTitle>
         </EuiFlexItem>
       </EuiFlexGroup>
     </>

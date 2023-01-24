@@ -36,7 +36,9 @@ export const useEsSearch = <DocumentSource extends unknown, TParams extends esty
             {
               params,
             },
-            {}
+            {
+              legacyHitsTotal: true,
+            }
           )
           .subscribe({
             next: (result) => {
@@ -106,7 +108,7 @@ export const useEsSearch = <DocumentSource extends unknown, TParams extends esty
   const { rawResponse } = response as any;
 
   return {
-    data: rawResponse as ESSearchResponse<DocumentSource, TParams>,
+    data: rawResponse as ESSearchResponse<DocumentSource, TParams, { restTotalHitsAsInt: false }>,
     loading: Boolean(loading),
   };
 };
