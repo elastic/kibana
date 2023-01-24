@@ -59,7 +59,7 @@ export interface ActionAccordionFormProps {
   setActionGroupIdByIndex?: (group: string, index: number) => void;
   setActions: (actions: RuleAction[]) => void;
   setActionParamsProperty: (key: string, value: RuleActionParam, index: number) => void;
-  setActionFrequencyProperty: (key: string, value: RuleActionParam, index: number) => voiåd;
+  setActionFrequencyProperty: (key: string, value: RuleActionParam, index: number) => void;
   featureId: string;
   messageVariables?: ActionVariables;
   setHasActionsDisabled?: (value: boolean) => void;
