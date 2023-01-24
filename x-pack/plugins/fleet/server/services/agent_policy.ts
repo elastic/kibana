@@ -6,7 +6,7 @@
  */
 
 import { omit, isEqual, keyBy, groupBy } from 'lodash';
-import uuidv5 from 'uuid/v5';
+import { v5 as uuidv5 } from 'uuid';
 import { safeDump } from 'js-yaml';
 import pMap from 'p-map';
 import { lt } from 'semver';
