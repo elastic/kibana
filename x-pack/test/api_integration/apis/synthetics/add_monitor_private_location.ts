@@ -34,6 +34,7 @@ export default function ({ getService }: FtrProviderContext) {
     const security = getService('security');
 
     before(async () => {
+      await supertestAPI.post(API_URLS.SYNTHETICS_ENABLEMENT).set('kbn-xsrf', 'true').expect(200);
       await supertestAPI.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
       await supertestAPI
         .post('/api/fleet/epm/packages/synthetics/0.10.3')

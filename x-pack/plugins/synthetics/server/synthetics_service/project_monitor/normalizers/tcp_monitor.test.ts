@@ -215,9 +215,9 @@ describe('tcp normalizers', () => {
           errors: [
             {
               details:
-                '`tcp` project monitors must have exactly one value for field `hosts` in version `8.5.0`. Your monitor was not created or updated.',
+                'Multiple hosts are not supported for tcp project monitors in 8.5.0. Please set only 1 host per monitor. You monitor was not created or updated.',
               id: 'always-down',
-              reason: 'Invalid Heartbeat configuration',
+              reason: 'Unsupported Heartbeat option',
             },
             {
               details:
