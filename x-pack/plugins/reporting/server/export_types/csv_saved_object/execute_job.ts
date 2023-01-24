@@ -91,7 +91,8 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFnType> = (reporting, _lo
       { uiSettings },
       await searchSourceStart.create(searchSourceFieldsWithRefs),
       savedSearch,
-      job.timerange
+      job.timerange,
+      job.state
     );
 
     const jobParamsCsv: JobParamsCSV = { ...job, columns, searchSource };

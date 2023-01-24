@@ -26,6 +26,27 @@ const CsvSavedSearchExportParamsSchema = schema.object({
 
 const CsvSavedSearchExportBodySchema = schema.nullable(
   schema.object({
+    state: schema.maybe(
+      schema.object({
+        query: schema.maybe(
+          schema.any({
+            validate: (input) => {
+              const failMessage = 'Must be a object of Query DSL or an array of Query DSL objects';
+              if (typeof input !== 'object') {
+                return failMessage;
+              }
+              if (Array.isArray(input)) {
+                for (let i = 0; i < input.length; i++) {
+                  if (typeof input[i] !== 'object') {
+                    return failMessage;
+                  }
+                }
+              }
+            },
+          })
+        ),
+      })
+    ),
     timerange: schema.maybe(
       schema.object({
         timezone: schema.maybe(schema.string()),
@@ -81,6 +102,7 @@ export function registerGenerateFromSavedObject(reporting: ReportingCore, logger
           browserTimezone: req.body?.timerange?.timezone || 'UTC',
           timerange: req.body?.timerange,
           savedObjectId: req.params.savedObjectId,
+          state: req.body?.state,
           title: searchObject.attributes.title ?? 'Unknown search',
           objectType: 'saved search',
           version: '7.17',

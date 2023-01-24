@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { Filter } from '@kbn/es-query';
 import type { IUiSettingsClient, SavedObject } from 'kibana/server';
 import moment from 'moment-timezone';
@@ -23,6 +24,17 @@ export type SavedSearchObjectType = SavedObject<
 function isStringArray(arr: unknown | string[]): arr is string[] {
   return Array.isArray(arr) && arr.every((p) => typeof p === 'string');
 }
+type FilterResponse = undefined | Filter | Filter[] | (() => Filter | Filter[] | undefined);
+function normalizeFilter(savedSearchFilterTmp?: FilterResponse) {
+  let savedSearchFilter: Filter[] | undefined;
+  if (savedSearchFilterTmp && Array.isArray(savedSearchFilterTmp)) {
+    // can not include functions: could be recursive
+    savedSearchFilter = [...savedSearchFilterTmp.filter((f) => typeof f !== 'function')];
+  } else if (savedSearchFilterTmp && typeof savedSearchFilterTmp !== 'function') {
+    savedSearchFilter = [savedSearchFilterTmp];
+  }
+  return savedSearchFilter;
+}
 
 /**
  * Partially copied from src/plugins/discover/public/application/apps/main/utils/get_sharing_data.ts
@@ -32,7 +44,10 @@ export async function getSharingData(
   services: { uiSettings: IUiSettingsClient },
   currentSearchSource: ISearchSource,
   savedSearch: SavedSearchObjectType,
-  jobParamsTimeRange?: { min?: string | number; max?: string | number; timezone?: string }
+  jobParamsTimeRange?: { min?: string | number; max?: string | number; timezone?: string },
+  jobParamsUnsavedState?: {
+    query?: estypes.QueryDslQueryContainer | estypes.QueryDslQueryContainer[];
+  }
 ) {
   const searchSource = currentSearchSource.createCopy();
   const index = searchSource.getField('index');
@@ -108,27 +123,22 @@ export async function getSharingData(
   // Combine the time range filter from the job request body with any filters that have been saved into the saved search object
   // NOTE: if the filters that were saved into the search are NOT an array, it may be a function. Function
   // filters are not supported in this API.
-  const savedSearchFilterTmp = searchSource.getField('filter');
+  let combinedFilters: Filter[] = [];
+  const savedSearchFilter = normalizeFilter(searchSource.getField('filter'));
+  const jobParamsStateFilter = normalizeFilter(jobParamsUnsavedState?.query as FilterResponse);
+
+  if (jobParamsTimeRangeFilter) {
+    combinedFilters.push(jobParamsTimeRangeFilter);
+  }
+  if (savedSearchFilter && savedSearchFilter.length > 0) {
+    combinedFilters = combinedFilters.concat(savedSearchFilter);
+  }
+  if (jobParamsStateFilter && jobParamsStateFilter?.length > 0) {
+    combinedFilters = combinedFilters.concat(jobParamsStateFilter);
+  }
+
   searchSource.removeField('filter');
-
-  let combinedFilters: Filter[] | undefined;
-  let savedSearchFilter: Filter[] | undefined;
-  if (savedSearchFilterTmp && Array.isArray(savedSearchFilterTmp)) {
-    // can not include functions: could be recursive
-    savedSearchFilter = [...savedSearchFilterTmp.filter((f) => typeof f !== 'function')];
-  } else if (savedSearchFilterTmp && typeof savedSearchFilterTmp !== 'function') {
-    savedSearchFilter = [savedSearchFilterTmp];
-  }
-
-  if (savedSearchFilter && jobParamsTimeRangeFilter) {
-    combinedFilters = [jobParamsTimeRangeFilter, ...savedSearchFilter];
-  } else if (savedSearchFilter) {
-    combinedFilters = [...savedSearchFilter];
-  } else if (jobParamsTimeRangeFilter) {
-    combinedFilters = [jobParamsTimeRangeFilter];
-  }
-
-  if (combinedFilters) {
+  if (combinedFilters.length > 0) {
     searchSource.setField('filter', combinedFilters);
   }
 

@@ -5,10 +5,14 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import type { BaseParams, BasePayload } from '../base';
 
 interface CsvFromSavedObjectBase {
   objectType: 'saved search';
+  state?: {
+    query?: estypes.QueryDslQueryContainer | estypes.QueryDslQueryContainer[];
+  };
   timerange?: {
     timezone?: string;
     min?: string | number;
