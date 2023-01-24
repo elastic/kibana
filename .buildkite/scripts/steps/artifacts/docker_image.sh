@@ -78,7 +78,7 @@ steps:
       env:
         MODE: sed
         TARGET_FILE: kibana-controller.yaml
-        IMAGE_TAG: "$KIBANA_IMAGE"
+        IMAGE_TAG: "$GIT_ABBREV_COMMIT"
         SERVICE: kibana-controller
 EOF
 
