@@ -92,7 +92,7 @@ export default function ({ getService }: FtrProviderContext) {
       await assertLogContains({
         description: 'execution context propagates to Kibana logs',
         predicate: (record) =>
-          isExecutionContextLog(record?.message, {
+          isExecutionContextLog(record, {
             type: 'task manager',
             name: 'run alerting:test.executionContext',
             // @ts-expect-error. it accepts strings only
@@ -132,7 +132,7 @@ export default function ({ getService }: FtrProviderContext) {
       await assertLogContains({
         description: 'execution context propagates to Kibana logs',
         predicate: (record) =>
-          isExecutionContextLog(record?.message, {
+          isExecutionContextLog(record, {
             type: 'usage_collection',
             name: 'collector.fetch',
             id: 'application_usage',

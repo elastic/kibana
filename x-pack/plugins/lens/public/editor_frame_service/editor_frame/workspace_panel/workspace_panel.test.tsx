@@ -8,7 +8,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { ReactExpressionRendererProps } from '@kbn/expressions-plugin/public';
-import { FramePublicAPI, Visualization } from '../../../types';
+import { FramePublicAPI, UserMessage, Visualization } from '../../../types';
 import {
   createMockVisualization,
   createMockDatasource,
@@ -61,6 +61,7 @@ function createCoreStartWithPermissions(newCapabilities = defaultPermissions) {
 
 const defaultProps = {
   datasourceMap: {},
+  visualizationMap: {},
   framePublicAPI: createMockFramePublicAPI(),
   ExpressionRenderer: createExpressionRendererMock(),
   core: createCoreStartWithPermissions(),
@@ -71,6 +72,8 @@ const defaultProps = {
   getSuggestionForField: () => undefined,
   lensInspector: getLensInspectorService(inspectorPluginMock.createStartContract()),
   toggleFullscreen: jest.fn(),
+  getUserMessages: () => [],
+  addUserMessages: () => () => {},
 };
 
 const toExpr = (
@@ -309,15 +312,6 @@ describe('workspace_panel', () => {
   });
 
   it('should base saveability on working changes when auto-apply disabled', async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    mockVisualization.getErrorMessages.mockImplementation((currentVisualizationState: any) => {
-      if (currentVisualizationState.hasProblem) {
-        return [{ shortMessage: 'An error occurred', longMessage: 'An long description here' }];
-      } else {
-        return [];
-      }
-    });
-
     const framePublicAPI = createMockFramePublicAPI();
     framePublicAPI.datasourceLayers = {
       first: mockDatasource.publicAPIMock,
@@ -325,9 +319,12 @@ describe('workspace_panel', () => {
     mockDatasource.toExpression.mockReturnValue('datasource');
     mockDatasource.getLayers.mockReturnValue(['first']);
 
+    let userMessages: UserMessage[] = [];
+
     const mounted = await mountWithProvider(
       <WorkspacePanel
         {...defaultProps}
+        getUserMessages={() => userMessages}
         datasourceMap={{
           testDatasource: mockDatasource,
         }}
@@ -355,11 +352,24 @@ describe('workspace_panel', () => {
     `);
     expect(isSaveable()).toBe(true);
 
+    // note that populating the user messages and then dispatching a state update is true to
+    // how Lens interacts with the workspace panel from its perspective. all the panel does is call
+    // that getUserMessages function any time it gets re-rendered (aka state update)
+    userMessages = [
+      {
+        severity: 'error',
+        fixableInEditor: true,
+        displayLocations: [{ id: 'visualization' }],
+        shortMessage: 'hey there',
+        longMessage: "i'm another error",
+      },
+    ] as UserMessage[];
+
     act(() => {
       mounted.lensStore.dispatch(
         updateVisualizationState({
           visualizationId: 'testVis',
-          newState: { activeId: 'testVis', hasProblem: true },
+          newState: {},
         })
       );
     });
@@ -598,7 +608,6 @@ describe('workspace_panel', () => {
       type: 'lens/onActiveDataChange',
       payload: {
         activeData: tablesData,
-        requestWarnings: [],
       },
     });
   });
@@ -696,92 +705,25 @@ describe('workspace_panel', () => {
     expect(expressionRendererMock).toHaveBeenCalledTimes(3);
   });
 
-  it('should show an error message if there are missing indexpatterns in the visualization', async () => {
-    mockDatasource.getLayers.mockReturnValue(['first']);
-    mockDatasource.checkIntegrity.mockReturnValue(['a']);
-    const framePublicAPI = createMockFramePublicAPI();
-    framePublicAPI.datasourceLayers = {
-      first: mockDatasource.publicAPIMock,
-    };
-    const mounted = await mountWithProvider(
-      <WorkspacePanel
-        {...defaultProps}
-        datasourceMap={{
-          testDatasource: mockDatasource,
-        }}
-        framePublicAPI={framePublicAPI}
-        visualizationMap={{
-          testVis: { ...mockVisualization, toExpression: () => 'testVis' },
-        }}
-      />,
-
+  it('should show configuration error messages if present', async () => {
+    const messages: UserMessage[] = [
       {
-        preloadedState: {
-          datasourceStates: {
-            testDatasource: {
-              // define a layer with an indexpattern not available
-              state: { layers: { indexPatternId: 'a' }, indexPatterns: {} },
-              isLoading: false,
-            },
-          },
-        },
-      }
-    );
-    instance = mounted.instance;
-
-    expect(instance.find('[data-test-subj="missing-refs-failure"]').exists()).toBeTruthy();
-    expect(instance.find(expressionRendererMock)).toHaveLength(0);
-  });
-
-  it('should not show the management action in case of missing indexpattern and no navigation permissions', async () => {
-    mockDatasource.getLayers.mockReturnValue(['first']);
-    const framePublicAPI = createMockFramePublicAPI();
-    framePublicAPI.datasourceLayers = {
-      first: mockDatasource.publicAPIMock,
-    };
-
-    const mounted = await mountWithProvider(
-      <WorkspacePanel
-        {...defaultProps}
-        datasourceMap={{
-          testDatasource: mockDatasource,
-        }}
-        framePublicAPI={framePublicAPI}
-        visualizationMap={{
-          testVis: { ...mockVisualization, toExpression: () => 'testVis' },
-        }}
-        // Use cannot navigate to the management page
-        core={createCoreStartWithPermissions({
-          navLinks: { management: false },
-          management: { kibana: { indexPatterns: true } },
-        })}
-      />,
-
+        severity: 'error',
+        fixableInEditor: true,
+        displayLocations: [{ id: 'visualization' }],
+        shortMessage: 'hey there',
+        longMessage: "i'm an error",
+      },
       {
-        preloadedState: {
-          datasourceStates: {
-            testDatasource: {
-              // define a layer with an indexpattern not available
-              state: { layers: { indexPatternId: 'a' }, indexPatterns: {} },
-              isLoading: false,
-            },
-          },
-        },
-      }
-    );
-    instance = mounted.instance;
+        severity: 'error',
+        fixableInEditor: true,
+        displayLocations: [{ id: 'visualization' }],
+        shortMessage: 'hey there',
+        longMessage: "i'm another error",
+      },
+    ];
 
-    expect(
-      instance.find('[data-test-subj="configuration-failure-reconfigure-indexpatterns"]').exists()
-    ).toBeFalsy();
-  });
-
-  it('should not show the management action in case of missing indexpattern and no indexPattern specific permissions', async () => {
-    mockDatasource.getLayers.mockReturnValue(['first']);
-    const framePublicAPI = createMockFramePublicAPI();
-    framePublicAPI.datasourceLayers = {
-      first: mockDatasource.publicAPIMock,
-    };
+    const getUserMessages = jest.fn(() => messages);
 
     const mounted = await mountWithProvider(
       <WorkspacePanel
@@ -789,167 +731,35 @@ describe('workspace_panel', () => {
         datasourceMap={{
           testDatasource: mockDatasource,
         }}
-        framePublicAPI={framePublicAPI}
-        visualizationMap={{
-          testVis: { ...mockVisualization, toExpression: () => 'testVis' },
-        }}
-        // user can go to management, but indexPatterns management is not accessible
-        core={createCoreStartWithPermissions({
-          navLinks: { management: true },
-          management: { kibana: { indexPatterns: false } },
-        })}
-      />,
-
-      {
-        preloadedState: {
-          datasourceStates: {
-            testDatasource: {
-              // define a layer with an indexpattern not available
-              state: { layers: { indexPatternId: 'a' }, indexPatterns: {} },
-              isLoading: false,
-            },
-          },
-        },
-      }
-    );
-    instance = mounted.instance;
-
-    expect(
-      instance.find('[data-test-subj="configuration-failure-reconfigure-indexpatterns"]').exists()
-    ).toBeFalsy();
-  });
-
-  it('should show an error message if validation on datasource does not pass', async () => {
-    mockDatasource.getErrorMessages.mockReturnValue([
-      { shortMessage: 'An error occurred', longMessage: 'An long description here' },
-    ]);
-    mockDatasource.getLayers.mockReturnValue(['first']);
-    const framePublicAPI = createMockFramePublicAPI();
-    framePublicAPI.datasourceLayers = {
-      first: mockDatasource.publicAPIMock,
-    };
-
-    const mounted = await mountWithProvider(
-      <WorkspacePanel
-        {...defaultProps}
-        datasourceMap={{
-          testDatasource: mockDatasource,
-        }}
-        framePublicAPI={framePublicAPI}
-        visualizationMap={{
-          testVis: { ...mockVisualization, toExpression: () => 'testVis' },
-        }}
-      />
-    );
-    instance = mounted.instance;
-    act(() => {
-      instance.update();
-    });
-
-    expect(instance.find('[data-test-subj="configuration-failure"]').exists()).toBeTruthy();
-    expect(instance.find(expressionRendererMock)).toHaveLength(0);
-  });
-
-  it('should show an error message if validation on visualization does not pass', async () => {
-    mockDatasource.getErrorMessages.mockReturnValue(undefined);
-    mockDatasource.getLayers.mockReturnValue(['first']);
-    mockVisualization.getErrorMessages.mockReturnValue([
-      { shortMessage: 'Some error happened', longMessage: 'Some long description happened' },
-    ]);
-    mockVisualization.toExpression.mockReturnValue('testVis');
-    const framePublicAPI = createMockFramePublicAPI();
-    framePublicAPI.datasourceLayers = {
-      first: mockDatasource.publicAPIMock,
-    };
-
-    const mounted = await mountWithProvider(
-      <WorkspacePanel
-        {...defaultProps}
-        datasourceMap={{
-          testDatasource: mockDatasource,
-        }}
-        framePublicAPI={framePublicAPI}
-        visualizationMap={{
-          testVis: mockVisualization,
-        }}
-      />
-    );
-    instance = mounted.instance;
-
-    expect(instance.find('[data-test-subj="configuration-failure"]').exists()).toBeTruthy();
-    expect(instance.find(expressionRendererMock)).toHaveLength(0);
-  });
-
-  it('should show an error message if validation on both datasource and visualization do not pass', async () => {
-    mockDatasource.getErrorMessages.mockReturnValue([
-      { shortMessage: 'An error occurred', longMessage: 'An long description here' },
-    ]);
-    mockDatasource.getLayers.mockReturnValue(['first']);
-    mockVisualization.getErrorMessages.mockReturnValue([
-      { shortMessage: 'Some error happened', longMessage: 'Some long description happened' },
-    ]);
-    mockVisualization.toExpression.mockReturnValue('testVis');
-    const framePublicAPI = createMockFramePublicAPI();
-    framePublicAPI.datasourceLayers = {
-      first: mockDatasource.publicAPIMock,
-    };
-
-    const mounted = await mountWithProvider(
-      <WorkspacePanel
-        {...defaultProps}
-        datasourceMap={{
-          testDatasource: mockDatasource,
-        }}
-        framePublicAPI={framePublicAPI}
-        visualizationMap={{
-          testVis: mockVisualization,
-        }}
+        getUserMessages={getUserMessages}
       />
     );
     instance = mounted.instance;
 
     // EuiFlexItem duplicates internally the attribute, so we need to filter only the most inner one here
-    expect(
-      instance.find('[data-test-subj="configuration-failure-more-errors"]').last().text()
-    ).toEqual(' +1 error');
+    expect(instance.find('[data-test-subj="workspace-more-errors-button"]').last().text()).toEqual(
+      ' +1 error'
+    );
     expect(instance.find(expressionRendererMock)).toHaveLength(0);
+    expect(getUserMessages).toHaveBeenCalledWith(['visualization', 'visualizationInEditor'], {
+      severity: 'error',
+    });
   });
 
-  it('should NOT display errors for unapplied changes', async () => {
+  it('should NOT display config errors for unapplied changes', async () => {
     // this test is important since we don't want the workspace panel to
     // display errors if the user has disabled auto-apply, messed something up,
     // but not yet applied their changes
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    mockDatasource.getErrorMessages.mockImplementation((currentDatasourceState: any) => {
-      if (currentDatasourceState.hasProblem) {
-        return [{ shortMessage: 'An error occurred', longMessage: 'An long description here' }];
-      } else {
-        return [];
-      }
-    });
-    mockDatasource.getLayers.mockReturnValue(['first']);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    mockVisualization.getErrorMessages.mockImplementation((currentVisualizationState: any) => {
-      if (currentVisualizationState.hasProblem) {
-        return [{ shortMessage: 'An error occurred', longMessage: 'An long description here' }];
-      } else {
-        return [];
-      }
-    });
-    mockVisualization.toExpression.mockReturnValue('testVis');
-    const framePublicAPI = createMockFramePublicAPI();
-    framePublicAPI.datasourceLayers = {
-      first: mockDatasource.publicAPIMock,
-    };
+    let userMessages = [] as UserMessage[];
 
     const mounted = await mountWithProvider(
       <WorkspacePanel
         {...defaultProps}
+        getUserMessages={() => userMessages}
         datasourceMap={{
           testDatasource: mockDatasource,
         }}
-        framePublicAPI={framePublicAPI}
         visualizationMap={{
           testVis: mockVisualization,
         }}
@@ -959,9 +769,7 @@ describe('workspace_panel', () => {
     instance = mounted.instance;
     const lensStore = mounted.lensStore;
 
-    const showingErrors = () =>
-      instance.exists('[data-test-subj="configuration-failure-error"]') ||
-      instance.exists('[data-test-subj="configuration-failure-more-errors"]');
+    const showingErrors = () => instance.exists('[data-test-subj="workspace-error-message"]');
 
     expect(showingErrors()).toBeFalsy();
 
@@ -973,27 +781,24 @@ describe('workspace_panel', () => {
     expect(showingErrors()).toBeFalsy();
 
     // introduce some issues
+    userMessages = [
+      {
+        severity: 'error',
+        fixableInEditor: true,
+        displayLocations: [{ id: 'visualization' }],
+        shortMessage: 'hey there',
+        longMessage: "i'm another error",
+      },
+    ] as UserMessage[];
+
     act(() => {
       lensStore.dispatch(
         updateDatasourceState({
           datasourceId: 'testDatasource',
-          updater: { hasProblem: true },
+          updater: {},
         })
       );
     });
-    instance.update();
-
-    expect(showingErrors()).toBeFalsy();
-
-    act(() => {
-      lensStore.dispatch(
-        updateVisualizationState({
-          visualizationId: 'testVis',
-          newState: { activeId: 'testVis', hasProblem: true },
-        })
-      );
-    });
-    instance.update();
 
     expect(showingErrors()).toBeFalsy();
 
@@ -1004,6 +809,7 @@ describe('workspace_panel', () => {
     expect(showingErrors()).toBeTruthy();
   });
 
+  // TODO - test refresh after expression failure error
   it('should show an error message if the expression fails to parse', async () => {
     mockDatasource.toExpression.mockReturnValue('|||');
     mockDatasource.getLayers.mockReturnValue(['first']);
@@ -1011,6 +817,10 @@ describe('workspace_panel', () => {
     framePublicAPI.datasourceLayers = {
       first: mockDatasource.publicAPIMock,
     };
+
+    const mockRemoveUserMessages = jest.fn();
+    const mockAddUserMessages = jest.fn(() => mockRemoveUserMessages);
+    const mockGetUserMessages = jest.fn<UserMessage[], unknown[]>(() => []);
 
     const mounted = await mountWithProvider(
       <WorkspacePanel
@@ -1022,11 +832,13 @@ describe('workspace_panel', () => {
         visualizationMap={{
           testVis: { ...mockVisualization, toExpression: () => 'testVis' },
         }}
+        addUserMessages={mockAddUserMessages}
+        getUserMessages={mockGetUserMessages}
       />
     );
     instance = mounted.instance;
 
-    expect(instance.find('[data-test-subj="expression-failure"]').exists()).toBeTruthy();
+    expect(mockAddUserMessages.mock.lastCall).toMatchSnapshot();
     expect(instance.find(expressionRendererMock)).toHaveLength(0);
   });
 

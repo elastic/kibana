@@ -20,7 +20,6 @@ import {
 } from '@kbn/charts-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { ISearchStart } from '@kbn/data-plugin/public';
-import React from 'react';
 import type { Document } from './persistence/saved_object_store';
 import {
   Datasource,
@@ -31,6 +30,7 @@ import {
   DraggedField,
   DragDropOperation,
   isOperation,
+  UserMessage,
 } from './types';
 import type { DatasourceStates, VisualizationState } from './state_management';
 import type { IndexPatternServiceAPI } from './data_views_service/service';
@@ -335,8 +335,8 @@ export const getSearchWarningMessages = (
   deps: {
     searchService: ISearchStart;
   }
-) => {
-  const warningsMap: Map<string, Array<string | React.ReactNode>> = new Map();
+): UserMessage[] => {
+  const warningsMap: Map<string, UserMessage[]> = new Map();
 
   deps.searchService.showWarnings(adapter, (warning, meta) => {
     const { request, response, requestId } = meta;
