@@ -9,7 +9,7 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 import { assertLogContains, isExecutionContextLog } from '../test_utils';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'home']);
+  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'home', 'timePicker']);
   const retry = getService('retry');
 
   // Failing: See https://github.com/elastic/kibana/issues/112102
@@ -33,42 +33,66 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('discover app', () => {
       before(async () => {
         await PageObjects.common.navigateToApp('discover');
+        await PageObjects.timePicker.setCommonlyUsedTime('Last_7 days');
         await PageObjects.header.waitUntilLoadingHasFinished();
       });
 
-      it('propagates context for Discover', async () => {
-        await assertLogContains({
-          description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
-          predicate: (record) =>
-            Boolean(record.http?.request?.id?.includes('kibana:application:discover')),
-          retry,
+      describe('propagates context for Discover', () => {
+        it('propagates to Elasticsearch via "x-opaque-id" header', async () => {
+          await assertLogContains({
+            description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
+            predicate: (record) =>
+              Boolean(record.http?.request?.id?.includes('kibana:application:discover')),
+            retry,
+          });
         });
 
-        await assertLogContains({
-          description: 'execution context propagates to Kibana logs',
-          predicate: (record) =>
-            isExecutionContextLog(record?.message, {
-              description: 'fetch documents',
-              id: '',
-              name: 'discover',
+        it('propagates to Kibana logs (fetch documents)', async () => {
+          await assertLogContains({
+            description: 'execution context propagates to Kibana logs (fetch documents)',
+            predicate: checkExecutionContextEntry({
               type: 'application',
-              // discovery doesn't have an URL since one of from the example dataset is not saved separately
+              name: 'discover',
               url: '/app/discover',
+              child: {
+                name: 'discover',
+                url: '/app/discover',
+                type: 'application',
+                page: 'app',
+                id: 'new',
+                description: 'fetch documents',
+              },
             }),
-          retry,
+            retry,
+          });
         });
 
-        await assertLogContains({
-          description: 'execution context propagates to Kibana logs',
-          predicate: (record) =>
-            isExecutionContextLog(record?.message, {
-              description: 'fetch chart data and total hits',
-              id: '',
-              name: 'discover',
+        it('propagates to Kibana logs (fetch chart data and total hits)', async () => {
+          await assertLogContains({
+            description:
+              'execution context propagates to Kibana logs (fetch chart data and total hits)',
+            predicate: checkExecutionContextEntry({
               type: 'application',
+              name: 'discover',
               url: '/app/discover',
+              child: {
+                name: 'discover',
+                url: '/app/discover',
+                type: 'application',
+                page: 'app',
+                id: 'new',
+                description: 'fetch chart data and total hits',
+                child: {
+                  type: 'lens',
+                  name: 'lnsXY',
+                  id: 'unifiedHistogramLensComponent',
+                  description: 'Edit visualization',
+                  url: '/app/lens#/edit_by_value',
+                },
+              },
             }),
-          retry,
+            retry,
+          });
         });
       });
     });
@@ -77,304 +101,353 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       before(async () => {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.loadSavedDashboard('[Flights] Global Flight Dashboard');
+        await PageObjects.timePicker.setCommonlyUsedTime('Last_7 days');
         await PageObjects.dashboard.waitForRenderComplete();
         await PageObjects.header.waitUntilLoadingHasFinished();
       });
 
       describe('propagates context for Lens visualizations', () => {
-        it('lnsXY', async () => {
-          await assertLogContains({
-            description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
-            predicate: (record) =>
-              Boolean(
-                record.http?.request?.id?.includes(
-                  'kibana:application:dashboard:7adfa750-4c81-11e8-b3d7-01146121b73d;lens:lnsXY:086ac2e9-dd16-4b45-92b8-1e43ff7e3f65'
-                )
+        describe('lnsXY', () => {
+          it('propagates to Elasticsearch via "x-opaque-id" header', async () => {
+            await assertLogContains({
+              description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
+              predicate: checkHttpRequestId(
+                'dashboard:dashboards:7adfa750-4c81-11e8-b3d7-01146121b73d;lens:lnsXY:086ac2e9-dd16-4b45-92b8-1e43ff7e3f65'
               ),
-            retry,
+              retry,
+            });
           });
 
-          await assertLogContains({
-            description: 'execution context propagates to Kibana logs',
-            predicate: (record) =>
-              isExecutionContextLog(record?.message, {
-                parent: {
-                  type: 'application',
-                  name: 'dashboard',
+          it('propagates to Kibana logs', async () => {
+            await assertLogContains({
+              description: 'execution context propagates to Kibana logs',
+              predicate: checkExecutionContextEntry({
+                type: 'application',
+                name: 'dashboards',
+                url: '/app/dashboards',
+                child: {
+                  name: 'dashboards',
+                  url: '/app/dashboards',
+                  type: 'dashboard',
+                  page: 'app',
                   id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
                   description: '[Flights] Global Flight Dashboard',
-                  url: '/view/7adfa750-4c81-11e8-b3d7-01146121b73d',
+                  child: {
+                    type: 'lens',
+                    name: 'lnsXY',
+                    id: '086ac2e9-dd16-4b45-92b8-1e43ff7e3f65',
+                    description: '[Flights] Flight count',
+                    url: '/app/lens#/edit_by_value',
+                  },
                 },
-                type: 'lens',
-                name: 'lnsXY',
-                id: '086ac2e9-dd16-4b45-92b8-1e43ff7e3f65',
-                description: '[Flights] Flight count',
-                url: '/app/lens#/edit_by_value',
               }),
-            retry,
+              retry,
+            });
           });
         });
 
-        it('lnsMetric', async () => {
-          await assertLogContains({
-            description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
-            predicate: (record) =>
-              Boolean(
-                record.http?.request?.id?.includes(
-                  'kibana:application:dashboard:7adfa750-4c81-11e8-b3d7-01146121b73d;lens:lnsMetric:b766e3b8-4544-46ed-99e6-9ecc4847e2a2'
-                )
+        describe('lnsMetric', () => {
+          it('propagates to Elasticsearch via "x-opaque-id" header', async () => {
+            await assertLogContains({
+              description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
+              predicate: checkHttpRequestId(
+                'dashboard:dashboards:7adfa750-4c81-11e8-b3d7-01146121b73d;lens:lnsLegacyMetric:b766e3b8-4544-46ed-99e6-9ecc4847e2a2'
               ),
-            retry,
+              retry,
+            });
           });
 
-          await assertLogContains({
-            description: 'execution context propagates to Kibana logs',
-            predicate: (record) =>
-              isExecutionContextLog(record?.message, {
-                parent: {
-                  type: 'application',
-                  name: 'dashboard',
+          it('propagates to Kibana logs', async () => {
+            await assertLogContains({
+              description: 'execution context propagates to Kibana logs',
+              predicate: checkExecutionContextEntry({
+                name: 'dashboards',
+                url: '/app/dashboards',
+                type: 'application',
+                child: {
+                  name: 'dashboards',
+                  url: '/app/dashboards',
+                  type: 'dashboard',
+                  page: 'app',
                   id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
                   description: '[Flights] Global Flight Dashboard',
-                  url: '/view/7adfa750-4c81-11e8-b3d7-01146121b73d',
+                  child: {
+                    type: 'lens',
+                    name: 'lnsLegacyMetric',
+                    id: 'b766e3b8-4544-46ed-99e6-9ecc4847e2a2',
+                    description: '',
+                    url: '/app/lens#/edit_by_value',
+                  },
                 },
-                type: 'lens',
-                name: 'lnsMetric',
-                id: '2e33ade5-96e5-40b4-b460-493e5d4fa834',
-                description: '',
-                url: '/app/lens#/edit_by_value',
               }),
-            retry,
+              retry,
+            });
           });
         });
 
-        it('lnsDatatable', async () => {
-          await assertLogContains({
-            description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
-            predicate: (record) =>
-              Boolean(
-                record.http?.request?.id?.includes(
-                  'kibana:application:dashboard:7adfa750-4c81-11e8-b3d7-01146121b73d;lens:lnsDatatable:fb86b32f-fb7a-45cf-9511-f366fef51bbd'
-                )
+        describe('lnsDatatable', () => {
+          it('propagates to Elasticsearch via "x-opaque-id" header', async () => {
+            await assertLogContains({
+              description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
+              predicate: checkHttpRequestId(
+                'dashboard:dashboards:7adfa750-4c81-11e8-b3d7-01146121b73d;lens:lnsDatatable:fb86b32f-fb7a-45cf-9511-f366fef51bbd'
               ),
-            retry,
+              retry,
+            });
           });
 
-          await assertLogContains({
-            description: 'execution context propagates to Kibana logs',
-            predicate: (record) =>
-              isExecutionContextLog(record?.message, {
-                parent: {
-                  type: 'application',
-                  name: 'dashboard',
+          it('propagates to Kibana logs', async () => {
+            await assertLogContains({
+              description: 'execution context propagates to Kibana logs',
+              predicate: checkExecutionContextEntry({
+                name: 'dashboards',
+                url: '/app/dashboards',
+                type: 'application',
+                child: {
+                  name: 'dashboards',
+                  url: '/app/dashboards',
+                  type: 'dashboard',
+                  page: 'app',
                   id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
                   description: '[Flights] Global Flight Dashboard',
-                  url: '/view/7adfa750-4c81-11e8-b3d7-01146121b73d',
+                  child: {
+                    type: 'lens',
+                    name: 'lnsDatatable',
+                    id: 'fb86b32f-fb7a-45cf-9511-f366fef51bbd',
+                    description: 'Cities by delay, cancellation',
+                    url: '/app/lens#/edit_by_value',
+                  },
                 },
-                type: 'lens',
-                name: 'lnsDatatable',
-                id: 'fb86b32f-fb7a-45cf-9511-f366fef51bbd',
-                description: 'Cities by delay, cancellation',
-                url: '/app/lens#/edit_by_value',
               }),
-            retry,
+              retry,
+            });
           });
         });
 
-        it('lnsPie', async () => {
-          await assertLogContains({
-            description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
-            predicate: (record) =>
-              Boolean(
-                record.http?.request?.id?.includes(
-                  'kibana:application:dashboard:7adfa750-4c81-11e8-b3d7-01146121b73d;lens:lnsPie:5d53db36-2d5a-4adc-af7b-cec4c1a294e0'
-                )
+        describe('lnsPie', () => {
+          it('propagates to Elasticsearch via "x-opaque-id" header', async () => {
+            await assertLogContains({
+              description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
+              predicate: checkHttpRequestId(
+                'dashboard:dashboards:7adfa750-4c81-11e8-b3d7-01146121b73d;lens:lnsPie:5d53db36-2d5a-4adc-af7b-cec4c1a294e0'
               ),
-            retry,
+              retry,
+            });
           });
-          await assertLogContains({
-            description: 'execution context propagates to Kibana logs',
-            predicate: (record) =>
-              isExecutionContextLog(record?.message, {
-                parent: {
-                  type: 'application',
-                  name: 'dashboard',
+
+          it('propagates to Kibana logs', async () => {
+            await assertLogContains({
+              description: 'execution context propagates to Kibana logs',
+              predicate: checkExecutionContextEntry({
+                name: 'dashboards',
+                url: '/app/dashboards',
+                type: 'application',
+                child: {
+                  name: 'dashboards',
+                  url: '/app/dashboards',
+                  type: 'dashboard',
+                  page: 'app',
                   id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
                   description: '[Flights] Global Flight Dashboard',
-                  url: '/view/7adfa750-4c81-11e8-b3d7-01146121b73d',
+                  child: {
+                    type: 'lens',
+                    name: 'lnsPie',
+                    id: '5d53db36-2d5a-4adc-af7b-cec4c1a294e0',
+                    description: '[Flights] Delay Type',
+                    url: '/app/lens#/edit_by_value',
+                  },
                 },
-                type: 'lens',
-                name: 'lnsPie',
-                id: '5d53db36-2d5a-4adc-af7b-cec4c1a294e0',
-                description: '[Flights] Delay Type',
-                url: '/app/lens#/edit_by_value',
               }),
+              retry,
+            });
+          });
+        });
+      });
+
+      describe('propagates context for built-in Discover', () => {
+        it('propagates to Elasticsearch via "x-opaque-id" header', async () => {
+          await assertLogContains({
+            description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
+            predicate: checkHttpRequestId(
+              'dashboard:dashboards:7adfa750-4c81-11e8-b3d7-01146121b73d;search:discover:571aaf70-4c88-11e8-b3d7-01146121b73d'
+            ),
+            retry,
+          });
+        });
+
+        it('propagates to Kibana logs', async () => {
+          await assertLogContains({
+            description: 'execution context propagates to Kibana logs',
+            predicate: checkExecutionContextEntry({
+              type: 'application',
+              name: 'dashboards',
+              url: '/app/dashboards',
+              child: {
+                type: 'dashboard',
+                name: 'dashboards',
+                url: '/app/dashboards',
+                page: 'app',
+                id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
+                description: '[Flights] Global Flight Dashboard',
+                child: {
+                  type: 'search',
+                  name: 'discover',
+                  id: '571aaf70-4c88-11e8-b3d7-01146121b73d',
+                  description: '[Flights] Flight Log',
+                  url: '/app/discover#/view/571aaf70-4c88-11e8-b3d7-01146121b73d',
+                },
+              },
+            }),
             retry,
           });
         });
       });
 
-      it('propagates context for built-in Discover', async () => {
-        await assertLogContains({
-          description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
-          predicate: (record) =>
-            Boolean(
-              record.http?.request?.id?.includes(
-                'application:dashboard:7adfa750-4c81-11e8-b3d7-01146121b73d;search:discover:571aaf70-4c88-11e8-b3d7-01146121b73d'
-              )
-            ),
-          retry,
+      describe('propagates context for TSVB visualizations', () => {
+        it('propagates to Elasticsearch via "x-opaque-id" header', async () => {
+          await assertLogContains({
+            description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
+            predicate: checkHttpRequestId('agg_based:metrics:bcb63b50-4c89-11e8-b3d7-01146121b73d'),
+            retry,
+          });
         });
-        await assertLogContains({
-          description: 'execution context propagates to Kibana logs',
-          predicate: (record) =>
-            isExecutionContextLog(record?.message, {
-              parent: {
-                type: 'application',
-                name: 'dashboard',
-                id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
-                description: '[Flights] Global Flight Dashboard',
-                url: '/view/7adfa750-4c81-11e8-b3d7-01146121b73d',
+
+        it('propagates to Kibana logs', async () => {
+          await assertLogContains({
+            description: 'execution context propagates to Kibana logs',
+            predicate: checkExecutionContextEntry({
+              name: 'dashboards',
+              url: '/app/dashboards',
+              type: 'application',
+              page: 'app',
+              description: '[Flights] Global Flight Dashboard',
+              child: {
+                type: 'agg_based',
+                name: 'metrics',
+                id: 'bcb63b50-4c89-11e8-b3d7-01146121b73d',
+                description: '[Flights] Delays & Cancellations',
+                url: '/app/visualize#/edit/bcb63b50-4c89-11e8-b3d7-01146121b73d',
               },
-              type: 'search',
-              name: 'discover',
-              id: '571aaf70-4c88-11e8-b3d7-01146121b73d',
-              description: '[Flights] Flight Log',
-              url: '/app/discover#/view/571aaf70-4c88-11e8-b3d7-01146121b73d',
             }),
-          retry,
+            retry,
+          });
         });
       });
 
-      it('propagates context for TSVB visualizations', async () => {
-        await assertLogContains({
-          description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
-          predicate: (record) =>
-            Boolean(
-              record.http?.request?.id?.includes(
-                'kibana:application:dashboard:7adfa750-4c81-11e8-b3d7-01146121b73d;visualization:TSVB:bcb63b50-4c89-11e8-b3d7-01146121b73d'
-              )
+      describe('propagates context for Vega visualizations', () => {
+        it('propagates to Elasticsearch via "x-opaque-id" header', async () => {
+          await assertLogContains({
+            description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
+            predicate: checkHttpRequestId(
+              'dashboard:dashboards:7adfa750-4c81-11e8-b3d7-01146121b73d;agg_based:vega:ed78a660-53a0-11e8-acbd-0be0ad9d822b'
             ),
-          retry,
+            retry,
+          });
         });
 
-        await assertLogContains({
-          description: 'execution context propagates to Kibana logs',
-          predicate: (record) =>
-            isExecutionContextLog(record?.message, {
-              parent: {
-                type: 'application',
-                name: 'dashboard',
+        it('propagates to Kibana logs', async () => {
+          await assertLogContains({
+            description: 'execution context propagates to Kibana logs',
+            predicate: checkExecutionContextEntry({
+              name: 'dashboards',
+              url: '/app/dashboards',
+              type: 'application',
+              child: {
+                name: 'dashboards',
+                url: '/app/dashboards',
+                type: 'dashboard',
+                page: 'app',
                 id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
                 description: '[Flights] Global Flight Dashboard',
-                url: '/view/7adfa750-4c81-11e8-b3d7-01146121b73d',
+                child: {
+                  type: 'agg_based',
+                  name: 'vega',
+                  id: 'ed78a660-53a0-11e8-acbd-0be0ad9d822b',
+                  description: '[Flights] Airport Connections (Hover Over Airport)',
+                  url: '/app/visualize#/edit/ed78a660-53a0-11e8-acbd-0be0ad9d822b',
+                },
               },
-              type: 'visualization',
-              name: 'TSVB',
-              id: 'bcb63b50-4c89-11e8-b3d7-01146121b73d',
-              description: '[Flights] Delays & Cancellations',
-              url: '/app/visualize#/edit/bcb63b50-4c89-11e8-b3d7-01146121b73d',
             }),
-          retry,
+            retry,
+          });
         });
       });
 
-      it('propagates context for Vega visualizations', async () => {
-        await assertLogContains({
-          description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
-          predicate: (record) =>
-            Boolean(
-              record.http?.request?.id?.includes(
-                'kibana:application:dashboard:7adfa750-4c81-11e8-b3d7-01146121b73d;visualization:Vega:ed78a660-53a0-11e8-acbd-0be0ad9d822b'
-              )
+      describe('propagates context for Tag Cloud visualization', () => {
+        it('propagates to Elasticsearch via "x-opaque-id" header', async () => {
+          await assertLogContains({
+            description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
+            predicate: checkHttpRequestId(
+              'dashboard:dashboards:7adfa750-4c81-11e8-b3d7-01146121b73d;agg_based:tagcloud:293b5a30-4c8f-11e8-b3d7-01146121b73d'
             ),
-          retry,
+            retry,
+          });
         });
 
-        await assertLogContains({
-          description: 'execution context propagates to Kibana logs',
-          predicate: (record) =>
-            isExecutionContextLog(record?.message, {
-              parent: {
-                type: 'application',
-                name: 'dashboard',
+        it('propagates to Kibana logs', async () => {
+          await assertLogContains({
+            description: 'execution context propagates to Kibana logs',
+            predicate: checkExecutionContextEntry({
+              name: 'dashboards',
+              url: '/app/dashboards',
+              type: 'application',
+              child: {
+                name: 'dashboards',
+                url: '/app/dashboards',
+                type: 'dashboard',
+                page: 'app',
                 id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
                 description: '[Flights] Global Flight Dashboard',
-                url: '/view/7adfa750-4c81-11e8-b3d7-01146121b73d',
+                child: {
+                  type: 'agg_based',
+                  name: 'tagcloud',
+                  id: '293b5a30-4c8f-11e8-b3d7-01146121b73d',
+                  description: '[Flights] Destination Weather',
+                  url: '/app/visualize#/edit/293b5a30-4c8f-11e8-b3d7-01146121b73d',
+                },
               },
-              type: 'visualization',
-              name: 'Vega',
-              id: 'ed78a660-53a0-11e8-acbd-0be0ad9d822b',
-              description: '[Flights] Airport Connections (Hover Over Airport)',
-              url: '/app/visualize#/edit/ed78a660-53a0-11e8-acbd-0be0ad9d822b',
             }),
-          retry,
+            retry,
+          });
         });
       });
 
-      it('propagates context for Tag Cloud visualization', async () => {
-        await assertLogContains({
-          description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
-          predicate: (record) =>
-            Boolean(
-              record.http?.request?.id?.includes(
-                'kibana:application:dashboard:7adfa750-4c81-11e8-b3d7-01146121b73d;visualization:Tag cloud:293b5a30-4c8f-11e8-b3d7-01146121b73d'
-              )
+      describe('propagates context for Vertical bar visualization', () => {
+        it('propagates to Elasticsearch via "x-opaque-id" header', async () => {
+          await assertLogContains({
+            description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
+            predicate: checkHttpRequestId(
+              'dashboard:dashboards:7adfa750-4c81-11e8-b3d7-01146121b73d;agg_based:histogram:9886b410-4c8b-11e8-b3d7-01146121b73d'
             ),
-          retry,
+            retry,
+          });
         });
 
-        await assertLogContains({
-          description: 'execution context propagates to Kibana logs',
-          predicate: (record) =>
-            isExecutionContextLog(record?.message, {
-              parent: {
-                type: 'application',
-                name: 'dashboard',
+        it('propagates to Kibana logs', async () => {
+          await assertLogContains({
+            description: 'execution context propagates to Kibana logs',
+            predicate: checkExecutionContextEntry({
+              type: 'application',
+              name: 'dashboards',
+              url: '/app/dashboards',
+              child: {
+                type: 'dashboard',
+                name: 'dashboards',
+                url: '/app/dashboards',
+                page: 'app',
                 id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
                 description: '[Flights] Global Flight Dashboard',
-                url: '/view/7adfa750-4c81-11e8-b3d7-01146121b73d',
+                child: {
+                  type: 'agg_based',
+                  name: 'histogram',
+                  id: '9886b410-4c8b-11e8-b3d7-01146121b73d',
+                  description: '[Flights] Delay Buckets',
+                  url: '/app/visualize#/edit/9886b410-4c8b-11e8-b3d7-01146121b73d',
+                },
               },
-              type: 'visualization',
-              name: 'Tag cloud',
-              id: '293b5a30-4c8f-11e8-b3d7-01146121b73d',
-              description: '[Flights] Destination Weather',
-              url: '/app/visualize#/edit/293b5a30-4c8f-11e8-b3d7-01146121b73d',
             }),
-          retry,
-        });
-      });
-
-      it('propagates context for Vertical bar visualization', async () => {
-        await assertLogContains({
-          description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
-          predicate: (record) =>
-            Boolean(
-              record.http?.request?.id?.includes(
-                'kibana:application:dashboard:7adfa750-4c81-11e8-b3d7-01146121b73d;visualization:Vertical bar:9886b410-4c8b-11e8-b3d7-01146121b73d'
-              )
-            ),
-          retry,
-        });
-
-        await assertLogContains({
-          description: 'execution context propagates to Kibana logs',
-          predicate: (record) =>
-            isExecutionContextLog(record?.message, {
-              parent: {
-                type: 'application',
-                name: 'dashboard',
-                id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
-                description: '[Flights] Global Flight Dashboard',
-                url: '/view/7adfa750-4c81-11e8-b3d7-01146121b73d',
-              },
-              type: 'visualization',
-              name: 'Vertical bar',
-              id: '9886b410-4c8b-11e8-b3d7-01146121b73d',
-              description: '[Flights] Delay Buckets',
-              url: '/app/visualize#/edit/9886b410-4c8b-11e8-b3d7-01146121b73d',
-            }),
-          retry,
+            retry,
+          });
         });
       });
     });
