@@ -67,7 +67,7 @@ describe('When a Console command is entered by the user', () => {
     await waitFor(() => expect(renderResult.getByTestId('test-commandUsage')).toBeTruthy());
   });
 
-  it('should should custom command `--help` output when Command service defines `getCommandUsage()`', async () => {
+  it('should render custom command `--help` output when Command service defines `getCommandUsage()`', async () => {
     const cmd2 = commands.find((command) => command.name === 'cmd2');
 
     if (cmd2) {
@@ -178,7 +178,7 @@ describe('When a Console command is entered by the user', () => {
     });
   });
 
-  it('should show error if argument is used more than one', async () => {
+  it('should show error if argument is used more than once', async () => {
     render();
     enterCommand('cmd2 --file one --file two');
 
@@ -200,7 +200,7 @@ describe('When a Console command is entered by the user', () => {
     });
   });
 
-  it('should show error no options were provided, but command requires some', async () => {
+  it('should show error if no options were provided, but command requires some', async () => {
     render();
     enterCommand('cmd2');
 
@@ -222,7 +222,7 @@ describe('When a Console command is entered by the user', () => {
     });
   });
 
-  it('should show error if command definition `validate()` callback return a message', async () => {
+  it("should show error if command's definition `validate()` callback returns a message", async () => {
     const cmd1Definition = commands.find((command) => command.name === 'cmd1');
 
     if (!cmd1Definition) {
@@ -241,7 +241,7 @@ describe('When a Console command is entered by the user', () => {
     });
   });
 
-  it('should show error for --help if command definition `validate()` callback return a message', async () => {
+  it("should show error for --help if command's definition `validate()` callback returns a message", async () => {
     const cmd1Definition = commands.find((command) => command.name === 'cmd1');
 
     if (!cmd1Definition) {
@@ -282,7 +282,7 @@ describe('When a Console command is entered by the user', () => {
     });
   });
 
-  it('should show success when one exlusive argument is used', async () => {
+  it('should show success when one exclusive argument is used', async () => {
     render();
     enterCommand('cmd6 --foo 234');
 
@@ -291,7 +291,7 @@ describe('When a Console command is entered by the user', () => {
     });
   });
 
-  it('should show success when the other exlusive argument is used', async () => {
+  it('should show success when the other exclusive argument is used', async () => {
     render();
     enterCommand('cmd6 --bar 234');
 
