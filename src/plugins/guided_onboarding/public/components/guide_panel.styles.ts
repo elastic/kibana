@@ -8,6 +8,8 @@
 
 import { EuiThemeComputed } from '@elastic/eui';
 import { css } from '@emotion/react';
+import panelBgTop from '../../assets/panel-bg-top.svg';
+import panelBgBottom from '../../assets/panel-bg-bottom.svg';
 
 /**
  *
@@ -21,6 +23,9 @@ export const getGuidePanelStyles = (euiTheme: EuiThemeComputed) => ({
     margin-right: ${euiTheme.size.m};
   `,
   flyoutOverrides: {
+    flyoutHeader: css`
+      background: url(${panelBgTop}) top right no-repeat;
+    `,
     flyoutContainer: css`
       top: 55px !important;
       // Unsetting bottom and height default values to create auto height
@@ -47,7 +52,7 @@ export const getGuidePanelStyles = (euiTheme: EuiThemeComputed) => ({
     `,
     flyoutFooter: css`
       border-radius: 0 0 6px 6px;
-      background: transparent;
+      background: url(${panelBgBottom}) -10px 0 no-repeat;
       padding: 24px 30px;
     `,
     flyoutFooterLink: css`

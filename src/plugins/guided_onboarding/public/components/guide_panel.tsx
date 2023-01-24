@@ -257,7 +257,7 @@ export const GuidePanel = ({ api, application, notifications }: GuidePanelProps)
         >
           {guideConfig && pluginState && pluginState.status !== 'error' ? (
             <>
-              <EuiFlyoutHeader>
+              <EuiFlyoutHeader css={styles.flyoutOverrides.flyoutHeader}>
                 {backToGuidesButton}
                 <EuiTitle size="m">
                   <h2 data-test-subj="guideTitle">
