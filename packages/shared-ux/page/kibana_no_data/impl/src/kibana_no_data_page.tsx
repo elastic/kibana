@@ -20,10 +20,11 @@ export const KibanaNoDataPage = ({
   onDataViewCreated,
   noDataConfig,
   allowAdHocDataView,
+  showPlainSpinner,
 }: KibanaNoDataPageProps) => {
   // These hooks are temporary, until this component is moved to a package.
   const services = useServices();
-  const { hasESData, hasUserDataView, showPlainSpinner } = services;
+  const { hasESData, hasUserDataView } = services;
 
   const [isLoading, setIsLoading] = useState(true);
   const [dataExists, setDataExists] = useState(false);

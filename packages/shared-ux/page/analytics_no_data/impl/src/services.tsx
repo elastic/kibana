@@ -17,7 +17,6 @@ import {
   AnalyticsNoDataPageServices,
   AnalyticsNoDataPageKibanaDependencies,
 } from '@kbn/shared-ux-page-analytics-no-data-types';
-import { of } from 'rxjs';
 
 const Context = React.createContext<Services | null>(null);
 
@@ -28,10 +27,10 @@ export const AnalyticsNoDataPageProvider: FC<AnalyticsNoDataPageServices> = ({
   children,
   ...services
 }) => {
-  const { kibanaGuideDocLink, showPlainSpinner } = services;
+  const { kibanaGuideDocLink, customBranding } = services;
 
   return (
-    <Context.Provider value={{ kibanaGuideDocLink, showPlainSpinner }}>
+    <Context.Provider value={{ kibanaGuideDocLink, customBranding }}>
       <KibanaNoDataPageProvider {...services}>{children}</KibanaNoDataPageProvider>
     </Context.Provider>
   );
@@ -46,9 +45,10 @@ export const AnalyticsNoDataPageKibanaProvider: FC<AnalyticsNoDataPageKibanaDepe
 }) => {
   const value: Services = {
     kibanaGuideDocLink: dependencies.coreStart.docLinks.links.kibana.guide,
-    showPlainSpinner: dependencies.customBranding.hasCustomBranding$.subscribe((data: boolean) => {
-      return of(true);
-    }),
+    customBranding: {
+      showPlainSpinner: dependencies.customBranding.showPlainSpinner,
+      hasCustomBranding$: dependencies.customBranding.hasCustomBranding$,
+    },
   };
   return (
     <Context.Provider {...{ value }}>

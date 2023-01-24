@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { CustomBrandingService } from '@kbn/core-custom-branding-browser-internal';
 import { PluginInitializerContext } from '@kbn/core/public';
 import { KibanaPluginServiceParams } from '@kbn/presentation-util-plugin/public';
 
@@ -64,4 +65,5 @@ export interface DashboardServices {
   urlForwarding: DashboardUrlForwardingService;
   usageCollection: DashboardUsageCollectionService; // TODO: make this optional in follow up
   visualizations: DashboardVisualizationsService;
+  customBranding: CustomBrandingService;
 }

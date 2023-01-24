@@ -15,7 +15,7 @@ import {
  */
 export interface Services {
   kibanaGuideDocLink: string;
-  showPlainSpinner: boolean;
+  customBranding: { showPlainSpinner?: boolean; hasCustomBranding$: Observable<boolean> };
 }
 
 /**
@@ -32,6 +32,10 @@ export interface KibanaDependencies {
         };
       };
     };
+  };
+  customBranding: {
+    hasCustomBranding$: Observable<boolean>;
+    showPlainSpinner?: boolean;
   };
 }
 

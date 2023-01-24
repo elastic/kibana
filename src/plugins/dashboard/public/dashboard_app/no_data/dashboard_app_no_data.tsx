@@ -25,6 +25,7 @@ export const DashboardAppNoDataPage = ({
     dataViewEditor,
     http: { basePath },
     documentationLinks: { indexPatternsDocLink, kibanaGuideDocLink },
+    customBranding,
   } = pluginServices.getServices();
 
   const analyticsServices = {
@@ -40,6 +41,9 @@ export const DashboardAppNoDataPage = ({
     },
     dataViews,
     dataViewEditor,
+    customBranding: {
+      hasCustomBranding$: customBranding.start().hasCustomBranding$,
+    },
   };
   return (
     <AnalyticsNoDataPageKibanaProvider {...analyticsServices}>

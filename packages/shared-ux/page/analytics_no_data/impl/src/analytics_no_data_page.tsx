@@ -20,7 +20,8 @@ export const AnalyticsNoDataPage = ({
   allowAdHocDataView,
 }: AnalyticsNoDataPageProps) => {
   const services = useServices();
-  const { kibanaGuideDocLink } = services;
+  const { kibanaGuideDocLink, customBranding } = services;
+  const { hasCustomBranding$, showPlainSpinner } = customBranding;
 
   return (
     <Component
@@ -28,6 +29,8 @@ export const AnalyticsNoDataPage = ({
         onDataViewCreated,
         allowAdHocDataView,
         kibanaGuideDocLink,
+        hasCustomBranding$,
+        showPlainSpinner,
       }}
     />
   );

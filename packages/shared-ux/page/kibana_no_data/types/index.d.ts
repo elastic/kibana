@@ -24,9 +24,6 @@ export interface Services {
   hasUserDataView: () => Promise<boolean>;
   /** if set to true allows creation of an ad-hoc data view from data view editor */
   allowAdHocDataView?: boolean;
-  /** True if the Kibana instance is customly branded */
-  showPlainSpinner: boolean;
-  hasCustomBranding$?: CustomBrandingStart['hasCustomBranding$'];
 }
 
 /**
@@ -41,10 +38,7 @@ export interface KibanaDependencies {
       hasUserDataView: () => Promise<boolean>;
     };
   };
-  customBranding: {
-    hasCustomBranding$?: Observable<boolean>;
-    showPlainSpinner?: boolean;
-  };
+  showPlainSpinner?: boolean;
 }
 /**
  * An interface containing a collection of Kibana plugins and services required to
@@ -64,4 +58,6 @@ export interface KibanaNoDataPageProps {
   noDataConfig: NoDataPageProps;
   /** if set to true allows creation of an ad-hoc dataview from data view editor */
   allowAdHocDataView?: boolean;
+  /** Set to true if the kibana is customly branded */
+  showPlainSpinner: boolean;
 }
