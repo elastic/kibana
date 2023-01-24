@@ -7,9 +7,7 @@
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
-import type { HostEcs } from '../../../../ecs/host';
-import type { UserEcs } from '../../../../ecs/user';
-import type { ProcessEcs } from '../../../../ecs/process';
+import type { HostEcs, ProcessEcs, UserEcs } from '@kbn/securitysolution-ecs';
 import type {
   RequestOptionsPaginated,
   SortField,

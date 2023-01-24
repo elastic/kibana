@@ -43,7 +43,7 @@ export function ErrorDetailsPage() {
       </PanelWithTitle>
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="m">
-        <EuiFlexItem grow={2}>
+        <EuiFlexItem grow={2} style={{ minWidth: 0 }}>
           <PanelWithTitle title="Failed tests">
             <FailedTestsList failedTests={failedTests} loading={loading} />
           </PanelWithTitle>

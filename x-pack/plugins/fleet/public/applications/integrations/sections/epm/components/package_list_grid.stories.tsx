@@ -45,10 +45,13 @@ const categories = [
 export const EmptyList = (props: Args) => (
   <PackageListGrid
     list={[]}
-    onSearchChange={action('onSearchChange')}
-    setSelectedCategory={action('setSelectedCategory')}
+    searchTerm=""
+    setSearchTerm={action('setSearchTerm')}
+    setCategory={action('setCategory')}
     categories={categories}
     selectedCategory=""
+    setUrlandReplaceHistory={action('setUrlandReplaceHistory')}
+    setUrlandPushHistory={action('setUrlandPushHistory')}
     {...props}
   />
 );
@@ -129,10 +132,13 @@ export const List = (props: Args) => (
         categories: ['category_two'],
       },
     ]}
-    onSearchChange={action('onSearchChange')}
-    setSelectedCategory={action('setSelectedCategory')}
+    searchTerm=""
+    setSearchTerm={action('setSearchTerm')}
+    setCategory={action('setCategory')}
     categories={categories}
     selectedCategory=""
+    setUrlandReplaceHistory={action('setUrlandReplaceHistory')}
+    setUrlandPushHistory={action('setUrlandPushHistory')}
     {...props}
   />
 );

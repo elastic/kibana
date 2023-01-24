@@ -238,3 +238,8 @@ export const selectFramePublicAPI = createSelector(
     };
   }
 );
+
+export const selectFrameDatasourceAPI = createSelector(
+  [selectFramePublicAPI, selectExecutionContext],
+  (framePublicAPI, context) => ({ ...context, ...framePublicAPI })
+);
