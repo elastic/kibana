@@ -8,10 +8,10 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { EuiFilterButton, EuiFilterSelectItem } from '@elastic/eui';
-import { RuleEventLogListStatusFilter } from './rule_event_log_list_status_filter';
-import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
+import { EventLogListStatusFilter } from './event_log_list_status_filter';
+import { getIsExperimentalFeatureEnabled } from '../../../../../common/get_experimental_features';
 
-jest.mock('../../../../common/get_experimental_features', () => ({
+jest.mock('../../../../../common/get_experimental_features', () => ({
   getIsExperimentalFeatureEnabled: jest.fn(),
 }));
 
@@ -21,14 +21,14 @@ beforeEach(() => {
 
 const onChangeMock = jest.fn();
 
-describe('rule_event_log_list_status_filter', () => {
+describe('event_log_list_status_filter', () => {
   beforeEach(() => {
     onChangeMock.mockReset();
   });
 
   it('renders correctly', () => {
     const wrapper = mountWithIntl(
-      <RuleEventLogListStatusFilter selectedOptions={[]} onChange={onChangeMock} />
+      <EventLogListStatusFilter selectedOptions={[]} onChange={onChangeMock} />
     );
 
     expect(wrapper.find(EuiFilterSelectItem).exists()).toBeFalsy();
@@ -39,7 +39,7 @@ describe('rule_event_log_list_status_filter', () => {
 
   it('can open the popover correctly', () => {
     const wrapper = mountWithIntl(
-      <RuleEventLogListStatusFilter selectedOptions={[]} onChange={onChangeMock} />
+      <EventLogListStatusFilter selectedOptions={[]} onChange={onChangeMock} />
     );
 
     wrapper.find(EuiFilterButton).simulate('click');

@@ -11,21 +11,24 @@ import { EuiLink } from '@elastic/eui';
 import { RuleAlertingOutcome } from '@kbn/alerting-plugin/common';
 import { useHistory } from 'react-router-dom';
 import { getRuleDetailsRoute } from '@kbn/rule-data-utils';
-import { formatRuleAlertCount } from '../../../../common/lib/format_rule_alert_count';
-import { useKibana, useSpacesData } from '../../../../common/lib/kibana';
-import { RuleEventLogListStatus } from './rule_event_log_list_status';
-import { RuleDurationFormat } from '../../rules_list/components/rule_duration_format';
+import { formatRuleAlertCount } from '../../../../../common/lib/format_rule_alert_count';
+import { useKibana, useSpacesData } from '../../../../../common/lib/kibana';
+import { EventLogListStatus } from './event_log_list_status';
+import { RuleDurationFormat } from '../../../rules_list/components/rule_duration_format';
 import {
   RULE_EXECUTION_LOG_COLUMN_IDS,
   RULE_EXECUTION_LOG_DURATION_COLUMNS,
   RULE_EXECUTION_LOG_ALERT_COUNT_COLUMNS,
-} from '../../../constants';
+  CONNECTOR_EXECUTION_LOG_COLUMN_IDS,
+} from '../../../../constants';
 
 export const DEFAULT_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
 
-export type ColumnId = typeof RULE_EXECUTION_LOG_COLUMN_IDS[number];
+export type ColumnId =
+  | typeof RULE_EXECUTION_LOG_COLUMN_IDS[number]
+  | typeof CONNECTOR_EXECUTION_LOG_COLUMN_IDS[number];
 
-interface RuleEventLogListCellRendererProps {
+interface EventLogListCellRendererProps {
   columnId: ColumnId;
   version?: string;
   value?: string | string[];
@@ -35,7 +38,7 @@ interface RuleEventLogListCellRendererProps {
   useExecutionStatus?: boolean;
 }
 
-export const RuleEventLogListCellRenderer = (props: RuleEventLogListCellRendererProps) => {
+export const EventLogListCellRenderer = (props: EventLogListCellRendererProps) => {
   const {
     columnId,
     value,
@@ -97,7 +100,7 @@ export const RuleEventLogListCellRenderer = (props: RuleEventLogListCellRenderer
 
   if (columnId === 'status') {
     return (
-      <RuleEventLogListStatus
+      <EventLogListStatus
         status={value as RuleAlertingOutcome}
         useExecutionStatus={useExecutionStatus}
       />
@@ -127,6 +130,10 @@ export const RuleEventLogListCellRenderer = (props: RuleEventLogListCellRenderer
 
   if (RULE_EXECUTION_LOG_DURATION_COLUMNS.includes(columnId)) {
     return <RuleDurationFormat duration={parseInt(value as string, 10)} />;
+  }
+
+  if (columnId === 'timed_out') {
+    return <>{value ? 'true' : 'false'}</>;
   }
 
   return <>{value}</>;

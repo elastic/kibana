@@ -13,9 +13,9 @@ import {
   RULE_LAST_RUN_OUTCOME_FAILED,
   RULE_LAST_RUN_OUTCOME_WARNING,
   ALERT_STATUS_UNKNOWN,
-} from '../../rules_list/translations';
+} from '../../../rules_list/translations';
 
-interface RuleEventLogListStatusProps {
+interface EventLogListStatusProps {
   status: RuleAlertingOutcome;
   useExecutionStatus?: boolean;
 }
@@ -44,7 +44,7 @@ const STATUS_TO_OUTCOME: Record<RuleAlertingOutcome, string> = {
   unknown: ALERT_STATUS_UNKNOWN,
 };
 
-export const RuleEventLogListStatus = (props: RuleEventLogListStatusProps) => {
+export const EventLogListStatus = (props: EventLogListStatusProps) => {
   const { status, useExecutionStatus = true } = props;
   const color = STATUS_TO_COLOR[status] || 'gray';
 
