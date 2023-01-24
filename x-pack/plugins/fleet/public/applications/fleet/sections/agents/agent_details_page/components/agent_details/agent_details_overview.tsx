@@ -16,6 +16,7 @@ import {
   EuiPanel,
   EuiIcon,
   EuiToolTip,
+  EuiLoadingContent,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
@@ -27,6 +28,7 @@ import { AgentPolicySummaryLine } from '../../../../../components';
 import { AgentHealth } from '../../../components';
 import { Tags } from '../../../components/tags';
 import { formatAgentCPU, formatAgentMemory } from '../../../services/agent_metrics';
+import { AgentDashboardLink } from '../agent_dashboard_link';
 
 // Allows child text to be truncated
 const FlexItemWithMinWidth = styled(EuiFlexItem)`
@@ -44,23 +46,53 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
     <EuiPanel>
       <EuiDescriptionList compressed>
         <EuiFlexGroup direction="column" gutterSize="m">
+          {displayAgentMetrics && (
+            <EuiFlexGroup>
+              <FlexItemWithMinWidth grow={5}>
+                <EuiFlexGroup direction="column" gutterSize="m">
+                  {[
+                    {
+                      title: i18n.translate('xpack.fleet.agentDetails.cpuLabel', {
+                        defaultMessage: 'CPU',
+                      }),
+                      description: formatAgentCPU(agent.metrics, agentPolicy),
+                    },
+                    {
+                      title: i18n.translate('xpack.fleet.agentDetails.memoryLabel', {
+                        defaultMessage: 'Memory',
+                      }),
+                      description: formatAgentMemory(agent.metrics, agentPolicy),
+                    },
+                  ].map(({ title, description }) => {
+                    const tooltip =
+                      typeof description === 'string' && description.length > 20 ? description : '';
+                    return (
+                      <EuiFlexGroup>
+                        <FlexItemWithMinWidth grow={8}>
+                          <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
+                        </FlexItemWithMinWidth>
+                        <FlexItemWithMinWidth grow={4}>
+                          <EuiToolTip position="top" content={tooltip}>
+                            <EuiDescriptionListDescription className="eui-textTruncate">
+                              {description}
+                            </EuiDescriptionListDescription>
+                          </EuiToolTip>
+                        </FlexItemWithMinWidth>
+                      </EuiFlexGroup>
+                    );
+                  })}
+                </EuiFlexGroup>
+              </FlexItemWithMinWidth>
+              <FlexItemWithMinWidth grow={5}>
+                <EuiFlexGroup justifyContent="flexEnd">
+                  <EuiFlexItem grow={false}>
+                    <AgentDashboardLink agent={agent} agentPolicy={agentPolicy} />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </FlexItemWithMinWidth>
+            </EuiFlexGroup>
+          )}
           {[
-            ...(displayAgentMetrics
-              ? [
-                  {
-                    title: i18n.translate('xpack.fleet.agentDetails.cpuLabel', {
-                      defaultMessage: 'CPU',
-                    }),
-                    description: formatAgentCPU(agent.metrics, agentPolicy),
-                  },
-                  {
-                    title: i18n.translate('xpack.fleet.agentDetails.memoryLabel', {
-                      defaultMessage: 'Memory',
-                    }),
-                    description: formatAgentMemory(agent.metrics, agentPolicy),
-                  },
-                ]
-              : []),
             {
               title: i18n.translate('xpack.fleet.agentDetails.statusLabel', {
                 defaultMessage: 'Status',
@@ -96,7 +128,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
               description: agentPolicy ? (
                 <AgentPolicySummaryLine policy={agentPolicy} agent={agent} />
               ) : (
-                agent.policy_id || '-'
+                <EuiLoadingContent lines={1} />
               ),
             },
             {
@@ -168,8 +200,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
               title: i18n.translate('xpack.fleet.agentDetails.monitorLogsLabel', {
                 defaultMessage: 'Monitor logs',
               }),
-              description:
-                Array.isArray(agentPolicy?.monitoring_enabled) &&
+              description: Array.isArray(agentPolicy?.monitoring_enabled) ? (
                 agentPolicy?.monitoring_enabled?.includes('logs') ? (
                   <FormattedMessage
                     id="xpack.fleet.agentList.monitorLogsEnabledText"
@@ -180,14 +211,16 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                     id="xpack.fleet.agentList.monitorLogsDisabledText"
                     defaultMessage="Disabled"
                   />
-                ),
+                )
+              ) : (
+                <EuiLoadingContent lines={1} />
+              ),
             },
             {
               title: i18n.translate('xpack.fleet.agentDetails.monitorMetricsLabel', {
                 defaultMessage: 'Monitor metrics',
               }),
-              description:
-                Array.isArray(agentPolicy?.monitoring_enabled) &&
+              description: Array.isArray(agentPolicy?.monitoring_enabled) ? (
                 agentPolicy?.monitoring_enabled?.includes('metrics') ? (
                   <FormattedMessage
                     id="xpack.fleet.agentList.monitorMetricsEnabledText"
@@ -198,7 +231,10 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                     id="xpack.fleet.agentList.monitorMetricsDisabledText"
                     defaultMessage="Disabled"
                   />
-                ),
+                )
+              ) : (
+                <EuiLoadingContent lines={1} />
+              ),
             },
             {
               title: i18n.translate('xpack.fleet.agentDetails.tagsLabel', {

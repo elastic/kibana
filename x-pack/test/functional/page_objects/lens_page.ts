@@ -840,17 +840,16 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     /** Counts the visible warnings in the config panel */
-    async getErrorCount() {
-      const moreButton = await testSubjects.exists('configuration-failure-more-errors');
+    async getWorkspaceErrorCount() {
+      const moreButton = await testSubjects.exists('workspace-more-errors-button');
       if (moreButton) {
         await retry.try(async () => {
-          await testSubjects.click('configuration-failure-more-errors');
-          await testSubjects.missingOrFail('configuration-failure-more-errors');
+          await testSubjects.click('workspace-more-errors-button');
+          await testSubjects.missingOrFail('workspace-more-errors-button');
         });
       }
-      const errors = await testSubjects.findAll('configuration-failure-error');
-      const expressionErrors = await testSubjects.findAll('expression-failure');
-      return (errors?.length ?? 0) + (expressionErrors?.length ?? 0);
+      const errors = await testSubjects.findAll('workspace-error-message');
+      return errors?.length ?? 0;
     },
 
     async searchOnChartSwitch(subVisualizationId: string, searchTerm?: string) {
