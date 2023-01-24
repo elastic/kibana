@@ -136,5 +136,7 @@
     "@kbn/core-saved-objects-common",
     "@kbn/core-saved-objects-import-export-server-mocks",
     "@kbn/user-profile-components",
+    "@kbn/guided-onboarding",
+    "@kbn/securitysolution-ecs",
   ]
 }

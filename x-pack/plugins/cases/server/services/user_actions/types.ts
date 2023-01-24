@@ -19,7 +19,7 @@ import type {
   CaseSettings,
   CaseSeverity,
   CaseStatuses,
-  CaseUserActionResponse,
+  CaseUserActionInjectedAttributesWithoutActionId,
   CommentUserAction,
   ConnectorUserAction,
   PushedUserAction,
@@ -145,11 +145,14 @@ export interface ServiceContext {
 
 export interface CaseConnectorActivity {
   connectorId: string;
-  fields: SavedObject<CaseUserActionResponse>;
-  push?: SavedObject<CaseUserActionResponse>;
+  fields: SavedObject<CaseUserActionInjectedAttributesWithoutActionId>;
+  push?: SavedObject<CaseUserActionInjectedAttributesWithoutActionId>;
 }
 
-export type CaseConnectorFields = Map<string, SavedObject<CaseUserActionResponse>>;
+export type CaseConnectorFields = Map<
+  string,
+  SavedObject<CaseUserActionInjectedAttributesWithoutActionId>
+>;
 
 export interface PushInfo {
   date: Date;

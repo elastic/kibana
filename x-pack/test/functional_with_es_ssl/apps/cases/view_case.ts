@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { CaseStatuses } from '@kbn/cases-plugin/common';
 import { CaseSeverity } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -32,7 +32,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
 
       it('edits a case title from the case view page', async () => {
-        const newTitle = `test-${uuid.v4()}`;
+        const newTitle = `test-${uuidv4()}`;
 
         await testSubjects.click('editable-title-edit-icon');
         await testSubjects.setValue('editable-title-input-field', newTitle);
@@ -64,7 +64,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('adds a tag to a case', async () => {
-        const tag = uuid.v4();
+        const tag = uuidv4();
         await testSubjects.click('tag-list-edit-button');
         await comboBox.setCustom('comboBoxInput', tag);
         await testSubjects.click('edit-tags-submit');
