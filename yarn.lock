@@ -1511,19 +1511,19 @@
     "@elastic/transport" "^8.3.1"
     tslib "^2.4.0"
 
-"@elastic/ems-client@8.3.3":
-  version "8.3.3"
-  resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-8.3.3.tgz#16ddd582e1029055a5a77e7bebbc5b57b3246ff7"
-  integrity sha512-vcgPwnAw7QjcR68IddErobZqwJdH0T4h/6U4swUR3XEF+9jojNZnxBkvM3mEV9Z7QLQxDprebJJu04d37lzlUw==
+"@elastic/ems-client@8.4.0":
+  version "8.4.0"
+  resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-8.4.0.tgz#e77bbddda998a77e29b86767fe4ff403c5a62133"
+  integrity sha512-uMxZl6BxCPLvIJiG80gqQbOlxKqNLYCo0KtHDFVwUGpTgUQnrVzAZUJ9PZ7fSD7cUDW6pE+QekDddDxB2nOCwA==
   dependencies:
-    "@types/geojson" "^7946.0.7"
+    "@types/geojson" "^7946.0.10"
     "@types/lru-cache" "^5.1.0"
-    "@types/topojson-client" "^3.0.0"
+    "@types/topojson-client" "^3.1.1"
     "@types/topojson-specification" "^1.0.1"
     chroma-js "^2.1.0"
     lodash "^4.17.15"
     lru-cache "^6.0.0"
-    semver "^7.3.2"
+    semver "^7.3.8"
     topojson-client "^3.1.0"
 
 "@elastic/eslint-plugin-eui@0.0.2":
@@ -6904,7 +6904,7 @@
   dependencies:
     "@types/node" "*"
 
-"@types/geojson@*", "@types/geojson@^7946.0.7", "@types/geojson@^7946.0.8":
+"@types/geojson@*", "@types/geojson@^7946.0.8":
   version "7946.0.8"
   resolved "https://registry.yarnpkg.com/@types/geojson/-/geojson-7946.0.8.tgz#30744afdb385e2945e22f3b033f897f76b1f12ca"
   integrity sha512-1rkryxURpr6aWP7R786/UQOkJ3PcpQiWkAXBmdWc7ryFWqN6a4xfK7BtjXvFBKO9LjQ+MWQSWxYeZX1OApnArA==
@@ -6913,6 +6913,11 @@
   version "7946.0.7"
   resolved "https://registry.yarnpkg.com/@types/geojson/-/geojson-7946.0.7.tgz#c8fa532b60a0042219cdf173ca21a975ef0666ad"
   integrity sha512-wE2v81i4C4Ol09RtsWFAqg3BUitWbHSpSlIo+bNdsCJijO9sjme+zm+73ZMCa/qMC8UEERxzGbvmr1cffo2SiQ==
+
+"@types/geojson@^7946.0.10":
+  version "7946.0.10"
+  resolved "https://registry.yarnpkg.com/@types/geojson/-/geojson-7946.0.10.tgz#6dfbf5ea17142f7f9a043809f1cd4c448cb68249"
+  integrity sha512-Nmh0K3iWQJzniTuPRcJn5hxXkfB1T1pgB89SBig5PlJQU5yocazeu4jATJlaA0GYFKWMqDdvYemoSnF2pXgLVA==
 
 "@types/getos@^3.0.0":
   version "3.0.0"
@@ -7936,10 +7941,10 @@
   resolved "https://registry.yarnpkg.com/@types/tinycolor2/-/tinycolor2-1.4.2.tgz#721ca5c5d1a2988b4a886e35c2ffc5735b6afbdf"
   integrity sha512-PeHg/AtdW6aaIO2a+98Xj7rWY4KC1E6yOy7AFknJQ7VXUGNrMlyxDFxJo7HqLtjQms/ZhhQX52mLVW/EX3JGOw==
 
-"@types/topojson-client@^3.0.0":
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/@types/topojson-client/-/topojson-client-3.1.0.tgz#2fd96d5e64f4f512742f22194f3e1e0443c27233"
-  integrity sha512-wmjTmMkF6k6m3Tn4mIyRjw8KUQZLHB1TxNcpGYirvV/aCINkC0eMJsUO/OPMkKIB6VO5iA6Vp39bmAq6QgvSfA==
+"@types/topojson-client@^3.1.1":
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/@types/topojson-client/-/topojson-client-3.1.1.tgz#d1396b2e79f530ef69bb162523cddf94576bd5a9"
+  integrity sha512-E4/Z2Xg56kVLRzYWem/6uOKVcVNqqxEqlWM9qCG2tCV1BxuzvvXC02/ELoGJWgtKkQhfycBPlMFEuTFdA/YiTg==
   dependencies:
     "@types/geojson" "*"
     "@types/topojson-specification" "*"
