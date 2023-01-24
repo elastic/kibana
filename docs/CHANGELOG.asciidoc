@@ -96,12 +96,12 @@ Infrastructure::
 Fixes an issue where the summary request piled up {kibana-pull}148670[#148670]
 
 Machine Learning::
-Fixes the bucket span estimator in the advanced wizard {kibana-pull}149008[#149008]
+* Fixes the bucket span estimator in the advanced wizard {kibana-pull}149008[#149008]
+* Fixes the transforms JSON display {kibana-pull}147996[#147996]
 
 Management::
 * Fixes the runtime field format editor {kibana-pull}148497[#148497]
 * Improves the check for response size in the `/autocomplete_entities` endpoint {kibana-pull}148328[#148328]
-* Fixes the transforms JSON display {kibana-pull}147996[#147996]
 
 Maps::
 Fixes an issue where Maps was unable to  initialize the time range from URLs {kibana-pull}148465[#148465]
