@@ -25,11 +25,7 @@ import styled from 'styled-components';
 import { GROUPS_UNIT } from '../../../common/components/grouping/translations';
 import { defaultUnit, UnitCount } from '../../../common/components/toolbar/unit';
 import { useBulkActionItems } from '../../../common/components/toolbar/bulk_actions/use_bulk_action_items';
-import type {
-  GroupingTableAggregation,
-  GroupSelection,
-  RawBucket,
-} from '../../../common/components/grouping';
+import type { GroupingTableAggregation, RawBucket } from '../../../common/components/grouping';
 import { getGroupingQuery, GroupsSelector } from '../../../common/components/grouping';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { combineQueries } from '../../../common/lib/kuery';
@@ -99,6 +95,25 @@ export const GroupsContainer = styled.div`
 
 const ALERTS_GROUPING_ID = '';
 
+const defaultGroupingOptions = [
+  {
+    label: i18n.ruleName,
+    key: 'kibana.alert.rule.name',
+  },
+  {
+    label: i18n.userName,
+    key: 'user.name',
+  },
+  {
+    label: i18n.hostName,
+    key: 'host.name',
+  },
+  {
+    label: i18n.sourceIP,
+    key: 'source.ip',
+  },
+];
+
 interface OwnProps {
   defaultFilters?: Filter[];
   from: string;
@@ -142,7 +157,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   selectedEventIds,
 }) => {
   const dispatch = useDispatch();
-  const [selectedGroup, setSelectedGroup] = useState<GroupSelection | undefined>();
+  const [selectedGroup, setSelectedGroup] = useState<string | undefined>();
 
   const {
     browserFields,
@@ -300,7 +315,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   }, [defaultFiltersMemo, globalFilters, globalQuery]);
 
   const [activePage, setActivePage] = useState<number>(0);
-  const [groupsPageSize, setShowPerPageOptions] = useState<number>(5);
+  const [groupsPageSize, setShowPerPageOptions] = useState<number>(25);
   const [groupsPagesCount, setGroupsPagesCount] = useState<number>(0);
 
   const queryGroups = useMemo(
@@ -384,7 +399,9 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     [additionalFilters, selectedGroup, from, runtimeMappings, to, groupsPageSize, activePage]
   );
 
-  const [trigger, setTrigger] = useState<{ [id: string]: 'open' | 'closed' | undefined }>({});
+  const [trigger, setTrigger] = useState<
+    Record<string, { state: 'open' | 'closed' | undefined; selectedBucket: RawBucket }>
+  >({});
   const [selectedBucket, setSelectedBucket] = useState<RawBucket>();
 
   const {
@@ -418,17 +435,33 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     uniqueQueryId,
   });
 
+  const [options, setOptions] = useState(defaultGroupingOptions);
+
   const groupsSelector = useMemo(
     () => (
       <GroupsSelector
         groupSelected={selectedGroup}
-        onGroupChange={(groupSelection?: GroupSelection) => {
+        onGroupChange={(groupSelection?: string) => {
           setSelectedGroup(groupSelection);
+          if (groupSelection && !options.find((o) => o.key === groupSelection)) {
+            setOptions([
+              ...defaultGroupingOptions,
+              {
+                label: groupSelection,
+                key: groupSelection,
+              },
+            ]);
+          } else {
+            setOptions(defaultGroupingOptions);
+          }
         }}
         localStorageGroupKey={ALERTS_TABLE_GROUPS_SELECTION_KEY}
+        onClearSelected={() => setSelectedGroup(undefined)}
+        fields={indexPatterns.fields}
+        options={options}
       />
     ),
-    [selectedGroup]
+    [indexPatterns.fields, options, selectedGroup]
   );
 
   const getGlobalQuerySelector = inputsSelectors.globalQuery();
@@ -558,7 +591,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       tableId={tableId}
       leadingControlColumns={leadingControlColumns}
       onRuleChange={onRuleChange}
-      pageFilters={[...(defaultFiltersMemo ?? []), ...groupFiltersMemo]}
+      pageFilters={defaultFiltersMemo ?? []}
       renderCellValue={RenderCellValue}
       rowRenderers={defaultRowRenderers}
       sourcererScope={SourcererScopeName.detections}
@@ -609,15 +642,66 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
                       />
                     }
                     paddingSize="l"
-                    forceState={trigger[`group0-${field0Bucket.key[0]}`] ?? 'closed'}
                     onToggle={(isOpen) => {
-                      setTrigger({ [`group0-${field0Bucket.key[0]}`]: isOpen ? 'open' : 'closed' });
-                      if (isOpen) {
-                        setSelectedBucket(field0Bucket);
-                      }
+                      setTrigger({
+                        ...trigger,
+                        [`group0-${field0Bucket.key[0]}`]: {
+                          state: isOpen ? 'open' : 'closed',
+                          selectedBucket: field0Bucket,
+                        },
+                      });
                     }}
                   >
-                    {trigger[`group0-${field0Bucket.key[0]}`] === 'open' ? dataTable : null}
+                    {trigger[`group0-${field0Bucket.key[0]}`] &&
+                    trigger[`group0-${field0Bucket.key[0]}`].state === 'open' ? (
+                      <StatefulEventsViewer
+                        additionalFilters={additionalFiltersComponent}
+                        currentFilter={filterGroup as AlertWorkflowStatus}
+                        defaultCellActions={defaultCellActions}
+                        defaultModel={getAlertsDefaultModel(license)}
+                        end={to}
+                        bulkActions={bulkActions}
+                        hasCrudPermissions={hasIndexWrite && hasIndexMaintenance}
+                        tableId={tableId}
+                        leadingControlColumns={leadingControlColumns}
+                        onRuleChange={onRuleChange}
+                        pageFilters={[
+                          ...(defaultFiltersMemo ?? []),
+                          {
+                            meta: {
+                              alias: null,
+                              negate: false,
+                              disabled: false,
+                              type: 'phrase',
+                              key: selectedGroup,
+                              params: {
+                                query: isArray(
+                                  trigger[`group0-${field0Bucket.key[0]}`].selectedBucket.key
+                                )
+                                  ? trigger[`group0-${field0Bucket.key[0]}`].selectedBucket.key[0]
+                                  : trigger[`group0-${field0Bucket.key[0]}`].selectedBucket.key,
+                              },
+                            },
+                            query: {
+                              match_phrase: {
+                                [selectedGroup]: {
+                                  query: isArray(
+                                    trigger[`group0-${field0Bucket.key[0]}`].selectedBucket.key
+                                  )
+                                    ? trigger[`group0-${field0Bucket.key[0]}`].selectedBucket.key[0]
+                                    : trigger[`group0-${field0Bucket.key[0]}`].selectedBucket.key,
+                                },
+                              },
+                            },
+                          },
+                        ]}
+                        renderCellValue={RenderCellValue}
+                        rowRenderers={defaultRowRenderers}
+                        sourcererScope={SourcererScopeName.detections}
+                        start={from}
+                        additionalRightMenuOptions={!selectedGroup ? [groupsSelector] : []}
+                      />
+                    ) : null}
                   </EuiAccordion>
                   <EuiSpacer size="s" />
                 </>
@@ -643,7 +727,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
                     : 0
                 }
                 onChangePage={goToPage}
-                itemsPerPageOptions={[5, 10, 20, 50]}
+                itemsPerPageOptions={[10, 25, 50, 100]}
               />
             )}
           </GroupsContainer>

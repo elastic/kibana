@@ -5,82 +5,89 @@
  * 2.0.
  */
 
-import type { EuiSelectableOption } from '@elastic/eui';
-import { EuiButtonEmpty, EuiPopover, EuiSelectable, EuiText } from '@elastic/eui';
+import type {
+  EuiContextMenuPanelDescriptor,
+  EuiContextMenuPanelItemDescriptor,
+} from '@elastic/eui';
+import { EuiButtonEmpty, EuiPopover, EuiBadge, EuiContextMenu } from '@elastic/eui';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
-import styled from 'styled-components';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import type { FieldSpec } from '@kbn/data-views-plugin/common';
+import { CustomFieldPanel } from './custom_field_panel';
 
 const storage = new Storage(localStorage);
 
 export type GroupSelection = 'kibana.alert.rule.name' | 'user.name' | 'host.name' | 'source.ip';
 
-const ContainerEuiSelectable = styled.div`
-  width: 200px;
-  .euiSelectableListItem__text {
-    white-space: pre-wrap !important;
-    line-height: normal;
+const StyledContextMenu = euiStyled(EuiContextMenu)`
+  width: 320px;
+  & .euiContextMenuItem__text {
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 `;
 
-const ruleName = i18n.translate('xpack.securitySolution.selector.groups.ruleName.label', {
-  defaultMessage: 'Rule name',
-});
-const userName = i18n.translate('xpack.securitySolution.selector.grouping.userName.label', {
-  defaultMessage: 'User name',
-});
-const hostName = i18n.translate('xpack.securitySolution.selector.grouping.hostName.label', {
-  defaultMessage: 'Host name',
-});
-const sourceIP = i18n.translate('xpack.securitySolution.selector.grouping.sourceIP.label', {
-  defaultMessage: 'Source IP',
-});
-
 interface GroupSelectorProps {
-  onGroupChange: (groupSelection?: GroupSelection) => void;
-  groupSelected?: GroupSelection;
+  onGroupChange: (groupSelection?: string) => void;
+  groupSelected?: string;
   localStorageGroupKey?: string;
+  onClearSelected: () => void;
+  fields: FieldSpec[];
+  options: Array<{ key: string; label: string }>;
 }
 
 const GroupsSelectorComponent = ({
   groupSelected,
   onGroupChange,
   localStorageGroupKey,
+  onClearSelected,
+  fields,
+  options,
 }: GroupSelectorProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const options = useMemo(
+  const panels: EuiContextMenuPanelDescriptor[] = useMemo(
     () => [
       {
-        label: ruleName,
-        key: 'kibana.alert.rule.name',
-        checked: (groupSelected === 'kibana.alert.rule.name'
-          ? 'on'
-          : undefined) as EuiSelectableOption['checked'],
+        id: 'firstPanel',
+        items: [
+          {
+            name: i18n.translate('xpack.infra.waffle.customGroupByOptionName', {
+              defaultMessage: 'Custom field',
+            }),
+            icon: 'empty',
+            panel: 'customPanel',
+          },
+          ...options.map((o) => {
+            const icon = groupSelected === o.key ? 'check' : 'empty';
+            const panel = {
+              name: o.label,
+              onClick: () => onGroupChange(o.key),
+              icon,
+            } as EuiContextMenuPanelItemDescriptor;
+            return panel;
+          }),
+        ],
       },
       {
-        label: userName,
-        key: 'user.name',
-        checked: (groupSelected === 'user.name'
-          ? 'on'
-          : undefined) as EuiSelectableOption['checked'],
-      },
-      {
-        label: hostName,
-        key: 'host.name',
-        checked: (groupSelected === 'host.name'
-          ? 'on'
-          : undefined) as EuiSelectableOption['checked'],
-      },
-      {
-        label: sourceIP,
-        key: 'source.ip',
-        checked: (groupSelected === 'source.ip'
-          ? 'on'
-          : undefined) as EuiSelectableOption['checked'],
+        id: 'customPanel',
+        title: i18n.translate('xpack.infra.waffle.customGroupByPanelTitle', {
+          defaultMessage: 'Group By Custom Field',
+        }),
+        width: 685,
+        content: (
+          <CustomFieldPanel
+            currentOptions={options.map((o) => ({ text: o.label, field: o.key }))}
+            onSubmit={(field: string) => {
+              onGroupChange(field);
+            }}
+            fields={fields}
+          />
+        ),
       },
     ],
-    [groupSelected]
+    [fields, groupSelected, onGroupChange, options]
   );
 
   const selectedOption = options.filter((groupOption) => groupOption.key === groupSelected);
@@ -88,22 +95,6 @@ const GroupsSelectorComponent = ({
   // add local storage group value
   const onButtonClick = useCallback(() => setIsPopoverOpen((currentVal) => !currentVal), []);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
-  const onChangeSelectable = useCallback(
-    (opts: EuiSelectableOption[]) => {
-      const selected = opts.filter((i) => i.checked === 'on');
-      if (localStorageGroupKey) {
-        storage.set(localStorageGroupKey, selected[0]?.key);
-      }
-
-      if (selected.length > 0 && selected[0]) {
-        onGroupChange(selected[0].key as GroupSelection);
-      } else {
-        onGroupChange(undefined);
-      }
-      setIsPopoverOpen(false);
-    },
-    [localStorageGroupKey, onGroupChange]
-  );
 
   const button = useMemo(
     () => (
@@ -120,25 +111,21 @@ const GroupsSelectorComponent = ({
           defaultMessage: 'Group alerts',
         })}
         {groupSelected ? ': ' : ''}
-        {groupSelected && selectedOption.length > 0 ? selectedOption[0].label : ''}
+        {groupSelected ? (
+          <EuiBadge
+            color="hollow"
+            iconType="cross"
+            iconSide="right"
+            iconOnClick={() => onClearSelected()}
+            iconOnClickAriaLabel="Example of onClick event for icon within the button"
+            data-test-sub="groups-selector"
+          >
+            {groupSelected && selectedOption.length > 0 ? selectedOption[0].label : ''}
+          </EuiBadge>
+        ) : null}
       </EuiButtonEmpty>
     ),
-    [groupSelected, onButtonClick, selectedOption]
-  );
-
-  const renderOption = useCallback((option) => {
-    return (
-      <>
-        <EuiText size="s">{option.label}</EuiText>
-      </>
-    );
-  }, []);
-
-  const listProps = useMemo(
-    () => ({
-      rowHeight: 40,
-    }),
-    []
+    [groupSelected, onButtonClick, onClearSelected, selectedOption]
   );
 
   return (
@@ -148,18 +135,11 @@ const GroupsSelectorComponent = ({
       isOpen={isPopoverOpen}
       closePopover={closePopover}
     >
-      <ContainerEuiSelectable>
-        <EuiSelectable
-          options={options}
-          onChange={onChangeSelectable}
-          renderOption={renderOption}
-          searchable={false}
-          listProps={listProps}
-          singleSelection={true}
-        >
-          {(list) => list}
-        </EuiSelectable>
-      </ContainerEuiSelectable>
+      <StyledContextMenu
+        initialPanelId="firstPanel"
+        panels={panels}
+        data-test-subj="groupByContextMenu"
+      />
     </EuiPopover>
   );
 };

@@ -364,3 +364,16 @@ export const STATS_GROUP_SEVERITY_MEDIUM = i18n.translate(
     defaultMessage: 'Medium',
   }
 );
+
+export const ruleName = i18n.translate('xpack.securitySolution.selector.groups.ruleName.label', {
+  defaultMessage: 'Rule name',
+});
+export const userName = i18n.translate('xpack.securitySolution.selector.grouping.userName.label', {
+  defaultMessage: 'User name',
+});
+export const hostName = i18n.translate('xpack.securitySolution.selector.grouping.hostName.label', {
+  defaultMessage: 'Host name',
+});
+export const sourceIP = i18n.translate('xpack.securitySolution.selector.grouping.sourceIP.label', {
+  defaultMessage: 'Source IP',
+});
