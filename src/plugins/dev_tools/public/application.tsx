@@ -108,9 +108,6 @@ function DevToolsWrapper({
                     label={i18n.translate('devTools.badge.betaLabel', {
                       defaultMessage: 'Beta',
                     })}
-                    tooltipContent={i18n.translate('devTools.badge.betaTooltipText', {
-                      defaultMessage: 'This feature might change drastically in future releases',
-                    })}
                   />
                 )}
               </span>

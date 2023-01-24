@@ -7,8 +7,10 @@
 
 export * from './create_slo';
 export * from './delete_slo';
+export * from './fetch_historical_summary';
 export * from './find_slo';
 export * from './get_slo';
+export * from './historical_summary_client';
 export * from './resource_installer';
 export * from './sli_client';
 export * from './slo_repository';

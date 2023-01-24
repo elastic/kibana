@@ -581,18 +581,6 @@
             "path": "src/plugins/home/public/application/components/tutorial/tutorial.js"
           },
           {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/components/ml_page/ml_page.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/components/ml_page/ml_page.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/components/ml_page/ml_page.tsx"
-          },
-          {
             "plugin": "canvas",
             "path": "x-pack/plugins/canvas/public/components/home/home.component.tsx"
           },
@@ -1315,18 +1303,6 @@
           {
             "plugin": "observability",
             "path": "x-pack/plugins/observability/public/application/index.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/components/ml_page/ml_page.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/components/ml_page/ml_page.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/components/ml_page/ml_page.tsx"
           },
           {
             "plugin": "ml",

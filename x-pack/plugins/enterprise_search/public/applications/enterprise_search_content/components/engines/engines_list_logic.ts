@@ -7,6 +7,8 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { Status } from '../../../../../common/types/api';
+
 import {
   EnterpriseSearchEngine,
   EnterpriseSearchEnginesResponse,
@@ -15,50 +17,92 @@ import {
 import { Actions } from '../../../shared/api_logic/create_api_logic';
 
 import {
+  DeleteEngineAPILogic,
+  DeleteEnginesApiLogicActions,
+} from '../../api/engines/delete_engines_api_logic';
+
+import {
   EnginesListAPIArguments,
   FetchEnginesAPILogic,
 } from '../../api/engines/fetch_engines_api_logic';
 
 import { DEFAULT_META, Meta, updateMetaPageIndex } from './types';
 
+interface EuiBasicTableOnChange {
+  page: { index: number };
+}
+
 type EnginesListActions = Pick<
   Actions<EnginesListAPIArguments, EnterpriseSearchEnginesResponse>,
   'apiError' | 'apiSuccess' | 'makeRequest'
 > & {
+  closeDeleteEngineModal(): void;
+  deleteEngine: DeleteEnginesApiLogicActions['makeRequest'];
+  deleteError: DeleteEnginesApiLogicActions['apiError'];
+  deleteSuccess: DeleteEnginesApiLogicActions['apiSuccess'];
+
   fetchEngines({ meta, searchQuery }: { meta: Meta; searchQuery?: string }): {
     meta: Meta;
     searchQuery?: string;
   };
-  onPaginate(pageNumber: number): { pageNumber: number };
+
+  onPaginate(args: EuiBasicTableOnChange): { pageNumber: number };
+  openDeleteEngineModal: (engine: EnterpriseSearchEngine) => { engine: EnterpriseSearchEngine };
 };
 interface EngineListValues {
   data: typeof FetchEnginesAPILogic.values.data;
+  deleteModalEngine: EnterpriseSearchEngine | null;
+  deleteModalEngineName: string;
+  deleteStatus: typeof DeleteEngineAPILogic.values.status;
+  isDeleteLoading: boolean;
+  isDeleteModalVisible: boolean;
+  isLoading: boolean;
   meta: Meta;
-  results: EnterpriseSearchEngine[]; // stores engine list value from data
   parameters: { meta: Meta; searchQuery?: string }; // Added this variable to store to the search Query value as well
+  results: EnterpriseSearchEngine[]; // stores engine list value from data
   status: typeof FetchEnginesAPILogic.values.status;
 }
 
 export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListActions>>({
+  connect: {
+    actions: [
+      FetchEnginesAPILogic,
+      ['makeRequest', 'apiSuccess', 'apiError'],
+      DeleteEngineAPILogic,
+      ['apiSuccess as deleteSuccess', 'makeRequest as deleteEngine', 'apiError as deleteError'],
+    ],
+    values: [
+      FetchEnginesAPILogic,
+      ['data', 'status'],
+      DeleteEngineAPILogic,
+      ['status as deleteStatus'],
+    ],
+  },
   actions: {
+    closeDeleteEngineModal: true,
     fetchEngines: ({ meta, searchQuery }) => ({
       meta,
       searchQuery,
     }),
-
-    onPaginate: (pageNumber) => ({ pageNumber }),
+    onPaginate: (args: EuiBasicTableOnChange) => ({ pageNumber: args.page.index }),
+    openDeleteEngineModal: (engine) => ({ engine }),
   },
-  connect: {
-    actions: [FetchEnginesAPILogic, ['makeRequest', 'apiSuccess', 'apiError']],
-    values: [FetchEnginesAPILogic, ['data', 'status']],
-  },
-  listeners: ({ actions }) => ({
-    fetchEngines: async (input) => {
-      actions.makeRequest(input);
-    },
-  }),
   path: ['enterprise_search', 'content', 'engine_list_logic'],
   reducers: ({}) => ({
+    deleteModalEngine: [
+      null,
+      {
+        closeDeleteEngineModal: () => null,
+        openDeleteEngineModal: (_, { engine }) => engine,
+      },
+    ],
+    isDeleteModalVisible: [
+      false,
+      {
+        closeDeleteEngineModal: () => false,
+        openDeleteEngineModal: () => true,
+      },
+    ],
     parameters: [
       { meta: DEFAULT_META },
       {
@@ -73,7 +117,25 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
     ],
   }),
   selectors: ({ selectors }) => ({
-    meta: [() => [selectors.parameters], (parameters) => parameters.meta],
+    deleteModalEngineName: [() => [selectors.deleteModalEngine], (engine) => engine?.name ?? ''],
+    isDeleteLoading: [
+      () => [selectors.deleteStatus],
+      (status: EngineListValues['deleteStatus']) => [Status.LOADING].includes(status),
+    ],
+    isLoading: [
+      () => [selectors.status],
+      (status: EngineListValues['status']) => [Status.LOADING, Status.IDLE].includes(status),
+    ],
     results: [() => [selectors.data], (data) => data?.results ?? []],
+    meta: [() => [selectors.parameters], (parameters) => parameters.meta],
+  }),
+  listeners: ({ actions, values }) => ({
+    deleteSuccess: () => {
+      actions.closeDeleteEngineModal();
+      actions.fetchEngines(values.parameters);
+    },
+    fetchEngines: async (input) => {
+      actions.makeRequest(input);
+    },
   }),
 });

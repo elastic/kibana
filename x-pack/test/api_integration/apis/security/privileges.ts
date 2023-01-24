@@ -92,6 +92,14 @@ export default function ({ getService }: FtrProviderContext) {
       ],
       filesManagement: ['all', 'read', 'minimal_all', 'minimal_read'],
       filesSharedImage: ['all', 'read', 'minimal_all', 'minimal_read'],
+      rulesSettings: [
+        'all',
+        'read',
+        'minimal_all',
+        'minimal_read',
+        'allFlappingSettings',
+        'readFlappingSettings',
+      ],
     },
     reserved: ['fleet-setup', 'ml_user', 'ml_admin', 'ml_apm_user', 'monitoring'],
   };
