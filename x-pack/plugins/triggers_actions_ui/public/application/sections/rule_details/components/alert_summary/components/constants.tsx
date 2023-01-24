@@ -9,6 +9,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 
 export const TOOLTIP_DATE_FORMAT = 'YYYY-MM-DD HH:mm';
+export const ALERT_COUNT_FORMAT = '0.[00]a';
 
 export const WIDGET_TITLE = (
   <FormattedMessage

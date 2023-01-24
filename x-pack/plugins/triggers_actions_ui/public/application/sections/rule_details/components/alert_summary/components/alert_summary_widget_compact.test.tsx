@@ -8,31 +8,32 @@
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import {
-  AlertsSummaryWidgetFullSize,
-  AlertsSummaryWidgetFullSizeProps,
-} from './alert_summary_widget_full_size';
+  AlertsSummaryWidgetCompact,
+  AlertsSummaryWidgetCompactProps,
+} from './alert_summary_widget_compact';
 import { render } from '@testing-library/react';
 import {
   mockedAlertSummaryResponse,
   mockedChartThemes,
 } from '../../../../../mock/alert_summary_widget';
 
-describe('AlertSummaryWidgetFullSize', () => {
-  const renderComponent = (props: Partial<AlertsSummaryWidgetFullSizeProps> = {}) =>
+describe('AlertsSummaryWidgetCompact', () => {
+  const renderComponent = (props: Partial<AlertsSummaryWidgetCompactProps> = {}) =>
     render(
       <IntlProvider locale="en">
-        <AlertsSummaryWidgetFullSize
+        <AlertsSummaryWidgetCompact
           chartThemes={mockedChartThemes}
+          onClick={jest.fn}
           {...mockedAlertSummaryResponse}
           {...props}
         />
       </IntlProvider>
     );
 
-  it('should render AlertSummaryWidgetFullSize', async () => {
+  it('should render AlertsSummaryWidgetCompact', async () => {
     const alertSummaryWidget = renderComponent();
 
-    expect(alertSummaryWidget.queryByTestId('alertSummaryWidgetFullSize')).toBeTruthy();
+    expect(alertSummaryWidget.queryByTestId('alertSummaryWidgetCompact')).toBeTruthy();
   });
 
   it('should render counts correctly', async () => {

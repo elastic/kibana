@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
+import numeral from '@elastic/numeral';
 import { EuiText, useEuiTheme } from '@elastic/eui';
-import { ALERTS_LABEL } from './constants';
+import { ALERT_COUNT_FORMAT, ALERTS_LABEL } from './constants';
 
 interface Props {
   count: number;
@@ -19,7 +20,7 @@ export const AllAlertCounts = ({ count }: Props) => {
   return (
     <>
       <EuiText color={euiTheme.colors.primaryText}>
-        <h3 data-test-subj="totalAlertsCount">{count}</h3>
+        <h3 data-test-subj="totalAlertsCount">{numeral(count).format(ALERT_COUNT_FORMAT)}</h3>
       </EuiText>
       <EuiText size="s" color="subdued">
         {ALERTS_LABEL}
