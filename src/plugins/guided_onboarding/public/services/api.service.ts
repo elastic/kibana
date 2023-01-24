@@ -37,7 +37,7 @@ import {
   getStepConfig,
   isLastStep,
 } from './helpers';
-import { ConfigService } from './config_service';
+import { ConfigService } from './config.service';
 
 export class ApiService implements GuidedOnboardingApi {
   private isCloudEnabled: boolean | undefined;
@@ -113,8 +113,7 @@ export class ApiService implements GuidedOnboardingApi {
 
   /**
    * Async operation to fetch state for all guides.
-   * This is useful for the onboarding landing page,
-   * where all guides are displayed with their corresponding status.
+   * Currently only used in the example plugin.
    */
   public async fetchAllGuidesState(): Promise<{ state: GuideState[] } | undefined> {
     if (!this.isCloudEnabled) {
@@ -176,55 +175,30 @@ export class ApiService implements GuidedOnboardingApi {
    * Activates a guide by guideId.
    * This is useful for the onboarding landing page, when a user selects a guide to start or continue.
    * @param {GuideId} guideId the id of the guide (one of search, kubernetes, siem)
-   * @param {GuideState} guide (optional) the selected guide state, if it exists (i.e., if a user is continuing a guide)
    * @return {Promise} a promise with the updated plugin state
    */
-  public async activateGuide(
-    guideId: GuideId,
-    guide?: GuideState
-  ): Promise<{ pluginState: PluginState } | undefined> {
-    // If we already have the guide state (i.e., user has already started the guide at some point),
-    // simply pass it through so they can continue where they left off, and update the guide to active
-    if (guide) {
-      return await this.updatePluginState(
-        {
-          status: 'in_progress',
-          guide: {
-            ...guide,
-            isActive: true,
-          },
-        },
-        true
-      );
+  public async activateGuide(guideId: GuideId): Promise<{ pluginState: PluginState } | undefined> {
+    if (!this.isCloudEnabled) {
+      return undefined;
+    }
+    if (!this.client) {
+      throw new Error('ApiService has not be initialized.');
     }
 
-    // If this is the 1st-time attempt, we need to create the default state
-    const guideConfig = await this.configService.getGuideConfig(guideId);
-
-    if (guideConfig) {
-      const updatedSteps: GuideStep[] = guideConfig.steps.map((step, stepIndex) => {
-        const isFirstStep = stepIndex === 0;
-        return {
-          id: step.id,
-          // Only the first step should be activated when activating a new guide
-          status: isFirstStep ? 'active' : 'inactive',
-        };
-      });
-
-      const updatedGuide: GuideState = {
-        guideId,
-        isActive: true,
-        status: 'not_started',
-        steps: updatedSteps,
-      };
-
-      return await this.updatePluginState(
-        {
-          status: 'in_progress',
-          guide: updatedGuide,
-        },
-        true
+    try {
+      this.isLoading$.next(true);
+      const response = await this.client.post<{ pluginState: PluginState }>(
+        `${API_BASE_PATH}/guides/activate/${guideId}`
       );
+      this.isLoading$.next(false);
+      // update the guide state in the plugin state observable
+      console.log({state:response.pluginState});
+      this.pluginState$.next(response.pluginState);
+      this.isGuidePanelOpen$.next(true);
+      return response;
+    } catch (error) {
+      this.isLoading$.next(false);
+      throw error;
     }
   }
 

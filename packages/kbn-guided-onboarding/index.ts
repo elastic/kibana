@@ -17,6 +17,5 @@ export type {
   StepConfig,
   StepDescriptionWithLink,
 } from './src/types';
-export { GuideCard, InfrastructureLinkCard } from './src/components/landing_page';
-export type { GuideCardUseCase } from './src/components/landing_page';
+export { GuideCards } from './src/components/landing_page';
 export { testGuideId, testGuideConfig } from './src/common/test_guide_config';

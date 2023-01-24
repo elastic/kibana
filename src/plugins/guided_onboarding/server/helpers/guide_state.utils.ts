@@ -7,7 +7,7 @@
  */
 
 import type { SavedObjectsClient } from '@kbn/core/server';
-import { GuideState } from '@kbn/guided-onboarding';
+import { GuideConfig, GuideId, GuideState, GuideStep} from '@kbn/guided-onboarding';
 import { guideStateSavedObjectsType } from '../saved_objects';
 
 export const findGuideById = async (savedObjectsClient: SavedObjectsClient, guideId: string) => {
@@ -97,4 +97,26 @@ export const updateGuideState = async (
 
     return createdGuideResponse;
   }
+};
+
+export const createDefaultGuideState = async (
+  guideId: GuideId,
+  guideConfig: GuideConfig
+): Promise<GuideState> => {
+  // create a default state from the config
+  const updatedSteps: GuideStep[] = guideConfig.steps.map((step, stepIndex) => {
+    const isFirstStep = stepIndex === 0;
+    return {
+      id: step.id,
+      // Only the first step should be activated when activating a new guide
+      status: isFirstStep ? 'active' : 'inactive',
+    };
+  });
+
+  return {
+    guideId,
+    isActive: true,
+    status: 'not_started',
+    steps: updatedSteps,
+  };
 };

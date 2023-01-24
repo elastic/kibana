@@ -6,29 +6,17 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
-import {
-  EuiButton,
-  EuiFlexGrid,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiLink,
-  EuiLoadingSpinner,
-  EuiPageTemplate,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-  useEuiTheme,
-} from '@elastic/eui';
+import React, { useCallback, useEffect } from 'react';
+import { EuiLink, EuiPageTemplate, EuiSpacer, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
 
 import { css } from '@emotion/react';
 import { useHistory } from 'react-router-dom';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import type { GuideState, GuideId, GuideCardUseCase } from '@kbn/guided-onboarding';
-import { GuideCard, InfrastructureLinkCard } from '@kbn/guided-onboarding';
+import type { GuideId } from '@kbn/guided-onboarding';
 
+import { GuideCards } from '@kbn/guided-onboarding';
 import { getServices } from '../../kibana_services';
 import { KEY_ENABLE_WELCOME } from '../home';
 
@@ -40,18 +28,15 @@ const title = i18n.translate('home.guidedOnboarding.gettingStarted.useCaseSelect
   defaultMessage: 'What would you like to do first?',
 });
 const subtitle = i18n.translate('home.guidedOnboarding.gettingStarted.useCaseSelectionSubtitle', {
-  defaultMessage: 'Select a guide to help you make the most of your data.',
+  defaultMessage: `Select an option below and we'll help you get started`,
 });
 const skipText = i18n.translate('home.guidedOnboarding.gettingStarted.skip.buttonLabel', {
   defaultMessage: `I’d like to do something else (skip)`,
 });
 
 export const GettingStarted = () => {
-  const { application, trackUiMetric, chrome, guidedOnboardingService, http, uiSettings, cloud } =
-    getServices();
-  const [guidesState, setGuidesState] = useState<GuideState[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isError, setIsError] = useState<boolean>(false);
+  console.log('rendering getting started');
+  const { application, trackUiMetric, chrome, guidedOnboardingService, cloud } = getServices();
   const history = useHistory();
 
   useEffect(() => {
@@ -69,25 +54,6 @@ export const GettingStarted = () => {
       },
     ]);
   }, [chrome, trackUiMetric]);
-
-  const fetchGuidesState = useCallback(async () => {
-    setIsLoading(true);
-    setIsError(false);
-    try {
-      const allGuides = await guidedOnboardingService?.fetchAllGuidesState();
-      setIsLoading(false);
-      if (allGuides) {
-        setGuidesState(allGuides.state);
-      }
-    } catch (error) {
-      setIsLoading(false);
-      setIsError(true);
-    }
-  }, [guidedOnboardingService]);
-
-  useEffect(() => {
-    fetchGuidesState();
-  }, [fetchGuidesState]);
 
   useEffect(() => {
     if (cloud?.isCloudEnabled === false) {
@@ -109,16 +75,10 @@ export const GettingStarted = () => {
     trackUiMetric(METRIC_TYPE.CLICK, 'guided_onboarding__skipped');
     application.navigateToApp('home');
   };
-  const { euiTheme } = useEuiTheme();
-  const paddingCss = css`
-    padding: calc(${euiTheme.size.base}*3) calc(${euiTheme.size.base}*4);
-  `;
-
-  const isDarkTheme = uiSettings.get<boolean>('theme:darkMode');
   const activateGuide = useCallback(
-    async (useCase: GuideCardUseCase, guideState?: GuideState) => {
+    async (guideId: GuideId) => {
       try {
-        await guidedOnboardingService?.activateGuide(useCase as GuideId, guideState);
+        await guidedOnboardingService?.activateGuide(guideId);
       } catch (err) {
         getServices().toastNotifications.addDanger({
           title: i18n.translate('home.guidedOnboarding.gettingStarted.activateGuide.errorMessage', {
@@ -130,59 +90,10 @@ export const GettingStarted = () => {
     },
     [guidedOnboardingService]
   );
-
-  if (isLoading) {
-    return (
-      <KibanaPageTemplate.EmptyPrompt
-        title={<EuiLoadingSpinner size="xl" />}
-        body={
-          <EuiText color="subdued">
-            {i18n.translate('home.guidedOnboarding.gettingStarted.loadingIndicator', {
-              defaultMessage: 'Loading the guide state...',
-            })}
-          </EuiText>
-        }
-        data-test-subj="onboarding--loadingIndicator"
-      />
-    );
-  }
-
-  if (isError) {
-    return (
-      <KibanaPageTemplate.EmptyPrompt
-        iconType="alert"
-        color="danger"
-        title={
-          <h2>
-            {i18n.translate('home.guidedOnboarding.gettingStarted.errorSectionTitle', {
-              defaultMessage: 'Unable to load the guide state',
-            })}
-          </h2>
-        }
-        body={
-          <>
-            <EuiText color="subdued">
-              {i18n.translate('home.guidedOnboarding.gettingStarted.errorSectionDescription', {
-                defaultMessage: `The guide couldn't be loaded. Wait a moment and try again.`,
-              })}
-            </EuiText>
-            <EuiSpacer />
-            <EuiButton
-              iconSide="right"
-              onClick={fetchGuidesState}
-              iconType="refresh"
-              color="danger"
-            >
-              {i18n.translate('home.guidedOnboarding.gettingStarted.errorSectionRefreshButton', {
-                defaultMessage: 'Refresh',
-              })}
-            </EuiButton>
-          </>
-        }
-        data-test-subj="onboarding--errorSection"
-      />
-    );
-  }
+  const { euiTheme } = useEuiTheme();
+  const paddingCss = css`
+    padding: calc(${euiTheme.size.base}*3) calc(${euiTheme.size.base}*4);
+  `;
 
   return (
     <KibanaPageTemplate panelled={false} grow>
@@ -200,34 +111,7 @@ export const GettingStarted = () => {
         </EuiText>
         <EuiSpacer size="s" />
         <EuiSpacer size="xxl" />
-        <EuiFlexGrid columns={4} gutterSize="l">
-          {['search', 'kubernetes', 'infrastructure', 'siem'].map((useCase) => {
-            if (useCase === 'infrastructure') {
-              return (
-                <EuiFlexItem key={`linkCard-${useCase}`}>
-                  <InfrastructureLinkCard
-                    navigateToApp={application.navigateToApp}
-                    isDarkTheme={isDarkTheme}
-                    addBasePath={http.basePath.prepend}
-                  />
-                </EuiFlexItem>
-              );
-            }
-            return (
-              <EuiFlexItem key={`guideCard-${useCase}`}>
-                <GuideCard
-                  useCase={useCase as GuideCardUseCase}
-                  guides={guidesState}
-                  activateGuide={activateGuide}
-                  isDarkTheme={isDarkTheme}
-                  addBasePath={http.basePath.prepend}
-                />
-              </EuiFlexItem>
-            );
-          })}
-        </EuiFlexGrid>
-        <EuiSpacer />
-        <EuiHorizontalRule />
+        <GuideCards activateGuide={activateGuide} navigateToApp={application.navigateToApp} />
         <EuiSpacer />
         <div className="eui-textCenter">
           {/* data-test-subj used for FS tracking */}

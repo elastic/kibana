@@ -31,10 +31,7 @@ export interface GuidedOnboardingApi {
     state: { status?: PluginStatus; guide?: GuideState },
     panelState: boolean
   ) => Promise<{ pluginState: PluginState } | undefined>;
-  activateGuide: (
-    guideId: GuideId,
-    guide?: GuideState
-  ) => Promise<{ pluginState: PluginState } | undefined>;
+  activateGuide: (guideId: GuideId) => Promise<{ pluginState: PluginState } | undefined>;
   deactivateGuide: (guide: GuideState) => Promise<{ pluginState: PluginState } | undefined>;
   completeGuide: (guideId: GuideId) => Promise<{ pluginState: PluginState } | undefined>;
   isGuideStepActive$: (guideId: GuideId, stepId: GuideStepIds) => Observable<boolean>;

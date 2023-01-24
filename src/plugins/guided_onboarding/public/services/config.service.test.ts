@@ -18,7 +18,7 @@ import {
   wrongIntegration,
 } from './api.mocks';
 
-import { ConfigService } from './config_service';
+import { ConfigService } from './config.service';
 
 describe('GuidedOnboarding ConfigService', () => {
   let configService: ConfigService;

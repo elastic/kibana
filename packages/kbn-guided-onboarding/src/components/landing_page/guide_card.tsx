@@ -9,105 +9,188 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { GuideState } from '../../types';
-import { GuideCardFooter } from './guide_card_footer';
-import { UseCaseCard } from './use_case_card';
+import { ApplicationStart } from '@kbn/core-application-browser';
+import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { GuideId } from '../../types';
 
-// separate type for GuideCardUseCase that includes some of GuideIds
-export type GuideCardUseCase = 'search' | 'kubernetes' | 'siem';
-type GuideCardConstants = {
-  [key in GuideCardUseCase]: {
-    i18nTexts: {
-      title: string;
-      description: string;
-    };
-    // duplicate the telemetry id from the guide config to not load the config from the endpoint
-    // this might change if we decide to use the guide config for the cards
-    // see this issue https://github.com/elastic/kibana/issues/146672
-    telemetryId: string;
+const cardCss = css`
+  position: relative;
+  min-height: 110px;
+  width: 380px;
+  .euiCard__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+`;
+interface GuideCardConstants {
+  solution: 'search' | 'observability' | 'security';
+  title: string;
+  // if present, guideId indicates which guide is opened when clicking the card
+  guideId?: GuideId;
+  // if present, navigateTo indicates where the user will be redirected, when clicking the card
+  navigateTo?: {
+    appId: string;
+    path?: string;
   };
-};
-
-const constants: GuideCardConstants = {
-  search: {
-    i18nTexts: {
-      title: i18n.translate('guidedOnboardingPackage.gettingStarted.guideCard.search.cardTitle', {
-        defaultMessage: 'Search my data',
-      }),
-      description: i18n.translate(
-        'guidedOnboardingPackage.gettingStarted.guideCard.search.cardDescription',
-        {
-          defaultMessage:
-            'Create a search experience for your websites, applications, workplace content, or anything in between.',
-        }
-      ),
-    },
-    telemetryId: 'search',
-  },
-  kubernetes: {
-    i18nTexts: {
-      title: i18n.translate(
-        'guidedOnboardingPackage.gettingStarted.guideCard.kubernetes.cardTitle',
-        {
-          defaultMessage: 'Observe my Kubernetes infrastructure',
-        }
-      ),
-      description: i18n.translate(
-        'guidedOnboardingPackage.gettingStarted.guideCard.kubernetes.cardDescription',
-        {
-          defaultMessage:
-            'Monitor your Kubernetes infrastructure by consolidating your logs and metrics.',
-        }
-      ),
-    },
-    telemetryId: 'kubernetes',
-  },
-  siem: {
-    i18nTexts: {
-      title: i18n.translate('guidedOnboardingPackage.gettingStarted.guideCard.siem.cardTitle', {
-        defaultMessage: 'Protect my environment',
-      }),
-      description: i18n.translate(
-        'guidedOnboardingPackage.gettingStarted.guideCard.siem.cardDescription',
-        {
-          defaultMessage:
-            'Investigate threats and get your SIEM up and running by installing the Elastic Defend integration.',
-        }
-      ),
-    },
-    telemetryId: 'siem',
-  },
-};
-
-export interface GuideCardProps {
-  useCase: GuideCardUseCase;
-  guides: GuideState[];
-  activateGuide: (useCase: GuideCardUseCase, guide?: GuideState) => Promise<void>;
-  isDarkTheme: boolean;
-  addBasePath: (url: string) => string;
+  // duplicate the telemetry id from the guide config to not load the config from the endpoint
+  // this might change if we decide to use the guide config for the cards
+  // see this issue https://github.com/elastic/kibana/issues/146672
+  telemetryId: string;
+  order: number;
 }
-export const GuideCard = ({
-  useCase,
-  guides,
-  activateGuide,
-  isDarkTheme,
-  addBasePath,
-}: GuideCardProps) => {
-  return (
-    <UseCaseCard
-      useCase={useCase}
-      title={constants[useCase].i18nTexts.title}
-      description={constants[useCase].i18nTexts.description}
-      footer={
-        <GuideCardFooter
-          guides={guides}
-          activateGuide={activateGuide}
-          useCase={useCase}
-          telemetryId={constants[useCase].telemetryId}
-        />
+
+const guideCards: GuideCardConstants[] = [
+  {
+    solution: 'search',
+    title: i18n.translate('home.guidedOnboarding.gettingStarted.cards.appSearch.title', {
+      defaultMessage: 'Build an application on top of Elasticsearch',
+    }),
+    guideId: 'search',
+    telemetryId: 'guided-onboarding--search--application',
+    order: 1,
+  },
+  {
+    solution: 'search',
+    title: i18n.translate('home.guidedOnboarding.gettingStarted.cards.websiteSearch.title', {
+      defaultMessage: 'Add search to your website',
+    }),
+    guideId: 'search',
+    telemetryId: 'guided-onboarding--search--website',
+    order: 4,
+  },
+  {
+    solution: 'search',
+    title: i18n.translate('home.guidedOnboarding.gettingStarted.cards.databaseSearch.title', {
+      defaultMessage: 'Search across databases and business systems',
+    }),
+    guideId: 'search',
+    telemetryId: 'guided-onboarding--search--database',
+    order: 7,
+  },
+  {
+    solution: 'observability',
+    title: i18n.translate('home.guidedOnboarding.gettingStarted.cards.logsObservability.title', {
+      defaultMessage: 'Monitor logs',
+    }),
+    navigateTo: {
+      appId: 'observability',
+      path: '/overview',
+    },
+    telemetryId: 'guided-onboarding--observability--logs',
+    order: 2,
+  },
+  {
+    solution: 'observability',
+    title: i18n.translate('home.guidedOnboarding.gettingStarted.cards.apmObservability.title', {
+      defaultMessage: 'Monitor my application performance (APM/tracing)',
+    }),
+    navigateTo: {
+      appId: 'observability',
+      path: '/overview',
+    },
+    telemetryId: 'guided-onboarding--observability--apm',
+    order: 5,
+  },
+  {
+    solution: 'observability',
+    title: i18n.translate('home.guidedOnboarding.gettingStarted.cards.hostsObservability.title', {
+      defaultMessage: 'Monitor hosts',
+    }),
+    navigateTo: {
+      appId: 'observability',
+      path: '/overview',
+    },
+    telemetryId: 'guided-onboarding--observability--hosts',
+    order: 8,
+  },
+  {
+    solution: 'observability',
+    title: i18n.translate(
+      'home.guidedOnboarding.gettingStarted.cards.kubernetesObservability.title',
+      {
+        defaultMessage: 'Monitor kubernetes clusters',
       }
-      isDarkTheme={isDarkTheme}
-      addBasePath={addBasePath}
-    />
+    ),
+    guideId: 'kubernetes',
+    telemetryId: 'guided-onboarding--observability--kubernetes',
+    order: 11,
+  },
+  {
+    solution: 'security',
+    title: i18n.translate('home.guidedOnboarding.gettingStarted.cards.siemSecurity.title', {
+      defaultMessage: 'Detect threats in my data with SIEM',
+    }),
+    guideId: 'siem',
+    telemetryId: 'guided-onboarding--security--siem',
+    order: 3,
+  },
+  {
+    solution: 'security',
+    title: i18n.translate('home.guidedOnboarding.gettingStarted.cards.hostsSecurity.title', {
+      defaultMessage: 'Secure my hosts',
+    }),
+    navigateTo: {
+      appId: 'securitySolutionUI',
+      path: '/overview',
+    },
+    telemetryId: 'guided-onboarding--security--hosts',
+    order: 6,
+  },
+  {
+    solution: 'security',
+    title: i18n.translate('home.guidedOnboarding.gettingStarted.cards.cloudSecurity.title', {
+      defaultMessage: 'Secure my cloud assets',
+    }),
+    navigateTo: {
+      appId: 'securitySolutionUI',
+      path: '/overview',
+    },
+    telemetryId: 'guided-onboarding--security--cloud',
+    order: 9,
+  },
+].sort((cardA, cardB) => cardA.order - cardB.order) as GuideCardConstants[];
+
+export interface GuideCardsProps {
+  activateGuide: (guideId: GuideId) => Promise<void>;
+  navigateToApp: ApplicationStart['navigateToApp'];
+}
+export const GuideCards = ({ activateGuide, navigateToApp }: GuideCardsProps) => {
+  return (
+    <EuiFlexGroup wrap responsive justifyContent="center">
+      {guideCards.map((card, index) => {
+        const onClick = async () => {
+          console.log('card onclick handler');
+          if (card.guideId) {
+            await activateGuide(card.guideId);
+          } else if (card.navigateTo) {
+            await navigateToApp(card.navigateTo?.appId, {
+              path: card.navigateTo.path,
+            });
+          }
+        };
+        return (
+          <EuiFlexItem key={index} grow={false}>
+            <EuiCard
+              onClick={onClick}
+              css={cardCss}
+              title={
+                <>
+                  <EuiSpacer size="s" />
+                  <h3 style={{ fontWeight: 600 }}>{card.title}</h3>
+                </>
+              }
+              titleSize="xs"
+              betaBadgeProps={{
+                label: card.solution,
+              }}
+            />
+            <EuiSpacer size="m" />
+          </EuiFlexItem>
+        );
+      })}
+    </EuiFlexGroup>
   );
 };

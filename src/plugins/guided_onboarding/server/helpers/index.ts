@@ -11,5 +11,5 @@ export {
   findAllGuides,
   findGuideById,
   updateGuideState,
-} from './guide_state_utils';
-export { updatePluginStatus, calculateIsActivePeriod, getPluginState } from './plugin_state_utils';
+} from './guide_state.utils';
+export { updatePluginStatus, calculateIsActivePeriod, getPluginState } from './plugin_state.utils';

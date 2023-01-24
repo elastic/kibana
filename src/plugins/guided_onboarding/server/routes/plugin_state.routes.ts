@@ -9,8 +9,8 @@
 import { IRouter, SavedObjectsClient } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { GuideState } from '@kbn/guided-onboarding';
-import { getPluginState, updatePluginStatus } from '../helpers/plugin_state_utils';
-import { API_BASE_PATH } from '../../common';
+import { getPluginState, updatePluginStatus } from '../helpers/plugin_state.utils';
+import { API_BASE_PATH, PluginStatus } from '../../common';
 import { updateGuideState } from '../helpers';
 
 export const registerGetPluginStateRoute = (router: IRouter) => {
@@ -62,7 +62,7 @@ export const registerPutPluginStateRoute = (router: IRouter) => {
       const savedObjectsClient = coreContext.savedObjects.client as SavedObjectsClient;
 
       if (status) {
-        await updatePluginStatus(savedObjectsClient, status);
+        await updatePluginStatus(savedObjectsClient, status as PluginStatus);
       }
       if (guide) {
         await updateGuideState(savedObjectsClient, guide);

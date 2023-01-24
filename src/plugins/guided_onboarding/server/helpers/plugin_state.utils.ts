@@ -7,7 +7,7 @@
  */
 
 import { SavedObjectsClient } from '@kbn/core/server';
-import { findActiveGuide } from './guide_state_utils';
+import { findActiveGuide } from './guide_state.utils';
 import type { PluginState, PluginStatus } from '../../common';
 import {
   pluginStateSavedObjectsId,
@@ -50,7 +50,7 @@ export const getPluginState = async (savedObjectsClient: SavedObjectsClient) => 
 
 export const updatePluginStatus = async (
   savedObjectsClient: SavedObjectsClient,
-  status: string
+  status: PluginStatus
 ) => {
   return await savedObjectsClient.update<PluginStateSO>(
     pluginStateSavedObjectsType,
