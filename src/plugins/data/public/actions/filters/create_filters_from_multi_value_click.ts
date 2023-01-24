@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { DataView } from '@kbn/data-views-plugin/common';
 import { buildCombinedFilter, Filter, toggleFilterNegated, BooleanRelation } from '@kbn/es-query';
 import { createFilter } from './create_filters_from_value_click';
 import type { MultiValueClickContext } from '../multi_value_click_action';
@@ -60,7 +59,7 @@ export const createFiltersFromMultiValueClickAction = async ({
     filters,
     {
       id: dataViewId,
-    } as DataView,
+    },
     undefined,
     undefined,
     alias
