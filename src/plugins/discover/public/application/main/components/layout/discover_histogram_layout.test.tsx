@@ -34,6 +34,7 @@ import { getSessionServiceMock } from '@kbn/data-plugin/public/search/session/mo
 import { ResetSearchButton } from './reset_search_button';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { DiscoverMainProvider } from '../../services/discover_state_provider';
+import { act } from 'react-dom/test-utils';
 
 function getStateContainer() {
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });
@@ -144,7 +145,7 @@ const mountComponent = async ({
   );
 
   // wait for lazy modules
-  await new Promise((resolve) => setTimeout(resolve, 0));
+  await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
   component.update();
 
   return component;
