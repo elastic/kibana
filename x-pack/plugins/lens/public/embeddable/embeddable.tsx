@@ -552,7 +552,7 @@ export class Embeddable
 
     if (addedMessageIds.length) {
       this.additionalUserMessages = newMessageMap;
-      this.reload();
+      this.renderBadgeMessages();
     }
 
     return () => {
@@ -875,6 +875,10 @@ export class Embeddable
       domNode
     );
 
+    this.renderBadgeMessages();
+  }
+
+  private renderBadgeMessages() {
     const warningsToDisplay = this.getUserMessages('embeddableBadge', {
       severity: 'warning',
     });
