@@ -25,7 +25,7 @@ export type ApmIndicesConfig = Readonly<{
 
 export const APM_AGENT_CONFIGURATION_INDEX = '.apm-agent-configuration';
 export const APM_CUSTOM_LINK_INDEX = '.apm-custom-link';
-export const APM_SOURCE_MAP_INDEX = '.apm-source-map';
+export const APM_SOURCE_MAP_INDEX = 'apm-agent-sourcemap';
 
 type ISavedObjectsClient = Pick<SavedObjectsClient, 'get'>;
 
