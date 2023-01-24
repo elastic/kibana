@@ -46,7 +46,6 @@
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/utils",
     "@kbn/core-http-router-server-internal",
-    "@kbn/core-saved-objects-utils-server",
   ],
   "exclude": [
     "target/**/*",
