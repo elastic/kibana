@@ -189,7 +189,7 @@ export const getAgentsHandler: RequestHandler<
       getTotalInactive: request.query.showInactive,
     });
 
-    const { total, page, perPage, totalInactive = 0 } = agentRes;
+    const { total, page, perPage, totalInactive = 0, totalUnenrolled = 0 } = agentRes;
     let { agents } = agentRes;
 
     // Assign metrics
@@ -202,6 +202,7 @@ export const getAgentsHandler: RequestHandler<
       items: agents,
       total,
       totalInactive,
+      totalUnenrolled,
       page,
       perPage,
     };

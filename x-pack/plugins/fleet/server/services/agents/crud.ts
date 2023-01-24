@@ -206,6 +206,7 @@ export async function getAgentsByKuery(
   page: number;
   perPage: number;
   totalInactive?: number;
+  totalUnenrolled?: number;
 }> {
   const {
     page = 1,
@@ -239,35 +240,43 @@ export async function getAgentsByKuery(
     ? [{ 'local_metadata.host.hostname.keyword': { order: 'asc' } }]
     : [];
   const queryAgents = async (from: number, size: number) =>
-    esClient.search<FleetServerAgent, { totalInactive?: { doc_count: number } }>({
-      from,
-      size,
-      track_total_hits: true,
-      rest_total_hits_as_int: true,
-      runtime_mappings: runtimeFields,
-      fields: Object.keys(runtimeFields),
-      sort: [{ [sortField]: { order: sortOrder } }, ...secondarySort],
-      post_filter: kueryNode ? toElasticsearchQuery(kueryNode) : undefined,
-      ...(pitId
-        ? {
-            pit: {
-              id: pitId,
-              keep_alive: '1m',
+    esClient.search<FleetServerAgent, { totalInactive?: { doc_count: number; aggregations: any } }>(
+      {
+        from,
+        size,
+        track_total_hits: true,
+        rest_total_hits_as_int: true,
+        runtime_mappings: runtimeFields,
+        fields: Object.keys(runtimeFields),
+        sort: [{ [sortField]: { order: sortOrder } }, ...secondarySort],
+        post_filter: kueryNode ? toElasticsearchQuery(kueryNode) : undefined,
+        ...(pitId
+          ? {
+              pit: {
+                id: pitId,
+                keep_alive: '1m',
+              },
+            }
+          : {
+              index: AGENTS_INDEX,
+              ignore_unavailable: true,
+            }),
+        ...(pitId && searchAfter ? { search_after: searchAfter, from: 0 } : {}),
+        ...(getTotalInactive && {
+          aggregations: {
+            totalInactive: {
+              filter: { bool: { must: { terms: { status: ['inactive', 'unenrolled'] } } } },
+              aggs: {
+                statusBreakdown: {
+                  terms: { field: 'status' },
+                  size: 2,
+                },
+              },
             },
-          }
-        : {
-            index: AGENTS_INDEX,
-            ignore_unavailable: true,
-          }),
-      ...(pitId && searchAfter ? { search_after: searchAfter, from: 0 } : {}),
-      ...(getTotalInactive && {
-        aggregations: {
-          totalInactive: {
-            filter: { bool: { must: { terms: { status: ['inactive', 'unenrolled'] } } } },
           },
-        },
-      }),
-    });
+        }),
+      }
+    );
   let res;
   try {
     res = await queryAgents((page - 1) * perPage, perPage);
@@ -279,8 +288,14 @@ export async function getAgentsByKuery(
   let agents = res.hits.hits.map(searchHitToAgent);
   let total = res.hits.total as number;
   let totalInactive = 0;
+  let totalUnenrolled = 0;
   if (getTotalInactive && res.aggregations) {
-    totalInactive = res.aggregations?.totalInactive?.doc_count ?? 0;
+    totalInactive = res.aggregations?.totalInactive?.aggregations?.statusBreakdown?.buckets?.find(
+      (bucket: { key: string }) => bucket.key === 'inactive'
+    )?.doc_count;
+    totalUnenrolled = res.aggregations?.totalInactive?.aggregations?.statusBreakdown?.buckets?.find(
+      (bucket: { key: string }) => bucket.key === 'unenrolled'
+    )?.doc_count;
   }
   // filtering for a range on the version string will not work,
   // nor does filtering on a flattened field (local_metadata), so filter here
@@ -308,7 +323,7 @@ export async function getAgentsByKuery(
     total,
     page,
     perPage,
-    ...(getTotalInactive && { totalInactive }),
+    ...(getTotalInactive && { totalInactive, totalUnenrolled }),
   };
 }
 

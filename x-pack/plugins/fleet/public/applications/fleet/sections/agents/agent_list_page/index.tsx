@@ -225,6 +225,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [totalAgents, setTotalAgents] = useState(0);
   const [totalInactiveAgents, setTotalInactiveAgents] = useState(0);
+  const [totalUnenrolledAgents, setTotalUnenrolledAgents] = useState(0);
   const [showAgentActivityTour, setShowAgentActivityTour] = useState({ isOpen: false });
 
   const getSortFieldForAPI = (field: keyof Agent): string => {
@@ -340,6 +341,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           setAgents(agentsResponse.data.items);
           setTotalAgents(agentsResponse.data.total);
           setTotalInactiveAgents(agentsResponse.data.totalInactive);
+          setTotalUnenrolledAgents(agentsResponse.data.totalUnenrolled);
         } catch (error) {
           notifications.toasts.addError(error, {
             title: i18n.translate('xpack.fleet.agentList.errorFetchingDataTitle', {
@@ -587,6 +589,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         onSelectedTagsChange={setSelectedTags}
         totalAgents={totalAgents}
         totalInactiveAgents={totalInactiveAgents}
+        totalUnenrolledAgents={totalUnenrolledAgents}
         selectionMode={selectionMode}
         currentQuery={kuery}
         selectedAgents={selectedAgents}

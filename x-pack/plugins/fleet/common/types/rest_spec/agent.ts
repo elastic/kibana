@@ -28,6 +28,7 @@ export interface GetAgentsRequest {
 
 export interface GetAgentsResponse extends ListResult<Agent> {
   totalInactive: number;
+  totalUnenrolled: number;
   // deprecated in 8.x
   list?: Agent[];
 }

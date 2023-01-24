@@ -157,6 +157,7 @@ const endpointListApiPathHandlerMocks = ({
         total: totalAgentsUsingEndpoint,
         items: [],
         totalInactive: 0,
+        totalUnenrolled: 0,
         page: 1,
         perPage: 10,
       };

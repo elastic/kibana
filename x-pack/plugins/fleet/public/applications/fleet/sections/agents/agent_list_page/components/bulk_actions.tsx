@@ -36,7 +36,7 @@ import { TagsAddRemove } from './tags_add_remove';
 
 export interface Props {
   totalAgents: number;
-  totalInactiveAgents: number;
+  totalInactiveAndUnenrolledAgents: number;
   selectionMode: SelectionMode;
   currentQuery: string;
   selectedAgents: Agent[];
@@ -48,7 +48,7 @@ export interface Props {
 
 export const AgentBulkActions: React.FunctionComponent<Props> = ({
   totalAgents,
-  totalInactiveAgents,
+  totalInactiveAndUnenrolledAgents,
   selectionMode,
   currentQuery,
   selectedAgents,
@@ -77,8 +77,8 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   const atLeastOneActiveAgentSelected =
     selectionMode === 'manual'
       ? !!selectedAgents.find((agent) => agent.active)
-      : totalAgents > totalInactiveAgents;
-  const totalActiveAgents = totalAgents - totalInactiveAgents;
+      : totalAgents > totalInactiveAndUnenrolledAgents;
+  const totalActiveAgents = totalAgents - totalInactiveAndUnenrolledAgents;
   const agentCount = selectionMode === 'manual' ? selectedAgents.length : totalActiveAgents;
   const agents = selectionMode === 'manual' ? selectedAgents : currentQuery;
   const [tagsPopoverButton, setTagsPopoverButton] = useState<HTMLElement>();

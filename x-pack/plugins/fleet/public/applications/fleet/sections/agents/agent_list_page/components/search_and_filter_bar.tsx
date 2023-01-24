@@ -56,6 +56,7 @@ export const SearchAndFilterBar: React.FunctionComponent<{
   onSelectedTagsChange: (selectedTags: string[]) => void;
   totalAgents: number;
   totalInactiveAgents: number;
+  totalUnenrolledAgents: number;
   selectionMode: SelectionMode;
   currentQuery: string;
   selectedAgents: Agent[];
@@ -81,6 +82,7 @@ export const SearchAndFilterBar: React.FunctionComponent<{
   onSelectedTagsChange,
   totalAgents,
   totalInactiveAgents,
+  totalUnenrolledAgents,
   selectionMode,
   currentQuery,
   selectedAgents,
@@ -312,7 +314,7 @@ export const SearchAndFilterBar: React.FunctionComponent<{
               <EuiFlexItem grow={false}>
                 <AgentBulkActions
                   totalAgents={totalAgents}
-                  totalInactiveAgents={totalInactiveAgents}
+                  totalInactiveAndUnenrolledAgents={totalInactiveAgents + totalUnenrolledAgents}
                   selectionMode={selectionMode}
                   currentQuery={currentQuery}
                   selectedAgents={selectedAgents}
