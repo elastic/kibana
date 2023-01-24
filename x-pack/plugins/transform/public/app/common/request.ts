@@ -206,7 +206,7 @@ export function getPreviewTransformRequestBody(
     dataView.timeFieldName,
     timeRangeMs?.from,
     timeRangeMs?.to,
-    transformConfigQuery
+    isDefaultQuery(transformConfigQuery) ? undefined : transformConfigQuery
   );
 
   const queryWithBaseFilterCriteria = {
@@ -259,7 +259,10 @@ export const getCreateTransformRequestBody = (
     dataView,
     getTransformConfigQuery(transformConfigState.searchQuery),
     transformConfigState.previewRequest,
-    transformConfigState.runtimeMappings
+    transformConfigState.runtimeMappings,
+    transformConfigState.isDatePickerApplyEnabled && transformConfigState.timeRangeMs
+      ? transformConfigState.timeRangeMs
+      : undefined
   ),
   // conditionally add optional description
   ...(transformDetailsState.transformDescription !== ''
