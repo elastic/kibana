@@ -559,9 +559,9 @@ export function parseDataStreamElasticsearchEntry(
   }
 
   if (expandedElasticsearch?.index_template?.data_stream) {
-    parsedElasticsearchEntry['index_template.data_stream'] = {
-      ...expandedElasticsearch.index_template.data_stream,
-    };
+    parsedElasticsearchEntry['index_template.data_stream'] = expandDottedEntries(
+      expandedElasticsearch.index_template.data_stream
+    );
   }
 
   if (expandedElasticsearch?.index_mode) {
