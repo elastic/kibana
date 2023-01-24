@@ -6,12 +6,13 @@
  */
 import { schema as rt, TypeOf } from '@kbn/config-schema';
 
-export const cspRuleMetadataSchema = rt.object({
+export const cspRuleTemplateMetadataSchema = rt.object({
   audit: rt.string(),
   benchmark: rt.object({
     name: rt.string(),
     id: rt.string(),
     version: rt.string(),
+    rule_number: rt.maybe(rt.string()),
   }),
   default_value: rt.maybe(rt.string()),
   description: rt.string(),
@@ -28,4 +29,4 @@ export const cspRuleMetadataSchema = rt.object({
   version: rt.string(),
 });
 
-export type CspRuleMetadata = TypeOf<typeof cspRuleMetadataSchema>;
+export type CspRuleTemplateMetadata = TypeOf<typeof cspRuleTemplateMetadataSchema>;
