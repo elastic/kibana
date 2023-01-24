@@ -8,7 +8,7 @@
 import httpProxy from 'http-proxy';
 import expect from '@kbn/expect';
 
-import { getHttpProxyServer } from '../../../../../packages/helpers/get_proxy_server';
+import { getHttpProxyServer } from '@kbn/alerting-api-integration-helpers/get_proxy_server';
 import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 import {
   getExternalServiceSimulatorPath,
