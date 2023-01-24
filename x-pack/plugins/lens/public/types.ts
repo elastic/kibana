@@ -18,7 +18,6 @@ import type {
   ExpressionRendererEvent,
 } from '@kbn/expressions-plugin/public';
 import type { Configuration, NavigateToLensContext } from '@kbn/visualizations-plugin/common';
-import { Adapters } from '@kbn/inspector-plugin/public';
 import type { Query } from '@kbn/es-query';
 import type {
   UiActionsStart,
@@ -105,6 +104,8 @@ export interface EditorFrameProps {
   showNoDataPopover: () => void;
   lensInspector: LensInspector;
   indexPatternService: IndexPatternServiceAPI;
+  getUserMessages: UserMessagesGetter;
+  addUserMessages: AddUserMessages;
 }
 
 export type VisualizationMap = Record<string, Visualization>;
@@ -272,6 +273,49 @@ interface DimensionLink {
   };
 }
 
+type UserMessageDisplayLocation =
+  | {
+      // NOTE: We want to move toward more errors that do not block the render!
+      id:
+        | 'toolbar'
+        | 'embeddableBadge'
+        | 'visualization' // blocks render
+        | 'visualizationOnEmbeddable' // blocks render in embeddable only
+        | 'visualizationInEditor' // blocks render in editor only
+        | 'textBasedLanguagesQueryInput'
+        | 'banner';
+    }
+  | { id: 'dimensionTrigger'; dimensionId: string };
+
+export type UserMessagesDisplayLocationId = UserMessageDisplayLocation['id'];
+
+export interface UserMessage {
+  uniqueId?: string;
+  severity: 'error' | 'warning';
+  shortMessage: string;
+  longMessage: React.ReactNode | string;
+  fixableInEditor: boolean;
+  displayLocations: UserMessageDisplayLocation[];
+}
+
+export type RemovableUserMessage = UserMessage & { uniqueId: string };
+
+export interface UserMessageFilters {
+  severity?: UserMessage['severity'];
+  dimensionId?: string;
+}
+
+export type UserMessagesGetter = (
+  locationId: UserMessagesDisplayLocationId | UserMessagesDisplayLocationId[] | undefined,
+  filters: UserMessageFilters
+) => UserMessage[];
+
+export type AddUserMessages = (messages: RemovableUserMessage[]) => () => void;
+
+export function isMessageRemovable(message: UserMessage): message is RemovableUserMessage {
+  return Boolean(message.uniqueId);
+}
+
 /**
  * Interface for the datasource registry
  */
@@ -291,7 +335,6 @@ export interface Datasource<T = unknown, P = unknown> {
 
   // Given the current state, which parts should be saved?
   getPersistableState: (state: T) => { state: P; savedObjectReferences: SavedObjectReference[] };
-  getUnifiedSearchErrors?: (state: T) => Error[];
 
   insertLayer: (state: T, newLayerId: string, linkToLayers?: string[]) => T;
   createEmptyLayer: (indexPatternId: string) => T;
@@ -433,28 +476,16 @@ export interface Datasource<T = unknown, P = unknown> {
    */
   checkIntegrity: (state: T, indexPatterns: IndexPatternMap) => string[];
 
-  getErrorMessages: (
-    state: T,
-    indexPatterns: Record<string, IndexPattern>
-  ) =>
-    | Array<{
-        shortMessage: string;
-        longMessage: React.ReactNode;
-        fixAction?: { label: string; newState: () => Promise<T> };
-      }>
-    | undefined;
-
   /**
-   * The frame calls this function to display warnings about visualization
+   * The frame calls this function to display messages to the user
    */
-  getWarningMessages?: (
+  getUserMessages: (
     state: T,
-    frame: FramePublicAPI,
-    adapters: Adapters,
-    setState: StateSetter<T>
-  ) => React.ReactNode[] | undefined;
-
-  getDeprecationMessages?: (state: T) => React.ReactNode[] | undefined;
+    deps: {
+      frame: FrameDatasourceAPI;
+      setState: StateSetter<T>;
+    }
+  ) => UserMessage[];
 
   /**
    * The embeddable calls this function to display warnings about visualization on the dashboard
@@ -464,7 +495,7 @@ export interface Datasource<T = unknown, P = unknown> {
     warning: SearchResponseWarning,
     request: SearchRequest,
     response: estypes.SearchResponse
-  ) => Array<string | React.ReactNode> | undefined;
+  ) => UserMessage[];
 
   /**
    * Checks if the visualization created is time based, for example date histogram
@@ -623,7 +654,7 @@ export type DatasourceDimensionProps<T> = SharedDimensionProps & {
   indexPatterns: IndexPatternMap;
   hideTooltip?: boolean;
   invalid?: boolean;
-  invalidMessage?: string;
+  invalidMessage?: string | React.ReactNode;
 };
 export type ParamEditorCustomProps = Record<string, unknown> & {
   labels?: string[];
@@ -835,9 +866,6 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   // this dimension group in the hierarchy. If not specified, the position of the dimension in the array is used. specified nesting
   // orders are always higher in the hierarchy than non-specified ones.
   nestingOrder?: number;
-  // some type of layers can produce groups even if invalid. Keep this information to visually show the user that.
-  invalid?: boolean;
-  invalidMessage?: string;
   // need a special flag to know when to pass the previous column on duplicating
   requiresPreviousColumnOnDuplicate?: boolean;
   supportStaticValue?: boolean;
@@ -1214,7 +1242,7 @@ export interface Visualization<T = unknown, P = unknown> {
     label: string;
     hideTooltip?: boolean;
     invalid?: boolean;
-    invalidMessage?: string;
+    invalidMessage?: string | React.ReactNode;
   }) => JSX.Element | null;
   /**
    * Creates map of columns ids and unique lables. Used only for noDatasource layers
@@ -1246,32 +1274,12 @@ export interface Visualization<T = unknown, P = unknown> {
     datasourceLayers: DatasourceLayers,
     datasourceExpressionsByLayers?: Record<string, Ast>
   ) => ExpressionAstExpression | string | null;
+
   /**
    * The frame will call this function on all visualizations at few stages (pre-build/build error) in order
    * to provide more context to the error and show it to the user
    */
-  getErrorMessages: (
-    state: T,
-    frame?: Pick<FramePublicAPI, 'datasourceLayers' | 'dataViews'>
-  ) =>
-    | Array<{
-        shortMessage: string;
-        longMessage: React.ReactNode;
-      }>
-    | undefined;
-
-  validateColumn?: (
-    state: T,
-    frame: Pick<FramePublicAPI, 'dataViews'>,
-    layerId: string,
-    columnId: string,
-    group?: VisualizationDimensionGroupConfig
-  ) => { invalid: boolean; invalidMessage?: string };
-
-  /**
-   * The frame calls this function to display warnings about visualization
-   */
-  getWarningMessages?: (state: T, frame: FramePublicAPI) => React.ReactNode[] | undefined;
+  getUserMessages?: (state: T, deps: { frame: FramePublicAPI }) => UserMessage[];
 
   /**
    * On Edit events the frame will call this to know what's going to be the next visualization state
