@@ -36,7 +36,7 @@ export const mapping = {
   },
   migration_version: { type: 'keyword' }, // new field (7.14) to distinguish reports that were scheduled with Task Manager
   jobtype: { type: 'keyword' },
-  payload: { dynamic: false, properties: {} },
+  payload: { type: 'object', enabled: false },
   priority: { type: 'byte' }, // TODO: remove: this is unused
   timeout: { type: 'long' },
   process_expiration: { type: 'date' },
@@ -57,7 +57,7 @@ export const mapping = {
       chunk: { type: 'long' },
       content_type: { type: 'keyword' },
       size: { type: 'long' },
-      content: { dynamic: false, properties: {} },
+      content: { type: 'object', enabled: false },
     },
   },
   metrics: {
