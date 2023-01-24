@@ -24,7 +24,7 @@ import {
   HeatmapLegendExpressionFunctionDefinition,
 } from '@kbn/expression-heatmap-plugin/common';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
-import type { OperationMetadata, Suggestion, Visualization } from '../../types';
+import type { OperationMetadata, Suggestion, UserMessage, Visualization } from '../../types';
 import type { HeatmapVisualizationState } from './types';
 import { getSuggestions } from './suggestions';
 import {
@@ -433,16 +433,19 @@ export const getHeatmapVisualization = ({
     };
   },
 
-  getErrorMessages(state) {
+  getUserMessages(state, { frame }) {
     if (!state.yAccessor && !state.xAccessor && !state.valueAccessor) {
       // nothing configured yet
-      return;
+      return [];
     }
 
-    const errors: ReturnType<Visualization['getErrorMessages']> = [];
+    const errors: UserMessage[] = [];
 
     if (!state.xAccessor) {
       errors.push({
+        severity: 'error',
+        fixableInEditor: true,
+        displayLocations: [{ id: 'visualization' }],
         shortMessage: i18n.translate(
           'xpack.lens.heatmapVisualization.missingXAccessorShortMessage',
           {
@@ -455,33 +458,37 @@ export const getHeatmapVisualization = ({
       });
     }
 
-    return errors.length ? errors : undefined;
-  },
+    let warnings: UserMessage[] = [];
 
-  getWarningMessages(state, frame) {
-    if (!state?.layerId || !frame.activeData || !state.valueAccessor) {
-      return;
+    if (state?.layerId && frame.activeData && state.valueAccessor) {
+      const rows = frame.activeData[state.layerId] && frame.activeData[state.layerId].rows;
+      if (rows) {
+        const hasArrayValues = rows.some((row) => Array.isArray(row[state.valueAccessor!]));
+
+        const datasource = frame.datasourceLayers[state.layerId];
+        const operation = datasource?.getOperationForColumnId(state.valueAccessor);
+
+        warnings = hasArrayValues
+          ? [
+              {
+                severity: 'warning',
+                fixableInEditor: true,
+                displayLocations: [{ id: 'toolbar' }],
+                shortMessage: '',
+                longMessage: (
+                  <FormattedMessage
+                    id="xpack.lens.heatmapVisualization.arrayValuesWarningMessage"
+                    defaultMessage="{label} contains array values. Your visualization may not render as expected."
+                    values={{ label: <strong>{operation?.label}</strong> }}
+                  />
+                ),
+              },
+            ]
+          : [];
+      }
     }
 
-    const rows = frame.activeData[state.layerId] && frame.activeData[state.layerId].rows;
-    if (!rows) {
-      return;
-    }
-
-    const hasArrayValues = rows.some((row) => Array.isArray(row[state.valueAccessor!]));
-
-    const datasource = frame.datasourceLayers[state.layerId];
-    const operation = datasource?.getOperationForColumnId(state.valueAccessor);
-
-    return hasArrayValues
-      ? [
-          <FormattedMessage
-            id="xpack.lens.heatmapVisualization.arrayValuesWarningMessage"
-            defaultMessage="{label} contains array values. Your visualization may not render as expected."
-            values={{ label: <strong>{operation?.label}</strong> }}
-          />,
-        ]
-      : undefined;
+    return [...errors, ...warnings];
   },
 
   getSuggestionFromConvertToLensContext({ suggestions, context }) {
