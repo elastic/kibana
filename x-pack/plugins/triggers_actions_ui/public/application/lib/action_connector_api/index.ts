@@ -11,3 +11,7 @@ export { createActionConnector } from './create';
 export { deleteActions } from './delete';
 export { executeAction } from './execute';
 export { updateActionConnector } from './update';
+export type { LoadGlobalConnectorExecutionLogAggregationsProps } from './load_execution_log_aggregations';
+export { loadGlobalConnectorExecutionLogAggregations } from './load_execution_log_aggregations';
+export type { LoadGlobalConnectorExecutionKPIAggregationsProps } from './load_execution_kpi_aggregations';
+export { loadGlobalConnectorExecutionKPIAggregations } from './load_execution_kpi_aggregations';

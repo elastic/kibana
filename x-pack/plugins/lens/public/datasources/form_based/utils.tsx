@@ -8,10 +8,10 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { DocLinksStart, ThemeServiceStart } from '@kbn/core/public';
+import type { CoreStart, DocLinksStart, ThemeServiceStart } from '@kbn/core/public';
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import { TimeRange } from '@kbn/es-query';
-import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiCallOut, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { groupBy, escape, uniq } from 'lodash';
@@ -26,7 +26,7 @@ import {
 
 import { estypes } from '@elastic/elasticsearch';
 import type { DateRange } from '../../../common/types';
-import type { FramePublicAPI, IndexPattern, StateSetter } from '../../types';
+import type { FramePublicAPI, IndexPattern, StateSetter, UserMessage } from '../../types';
 import { renewIDs } from '../../utils';
 import type { FormBasedLayer, FormBasedPersistedState, FormBasedPrivateState } from './types';
 import type { ReferenceBasedIndexPatternColumn } from './operations/definitions/column_types';
@@ -186,7 +186,7 @@ export function getShardFailuresWarningMessages(
   request: SearchRequest,
   response: estypes.SearchResponse,
   theme: ThemeServiceStart
-): Array<string | React.ReactNode> {
+): UserMessage[] {
   if (state) {
     if (warning.type === 'shard_failure') {
       switch (warning.reason.type) {
@@ -205,38 +205,55 @@ export function getShardFailuresWarningMessages(
                   ].includes(col.operationType)
                 )
                 .map((col) => col.label)
-            ).map((label) =>
-              i18n.translate('xpack.lens.indexPattern.tsdbRollupWarning', {
-                defaultMessage:
-                  '{label} uses a function that is unsupported by rolled up data. Select a different function or change the time range.',
-                values: {
-                  label,
-                },
-              })
+            ).map(
+              (label) =>
+                ({
+                  uniqueId: `unsupported_aggregation_on_downsampled_index--${label}`,
+                  severity: 'warning',
+                  fixableInEditor: true,
+                  displayLocations: [{ id: 'toolbar' }, { id: 'embeddableBadge' }],
+                  shortMessage: '',
+                  longMessage: i18n.translate('xpack.lens.indexPattern.tsdbRollupWarning', {
+                    defaultMessage:
+                      '{label} uses a function that is unsupported by rolled up data. Select a different function or change the time range.',
+                    values: {
+                      label,
+                    },
+                  }),
+                } as UserMessage)
             )
           );
         default:
           return [
-            <>
-              <EuiText size="s">
-                <strong>{warning.message}</strong>
-                <p>{warning.text}</p>
-              </EuiText>
-              <EuiSpacer size="s" />
-              {warning.text ? (
-                <ShardFailureOpenModalButton
-                  theme={theme}
-                  title={warning.message}
-                  size="m"
-                  getRequestMeta={() => ({
-                    request: request as ShardFailureRequest,
-                    response,
-                  })}
-                  color="primary"
-                  isButtonEmpty={true}
-                />
-              ) : null}
-            </>,
+            {
+              uniqueId: `shard_failure`,
+              severity: 'warning',
+              fixableInEditor: true,
+              displayLocations: [{ id: 'toolbar' }, { id: 'embeddableBadge' }],
+              shortMessage: '',
+              longMessage: (
+                <>
+                  <EuiText size="s">
+                    <strong>{warning.message}</strong>
+                    <p>{warning.text}</p>
+                  </EuiText>
+                  <EuiSpacer size="s" />
+                  {warning.text ? (
+                    <ShardFailureOpenModalButton
+                      theme={theme}
+                      title={warning.message}
+                      size="m"
+                      getRequestMeta={() => ({
+                        request: request as ShardFailureRequest,
+                        response,
+                      })}
+                      color="primary"
+                      isButtonEmpty={true}
+                    />
+                  ) : null}
+                </>
+              ),
+            } as UserMessage,
           ];
       }
     }
@@ -374,6 +391,52 @@ export function getPrecisionErrorWarningMessages(
   }
 
   return warningMessages;
+}
+
+export function getDeprecatedSamplingWarningMessage(core: CoreStart): UserMessage[] {
+  const useFieldExistenceSamplingKey = 'lens:useFieldExistenceSampling';
+  const isUsingSampling = core.uiSettings.get(useFieldExistenceSamplingKey);
+
+  return isUsingSampling
+    ? [
+        {
+          severity: 'warning',
+          fixableInEditor: false,
+          displayLocations: [{ id: 'banner' }],
+          shortMessage: '',
+          longMessage: (
+            <EuiCallOut
+              color="warning"
+              iconType="alert"
+              size="s"
+              title={
+                <FormattedMessage
+                  id="xpack.lens.indexPattern.useFieldExistenceSamplingBody"
+                  defaultMessage="Field existence sampling has been deprecated and will be removed in Kibana {version}. You may disable this feature in {link}."
+                  values={{
+                    version: '8.6.0',
+                    link: (
+                      <EuiLink
+                        onClick={() => {
+                          core.application.navigateToApp('management', {
+                            path: `/kibana/settings?query=${useFieldExistenceSamplingKey}`,
+                          });
+                        }}
+                      >
+                        <FormattedMessage
+                          id="xpack.lens.indexPattern.useFieldExistenceSampling.advancedSettings"
+                          defaultMessage="Advanced Settings"
+                        />
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              }
+            />
+          ),
+        },
+      ]
+    : [];
 }
 
 export function getVisualDefaultsForLayer(layer: FormBasedLayer) {
