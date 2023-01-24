@@ -444,9 +444,7 @@
             "parentPluginId": "@kbn/core-metrics-server",
             "id": "def-common.OpsMetrics.process",
             "type": "Object",
-            "tags": [
-              "deprecated"
-            ],
+            "tags": [],
             "label": "process",
             "description": [
               "\nProcess related metrics."
@@ -461,79 +459,8 @@
               }
             ],
             "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
-            "deprecated": true,
-            "removeBy": "8.8.0",
-            "trackAdoption": false,
-            "references": [
-              {
-                "plugin": "@kbn/core-apps-browser-internal",
-                "path": "packages/core/apps/core-apps-browser-internal/src/status/lib/load_status.ts"
-              },
-              {
-                "plugin": "@kbn/core-apps-browser-internal",
-                "path": "packages/core/apps/core-apps-browser-internal/src/status/lib/load_status.ts"
-              },
-              {
-                "plugin": "@kbn/core-apps-browser-internal",
-                "path": "packages/core/apps/core-apps-browser-internal/src/status/lib/load_status.ts"
-              },
-              {
-                "plugin": "@kbn/core-apps-browser-internal",
-                "path": "packages/core/apps/core-apps-browser-internal/src/status/lib/load_status.ts"
-              },
-              {
-                "plugin": "@kbn/core-apps-browser-internal",
-                "path": "packages/core/apps/core-apps-browser-internal/src/status/lib/load_status.ts"
-              },
-              {
-                "plugin": "@kbn/core-apps-browser-internal",
-                "path": "packages/core/apps/core-apps-browser-internal/src/status/lib/load_status.ts"
-              },
-              {
-                "plugin": "@kbn/core-metrics-server-internal",
-                "path": "packages/core/metrics/core-metrics-server-internal/src/ops_metrics_collector.ts"
-              },
-              {
-                "plugin": "@kbn/core-metrics-server-internal",
-                "path": "packages/core/metrics/core-metrics-server-internal/src/logging/get_ops_metrics_log.ts"
-              },
-              {
-                "plugin": "@kbn/core-status-server-internal",
-                "path": "packages/core/status/core-status-server-internal/src/routes/status.ts"
-              },
-              {
-                "plugin": "@kbn/core-status-server-internal",
-                "path": "packages/core/status/core-status-server-internal/src/routes/status.ts"
-              },
-              {
-                "plugin": "@kbn/core-usage-data-server-internal",
-                "path": "packages/core/usage-data/core-usage-data-server-internal/src/core_usage_data_service.ts"
-              },
-              {
-                "plugin": "@kbn/core-usage-data-server-internal",
-                "path": "packages/core/usage-data/core-usage-data-server-internal/src/core_usage_data_service.ts"
-              },
-              {
-                "plugin": "@kbn/core-usage-data-server-internal",
-                "path": "packages/core/usage-data/core-usage-data-server-internal/src/core_usage_data_service.ts"
-              },
-              {
-                "plugin": "monitoring",
-                "path": "x-pack/plugins/monitoring/server/kibana_monitoring/bulk_uploader.ts"
-              },
-              {
-                "plugin": "kibanaUsageCollection",
-                "path": "src/plugins/kibana_usage_collection/server/collectors/ops_stats/ops_stats_collector.ts"
-              },
-              {
-                "plugin": "@kbn/core-metrics-server-internal",
-                "path": "packages/core/metrics/core-metrics-server-internal/src/logging/get_ops_metrics_log.test.ts"
-              },
-              {
-                "plugin": "@kbn/core-apps-browser-internal",
-                "path": "packages/core/apps/core-apps-browser-internal/src/status/lib/load_status.test.ts"
-              }
-            ]
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-metrics-server",
