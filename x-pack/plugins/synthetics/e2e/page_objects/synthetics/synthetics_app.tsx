@@ -71,6 +71,7 @@ export function syntheticsAppPageProvider({ page, kibanaUrl }: { page: Page; kib
     },
 
     async navigateToAddMonitor() {
+      await page.waitForTimeout(5_000);
       if (await page.isVisible('text=select a different monitor type', { timeout: 0 })) {
         await page.click('text=select a different monitor type');
       } else if (await page.isVisible('text=Create monitor', { timeout: 0 })) {
