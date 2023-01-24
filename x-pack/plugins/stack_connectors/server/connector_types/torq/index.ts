@@ -327,7 +327,7 @@ function errorResultUnauthorised(
   actionId: string,
   serviceMessage: string
 ): ActionTypeExecutorResult<unknown> {
-  const errMessage = i18n.translate('xpack.stackConnectors.torq.invalidMethodErrorMessage', {
+  const errMessage = i18n.translate('xpack.stackConnectors.torq.unauthorisedErrorMessage', {
     defaultMessage: 'error triggering Torq workflow, unauthorised',
   });
   return {
