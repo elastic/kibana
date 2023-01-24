@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FailedTestsByStep } from './failed_tests_by_step';
-import { Ping } from '../../../../../../common/runtime_types';
+import { PingState } from '../../../../../../common/runtime_types';
 import { PanelWithTitle } from '../../common/components/panel_with_title';
 import { MonitorErrorsCount } from '../monitor_summary/monitor_errors_count';
 import { FailedTestsCount } from './failed_tests_count';
@@ -22,7 +22,7 @@ export const ErrorsTabContent = ({
   errorStates,
   loading,
 }: {
-  errorStates: Ping[];
+  errorStates: PingState[];
   loading: boolean;
 }) => {
   const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
