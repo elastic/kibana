@@ -7,7 +7,13 @@
  */
 
 import * as t from 'io-ts';
-import { allOrAnyString, dateRangeSchema } from './common';
+import {
+  allOrAnyString,
+  dateRangeSchema,
+  dateType,
+  errorBudgetSchema,
+  statusSchema,
+} from './common';
 
 const apmTransactionDurationIndicatorTypeSchema = t.literal('sli.apm.transactionDuration');
 const apmTransactionDurationIndicatorSchema = t.type({
@@ -62,6 +68,13 @@ const indicatorDataSchema = t.type({
   total: t.number,
 });
 
+const historicalSummarySchema = t.type({
+  date: dateType,
+  errorBudget: errorBudgetSchema,
+  sliValue: t.number,
+  status: statusSchema,
+});
+
 const indicatorTypesSchema = t.union([
   apmTransactionDurationIndicatorTypeSchema,
   apmTransactionErrorRateIndicatorTypeSchema,
@@ -104,4 +117,5 @@ export {
   indicatorTypesArraySchema,
   indicatorTypesSchema,
   indicatorDataSchema,
+  historicalSummarySchema,
 };

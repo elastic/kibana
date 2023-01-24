@@ -19,7 +19,7 @@ export const mockAPMIndexPatternIds: IndexPatternMapping[] = [
 ];
 
 export const mockLayerGroup = {
-  id: 'uuid.v4()',
+  id: 'uuidv4()',
   label: 'filebeat-*',
   sourceDescriptor: null,
   type: LAYER_TYPE.LAYER_GROUP,
@@ -28,7 +28,7 @@ export const mockLayerGroup = {
 
 export const mockSourceLayer = {
   sourceDescriptor: {
-    id: 'uuid.v4()',
+    id: 'uuidv4()',
     type: 'ES_SEARCH',
     applyGlobalQuery: true,
     geoField: 'source.geo.location',
@@ -71,8 +71,8 @@ export const mockSourceLayer = {
       },
     },
   },
-  id: 'uuid.v4()',
-  parent: 'uuid.v4()',
+  id: 'uuidv4()',
+  parent: 'uuidv4()',
   label: `filebeat-* | Source Point`,
   minZoom: 0,
   maxZoom: 24,
@@ -85,7 +85,7 @@ export const mockSourceLayer = {
 
 export const mockDestinationLayer = {
   sourceDescriptor: {
-    id: 'uuid.v4()',
+    id: 'uuidv4()',
     type: 'ES_SEARCH',
     applyGlobalQuery: true,
     geoField: 'destination.geo.location',
@@ -129,8 +129,8 @@ export const mockDestinationLayer = {
       },
     },
   },
-  id: 'uuid.v4()',
-  parent: 'uuid.v4()',
+  id: 'uuidv4()',
+  parent: 'uuidv4()',
   label: `filebeat-* | Destination Point`,
   minZoom: 0,
   maxZoom: 24,
@@ -142,7 +142,7 @@ export const mockDestinationLayer = {
 
 export const mockClientLayer = {
   sourceDescriptor: {
-    id: 'uuid.v4()',
+    id: 'uuidv4()',
     type: 'ES_SEARCH',
     applyGlobalQuery: true,
     geoField: 'client.geo.location',
@@ -185,8 +185,8 @@ export const mockClientLayer = {
       },
     },
   },
-  id: 'uuid.v4()',
-  parent: 'uuid.v4()',
+  id: 'uuidv4()',
+  parent: 'uuidv4()',
   label: `apm-* | Client Point`,
   minZoom: 0,
   maxZoom: 24,
@@ -204,7 +204,7 @@ const mockApmDataStreamClientLayer = {
 
 export const mockServerLayer = {
   sourceDescriptor: {
-    id: 'uuid.v4()',
+    id: 'uuidv4()',
     type: 'ES_SEARCH',
     applyGlobalQuery: true,
     geoField: 'server.geo.location',
@@ -248,8 +248,8 @@ export const mockServerLayer = {
       },
     },
   },
-  id: 'uuid.v4()',
-  parent: 'uuid.v4()',
+  id: 'uuidv4()',
+  parent: 'uuidv4()',
   label: `apm-* | Server Point`,
   minZoom: 0,
   maxZoom: 24,
@@ -268,7 +268,7 @@ export const mockLineLayer = {
   sourceDescriptor: {
     type: 'ES_PEW_PEW',
     applyGlobalQuery: true,
-    id: 'uuid.v4()',
+    id: 'uuidv4()',
     indexPatternId: '8c7323ac-97ad-4b53-ac0a-40f8f691a918',
     sourceGeoField: 'source.geo.location',
     destGeoField: 'destination.geo.location',
@@ -318,8 +318,8 @@ export const mockLineLayer = {
       },
     },
   },
-  id: 'uuid.v4()',
-  parent: 'uuid.v4()',
+  id: 'uuidv4()',
+  parent: 'uuidv4()',
   label: `filebeat-* | Line`,
   minZoom: 0,
   maxZoom: 24,
@@ -333,7 +333,7 @@ export const mockClientServerLineLayer = {
   sourceDescriptor: {
     type: 'ES_PEW_PEW',
     applyGlobalQuery: true,
-    id: 'uuid.v4()',
+    id: 'uuidv4()',
     indexPatternId: '8c7323ac-97ad-4b53-ac0a-40f8f691a918',
     sourceGeoField: 'client.geo.location',
     destGeoField: 'server.geo.location',
@@ -383,8 +383,8 @@ export const mockClientServerLineLayer = {
       },
     },
   },
-  id: 'uuid.v4()',
-  parent: 'uuid.v4()',
+  id: 'uuidv4()',
+  parent: 'uuidv4()',
   label: `apm-* | Line`,
   minZoom: 0,
   maxZoom: 24,
@@ -401,7 +401,7 @@ const mockApmDataStreamClientServerLineLayer = {
 export const mockLayerList = [
   {
     sourceDescriptor: { type: 'EMS_TMS', isAutoSelect: true },
-    id: 'uuid.v4()',
+    id: 'uuidv4()',
     label: null,
     minZoom: 0,
     maxZoom: 24,
@@ -419,7 +419,7 @@ export const mockLayerList = [
 export const mockLayerListDouble = [
   {
     sourceDescriptor: { type: 'EMS_TMS', isAutoSelect: true },
-    id: 'uuid.v4()',
+    id: 'uuidv4()',
     label: null,
     minZoom: 0,
     maxZoom: 24,
@@ -441,7 +441,7 @@ export const mockLayerListDouble = [
 export const mockLayerListMixed = [
   {
     sourceDescriptor: { type: 'EMS_TMS', isAutoSelect: true },
-    id: 'uuid.v4()',
+    id: 'uuidv4()',
     label: null,
     minZoom: 0,
     maxZoom: 24,
