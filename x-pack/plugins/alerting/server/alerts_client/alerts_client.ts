@@ -18,6 +18,7 @@ import {
   ALERT_RULE_CONSUMER,
   ALERT_RULE_EXECUTION_UUID,
   ALERT_RULE_NAME,
+  ALERT_RULE_PARAMETERS,
   ALERT_RULE_PRODUCER,
   ALERT_RULE_TAGS,
   ALERT_RULE_TYPE_ID,
@@ -75,6 +76,7 @@ export interface AlertRuleSchema {
   [ALERT_RULE_TAGS]: string[];
   [ALERT_RULE_TYPE_ID]: string;
   [ALERT_RULE_UUID]: string;
+  [ALERT_RULE_PARAMETERS]: unknown;
   [SPACE_IDS]: string[];
 }
 
@@ -86,6 +88,7 @@ interface InitializeOpts {
     name: string;
     tags: string[];
     spaceId: string;
+    parameters: unknown;
   };
 }
 
@@ -232,21 +235,25 @@ export class AlertsClient<
       } as Alert);
     }
 
-    await esClient.bulk({
-      refresh: 'wait_for',
-      body: [...activeAlertsToIndex, ...recoveredAlertsToIndex].map((alert) => [
-        {
-          index: {
-            _id: alert[ALERT_UUID],
-            // If we know the concrete index for this alert, specify it
-            ...(this.trackedAlertIndices[alert[ALERT_UUID]]
-              ? { _index: this.trackedAlertIndices[alert[ALERT_UUID]], require_alias: false }
-              : {}),
-          },
-        },
-        alert,
-      ]),
-    });
+    console.log(
+      `alerts to write ${JSON.stringify([...activeAlertsToIndex, ...recoveredAlertsToIndex])}`
+    );
+
+    // await esClient.bulk({
+    //   refresh: 'wait_for',
+    //   body: [...activeAlertsToIndex, ...recoveredAlertsToIndex].map((alert) => [
+    //     {
+    //       index: {
+    //         _id: alert[ALERT_UUID],
+    //         // If we know the concrete index for this alert, specify it
+    //         ...(this.trackedAlertIndices[alert[ALERT_UUID]]
+    //           ? { _index: this.trackedAlertIndices[alert[ALERT_UUID]], require_alias: false }
+    //           : {}),
+    //       },
+    //     },
+    //     alert,
+    //   ]),
+    // });
 
     return { alertsToReturn, recoveredAlertsToReturn };
   }
@@ -276,6 +283,7 @@ export class AlertsClient<
     name: string;
     tags: string[];
     spaceId: string;
+    parameters: unknown;
   }) {
     this.rule = {
       [ALERT_RULE_CATEGORY]: this.options.ruleType.name,
@@ -286,6 +294,7 @@ export class AlertsClient<
       [ALERT_RULE_TAGS]: rule.tags,
       [ALERT_RULE_TYPE_ID]: this.options.ruleType.id,
       [ALERT_RULE_UUID]: rule.id,
+      [ALERT_RULE_PARAMETERS]: rule.parameters,
       [SPACE_IDS]: [rule.spaceId],
     };
     this.ruleLogPrefix = `${this.options.ruleType.id}:${rule.id}: '${rule.name}'`;

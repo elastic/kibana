@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { isEmpty } from 'lodash';
 import {
   AlertInstanceMeta,
@@ -55,7 +55,7 @@ export class Alert<
     this.state = (state || {}) as State;
     this.context = {} as Context;
     this.meta = meta;
-    this.meta.uuid = this.uuid = meta.uuid ?? uuid.v4();
+    this.meta.uuid = this.uuid = meta.uuid ?? uuidv4();
 
     if (!this.meta.flappingHistory) {
       this.meta.flappingHistory = [];

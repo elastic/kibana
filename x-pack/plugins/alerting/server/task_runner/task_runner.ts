@@ -281,6 +281,7 @@ export class TaskRunner<
       ruleLabel,
       activeAlertsFromState: alertRawInstances,
       recoveredAlertsFromState: alertRecoveredRawInstances,
+      trackedAlertsFromState: ruleTypeState?.trackedAlerts ?? {},
     });
 
     const alertsClient =
@@ -304,6 +305,7 @@ export class TaskRunner<
         consumer: rule.consumer,
         spaceId,
         executionId: this.executionId,
+        parameters: rule.params,
       },
     });
 
@@ -503,7 +505,7 @@ export class TaskRunner<
     // we don't need to keep this information around.
     if (this.ruleType.autoRecoverAlerts) {
       const { alertsToReturn: alerts, recoveredAlertsToReturn: recovered } =
-        alertsClientToUse.getAlertsToSerialize();
+        await alertsClientToUse.getAlertsToSerialize();
       alertsToReturn = alerts;
       recoveredAlertsToReturn = recovered;
     }

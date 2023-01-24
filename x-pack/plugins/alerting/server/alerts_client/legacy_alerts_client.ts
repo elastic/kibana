@@ -58,6 +58,13 @@ interface ConstructorOpts {
   ruleLabel: string;
   activeAlertsFromState: Record<string, RawAlertInstance>;
   recoveredAlertsFromState: Record<string, RawAlertInstance>;
+  trackedAlertsFromState: Record<
+    string,
+    {
+      alertId: string;
+      alertUuid: string;
+    }
+  >;
 }
 
 export class LegacyAlertsClient<
@@ -100,10 +107,15 @@ export class LegacyAlertsClient<
 
     for (const id in options.activeAlertsFromState) {
       if (options.activeAlertsFromState.hasOwnProperty(id)) {
-        this.trackedAlerts.active[id] = new Alert<State, Context>(
-          id,
-          options.activeAlertsFromState[id]
-        );
+        // Look for this alert in the tracked alerts and copy over UUID if it exists
+        const uuid = options.trackedAlertsFromState[id]
+          ? options.trackedAlertsFromState[id].alertUuid
+          : undefined;
+
+        this.trackedAlerts.active[id] = new Alert<State, Context>(id, {
+          ...options.activeAlertsFromState[id],
+          meta: { ...options.activeAlertsFromState[id].meta, uuid },
+        });
       }
     }
 

@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import { PluginSetupContract, RuleType } from '@kbn/alerting-plugin/server';
+import { experimentalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/experimental_rule_field_map';
 import { Comparator, METRIC_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
 import { METRIC_EXPLORER_AGGREGATIONS } from '../../../../common/http_api';
 import { InfraBackendLibs } from '../../infra_types';
@@ -128,5 +129,9 @@ export async function registerMetricThresholdRuleType(
     },
     producer: 'infrastructure',
     getSummarizedAlerts: libs.metricsRules.createGetSummarizedAlerts(),
+    alerts: {
+      context: 'observability.metrics',
+      fieldMap: experimentalRuleFieldMap,
+    },
   });
 }
