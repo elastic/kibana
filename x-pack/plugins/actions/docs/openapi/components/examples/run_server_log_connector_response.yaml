@@ -1,3 +1,4 @@
-title: Response from running a server log connector.
+summary: Response from running a server log connector.
 value:
-  {}
+  connector_id: 7fc7b9a0-ecc9-11ec-8736-e7d63118c907
+  status: ok

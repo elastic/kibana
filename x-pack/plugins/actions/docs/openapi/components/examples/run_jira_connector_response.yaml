@@ -1,4 +1,4 @@
-title: Response from retrieving the list of issue types for a Jira connector.
+summary: Response from retrieving the list of issue types for a Jira connector.
 value:
   connector_id: b3aad810-edbe-11ec-82d1-11348ecbf4a6
   data:

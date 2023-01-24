@@ -63,20 +63,27 @@ post:
                 type: string
                 description: The identifier for the connector.
               data:
-                type: object
-                description: Information returned from the action.
-                additionalProperties: true
+                oneOf:
+                  - type: object
+                    description: Information returned from the action.
+                    additionalProperties: true
+                  - type: array
+                    description: An array of information returned from the action.
+                    items:
+                      type: object
               status:
                 type: string
                 description: The status of the action.
                 enum:
                   - error
                   - ok
-#          examples:
-#            runIndexConnectorResponse:
-#              $ref: '../components/examples/run_index_connector_response.yaml'
-#            runServerLogConnectorResponse:
-#              $ref: '../components/examples/run_server_log_connector_response.yaml'
+          examples:
+            runIndexConnectorResponse:
+              $ref: '../components/examples/run_index_connector_response.yaml'
+            runJiraConnectorResponse:
+              $ref: '../components/examples/run_jira_connector_response.yaml'
+            runServerLogConnectorResponse:
+              $ref: '../components/examples/run_server_log_connector_response.yaml'
     '401':
       description: Authorization information is missing or invalid.
       content:
