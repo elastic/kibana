@@ -11,7 +11,7 @@ import type { ComponentType, ReactNode } from 'react';
 import type { CommonProps } from '@elastic/eui';
 import type { ParsedArgData, ParsedCommandInterface, PossibleArgDataTypes } from './service/types';
 import type { CommandExecutionResultComponent } from './components/command_execution_result';
-import type { CommandExecutionState } from './components/console_state/types';
+import type { CommandExecutionState, ArgSelectorState } from './components/console_state/types';
 import type { Immutable, MaybeImmutable } from '../../../../common/endpoint/types';
 
 /**
@@ -216,7 +216,7 @@ export type CommandExecutionComponent<
 /**
  * The component props for an argument `SelectorComponent`
  */
-export interface CommandArgumentValueSelectorProps<TSelection = any> {
+export interface CommandArgumentValueSelectorProps<TSelection = any, TState = any> {
   /**
    * The current value that was selected. This will not be displayed in the UI, but will
    * be passed on to the command execution as part of the argument's value
@@ -242,12 +242,18 @@ export interface CommandArgumentValueSelectorProps<TSelection = any> {
   argInstance: number;
 
   /**
+   * A store for the Argument Selector. Should be used for any component state that needs to be
+   * persisted across re-renders by the console.
+   */
+  store: TState;
+
+  /**
    * callback for the Value Selector to call and provide the selection value.
    * This selection value will then be passed along with the argument to the command execution
    * component.
    * @param newData
    */
-  onChange: (newData: { value: TSelection | undefined; valueText: string }) => void;
+  onChange: (newData: ArgSelectorState<TState>) => void;
 }
 
 /**

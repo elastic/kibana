@@ -88,9 +88,14 @@ export interface ConsoleDataState {
 }
 
 /** State that is provided/received to Argument Value Selectors */
-export interface ArgSelectorState {
+export interface ArgSelectorState<TState = any> {
   value: any;
   valueText: string | undefined;
+  /**
+   * A store (data) for the Argument Selector Component so that it can persist state between
+   * re-renders or between console being opened/closed
+   */
+  store?: TState;
 }
 
 export interface EnteredCommand {

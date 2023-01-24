@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import {
   EuiButtonIcon,
   EuiFilePicker,
@@ -33,77 +33,99 @@ const NO_FILE_SELECTED = i18n.translate(
   { defaultMessage: 'No file selected' }
 );
 
+interface ArgumentFileSelectorState {
+  isPopoverOpen: boolean;
+}
+
 /**
  * A Console Argument Selector component that enables the user to select a file from the local machine
  */
-export const ArgumentFileSelector = memo<CommandArgumentValueSelectorProps<File>>(
-  ({ value, valueText, onChange }) => {
-    const [isPopoverOpen, setIsPopoverOpen] = useState(!value);
+export const ArgumentFileSelector = memo<
+  CommandArgumentValueSelectorProps<File, ArgumentFileSelectorState>
+>(({ value, valueText, onChange, store: _store }) => {
+  const state = useMemo<ArgumentFileSelectorState>(() => {
+    return _store ?? { isPopoverOpen: true };
+  }, [_store]);
 
-    const filePickerUUID = useMemo(() => {
-      return htmlIdGenerator('console')();
-    }, []);
+  const setIsPopoverOpen = useCallback(
+    (newValue: boolean) => {
+      onChange({
+        value,
+        valueText,
+        store: {
+          ...state,
+          isPopoverOpen: newValue,
+        },
+      });
+    },
+    [onChange, state, value, valueText]
+  );
 
-    const handleOpenPopover = useCallback(() => {
-      setIsPopoverOpen((prevState) => !prevState);
-    }, []);
+  const filePickerUUID = useMemo(() => {
+    return htmlIdGenerator('console')();
+  }, []);
 
-    const handleClosePopover = useCallback(() => {
-      setIsPopoverOpen(false);
-    }, []);
+  const handleOpenPopover = useCallback(() => {
+    setIsPopoverOpen(true);
+  }, [setIsPopoverOpen]);
 
-    const handleFileSelection: EuiFilePickerProps['onChange'] = useCallback(
-      (selectedFiles) => {
-        // Get only the first file selected
-        const file = selectedFiles?.item(0);
+  const handleClosePopover = useCallback(() => {
+    setIsPopoverOpen(false);
+  }, [setIsPopoverOpen]);
 
-        onChange({
-          value: file ?? undefined,
-          valueText: file ? file.name : '',
-        });
+  const handleFileSelection: EuiFilePickerProps['onChange'] = useCallback(
+    (selectedFiles) => {
+      // Get only the first file selected
+      const file = selectedFiles?.item(0);
 
-        setIsPopoverOpen(false);
-      },
-      [onChange]
-    );
+      onChange({
+        value: file ?? undefined,
+        valueText: file ? file.name : '',
+        store: {
+          ...state,
+          isPopoverOpen: false,
+        },
+      });
+    },
+    [onChange, state]
+  );
 
-    return (
-      <div>
-        <EuiPopover
-          isOpen={isPopoverOpen}
-          closePopover={handleClosePopover}
-          anchorPosition="upCenter"
-          initialFocus={`#${filePickerUUID}`}
-          anchorClassName="popoverAnchor"
-          button={
-            <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
-              <EuiFlexItem grow={false} className="eui-textTruncate" onClick={handleOpenPopover}>
-                <div className="eui-textTruncate" title={valueText || NO_FILE_SELECTED}>
-                  {valueText || INITIAL_DISPLAY_LABEL}
-                </div>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="folderOpen"
-                  size="xs"
-                  onClick={handleOpenPopover}
-                  aria-label={OPEN_FILE_PICKER_LABEL}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          }
-        >
-          {isPopoverOpen && (
-            <EuiFilePicker
-              id={filePickerUUID}
-              onChange={handleFileSelection}
-              fullWidth
-              display="large"
-            />
-          )}
-        </EuiPopover>
-      </div>
-    );
-  }
-);
+  return (
+    <div>
+      <EuiPopover
+        isOpen={state.isPopoverOpen}
+        closePopover={handleClosePopover}
+        anchorPosition="upCenter"
+        initialFocus={`#${filePickerUUID}`}
+        anchorClassName="popoverAnchor"
+        button={
+          <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
+            <EuiFlexItem grow={false} className="eui-textTruncate" onClick={handleOpenPopover}>
+              <div className="eui-textTruncate" title={valueText || NO_FILE_SELECTED}>
+                {valueText || INITIAL_DISPLAY_LABEL}
+              </div>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                iconType="folderOpen"
+                size="xs"
+                onClick={handleOpenPopover}
+                aria-label={OPEN_FILE_PICKER_LABEL}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+      >
+        {state.isPopoverOpen && (
+          <EuiFilePicker
+            id={filePickerUUID}
+            onChange={handleFileSelection}
+            fullWidth
+            display="large"
+          />
+        )}
+      </EuiPopover>
+    </div>
+  );
+});
 ArgumentFileSelector.displayName = 'ArgumentFileSelector';

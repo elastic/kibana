@@ -89,7 +89,7 @@ export interface ArgumentSelectorWrapperProps {
 export const ArgumentSelectorWrapper = memo<ArgumentSelectorWrapperProps>(
   ({ argName, argInstance, argDefinition: { SelectorComponent } }) => {
     const dispatch = useConsoleStateDispatch();
-    const { valueText, value } = useWithCommandArgumentState(argName, argInstance);
+    const { valueText, value, store } = useWithCommandArgumentState(argName, argInstance);
 
     const handleSelectorComponentOnChange = useCallback<
       CommandArgumentValueSelectorProps['onChange']
@@ -124,6 +124,7 @@ export const ArgumentSelectorWrapper = memo<ArgumentSelectorWrapperProps>(
                 valueText={valueText ?? ''}
                 argName={argName}
                 argInstance={argInstance}
+                store={store}
                 onChange={handleSelectorComponentOnChange}
               />
             </div>
