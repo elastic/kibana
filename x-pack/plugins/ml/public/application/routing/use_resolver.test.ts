@@ -47,7 +47,7 @@ describe('useResolver', () => {
 
   it('should accept undefined as dataViewId and savedSearchId.', async () => {
     const { result, waitForNextUpdate } = renderHook(() =>
-      useResolver(undefined, undefined, {} as IUiSettingsClient, {} as DataViewsContract, {})
+      useResolver(undefined, undefined, {} as IUiSettingsClient, {} as DataViewsContract, {}, {})
     );
 
     await act(async () => {
@@ -78,7 +78,7 @@ describe('useResolver', () => {
 
   it('should add an error toast and redirect if dataViewId is an empty string.', async () => {
     const { result } = renderHook(() =>
-      useResolver('', undefined, {} as IUiSettingsClient, {} as DataViewsContract, {})
+      useResolver('', undefined, {} as IUiSettingsClient, {} as DataViewsContract, {}, {})
     );
 
     await act(async () => {});

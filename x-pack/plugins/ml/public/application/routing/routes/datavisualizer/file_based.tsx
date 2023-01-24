@@ -44,12 +44,19 @@ export const fileBasedRouteFactory = (
 const PageWrapper: FC<PageProps> = ({ deps }) => {
   const { redirectToMlAccessDeniedPage } = deps;
 
-  const { context } = useResolver(undefined, undefined, deps.config, deps.dataViewsContract, {
-    checkBasicLicense,
-    cacheDataViewsContract: () => cacheDataViewsContract(deps.dataViewsContract),
-    checkFindFileStructurePrivilege: () =>
-      checkFindFileStructurePrivilegeResolver(redirectToMlAccessDeniedPage),
-  });
+  const { context } = useResolver(
+    undefined,
+    undefined,
+    deps.config,
+    deps.dataViewsContract,
+    deps.getSavedSearchDeps,
+    {
+      checkBasicLicense,
+      cacheDataViewsContract: () => cacheDataViewsContract(deps.dataViewsContract),
+      checkFindFileStructurePrivilege: () =>
+        checkFindFileStructurePrivilegeResolver(redirectToMlAccessDeniedPage),
+    }
+  );
 
   return (
     <PageLoader context={context}>

@@ -29,7 +29,14 @@ export const accessDeniedRouteFactory = (): MlRoute => ({
 });
 
 const PageWrapper: FC<PageProps> = ({ deps }) => {
-  const { context } = useResolver(undefined, undefined, deps.config, deps.dataViewsContract, {});
+  const { context } = useResolver(
+    undefined,
+    undefined,
+    deps.config,
+    deps.dataViewsContract,
+    deps.getSavedSearchDeps,
+    {}
+  );
 
   return (
     <PageLoader context={context}>

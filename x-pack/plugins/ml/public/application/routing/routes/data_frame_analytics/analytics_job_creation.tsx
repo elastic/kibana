@@ -47,11 +47,18 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
     sort: false,
   });
 
-  const { context } = useResolver(index, savedSearchId, deps.config, deps.dataViewsContract, {
-    ...basicResolvers(deps),
-    analyticsFields: () =>
-      loadNewJobCapabilities(index, savedSearchId, deps.dataViewsContract, DATA_FRAME_ANALYTICS),
-  });
+  const { context } = useResolver(
+    index,
+    savedSearchId,
+    deps.config,
+    deps.dataViewsContract,
+    deps.getSavedSearchDeps,
+    {
+      ...basicResolvers(deps),
+      analyticsFields: () =>
+        loadNewJobCapabilities(index, savedSearchId, deps.dataViewsContract, DATA_FRAME_ANALYTICS),
+    }
+  );
 
   return (
     <PageLoader context={context}>

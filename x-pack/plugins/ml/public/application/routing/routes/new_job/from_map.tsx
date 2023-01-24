@@ -27,8 +27,15 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
       sort: false,
     });
 
-  const { context } = useResolver(undefined, undefined, deps.config, deps.dataViewsContract, {
-    redirect: () => resolver(dashboard, dataViewId, embeddable, geoField, splitField, from, to),
-  });
+  const { context } = useResolver(
+    undefined,
+    undefined,
+    deps.config,
+    deps.dataViewsContract,
+    deps.getSavedSearchDeps,
+    {
+      redirect: () => resolver(dashboard, dataViewId, embeddable, geoField, splitField, from, to),
+    }
+  );
   return <PageLoader context={context}>{<Redirect to="/jobs/new_job" />}</PageLoader>;
 };

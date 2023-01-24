@@ -29,8 +29,15 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
     }
   );
 
-  const { context } = useResolver(undefined, undefined, deps.config, deps.dataViewsContract, {
-    redirect: () => resolver(lensId, vis, from, to, query, filters, layerIndex),
-  });
+  const { context } = useResolver(
+    undefined,
+    undefined,
+    deps.config,
+    deps.dataViewsContract,
+    deps.getSavedSearchDeps,
+    {
+      redirect: () => resolver(lensId, vis, from, to, query, filters, layerIndex),
+    }
+  );
   return <PageLoader context={context}>{<Redirect to="/jobs/new_job" />}</PageLoader>;
 };

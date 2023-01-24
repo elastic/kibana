@@ -34,11 +34,18 @@ export const selectorRouteFactory = (
 const PageWrapper: FC<PageProps> = ({ location, deps }) => {
   const { redirectToMlAccessDeniedPage } = deps;
 
-  const { context } = useResolver(undefined, undefined, deps.config, deps.dataViewsContract, {
-    checkBasicLicense,
-    checkFindFileStructurePrivilege: () =>
-      checkFindFileStructurePrivilegeResolver(redirectToMlAccessDeniedPage),
-  });
+  const { context } = useResolver(
+    undefined,
+    undefined,
+    deps.config,
+    deps.dataViewsContract,
+    deps.getSavedSearchDeps,
+    {
+      checkBasicLicense,
+      checkFindFileStructurePrivilege: () =>
+        checkFindFileStructurePrivilegeResolver(redirectToMlAccessDeniedPage),
+    }
+  );
   return (
     <PageLoader context={context}>
       <DatavisualizerSelector />
