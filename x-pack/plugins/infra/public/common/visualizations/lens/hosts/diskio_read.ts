@@ -7,9 +7,9 @@
 
 import { type Filter, FilterStateStore } from '@kbn/es-query';
 import type {
-  CounterRateIndexPatternColumn,
   FormBasedLayer,
-  MaxIndexPatternColumn,
+  FormulaPublicApi,
+  PersistedIndexPatternLayer,
   XYState,
 } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -27,7 +27,11 @@ const BREAKDOWN_COLUMN_NAME = 'hosts_aggs_breakdown';
 const HISTOGRAM_COLUMN_NAME = 'x_date_histogram';
 
 export class DiskIORead implements ILensVisualization {
-  constructor(private dataView: DataView, private options: LensOptions) {}
+  constructor(
+    private dataView: DataView,
+    private options: LensOptions,
+    private formula: FormulaPublicApi
+  ) {}
 
   getTitle(): string {
     return 'Disk Read IOPS';
@@ -38,53 +42,36 @@ export class DiskIORead implements ILensVisualization {
   }
 
   getLayers = (): Record<string, Omit<FormBasedLayer, 'indexPatternId'>> => {
-    return {
-      [DEFAULT_LAYER_ID]: {
-        columnOrder: [
-          BREAKDOWN_COLUMN_NAME,
-          HISTOGRAM_COLUMN_NAME,
-          'max_diskio_read',
-          'y_diskio_read',
-        ],
-        columns: {
-          ...getBreakdownColumn(BREAKDOWN_COLUMN_NAME, 'host.name', this.options.breakdownSize),
-          ...getHistogramColumn(HISTOGRAM_COLUMN_NAME, this.dataView.timeFieldName ?? '@timestamp'),
-          y_diskio_read: {
-            label: 'Counter rate of system.diskio.read.bytes per second',
-            dataType: 'number',
-            operationType: 'counter_rate',
-            isBucketed: false,
-            scale: 'ratio',
-            references: ['max_diskio_read'],
-            timeScale: 's',
-            params: {
-              format: {
-                id: 'bytes',
-                params: {
-                  decimals: 1,
-                },
-              },
-            },
-            filter: {
-              query: 'system.diskio.read.bytes >= 0',
-              language: 'kuery',
-            },
-          } as CounterRateIndexPatternColumn,
-          max_diskio_read: {
-            label: 'Maximum of system.diskio.read.bytes',
-            dataType: 'number',
-            operationType: 'max',
-            sourceField: 'system.diskio.read.bytes',
-            isBucketed: false,
-            scale: 'ratio',
-            params: {
-              emptyAsNull: true,
-            },
-          } as MaxIndexPatternColumn,
-        },
+    const baseLayer: PersistedIndexPatternLayer = {
+      columnOrder: [BREAKDOWN_COLUMN_NAME, HISTOGRAM_COLUMN_NAME],
+      columns: {
+        ...getBreakdownColumn(BREAKDOWN_COLUMN_NAME, 'host.name', this.options.breakdownSize),
+        ...getHistogramColumn(HISTOGRAM_COLUMN_NAME, this.dataView.timeFieldName ?? '@timestamp'),
       },
     };
+
+    const dataLayer = this.formula.insertOrReplaceFormulaColumn(
+      'y_diskio_read',
+      {
+        formula: "counter_rate(max(system.diskio.read.bytes), kql='system.diskio.read.bytes >= 0')",
+        format: {
+          id: 'bytes',
+          params: {
+            decimals: 1,
+          },
+        },
+      },
+      baseLayer,
+      this.dataView
+    );
+
+    if (!dataLayer) {
+      throw new Error('Error generating the data layer for the chart');
+    }
+
+    return { [DEFAULT_LAYER_ID]: dataLayer };
   };
+
   getVisualizationState = (): XYState => {
     return getXYVisualizationState({
       layers: [
