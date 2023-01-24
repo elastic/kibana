@@ -8,8 +8,8 @@
 
 import { EuiThemeComputed } from '@elastic/eui';
 import { css } from '@emotion/react';
-import panelBgTop from '../../assets/panel-bg-top.svg';
-import panelBgBottom from '../../assets/panel-bg-bottom.svg';
+import panelBgTop from '../../assets/panel_bg_top.svg';
+import panelBgBottom from '../../assets/panel_bg_bottom.svg';
 
 /**
  *
