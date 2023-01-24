@@ -50,6 +50,16 @@ export const createCaseUserActionSavedObjectType = (
               type: { type: 'keyword' },
             },
           },
+          comment: {
+            properties: {
+              // comment.type
+              type: { type: 'keyword' },
+              // comment.externalReferenceAttachmentTypeId
+              externalReferenceAttachmentTypeId: { type: 'keyword' },
+              // comment.persistableStateAttachmentTypeId
+              persistableStateAttachmentTypeId: { type: 'keyword' },
+            },
+          },
         },
       },
       owner: {

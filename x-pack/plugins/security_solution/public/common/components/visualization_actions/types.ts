@@ -44,6 +44,7 @@ export type OnEmbeddableLoaded = (data: EmbeddableData) => void;
 
 export interface LensEmbeddableComponentProps {
   adHocDataViews?: string[];
+  applyGlobalQueriesAndFilters?: boolean;
   extraActions?: Action[];
   extraOptions?: ExtraOptions;
   getLensAttributes?: GetLensAttributes;
@@ -103,4 +104,10 @@ export interface ExtraOptions {
   ruleId?: string;
   spaceId?: string;
   status?: Status;
+}
+
+export interface VisualizationEmbeddableProps extends LensEmbeddableComponentProps {
+  isDonut?: boolean;
+  label?: string;
+  inputId?: InputsModelId.global | InputsModelId.timeline;
 }

@@ -8,6 +8,7 @@
 import React, { useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
+import type { HostEcs, OsEcs } from '@kbn/securitysolution-ecs';
 import type {
   Columns,
   Criteria,
@@ -26,7 +27,6 @@ import type {
 } from '../../../../../common/search_strategy/security_solution/hosts';
 import { HostsFields } from '../../../../../common/search_strategy/security_solution/hosts';
 import type { Direction, RiskSeverity } from '../../../../../common/search_strategy';
-import type { HostEcs, OsEcs } from '../../../../../common/ecs/host';
 import { SecurityPageName } from '../../../../../common/constants';
 import { HostsTableType } from '../../store/model';
 import { useNavigateTo } from '../../../../common/lib/kibana/hooks';

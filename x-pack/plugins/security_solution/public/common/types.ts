@@ -18,6 +18,7 @@ export interface ServerApiError {
 
 export interface SecuritySolutionUiConfigType {
   enableExperimental: string[];
+  prebuiltRulesPackageVersion?: string;
 }
 
 /**
@@ -25,6 +26,7 @@ export interface SecuritySolutionUiConfigType {
  */
 export interface SecuritySolutionDataViewBase extends DataViewBase {
   fields: FieldSpec[];
+  getName?: () => string;
 }
 
 export type AlertWorkflowStatus = 'open' | 'closed' | 'acknowledged';

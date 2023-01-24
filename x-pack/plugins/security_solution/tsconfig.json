@@ -135,5 +135,7 @@
     "@kbn/shared-ux-utility",
     "@kbn/user-profile-components",
     "@kbn/core-saved-objects-common",
+    "@kbn/guided-onboarding",
+    "@kbn/securitysolution-ecs",
   ]
 }

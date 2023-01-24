@@ -17,11 +17,13 @@ export const DEFAULT_META = {
   total: 0,
 };
 
-export const convertMetaToPagination = (meta: Meta) => ({
-  pageIndex: meta.from - 1,
-  pageSize: meta.size,
-  totalItemCount: meta.total,
-});
+export const convertMetaToPagination = (meta: Meta) => {
+  return {
+    pageIndex: meta.from / meta.size,
+    pageSize: meta.size,
+    totalItemCount: meta.total,
+  };
+};
 export const updateMetaPageIndex = (oldState: Meta, newPageIndex: number) => {
-  return { ...oldState, from: newPageIndex };
+  return { ...oldState, from: newPageIndex * oldState.size };
 };
