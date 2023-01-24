@@ -23,6 +23,10 @@ import { useNotifications } from '../contexts/kibana';
 import { useCreateAndNavigateToMlLink } from '../contexts/kibana/use_create_url';
 import { ML_PAGES } from '../../../common/constants/locator';
 
+export interface GetSavedSearchPageDeps {
+  search: DataPublicPluginStart['search'];
+  savedObjectsClient: SavedObjectsClientContract;
+}
 /**
  * Hook to resolve route specific requirements
  * @param dataViewId optional Kibana data view id, used for wizards

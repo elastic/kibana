@@ -12,11 +12,13 @@ import {
 } from './saved_search_utils';
 import type { SavedSearchSavedObject } from '../../../../common/types';
 import type { SavedSearch } from '@kbn/discover-plugin/public';
-import type { Filter, FilterStateStore } from '@kbn/es-query';
+import { type Filter, FilterStateStore } from '@kbn/es-query';
 import { stubbedSavedObjectIndexPattern } from '@kbn/data-views-plugin/common/data_view.stub';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { uiSettingsServiceMock } from '@kbn/core/public/mocks';
+import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
+import { Query } from '@kbn/es-query';
 
 // helper function to create data views
 function createMockDataView(id: string) {
@@ -44,6 +46,32 @@ function createMockDataView(id: string) {
 
 const mockDataView = createMockDataView('test-mock-data-view');
 const mockUiSettings = uiSettingsServiceMock.createStartContract();
+
+const luceneSavedSearch: SavedSearch = {
+  title: 'farequote_filter_and_kuery',
+  description: '',
+  columns: ['_source'],
+  searchSource: createSearchSourceMock({
+    index: mockDataView,
+    query: { query: 'responsetime > 49', language: 'lucene' } as Query,
+    filter: [
+      {
+        meta: {
+          index: '90a978e0-1c80-11ec-b1d7-f7e5cf21b9e0',
+          negate: false,
+          disabled: false,
+          alias: null,
+          type: 'phrase',
+          key: 'airline',
+          value: 'ASA',
+          params: { query: 'ASA', type: 'phrase' },
+        },
+        query: { match: { airline: { query: 'ASA', type: 'phrase' } } },
+        $state: { store: FilterStateStore.APP_STATE },
+      },
+    ],
+  }),
+} as unknown as SavedSearch;
 
 // @ts-expect-error We don't need the full object here
 const luceneSavedSearchObj: SavedSearchSavedObject = {
@@ -75,12 +103,27 @@ const kqlSavedSearch: SavedSearch = {
   title: 'farequote_filter_and_kuery',
   description: '',
   columns: ['_source'],
-  // @ts-expect-error this isn't a valid SavedSearch object... but does anyone care?
-  kibanaSavedObjectMeta: {
-    searchSourceJSON:
-      '{"highlightAll":true,"version":true,"query":{"query":"responsetime > 49","language":"kuery"},"filter":[{"meta":{"index":"90a978e0-1c80-11ec-b1d7-f7e5cf21b9e0","negate":false,"disabled":false,"alias":null,"type":"phrase","key":"airline","value":"ASA","params":{"query":"ASA","type":"phrase"}},"query":{"match":{"airline":{"query":"ASA","type":"phrase"}}},"$state":{"store":"appState"}}],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
-  },
-};
+  searchSource: createSearchSourceMock({
+    index: mockDataView,
+    query: { query: 'responsetime > 49', language: 'kuery' } as Query,
+    filter: [
+      {
+        meta: {
+          index: '90a978e0-1c80-11ec-b1d7-f7e5cf21b9e0',
+          negate: false,
+          disabled: false,
+          alias: null,
+          type: 'phrase',
+          key: 'airline',
+          value: 'ASA',
+          params: { query: 'ASA', type: 'phrase' },
+        },
+        query: { match: { airline: { query: 'ASA', type: 'phrase' } } },
+        $state: { store: FilterStateStore.APP_STATE },
+      },
+    ],
+  }),
+} as unknown as SavedSearch;
 
 describe('getQueryFromSavedSearchObject()', () => {
   it('should return parsed searchSourceJSON with query and filter', () => {
@@ -107,26 +150,24 @@ describe('getQueryFromSavedSearchObject()', () => {
       version: true,
     });
     expect(getQueryFromSavedSearchObject(kqlSavedSearch)).toEqual({
+      query: { query: 'responsetime > 49', language: 'kuery' },
+      index: 'test-mock-data-view',
       filter: [
         {
-          $state: { store: 'appState' },
           meta: {
-            alias: null,
-            disabled: false,
             index: '90a978e0-1c80-11ec-b1d7-f7e5cf21b9e0',
-            key: 'airline',
             negate: false,
-            params: { query: 'ASA', type: 'phrase' },
+            disabled: false,
+            alias: null,
             type: 'phrase',
+            key: 'airline',
             value: 'ASA',
+            params: { query: 'ASA', type: 'phrase' },
           },
           query: { match: { airline: { query: 'ASA', type: 'phrase' } } },
+          $state: { store: 'appState' },
         },
       ],
-      highlightAll: true,
-      indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-      query: { language: 'kuery', query: 'responsetime > 49' },
-      version: true,
     });
   });
   it('should return undefined if invalid searchSourceJSON', () => {
@@ -222,27 +263,31 @@ describe('getEsQueryFromSavedSearch()', () => {
     expect(
       getEsQueryFromSavedSearch({
         dataView: mockDataView,
-        savedSearch: luceneSavedSearchObj,
+        savedSearch: luceneSavedSearch,
         uiSettings: mockUiSettings,
       })
     ).toEqual({
       queryLanguage: 'lucene',
+      queryOrAggregateQuery: {
+        language: 'lucene',
+        query: 'responsetime > 49',
+      },
       searchQuery: {
         bool: {
           filter: [{ match_phrase: { airline: { query: 'ASA' } } }],
-          must: [{ query_string: { query: 'responsetime:>50' } }],
+          must: [{ query_string: { query: 'responsetime > 49' } }],
           must_not: [],
           should: [],
         },
       },
-      searchString: 'responsetime:>50',
+      searchString: 'responsetime > 49',
     });
   });
   it('should override original saved search with the provided query ', () => {
     expect(
       getEsQueryFromSavedSearch({
         dataView: mockDataView,
-        savedSearch: luceneSavedSearchObj,
+        savedSearch: luceneSavedSearch,
         uiSettings: mockUiSettings,
         query: {
           query: 'responsetime:>100',
@@ -251,6 +296,7 @@ describe('getEsQueryFromSavedSearch()', () => {
       })
     ).toEqual({
       queryLanguage: 'lucene',
+      queryOrAggregateQuery: { language: 'lucene', query: 'responsetime:>100' },
       searchQuery: {
         bool: {
           filter: [{ match_phrase: { airline: { query: 'ASA' } } }],
@@ -267,7 +313,7 @@ describe('getEsQueryFromSavedSearch()', () => {
     expect(
       getEsQueryFromSavedSearch({
         dataView: mockDataView,
-        savedSearch: luceneSavedSearchObj,
+        savedSearch: luceneSavedSearch,
         uiSettings: mockUiSettings,
         query: {
           query: 'responsetime:>100',
@@ -299,6 +345,7 @@ describe('getEsQueryFromSavedSearch()', () => {
       })
     ).toEqual({
       queryLanguage: 'lucene',
+      queryOrAggregateQuery: { language: 'lucene', query: 'responsetime:>100' },
       searchQuery: {
         bool: {
           filter: [],

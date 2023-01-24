@@ -273,7 +273,6 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
 
   const {
     configs,
-    queryOrAggregateQuery,
     searchQueryLanguage,
     searchString,
     overallStats,
@@ -599,7 +598,8 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
           <EuiFlexItem grow={false}>
             <ActionsPanel
               dataView={currentDataView}
-              query={queryOrAggregateQuery}
+              searchQueryLanguage={searchQueryLanguage}
+              searchString={searchString}
               getAdditionalLinks={getAdditionalLinks}
             />
           </EuiFlexItem>
