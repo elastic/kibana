@@ -42,7 +42,7 @@ export const DashboardAppNoDataPage = ({
     dataViews,
     dataViewEditor,
     customBranding: {
-      hasCustomBranding$: customBranding.start().hasCustomBranding$,
+      hasCustomBranding$: customBranding.customBranding.hasCustomBranding$,
     },
   };
   return (
