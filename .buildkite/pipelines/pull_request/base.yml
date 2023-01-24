@@ -1,5 +1,6 @@
 env:
   KIBANA_BUILD_ID: 0185e494-e586-4061-a9eb-57cff774d515
+  ELASTIC_APM_LOG_LEVEL: trace
 
 steps:
   - command: .buildkite/scripts/lifecycle/pre_build.sh

@@ -37,6 +37,7 @@ export default function ({ getService }: FtrProviderContext) {
             record.url?.path === '/emit_log_with_trace_id'
           ) {
             responseTraceId = record.trace?.id;
+            console.log('HTTP REQUEST LOG LINE', record);
             return true;
           }
           return false;
@@ -48,13 +49,27 @@ export default function ({ getService }: FtrProviderContext) {
 
       await assertLogContains({
         description: 'elasticsearch logs have the same traceId',
-        predicate: (record) =>
-          Boolean(
+        predicate: (record) => {
+          if (
             record.log?.logger === 'elasticsearch.query.data' &&
-              record.trace?.id === responseTraceId &&
-              // esClient.ping() request
-              record.message?.includes('HEAD /')
-          ),
+            // esClient.ping() request
+            record.message?.includes('HEAD /')
+          ) {
+            console.log('ES QUERY POSSIBLE LOG LINE', record);
+          }
+
+          if (
+            record.log?.logger === 'elasticsearch.query.data' &&
+            record.trace?.id === responseTraceId &&
+            // esClient.ping() request
+            record.message?.includes('HEAD /')
+          ) {
+            console.log('ES QUERY LOG LINE', record);
+            return true;
+          }
+
+          return false;
+        },
 
         retry,
       });

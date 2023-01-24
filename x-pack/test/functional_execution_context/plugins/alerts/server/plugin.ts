@@ -94,6 +94,12 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
         },
       },
       async (ctx, req, res) => {
+        console.log(
+          'ROUTE CURRENT TRACE INFO -- start',
+          apmAgent.currentTraceparent,
+          apmAgent.currentTraceIds
+        );
+
         // Kibana might set transactiopnSampleRate < 1.0 on CI, so we need to
         // enforce transaction creation to prevent the test from failing.
         const transaction = apmAgent.startTransaction();
@@ -104,8 +110,20 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
           }, 1_000);
         });
 
+        console.log(
+          'ROUTE CURRENT TRACE INFO -- after startTransaction',
+          apmAgent.currentTraceparent,
+          apmAgent.currentTraceIds
+        );
+
         const coreCtx = await ctx.core;
         await coreCtx.elasticsearch.client.asInternalUser.ping();
+
+        console.log(
+          'ROUTE CURRENT TRACE INFO -- after es',
+          apmAgent.currentTraceparent,
+          apmAgent.currentTraceIds
+        );
 
         return res.ok({
           body: {
