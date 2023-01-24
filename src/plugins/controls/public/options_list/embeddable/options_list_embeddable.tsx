@@ -40,6 +40,7 @@ import { getDefaultComponentState, optionsListReducers } from '../options_list_r
 import { OptionsListControl } from '../components/options_list_control';
 import { ControlsDataViewsService } from '../../services/data_views/types';
 import { ControlsOptionsListService } from '../../services/options_list/types';
+import { ControlsHTTPService } from '../../services/http/types';
 
 const diffDataFetchProps = (
   last?: OptionsListDataFetchProps,
@@ -72,6 +73,8 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
   // Controls services
   private dataViewsService: ControlsDataViewsService;
   private optionsListService: ControlsOptionsListService;
+
+  private allowExpensiveQueries: boolean = false; // default to false, since wrongly assuming true will break stuff
 
   // Internal data fetching state for this input control.
   private typeaheadSubject: Subject<string> = new Subject<string>();
@@ -116,6 +119,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
   private initialize = async () => {
     const { selectedOptions: initialSelectedOptions } = this.getInput();
     if (!initialSelectedOptions) this.setInitializationFinished();
+    this.allowExpensiveQueries = await this.optionsListService.getAllowExpensiveQueries();
     this.runOptionsListQuery().then(async () => {
       if (initialSelectedOptions) {
         await this.buildFilter();
@@ -312,9 +316,10 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
             filters,
             dataView,
             timeRange,
-            searchString: searchString.value,
             runPastTimeout,
             selectedOptions,
+            searchString: searchString.value,
+            allowExpensiveQueries: this.allowExpensiveQueries,
           },
           this.abortController.signal
         );

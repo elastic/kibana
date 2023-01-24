@@ -7,7 +7,6 @@
  */
 
 import { Observable } from 'rxjs';
-import { get } from 'lodash';
 
 import { PluginSetup as UnifiedSearchPluginSetup } from '@kbn/unified-search-plugin/server';
 import { getKbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/server';
@@ -44,6 +43,7 @@ export const setupOptionsListSuggestionsRoute = (
             sort: schema.maybe(schema.any()),
             filters: schema.maybe(schema.any()),
             fieldSpec: schema.maybe(schema.any()),
+            allowExpensiveQueries: schema.boolean(),
             searchString: schema.maybe(schema.string()),
             selectedOptions: schema.maybe(schema.arrayOf(schema.string())),
           },
@@ -56,6 +56,7 @@ export const setupOptionsListSuggestionsRoute = (
         const suggestionRequest: OptionsListRequestBody = request.body;
         const { index } = request.params;
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+
         const suggestionsResponse = await getOptionsListSuggestions({
           abortedEvent$: request.events.aborted$,
           request: suggestionRequest,
@@ -87,20 +88,12 @@ export const setupOptionsListSuggestionsRoute = (
     /**
      * Build ES Query
      */
-    const { runPastTimeout, filters, runtimeFieldMap } = request;
+    const { runPastTimeout, filters, runtimeFieldMap, allowExpensiveQueries } = request;
+    // console.log('ALLOW EXPENSIVE QUERIES???', allowExpensiveQueries);
     const { terminateAfter, timeout } = getAutocompleteSettings();
     const timeoutSettings = runPastTimeout
       ? {}
       : { timeout: `${timeout}ms`, terminate_after: terminateAfter };
-
-    const allowExpensiveQueries =
-      get(
-        await esClient.cluster.getSettings({
-          include_defaults: true,
-          filter_path: '**.allow_expensive_queries',
-        }),
-        'transient.search.allow_expensive_queries'
-      ) === 'true';
 
     let suggestionBuilder: OptionsListSuggestionAggregationBuilder;
     if (allowExpensiveQueries) {

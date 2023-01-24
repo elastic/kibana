@@ -15,7 +15,7 @@ import { controlGroupContainerPersistableStateServiceFactory } from './control_g
 import { optionsListPersistableStateServiceFactory } from './options_list/options_list_embeddable_factory';
 import { rangeSliderPersistableStateServiceFactory } from './range_slider/range_slider_embeddable_factory';
 import { timeSliderPersistableStateServiceFactory } from './time_slider/time_slider_embeddable_factory';
-import { get } from 'lodash';
+import { setupControlGroupClusterSettingsRoute } from './control_group/control_group_cluster_settings_route';
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;
@@ -24,8 +24,6 @@ interface SetupDeps {
 }
 
 export class ControlsPlugin implements Plugin<object, object, SetupDeps> {
-  // private allowExpensiveQueries: boolean = false;
-
   public setup(core: CoreSetup, { embeddable, unifiedSearch }: SetupDeps) {
     embeddable.registerEmbeddableFactory(
       controlGroupContainerPersistableStateServiceFactory(embeddable)
@@ -33,22 +31,12 @@ export class ControlsPlugin implements Plugin<object, object, SetupDeps> {
     embeddable.registerEmbeddableFactory(optionsListPersistableStateServiceFactory());
     embeddable.registerEmbeddableFactory(rangeSliderPersistableStateServiceFactory());
     embeddable.registerEmbeddableFactory(timeSliderPersistableStateServiceFactory());
+    setupControlGroupClusterSettingsRoute(core);
     setupOptionsListSuggestionsRoute(core, unifiedSearch.autocomplete.getAutocompleteSettings);
     return {};
   }
 
-  public async start(core: CoreStart) {
-    // const esClient = core.elasticsearch.client.asInternalUser;
-    // this.allowExpensiveQueries =
-    //   get(
-    //     await esClient.cluster.getSettings({
-    //       include_defaults: true,
-    //       filter_path: '**.allow_expensive_queries',
-    //     }),
-    //     'transient.search.allow_expensive_queries'
-    //   ) === 'true';
-    // console.log('!!!!!!!! allowExpensiveQueries?', this.allowExpensiveQueries);
-    // return { allowExpensiveQueries: this.allowExpensiveQueries };
+  public start(core: CoreStart) {
     return {};
   }
 

@@ -21,7 +21,6 @@ import { ControlsHTTPService } from '../http/types';
 import { ControlsDataService } from '../data/types';
 import { ControlsPluginStartDeps } from '../../types';
 import { ControlsOptionsListService } from './types';
-import { CoreStart } from '@kbn/core/server';
 
 class OptionsListService implements ControlsOptionsListService {
   private data: ControlsDataService;
@@ -94,6 +93,21 @@ class OptionsListService implements ControlsOptionsListService {
       fieldSpec: field,
       runtimeFieldMap: dataView.toSpec().runtimeFieldMap,
     };
+  };
+
+  private cachedAllowExpensiveQueries = memoize(async () => {
+    const { allowExpensiveQueries } = await this.http.get<{
+      allowExpensiveQueries: boolean;
+    }>('/api/kibana/controls/getClusterSettings');
+    return allowExpensiveQueries;
+  });
+
+  public getAllowExpensiveQueries = async (): Promise<boolean> => {
+    try {
+      return await this.cachedAllowExpensiveQueries();
+    } catch (error) {
+      return false;
+    }
   };
 
   public runOptionsListRequest = async (request: OptionsListRequest, abortSignal: AbortSignal) => {
