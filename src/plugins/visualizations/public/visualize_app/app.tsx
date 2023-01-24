@@ -19,7 +19,6 @@ import {
   AnalyticsNoDataPage,
 } from '@kbn/shared-ux-page-analytics-no-data';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { of } from 'rxjs';
 import { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import { VisualizeServices } from './types';
 import {
@@ -49,23 +48,12 @@ const NoDataComponent = ({
   onDataViewCreated,
   customBranding,
 }: NoDataComponentProps) => {
-  const hasCustomBranding = customBranding.hasCustomBranding$.pipe(() => {
-    return of(true);
-  })
-    ? true
-    : false;
-
   const analyticsServices = {
-    coreStart: {
-      ...core,
-      customBranding: {
-        hasCustomBranding,
-      },
-    },
+    coreStart: core,
     dataViews,
     dataViewEditor,
     customBranding: {
-      hasCustomBranding,
+      hasCustomBranding: customBranding,
     },
   };
   return (

@@ -24,6 +24,8 @@ export interface Services {
   hasUserDataView: () => Promise<boolean>;
   /** if set to true allows creation of an ad-hoc data view from data view editor */
   allowAdHocDataView?: boolean;
+  /** True if the Kibana instance is customly branded */
+  hasCustomBranding?: boolean;
 }
 
 /**

@@ -19,6 +19,7 @@ interface Params {
 const defaultParams = {
   hasESData: true,
   hasUserDataView: true,
+  hasCustomBranding: false,
 };
 
 /**

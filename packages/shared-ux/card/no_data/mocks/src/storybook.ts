@@ -12,7 +12,7 @@ import { RedirectAppLinksStorybookMock } from '@kbn/shared-ux-link-redirect-app-
 import type { NoDataCardServices, NoDataCardProps } from '@kbn/shared-ux-card-no-data-types';
 
 type PropArguments = Pick<NoDataCardProps, 'category' | 'title' | 'description' | 'button'>;
-type ServiceArguments = Pick<NoDataCardServices, 'canAccessFleet' | 'customBranding'>;
+type ServiceArguments = Pick<NoDataCardServices, 'canAccessFleet'>;
 type Arguments = PropArguments & ServiceArguments;
 
 /**
@@ -83,11 +83,10 @@ export class StorybookMock extends AbstractStorybookMock<
   }
 
   getServices(params: Params): NoDataCardServices {
-    const { canAccessFleet, customBranding } = params;
+    const { canAccessFleet } = params;
 
     return {
       canAccessFleet,
-      customBranding: { hasCustomBranding: customBranding.hasCustomBranding },
       addBasePath: (path) => {
         action('addBasePath')(path);
         return path;
