@@ -203,9 +203,9 @@ export class LegacyAlertsClient<
     logAlerts({
       logger: this.options.logger,
       alertingEventLogger: eventLogger,
-      newAlerts: processedAlertsNew,
-      activeAlerts: processedAlertsActive,
-      recoveredAlerts: processedAlertsRecoveredCurrent,
+      newAlerts: alerts.newAlerts,
+      activeAlerts: alerts.activeAlerts,
+      recoveredAlerts: alerts.currentRecoveredAlerts,
       ruleLogPrefix: this.ruleLogPrefix,
       ruleRunMetricsStore,
       canSetRecoveryContext: this.options.ruleType.doesSetRecoveryContext ?? false,
