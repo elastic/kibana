@@ -19,7 +19,6 @@ export class ListingTableService extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly common = this.ctx.getPageObject('common');
   private readonly header = this.ctx.getPageObject('header');
-  private readonly tagManagement = this.ctx.getPageObject('tagManagement');
 
   private readonly tagPopoverToggle = this.ctx.getService('menuToggle').create({
     name: 'Tag Popover',
@@ -114,7 +113,7 @@ export class ListingTableService extends FtrService {
     // select the tags
     for (const tagName of tagNames) {
       await this.testSubjects.click(
-        `tag-searchbar-option-${this.tagManagement.testSubjFriendly(tagName)}`
+        `tag-searchbar-option-${tagName.replace(' ', '_')}`
       );
     }
     await this.closeTagPopover();
