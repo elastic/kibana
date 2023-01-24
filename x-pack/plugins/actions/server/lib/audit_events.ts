@@ -15,6 +15,8 @@ export enum ConnectorAuditAction {
   DELETE = 'connector_delete',
   FIND = 'connector_find',
   EXECUTE = 'connector_execute',
+  GET_GLOBAL_EXECUTION_LOG = 'connector_get_global_execution_log',
+  GET_GLOBAL_EXECUTION_KPI = 'connector_get_global_execution_kpi',
 }
 
 type VerbsTuple = [string, string, string];
@@ -26,6 +28,8 @@ const eventVerbs: Record<ConnectorAuditAction, VerbsTuple> = {
   connector_delete: ['delete', 'deleting', 'deleted'],
   connector_find: ['access', 'accessing', 'accessed'],
   connector_execute: ['execute', 'executing', 'executed'],
+  connector_get_global_execution_log: ['access', 'accessing', 'accessed'],
+  connector_get_global_execution_kpi: ['access', 'accessing', 'accessed'],
 };
 
 const eventTypes: Record<ConnectorAuditAction, EcsEventType | undefined> = {
@@ -35,6 +39,8 @@ const eventTypes: Record<ConnectorAuditAction, EcsEventType | undefined> = {
   connector_delete: 'deletion',
   connector_find: 'access',
   connector_execute: undefined,
+  connector_get_global_execution_log: 'access',
+  connector_get_global_execution_kpi: 'access',
 };
 
 export interface ConnectorAuditEventParams {

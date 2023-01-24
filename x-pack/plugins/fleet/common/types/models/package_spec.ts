@@ -29,7 +29,7 @@ export interface PackageSpecManifest {
   owner: { github: string };
   elasticsearch?: Pick<
     RegistryElasticsearch,
-    'index_template.settings' | 'index_template.mappings'
+    'index_template.settings' | 'index_template.mappings' | 'index_template.data_stream'
   >;
 }
 
