@@ -40,6 +40,7 @@ interface Props {
   end: number;
   locationField?: string;
   offset?: string;
+  transactionType?: string;
 }
 
 async function getMobileLocationStats({
@@ -51,6 +52,7 @@ async function getMobileLocationStats({
   end,
   locationField = CLIENT_GEO_COUNTRY_NAME,
   offset,
+  transactionType,
 }: Props) {
   const commonProps = {
     kuery,
