@@ -29,13 +29,24 @@ export const ControlSettings = ({ policy, onChange }: SettingsDeps) => {
   const isGeneralViewSelected = viewMode === VIEW_MODE_GENERAL;
   const isYamlViewSelected = viewMode === VIEW_MODE_YAML;
 
-  const onChanges = useCallback(
+  const onGeneralChanges = useCallback(
     (opts: OnChangeDeps) => {
       opts.updatedPolicy = policy;
       onChange(opts);
       setIsValid(opts.isValid);
     },
     [onChange, policy]
+  );
+
+  const onYamlChanges = useCallback(
+    (opts: OnChangeDeps) => {
+      if (isYamlViewSelected) {
+        opts.updatedPolicy = policy;
+        onChange(opts);
+        setIsValid(opts.isValid);
+      }
+    },
+    [isYamlViewSelected, onChange, policy]
   );
 
   return (
@@ -65,10 +76,15 @@ export const ControlSettings = ({ policy, onChange }: SettingsDeps) => {
       <EuiFlexItem>
         {/** general view removed from DOM for performance and to avoid errors when invalid yaml is passed to it**/}
         {isGeneralViewSelected && (
-          <ControlGeneralView show={isGeneralViewSelected} policy={policy} onChange={onChanges} />
+          <ControlGeneralView
+            show={isGeneralViewSelected}
+            policy={policy}
+            onChange={onGeneralChanges}
+          />
         )}
-        {/** yaml view is kept in the dom at all times to prevent some sizing/rendering issues **/}
-        <ControlYamlView show={isYamlViewSelected} policy={policy} onChange={onChanges} />
+        {/** Yaml view is kept in the dom at all times to prevent some sizing/rendering issues.
+        Also only listening for changes if yaml view visible to avoid isValid race condition **/}
+        <ControlYamlView show={isYamlViewSelected} policy={policy} onChange={onYamlChanges} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
