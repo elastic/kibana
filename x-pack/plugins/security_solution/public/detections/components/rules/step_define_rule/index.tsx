@@ -521,7 +521,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 <DurationInput
                   durationValueField={groupByDurationValue}
                   durationUnitField={groupByDurationUnit}
-                  isDisabled={groupByRadioSelection.value !== GroupByOptions.PerTimePeriod}
+                  isDisabled={
+                    groupByFields?.length === 0 ||
+                    groupByRadioSelection.value !== GroupByOptions.PerTimePeriod
+                  }
                   minimumValue={1}
                 />
               </>
