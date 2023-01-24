@@ -8,7 +8,7 @@
 import { rgba } from 'polished';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
@@ -65,7 +65,7 @@ const DropTargetDataProviders = styled.div`
 DropTargetDataProviders.displayName = 'DropTargetDataProviders';
 
 const getDroppableId = (id: string): string =>
-  `${droppableTimelineProvidersPrefix}${id}${uuid.v4()}`;
+  `${droppableTimelineProvidersPrefix}${id}${uuidv4()}`;
 
 /**
  * Renders the data providers section of the timeline.

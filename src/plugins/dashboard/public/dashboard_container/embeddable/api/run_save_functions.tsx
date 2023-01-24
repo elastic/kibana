@@ -27,7 +27,6 @@ export function runSaveAs(this: DashboardContainer) {
         timefilter: { timefilter },
       },
     },
-    coreContext: { i18nContext },
     savedObjectsTagging: { hasApi: hasSavedObjectsTagging },
     dashboardSavedObject: { checkForDuplicateDashboardTitle, saveDashboardStateToSavedObject },
   } = pluginServices.getServices();
@@ -125,7 +124,7 @@ export function runSaveAs(this: DashboardContainer) {
       />
     );
     this.clearOverlays();
-    showSaveModal(dashboardSaveModal, i18nContext);
+    showSaveModal(dashboardSaveModal);
   });
 }
 

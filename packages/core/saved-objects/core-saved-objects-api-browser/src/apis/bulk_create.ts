@@ -26,7 +26,7 @@ export interface SavedObjectsBulkCreateObject<T = unknown> extends SavedObjectsC
  *
  * @public
  * @deprecated See https://github.com/elastic/kibana/issues/149098
- * */
+ */
 export interface SavedObjectsBulkCreateOptions {
   /** If a document with the given `id` already exists, overwrite its contents (default=false). */
   overwrite?: boolean;
