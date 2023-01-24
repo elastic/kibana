@@ -168,31 +168,39 @@ function SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query>({
   const [stateQuery, setStateQuery] = useState<QT | Query | AggregateQuery | undefined>(
     query ? { ...query } : undefined
   );
-  const [stateDateRangeFrom, setStateDateRangeFrom] = useState<string>(dateRangeFrom ?? 'now-15m');
-  const [stateDateRangeTo, setStateDateRangeTo] = useState<string>(dateRangeTo ?? 'now');
+  const [stateDateRangeFrom, setStateDateRangeFrom] = useState<string | undefined>(
+    dateRangeFrom ?? 'now-15m'
+  );
+  const [stateDateRangeTo, setStateDateRangeTo] = useState<string | undefined>(
+    dateRangeTo ?? 'now'
+  );
   const [stateOpenQueryBarMenu, setStateOpenQueryBarMenu] = useState(false);
 
   useEffect(() => {
-    if (isOfQueryType(stateQuery) && isOfQueryType(query)) {
-      if (stateQuery?.language !== query?.language) {
-        setStateQuery({ query: '', language: query.language });
-      } else if (stateQuery.query !== query.query) {
-        setStateQuery({ ...query });
+    if (!query) {
+      if (stateQuery) {
+        setStateQuery(undefined);
       }
     }
 
-    if (query && !isOfQueryType(query)) {
-      setStateQuery({ ...query });
-    }
+    if (query) {
+      // 'query' is a Query
+      if (isOfQueryType(query)) {
+        if (isOfQueryType(stateQuery)) {
+          if (stateQuery?.language !== query?.language) {
+            setStateQuery({ query: '', language: query.language });
+          }
+        }
+      }
 
-    if (dateRangeFrom && dateRangeFrom !== stateDateRangeFrom) {
-      setStateDateRangeFrom(dateRangeFrom);
+      // 'query' is an AggregateQuery
+      if (!isOfQueryType(query)) {
+        if (!isEqual(query, stateQuery)) {
+          setStateQuery({ ...query });
+        }
+      }
     }
-
-    if (dateRangeTo && dateRangeTo !== stateDateRangeTo) {
-      setStateDateRangeTo(dateRangeTo);
-    }
-  }, [dateRangeFrom, dateRangeTo, query, stateDateRangeFrom, stateDateRangeTo, stateQuery]);
+  }, [query, stateQuery]);
 
   const timeRangeForSuggestionsOverride = showDatePicker ? undefined : false;
 
@@ -224,21 +232,24 @@ function SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query>({
     );
   };
 
-  const handleSave = async (savedQueryMeta: SavedQueryMeta, saveAsNew = false) => {
+  const handleSave = async (
+    { title, description, shouldIncludeFilters, shouldIncludeTimefilter, id }: SavedQueryMeta,
+    saveAsNew = false
+  ) => {
     if (!stateQuery) return;
 
     const savedQueryAttributes: SavedQueryAttributes = {
-      title: savedQueryMeta.title,
-      description: savedQueryMeta.description,
+      title,
+      description,
       query: stateQuery as Query,
     };
 
-    if (savedQueryMeta.shouldIncludeFilters) {
+    if (shouldIncludeFilters) {
       savedQueryAttributes.filters = filters;
     }
 
     if (
-      savedQueryMeta.shouldIncludeTimefilter &&
+      shouldIncludeTimefilter &&
       stateDateRangeTo !== undefined &&
       stateDateRangeFrom !== undefined &&
       refreshInterval !== undefined &&
@@ -257,7 +268,7 @@ function SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query>({
     try {
       const response =
         savedQuery && !saveAsNew
-          ? await savedQueries.updateQuery(savedQueryMeta.id!, savedQueryAttributes)
+          ? await savedQueries.updateQuery(id!, savedQueryAttributes)
           : await savedQueries.createQuery(savedQueryAttributes);
 
       onSaved?.(response);
@@ -304,8 +315,8 @@ function SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query>({
     onQueryChange?.({
       query: newQuery as QT,
       dateRange: {
-        from: stateDateRangeFrom,
-        to: stateDateRangeTo,
+        from: stateDateRangeFrom || '',
+        to: stateDateRangeTo || '',
       },
     });
   };
@@ -319,8 +330,8 @@ function SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query>({
     onQuerySubmit?.({
       query: newQuery as Query,
       dateRange: {
-        from: stateDateRangeFrom,
-        to: stateDateRangeTo,
+        from: stateDateRangeFrom || '',
+        to: stateDateRangeTo || '',
       },
     });
 
@@ -341,8 +352,8 @@ function SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query>({
     onQuerySubmit?.({
       query: newQuery as Query,
       dateRange: {
-        from: newDateRange?.from || stateDateRangeFrom,
-        to: newDateRange?.to || stateDateRangeTo,
+        from: newDateRange?.from || stateDateRangeFrom || '',
+        to: newDateRange?.to || stateDateRangeTo || '',
       },
     });
 
@@ -353,6 +364,8 @@ function SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query>({
 
   const toggleFilterBarMenuPopover = (open: boolean) => setStateOpenQueryBarMenu(open);
 
+  console.log('stateQuery', stateQuery);
+
   return (
     <div className={classes} css={cssStyles} data-test-subj="globalQueryBar">
       <QueryBarTopRow<QT>
@@ -361,7 +374,7 @@ function SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query>({
         dataViewPickerComponentProps={dataViewPickerComponentProps}
         dateRangeFrom={stateDateRangeFrom}
         dateRangeTo={stateDateRangeTo}
-        fillSubmitButton={fillSubmitButton || false}
+        fillSubmitButton={Boolean(fillSubmitButton)}
         filterBar={
           shouldRenderFilterBar ? (
             shouldShowDatePickerAsBadge ? (

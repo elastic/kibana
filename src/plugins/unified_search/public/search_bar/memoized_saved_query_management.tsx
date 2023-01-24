@@ -14,6 +14,7 @@ import type { SavedQuery } from '@kbn/data-plugin/public';
 
 import { SavedQueryManagementList } from '../saved_query_management';
 import type { IUnifiedSearchPluginServices } from '../types';
+
 interface MemoizedSavedQueryManagementProps {
   filters: Filter[] | undefined;
   query: AggregateQuery | Query | undefined;
