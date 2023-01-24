@@ -46,7 +46,7 @@ describe('Kibana No Data Page', () => {
     const services = getKibanaNoDataPageServicesMock(config);
     const component = mountWithIntl(
       <KibanaNoDataPageProvider {...services}>
-        <KibanaNoDataPage {...{ noDataConfig, onDataViewCreated }} />
+        <KibanaNoDataPage {...{ noDataConfig, onDataViewCreated, showPlainSpinner: false }} />
       </KibanaNoDataPageProvider>
     );
 
@@ -61,7 +61,11 @@ describe('Kibana No Data Page', () => {
     const services = getKibanaNoDataPageServicesMock({ ...config, hasESData: true });
     const component = mountWithIntl(
       <KibanaNoDataPageProvider {...services}>
-        <KibanaNoDataPage noDataConfig={noDataConfig} onDataViewCreated={onDataViewCreated} />
+        <KibanaNoDataPage
+          noDataConfig={noDataConfig}
+          onDataViewCreated={onDataViewCreated}
+          showPlainSpinner={false}
+        />
       </KibanaNoDataPageProvider>
     );
 
@@ -86,7 +90,11 @@ describe('Kibana No Data Page', () => {
 
     const component = mountWithIntl(
       <KibanaNoDataPageProvider {...services}>
-        <KibanaNoDataPage noDataConfig={noDataConfig} onDataViewCreated={onDataViewCreated} />
+        <KibanaNoDataPage
+          noDataConfig={noDataConfig}
+          onDataViewCreated={onDataViewCreated}
+          showPlainSpinner={false}
+        />
       </KibanaNoDataPageProvider>
     );
 

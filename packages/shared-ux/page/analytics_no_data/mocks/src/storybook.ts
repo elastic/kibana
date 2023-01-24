@@ -16,7 +16,7 @@ import type {
   AnalyticsNoDataPageProps,
 } from '@kbn/shared-ux-page-analytics-no-data-types';
 
-type ServiceArguments = Pick<AnalyticsNoDataPageServices, 'kibanaGuideDocLink'>;
+type ServiceArguments = Pick<AnalyticsNoDataPageServices, 'kibanaGuideDocLink' | 'customBranding'>;
 
 export type Params = ArgumentParams<{}, ServiceArguments> & KibanaNoDataPageStorybookParams;
 
@@ -34,6 +34,12 @@ export class StorybookMock extends AbstractStorybookMock<
       control: 'text',
       defaultValue: 'Kibana guide',
     },
+    customBranding: {
+      hasCustomBranding$: {
+        control: 'boolean',
+        defaultValue: false,
+      },
+    },
   };
 
   dependencies = [kibanaNoDataMock];
@@ -41,6 +47,7 @@ export class StorybookMock extends AbstractStorybookMock<
   getServices(params: Params): AnalyticsNoDataPageServices {
     return {
       kibanaGuideDocLink: 'Kibana guide',
+      customBranding: { hasCustomBranding$: false },
       ...kibanaNoDataMock.getServices(params),
     };
   }
