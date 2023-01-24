@@ -63,9 +63,6 @@ disabled:
 
   # Scalability testing config that we run in its own pipeline
   - x-pack/test/scalability/config.ts
-
-defaultQueue: 'n2-4-spot'
-enabled:
   - test/accessibility/config.ts
   - test/analytics/config.ts
   - test/api_integration/config.js
@@ -163,7 +160,6 @@ enabled:
   - x-pack/test/functional_cors/config.ts
   - x-pack/test/functional_embedded/config.ts
   - x-pack/test/functional_enterprise_search/without_host_configured.config.ts
-  - x-pack/test/functional_execution_context/config.ts
   - x-pack/test/functional_with_es_ssl/config.ts
   - x-pack/test/functional/apps/advanced_settings/config.ts
   - x-pack/test/functional/apps/aiops/config.ts
@@ -297,3 +293,7 @@ enabled:
   - x-pack/performance/journeys/ecommerce_dashboard_saved_search_only.ts
   - x-pack/performance/journeys/ecommerce_dashboard_tsvb_gauge_only.ts
   - x-pack/performance/journeys/dashboard_listing_page.ts
+
+defaultQueue: 'n2-4-spot'
+enabled:
+  - x-pack/test/functional_execution_context/config.ts
