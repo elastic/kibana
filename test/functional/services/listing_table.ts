@@ -21,7 +21,6 @@ export class ListingTableService extends FtrService {
   private readonly header = this.ctx.getPageObject('header');
   private readonly tagManagement = this.ctx.getPageObject('tagManagement');
 
-  
   private readonly tagPopoverToggle = this.ctx.getService('menuToggle').create({
     name: 'Tag Popover',
     menuTestSubject: 'tagSelectableList',
@@ -120,7 +119,7 @@ export class ListingTableService extends FtrService {
     }
     await this.closeTagPopover();
     await this.waitUntilTableIsLoaded();
-  };
+  }
 
   public async openTagPopover(): Promise<void> {
     this.log.debug('ListingTable.openTagPopover');
