@@ -30,7 +30,6 @@ export function addEOL(
 
 export const mergeTokens = (...args: any[]) => [].concat.apply([], args);
 
-const oop = ace.acequire('ace/lib/oop');
 const { TextHighlightRules } = ace.acequire('ace/mode/text_highlight_rules');
 
 export class InputHighlightRules extends TextHighlightRules {
@@ -147,5 +146,3 @@ export class InputHighlightRules extends TextHighlightRules {
     }
   }
 }
-
-oop.inherits(InputHighlightRules);

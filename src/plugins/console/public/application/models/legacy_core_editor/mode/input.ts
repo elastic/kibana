@@ -10,7 +10,6 @@ import ace from 'brace';
 import { workerModule } from './worker';
 import { ScriptMode } from './script';
 
-const oop = ace.acequire('ace/lib/oop');
 const TextMode = ace.acequire('ace/mode/text').Mode;
 
 const MatchingBraceOutdent = ace.acequire('ace/mode/matching_brace_outdent').MatchingBraceOutdent;
@@ -33,8 +32,6 @@ export class Mode extends TextMode {
     });
   }
 }
-
-oop.inherits(Mode);
 
 (function (this: any) {
   this.getCompletions = function () {
