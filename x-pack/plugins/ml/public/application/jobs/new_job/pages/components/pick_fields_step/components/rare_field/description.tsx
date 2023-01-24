@@ -20,13 +20,11 @@ export const Description: FC = memo(({ children }) => {
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.pickFieldsStep.rareField.description"
-          defaultMessage="Select a field in which to detect rare values."
+          defaultMessage="A field in which to detect rare values."
         />
       }
     >
-      <EuiFormRow label={title}>
-        <>{children}</>
-      </EuiFormRow>
+      <>{children}</>
     </EuiDescribedFormGroup>
   );
 });

@@ -20,13 +20,11 @@ export const Description: FC = memo(({ children }) => {
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.pickFieldsStep.geoField.description"
-          defaultMessage="Select a geo field to detect anomalies in the geographic location of the input data."
+          defaultMessage="A geo field to detect anomalies in the geographic location of the input data."
         />
       }
     >
-      <EuiFormRow label={title}>
-        <>{children}</>
-      </EuiFormRow>
+      <>{children}</>
     </EuiDescribedFormGroup>
   );
 });

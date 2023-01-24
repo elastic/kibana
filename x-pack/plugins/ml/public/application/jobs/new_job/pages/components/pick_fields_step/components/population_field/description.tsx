@@ -20,13 +20,11 @@ export const Description: FC = memo(({ children }) => {
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.pickFieldsStep.populationField.description"
-          defaultMessage="All values in the selected field will be modeled together as a population. This analysis type is recommended for high cardinality data."
+          defaultMessage="All values in the selected field will be modeled together as a population. Recommended for high cardinality data."
         />
       }
     >
-      <EuiFormRow label={title}>
-        <>{children}</>
-      </EuiFormRow>
+      <>{children}</>
     </EuiDescribedFormGroup>
   );
 });
