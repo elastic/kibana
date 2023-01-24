@@ -33,7 +33,7 @@ export const SortActivity = React.memo<FilterActivityProps>(
   ({ sortOrder, onOrderChange, isLoading = false }) => {
     const onChange = useCallback(
       (e) => {
-        onOrderChange(e.target.value);
+        onOrderChange(e.target.value as SortOrderType);
       },
       [onOrderChange]
     );
