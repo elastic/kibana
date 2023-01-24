@@ -14,7 +14,9 @@ export default function ({ getService, getPageObjects }) {
   const from = 'Sep 22, 2015 @ 00:00:00.000';
   const to = 'Sep 22, 2015 @ 04:00:00.000';
 
-  describe('discover visualize button', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/137408
+  // Failing: See https://github.com/elastic/kibana/issues/149358
+  describe.skip('discover visualize button', () => {
     beforeEach(async () => {
       await security.testUser.setRoles([
         'test_logstash_reader',

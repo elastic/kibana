@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
+import type { HostEcs } from '@kbn/securitysolution-ecs';
 import type { HostsUncommonProcessesEdges } from '../../../../../common/search_strategy';
 import { hostsActions, hostsModel, hostsSelectors } from '../../store';
 import { defaultToEmptyTag, getEmptyValue } from '../../../../common/components/empty_value';
@@ -19,7 +20,6 @@ import * as i18n from './translations';
 import { getRowItemDraggables } from '../../../../common/components/tables/helpers';
 import { HostsType } from '../../store/model';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import type { HostEcs } from '../../../../../common/ecs/host';
 
 const tableType = hostsModel.HostsTableType.uncommonProcesses;
 interface UncommonProcessTableProps {
