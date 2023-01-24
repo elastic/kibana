@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { packagePolicyService } from '@kbn/fleet-plugin/server/services';
 import { eachSeries } from 'async';
 import { RouteRegisterParameters } from '.';
 import { getRoutePaths } from '../../common';
@@ -35,7 +34,7 @@ export function registerSetupRoute({
         const steps = getProfilingSetupSteps({
           client: createProfilingEsClient({ esClient, request, useDefaultAuth: true }),
           logger,
-          packagePolicyClient: packagePolicyService,
+          packagePolicyClient: dependencies.start.fleet.packagePolicyService,
           soClient: core.savedObjects.client,
           spaceId: dependencies.setup.spaces.spacesService.getSpaceId(request),
           isCloudEnabled: dependencies.setup.cloud.isCloudEnabled,
@@ -72,7 +71,7 @@ export function registerSetupRoute({
         const steps = getProfilingSetupSteps({
           client: createProfilingEsClient({ esClient, request, useDefaultAuth: true }),
           logger,
-          packagePolicyClient: packagePolicyService,
+          packagePolicyClient: dependencies.start.fleet.packagePolicyService,
           soClient: (await context.core).savedObjects.client,
           spaceId: dependencies.setup.spaces.spacesService.getSpaceId(request),
           isCloudEnabled: dependencies.setup.cloud.isCloudEnabled,

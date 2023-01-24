@@ -40,6 +40,7 @@ export interface ProfilingESClient {
     query: QueryDslQueryContainer;
     sampleSize: number;
   }): Promise<StackTraceResponse>;
+  getEsClient(): ElasticsearchClient;
 }
 
 export function createProfilingEsClient({
@@ -115,6 +116,9 @@ export function createProfilingEsClient({
       });
 
       return unwrapEsResponse(promise) as Promise<StackTraceResponse>;
+    },
+    getEsClient() {
+      return esClient;
     },
   };
 }

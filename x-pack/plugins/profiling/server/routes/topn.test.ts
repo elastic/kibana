@@ -53,6 +53,7 @@ describe('TopN data from Elasticsearch', () => {
           },
         }) as Promise<any>
     ),
+    getEsClient: jest.fn(() => context.elasticsearch.client.asCurrentUser),
   };
   const logger = loggerMock.create();
 

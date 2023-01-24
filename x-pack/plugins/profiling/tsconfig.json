@@ -9,7 +9,8 @@
     "common/**/*.ts",
     "public/**/*.ts",
     "public/**/*.tsx",
-    "server/**/*.ts"
+    "server/**/*.ts",
+    "server/**/*.json"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -34,6 +35,7 @@
     "@kbn/core-http-server",
     "@kbn/apm-utils",
     "@kbn/core-elasticsearch-server",
+    "@kbn/fleet-plugin"
     // add references to other TypeScript projects the plugin depends on
 
     // requiredPlugins from ./kibana.json

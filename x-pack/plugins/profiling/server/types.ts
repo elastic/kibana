@@ -8,18 +8,25 @@
 import { CustomRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { CloudSetup } from '@kbn/cloud-plugin/server';
+import { SpacesPluginStart, SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
+import { FleetSetupContract, FleetStartContract } from '@kbn/fleet-plugin/server';
 
 export interface ProfilingPluginSetupDeps {
   observability: ObservabilityPluginSetup;
   features: FeaturesPluginSetup;
-  spaces: SpacesPluginStart;
+  spaces: SpacesPluginSetup;
   cloud: CloudSetup;
+  fleet: FleetSetupContract;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ProfilingPluginStartDeps {}
+export interface ProfilingPluginStartDeps {
+  observability: {};
+  features: {};
+  spaces: SpacesPluginStart;
+  cloud: CloudStart;
+  fleet: FleetStartContract;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ProfilingPluginSetup {}
