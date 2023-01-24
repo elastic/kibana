@@ -63,12 +63,6 @@ export class StorybookMock extends AbstractStorybookMock<
       control: 'boolean',
       defaultValue: true,
     },
-    customBranding: {
-      hasCustomBranding: {
-        control: 'boolean',
-        defaultValue: false,
-      },
-    },
   };
 
   dependencies = [redirectMock];

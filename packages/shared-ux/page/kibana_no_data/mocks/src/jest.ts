@@ -34,14 +34,11 @@ export const getServicesMock = (params?: Partial<Params>) => {
       ? params.hasUserDataView
       : defaultParams.hasUserDataView;
 
-  const showPlainSpinner = Boolean(params?.showPlainSpinner);
-
   const services: KibanaNoDataPageServices = {
     ...getNoDataCardServicesMock(),
     ...getNoDataViewsPromptServicesMock(),
     hasESData: async () => hasESData,
     hasUserDataView: async () => hasUserDataView,
-    showPlainSpinner,
   };
 
   return services;
