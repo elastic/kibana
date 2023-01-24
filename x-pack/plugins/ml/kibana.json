@@ -52,6 +52,7 @@
     "savedObjects",
     "savedSearch",
     "usageCollection",
+    "unifiedFieldList",
     "unifiedSearch"
   ],
   "extraPublicDirs": [

@@ -22,10 +22,18 @@ export const fromMapRouteFactory = (): MlRoute => ({
 });
 
 const PageWrapper: FC<PageProps> = ({ location, deps }) => {
-  const { dashboard, dataViewId, embeddable, geoField, splitField, from, to }: Record<string, any> =
-    parse(location.search, {
-      sort: false,
-    });
+  const {
+    dashboard,
+    dataViewId,
+    embeddable,
+    geoField,
+    splitField,
+    from,
+    to,
+    layer,
+  }: Record<string, any> = parse(location.search, {
+    sort: false,
+  });
 
   const { context } = useResolver(
     undefined,
@@ -34,7 +42,8 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
     deps.dataViewsContract,
     deps.getSavedSearchDeps,
     {
-      redirect: () => resolver(dashboard, dataViewId, embeddable, geoField, splitField, from, to),
+      redirect: () =>
+      resolver(dashboard, dataViewId, embeddable, geoField, splitField, from, to, layer),
     }
   );
   return <PageLoader context={context}>{<Redirect to="/jobs/new_job" />}</PageLoader>;

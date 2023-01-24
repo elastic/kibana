@@ -2619,6 +2619,7 @@ describe('Task Runner', () => {
               },
               flappingHistory: [true],
               flapping: false,
+              pendingRecoveredCount: 0,
             },
             state: {
               duration: '0',
@@ -2784,6 +2785,7 @@ describe('Task Runner', () => {
               },
               flappingHistory: [true],
               flapping: false,
+              pendingRecoveredCount: 0,
             },
             state: {
               duration: '0',
@@ -2798,6 +2800,7 @@ describe('Task Runner', () => {
               },
               flappingHistory: [true],
               flapping: false,
+              pendingRecoveredCount: 0,
             },
             state: {
               duration: '0',
