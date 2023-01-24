@@ -127,7 +127,6 @@ describe('getAlertsForNotification', () => {
           "meta": Object {
             "flapping": false,
             "flappingHistory": Array [],
-            "pendingRecoveredCount": 0,
           },
           "state": Object {},
         },
@@ -147,7 +146,6 @@ describe('getAlertsForNotification', () => {
           "meta": Object {
             "flapping": false,
             "flappingHistory": Array [],
-            "pendingRecoveredCount": 0,
           },
           "state": Object {},
         },
