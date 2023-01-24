@@ -22,16 +22,9 @@ const DEFAULT_VALUES = {
   deleteModalEngine: null,
   deleteModalEngineName: '',
   deleteStatus: Status.IDLE,
-  fetchEngineData: undefined,
-  fetchEngineApiError: undefined,
-  fetchEngineApiStatus: Status.IDLE,
-  fetchEngineName: null,
   isDeleteLoading: false,
   isDeleteModalVisible: false,
-  isFetchEngineFlyoutVisible: false,
-  isFetchEngineLoading: false,
   isLoading: true,
-
   meta: DEFAULT_META,
   parameters: { meta: DEFAULT_META },
   results: [],
@@ -131,25 +124,8 @@ describe('EnginesListLogic', () => {
         });
       });
     });
-    describe('closeFetchEngineIndicesFlyout', () => {
-      it('set isFetchEngineFlyoutVisible to false and fetchEngineName to empty string', () => {
-        EnginesListLogic.actions.closeFetchIndicesFlyout();
-        expect(EnginesListLogic.values).toEqual(DEFAULT_VALUES);
-      });
-    });
-    describe('openFetchEngineIndicesFlyout', () => {
-      it('set isFetchEngineFlyoutVisible to true and sets fetchEngineName to engine name', () => {
-        EnginesListLogic.actions.openFetchEngineFlyout('engine-name');
-        expect(EnginesListLogic.values).toEqual({
-          ...DEFAULT_VALUES,
-          isFetchEngineFlyoutVisible: true,
-          fetchEngineName: 'engine-name',
-          isFetchEngineLoading: true,
-          fetchEngineApiStatus: Status.LOADING,
-        });
-      });
-    });
   });
+
   describe('reducers', () => {
     describe('meta', () => {
       it('updates when apiSuccess', () => {

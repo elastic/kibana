@@ -26,7 +26,8 @@ import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 import { EmptyEnginesPrompt } from './components/empty_engines_prompt';
 import { EnginesListTable } from './components/tables/engines_table';
 import { DeleteEngineModal } from './delete_engine_modal';
-import { EngineListIndicesFlyout } from './engines_list_indices_flyout';
+import { EngineListIndicesFlyout } from './engines_list_flyout';
+import { EnginesListFlyoutLogic } from './engines_list_flyout_logic';
 import { EnginesListLogic } from './engines_list_logic';
 
 const CreateButton: React.FC = () => {
@@ -46,9 +47,11 @@ const CreateButton: React.FC = () => {
 };
 
 export const EnginesList: React.FC = () => {
-  const { fetchEngines, onPaginate, openDeleteEngineModal, openFetchEngineFlyout } =
-    useActions(EnginesListLogic);
-  const { meta, results, fetchEngineApiError, fetchEngineApiStatus, isLoading } = useValues(EnginesListLogic);
+  const { fetchEngines, onPaginate, openDeleteEngineModal } = useActions(EnginesListLogic);
+  const { openFetchEngineFlyout } = useActions(EnginesListFlyoutLogic);
+
+  const { meta, results, isLoading } = useValues(EnginesListLogic);
+  const { fetchEngineApiError, fetchEngineApiStatus } = useValues(EnginesListFlyoutLogic);
 
   const [searchQuery, setSearchValue] = useState('');
   const throttledSearchQuery = useThrottle(searchQuery, INPUT_THROTTLE_DELAY_MS);

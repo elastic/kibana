@@ -34,12 +34,12 @@ import { SEARCH_INDEX_PATH } from '../../routes';
 import { IngestionMethod } from '../../types';
 import { ingestionMethodToText } from '../../utils/indices';
 
-import { EnginesListLogic } from './engines_list_logic';
+import { EnginesListFlyoutLogic } from './engines_list_flyout_logic';
 
 export const EngineListIndicesFlyout: React.FC = () => {
   const { fetchEngineData, fetchEngineName, isFetchEngineLoading, isFetchEngineFlyoutVisible } =
-    useValues(EnginesListLogic);
-  const { closeFetchIndicesFlyout } = useActions(EnginesListLogic);
+    useValues(EnginesListFlyoutLogic);
+  const { closeFetchIndicesFlyout } = useActions(EnginesListFlyoutLogic);
 
   if (!fetchEngineData) return null;
   const { indices } = fetchEngineData;
