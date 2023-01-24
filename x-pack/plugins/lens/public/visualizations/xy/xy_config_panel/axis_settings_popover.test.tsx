@@ -22,6 +22,10 @@ function getRangeInputComponent(component: ShallowWrapper) {
     .shallow();
 }
 
+function getModeButtonsComponent(root: ShallowWrapper) {
+  return root.find('[testSubjPrefix="lnsXY"]').shallow().find('[testSubjPrefix="lnsXY"]').shallow();
+}
+
 describe('Axes Settings', () => {
   let props: AxisSettingsPopoverProps;
   beforeEach(() => {
@@ -141,7 +145,7 @@ describe('Axes Settings', () => {
   describe('axis extent', () => {
     it('hides the extent section if no extent is passed in', () => {
       const component = shallow(<AxisSettingsPopover {...props} />);
-      expect(component.find('[data-test-subj="lnsXY_axisBounds_groups"]').length).toBe(0);
+      expect(component.find('[testSubjPrefix="lnsXY"]').isEmptyRender()).toBe(true);
     });
 
     it('renders 3 options for metric bound inputs', () => {
@@ -154,8 +158,9 @@ describe('Axes Settings', () => {
           setExtent={setSpy}
         />
       );
-      const boundInput = component.find('[testSubjPrefix="lnsXY"]').shallow();
-      const buttonGroup = boundInput.find('[data-test-subj="lnsXY_axisBounds_groups"]');
+      const buttonGroup = getModeButtonsComponent(component).find(
+        '[data-test-subj="lnsXY_axisBounds_groups"]'
+      );
       expect(buttonGroup.prop('options')).toHaveLength(3);
     });
 
@@ -186,8 +191,9 @@ describe('Axes Settings', () => {
           setExtent={setSpy}
         />
       );
-      const boundInput = component.find('[testSubjPrefix="lnsXY"]').shallow();
-      const buttonGroup = boundInput.find('[data-test-subj="lnsXY_axisBounds_groups"]');
+      const buttonGroup = getModeButtonsComponent(component).find(
+        '[data-test-subj="lnsXY_axisBounds_groups"]'
+      );
       expect(buttonGroup.prop('options')).toHaveLength(2);
     });
 
