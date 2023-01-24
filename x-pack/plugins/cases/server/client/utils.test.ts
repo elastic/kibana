@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { v1 as uuidv1 } from 'uuid';
+
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { toElasticsearchQuery } from '@kbn/es-query';
 
@@ -924,26 +926,26 @@ describe('utils', () => {
   describe('constructSearchById', () => {
     const savedObjectsSerializer = createSavedObjectsSerializerMock();
 
-    it('handles uuid-v4 search terms correctly', () => {
-      const uuidv4 = '0d397548-30f7-4a7f-aa54-cfe1a38cb902';
+    it('returns the rootSearchFields and search with correct values when given a uuidv1', () => {
+      const uuid = uuidv1();
 
-      expect(constructSearch(uuidv4, DEFAULT_NAMESPACE_STRING, savedObjectsSerializer))
+      expect(constructSearch(uuid, DEFAULT_NAMESPACE_STRING, savedObjectsSerializer))
         .toMatchInlineSnapshot(`
         Object {
           "rootSearchFields": Array [
             "_id",
           ],
-          "search": "\\"0d397548-30f7-4a7f-aa54-cfe1a38cb902\\" \\"cases:0d397548-30f7-4a7f-aa54-cfe1a38cb902\\"",
+          "search": "\\"${uuid}\\" \\"cases:${uuid}\\"",
         }
       `);
     });
 
-    it('handles non-uuid-v4 search terms correctly', () => {
+    it('search value not changed and no rootSearchFields when search is non-uuidv1', () => {
       const search = 'foobar';
+      const result = constructSearch(search, DEFAULT_NAMESPACE_STRING, savedObjectsSerializer);
 
-      expect(constructSearch(search, DEFAULT_NAMESPACE_STRING, savedObjectsSerializer)).toEqual({
-        search,
-      });
+      expect(result).not.toHaveProperty('rootSearchFields');
+      expect(result).toEqual({ search });
     });
 
     it('returns undefined if search term undefined', () => {

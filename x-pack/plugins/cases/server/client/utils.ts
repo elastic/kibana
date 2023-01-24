@@ -539,20 +539,22 @@ export const constructSearch = (
   spaceId: string,
   savedObjectsSerializer: ISavedObjectsSerializer
 ): Pick<CasesFindRequest, 'search' | 'rootSearchFields'> | undefined => {
-  if (search) {
-    if (uuidValidate(search) && uuidVersion(search) === 4) {
-      const rawId = savedObjectsSerializer.generateRawId(
-        spaceIdToNamespace(spaceId),
-        CASE_SAVED_OBJECT,
-        search
-      );
-
-      return {
-        search: `"${search}" "${rawId}"`,
-        rootSearchFields: ['_id'],
-      };
-    }
-    return { search };
+  if (!search) {
+    return undefined;
   }
-  return undefined;
+
+  if (uuidValidate(search) && uuidVersion(search) === 1) {
+    const rawId = savedObjectsSerializer.generateRawId(
+      spaceIdToNamespace(spaceId),
+      CASE_SAVED_OBJECT,
+      search
+    );
+
+    return {
+      search: `"${search}" "${rawId}"`,
+      rootSearchFields: ['_id'],
+    };
+  }
+
+  return { search };
 };

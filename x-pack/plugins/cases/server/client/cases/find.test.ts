@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { v4 as uuidv4 } from 'uuid';
+import { v1 as uuidv1 } from 'uuid';
 
 import type { CaseResponse } from '../../../common/api';
 
@@ -38,7 +38,7 @@ describe('find', () => {
     });
 
     it('search by uuid updates search term and adds rootSearchFields', async () => {
-      const search = uuidv4();
+      const search = uuidv1();
       const findRequest = createCasesClientMockFindRequest({ search });
 
       await find(findRequest, clientArgs);

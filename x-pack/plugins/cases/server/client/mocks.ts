@@ -12,6 +12,7 @@ import type { ISavedObjectsSerializer } from '@kbn/core-saved-objects-server';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client.mock';
 import { makeLensEmbeddableFactory } from '@kbn/lens-plugin/server/embeddable/make_lens_embeddable_factory';
+import { serializerMock } from '@kbn/core-saved-objects-base-server-mocks';
 
 import type { CasesFindRequest } from '../../common/api';
 import type { CasesClient } from '.';
@@ -136,18 +137,15 @@ export const createCasesClientFactory = (): CasesClientFactoryMock => {
 type SavedObjectsSerializerMock = jest.Mocked<ISavedObjectsSerializer>;
 
 export const createSavedObjectsSerializerMock = (): SavedObjectsSerializerMock => {
-  return {
-    isRawSavedObject: jest.fn(),
-    rawToSavedObject: jest.fn(),
-    savedObjectToRaw: jest.fn(),
-    generateRawId: jest
-      .fn()
-      .mockImplementation((namespace: string | undefined, type: string, id: string) => {
-        const namespacePrefix = namespace ? `${namespace}:` : '';
-        return `${namespacePrefix}${type}:${id}`;
-      }),
-    generateRawLegacyUrlAliasId: jest.fn(),
-  };
+  const serializer = serializerMock.create();
+  serializer.generateRawId.mockImplementation(
+    (namespace: string | undefined, type: string, id: string) => {
+      const namespacePrefix = namespace ? `${namespace}:` : '';
+      return `${namespacePrefix}${type}:${id}`;
+    }
+  );
+
+  return serializer;
 };
 
 export const createCasesClientMockArgs = () => {
