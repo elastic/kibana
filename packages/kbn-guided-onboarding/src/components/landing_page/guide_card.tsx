@@ -154,10 +154,11 @@ const guideCards: GuideCardConstants[] = [
 ].sort((cardA, cardB) => cardA.order - cardB.order) as GuideCardConstants[];
 
 export interface GuideCardsProps {
+  isLoading: boolean;
   activateGuide: (guideId: GuideId) => Promise<void>;
   navigateToApp: ApplicationStart['navigateToApp'];
 }
-export const GuideCards = ({ activateGuide, navigateToApp }: GuideCardsProps) => {
+export const GuideCards = ({ isLoading, activateGuide, navigateToApp }: GuideCardsProps) => {
   return (
     <EuiFlexGroup wrap responsive justifyContent="center">
       {guideCards.map((card, index) => {
@@ -174,6 +175,7 @@ export const GuideCards = ({ activateGuide, navigateToApp }: GuideCardsProps) =>
         return (
           <EuiFlexItem key={index} grow={false}>
             <EuiCard
+              isDisabled={isLoading}
               onClick={onClick}
               css={cardCss}
               title={

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { EuiLink, EuiPageTemplate, EuiSpacer, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
 
 import { css } from '@emotion/react';
@@ -38,6 +38,7 @@ export const GettingStarted = () => {
   console.log('rendering getting started');
   const { application, trackUiMetric, chrome, guidedOnboardingService, cloud } = getServices();
   const history = useHistory();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
     chrome.setBreadcrumbs([
@@ -78,7 +79,9 @@ export const GettingStarted = () => {
   const activateGuide = useCallback(
     async (guideId: GuideId) => {
       try {
+        setIsLoading(true);
         await guidedOnboardingService?.activateGuide(guideId);
+        setIsLoading(false);
       } catch (err) {
         getServices().toastNotifications.addDanger({
           title: i18n.translate('home.guidedOnboarding.gettingStarted.activateGuide.errorMessage', {
@@ -86,6 +89,7 @@ export const GettingStarted = () => {
           }),
           text: err.message,
         });
+        setIsLoading(false);
       }
     },
     [guidedOnboardingService]
@@ -111,7 +115,11 @@ export const GettingStarted = () => {
         </EuiText>
         <EuiSpacer size="s" />
         <EuiSpacer size="xxl" />
-        <GuideCards activateGuide={activateGuide} navigateToApp={application.navigateToApp} />
+        <GuideCards
+          activateGuide={activateGuide}
+          navigateToApp={application.navigateToApp}
+          isLoading={isLoading}
+        />
         <EuiSpacer />
         <div className="eui-textCenter">
           {/* data-test-subj used for FS tracking */}
