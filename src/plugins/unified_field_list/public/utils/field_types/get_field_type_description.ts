@@ -110,6 +110,10 @@ export function getFieldTypeDescription(type?: string) {
       return i18n.translate('unifiedFieldList.fieldNameDescription.rankFeaturesField', {
         defaultMessage: 'Records numeric features to boost hits at query time.',
       });
+    case KNOWN_FIELD_TYPES.POINT:
+      return i18n.translate('unifiedFieldList.fieldNameDescription.pointField', {
+        defaultMessage: 'Arbitrary cartesian points.',
+      });
     case KNOWN_FIELD_TYPES.SHAPE:
       return i18n.translate('unifiedFieldList.fieldNameDescription.shapeField', {
         defaultMessage: 'Arbitrary cartesian geometries.',

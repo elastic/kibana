@@ -30,6 +30,7 @@ export interface FieldIconProps extends Omit<EuiTokenProps, 'iconType'> {
     | 'rank_feature'
     | 'rank_features'
     | '_source'
+    | 'point'
     | 'shape'
     | 'string'
     | string
@@ -66,6 +67,7 @@ export const typeToEuiIconMap: Partial<Record<string, EuiTokenProps>> = {
   rank_features: { iconType: 'tokenRankFeatures' },
   histogram: { iconType: 'tokenHistogram' },
   _source: { iconType: 'editorCodeBlock', color: 'gray' },
+  point: { iconType: 'tokenShape' }, // there is no separate icon for `point` yet
   shape: { iconType: 'tokenShape' },
   string: { iconType: 'tokenString' },
   text: { iconType: 'tokenString' },

@@ -115,6 +115,10 @@ export function getFieldTypeName(type?: string) {
       return i18n.translate('unifiedFieldList.fieldNameIcons.rankFeaturesFieldAriaLabel', {
         defaultMessage: 'Rank features',
       });
+    case KNOWN_FIELD_TYPES.POINT:
+      return i18n.translate('unifiedFieldList.fieldNameIcons.pointFieldAriaLabel', {
+        defaultMessage: 'Point',
+      });
     case KNOWN_FIELD_TYPES.SHAPE:
       return i18n.translate('unifiedFieldList.fieldNameIcons.shapeFieldAriaLabel', {
         defaultMessage: 'Shape',

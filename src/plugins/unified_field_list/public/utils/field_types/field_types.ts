@@ -34,6 +34,7 @@ export enum KNOWN_FIELD_TYPES {
   NESTED = 'nested',
   RANK_FEATURE = 'rank_feature',
   RANK_FEATURES = 'rank_features',
+  POINT = 'point',
   SHAPE = 'shape',
   STRING = 'string',
   TEXT = 'text',
