@@ -5,16 +5,22 @@
  * 2.0.
  */
 import { Logger } from '@kbn/core/server';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, merge } from 'lodash';
 import { Alert } from '../alert/alert';
 import {
   AlertFactory,
   createAlertFactory,
   getPublicAlertFactory,
 } from '../alert/create_alert_factory';
-import { determineAlertsToReturn, processAlerts, setFlapping } from '../lib';
+import {
+  determineAlertsToReturn,
+  processAlerts,
+  setFlapping,
+  getAlertsForNotification,
+} from '../lib';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
+import { trimRecoveredAlerts } from '../lib/trim_recovered_alerts';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { logAlerts } from '../task_runner/log_alerts';
 import {
@@ -174,10 +180,25 @@ export class LegacyAlertsClient<
       processedAlertsRecovered
     );
 
-    this.processedAlerts.new = processedAlertsNew;
-    this.processedAlerts.active = processedAlertsActive;
-    this.processedAlerts.recovered = processedAlertsRecovered;
-    this.processedAlerts.recoveredCurrent = processedAlertsRecoveredCurrent;
+    const { trimmedAlertsRecovered, earlyRecoveredAlerts } = trimRecoveredAlerts(
+      this.options.logger,
+      processedAlertsRecovered,
+      this.options.maxAlerts
+    );
+
+    const alerts = getAlertsForNotification<State, Context, ActionGroupIds, RecoveryActionGroupId>(
+      this.options.ruleType.defaultActionGroupId,
+      processedAlertsNew,
+      processedAlertsActive,
+      trimmedAlertsRecovered,
+      processedAlertsRecoveredCurrent
+    );
+    alerts.currentRecoveredAlerts = merge(alerts.currentRecoveredAlerts, earlyRecoveredAlerts);
+
+    this.processedAlerts.new = alerts.newAlerts;
+    this.processedAlerts.active = alerts.activeAlerts;
+    this.processedAlerts.recovered = alerts.recoveredAlerts;
+    this.processedAlerts.recoveredCurrent = alerts.currentRecoveredAlerts;
 
     logAlerts({
       logger: this.options.logger,

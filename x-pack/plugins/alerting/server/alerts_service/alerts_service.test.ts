@@ -156,7 +156,6 @@ describe('Alerts Service', () => {
     pluginStop$.next();
     pluginStop$.complete();
   });
-
   describe('initialize()', () => {
     test('should correctly initialize common resources', async () => {
       const alertsService = new AlertsService({
