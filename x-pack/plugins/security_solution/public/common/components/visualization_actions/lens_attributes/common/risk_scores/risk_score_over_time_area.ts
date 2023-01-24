@@ -8,7 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { GetLensAttributes } from '../../../types';
 export const getRiskScoreOverTimeAreaAttributes: GetLensAttributes = (
-  stackByField,
+  stackByField = 'host',
   extraOptions = { spaceId: 'default' }
 ) => {
   const layerIds = [uuidv4(), uuidv4()];
