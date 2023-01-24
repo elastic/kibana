@@ -6,7 +6,29 @@
  */
 import { schema as rt, TypeOf } from '@kbn/config-schema';
 
-export const cspRuleMetadataSchema = rt.object({
+export const cspRuleMetadataSchemaV840 = rt.object({
+  audit: rt.string(),
+  benchmark: rt.object({
+    name: rt.string(),
+    id: rt.string(),
+    version: rt.string(),
+  }),
+  default_value: rt.maybe(rt.string()),
+  description: rt.string(),
+  id: rt.string(),
+  impact: rt.maybe(rt.string()),
+  name: rt.string(),
+  profile_applicability: rt.string(),
+  rationale: rt.string(),
+  references: rt.maybe(rt.string()),
+  rego_rule_id: rt.string(),
+  remediation: rt.string(),
+  section: rt.string(),
+  tags: rt.arrayOf(rt.string()),
+  version: rt.string(),
+});
+
+export const cspRuleMetadataSchemaV870 = rt.object({
   audit: rt.string(),
   benchmark: rt.object({
     name: rt.string(),
@@ -29,4 +51,6 @@ export const cspRuleMetadataSchema = rt.object({
   version: rt.string(),
 });
 
-export type CspRuleMetadata = TypeOf<typeof cspRuleMetadataSchema>;
+export type CspRuleMetadataV840 = TypeOf<typeof cspRuleMetadataSchemaV840>;
+export type CspRuleMetadataV870 = TypeOf<typeof cspRuleMetadataSchemaV870>;
+export type CspRuleMetadata = CspRuleMetadataV870;
