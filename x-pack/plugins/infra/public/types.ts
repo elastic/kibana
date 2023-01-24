@@ -77,6 +77,7 @@ export interface InfraClientStartDeps {
   osquery?: unknown; // OsqueryPluginStart;
   share: SharePluginStart;
   storage: IStorageWrapper;
+  telemetry: ITelemetryClient;
 }
 
 export type InfraClientCoreSetup = CoreSetup<InfraClientStartDeps, InfraClientStartExports>;

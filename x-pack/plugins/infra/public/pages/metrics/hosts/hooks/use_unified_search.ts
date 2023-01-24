@@ -6,21 +6,34 @@
  */
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import createContainer from 'constate';
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { buildEsQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { debounce } from 'lodash';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import type { InfraClientStartDeps } from '../../../../types';
 import { useMetricsDataViewContext } from './use_data_view';
 import { useSyncKibanaTimeFilterTime } from '../../../../hooks/use_kibana_timefilter_time';
-import { useHostsUrlState, INITIAL_DATE_RANGE } from './use_hosts_url_state';
+import { useHostsUrlState, INITIAL_DATE_RANGE, HostsState } from './use_hosts_url_state';
+
+const buildQuerySubmittedPayload = (hostState: HostsState) => {
+  const { panelFilters, filters, dateRange, query: queryObj } = hostState;
+
+  return {
+    control_filters: panelFilters.map((filter) => JSON.stringify(filter)),
+    filters: filters.map((filter) => JSON.stringify(filter)),
+    interval: `interval(from:${dateRange.from},to:${dateRange.to})`,
+    query: queryObj.query,
+  };
+};
 
 export const useUnifiedSearch = () => {
   const { state, dispatch, getRangeInTimestamp, getTime } = useHostsUrlState();
   const { metricsDataView } = useMetricsDataViewContext();
   const { services } = useKibana<InfraClientStartDeps>();
+
   const {
     data: { query: queryManager },
+    telemetry,
   } = services;
 
   useSyncKibanaTimeFilterTime(INITIAL_DATE_RANGE, {
@@ -29,6 +42,11 @@ export const useUnifiedSearch = () => {
   });
 
   const { filterManager } = queryManager;
+
+  // Track telemetry event on query/filter/date changes
+  useEffect(() => {
+    telemetry.reportHostsViewQuerySubmitted(buildQuerySubmittedPayload(state));
+  }, [state, telemetry]);
 
   const onSubmit = useCallback(
     (data?: {
