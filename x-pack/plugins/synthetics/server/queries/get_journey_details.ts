@@ -67,6 +67,11 @@ export const getJourneyDetails: UMElasticsearchQueryFn<
               },
               {
                 term: {
+                  'observer.geo.name': thisJourneySource.observer?.geo?.name,
+                },
+              },
+              {
+                term: {
                   'synthetics.type': 'journey/start',
                 },
               },

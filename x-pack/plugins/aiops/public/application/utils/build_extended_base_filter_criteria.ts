@@ -12,6 +12,9 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { Query } from '@kbn/es-query';
 import type { ChangePoint, FieldValuePair } from '@kbn/ml-agg-utils';
+
+import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
+
 import type { GroupTableItem } from '../../components/spike_analysis_table/types';
 
 /*
@@ -20,7 +23,7 @@ import type { GroupTableItem } from '../../components/spike_analysis_table/types
 
 // Builds the base filter criteria used in queries,
 // adding criteria for the time range and an optional query.
-export function buildBaseFilterCriteria(
+export function buildExtendedBaseFilterCriteria(
   timeFieldName?: string,
   earliestMs?: number,
   latestMs?: number,
@@ -29,22 +32,7 @@ export function buildBaseFilterCriteria(
   includeSelectedChangePoint = true,
   selectedGroup?: GroupTableItem | null
 ): estypes.QueryDslQueryContainer[] {
-  const filterCriteria = [];
-  if (timeFieldName && earliestMs && latestMs) {
-    filterCriteria.push({
-      range: {
-        [timeFieldName]: {
-          gte: earliestMs,
-          lte: latestMs,
-          format: 'epoch_millis',
-        },
-      },
-    });
-  }
-
-  if (query && typeof query === 'object') {
-    filterCriteria.push(query);
-  }
+  const filterCriteria = buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, query);
 
   const groupFilter = [];
   if (selectedGroup) {
