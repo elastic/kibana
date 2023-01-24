@@ -32,6 +32,7 @@ const getFakeFindings = (name: string): CspFinding & { id: string } => ({
   rule: {
     audit: chance.paragraph(),
     benchmark: {
+      rule_number: '1.1.1',
       name: 'CIS Kubernetes',
       version: '1.6.0',
       id: 'cis_k8s',
@@ -140,12 +141,11 @@ describe('<FindingsTable />', () => {
     const row = data[0];
 
     const columns = [
-      'resource.id',
       'result.evaluation',
-      'resource.sub_type',
+      'resource.id',
       'resource.name',
+      'resource.sub_type',
       'rule.name',
-      'cluster_id',
     ];
 
     columns.forEach((field) => {

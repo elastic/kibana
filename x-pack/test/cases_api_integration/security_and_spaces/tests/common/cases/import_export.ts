@@ -36,8 +36,8 @@ import {
   createCase,
   createComment,
   findCases,
-  getCaseUserActions,
 } from '../../../../common/lib/utils';
+import { getCaseUserActions } from '../../../../common/lib/user_actions';
 import { getPostCaseRequest, postCommentUserReq } from '../../../../common/lib/mock';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
