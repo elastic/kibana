@@ -18,24 +18,41 @@ export interface Params {
 }
 
 interface UserActionsActivityProps {
+  isLoading?: boolean;
   params: Params;
-  onFilterActivityChange: (type: FilterType) => void;
-  onSortActivityChange: (sortOrder: SortOrderType) => void;
+  onUserActionsActivityChanged: (params: Params) => void;
 }
 
 export const UserActionsActivityBar = React.memo<UserActionsActivityProps>(
-  ({ params, onFilterActivityChange, onSortActivityChange }) => {
+  ({ params, onUserActionsActivityChanged, isLoading }) => {
+    const handleFilterChange = (type: FilterType) => {
+      onUserActionsActivityChanged({ ...params, type });
+    };
+
+    const handleOrderChange = (sortOrder: SortOrderType) => {
+      onUserActionsActivityChanged({ ...params, sortOrder });
+    };
+
     return (
       <EuiFlexGroup
         wrap={true}
         responsive={false}
         justifyContent="spaceBetween"
+        data-test-subj="user-actions-activity-bar"
       >
         <EuiFlexItem grow={false}>
-          <FilterActivity type={params.type} onFilterChange={onFilterActivityChange} />
+          <FilterActivity
+            type={params.type}
+            onFilterChange={handleFilterChange}
+            isLoading={isLoading}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <SortActivity sortOrder={params.sortOrder} onOrderChange={onSortActivityChange} />
+          <SortActivity
+            sortOrder={params.sortOrder}
+            onOrderChange={handleOrderChange}
+            isLoading={isLoading}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     );

@@ -9,9 +9,9 @@ import React from 'react';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { FilterActivity } from './filter_activity';
-import userEvent from '@testing-library/user-event';
 
 describe('FilterActivity ', () => {
   const onFilterActivityChange = jest.fn();
