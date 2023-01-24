@@ -16,7 +16,7 @@ export interface AlertContextMeta {
 
 export type MetricExpression = Omit<
   MetricExpressionParams,
-  'metric' | 'timeSize' | 'timeUnit' | 'metrics' | 'equation'
+  'metric' | 'timeSize' | 'timeUnit' | 'metrics' | 'equation' | 'customMetrics'
 > & {
   metric?: MetricExpressionParams['metric'];
   customMetrics?: MetricExpressionParams['customMetrics'];
