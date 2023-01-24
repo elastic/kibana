@@ -25,8 +25,10 @@ export const axisExtentConfigToExpression = (
       arguments: {
         // rely on expression default value here
         mode: extent?.mode ? [extent.mode] : [],
-        lowerBound: extent?.lowerBound !== undefined ? [extent?.lowerBound] : [],
-        upperBound: extent?.upperBound !== undefined ? [extent?.upperBound] : [],
+        lowerBound: extent?.lowerBound != null ? [extent.lowerBound] : [],
+        upperBound: extent?.upperBound != null ? [extent.upperBound] : [],
+        // be explicit in this case
+        niceValues: extent?.niceValues != null ? [extent.niceValues] : [true],
       },
     },
   ],

@@ -941,6 +941,9 @@ export function XYChart({
               fittingFunction={fittingFunction}
               emphasizeFitting={emphasizeFitting}
               yAxesConfiguration={yAxesConfiguration}
+              xAxisConfiguration={
+                xAxisConfig ? axesConfiguration[axesConfiguration.length - 1] : undefined
+              }
               shouldShowValueLabels={shouldShowValueLabels}
               formattedDatatables={formattedDatatables}
               chartHasMoreThanOneBarSeries={chartHasMoreThanOneBarSeries}

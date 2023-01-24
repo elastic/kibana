@@ -21,7 +21,7 @@ export {
 } from './drag_drop_bucket';
 export { RangeInputField } from './range_input_field';
 export {
-  BucketAxisBoundsControl,
+  AxisBoundsControl,
   validateAxisDomain,
   validateZeroInclusivityExtent,
   hasNumericHistogramDimension,

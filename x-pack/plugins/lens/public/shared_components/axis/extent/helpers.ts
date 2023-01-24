@@ -6,7 +6,8 @@
  */
 
 import { Datatable } from '@kbn/expressions-plugin/common';
-import type { DatasourcePublicAPI } from '../../types';
+import type { DatasourcePublicAPI } from '../../../types';
+import { UnifiedAxisExtentConfig } from './types';
 
 /**
  * Returns true if the provided extent includes 0
@@ -83,4 +84,11 @@ export function getDataBounds(
       };
     }
   }
+}
+
+export function validateExtent(shouldIncludeZero: boolean, extent?: UnifiedAxisExtentConfig) {
+  return {
+    inclusiveZeroError: shouldIncludeZero && !validateZeroInclusivityExtent(extent),
+    boundaryError: !validateAxisDomain(extent),
+  };
 }

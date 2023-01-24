@@ -11,6 +11,7 @@ import { Position, ScaleType } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { AxisExtentConfig } from '@kbn/expression-xy-plugin/common';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
+import type { LegendSettingsPopoverProps } from '../../../shared_components/legend/legend_settings_popover';
 import type { VisualizationToolbarProps, FramePublicAPI } from '../../../types';
 import { State, XYState, AxesSettingsConfig } from '../types';
 import { isHorizontalChart } from '../state_helpers';
@@ -22,7 +23,6 @@ import { getScaleType } from '../to_expression';
 import { TooltipWrapper } from '../../../shared_components';
 import { getDefaultVisualValuesForLayer } from '../../../shared_components/datasource_default_values';
 import { getDataLayers } from '../visualization_helpers';
-import { LegendSettingsPopoverProps } from '../../../shared_components/legend_settings_popover';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
@@ -485,7 +485,7 @@ export const XyToolbar = memo(function XyToolbar(
               orientation={labelsOrientation.yLeft}
               setOrientation={onLabelsOrientationChange}
               isAxisTitleVisible={axisTitlesVisibilitySettings.yLeft}
-              extent={state?.yLeftExtent || { mode: 'full' }}
+              extent={state?.yLeftExtent || { mode: 'full', niceValues: true }}
               setExtent={setLeftExtent}
               hasBarOrAreaOnAxis={hasBarOrAreaOnLeftAxis}
               dataBounds={dataBounds.left}
@@ -521,7 +521,11 @@ export const XyToolbar = memo(function XyToolbar(
             useMultilayerTimeAxis={
               isTimeHistogramModeEnabled && !useLegacyTimeAxis && !shouldRotate
             }
-            extent={hasNumberHistogram ? state?.xExtent || { mode: 'dataBounds' } : undefined}
+            extent={
+              hasNumberHistogram
+                ? state?.xExtent || { mode: 'dataBounds', niceValues: true }
+                : undefined
+            }
             setExtent={setXExtent}
             dataBounds={xDataBounds}
           />
@@ -557,7 +561,7 @@ export const XyToolbar = memo(function XyToolbar(
               setOrientation={onLabelsOrientationChange}
               hasPercentageAxis={hasPercentageAxis(axisGroups, 'right', state)}
               isAxisTitleVisible={axisTitlesVisibilitySettings.yRight}
-              extent={state?.yRightExtent || { mode: 'full' }}
+              extent={state?.yRightExtent || { mode: 'full', niceValues: true }}
               setExtent={setRightExtent}
               hasBarOrAreaOnAxis={hasBarOrAreaOnRightAxis}
               dataBounds={dataBounds.right}
