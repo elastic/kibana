@@ -36,6 +36,7 @@ import {
 } from '@kbn/ml-date-picker';
 import { useStorage } from '@kbn/ml-local-storage';
 
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
 import {
   DV_FROZEN_TIER_PREFERENCE,
@@ -57,7 +58,7 @@ import {
   DataVisualizerIndexBasedPageUrlState,
 } from '../../types/index_data_visualizer_state';
 import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '../../types/combined_query';
-import { SupportedFieldType, SavedSearchSavedObject } from '../../../../../common/types';
+import { SupportedFieldType } from '../../../../../common/types';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { FieldCountPanel } from '../../../common/components/field_count_panel';
 import { DocumentCountContent } from '../../../common/components/document_count_content';
@@ -129,7 +130,7 @@ export const getDefaultDataVisualizerListState = (
 
 export interface IndexDataVisualizerViewProps {
   currentDataView: DataView;
-  currentSavedSearch: SavedSearchSavedObject | null;
+  currentSavedSearch: SavedSearch | null;
   currentSessionId?: string;
   getAdditionalLinks?: GetAdditionalLinks;
 }

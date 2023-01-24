@@ -85,9 +85,9 @@ export const useResolver = (
         let _savedSearch;
 
         if (savedSearchId !== undefined) {
+          // @todo: use better name
           _savedSearch = await getSavedSearch(savedSearchId, getSavedSearchDeps);
           dataViewAndSavedSearch = await getDataViewAndSavedSearch(savedSearchId);
-          console.log('dataViewAndSavedSearch', dataViewAndSavedSearch);
         } else if (dataViewId !== undefined) {
           dataViewAndSavedSearch.dataView = await getDataViewById(dataViewId);
         }
