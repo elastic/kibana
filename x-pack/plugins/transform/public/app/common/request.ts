@@ -48,7 +48,13 @@ export interface SimpleQuery {
   };
 }
 
-export type PivotQuery = SimpleQuery | SavedSearchQuery;
+export interface FilterBasedSimpleQuery {
+  bool: {
+    filter: [SimpleQuery];
+  };
+}
+
+export type PivotQuery = FilterBasedSimpleQuery | SimpleQuery | SavedSearchQuery;
 
 export function getPivotQuery(search: string | SavedSearchQuery): PivotQuery {
   if (typeof search === 'string') {
@@ -67,6 +73,16 @@ export function isSimpleQuery(arg: unknown): arg is SimpleQuery {
   return isPopulatedObject(arg, ['query_string']);
 }
 
+export function isFilterBasedSimpleQuery(arg: unknown): arg is FilterBasedSimpleQuery {
+  return (
+    isPopulatedObject(arg, ['bool']) &&
+    isPopulatedObject(arg.bool, ['filter']) &&
+    Array.isArray(arg.bool.filter) &&
+    arg.bool.filter.length === 1 &&
+    isSimpleQuery(arg.bool.filter[0])
+  );
+}
+
 export const matchAllQuery = { match_all: {} };
 export function isMatchAllQuery(query: unknown): boolean {
   return (
@@ -79,7 +95,10 @@ export function isMatchAllQuery(query: unknown): boolean {
 
 export const defaultQuery: PivotQuery = { query_string: { query: '*' } };
 export function isDefaultQuery(query: PivotQuery): boolean {
-  return isSimpleQuery(query) && query.query_string.query === '*';
+  return (
+    (isSimpleQuery(query) && query.query_string.query === '*') ||
+    (isFilterBasedSimpleQuery(query) && query.bool.filter[0].query_string.query === '*')
+  );
 }
 
 export function getCombinedRuntimeMappings(
