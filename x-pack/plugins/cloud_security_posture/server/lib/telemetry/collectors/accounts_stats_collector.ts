@@ -56,9 +56,8 @@ export const getIdentifierRuntimeMapping = (): MappingRuntimeFields => ({
   asset_identifier: {
     type: 'keyword',
     script: {
-      // 'myField' should be replace by the new field in: https://github.com/elastic/security-team/issues/5732
       source: `
-        if (!doc.containsKey('policy_template_type')) 
+        if (!doc.containsKey('rule.benchmark.posture_type')) 
           {
             def identifier = doc["cluster_id"].value;
             emit(identifier);
@@ -66,12 +65,12 @@ export const getIdentifierRuntimeMapping = (): MappingRuntimeFields => ({
           }
         else
         {
-          if(doc["policy_template_type"].size() > 0)
+          if(doc["rule.benchmark.posture_type"].size() > 0)
             {
-              def policy_template_type = doc["policy_template_type"].value; 
+              def policy_template_type = doc["rule.benchmark.posture_type"].value; 
               if (policy_template_type == "cspm")
               {
-                def identifier = doc["account_id"].value;
+                def identifier = doc["cloud.account.id"].value;
                 emit(identifier);
                 return
               }
