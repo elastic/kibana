@@ -24,7 +24,7 @@ const DEFAULT_VALUES = {
   deleteStatus: Status.IDLE,
   isDeleteLoading: false,
   isDeleteModalVisible: false,
-  isLoading: false,
+  isLoading: true,
   meta: DEFAULT_META,
   parameters: { meta: DEFAULT_META },
   results: [],
@@ -146,6 +146,7 @@ describe('EnginesListLogic', () => {
             meta: newPageMeta,
             // searchQuery: 'k',
           },
+          isLoading: false,
           meta: newPageMeta,
           parameters: {
             meta: newPageMeta,
@@ -224,6 +225,7 @@ describe('EnginesListLogic', () => {
             results,
             meta: DEFAULT_META,
           },
+          isLoading: false,
           meta: DEFAULT_META,
           parameters: {
             meta: DEFAULT_META,

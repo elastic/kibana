@@ -26198,7 +26198,7 @@
             "label": "aggregate",
             "description": [],
             "signature": [
-              "\"min\" | \"max\" | \"sum\" | \"average\" | \"concat\""
+              "\"min\" | \"max\" | \"concat\" | \"sum\" | \"average\""
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/top_hit.ts",
             "deprecated": false,

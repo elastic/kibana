@@ -15,16 +15,12 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import {
-  EUI_CHARTS_THEME_DARK,
-  EUI_CHARTS_THEME_LIGHT,
-  EUI_SPARKLINE_THEME_PARTIAL,
-} from '@elastic/eui/dist/eui_charts_theme';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { EUI_SPARKLINE_THEME_PARTIAL } from '@elastic/eui/dist/eui_charts_theme';
 import React from 'react';
-import { Alert } from '../../../../../hooks/use_load_alert_summary';
+import { Alert, ChartThemes } from '../types';
 
 interface AlertStateInfoProps {
+  chartThemes: ChartThemes;
   count: number;
   data: Alert[];
   dataTestSubj: string;
@@ -41,14 +37,14 @@ export const AlertStateInfo = ({
   domain,
   id,
   stroke,
+  chartThemes: { theme, baseTheme },
   title,
 }: AlertStateInfoProps) => {
-  const isDarkMode = useUiSetting<boolean>('theme:darkMode');
   const { euiTheme } = useEuiTheme();
-  const theme = [
+  const chartTheme = [
+    theme,
     EUI_SPARKLINE_THEME_PARTIAL,
     {
-      ...(isDarkMode ? EUI_CHARTS_THEME_DARK.theme : EUI_CHARTS_THEME_LIGHT.theme),
       chartMargins: {
         left: 10,
         right: 10,
@@ -70,7 +66,7 @@ export const AlertStateInfo = ({
       </EuiFlexItem>
       <EuiFlexItem grow={3}>
         <Chart size={{ height: 50 }}>
-          <Settings theme={theme} tooltip={{ type: 'none' }} />
+          <Settings theme={chartTheme} baseTheme={baseTheme} tooltip={{ type: 'none' }} />
           <Axis
             domain={domain}
             hide
