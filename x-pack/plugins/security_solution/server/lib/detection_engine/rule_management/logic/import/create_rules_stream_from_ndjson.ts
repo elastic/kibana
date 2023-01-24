@@ -24,7 +24,7 @@ import type {
   ImportExceptionsListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { SavedObject } from '@kbn/core-saved-objects-server';
 import {
   RuleToImport,
   validateRuleToImport,
@@ -89,7 +89,6 @@ export const sortImports = (): Transform => {
       if (has('list_id', importItem) || has('item_id', importItem) || has('entries', importItem)) {
         return { ...acc, exceptions: [...acc.exceptions, importItem] };
       }
-      // if (has('actionTypeId', importItem)) {
       if (has('attributes', importItem)) {
         return { ...acc, actionConnectors: [...acc.actionConnectors, importItem] };
       } else {

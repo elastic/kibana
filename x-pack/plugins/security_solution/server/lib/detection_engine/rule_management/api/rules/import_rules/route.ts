@@ -122,6 +122,13 @@ export const importRulesRoute = (
         });
 
         // import actions-connectors
+        const rulesActionsIds = rules.reduce((acc: string[], rule) => {
+          if (rule instanceof Error) return acc;
+
+          const actionIds = rule.actions?.length ? rule.actions.map(({ id }) => id) : [];
+
+          return [...new Set(actionIds)];
+        }, []);
         const {
           successCount: actionConnectorSuccessCount,
           success: actionConnectorSuccess,
@@ -131,6 +138,7 @@ export const importRulesRoute = (
           actionConnectors,
           actionsClient,
           actionsImporter,
+          actionsIds: [...rulesActionsIds],
           overwrite: request.query.overwrite_action_connectors,
         });
 
@@ -143,8 +151,9 @@ export const importRulesRoute = (
           actionSOClient
         );
 
-        // TODO check why we need to parse rules??
-        const parsedRules = migratedParsedObjectsWithoutDuplicateErrors;
+        const parsedRules = actionConnectorErrors.length
+          ? []
+          : migratedParsedObjectsWithoutDuplicateErrors;
 
         // gather all exception lists that the imported rules reference
         const foundReferencedExceptionLists = await getReferencedExceptionLists({

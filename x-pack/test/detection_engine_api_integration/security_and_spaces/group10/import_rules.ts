@@ -168,15 +168,24 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(body).to.eql({
           errors: [],
-          success: true,
-          success_count: 1,
-          rules_count: 1,
+          success: false,
+          success_count: 0,
+          rules_count: 0,
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
-          action_connectors_success: true,
+          action_connectors_success: false,
           action_connectors_success_count: 0,
-          action_connectors_errors: [],
+          action_connectors_errors: [
+            {
+              error: {
+                message:
+                  '1 connector is missing. Connector id missing is: a52bee60-9be1-11ed-8d37-5538d9e066c5',
+                status_code: 404,
+              },
+              rule_id: '(unknown id)',
+            },
+          ],
           action_connectors_warnings: [],
         });
       });
@@ -228,7 +237,7 @@ export default ({ getService }: FtrProviderContext): void => {
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
-          action_connectors_success: true,
+          action_connectors_success: false,
           action_connectors_success_count: 0,
           action_connectors_errors: [],
           action_connectors_warnings: [],
@@ -872,11 +881,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(body).to.eql({
           success: false,
-          success_count: 1,
+          success_count: 0,
           rules_count: 2,
           errors: [
             {
-              rule_id: 'rule-2',
+              rule_id: '(unknown id)', // 'rule-2' do we need the rule_id
               error: {
                 status_code: 404,
                 message: '1 connector is missing. Connector id missing is: 123',
@@ -886,9 +895,17 @@ export default ({ getService }: FtrProviderContext): void => {
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
-          action_connectors_success: true,
+          action_connectors_success: false,
           action_connectors_success_count: 0,
-          action_connectors_errors: [],
+          action_connectors_errors: [
+            {
+              error: {
+                status_code: 404,
+                message: '1 connector is missing. Connector id missing is: 123',
+              },
+              rule_id: '(unknown id)',
+            },
+          ],
           action_connectors_warnings: [],
         });
       });

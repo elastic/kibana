@@ -23,7 +23,7 @@ export const OVERWRITE_EXCEPTIONS_LABEL = i18n.translate(
 export const OVERWRITE_ACTION_CONNECTORS_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.importRuleModal.overwriteActionConnectorsLabel',
   {
-    defaultMessage: 'Overwrite existing action connectors with conflicting "id"',
+    defaultMessage: 'Overwrite existing action connectors with conflicting "action_type_id"',
   }
 );
 export const SUCCESSFULLY_IMPORTED_EXCEPTIONS = (totalExceptions: number) =>

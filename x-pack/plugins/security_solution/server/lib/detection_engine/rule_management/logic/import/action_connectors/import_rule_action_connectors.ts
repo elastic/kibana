@@ -7,35 +7,91 @@
 import { Readable } from 'stream';
 
 import type { ActionResult } from '@kbn/actions-plugin/server';
-import type { SavedObject, SavedObjectsImportResponse } from '@kbn/core-saved-objects-common';
+import type { SavedObjectsImportResponse } from '@kbn/core-saved-objects-common';
+import type { SavedObject } from '@kbn/core-saved-objects-server';
 import type { WarningSchema } from '../../../../../../../common/detection_engine/schemas/response';
 import { mapSOErrorToRuleError } from './validate_action_connectors_import_result';
 import type { ImportRuleActionConnectorsParams, ImportRuleActionConnectorsResult } from './types';
+import type { BulkError } from '../../../../routes/utils';
+import { createBulkErrorObject } from '../../../../routes/utils';
 
-export const importRuleActionConnectors = async ({
-  actionConnectors,
-  actionsClient,
-  actionsImporter,
-  overwrite,
-}: ImportRuleActionConnectorsParams): Promise<ImportRuleActionConnectorsResult> => {
-  const importResult: ImportRuleActionConnectorsResult = {
+const checkIfActionsHaveNoConnectors = (actionsIds: string[]): ImportRuleActionConnectorsResult => {
+  if (actionsIds && actionsIds.length) {
+    const errors: BulkError[] = [];
+    const errorMessage =
+      actionsIds.length > 1
+        ? 'connectors are missing. Connector ids missing are:'
+        : 'connector is missing. Connector id missing is:';
+    errors.push(
+      createBulkErrorObject({
+        statusCode: 404,
+        message: `${actionsIds.length} ${errorMessage} ${actionsIds.join(', ')}`,
+      })
+    );
+    return {
+      success: false,
+      errors,
+      successCount: 0,
+      warnings: [],
+    };
+  }
+  return {
     success: true,
     errors: [],
     successCount: 0,
     warnings: [],
   };
+};
 
-  if (!actionConnectors.length) return importResult;
+const handleActionConnectorsErrors = (error: {
+  output: { statusCode: number; payload: { message: string } };
+}): ImportRuleActionConnectorsResult => {
+  const statusCode = error?.output.statusCode;
+  const message = error.output.payload.message;
+  if (statusCode === 403)
+    return {
+      success: false,
+      errors: [
+        createBulkErrorObject({
+          statusCode,
+          message: `You may not have actions privileges required to import rules with actions: ${message}`,
+        }),
+      ],
+      successCount: 0,
+      warnings: [],
+    };
+
+  return {
+    success: false,
+    errors: [
+      createBulkErrorObject({
+        statusCode,
+        message,
+      }),
+    ],
+    successCount: 0,
+    warnings: [],
+  };
+};
+
+export const importRuleActionConnectors = async ({
+  actionConnectors,
+  actionsClient,
+  actionsImporter,
+  actionsIds,
+  overwrite,
+}: ImportRuleActionConnectorsParams): Promise<ImportRuleActionConnectorsResult> => {
+  if (!actionConnectors.length) return checkIfActionsHaveNoConnectors(actionsIds);
+
   let actionConnectorsToImport: SavedObject[] = actionConnectors;
   let storedActionConnectors: ActionResult[] | [] = [];
 
-  const actionConnectorIds = actionConnectors.map(({ id }) => id);
   try {
-    // getBulk throws 404 error if the saved_oject wasn't found
-    storedActionConnectors = await actionsClient.getBulk(actionConnectorIds);
+    // getBulk throws 404 error if the saved_oject wasn't found, is there a better
+    storedActionConnectors = await actionsClient.getBulk(actionsIds);
   } catch (error) {
-    // TODO ask if there's a better way
-    if (error.output.statusCode === 400) storedActionConnectors = [];
+    if (error.message.includes('404')) storedActionConnectors = [];
+    else return handleActionConnectorsErrors(error);
   }
 
   if (storedActionConnectors.length)
@@ -43,22 +99,29 @@ export const importRuleActionConnectors = async ({
       ({ id }) => !storedActionConnectors.find((stored) => stored.id === id)
     );
 
-  if (!actionConnectorsToImport.length && !overwrite) return importResult;
-
-  const readStream = Readable.from(actionConnectors);
-
-  const { success, successCount, successResults, warnings, errors }: SavedObjectsImportResponse =
-    await actionsImporter.import({
-      readStream,
-      overwrite,
-      createNewCopies: false,
-    });
-
-  return {
-    success,
-    successCount,
-    successResults,
-    errors: mapSOErrorToRuleError(errors) || [],
-    warnings: (warnings as WarningSchema[]) || [],
-  };
+  if (!actionConnectorsToImport.length && !overwrite)
+    return {
+      success: true,
+      errors: [],
+      successCount: 0,
+      warnings: [],
+    };
+  try {
+    const readStream = Readable.from(actionConnectors);
+    const { success, successCount, successResults, warnings, errors }: SavedObjectsImportResponse =
+      await actionsImporter.import({
+        readStream,
+        overwrite,
+        createNewCopies: false,
+      });
+    return {
+      success,
+      successCount,
+      successResults,
+      errors: mapSOErrorToRuleError(errors) || [],
+      warnings: (warnings as WarningSchema[]) || [],
+    };
+  } catch (error) {
+    return handleActionConnectorsErrors(error);
+  }
 };
