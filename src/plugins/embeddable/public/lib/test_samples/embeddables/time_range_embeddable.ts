@@ -9,8 +9,8 @@
 import type { TimeRange } from '@kbn/es-query';
 import { EmbeddableOutput, Embeddable, EmbeddableInput, IContainer } from '../../..';
 
-interface EmbeddableTimeRangeInput extends EmbeddableInput {
-  timeRange: TimeRange;
+export interface EmbeddableTimeRangeInput extends EmbeddableInput {
+  timeRange?: TimeRange;
 }
 
 export const TIME_RANGE_EMBEDDABLE = 'TIME_RANGE_EMBEDDABLE';
@@ -19,7 +19,15 @@ export class TimeRangeEmbeddable extends Embeddable<EmbeddableTimeRangeInput, Em
   public readonly type = TIME_RANGE_EMBEDDABLE;
 
   constructor(initialInput: EmbeddableTimeRangeInput, parent?: IContainer) {
-    super(initialInput, {}, parent);
+    const { title: defaultTitle, description: defaultDescription } = initialInput;
+    super(
+      initialInput,
+      {
+        defaultTitle,
+        defaultDescription,
+      },
+      parent
+    );
   }
 
   public render() {}

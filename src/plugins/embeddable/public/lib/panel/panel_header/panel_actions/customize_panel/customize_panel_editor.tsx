@@ -80,16 +80,16 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
   const { onClose, embeddable } = props;
   const timeRangeCompatible = isTimeRangeCompatible(embeddable);
   const [hideTitle, setHideTitle] = useState(embeddable.getInput().hidePanelTitles);
-  const [description, setDescription] = useState(
+  const [panelDescription, setPanelDescription] = useState(
     embeddable.getInput().description ?? embeddable.getOutput().defaultDescription
   );
-  const [title, setTitle] = useState(
+  const [panelTitle, setPanelTitle] = useState(
     embeddable.getInput().title ?? embeddable.getOutput().defaultTitle
   );
   const [inheritTimeRange, setInheritTimeRange] = useState(
     timeRangeCompatible ? doesInheritTimeRange(embeddable as Embeddable<TimeRangeInput>) : false
   );
-  const [timeRange, setTimeRange] = useState(
+  const [panelTimeRange, setPanelTimeRange] = useState(
     timeRangeCompatible
       ? (embeddable as Embeddable<TimeRangeInput>).getInput().timeRange
       : undefined
@@ -108,17 +108,17 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
     : undefined;
 
   const save = () => {
-    const newTitle = title === embeddable.getOutput().defaultTitle ? undefined : title;
-    const newDescription =
-      description === embeddable.getOutput().defaultDescription ? undefined : description;
     const newPanelSettings: PanelSettings = {
-      title: newTitle,
       hidePanelTitles: hideTitle,
-      description: newDescription,
+      title: panelTitle === embeddable.getOutput().defaultTitle ? undefined : panelTitle,
+      description:
+        panelDescription === embeddable.getOutput().defaultDescription
+          ? undefined
+          : panelDescription,
     };
-    if (Boolean(timeRangeCompatible)) {
-      newPanelSettings.timeRange = !inheritTimeRange ? timeRange : undefined;
-    }
+    if (Boolean(timeRangeCompatible))
+      newPanelSettings.timeRange = !inheritTimeRange ? panelTimeRange : undefined;
+
     embeddable.updateInput(newPanelSettings);
     onClose();
   };
@@ -162,7 +162,7 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
               <EuiButtonEmpty
                 size="xs"
                 data-test-subj="resetCustomEmbeddablePanelTitleButton"
-                onClick={() => setTitle(embeddable.getOutput().defaultTitle)}
+                onClick={() => setPanelTitle(embeddable.getOutput().defaultTitle)}
                 disabled={hideTitle}
                 aria-label={i18n.translate(
                   'embeddableApi.customizePanel.flyout.optionsMenuForm.resetCustomTitleButtonAriaLabel',
@@ -185,8 +185,8 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
               name="title"
               type="text"
               disabled={hideTitle}
-              value={title ?? ''}
-              onChange={(e) => setTitle(e.target.value)}
+              value={panelTitle ?? ''}
+              onChange={(e) => setPanelTitle(e.target.value)}
               aria-label={i18n.translate(
                 'embeddableApi.customizePanel.flyout.optionsMenuForm.panelTitleInputAriaLabel',
                 {
@@ -207,7 +207,7 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
                 size="xs"
                 data-test-subj="resetCustomEmbeddablePanelDescriptionButton"
                 onClick={() => {
-                  setDescription(embeddable.getOutput().defaultDescription);
+                  setPanelDescription(embeddable.getOutput().defaultDescription);
                 }}
                 disabled={hideTitle}
                 aria-label={i18n.translate(
@@ -230,8 +230,8 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
               data-test-subj="customEmbeddablePanelDescriptionInput"
               disabled={hideTitle}
               name="description"
-              value={description ?? ''}
-              onChange={(e) => setDescription(e.target.value)}
+              value={panelDescription ?? ''}
+              onChange={(e) => setPanelDescription(e.target.value)}
               aria-label={i18n.translate(
                 'embeddableApi.customizePanel.flyout.optionsMenuForm.panelDescriptionAriaLabel',
                 {
@@ -266,9 +266,9 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
                   }
                 >
                   <EuiSuperDatePicker
-                    start={timeRange?.from ?? undefined}
-                    end={timeRange?.to ?? undefined}
-                    onTimeChange={({ start, end }) => setTimeRange({ from: start, to: end })}
+                    start={panelTimeRange?.from ?? undefined}
+                    end={panelTimeRange?.to ?? undefined}
+                    onTimeChange={({ start, end }) => setPanelTimeRange({ from: start, to: end })}
                     showUpdateButton={false}
                     dateFormat={props.dateFormat}
                     commonlyUsedRanges={commonlyUsedRangesForDatePicker}

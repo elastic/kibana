@@ -6,13 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { TimeRange } from '@kbn/es-query';
-import { EmbeddableInput, IContainer, EmbeddableFactoryDefinition } from '../../..';
-import { TIME_RANGE_EMBEDDABLE, TimeRangeEmbeddable } from './time_range_embeddable';
-
-interface EmbeddableTimeRangeInput extends EmbeddableInput {
-  timeRange: TimeRange;
-}
+import { IContainer, EmbeddableFactoryDefinition } from '../../..';
+import {
+  TIME_RANGE_EMBEDDABLE,
+  TimeRangeEmbeddable,
+  EmbeddableTimeRangeInput,
+} from './time_range_embeddable';
 
 export class TimeRangeEmbeddableFactory
   implements EmbeddableFactoryDefinition<EmbeddableTimeRangeInput>

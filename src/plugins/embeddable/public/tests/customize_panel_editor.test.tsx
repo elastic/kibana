@@ -8,69 +8,47 @@
 
 import { findTestSubject } from '@elastic/eui/lib/test';
 import * as React from 'react';
-import { Container, isErrorEmbeddable } from '../lib';
-import {
-  ContactCardEmbeddable,
-  ContactCardEmbeddableInput,
-  ContactCardEmbeddableOutput,
-} from '../lib/test_samples/embeddables/contact_card/contact_card_embeddable';
-import {
-  CONTACT_CARD_EMBEDDABLE,
-  ContactCardEmbeddableFactory,
-} from '../lib/test_samples/embeddables/contact_card/contact_card_embeddable_factory';
-import { HelloWorldContainer } from '../lib/test_samples/embeddables/hello_world_container';
+import { EmbeddableOutput, isErrorEmbeddable } from '../lib';
 import { coreMock } from '@kbn/core/public/mocks';
 import { testPlugin } from './test_plugin';
 import { CustomizePanelEditor } from '../lib/panel/panel_header/panel_actions/customize_panel/customize_panel_editor';
-import { EmbeddableStart } from '../plugin';
-import { createEmbeddablePanelMock } from '../mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { OverlayStart } from '@kbn/core/public';
+import {
+  EmbeddableTimeRangeInput,
+  TimeRangeContainer,
+  TimeRangeEmbeddable,
+  TimeRangeEmbeddableFactory,
+  TIME_RANGE_EMBEDDABLE,
+} from '../lib/test_samples';
 
-let api: EmbeddableStart;
-let container: Container;
-let embeddable: ContactCardEmbeddable;
+let container: TimeRangeContainer;
+let embeddable: TimeRangeEmbeddable;
 
 beforeEach(async () => {
-  const { doStart, coreStart, uiActions, setup } = testPlugin(
-    coreMock.createSetup(),
-    coreMock.createStart()
+  const { doStart, setup } = testPlugin(coreMock.createSetup(), coreMock.createStart());
+
+  const timeRangeFactory = new TimeRangeEmbeddableFactory();
+  setup.registerEmbeddableFactory(timeRangeFactory.type, timeRangeFactory);
+
+  const { getEmbeddableFactory } = doStart();
+
+  container = new TimeRangeContainer(
+    { id: '123', panels: {}, timeRange: { from: '-7d', to: 'now' } },
+    getEmbeddableFactory
   );
-
-  const contactCardFactory = new ContactCardEmbeddableFactory(
-    uiActions.executeTriggerActions,
-    {} as unknown as OverlayStart
-  );
-  setup.registerEmbeddableFactory(contactCardFactory.type, contactCardFactory);
-
-  api = doStart();
-
-  const testPanel = createEmbeddablePanelMock({
-    getActions: uiActions.getTriggerCompatibleActions,
-    getEmbeddableFactory: api.getEmbeddableFactory,
-    getAllEmbeddableFactories: api.getEmbeddableFactories,
-    overlays: coreStart.overlays,
-    notifications: coreStart.notifications,
-    application: coreStart.application,
+  const timeRangeEmbeddable = await container.addNewEmbeddable<
+    EmbeddableTimeRangeInput,
+    EmbeddableOutput,
+    TimeRangeEmbeddable
+  >(TIME_RANGE_EMBEDDABLE, {
+    id: '4321',
+    title: 'A time series',
+    description: 'This might be a neat line chart',
   });
-  container = new HelloWorldContainer(
-    { id: '123', panels: {} },
-    {
-      getEmbeddableFactory: api.getEmbeddableFactory,
-      panelComponent: testPanel,
-    }
-  );
-  const contactCardEmbeddable = await container.addNewEmbeddable<
-    ContactCardEmbeddableInput,
-    ContactCardEmbeddableOutput,
-    ContactCardEmbeddable
-  >(CONTACT_CARD_EMBEDDABLE, {
-    firstName: 'Joe',
-  });
-  if (isErrorEmbeddable(contactCardEmbeddable)) {
+  if (isErrorEmbeddable(timeRangeEmbeddable)) {
     throw new Error('Error creating new hello world embeddable');
   } else {
-    embeddable = contactCardEmbeddable;
+    embeddable = timeRangeEmbeddable;
   }
 });
 
@@ -84,9 +62,7 @@ test('Value is initialized with the embeddables title', async () => {
     'textarea'
   );
   expect(titleField.props().value).toBe(embeddable.getOutput().title);
-  expect(titleField.props().value).toBe(embeddable.getOutput().defaultTitle);
   expect(descriptionField.props().value).toBe(embeddable.getOutput().description);
-  expect(descriptionField.props().value).toBe(embeddable.getOutput().defaultDescription);
 });
 
 test('Calls updateInput with a new title', async () => {
@@ -102,8 +78,6 @@ test('Calls updateInput with a new title', async () => {
   findTestSubject(component, 'saveCustomizePanelButton').simulate('click');
 
   expect(updateInput).toBeCalledWith({
-    description: undefined,
-    hidePanelTitles: undefined,
     title: 'new title',
   });
 });
@@ -178,9 +152,27 @@ test('Reset title calls updateInput with undefined', async () => {
   findTestSubject(component, 'saveCustomizePanelButton').simulate('click');
 
   expect(updateInput).toBeCalledWith({
-    description: undefined,
-    hidePanelTitles: undefined,
     title: undefined,
+  });
+});
+
+test('Reset description calls updateInput with undefined', async () => {
+  const updateInput = jest.spyOn(embeddable, 'updateInput');
+  const component = mountWithIntl(
+    <CustomizePanelEditor embeddable={embeddable} onClose={() => {}} />
+  );
+
+  const inputField = findTestSubject(component, 'customEmbeddablePanelDescriptionInput').find(
+    'textarea'
+  );
+  const event = { target: { value: 'new title' } };
+  inputField.simulate('change', event);
+
+  findTestSubject(component, 'resetCustomEmbeddablePanelDescriptionButton').simulate('click');
+  findTestSubject(component, 'saveCustomizePanelButton').simulate('click');
+
+  expect(updateInput).toBeCalledWith({
+    description: undefined,
   });
 });
 
@@ -199,12 +191,13 @@ test('Can set title and description to an empty string', async () => {
     inputField.simulate('change', event);
   }
 
-  const inputField = findTestSubject(component, 'customEmbeddablePanelTitleInput');
-  const event = { target: { value: '' } };
-  inputField.simulate('change', event);
-
   findTestSubject(component, 'saveCustomizePanelButton').simulate('click');
-  const inputFieldAfter = findTestSubject(component, 'customEmbeddablePanelTitleInput');
-  expect(inputFieldAfter.props().value).toBe('');
-  expect(updateInput).toBeCalledWith({ description: '', hidePanelTitles: undefined, title: '' });
+  const titleFieldAfter = findTestSubject(component, 'customEmbeddablePanelTitleInput');
+  const descriptionFieldAfter = findTestSubject(component, 'customEmbeddablePanelDescriptionInput');
+  expect(titleFieldAfter.props().value).toBe('');
+  expect(descriptionFieldAfter.props().value).toBe('');
+  expect(updateInput).toBeCalledWith({ description: '', title: '' });
 });
+
+// TODO
+test.skip('Can set a custom time range for the panel', async () => {});
