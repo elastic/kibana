@@ -10,7 +10,6 @@ import { IRuleTypeAlerts } from '../types';
 export interface ResourceInstallationHelper {
   add: (context: IRuleTypeAlerts, timeoutMs?: number) => void;
   setReadyToInitialize: (timeoutMs?: number) => void;
-  getInitializedContexts: () => Map<string, Promise<boolean>>;
 }
 
 /**
@@ -25,12 +24,12 @@ export interface ResourceInstallationHelper {
  * running, kick off the processing loop
  */
 export function createResourceInstallationHelper(
+  initializedContexts: Map<string, Promise<boolean>>,
   initFn: (context: IRuleTypeAlerts, timeoutMs?: number) => Promise<void>
 ): ResourceInstallationHelper {
   let readyToInitialize = false;
   let isInitializing: boolean = false;
   const contextsToInitialize: IRuleTypeAlerts[] = [];
-  const initializedContexts: Map<string, Promise<boolean>> = new Map();
 
   const waitUntilContextResourcesInstalled = async (
     context: IRuleTypeAlerts,
@@ -73,9 +72,6 @@ export function createResourceInstallationHelper(
     setReadyToInitialize: (timeoutMs?: number) => {
       readyToInitialize = true;
       startInitialization(timeoutMs);
-    },
-    getInitializedContexts: () => {
-      return initializedContexts;
     },
   };
 }

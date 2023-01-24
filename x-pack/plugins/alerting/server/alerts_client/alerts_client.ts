@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
 import { Logger, ElasticsearchClient } from '@kbn/core/server';
 import {
   ALERT_ACTION_GROUP,
@@ -36,12 +35,14 @@ import { Alert } from '../../common/alert_schema/schemas/alert_schema';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 import { PublicAlertFactory } from '../alert/create_alert_factory';
-import { AlertInstanceContext, AlertInstanceState, WithoutReservedActionGroups } from '../types';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  RuleAlertData,
+  WithoutReservedActionGroups,
+} from '../types';
 import { IAlertsClient, LegacyAlertsClient, ProcessAndLogAlertsOpts } from './legacy_alerts_client';
 import { Alert as LegacyAlert } from '../alert/alert';
-
-const contextSchema = rt.record(rt.string, rt.unknown);
-export type ContextAlert = rt.TypeOf<typeof contextSchema>;
 
 export type ReportedAlert = Pick<Alert, typeof ALERT_ACTION_GROUP | typeof ALERT_ID> &
   Partial<Omit<Alert, typeof ALERT_ACTION_GROUP | typeof ALERT_ID>>;
@@ -56,7 +57,6 @@ export interface AlertsClientParams<
   ruleType: UntypedNormalizedRuleType;
   maxAlerts: number;
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
-  resourceInstallationPromise: Promise<boolean>;
   eventLogger: AlertingEventLogger;
   legacyAlertsClient: LegacyAlertsClient<
     LegacyState,
@@ -93,13 +93,13 @@ interface InitializeOpts {
 }
 
 export type PublicAlertsClient<
-  Context extends ContextAlert,
+  AlertData extends RuleAlertData,
   LegacyState extends AlertInstanceState,
   LegacyContext extends AlertInstanceContext,
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string
 > = Pick<
-  AlertsClient<Context, LegacyState, LegacyContext, ActionGroupIds, RecoveryActionGroupId>,
+  AlertsClient<AlertData, LegacyState, LegacyContext, ActionGroupIds, RecoveryActionGroupId>,
   'create'
 > & {
   getAlertLimitValue: () => number;
@@ -108,7 +108,7 @@ export type PublicAlertsClient<
 };
 
 export class AlertsClient<
-  Context extends ContextAlert,
+  AlertData extends RuleAlertData,
   LegacyState extends AlertInstanceState,
   LegacyContext extends AlertInstanceContext,
   ActionGroupIds extends string,
@@ -122,7 +122,7 @@ export class AlertsClient<
     LegacyContext,
     WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
   >;
-  private reportedAlerts: Record<string, ReportedAlert & Context> = {};
+  private reportedAlerts: Record<string, ReportedAlert & AlertData> = {};
 
   constructor(
     private readonly options: AlertsClientParams<
@@ -138,19 +138,9 @@ export class AlertsClient<
 
   public async initialize({ rule }: InitializeOpts) {
     this.setRuleData(rule);
-    const context = this.options.ruleType.alerts?.context;
-    const resourceInstalled = await this.options.resourceInstallationPromise;
-
-    if (!resourceInstalled) {
-      // TODO RETRY INSTALLATION
-      this.options.logger.warn(
-        `${this.ruleLogPrefix}: Something went wrong installing resources for context ${context}`
-      );
-      return;
-    }
   }
 
-  public create(alert: ReportedAlert & Context) {
+  public create(alert: ReportedAlert & AlertData) {
     const alertId = alert[ALERT_ID];
     this.alertsFactory
       .create(alert[ALERT_ID])
@@ -259,7 +249,7 @@ export class AlertsClient<
   }
 
   public getExecutorServices(): PublicAlertsClient<
-    Context,
+    AlertData,
     LegacyState,
     LegacyContext,
     ActionGroupIds,

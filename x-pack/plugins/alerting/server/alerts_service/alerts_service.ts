@@ -24,17 +24,18 @@ import {
 } from './types';
 import { retryTransientEsErrors } from './retry_transient_es_errors';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
-import { AlertInstanceContext, AlertInstanceState, IRuleTypeAlerts } from '../types';
+import { AlertInstanceContext, AlertInstanceState, IRuleTypeAlerts, RuleAlertData } from '../types';
 import {
   createResourceInstallationHelper,
   ResourceInstallationHelper,
 } from './create_resource_installation_helper';
-import { AlertsClient, ContextAlert } from '../alerts_client/alerts_client';
+import { AlertsClient } from '../alerts_client/alerts_client';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 import { LegacyAlertsClient } from '../alerts_client/legacy_alerts_client';
 
 const TOTAL_FIELDS_LIMIT = 2500;
 const INSTALLATION_TIMEOUT = 20 * 60 * 1000; // 20 minutes
+export const MAX_INSTALLATION_RETRIES = 10;
 
 interface AlertsServiceParams {
   logger: Logger;
@@ -95,7 +96,7 @@ interface IAlertsService {
    * we will make it a requirement for all rule types and this function should not return null.
    */
   createAlertsClient<
-    Context extends ContextAlert,
+    AlertData extends RuleAlertData,
     LegacyState extends AlertInstanceState,
     LegacyContext extends AlertInstanceContext,
     ActionGroupIds extends string,
@@ -107,23 +108,26 @@ interface IAlertsService {
       ActionGroupIds,
       RecoveryActionGroupId
     >
-  ): AlertsClient<
-    Context,
+  ): Promise<AlertsClient<
+    AlertData,
     LegacyState,
     LegacyContext,
     ActionGroupIds,
     RecoveryActionGroupId
-  > | null;
+  > | null>;
 }
 
 export class AlertsService implements IAlertsService {
   private initialized: boolean;
   private resourceInitializationHelper: ResourceInstallationHelper;
   private registeredContexts: Map<string, FieldMap> = new Map();
+  private initializedContexts: Map<string, Promise<boolean>> = new Map();
+  private installationRetries: Map<string, number> = new Map();
 
   constructor(private readonly options: AlertsServiceParams) {
     this.initialized = false;
     this.resourceInitializationHelper = createResourceInstallationHelper(
+      this.initializedContexts,
       this.initializeContext.bind(this)
     );
   }
@@ -133,7 +137,7 @@ export class AlertsService implements IAlertsService {
   }
 
   public async isContextInitialized(context: string): Promise<boolean> {
-    return (await this.resourceInitializationHelper.getInitializedContexts().get(context)) ?? false;
+    return (await this.initializedContexts.get(context)) ?? false;
   }
 
   public initialize(timeoutMs?: number) {
@@ -187,8 +191,8 @@ export class AlertsService implements IAlertsService {
     this.resourceInitializationHelper.add({ context, fieldMap }, timeoutMs);
   }
 
-  public createAlertsClient<
-    Context extends ContextAlert,
+  public async createAlertsClient<
+    AlertData extends RuleAlertData,
     LegacyState extends AlertInstanceState,
     LegacyContext extends AlertInstanceContext,
     ActionGroupIds extends string,
@@ -201,29 +205,53 @@ export class AlertsService implements IAlertsService {
       RecoveryActionGroupId
     >
   ) {
-    // TODO - if context specific installation has failed during plugin setup,
-    // we want to retry it here but we probably only want to do N retries before just logging an error.
-    return this.initialized && opts.ruleType.alerts
-      ? new AlertsClient<
-          Context,
-          LegacyState,
-          LegacyContext,
-          ActionGroupIds,
-          RecoveryActionGroupId
-        >({
-          logger: this.options.logger,
-          elasticsearchClientPromise: this.options.elasticsearchClientPromise,
-          resourceInstallationPromise: this.isContextInitialized(opts.ruleType.alerts.context),
-          ruleType: opts.ruleType,
-          maxAlerts: opts.maxAlerts,
-          eventLogger: opts.eventLogger,
-          legacyAlertsClient: opts.legacyAlertsClient,
-        })
-      : null;
+    if (!this.initialized || !opts.ruleType.alerts) {
+      return null;
+    }
+
+    // Check if context specific installation has succeeded
+    const resourceInstalled = await this.isContextInitialized(opts.ruleType.alerts.context);
+
+    if (!resourceInstalled) {
+      this.options.logger.debug(
+        `Retrying resource installation for context "${opts.ruleType.alerts.context}".`
+      );
+      try {
+        await this.initializeContext(opts.ruleType.alerts);
+        this.initializedContexts.set(opts.ruleType.alerts.context, Promise.resolve(true));
+      } catch (err) {
+        this.options.logger.warn(`Resource installation failed - ${err.message}`);
+        return null;
+      }
+    }
+
+    return new AlertsClient<
+      AlertData,
+      LegacyState,
+      LegacyContext,
+      ActionGroupIds,
+      RecoveryActionGroupId
+    >({
+      logger: this.options.logger,
+      elasticsearchClientPromise: this.options.elasticsearchClientPromise,
+      ruleType: opts.ruleType,
+      maxAlerts: opts.maxAlerts,
+      eventLogger: opts.eventLogger,
+      legacyAlertsClient: opts.legacyAlertsClient,
+    });
   }
 
   private async initializeContext({ context, fieldMap }: IRuleTypeAlerts, timeoutMs?: number) {
     const esClient = await this.options.elasticsearchClientPromise;
+    const numTries = this.installationRetries.get(context) ?? 0;
+
+    if (numTries >= MAX_INSTALLATION_RETRIES) {
+      throw new Error(
+        `Unable to install resources for context "${context}" - exceeded maximum number of retries. Alert data will not be written.`
+      );
+    }
+
+    this.installationRetries.set(context, numTries + 1);
 
     const indexTemplateAndPattern = getIndexTemplateAndPattern(context);
 

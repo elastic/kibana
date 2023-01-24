@@ -8,7 +8,7 @@
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { ReplaySubject, Subject } from 'rxjs';
-import { AlertsService } from './alerts_service';
+import { AlertsService, MAX_INSTALLATION_RETRIES } from './alerts_service';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { RecoveredActionGroup } from '../types';
 import { AlertsClient } from '../alerts_client/alerts_client';
@@ -819,8 +819,8 @@ describe('Alerts Service', () => {
       await new Promise((r) => setTimeout(r, 50));
     });
 
-    test('should create and return AlertsClient if initialized is true and rule type has alerts definition', () => {
-      alertsService.createAlertsClient({
+    test('should create and return AlertsClient if initialized is true and rule type has alerts definition', async () => {
+      await alertsService.createAlertsClient({
         ruleType: TestRuleType,
         maxAlerts: 1000,
         eventLogger: alertingEventLogger,
@@ -829,7 +829,6 @@ describe('Alerts Service', () => {
       expect(AlertsClient).toHaveBeenCalledWith({
         logger,
         elasticsearchClientPromise: Promise.resolve(clusterClient),
-        resourceInstallationPromise: Promise.resolve(true),
         ruleType: TestRuleType,
         maxAlerts: 1000,
         eventLogger: alertingEventLogger,
@@ -848,7 +847,7 @@ describe('Alerts Service', () => {
       alertsService.initialize();
       await new Promise((r) => setTimeout(r, 50));
       expect(
-        alertsService.createAlertsClient({
+        await alertsService.createAlertsClient({
           ruleType: TestRuleType,
           maxAlerts: 1000,
           eventLogger: alertingEventLogger,
@@ -857,15 +856,81 @@ describe('Alerts Service', () => {
       ).toBeNull();
     });
 
-    test('should return null if rule type does not have alerts definition', () => {
+    test('should return null if rule type does not have alerts definition', async () => {
       expect(
-        alertsService.createAlertsClient({
+        await alertsService.createAlertsClient({
           ruleType: { ...TestRuleType, alerts: undefined },
           maxAlerts: 1000,
           eventLogger: alertingEventLogger,
           legacyAlertsClient,
         })
       ).toBeNull();
+    });
+
+    test('should retry resource installation if resources are not installed', async () => {
+      const AnotherTestRuleType = {
+        ...TestRuleType,
+        alerts: { ...TestRegistrationContext, context: 'another-test' },
+      };
+      expect(await alertsService.isContextInitialized('another-test')).toEqual(false);
+      await alertsService.createAlertsClient({
+        ruleType: AnotherTestRuleType,
+        maxAlerts: 1000,
+        eventLogger: alertingEventLogger,
+        legacyAlertsClient,
+      });
+
+      expect(await alertsService.isContextInitialized('another-test')).toEqual(true);
+
+      expect(AlertsClient).toHaveBeenCalledWith({
+        logger,
+        elasticsearchClientPromise: Promise.resolve(clusterClient),
+        ruleType: AnotherTestRuleType,
+        maxAlerts: 1000,
+        eventLogger: alertingEventLogger,
+        legacyAlertsClient,
+      });
+      expect(logger.debug).toHaveBeenCalledWith(
+        `Retrying resource installation for context "another-test".`
+      );
+    });
+
+    test('should retry resource installation up to max attempts if resources are not installed', async () => {
+      clusterClient.indices.putIndexTemplate.mockRejectedValue(new Error('fail'));
+      const AnotherTestRuleType = {
+        ...TestRuleType,
+        alerts: { ...TestRegistrationContext, context: 'another-test' },
+      };
+      expect(await alertsService.isContextInitialized('another-test')).toEqual(false);
+
+      for (let i = 0; i < MAX_INSTALLATION_RETRIES; i++) {
+        await alertsService.createAlertsClient({
+          ruleType: AnotherTestRuleType,
+          maxAlerts: 1000,
+          eventLogger: alertingEventLogger,
+          legacyAlertsClient,
+        });
+        expect(await alertsService.isContextInitialized('another-test')).toEqual(false);
+        expect(logger.warn).toHaveBeenCalledTimes(i + 1);
+        expect(logger.warn).toHaveBeenNthCalledWith(
+          i + 1,
+          `Resource installation failed - Failure during installation. fail`
+        );
+      }
+
+      await alertsService.createAlertsClient({
+        ruleType: AnotherTestRuleType,
+        maxAlerts: 1000,
+        eventLogger: alertingEventLogger,
+        legacyAlertsClient,
+      });
+      expect(await alertsService.isContextInitialized('another-test')).toEqual(false);
+      expect(logger.warn).toHaveBeenCalledTimes(MAX_INSTALLATION_RETRIES + 1);
+      expect(logger.warn).toHaveBeenNthCalledWith(
+        MAX_INSTALLATION_RETRIES + 1,
+        `Resource installation failed - Unable to install resources for context "another-test" - exceeded maximum number of retries. Alert data will not be written.`
+      );
+      expect(AlertsClient).not.toHaveBeenCalled();
     });
   });
 

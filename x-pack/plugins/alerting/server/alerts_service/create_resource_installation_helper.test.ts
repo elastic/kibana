@@ -31,19 +31,20 @@ describe('createResourceInstallationHelper', () => {
   });
 
   test(`should not call init function if readyToInitialize is false`, () => {
-    const helper = createResourceInstallationHelper(initFn);
+    const initializedContexts: Map<string, Promise<boolean>> = new Map();
+    const helper = createResourceInstallationHelper(initializedContexts, initFn);
 
     // Add two contexts that need to be initialized but don't call helper.setReadyToInitialize()
     helper.add({ context: 'test1', fieldMap: { field: { type: 'keyword', required: false } } });
     helper.add({ context: 'test2', fieldMap: { field: { type: 'keyword', required: false } } });
 
     expect(logger.info).not.toHaveBeenCalled();
-    const initializedContexts = helper.getInitializedContexts();
     expect([...initializedContexts.keys()].length).toEqual(0);
   });
 
   test(`should call init function if readyToInitialize is set to true`, async () => {
-    const helper = createResourceInstallationHelper(initFn);
+    const initializedContexts: Map<string, Promise<boolean>> = new Map();
+    const helper = createResourceInstallationHelper(initializedContexts, initFn);
 
     // Add two contexts that need to be initialized and then call helper.setReadyToInitialize()
     helper.add({ context: 'test1', fieldMap: { field: { type: 'keyword', required: false } } });
@@ -55,7 +56,6 @@ describe('createResourceInstallationHelper', () => {
     await new Promise((r) => setTimeout(r, 10));
 
     expect(logger.info).toHaveBeenCalledTimes(2);
-    const initializedContexts = helper.getInitializedContexts();
     expect([...initializedContexts.keys()].length).toEqual(2);
 
     expect(await initializedContexts.get('test1')).toEqual(true);
@@ -63,7 +63,8 @@ describe('createResourceInstallationHelper', () => {
   });
 
   test(`should install resources for contexts added after readyToInitialize is called`, async () => {
-    const helper = createResourceInstallationHelper(initFnWithDelay);
+    const initializedContexts: Map<string, Promise<boolean>> = new Map();
+    const helper = createResourceInstallationHelper(initializedContexts, initFnWithDelay);
 
     // Add two contexts that need to be initialized
     helper.add({ context: 'test1', fieldMap: { field: { type: 'keyword', required: false } } });
@@ -82,7 +83,6 @@ describe('createResourceInstallationHelper', () => {
     await new Promise((r) => setTimeout(r, 10));
 
     expect(logger.info).toHaveBeenCalledTimes(3);
-    const initializedContexts = helper.getInitializedContexts();
     expect([...initializedContexts.keys()].length).toEqual(3);
 
     expect(await initializedContexts.get('test1')).toEqual(true);
@@ -91,7 +91,8 @@ describe('createResourceInstallationHelper', () => {
   });
 
   test(`should install resources for contexts added after initial processing loop has run`, async () => {
-    const helper = createResourceInstallationHelper(initFn);
+    const initializedContexts: Map<string, Promise<boolean>> = new Map();
+    const helper = createResourceInstallationHelper(initializedContexts, initFn);
 
     // No contexts queued so this should finish quickly
     helper.setReadyToInitialize();
@@ -100,7 +101,6 @@ describe('createResourceInstallationHelper', () => {
     await new Promise((r) => setTimeout(r, 10));
 
     expect(logger.info).not.toHaveBeenCalled();
-    let initializedContexts = helper.getInitializedContexts();
     expect([...initializedContexts.keys()].length).toEqual(0);
 
     // Add a context to process
@@ -110,14 +110,14 @@ describe('createResourceInstallationHelper', () => {
     await new Promise((r) => setTimeout(r, 10));
 
     expect(logger.info).toHaveBeenCalledTimes(1);
-    initializedContexts = helper.getInitializedContexts();
     expect([...initializedContexts.keys()].length).toEqual(1);
 
     expect(await initializedContexts.get('test1')).toEqual(true);
   });
 
   test(`should gracefully handle errors during initialization and set initialized flag to false`, async () => {
-    const helper = createResourceInstallationHelper(initFnWithError);
+    const initializedContexts: Map<string, Promise<boolean>> = new Map();
+    const helper = createResourceInstallationHelper(initializedContexts, initFnWithError);
 
     helper.setReadyToInitialize();
 
@@ -130,7 +130,6 @@ describe('createResourceInstallationHelper', () => {
     // for the setImmediate
     await new Promise((r) => setTimeout(r, 10));
 
-    const initializedContexts = helper.getInitializedContexts();
     expect([...initializedContexts.keys()].length).toEqual(1);
     expect(await initializedContexts.get('test1')).toEqual(false);
   });
