@@ -72,7 +72,6 @@ export const reportingCsvShareProvider = ({
           icon: 'document',
           toolTipContent: licenseToolTipContent,
           disabled: licenseDisabled,
-          ['data-test-subj']: 'csvReportMenuItem',
           sortOrder: 1,
         },
         panel: {
