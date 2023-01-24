@@ -7,6 +7,7 @@
 
 import React, { useCallback, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
+import { css } from 'styled-components';
 import { ChartLabel } from '../../../overview/components/detection_response/alerts_by_status/chart_label';
 import type { VisualizationAlertsByStatusResponse } from '../../../overview/components/detection_response/alerts_by_status/types';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
@@ -39,7 +40,15 @@ const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> =
     ? parseVisualizationData<VisualizationAlertsByStatusResponse>(inspect?.response)
     : null;
   const dataExists = visualizationData != null && visualizationData[0]?.hits.total !== 0;
-
+  const donutTextWrapperStyles = dataExists
+    ? css`
+        top: 40%;
+        right: 12%;
+      `
+    : css`
+        top: 66%;
+        right: 12%;
+      `;
   const onEmbeddableLoad = useCallback(
     ({ requests, responses, isLoading }: EmbeddableData) => {
       dispatch(
@@ -87,6 +96,7 @@ const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> =
         label={label}
         title={dataExists ? <ChartLabel count={visualizationData[0]?.hits.total} /> : null}
         donutTextWrapperClassName={donutTextWrapperClassName}
+        donutTextWrapperStyles={donutTextWrapperStyles}
       >
         <LensEmbeddable {...lensPorps} id={id} onLoad={onEmbeddableLoad} />
       </DonutChartWrapper>

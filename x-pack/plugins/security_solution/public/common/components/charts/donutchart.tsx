@@ -17,6 +17,7 @@ import {
   PartitionLayout,
   defaultPartitionValueFormatter,
 } from '@elastic/charts';
+import type { FlattenSimpleInterpolation } from 'styled-components';
 import styled from 'styled-components';
 import { useTheme } from './common';
 import { DraggableLegend } from './draggable_legend';
@@ -56,6 +57,7 @@ export interface DonutChartWrapperProps {
   children?: React.ReactElement;
   dataExists: boolean;
   donutTextWrapperClassName?: string;
+  donutTextWrapperStyles?: FlattenSimpleInterpolation;
   isChartEmbeddablesEnabled?: boolean;
   label?: React.ReactElement | string;
   title: React.ReactElement | string | number | null;
@@ -63,7 +65,12 @@ export interface DonutChartWrapperProps {
 
 /* Make this position absolute in order to overlap the text onto the donut */
 export const DonutTextWrapper = styled(EuiFlexGroup)<
-  EuiFlexGroupProps & { $isChartEmbeddablesEnabled?: boolean; $dataExists?: boolean }
+  EuiFlexGroupProps & {
+    $isChartEmbeddablesEnabled?: boolean;
+    $dataExists?: boolean;
+    className?: string;
+    donutTextWrapperStyles?: FlattenSimpleInterpolation;
+  }
 >`
   top: ${({ $isChartEmbeddablesEnabled, $dataExists }) =>
     $isChartEmbeddablesEnabled && !$dataExists ? `66%` : `34%;`};
@@ -72,11 +79,8 @@ export const DonutTextWrapper = styled(EuiFlexGroup)<
   position: absolute;
   z-index: 1;
 
-  &.risk-score {
-    top: ${({ $isChartEmbeddablesEnabled, $dataExists }) =>
-      $isChartEmbeddablesEnabled && !$dataExists ? `66%` : `40%;`};
-    right: 12%;
-  }
+  ${({ className, donutTextWrapperStyles }) =>
+    className && donutTextWrapperStyles ? `&.${className} {${donutTextWrapperStyles}}` : ''}
 `;
 
 export const StyledEuiFlexItem = styled(EuiFlexItem)`
@@ -87,9 +91,10 @@ export const StyledEuiFlexItem = styled(EuiFlexItem)`
 const DonutChartWrapperComponent: React.FC<DonutChartWrapperProps> = ({
   children,
   dataExists,
+  donutTextWrapperClassName,
+  donutTextWrapperStyles,
   isChartEmbeddablesEnabled,
   label,
-  donutTextWrapperClassName,
   title,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -115,6 +120,7 @@ const DonutChartWrapperComponent: React.FC<DonutChartWrapperProps> = ({
           alignItems="center"
           className={donutTextWrapperClassName}
           direction="column"
+          donutTextWrapperStyles={donutTextWrapperStyles}
           gutterSize="none"
           justifyContent="center"
         >

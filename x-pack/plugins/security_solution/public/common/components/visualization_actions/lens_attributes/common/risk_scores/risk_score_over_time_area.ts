@@ -8,11 +8,12 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { GetLensAttributes } from '../../../types';
 export const getRiskScoreOverTimeAreaAttributes: GetLensAttributes = (
-  stackByField,
+  stackByField = 'host',
   extraOptions = { spaceId: 'default' }
 ) => {
-  const layerId = uuidv4();
+  const layerIds = [uuidv4(), uuidv4()];
   const internalReferenceId = uuidv4();
+  const layer2ColumnId = uuidv4();
   return {
     title: `${stackByField} risk score over time`,
     description: '',
@@ -21,18 +22,15 @@ export const getRiskScoreOverTimeAreaAttributes: GetLensAttributes = (
       visualization: {
         title: 'Empty XY chart',
         legend: {
-          isVisible: true,
+          isVisible: false,
           position: 'right',
         },
         valueLabels: 'hide',
         preferredSeriesType: 'line',
         layers: [
           {
-            layerId,
-            accessors: [
-              '8886a925-4419-4d9a-8498-3bda4ecf1b0a',
-              'df9461a3-db14-4196-932c-6404dabfd11a',
-            ],
+            layerId: layerIds[0],
+            accessors: ['8886a925-4419-4d9a-8498-3bda4ecf1b0a'],
             position: 'top',
             seriesType: 'line',
             showGridlines: false,
@@ -40,8 +38,25 @@ export const getRiskScoreOverTimeAreaAttributes: GetLensAttributes = (
             xAccessor: '02a55c97-d7a4-440d-ac77-33b941c16189',
             yConfig: [
               {
-                forAccessor: 'df9461a3-db14-4196-932c-6404dabfd11a',
-                color: '#c06060',
+                forAccessor: '8886a925-4419-4d9a-8498-3bda4ecf1b0a',
+                axisMode: 'left',
+              },
+            ],
+          },
+          {
+            layerId: layerIds[1],
+            layerType: 'referenceLine',
+            accessors: [layer2ColumnId],
+            yConfig: [
+              {
+                forAccessor: layer2ColumnId,
+                axisMode: 'left',
+                lineWidth: 2,
+                color: '#aa6556',
+                icon: 'alert',
+                textVisibility: true,
+                fill: 'none',
+                iconPosition: 'left',
               },
             ],
           },
@@ -50,9 +65,26 @@ export const getRiskScoreOverTimeAreaAttributes: GetLensAttributes = (
         axisTitlesVisibilitySettings: {
           x: false,
           yLeft: false,
-          yRight: true,
+          yRight: false,
         },
         yTitle: '',
+        yRightTitle: '',
+        valuesInLegend: true,
+        labelsOrientation: {
+          x: 0,
+          yLeft: 0,
+          yRight: 0,
+        },
+        tickLabelsVisibilitySettings: {
+          x: true,
+          yLeft: true,
+          yRight: true,
+        },
+        yLeftExtent: {
+          mode: 'custom',
+          lowerBound: 0,
+          upperBound: 100,
+        },
       },
       query: {
         query: '',
@@ -62,7 +94,7 @@ export const getRiskScoreOverTimeAreaAttributes: GetLensAttributes = (
       datasourceStates: {
         formBased: {
           layers: {
-            [layerId]: {
+            [layerIds[0]]: {
               columns: {
                 '02a55c97-d7a4-440d-ac77-33b941c16189': {
                   label: '@timestamp',
@@ -80,53 +112,47 @@ export const getRiskScoreOverTimeAreaAttributes: GetLensAttributes = (
                 '8886a925-4419-4d9a-8498-3bda4ecf1b0a': {
                   label: 'Risk score',
                   dataType: 'number',
-                  operationType: 'average',
+                  operationType: 'max',
                   sourceField: `${stackByField}.risk.calculated_score_norm`,
                   isBucketed: false,
                   scale: 'ratio',
                   params: {
-                    emptyAsNull: true,
                     format: {
                       id: 'number',
                       params: {
                         decimals: 0,
                       },
                     },
+                    emptyAsNull: true,
                   },
-                  customLabel: true,
-                },
-                'df9461a3-db14-4196-932c-6404dabfd11aX0': {
-                  label: 'Part of Risky threshold',
-                  dataType: 'number',
-                  operationType: 'math',
-                  isBucketed: false,
-                  scale: 'ratio',
-                  params: {
-                    tinymathAst: 70,
-                  },
-                  references: [],
-                  customLabel: true,
-                },
-                'df9461a3-db14-4196-932c-6404dabfd11a': {
-                  label: 'Risky threshold',
-                  dataType: 'number',
-                  operationType: 'formula',
-                  isBucketed: false,
-                  scale: 'ratio',
-                  params: {
-                    formula: '70',
-                    isFormulaBroken: false,
-                  },
-                  references: ['df9461a3-db14-4196-932c-6404dabfd11aX0'],
                   customLabel: true,
                 },
               },
               columnOrder: [
                 '02a55c97-d7a4-440d-ac77-33b941c16189',
                 '8886a925-4419-4d9a-8498-3bda4ecf1b0a',
-                'df9461a3-db14-4196-932c-6404dabfd11a',
-                'df9461a3-db14-4196-932c-6404dabfd11aX0',
               ],
+              sampling: 1,
+              incompleteColumns: {},
+            },
+            [layerIds[1]]: {
+              linkToLayers: [],
+              columns: {
+                [layer2ColumnId]: {
+                  label: 'Risky threshold',
+                  dataType: 'number',
+                  operationType: 'static_value',
+                  isStaticValue: true,
+                  isBucketed: false,
+                  scale: 'ratio',
+                  params: {
+                    value: '70',
+                  },
+                  references: [],
+                  customLabel: true,
+                },
+              },
+              columnOrder: [layer2ColumnId],
               sampling: 1,
               incompleteColumns: {},
             },
@@ -140,7 +166,12 @@ export const getRiskScoreOverTimeAreaAttributes: GetLensAttributes = (
         {
           type: 'index-pattern',
           id: internalReferenceId,
-          name: `indexpattern-datasource-layer-${layerId}`,
+          name: `indexpattern-datasource-layer-${layerIds[0]}`,
+        },
+        {
+          type: 'index-pattern',
+          id: internalReferenceId,
+          name: `indexpattern-datasource-layer-${layerIds[1]}`,
         },
       ],
       adHocDataViews: {
