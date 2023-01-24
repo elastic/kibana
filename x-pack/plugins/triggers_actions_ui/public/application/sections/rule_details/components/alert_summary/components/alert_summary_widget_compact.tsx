@@ -9,8 +9,6 @@ import React, { MouseEvent } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
-  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -19,8 +17,9 @@ import {
 } from '@elastic/eui';
 import { Axis, Chart, CurveType, LineSeries, Position, ScaleType, Settings } from '@elastic/charts';
 import { EUI_SPARKLINE_THEME_PARTIAL } from '@elastic/eui/dist/eui_charts_theme';
-import { ALERT_STATUS_ACTIVE, AlertStatus } from '@kbn/rule-data-utils';
-import { ACTIVE_ALERT_LABEL, ALERTS_LABEL, WIDGET_TITLE } from './constants';
+import { AlertStatus } from '@kbn/rule-data-utils';
+import { AlertCounts } from './alert_counts';
+import { WIDGET_TITLE } from './constants';
 import { Alert, ChartThemes } from '../types';
 
 export interface AlertsSummaryWidgetCompactProps {
@@ -86,43 +85,11 @@ export const AlertsSummaryWidgetCompact = ({
         )}
 
         <EuiFlexItem>
-          <EuiFlexGroup gutterSize="l" responsive={false}>
-            <EuiFlexItem style={{ minWidth: 50, wordWrap: 'break-word' }} grow={false}>
-              <EuiText color={euiTheme.colors.primaryText}>
-                <h3 data-test-subj="totalAlertsCount">{activeAlertCount + recoveredAlertCount}</h3>
-              </EuiText>
-              <EuiText size="s" color="subdued">
-                {ALERTS_LABEL}
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem style={{ minWidth: 50, wordWrap: 'break-word' }} grow={false}>
-              <EuiLink
-                onClick={(event: React.MouseEvent<HTMLAnchorElement>) =>
-                  handleClick(event, ALERT_STATUS_ACTIVE)
-                }
-                data-test-subj="activeAlerts"
-              >
-                <EuiText
-                  color={
-                    !!activeAlertCount ? euiTheme.colors.dangerText : euiTheme.colors.successText
-                  }
-                >
-                  <h3 data-test-subj={`activeAlertsCount`}>
-                    {activeAlertCount}
-                    {!!activeAlertCount && (
-                      <>
-                        &nbsp;
-                        <EuiIcon type="alert" ascent={10} />
-                      </>
-                    )}
-                  </h3>
-                </EuiText>
-                <EuiText size="s" color="subdued">
-                  {ACTIVE_ALERT_LABEL}
-                </EuiText>
-              </EuiLink>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <AlertCounts
+            activeAlertCount={activeAlertCount}
+            recoveredAlertCount={recoveredAlertCount}
+            onActiveClick={handleClick}
+          />
         </EuiFlexItem>
 
         <EuiFlexItem>

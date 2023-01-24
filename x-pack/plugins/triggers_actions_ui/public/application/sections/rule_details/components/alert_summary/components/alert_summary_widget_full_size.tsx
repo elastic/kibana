@@ -8,16 +8,9 @@
 import moment from 'moment';
 import React from 'react';
 import { Axis, Chart, CurveType, LineSeries, Position, ScaleType, Settings } from '@elastic/charts';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  useEuiTheme,
-} from '@elastic/eui';
-import { ACTIVE_ALERT_LABEL, ALERTS_LABEL, TOOLTIP_DATE_FORMAT } from './constants';
+import { EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { AlertCounts } from './alert_counts';
+import { TOOLTIP_DATE_FORMAT } from './constants';
 import { Alert, ChartThemes } from '../types';
 
 export interface AlertsSummaryWidgetFullSizeProps {
@@ -35,7 +28,6 @@ export const AlertsSummaryWidgetFullSize = ({
   dateFormat,
   recoveredAlertCount,
 }: AlertsSummaryWidgetFullSizeProps) => {
-  const { euiTheme } = useEuiTheme();
   const chartTheme = [
     theme,
     {
@@ -53,34 +45,10 @@ export const AlertsSummaryWidgetFullSize = ({
       paddingSize="none"
     >
       <EuiFlexItem>
-        <EuiFlexGroup gutterSize="l" responsive={false}>
-          <EuiFlexItem style={{ minWidth: 50, wordWrap: 'break-word' }} grow={false}>
-            <EuiText color={euiTheme.colors.primaryText}>
-              <h3 data-test-subj="totalAlertsCount">{activeAlertCount + recoveredAlertCount}</h3>
-            </EuiText>
-            <EuiText size="s" color="subdued">
-              {ALERTS_LABEL}
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem style={{ minWidth: 50, wordWrap: 'break-word' }} grow={false}>
-            <EuiText
-              color={!!activeAlertCount ? euiTheme.colors.dangerText : euiTheme.colors.successText}
-            >
-              <h3 data-test-subj={`activeAlertsCount`}>
-                {activeAlertCount}
-                {!!activeAlertCount && (
-                  <>
-                    &nbsp;
-                    <EuiIcon type="alert" ascent={10} />
-                  </>
-                )}
-              </h3>
-            </EuiText>
-            <EuiText size="s" color="subdued">
-              {ACTIVE_ALERT_LABEL}
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <AlertCounts
+          activeAlertCount={activeAlertCount}
+          recoveredAlertCount={recoveredAlertCount}
+        />
       </EuiFlexItem>
       <EuiSpacer size="l" />
       <Chart size={['100%', 170]}>
