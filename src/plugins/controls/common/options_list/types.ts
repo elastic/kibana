@@ -23,7 +23,9 @@ export interface OptionsListEmbeddableInput extends DataControlInput {
   hideExclude?: boolean;
   hideExists?: boolean;
   hideSort?: boolean;
+  hideActionBar?: boolean;
   exclude?: boolean;
+  placeholder?: string;
 }
 
 export type OptionsListField = FieldSpec & {
