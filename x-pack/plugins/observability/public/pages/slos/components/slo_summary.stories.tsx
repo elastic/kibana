@@ -8,21 +8,25 @@
 import React from 'react';
 import { ComponentStory } from '@storybook/react';
 
+import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
+import {
+  HEALTHY_ROLLING_SLO,
+  historicalSummaryData,
+} from '../../../data/slo/historical_summary_data';
 import { anSLO } from '../../../data/slo/slo';
-import { SloSummaryStats as Component, SloSummaryStatsProps } from './slo_summary_stats';
+import { SloSummary as Component, Props } from './slo_summary';
 
 export default {
   component: Component,
-  title: 'app/SLO/ListPage/SloSummaryStats',
-  argTypes: {},
+  title: 'app/SLO/ListPage/SloSummary',
+  decorators: [KibanaReactStorybookDecorator],
 };
 
-const Template: ComponentStory<typeof Component> = (props: SloSummaryStatsProps) => (
-  <Component {...props} />
-);
+const Template: ComponentStory<typeof Component> = (props: Props) => <Component {...props} />;
 
 const defaultProps = {
   slo: anSLO,
+  historicalSummary: historicalSummaryData[HEALTHY_ROLLING_SLO],
 };
 
 export const SloSummaryStats = Template.bind({});

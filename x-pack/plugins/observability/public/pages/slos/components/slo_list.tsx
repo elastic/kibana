@@ -9,7 +9,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPagination } from '@elastic/eui';
 import { debounce } from 'lodash';
 
-import { useFetchHistoricalSummary } from '../../../hooks/slo/use_fetch_historical_summary';
 import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
 import {
   FilterType,
@@ -17,10 +16,8 @@ import {
   SortType,
 } from './slo_list_search_filter_sort_bar';
 import { SloListItems } from './slo_list_items';
-import { SloSparkline } from './slo_sparkline';
 
 export function SloList() {
-  const [sloIds, setSloIds] = useState<string[]>([]);
   const [activePage, setActivePage] = useState(0);
 
   const [query, setQuery] = useState('');
@@ -33,7 +30,7 @@ export function SloList() {
   const {
     loading,
     error,
-    sloList: { results: slos = [], total, perPage },
+    sloList: { results: sloList = [], total, perPage },
   } = useFetchSloList({
     page: activePage + 1,
     name: query,
@@ -41,16 +38,6 @@ export function SloList() {
     indicatorTypes: indicatorTypeFilter,
     refetch: shouldReload,
   });
-
-  useEffect(() => {
-    setSloIds(slos.map((slo) => slo.id));
-  }, [slos]);
-
-  const {
-    loading: loadingHistoricalSummary,
-    error: errorHistoricalSummary,
-    data: historicalSummary,
-  } = useFetchHistoricalSummary({ sloIds, refetch: shouldReload });
 
   useEffect(() => {
     if (shouldReload) {
@@ -101,7 +88,7 @@ export function SloList() {
 
       <EuiFlexItem>
         <SloListItems
-          slos={slos}
+          sloList={sloList}
           loading={loading}
           error={error}
           onDeleting={handleDeleting}
@@ -109,7 +96,7 @@ export function SloList() {
         />
       </EuiFlexItem>
 
-      {slos.length ? (
+      {sloList.length ? (
         <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexEnd">
             <EuiFlexItem>

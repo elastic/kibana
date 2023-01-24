@@ -19,23 +19,19 @@ export interface UseFetchHistoricalSummaryResponse {
   error: boolean;
 }
 
-interface Params {
+export interface Params {
   sloIds: string[];
 }
 
 export function useFetchHistoricalSummary({
   sloIds = [],
-  refetch = false,
-}: {
-  sloIds: string[];
-  refetch: boolean;
-}): UseFetchHistoricalSummaryResponse {
+}: Params): UseFetchHistoricalSummaryResponse {
   const [historicalSummary, setHistoricalSummary] = useState(EMPTY_RESPONSE);
 
   const params: Params = useMemo(() => ({ sloIds }), [sloIds]);
   const shouldExecuteApiCall = useCallback(
-    (apiCallParams: Params) => apiCallParams.sloIds.length > 0 || refetch,
-    [refetch]
+    (apiCallParams: Params) => apiCallParams.sloIds.length > 0,
+    []
   );
 
   const { data, loading, error } = useDataFetcher<Params, FetchHistoricalSummaryResponse>({

@@ -9,7 +9,7 @@ import React from 'react';
 import { ComponentStory } from '@storybook/react';
 
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
-import { SloListItems as Component, SloListItemsProps } from './slo_list_items';
+import { SloListItems as Component, Props } from './slo_list_items';
 import { aForecastedSLO, anSLO } from '../../../data/slo/slo';
 
 export default {
@@ -18,12 +18,10 @@ export default {
   decorators: [KibanaReactStorybookDecorator],
 };
 
-const Template: ComponentStory<typeof Component> = (props: SloListItemsProps) => (
-  <Component {...props} />
-);
+const Template: ComponentStory<typeof Component> = (props: Props) => <Component {...props} />;
 
-const defaultProps: SloListItemsProps = {
-  slos: [anSLO, anSLO, aForecastedSLO],
+const defaultProps: Props = {
+  sloList: [anSLO, anSLO, aForecastedSLO],
   loading: false,
   error: false,
   onDeleted: () => {},

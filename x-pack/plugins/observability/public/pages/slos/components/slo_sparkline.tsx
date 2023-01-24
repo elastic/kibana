@@ -9,7 +9,7 @@ import { AreaSeries, Chart, Fit, LineSeries, ScaleType, Settings } from '@elasti
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 
-import { useEuiTheme } from '@elastic/eui';
+import { EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 import { EUI_SPARKLINE_THEME_PARTIAL } from '@elastic/eui/dist/eui_charts_theme';
 import { ObservabilityAppServices } from '../../../application/types';
 
@@ -25,9 +25,10 @@ export interface Props {
   data: Data[];
   chart: ChartType;
   state: State;
+  loading: boolean;
 }
 
-export function SloSparkline({ chart, data, id, state }: Props) {
+export function SloSparkline({ chart, data, id, loading, state }: Props) {
   const { charts } = useKibana<ObservabilityAppServices>().services;
   const { euiTheme } = useEuiTheme();
   const chartThemes = {
@@ -38,8 +39,12 @@ export function SloSparkline({ chart, data, id, state }: Props) {
   const color = state === 'error' ? euiTheme.colors.danger : euiTheme.colors.success;
   const ChartComponent = chart === 'area' ? AreaSeries : LineSeries;
 
+  if (loading) {
+    return <EuiLoadingChart size="m" />;
+  }
+
   return (
-    <Chart size={{ height: 64, width: 128 }}>
+    <Chart size={{ height: 28, width: 80 }}>
       <Settings
         theme={[chartThemes.theme, EUI_SPARKLINE_THEME_PARTIAL]}
         baseTheme={chartThemes.baseTheme}
@@ -49,7 +54,7 @@ export function SloSparkline({ chart, data, id, state }: Props) {
       <ChartComponent
         id={id}
         data={data}
-        fit={Fit.Lookahead}
+        fit={Fit.Nearest}
         xScaleType={ScaleType.Time}
         yScaleType={ScaleType.Linear}
         xAccessor={'key'}
