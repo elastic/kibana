@@ -8,7 +8,7 @@
 
 import { pick, throttle, cloneDeep } from 'lodash';
 import type { HttpSetup, HttpFetchOptions } from '@kbn/core-http-browser';
-import type { SavedObject, SavedObjectTypeIdTuple } from '@kbn/core-saved-objects-common';
+import type { SavedObjectTypeIdTuple } from '@kbn/core-saved-objects-common';
 import type {
   SavedObjectsBulkResolveResponse as SavedObjectsBulkResolveResponseServer,
   SavedObjectsBulkDeleteResponse as SavedObjectsBulkDeleteResponseServer,
@@ -32,7 +32,7 @@ import type {
   SimpleSavedObject,
   SavedObjectsBulkDeleteResponse,
 } from '@kbn/core-saved-objects-api-browser';
-
+import { SavedObject } from '@kbn/core-saved-objects-server';
 import { SimpleSavedObjectImpl } from './simple_saved_object';
 
 type PromiseType<T extends Promise<any>> = T extends Promise<infer U> ? U : never;

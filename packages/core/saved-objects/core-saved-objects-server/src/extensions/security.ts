@@ -10,8 +10,9 @@ import {
   SavedObjectReferenceWithContext,
   SavedObjectsResolveResponse,
 } from '@kbn/core-saved-objects-api-server';
-import type { BulkResolveError, SavedObject } from '@kbn/core-saved-objects-common';
+import type { BulkResolveError } from '@kbn/core-saved-objects-common';
 import { EcsEventOutcome } from '@kbn/ecs';
+import { SavedObject } from '../..';
 
 /**
  * The SecurityAction enumeration contains values for all

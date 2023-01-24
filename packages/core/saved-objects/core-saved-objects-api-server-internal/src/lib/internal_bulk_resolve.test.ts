@@ -13,7 +13,6 @@ import {
 } from './internal_bulk_resolve.test.mock';
 
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import type { SavedObject } from '@kbn/core-saved-objects-common';
 import type {
   SavedObjectsBulkResolveObject,
   SavedObjectsBaseOptions,
@@ -31,6 +30,7 @@ import {
   type ISavedObjectsEncryptionExtension,
   type ISavedObjectsSecurityExtension,
   type ISavedObjectTypeRegistry,
+  type SavedObject,
 } from '@kbn/core-saved-objects-server';
 import {
   enforceError,

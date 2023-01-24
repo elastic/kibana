@@ -17,7 +17,7 @@ import {
   isSupportedEsServer,
   isNotFoundFromUnsupportedServer,
 } from '@kbn/core-elasticsearch-server-internal';
-import type { BulkResolveError, SavedObject } from '@kbn/core-saved-objects-common';
+import type { BulkResolveError } from '@kbn/core-saved-objects-common';
 import type {
   SavedObjectsBaseOptions,
   SavedObjectsIncrementCounterOptions,
@@ -76,6 +76,7 @@ import {
   AuthorizeCreateObject,
   AuthorizeUpdateObject,
   type AuthorizeBulkGetObject,
+  type SavedObject,
 } from '@kbn/core-saved-objects-server';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { SavedObjectsErrorHelpers, type DecoratedError } from '@kbn/core-saved-objects-common';

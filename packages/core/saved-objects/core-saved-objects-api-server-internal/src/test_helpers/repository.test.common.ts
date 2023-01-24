@@ -22,8 +22,9 @@ import {
   SavedObjectsRawDocSource,
   SavedObjectsType,
   SavedObjectsTypeMappingDefinition,
+  SavedObject,
+  SavedObjectReference,
 } from '@kbn/core-saved-objects-server';
-import { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-common';
 import {
   SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,

@@ -20,13 +20,13 @@ import { estypes } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { SavedObjectsBulkUpdateObject } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
-import { SavedObject } from '@kbn/core-saved-objects-common';
 import {
   ISavedObjectsSecurityExtension,
   AuditAction,
   SavedObjectsRawDocSource,
   AuthorizationTypeEntry,
   SecurityAction,
+  SavedObject,
 } from '@kbn/core-saved-objects-server';
 import {
   setMapsAreEqual,
@@ -590,36 +590,6 @@ describe('SavedObjectsRepository Security Extension', () => {
       expect(actualOptions).toBeUndefined();
       expect(actualAuditOptions).toEqual({ objects: [{ type, id }] });
     });
-
-    // test(`adds audit event when successful`, async () => {
-    //   setupAuthorizeFullyAuthorized(mockSecurityExt);
-    //   setupRedactPassthrough(mockSecurityExt);
-
-    //   await removeReferencesToSuccess(client, repository, type, id, { namespace });
-
-    //   expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(1);
-    //   expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledWith({
-    //     action: AuditAction.REMOVE_REFERENCES,
-    //     savedObject: { type, id },
-    //     error: undefined,
-    //     outcome: 'unknown',
-    //   });
-    // });
-
-    // test(`adds audit event when not successful`, async () => {
-    //   setupPerformAuthEnforceFailure(mockSecurityExt);
-
-    //   await expect(
-    //     removeReferencesToSuccess(client, repository, type, id, { namespace })
-    //   ).rejects.toThrow(enforceError);
-
-    //   expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(1);
-    //   expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledWith({
-    //     action: AuditAction.REMOVE_REFERENCES,
-    //     savedObject: { type, id },
-    //     error: enforceError,
-    //   });
-    // });
   });
 
   describe('#checkConflicts', () => {

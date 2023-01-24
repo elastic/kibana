@@ -11,7 +11,7 @@ import type {
   AggregationsAggregationContainer,
   SortResults,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { SavedObject } from '@kbn/core-saved-objects-server';
 
 type KueryNode = any;
 

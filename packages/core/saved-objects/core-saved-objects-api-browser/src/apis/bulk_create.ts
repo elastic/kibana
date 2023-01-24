@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectsCreateOptions } from './create';
+import { SavedObjectsCreateOptions } from '@kbn/core-saved-objects-api-server';
 
 /**
  * Per-object parameters for bulk create operation

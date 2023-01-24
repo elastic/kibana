@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObject as SavedObjectType } from '@kbn/core-saved-objects-common';
+import type { SavedObject as SavedObjectType } from '@kbn/core-saved-objects-server';
 
 /**
  * Very simple wrapper for SavedObjects loaded from the server

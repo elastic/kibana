@@ -9,7 +9,7 @@
 import type { MgetResponseItem } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
-import type { BulkResolveError, SavedObject } from '@kbn/core-saved-objects-common';
+import type { BulkResolveError } from '@kbn/core-saved-objects-common';
 import type {
   SavedObjectsBaseOptions,
   SavedObjectsBulkResolveObject,
@@ -22,6 +22,7 @@ import {
   type ISavedObjectsSecurityExtension,
   type ISavedObjectTypeRegistry,
   type SavedObjectsRawDocSource,
+  type SavedObject,
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-common';
 import {

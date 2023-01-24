@@ -27,11 +27,11 @@ import {
   SavedObjectsBulkUpdateObject,
 } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
-import { SavedObject } from '@kbn/core-saved-objects-common';
 import {
   ISavedObjectsSpacesExtension,
   ISavedObjectsSecurityExtension,
   ISavedObjectsEncryptionExtension,
+  SavedObject,
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-common';
 import { kibanaMigratorMock } from '../mocks';

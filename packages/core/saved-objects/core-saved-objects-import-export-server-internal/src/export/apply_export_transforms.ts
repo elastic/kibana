@@ -7,10 +7,10 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { SavedObject } from '@kbn/core-saved-objects-common';
 import type {
   SavedObjectsExportTransform,
   SavedObjectsExportTransformContext,
+  SavedObject,
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsExportError } from './errors';
 import { getObjKey, type SavedObjectComparator } from './utils';
