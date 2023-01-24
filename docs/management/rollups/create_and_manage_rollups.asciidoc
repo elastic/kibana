@@ -12,7 +12,7 @@ visualizations and reports.
 To get started, open the main menu, then click *Stack Management > Rollup Jobs*.
 
 [role="screenshot"]
-image::images/management_rollup_list.png[][List of currently active rollup jobs]
+image::images/management_rollup_list.png[List of currently active rollup jobs]
 
 Before using this feature, you should be familiar with how rollups work.
 {ref}/xpack-rollup.html[Rolling up historical data] is a good source for more
