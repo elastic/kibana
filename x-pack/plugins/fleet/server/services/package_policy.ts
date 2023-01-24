@@ -17,7 +17,7 @@ import type {
   SavedObjectsClientContract,
   Logger,
 } from '@kbn/core/server';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { safeLoad } from 'js-yaml';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
@@ -101,6 +101,7 @@ import { sendTelemetryEvents } from './upgrade_sender';
 import { handleExperimentalDatastreamFeatureOptIn } from './package_policies';
 import { updateDatastreamExperimentalFeatures } from './epm/packages/update';
 import type { PackagePolicyClient, PackagePolicyService } from './package_policy_service';
+import { installAssetsForInputPackagePolicy } from './epm/packages/install';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
@@ -134,6 +135,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       packageInfo?: PackageInfo;
     }
   ): Promise<PackagePolicy> {
+    const logger = appContextService.getLogger();
     const agentPolicy = await agentPolicyService.get(soClient, packagePolicy.policy_id, true);
 
     if (agentPolicy && packagePolicy.package?.name === FLEET_APM_PACKAGE) {
@@ -160,9 +162,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
     }
 
-    let elasticsearch: PackagePolicy['elasticsearch'];
+    let elasticsearchPrivileges: NonNullable<PackagePolicy['elasticsearch']>['privileges'];
     // Add ids to stream
-    const packagePolicyId = options?.id || uuid.v4();
+    const packagePolicyId = options?.id || uuidv4();
     let inputs: PackagePolicyInput[] = packagePolicy.inputs.map((input) =>
       assignStreamIdToInput(packagePolicyId, input)
     );
@@ -205,7 +207,18 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
       inputs = await _compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs);
 
-      elasticsearch = pkgInfo.elasticsearch;
+      elasticsearchPrivileges = pkgInfo.elasticsearch?.privileges;
+
+      if (pkgInfo.type === 'input') {
+        await installAssetsForInputPackagePolicy({
+          soClient,
+          esClient,
+          pkgInfo,
+          packagePolicy,
+          force: !!options?.force,
+          logger,
+        });
+      }
     }
 
     const isoDate = new Date().toISOString();
@@ -217,7 +230,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           ? { package: omit(packagePolicy.package, 'experimental_data_stream_features') }
           : {}),
         inputs,
-        elasticsearch,
+        ...(elasticsearchPrivileges && { elasticsearch: { privileges: elasticsearchPrivileges } }),
         revision: 1,
         created_at: isoDate,
         created_by: options?.user?.username ?? 'system',
@@ -263,7 +276,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const { saved_objects } = await soClient.bulkCreate<PackagePolicySOAttributes>(
       await pMap(packagePolicies, async (packagePolicy) => {
-        const packagePolicyId = packagePolicy.id ?? uuid.v4();
+        const packagePolicyId = packagePolicy.id ?? uuidv4();
         const agentPolicyId = packagePolicy.policy_id;
 
         let inputs = packagePolicy.inputs.map((input) =>
@@ -511,7 +524,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     );
 
     inputs = enforceFrozenInputs(oldPackagePolicy.inputs, inputs, options?.force);
-    let elasticsearch: PackagePolicy['elasticsearch'];
+    let elasticsearchPrivileges: NonNullable<PackagePolicy['elasticsearch']>['privileges'];
     if (packagePolicy.package?.name) {
       const pkgInfo = await getPackageInfo({
         savedObjectsClient: soClient,
@@ -527,7 +540,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
 
       inputs = await _compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs);
-      elasticsearch = pkgInfo.elasticsearch;
+      elasticsearchPrivileges = pkgInfo.elasticsearch?.privileges;
     }
 
     // Handle component template/mappings updates for experimental features, e.g. synthetic source
@@ -542,7 +555,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           ? { package: omit(restOfPackagePolicy.package, 'experimental_data_stream_features') }
           : {}),
         inputs,
-        elasticsearch,
+        ...(elasticsearchPrivileges && { elasticsearch: { privileges: elasticsearchPrivileges } }),
         revision: oldPackagePolicy.revision + 1,
         updated_at: new Date().toISOString(),
         updated_by: options?.user?.username ?? 'system',
@@ -614,7 +627,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         );
 
         inputs = enforceFrozenInputs(oldPackagePolicy.inputs, inputs, options?.force);
-        let elasticsearch: PackagePolicy['elasticsearch'];
+        let elasticsearchPrivileges: NonNullable<PackagePolicy['elasticsearch']>['privileges'];
         if (packagePolicy.package?.name) {
           const pkgInfo = packageInfos.get(
             `${packagePolicy.package.name}-${packagePolicy.package.version}`
@@ -623,7 +636,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
 
             inputs = await _compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs);
-            elasticsearch = pkgInfo.elasticsearch;
+            elasticsearchPrivileges = pkgInfo.elasticsearch?.privileges;
           }
         }
 
@@ -639,7 +652,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
               ? { package: omit(restOfPackagePolicy.package, 'experimental_data_stream_features') }
               : {}),
             inputs,
-            elasticsearch,
+            ...(elasticsearchPrivileges && {
+              elasticsearch: { privileges: elasticsearchPrivileges },
+            }),
             revision: oldPackagePolicy.revision + 1,
             updated_at: new Date().toISOString(),
             updated_by: options?.user?.username ?? 'system',
@@ -1985,7 +2000,8 @@ export function _validateRestrictedFieldsNotModifiedOrThrow(opts: {
           if (
             oldStream &&
             oldStream?.vars?.['data_stream.dataset'] &&
-            oldStream?.vars['data_stream.dataset'] !== stream?.vars?.['data_stream.dataset']
+            oldStream?.vars['data_stream.dataset']?.value !==
+              stream?.vars?.['data_stream.dataset']?.value
           ) {
             throw new PackagePolicyValidationError(
               i18n.translate('xpack.fleet.updatePackagePolicy.datasetCannotBeModified', {
