@@ -281,6 +281,7 @@ export function RuleDetailsPage() {
                   featureIds={featureIds}
                   query={esQuery}
                   showExpandToDetails={false}
+                  showAlertStatusWithFlapping={true}
                 />
               )}
             </EuiFlexItem>

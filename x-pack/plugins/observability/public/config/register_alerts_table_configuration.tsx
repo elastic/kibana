@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  GetRenderCellValue,
-  AlertLifecycleStatusBadgeProps,
-} from '@kbn/triggers-actions-ui-plugin/public';
+import type { GetRenderCellValue } from '@kbn/triggers-actions-ui-plugin/public';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { casesFeatureId, observabilityFeatureId } from '../../common';
@@ -21,24 +18,15 @@ import { getRowActions } from '../pages/alerts/containers/alerts_table/get_row_a
 import type { ObservabilityRuleTypeRegistry } from '../rules/create_observability_rule_type_registry';
 import type { ConfigSchema } from '../plugin';
 
-const getO11yAlertsTableConfiguration = ({
-  observabilityRuleTypeRegistry,
-  getAlertLifecycleStatusBadge,
-  config,
-}: {
-  observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
-  getAlertLifecycleStatusBadge: (props: AlertLifecycleStatusBadgeProps) => JSX.Element;
-  config: ConfigSchema;
-}) => ({
+const getO11yAlertsTableConfiguration = (
+  observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry,
+  config: ConfigSchema
+) => ({
   id: observabilityFeatureId,
   casesFeatureId,
   columns: alertO11yColumns.map(addDisplayNames),
   getRenderCellValue: (({ setFlyoutAlert }: { setFlyoutAlert: (data: TopAlert) => void }) => {
-    return getRenderCellValue({
-      observabilityRuleTypeRegistry,
-      setFlyoutAlert,
-      getAlertLifecycleStatusBadge,
-    });
+    return getRenderCellValue({ observabilityRuleTypeRegistry, setFlyoutAlert });
   }) as unknown as GetRenderCellValue,
   sort: [
     {

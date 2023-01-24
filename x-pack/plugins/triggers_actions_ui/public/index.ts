@@ -42,7 +42,6 @@ export type {
   RuleDefinitionProps,
   RulesListVisibleColumns,
   AlertSummaryTimeRange,
-  AlertLifecycleStatusBadgeProps,
 } from './types';
 
 export type {

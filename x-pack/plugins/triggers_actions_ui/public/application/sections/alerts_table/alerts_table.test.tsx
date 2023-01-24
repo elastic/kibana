@@ -187,6 +187,7 @@ describe('AlertsTable', () => {
     it('should show alert status', () => {
       const props = {
         ...tableProps,
+        showAlertStatusWithFlapping: true,
         pageSize: alerts.length,
         alertsTableConfiguration: {
           ...alertsTableConfiguration,

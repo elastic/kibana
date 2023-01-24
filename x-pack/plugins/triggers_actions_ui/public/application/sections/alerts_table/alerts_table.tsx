@@ -88,6 +88,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     updatedAt,
     browserFields,
     onChangeVisibleColumns,
+    showAlertStatusWithFlapping = false,
   } = props;
 
   // TODO when every solution is using this table, we will be able to simplify it by just passing the alert index
@@ -226,15 +227,6 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     columnId: string;
   }) => {
     const value = data.find((d) => d.field === columnId)?.value ?? [];
-    if (columnId === ALERT_STATUS && Array.isArray(value)) {
-      const flapping = data.find((d) => d.field === ALERT_FLAPPING)?.value ?? [];
-      return (
-        <AlertLifecycleStatusBadge
-          alertStatus={value.join() as AlertStatus}
-          flapping={flapping[0]}
-        />
-      );
-    }
     if (Array.isArray(value)) {
       return <>{value.length ? value.join() : '--'}</>;
     }
@@ -251,6 +243,23 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     [handleFlyoutAlert, props.alertsTableConfiguration]
   )();
 
+  const renderAlertLifecycleStatus = useCallback(
+    ({ data, columnId }: { data: Array<{ field: string; value: string[] }>; columnId: string }) => {
+      const alertStatus = data.find((d) => d.field === ALERT_STATUS)?.value ?? [];
+      if (Array.isArray(alertStatus) && alertStatus.length) {
+        const flapping = data.find((d) => d.field === ALERT_FLAPPING)?.value ?? [];
+        return (
+          <AlertLifecycleStatusBadge
+            alertStatus={alertStatus.join() as AlertStatus}
+            flapping={flapping[0]}
+          />
+        );
+      }
+      return basicRenderCellValue({ data, columnId });
+    },
+    []
+  );
+
   const handleRenderCellValue = useCallback(
     (_props: EuiDataGridCellValueElementProps) => {
       // https://github.com/elastic/eui/issues/5811
@@ -260,6 +269,12 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
         Object.entries(alert ?? {}).forEach(([key, value]) => {
           data.push({ field: key, value: value as string[] });
         });
+        if (showAlertStatusWithFlapping && _props.columnId === ALERT_STATUS) {
+          return renderAlertLifecycleStatus({
+            ..._props,
+            data,
+          });
+        }
         return renderCellValue({
           ..._props,
           data,
@@ -269,7 +284,15 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       }
       return null;
     },
-    [alerts, isLoading, pagination.pageIndex, pagination.pageSize, renderCellValue]
+    [
+      alerts,
+      isLoading,
+      pagination.pageIndex,
+      pagination.pageSize,
+      renderCellValue,
+      showAlertStatusWithFlapping,
+      renderAlertLifecycleStatus,
+    ]
   );
 
   return (

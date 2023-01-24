@@ -179,6 +179,7 @@ export function OverviewPage() {
                 pageSize={ALERTS_PER_PAGE}
                 query={esQuery}
                 showExpandToDetails={false}
+                showAlertStatusWithFlapping={true}
               />
             </CasesContext>
           </SectionContainer>

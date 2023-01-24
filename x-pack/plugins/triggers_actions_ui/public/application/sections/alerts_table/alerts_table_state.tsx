@@ -59,6 +59,7 @@ export interface AlertsTableStateProps {
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   pageSize?: number;
   showExpandToDetails: boolean;
+  showAlertStatusWithFlapping?: boolean;
 }
 
 export interface AlertsTableStorage {
