@@ -6,9 +6,9 @@
  */
 
 import { keys } from 'lodash';
+import { RulesSettingsFlapping } from '../../common/rules_settings';
 import { Alert } from '../alert';
 import { AlertInstanceState, AlertInstanceContext } from '../types';
-import { MAX_FLAP_COUNT } from './flapping_utils';
 
 export function getAlertsForNotification<
   State extends AlertInstanceState,
@@ -16,6 +16,7 @@ export function getAlertsForNotification<
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string
 >(
+  flappingSettings: RulesSettingsFlapping,
   actionGroupId: string,
   newAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {},
   activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {},
@@ -30,10 +31,10 @@ export function getAlertsForNotification<
   for (const id of keys(currentRecoveredAlerts)) {
     const alert = recoveredAlerts[id];
     const flapping = alert.getFlapping();
-    if (flapping) {
+    if (flappingSettings.enabled && flapping) {
       alert.incrementPendingRecoveredCount();
 
-      if (alert.getPendingRecoveredCount() < MAX_FLAP_COUNT) {
+      if (alert.getPendingRecoveredCount() < flappingSettings.statusChangeThreshold) {
         // keep the context and previous actionGroupId if available
         const context = alert.getContext();
         const lastActionGroupId = alert.getLastScheduledActions()?.group;
@@ -57,6 +58,8 @@ export function getAlertsForNotification<
       } else {
         alert.resetPendingRecoveredCount();
       }
+    } else {
+      alert.resetPendingRecoveredCount();
     }
   }
 

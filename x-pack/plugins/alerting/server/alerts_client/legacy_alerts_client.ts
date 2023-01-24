@@ -29,6 +29,7 @@ import {
   RawAlertInstance,
   WithoutReservedActionGroups,
 } from '../types';
+import { RulesSettingsFlapping } from '../../common/rules_settings';
 
 interface ConstructorOpts {
   logger: Logger;
@@ -111,11 +112,13 @@ export class LegacyAlertsClient<
     ruleLabel,
     ruleRunMetricsStore,
     shouldLogAndScheduleActionsForAlerts,
+    flappingSettings,
   }: {
     eventLogger: AlertingEventLogger;
     ruleLabel: string;
     shouldLogAndScheduleActionsForAlerts: boolean;
     ruleRunMetricsStore: RuleRunMetricsStore;
+    flappingSettings: RulesSettingsFlapping;
   }) {
     const {
       newAlerts: processedAlertsNew,
@@ -132,10 +135,11 @@ export class LegacyAlertsClient<
         this.options.ruleType.autoRecoverAlerts !== undefined
           ? this.options.ruleType.autoRecoverAlerts
           : true,
-      setFlapping: true,
+      flappingSettings,
     });
 
     setFlapping<State, Context, ActionGroupIds, RecoveryActionGroupId>(
+      flappingSettings,
       processedAlertsActive,
       processedAlertsRecovered
     );
@@ -147,6 +151,7 @@ export class LegacyAlertsClient<
     );
 
     const alerts = getAlertsForNotification<State, Context, ActionGroupIds, RecoveryActionGroupId>(
+      flappingSettings,
       this.options.ruleType.defaultActionGroupId,
       processedAlertsNew,
       processedAlertsActive,

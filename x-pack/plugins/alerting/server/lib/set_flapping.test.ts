@@ -9,10 +9,16 @@ import { pick } from 'lodash';
 import { Alert } from '../alert';
 import { AlertInstanceState, AlertInstanceContext, DefaultActionGroupId } from '../../common';
 import { setFlapping, isAlertFlapping } from './set_flapping';
+import { RulesSettingsFlapping } from '../../common/rules_settings';
 
 describe('setFlapping', () => {
   const flapping = new Array(16).fill(false).concat([true, true, true, true]);
   const notFlapping = new Array(20).fill(false);
+  const flappingSettings = {
+    enabled: true,
+    lookBackWindow: 20,
+    statusChangeThreshold: 4,
+  } as RulesSettingsFlapping;
 
   test('should set flapping on alerts', () => {
     const activeAlerts = {
@@ -29,7 +35,7 @@ describe('setFlapping', () => {
       '4': new Alert('4', { meta: { flapping: true, flappingHistory: notFlapping } }),
     };
 
-    setFlapping(activeAlerts, recoveredAlerts);
+    setFlapping(flappingSettings, activeAlerts, recoveredAlerts);
     const fields = ['1.meta.flapping', '2.meta.flapping', '3.meta.flapping', '4.meta.flapping'];
     expect(pick(activeAlerts, fields)).toMatchInlineSnapshot(`
       Object {
@@ -81,6 +87,73 @@ describe('setFlapping', () => {
     `);
   });
 
+  test('should set flapping to false on alerts when flapping is disabled', () => {
+    const activeAlerts = {
+      '1': new Alert('1', { meta: { flappingHistory: flapping } }),
+      '2': new Alert('2', { meta: { flappingHistory: [false, false] } }),
+      '3': new Alert('3', { meta: { flapping: true, flappingHistory: flapping } }),
+      '4': new Alert('4', { meta: { flapping: true, flappingHistory: [false, false] } }),
+    };
+
+    const recoveredAlerts = {
+      '1': new Alert('1', { meta: { flappingHistory: [true, true, true, true] } }),
+      '2': new Alert('2', { meta: { flappingHistory: notFlapping } }),
+      '3': new Alert('3', { meta: { flapping: true, flappingHistory: [true, true] } }),
+      '4': new Alert('4', { meta: { flapping: true, flappingHistory: notFlapping } }),
+    };
+
+    setFlapping({ ...flappingSettings, enabled: false }, activeAlerts, recoveredAlerts);
+    const fields = ['1.meta.flapping', '2.meta.flapping', '3.meta.flapping', '4.meta.flapping'];
+    expect(pick(activeAlerts, fields)).toMatchInlineSnapshot(`
+      Object {
+        "1": Object {
+          "meta": Object {
+            "flapping": false,
+          },
+        },
+        "2": Object {
+          "meta": Object {
+            "flapping": false,
+          },
+        },
+        "3": Object {
+          "meta": Object {
+            "flapping": false,
+          },
+        },
+        "4": Object {
+          "meta": Object {
+            "flapping": false,
+          },
+        },
+      }
+    `);
+    expect(pick(recoveredAlerts, fields)).toMatchInlineSnapshot(`
+      Object {
+        "1": Object {
+          "meta": Object {
+            "flapping": false,
+          },
+        },
+        "2": Object {
+          "meta": Object {
+            "flapping": false,
+          },
+        },
+        "3": Object {
+          "meta": Object {
+            "flapping": false,
+          },
+        },
+        "4": Object {
+          "meta": Object {
+            "flapping": false,
+          },
+        },
+      }
+    `);
+  });
+
   describe('isAlertFlapping', () => {
     describe('not currently flapping', () => {
       test('returns true if the flap count exceeds the threshold', () => {
@@ -91,7 +164,7 @@ describe('setFlapping', () => {
             meta: { flappingHistory },
           }
         );
-        expect(isAlertFlapping(alert)).toEqual(true);
+        expect(isAlertFlapping(flappingSettings, alert)).toEqual(true);
       });
 
       test("returns false the flap count doesn't exceed the threshold", () => {
@@ -102,7 +175,7 @@ describe('setFlapping', () => {
             meta: { flappingHistory },
           }
         );
-        expect(isAlertFlapping(alert)).toEqual(false);
+        expect(isAlertFlapping(flappingSettings, alert)).toEqual(false);
       });
 
       test('returns true if not at capacity and the flap count exceeds the threshold', () => {
@@ -113,7 +186,7 @@ describe('setFlapping', () => {
             meta: { flappingHistory },
           }
         );
-        expect(isAlertFlapping(alert)).toEqual(true);
+        expect(isAlertFlapping(flappingSettings, alert)).toEqual(true);
       });
     });
 
@@ -126,7 +199,7 @@ describe('setFlapping', () => {
             meta: { flappingHistory, flapping: true },
           }
         );
-        expect(isAlertFlapping(alert)).toEqual(true);
+        expect(isAlertFlapping(flappingSettings, alert)).toEqual(true);
       });
 
       test("returns true if not at capacity and the flap count doesn't exceed the threshold", () => {
@@ -137,7 +210,7 @@ describe('setFlapping', () => {
             meta: { flappingHistory, flapping: true },
           }
         );
-        expect(isAlertFlapping(alert)).toEqual(true);
+        expect(isAlertFlapping(flappingSettings, alert)).toEqual(true);
       });
 
       test('returns true if not at capacity and the flap count exceeds the threshold', () => {
@@ -148,7 +221,7 @@ describe('setFlapping', () => {
             meta: { flappingHistory, flapping: true },
           }
         );
-        expect(isAlertFlapping(alert)).toEqual(true);
+        expect(isAlertFlapping(flappingSettings, alert)).toEqual(true);
       });
 
       test("returns false if at capacity and the flap count doesn't exceed the threshold", () => {
@@ -159,7 +232,7 @@ describe('setFlapping', () => {
             meta: { flappingHistory, flapping: true },
           }
         );
-        expect(isAlertFlapping(alert)).toEqual(false);
+        expect(isAlertFlapping(flappingSettings, alert)).toEqual(false);
       });
     });
   });

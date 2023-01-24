@@ -51,6 +51,7 @@ import {
 } from '../common';
 import { PublicAlertFactory } from './alert/create_alert_factory';
 import { FieldMap } from '../common/alert_schema/field_maps/types';
+import { RulesSettingsFlapping } from '../common/rules_settings';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 export type { RuleTypeParams };
@@ -111,6 +112,7 @@ export interface RuleExecutorOptions<
   startedAt: Date;
   state: State;
   namespace?: string;
+  flappingSettings: RulesSettingsFlapping;
 }
 
 export interface RuleParamsAndRefs<Params extends RuleTypeParams> {

@@ -76,6 +76,7 @@ import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_e
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import { rulesSettingsClientMock } from '../rules_settings_client.mock';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -162,6 +163,7 @@ describe('Task Runner', () => {
         max: 10000,
       },
     },
+    getRulesSettingsClientWithRequest: jest.fn().mockReturnValue(rulesSettingsClientMock.create()),
   };
 
   const ephemeralTestParams: Array<
@@ -208,6 +210,9 @@ describe('Task Runner', () => {
     ruleTypeRegistry.get.mockReturnValue(ruleType);
     taskRunnerFactoryInitializerParams.executionContext.withContext.mockImplementation((ctx, fn) =>
       fn()
+    );
+    taskRunnerFactoryInitializerParams.getRulesSettingsClientWithRequest.mockReturnValue(
+      rulesSettingsClientMock.create()
     );
     mockedRuleTypeSavedObject.monitoring!.run.history = [];
     mockedRuleTypeSavedObject.monitoring!.run.calculated_metrics.success_ratio = 0;

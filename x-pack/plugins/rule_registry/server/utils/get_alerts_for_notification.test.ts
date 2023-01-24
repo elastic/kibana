@@ -5,10 +5,18 @@
  * 2.0.
  */
 
+import { RulesSettingsFlapping } from '@kbn/alerting-plugin/common/rules_settings';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
+import { cloneDeep } from 'lodash';
 import { getAlertsForNotification } from './get_alerts_for_notification';
 
 describe('getAlertsForNotification', () => {
+  const flappingSettings = {
+    enabled: true,
+    lookBackWindow: 20,
+    statusChangeThreshold: 4,
+  } as RulesSettingsFlapping;
+
   const alert1 = {
     event: {
       'kibana.alert.status': ALERT_STATUS_RECOVERED,
@@ -38,7 +46,7 @@ describe('getAlertsForNotification', () => {
 
   test('should set pendingRecoveredCount to zero for all active alerts', () => {
     const trackedEvents = [alert4];
-    expect(getAlertsForNotification(trackedEvents)).toMatchInlineSnapshot(`
+    expect(getAlertsForNotification(flappingSettings, trackedEvents)).toMatchInlineSnapshot(`
       Array [
         Object {
           "event": Object {
@@ -55,8 +63,8 @@ describe('getAlertsForNotification', () => {
   });
 
   test('should not remove alerts if the num of recovered alerts is not at the limit', () => {
-    const trackedEvents = [alert1, alert2, alert3];
-    expect(getAlertsForNotification(trackedEvents)).toMatchInlineSnapshot(`
+    const trackedEvents = cloneDeep([alert1, alert2, alert3]);
+    expect(getAlertsForNotification(flappingSettings, trackedEvents)).toMatchInlineSnapshot(`
       Array [
         Object {
           "event": Object {
@@ -78,6 +86,36 @@ describe('getAlertsForNotification', () => {
           },
           "flapping": true,
           "pendingRecoveredCount": 1,
+        },
+      ]
+    `);
+  });
+
+  test('should reset counts and not modify alerts if flapping is disabled', () => {
+    const trackedEvents = cloneDeep([alert1, alert2, alert3]);
+    expect(getAlertsForNotification({ ...flappingSettings, enabled: false }, trackedEvents))
+      .toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "event": Object {
+            "kibana.alert.status": "recovered",
+          },
+          "flapping": true,
+          "pendingRecoveredCount": 0,
+        },
+        Object {
+          "event": Object {
+            "kibana.alert.status": "recovered",
+          },
+          "flapping": false,
+          "pendingRecoveredCount": 0,
+        },
+        Object {
+          "event": Object {
+            "kibana.alert.status": "recovered",
+          },
+          "flapping": true,
+          "pendingRecoveredCount": 0,
         },
       ]
     `);

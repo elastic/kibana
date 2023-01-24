@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MAX_FLAP_COUNT } from '@kbn/alerting-plugin/server/lib/flapping_utils';
+import { RulesSettingsFlapping } from '@kbn/alerting-plugin/common/rules_settings';
 import {
   ALERT_END,
   ALERT_STATUS,
@@ -14,15 +14,21 @@ import {
   EVENT_ACTION,
 } from '@kbn/rule-data-utils';
 
-export function getAlertsForNotification(trackedEventsToIndex: any[]) {
+export function getAlertsForNotification(
+  flappingSettings: RulesSettingsFlapping,
+  trackedEventsToIndex: any[]
+) {
   return trackedEventsToIndex.map((trackedEvent) => {
-    if (trackedEvent.event[ALERT_STATUS] === ALERT_STATUS_ACTIVE) {
+    if (!flappingSettings.enabled || trackedEvent.event[ALERT_STATUS] === ALERT_STATUS_ACTIVE) {
       trackedEvent.pendingRecoveredCount = 0;
-    } else if (trackedEvent.event[ALERT_STATUS] === ALERT_STATUS_RECOVERED) {
+    } else if (
+      flappingSettings.enabled &&
+      trackedEvent.event[ALERT_STATUS] === ALERT_STATUS_RECOVERED
+    ) {
       if (trackedEvent.flapping) {
         const count = trackedEvent.pendingRecoveredCount || 0;
         trackedEvent.pendingRecoveredCount = count + 1;
-        if (trackedEvent.pendingRecoveredCount < MAX_FLAP_COUNT) {
+        if (trackedEvent.pendingRecoveredCount < flappingSettings.statusChangeThreshold) {
           trackedEvent.event[ALERT_STATUS] = ALERT_STATUS_ACTIVE;
           trackedEvent.event[EVENT_ACTION] = 'active';
           delete trackedEvent.event[ALERT_END];

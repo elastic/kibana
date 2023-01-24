@@ -10,6 +10,7 @@ import { cloneDeep } from 'lodash';
 import { Alert } from '../alert';
 import { AlertInstanceState, AlertInstanceContext } from '../types';
 import { updateFlappingHistory } from './flapping_utils';
+import { RulesSettingsFlapping } from '../../common/rules_settings';
 
 interface ProcessAlertsOpts<
   State extends AlertInstanceState,
@@ -21,8 +22,7 @@ interface ProcessAlertsOpts<
   hasReachedAlertLimit: boolean;
   alertLimit: number;
   autoRecoverAlerts: boolean;
-  // flag used to determine whether or not we want to push the flapping state on to the flappingHistory array
-  setFlapping: boolean;
+  flappingSettings: RulesSettingsFlapping;
 }
 interface ProcessAlertsResult<
   State extends AlertInstanceState,
@@ -49,7 +49,7 @@ export function processAlerts<
   hasReachedAlertLimit,
   alertLimit,
   autoRecoverAlerts,
-  setFlapping,
+  flappingSettings,
 }: ProcessAlertsOpts<State, Context>): ProcessAlertsResult<
   State,
   Context,
@@ -62,14 +62,14 @@ export function processAlerts<
         existingAlerts,
         previouslyRecoveredAlerts,
         alertLimit,
-        setFlapping
+        flappingSettings
       )
     : processAlertsHelper(
         alerts,
         existingAlerts,
         previouslyRecoveredAlerts,
         autoRecoverAlerts,
-        setFlapping
+        flappingSettings
       );
 }
 
@@ -83,7 +83,7 @@ function processAlertsHelper<
   existingAlerts: Record<string, Alert<State, Context>>,
   previouslyRecoveredAlerts: Record<string, Alert<State, Context>>,
   autoRecoverAlerts: boolean,
-  setFlapping: boolean
+  flappingSettings: RulesSettingsFlapping
 ): ProcessAlertsResult<State, Context, ActionGroupIds, RecoveryActionGroupId> {
   const existingAlertIds = new Set(Object.keys(existingAlerts));
   const previouslyRecoveredAlertsIds = new Set(Object.keys(previouslyRecoveredAlerts));
@@ -106,13 +106,13 @@ function processAlertsHelper<
           const state = newAlerts[id].getState();
           newAlerts[id].replaceState({ ...state, start: currentTime, duration: '0' });
 
-          if (setFlapping) {
+          if (flappingSettings.enabled) {
             if (previouslyRecoveredAlertsIds.has(id)) {
               // this alert has flapped from recovered to active
               newAlerts[id].setFlappingHistory(previouslyRecoveredAlerts[id].getFlappingHistory());
               previouslyRecoveredAlertsIds.delete(id);
             }
-            updateAlertFlappingHistory(newAlerts[id], true);
+            updateAlertFlappingHistory(flappingSettings, newAlerts[id], true);
           }
         } else {
           // this alert did exist in previous run
@@ -128,8 +128,8 @@ function processAlertsHelper<
           });
 
           // this alert is still active
-          if (setFlapping) {
-            updateAlertFlappingHistory(activeAlerts[id], false);
+          if (flappingSettings.enabled) {
+            updateAlertFlappingHistory(flappingSettings, activeAlerts[id], false);
           }
         }
       } else if (existingAlertIds.has(id) && autoRecoverAlerts) {
@@ -147,8 +147,8 @@ function processAlertsHelper<
           ...(state.start ? { end: currentTime } : {}),
         });
         // this alert has flapped from active to recovered
-        if (setFlapping) {
-          updateAlertFlappingHistory(recoveredAlerts[id], true);
+        if (flappingSettings.enabled) {
+          updateAlertFlappingHistory(flappingSettings, recoveredAlerts[id], true);
         }
       }
     }
@@ -157,8 +157,8 @@ function processAlertsHelper<
   // alerts are still recovered
   for (const id of previouslyRecoveredAlertsIds) {
     recoveredAlerts[id] = previouslyRecoveredAlerts[id];
-    if (setFlapping) {
-      updateAlertFlappingHistory(recoveredAlerts[id], false);
+    if (flappingSettings.enabled) {
+      updateAlertFlappingHistory(flappingSettings, recoveredAlerts[id], false);
     }
   }
 
@@ -175,7 +175,7 @@ function processAlertsLimitReached<
   existingAlerts: Record<string, Alert<State, Context>>,
   previouslyRecoveredAlerts: Record<string, Alert<State, Context>>,
   alertLimit: number,
-  setFlapping: boolean
+  flappingSettings: RulesSettingsFlapping
 ): ProcessAlertsResult<State, Context, ActionGroupIds, RecoveryActionGroupId> {
   const existingAlertIds = new Set(Object.keys(existingAlerts));
   const previouslyRecoveredAlertsIds = new Set(Object.keys(previouslyRecoveredAlerts));
@@ -210,8 +210,8 @@ function processAlertsLimitReached<
       });
 
       // this alert is still active
-      if (setFlapping) {
-        updateAlertFlappingHistory(activeAlerts[id], false);
+      if (flappingSettings.enabled) {
+        updateAlertFlappingHistory(flappingSettings, activeAlerts[id], false);
       }
     }
   }
@@ -236,12 +236,12 @@ function processAlertsLimitReached<
         const state = newAlerts[id].getState();
         newAlerts[id].replaceState({ ...state, start: currentTime, duration: '0' });
 
-        if (setFlapping) {
+        if (flappingSettings.enabled) {
           if (previouslyRecoveredAlertsIds.has(id)) {
             // this alert has flapped from recovered to active
             newAlerts[id].setFlappingHistory(previouslyRecoveredAlerts[id].getFlappingHistory());
           }
-          updateAlertFlappingHistory(newAlerts[id], true);
+          updateAlertFlappingHistory(flappingSettings, newAlerts[id], true);
         }
 
         if (!hasCapacityForNewAlerts()) {
@@ -258,7 +258,15 @@ export function updateAlertFlappingHistory<
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string
->(alert: Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>, state: boolean) {
-  const updatedFlappingHistory = updateFlappingHistory(alert.getFlappingHistory() || [], state);
+>(
+  flappingSettings: RulesSettingsFlapping,
+  alert: Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>,
+  state: boolean
+) {
+  const updatedFlappingHistory = updateFlappingHistory(
+    flappingSettings,
+    alert.getFlappingHistory() || [],
+    state
+  );
   alert.setFlappingHistory(updatedFlappingHistory);
 }

@@ -21,6 +21,7 @@ import { searchSourceCommonMock } from '@kbn/data-plugin/common/search/search_so
 import { Logger } from '@kbn/logging';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { RulesSettingsFlapping } from '@kbn/alerting-plugin/common/rules_settings';
 
 export const createDefaultAlertExecutorOptions = <
   Params extends RuleTypeParams = never,
@@ -87,4 +88,9 @@ export const createDefaultAlertExecutorOptions = <
   namespace: undefined,
   executionId: 'b33f65d7-6e8b-4aae-8d20-c93613deb33f',
   logger,
+  flappingSettings: {
+    enabled: true,
+    lookBackWindow: 20,
+    statusChangeThreshold: 4,
+  } as RulesSettingsFlapping,
 });

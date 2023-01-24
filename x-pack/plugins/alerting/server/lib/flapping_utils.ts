@@ -5,31 +5,46 @@
  * 2.0.
  */
 
-const MAX_CAPACITY = 20;
-export const MAX_FLAP_COUNT = 4;
+import { RulesSettingsFlapping } from '../../common/rules_settings';
 
-export function updateFlappingHistory(flappingHistory: boolean[], state: boolean) {
-  const updatedFlappingHistory = flappingHistory.concat(state).slice(MAX_CAPACITY * -1);
-  return updatedFlappingHistory;
+export function updateFlappingHistory(
+  flappingSettings: RulesSettingsFlapping,
+  flappingHistory: boolean[],
+  state: boolean
+) {
+  if (flappingSettings.enabled) {
+    const updatedFlappingHistory = flappingHistory
+      .concat(state)
+      .slice(flappingSettings.lookBackWindow * -1);
+    return updatedFlappingHistory;
+  }
+  return flappingHistory;
 }
 
 export function isFlapping(
+  flappingSettings: RulesSettingsFlapping,
   flappingHistory: boolean[],
   isCurrentlyFlapping: boolean = false
 ): boolean {
-  const numStateChanges = flappingHistory.filter((f) => f).length;
-  if (isCurrentlyFlapping) {
-    // if an alert is currently flapping,
-    // it will return false if the flappingHistory array is at capacity and there are 0 state changes
-    // else it will return true
-    return !(atCapacity(flappingHistory) && numStateChanges === 0);
-  } else {
-    // if an alert is not currently flapping,
-    // it will return true if the number of state changes in flappingHistory array >= the max flapping count
-    return numStateChanges >= MAX_FLAP_COUNT;
+  if (flappingSettings.enabled) {
+    const numStateChanges = flappingHistory.filter((f) => f).length;
+    if (isCurrentlyFlapping) {
+      // if an alert is currently flapping,
+      // it will return false if the flappingHistory array is at capacity and there are 0 state changes
+      // else it will return true
+      return !(atCapacity(flappingSettings, flappingHistory) && numStateChanges === 0);
+    } else {
+      // if an alert is not currently flapping,
+      // it will return true if the number of state changes in flappingHistory array >= the flapping status change threshold
+      return numStateChanges >= flappingSettings.statusChangeThreshold;
+    }
   }
+  return false;
 }
 
-export function atCapacity(flappingHistory: boolean[] = []): boolean {
-  return flappingHistory.length >= MAX_CAPACITY;
+export function atCapacity(
+  flappingSettings: RulesSettingsFlapping,
+  flappingHistory: boolean[] = []
+): boolean {
+  return flappingSettings.enabled && flappingHistory.length >= flappingSettings.lookBackWindow;
 }

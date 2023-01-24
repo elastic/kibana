@@ -14,7 +14,11 @@ export type RulesSettingsFlappingClientMock = jest.Mocked<RulesSettingsFlappingC
 // the mock return value on the flapping
 const createRulesSettingsClientMock = () => {
   const flappingMocked: RulesSettingsFlappingClientMock = {
-    get: jest.fn(),
+    get: jest.fn().mockReturnValue({
+      enabled: true,
+      lookBackWindow: 20,
+      statusChangeThreshold: 4,
+    }),
     update: jest.fn(),
   };
   const mocked: RulesSettingsClientMock = {

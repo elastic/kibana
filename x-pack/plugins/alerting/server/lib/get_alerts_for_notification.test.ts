@@ -5,15 +5,23 @@
  * 2.0.
  */
 
+import { RulesSettingsFlapping } from '../../common/rules_settings';
 import { getAlertsForNotification } from '.';
 import { Alert } from '../alert';
 
 describe('getAlertsForNotification', () => {
+  const flappingSettings = {
+    enabled: true,
+    lookBackWindow: 20,
+    statusChangeThreshold: 4,
+  } as RulesSettingsFlapping;
+
   test('should set pendingRecoveredCount to zero for all active alerts', () => {
     const alert1 = new Alert('1', { meta: { flapping: true, pendingRecoveredCount: 3 } });
     const alert2 = new Alert('2', { meta: { flapping: false } });
 
     const { newAlerts, activeAlerts } = getAlertsForNotification(
+      flappingSettings,
       'default',
       {
         '1': alert1,
@@ -66,6 +74,7 @@ describe('getAlertsForNotification', () => {
 
     const { newAlerts, activeAlerts, recoveredAlerts, currentRecoveredAlerts } =
       getAlertsForNotification(
+        flappingSettings,
         'default',
         {},
         {},
@@ -118,6 +127,7 @@ describe('getAlertsForNotification', () => {
           "meta": Object {
             "flapping": false,
             "flappingHistory": Array [],
+            "pendingRecoveredCount": 0,
           },
           "state": Object {},
         },
@@ -137,6 +147,90 @@ describe('getAlertsForNotification', () => {
           "meta": Object {
             "flapping": false,
             "flappingHistory": Array [],
+            "pendingRecoveredCount": 0,
+          },
+          "state": Object {},
+        },
+      }
+    `);
+  });
+
+  test('should reset counts and not modify alerts if flapping is disabled', () => {
+    const alert1 = new Alert('1', { meta: { flapping: true, pendingRecoveredCount: 3 } });
+    const alert2 = new Alert('2', { meta: { flapping: false } });
+    const alert3 = new Alert('3', { meta: { flapping: true } });
+
+    const { newAlerts, activeAlerts, recoveredAlerts, currentRecoveredAlerts } =
+      getAlertsForNotification(
+        { ...flappingSettings, enabled: false },
+        'default',
+        {},
+        {},
+        {
+          '1': alert1,
+          '2': alert2,
+          '3': alert3,
+        },
+        {
+          '1': alert1,
+          '2': alert2,
+          '3': alert3,
+        }
+      );
+
+    expect(newAlerts).toMatchInlineSnapshot(`Object {}`);
+    expect(activeAlerts).toMatchInlineSnapshot(`Object {}`);
+    expect(recoveredAlerts).toMatchInlineSnapshot(`
+      Object {
+        "1": Object {
+          "meta": Object {
+            "flapping": true,
+            "flappingHistory": Array [],
+            "pendingRecoveredCount": 0,
+          },
+          "state": Object {},
+        },
+        "2": Object {
+          "meta": Object {
+            "flapping": false,
+            "flappingHistory": Array [],
+            "pendingRecoveredCount": 0,
+          },
+          "state": Object {},
+        },
+        "3": Object {
+          "meta": Object {
+            "flapping": true,
+            "flappingHistory": Array [],
+            "pendingRecoveredCount": 0,
+          },
+          "state": Object {},
+        },
+      }
+    `);
+    expect(currentRecoveredAlerts).toMatchInlineSnapshot(`
+      Object {
+        "1": Object {
+          "meta": Object {
+            "flapping": true,
+            "flappingHistory": Array [],
+            "pendingRecoveredCount": 0,
+          },
+          "state": Object {},
+        },
+        "2": Object {
+          "meta": Object {
+            "flapping": false,
+            "flappingHistory": Array [],
+            "pendingRecoveredCount": 0,
+          },
+          "state": Object {},
+        },
+        "3": Object {
+          "meta": Object {
+            "flapping": true,
+            "flappingHistory": Array [],
+            "pendingRecoveredCount": 0,
           },
           "state": Object {},
         },
