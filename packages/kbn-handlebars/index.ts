@@ -683,6 +683,8 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
       } else {
         options.args = this.resolveNodes(decorator.params);
       }
+    } else {
+      options.args = [];
     }
 
     return options;

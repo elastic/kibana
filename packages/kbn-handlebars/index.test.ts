@@ -307,7 +307,37 @@ describe('blocks', () => {
         .toCompileTo('');
     });
 
-    it('should pass expected options to root decorator', () => {
+    it('should pass expected options to root decorator with no args', () => {
+      expectTemplate('{{*decorator}}')
+        .withDecorator('decorator', function (fn, props, container, options) {
+          expect(options).toMatchInlineSnapshot(`
+            Object {
+              "args": Array [],
+              "data": Object {
+                "root": Object {
+                  "foo": "bar",
+                },
+              },
+              "hash": Object {},
+              "loc": Object {
+                "end": Object {
+                  "column": 14,
+                  "line": 1,
+                },
+                "start": Object {
+                  "column": 0,
+                  "line": 1,
+                },
+              },
+              "name": "decorator",
+            }
+          `);
+        })
+        .withInput({ foo: 'bar' })
+        .toCompileTo('');
+    });
+
+    it('should pass expected options to root decorator with one arg', () => {
       expectTemplate('{{*decorator foo}}')
         .withDecorator('decorator', function (fn, props, container, options) {
           expect(options).toMatchInlineSnapshot(`
