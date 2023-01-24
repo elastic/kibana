@@ -16,7 +16,6 @@ import {
   type EuiTableFieldDataColumnType,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
 import * as TEST_SUBJECTS from '../test_subjects';
 import { FindingsRuleFlyout } from '../findings_flyout/findings_flyout';
@@ -70,16 +69,6 @@ const FindingsTableComponent = ({
       createColumnWithFilters(baseFindingsColumns['resource.name'], { onAddFilter }),
       createColumnWithFilters(baseFindingsColumns['resource.sub_type'], { onAddFilter }),
       baseFindingsColumns['rule.benchmark.rule_number'],
-      {
-        field: 'rule.benchmark.rule_number_2',
-        name: i18n.translate(
-          'xpack.csp.findings.findingsTable.findingsTableColumn.ruleNumberColumnLabel2',
-          {
-            defaultMessage: 'Rule Number 2',
-          }
-        ),
-        width: '120px',
-      },
       createColumnWithFilters(baseFindingsColumns['rule.name'], { onAddFilter }),
       baseFindingsColumns['rule.section'],
       baseFindingsColumns['@timestamp'],
